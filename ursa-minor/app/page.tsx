@@ -34,7 +34,7 @@ export default function Home() {
           </div>
         </header>
 
-        <div data-hero-copy className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20">
+        <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20 portrait:mt-[92svh]">
           <p className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
             <em className="not-italic text-[var(--polar)]">Polaris</em> —
             peer-to-peer supervised fine-tuning; outcome reward for open-ended

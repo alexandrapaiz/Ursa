@@ -38,6 +38,7 @@ uniform vec2 u_res;
 uniform float u_time;
 uniform float u_motion;
 uniform float u_scroll;
+uniform float u_spx;
 uniform vec2 u_star[7];
 uniform vec2 u_segA[7];
 uniform vec2 u_segB[7];
@@ -122,34 +123,32 @@ void main() {
     }
   }
 
-  // constellation belongs to the hero: it fades and rises away as you scroll
-  float cFade = 1.0 - clamp(u_scroll * 1.3, 0.0, 1.0);
-  vec2 cRise = vec2(0.0, u_scroll * 30.0);
+  // constellation is anchored to the page, not the viewport: it scrolls up
+  // and away with the hero like any other content
+  vec2 cOff = vec2(0.0, u_spx);
 
-  if (cFade > 0.0) {
-    // constellation lines, dotted pixel checker
-    for (int i = 0; i < 7; i++) {
-      if (segDist(p, u_segA[i] - cRise, u_segB[i] - cRise) < 0.5) {
-        if (mod(px.x + px.y, 4.0) < 1.0) {
-          col += vec3(0.66, 0.78, 0.98) * 0.11 * cFade;
-        }
+  // constellation lines, dotted pixel checker
+  for (int i = 0; i < 7; i++) {
+    if (segDist(p, u_segA[i] - cOff, u_segB[i] - cOff) < 0.5) {
+      if (mod(px.x + px.y, 4.0) < 1.0) {
+        col += vec3(0.66, 0.78, 0.98) * 0.11;
       }
     }
+  }
 
-    // constellation stars as pixel clusters; Polaris gets a soft gradient glow
-    for (int i = 0; i < 7; i++) {
-      vec2 sp = u_star[i] - cRise;
-      vec2 d = abs(p - sp);
-      float ch = max(d.x, d.y);
-      if (i == 0) {
-        float pulse = 0.85 + 0.15 * sin(u_time * 1.1);
-        float g = max(0.0, 1.0 - length(p - sp) / (16.0 * pulse));
-        g *= g; // smooth quadratic falloff, no hard edge
-        col += vec3(0.41, 0.49, 0.68) * g * 0.45 * cFade;
-        if (ch < 1.5) col += vec3(0.86, 0.91, 1.0) * cFade;
-      } else {
-        if (ch < 1.0) col += vec3(0.80, 0.85, 0.93) * 0.65 * cFade;
-      }
+  // constellation stars as pixel clusters; Polaris gets a soft gradient glow
+  for (int i = 0; i < 7; i++) {
+    vec2 sp = u_star[i] - cOff;
+    vec2 d = abs(p - sp);
+    float ch = max(d.x, d.y);
+    if (i == 0) {
+      float pulse = 0.85 + 0.15 * sin(u_time * 1.1);
+      float g = max(0.0, 1.0 - length(p - sp) / (16.0 * pulse));
+      g *= g; // smooth quadratic falloff, no hard edge
+      col += vec3(0.41, 0.49, 0.68) * g * 0.45;
+      if (ch < 1.5) col += vec3(0.86, 0.91, 1.0);
+    } else {
+      if (ch < 1.0) col += vec3(0.80, 0.85, 0.93) * 0.65;
     }
   }
 
@@ -171,29 +170,18 @@ export function PixelSky() {
 
     // constellation placement, in shader-pixel space (y down), uniform scale
     // so the dipper keeps its shape at any aspect ratio.
-    // portrait: measure the real band of open sky between the header and the
-    // hero text (viewport heights vary wildly on phones) and fit inside it.
+    // portrait: the hero is sky-only (text sits below the fold), so the
+    // dipper owns the viewport, centered, clear of the header.
+    // landscape: upper-right, beside the hero text.
     const BX = 0.376, BY = 0.17, BW = 0.384, BH = 0.52; // dipper data bounds
-    let bandTop = 0;
-    let bandBot = 0;
-    const measureBand = () => {
-      bandTop = h * 0.14;
-      bandBot = h * 0.5;
-      const headerEl = document.querySelector("header");
-      const copyEl = document.querySelector("[data-hero-copy]");
-      if (headerEl && copyEl) {
-        bandTop = (headerEl.getBoundingClientRect().bottom + scrollY) / PIX + 18;
-        bandBot = (copyEl.getBoundingClientRect().top + scrollY) / PIX - 8;
-      }
-    };
     const cpos = (i: number): [number, number] => {
       const portrait = w < h;
       let s: number, ox: number, oy: number;
       if (portrait) {
-        const band = Math.max(bandBot - bandTop, 30);
-        s = Math.min((w * 0.62) / BW, band / BH);
+        const top = 60, bot = h * 0.94;
+        s = Math.min((w * 0.8) / BW, (bot - top) / BH);
         ox = (w - BW * s) / 2;
-        oy = bandTop + Math.max(0, (band - BH * s) / 2);
+        oy = top + Math.max(0, (bot - top - BH * s) / 2);
       } else {
         s = Math.min((w * 0.35) / BW, (h * 0.42) / BH);
         ox = w * 0.92 - BW * s;
@@ -225,11 +213,12 @@ export function PixelSky() {
       gl.enableVertexAttribArray(a);
       gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
 
-      for (const u of ["u_res", "u_time", "u_motion", "u_scroll", "u_star", "u_segA", "u_segB"]) {
+      for (const u of ["u_res", "u_time", "u_motion", "u_scroll", "u_spx", "u_star", "u_segA", "u_segB"]) {
         loc[u] = gl.getUniformLocation(prog, u);
       }
       gl.uniform1f(loc.u_motion, reduced ? 0 : 1);
       gl.uniform1f(loc.u_scroll, 0);
+      gl.uniform1f(loc.u_spx, 0);
     }
 
     const draw = (t: number) => {
@@ -275,7 +264,6 @@ export function PixelSky() {
       h = Math.max(1, Math.ceil(canvas.clientHeight / PIX));
       canvas.width = w;
       canvas.height = h;
-      measureBand();
 
       if (gl) {
         gl.viewport(0, 0, w, h);
@@ -316,7 +304,10 @@ export function PixelSky() {
 
       const scrollTarget = Math.min(scrollY / innerHeight, 1);
       scrollS += (scrollTarget - scrollS) * 0.08;
-      if (gl) gl.uniform1f(loc.u_scroll, scrollS);
+      if (gl) {
+        gl.uniform1f(loc.u_scroll, scrollS);
+        gl.uniform1f(loc.u_spx, scrollY / PIX);
+      }
 
       // step time at 16 fps for the retro pixel feel
       draw(Math.floor((t / 1000) * 16) / 16);
@@ -327,6 +318,7 @@ export function PixelSky() {
     const onScrollReduced = () => {
       if (!gl) return;
       gl.uniform1f(loc.u_scroll, Math.min(scrollY / innerHeight, 1));
+      gl.uniform1f(loc.u_spx, scrollY / PIX);
       draw(40);
     };
 
