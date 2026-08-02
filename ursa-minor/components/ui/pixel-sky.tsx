@@ -183,9 +183,9 @@ export function PixelSky() {
         ox = (w - BW * s) / 2;
         oy = top + Math.max(0, (bot - top - BH * s) / 2);
       } else {
-        s = Math.min((w * 0.35) / BW, (h * 0.42) / BH);
-        ox = w * 0.92 - BW * s;
-        oy = h * 0.09;
+        // the original landscape placement: upper-right area, positioned
+        // relative to the viewport — the layout the site launched with
+        return [(0.42 + DIPPER[i][0] * 0.52) * w, (0.06 + DIPPER[i][1] * 0.62) * h];
       }
       return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
     };
