@@ -2,19 +2,19 @@ import PixelSky from "@/components/ui/pixel-sky";
 
 const NORTH_STARS = [
   {
-    key: "distributed_information",
+    key: "distributed_intelligence",
     text: "The information a decision needs is dispersed across many individuals. No single observer ever holds it whole.",
   },
   {
-    key: "discovery_of_information",
+    key: "discovery_of_intelligence",
     text: "Generation discovers facts that would otherwise stay unknown. If the result could be specified beforehand, there would be nothing to discover.",
   },
   {
-    key: "tacit_information",
+    key: "tacit_intelligence",
     text: "Much of what people know cannot be stated as rules. It shows up only in action, applied to a particular case.",
   },
   {
-    key: "pretence_of_information",
+    key: "pretence_of_intelligence",
     text: "Claims of information sufficient for central assessment always overreach. Systems built on them conform to the measure, not the world.",
   },
 ];
