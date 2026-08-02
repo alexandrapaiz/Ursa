@@ -169,11 +169,17 @@ export function PixelSky() {
     let h = 0;
     let raf = 0;
 
-    // constellation occupies upper-right of hero; coords in shader-pixel space, y down
-    const cpos = (i: number): [number, number] => [
-      (0.42 + DIPPER[i][0] * 0.52) * w,
-      (0.06 + DIPPER[i][1] * 0.62) * h,
-    ];
+    // constellation placement, in shader-pixel space (y down).
+    // scaled uniformly so the dipper keeps its shape at any aspect ratio:
+    // upper-right on wide screens, centered and larger on portrait/mobile.
+    const BX = 0.376, BY = 0.17, BW = 0.384, BH = 0.52; // dipper data bounds
+    const cpos = (i: number): [number, number] => {
+      const portrait = w < h;
+      const s = Math.min((w * (portrait ? 0.62 : 0.35)) / BW, (h * (portrait ? 0.3 : 0.42)) / BH);
+      const ox = portrait ? (w - BW * s) / 2 : w * 0.92 - BW * s;
+      const oy = h * (portrait ? 0.14 : 0.09);
+      return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
+    };
 
     const gl = canvas.getContext("webgl", { antialias: false });
     const loc: Record<string, WebGLUniformLocation | null> = {};
