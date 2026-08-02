@@ -85,11 +85,16 @@ void main() {
   float n = fbm(p * 0.008 + vec2(u_time * 0.008, u_time * 0.003));
   col += vec3(0.055, 0.085, 0.170) * (0.12 + n * 0.10);
 
+  // background stars begin below a soft diagonal, leaving the constellation's
+  // upper-right corner clean; the boundary dissolves as you scroll away
+  float diag = p.x / u_res.x + (1.0 - p.y / u_res.y);
+  float starVis = mix(1.0 - 0.85 * smoothstep(1.0, 1.5, diag), 1.0, clamp(u_scroll, 0.0, 1.0));
+
   // faint underlayer of dim stars: denser, so no region of sky reads empty
   float h2 = hash(px + 57.0);
   if (h2 > 0.9945) {
     float tw2 = 0.7 + 0.3 * sin(u_time * (0.4 + hash(px + 11.0)) + hash(px + 19.0) * 6.283);
-    col += vec3(0.62, 0.70, 0.86) * tw2 * 0.16;
+    col += vec3(0.62, 0.70, 0.86) * tw2 * 0.16 * starVis;
   }
 
   // pixel starfield: stars twinkle in place; a fraction of the field
@@ -103,7 +108,7 @@ void main() {
       float b = (h - 0.9986) / 0.0014;
       float warm = step(0.8, hash(cell + 3.3));
       vec3 tint = mix(vec3(0.75, 0.82, 0.95), vec3(0.95, 0.90, 0.78), warm);
-      col += tint * tw * (0.18 + 0.45 * b);
+      col += tint * tw * (0.18 + 0.45 * b) * starVis;
     }
   }
 
@@ -178,14 +183,14 @@ export function PixelSky() {
       const portrait = w < h;
       let s: number, ox: number, oy: number;
       if (portrait) {
-        const top = 60, bot = h * 0.94;
-        s = Math.min((w * 0.8) / BW, (bot - top) / BH);
-        ox = (w - BW * s) / 2;
-        oy = top + Math.max(0, (bot - top - BH * s) / 2);
+        // scenic, like the laptop composition: modest dipper upper-right
+        s = Math.min((w * 0.55) / BW, (h * 0.3) / BH);
+        ox = w * 0.88 - BW * s;
+        oy = h * 0.19;
       } else {
-        // the original landscape placement: upper-right area, positioned
-        // relative to the viewport — the layout the site launched with
-        return [(0.42 + DIPPER[i][0] * 0.52) * w, (0.06 + DIPPER[i][1] * 0.62) * h];
+        // the original landscape placement, eased toward center so Polaris
+        // keeps clear distance from the header label
+        return [(0.36 + DIPPER[i][0] * 0.52) * w, (0.1 + DIPPER[i][1] * 0.62) * h];
       }
       return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
     };
