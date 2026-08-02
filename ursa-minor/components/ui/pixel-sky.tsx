@@ -169,15 +169,36 @@ export function PixelSky() {
     let h = 0;
     let raf = 0;
 
-    // constellation placement, in shader-pixel space (y down).
-    // scaled uniformly so the dipper keeps its shape at any aspect ratio:
-    // upper-right on wide screens, centered and larger on portrait/mobile.
+    // constellation placement, in shader-pixel space (y down), uniform scale
+    // so the dipper keeps its shape at any aspect ratio.
+    // portrait: measure the real band of open sky between the header and the
+    // hero text (viewport heights vary wildly on phones) and fit inside it.
     const BX = 0.376, BY = 0.17, BW = 0.384, BH = 0.52; // dipper data bounds
+    let bandTop = 0;
+    let bandBot = 0;
+    const measureBand = () => {
+      bandTop = h * 0.14;
+      bandBot = h * 0.5;
+      const headerEl = document.querySelector("header");
+      const copyEl = document.querySelector("[data-hero-copy]");
+      if (headerEl && copyEl) {
+        bandTop = (headerEl.getBoundingClientRect().bottom + scrollY) / PIX + 18;
+        bandBot = (copyEl.getBoundingClientRect().top + scrollY) / PIX - 8;
+      }
+    };
     const cpos = (i: number): [number, number] => {
       const portrait = w < h;
-      const s = Math.min((w * (portrait ? 0.62 : 0.35)) / BW, (h * (portrait ? 0.3 : 0.42)) / BH);
-      const ox = portrait ? (w - BW * s) / 2 : w * 0.92 - BW * s;
-      const oy = h * (portrait ? 0.14 : 0.09);
+      let s: number, ox: number, oy: number;
+      if (portrait) {
+        const band = Math.max(bandBot - bandTop, 30);
+        s = Math.min((w * 0.62) / BW, band / BH);
+        ox = (w - BW * s) / 2;
+        oy = bandTop + Math.max(0, (band - BH * s) / 2);
+      } else {
+        s = Math.min((w * 0.35) / BW, (h * 0.42) / BH);
+        ox = w * 0.92 - BW * s;
+        oy = h * 0.09;
+      }
       return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
     };
 
@@ -254,6 +275,7 @@ export function PixelSky() {
       h = Math.max(1, Math.ceil(canvas.clientHeight / PIX));
       canvas.width = w;
       canvas.height = h;
+      measureBand();
 
       if (gl) {
         gl.viewport(0, 0, w, h);
