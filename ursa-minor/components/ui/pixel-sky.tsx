@@ -44,7 +44,9 @@ uniform vec2 u_segA[7];
 uniform vec2 u_segB[7];
 
 float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
 }
 
 float vnoise(vec2 p) {
@@ -185,12 +187,12 @@ export function PixelSky() {
       if (portrait) {
         // scenic, like the laptop composition: modest dipper upper-right
         s = Math.min((w * 0.55) / BW, (h * 0.3) / BH);
-        ox = w * 0.88 - BW * s;
+        ox = w * 0.78 - BW * s;
         oy = h * 0.19;
       } else {
         // the original landscape placement, eased toward center so Polaris
         // keeps clear distance from the header label
-        return [(0.36 + DIPPER[i][0] * 0.52) * w, (0.1 + DIPPER[i][1] * 0.62) * h];
+        return [(0.3 + DIPPER[i][0] * 0.52) * w, (0.1 + DIPPER[i][1] * 0.62) * h];
       }
       return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
     };
@@ -314,8 +316,7 @@ export function PixelSky() {
         gl.uniform1f(loc.u_spx, scrollY / PIX);
       }
 
-      // step time at 16 fps for the retro pixel feel
-      draw(Math.floor((t / 1000) * 16) / 16);
+      draw(t / 1000);
       raf = requestAnimationFrame(loop);
     };
 
