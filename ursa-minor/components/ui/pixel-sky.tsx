@@ -39,6 +39,7 @@ uniform float u_time;
 uniform float u_motion;
 uniform float u_scroll;
 uniform float u_spx;
+uniform sampler2D u_rand;
 uniform vec2 u_star[7];
 uniform vec2 u_segA[7];
 uniform vec2 u_segB[7];
@@ -88,30 +89,33 @@ void main() {
   col += vec3(0.055, 0.085, 0.170) * (0.12 + n * 0.10);
 
   // background stars begin below a soft diagonal, leaving the constellation's
-  // upper-right corner clean; the boundary dissolves as you scroll away
-  float diag = p.x / u_res.x + (1.0 - p.y / u_res.y);
+  // upper-right corner clean; the boundary is roughened with noise so it
+  // never reads as a straight line, and dissolves as you scroll away
+  float diag = p.x / u_res.x + (1.0 - p.y / u_res.y) + (vnoise(p * 0.015) - 0.5) * 0.5;
   float starVis = mix(1.0 - 0.85 * smoothstep(1.0, 1.5, diag), 1.0, clamp(u_scroll, 0.0, 1.0));
 
+  // star randomness comes from a CPU-generated random texture — placement
+  // cannot correlate into lines the way procedural hashes can.
+  // r+g = 16-bit placement value for the main layer, b+a for the underlayer;
+  // remaining channels drive twinkle phase, speed, and tint.
+  vec4 rnd = texture2D(u_rand, (px + 0.5) / u_res);
+
   // faint underlayer of dim stars: denser, so no region of sky reads empty
-  float h2 = hash(px + 57.0);
-  if (h2 > 0.9945) {
-    float tw2 = 0.7 + 0.3 * sin(u_time * (0.4 + hash(px + 11.0)) + hash(px + 19.0) * 6.283);
+  float place2 = dot(vec2(rnd.b, rnd.a), vec2(255.0 / 256.0, 1.0 / 256.0));
+  if (place2 > 0.9945) {
+    float tw2 = 0.7 + 0.3 * sin(u_time * (0.4 + rnd.r) + rnd.g * 6.283);
     col += vec3(0.62, 0.70, 0.86) * tw2 * 0.16 * starVis;
   }
 
-  // pixel starfield: stars twinkle in place; a fraction of the field
-  // regenerates every few seconds (stars die out, new ones appear elsewhere)
-  vec2 cell = px;
-  float h = hash(cell);
-  if (h > 0.9986) {
-    float epoch = floor(u_time / 6.0);
-    if (hash(cell + epoch * 13.7) > 0.15) {
-      float tw = 0.7 + 0.3 * sin(u_time * (0.6 + hash(cell + 7.0) * 1.6) + hash(cell + 3.0) * 6.283);
-      float b = (h - 0.9986) / 0.0014;
-      float warm = step(0.8, hash(cell + 3.3));
-      vec3 tint = mix(vec3(0.75, 0.82, 0.95), vec3(0.95, 0.90, 0.78), warm);
-      col += tint * tw * (0.18 + 0.45 * b) * starVis;
-    }
+  // pixel starfield: stars twinkle in place; the texture is partially
+  // re-randomized every few seconds so stars die out and appear elsewhere
+  float place = dot(vec2(rnd.r, rnd.g), vec2(255.0 / 256.0, 1.0 / 256.0));
+  if (place > 0.9986) {
+    float tw = 0.7 + 0.3 * sin(u_time * (0.6 + rnd.b * 1.6) + rnd.a * 6.283);
+    float b = (place - 0.9986) / 0.0014;
+    float warm = step(0.8, fract(rnd.b * 7.31));
+    vec3 tint = mix(vec3(0.75, 0.82, 0.95), vec3(0.95, 0.90, 0.78), warm);
+    col += tint * tw * (0.18 + 0.45 * b) * starVis;
   }
 
   // pixelated shooting star: one streak roughly every 5s, top edge, falling
@@ -199,6 +203,8 @@ export function PixelSky() {
 
     const gl = canvas.getContext("webgl", { antialias: false });
     const loc: Record<string, WebGLUniformLocation | null> = {};
+    let randData: Uint8Array | null = null;
+    let fillRand = (_full: boolean) => {};
 
     if (gl) {
       const compile = (type: number, src: string) => {
@@ -220,12 +226,37 @@ export function PixelSky() {
       gl.enableVertexAttribArray(a);
       gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
 
-      for (const u of ["u_res", "u_time", "u_motion", "u_scroll", "u_spx", "u_star", "u_segA", "u_segB"]) {
+      for (const u of ["u_res", "u_time", "u_motion", "u_scroll", "u_spx", "u_rand", "u_star", "u_segA", "u_segB"]) {
         loc[u] = gl.getUniformLocation(prog, u);
       }
       gl.uniform1f(loc.u_motion, reduced ? 0 : 1);
       gl.uniform1f(loc.u_scroll, 0);
       gl.uniform1f(loc.u_spx, 0);
+      gl.uniform1i(loc.u_rand, 0);
+
+      // one texel of true randomness per shader pixel
+      const randTex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, randTex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+      fillRand = (full: boolean) => {
+        if (!randData) return;
+        if (full) {
+          for (let i = 0; i < randData.length; i++) randData[i] = (Math.random() * 256) | 0;
+        } else {
+          // regenerate ~12% of the sky
+          const n = Math.floor((randData.length / 4) * 0.12);
+          for (let k = 0; k < n; k++) {
+            const idx = ((Math.random() * (randData.length / 4)) | 0) * 4;
+            for (let j = 0; j < 4; j++) randData[idx + j] = (Math.random() * 256) | 0;
+          }
+        }
+        gl.bindTexture(gl.TEXTURE_2D, randTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, randData);
+      };
     }
 
     const draw = (t: number) => {
@@ -275,6 +306,8 @@ export function PixelSky() {
       if (gl) {
         gl.viewport(0, 0, w, h);
         gl.uniform2f(loc.u_res, w, h);
+        randData = new Uint8Array(w * h * 4);
+        fillRand(true);
         const stars: number[] = [];
         const segA: number[] = [];
         const segB: number[] = [];
@@ -303,8 +336,14 @@ export function PixelSky() {
     };
 
     let scrollS = 0;
+    let lastEpoch = 0;
 
     const loop = (t: number) => {
+      const epoch = Math.floor(t / 6000);
+      if (epoch !== lastEpoch) {
+        lastEpoch = epoch;
+        fillRand(false);
+      }
       mouseS.x += (mouseT.x - mouseS.x) * 0.06;
       mouseS.y += (mouseT.y - mouseS.y) * 0.06;
       canvas.style.transform = `scale(1.05) translate(${(mouseS.x * 14).toFixed(2)}px, ${(mouseS.y * 10).toFixed(2)}px)`;
