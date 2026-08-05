@@ -53,9 +53,10 @@ void main() {
   // night ground #020308
   vec3 col = vec3(0.008, 0.012, 0.031);
 
-  // slow nebula haze, barely there — small floor keeps corners from going pitch black
+  // deep-navy ambience over the night ground — bright enough at the top of
+  // the page that the scroll darkening reads as a real color change
   float n = fbm(p * 0.008 + vec2(u_time * 0.008, u_time * 0.003));
-  col += vec3(0.055, 0.085, 0.170) * (0.12 + n * 0.10);
+  col += vec3(0.060, 0.090, 0.180) * (0.30 + n * 0.22);
 
   // background stars begin below a soft diagonal, leaving the constellation's
   // upper-right corner clean; the boundary is roughened with noise so it
@@ -104,7 +105,7 @@ void main() {
   }
 
   // the whole sky settles darker as you scroll into the reading section
-  gl_FragColor = vec4(min(col, 1.0) * mix(1.0, 0.42, clamp(u_scroll, 0.0, 1.0)), 1.0);
+  gl_FragColor = vec4(min(col, 1.0) * mix(1.0, 0.35, clamp(u_scroll, 0.0, 1.0)), 1.0);
 }`;
 
 export function PixelSky() {
