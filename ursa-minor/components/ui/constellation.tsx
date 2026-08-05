@@ -57,8 +57,9 @@ export function Constellation() {
         const oy = h * 0.19;
         return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
       }
-      // landscape: upper-right area with clear air above the hero text
-      return [(0.34 + DIPPER[i][0] * 0.52) * w, (0.04 + DIPPER[i][1] * 0.48) * h];
+      // landscape: center-right at mid-height, floating in the open sky
+      // beside the hero text
+      return [(0.42 + DIPPER[i][0] * 0.52) * w, (0.29 + DIPPER[i][1] * 0.48) * h];
     };
 
     const draw = (t: number) => {
