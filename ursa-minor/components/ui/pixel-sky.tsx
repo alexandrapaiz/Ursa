@@ -61,7 +61,7 @@ void main() {
   // upper-right corner clean; the boundary is roughened with noise so it
   // never reads as a straight line, and dissolves as you scroll away
   float diag = p.x / u_res.x + (1.0 - p.y / u_res.y) + (vnoise(p * 0.015) - 0.5) * 0.5;
-  float starVis = mix(1.0 - 0.85 * smoothstep(1.0, 1.5, diag), 1.0, clamp(u_scroll, 0.0, 1.0));
+  float starVis = mix(1.0 - 0.85 * smoothstep(1.0, 1.5, diag), 0.8, clamp(u_scroll, 0.0, 1.0));
 
   // star randomness comes from a CPU-generated random texture — placement
   // cannot correlate into lines the way procedural hashes can.
@@ -104,7 +104,7 @@ void main() {
   }
 
   // the whole sky settles darker as you scroll into the reading section
-  gl_FragColor = vec4(min(col, 1.0) * mix(1.0, 0.55, clamp(u_scroll, 0.0, 1.0)), 1.0);
+  gl_FragColor = vec4(min(col, 1.0) * mix(1.0, 0.42, clamp(u_scroll, 0.0, 1.0)), 1.0);
 }`;
 
 export function PixelSky() {
