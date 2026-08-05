@@ -5,27 +5,6 @@ import { useEffect, useRef } from "react";
 // Each shader pixel is a PIX×PIX block on screen.
 const PIX = 2;
 
-// Little Dipper, normalized. Polaris first.
-const DIPPER: [number, number][] = [
-  [0.76, 0.17], // Polaris
-  [0.706, 0.285], // Yildun
-  [0.646, 0.395], // ε UMi
-  [0.566, 0.49], // ζ UMi
-  [0.436, 0.56], // β Kochab
-  [0.376, 0.69], // γ Pherkad
-  [0.496, 0.685], // η UMi
-];
-// handle: 0-1-2-3, bowl: 3-4-5-6-3
-const EDGES: [number, number][] = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 4],
-  [4, 5],
-  [5, 6],
-  [6, 3],
-];
-
 const VERT = "attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }";
 
 const FRAG = `
@@ -38,11 +17,7 @@ uniform vec2 u_res;
 uniform float u_time;
 uniform float u_motion;
 uniform float u_scroll;
-uniform float u_spx;
 uniform sampler2D u_rand;
-uniform vec2 u_star[7];
-uniform vec2 u_segA[7];
-uniform vec2 u_segB[7];
 
 float hash(vec2 p) {
   vec3 p3 = fract(vec3(p.xyx) * 0.1031);
@@ -68,12 +43,6 @@ float fbm(vec2 p) {
     amp *= 0.5;
   }
   return v;
-}
-
-float segDist(vec2 p, vec2 a, vec2 b) {
-  vec2 pa = p - a, ba = b - a;
-  float t = clamp(dot(pa, ba) / max(dot(ba, ba), 0.0001), 0.0, 1.0);
-  return length(pa - ba * t);
 }
 
 void main() {
@@ -134,35 +103,6 @@ void main() {
     }
   }
 
-  // constellation is anchored to the page, not the viewport: it scrolls up
-  // and away with the hero like any other content
-  vec2 cOff = vec2(0.0, u_spx);
-
-  // constellation lines, dotted pixel checker
-  for (int i = 0; i < 7; i++) {
-    if (segDist(p, u_segA[i] - cOff, u_segB[i] - cOff) < 0.5) {
-      if (mod(px.x + px.y, 4.0) < 1.0) {
-        col += vec3(0.66, 0.78, 0.98) * 0.11;
-      }
-    }
-  }
-
-  // constellation stars as pixel clusters; Polaris gets a soft gradient glow
-  for (int i = 0; i < 7; i++) {
-    vec2 sp = u_star[i] - cOff;
-    vec2 d = abs(p - sp);
-    float ch = max(d.x, d.y);
-    if (i == 0) {
-      float pulse = 0.85 + 0.15 * sin(u_time * 1.1);
-      float g = max(0.0, 1.0 - length(p - sp) / (16.0 * pulse));
-      g *= g; // smooth quadratic falloff, no hard edge
-      col += vec3(0.41, 0.49, 0.68) * g * 0.45;
-      if (ch < 1.5) col += vec3(0.86, 0.91, 1.0);
-    } else {
-      if (ch < 1.0) col += vec3(0.80, 0.85, 0.93) * 0.65;
-    }
-  }
-
   // the whole sky settles darker as you scroll into the reading section
   gl_FragColor = vec4(min(col, 1.0) * mix(1.0, 0.55, clamp(u_scroll, 0.0, 1.0)), 1.0);
 }`;
@@ -178,28 +118,6 @@ export function PixelSky() {
     let w = 0;
     let h = 0;
     let raf = 0;
-
-    // constellation placement, in shader-pixel space (y down), uniform scale
-    // so the dipper keeps its shape at any aspect ratio.
-    // portrait: the hero is sky-only (text sits below the fold), so the
-    // dipper owns the viewport, centered, clear of the header.
-    // landscape: upper-right, beside the hero text.
-    const BX = 0.376, BY = 0.17, BW = 0.384, BH = 0.52; // dipper data bounds
-    const cpos = (i: number): [number, number] => {
-      const portrait = w < h;
-      let s: number, ox: number, oy: number;
-      if (portrait) {
-        // scenic, like the laptop composition: modest dipper upper-right
-        s = Math.min((w * 0.55) / BW, (h * 0.3) / BH);
-        ox = w * 0.78 - BW * s;
-        oy = h * 0.19;
-      } else {
-        // the original landscape placement, eased toward center so Polaris
-        // keeps clear distance from the header label
-        return [(0.3 + DIPPER[i][0] * 0.52) * w, (0.1 + DIPPER[i][1] * 0.62) * h];
-      }
-      return [ox + (DIPPER[i][0] - BX) * s, oy + (DIPPER[i][1] - BY) * s];
-    };
 
     const gl = canvas.getContext("webgl", { antialias: false });
     const loc: Record<string, WebGLUniformLocation | null> = {};
@@ -226,12 +144,11 @@ export function PixelSky() {
       gl.enableVertexAttribArray(a);
       gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
 
-      for (const u of ["u_res", "u_time", "u_motion", "u_scroll", "u_spx", "u_rand", "u_star", "u_segA", "u_segB"]) {
+      for (const u of ["u_res", "u_time", "u_motion", "u_scroll", "u_rand"]) {
         loc[u] = gl.getUniformLocation(prog, u);
       }
       gl.uniform1f(loc.u_motion, reduced ? 0 : 1);
       gl.uniform1f(loc.u_scroll, 0);
-      gl.uniform1f(loc.u_spx, 0);
       gl.uniform1i(loc.u_rand, 0);
 
       // one texel of true randomness per shader pixel
@@ -275,26 +192,6 @@ export function PixelSky() {
       for (let i = 0; i < (w * h) / 1100; i++) {
         ctx.fillRect(Math.floor(Math.random() * w), Math.floor(Math.random() * h), 1, 1);
       }
-      ctx.fillStyle = "rgba(168,199,250,0.35)";
-      for (const [a, b] of EDGES) {
-        const [ax, ay] = cpos(a);
-        const [bx, by] = cpos(b);
-        const steps = Math.ceil(Math.hypot(bx - ax, by - ay));
-        for (let s = 0; s <= steps; s += 2) {
-          ctx.fillRect(
-            Math.floor(ax + ((bx - ax) * s) / steps),
-            Math.floor(ay + ((by - ay) * s) / steps),
-            1,
-            1,
-          );
-        }
-      }
-      for (let i = 0; i < 7; i++) {
-        const [x, y] = cpos(i);
-        const r = i === 0 ? 1 : 0;
-        ctx.fillStyle = i === 0 ? "#dbe8ff" : "rgba(205,216,238,0.8)";
-        ctx.fillRect(Math.floor(x) - r, Math.floor(y) - r, 1 + 2 * r, 1 + 2 * r);
-      }
     };
 
     const resize = () => {
@@ -308,17 +205,6 @@ export function PixelSky() {
         gl.uniform2f(loc.u_res, w, h);
         randData = new Uint8Array(w * h * 4);
         fillRand(true);
-        const stars: number[] = [];
-        const segA: number[] = [];
-        const segB: number[] = [];
-        for (let i = 0; i < 7; i++) stars.push(...cpos(i));
-        for (const [a, b] of EDGES) {
-          segA.push(...cpos(a));
-          segB.push(...cpos(b));
-        }
-        gl.uniform2fv(loc.u_star, stars);
-        gl.uniform2fv(loc.u_segA, segA);
-        gl.uniform2fv(loc.u_segB, segB);
         draw(reduced ? 40 : 0);
       } else {
         fallback();
@@ -350,10 +236,7 @@ export function PixelSky() {
 
       const scrollTarget = Math.min(scrollY / innerHeight, 1);
       scrollS += (scrollTarget - scrollS) * 0.08;
-      if (gl) {
-        gl.uniform1f(loc.u_scroll, scrollS);
-        gl.uniform1f(loc.u_spx, scrollY / PIX);
-      }
+      if (gl) gl.uniform1f(loc.u_scroll, scrollS);
 
       draw(t / 1000);
       raf = requestAnimationFrame(loop);
@@ -363,7 +246,6 @@ export function PixelSky() {
     const onScrollReduced = () => {
       if (!gl) return;
       gl.uniform1f(loc.u_scroll, Math.min(scrollY / innerHeight, 1));
-      gl.uniform1f(loc.u_spx, scrollY / PIX);
       draw(40);
     };
 

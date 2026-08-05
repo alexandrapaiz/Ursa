@@ -1,3 +1,4 @@
+import Constellation from "@/components/ui/constellation";
 import PixelSky from "@/components/ui/pixel-sky";
 
 const NORTH_STARS = [
@@ -25,6 +26,7 @@ export default function Home() {
       <PixelSky />
 
       <div className="relative flex min-h-svh flex-col justify-between">
+        <Constellation />
         <header className="relative z-10 flex items-baseline justify-between px-[clamp(2rem,8vw,6rem)] pt-14 pb-8">
           <div className="font-[family-name:var(--font-inter-tight)] text-[0.95rem] font-extralight uppercase tracking-[0.34em] text-[var(--star)]">
             Ursa Minor
