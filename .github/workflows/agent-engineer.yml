@@ -1,0 +1,44 @@
+name: engineer-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's daily engineer agent (ADR-14 in docs/decisions.md),
+            running in GitHub Actions with this repository already checked out.
+            Read prompts/engineer-agent.md; it is your full charter. Execute one
+            OODA cycle exactly as it specifies: implement on a branch named
+            engineer/YYYY-MM-DD-slug (today's date), push the branch, and open
+            exactly one pull request with `gh pr create`, appending new ideas to
+            docs/ideas.md on the same branch. Never merge your own PR, never
+            push to main, never touch secrets, never write into skills/ or
+            digests/, never edit charters or docs/sprints/. If the charter file
+            is missing, stop and fail loudly instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 120 --permission-mode bypassPermissions --model opus"

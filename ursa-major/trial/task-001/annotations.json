@@ -1,0 +1,198 @@
+{
+  "method": "manual-annotation",
+  "annotatedAt": "2026-08-05",
+  "episode": {
+    "steps": 758,
+    "generations": 193,
+    "accepted": true,
+    "acceptanceStatedInChat": false,
+    "acceptanceBasis": "site deployed to production and retained unchanged; user confirmed satisfaction out of band. Terminal acceptance is tacit — retention without further correction is the acceptance signal (Demonstrated Preference)."
+  },
+  "correctionLoops": [
+    {
+      "id": "A",
+      "theme": "Background star-motion quality",
+      "targetFiles": ["components/ui/pixel-sky.tsx", "ursa-minor/index.html"],
+      "openedStep": 100,
+      "promptSteps": [100, 175, 286, 558, 615],
+      "recurrences": 4,
+      "regressionSteps": [],
+      "closedStep": 628,
+      "resolution": "accepted_tacitly",
+      "resolvingSteps": [296, 577, 621, 622, 625, 626, 627, 628],
+      "discoveredSpec": "Pixelated in appearance, continuous in motion: parallax via sub-pixel CSS transform (never stepping the shader grid), stars twinkle in place, randomness visually uncorrelated (CPU-generated texture, not GPU float hash), field regenerates on a slow ~6s epoch."
+    },
+    {
+      "id": "B",
+      "theme": "Constellation placement, scale, and layering (mobile + desktop)",
+      "targetFiles": ["components/ui/pixel-sky.tsx", "components/ui/constellation.tsx", "app/page.tsx"],
+      "openedStep": 365,
+      "promptSteps": [365, 422, 453, 497, 521, 650, 710],
+      "recurrences": 6,
+      "regressionSteps": [453, 497],
+      "closedStep": 730,
+      "resolution": "accepted",
+      "resolvingSteps": [656, 657, 660, 661, 710],
+      "discoveredSpec": "Constellation as its own layer above the starfield, out of the shader; desktop keeps the originally-accepted upper-right composition; mobile hero is sky-only with a uniform-scale dipper; background stars begin below a noise-roughened diagonal so the constellation's corner stays clean; constellation follows the pointer."
+    },
+    {
+      "id": "C",
+      "theme": "Darkness calibration and scroll color-change",
+      "targetFiles": ["components/ui/pixel-sky.tsx"],
+      "openedStep": 77,
+      "promptSteps": [77, 175, 220, 286, 732, 754],
+      "recurrences": 5,
+      "regressionSteps": [732],
+      "closedStep": 758,
+      "resolution": "accepted_tacitly",
+      "resolvingSteps": [757, 758],
+      "discoveredSpec": "Darkness needs headroom: top-of-page ambience bright enough that scroll darkening (floor 0.35) reads as a real change; corners never pitch black (nebula floor ~0.12). 'Darker' was a direction, not a destination — the preference was contrast, not absolute darkness."
+    },
+    {
+      "id": "D",
+      "theme": "Copy-edit scope (overreach)",
+      "targetFiles": ["ursa-minor/index.html", "app/page.tsx"],
+      "openedStep": 77,
+      "promptSteps": [77, 100, 402],
+      "recurrences": 1,
+      "regressionSteps": [],
+      "closedStep": 402,
+      "resolution": "accepted",
+      "resolvingSteps": [402],
+      "discoveredSpec": "Deletion requests are content-scoped, never style-scoped: removing text the user dislikes must not remove typography the user loves. Edit boundaries must be minimal and explicit."
+    }
+  ],
+  "feedbackTranslations": [
+    {
+      "loopId": "A",
+      "complaint": "i wish the background movement was smoother, and centered on the mouse. not opposite and away. its quite unsatisfying",
+      "complaintStep": 286,
+      "mechanism": "Parallax was applied inside the shader on the pixel grid, so motion stepped in whole pixels (and direction was inverted). Fix: sub-pixel CSS transform on the canvas — continuous kinematics under a pixelated look.",
+      "resolvedBySteps": [296]
+    },
+    {
+      "loopId": "A",
+      "complaint": "i know its supposed to be pixely, but right now it just looks like its crashing",
+      "complaintStep": 558,
+      "mechanism": "Hash cells re-randomized as parallax shifted their coordinates, reading as flicker/shimmer; plus correlated GPU float-hash artifacts.",
+      "resolvedBySteps": [621, 625, 626, 627, 628]
+    },
+    {
+      "loopId": "A",
+      "complaint": "the stars still look like diagonal lines. not randomly placed",
+      "complaintStep": 615,
+      "mechanism": "Float-precision aliasing in the sin/fract GPU hash produced spatially correlated star placement. Interim fix: better hash (step 577, partial). Definitive: randomness moved to a CPU-filled RGBA texture sampled by the shader.",
+      "resolvedBySteps": [621, 625, 626, 627, 628]
+    },
+    {
+      "loopId": "B",
+      "complaint": "its scaled too big and the text covers it, and it overlaps with frontier labs",
+      "complaintStep": 422,
+      "mechanism": "Constellation scaled per-axis with the viewport, distorting the dipper's shape on portrait aspect ratios and colliding with DOM text the shader could not see. Fix path: uniform scaling, then DOM band measurement, finally extraction to its own layer.",
+      "resolvedBySteps": [368, 426, 656, 661]
+    },
+    {
+      "loopId": "C",
+      "complaint": "not really, its so dark overall i dont see changes upon scroll",
+      "complaintStep": 754,
+      "mechanism": "Scroll darkening lacked contrast headroom — the page started too dark for a 0.42 floor to read as change. Fix inverted the approach: raise top-of-page ambience and deepen the floor to 0.35.",
+      "resolvedBySteps": [757, 758]
+    }
+  ],
+  "repairAttempts": [
+    {
+      "loopId": "A",
+      "strategy": "Shift the hash cell by the parallax offset inside the shader",
+      "steps": [243],
+      "outcome": "failed",
+      "evidence": "0% of the edit survived; stars re-randomized while moving (the 'crashing' look)"
+    },
+    {
+      "loopId": "A",
+      "strategy": "Sub-pixel CSS transform on the canvas; shader look untouched",
+      "steps": [296],
+      "outcome": "resolved",
+      "evidence": "58% survival; comment 'continuous instead of stepping on the pixel grid' ships in the final file"
+    },
+    {
+      "loopId": "A",
+      "strategy": "Replace sin/fract GPU hash with a higher-quality hash",
+      "steps": [577],
+      "outcome": "partial",
+      "evidence": "83% survival but the complaint recurred at step 615 ('still diagonal lines')"
+    },
+    {
+      "loopId": "A",
+      "strategy": "Move randomness to CPU: RGBA random texture sampled in-shader, refreshed per 6s epoch",
+      "steps": [621, 625, 626, 627, 628],
+      "outcome": "resolved",
+      "evidence": "71–75% survival; no further randomness complaints; ships in final"
+    },
+    {
+      "loopId": "B",
+      "strategy": "Keep constellation in-shader, tune viewport-relative placement per aspect ratio",
+      "steps": [368, 384, 426, 456, 458, 500, 524],
+      "outcome": "partial",
+      "evidence": "Repeated 0–37% survival across seven placement attempts; two desktop regressions (steps 453, 497) caused while tuning mobile"
+    },
+    {
+      "loopId": "B",
+      "strategy": "Extract constellation to a separate DOM layer; remove u_star/u_seg uniforms from shader",
+      "steps": [656, 657, 660, 661],
+      "outcome": "resolved",
+      "evidence": "Shader uniform list shrinks 9→5; explicit acceptance at step 730 ('yesss finallyyy!!')"
+    },
+    {
+      "loopId": "C",
+      "strategy": "Deepen the scroll-darkening floor (mix to 0.42)",
+      "steps": [739],
+      "outcome": "failed",
+      "evidence": "0% survival; user could not perceive the change (step 754)"
+    },
+    {
+      "loopId": "C",
+      "strategy": "Raise top-of-page ambience so darkening has contrast headroom; floor 0.35",
+      "steps": [757, 758],
+      "outcome": "resolved",
+      "evidence": "75–100% survival; final two generations of the session; retained at ship"
+    }
+  ],
+  "regressions": [
+    {
+      "step": 453,
+      "brokenState": "Accepted desktop layout broken while fixing the mobile constellation",
+      "evidence": "desktop view is very off now. it was perfect before. please restore how it was",
+      "causedBySteps": [426, 432]
+    },
+    {
+      "step": 497,
+      "brokenState": "Constellation drifted from its previously accepted position",
+      "evidence": "look its oof. the constellation goes very much to the upper right corner. it used to be placed perfectly before",
+      "causedBySteps": [456, 458]
+    },
+    {
+      "step": 732,
+      "brokenState": "Accepted scroll color-change silently lost during the constellation-layer refactor",
+      "evidence": "the color change on scroll disappeared",
+      "causedBySteps": [656, 668]
+    }
+  ],
+  "defensiveGuardrails": [
+    {
+      "step": 402,
+      "text": "dont change anything else and dont touch the descriptions",
+      "priorIncidentStep": 100
+    }
+  ],
+  "oneShotCorrections": [
+    { "step": 203, "text": "i need more padding from the edge of my screen", "domain": "stateable geometry — accepted next turn ('perfect on the padding')" },
+    { "step": 120, "text": "north stars descriptions too long, more concise; expand SFT/RLHF; Systems plural", "domain": "stateable copy edits" },
+    { "step": 335, "text": "upload to github / deploy on vercel", "domain": "procedural with verifiable outcome — zero corrections" }
+  ],
+  "notes": [
+    "All `step` values are assistant-step ordinals joinable to generations[].turnIndex and conversations[].prompts[].step; every labeled claim is auditable against the raw generation text and the user's verbatim prompt.",
+    "Correction loops cluster where language runs out (motion, placement, perceptual calibration); one-shots cluster where specs are stateable. The recurrence map locates where outcome-based signal replaces unavailable elicited preference.",
+    "Repair attempts are graded by the artifact (edit survival), not by a rater: wrong-diagnosis edits die at 0%, correct-diagnosis edits survive at 70–100%.",
+    "v1 labels are human-curated from the embedded prompt stream and generation churn; auto-detection heuristics (prompt clustering + same-file regeneration bursts; accepted-span disappearance for regressions) are specified in trajectory.md."
+  ]
+}

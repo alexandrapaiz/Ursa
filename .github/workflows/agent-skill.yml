@@ -1,0 +1,52 @@
+name: skill-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+      NEON_RO_URL: ${{ secrets.NEON_RO_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's skill agent (ADR-22 in docs/decisions.md),
+            running in GitHub Actions with this repository already checked
+            out. Read docs/vision.md section 0, the newest file in
+            docs/okrs/, the newest sprint in docs/sprints/, and then
+            prompts/skill-agent.md; the charter is your full instruction
+            set. Execute one run exactly as it specifies: pick the strongest
+            un-extracted claim cluster (read-only, via the NEON_RO_URL
+            environment variable when set; if unset, say so and do the
+            non-database work), draft one evidence-backed skill under
+            skills/ with provenance frontmatter and claim-id citations,
+            include the trigger test in the PR, and open exactly one pull
+            request on a branch named skill/YYYY-MM-DD-slug with `gh pr
+            create`. Write only under skills/, prompts/skill-extract.md,
+            and docs/ideas.md. Never print credentials, never merge your
+            own PR, never push to main, never touch digests/. If the
+            charter file is missing, stop and fail loudly instead of
+            improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 100 --permission-mode bypassPermissions --model opus"

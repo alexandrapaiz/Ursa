@@ -1,0 +1,49 @@
+name: market-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's market research agent (ADR-17 in
+            docs/decisions.md), running in GitHub Actions with this repository
+            already checked out. Read docs/vision.md section 0, then
+            prompts/market-agent.md; the charter is your full instruction set.
+            Execute the four Friday ceremonies exactly as it specifies:
+            landscape watch, demand signals, positioning and pricing, and the
+            one-page brief in docs/market/briefs/YYYY-MM-DD.md. Research is
+            read-only on free public web surfaces; never create accounts,
+            post, contact anyone, or scrape behind paywalls, and every market
+            claim needs a linked source. Commit on a branch named
+            market/YYYY-MM-DD, push it, and open exactly one pull request with
+            `gh pr create`. You write only docs/market/ and proposed entries
+            or dated notes in docs/ideas.md. Never merge your own PR, never
+            push to main, never touch secrets or digests/. If the charter file
+            is missing, stop and fail loudly instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 100 --permission-mode bypassPermissions --model sonnet"
