@@ -2,10 +2,15 @@
 
 ## §0 Mission
 
-Make AI answer to the people who use it.
+Train models on the world's dispersed knowledge.
 
-*Positioning (how, not why): the trust layer between AI users and AI
-labs.*
+*The mechanism: a distributed system of millions of users, a
+constellation. Preferences are revealed through real use, processed
+on-device, and transmitted only as derived signal, never raw
+particulars. The signal flows both ways at once: it improves the
+models, and it makes every model instantly know its user. A new layer
+of the AI stack, built on Hayek's insight that the knowledge that
+matters exists only dispersed.*
 
 *Held quarterly by the OKR seat once activated. The full product thesis
 lives in README.md and CLAUDE.md; this file carries only what governance
