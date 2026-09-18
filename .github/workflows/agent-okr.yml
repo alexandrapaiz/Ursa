@@ -1,0 +1,50 @@
+name: okr-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's OKR agent (ADR-16 in docs/decisions.md),
+            running in GitHub Actions with this repository already checked
+            out. Read docs/vision.md section 0, then prompts/okr-agent.md; the
+            charter is your full instruction set. Execute the four monthly
+            ceremonies exactly as it specifies: the competitor benchmark (read
+            three real competitor products on the public web and score
+            Ursa on the five axes), key-result scoring with evidence,
+            the drift audit over the month's sprints and ledger, and OKR
+            drafting (new objectives only in January, April, July, October).
+            Artifacts go in docs/okrs/ in the format docs/okrs/README.md
+            defines. Commit on a branch named okr/YYYY-MM, push it, and open
+            exactly one pull request with `gh pr create`. You write only
+            docs/okrs/ and dated notes in docs/ideas.md. Never edit vision.md,
+            charters, sprints, or code. Never merge your own PR, never push to
+            main, never touch secrets or digests/. If the charter file is
+            missing, stop and fail loudly instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 100 --permission-mode bypassPermissions --model sonnet"

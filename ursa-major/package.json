@@ -1,0 +1,20 @@
+{
+  "name": "ursa-major",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ursa Major provenance resolver — joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
+  "scripts": {
+    "test": "vitest run",
+    "resolve": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "diff": "^8.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

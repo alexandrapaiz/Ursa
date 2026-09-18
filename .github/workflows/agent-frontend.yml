@@ -1,0 +1,55 @@
+name: frontend-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's frontend engineer (ADR-23 in
+            docs/decisions.md), running in GitHub Actions with this
+            repository already checked out and Node 20 available. Read
+            docs/vision.md section 0 and prompts/frontend-agent.md; the
+            charter is your full instruction set. Execute the run exactly as
+            it specifies: build the site, screenshot every page at the three
+            viewports with Playwright, LOOK at every screenshot and judge it
+            visually (never call a page fine without having seen it
+            rendered), fix what you find, benchmark two or three
+            best-in-class AI product sites for interaction craft, implement
+            at most two verified polish refinements, and ship the evidence
+            as screenshots in docs/design/reviews/ inside ONE pull request
+            on a branch named fe/YYYY-MM-DD-slug via `gh pr create`. Protect
+            the fixed design identity: black and white only, Apple-clean,
+            and the hero mark's owner-approved geometry is untouchable.
+            Never merge your own PR, never push to main, never touch
+            secrets or digests/. If the charter file is missing, stop and
+            fail loudly instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 250 --permission-mode bypassPermissions --model opus"
