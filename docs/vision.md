@@ -2,7 +2,10 @@
 
 ## §0 Mission
 
-The trust layer between AI users and AI labs.
+Make AI answer to the people who use it.
+
+*Positioning (how, not why): the trust layer between AI users and AI
+labs.*
 
 *Held quarterly by the OKR seat once activated. The full product thesis
 lives in README.md and CLAUDE.md; this file carries only what governance

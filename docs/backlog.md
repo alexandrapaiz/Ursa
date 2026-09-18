@@ -4,8 +4,13 @@ Owner-seeded; the PM seat grooms once activated.
 
 ## Now
 
-- [ ] OKR walkthrough with the owner: mission held, first objectives set
-  (docs/okrs/), activation order for seats decided
+- [x] Mission set by the owner (2026-09-18): "Make AI answer to the
+  people who use it." (vision.md §0)
+- [ ] OKR walkthrough, remainder: draft key results for the committed
+  objectives — O1 prove the record (resolver v2 + n≥5 trials), O2
+  publish methodology, O3 company operational, O4 outreach groundwork
+  (docs/okrs/2026-q4.md). Activation order confirmed: playbook
+  (okr → pm → exo → builders)
 - [ ] Owner: create CLAUDE_CODE_OAUTH_TOKEN secret in this repo (needed
   before ANY seat dispatch, even dormant ones)
 
