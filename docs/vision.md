@@ -2,7 +2,7 @@
 
 ## §0 Mission
 
-Train models on the world's dispersed knowledge.
+Turn AI peer-to-peer.
 
 *The mechanism: a distributed system of millions of users, a
 constellation. Preferences are revealed through real use, processed
@@ -20,7 +20,12 @@ needs.*
 
 One parent, two products, one repo for now (owner's call, 2026-09-18):
 Ursa Major (consumers; zero revenue permanently, by design) and Ursa
-Minor (labs; all revenue). The split into separate repos happens when
+Minor (labs; all revenue).
+
+Product missions, set with the parent's (2026-09-18):
+
+- **Ursa Minor** — Train models on the world's dispersed knowledge.
+- **Ursa Major** — Import your taste into every model. The split into separate repos happens when
 the products' cadences diverge; until then `ursa-major/` and
 `ursa-minor/` live here.
 
