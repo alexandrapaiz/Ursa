@@ -1,6 +1,8 @@
 name: pm-agent
 
 on:
+  schedule:
+    - cron: "0 12 * * 1" # weekly, Monday, 12:00 UTC (morning ET)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -28,7 +30,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            You are Ursa's project manager agent (ADR-15 in
+            You are Ursa's project manager agent (ADR-002 in
             docs/decisions.md), running in GitHub Actions with this repository
             already checked out. Read prompts/pm-agent.md; it is your full
             charter. Execute the three Monday ceremonies exactly as it
@@ -39,7 +41,7 @@ jobs:
             exactly one pull request with `gh pr create`. You write only
             docs/sprints/ and grooming notes in docs/ideas.md. Never write
             code, never edit charters, never merge your own PR, never push to
-            main, never touch secrets or digests/. If the charter file is
+            main, never touch secrets. If the charter file is
             missing, stop and fail loudly instead of improvising.
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
