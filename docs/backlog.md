@@ -19,7 +19,9 @@ Owner-seeded; the PM seat grooms once activated.
 ## Next
 
 - [ ] Adapt + activate first seats per the walkthrough (playbook order:
-  okr → pm → exo → builders)
+  okr → pm → exo → builders) — wave 1 (okr, pm, exo) adapted and
+  scheduled in the activation PR (ADR-002); ACTIVE on the owner's
+  merge. Builders follow after one full governance cycle.
 - [ ] Decide the ursa-major / ursa-minor repo split criteria
 - [ ] Ursa Major: adjudicate the pending n=1 trial (trial/task-001)
 

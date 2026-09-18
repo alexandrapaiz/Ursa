@@ -1,6 +1,8 @@
 name: okr-agent
 
 on:
+  schedule:
+    - cron: "0 13 1 * *" # monthly, 1st, 13:00 UTC (morning ET)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -28,7 +30,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            You are Ursa's OKR agent (ADR-16 in docs/decisions.md),
+            You are Ursa's OKR agent (ADR-002 in docs/decisions.md),
             running in GitHub Actions with this repository already checked
             out. Read docs/vision.md section 0, then prompts/okr-agent.md; the
             charter is your full instruction set. Execute the four monthly
@@ -42,7 +44,7 @@ jobs:
             exactly one pull request with `gh pr create`. You write only
             docs/okrs/ and dated notes in docs/ideas.md. Never edit vision.md,
             charters, sprints, or code. Never merge your own PR, never push to
-            main, never touch secrets or digests/. If the charter file is
+            main, never touch secrets. If the charter file is
             missing, stop and fail loudly instead of improvising.
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
