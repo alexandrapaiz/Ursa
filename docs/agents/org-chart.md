@@ -1,20 +1,25 @@
 # Org Chart — Ursa
 
-All seats DORMANT (ADR-001): installed, no schedules, owner-dispatch
-only. Charters inherited from alexandria, adapted at activation.
+Wave 1 (okr, pm, exo) ACTIVE per ADR-002 (2026-09-18): charters
+adapted, workflows scheduled. All other seats DORMANT (ADR-001):
+installed, no schedules, owner-dispatch only, charters inherited from
+alexandria and adapted at activation.
 
-| Seat | Charter | Status | Intended cadence at activation |
+| Seat | Charter | Status | Cadence |
 |---|---|---|---|
-| okr | prompts/okr-agent.md | dormant | monthly |
-| pm | prompts/pm-agent.md | dormant | weekly Mon |
-| exo | prompts/exo-agent.md | dormant | weekly Sun |
-| engineer | prompts/engineer-agent.md | dormant | daily |
-| research | prompts/research-agent.md | dormant | weekly |
-| market | prompts/market-agent.md | dormant | weekly Fri |
-| frontend | prompts/frontend-agent.md | dormant | weekly Wed |
-| security | prompts/security-agent.md | dormant | biweekly |
-| skill | prompts/skill-agent.md | dormant | weekly |
-| finance | prompts/finance-agent.md | dormant | monthly |
+| okr | prompts/okr-agent.md | active | monthly, 1st |
+| pm | prompts/pm-agent.md | active | weekly Mon |
+| exo | prompts/exo-agent.md | active | weekly Sun |
+| engineer | prompts/engineer-agent.md | dormant | daily at activation |
+| research | prompts/research-agent.md | dormant | weekly at activation |
+| market | prompts/market-agent.md | dormant | weekly Fri at activation |
+| frontend | prompts/frontend-agent.md | dormant | weekly Wed at activation |
+| security | prompts/security-agent.md | dormant | biweekly at activation |
+| skill | prompts/skill-agent.md | dormant | weekly at activation |
+| finance | prompts/finance-agent.md | dormant | monthly at activation |
 | sales | prompts/sales-agent.md | dormant | near launch |
 
-The chair (interactive session) covers all functions until activation.
+The chair (interactive session) covers the dormant seats' functions.
+Wave 2 (builders, starting with engineer) activates after the
+governance spine completes one full cycle: an OKR file, a sprint, and
+an ExO audit, each merged by the owner.
