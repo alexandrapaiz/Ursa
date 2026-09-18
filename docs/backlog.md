@@ -4,8 +4,8 @@ Owner-seeded; the PM seat grooms once activated.
 
 ## Now
 
-- [x] Mission set by the owner (2026-09-18): "Make AI answer to the
-  people who use it." (vision.md §0)
+- [x] Mission set by the owner (2026-09-18): "Train models on the
+  world's dispersed knowledge." (vision.md §0)
 - [ ] OKR walkthrough, remainder: draft key results for the committed
   objectives — O1 prove the record (resolver v2 + n≥5 trials), O2
   publish methodology, O3 company operational, O4 outreach groundwork
