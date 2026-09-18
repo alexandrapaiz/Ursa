@@ -1,0 +1,58 @@
+name: research-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+      NEON_RO_URL: ${{ secrets.NEON_RO_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's research agent, the input curator (prompts/research-agent.md;
+            ADR-11 and ADR-12 in docs/decisions.md), running in GitHub Actions
+            with this repository already checked out, on Mondays after the
+            digest cron has published. Read docs/vision.md section 0, the
+            newest file in docs/okrs/, and then prompts/research-agent.md; the
+            charter's steps are your instruction set, with two adaptations for
+            this runner. First, data access: read the corpus read-only through
+            the NEON_RO_URL environment variable with psql when it is set; if
+            it is unset, say so at the top of your PR and do only the
+            repo-side work. Use the discovery_report queries documented in
+            docs/product/source-discovery.md as SQL directly when reviewing
+            sources. Second, division of labor: drafting new skills now
+            belongs to the dedicated skill agent (ADR-22), so skip the
+            skill-drafting step; your lane is the digest quality review, the claim-graph
+            error hunt, the CURATION BRIEF (charter step 2b, the output the
+            PM and skill agent plan from), and the meta-review, proposing diffs to
+            prompts/*.md and sources.yaml (the ADR-12 whitelist) when the
+            week's evidence justifies one, at most one system diff per week.
+            Commit on a branch named research/YYYY-MM-DD and open exactly one
+            pull request with `gh pr create`. Never write to the database,
+            never print credentials, never merge your own PR, never push to
+            main, never touch digests/ or skills/. If the charter file is
+            missing, stop and fail loudly instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 100 --permission-mode bypassPermissions --model opus"

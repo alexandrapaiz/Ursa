@@ -1,0 +1,49 @@
+name: exo-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  actions: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's ExO agent (ADR-19 in docs/decisions.md),
+            running in GitHub Actions with this repository already checked
+            out. Read prompts/exo-agent.md; it is your full charter. Execute
+            one cycle exactly as it specifies: purpose, observe (workflow
+            runs, PR outcomes, retros, charters), orient on the organization,
+            decide at most three evidenced improvements, orchestrate them as
+            edits to the agent layer only (charters, agent workflows, org
+            docs, your own charter included), and write the learning log.
+            Commit on a branch named exo/YYYY-MM-DD and open exactly one pull
+            request with `gh pr create`. Never edit pipeline code, site,
+            skills, sprints, OKRs, market docs, or vision.md. Never merge
+            your own PR, never push to main, never touch secrets or
+            digests/. If the charter file is missing, stop and fail loudly
+            instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 100 --permission-mode bypassPermissions --model opus"

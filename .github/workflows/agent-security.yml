@@ -1,0 +1,51 @@
+name: security-agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  actions: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's debug and cybersecurity agent (ADR-20 in
+            docs/decisions.md), running in GitHub Actions with this
+            repository already checked out at full depth. Read
+            prompts/security-agent.md; it is your full charter. Execute both
+            sweeps exactly as it specifies: the debug sweep (workflow
+            failures, builds, tests, defects in recent diffs, small safe
+            fixes) and the defensive security audit (secrets in tree and
+            history, dependencies, the public/private boundary, the MCP
+            server, workflow security, prompt injection surface), with the
+            audit report at docs/security/audit-YYYY-MM-DD.md. Never print
+            or commit a secret value. Commit on a branch named
+            sec/YYYY-MM-DD and open exactly one pull request with `gh pr
+            create`, severe findings in bold at the top. Never merge your
+            own PR, never push to main, never touch digests/. If the
+            charter file is missing, stop and fail loudly instead of
+            improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 100 --permission-mode bypassPermissions --model opus"

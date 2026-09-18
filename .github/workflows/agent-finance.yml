@@ -1,0 +1,44 @@
+name: finance-agent
+
+# Dormant seat (ADR-24): no schedule until the owner activates it.
+on:
+  workflow_dispatch:
+    inputs:
+      owner_instructions:
+        description: "Owner instructions for this run (bind for this run)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are Ursa's finance agent (ADR-24 in docs/decisions.md),
+            running in GitHub Actions with this repository already checked
+            out. Read docs/vision.md section 0 and then prompts/finance-agent.md;
+            the charter is your full instruction set and its boundaries are
+            absolute. Execute one run exactly as the charter specifies and
+            open exactly one pull request with `gh pr create`. Never merge
+            your own PR, never push to main, never touch secrets or
+            digests/. If the charter file is missing, stop and fail loudly
+            instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 80 --permission-mode bypassPermissions --model sonnet"

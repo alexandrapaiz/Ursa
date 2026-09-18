@@ -35,3 +35,16 @@ The label is supplied by the artifact, not by a grader. Nobody judged the output
 ---
 
 See [`CLAUDE.md`](./CLAUDE.md) for full project context, the three Business Model Canvases, and strategic notes.
+
+**Working artifacts:**
+
+- [`ursa-major/`](./ursa-major/) — the provenance resolver: joins finished work back to the model generations that fed it and emits provenance-resolved outcome records (first n=1 record in `ursa-major/trial/task-001/`).
+- [`docs/beyond-preference-pairs.md`](./docs/beyond-preference-pairs.md) — methods position: the training constructions outcome records support that comparison data cannot (unary acceptance learning, correction learning, the correction basis, recognition-target reward models).
+
+## Operations
+
+Ursa is a portfolio product of [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems).
+It runs on the company's agent-seat model: charters in `prompts/`,
+workflows in `.github/workflows/`, standard in `docs/standards/pm.md`.
+All seats are currently **dormant** (owner-dispatch only; see
+`docs/agents/org-chart.md`). The owner's merge is the only authority.
