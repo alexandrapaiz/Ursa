@@ -9,6 +9,7 @@
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
 import { blobAt, findCommitPairs } from '../pairfinder'
+import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
@@ -90,6 +91,7 @@ export async function main(argv: string[]): Promise<number> {
     options: {
       limit: { type: 'string' },
       'min-chars': { type: 'string' },
+      declare: { type: 'string' },
     },
   })
   const [cmd, project] = positionals
@@ -101,12 +103,20 @@ export async function main(argv: string[]): Promise<number> {
   const minChars = Number(values['min-chars'] ?? 200)
   const limit = values.limit ? Number(values.limit) : Infinity
 
+  let declaration: Declaration = UNDECLARED
+  if (values.declare === 'satisfied') {
+    declaration = { accepted: true, basis: 'owner-declared satisfied at launch (--declare satisfied)' }
+  } else if (values.declare === 'unsatisfied') {
+    declaration = { accepted: false, basis: 'owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed' }
+  }
+
   const pairs = findCommitPairs(projectPath)
   const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
     const record = resolveEpisode(projectPath, ep)
     if (!record || record.stats.generated.totalChars < minChars) continue
+    record.signals = deriveSignals(record, declaration)
     saveRecord(projectPath, record)
     records.push(record)
   }
