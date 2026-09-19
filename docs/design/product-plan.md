@@ -3,25 +3,25 @@
 Engineer seat, owner-dispatched 2026-09-18. The flagship dogfood case
 throughout is the alexandria digest (owner's own RLHF example).
 
-## 1. Product definition
+## 1. Product definition (revised per ADR-003, 2026-09-18)
 
-v0 ships as a background daemon plus a local MCP server, both
-Node/TypeScript processes on the user's own machine, built on the
-existing `ursa-major/src` code. The daemon watches session and
-file-history sources, turns finished episodes into outcome records, and
-distills them into `taste.json`; the MCP server serves the current
-`taste.md` as a resource any MCP-capable client attaches to (Claude
-Code, Claude Desktop, Cursor). The flagship dogfood case is the
-alexandria digest: she edits a cron-generated newsletter draft,
-repeatedly, for prose. That editing is a real correction stream today,
-sitting in her own git history, and it names the delivery problem
-precisely — the consumer isn't a chat she's in, it's a GitHub Actions
-cron calling a non-Claude model. Rejected: a hand-run CLI, because
-continuous only means something if nothing needs remembering, and
-because a CLI never gets taste into a cron job automatically, only onto
-disk. Rejected: a desktop GUI app, because the loop (capture → record →
-whys → taste → a measurably better next digest) hasn't been proven to
-run unattended once yet.
+v0 has no daemon, no watcher, no timer, and reads nothing ambiently.
+The interaction is a launch: the user selects a finished project and
+runs `ursa run <project>` locally, once, against that project's own
+git history — episode boundaries are explicit, not inferred from idle
+time, because git commit pairs already bound the work (a generated
+commit, a human-edited commit). The second launch mode is the GitHub
+Action, triggered by a PR merge the user's own workflow declares —
+also explicit, also event-fired, never a poll. Both are launches the
+user causes, not surveillance running in the background. Scope narrows
+to building: git is the interface because Codex and Claude Code
+already live there. Cron becomes an opt-in v1+ feature layered on top
+of `ursa run`, never v0's default. The MCP server remains the delivery
+path for interactive clients; the flagship dogfood case remains the
+alexandria repo, now as n=2 in full (the whole build history, not only
+digest prose). Superseded from the earlier draft: the always-on
+daemon-first form factor; the owner rejected ambient reading, and
+explicit launch respects consent and matches how builders work.
 
 ## 2. Architecture
 
@@ -113,13 +113,15 @@ call per closure, on her own subscription.
 
 ## 5. Milestones
 
-- **M0 (days):** git-diff adapter run once, in batch, against
-  alexandria's *existing* commit history for past digest cycles — no
-  waiting on new live sessions. Done when it produces at least 3
-  `OutcomeRecord`s (one per past cycle) with nonzero
-  `generated.deletedPct`, zero manual flags. In parallel, the
-  watcher/watermark/idle-timeout path starts running for ordinary
-  Claude Code use. Defers: signals, distillation, delivery.
+- **M0 (days, revised per ADR-003):** `ursa run <project>` as a
+  one-shot CLI invocation against a real git repo's full history — no
+  watcher, no watermark, no background process before or after the
+  run. Mines commit pairs across the whole repo. First target:
+  alexandria, the full repo (n=2). Done when
+  `ursa run <path>/alexandria` produces at least one `OutcomeRecord`
+  per detected commit-pair episode from a single explicit command,
+  with no ursa process running before the invocation or after it
+  exits. Defers: signals, distillation, delivery, any cron.
 - **M1:** signals (whatever resolver v2 has shipped) plus distillation
   wired automatically onto M0's records. Domain-filtered
   `taste-digest.md` commits, gated on owner review of the first several
@@ -266,3 +268,72 @@ Honest failure mode: remote MCP needs real auth, since anyone with the
 endpoint URL could read taste or push fake transcripts. v0 uses a
 single owner-generated bearer token, no OAuth — adequate for one user's
 own deployment, not for anything on shared compute.
+
+## 10. The output end-goal (revised per ADR-003 and vision §0b)
+
+Rules-as-sole-output contradicts §0b.3 directly: the distiller's
+product until now was stated rules, and the trial data shows exactly
+where language runs out (Loops A–C: four to seven recurrences, motion
+and feel) versus where it does not (padding, deploys: one shot,
+stateable). That split is not invented, it is already in the data —
+recurrence count is the code-computed signal for which domain gets
+which treatment. Rules only where recurrence is low and stateable;
+everything else becomes cases, not summaries.
+
+Schema — `TasteRecord.units[]` replaces flat `axioms[]`:
+
+```ts
+type TasteUnit = RuleUnit | CaseUnit
+
+interface RuleUnit {
+  kind: 'rule'
+  statement: string
+  domain: string
+  pinnedExamples: AxiomEvidence[]   // required, length >= 1, never freestanding
+}
+
+interface CaseUnit {
+  kind: 'case'
+  domain: string
+  discoveredSpec: string            // post-hoc articulation, verbatim where possible
+  evidenceTrail: { step: number; quote: string }[]  // every stated position kept, none merged
+  survivalScalar: number            // price analog: resolving generation's survival rate
+  acceptanceBasis: 'stated' | 'tacit'
+  contradicts: string[]             // sibling unit ids, cross-referenced, never resolved away
+}
+
+interface ContrastivePair {         // Minor-facing, ComPO-shaped, from regressions
+  rejectedRef: SourcePointer
+  acceptedRef: SourcePointer
+  evidenceSteps: number[]
+}
+```
+
+Worked example, Loop B (constellation placement, recurrence 6, from
+the real annotations): a RuleUnit here is falsifiable on contact. Step
+650 says "should not move with mouse. separate layer. brighter." Step
+710 says "please place the constellation where my mouse is." Any
+single rule statement is wrong the moment the other quote exists. The
+CaseUnit instead carries both as evidenceTrail entries, marks them as
+contradicting, states the discoveredSpec from the record, sets
+acceptanceBasis stated from step 730's acceptance, and reports the
+survivalScalar of the resolving generations as the objective tiebreak
+neither verbal statement could supply. This is the form the hand-made
+trajectory (the first distillation, ursa-private trial/task-001)
+already uses; the distiller's job is to reach it without hand
+annotation, not to compress it into a rule.
+
+Distiller changes that enforce §0b: the rule-versus-case partition is
+code-owned, decided by the resolver's own recurrence count before the
+model runs, preserving the discipline that the model judges content
+and the code counts. Three new hard rejections join the evidence
+check: a RuleUnit with zero pinnedExamples is rejected; a CaseUnit
+that collapses two contradicting quotes into one merged statement is
+rejected — contradictions survive as separate trail entries or linked
+sibling cases, never resolved by the model into a single "true"
+preference; and acceptanceBasis tacit is rejected unless the evidence
+shows actual retention, not mere silence. The prompt states §0b.3 as
+an operating instruction: where evidence contradicts itself or
+contains no verbal statement, the correct output is a case, never a
+rule, and summarizing a contradiction away is a validation failure,
+not a quality improvement.
