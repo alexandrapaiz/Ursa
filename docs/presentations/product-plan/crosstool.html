@@ -1,0 +1,14 @@
+<section id="crosstool" data-transition="fade" style="background:#0A101E; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:26px">
+  <div style="display:flex; flex-direction:column; gap:10px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">CROSS-TOOL · plan §13</p>
+    <h2 style="font-size:48px; font-weight:300; line-height:1.1">Codex, Claude Code, Cursor: mechanisms, not checkmarks</h2>
+  </div>
+  <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
+    <tr><th style="width:14%; color:#A8C7FA; text-align:left">Tool</th><th style="width:38%; color:#A8C7FA; text-align:left">Capture: how its commits are recognized</th><th style="width:48%; color:#A8C7FA; text-align:left">Delivery: how your taste reaches it</th></tr>
+    <tr><td>Claude Code</td><td>Co-Authored-By Claude trailer — verified, this org's own commits carry it</td><td>CLAUDE.md managed block + local MCP resource (live pull)</td></tr>
+    <tr><td>Codex</td><td>author-pattern fallback (configurable agent-identity list) — unverified trailer, flagged to confirm against real Codex commits</td><td>AGENTS.md managed block, the documented cross-tool convention; MCP not assumed</td></tr>
+    <tr><td>Cursor</td><td>same author-pattern fallback — flagged to confirm</td><td>AGENTS.md managed block + MCP where the user wired Cursor's MCP config</td></tr>
+  </table>
+  <p style="font-size:25px; font-weight:300; color:#9FB2CC; line-height:1.5">Design rule: where a tool's convention is unverified, the pair finder degrades to the author-pattern fallback instead of silently missing commits — a generated commit mistaken for human work is worse than a slightly noisy match. AGENTS.md is the guaranteed path for all three; MCP is the richer layer where present.</p>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 10</p>
+</section>

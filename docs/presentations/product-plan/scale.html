@@ -1,0 +1,23 @@
+<section id="scale" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:22px">
+  <div style="display:flex; flex-direction:column; gap:8px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">SCALE · plan §12 · lots of users</p>
+    <h2 style="font-size:48px; font-weight:300; line-height:1.1">Two zones, one wall, three crossings</h2>
+  </div>
+  <div style="display:flex; gap:0; align-items:stretch">
+    <div style="width:760px; display:flex; flex-direction:column; gap:12px; background:#0B1224; border:1px solid #1C2740; border-radius:16px 0 0 16px; padding:28px 32px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">USER'S MACHINE — forever</p>
+      <div style="display:flex; flex-direction:column; gap:4px; background:#101B33; border:1px solid #31415F; border-radius:10px; padding:16px 22px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">ursa pipeline — all 9 components (§2)</p><p style="font-size:24px; color:#8291AD">resolver, distiller, claude -p, run summary</p></div>
+      <div style="display:flex; flex-direction:column; gap:4px; background:#101B33; border:1px solid #31415F; border-radius:10px; padding:16px 22px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">.ursa/ — records, taste.json, embeddings</p><p style="font-size:24px; color:#8291AD">raw prompts, diffs, quotes: never leave, even encrypted</p></div>
+      <div style="display:flex; flex-direction:column; gap:4px; background:#101B33; border:1px solid #31415F; border-radius:10px; padding:16px 22px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">MiniLM (all-MiniLM-L6-v2, ONNX, in-process)</p><p style="font-size:24px; color:#8291AD">case-retrieval embeddings, no network call, no vector DB needed</p></div>
+    </div>
+    <div style="width:8px; background:#A8C7FA"></div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px; background:#0B1224; border:1px solid #1C2740; border-radius:0 16px 16px 0; padding:28px 32px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">URSA CLOUD — Vercel + Neon + Blob, $0 tier</p>
+      <div style="display:flex; flex-direction:column; gap:4px; background:#101B33; border:1px solid #31415F; border-radius:10px; padding:16px 22px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">Vercel API — 4 routes, nothing else</p><p style="font-size:24px; color:#8291AD">auth callback · sync put/get · minor ingest</p></div>
+      <div style="display:flex; flex-direction:column; gap:4px; background:#101B33; border:1px solid #31415F; border-radius:10px; padding:16px 22px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">Neon Postgres — 3 tables</p><p style="font-size:24px; color:#8291AD">accounts · sync_blobs · survival_stats (the price book, k≥5 anonymity floor)</p></div>
+      <div style="display:flex; flex-direction:column; gap:4px; background:#101B33; border:1px solid #31415F; border-radius:10px; padding:16px 22px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">Vercel Blob — ciphertext only</p><p style="font-size:24px; color:#8291AD">client-encrypted taste sync; the key never crosses the wall</p></div>
+    </div>
+  </div>
+  <p style="font-size:24px; color:#9FB2CC">Exactly three edges cross the wall: the GitHub OAuth token exchange (identity = the account you already have), encrypted sync blobs (opt-in, key stays with you), and aggregate survival scalars (Minor-consented accounts only). No analytics SDK ships, ever. Distribution is integration-led: the same artifacts listed on every shelf developers browse — Claude and Cursor MCP directories, OpenAI connectors, GitHub Actions Marketplace, npm, ghcr, Vercel/Neon/Supabase templates. A listing never adds a new trust surface.</p>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 09</p>
+</section>
