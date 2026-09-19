@@ -463,3 +463,167 @@ with real values: domain "motion/placement"; discoveredSpec
 pointer"; evidenceTrail [{650, "should not move with mouse..."},
 {710, "please place the constellation where my mouse is"}];
 survivalScalar 1.0; acceptanceBasis "stated".
+
+## 12. Scale architecture (the product, not the trial)
+
+Everything in §1–§11 describes what runs on one machine for one user.
+This section is what makes Ursa Major a product with many users:
+accounts, sync, and the cloud surface Minor's price book lives on. The
+invariant does not move: raw records and taste never touch
+Ursa-operated compute. The cloud only ever holds three things —
+accounts, opt-in encrypted sync blobs (Ursa cannot read them), and
+Minor's aggregated survival scalars (never particulars).
+
+**Identity/auth — decision: GitHub OAuth**, not Clerk, not deferred.
+The audience is git-native by construction; GitHub OAuth is $0 and the
+identity the user already has. No second credential, no paid identity
+vendor before revenue.
+
+**Cloud API — decision: Vercel serverless functions**, matching every
+other project on this account. Three routes only, v0:
+
+```
+POST /api/auth/callback   # GitHub OAuth exchange -> account row
+PUT  /api/sync/:blobKey   # upload opaque ciphertext, account-scoped
+GET  /api/sync/:blobKey   # download opaque ciphertext
+POST /api/minor/ingest    # aggregate survival_stats batch, Minor-consented only
+```
+
+Hobby tier, $0 until traffic demands otherwise.
+
+**Database — decision: Neon serverless Postgres** (already the
+alexandria stack's choice; branching is useful for schema migrations
+against a live price book).
+
+```sql
+CREATE TABLE accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  github_user_id BIGINT UNIQUE NOT NULL,
+  github_login TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  minor_consent_at TIMESTAMPTZ          -- null = Major-only, never in Minor's aggregate
+);
+
+CREATE TABLE sync_blobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  blob_key TEXT NOT NULL,               -- object storage key
+  ciphertext_sha256 TEXT NOT NULL,      -- integrity only, never inspectable content
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (account_id, blob_key)
+);
+
+-- Minor's price book. One row per (domain, model, week) — never per-user,
+-- never per-behavior-text. This table IS the price analog, literally.
+CREATE TABLE survival_stats (
+  domain TEXT NOT NULL,
+  model TEXT NOT NULL,
+  week_start DATE NOT NULL,
+  contributor_count INT NOT NULL,       -- k-anonymity floor; rows below 5 are withheld
+  survival_scalar NUMERIC(5,4) NOT NULL,
+  sample_generations INT NOT NULL,
+  PRIMARY KEY (domain, model, week_start)
+);
+```
+
+**Object storage — decision: user-owned, client-encrypted, Vercel Blob
+for ciphertext.** The CLI/container encrypts `.ursa/taste.json`
+locally with a key derived from a passphrase only the user holds,
+uploads ciphertext, and `sync_blobs.blob_key` points at it. Ursa's
+server never holds the key and never sees plaintext. Sync is opt-in;
+the tool works fully offline without it.
+
+**Classic AI stack — where it belongs, and where it doesn't.** The
+distiller stays `claude -p` on user compute (§9). The one genuine
+embeddings use case is case retrieval — matching a new CaseUnit
+against existing ones so loops don't fork into duplicates across
+episodes. Decision: client-side, no cloud vector DB.
+`@xenova/transformers` running `all-MiniLM-L6-v2` (ONNX, CPU,
+in-process, no network call) embeds each `CaseUnit.discoveredSpec`;
+the vector is cached as `embedding: number[]` on the unit inside
+taste.json. Tens to low hundreds of cases per store means brute-force
+cosine similarity is sub-millisecond; no Pinecone or pgvector is
+justified, and raw case text never leaves the machine to be embedded
+remotely.
+
+**Telemetry.** Collected: account existence, sync blob events (hash
+plus timestamp, no content), and — Minor-consented accounts only —
+the aggregate survival_stats rows. Never collected: prompts, diffs,
+case text, rule statements, embeddings, or per-run analytics tied to
+identity. No analytics SDK ships in the CLI or container; that would
+be the ambient collection ADR-003 already rejected.
+
+**Distribution — three channels:** `npx @ursa-major/cli run <project>`
+(npm registry); `ghcr.io/alexandrapaiz/ursa-major:<version>` (GitHub
+Container Registry, $0, same account as the code);
+`alexandrapaiz/ursa-major-action@v1` on the Actions Marketplace,
+referencing the ghcr image per §9's one-image invariant.
+
+**On-device vs cloud, explicit:**
+
+| Forever on-device | Cloud (Vercel + Neon + Vercel Blob) |
+|---|---|
+| Resolver, distiller, all 9 §2 components | GitHub OAuth exchange, account row |
+| `.ursa/` — records, episodes, taste.json, embeddings | Encrypted sync blobs (ciphertext only) |
+| `claude -p` calls | survival_stats — Minor's price book, opt-in aggregate only |
+| MiniLM case-retrieval embeddings | — |
+| Raw prompts, diffs, quotes, discovered specs | — never leaves, even encrypted |
+
+**Diagram spec — two zones, one boundary, three crossing edges.**
+On-device zone ("User's machine"): the ursa pipeline (the 9
+components as one sub-box), `.ursa/` (cylinder), claude CLI (external
+tool), MiniLM (process). Cloud zone ("Ursa-operated — Vercel + Neon +
+Vercel Blob"): Vercel API (3 routes listed), Neon Postgres (3 tables
+listed), Vercel Blob ("ciphertext only"). External: GitHub OAuth. A
+wall between zones crossed by exactly three labeled edges: OAuth
+token exchange; ciphertext (encrypted client-side, key never
+crosses); aggregate scalar batch (Minor-consented only). No other
+edge crosses the wall.
+
+## 13. Cross-tool matrix
+
+| Tool | Capture mechanism | Verified? | Delivery mechanism | v0 ships |
+|---|---|---|---|---|
+| Claude Code | Co-Authored-By Claude trailer (§4b regex) | verified — this org's own commits carry it | reads CLAUDE.md; MCP client | CLAUDE.md managed block + local MCP resource |
+| Codex (OpenAI CLI) | trailer/author-pattern fallback: no confirmed universal trailer, so the pair finder also matches commit author against a configurable agent-identity list | unverified — confirm against real Codex commits before trusting | reads AGENTS.md (the cross-tool convention) | AGENTS.md managed block; MCP not assumed |
+| Cursor | same author-pattern fallback | unverified — confirm | reads AGENTS.md; MCP client | AGENTS.md managed block + MCP where the user wired it |
+
+Where a tool's trailer convention is unverified, findCommitPairs
+degrades to the author-pattern fallback rather than silently missing
+the commit: a false negative (a generated commit treated as human) is
+worse than a slightly noisy match. AGENTS.md is the guaranteed-works
+delivery for all three; MCP is the richer live-pull layer where
+present.
+
+## 14. Encouragement (owner directive)
+
+Two mechanics, both additive, neither required.
+
+**1. The run summary leads with what survived, not a log dump.** New
+`renderRunSummary(record: OutcomeRecord, signals: LabSignals): string`
+in `src/bin/ursa.ts`. Real example, task-001's actual numbers:
+
+```
+ursa run ~/Desktop/ursa-minor-site — 193 generations resolved.
+15,654 chars survived verbatim, 198 survived edited. That's the part
+worth noticing: not what got written, what got kept.
+
+3 correction loops closed this run. Loop B (constellation placement)
+took 7 rounds and 365 steps — that one was hard-won, and it's closed.
+1 regression caught and fixed (step 453).
+55 spans still uncertain — nothing lost, just not confident yet.
+
+Mark this run a win? [y/N]
+```
+
+**2. An optional satisfaction mark, offered once, never repeated.**
+`promptSatisfactionMark(): Promise<'yes' | 'skip'>` after the summary;
+`SatisfactionMark { step: number; polarity: 'positive'; source:
+'cli-prompt' | 'pr-reaction'; recordedAt: string }` becomes one more
+AxiomEvidence entry if given — it raises evidenceCount, it never
+gates acceptance. Ignoring the prompt is a no-op: tacit closure
+through retention (§0b, §10) stays fully valid with zero marks. For
+the Action (no interactive stdin) the same summary posts as a PR
+comment, and a thumbs-up reaction on it is the equivalent mark
+(`source: 'pr-reaction'`), read back via the GitHub API on the next
+run.
