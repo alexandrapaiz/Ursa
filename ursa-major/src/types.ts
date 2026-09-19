@@ -217,7 +217,8 @@ export interface LabSignals {
   episode: {
     steps: number
     generations: number
-    accepted: boolean
+    /** null = undeclared: no owner declaration was given; never inferred */
+    accepted: boolean | null
     /** terminal acceptance is often tacit — retention without complaint */
     acceptanceStatedInChat: boolean
     acceptanceBasis: string

@@ -15,7 +15,18 @@ function excerpt(text: string): string {
   return t.length > MAX_EXCERPT ? t.slice(0, MAX_EXCERPT) + '…' : t
 }
 
-export function deriveSignals(record: OutcomeRecord): LabSignals {
+export interface Declaration {
+  /** the owner's own verdict on the artifact's current state; null = never asked */
+  accepted: boolean | null
+  basis: string
+}
+
+export const UNDECLARED: Declaration = {
+  accepted: null,
+  basis: 'undeclared: no owner declaration surface was offered; retention is NOT acceptance',
+}
+
+export function deriveSignals(record: OutcomeRecord, declaration: Declaration = UNDECLARED): LabSignals {
   const oneShotCorrections: OneShotCorrection[] = []
   for (const file of record.files) {
     for (const span of file.spans) {
@@ -36,9 +47,9 @@ export function deriveSignals(record: OutcomeRecord): LabSignals {
     episode: {
       steps: record.generations.length,
       generations: record.generations.length,
-      accepted: record.task.finished,
+      accepted: declaration.accepted,
       acceptanceStatedInChat: false,
-      acceptanceBasis: 'retention: the edited state was committed and kept',
+      acceptanceBasis: declaration.basis,
     },
     correctionLoops: [],
     feedbackTranslations: [],
