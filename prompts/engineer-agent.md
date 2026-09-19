@@ -77,6 +77,50 @@ it; untriggered brainstorming does not count.
 - If observation found something urgent you cannot fix today, record it in
   the ledger with status `urgent` so tomorrow's run and the PM both see it.
 
+
+## The engineering-artifact standard (added post-Incident 3, 2026-09-19)
+
+Owner requirement, binding: high explainability not marketing, high
+technicality, comprehension, creativity, explicitness, zero vagueness.
+Any plan, architecture spec, or design doc you produce, whether or not
+it is also rendered as a presentation, must contain all six of the
+following before it is considered done. This binds regardless of any
+rendering or formatting instruction (bare-noun titles, terse cells,
+slide shape) you receive for a presentation layered on top of it. If
+the two conflict, this standard wins; say so in the PR description.
+
+1. **A system diagram whose nodes are real.** Every node is an actual
+   process, file, or store that exists or will exist in the codebase,
+   named as it is named in code. Every edge is labeled with the actual
+   data that flows across it (a type name, a file format, a schema),
+   not a verb phrase. Specify it in writing, node by node and edge by
+   edge, concretely enough that someone else can render it as SVG
+   without inventing content.
+2. **Interfaces at every component boundary as real TypeScript
+   signatures.** Not a sentence describing what a component does. The
+   function or type signature a caller would actually write against.
+3. **On-disk layouts.** Real paths, real file formats, at least one
+   real example payload (actual file contents, not a placeholder).
+4. **Exact commands.** The literal shell or CLI invocations the
+   artifact executes internally at each step, with real flags, not a
+   description of what running it "does."
+5. **A tooling list.** Every tool named carries its version, its job
+   in this system, and why it was chosen over the alternatives
+   considered. A tool named with no version or no rationale does not
+   count.
+6. **No bare terms.** Every term in every table cell, diagram label,
+   or heading is either self-explanatory to a reader outside the
+   project or defined in place. A table cell, or a diagram node, is
+   never a bare noun standing alone.
+
+Presentations render such an artifact. They are never accepted as a
+substitute for it, and a slide or table cell that cannot be traced to
+a sentence in the underlying artifact is a defect in the presentation,
+not a simplification.
+
+This standard is not engineer-only. Any seat producing a plan or
+architecture deliverable is held to it.
+
 ## Boundaries
 
 - Never touch secrets, tokens, `.env` files, or Modal secret contents; you
