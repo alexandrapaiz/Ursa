@@ -23,40 +23,27 @@ digest prose). Superseded from the earlier draft: the always-on
 daemon-first form factor; the owner rejected ambient reading, and
 explicit launch respects consent and matches how builders work.
 
-## 2. Architecture
+## 2. Architecture (revised per ADR-003 and the engineering-artifact standard)
 
-- **Watcher** (new): tails `~/.claude/projects/**/*.jsonl` with a
-  byte/line watermark per file.
-- **Episode segmenter** (new): replaces `--final`/`--sessions`. Reads
-  parsed generations plus on-disk files. Writes an `Episode` record.
-- **Resolver** (exists, unchanged): `resolve.ts`, `match.ts`,
-  `segment.ts`, `normalize.ts`, `stats.ts`. Reads an episode's files
-  and generations. Writes an `OutcomeRecord`.
-- **Git-diff adapter** (new, digest-specific): treats two git blobs —
-  the cron's generated commit and her edited commit for the same digest
-  file — as a `(generation, final)` pair, bypassing conversations
-  entirely. Same `RawGeneration`/`FinalFile` shapes the resolver
-  already consumes; conversationId is synthetic (e.g.
-  `digest-2026-09-18`), kind is a new `'generated_artifact'`.
-- **Signals** (refactor point, resolver v2 track): auto-loop/regression
-  detection, needed before distillation can run unattended.
-- **Record store** (new): flat JSON under `~/.ursa/records/`, plus the
-  distillation watermark, moved out of `taste/cli.ts`'s in-memory throw
-  into something that survives restarts.
-- **Distiller** (exists, unchanged): `distill.ts`, `merge.ts`. Already
-  rejects axioms without evidence, already protects `user-edited`
-  statements from overwrite.
-- **Export/delivery** (exists as static file, extended for two new
-  consumers): `export.ts` renders `taste.md` for paste-into-context.
-  New: an MCP resource for live pull by interactive clients. New: a
-  **domain-filtered git export** — a scoped `taste-digest.md` (axioms
-  tagged `prose`/`voice`/`writing` only) committed into the alexandria
-  repo at a path its digest prompt reads, for a consumer that is a cron
-  job, not a chat.
-- **Control surface** (new, minimal): `taste.json`
-  hand-readable/editable; a `taste revoke <id>` CLI verb.
-- **Orchestrator** (new): wires the above on a timer; v0 is a
-  cron/launchd script, not a supervised process (that's M3).
+Nine components. Four exist and are reused unchanged; five are new.
+All of it runs inside one explicit invocation — nothing polls, nothing
+watches a directory on a timer. `Watcher` and `Orchestrator` (the
+daemon-era components) are deleted from the architecture, not
+deferred; the CLI entrypoint is what was previously called the
+orchestrator, run once to completion when the user types the command,
+holding no state between invocations.
+
+| # | Component | File | Status | Signature a caller writes against |
+|---|---|---|---|---|
+| 1 | CLI entrypoint | `src/bin/ursa.ts` | new | `main(argv: string[]): Promise<number>` — parses `ursa run <projectPath> [--model sonnet] [--out .ursa]` |
+| 2 | Pair finder | `src/pairfinder.ts` | new | `findCommitPairs(repoPath: string, opts?: { agentTrailerPattern?: RegExp }): CommitPair[]` where `CommitPair { generatedSha; finalSha; paths; generatedAuthor; finalAuthor; generatedAt; finalAt }` |
+| 3 | Episode segmenter | `src/episodes.ts` | new | `buildEpisodes(pairs: CommitPair[], projectPath: string): Episode[]` |
+| 4 | Resolver | `src/resolve.ts` | exists, unchanged | `resolve(input: ResolveInput): OutcomeRecord` |
+| 5 | Signals | `src/signals.ts` | new | `deriveSignals(record: OutcomeRecord, pairs: CommitPair[]): LabSignals` |
+| 6 | Record store | `src/store.ts` | new | `saveRecord(projectRoot: string, record: OutcomeRecord): string` (returns the written path); `isDistilled(projectRoot: string, recordId: string): boolean` |
+| 7 | Distiller | `src/taste/distill.ts`, `merge.ts` | exists, unchanged | `distill(record: OutcomeRecord, taste: TasteRecord, model: string, runner?: DistillRunner): DistillOutput` |
+| 8 | Export/delivery | `src/taste/export.ts` | exists, extended | `renderTasteBlock(taste: TasteRecord, opts?: { domain?: string[] }): string` — the domain filter is the new part |
+| 9 | Control surface | `src/taste/cli.ts` | exists, extended | `revokeAxiom(tastePath: string, unitId: string): TasteRecord` — new export beside the existing distill/export subcommands |
 
 ## 3. The hard problems
 
@@ -99,17 +86,119 @@ for the digest export path specifically, so the alexandria repo doesn't
 get a noisy commit per unrelated coding episode. Cost is one `claude -p`
 call per closure, on her own subscription.
 
-## 4. Data model changes
+## 4. Data model and on-disk layout (revised)
 
-- `types.ts`: add `Episode { id, projectPath, status, openedAt,
-  closedAt?, touchedFiles, conversationIds, closureHeuristic:
-  'idle-timeout'|'git-commit-pair', distilled }`; add
-  `SourceWatermark`; extend `OutcomeRecord.task` with `episodeId` and
-  `closure: { method, confidenceNote }`; add `GenerationKind:
-  'generated_artifact'` for the git-diff adapter.
-- `taste/types.ts`: no break. Add a `domain` filter parameter to
-  `renderTasteBlock` (export.ts) so a consumer like the digest cron
-  gets only relevant axioms, not the whole store.
+**Decision: per-project `<project>/.ursa/`, not `~/.ursa/`.** The user
+names a project explicitly, so storage scopes to that project the way
+`.git/` does — a coder already understands "this directory has its own
+local state." A global `~/.ursa/` would silently commingle projects;
+cross-project aggregation should be an explicit later command, not an
+implicit default. `.ursa/` goes in the target project's `.gitignore`;
+only the small, domain-filtered exports (`taste-digest.md`, the
+`AGENTS.md` managed block) are meant to be committed.
+
+```
+<project>/.ursa/
+  episodes.json               # index of all Episode objects for this project
+  records/<episode-id>.json   # one OutcomeRecord per episode
+  taste.json                  # the TasteRecord (units[])
+  taste.md                    # full rendered export
+```
+
+Episode — real example, reconstructed from the Ursa Minor site trial
+(conversation 64899e58-98dd-44a6-940a-3ee95949a31f, Loop B files,
+real session window):
+
+```json
+{
+  "id": "ursa-minor-site-2026-08-05-constellation",
+  "projectPath": "/Users/alexandrapaiz/Desktop/ursa-minor-site",
+  "status": "closed",
+  "openedAt": "2026-08-05T18:59:00.000Z",
+  "closedAt": "2026-08-05T20:33:00.000Z",
+  "closureHeuristic": "git-commit-pair",
+  "touchedFiles": [
+    "components/ui/pixel-sky.tsx",
+    "components/ui/constellation.tsx",
+    "app/page.tsx"
+  ],
+  "conversationIds": ["64899e58-98dd-44a6-940a-3ee95949a31f"],
+  "distilled": true
+}
+```
+
+`closureHeuristic` is a single-value type in v0
+(`'git-commit-pair'`); `'idle-timeout'` is removed from the type
+entirely, per ADR-003.
+
+OutcomeRecord — real excerpt from the task-001 record, the generation
+whose text closed Loop B (the last edit before step 730's acceptance):
+
+```json
+{
+  "task": { "id": "ursa-minor-site", "finished": true, "generatedAt": "2026-08-05T22:14:39.607Z" },
+  "generations": [
+    {
+      "conversationId": "64899e58-98dd-44a6-940a-3ee95949a31f",
+      "turnIndex": 716,
+      "kind": "edit",
+      "filePath": ".../components/ui/constellation.tsx",
+      "timestamp": "2026-08-05T20:20:38.065Z",
+      "generationIndex": 183,
+      "totalChars": 165,
+      "survivedChars": 165,
+      "survivalRate": 1
+    }
+  ],
+  "stats": {
+    "coveredChars": 19776,
+    "byClass": {
+      "survived_verbatim": { "spans": 478, "chars": 15654, "pct": 0.792 },
+      "survived_mutated": { "spans": 7, "chars": 198, "pct": 0.01 },
+      "no_generation_provenance": { "spans": 114, "chars": 3924, "pct": 0.198 }
+    },
+    "uncertainSpans": 55,
+    "generated": { "totalChars": 83661, "survivedChars": 14935, "deletedChars": 68726, "deletedPct": 0.821 }
+  }
+}
+```
+
+`survivalRate: 1` on generation 716 is the real number §10's CaseUnit
+`survivalScalar` is drawn from — no invented figure.
+
+## 4b. Exact commands
+
+Pair finder — the literal git invocations, run via
+`node:child_process.execFileSync`:
+
+```sh
+# 1. enumerate commits: hash, author, email, ISO date, Co-Authored-By trailer, subject
+git -C <projectPath> log --all --date=iso-strict \
+  --pretty=format:'%H%x09%an%x09%ae%x09%aI%x09%(trailers:key=Co-Authored-By,valueonly,separator=|)%x09%s'
+
+# 2. the files a commit touched
+git -C <projectPath> show --name-only --format='' <sha>
+
+# 3. one file's exact blob content at a commit
+git -C <projectPath> show <sha>:<path>
+```
+
+Identifying a "generated" commit — decision: a commit counts as
+generated if its Co-Authored-By trailer matches
+`/Claude|Codex|Cursor|GPT/i` (the trailer this org's own commits
+already carry — reusing an existing convention, not inventing one).
+Its pairing "final" commit is the next commit by author date touching
+an overlapping path, with no such trailer and author email equal to
+`git config user.email`.
+
+Distiller — the literal invocation, unchanged from distill.ts:
+
+```sh
+claude -p --model sonnet --output-format json
+```
+
+run as `execFileSync('claude', ['-p','--model',model,'--output-format','json'], { input: prompt, encoding: 'utf8', maxBuffer: 16*1024*1024, timeout: 300000 })`,
+prompt on stdin, response parsed as `{ result: string, is_error?: boolean }`.
 
 ## 5. Milestones
 
@@ -246,28 +335,22 @@ overlaps its line range. Private-repo Actions need an explicit
 repo-write token; v0 requests the narrowest scope, one path, never
 org-wide.
 
-## 9. The container
+## 9. Tooling and the container (revised, every entry versioned and justified)
 
-One image, watcher-less: resolver, distiller, and MCP server, no
-filesystem watching baked in. The same image runs three ways: local,
-invoked by the orchestrator's cron tick; as the GitHub Action's runtime
-in §8; and user-deployed as a remote MCP server, so any MCP-speaking
-chat surface connects to the user's own endpoint, sends it transcripts,
-and pulls taste back.
+The container invariant stands: one image, Ursa distributes it and
+never operates the compute it runs on.
 
-Invariant, stated hard: Ursa distributes the image, Ursa never operates
-the compute it runs on. No Ursa-owned server ever sees a raw
-transcript.
-
-Reuses: the entire existing pipeline as the image's payload, unchanged.
-New: a Dockerfile, and an MCP transport that works as both local stdio
-(M2) and remote HTTP (this section), same `TasteRecord` logic
-underneath.
-
-Honest failure mode: remote MCP needs real auth, since anyone with the
-endpoint URL could read taste or push fake transcripts. v0 uses a
-single owner-generated bearer token, no OAuth — adequate for one user's
-own deployment, not for anything on shared compute.
+| Tool | Version | Job | Why over the alternative |
+|---|---|---|---|
+| Node.js | 22 (active LTS) | runtime for every component | package.json already targets ^22.10.0; the LTS line, not the sandbox's incidental v23 |
+| tsx | ^4.19.2 (pinned) | run .ts directly, no compile step | v0 is invoked, not deployed as a compiled server; `npx tsx` is the repo's existing pattern |
+| system git via execFileSync | user's installed git | pair finder's log/show calls | the target repo already has git; isomorphic-git reimplements git in JS (unneeded weight); simple-git wraps the three calls we write directly; distill.ts already shells out the same way — one pattern, not two |
+| node:util parseArgs | built-in since 18.3 | parse `ursa run <project> [--model] [--out]` | one subcommand, no nested help; commander is for multi-command CLIs; taste/cli.ts already hand-rolls this way |
+| vitest | ^2.1.8 (pinned) | test runner | already the toolchain; 22/22 tests pass on it today |
+| diff | ^8.0.2 (pinned) | diffWords for survived_mutated spans | already imported in resolve.ts; unchanged |
+| @modelcontextprotocol/sdk | ^1.x (Anthropic reference TS SDK) | MCP server, M2 local stdio and M2.5 remote HTTP | one package ships both transports; avoids a hand-rolled protocol implementation |
+| Docker base image | node:22-slim | the one container image | -slim (Debian) over -alpine avoids musl native-module breakage; over full node:22 it is smaller and still allows `apt-get install -y git` for the one binary the pair finder needs |
+| GitHub Action wrapper | composite (`runs: using: composite`) | the PR-merge-triggered launch mode | composite can checkout with the runner's own git/token first, then `docker run` the same image as a step; a pure docker-container action makes checkout awkward, and the composite YAML stays user-auditable before it pulls the image |
 
 ## 10. The output end-goal (revised per ADR-003 and vision §0b)
 
@@ -337,3 +420,46 @@ an operating instruction: where evidence contradicts itself or
 contains no verbal statement, the correct output is a case, never a
 rule, and summarizing a contradiction away is a validation failure,
 not a quality improvement.
+
+## 11. Diagram specifications
+
+**Diagram 1 — M0 runtime/data-flow.** Rounded box = process, cylinder
+= file store, plain box = external tool shelled out to. Nodes in
+order: User (terminal) → `ursa run` (src/bin/ursa.ts) → Pair finder
+(src/pairfinder.ts) ↔ system git (child process) → Episode segmenter
+(src/episodes.ts) → Resolver (src/resolve.ts) → Record store
+.ursa/records/*.json (cylinder); Resolver → Signals (src/signals.ts)
+→ Record store; Record store → Distiller (src/taste/distill.ts +
+merge.ts) ↔ claude CLI (child process) → Taste store .ursa/taste.json
+(cylinder) → Export (src/taste/export.ts) → Output files: taste.md /
+taste-digest.md / AGENTS.md managed block. Edge labels, exact: argv:
+string[]; projectPath: string; execFileSync stdout (commit log text /
+blob text); CommitPair[]; ResolveInput { files, conversations,
+generations }; OutcomeRecord (JSON); LabSignals (merged into
+record.signals); OutcomeRecord (read back); prompt: string out,
+DistillOutput (JSON) back; TasteRecord (JSON); TasteRecord (read);
+string (rendered text).
+
+**Diagram 2 — component-interface diagram.** The nine §2 nodes,
+labeled with file paths; edges carry the exact signatures from §2's
+table (e.g. 2→3 `findCommitPairs(repoPath, opts?): CommitPair[]`; 3→4
+`buildEpisodes(pairs, projectPath): Episode[]`; 4→6
+`resolve(input): OutcomeRecord`; 6→7 `saveRecord(projectRoot,
+record): string` and `isDistilled(projectRoot, recordId): boolean`;
+7→8 `distill(record, taste, model, runner?): DistillOutput`; 8→9
+`renderTasteBlock(taste, opts?): string`; 9 self-loop
+`revokeAxiom(tastePath, unitId): TasteRecord`).
+
+**Diagram 3 — output-schema entity diagram.** Dashed box `TasteUnit`
+("union type") with is-a edges to `RuleUnit { statement; domain;
+pinnedExamples: AxiomEvidence[] }` and `CaseUnit { domain;
+discoveredSpec; evidenceTrail: {step,quote}[]; survivalScalar:
+number; acceptanceBasis: 'stated'|'tacit'; contradicts: string[] }`;
+beside them, no is-a edge, `ContrastivePair { rejectedRef;
+acceptedRef; evidenceSteps: number[] }` (Minor-facing, outside the
+union). A dashed "example instance" edge attaches `CaseUnit: Loop B`
+with real values: domain "motion/placement"; discoveredSpec
+"Constellation as its own layer above the starfield... follows the
+pointer"; evidenceTrail [{650, "should not move with mouse..."},
+{710, "please place the constellation where my mouse is"}];
+survivalScalar 1.0; acceptanceBasis "stated".
