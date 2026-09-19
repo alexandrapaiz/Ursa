@@ -27,7 +27,15 @@ wrapped-line copies. The ExO Sunday run's first check is whether any
 scheduled run has actually succeeded, because a dead token makes every
 cadence silently theatrical.
 
-**Status: fix pending (owner action).**
+**Closure verification (2026-09-19).** Owner-dispatched supervised
+smoke run of the OKR agent, run to test the token fix directly. The
+run authenticated, read the charter and vision files, and reached
+multiple further API calls without failure, well past the roughly
+2-second, one-turn, zero-usage failure signature both dead runs showed
+on 2026-09-18. That is the dispatched run passing its first API call
+that this incident was left open pending.
+
+**Status: closed (2026-09-19), fix confirmed by this run.**
 
 ## Incident 2 — Unredacted user data on the public repo; history purged (2026-09-18)
 
