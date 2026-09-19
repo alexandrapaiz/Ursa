@@ -1,16 +1,53 @@
 {
   "v": 4,
-  "createdOnFiles": { "v": 1, "at": "2026-09-18T22:30:00Z" },
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-18T22:30:00Z"
+  },
   "title": "Ursa Product Plan",
-  "order": ["cover", "runtime", "components", "episode", "edges", "capture", "store", "delivery", "milestones", "metric", "risks", "questions", "sequence", "capacity", "gates", "decisions", "sprints"],
+  "order": [
+    "cover",
+    "runtime",
+    "components",
+    "episode",
+    "edges",
+    "capture",
+    "store",
+    "loopb",
+    "delivery",
+    "milestones",
+    "metric",
+    "risks",
+    "questions",
+    "sequence",
+    "capacity",
+    "gates",
+    "decisions",
+    "sprints"
+  ],
   "sections": {
-    "s1": { "description": "Architecture: the runtime, components, and data flow", "start": "cover" },
-    "s2": { "description": "Milestones, the dogfood metric, risks, open questions", "start": "milestones" },
-    "s3": { "description": "Delivery: sequence, capacity, gates, decisions", "start": "sequence" }
+    "s1": {
+      "description": "Architecture: the runtime, components, and data flow",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "Milestones, the dogfood metric, risks, open questions",
+      "start": "milestones"
+    },
+    "s3": {
+      "description": "Delivery: sequence, capacity, gates, decisions",
+      "start": "sequence"
+    }
   },
   "faces": {
-    "inter-tight": { "family": "Inter Tight", "href": "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200..700&display=swap" },
-    "jetbrains-mono": { "family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" }
+    "inter-tight": {
+      "family": "Inter Tight",
+      "href": "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200..700&display=swap"
+    },
+    "jetbrains-mono": {
+      "family": "JetBrains Mono",
+      "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
+    }
   },
   "designSystems": []
 }

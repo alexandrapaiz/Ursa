@@ -1,27 +1,28 @@
 <section id="edges" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:36px">
   <div style="display:flex; flex-direction:column; gap:14px">
-    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">EPISODE EDGES</p>
-    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Two heuristics, one known failure</h2>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">WORK BOUNDARIES</p>
+    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Explicit, not guessed</h2>
+    <p style="font-size:28px; font-weight:300; color:#9FB2CC">You name the project. Commit pairs bound the work. Guessing was rejected, and the n=1 data shows why.</p>
   </div>
   <div style="display:flex; gap:32px">
     <div style="width:560px; display:flex; flex-direction:column; gap:18px; background:#0B1224; border:1px solid #1C2740; border-radius:16px; padding:36px">
-      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">CLOSURE RULES</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">V0 BOUNDARIES</p>
       <ul style="font-size:26px; font-weight:300; line-height:1.55; color:#D5DFF0">
-        <li>Idle timeout, 24h default (chat-driven work)</li>
-        <li>Git commit pair (digest, PR work)</li>
-        <li>Commit pair wins whenever both exist</li>
-        <li>Every record admits how sure it is about its own boundaries</li>
+        <li>The project: you select it at launch</li>
+        <li>The work unit: a generated commit and your edited commit, as a pair</li>
+        <li>A merged pull request, on GitHub</li>
+        <li>Every record states how its boundary was drawn</li>
       </ul>
     </div>
     <div style="flex:1; display:flex; flex-direction:column; gap:18px; background:#0B1224; border:1px solid #1C2740; border-radius:16px; padding:36px">
-      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">TASK-001 BREAKS IT</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">WHY GUESSING LOST</p>
       <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
-        <tr><th style="width:18%; color:#A8C7FA; text-align:left">Step</th><th style="width:36%; color:#A8C7FA; text-align:left">Event</th><th style="width:26%; color:#A8C7FA; text-align:left">Idle verdict</th><th style="width:20%; color:#A8C7FA; text-align:left">Correct</th></tr>
-        <tr><td>42–297</td><td>Loop A opens, active edits</td><td>open</td><td>open</td></tr>
-        <tr><td>~300</td><td>3-day gap begins</td><td>closes episode</td><td>still open</td></tr>
-        <tr><td>558</td><td>Loop A recurs after gap</td><td>new episode</td><td>same loop</td></tr>
+        <tr><th style="width:18%; color:#A8C7FA; text-align:left">Step</th><th style="width:42%; color:#A8C7FA; text-align:left">Event in the n=1</th><th style="width:40%; color:#A8C7FA; text-align:left">A timeout guess would say</th></tr>
+        <tr><td>42–297</td><td>Star-motion correction loop, active</td><td>work in progress</td></tr>
+        <tr><td>~300</td><td>She walks away for 3 days</td><td>work finished (wrong)</td></tr>
+        <tr><td>558</td><td>Returns, same correction continues</td><td>new work (wrong: same loop)</td></tr>
       </table>
-      <p style="font-size:24px; color:#8291AD">Consequence: a timeout alone would split one stubborn correction into two, undercounting it. The fix is milestone M4.</p>
+      <p style="font-size:24px; color:#8291AD">An inferred boundary splits one stubborn correction into two and undercounts it. Explicit selection makes the failure impossible.</p>
     </div>
   </div>
   <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 05</p>

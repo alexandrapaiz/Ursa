@@ -1,21 +1,20 @@
 <section id="components" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:32px">
   <div style="display:flex; flex-direction:column; gap:14px">
     <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">COMPONENTS</p>
-    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Ten parts, five already built</h2>
+    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Nine parts, five already built</h2>
   </div>
   <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
     <tr><th style="width:19%; color:#A8C7FA; text-align:left">Part</th><th style="width:63%; color:#A8C7FA; text-align:left">What it does</th><th style="width:18%; color:#A8C7FA; text-align:left">Status</th></tr>
-    <tr><td>Watcher</td><td>Notices new activity in your session logs; keeps a bookmark so nothing is read twice</td><td>to build</td></tr>
-    <tr><td>Segmenter</td><td>Decides where one piece of work ends and the next begins</td><td>to build</td></tr>
+    <tr><td>Launcher</td><td>The ursa run command: reads the project you name, runs the pipeline once, exits</td><td>to build</td></tr>
+    <tr><td>Pair finder</td><td>Walks the project's git history for generated-then-edited commit pairs; each pair bounds one piece of work</td><td>to build</td></tr>
     <tr style="background:#0B1224"><td>Resolver</td><td>Traces every span of the finished work back to the AI generation that produced it, or to you</td><td>built, proven</td></tr>
-    <tr><td>Snapshot reader</td><td>Reads a generated file and your edited version of it as a before-and-after pair, no chat needed</td><td>to build</td></tr>
     <tr><td>PR reader</td><td>Reads a merged pull request the same way: agent commits in, your review and merge out</td><td>to build</td></tr>
-    <tr><td>Record store</td><td>Keeps every finished record in one folder on your machine</td><td>to build</td></tr>
-    <tr style="background:#0B1224"><td>Distiller</td><td>Reads a record and writes down the whys as rules, each pinned to its evidence</td><td>built, tested</td></tr>
-    <tr style="background:#0B1224"><td>Export</td><td>Turns your rules into a block any model can read</td><td>built, extending</td></tr>
-    <tr><td>Controls</td><td>Lets you see, edit, or permanently delete any rule</td><td>to build</td></tr>
-    <tr><td>Scheduler</td><td>Runs the parts above in order, on a timer</td><td>to build</td></tr>
+    <tr><td>Pattern detector</td><td>Finds recurring corrections and regressions in a record (resolver v2)</td><td>to build</td></tr>
+    <tr><td>Record store</td><td>Keeps every finished record in one folder, in the project or beside it</td><td>to build</td></tr>
+    <tr style="background:#0B1224"><td>Distiller</td><td>Writes the whys as rules where stateable and cases where not, each pinned to evidence</td><td>built, reworking</td></tr>
+    <tr style="background:#0B1224"><td>Export</td><td>Turns rules and cases into a block any model can read</td><td>built, extending</td></tr>
+    <tr><td>Controls</td><td>Lets you see, edit, or permanently delete anything learned</td><td>to build</td></tr>
   </table>
-  <p style="font-size:24px; color:#8291AD">Highlighted rows ship unchanged from the pipeline the n=1 experiment already validated.</p>
+  <p style="font-size:24px; color:#8291AD">Gone by design: the watcher and the timer. Nothing observes you; everything is a run you caused.</p>
   <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 03</p>
 </section>
