@@ -20,13 +20,42 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
+      OPENROUTE: ${{ secrets.OPENROUTE_API_KEY }}
       GH_TOKEN: ${{ github.token }}
       PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: anthropics/claude-code-action@v1
+      - name: Seat run (open-routed)
+        if: env.OPENROUTE != ''
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ secrets.OPENROUTE_BASE_URL }}
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.OPENROUTE_API_KEY }}
+        with:
+          anthropic_api_key: ${{ secrets.OPENROUTE_API_KEY }}
+          prompt: |
+            You are Ursa's project manager agent (ADR-002 in
+            docs/decisions.md), running in GitHub Actions with this repository
+            already checked out. Read prompts/pm-agent.md; it is your full
+            charter. Execute the three Monday ceremonies exactly as it
+            specifies: retrospective on the ending sprint, grooming of
+            docs/ideas.md, and the new sprint file in docs/sprints/ in the
+            format docs/sprints/README.md defines. Commit on a branch named
+            pm/sprint-YYYY-MM-DD (this Monday's date), push it, and open
+            exactly one pull request with `gh pr create`. You write only
+            docs/sprints/ and grooming notes in docs/ideas.md. Never write
+            code, never edit charters, never merge your own PR, never push to
+            main, never touch secrets. If the charter file is
+            missing, stop and fail loudly instead of improvising.
+            Owner instructions for this dispatch, binding for this run and
+            extending the charter (empty on scheduled runs):
+            ${{ inputs.owner_instructions }}
+          claude_args: "--max-turns 140 --permission-mode bypassPermissions --model ${{ vars.OPENROUTE_MODEL || 'kimi-k2.7-code' }}"
+      - name: Seat run (Claude)
+        if: env.OPENROUTE == ''
+        uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
