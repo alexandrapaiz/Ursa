@@ -2,11 +2,24 @@
 
 ## 0. Orientation (read this first)
 
-Ursa is the **trust layer between AI users and AI labs**.
+**Mission: Turn AI peer-to-peer.** Ursa Minor trains models on the
+world's dispersed knowledge. Ursa Major imports your taste into every
+model. The mission, the four principles of intelligence, and how they
+bind are in `docs/vision.md`, which outranks this file wherever the two
+differ. "The trust layer between AI users and AI labs" is positioning
+(the how), not the mission (the what).
 
 - Users get portability and ownership of their AI preferences across every model they use.
 - Labs get consented, cross-model, revealed-preference data at population scale — the RLHF signal they can't build in-house.
 - The same underlying network serves both, honestly, because the value flowing to each side depends on the other side working.
+
+**Current state (2026-09-19):** `ursa run <project>` works (M0 shipped,
+launch-based, git-native, no daemon). Two trials done: n=1 over the
+Ursa Minor site build, n=2 over the full alexandria repo (owner-declared
+unsatisfied). Plan of record: `docs/design/product-plan.md`. Standards
+for any engineering deliverable: the engineering-artifact standard in
+`prompts/engineer-agent.md`. Acceptance is never inferred from
+retention; only the owner's declaration counts.
 
 **Structure: one parent, two products.**
 
