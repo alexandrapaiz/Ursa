@@ -204,3 +204,39 @@ with confidence, per behavior, per model, per domain. The moment we
 ship high-dimensional particulars instead, we are a census bureau
 rather than a price system, and the census bureau was the villain of
 the calculation debate.
+
+## The fine-tuning trace and the label (owner note, 2026-09-19)
+
+Do not read the H in RLHF as the user's commits. The H is the in-chat
+fine-tuning: the live correction stream where the user steers the
+agent turn by turn. What the AI does is reverse engineer what was
+fine-tuned there. The commits, and the finished artifact behind them,
+are something else: they are the label.
+
+The Hayekian laws bind here. While fine-tuning in chat, the user often
+does not know what she wants. Steps 650 and 710 of the first trial are
+the canonical case: two sincere instructions, one hour apart, that
+contradict each other. An instruction is therefore a feature of the
+trajectory, never ground truth. A system that treats instructions as
+labels learns the user's guesses, not the user's taste.
+
+Success is measured by the finished product and by user satisfaction,
+not by user instruction, because users do not know what they want
+until they get it. Only the getting it can grade the process. In the
+record's terms: retention and felicitation are labels; prompts are
+trajectory.
+
+The consequence for capture is a division of labor between the two
+adapters. Session capture carries the trace, which is where the
+fine-tuning churns, and the first trial's 82 percent deletion rate is
+that churn measured. Git capture carries the label, which is why the
+second trial's commit pairs showed only 7 percent deletion: a commit
+already sits near the label end of the funnel. Neither stream
+substitutes for the other. A full record joins them, trajectory in,
+retention-graded out, and a record should state which stage of the
+funnel it measured.
+
+The consequence for training is the position this document already
+holds, now stated at its root: the trajectory is the input, acceptance
+is the reward, and the distiller reverse engineers the whys from the
+trace while the artifact, not the chat, supplies the grade.
