@@ -1,20 +1,19 @@
-<section id="components" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:32px">
-  <div style="display:flex; flex-direction:column; gap:14px">
-    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">COMPONENTS</p>
-    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Nine parts, five already built</h2>
+<section id="components" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-direction:column; gap:10px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">COMPONENT INTERFACES · plan §2</p>
+    <h2 style="font-size:50px; font-weight:300; line-height:1.1">Nine components, real signatures</h2>
+    <p style="font-size:25px; font-weight:300; color:#9FB2CC">The signature is what a caller writes against. Four ship unchanged from the proven pipeline; the watcher and the timer are deleted, not deferred.</p>
   </div>
-  <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
-    <tr><th style="width:19%; color:#A8C7FA; text-align:left">Part</th><th style="width:63%; color:#A8C7FA; text-align:left">What it does</th><th style="width:18%; color:#A8C7FA; text-align:left">Status</th></tr>
-    <tr><td>Launcher</td><td>The ursa run command: reads the project you name, runs the pipeline once, exits</td><td>to build</td></tr>
-    <tr><td>Pair finder</td><td>Walks the project's git history for generated-then-edited commit pairs; each pair bounds one piece of work</td><td>to build</td></tr>
-    <tr style="background:#0B1224"><td>Resolver</td><td>Traces every span of the finished work back to the AI generation that produced it, or to you</td><td>built, proven</td></tr>
-    <tr><td>PR reader</td><td>Reads a merged pull request the same way: agent commits in, your review and merge out</td><td>to build</td></tr>
-    <tr><td>Pattern detector</td><td>Finds recurring corrections and regressions in a record (resolver v2)</td><td>to build</td></tr>
-    <tr><td>Record store</td><td>Keeps every finished record in one folder, in the project or beside it</td><td>to build</td></tr>
-    <tr style="background:#0B1224"><td>Distiller</td><td>Writes the whys as rules where stateable and cases where not, each pinned to evidence</td><td>built, reworking</td></tr>
-    <tr style="background:#0B1224"><td>Export</td><td>Turns rules and cases into a block any model can read</td><td>built, extending</td></tr>
-    <tr><td>Controls</td><td>Lets you see, edit, or permanently delete anything learned</td><td>to build</td></tr>
-  </table>
-  <p style="font-size:24px; color:#8291AD">Gone by design: the watcher and the timer. Nothing observes you; everything is a run you caused.</p>
+  <div style="display:flex; flex-direction:column; gap:8px">
+    <div style="display:flex; gap:20px; align-items:center; background:#0B1224; border:1px solid #1C2740; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">CLI entrypoint · src/bin/ursa.ts</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">main(argv: string[]): Promise&lt;number&gt;</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#0B1224; border:1px solid #1C2740; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Pair finder · src/pairfinder.ts</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">findCommitPairs(repoPath, opts?): CommitPair[]</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#0B1224; border:1px solid #1C2740; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Episode segmenter · src/episodes.ts</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">buildEpisodes(pairs, projectPath): Episode[]</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#101B33; border:1px solid #A8C7FA; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Resolver · src/resolve.ts · unchanged</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#EAF0FA">resolve(input: ResolveInput): OutcomeRecord</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#0B1224; border:1px solid #1C2740; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Signals · src/signals.ts</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">deriveSignals(record, pairs): LabSignals</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#0B1224; border:1px solid #1C2740; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Record store · src/store.ts</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">saveRecord(projectRoot, record): string</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#101B33; border:1px solid #A8C7FA; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Distiller · src/taste/distill.ts · unchanged</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#EAF0FA">distill(record, taste, model, runner?): DistillOutput</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#101B33; border:1px solid #A8C7FA; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Export · src/taste/export.ts · extended</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#EAF0FA">renderTasteBlock(taste, { domain? }): string</p></div>
+    <div style="display:flex; gap:20px; align-items:center; background:#0B1224; border:1px solid #1C2740; border-radius:10px; padding:14px 24px"><p style="font-size:24px; color:#D5DFF0; width:330px">Control · src/taste/cli.ts · extended</p><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">revokeAxiom(tastePath, unitId): TasteRecord</p></div>
+  </div>
   <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 03</p>
 </section>

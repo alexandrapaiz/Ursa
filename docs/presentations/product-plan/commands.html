@@ -1,0 +1,26 @@
+<section id="commands" data-transition="fade" style="background:#0A101E; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:26px">
+  <div style="display:flex; flex-direction:column; gap:10px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">EXACT COMMANDS · plan §4b</p>
+    <h2 style="font-size:50px; font-weight:300; line-height:1.1">What a run literally executes</h2>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:8px; background:#060B16; border:1px solid #1C2740; border-radius:12px; padding:28px 32px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD"># enumerate commits with author, date, and Co-Authored-By trailer</p>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">git -C &lt;project&gt; log --all --date=iso-strict --pretty=format:</p>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;'%H%x09%an%x09%ae%x09%aI%x09%(trailers:key=Co-Authored-By,valueonly)%x09%s'</p>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD"># files a commit touched · then the exact blob at that commit</p>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">git -C &lt;project&gt; show --name-only --format='' &lt;sha&gt;&#160;&#160;·&#160;&#160;git -C &lt;project&gt; show &lt;sha&gt;:&lt;path&gt;</p>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD"># the one model call, on your subscription, prompt on stdin</p>
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">claude -p --model sonnet --output-format json</p>
+  </div>
+  <div style="display:flex; gap:24px">
+    <div style="flex:1; display:flex; flex-direction:column; gap:10px; background:#0B1224; border:1px solid #1C2740; border-radius:12px; padding:28px 32px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">WHAT COUNTS AS A GENERATED COMMIT</p>
+      <p style="font-size:25px; font-weight:300; color:#D5DFF0; line-height:1.45">Its Co-Authored-By trailer matches /Claude|Codex|Cursor|GPT/i — the trailer agent commits already carry today. An existing convention reused, not a new one invented.</p>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:10px; background:#0B1224; border:1px solid #1C2740; border-radius:12px; padding:28px 32px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">WHAT PAIRS WITH IT</p>
+      <p style="font-size:25px; font-weight:300; color:#D5DFF0; line-height:1.45">The next commit by author date touching an overlapping path, with no agent trailer, authored by git config user.email — that is you, editing what the agent wrote.</p>
+    </div>
+  </div>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 04</p>
+</section>

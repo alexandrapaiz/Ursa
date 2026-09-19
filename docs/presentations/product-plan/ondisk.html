@@ -1,0 +1,34 @@
+<section id="ondisk" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-direction:column; gap:10px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">ON DISK · plan §4</p>
+    <h2 style="font-size:50px; font-weight:300; line-height:1.1">Per-project .ursa/, like .git/</h2>
+    <p style="font-size:25px; font-weight:300; color:#9FB2CC">Storage scopes to the project you named, never a global commingled store. Gitignored; only the small filtered exports are meant to be committed.</p>
+  </div>
+  <div style="display:flex; gap:24px">
+    <div style="width:640px; display:flex; flex-direction:column; gap:6px; background:#060B16; border:1px solid #1C2740; border-radius:12px; padding:28px 32px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&lt;project&gt;/.ursa/</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;episodes.json</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">&#160;&#160;&#160;&#160;index of every Episode found</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;records/&lt;episode-id&gt;.json</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">&#160;&#160;&#160;&#160;one OutcomeRecord per episode</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;taste.json</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">&#160;&#160;&#160;&#160;your rules and cases (TasteRecord)</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;taste.md</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">&#160;&#160;&#160;&#160;full rendered export</p>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:6px; background:#060B16; border:1px solid #1C2740; border-radius:12px; padding:28px 32px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">episodes.json entry — real reconstruction, Loop B window</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">{ "id": "ursa-minor-site-2026-08-05-constellation",</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"status": "closed",</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"openedAt": "2026-08-05T18:59:00Z",</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"closedAt": "2026-08-05T20:33:00Z",</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"closureHeuristic": "git-commit-pair",</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"touchedFiles": ["components/ui/pixel-sky.tsx",</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;&#160;&#160;"components/ui/constellation.tsx", "app/page.tsx"],</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"conversationIds": ["64899e58-..."],</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">&#160;&#160;"distilled": true }</p>
+    </div>
+  </div>
+  <p style="font-size:24px; color:#8291AD">idle-timeout is removed from the closureHeuristic type entirely, not just unused — ADR-003 in the type system.</p>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 05</p>
+</section>

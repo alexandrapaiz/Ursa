@@ -1,0 +1,19 @@
+<section id="tooling" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-direction:column; gap:10px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">TOOLING · plan §9</p>
+    <h2 style="font-size:50px; font-weight:300; line-height:1.1">Every tool, versioned, with its why</h2>
+  </div>
+  <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
+    <tr><th style="width:21%; color:#A8C7FA; text-align:left">Tool · version</th><th style="width:26%; color:#A8C7FA; text-align:left">Job here</th><th style="width:53%; color:#A8C7FA; text-align:left">Why it beat the alternative</th></tr>
+    <tr><td>Node.js 22 LTS</td><td>runtime for everything</td><td>package.json already targets ^22.10.0; the LTS line, deliberately</td></tr>
+    <tr><td>tsx ^4.19.2</td><td>run .ts directly, no build</td><td>v0 is invoked, not deployed; npx tsx is the repo's existing pattern</td></tr>
+    <tr><td>system git, execFileSync</td><td>the pair finder's log/show calls</td><td>the target repo already has git; isomorphic-git reimplements it in JS for nothing; one shell-out pattern shared with claude -p</td></tr>
+    <tr><td>node:util parseArgs (built-in)</td><td>parse ursa run flags</td><td>one subcommand needs no commander; zero added dependency</td></tr>
+    <tr><td>vitest ^2.1.8</td><td>tests</td><td>already the toolchain; all 22 current tests pass on it</td></tr>
+    <tr><td>diff ^8.0.2</td><td>diffWords for mutated spans</td><td>already inside resolve.ts, validated by the n=1</td></tr>
+    <tr><td>@modelcontextprotocol/sdk ^1.x</td><td>MCP server, local + remote</td><td>Anthropic's reference SDK ships both transports; no hand-rolled protocol</td></tr>
+    <tr><td>Docker node:22-slim</td><td>the one container image</td><td>slim Debian avoids alpine's musl breakage; apt-get adds the one git binary needed</td></tr>
+    <tr><td>GitHub Action, composite</td><td>the PR-merge launch mode</td><td>checkout with the runner's own token first, then docker run the same image; YAML stays user-auditable</td></tr>
+  </table>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 07</p>
+</section>
