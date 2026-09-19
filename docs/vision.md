@@ -16,6 +16,34 @@ matters exists only dispersed.*
 lives in README.md and CLAUDE.md; this file carries only what governance
 needs.*
 
+## §0b Principles of intelligence
+
+Held with the mission; the OKR seat reads them every run. Canonical
+wording from the Ursa Minor site (ursa-minor/app/page.tsx), the
+product's public north stars:
+
+1. **Distributed intelligence.** "The information a decision needs is
+   dispersed across many individuals. No single observer ever holds it
+   whole."
+2. **Discovery of intelligence.** "Generation discovers facts that
+   would otherwise stay unknown. If the result could be specified
+   beforehand, there would be nothing to discover."
+3. **Tacit intelligence.** "Much of what people know cannot be stated
+   as rules. It shows up only in action, applied to a particular case."
+4. **Pretence of intelligence.** "Claims of information sufficient for
+   central assessment always overreach. Systems built on them conform
+   to the measure, not the world."
+
+How they bind (owner directive, 2026-09-18): these principles guide the
+project. Objectives, key results, and shipped work are checked against
+them, and work that contradicts one is drift even when it scores well.
+A central grader contradicts the first. A benchmark that demands the
+spec up front contradicts the second. A stated-preference survey
+contradicts the third. A metric the system starts conforming to
+contradicts the fourth. Their operational form is the price analog
+(docs/beyond-preference-pairs.md, "The price analog"): transmit
+survival, never the particulars.
+
 ## §1 Structure
 
 One parent, two products, one repo for now (owner's call, 2026-09-18):

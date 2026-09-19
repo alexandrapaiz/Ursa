@@ -60,7 +60,12 @@ movement, the benchmark you just ran. Statuses: `on-track`, `at-risk`,
 
 Read the month's sprint files and the ideas ledger. Answer two questions
 in writing: which shipped work served no objective (orphan work), and
-which objective got no work (orphan objective). One or two orphans is
+which objective got no work (orphan objective). Then check the month's
+work against the principles of intelligence (vision.md §0b, owner
+directive 2026-09-18): work that contradicts one — a central grader, a
+spec demanded where discovery is the point, a stated-preference survey,
+a metric the system conforms to — is drift even when a key result
+scores well, and it goes at the top of your PR description. One or two orphans is
 information; a pattern is a finding the owner must see at the top of
 your PR description. Check the tiebreak too: flag any month where manual
 intervention substituted for building the system's own capability.
