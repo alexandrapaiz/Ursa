@@ -39,3 +39,17 @@ Contract in docs/standards/pm.md §4.
   (plan §15 stub); dogfood on Ursa's own seats
 - Cost: $0
 - Status: accepted (owner-directed 2026-09-19)
+
+### 2026-09-19 — Taste packs (the omarchy lesson)
+- Trigger: owner asked "thoughts on omarchy for our product?" — omarchy
+  proves developers adopt curated taste-as-artifact wholesale
+- What: exportable, adoptable taste profiles — a respected builder's
+  distilled taste.md installable the way people adopt omarchy configs;
+  Ursa generalizes omakase (one chef's taste) into your own learned
+  palate, and lets either be shared deliberately. Consumer-side
+  network effect no competitor has. Requires the redaction/consent
+  standard before any pack leaves a machine
+- First step: an `ursa taste export --pack` variant that strips
+  evidence quotes and ships rules + case specs only, owner-reviewed
+- Cost: $0
+- Status: proposed

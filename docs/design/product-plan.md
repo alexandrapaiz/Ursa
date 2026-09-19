@@ -645,6 +645,7 @@ image or MCP server wearing that ecosystem's jacket.
 | Neon | integration page / launch partner listing | the price-book schema as a template; co-marketing surface |
 | Supabase | integration listing (alternative BaaS audience) | same self-host template with Supabase Postgres substituted — the schema is plain SQL on purpose |
 | Clerk | not an identity dependency (GitHub OAuth decision stands) | a listed integration recipe only, for teams that already run Clerk |
+| Arch / omarchy | AUR package; omarchy-adjacent terminal-first audience | `ursa` CLI installable natively; the run summary and a future TUI dashboard are already that world's idiom |
 
 Rule: an integration listing never adds a new trust surface — every
 entry resolves to the npm CLI, the ghcr image, the Action, or the
