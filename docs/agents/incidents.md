@@ -66,3 +66,50 @@ CLI.
 
 **Status: fix executed pending the owner's force-push; verification
 (clean UI, clean clone) owed by the ExO Sunday run.**
+
+## Incident 3 — Product-plan delivered as a presentation; owner rejected it (2026-09-18/19)
+
+**What happened.** The engineer seat, owner-dispatched to plan Ursa
+Major v0, produced docs/design/product-plan.md (real components, real
+TypeScript schema in §10, real done-conditions) and then rendered it
+as docs/presentations/product-plan/*.html, an 18-slide deck. The owner
+reviewed the deck, not the markdown, and rejected it: "just buzzwords
+and it's not a plan," no real system architecture, no diagrams, "a
+table with only words and no explanations is not good." The cover
+slide's own line proves it: "session → record → whys → taste → any
+model," five bare nouns joined by arrows, nothing explained, first
+thing she saw. The "architecture" slide renders lifecycle phrases
+instead of a diagram of named processes, files, and stores.
+
+**Why, technically. Three compounding causes, none of them the seat
+acting alone.**
+1. The seat optimized for presentability over content. Given a
+   substantive source doc, its rendering step dropped every interface,
+   path, and command and kept only prose labels and rounded cards.
+2. The chair's dispatch briefs commissioned the compression: bare-noun
+   titles at 2-3 words, terse table cells, slide-shaped output. Built
+   for OKR and status decks, not for a deliverable meant to survive
+   scrutiny at the interface level. The seat complied with the brief
+   exactly, and that compliance produced the defect.
+3. No standard existed. prompts/engineer-agent.md named a PR
+   description as the only required artifact. Nothing defined what a
+   plan or architecture deliverable must contain before it can be
+   rendered as anything else. The seat had no content contract to
+   fail.
+
+**Fix.** The engineering-artifact standard in
+prompts/engineer-agent.md, reusable by any seat: content requirements
+bind regardless of rendering instructions. A presentation is a view of
+the artifact, never a substitute for it. Reissued dispatch for the
+real deliverable. Owner's added requirements, verbatim intent: for
+engineering agents, high explainability not marketing, high
+technicality, comprehension, creativity, explicitness, zero vagueness;
+literally which products and tooling; systems architecture; diagrams.
+
+**What the org grew.** Formatting instructions from the chair (or
+anyone) govern the rendering layer only, never a deliverable's content
+requirements. A plan is judged by what it specifies, not by how it
+reads on a slide.
+
+**Status: fix applied on owner directive; verification owed by the
+next ExO run.**
