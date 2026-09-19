@@ -627,3 +627,26 @@ the Action (no interactive stdin) the same summary posts as a PR
 comment, and a thumbs-up reaction on it is the equivalent mark
 (`source: 'pr-reaction'`), read back via the GitHub API on the next
 run.
+
+### §12b. Integration-led distribution (owner directive)
+
+Distribution is every available integration surface: Ursa lists
+wherever developers already browse, and each listing is the same one
+image or MCP server wearing that ecosystem's jacket.
+
+| Ecosystem | Integration surface | What ships there |
+|---|---|---|
+| Claude | MCP connector directory; Claude Code plugin/skill listing | the Ursa MCP server (stdio + remote); a skill that wraps `ursa run` |
+| OpenAI | ChatGPT apps / connectors (MCP-compatible), Codex tool registry as it opens | the same remote MCP endpoint; AGENTS.md convention already covers Codex delivery |
+| Cursor | MCP directory / recommended servers | the same MCP server config snippet |
+| GitHub | Actions Marketplace (already §12); app listing later for the PR reader | `ursa-major-action@v1` |
+| npm | registry | `@ursa-major/cli` |
+| Vercel | Marketplace integration | one-click provision of the sync/API layer for self-hosters (templates: the 4 routes + Neon binding) |
+| Neon | integration page / launch partner listing | the price-book schema as a template; co-marketing surface |
+| Supabase | integration listing (alternative BaaS audience) | same self-host template with Supabase Postgres substituted — the schema is plain SQL on purpose |
+| Clerk | not an identity dependency (GitHub OAuth decision stands) | a listed integration recipe only, for teams that already run Clerk |
+
+Rule: an integration listing never adds a new trust surface — every
+entry resolves to the npm CLI, the ghcr image, the Action, or the
+user-deployed MCP endpoint. Marketplaces are shelves, not new
+architecture.
