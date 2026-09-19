@@ -92,7 +92,7 @@ export interface UserPrompt {
 export interface ConversationMeta {
   id: string
   title: string
-  adapter: 'claude-code' | 'paste'
+  adapter: 'claude-code' | 'paste' | 'git'
   model?: string
   source?: string
   date?: string
