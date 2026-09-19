@@ -138,6 +138,14 @@ call per closure, on her own subscription.
   measurement code.
 - **M2:** MCP server for interactive clients (Claude Code, Desktop,
   Cursor). Done when a fresh session states back an axiom unprompted.
+- **M2.5 (image + remote MCP):** done when the same container image
+  runs the M0 pipeline locally and separately answers an authenticated
+  remote MCP `list_axioms()` call from a second machine.
+- **GitHub spine (after M2.5, before M3):** done when one real merged
+  PR in a repo she owns, run through the Action, produces an
+  `OutcomeRecord` and updates that repo's `AGENTS.md` managed block,
+  with zero Ursa-operated compute involved, verified by the Action's
+  own run log on her runner.
 - **M3:** supervised daemon (launchd, restart-on-crash),
   git-commit-pair closure promoted to first-class alongside
   idle-timeout.
@@ -169,6 +177,18 @@ call per closure, on her own subscription.
   fastest path to a real dogfood record.
 - Reuse `resolve.ts`/`distill.ts`/`merge.ts` unchanged over rewriting
   for streaming: task-001 already validated the matching logic.
+- PR adapter over one adapter per tool: GitHub's commit/review/merge
+  shape is already tool-agnostic, so one adapter covers every
+  committing agent.
+- GitHub Action on the user's runner over an Ursa-hosted capture
+  service: keeps raw diffs and review text off Ursa compute entirely.
+- `CLAUDE.md`/`AGENTS.md` managed block over MCP as the default
+  coder-delivery path: every coding agent already reads these files.
+- One watcher-less image for local, Action, and remote MCP over three
+  separate builds: identical resolver/distiller logic, only the
+  transport differs.
+- Bearer token over OAuth for v0 remote MCP: sufficient for one owner's
+  one deployment, revisited before any multi-user story.
 
 ## 7. Risks
 
@@ -181,9 +201,68 @@ call per closure, on her own subscription.
    Mitigation: scope access to one path (`taste-digest.md`),
    commit-only, never force-push, and gate the first several pushes on
    the owner's manual merge before trusting full automation.
-3. **The generated-draft commit may not always exist cleanly** if
-   alexandria's cron doesn't commit the raw draft before she edits it.
-   Mitigation: verify this against alexandria's actual cron script
-   before trusting M0's digest data; if it's false, it's a one-line fix
-   on alexandria's side, named here as an explicit dependency, not
-   assumed away.
+3. **Commit-pair capture breaks under squash merges and force-pushed
+   history**, generalizing the narrower alexandria-only version of this
+   risk (the cron must commit the raw draft before she edits it — still
+   an explicit dependency to verify) to the whole GitHub-spine story.
+   Mitigation: detect a squash merge (single commit whose parent is the
+   PR base) and degrade to one coarse pair instead of failing; never
+   re-derive from a force-pushed ref without confirming the prior base
+   commit still exists.
+
+## 8. GitHub spine
+
+Responsibility: generalize the git-diff adapter into a PR adapter so
+capture works across any committing agent (Cursor, Codex, Claude
+Code), not just alexandria's cron. Reads: a merged PR's commit history
+— agent commits as generations, review comments as stated corrections,
+follow-up commits as mutations, merge as acceptance, revert or
+post-merge force-push as regression. Writes: the same
+`OutcomeRecord`/`Episode` shapes M0 already produces; no new record
+schema, only a new adapter.
+
+Runs as a GitHub Action in the user's own account and repo, their
+runner, their minutes, not Ursa-operated compute. The Action checks out
+the PR, runs the container image from §9 locally to the runner, and
+pushes only the derived record/taste to the user's own store, never the
+raw diff or review text. Delivery for coders: a managed block in
+`CLAUDE.md`/`AGENTS.md`, the digest pattern generalized, since every
+coding agent already reads these files and no MCP client is required.
+
+Reuses: `resolve.ts`, `distill.ts`, `merge.ts`, the domain-filtered
+export, unchanged. New: a `parseGitHubPR` adapter (mirrors the git-diff
+adapter's shape) and a managed-block writer using bounded markers so it
+never clobbers the rest of the file.
+
+Honest failure modes: squash merges collapse the commit sequence into
+one, destroying the generation-to-mutation chain the loop detector
+needs; v0 degrades to treating the squashed diff as one coarse pair,
+losing recurrence counts. Review comments are not reliably corrections
+— many are questions or praise; v0 does not classify comment intent,
+and counts a comment as evidence only when a following commit's diff
+overlaps its line range. Private-repo Actions need an explicit
+repo-write token; v0 requests the narrowest scope, one path, never
+org-wide.
+
+## 9. The container
+
+One image, watcher-less: resolver, distiller, and MCP server, no
+filesystem watching baked in. The same image runs three ways: local,
+invoked by the orchestrator's cron tick; as the GitHub Action's runtime
+in §8; and user-deployed as a remote MCP server, so any MCP-speaking
+chat surface connects to the user's own endpoint, sends it transcripts,
+and pulls taste back.
+
+Invariant, stated hard: Ursa distributes the image, Ursa never operates
+the compute it runs on. No Ursa-owned server ever sees a raw
+transcript.
+
+Reuses: the entire existing pipeline as the image's payload, unchanged.
+New: a Dockerfile, and an MCP transport that works as both local stdio
+(M2) and remote HTTP (this section), same `TasteRecord` logic
+underneath.
+
+Honest failure mode: remote MCP needs real auth, since anyone with the
+endpoint URL could read taste or push fake transcripts. v0 uses a
+single owner-generated bearer token, no OAuth — adequate for one user's
+own deployment, not for anything on shared compute.
