@@ -60,3 +60,13 @@ Then open `trial/task-001/outcome_record.html`.
 Spans flagged **uncertain** had a rejected best-match between the thresholds
 (0.35–0.6); eyeball those first when calibrating. Thresholds live in
 `src/match.ts`.
+
+## Where the records live (2026-09-18)
+
+The raw trial records (task-001, task-001-all-sessions) were moved to
+the private repo alexandrapaiz/ursa-private after the All-Hands 002
+security finding: they contain verbatim user prompts, raw conversation
+captures, and absolute local paths. This public repo's history was
+purged of them. A record returns here only redacted, after the security
+seat's pass and the owner's sign-off per record
+(docs/security/redaction-standard.md, once it exists).
