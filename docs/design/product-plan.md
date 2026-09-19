@@ -650,3 +650,18 @@ Rule: an integration listing never adds a new trust surface — every
 entry resolves to the npm CLI, the ghcr image, the Action, or the
 user-deployed MCP endpoint. Marketplaces are shelves, not new
 architecture.
+
+## 15. Agentic-forward: the HQ surface (owner idea, stub)
+
+Agents are the second consumer. The MCP server grows one call beyond
+taste delivery: `get_briefing(input: { domain?: string; files?:
+string[] }): Briefing` where `Briefing { rules: RuleUnit[]; nearestCases:
+CaseUnit[]; guardrails: AxiomEvidence[] }` — relevant rules, nearest
+cases by the §12 client-side embedding retrieval, and learned
+guardrails, served to an agent before it starts work on named files.
+The debrief half already exists: the PR reader grades the run into an
+OutcomeRecord. Together: brief → work → debrief, every agent run both
+reading the HQ and enriching it. Discipline per §0b: the HQ serves
+evidence, never orders; commanding agents would be the central planner
+the principles reject. Dogfood target: Ursa's own seat org. Full spec
+owed when this stub graduates to a milestone.
