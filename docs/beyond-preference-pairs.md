@@ -167,3 +167,40 @@ of good faith to the users whose consent produces the data.
   and consent that survives legal review for training use. Those live with
   the user. That is not a marketing constraint; it is why the signal must
   flow through something the user owns.
+
+## The price analog (owner note, 2026-09-18)
+
+Hayek's system does not run on dispersed knowledge alone. It runs
+because the price compresses that knowledge into one number that
+travels, and the number is actionable without its causes. Ursa needs
+its analog of price, and the record already contains it: survival,
+meaning retention through use.
+
+A generation's price is what the work paid for it. Kept verbatim, kept
+edited, or deleted. The analogy is exact on every property that makes
+price work. Prices emerge from transactions rather than opinions, and
+survival emerges from what the work used rather than what a grader
+judged. Prices are actionable without their causes, and a lab can train
+on a falling survival rate without seeing any user's circumstances,
+because the whys stay with the user in the taste store. The price
+system transmits the signal and never the particulars, which is the
+on-device architecture restated: derived signal leaves the machine, raw
+circumstances do not. On-device processing is therefore a Hayekian
+necessity, not a privacy feature. Prices are comparable in a common
+unit, and this gives the cross-model claim its precise meaning: the
+same user's work under two models yields a ratio of survival rates,
+which is a relative price between models that only a cross-model layer
+can quote. Finally, prices equilibrate. Labs respond to survival rates,
+models improve, and survival rises.
+
+Two corollaries. The taste axiom is the user's personal shadow price,
+the compressed rule their own transactions revealed. Deleted
+generations are the losses, the determinate negation that disciplines
+production and makes the market learn.
+
+The discipline this imposes on the product: Ursa must always be able to
+quote a scalar. Every lab-facing deliverable reduces to survival rates
+with confidence, per behavior, per model, per domain. The moment we
+ship high-dimensional particulars instead, we are a census bureau
+rather than a price system, and the census bureau was the villain of
+the calculation debate.
