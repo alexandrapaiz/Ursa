@@ -9,6 +9,11 @@
     "cover",
     "runtime",
     "components",
+    "commands",
+    "ondisk",
+    "record",
+    "tooling",
+    "datamodel",
     "episode",
     "edges",
     "capture",
@@ -27,14 +32,18 @@
   ],
   "sections": {
     "s1": {
-      "description": "Architecture: the runtime, components, and data flow",
+      "description": "Systems architecture: components, commands, disk, tooling, schema",
       "start": "cover"
     },
     "s2": {
-      "description": "Milestones, the dogfood metric, risks, open questions",
-      "start": "milestones"
+      "description": "Behavior: data flow, boundaries, capture, output, delivery",
+      "start": "episode"
     },
     "s3": {
+      "description": "Milestones, metric, risks",
+      "start": "milestones"
+    },
+    "s4": {
       "description": "Delivery: sequence, capacity, gates, decisions",
       "start": "sequence"
     }

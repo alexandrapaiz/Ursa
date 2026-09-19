@@ -1,0 +1,36 @@
+<section id="datamodel" data-transition="fade" style="background:#0A101E; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:24px">
+  <div style="display:flex; flex-direction:column; gap:10px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">OUTPUT SCHEMA · plan §10–11</p>
+    <h2 style="font-size:50px; font-weight:300; line-height:1.1">TasteUnit: the union of rule and case</h2>
+  </div>
+  <div style="position:relative; width:1664px; height:520px">
+    <div style="position:absolute; left:600px; top:0; width:420px; display:flex; flex-direction:column; gap:4px; background:#0B1224; border:1px dashed #A8C7FA; border-radius:12px; padding:18px 24px"><p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#EAF0FA">TasteUnit</p><p style="font-size:24px; color:#9FB2CC">union type: every learned thing is one of the two below</p></div>
+    <div style="position:absolute; left:60px; top:170px; width:560px; display:flex; flex-direction:column; gap:3px; background:#0B1224; border:1px solid #1C2740; border-radius:12px; padding:20px 26px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">RuleUnit — stateable taste</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">statement: string</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">domain: string</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">pinnedExamples: AxiomEvidence[]</p>
+      <p style="font-size:24px; color:#8291AD">length >= 1 enforced: no rule exists without its examples</p>
+    </div>
+    <div style="position:absolute; left:700px; top:170px; width:620px; display:flex; flex-direction:column; gap:3px; background:#0B1224; border:1px solid #A8C7FA; border-radius:12px; padding:20px 26px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">CaseUnit — tacit taste</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">discoveredSpec: string</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">evidenceTrail: { step, quote }[]</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">survivalScalar: number</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">acceptanceBasis: 'stated' | 'tacit'</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">contradicts: string[]</p>
+    </div>
+    <div style="position:absolute; left:60px; top:400px; width:560px; display:flex; flex-direction:column; gap:3px; background:#101B33; border:1px solid #1C2740; border-radius:12px; padding:18px 24px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">ContrastivePair — Minor-facing, outside the union</p>
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#D5DFF0">rejectedRef · acceptedRef · evidenceSteps[] — one per regression, training-ready</p>
+    </div>
+    <div style="position:absolute; left:700px; top:420px; width:760px; display:flex; flex-direction:column; gap:3px; background:#101B33; border:1px dashed #3A4A6B; border-radius:12px; padding:18px 24px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">instance: Loop B · real values</p>
+      <p style="font-size:24px; color:#D5DFF0">trail: [650 "should not move with mouse..."] [710 "place it where my mouse is"] · survivalScalar 1.0 · basis stated ("yesss finallyyy!!", step 730)</p>
+    </div>
+    <x-connector x1="810" y1="90" x2="400" y2="170" head="end" style="color:#3A4A6B"></x-connector>
+    <x-connector x1="830" y1="90" x2="1000" y2="170" head="end" style="color:#3A4A6B"></x-connector>
+    <x-connector x1="1010" y1="380" x2="1050" y2="420" head="end" style="color:#3A4A6B; border-style:dashed"></x-connector>
+  </div>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 08</p>
+</section>
