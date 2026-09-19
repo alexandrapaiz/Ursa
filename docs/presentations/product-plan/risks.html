@@ -1,0 +1,13 @@
+<section id="risks" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:36px">
+  <div style="display:flex; flex-direction:column; gap:14px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">RISKS</p>
+    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Three, with planned mitigations</h2>
+  </div>
+  <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
+    <tr><th style="width:26%; color:#A8C7FA; text-align:left">Risk</th><th style="width:30%; color:#A8C7FA; text-align:left">Why it matters</th><th style="width:44%; color:#A8C7FA; text-align:left">Mitigation</th></tr>
+    <tr><td>Episode misclassification</td><td>corrupts loop and regression signal silently</td><td>confidenceNote on every record; weekly regression against task-001</td></tr>
+    <tr><td>Cross-repo write access</td><td>daemon pushes to alexandria and user repos</td><td>one path, commit-only, no force-push; owner reviews first pushes</td></tr>
+    <tr><td>Squash merge, force-push</td><td>destroys the generation-to-mutation chain</td><td>detect squash, degrade to coarse pair; never re-derive without prior base</td></tr>
+  </table>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 11</p>
+</section>

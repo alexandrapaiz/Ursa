@@ -39,3 +39,26 @@ schedules will trigger and fail loudly, which is the intended signal.
 
 **Owner:** Alexandra. **Status:** accepted on merge of the activation
 PR; her merge is the activation.
+
+## ADR-003 — Launch-based capture; building only; git as the interface (2026-09-18)
+
+**Decision.** Ursa Major v0 is launch-based, not ambient: the user
+selects a finished project and launches a run (`ursa run <project>`
+locally, or the PR-merge-triggered Action in their own GitHub
+account). No background daemon on a timer, no reading of chats the
+user did not hand over. Scope is building, not chats in general;
+Codex and Claude Code live in git, so git is the interface and the
+episode boundary (commit pairs), with opt-in crons possible later.
+The distiller is bound by the principles of intelligence (vision.md
+§0b); the output end-goal is being reworked so tacit knowledge is
+carried by examples and survival evidence, never flattened into
+freestanding stated rules. n=2 is the alexandria project.
+
+**Reasoning.** Owner directive: users will not want an always-on
+process reading everything; explicit launch respects consent and
+matches how builders actually work. The first distillation
+(ursa-private, trial/task-001/trajectory.md) shows the value lives in
+loops, quotes, discovered specs and tacit closures — the form rules
+destroy.
+
+**Owner:** Alexandra. **Status:** accepted (directed in session).

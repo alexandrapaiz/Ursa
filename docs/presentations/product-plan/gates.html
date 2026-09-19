@@ -1,0 +1,16 @@
+<section id="gates" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:32px">
+  <div style="display:flex; flex-direction:column; gap:14px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">DELIVERY · PM</p>
+    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Dependencies and gates</h2>
+    <p style="font-size:27px; font-weight:300; color:#9FB2CC">Owner-only actions and cross-track blockers set the real start dates, not the milestone list.</p>
+  </div>
+  <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
+    <tr><th style="width:38%; color:#A8C7FA; text-align:left">Gate</th><th style="width:16%; color:#A8C7FA; text-align:left">Type</th><th style="width:30%; color:#A8C7FA; text-align:left">Blocks</th><th style="width:16%; color:#A8C7FA; text-align:left">Needed by</th></tr>
+    <tr style="background:#0B1224"><td>Valid OAuth token secret (current fails auth)</td><td>owner-only</td><td>all wave-1 cadence, KR3.1</td><td>now</td></tr>
+    <tr><td>Cron commits raw draft before her edits (verify)</td><td>owner-only</td><td>M0's digest data trust</td><td>Sep 29</td></tr>
+    <tr><td>Digest prompt reads taste-digest.md</td><td>owner-only</td><td>M1.5 dogfood test</td><td>Oct 20</td></tr>
+    <tr><td>Resolver v2 signals (KR1.2)</td><td>cross-track</td><td>M1 distillation</td><td>Oct 6</td></tr>
+    <tr><td>55-span adjudication (KR1.1)</td><td>manual, parallel</td><td>threshold retune only, no hard block</td><td>all quarter</td></tr>
+  </table>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 15</p>
+</section>

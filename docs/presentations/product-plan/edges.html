@@ -1,0 +1,28 @@
+<section id="edges" data-transition="fade" style="background:#050810; color:#EAF0FA; font-family:'Inter Tight', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; gap:36px">
+  <div style="display:flex; flex-direction:column; gap:14px">
+    <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA; letter-spacing:4px">EPISODE EDGES</p>
+    <h2 style="font-size:56px; font-weight:300; line-height:1.1">Two heuristics, one known failure</h2>
+  </div>
+  <div style="display:flex; gap:32px">
+    <div style="width:560px; display:flex; flex-direction:column; gap:18px; background:#0B1224; border:1px solid #1C2740; border-radius:16px; padding:36px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">CLOSURE RULES</p>
+      <ul style="font-size:26px; font-weight:300; line-height:1.55; color:#D5DFF0">
+        <li>Idle timeout, 24h default (chat-driven work)</li>
+        <li>Git commit pair (digest, PR work)</li>
+        <li>Commit pair wins whenever both exist</li>
+        <li>Every record admits how sure it is about its own boundaries</li>
+      </ul>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:18px; background:#0B1224; border:1px solid #1C2740; border-radius:16px; padding:36px">
+      <p style="font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#A8C7FA">TASK-001 BREAKS IT</p>
+      <table style="font-size:24px; color:#D5DFF0; border:1px solid #1C2740">
+        <tr><th style="width:18%; color:#A8C7FA; text-align:left">Step</th><th style="width:36%; color:#A8C7FA; text-align:left">Event</th><th style="width:26%; color:#A8C7FA; text-align:left">Idle verdict</th><th style="width:20%; color:#A8C7FA; text-align:left">Correct</th></tr>
+        <tr><td>42–297</td><td>Loop A opens, active edits</td><td>open</td><td>open</td></tr>
+        <tr><td>~300</td><td>3-day gap begins</td><td>closes episode</td><td>still open</td></tr>
+        <tr><td>558</td><td>Loop A recurs after gap</td><td>new episode</td><td>same loop</td></tr>
+      </table>
+      <p style="font-size:24px; color:#8291AD">Consequence: a timeout alone would split one stubborn correction into two, undercounting it. The fix is milestone M4.</p>
+    </div>
+  </div>
+  <p style="position:absolute; left:128px; bottom:64px; font-family:'JetBrains Mono', Courier New, monospace; font-size:24px; color:#8291AD">Ursa · 05</p>
+</section>

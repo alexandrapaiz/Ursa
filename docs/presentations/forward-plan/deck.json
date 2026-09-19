@@ -1,0 +1,16 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-09-18T21:05:00Z" },
+  "title": "Ursa Forward Plan",
+  "order": ["cover", "mission", "n1", "taste", "resolver", "corpus", "publish", "clock", "gates", "endstate"],
+  "sections": {
+    "s1": { "description": "The n=1: Ursa Major run over the building of Ursa Minor", "start": "cover" },
+    "s2": { "description": "What we build next: the taste pipeline and resolver v2", "start": "taste" },
+    "s3": { "description": "The quarter, its evidence, and its gates", "start": "corpus" }
+  },
+  "faces": {
+    "inter-tight": { "family": "Inter Tight", "href": "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200..700&display=swap" },
+    "jetbrains-mono": { "family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" }
+  },
+  "designSystems": []
+}
