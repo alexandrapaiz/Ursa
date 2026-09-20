@@ -1,4 +1,4 @@
-<!-- Vendored from alexandrapaiz/alexandra-systems standards/pm.md @ 22d0f95 (2026-09-18). Deviations belong in docs/decisions.md. -->
+<!-- Vendored from alexandrapaiz/alexandra-systems standards/pm.md @ 49cc38e (2026-09-20), incl. §2c Working Backwards. -->
 
 # Standard: Project Management
 
@@ -45,6 +45,55 @@ criteria, an assignment line per item naming the seat, and a notes
 section for anything orientation-critical. Five items is a ceiling, not
 a target; capacity is what the seats actually ship, measured by the
 retro, not hoped.
+
+## 2b. Board, milestones, labels (owner directive, 2026-09-19)
+
+The PM seat owns the tracking surfaces, so the owner never does:
+
+- **The company board** (GitHub Projects "Alexandra Systems",
+  users/alexandrapaiz/projects/5): every sprint item the PM plans gets
+  a board item with Product, Seat, and Horizon fields set; done items
+  get Status → Done in the retro. Board writes require the
+  PROJECTS_TOKEN secret (classic PAT, `project` scope — user-level
+  Projects v2 accepts neither GITHUB_TOKEN nor fine-grained PATs).
+  When the secret is absent, the PM lists the exact `gh project`
+  commands it would have run in its PR description instead of failing.
+- **Milestones**: one per sprint/cycle in the product repo, named by
+  the sprint date, sprint items attached, closed at the retro.
+- **Labels**: maintain a stable set — `seat:<name>` for ownership,
+  `horizon:now|next|later`, `blocked`, `owner-action` — and apply them
+  to issues and PRs the seats produce. Labels and milestones use the
+  normal repo token (workflows need `issues: write`).
+
+## 2c. Working Backwards (owner directive, 2026-09-20)
+
+Amazon's practice, binding on every PM seat: **nothing larger than a
+sprint item is planned until its PR/FAQ exists.** A new product, a new
+tier, a launch, a feature that changes what the product is — each gets
+`docs/prfaq/<slug>.md` before it enters a sprint, written by the PM and
+merged by the owner (Tier B: it is a decision).
+
+The document, one page plus the FAQ, in the customer's language:
+
+1. **Press release**, dated launch day, as if it already happened:
+   headline, one-sentence subhead, the problem in the customer's words,
+   the solution, one quote from the owner saying why it matters, how a
+   customer starts today, one customer quote saying what changed for
+   them, and the call to action.
+2. **Customer FAQ**: the five to ten questions a real customer asks
+   first, answered plainly (price, what it does not do, data, how to
+   leave).
+3. **Internal FAQ**: the hard questions, answered honestly — what has to
+   be true for this to work, what breaks, what it costs (filed in the
+   shared-services register if it costs anything), dependencies on
+   owner-only actions, and why now rather than later.
+
+The rule that gives it teeth: if the press release does not read as
+something a customer would want, the build does not start — the PM
+revises the document, not the roadmap. Sprint items that serve an
+initiative link its PR/FAQ; the retro grades shipped work against the
+press release, not against the task list. The owner's merge of the
+PR/FAQ is the go decision.
 
 ## 3. The sprint file
 
@@ -130,7 +179,9 @@ close it. Ending silently is the one outcome never acceptable.
 
 ## 9. Boundaries (all seats, template)
 
-- Never merge your own PR; never push to main; never enable auto-merge.
+- Never push to main; never enable GitHub auto-merge. Self-merging your
+  own PR is forbidden EXCEPT under the Tier A scope check of §10; where
+  a charter says "never merge your own PR," §10 defines the exception.
 - Never touch secrets, tokens, or `.env`; secret NAMES only.
 - No new paid services or process software without a ledger proposal and
   the owner's merge (and, company-wide, a line in the HQ shared-services
@@ -140,3 +191,27 @@ close it. Ending silently is the one outcome never acceptable.
   and the owner.
 - Owner-facing prose in the house voice: plain sentences, transition
   words, no stylistic em dashes or semicolon joins.
+
+## 10. Autonomy tiers (ADR-011)
+
+The owner's merge gates authority, not knowledge. Two tiers, company-
+wide:
+
+**Tier A — self-merge.** A seat merges its own PR after verifying with
+`gh pr diff --name-only` that EVERY changed file is a knowledge
+surface: `docs/sprints/`, `docs/agents/` (org-chart, pending,
+frameworks, lessons, incidents), grooming edits to `docs/ideas.md`,
+`docs/finance/` register maintenance (never a new spend), and — for the
+exo centralizer only — `standards/lessons.md` and each product's
+vendored `docs/standards/lessons.md`. Merge as a normal merge, never
+force. If the diff contains anything else, the PR waits for the owner.
+
+**Tier B — owner merge.** Charters (`prompts/`), workflows
+(`.github/workflows/`), standards other than lessons, ADRs in
+`docs/decisions.md`, product code, the site, anything that incurs or
+approves spend, and any ledger status the owner controls. These wait,
+and the merge-or-close rule escalates them rather than bypassing her.
+
+A Tier A merge whose diff turns out to have crossed the line is an
+incident, and that seat's self-merge right is suspended until the exo
+ships the fix.
