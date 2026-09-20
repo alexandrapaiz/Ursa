@@ -37,6 +37,8 @@ interface CommitInfo {
   date: string
   trailers: string
   subject: string
+  /** more than one parent = a merge; a merge is never an edit */
+  parentCount: number
 }
 
 function git(repoPath: string, args: string[]): string {
@@ -52,11 +54,16 @@ export function listCommits(repoPath: string): CommitInfo[] {
   // timestamp (same-second bursts are common in agent workflows).
   const out = git(repoPath, [
     'log', '--all', '--reverse', '--topo-order', '--date=iso-strict',
-    '--pretty=format:%H%x09%an%x09%ae%x09%aI%x09%(trailers:key=Co-Authored-By,valueonly,separator=|)%x09%s',
+    '--pretty=format:%H%x09%an%x09%ae%x09%aI%x09%P%x09%(trailers:key=Co-Authored-By,valueonly,separator=|)%x09%s',
   ])
   return out.split('\n').filter(Boolean).map((line) => {
-    const [sha, authorName, authorEmail, date, trailers, ...rest] = line.split('\t')
-    return { sha, authorName, authorEmail, date, trailers: trailers ?? '', subject: rest.join('\t') }
+    const [sha, authorName, authorEmail, date, parents, trailers, ...rest] = line.split('\t')
+    return {
+      sha, authorName, authorEmail, date,
+      parentCount: parents ? parents.split(' ').length : 0,
+      trailers: trailers ?? '',
+      subject: rest.join('\t'),
+    }
   })
 }
 
@@ -98,6 +105,10 @@ export function findCommitPairs(repoPath: string, opts: PairFinderOptions = {}):
     for (let j = i + 1; j < commits.length; j++) {
       const fin = commits[j]
       if (marker(fin)) continue
+      // A merge brings in other commits' work; the human did not write
+      // that diff. Skip it as a pairing target rather than count another
+      // agent's changes as this person's corrections.
+      if (fin.parentCount > 1) continue
       const overlap = touched(fin.sha).filter((p) => genFiles.has(p))
       if (overlap.length === 0) continue
       pairs.push({

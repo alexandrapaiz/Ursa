@@ -46,6 +46,19 @@ describe('M0: ursa run over a git repo', () => {
     expect(pairs[0].finalAuthor).toBe('Human Owner')
   })
 
+  it('never pairs an agent commit with a merge commit', () => {
+    const repo = fixtureRepo()
+    sh(repo, 'git', ['checkout', '-q', '-b', 'feature'])
+    writeFileSync(join(repo, 'digest.js'), 'export const other = 1\n')
+    sh(repo, 'git', ['add', '.'])
+    sh(repo, 'git', ['commit', '-q', '-m', 'Agent feature\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+    sh(repo, 'git', ['checkout', '-q', 'main'])
+    sh(repo, 'git', ['merge', '-q', '--no-ff', '-m', 'Merge feature', 'feature'])
+    const pairs = findCommitPairs(repo)
+    expect(pairs.every((p) => p.finalSha !== execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).trim())).toBe(true)
+    expect(pairs).toHaveLength(1)
+  })
+
   it('resolves an episode into a record with survived and mutated spans', () => {
     const repo = fixtureRepo()
     const eps = buildEpisodes(findCommitPairs(repo), repo)

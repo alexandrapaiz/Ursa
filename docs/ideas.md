@@ -76,3 +76,22 @@ Contract in docs/standards/pm.md §4.
   a deploy is detectable, `hosted`.
 - Cost: $0
 - Status: accepted (owner-directed 2026-09-20)
+
+### 2026-09-20 — Finding: merge commits are not edits; the PR reader is load-bearing
+- Trigger: the M1 redo on alexandria. With merge commits excluded as
+  pairing targets, the repo yields ONE real generated-then-edited pair
+  (the W37 digest, 2026-09-08). Yesterday's 19 records were 18 merge
+  artifacts plus that one; a 95-record run before the fix was 69 pairs
+  against a single PR merge.
+- What: in a repo run by agent seats through pull requests, the owner
+  almost never edits an agent commit directly on main. Her corrections
+  live in two other places: inside the PR (review comments, follow-up
+  commits on the branch before merge) and in chat. So the commit-pair
+  path is thin for agent-run repos, and the PR reader (plan §8) plus
+  the session trace are where the signal actually is. The pair finder
+  now skips merge commits (test added, 26 passing).
+- First step: promote the PR reader from the GitHub-spine milestone
+  into M1 scope for the alexandria trial; read each merged PR's review
+  comments and branch commits as the correction stream.
+- Cost: $0
+- Status: proposed
