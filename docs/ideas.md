@@ -9,16 +9,16 @@ Contract in docs/standards/pm.md §4.
 - Cost: $0
 - Status: proposed
 
-### 2026-09-18 — The taste pipeline (sessions → whys → portable taste)
+### 2026-09-18 — The tuning pipeline (sessions → whys → portable tuning)
 - Trigger: owner directive at the engineering session: regular chats and
   code sessions must become useful for RLHF; the H is the human building,
-  the RLAIF reverse-engineers the whys; stored taste for the user first,
+  the RLAIF reverse-engineers the whys; stored tuning for the user first,
   anonymized signal for labs later
 - What: interpretation layer over outcome records — a local model pass
-  distills evidence-backed taste axioms into a user-owned taste.json,
+  distills evidence-backed tuning axioms into a user-owned tuning.json,
   exported as a portable context block; design at
-  docs/design/taste-pipeline.md, MVP in ursa-major/src/taste/
-- First step: shipped as MVP on branch taste/mvp (distill, merge with
+  docs/design/tuning-pipeline.md, MVP in ursa-major/src/tuning/
+- First step: shipped as MVP on branch tuning/mvp (distill, merge with
   revocation tombstones and tension wiring, export, 10 tests)
 - Cost: $0 (runs on the owner's local claude CLI)
 - Status: accepted (owner-directed 2026-09-18)
@@ -26,7 +26,7 @@ Contract in docs/standards/pm.md §4.
 ### 2026-09-19 — Agentic-forward: Ursa as the agents' HQ
 - Trigger: owner product idea, verbatim: "being agentic forward.
   helping this guide agents as well, almost like an hq"
-- What: agents become first-class taste consumers and producers. A
+- What: agents become first-class tuning consumers and producers. A
   brief→work→debrief loop on the existing MCP server: get_briefing
   (domain, files) returns relevant rules, nearest cases via the
   client-side embedding retrieval, and learned guardrails before an
@@ -40,16 +40,16 @@ Contract in docs/standards/pm.md §4.
 - Cost: $0
 - Status: accepted (owner-directed 2026-09-19)
 
-### 2026-09-19 — Taste packs (the omarchy lesson)
+### 2026-09-19 — Tuning packs (the omarchy lesson)
 - Trigger: owner asked "thoughts on omarchy for our product?" — omarchy
-  proves developers adopt curated taste-as-artifact wholesale
-- What: exportable, adoptable taste profiles — a respected builder's
-  distilled taste.md installable the way people adopt omarchy configs;
-  Ursa generalizes omakase (one chef's taste) into your own learned
+  proves developers adopt curated tuning-as-artifact wholesale
+- What: exportable, adoptable tuning profiles — a respected builder's
+  distilled tuning.md installable the way people adopt omarchy configs;
+  Ursa generalizes omakase (one chef's tuning) into your own learned
   palate, and lets either be shared deliberately. Consumer-side
   network effect no competitor has. Requires the redaction/consent
   standard before any pack leaves a machine
-- First step: an `ursa taste export --pack` variant that strips
+- First step: an `ursa tuning export --pack` variant that strips
   evidence quotes and ships rules + case specs only, owner-reviewed
 - Cost: $0
 - Status: proposed

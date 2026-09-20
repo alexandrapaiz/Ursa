@@ -53,7 +53,7 @@ Minor (labs; all revenue).
 Product missions, set with the parent's (2026-09-18):
 
 - **Ursa Minor** — Train models on the world's dispersed knowledge.
-- **Ursa Major** — Import your taste into every model. The split into separate repos happens when
+- **Ursa Major** — Import your tuning into every model. The split into separate repos happens when
 the products' cadences diverge; until then `ursa-major/` and
 `ursa-minor/` live here.
 

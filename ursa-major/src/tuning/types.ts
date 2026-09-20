@@ -1,4 +1,4 @@
-// The taste layer: what the interpretation pass (RLAIF) distills out of
+// The tuning layer: what the interpretation pass (RLAIF) distills out of
 // outcome records, and the user-owned store it compounds into.
 //
 // Division of labor, load-bearing: the MODEL infers the why (an axiom's
@@ -8,7 +8,7 @@
 // without evidence is invalid by construction.
 //
 // Privacy invariants: distillation runs on the user's machine; the
-// taste record lives with the user, never on an aggregation layer; the
+// tuning record lives with the user, never on an aggregation layer; the
 // user can edit or revoke any axiom and revocation survives re-distills.
 
 export interface AxiomEvidence {
@@ -29,7 +29,7 @@ export interface AxiomEvidence {
   quote?: string
 }
 
-export interface TasteAxiom {
+export interface TuningAxiom {
   id: string
   /** the why, stated as a rule portable to any model */
   statement: string
@@ -53,7 +53,7 @@ export interface TasteAxiom {
   status: 'active' | 'user-edited' | 'revoked'
 }
 
-export interface TasteRecord {
+export interface TuningRecord {
   schemaVersion: '0.1.0'
   /** local label only; never transmitted */
   owner: string
@@ -64,7 +64,7 @@ export interface TasteRecord {
     method: 'rlaif-claude'
     model: string
   }>
-  axioms: TasteAxiom[]
+  axioms: TuningAxiom[]
 }
 
 // What the model must return from one distillation pass. Kept minimal:

@@ -6,7 +6,7 @@ Owner-seeded; the PM seat grooms once activated.
 
 - [x] Missions set by the owner (2026-09-18): Ursa "Turn AI
   peer-to-peer."; Ursa Minor "Train models on the world's dispersed
-  knowledge."; Ursa Major "Import your taste into every model."
+  knowledge."; Ursa Major "Import your tuning into every model."
   (vision.md §0–§1)
 - [ ] OKR walkthrough, remainder: draft key results for the committed
   objectives — O1 prove the record (resolver v2 + n≥5 trials), O2

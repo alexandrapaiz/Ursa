@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { OutcomeRecord } from '../types'
 import { buildDistillPrompt, distill, parseDistillOutput } from './distill'
-import { emptyTaste, mergeDistill } from './merge'
-import { renderTasteBlock } from './export'
+import { emptyTuning, mergeDistill } from './merge'
+import { renderTuningBlock } from './export'
 import type { DistillOutput } from './types'
 
 const record = (id: string): OutcomeRecord =>
@@ -73,8 +73,8 @@ describe('distill parsing', () => {
   })
 
   it('prompt carries signals, existing axioms and revocations', () => {
-    const taste = emptyTaste('t')
-    taste.axioms.push({
+    const tuning = emptyTuning('t')
+    tuning.axioms.push({
       id: 'ax-001',
       statement: 'old rule',
       domain: 'copy',
@@ -87,7 +87,7 @@ describe('distill parsing', () => {
       lastSeen: 'x',
       status: 'revoked',
     })
-    const p = buildDistillPrompt(record('r1'), taste)
+    const p = buildDistillPrompt(record('r1'), tuning)
     expect(p).toContain('discoveredSpec')
     expect(p).toContain('do not resurrect')
     expect(p).toContain('old rule')
@@ -96,7 +96,7 @@ describe('distill parsing', () => {
 
 describe('merge', () => {
   it('creates new axioms with evidence-count confidence', () => {
-    const t = mergeDistill(emptyTaste('t'), output1, record('r1'), 'sonnet')
+    const t = mergeDistill(emptyTuning('t'), output1, record('r1'), 'sonnet')
     expect(t.axioms).toHaveLength(1)
     expect(t.axioms[0].id).toBe('ax-001')
     expect(t.axioms[0].evidenceCount).toBe(1)
@@ -105,7 +105,7 @@ describe('merge', () => {
   })
 
   it('reinforces matched axioms instead of duplicating', () => {
-    const t1 = mergeDistill(emptyTaste('t'), output1, record('r1'), 'sonnet')
+    const t1 = mergeDistill(emptyTuning('t'), output1, record('r1'), 'sonnet')
     const output2: DistillOutput = {
       axioms: [{ ...output1.axioms[0], matchesExisting: 'ax-001' }],
     }
@@ -116,7 +116,7 @@ describe('merge', () => {
   })
 
   it('revoked axioms stay revoked and gain nothing', () => {
-    const t1 = mergeDistill(emptyTaste('t'), output1, record('r1'), 'sonnet')
+    const t1 = mergeDistill(emptyTuning('t'), output1, record('r1'), 'sonnet')
     t1.axioms[0].status = 'revoked'
     const output2: DistillOutput = {
       axioms: [{ ...output1.axioms[0], matchesExisting: 'ax-001' }],
@@ -133,7 +133,7 @@ describe('merge', () => {
         { ...output1.axioms[0], statement: 'B rule', contradicts: ['A rule'] },
       ],
     }
-    const t = mergeDistill(emptyTaste('t'), conflicted, record('r1'), 'sonnet')
+    const t = mergeDistill(emptyTuning('t'), conflicted, record('r1'), 'sonnet')
     expect(t.axioms[0].contradicts).toEqual(['ax-002'])
     expect(t.axioms[1].contradicts).toEqual(['ax-001'])
   })
@@ -142,7 +142,7 @@ describe('merge', () => {
     const bad: DistillOutput = {
       axioms: [{ ...output1.axioms[0], matchesExisting: 'ax-999' }],
     }
-    expect(() => mergeDistill(emptyTaste('t'), bad, record('r1'), 'sonnet')).toThrow(/unknown axiom/)
+    expect(() => mergeDistill(emptyTuning('t'), bad, record('r1'), 'sonnet')).toThrow(/unknown axiom/)
   })
 })
 
@@ -154,9 +154,9 @@ describe('export', () => {
         { ...output1.axioms[0], statement: 'Rich copy', polarity: 'prefer', contradicts: ['Sparse copy'] },
       ],
     }
-    const t = mergeDistill(emptyTaste('t'), conflicted, record('r1'), 'sonnet')
+    const t = mergeDistill(emptyTuning('t'), conflicted, record('r1'), 'sonnet')
     t.axioms.push({ ...t.axioms[0], id: 'ax-009', statement: 'gone', status: 'revoked' })
-    const md = renderTasteBlock(t)
+    const md = renderTuningBlock(t)
     expect(md).toContain('## copy')
     expect(md).toContain('Avoid: Sparse copy (mixed, x1)')
     expect(md).toContain('## Tensions')
@@ -167,7 +167,7 @@ describe('export', () => {
 describe('distill with injected runner', () => {
   it('runs end to end without the real CLI', () => {
     const runner = () => JSON.stringify(output1)
-    const out = distill(record('r1'), emptyTaste('t'), 'sonnet', runner)
+    const out = distill(record('r1'), emptyTuning('t'), 'sonnet', runner)
     expect(out.axioms).toHaveLength(1)
   })
 })

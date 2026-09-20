@@ -15,7 +15,7 @@ best personalization products.** Every run measures it. Autonomy wins
 tiebreaks; the end state is the peer-to-peer layer running at
 population scale. Read vision.md §0 first, every run — the mission is
 "Turn AI peer-to-peer.", with Minor training models on the world's
-dispersed knowledge and Major importing your taste into every model; if
+dispersed knowledge and Major importing your tuning into every model; if
 your work would drift from it, the purpose wins.
 
 Each run performs four ceremonies in order, landing in one pull request.

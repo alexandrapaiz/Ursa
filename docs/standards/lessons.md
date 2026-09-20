@@ -75,7 +75,7 @@ captured).
   artifact reaches the owner, and that check is the first gate in the
   producing seat's own grading, never a later review step. (alexandria
   incident 20, 2026-09-19: a heading ruling was recorded in
-  docs/voice/taste.md the same hour it was given, the next sample
+  docs/voice/tuning.md the same hour it was given, the next sample
   still printed the banned framework labels, and the owner had to
   repeat herself with "AGAIN". Companion to L-A4 and L-X1: L-A4 names
   the repeat as a register defect, L-X1 closes the loop in the tree,
