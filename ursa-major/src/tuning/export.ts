@@ -1,12 +1,12 @@
-// Export the taste record as a portable context block: paste it into
+// Export the tuning record as a portable context block: paste it into
 // any model's instructions (Claude Code CLAUDE.md, ChatGPT custom
-// instructions, a system prompt) and the model starts from your taste
-// instead of zero. Import your taste into every model.
+// instructions, a system prompt) and the model starts from your tuning
+// instead of zero. Import your tuning into every model.
 
-import type { TasteRecord } from './types'
+import type { TuningRecord } from './types'
 
-export function renderTasteBlock(taste: TasteRecord): string {
-  const active = taste.axioms.filter((a) => a.status !== 'revoked')
+export function renderTuningBlock(tuning: TuningRecord): string {
+  const active = tuning.axioms.filter((a) => a.status !== 'revoked')
   const byDomain = new Map<string, typeof active>()
   for (const a of active) {
     const list = byDomain.get(a.domain) ?? []
@@ -15,9 +15,9 @@ export function renderTasteBlock(taste: TasteRecord): string {
   }
 
   const lines: string[] = [
-    '# Taste',
+    '# Tuning',
     '',
-    `Distilled from ${taste.sources.length} real working session${taste.sources.length === 1 ? '' : 's'};`,
+    `Distilled from ${tuning.sources.length} real working session${tuning.sources.length === 1 ? '' : 's'};`,
     'every rule is backed by evidence in the owner\'s outcome records.',
     'Confidence = independent evidence count. Follow high-confidence rules',
     'from the first message; treat single-evidence rules as hints.',

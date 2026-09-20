@@ -6,7 +6,7 @@ order and typography index; each slide is one HTML section on a
 Alexandra:
 
 - forward-plan/ — Ursa Forward Plan (strategy: mission trio, n=1,
-  taste pipeline, resolver v2, the clock, gates, end state).
+  tuning pipeline, resolver v2, the clock, gates, end state).
 - product-plan/ — Ursa Product Plan (internal: runtime, components,
   data flow, capture and delivery matrices, milestones with acceptance
   tests, sequence, capacity, decision queue).

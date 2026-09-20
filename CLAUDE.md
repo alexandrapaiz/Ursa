@@ -3,7 +3,7 @@
 ## 0. Orientation (read this first)
 
 **Mission: Turn AI peer-to-peer.** Ursa Minor trains models on the
-world's dispersed knowledge. Ursa Major imports your taste into every
+world's dispersed knowledge. Ursa Major imports your tuning into every
 model. The mission, the four principles of intelligence, and how they
 bind are in `docs/vision.md`, which outranks this file wherever the two
 differ. "The trust layer between AI users and AI labs" is positioning

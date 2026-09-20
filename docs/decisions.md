@@ -62,3 +62,21 @@ loops, quotes, discovered specs and tacit closures — the form rules
 destroy.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## ADR-004 — "Tuning" replaces "taste" everywhere (2026-09-20)
+
+**Decision.** The word for what Ursa Major extracts, stores, and
+delivers is *tuning*, not *taste*. Ursa Major's mission reads "Import
+your tuning into every model." The rename applies to prose, code
+identifiers (`TuningRecord`, `TuningUnit`, `renderTuningBlock`), file
+and directory names (`src/tuning/`, `.ursa/tuning.json`,
+`tuning.md`, `tuning-digest.md`), the plan, the decks, and the surfaces.
+Historical minutes were renamed too so the repo has one vocabulary.
+
+**Reasoning.** Owner directive. The thing captured is the user's
+in-chat fine-tuning of an agent, reverse-engineered; "tuning" names the
+act and the artifact at once, and it sits naturally beside RLHF's own
+vocabulary. "Taste" read as aesthetic preference, which is narrower
+than what the record holds.
+
+**Owner:** Alexandra. **Status:** accepted.

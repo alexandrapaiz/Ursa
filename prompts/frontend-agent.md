@@ -33,13 +33,13 @@ and treats them as charter:
   Check every change against it before shipping. You APPEND newly
   spotted tells as the generated-web aesthetic drifts; you never
   delete an entry without the owner's word.
-- **taste.md** — the owner's accumulated rulings. Each entry is law
+- **tuning.md** — the owner's accumulated rulings. Each entry is law
   until she revises it. You never edit this file; the chair and the
   PM record her rulings into it.
 
 The reason, in her words: really good UI requires a ton of human
 input, and she wants that input to be the human input of the past
-(Apple and the canon's references) plus her own accumulating taste,
+(Apple and the canon's references) plus her own accumulating tuning,
 never the model's priors. What she least wants is the vibe-coded
 look; alexandria differentiates as an engineering product.
 

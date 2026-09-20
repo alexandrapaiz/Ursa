@@ -41,9 +41,9 @@ holding no state between invocations.
 | 4 | Resolver | `src/resolve.ts` | exists, unchanged | `resolve(input: ResolveInput): OutcomeRecord` |
 | 5 | Signals | `src/signals.ts` | new | `deriveSignals(record: OutcomeRecord, pairs: CommitPair[]): LabSignals` |
 | 6 | Record store | `src/store.ts` | new | `saveRecord(projectRoot: string, record: OutcomeRecord): string` (returns the written path); `isDistilled(projectRoot: string, recordId: string): boolean` |
-| 7 | Distiller | `src/taste/distill.ts`, `merge.ts` | exists, unchanged | `distill(record: OutcomeRecord, taste: TasteRecord, model: string, runner?: DistillRunner): DistillOutput` |
-| 8 | Export/delivery | `src/taste/export.ts` | exists, extended | `renderTasteBlock(taste: TasteRecord, opts?: { domain?: string[] }): string` — the domain filter is the new part |
-| 9 | Control surface | `src/taste/cli.ts` | exists, extended | `revokeAxiom(tastePath: string, unitId: string): TasteRecord` — new export beside the existing distill/export subcommands |
+| 7 | Distiller | `src/tuning/distill.ts`, `merge.ts` | exists, unchanged | `distill(record: OutcomeRecord, tuning: TuningRecord, model: string, runner?: DistillRunner): DistillOutput` |
+| 8 | Export/delivery | `src/tuning/export.ts` | exists, extended | `renderTuningBlock(tuning: TuningRecord, opts?: { domain?: string[] }): string` — the domain filter is the new part |
+| 9 | Control surface | `src/tuning/cli.ts` | exists, extended | `revokeAxiom(tuningPath: string, unitId: string): TuningRecord` — new export beside the existing distill/export subcommands |
 
 ## 3. The hard problems
 
@@ -94,15 +94,15 @@ names a project explicitly, so storage scopes to that project the way
 local state." A global `~/.ursa/` would silently commingle projects;
 cross-project aggregation should be an explicit later command, not an
 implicit default. `.ursa/` goes in the target project's `.gitignore`;
-only the small, domain-filtered exports (`taste-digest.md`, the
+only the small, domain-filtered exports (`tuning-digest.md`, the
 `AGENTS.md` managed block) are meant to be committed.
 
 ```
 <project>/.ursa/
   episodes.json               # index of all Episode objects for this project
   records/<episode-id>.json   # one OutcomeRecord per episode
-  taste.json                  # the TasteRecord (units[])
-  taste.md                    # full rendered export
+  tuning.json                  # the TuningRecord (units[])
+  tuning.md                    # full rendered export
 ```
 
 Episode — real example, reconstructed from the Ursa Minor site trial
@@ -213,14 +213,14 @@ prompt on stdin, response parsed as `{ result: string, is_error?: boolean }`.
   exits. Defers: signals, distillation, delivery, any cron.
 - **M1:** signals (whatever resolver v2 has shipped) plus distillation
   wired automatically onto M0's records. Domain-filtered
-  `taste-digest.md` commits, gated on owner review of the first several
-  pushes (draft PR, not auto-merge). Done when `taste-digest.md` lands
+  `tuning-digest.md` commits, gated on owner review of the first several
+  pushes (draft PR, not auto-merge). Done when `tuning-digest.md` lands
   in the alexandria repo with the two named axiom families — Morning
   Brew register with why-it-matters framing, and no stylistic em dashes
   or semicolon joins — each traceable to real evidence steps in the
   digest records.
 - **M1.5 (the flagship dogfood test):** alexandria's digest prompt
-  reads `taste-digest.md` (a one-line change on alexandria's side,
+  reads `tuning-digest.md` (a one-line change on alexandria's side,
   named as a dependency, not built here). Done when comparing the
   resolver's own `stats.byClass.survived_verbatim.pct` between digest
   cycle N (before the export existed) and cycle N+1 (after) shows N+1
@@ -252,11 +252,11 @@ prompt on stdin, response parsed as `{ result: string, is_error?: boolean }`.
   a transcript: her digest edits include direct file edits with no
   chat, and the resolver only ever needed generation text and final
   text.
-- Domain-filtered export over shipping the whole taste block to the
+- Domain-filtered export over shipping the whole tuning block to the
   digest cron: a small non-Claude model's prompt budget shouldn't carry
   irrelevant code/layout axioms.
 - Commit the export into the consumer's own repo over a hosted
-  taste-serving endpoint: alexandria's cron already reads files from
+  tuning-serving endpoint: alexandria's cron already reads files from
   its repo at build time; a hosted endpoint is new infrastructure and a
   new trust boundary this doesn't need yet.
 - Resolver's existing `survived_verbatim` percentage as the
@@ -289,7 +289,7 @@ prompt on stdin, response parsed as `{ result: string, is_error?: boolean }`.
    regression run against task-001.
 2. **Cross-repo write access is a bigger blast radius than local file
    watching.** The daemon now needs push access to alexandria.
-   Mitigation: scope access to one path (`taste-digest.md`),
+   Mitigation: scope access to one path (`tuning-digest.md`),
    commit-only, never force-push, and gate the first several pushes on
    the owner's manual merge before trusting full automation.
 3. **Commit-pair capture breaks under squash merges and force-pushed
@@ -315,7 +315,7 @@ schema, only a new adapter.
 Runs as a GitHub Action in the user's own account and repo, their
 runner, their minutes, not Ursa-operated compute. The Action checks out
 the PR, runs the container image from §9 locally to the runner, and
-pushes only the derived record/taste to the user's own store, never the
+pushes only the derived record/tuning to the user's own store, never the
 raw diff or review text. Delivery for coders: a managed block in
 `CLAUDE.md`/`AGENTS.md`, the digest pattern generalized, since every
 coding agent already reads these files and no MCP client is required.
@@ -345,7 +345,7 @@ never operates the compute it runs on.
 | Node.js | 22 (active LTS) | runtime for every component | package.json already targets ^22.10.0; the LTS line, not the sandbox's incidental v23 |
 | tsx | ^4.19.2 (pinned) | run .ts directly, no compile step | v0 is invoked, not deployed as a compiled server; `npx tsx` is the repo's existing pattern |
 | system git via execFileSync | user's installed git | pair finder's log/show calls | the target repo already has git; isomorphic-git reimplements git in JS (unneeded weight); simple-git wraps the three calls we write directly; distill.ts already shells out the same way — one pattern, not two |
-| node:util parseArgs | built-in since 18.3 | parse `ursa run <project> [--model] [--out]` | one subcommand, no nested help; commander is for multi-command CLIs; taste/cli.ts already hand-rolls this way |
+| node:util parseArgs | built-in since 18.3 | parse `ursa run <project> [--model] [--out]` | one subcommand, no nested help; commander is for multi-command CLIs; tuning/cli.ts already hand-rolls this way |
 | vitest | ^2.1.8 (pinned) | test runner | already the toolchain; 22/22 tests pass on it today |
 | diff | ^8.0.2 (pinned) | diffWords for survived_mutated spans | already imported in resolve.ts; unchanged |
 | @modelcontextprotocol/sdk | ^1.x (Anthropic reference TS SDK) | MCP server, M2 local stdio and M2.5 remote HTTP | one package ships both transports; avoids a hand-rolled protocol implementation |
@@ -363,10 +363,10 @@ recurrence count is the code-computed signal for which domain gets
 which treatment. Rules only where recurrence is low and stateable;
 everything else becomes cases, not summaries.
 
-Schema — `TasteRecord.units[]` replaces flat `axioms[]`:
+Schema — `TuningRecord.units[]` replaces flat `axioms[]`:
 
 ```ts
-type TasteUnit = RuleUnit | CaseUnit
+type TuningUnit = RuleUnit | CaseUnit
 
 interface RuleUnit {
   kind: 'rule'
@@ -429,15 +429,15 @@ order: User (terminal) → `ursa run` (src/bin/ursa.ts) → Pair finder
 (src/pairfinder.ts) ↔ system git (child process) → Episode segmenter
 (src/episodes.ts) → Resolver (src/resolve.ts) → Record store
 .ursa/records/*.json (cylinder); Resolver → Signals (src/signals.ts)
-→ Record store; Record store → Distiller (src/taste/distill.ts +
-merge.ts) ↔ claude CLI (child process) → Taste store .ursa/taste.json
-(cylinder) → Export (src/taste/export.ts) → Output files: taste.md /
-taste-digest.md / AGENTS.md managed block. Edge labels, exact: argv:
+→ Record store; Record store → Distiller (src/tuning/distill.ts +
+merge.ts) ↔ claude CLI (child process) → Tuning store .ursa/tuning.json
+(cylinder) → Export (src/tuning/export.ts) → Output files: tuning.md /
+tuning-digest.md / AGENTS.md managed block. Edge labels, exact: argv:
 string[]; projectPath: string; execFileSync stdout (commit log text /
 blob text); CommitPair[]; ResolveInput { files, conversations,
 generations }; OutcomeRecord (JSON); LabSignals (merged into
 record.signals); OutcomeRecord (read back); prompt: string out,
-DistillOutput (JSON) back; TasteRecord (JSON); TasteRecord (read);
+DistillOutput (JSON) back; TuningRecord (JSON); TuningRecord (read);
 string (rendered text).
 
 **Diagram 2 — component-interface diagram.** The nine §2 nodes,
@@ -446,11 +446,11 @@ table (e.g. 2→3 `findCommitPairs(repoPath, opts?): CommitPair[]`; 3→4
 `buildEpisodes(pairs, projectPath): Episode[]`; 4→6
 `resolve(input): OutcomeRecord`; 6→7 `saveRecord(projectRoot,
 record): string` and `isDistilled(projectRoot, recordId): boolean`;
-7→8 `distill(record, taste, model, runner?): DistillOutput`; 8→9
-`renderTasteBlock(taste, opts?): string`; 9 self-loop
-`revokeAxiom(tastePath, unitId): TasteRecord`).
+7→8 `distill(record, tuning, model, runner?): DistillOutput`; 8→9
+`renderTuningBlock(tuning, opts?): string`; 9 self-loop
+`revokeAxiom(tuningPath, unitId): TuningRecord`).
 
-**Diagram 3 — output-schema entity diagram.** Dashed box `TasteUnit`
+**Diagram 3 — output-schema entity diagram.** Dashed box `TuningUnit`
 ("union type") with is-a edges to `RuleUnit { statement; domain;
 pinnedExamples: AxiomEvidence[] }` and `CaseUnit { domain;
 discoveredSpec; evidenceTrail: {step,quote}[]; survivalScalar:
@@ -469,7 +469,7 @@ survivalScalar 1.0; acceptanceBasis "stated".
 Everything in §1–§11 describes what runs on one machine for one user.
 This section is what makes Ursa Major a product with many users:
 accounts, sync, and the cloud surface Minor's price book lives on. The
-invariant does not move: raw records and taste never touch
+invariant does not move: raw records and tuning never touch
 Ursa-operated compute. The cloud only ever holds three things —
 accounts, opt-in encrypted sync blobs (Ursa cannot read them), and
 Minor's aggregated survival scalars (never particulars).
@@ -527,7 +527,7 @@ CREATE TABLE survival_stats (
 ```
 
 **Object storage — decision: user-owned, client-encrypted, Vercel Blob
-for ciphertext.** The CLI/container encrypts `.ursa/taste.json`
+for ciphertext.** The CLI/container encrypts `.ursa/tuning.json`
 locally with a key derived from a passphrase only the user holds,
 uploads ciphertext, and `sync_blobs.blob_key` points at it. Ursa's
 server never holds the key and never sees plaintext. Sync is opt-in;
@@ -541,7 +541,7 @@ episodes. Decision: client-side, no cloud vector DB.
 `@xenova/transformers` running `all-MiniLM-L6-v2` (ONNX, CPU,
 in-process, no network call) embeds each `CaseUnit.discoveredSpec`;
 the vector is cached as `embedding: number[]` on the unit inside
-taste.json. Tens to low hundreds of cases per store means brute-force
+tuning.json. Tens to low hundreds of cases per store means brute-force
 cosine similarity is sub-millisecond; no Pinecone or pgvector is
 justified, and raw case text never leaves the machine to be embedded
 remotely.
@@ -564,7 +564,7 @@ referencing the ghcr image per §9's one-image invariant.
 | Forever on-device | Cloud (Vercel + Neon + Vercel Blob) |
 |---|---|
 | Resolver, distiller, all 9 §2 components | GitHub OAuth exchange, account row |
-| `.ursa/` — records, episodes, taste.json, embeddings | Encrypted sync blobs (ciphertext only) |
+| `.ursa/` — records, episodes, tuning.json, embeddings | Encrypted sync blobs (ciphertext only) |
 | `claude -p` calls | survival_stats — Minor's price book, opt-in aggregate only |
 | MiniLM case-retrieval embeddings | — |
 | Raw prompts, diffs, quotes, discovered specs | — never leaves, even encrypted |
@@ -655,7 +655,7 @@ architecture.
 ## 15. Agentic-forward: the HQ surface (owner idea, stub)
 
 Agents are the second consumer. The MCP server grows one call beyond
-taste delivery: `get_briefing(input: { domain?: string; files?:
+tuning delivery: `get_briefing(input: { domain?: string; files?:
 string[] }): Briefing` where `Briefing { rules: RuleUnit[]; nearestCases:
 CaseUnit[]; guardrails: AxiomEvidence[] }` — relevant rules, nearest
 cases by the §12 client-side embedding retrieval, and learned

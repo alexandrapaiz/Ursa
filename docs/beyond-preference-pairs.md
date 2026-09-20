@@ -182,7 +182,7 @@ price work. Prices emerge from transactions rather than opinions, and
 survival emerges from what the work used rather than what a grader
 judged. Prices are actionable without their causes, and a lab can train
 on a falling survival rate without seeing any user's circumstances,
-because the whys stay with the user in the taste store. The price
+because the whys stay with the user in the tuning store. The price
 system transmits the signal and never the particulars, which is the
 on-device architecture restated: derived signal leaves the machine, raw
 circumstances do not. On-device processing is therefore a Hayekian
@@ -193,7 +193,7 @@ which is a relative price between models that only a cross-model layer
 can quote. Finally, prices equilibrate. Labs respond to survival rates,
 models improve, and survival rises.
 
-Two corollaries. The taste axiom is the user's personal shadow price,
+Two corollaries. The tuning axiom is the user's personal shadow price,
 the compressed rule their own transactions revealed. Deleted
 generations are the losses, the determinate negation that disciplines
 production and makes the market learn.
@@ -218,7 +218,7 @@ does not know what she wants. Steps 650 and 710 of the first trial are
 the canonical case: two sincere instructions, one hour apart, that
 contradict each other. An instruction is therefore a feature of the
 trajectory, never ground truth. A system that treats instructions as
-labels learns the user's guesses, not the user's taste.
+labels learns the user's guesses, not the user's tuning.
 
 Success is measured by the finished product and by user satisfaction,
 not by user instruction, because users do not know what they want

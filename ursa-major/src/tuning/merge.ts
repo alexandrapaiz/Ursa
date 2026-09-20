@@ -1,19 +1,19 @@
-// Deterministic merge of one distillation pass into the taste record.
+// Deterministic merge of one distillation pass into the tuning record.
 // The model judged (statements, matches, contradictions); this code
 // counts. Confidence IS evidenceCount — recurrence across records,
 // never a model's self-reported score.
 
 import type { OutcomeRecord } from '../types'
-import type { DistillOutput, TasteAxiom, TasteRecord } from './types'
+import type { DistillOutput, TuningAxiom, TuningRecord } from './types'
 
-function axiomId(existing: TasteAxiom[]): string {
+function axiomId(existing: TuningAxiom[]): string {
   let n = existing.length + 1
   const taken = new Set(existing.map((a) => a.id))
   while (taken.has(`ax-${String(n).padStart(3, '0')}`)) n++
   return `ax-${String(n).padStart(3, '0')}`
 }
 
-export function emptyTaste(owner: string): TasteRecord {
+export function emptyTuning(owner: string): TuningRecord {
   return {
     schemaVersion: '0.1.0',
     owner,
@@ -24,14 +24,14 @@ export function emptyTaste(owner: string): TasteRecord {
 }
 
 export function mergeDistill(
-  taste: TasteRecord,
+  tuning: TuningRecord,
   output: DistillOutput,
   record: OutcomeRecord,
   model: string,
   now = new Date().toISOString()
-): TasteRecord {
+): TuningRecord {
   const recordId = record.task.id
-  const axioms = taste.axioms.map((a) => ({ ...a, evidence: [...a.evidence], contradicts: [...a.contradicts] }))
+  const axioms = tuning.axioms.map((a) => ({ ...a, evidence: [...a.evidence], contradicts: [...a.contradicts] }))
   const byId = new Map(axioms.map((a) => [a.id, a]))
   // Second pass resolves contradiction ids for axioms new in this run.
   const newIdsByStatement = new Map<string, string>()
@@ -53,7 +53,7 @@ export function mergeDistill(
       match.lastSeen = now
     } else {
       const id = axiomId(axioms)
-      const created: TasteAxiom = {
+      const created: TuningAxiom = {
         id,
         statement: d.statement,
         domain: d.domain,
@@ -89,9 +89,9 @@ export function mergeDistill(
   }
 
   return {
-    ...taste,
+    ...tuning,
     updatedAt: now,
-    sources: [...taste.sources, { recordId, distilledAt: now, method: 'rlaif-claude', model }],
+    sources: [...tuning.sources, { recordId, distilledAt: now, method: 'rlaif-claude', model }],
     axioms,
   }
 }

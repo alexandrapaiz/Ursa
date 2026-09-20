@@ -6,7 +6,7 @@
 
 import { execFileSync } from 'node:child_process'
 import type { OutcomeRecord } from '../types'
-import type { DistillOutput, DistilledAxiom, TasteRecord } from './types'
+import type { DistillOutput, DistilledAxiom, TuningRecord } from './types'
 
 const VALID_KINDS = new Set([
   'correction-loop',
@@ -17,14 +17,14 @@ const VALID_KINDS = new Set([
   'episode',
 ])
 
-export function buildDistillPrompt(record: OutcomeRecord, taste: TasteRecord): string {
+export function buildDistillPrompt(record: OutcomeRecord, tuning: TuningRecord): string {
   const s = record.signals
   if (!s) throw new Error('Record has no signals block; nothing to distill from')
 
-  const existing = taste.axioms
+  const existing = tuning.axioms
     .filter((a) => a.status !== 'revoked')
     .map((a) => ({ id: a.id, statement: a.statement, domain: a.domain, polarity: a.polarity }))
-  const revoked = taste.axioms
+  const revoked = tuning.axioms
     .filter((a) => a.status === 'revoked')
     .map((a) => ({ id: a.id, statement: a.statement }))
 
@@ -127,10 +127,10 @@ export const claudeRunner: DistillRunner = (prompt, model) => {
 
 export function distill(
   record: OutcomeRecord,
-  taste: TasteRecord,
+  tuning: TuningRecord,
   model: string,
   runner: DistillRunner = claudeRunner
 ): DistillOutput {
-  const prompt = buildDistillPrompt(record, taste)
+  const prompt = buildDistillPrompt(record, tuning)
   return parseDistillOutput(runner(prompt, model))
 }

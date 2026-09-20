@@ -4,7 +4,7 @@
 
 Ursa is one parent with two products. Ursa Minor trains models on the
 world's dispersed knowledge and earns all the revenue. Ursa Major
-imports your taste into every model and earns none, permanently, by
+imports your tuning into every model and earns none, permanently, by
 design. Neither works without the other.
 
 The full mission text and the principles that bind the project are in
@@ -71,13 +71,13 @@ npm test                                   # 25 tests
 # and print a summary that leads with what survived.
 npx tsx src/bin/ursa.ts run <projectPath> --declare unsatisfied
 
-# Distill one record's corrections into evidence-backed taste units.
+# Distill one record's corrections into evidence-backed tuning units.
 # Runs locally through the claude CLI on your own subscription.
-npx tsx src/taste/cli.ts distill --record <project>/.ursa/records/<id>.json \
-  --taste <project>/.ursa/taste.json --model sonnet
+npx tsx src/tuning/cli.ts distill --record <project>/.ursa/records/<id>.json \
+  --tuning <project>/.ursa/tuning.json --model sonnet
 
-# Render the taste store as a block any model can read.
-npx tsx src/taste/cli.ts export --taste <project>/.ursa/taste.json --out taste.md
+# Render the tuning store as a block any model can read.
+npx tsx src/tuning/cli.ts export --tuning <project>/.ursa/tuning.json --out tuning.md
 ```
 
 `--declare` records your own verdict on the project's current state.
@@ -95,10 +95,10 @@ HTML viewer.
 | `src/resolve.ts` | joins final text to generations and classifies every span |
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
-| `src/taste/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
+| `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 
 `.ursa/` belongs in the target project's `.gitignore`. Raw records and
-the taste store never leave the machine they were made on.
+the tuning store never leave the machine they were made on.
 
 ## Trials
 

@@ -84,7 +84,7 @@ as docs/presentations/product-plan/*.html, an 18-slide deck. The owner
 reviewed the deck, not the markdown, and rejected it: "just buzzwords
 and it's not a plan," no real system architecture, no diagrams, "a
 table with only words and no explanations is not good." The cover
-slide's own line proves it: "session → record → whys → taste → any
+slide's own line proves it: "session → record → whys → tuning → any
 model," five bare nouns joined by arrows, nothing explained, first
 thing she saw. The "architecture" slide renders lifecycle phrases
 instead of a diagram of named processes, files, and stores.
