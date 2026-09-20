@@ -53,3 +53,26 @@ Contract in docs/standards/pm.md §4.
   evidence quotes and ships rules + case specs only, owner-reviewed
 - Cost: $0
 - Status: proposed
+
+### 2026-09-20 — Finished work is not only chat: hosted and visual outputs
+- Trigger: owner directive: Ursa must analyze not just chats. Sometimes
+  the final output is hosted on GitHub, or it is visual. That is
+  captured in code, but she wants it stated explicitly.
+- What: the finished artifact the record joins against can live in
+  three places, and the capture path should name which. (1) The chat
+  trace. (2) A hosted artifact: a repo on GitHub, a deployed site, a
+  published page; git commit pairs already cover the repo case and a
+  deployed URL is the retention evidence for the site case. (3) A
+  visual artifact: a rendered UI, a design, a page the user looked at
+  and accepted or corrected by eye. The n=1 trial was exactly this, the
+  Ursa Minor site, and its loops were visual ("looks like crashing",
+  "still too dark"). The code carries the visual outcome, but the
+  correction happened on the render, so the record should carry the
+  rendered state alongside the source when one exists (a screenshot
+  per accepted commit, or the deployed URL at that commit).
+- First step: add `artifact.kind: 'chat' | 'repo' | 'hosted' | 'visual'`
+  and an optional `artifact.renderRef` (deployed URL or screenshot
+  path) to the record schema, and have `ursa run` fill `repo` and, when
+  a deploy is detectable, `hosted`.
+- Cost: $0
+- Status: accepted (owner-directed 2026-09-20)
