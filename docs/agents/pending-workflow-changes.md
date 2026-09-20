@@ -144,3 +144,31 @@ to find your own session file, so a placeholder loses the reader
 nothing. The irony worth naming: this line sits in the README whose
 closing section announces that the repo's history was purged of exactly
 this string.
+
+---
+
+## PWC-4 — Set the repository description (owner-only, not a workflow)
+
+**Status: queued 2026-09-20. Attempted and refused, so routed here.**
+
+**Evidence.** The public repo has an empty description and no topics.
+The ExO seat's charter §5b says the repo description is its
+responsibility, so this run tried to set it and got HTTP 403,
+"Resource not accessible by integration," from `gh repo edit`. The
+runner's token cannot write repository metadata, the same boundary that
+closes `.github/workflows/`. The charter has been corrected to say so.
+Labels and branch deletion were probed in the same way and are
+writable, so those stay with the seat.
+
+**What the owner runs, once:**
+
+```bash
+gh repo edit alexandrapaiz/Ursa \
+  --description "Turn AI peer-to-peer. Ursa Minor trains models on the world's dispersed knowledge; Ursa Major imports your tuning into every model." \
+  --add-topic ai --add-topic rlhf --add-topic preference-data \
+  --add-topic personalization --add-topic privacy
+```
+
+The description is the mission sentence from docs/vision.md §0 followed
+by the two product missions from §1, so it stays true as long as those
+do. Change it there first if the mission ever moves, and this follows.

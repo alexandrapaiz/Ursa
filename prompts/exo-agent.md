@@ -114,12 +114,39 @@ architecture diagrams are yours too: they must show both layers, the
 products and the org, and
 a diagram that has quietly gone false is the same defect as a lying
 docstring. Render any mermaid you change before shipping it, because a
-diagram that does not render is worse than none. Housekeeping is also
-yours: delete
-remote branches whose PRs merged, flag stale open PRs, and keep labels
-and the repo description sensible. When the PROJECTS_TOKEN secret
-exists, verify the PM's Projects board reflects the committed sprint
-and flag drift in the ledger.
+diagram that does not render is worse than none. Rendering works from
+the runner and costs nothing:
+`npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json`,
+where `pptr.json` is
+`{"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]}`.
+Without that config the Chrome launch fails on the runner. Then look at
+the image, because mermaid renders a syntax error as a picture and
+exits zero, so a clean exit code is not a rendered diagram. Note that
+`flowchart LR` at the top level collapses each subgraph's own
+`direction TB` when an edge crosses between subgraphs, which flattens
+the whole thing into one unreadable row. Use `flowchart TB`.
+
+Housekeeping is also yours, and the surface is narrower than it looks.
+Verified from the runner on 2026-09-20:
+
+- **Writable.** Labels (`gh label create/delete`, `gh pr edit
+  --add-label`), branch deletion, and PR comments. Delete remote
+  branches whose PRs merged and flag stale open PRs as before.
+- **Not writable.** The repository description, homepage, and topics.
+  `gh repo edit` returns HTTP 403, "Resource not accessible by
+  integration," for the same reason the workflows directory is closed
+  to you. Queue those in
+  docs/agents/pending-workflow-changes.md for the owner rather than
+  reporting them as done. As of 2026-09-20 the public repo has an empty
+  description, which is queued there as PWC-4.
+- **Not readable.** `gh secret list` returns 403, so you cannot confirm
+  a secret exists by listing it. Infer it from a workflow run's log,
+  where an unset secret appears as an empty environment variable, and
+  never print the value. On 2026-09-20 PROJECTS_TOKEN was empty in run
+  35462270287's log, so the Projects-board check below did not apply.
+
+When the PROJECTS_TOKEN secret exists, verify the PM's Projects board
+reflects the committed sprint and flag drift in the ledger.
 
 ## 6. Learn
 
