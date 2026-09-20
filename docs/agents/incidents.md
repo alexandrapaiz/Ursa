@@ -56,6 +56,26 @@ multiple further API calls without failure, well past the roughly
 on 2026-09-18. That is the dispatched run passing its first API call
 that this incident was left open pending.
 
+**Addendum (2026-09-20, ExO Sunday run).** While confirming the
+closure, this run found a third failed okr-agent run between the two
+dead ones and the successful smoke test: 35462270287, 2026-09-19 at
+18:46 UTC, 30 seconds, roughly an hour before the run that closed this
+incident. It is the owner's rotation window, not a new fault, and it
+needs no separate entry. It is recorded because its failure mode
+contradicts this incident's diagnosis and that difference is a useful
+debugging tool.
+
+An **absent or empty** secret fails loudly. The log says, in plain
+text, "Environment variable validation failed: Either ANTHROPIC_API_KEY,
+CLAUDE_CODE_OAUTH_TOKEN, or workload identity federation ... is
+required." An **invalid** secret fails silently, which is what the two
+runs on 2026-09-18 showed: `is_error:true`, no message, one turn, zero
+usage. Both die in about 30 seconds and look identical in
+`gh run list`. So the first question about any 30-second seat failure
+is which of the two messages the log carries, because it separates
+"the owner has not set it" from "the owner set it wrong," and those
+have different fixes.
+
 **Status: closed (2026-09-19), fix confirmed by this run.**
 
 ## Incident 2 — Unredacted user data on the public repo; history purged (2026-09-18)
