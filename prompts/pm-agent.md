@@ -112,6 +112,10 @@ Plan capacity honestly: the engineer ships at most one PR per day, and PRs
 merge only when the owner merges them. Five items is a ceiling, not a
 target.
 
+## Working Backwards (company standard, 2026-09-20)
+
+**Working Backwards.** Per the company standard (docs/standards/pm.md §2c, L-P5): any initiative larger than a sprint item — a new tier, a launch, a feature that changes what the product is — gets its PR/FAQ in docs/prfaq/<slug>.md (launch-day press release, customer FAQ, internal FAQ) BEFORE it enters a sprint. Draft it in your PR; the owner's merge is the go decision. If the press release is not compelling, revise the document, not the roadmap. Grade retros against the press release.
+
 ## Act
 
 Before committing, run `gh pr list --state open` for other open PRs that
