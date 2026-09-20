@@ -181,14 +181,16 @@ in this closure.
 **What happened.** Ursa incident 2 purged the owner's absolute local
 paths from this repo's history on 2026-09-18 and created a permanent
 rule: nothing generated from a raw record ships public without the
-security seat's pass. On 2026-09-19, commit 5012f91 added
-`"projectPath": "/Users/alexandrapaiz/Desktop/ursa-minor-site"` to
-docs/design/product-plan.md, along with the private session identifier
-64899e58-98dd-44a6-940a-3ee95949a31f in three places. This ExO run
-found them on 2026-09-20 with a grep, alongside a fourth instance in
-ursa-major/trial/README.md line 46, which carries
-`~/.claude/projects/-Users-alexandrapaiz-Desktop/64899e58-...jsonl`
-inside the very README that announces the purge.
+security seat's pass. On 2026-09-19, commit 5012f91 added a `projectPath` field to
+docs/design/product-plan.md holding the owner's literal macOS home
+directory, along with the full private session UUID (prefix 64899e58)
+in three more places. This ExO run found them on 2026-09-20 with a
+grep, alongside a fourth instance at ursa-major/trial/README.md line
+46, a `--sessions` argument carrying both the machine-path project slug
+and the same full UUID, inside the very README that announces the
+purge. The strings are described rather than quoted here, because
+quoting them in this register would reproduce the exposure it
+documents.
 
 **Severity, stated honestly.** Low, and lower than incident 2. What
 leaked is two pointers, not content: a home-directory path whose
@@ -223,7 +225,7 @@ nothing protected the future.
 
 **Fix.**
 1. Element 3 of the engineering-artifact standard now carries the
-   redaction convention (this run, prompts/engineer-agent.md): real
+   redaction rider (this run, prompts/engineer-agent.md): real
    payloads stay mandatory, and the specific fields that carry machine
    or session identity are written in a named placeholder form that is
    still a real, runnable value. Realism was never the thing that
