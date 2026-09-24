@@ -2,6 +2,39 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Grooming (2026-09-21, first PM run)
+
+Accepted entries below, ordered by leverage against docs/vision.md
+(highest first). This section is a priority note for sprint planning;
+the dated entries beneath it are left in their original chronological
+order, since the ledger is also the historical record of when each
+idea entered.
+
+1. **Finished work is not only chat** (2026-09-20) — directly serves O1
+   KR1.3 (multi-source, multi-kind corpus). Verified unbuilt: no
+   `artifact` field exists yet in `ursa-major/src/types.ts`. Pulled into
+   sprint-2026-09-21 item 2.
+2. **The tuning pipeline** (2026-09-18) — appears already shipped: the
+   files the entry's "First step" describes (`distill.ts`, `merge.ts`,
+   `export.ts`, `tuning.test.ts`) already exist on `main` under
+   `ursa-major/src/tuning/`. Flagging so the building seat (or the
+   owner) can move the status to `built`; the PM does not change
+   statuses it does not own (docs/standards/pm.md §4).
+3. **Agentic-forward: Ursa as the agents' HQ** (2026-09-19) — no KR
+   names it yet this quarter, and its own first step is still bigger
+   than a day. Split for whenever it is pulled: (a) define the
+   `get_briefing` TypeScript interface in a new module, returning empty
+   `rules`/`nearestCases`/`guardrails` arrays, with a test; (b)
+   wire domain/file-based rule lookup against whatever rule store
+   exists by then; (c) wire the §12 client-side embedding retrieval for
+   `nearestCases`; (d) dogfood against one of Ursa's own seats and
+   record what it actually returned. Not pulled into this sprint.
+
+No `proposed` entry has sat two or more weeks without a verdict yet
+(the oldest, repo split, is 3 days old as of this grooming), so nothing
+escalates to "Awaiting your verdict" this run. Tracked instead in
+docs/sprints/pending.md under "Owed by a seat, not yet started."
+
 ### 2026-09-18 — Repo split: Major and Minor
 - Trigger: owner at bootstrap: combine now, "then we'll split it in two different ones"
 - What: criteria and mechanics for splitting ursa-major and ursa-minor into their own repos with history preserved
