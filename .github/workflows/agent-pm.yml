@@ -2,7 +2,8 @@ name: pm-agent
 
 on:
   schedule:
-    - cron: "0 12 * * 1" # weekly, Monday, 12:00 UTC (morning ET)
+    - cron: "0 12 * * 1"      # Monday: the ceremony run
+    - cron: "5 11 * * 0,2-6"  # every other day: the standup run (charter §0b, standard §11)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -12,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # §0b: the standup dispatches other seats with GITHUB_TOKEN
   pull-requests: write
   id-token: write
 
@@ -22,6 +24,8 @@ jobs:
     env:
       OPENROUTE: ${{ secrets.OPENROUTE_API_KEY }}
       GH_TOKEN: ${{ github.token }}
+      PM_DISPATCH_ENABLED: ${{ vars.PM_DISPATCH_ENABLED }}
+      RUN_MODE: ${{ github.event.schedule == '0 12 * * 1' && 'ceremony' || (github.event_name == 'schedule' && 'standup' || 'dispatch') }}
       PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
@@ -49,6 +53,11 @@ jobs:
             code, never edit charters, never merge your own PR, never push to
             main, never touch secrets. If the charter file is
             missing, stop and fail loudly instead of improvising.
+            Run mode for this run: ${{ env.RUN_MODE }} (ceremony = charter
+            §1–§3 then §0b; standup = §0b alone; dispatch = decide from the
+            date and the owner instructions). PM_DISPATCH_ENABLED is
+            "${{ vars.PM_DISPATCH_ENABLED }}": fire dispatches only when it is
+            exactly true, under docs/standards/pm.md §11.4.
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
@@ -72,6 +81,11 @@ jobs:
             code, never edit charters, never merge your own PR, never push to
             main, never touch secrets. If the charter file is
             missing, stop and fail loudly instead of improvising.
+            Run mode for this run: ${{ env.RUN_MODE }} (ceremony = charter
+            §1–§3 then §0b; standup = §0b alone; dispatch = decide from the
+            date and the owner instructions). PM_DISPATCH_ENABLED is
+            "${{ vars.PM_DISPATCH_ENABLED }}": fire dispatches only when it is
+            exactly true, under docs/standards/pm.md §11.4.
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
