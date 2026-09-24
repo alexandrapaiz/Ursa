@@ -10,6 +10,10 @@ design. Neither works without the other.
 The full mission text and the principles that bind the project are in
 [`docs/vision.md`](docs/vision.md).
 
+Ursa is a subcompany of **Alexandra Systems Company**, which generalizes
+operations across the portfolio; its standards, seats and chair reach
+into this repository by design (see `CLAUDE.md`, "The holding company").
+
 ## The principles
 
 Four theses, taken from the Ursa Minor site, guide every decision here.

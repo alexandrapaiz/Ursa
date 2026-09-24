@@ -80,3 +80,42 @@ vocabulary. "Taste" read as aesthetic preference, which is narrower
 than what the record holds.
 
 **Owner:** Alexandra. **Status:** accepted.
+
+## ADR-005 — Every seat but sales is active (2026-09-24)
+
+**Context.** Owner, the same night the engineer cadence went to twice a day (HQ ADR-035): "plz activate seats for ursa." Ursa was bootstrapped with every seat installed and all but pm, okr and exo dormant, waiting for the OKR walkthrough and for building to start. Building has started (engineer runs daily since 2026-09-24, twice a day from now on).
+
+**Decision.** engineer, research, frontend, market, skill, security and finance are ACTIVE: charter headers flipped, crons live and staggered (research Tue+Fri 13:15 UTC; frontend Mon+Thu 14:15; market Wed 13:35; skill Thu 13:55; security Sun 15:15; finance monthly on the 1st, 11:30; engineer 11:26 and 23:26 daily). The PM may dispatch all of them by criteria (its charter §0b). **sales stays dormant**: Ursa is private R&D and never for sale (ADR-001); a sales seat has nothing to sell.
+
+**Consequences.** Ursa's weekly load rises from roughly three runs to about fifteen on the shared Claude subscription; the PM's daily standup and the no-ship tripwire are the two places a throttled or failed run shows up within a day. Each newly active seat's first run is a smoke run by definition: the PM's next standup reads them and proposes fixes to charters that were written before the seat ever ran.
+
+## ADR-006 — Ursa is a subcompany of Alexandra Systems Company; HQ's reach is legitimate (2026-09-24)
+
+**Context.** Owner: "please note ursa is a subcompany of alexandra systems company which generalizes ops. expect for interference from them/contact."
+
+**Decision.** Recorded in CLAUDE.md §0, the README, and every charter: HQ generalizes operations; standards pushes, lessons syncs, HQ seat PRs, chair messages on HQ's behalf, and host dispatches are expected and binding within a standard's scope; conflicts resolve to the standard unless an Ursa ADR records a deviation. Ursa keeps its mission, product decisions and ledger verdicts; the owner keeps the merge.
+
+**Consequences.** Seats stop treating HQ traffic as noise or as an unknown actor (Ursa PR #2's stranding and the "unknown dispatcher" hesitation in earlier runs are the failure this prevents). The company interface (HQ ADR-027) is the mechanism; `company.yaml` here names the secrets and services HQ may expect.
+
+## ADR-005 — Linear is the board of record; builders build from it (2026-09-23)
+
+**Decision.** Ursa's work queue lives in Linear (workspace Alexandra
+Personal, team URSA), maintained by the PM seat every run per charter
+§1f: sprint items become issues with self-contained descriptions,
+dispatch instructions carry the issue identifier, statuses move with
+dispatch, PR, and merge, and owner-only actions each get an `[owner]`
+issue synced from pending.md. The repo remains the source of truth for
+specs; Linear is the queue the owner watches and builder agents draw
+from. Seats reach Linear through its GraphQL API with the
+LINEAR_API_KEY repo secret; without the secret the sync is skipped and
+said so, never a run failure.
+
+**Reasoning.** Owner directives: "please make sure pm updates in
+linear" and "based on it builder agents will build." This supersedes
+the company default of GitHub Projects as the board layer (HQ ADR-008)
+for Ursa; the deviation is recorded here per docs/standards/pm.md and
+proposed upstream via the ledger. First board seeded 2026-09-23 by the
+chair: project "Q4 2026 — prove the record, publish the method",
+issues URS-1 through URS-7 from sprint-2026-09-21 and pending.md.
+
+**Owner:** Alexandra. **Status:** accepted (directed in session).

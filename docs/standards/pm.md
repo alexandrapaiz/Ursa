@@ -1,5 +1,3 @@
-<!-- Vendored from alexandrapaiz/alexandra-systems standards/pm.md @ 49cc38e (2026-09-20), incl. §2c Working Backwards. -->
-
 # Standard: Project Management
 
 The PM practice proven in alexandria, modularized so every Alexandra
@@ -215,3 +213,103 @@ and the merge-or-close rule escalates them rather than bypassing her.
 A Tier A merge whose diff turns out to have crossed the line is an
 incident, and that seat's self-merge right is suspended until the exo
 ships the fix.
+
+## 11. The daily run and the dispatch criteria (owner directive, 2026-09-23)
+
+Owner: "I'd love for the PMs of each project to run daily and set off
+orchestration depending on its criterion." This section makes every PM
+seat a daily conductor. It lifts alexandria's standup and dispatch
+design (its charter §4–§5, written 2026-09-19 after a day in which the
+owner was the only actor present between Mondays) into the company
+standard, and it activates the part alexandria had to leave dormant.
+
+### 11.1 Two modes, one seat
+
+- **Monday, or a dispatch that says so: the ceremony run.** §2's three
+  ceremonies in one PR, then the standup below as well.
+- **Every other day: the standup run.** The standup alone, at a
+  fraction of the ceremony's cost. No sprint opened, no retro
+  rewritten, no ledger groomed. A standup that grows into a ceremony
+  has failed at being daily. Every duty added here is paid seven times
+  a week; resist adding.
+
+The workflow carries both crons (Monday ceremonies; the other six days
+the standup) and tells the seat which mode it is in.
+
+### 11.2 What the standup reads
+
+In this order, spending few turns: (1) `gh run list --limit 30`, every
+non-success since yesterday accounted for; (2) `gh pr list --state
+open` with age, seat, draft state, CI and review status; (3)
+`docs/sprints/pending.md` and the current sprint file; (4) rulings
+since the last run — `docs/decisions.md`, `docs/allhands/`, the ledger;
+(5) the board when `PROJECTS_TOKEN` is present; (6) milestones due
+within three days.
+
+### 11.3 The criteria — what fires a dispatch
+
+Defaults for every product; a charter may tighten them or add product
+lines, never loosen them. Each row is observed evidence, never a
+feeling. The instruction the PM writes must carry the evidence by name
+(run URL, PR number, ADR, sprint item verbatim) so the dispatched seat
+starts from a fact.
+
+| Observed | Dispatch | Instruction carries |
+|---|---|---|
+| A seat run failed in the last 24h and the cause is diagnosable from its log | that seat; the engineer if the cause is code or workflow | the run URL, the diagnosed cause, "fix and re-run" |
+| A seat's open draft PR has failing CI, or a review comment unanswered >24h | that seat | the PR number and "build on the open branch" |
+| A sprint item is due this week and its owning seat has not run this sprint | that seat | the item verbatim from the sprint file |
+| A ruling or ADR merged since the last run names a seat and no run followed | that seat | the ADR or minutes by name |
+| A milestone is due within three days with open items | the owning seats | the milestone and its open items |
+| An owner-merge PR is older than seven days | nobody — a pending line and the Slack report | — |
+| Nothing observed | nobody — say so, cheaply | — |
+
+### 11.4 The hard stops
+
+- **Ceilings, UTC days:** at most three PM dispatches a day, one per
+  seat, ten in any rolling seven days. Count from the log, not memory.
+- **Never dispatch a seat whose last PR is still open**, unless the
+  instruction tells it to build on that branch in those words.
+- **Never dispatch while the owner is present:** any `workflow_dispatch`
+  by a human in the last two hours means synchronous mode; queue instead.
+- **Never dispatch the exo seat** (it audits you), **yourself** (no
+  cadence), or **a dormant seat** (activation is the owner's).
+- **Never invent a judgment.** Every decision inside an instruction
+  already exists in a file and is cited. When a dispatch would need a
+  decision the owner has not made, the queue asks for the decision.
+- **Space dispatches at least three minutes apart** (`sleep 180`
+  between `gh workflow run` calls): open-routed seats share one
+  provider concurrency limit, and two runs started in the same minute
+  both died on 2026-09-21 (HQ and alexandria PM, Kimi).
+- **What stays the owner's, always:** spend, activating a dormant
+  seat, editing a charter or moving authority, loosening a gate, and
+  every merge.
+
+### 11.5 The mechanism and the switch
+
+Dispatch is `gh workflow run agent-<seat>.yml -f owner_instructions='…'`
+with the run's own `GITHUB_TOKEN`, which needs `permissions: actions:
+write` on the PM workflow. Alexandria's charter §5 recorded that the
+runner's token cannot start another run; that was the general rule
+misread — `workflow_dispatch` and `repository_dispatch` are GitHub's two
+exceptions, and HQ's `dispatch-probe` workflow is the evidence (a parent
+run started a child run with `GITHUB_TOKEN`, 2026-09-24). No App key is
+needed.
+
+The switch is the repository variable `PM_DISPATCH_ENABLED`, exactly
+`true`. Unset, the standup writes the queue and fires nothing. Only the
+owner sets it (`gh variable set PM_DISPATCH_ENABLED -b true`); no seat
+can. It is her off switch first.
+
+### 11.6 The record
+
+`docs/sprints/dispatch-queue.md`, replaced in full each run: at most
+three proposed entries (trigger, cost of skipping, the exact dispatch
+command), then `## Dispatched by the PM` appended in the same run with
+date, seat, instruction in full and run URL. The exo seat audits that
+log weekly against `gh run list --event workflow_dispatch`; a dispatch
+that happened and was not logged is an incident. The standup's PR is
+`pm/standup-YYYY-MM-DD`, draft-first, the queue in the description in
+full; with nothing to propose and nothing red, say so and close it.
+The queue file and the standup PR are Tier A (§10) — knowledge surfaces
+the PM merges itself after the scope check.

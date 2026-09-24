@@ -666,3 +666,164 @@ reading the HQ and enriching it. Discipline per §0b: the HQ serves
 evidence, never orders; commanding agents would be the central planner
 the principles reject. Dogfood target: Ursa's own seat org. Full spec
 owed when this stub graduates to a milestone.
+
+## 16. The overlay: the first surface (planned 2026-09-20, not yet built)
+
+Owner's picture: a hovering, terminal-like, slightly translucent
+screen over Claude Code. Decisions taken with the owner in the planning
+session: it watches one project she points it at (never whatever is
+open); it runs as a hosted page with cloud-synced data; the verdict is
+read from the Claude Code session log, never asked for with buttons.
+
+### 16.1 What it does, in order of importance
+
+1. **Reads the verdict out of the chat.** The owner's satisfaction is
+   already in the trace ("yesss finallyyy!!" at step 730 of the n=1;
+   "i was dissatisfied with that product" on 2026-09-19). Asking with
+   buttons would turn a revealed verdict into a stated one, a survey,
+   which §0b forbids. The overlay shows what it read: `reads as
+   satisfied at step N`, `reads as unsatisfied at step N`, or `no
+   verdict yet`. The owner intervenes only to correct a misread. That
+   correction is itself a chat message, so the loop stays inside the
+   trace.
+2. **Captures the trace.** It tails the project's Claude Code session
+   JSONL (the file `src/parse.ts` already parses for the n=1), so the
+   record gets the fine-tuning trace that n=2's commit pairs lacked.
+   This is explicit scope: one project, one log, opt-in, stops when
+   closed.
+3. **Shows the tuning live.** Rules and cases for that project with
+   evidence counts, tensions in their own color, so what has already
+   been learned is visible while she steers.
+4. **Runs `ursa run`** on demand and shows the survival-led summary.
+
+### 16.2 Architecture
+
+Three parts. Only the first sees raw text in the clear.
+
+| Part | Runs where | Job | Sees raw text |
+|---|---|---|---|
+| **Bridge** `ursa-major/src/bridge/` | the owner's Mac, launched as `ursa bridge <project>` | tails the session JSONL, runs the resolver and distiller locally, encrypts `.ursa/` with the owner's key, pushes ciphertext to sync | yes, and only here |
+| **Sync** (plan §12: Vercel API + Vercel Blob + Neon `sync_blobs`) | Ursa cloud | stores ciphertext, serves it back to the owner's authenticated sessions | never; ciphertext only |
+| **Page** `ursa-major/overlay/` on Vercel | any browser, kept in a small always-on-top window | decrypts in the browser with the owner's key, renders tuning, verdict, run summary; sends a run request to the bridge | yes, in the browser only, after client-side decryption |
+
+The bridge is the same launch-based process as `ursa run`, extended to
+stay resident *while the owner has it open* and to exit when she
+closes it. It is not a daemon: nothing starts it but her.
+
+Data flow for one session, edge labels exact:
+
+`session .jsonl` → bridge `tail` → `ParsedConversation` (existing
+`parseClaudeSession`) → **verdict reader** (new, §16.3) →
+`Declaration` → `deriveSignals(record, declaration)` (existing) →
+`OutcomeRecord` → `.ursa/records/` → bridge `encrypt(key)` →
+`PUT /api/sync/:blobKey` (ciphertext) → page `GET` → `decrypt(key)` →
+render. Run request: page → bridge over a local WebSocket on
+`127.0.0.1` → `ursa run` → summary back the same way.
+
+### 16.3 The verdict reader
+
+New module `ursa-major/src/verdict.ts`:
+
+```ts
+export interface Verdict {
+  accepted: boolean | null
+  step: number | null          // the prompt that carried it
+  quote: string | null         // the owner's words, verbatim
+  basis: 'read-from-chat' | 'undeclared'
+  confidence: 'stated' | 'inferred'
+}
+export function readVerdict(prompts: UserPrompt[]): Verdict
+```
+
+One tier only (owner revision, 2026-09-20): **stated**. The reader
+recognizes a verdict the user actually said, in either direction, and
+nothing else. There is no inferred tier; the owner would rather teach
+the user to reward the model and state satisfaction than have the
+system infer it. Silence is `undeclared`, displayed as such, never
+converted to acceptance by retention (the 2026-09-19 rule). The
+reader is a single `claude -p` call with a fixed instruction to
+return `{accepted, step, quote}` only when the user's own words carry
+the verdict, else `{accepted: null}`.
+
+**The teaching mechanic.** Because the only labels are stated ones,
+§14's encouragement stops being garnish and becomes the labeling UX.
+The overlay coaches the habit: when a session ends with work shipped
+and no verdict, the verdict line reads `no verdict yet — tell the
+model when it's right`, and the run summary models the vocabulary
+("that one was hard-won, and it's closed"). Rewarding the model well
+is a skill the product teaches, and every rewarded moment is a label
+the user chose to give. The reader runs on the bridge, on the owner's
+machine, on her subscription.
+
+### 16.4 Encryption
+
+Client-side, the pattern the owner already uses in Atria Ledger: a
+passphrase she holds derives the key (PBKDF2, 600k iterations,
+SHA-256), AES-GCM for the blobs, Web Crypto in the browser and
+`node:crypto` in the bridge. The passphrase is entered once per page
+session and held in memory only. Ursa's servers store ciphertext and
+the SHA-256 of it for integrity, nothing else.
+
+### 16.5 The window
+
+- A Vercel-hosted page at a fixed route; the owner opens it in a small
+  Chrome app window (`--app=` mode, or Arc's little arc) and sets it
+  always-on-top with the OS (Raycast or a one-line AppleScript). The
+  page is 380 px wide by content height, dark glass at roughly 85%
+  opacity so terminal text reads through faintly.
+- Three regions: header (project name, session file, last sync);
+  body (tuning list, one line per unit; rules and cases distinct;
+  tensions in their own color); footer (the verdict line, then a
+  single `run` button).
+- Design language: the deck's. `#050810` ground, `#A8C7FA` accent,
+  Inter Tight and JetBrains Mono.
+- No buttons for satisfied or unsatisfied. The verdict line is a
+  reading, and the only control on it is `misread?` which opens the
+  quoted prompt so the owner can see why.
+
+### 16.6 Tooling
+
+| Tool | Version | Job | Why |
+|---|---|---|---|
+| Next.js | 16 | the hosted page | the account's convention (ursa-minor, atria-ledger); Vercel-native |
+| Web Crypto, `node:crypto` | built-in | AES-GCM, PBKDF2 | no dependency, same primitives both sides |
+| `ws` | ^8 | bridge to page, `127.0.0.1` only | the standard Node WebSocket server; the local socket never listens on a public interface |
+| `chokidar` | ^4 | tail the session JSONL | `fs.watch` is unreliable on macOS for appended files; chokidar polls correctly |
+| `@vercel/blob` | ^1 | ciphertext storage | already the §12 decision |
+| Neon | serverless Postgres | `accounts`, `sync_blobs` | already the §12 decision; `survival_stats` untouched by this surface |
+
+### 16.7 Milestones
+
+- **S0 (bridge, local only):** `ursa bridge <project>` tails the
+  session log, reads the verdict, writes records with it, serves
+  `.ursa/` over the local socket. Done when, on the owner's machine,
+  the n=1 session file replayed through the bridge produces the
+  verdict `accepted: true, step 730, quote "yesss finallyyy!! lol"`
+  with no hand annotation.
+- **S1 (page, local bridge):** the hosted page reads from the local
+  socket and renders tuning, verdict, and run summary. Done when the
+  owner has it open over Claude Code during one real session and the
+  verdict line updates when she declares in chat.
+- **S2 (sync):** encrypt, push, pull; the page works from a second
+  machine with the passphrase. Done when a blob decrypts on the
+  second machine and the server's copy is verifiably ciphertext.
+
+Defers: claude.ai paste capture into the overlay, the PR-comment
+surface, the editor hover, and anything that reads more than the one
+named project.
+
+### 16.8 Risks
+
+1. **The verdict reader misreads.** A false `satisfied` is the worst
+   outcome, since it converts silence into acceptance. Mitigation:
+   two tiers with `inferred` shown as such; the quote always displayed
+   beside the reading; `misread?` one click away; the reader is
+   evaluated first against the n=1 transcript, where the true verdicts
+   are known.
+2. **Raw text leaves the device for the first time.** Mitigation: it
+   leaves only as AES-GCM ciphertext under a key the server never has;
+   the sync is opt-in per project; the bridge works with sync off.
+3. **A page in a browser is not a native overlay.** Always-on-top and
+   translucency depend on the OS and browser. Mitigation: ship the
+   page first, and if the window never feels right, wrap the same page
+   in Tauri later; nothing in the page changes.
