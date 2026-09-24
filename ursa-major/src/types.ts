@@ -150,6 +150,8 @@ export interface Stats {
 
 export interface CorrectionLoop {
   id: string
+  /** conversation the steps below belong to; step ordinals are per-conversation */
+  conversationId?: string
   theme: string
   targetFiles: string[]
   openedStep: number
@@ -188,6 +190,8 @@ export interface RepairAttempt {
 }
 
 export interface RegressionEvent {
+  /** conversation the steps below belong to; step ordinals are per-conversation */
+  conversationId?: string
   /** step at which the user reported it */
   step: number
   brokenState: string
