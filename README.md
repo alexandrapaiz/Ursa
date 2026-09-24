@@ -109,6 +109,9 @@ flowchart TB
     PF -->|"CommitPair[]"| EP
     EP -->|"Episode[]"| RS
     RS -->|"OutcomeRecord"| SG
+    LP["<code>src/loops.ts</code>"]
+    SG -->|"OutcomeRecord, when a chat trace is present"| LP
+    LP -->|"CorrectionLoop[], RegressionEvent[], OneShotCorrection[]"| SG
     SG -->|"OutcomeRecord plus LabSignals"| ST
     ST --> REC
     REC -->|"OutcomeRecord"| DI
@@ -129,7 +132,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 25 tests
+npm test                                   # 44 tests
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -158,7 +161,8 @@ HTML viewer.
 | `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
 | `src/resolve.ts` | joins final text to generations and classifies every span |
-| `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
+| `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
+| `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 
