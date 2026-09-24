@@ -60,6 +60,67 @@ generated commit followed by the person's edit of it. A full record
 joins both. The reasoning is in
 [`docs/beyond-preference-pairs.md`](docs/beyond-preference-pairs.md).
 
+## Architecture
+
+Two layers, drawn together because neither explains the company alone.
+The product layer is what a user runs on their own machine. The org
+layer is the set of agent seats that build the product, which run in
+GitHub Actions and write only through pull requests the owner merges.
+Every node below is a real file or a real store in this repository, and
+every edge carries the actual type or file that crosses it.
+
+The one edge worth reading twice is the dotted one. It is the only path
+out of the user's machine, it carries derived signal and never a raw
+record, and it is the constraint the whole business rests on.
+
+```mermaid
+flowchart TB
+  subgraph ORG["Org layer — the agent seats that build it"]
+    direction TB
+    WF["<code>.github/workflows/agent-*.yml</code><br/>cron plus workflow_dispatch"]
+    CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
+    PR["a branch and one pull request"]
+    OWN{{"the owner's merge<br/>the only authority"}}
+    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md,<br/>org-chart.md, pending-workflow-changes.md")]
+
+    WF -->|"prompt plus claude_args"| CH
+    CH -->|"commits"| PR
+    PR --> OWN
+    OWN -->|"applies the change"| MEM
+    MEM -->|"read at the start of every run,<br/>the memory a fresh session lacks"| CH
+  end
+
+  subgraph PRODUCT["Product layer — the two products"]
+    direction TB
+    GIT["the user's own machine:<br/>a project's git history"]
+    PF["<code>src/pairfinder.ts</code>"]
+    EP["<code>src/episodes.ts</code>"]
+    RS["<code>src/resolve.ts</code>"]
+    SG["<code>src/signals.ts</code>"]
+    ST["<code>src/store.ts</code>"]
+    REC[("<code>&lt;project&gt;/.ursa/records/*.json</code><br/>never leaves the machine")]
+    DI["<code>src/tuning/distill.ts</code>"]
+    TUN[("<code>&lt;project&gt;/.ursa/tuning.json</code>")]
+    EX["<code>src/tuning/export.ts</code>"]
+    MD["<code>tuning.md</code><br/>pasted into any model"]
+    MINOR["Ursa Minor aggregation<br/>not built yet"]
+
+    GIT -->|"commits and Co-Authored-By trailers"| PF
+    PF -->|"CommitPair[]"| EP
+    EP -->|"Episode[]"| RS
+    RS -->|"OutcomeRecord"| SG
+    SG -->|"OutcomeRecord plus LabSignals"| ST
+    ST --> REC
+    REC -->|"OutcomeRecord"| DI
+    DI -->|"TuningRecord"| TUN
+    TUN -->|"TuningRecord"| EX
+    EX --> MD
+    SG -.->|"derived signal only, on consent,<br/>after redaction. Never a raw record."| MINOR
+  end
+
+  OWN ==>|"merged edits to <code>ursa-major/</code>"| GIT
+```
+
 ## What is built
 
 `ursa-major/` is a TypeScript package. It has no daemon, no watcher,
@@ -133,6 +194,13 @@ Other governance files:
 - [`docs/ideas.md`](docs/ideas.md), the ledger of proposed work
 - [`docs/agents/incidents.md`](docs/agents/incidents.md), blameless
   postmortems
+- [`docs/agents/learning-log.md`](docs/agents/learning-log.md), what
+  each ExO run observed and what the next one must check first
+- [`docs/agents/org-chart.md`](docs/agents/org-chart.md), the seats,
+  their cadences, and the governance-cycle tracker
+- [`docs/agents/pending-workflow-changes.md`](docs/agents/pending-workflow-changes.md),
+  workflow edits specified for the owner to apply, because the runner's
+  token cannot write them
 - [`docs/allhands/`](docs/allhands/), meeting minutes
 - [`docs/presentations/`](docs/presentations/), slide sources
 
