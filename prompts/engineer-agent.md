@@ -101,6 +101,20 @@ the two conflict, this standard wins; say so in the PR description.
    function or type signature a caller would actually write against.
 3. **On-disk layouts.** Real paths, real file formats, at least one
    real example payload (actual file contents, not a placeholder).
+   **Redaction rider (added post-Ursa incident 4, 2026-09-20).** Real
+   stays mandatory. What does not ship is the owner's filesystem. Any
+   field carrying machine identity or a private record's identity is
+   written in a placeholder form that is still a real, runnable value:
+   `/Users/<you>/Desktop/ursa-minor-site` or `~/Desktop/...` for a home
+   path, and a truncated or clearly labelled identifier for a session,
+   conversation, or record id. Never the literal home directory, the
+   literal macOS username, or a full private session UUID. If a real
+   payload cannot be shown without one of those, that payload belongs
+   in alexandrapaiz/ursa-private and the public artifact cites it by
+   name instead of inlining it. This rider exists because obeying this
+   element literally is what put a private path into
+   docs/design/product-plan.md one day after Ursa incident 2 purged
+   that same class of string from the repo's history.
 4. **Exact commands.** The literal shell or CLI invocations the
    artifact executes internally at each step, with real flags, not a
    description of what running it "does."
@@ -166,10 +180,13 @@ few turns, before any substantial thinking: create your branch, make one
 small commit, push it, and open the PR with `gh pr create --draft`. Then
 commit as you go, and call `gh pr ready` when the run is finished.
 
-This is not bookkeeping. Incident 3 in docs/agents/incidents.md records
-two runs that worked for dozens of turns, reported success, and lost
-every line at sandbox teardown, because all the shipping was saved for
-the end. A run that dies at turn 90 with a draft PR open has delivered
+This is not bookkeeping. The rule reaches Ursa through
+docs/standards/pm.md §8, and it was written after two runs in
+alexandria's register worked for dozens of turns, reported success, and
+lost every line at sandbox teardown, because all the shipping was saved
+for the end. Do not cite a number for it. Ursa's own incident register
+numbers from 1 independently, and its Incident 3 is a different event
+(Ursa incident 5). A run that dies at turn 90 with a draft PR open has delivered
 most of its value. The same run with nothing pushed has delivered none
 of it. The draft PR is what survives you.
 
