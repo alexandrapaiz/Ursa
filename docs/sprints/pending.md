@@ -50,11 +50,20 @@ wrote it shipped only inside PR #9, still unmerged).
   re-tested today. Command for the owner to run directly:
   `gh repo edit alexandrapaiz/Ursa --description "..."`.
 - 2026-09-24 (new) — `PROJECTS_TOKEN` is unset (confirmed this run:
-  the env var is empty in the PM workflow). Board mirroring
-  (docs/standards/pm.md §2b) cannot run until the owner adds it:
-  `gh secret set PROJECTS_TOKEN` with a classic PAT, `project` scope.
-  The `gh project` commands this run would otherwise have issued are
-  in this PR's description.
+  the env var is empty in the PM workflow). Moot for the board itself
+  now that ADR-005 (Linear, below) supersedes GitHub Projects as
+  Ursa's board of record, but labels and milestones (docs/standards/pm.md
+  §2b, unaffected by the Linear switch) don't need it and are mirrored
+  this run regardless.
+- 2026-09-24 (new) — `LINEAR_API_KEY` is unset (confirmed this run:
+  the env var is empty in the PM workflow), so the §1f Linear sync
+  (issue create/update, `[owner]` issues from this file) is skipped
+  this run per the charter's own fail-soft rule. The board was seeded
+  2026-09-23 by the chair with project "Q4 2026" and issues URS-1..7,
+  presumably using a credential outside the repo secret, since the
+  secret isn't visible to this workflow. The owner should confirm the
+  seeded board still matches reality and add the secret:
+  `gh secret set LINEAR_API_KEY`.
 - 2026-09-21 (3 days old) — `docs/prfaq/overlay.md` (drafted, sitting
   inside PR #9) needs the owner's merge as the go/no-go decision before
   the overlay (product-plan.md §16) enters any sprint, per
