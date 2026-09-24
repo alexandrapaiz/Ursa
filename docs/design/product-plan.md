@@ -735,14 +735,24 @@ export interface Verdict {
 export function readVerdict(prompts: UserPrompt[]): Verdict
 ```
 
-Two tiers. **Stated**: the prompt says it plainly, in either
-direction, and the reader only has to recognize it. **Inferred**: the
-prompt implies it. Both tiers are produced by the same `claude -p`
-call the distiller already uses, with a fixed instruction to return
-`{accepted, step, quote}` or `{accepted: null}`, never to guess when
-the trace is silent. Silence is `undeclared`, and undeclared is
-displayed as such; it is never converted to acceptance by retention
-(the 2026-09-19 rule). The reader runs on the bridge, on the owner's
+One tier only (owner revision, 2026-09-20): **stated**. The reader
+recognizes a verdict the user actually said, in either direction, and
+nothing else. There is no inferred tier; the owner would rather teach
+the user to reward the model and state satisfaction than have the
+system infer it. Silence is `undeclared`, displayed as such, never
+converted to acceptance by retention (the 2026-09-19 rule). The
+reader is a single `claude -p` call with a fixed instruction to
+return `{accepted, step, quote}` only when the user's own words carry
+the verdict, else `{accepted: null}`.
+
+**The teaching mechanic.** Because the only labels are stated ones,
+§14's encouragement stops being garnish and becomes the labeling UX.
+The overlay coaches the habit: when a session ends with work shipped
+and no verdict, the verdict line reads `no verdict yet — tell the
+model when it's right`, and the run summary models the vocabulary
+("that one was hard-won, and it's closed"). Rewarding the model well
+is a skill the product teaches, and every rewarded moment is a label
+the user chose to give. The reader runs on the bridge, on the owner's
 machine, on her subscription.
 
 ### 16.4 Encryption
