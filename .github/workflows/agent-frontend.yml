@@ -1,6 +1,8 @@
 name: frontend-agent
 
 on:
+  schedule:
+    - cron: "15 14 * * 1,4"  # Mon+Thu 14:15 UTC; activated 2026-09-24 by owner directive (ADR below)
   workflow_dispatch:
     inputs:
       owner_instructions:

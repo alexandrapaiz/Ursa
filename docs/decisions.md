@@ -80,3 +80,11 @@ vocabulary. "Taste" read as aesthetic preference, which is narrower
 than what the record holds.
 
 **Owner:** Alexandra. **Status:** accepted.
+
+## ADR-005 — Every seat but sales is active (2026-09-24)
+
+**Context.** Owner, the same night the engineer cadence went to twice a day (HQ ADR-035): "plz activate seats for ursa." Ursa was bootstrapped with every seat installed and all but pm, okr and exo dormant, waiting for the OKR walkthrough and for building to start. Building has started (engineer runs daily since 2026-09-24, twice a day from now on).
+
+**Decision.** engineer, research, frontend, market, skill, security and finance are ACTIVE: charter headers flipped, crons live and staggered (research Tue+Fri 13:15 UTC; frontend Mon+Thu 14:15; market Wed 13:35; skill Thu 13:55; security Sun 15:15; finance monthly on the 1st, 11:30; engineer 11:26 and 23:26 daily). The PM may dispatch all of them by criteria (its charter §0b). **sales stays dormant**: Ursa is private R&D and never for sale (ADR-001); a sales seat has nothing to sell.
+
+**Consequences.** Ursa's weekly load rises from roughly three runs to about fifteen on the shared Claude subscription; the PM's daily standup and the no-ship tripwire are the two places a throttled or failed run shows up within a day. Each newly active seat's first run is a smoke run by definition: the PM's next standup reads them and proposes fixes to charters that were written before the seat ever ran.

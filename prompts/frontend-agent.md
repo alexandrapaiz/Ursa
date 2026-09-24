@@ -1,4 +1,4 @@
-> **DORMANT.** Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). Alexandria-specific references (pipeline, Modal, digests, corpus, skills/) do not apply here; this charter is adapted to Ursa at activation, by the owner's merge. Until then the seat runs only on owner dispatch.
+> **ACTIVE.** (activated 2026-09-24 by owner directive — "plz activate seats for ursa"; see docs/decisions.md.) Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). Alexandria-specific references (pipeline, Modal, digests, corpus, skills/) do not apply here; this charter is adapted to Ursa at activation, by the owner's merge. Until then the seat runs only on owner dispatch.
 
 # The frontend engineer — weekly visual charter
 

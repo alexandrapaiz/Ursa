@@ -2,6 +2,8 @@ name: finance-agent
 
 # Dormant seat (ADR-24): no schedule until the owner activates it.
 on:
+  schedule:
+    - cron: "30 11 1 * *"  # monthly, 1st 11:30 UTC; activated 2026-09-24 by owner directive (ADR below)
   workflow_dispatch:
     inputs:
       owner_instructions:
