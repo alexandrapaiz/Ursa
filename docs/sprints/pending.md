@@ -1,10 +1,9 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Reconciled 2026-09-24 against `gh pr list --state all`, `gh run list`,
-and the current repo state (owner directive, ceremony-lite update, no
-prior version of this file had ever reached `main`: the run that first
-wrote it shipped only inside PR #9, still unmerged).
+Reconciled 2026-09-24 (standup run, two runs today: the 04:31Z
+ceremony-lite update and this one) against `gh pr list --state all`,
+`gh run list`, and the current repo state.
 
 ## Awaiting the owner's merge
 
@@ -25,11 +24,13 @@ wrote it shipped only inside PR #9, still unmerged).
   ledger grooming, and `docs/prfaq/overlay.md` as a go/no-go gate on the
   overlay initiative (product-plan.md §16). Also edits
   `docs/agents/org-chart.md`, so it collides with PR #7 there too.
-  Because the sprint file never reached `main`, this run opens
-  `docs/sprints/sprint-2026-09-21.md` directly (see below) so the week
-  isn't tracked nowhere while #9 waits; PR #9 itself is otherwise
-  unaffected and still needs a decision on `docs/prfaq/overlay.md` and
-  `docs/agents/frameworks.md`.
+  Because the sprint file never reached `main`, the prior run opened
+  `docs/sprints/sprint-2026-09-21.md` directly so the week isn't
+  tracked nowhere while #9 waits; PR #9 itself still needs a decision
+  on `docs/prfaq/overlay.md` and `docs/agents/frameworks.md`. **New
+  this run:** `gh pr view 9` now reports `mergeable: CONFLICTING`
+  (PR #7 is still `MERGEABLE`) — it will need a rebase in addition to
+  the owner's content decision before it can land.
 
 ## Waiting on an owner-only action
 
@@ -55,15 +56,27 @@ wrote it shipped only inside PR #9, still unmerged).
   Ursa's board of record, but labels and milestones (docs/standards/pm.md
   §2b, unaffected by the Linear switch) don't need it and are mirrored
   this run regardless.
-- 2026-09-24 (new) — `LINEAR_API_KEY` is unset (confirmed this run:
-  the env var is empty in the PM workflow), so the §1f Linear sync
-  (issue create/update, `[owner]` issues from this file) is skipped
-  this run per the charter's own fail-soft rule. The board was seeded
-  2026-09-23 by the chair with project "Q4 2026" and issues URS-1..7,
-  presumably using a credential outside the repo secret, since the
-  secret isn't visible to this workflow. The owner should confirm the
-  seeded board still matches reality and add the secret:
-  `gh secret set LINEAR_API_KEY`.
+- 2026-09-24 (updated this run) — `LINEAR_API_KEY` is now present (the
+  owner's dispatch said it was just added), but it **does not
+  authenticate**: the GraphQL API returns `401 Authentication required`
+  against both `team(id: ...)` and a bare `viewer { id name }` probe,
+  tried with and without a `Bearer` prefix. More telling than the 401:
+  the secret's value does not have the shape of a Linear key at all
+  (Linear personal API keys are opaque tokens prefixed `lin_api_`).
+  This one reads like a GitHub notification email subject line from a
+  different repo (`alexandrapaiz/alexandria`) — consistent with a
+  copy-paste mistake while setting the secret, not a rotated or
+  malformed real key. Not reproduced here verbatim on purpose; nothing
+  that goes into a secret slot belongs in a committed file. The §1f
+  sync (query, reconcile URS-1..7, issue create/update) is skipped
+  this run per the charter's own fail-soft rule for a missing-or-unusable
+  key — same treatment as "absent." The board was seeded 2026-09-23 by
+  the chair with project "Q4 2026" and issues URS-1..7, presumably
+  using a credential outside the repo secret. **Action for the owner:**
+  re-set the secret from Linear's own value (Linear → Settings → API →
+  Personal API keys): `gh secret set LINEAR_API_KEY`, then the next PM
+  run (ceremony or standup) will complete the reconciliation the owner
+  asked for today.
 - 2026-09-21 (3 days old) — `docs/prfaq/overlay.md` (drafted, sitting
   inside PR #9) needs the owner's merge as the go/no-go decision before
   the overlay (product-plan.md §16) enters any sprint, per
