@@ -26,7 +26,7 @@ jobs:
             hits=$(grep -rInE "$pattern" . \
               --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.ursa \
               --exclude=redaction-gate.yml 2>/dev/null \
-              | grep -vE '/(home/runner|Users/<you>|home/<you>)/' || true)
+              | grep -vE '/(home/runner|Users/<you>|home/<you>)/|projects/-Users-you-' || true)
             if [ -n "$hits" ]; then
               echo "::error::$label"
               printf '%s\n' "$hits" | head -20
