@@ -27,6 +27,7 @@ jobs:
       PM_DISPATCH_ENABLED: ${{ vars.PM_DISPATCH_ENABLED }}
       RUN_MODE: ${{ github.event.schedule == '0 12 * * 1' && 'ceremony' || (github.event_name == 'schedule' && 'standup' || 'dispatch') }}
       PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:

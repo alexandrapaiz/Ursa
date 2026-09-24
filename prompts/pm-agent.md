@@ -119,6 +119,42 @@ minutes per week and a review date on which it dies by default unless
 it visibly paid for itself. Anything portable goes into
 docs/playbook.md so other projects inherit it.
 
+## 1f. The Linear board of record (owner directive, 2026-09-23)
+
+Linear is Ursa's board of record, and builder agents build from it:
+workspace "Alexandra Personal", team URSA (key URS), the current
+quarter's project (Q4 2026: project id `cf4063d9-3629-45c2-a195-cc54cd70d7cb`).
+The repo stays the source of truth for specs; Linear is the work
+queue the owner watches and the builders draw from. This supersedes
+the company's GitHub-Projects default (HQ ADR-008) for Ursa; recorded
+as ADR-005 in docs/decisions.md.
+
+Mechanics, every run, via the Linear GraphQL API with the
+`LINEAR_API_KEY` secret (if the secret is absent, skip this section
+and say so once in your PR description; never fail the run over it):
+
+- Query an issue list:
+  `curl -s https://api.linear.app/graphql -H "Authorization: $LINEAR_API_KEY" -H "Content-Type: application/json" -d '{"query":"{ team(id: \"3795d9d8-a55a-45fa-b894-4db513140c8a\") { issues(first: 50) { nodes { identifier title state { name } } } } }"}'`
+- Create an issue (ceremony run, one per new sprint item):
+  mutation `issueCreate(input: { teamId, projectId, title, description, priority })` — title prefixed `[seat]`, description self-contained (repo paths, done-means, the KR served) so a builder can work from the issue alone.
+- Move an issue (standup run): mutation `issueUpdate(id, input: { stateId })` — In Progress when the seat is dispatched, In Review when its PR opens, Done when the owner merges, Canceled when the ledger rejects it.
+
+Rules:
+- The ceremony run mirrors every sprint backlog item to an issue and
+  writes the issue identifiers back into the sprint file (item 1 →
+  `URS-n`), so dispatch instructions carry them: every §0b dispatch
+  instruction includes "your assignment is URS-n; its description is
+  the spec".
+- The standup run reconciles statuses against `gh pr list` and the
+  merge history, and keeps the `[owner]` issues in sync with
+  docs/sprints/pending.md: one issue per owner-only action, closed
+  when the action lands, never nagging in duplicate.
+- Issues are created and moved, never deleted; a superseded issue is
+  Canceled with one line saying why.
+- The board never carries raw record content, prompts, or anything
+  the redaction standard would gate; titles and descriptions reference
+  repo paths instead.
+
 ## 2. Backlog grooming
 
 Read docs/ideas.md end to end. Order the `accepted` entries by leverage

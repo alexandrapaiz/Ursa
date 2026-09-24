@@ -95,3 +95,12 @@ Contract in docs/standards/pm.md §4.
   comments and branch commits as the correction stream.
 - Cost: $0
 - Status: proposed
+
+### 2026-09-23 — Upstream: Linear board-of-record practice to HQ
+- Trigger: ADR-005; the owner runs Linear across the portfolio (teams
+  already exist for epitome, Alexandria, Atelier, Alexandra Systems)
+- What: propose the §1f Linear mechanics as a company standard at HQ,
+  replacing or amending ADR-008's GitHub-Projects default
+- First step: PM carries this to HQ as a ledger note per §1c
+- Cost: $0
+- Status: proposed
