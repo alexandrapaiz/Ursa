@@ -37,9 +37,9 @@ wrote it shipped only inside PR #9, still unmerged).
   fixes only the owner can land, confirmed still present today:
   `docs/design/product-plan.md` lines 115, 500, 508 and
   `ursa-major/trial/README.md` line 46 carry the owner's literal local
-  path (`/Users/alexandrapaiz/Desktop/ursa-minor-site`,
-  `~/.claude/projects/-Users-alexandrapaiz-Desktop/`) and a trial
-  session UUID (`64899e58-98dd-44a6-940a-3ee95949a31f`). Filed as Ursa
+  path (`/Users/<you>/Desktop/ursa-minor-site`,
+  `~/.claude/projects/-Users-you-Desktop/`) and a trial
+  session UUID (`64899e58 (truncated)`). Filed as Ursa
   Incident 4. Exact replacement text was drafted in PR #7's
   `docs/agents/pending-workflow-changes.md` (unmerged; pull it from
   that PR before acting). Neither file is in any active seat's

@@ -123,7 +123,9 @@ docs/playbook.md so other projects inherit it.
 
 Linear is Ursa's board of record, and builder agents build from it:
 workspace "Alexandra Personal", team URSA (key URS), the current
-quarter's project (Q4 2026: project id `cf4063d9-3629-45c2-a195-cc54cd70d7cb`).
+quarter's project (Q4 2026: "Q4 2026 — prove the record, publish the
+method"). Resolve ids at runtime; never hardcode workspace UUIDs here
+(the redaction gate scans for UUID shapes).
 The repo stays the source of truth for specs; Linear is the work
 queue the owner watches and the builders draw from. This supersedes
 the company's GitHub-Projects default (HQ ADR-008) for Ursa; recorded
@@ -133,8 +135,9 @@ Mechanics, every run, via the Linear GraphQL API with the
 `LINEAR_API_KEY` secret (if the secret is absent, skip this section
 and say so once in your PR description; never fail the run over it):
 
-- Query an issue list:
-  `curl -s https://api.linear.app/graphql -H "Authorization: $LINEAR_API_KEY" -H "Content-Type: application/json" -d '{"query":"{ team(id: \"3795d9d8-a55a-45fa-b894-4db513140c8a\") { issues(first: 50) { nodes { identifier title state { name } } } } }"}'`
+- Resolve the team and list issues by key, no hardcoded ids:
+  `curl -s https://api.linear.app/graphql -H "Authorization: $LINEAR_API_KEY" -H "Content-Type: application/json" -d '{"query":"{ teams(filter: { key: { eq: \"URS\" } }) { nodes { id issues(first: 50) { nodes { identifier title state { name } } } } } }"}'`
+  The project id comes from `{ projects(filter: { name: { contains: \"Q4 2026\" } }) { nodes { id name } } }` the same way.
 - Create an issue (ceremony run, one per new sprint item):
   mutation `issueCreate(input: { teamId, projectId, title, description, priority })` — title prefixed `[seat]`, description self-contained (repo paths, done-means, the KR served) so a builder can work from the issue alone.
 - Move an issue (standup run): mutation `issueUpdate(id, input: { stateId })` — In Progress when the seat is dispatched, In Review when its PR opens, Done when the owner merges, Canceled when the ledger rejects it.

@@ -106,13 +106,13 @@ only the small, domain-filtered exports (`tuning-digest.md`, the
 ```
 
 Episode — real example, reconstructed from the Ursa Minor site trial
-(conversation 64899e58-98dd-44a6-940a-3ee95949a31f, Loop B files,
+(conversation 64899e58, full id in ursa-private; Loop B files,
 real session window):
 
 ```json
 {
   "id": "ursa-minor-site-2026-08-05-constellation",
-  "projectPath": "/Users/alexandrapaiz/Desktop/ursa-minor-site",
+  "projectPath": "/Users/<you>/Desktop/ursa-minor-site",
   "status": "closed",
   "openedAt": "2026-08-05T18:59:00.000Z",
   "closedAt": "2026-08-05T20:33:00.000Z",
@@ -122,7 +122,7 @@ real session window):
     "components/ui/constellation.tsx",
     "app/page.tsx"
   ],
-  "conversationIds": ["64899e58-98dd-44a6-940a-3ee95949a31f"],
+  "conversationIds": ["64899e58"],
   "distilled": true
 }
 ```
@@ -139,7 +139,7 @@ whose text closed Loop B (the last edit before step 730's acceptance):
   "task": { "id": "ursa-minor-site", "finished": true, "generatedAt": "2026-08-05T22:14:39.607Z" },
   "generations": [
     {
-      "conversationId": "64899e58-98dd-44a6-940a-3ee95949a31f",
+      "conversationId": "64899e58",
       "turnIndex": 716,
       "kind": "edit",
       "filePath": ".../components/ui/constellation.tsx",

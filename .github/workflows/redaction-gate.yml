@@ -1,0 +1,46 @@
+name: redaction-gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Ursa incident 2 named three classes of private data. Incident 4
+      # is the same classes coming back through new files one day later,
+      # because the incident-2 fix rewrote history and added no gate.
+      - name: Scan for private paths and identifiers
+        run: |
+          set -uo pipefail
+          fail=0
+          scan() {
+            label="$1"; pattern="$2"
+            hits=$(grep -rInE "$pattern" . \
+              --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.ursa \
+              --exclude=redaction-gate.yml 2>/dev/null \
+              | grep -vE '/(home/runner|Users/<you>|home/<you>)/' || true)
+            if [ -n "$hits" ]; then
+              echo "::error::$label"
+              printf '%s\n' "$hits" | head -20
+              fail=1
+            fi
+          }
+          scan "Absolute home path with a real username. Write /Users/<you>/ or ~/ instead." \
+               '(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/'
+          scan "Claude Code project slug carrying a machine path. Write -Users-you-Desktop." \
+               '\.claude/projects/-[A-Za-z]'
+          scan "Full private session or conversation UUID. Truncate it to 8 characters." \
+               '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+          if [ "$fail" = 1 ]; then
+            echo "::error::Redaction gate failed. See prompts/engineer-agent.md, the engineering-artifact standard, element 3, and Ursa incident 4 in docs/agents/incidents.md."
+            exit 1
+          fi
+          echo "Redaction gate clean."
