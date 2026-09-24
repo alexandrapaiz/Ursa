@@ -323,7 +323,7 @@ export function detectTraceSignals(record: OutcomeRecord): TraceSignals {
         closedStep,
         resolution,
         resolvingSteps,
-        discoveredSpec: `stated at step ${members[members.length - 1].step}, the loop's most refined statement: "${excerpt(members[members.length - 1].text)}" (every earlier statement is at conversations[].prompts[].step ${promptSteps.slice(0, -1).join(', ')})`,
+        discoveredSpec: specFrom(members, promptSteps),
       })
     }
   }
@@ -366,6 +366,30 @@ export function detectTraceSignals(record: OutcomeRecord): TraceSignals {
     unresolvedSingleCorrections,
     notes,
   }
+}
+
+/**
+ * The spec the user could not state in advance, articulated post-hoc. The
+ * detector does not write prose: it quotes. Which quote is the spec is a
+ * code-owned choice — the loop's LAST statement of what was wanted, with
+ * regression reports excluded, because "it went dark again" says the state
+ * broke and never says what the state should be. Every other statement in
+ * the loop stays addressable by step, so nothing is merged away
+ * (docs/design/product-plan.md §10: contradictions survive as separate trail
+ * entries, they are never resolved into one true preference).
+ */
+function specFrom(members: TracePrompt[], promptSteps: number[]): string {
+  const wanted = members.filter((m) => !m.regressionCue)
+  const pool = wanted.length > 0 ? wanted : members
+  const chosen = pool[pool.length - 1]
+  const others = promptSteps.filter((s) => s !== chosen.step)
+  return (
+    `quoted from step ${chosen.step}, the loop's last statement of what was wanted ` +
+    `(regression reports excluded): "${excerpt(chosen.text)}"` +
+    (others.length > 0
+      ? ` — the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(', ')}`
+      : '')
+  )
 }
 
 /**
