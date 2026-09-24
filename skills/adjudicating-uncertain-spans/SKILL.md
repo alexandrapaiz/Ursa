@@ -23,10 +23,10 @@ evidence:
     source: ursa-major/src/types.ts:5-13
   - ref: E2
     what: the two thresholds, 0.35 and 0.6, and the combined score they apply to
-    source: ursa-major/src/match.ts:6,8,50-56
+    source: ursa-major/src/match.ts:6,8,49-52
   - ref: E3
     what: uncertain is set in exactly one place, and the losing candidate is kept on the span
-    source: ursa-major/src/resolve.ts:159-167, ursa-major/src/types.ts:47-48
+    source: ursa-major/src/resolve.ts:160-167, ursa-major/src/types.ts:47-48
   - ref: E4
     what: trivial is a different flag with a different cause, set on short exact matches
     source: ursa-major/src/resolve.ts:112-123, ursa-major/src/match.ts:10, ursa-major/src/types.ts:50
@@ -56,7 +56,7 @@ evidence:
     source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
   - ref: E13
     what: session capture and git capture sit at different points of the funnel, 82 percent deletion against 7 percent
-    source: docs/beyond-preference-pairs.md:225-242
+    source: docs/beyond-preference-pairs.md:229-236
   - ref: E14
     what: the methods document's own limits, n=1 demonstrates label types and not statistics
     source: docs/beyond-preference-pairs.md:154-170
@@ -102,7 +102,8 @@ changes the record. Output: nothing, but skipping this step is how
 adjudication turns into free-form opinion.
 
 **3. Judge each span against its candidate, in three verdicts.** Read
-the span text and `span.candidate.text` side by side and decide.
+the span text and `span.candidate.text` side by side and decide. Two of
+the three verdicts are span classes the schema already carries [E1].
 `survived_mutated` means the candidate is the ancestor and the
 difference between them is the user's correction. `no_generation_provenance`
 means it is not the ancestor, whatever the score said. `unresolvable`
@@ -151,6 +152,15 @@ artifact, since it marks work the model was never in the running for
 [E6]. Calling a human span model-descended therefore does two kinds of
 damage at once. It credits a model with text it did not write, and it
 destroys an instance of the label that is hardest to get anywhere else.
+
+The other direction costs something too, and it is worth naming so the
+asymmetry is a judgment rather than a slogan. Refusing a real ancestor
+moves that generation's text toward `generated_deleted`, which is the
+constitutive category where the spec was actually forged, and which
+already accounts for 82.1 percent of generated characters in the first
+trial [E7]. Understating survival inside a category that large is a
+smaller distortion than manufacturing provenance that never existed,
+but it is not free.
 
 Ours: when genuinely torn, adjudicate toward `no_generation_provenance`
 and record the tie in the reasoning line. The conservative direction is
