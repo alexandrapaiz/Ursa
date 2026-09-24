@@ -88,3 +88,11 @@ than what the record holds.
 **Decision.** engineer, research, frontend, market, skill, security and finance are ACTIVE: charter headers flipped, crons live and staggered (research Tue+Fri 13:15 UTC; frontend Mon+Thu 14:15; market Wed 13:35; skill Thu 13:55; security Sun 15:15; finance monthly on the 1st, 11:30; engineer 11:26 and 23:26 daily). The PM may dispatch all of them by criteria (its charter §0b). **sales stays dormant**: Ursa is private R&D and never for sale (ADR-001); a sales seat has nothing to sell.
 
 **Consequences.** Ursa's weekly load rises from roughly three runs to about fifteen on the shared Claude subscription; the PM's daily standup and the no-ship tripwire are the two places a throttled or failed run shows up within a day. Each newly active seat's first run is a smoke run by definition: the PM's next standup reads them and proposes fixes to charters that were written before the seat ever ran.
+
+## ADR-006 — Ursa is a subcompany of Alexandra Systems Company; HQ's reach is legitimate (2026-09-24)
+
+**Context.** Owner: "please note ursa is a subcompany of alexandra systems company which generalizes ops. expect for interference from them/contact."
+
+**Decision.** Recorded in CLAUDE.md §0, the README, and every charter: HQ generalizes operations; standards pushes, lessons syncs, HQ seat PRs, chair messages on HQ's behalf, and host dispatches are expected and binding within a standard's scope; conflicts resolve to the standard unless an Ursa ADR records a deviation. Ursa keeps its mission, product decisions and ledger verdicts; the owner keeps the merge.
+
+**Consequences.** Seats stop treating HQ traffic as noise or as an unknown actor (Ursa PR #2's stranding and the "unknown dispatcher" hesitation in earlier runs are the failure this prevents). The company interface (HQ ADR-027) is the mechanism; `company.yaml` here names the secrets and services HQ may expect.
