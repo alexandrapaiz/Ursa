@@ -1,114 +1,88 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Reconciled 2026-09-24 (standup run, two runs today: the 04:31Z
-ceremony-lite update and this one) against `gh pr list --state all`,
-`gh run list`, and the current repo state.
+Reconciled 2026-09-24, second standup pass today (04:31Z/04:41Z
+ceremony-lite + standup, then this 15:44Z scheduled standup), against
+`gh pr list --state all`, `gh run list --limit 30`, `gh workflow
+list --all`, and the current repo state.
 
 ## Awaiting the owner's merge
 
-- 2026-09-20 (4 days old) — PR #7 `exo/2026-09-20`, the ExO weekly
-  cycle: 11 charter citation fixes (Tier B, `prompts/*.md`), Incidents
-  4 and 5, a `redaction-gate.yml` proposal (PWC-1), the architecture
-  diagram, and the governance-cycle tracker on `docs/agents/org-chart.md`.
-  **Now stale relative to `main`**: since it opened, `main` picked up
-  the ADR-033 standup charter (PR #10, merged) and the ADR-005 seat
-  activation (direct commits `27f8b27`, `1a52d01`), both editing
-  `prompts/pm-agent.md` and six other charter files PR #7 also touches.
-  Expect a merge conflict; it will need a rebase before it can land.
-  The "Incident 3" mis-citation PR #7 fixes is still live on `main`
-  today (`prompts/pm-agent.md:198` and ten other charters) because this
-  PR hasn't merged.
-- 2026-09-21 (3 days old) — PR #9 `pm/sprint-2026-09-21`: the first
-  sprint file, this file's first version, `docs/agents/frameworks.md`,
-  ledger grooming, and `docs/prfaq/overlay.md` as a go/no-go gate on the
-  overlay initiative (product-plan.md §16). Also edits
-  `docs/agents/org-chart.md`, so it collides with PR #7 there too.
-  Because the sprint file never reached `main`, the prior run opened
-  `docs/sprints/sprint-2026-09-21.md` directly so the week isn't
-  tracked nowhere while #9 waits; PR #9 itself still needs a decision
-  on `docs/prfaq/overlay.md` and `docs/agents/frameworks.md`. **New
-  this run:** `gh pr view 9` now reports `mergeable: CONFLICTING`
-  (PR #7 is still `MERGEABLE`) — it will need a rebase in addition to
-  the owner's content decision before it can land.
+- None open right now. **Resolved this run:** PR #7 (`exo/2026-09-20`)
+  and PR #9 (`pm/sprint-2026-09-21`) both show `state: MERGED` as of
+  this pass (merged 2026-09-24, `104697a`/`e5d1110` range) — the prior
+  standup's "4 days old, awaiting merge" lines are stale and removed.
+  PR #9's merge is also the owner's go decision on `docs/prfaq/overlay.md`
+  (docs/standards/pm.md §2c): the overlay initiative may now enter a
+  sprint. That's a sprint-planning action for the next ceremony, not
+  this standup.
 
 ## Waiting on an owner-only action
 
-- 2026-09-20 (4 days old, still true as of this run) — Two data-hygiene
-  fixes only the owner can land, confirmed still present today:
-  `docs/design/product-plan.md` lines 115, 500, 508 and
-  `ursa-major/trial/README.md` line 46 carry the owner's literal local
-  path (`/Users/<you>/Desktop/ursa-minor-site`,
-  `~/.claude/projects/-Users-you-Desktop/`) and a trial
-  session UUID (`64899e58 (truncated)`). Filed as Ursa
-  Incident 4. Exact replacement text was drafted in PR #7's
-  `docs/agents/pending-workflow-changes.md` (unmerged; pull it from
-  that PR before acting). Neither file is in any active seat's
-  writable lane.
-- 2026-09-20 (4 days old, confirmed still true this run) — the repo
-  description is still empty. `gh repo edit` still returns
-  `403: Resource not accessible by integration` for this seat's token,
-  re-tested today. Command for the owner to run directly:
-  `gh repo edit alexandrapaiz/Ursa --description "..."`.
-- 2026-09-24 (new) — `PROJECTS_TOKEN` is unset (confirmed this run:
-  the env var is empty in the PM workflow). Moot for the board itself
-  now that ADR-005 (Linear, below) supersedes GitHub Projects as
-  Ursa's board of record, but labels and milestones (docs/standards/pm.md
-  §2b, unaffected by the Linear switch) don't need it and are mirrored
-  this run regardless.
-- 2026-09-24 (updated this run) — `LINEAR_API_KEY` is now present (the
-  owner's dispatch said it was just added), but it **does not
-  authenticate**: the GraphQL API returns `401 Authentication required`
-  against both `team(id: ...)` and a bare `viewer { id name }` probe,
-  tried with and without a `Bearer` prefix. More telling than the 401:
-  the secret's value does not have the shape of a Linear key at all
-  (Linear personal API keys are opaque tokens prefixed `lin_api_`).
-  This one reads like a GitHub notification email subject line from a
-  different repo (`alexandrapaiz/alexandria`) — consistent with a
-  copy-paste mistake while setting the secret, not a rotated or
-  malformed real key. Not reproduced here verbatim on purpose; nothing
-  that goes into a secret slot belongs in a committed file. The §1f
-  sync (query, reconcile URS-1..7, issue create/update) is skipped
-  this run per the charter's own fail-soft rule for a missing-or-unusable
-  key — same treatment as "absent." The board was seeded 2026-09-23 by
-  the chair with project "Q4 2026" and issues URS-1..7, presumably
-  using a credential outside the repo secret. **Action for the owner:**
-  re-set the secret from Linear's own value (Linear → Settings → API →
-  Personal API keys): `gh secret set LINEAR_API_KEY`, then the next PM
-  run (ceremony or standup) will complete the reconciliation the owner
-  asked for today.
-- 2026-09-21 (3 days old) — `docs/prfaq/overlay.md` (drafted, sitting
-  inside PR #9) needs the owner's merge as the go/no-go decision before
-  the overlay (product-plan.md §16) enters any sprint, per
-  docs/standards/pm.md §2c.
+- **Resolved this run:** the two data-hygiene leaks (owner's literal
+  local path in `docs/design/product-plan.md`, the trial session UUID
+  in both that file and `ursa-major/trial/README.md`) and the empty
+  repo description are all fixed. Confirmed by direct grep this pass:
+  neither file carries the raw path or full UUID anymore (the UUID is
+  now truncated to its first segment with a pointer to
+  `ursa-private`), and `gh repo view` now returns the mission
+  one-liner as the description. `docs/agents/pending-workflow-changes.md`
+  itself confirms all four PWC entries were applied by the chair
+  2026-09-24 and self-deletes its entries per its own rule. Incident 4
+  is fixed in practice; its Status line in `docs/agents/incidents.md`
+  (still reading "Open until both are edited") is now stale — that's
+  exo's register to update, not this seat's lane, flagged here so it
+  doesn't get missed.
+- 2026-09-24 (confirmed directly this run, not just inferred) —
+  `LINEAR_API_KEY` is present but **is not a Linear key**. This run's
+  own environment exposes the secret (needed for §1f), and its value
+  is legible as an email notification subject line from a *different*
+  repository entirely, not an opaque `lin_api_...` token. Not
+  reproduced verbatim here on purpose — same redaction discipline as
+  the leaks above. The §1f sync (issue query/create/update, URS-1..7
+  reconciliation) is skipped again this run under the charter's
+  fail-soft rule for an unusable key. **Action for the owner:**
+  `gh secret set LINEAR_API_KEY` with the actual value from Linear →
+  Settings → API → Personal API keys.
+- `PROJECTS_TOKEN` still unset (moot: Linear is the board of record
+  per ADR-005; labels/milestones per §2b don't need it).
+
+## New this run — newly-activated seats' first scheduled crons did not fire
+
+Confirmed via `gh workflow list --all` (all seven show `active`, not
+disabled) and `gh run list` (zero runs, ever, for engineer, market,
+skill, frontend, research, security, finance): **engineer's 11:26 UTC
+cron today, skill's 13:55 UTC today, and frontend's 14:15 UTC today
+all passed with no run recorded**, as of this pass at 15:49 UTC — 4+
+hours late for engineer specifically. The workflows aren't disabled
+and `workflow_dispatch` is proven working today (this seat's own two
+human-triggered runs, 04:31Z/04:40Z, and its own current scheduled
+run). Cause not diagnosed further this run (standup budget); worth an
+exo look if it recurs tomorrow. Practical response taken now: engineer
+and market are dispatched below rather than waiting on a cron that
+hasn't proven itself yet this sprint.
 
 ## Owed by a seat, not yet started
 
-- 2026-09-21 — engineer: sprint-2026-09-21 items 1-3
-  (docs/sprints/sprint-2026-09-21.md). Engineer has never run (0 runs
-  in `gh run list` history); it was dormant until ADR-005 activated it
-  today, 2026-09-24, with a twice-daily cron (11:26 and 23:26 UTC).
-  Today's 11:26 run is this sprint's first real chance to pick up item
-  1.
+- 2026-09-21 — engineer: sprint-2026-09-21 items 1-3. Zero runs ever.
+  **Dispatched this run** (see dispatch-queue.md) because the 11:26
+  UTC cron that was supposed to be its first chance at item 1 did not
+  fire.
 - 2026-09-21 — market: sprint-2026-09-21 item 4,
-  `docs/market/landscape.md`, serving OKR KR2.3 (due 2026-10-31).
-  Market was dormant until ADR-005 today; its cron is Wednesdays,
-  13:35 UTC, next occurrence 2026-09-30, comfortably inside the KR
-  deadline.
+  `docs/market/landscape.md`, serving KR2.3 (due 2026-10-31). Zero
+  runs ever. **Dispatched this run**: its own Wednesday 13:35 UTC cron
+  already passed this week without firing, and the next occurrence
+  (2026-09-30) falls after this sprint closes (Sunday 2026-09-27).
 - 2026-09-18 through 2026-09-20 — three `proposed` ledger entries still
   have no owner verdict: repo split (2026-09-18, 6 days), tuning packs
   (2026-09-19, 5 days), the merge-commits/PR-reader finding
-  (2026-09-20, 4 days). None has crossed the two-week mark yet, so none
-  escalates to "Awaiting your verdict" in this PR's description.
+  (2026-09-20, 4 days). None has crossed the two-week mark yet.
 
-## Newly active, no run yet (ADR-005, 2026-09-24)
+## Newly active, first cron due but not yet fired (ADR-005, 2026-09-24)
 
-research, frontend, skill, security, finance went active today
-alongside engineer and market. None has run yet as of this update
-(`gh run list` shows zero runs ever for any of the seven). First
-scheduled fires, in order: engineer 11:26 UTC today; skill 13:55 UTC
-today (Thu); frontend 14:15 UTC today (Thu); research 13:15 UTC Fri
-09-25; security 15:15 UTC Sun 09-27; finance 11:30 UTC on the 1st of
-the month (2026-10-01). Nothing is owed by these seats yet beyond
-"exist and run cleanly the first time" — that first run is itself the
-thing to check at the next standup.
+research (Fri 13:15 UTC, next 09-25), security (Sun 15:15 UTC, next
+09-27), finance (1st of month 11:30 UTC, next 10-01) still have their
+first occurrence ahead of them — nothing owed yet. skill (Thu 13:55
+UTC) and frontend (Thu 14:15 UTC) had a first occurrence *today* that
+did not fire (see above); neither has a sprint item assigned yet, so
+no dispatch trigger applies to them under §11.3 — noted, not acted on.
