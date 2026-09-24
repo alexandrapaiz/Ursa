@@ -39,7 +39,7 @@ wrote it shipped only inside PR #9, still unmerged).
   `ursa-major/trial/README.md` line 46 carry the owner's literal local
   path (`/Users/<you>/Desktop/ursa-minor-site`,
   `~/.claude/projects/-Users-you-Desktop/`) and a trial
-  session UUID (`64899e58`). Filed as Ursa
+  session UUID (`64899e58 (truncated)`). Filed as Ursa
   Incident 4. Exact replacement text was drafted in PR #7's
   `docs/agents/pending-workflow-changes.md` (unmerged; pull it from
   that PR before acting). Neither file is in any active seat's

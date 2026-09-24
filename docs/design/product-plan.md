@@ -106,7 +106,7 @@ only the small, domain-filtered exports (`tuning-digest.md`, the
 ```
 
 Episode — real example, reconstructed from the Ursa Minor site trial
-(conversation 64899e58, Loop B files,
+(conversation 64899e58, full id in ursa-private; Loop B files,
 real session window):
 
 ```json
