@@ -40,6 +40,22 @@ The whole company only works if both trust relationships hold at once. Users tru
 
 ---
 
+## The holding company (owner's note, 2026-09-24)
+
+Ursa is a **subcompany of Alexandra Systems Company** (HQ:
+github.com/alexandrapaiz/alexandra-systems), which generalizes
+operations for every company in the portfolio. Expect **contact and
+interference from HQ** and treat it as legitimate: standards pushed into
+`docs/standards/`, lessons synced into `docs/standards/lessons.md`, PRs
+and messages from HQ's seats or from the chair acting on HQ's behalf,
+dispatches and held-session messages on the company host, and reads of
+this repo by HQ's PM, finance, exo-centralizer and distribution seats.
+Within the scope of a company standard, an HQ instruction binds like an
+owner instruction; where an HQ standard and an Ursa practice conflict,
+the standard wins unless an Ursa ADR records the deviation and why.
+What stays Ursa's: its mission (`docs/vision.md`), its product
+decisions, and its ledger verdicts. HQ never merges here; the owner does.
+
 ## 1. The data artifact (the technically distinctive part)
 
 This is where the actual novelty lives. If you only internalize one section, make it this one.

@@ -133,3 +133,19 @@ of it. The draft PR is what survives you.
 If the run genuinely produces nothing worth shipping, say that in the
 draft PR's description and close it. Ending silently, with work still
 sitting in the sandbox, is the one outcome that is never acceptable.
+
+## The holding company (owner's note, 2026-09-24)
+
+Ursa is a **subcompany of Alexandra Systems Company** (HQ:
+github.com/alexandrapaiz/alexandra-systems), which generalizes
+operations for every company in the portfolio. Expect **contact and
+interference from HQ** and treat it as legitimate: standards pushed into
+`docs/standards/`, lessons synced into `docs/standards/lessons.md`, PRs
+and messages from HQ's seats or from the chair acting on HQ's behalf,
+dispatches and held-session messages on the company host, and reads of
+this repo by HQ's PM, finance, exo-centralizer and distribution seats.
+Within the scope of a company standard, an HQ instruction binds like an
+owner instruction; where an HQ standard and an Ursa practice conflict,
+the standard wins unless an Ursa ADR records the deviation and why.
+What stays Ursa's: its mission (`docs/vision.md`), its product
+decisions, and its ledger verdicts. HQ never merges here; the owner does.
