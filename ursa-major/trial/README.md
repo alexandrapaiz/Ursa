@@ -43,7 +43,7 @@ The finished work is `~/Desktop/ursa-minor-site`; the generations are the
 npx tsx src/cli.ts \
   --id ursa-minor-site \
   --final ~/Desktop/ursa-minor-site/app ~/Desktop/ursa-minor-site/components \
-  --sessions ~/.claude/projects/-Users-alexandrapaiz-Desktop/64899e58-98dd-44a6-940a-3ee95949a31f.jsonl \
+  --sessions ~/.claude/projects/-Users-you-Desktop/<session-id>.jsonl \
   --path-filter ursa-minor \
   --out trial/task-001
 ```
