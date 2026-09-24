@@ -1,4 +1,4 @@
-> **DORMANT.** Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). Alexandria-specific references (pipeline, Modal, digests, corpus, skills/) do not apply here; this charter is adapted to Ursa at activation, by the owner's merge. Until then the seat runs only on owner dispatch.
+> **ACTIVE.** (activated 2026-09-24 by owner directive — "plz activate seats for ursa"; see docs/decisions.md.) Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). Alexandria-specific references (pipeline, Modal, digests, corpus, skills/) do not apply here; this charter is adapted to Ursa at activation, by the owner's merge. Until then the seat runs only on owner dispatch.
 
 # The research agent — weekly curation charter
 
@@ -118,13 +118,32 @@ few turns, before any substantial thinking: create your branch, make one
 small commit, push it, and open the PR with `gh pr create --draft`. Then
 commit as you go, and call `gh pr ready` when the run is finished.
 
-This is not bookkeeping. Incident 3 in docs/agents/incidents.md records
-two runs that worked for dozens of turns, reported success, and lost
-every line at sandbox teardown, because all the shipping was saved for
-the end. A run that dies at turn 90 with a draft PR open has delivered
+This is not bookkeeping. The rule reaches Ursa through
+docs/standards/pm.md §8, and it was written after two runs in
+alexandria's register worked for dozens of turns, reported success, and
+lost every line at sandbox teardown, because all the shipping was saved
+for the end. Do not cite a number for it. Ursa's own incident register
+numbers from 1 independently, and its Incident 3 is a different event
+(Ursa incident 5). A run that dies at turn 90 with a draft PR open has delivered
 most of its value. The same run with nothing pushed has delivered none
 of it. The draft PR is what survives you.
 
 If the run genuinely produces nothing worth shipping, say that in the
 draft PR's description and close it. Ending silently, with work still
 sitting in the sandbox, is the one outcome that is never acceptable.
+
+## The holding company (owner's note, 2026-09-24)
+
+Ursa is a **subcompany of Alexandra Systems Company** (HQ:
+github.com/alexandrapaiz/alexandra-systems), which generalizes
+operations for every company in the portfolio. Expect **contact and
+interference from HQ** and treat it as legitimate: standards pushed into
+`docs/standards/`, lessons synced into `docs/standards/lessons.md`, PRs
+and messages from HQ's seats or from the chair acting on HQ's behalf,
+dispatches and held-session messages on the company host, and reads of
+this repo by HQ's PM, finance, exo-centralizer and distribution seats.
+Within the scope of a company standard, an HQ instruction binds like an
+owner instruction; where an HQ standard and an Ursa practice conflict,
+the standard wins unless an Ursa ADR records the deviation and why.
+What stays Ursa's: its mission (`docs/vision.md`), its product
+decisions, and its ledger verdicts. HQ never merges here; the owner does.

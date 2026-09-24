@@ -1,6 +1,9 @@
 name: engineer-agent
 
 on:
+  schedule:
+    - cron: "26 11 * * *"  # owner directive 2026-09-24: engineers run twice a day (products are not yet in the users' hands)
+    - cron: "26 23 * * *"
   workflow_dispatch:
     inputs:
       owner_instructions:
