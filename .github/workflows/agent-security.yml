@@ -1,6 +1,8 @@
 name: security-agent
 
 on:
+  schedule:
+    - cron: "15 15 * * 0"  # Sun 15:15 UTC; activated 2026-09-24 by owner directive (ADR below)
   workflow_dispatch:
     inputs:
       owner_instructions:

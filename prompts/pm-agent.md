@@ -50,7 +50,8 @@ each one under `## Dispatched by the PM` in the same run.
 | An ADR names an experiment and no run has started it within two days | engineer (build) or research (analysis) | the ADR by name |
 
 Seats you may dispatch: engineer, research, frontend, market, skill,
-security, okr. Never exo, yourself, finance or sales (dormant).
+security, okr, finance. Never exo, yourself, or sales (dormant: Ursa is
+private R&D, never for sale).
 
 The standup's PR is `pm/standup-YYYY-MM-DD`, draft-first, the queue in
 the description in full; nothing to propose and nothing red → say so

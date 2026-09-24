@@ -1,6 +1,8 @@
 name: skill-agent
 
 on:
+  schedule:
+    - cron: "55 13 * * 4"  # Thu 13:55 UTC; activated 2026-09-24 by owner directive (ADR below)
   workflow_dispatch:
     inputs:
       owner_instructions:
