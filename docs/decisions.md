@@ -96,3 +96,26 @@ than what the record holds.
 **Decision.** Recorded in CLAUDE.md §0, the README, and every charter: HQ generalizes operations; standards pushes, lessons syncs, HQ seat PRs, chair messages on HQ's behalf, and host dispatches are expected and binding within a standard's scope; conflicts resolve to the standard unless an Ursa ADR records a deviation. Ursa keeps its mission, product decisions and ledger verdicts; the owner keeps the merge.
 
 **Consequences.** Seats stop treating HQ traffic as noise or as an unknown actor (Ursa PR #2's stranding and the "unknown dispatcher" hesitation in earlier runs are the failure this prevents). The company interface (HQ ADR-027) is the mechanism; `company.yaml` here names the secrets and services HQ may expect.
+
+## ADR-005 — Linear is the board of record; builders build from it (2026-09-23)
+
+**Decision.** Ursa's work queue lives in Linear (workspace Alexandra
+Personal, team URSA), maintained by the PM seat every run per charter
+§1f: sprint items become issues with self-contained descriptions,
+dispatch instructions carry the issue identifier, statuses move with
+dispatch, PR, and merge, and owner-only actions each get an `[owner]`
+issue synced from pending.md. The repo remains the source of truth for
+specs; Linear is the queue the owner watches and builder agents draw
+from. Seats reach Linear through its GraphQL API with the
+LINEAR_API_KEY repo secret; without the secret the sync is skipped and
+said so, never a run failure.
+
+**Reasoning.** Owner directives: "please make sure pm updates in
+linear" and "based on it builder agents will build." This supersedes
+the company default of GitHub Projects as the board layer (HQ ADR-008)
+for Ursa; the deviation is recorded here per docs/standards/pm.md and
+proposed upstream via the ledger. First board seeded 2026-09-23 by the
+chair: project "Q4 2026 — prove the record, publish the method",
+issues URS-1 through URS-7 from sprint-2026-09-21 and pending.md.
+
+**Owner:** Alexandra. **Status:** accepted (directed in session).
