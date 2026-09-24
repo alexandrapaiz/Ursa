@@ -46,6 +46,17 @@ list --all`, and the current repo state.
   Settings → API → Personal API keys.
 - `PROJECTS_TOKEN` still unset (moot: Linear is the board of record
   per ADR-005; labels/milestones per §2b don't need it).
+- 2026-09-24 (new, this run) — **the dispatch mechanism itself is
+  broken at the credential level.** `PM_DISPATCH_ENABLED` is `true`
+  and `agent-pm.yml` declares `permissions: actions: write`, but
+  `gh workflow run` and even a bare `gh api .../actions/permissions`
+  both return `403: Resource not accessible by integration` from this
+  run's own credential. Full evidence and the specific fix needed in
+  docs/sprints/dispatch-queue.md's "Dispatched by the PM" section.
+  This is the top item in this pass: every dispatch decision this
+  standup made correctly per §11.3 died at this wall, and will keep
+  dying there until the owner (or whoever administers the GitHub App
+  installation) grants it Actions scope.
 
 ## New this run — newly-activated seats' first scheduled crons did not fire
 
@@ -64,15 +75,19 @@ hasn't proven itself yet this sprint.
 
 ## Owed by a seat, not yet started
 
-- 2026-09-21 — engineer: sprint-2026-09-21 items 1-3. Zero runs ever.
-  **Dispatched this run** (see dispatch-queue.md) because the 11:26
-  UTC cron that was supposed to be its first chance at item 1 did not
-  fire.
+- 2026-09-21 — engineer: sprint-2026-09-21 items 1-3. Zero runs ever;
+  its 11:26 UTC cron today did not fire. **Dispatch attempted this
+  run and failed** (403, credential lacks Actions scope — see
+  dispatch-queue.md). Still owed, now with no proven path to a run
+  today short of the 23:26 UTC cron or an owner-triggered
+  `workflow_dispatch` (which works: alexandrapaiz's own dispatches at
+  04:31Z/04:40Z succeeded).
 - 2026-09-21 — market: sprint-2026-09-21 item 4,
   `docs/market/landscape.md`, serving KR2.3 (due 2026-10-31). Zero
-  runs ever. **Dispatched this run**: its own Wednesday 13:35 UTC cron
-  already passed this week without firing, and the next occurrence
-  (2026-09-30) falls after this sprint closes (Sunday 2026-09-27).
+  runs ever; Wednesday 13:35 UTC cron already passed this week.
+  **Dispatch attempted this run and failed**, same 403. Without an
+  owner-triggered dispatch, item 4 gets no run inside this sprint's
+  window at all (next cron 2026-09-30, after Sunday's close).
 - 2026-09-18 through 2026-09-20 — three `proposed` ledger entries still
   have no owner verdict: repo split (2026-09-18, 6 days), tuning packs
   (2026-09-19, 5 days), the merge-commits/PR-reader finding

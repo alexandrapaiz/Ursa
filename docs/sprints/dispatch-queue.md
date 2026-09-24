@@ -52,11 +52,30 @@ past seven days old (none are open at all right now).
 
 ## Dispatched by the PM
 
-1. **2026-09-24, engineer** — instruction as above (item 1, cron
-   miss). Fired via `gh workflow run agent-engineer.yml`. Run:
-   see `gh run list --workflow agent-engineer.yml` (URL added once the
-   run appears; the API returns the run only after it starts).
-2. **2026-09-24, market** — instruction as above (item 4, cron miss),
-   fired 3+ minutes after entry 1 per the concurrency-spacing rule.
-   Fired via `gh workflow run agent-market.yml`. Run: see `gh run list
-   --workflow agent-market.yml`.
+**Neither fired. Both attempts failed at the credential, not the
+switch.** `gh workflow run agent-engineer.yml -f owner_instructions=…`
+returned `HTTP 403: Resource not accessible by integration`
+(`/repos/alexandrapaiz/Ursa/actions/workflows/361138497/dispatches`).
+Confirmed it isn't a fluke or a workflow-file problem: `agent-pm.yml`
+already declares `permissions: actions: write` at the job level
+(charter §11.5's own prescription), and a direct probe —
+`gh api /repos/alexandrapaiz/Ursa/actions/permissions` — returns the
+identical 403 with no workflow involved at all. That combination means
+this run's credential is a GitHub App installation token, not the
+plain repo `GITHUB_TOKEN`, and the App's installation grant doesn't
+include the `actions` scope — a per-workflow `permissions:` block
+can't widen what the installation itself was never granted. This
+contradicts §11.5's own claim ("No App key is needed"): a key is
+involved, and it's the blocker.
+
+Did not retry (a 403 on a capability check isn't a transient failure
+to retry into). Both instructions are preserved above under Proposed,
+verbatim and still evidenced, so the owner or an App-permission fix
+can act on them without redoing the analysis. **Action for the owner:**
+grant the `actions: write` scope to whatever GitHub App installation
+is acting as this seat (Settings → Integrations → the app's
+permissions, or re-check `agent-pm.yml`'s auth step if it's minting
+its own installation token with a narrower scope list than the
+workflow's `permissions:` block implies). Until that's fixed,
+`PM_DISPATCH_ENABLED: true` has no effect — it's an inert switch, and
+every future standup will hit the same wall on the same criteria.
