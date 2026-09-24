@@ -137,3 +137,105 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - First step: PM carries this to HQ as a ledger note per §1c
 - Cost: $0
 - Status: proposed
+
+### 2026-09-24 — Write-time file receipts: exact provenance for the file-write path
+- Trigger: today's craft scan of LangSmith's feedback-to-trace join
+  (oneuptime, 2026-09-12) proposes writing a durable response-to-trace
+  mapping *before* the answer is returned, so late feedback attaches to
+  the exact generation displayed rather than to a regeneration. Ursa
+  does the opposite: `ursa-major/src/resolve.ts` reconstructs the join
+  afterwards by lexical matching, which is why task-001 carries 55
+  uncertain spans (KR1.1) and why the loop detector shipped today has
+  to reason about themes rather than identities.
+- What: for the one path where Ursa does see the generation at emit
+  time — a Claude Code `Write`/`MultiEdit`/`Edit` tool call, already
+  parsed in `ursa-major/src/parse.ts` — record a receipt per write:
+  `{ path, contentSha256, generationIndex, turnIndex, timestamp }`.
+  With receipts, the finished file's provenance join starts from the
+  last receipt for that path instead of searching every generation, and
+  the receipt-to-final diff is the exact mutation with no threshold
+  involved. The fuzzy matcher stays, but only for text with no receipt:
+  pasted conversations, prose the user moved between files, and
+  everything a model produced outside a tool call. This narrows the
+  uncertain-span population rather than retuning thresholds against it.
+- First step: a `receipts: FileReceipt[]` array on `OutcomeRecord`,
+  filled by `parseClaudeSession`, with a test asserting one receipt per
+  Write/Edit and the sha matching the generation text. No resolver
+  change in the first slice, so the receipt data can be inspected
+  before anything depends on it.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-24 — Near-miss theme diagnostic: let the corpus teach the detector its own synonyms
+- Trigger: building the loop detector today. Its themes are lexical, so
+  `brightness` and `brighten` are two terms, and a user who says "too
+  dark" once and "needs more contrast" the next time opens two themes
+  instead of one loop. `docs/design/trace-stage-loops.md` §6 states the
+  consequence plainly: `recurrences` is a floor, not an exact count.
+  Embeddings would fix it and would also make a theme label
+  unexplainable, which `ursa-major/src/match.ts` exists to prevent.
+- What: emit the near misses instead of silently dropping them. Any two
+  prompts whose shared-term overlap lands between 0.2 and
+  `THEME_OVERLAP` (0.34) are candidate members of one theme; list those
+  pairs, with their steps and the terms they do share, as a diagnostic
+  alongside the signals. The owner reading that list is the cheapest
+  possible labelling surface, and the terms she confirms become a
+  per-user equivalence table the next run applies before clustering.
+  The corpus teaches the detector the user's own vocabulary, and every
+  merge stays traceable to a term pair a human confirmed.
+- First step: add `themeNearMisses` to the `TraceSignals` return of
+  `ursa-major/src/loops.ts` and render it as one more table in
+  `ursa-major/src/viewer.ts`. Detection behaviour unchanged in this
+  slice; it only becomes visible what the detector nearly merged.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-24 — `ursa run` cannot see a chat trace, so the loop detector never fires on the product's own entry point
+- Trigger: shipping the detector exposed the gap. `ursa run <project>`
+  (`ursa-major/src/bin/ursa.ts`) builds every record from git commit
+  pairs alone, so `hasChatTrace` is false for all of them and the
+  loops, regressions and recurrence counts that shipped today are
+  unreachable from the launch the README documents. The trace-stage
+  path exists only in `ursa-major/src/cli.ts`, which requires the user
+  to name session files by hand with `--sessions`.
+- What: have `ursa run` find the sessions itself. Claude Code stores
+  every transcript under `~/.claude/projects/<project-slug>/`, where the
+  slug is derived from the project's own path, so the launch already
+  knows enough to locate the candidates: derive the slug from the
+  `<projectPath>` argument, read the transcripts whose generations touch
+  files inside the episode's `touchedFiles`, and pass them into the same
+  `resolve()` call as the commit pair. One record then carries both the
+  commit-pair evidence and the trace evidence, which is also the
+  multi-source condition KR1.3 asks for. Nothing leaves the machine:
+  this reads a local directory the user already owns.
+- First step: a `findSessionsForProject(projectPath): string[]` helper
+  with a test over a temporary `~/.claude/projects` layout, returning
+  paths only, wired into nothing yet.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-24 — Competitive scan (engineer's craft scan): LangSmith and the feedback-to-trace join
+- `docs/market/landscape.md` does not exist yet (sprint-2026-09-21 item
+  4, market seat, not yet run), so this scan used the charter's fallback
+  list and picked the product adjacent to today's work.
+- Scanned: LangSmith's human-feedback surface — annotation queues,
+  `create_annotation_queue()` / `add_runs_to_annotation_queue()` /
+  `list_annotations()`, feedback attached to a root or child run — plus
+  a current write-up of the join problem itself (oneuptime,
+  2026-09-12), which proposes a durable response-to-trace mapping
+  written before the answer is returned, an outbox row in the same
+  transaction as the feedback event, and a background worker so a
+  telemetry outage cannot lose a customer's report.
+- Worth stealing: joining at emit time rather than reconstructing the
+  join later. That is the ledger entry "Write-time file receipts"
+  above, and it is the same insight from the opposite direction:
+  LangSmith can do it because its customer owns the application, while
+  Ursa's write-time surface is the agent's own tool calls.
+- What Ursa does better: their label is a grader's verdict typed into a
+  queue ("correct", "hallucinated"), which is an opinion about how an
+  answer looks. Ursa's label is whether the text survived into finished
+  work, which no one typed and no one can flatter. And LangSmith's
+  instrumentation requires owning the app, so it can never see the same
+  user across claude.ai, ChatGPT and Gemini; Ursa's cross-model
+  comparison is exactly the property that requires no instrumentation
+  inside any lab's product.

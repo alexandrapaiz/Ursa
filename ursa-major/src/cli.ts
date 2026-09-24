@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from 'n
 import { join, resolve as absPath, relative, basename, extname } from 'node:path'
 import { parseClaudeSession, parsePasteConversation, type ParsedConversation } from './parse'
 import { resolve } from './resolve'
+import { deriveSignals } from './signals'
 import { renderViewer } from './viewer'
 
 const FINAL_EXTS = new Set([
@@ -111,10 +112,17 @@ function main() {
   const record = resolve({ taskId: args.id, files, conversations, generations, finished: args.finished })
   console.timeEnd('resolve')
 
-  if (args.annotations) {
-    record.signals = JSON.parse(readFileSync(args.annotations, 'utf8'))
-    console.log(`signals: ${record.signals!.correctionLoops.length} loops, ${record.signals!.feedbackTranslations.length} translations, ${record.signals!.regressions.length} regressions (${record.signals!.method})`)
-  }
+  // Hand annotations win when they are supplied; otherwise the detector runs.
+  // No --declare flag here: the CLI offers the owner no declaration surface, so
+  // episode.accepted stays null rather than being read off retention.
+  record.signals = args.annotations
+    ? JSON.parse(readFileSync(args.annotations, 'utf8'))
+    : deriveSignals(record)
+  const sig = record.signals!
+  console.log(
+    `signals: ${sig.correctionLoops.length} loops, ${sig.regressions.length} regressions, ` +
+    `${sig.oneShotCorrections.length} one-shot corrections, ${sig.feedbackTranslations.length} translations (${sig.method})`,
+  )
 
   mkdirSync(args.out, { recursive: true })
   const jsonPath = join(args.out, 'outcome_record.json')
