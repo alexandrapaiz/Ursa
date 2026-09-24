@@ -137,3 +137,92 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - First step: PM carries this to HQ as a ledger note per §1c
 - Cost: $0
 - Status: proposed
+
+### 2026-09-24 — Finding: Ursa has no claims database, so the skill seat cannot extract
+- Trigger: the skill agent's first activated run. `NEON_RO_URL` was
+  unset, so per charter the run skipped extraction. Looking into why
+  turned up the larger problem.
+- What: the seat's whole "Data access" section is alexandria's. It
+  assumes a Neon database holding silver-layer claims produced by a
+  research pipeline, and it tells the seat to query that database for
+  "the strongest un-extracted claim cluster." Ursa has no research
+  pipeline, no claims, and no such database, and the charter's own
+  activation banner says the alexandria-specific references do not
+  apply here. So the unset secret is not the blocker. There is nothing
+  behind the secret to connect to. Every future run of this seat will
+  hit the same wall and produce the same paragraph unless the charter
+  changes or the evidence source changes.
+- Two ways out, and they are not exclusive. (a) Point the seat at the
+  evidence Ursa actually has: its own published documents, the outcome
+  records, the code, and the trial corpus, which is what this run did
+  through the `evidence_scheme: repo` mechanism in
+  `prompts/skill-extract.md`. (b) Decide that Ursa wants a claims
+  corpus, which is a real product decision and not a docs fix, since it
+  means a research pipeline this repo does not have.
+- First step: owner or PM amends `prompts/skill-agent.md` "Data access"
+  to name repo evidence as the Ursa source and to stop instructing the
+  seat to query a database that does not exist. Charters are outside
+  this seat's write surface, so it cannot make the edit itself.
+- Cost: $0 for (a). Unknown and material for (b).
+- Status: proposed
+
+### 2026-09-24 — Finding: nothing renders the skills library
+- Trigger: charter step 4 asks the skill agent to check that the site's
+  skills parsing handles its frontmatter, and to flag rendering gaps
+  rather than editing the site.
+- What: there is no skills surface to check. `ursa-minor/` has `app`,
+  `components`, `lib` and `public`, and no skills route anywhere, and
+  `find ursa-minor -iname "*skill*"` returns nothing. A skill's
+  receipts are its product, and right now they are readable only by
+  someone with the repo checked out. The constraint any future surface
+  has to meet is set by the evidence table in
+  `prompts/skill-extract.md`: a reader clicks a ref in the body and
+  lands on the cited source, which is the same auditability property
+  the outcome record promises its buyers, turned on our own output.
+- First step: engineer or frontend seat adds a route that lists
+  `skills/*/SKILL.md`, parses the frontmatter, and renders each `[E*]`
+  citation in the body as a link to its `source`.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-24 — Finding: two docs defects found while reading in, both small
+- Trigger: the skill agent's first run read `docs/decisions.md` to find
+  the ADR its own dispatch cited.
+- What: two separate things, neither worth a sprint item on its own.
+  (1) The dispatch identifies this seat as "ADR-22 in docs/decisions.md"
+  and `prompts/research-agent.md:13` does the same. Ursa's
+  `docs/decisions.md` stops at ADR-006 and has no ADR-22. ADR-22 is
+  alexandria's numbering, carried across at bootstrap. The Ursa
+  decision that actually activated this seat is ADR-005, "Every seat but
+  sales is active" (2026-09-24). (2) `docs/decisions.md` has two
+  different ADRs both numbered ADR-005, at lines 84 and 100: "Every
+  seat but sales is active" and "Linear is the board of record". One of
+  them needs a new number, and whichever is renumbered leaves stale
+  references behind it.
+- First step: PM renumbers the duplicate and fixes the ADR-22 reference
+  in `prompts/research-agent.md`. Both files are outside this seat's
+  write surface.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-24 — The ship-first rule and the branch-name rule collide
+- Trigger: `prompts/skill-agent.md` requires a branch named
+  `skill/YYYY-MM-DD-slug` and, separately, requires the branch, a
+  commit, and a draft PR before any substantial thinking.
+- What: the slug names the skill, and the skill is not chosen until the
+  work is underway, so the branch has to be named before its name is
+  knowable. This run guessed `outcome-record-provenance` in its first
+  minute and then drafted a skill whose honest slug is
+  `adjudicating-uncertain-spans`, following the rule in
+  `prompts/skill-extract.md` that a slug names the work rather than the
+  topic. The branch and the skill therefore disagree, which is cosmetic
+  here and would be confusing across twenty runs.
+- Options: allow `skill/YYYY-MM-DD-run` as the ship-first branch name
+  and let the skill's own slug live in its directory, or rename the
+  branch once the slug is known, which costs a force-push and a new PR
+  because a PR cannot follow a renamed head. The first option is
+  cheaper and loses nothing, since the directory name is where the slug
+  is load-bearing.
+- First step: owner or PM picks one and amends the charter.
+- Cost: $0
+- Status: proposed
