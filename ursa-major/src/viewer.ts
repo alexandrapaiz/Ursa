@@ -377,19 +377,24 @@ export function renderViewer(record: OutcomeRecord): string {
   function buildSignalsPanel(panel) {
     var S = R.signals;
     var ep = S.episode;
+    // three states, not two: null means the owner was never asked, which is
+    // not the same claim as her declaring the work unacceptable.
+    var verdict = ep.accepted === null ? 'UNDECLARED' : (ep.accepted ? 'ACCEPTED' : 'NOT ACCEPTED');
     var note = el('p', 'filenote',
-      'Episode: ' + fmt(ep.steps) + ' steps · ' + fmt(ep.generations) + ' generations · '
-      + (ep.accepted ? 'ACCEPTED' : 'NOT ACCEPTED')
-      + (ep.acceptanceStatedInChat ? ' (stated in chat)' : ' (tacit — ' + ep.acceptanceBasis + ')')
+      'Episode: ' + fmt(ep.steps) + ' steps · ' + fmt(ep.generations) + ' generations · ' + verdict
+      + (ep.acceptanceStatedInChat ? ' (an acceptance was stated in chat, which is not a declaration)' : '')
+      + ' · basis: ' + ep.acceptanceBasis
       + ' · labels: ' + S.method);
     panel.appendChild(note);
 
     table(panel, 'Correction loops (recurrence = agentic failure count)',
-      ['Loop', 'Theme', 'Recurrences', 'Opened → closed', 'Resolution', 'Discovered spec'],
+      ['Loop', 'Theme', 'Recurrences', 'Every prompt step', 'Opened → closed',
+       'Resolution', 'Files it touched', 'Discovered spec'],
       S.correctionLoops.map(function (l) {
-        return [l.id, l.theme, l.recurrences,
-          l.openedStep + ' → ' + (l.closedStep === null ? 'open' : l.closedStep),
-          l.resolution.replace('_', ' '), l.discoveredSpec];
+        return [l.id, l.theme, l.recurrences, (l.promptSteps || []).join(', '),
+          l.openedStep + ' → ' + (l.closedStep === null ? 'not closed' : l.closedStep),
+          l.resolution.replace('_', ' '), (l.targetFiles || []).join(', ') || '—',
+          l.discoveredSpec];
       }));
 
     table(panel, 'Feedback → mechanism translations',
