@@ -54,6 +54,16 @@ span of the final text classified by what happened to it.
 | `generated_deleted` | produced and thrown away |
 | `no_generation_provenance` | in the finished work but traceable to no generation. The model was never in the running. |
 
+Every record also names **what kind of finished thing** it is about,
+because finished work is not only chat. A record's `artifact.kind` is
+`chat` when the conversation is the product, `repo` when the product is
+versioned source, `hosted` when it is served at a URL, and `visual` when
+the person accepted or corrected it by eye. When a rendered state exists,
+`artifact.renderRef` points at it, a deploy URL or a screenshot path, so
+a lab reading the record can go and look at the thing that was actually
+judged. `ursa run` fills `repo` on every run and upgrades it to `hosted`
+when the episode's own commit names a domain.
+
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
 generated commit followed by the person's edit of it. A full record
@@ -104,6 +114,10 @@ flowchart TB
     EX["<code>src/tuning/export.ts</code>"]
     MD["<code>tuning.md</code><br/>pasted into any model"]
     MINOR["Ursa Minor aggregation<br/>not built yet"]
+    DEP["<code>src/deploy.ts</code>"]
+
+    GIT -->|"<code>CNAME</code>, <code>package.json</code>, <code>vercel.json</code><br/>at the episode's final commit"| DEP
+    DEP -->|"DeployDetection, which becomes<br/>OutcomeRecord.artifact"| RS
 
     GIT -->|"commits and Co-Authored-By trailers"| PF
     PF -->|"CommitPair[]"| EP
@@ -151,7 +165,16 @@ acceptance; only the owner's declaration is.
 
 The older session-log path is `src/cli.ts`, which takes `--final` and
 `--sessions` flags and produces the same record plus a self-contained
-HTML viewer.
+HTML viewer. It defaults to `artifact.kind: 'chat'`, and takes
+`--artifact-kind` and `--render-ref` when the finished thing was
+something you looked at rather than something you read:
+
+```bash
+npx tsx src/cli.ts --id ursa-minor-site \
+  --final ~/Desktop/ursa-minor-site --conversations ./conversations \
+  --artifact-kind visual --render-ref screenshots/hero-accepted.png \
+  --out ./out
+```
 
 | Module | Job |
 |---|---|
@@ -161,6 +184,7 @@ HTML viewer.
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
+| `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
 
 `.ursa/` belongs in the target project's `.gitignore`. Raw records and
 the tuning store never leave the machine they were made on.
