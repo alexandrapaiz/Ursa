@@ -137,3 +137,95 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - First step: PM carries this to HQ as a ledger note per §1c
 - Cost: $0
 - Status: proposed
+
+### 2026-09-25 — Craft scan: Arena (lmarena.ai, now arena.ai)
+- Scanned the product surface itself, not the leaderboard press. What is
+  there: a Battle mode with an "Auto" routing option, a per-user
+  `/history/search` surface, a `/leaderboard` section, and a standing
+  disclaimer on the composer that "inputs are processed by third-party
+  AI and responses may be inaccurate." The methodology behind the
+  ranking was not extractable from the landing surface.
+- **Worth stealing: the searchable personal history.** Arena treats
+  every battle a user ran as retrievable later, with search as a
+  first-class route rather than a scroll. Ursa's viewer has tabs per
+  file plus Generations and Sessions, which is fine for the 5-span
+  fixture record and unusable for a real one. The alexandria n=2 record
+  has thousands of spans and no way to ask "show me every span the user
+  rewrote" or "find the prompt where this started." See the navigation
+  idea below.
+- **What Ursa does better: the label costs the user nothing and cannot
+  be gamed by presentation.** An Arena vote is a stated judgment made
+  by someone who then walks away, on two answers seen side by side,
+  which is exactly the preference-for-how-an-answer-looks proxy
+  CLAUDE.md §1 names as the thing labs already have too much of. Ursa's
+  label is what the finished work retained. Nobody voted. Second: that
+  composer disclaimer is the posture Ursa inverts — raw processing
+  happens on the user's device and raw data never reaches the
+  aggregation layer.
+
+### 2026-09-25 — Addressable spans: a URL for a finding inside a record
+- Trigger: today's sprint item 3 work. The viewer now navigates from a
+  span to its generation and to the user's prompt, but none of that
+  navigation is addressable. Open `outcome_record.html`, click your way
+  to the one span that proves a point, and you cannot hand that state
+  to anyone. Combined with the Arena scan above: their history is
+  searchable and routable, ours is neither.
+- What: give the viewer URL state. A fragment like
+  `#f=final.md&s=3` selects file panel `final.md`, span index 3, opens
+  the inspector on it, and scrolls it into view on load; clicking a span
+  pushes that fragment with `history.replaceState`. Add a filter row
+  over the file panel (class, `uncertain`, `trivial`, minimum score) and
+  a text search across span text and `conversations[].prompts[].text`,
+  with the active filter carried in the same fragment. The payoff is
+  citation: a lab conversation, a PR comment, or an owner's ledger entry
+  can point at one span of one record instead of describing it.
+- First step: fragment read-and-write for the `(file, span)` pair only,
+  with a jsdom test that loads the page with a fragment set and asserts
+  the inspector opens on the right span.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-25 — Run the provenance audit inside `ursa run`, not only `npm run resolve`
+- Trigger: today's work wired `auditProvenance` into
+  `ursa-major/src/cli.ts`, which is the fixture and paste-transcript
+  path. The path that actually produced both trials, `ursa run` in
+  `ursa-major/src/bin/ursa.ts`, writes its records with no audit at all.
+  The command that runs least often is the one that is checked.
+- What: call `auditProvenance` on every episode record `ursa run`
+  writes, print the one-line summary in the run report, and store the
+  result per episode so a record that stopped being navigable is visible
+  without opening it. Then decide the policy question deliberately:
+  does a broken pointer fail the run, or does it write the record and
+  flag it? The git-pair path can legitimately produce sources with no
+  eliciting prompt (a commit has no chat turn in front of it), so
+  `no_eliciting_prompt` likely needs to be a warning there and an error
+  on the chat path, which is a rule the audit does not yet have.
+- First step: add an `expectPrompts: boolean` option to
+  `auditProvenance`, call it from `resolveEpisode`, and print the
+  summary. Do it after PR #16 merges, since both touch `bin/ursa.ts`.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-25 — Prompt yield: which of the user's asks the model actually answered in surviving form
+- Trigger: rendering `conversations[].prompts` into the viewer today
+  made it obvious that prompts are the one part of the record that is
+  displayed and never scored. Every generation has a survival rate. The
+  instruction that caused the generation has nothing.
+- What: invert the existing join. For each `UserPrompt`, collect the
+  generations it elicited (the rule already exists as
+  `elicitingPrompt`), and roll their spans up into a prompt-level yield:
+  chars generated, chars that survived verbatim, chars mutated, chars
+  deleted. A prompt with high generated volume and near-zero survival is
+  an ask the model answered fluently and uselessly, and it is a
+  different failure from a prompt that had to be repeated, which is what
+  `CorrectionLoop` already captures. This is the artifact grading the
+  instruction rather than the output, and it is the natural unit for
+  Ursa Minor's commissioned collection: a lab weak in a given kind of
+  ask can be sold the prompts whose yield is worst.
+- First step: `promptYield(record): Array<{ conversationId, step,
+  generatedChars, survivedChars, deletedChars, yieldRate }>` in a new
+  module, tested against `fixtures/mini`, where the expected answer is
+  hand-checkable: `01-claude` step 0 should show yield 0.632 and
+  `02-chatgpt` step 0 should show 1.0.
+- Cost: $0
+- Status: proposed
