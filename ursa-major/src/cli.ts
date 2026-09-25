@@ -4,13 +4,17 @@
 //     --final <file-or-dir>... \
 //     [--sessions <claude-code .jsonl>...] [--path-filter <substring>] \
 //     [--conversations <dir of paste-format .md>] \
-//     [--out <dir>] [--abandoned]
+//     [--out <dir>] [--abandoned] \
+//     [--artifact-kind chat|repo|hosted|visual] [--render-ref <url-or-path>]
 
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from 'node:fs'
 import { join, resolve as absPath, relative, basename, extname } from 'node:path'
 import { parseClaudeSession, parsePasteConversation, type ParsedConversation } from './parse'
 import { resolve } from './resolve'
 import { renderViewer } from './viewer'
+import type { Artifact, ArtifactKind } from './types'
+
+const ARTIFACT_KINDS: ArtifactKind[] = ['chat', 'repo', 'hosted', 'visual']
 
 const FINAL_EXTS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.css', '.scss', '.html',
@@ -29,10 +33,14 @@ interface Args {
   pathFilter?: string
   annotations?: string
   finished: boolean
+  artifact: Artifact
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { id: 'task', out: '.', final: [], sessions: [], finished: true }
+  // Default `chat`: this entry point resolves final files against a
+  // conversation transcript, so unless the caller says otherwise the finished
+  // thing is the chat. `ursa run` is the one that knows it is looking at a repo.
+  const args: Args = { id: 'task', out: '.', final: [], sessions: [], finished: true, artifact: { kind: 'chat' } }
   let key: string | null = null
   for (const a of argv) {
     if (a.startsWith('--')) {
@@ -46,6 +54,15 @@ function parseArgs(argv: string[]): Args {
       case 'path-filter': args.pathFilter = a; key = null; break
       case 'conversations': args.conversations = a; key = null; break
       case 'annotations': args.annotations = a; key = null; break
+      case 'artifact-kind': {
+        if (!ARTIFACT_KINDS.includes(a as ArtifactKind)) {
+          throw new Error(`--artifact-kind must be one of ${ARTIFACT_KINDS.join(', ')}; got ${a}`)
+        }
+        args.artifact.kind = a as ArtifactKind
+        key = null
+        break
+      }
+      case 'render-ref': args.artifact.renderRef = a; key = null; break
       case 'final': args.final.push(a); break
       case 'sessions': args.sessions.push(a); break
       default:
@@ -108,7 +125,10 @@ function main() {
   const generations = parsed.flatMap((p) => p.generations)
   console.log(`final files: ${files.length} · conversations: ${conversations.length} · generations: ${generations.length}`)
   console.time('resolve')
-  const record = resolve({ taskId: args.id, files, conversations, generations, finished: args.finished })
+  const record = resolve({
+    taskId: args.id, files, conversations, generations,
+    finished: args.finished, artifact: args.artifact,
+  })
   console.timeEnd('resolve')
 
   if (args.annotations) {
@@ -125,6 +145,7 @@ function main() {
   const s = record.stats
   const pct = (x: number) => (x * 100).toFixed(1) + '%'
   console.log('\n— outcome record —')
+  console.log(`artifact kind: ${record.artifact.kind}${record.artifact.renderRef ? ` · rendered at ${record.artifact.renderRef}` : ''}`)
   console.log(`covered final chars: ${s.coveredChars.toLocaleString()}`)
   for (const [cls, st] of Object.entries(s.byClass)) {
     console.log(`  ${cls.padEnd(26)} ${pct(st.pct).padStart(7)}  (${st.chars.toLocaleString()} chars, ${st.spans} spans)`)
