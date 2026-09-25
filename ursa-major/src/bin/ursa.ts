@@ -9,11 +9,12 @@
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
 import { blobAt, findCommitPairs } from '../pairfinder'
+import { detectDeploy, type DeployDetection } from '../deploy'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
-import type { OutcomeRecord, RawGeneration } from '../types'
+import type { Artifact, OutcomeRecord, RawGeneration } from '../types'
 
 const TEXT_EXTS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.py', '.css', '.scss', '.html',
@@ -21,6 +22,23 @@ const TEXT_EXTS = new Set([
 ])
 const SKIP_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'])
 const MAX_BLOB_CHARS = 300_000
+
+/**
+ * What kind of finished thing an episode is, as of its own final commit.
+ *
+ * Every `ursa run` episode is at minimum a `repo`: the finished work is source
+ * under version control and the human's commit is the edit. It is `hosted`
+ * when that same commit also names a URL the work is served from, because then
+ * the thing the owner actually looked at before accepting was the deployed
+ * page, not the diff. The lookup reads blobs at `ep.finalSha`, not the working
+ * tree, so a record made today from a commit six months old carries the URL
+ * that commit shipped with rather than today's.
+ */
+export function artifactFor(projectPath: string, ep: Episode): { artifact: Artifact; deploy: DeployDetection | null } {
+  const deploy = detectDeploy((path) => blobAt(projectPath, ep.finalSha, path))
+  if (!deploy) return { artifact: { kind: 'repo' }, deploy: null }
+  return { artifact: { kind: 'hosted', renderRef: deploy.url }, deploy }
+}
 
 export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord | null {
   const files: Array<{ path: string; text: string }> = []
@@ -60,6 +78,7 @@ export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord 
     generations,
     finished: true,
     generatedAt: ep.closedAt,
+    artifact: artifactFor(projectPath, ep).artifact,
   })
 }
 
@@ -81,6 +100,15 @@ export function renderRunSummary(records: OutcomeRecord[], episodes: Episode[]):
   }
   const edited = records.filter((r) => r.stats.byClass.survived_mutated.chars > 0).length
   if (edited > 0) lines.push(`${edited} record${edited === 1 ? '' : 's'} carry your corrections — the whys live there.`)
+  // Say where the work is live. If the owner judged it by looking at a page
+  // rather than by reading a diff, the page is the thing that was accepted.
+  const hosted = [...new Set(
+    records.filter((r) => r.artifact.kind === 'hosted' && r.artifact.renderRef)
+      .map((r) => r.artifact.renderRef!),
+  )]
+  for (const url of hosted) {
+    lines.push(`This work is also live at ${url}, so the records carry where to go and look at it.`)
+  }
   return lines.join('\n')
 }
 
