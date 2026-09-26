@@ -82,3 +82,39 @@ Sources: rlhfbook.com; Manning, The RLHF Book (2026); Tulu 3, arXiv
 2411.15124; Raschka, Build a Large Language Model From Scratch
 (Manning 2024); Raschka, Build a Reasoning Model From Scratch
 (Manning 2026).
+
+## Addendum 2026-09-25 — the alexandria pull (chair session)
+
+The owner asked the chair to query alexandria's claims database
+through its MCP connector and report what bears on Ursa. Four claims
+do, each with a consequence for this doc's plan:
+
+1. **Harness-Zero** (arXiv 2609.24974; alexandria digest 2026-W39).
+   Supervision built from mechanism-level trajectory review, where a
+   reference agent passes good student actions and minimally rewrites
+   bad ones, distills to 30% macro task success; supervision from
+   final answers alone reaches 3 to 15%. This is external validation
+   of the trace-not-label doctrine: the correction mechanism carries
+   the signal, endpoint verdicts alone do not. Consequence: CaseUnit
+   exports must keep the per-step correction context, not only the
+   final diff.
+2. **Revisiting Complete Reasoning Traces** (arXiv 2609.07103).
+   Endpoint-only training consistently alters reasoning behavior.
+   Consequence for the pair lane (n=2, commit endpoints): state in
+   the lab one-pager that endpoint pairs shift behavior in ways full
+   traces do not, which is an argument for selling the trace corpus
+   beside the pair corpus, not instead of it.
+3. **Mind2Dialogue** (arXiv 2609.15972). Training on simulated user
+   mental states improves preference-following by 26.6 to 40.9 points
+   over instruction-tuned baselines. The whys Ursa distills are that
+   mental-state annotation, produced from real usage instead of
+   simulation. A contrast worth one line in the one-pager.
+4. **ACLArena** (arXiv 2609.23989). Sequential post-training stages
+   destroy earlier capability (single-hop search 45.2 falls to 14.6
+   after a later stage, recovering only partially). Consequence for
+   Major's import story: per-user tuning lands as adapters or merged
+   batches, never as fine-tunes stacked sequentially on one
+   checkpoint.
+
+Availability: the connector is chair-only (a local MCP on the owner's
+machine). Seats citing these read the arXiv links above.
