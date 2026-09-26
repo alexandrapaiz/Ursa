@@ -22,8 +22,17 @@ describe('readVerdict — stated tier only', () => {
     expect(v).toEqual(NO_VERDICT)
   })
 
-  it('discards a reading that points at a step that does not exist', () => {
-    const v = readVerdict(prompts, () => '{"accepted": false, "step": 999, "quote": "no, that is not it"}')
+  it('repairs a misnumbered step from the trace when the quote is verbatim', () => {
+    // the n=1 acceptance run: the model quoted the verdict exactly but
+    // said step 710; the quote lives at step 730 and the trace governs
+    const v = readVerdict(prompts, () => '{"accepted": true, "step": 710, "quote": "yesss finallyyy!! lol"}')
+    expect(v.accepted).toBe(true)
+    expect(v.step).toBe(730)
+    expect(v.quote).toBe('yesss finallyyy!! lol')
+  })
+
+  it('a quote found nowhere in the trace stays undeclared even with a plausible step', () => {
+    const v = readVerdict(prompts, () => '{"accepted": false, "step": 12, "quote": "utterly wrong, start over"}')
     expect(v).toEqual(NO_VERDICT)
   })
 

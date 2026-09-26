@@ -90,19 +90,25 @@ export function readVerdict(
 
   if (parsed.accepted === null || typeof parsed.accepted !== 'boolean') return NO_VERDICT
 
-  const step = typeof parsed.step === 'number' ? parsed.step : null
+  const claimedStep = typeof parsed.step === 'number' ? parsed.step : null
   const quote = typeof parsed.quote === 'string' ? parsed.quote : null
-  if (step === null || quote === null) return NO_VERDICT
+  if (quote === null) return NO_VERDICT
 
-  // Verify against the trace: the model's reading must be literally
-  // present in the message it points at. A hallucinated quote or step
-  // is a misread, and a misread is not a verdict.
-  const source = prompts.find((p) => p.step === step)
-  if (!source || !source.text.includes(quote)) return NO_VERDICT
+  // Verify against the trace, quote first: the user's words must be
+  // literally present in some message, or the reading is a
+  // hallucination and the session stays undeclared. The step is then
+  // taken FROM the trace, not from the model — in the n=1 acceptance
+  // run the model quoted the verdict verbatim but misnumbered its step
+  // (710 for 730), and the trace, not the pointer, is the authority.
+  const candidates = prompts.filter((p) => p.text.includes(quote))
+  if (candidates.length === 0) return NO_VERDICT
+  const source =
+    candidates.find((p) => p.step === claimedStep) ??
+    candidates[candidates.length - 1]
 
   return {
     accepted: parsed.accepted,
-    step,
+    step: source.step,
     quote,
     basis: 'read-from-chat',
     confidence: 'stated',
