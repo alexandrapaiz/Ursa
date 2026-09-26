@@ -145,3 +145,38 @@ organizes) applies. Infisical centralizes the growing secret set
 with rotation and audit in one place.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## ADR-007 — Slack carries prose from the PM, not just run reports (2026-09-26)
+
+**Context.** Owner, mid-window: "communications are pretty dead on
+slack. theres no chatting there, only one-line run reports." The
+existing pattern (this and other seats posting single-line run
+summaries) technically satisfied "post a report" while leaving the
+channel unreadable as a place a person would actually check for what
+the team is doing.
+
+**Decision.** From this directive on, in every synchronous window and
+by extension every run that posts to Slack: the PM talks like a
+colleague, not a logger. Concretely, each window posts (1) the
+window's plan in three to six sentences of plain prose, first person,
+no bullet lists; (2) each dispatch, as it fires, in one sentence naming
+the seat, what it's for, and why now; (3) anything needed from the
+owner, phrased as a direct question; (4) a closing paragraph when the
+run stops. `SLACK_WEBHOOK_URL` (already an Infisical-synced secret per
+ADR-006) is the mechanism; posts go via a plain `curl -s -X POST`
+with a JSON `text` field.
+
+**Reasoning.** A channel that only ever prints one-line run reports
+reads as a log, not a team, and the owner is trying to run this
+synchronously as a team. The fix is a communication-style change, not
+new infrastructure — no new secret, no new service, cost stays $0.
+
+**Consequences.** This run (the 2026-09-26 sync window) already posts
+this way; it is recorded here so the practice survives past this
+window rather than living only in one session's memory, and so
+`prompts/pm-agent.md` can be amended by the owner's merge to state it
+as a standing charter rule rather than a one-off. Other seats that
+post to Slack should follow the same shape once their charters are
+amended; this ADR does not itself edit any charter.
+
+**Owner:** Alexandra. **Status:** accepted (directed in session).
