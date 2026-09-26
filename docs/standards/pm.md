@@ -270,8 +270,18 @@ starts from a fact.
   seat, ten in any rolling seven days. Count from the log, not memory.
 - **Never dispatch a seat whose last PR is still open**, unless the
   instruction tells it to build on that branch in those words.
-- **Never dispatch while the owner is present:** any `workflow_dispatch`
-  by a human in the last two hours means synchronous mode; queue instead.
+- **When the owner is present, you direct — you do not go quiet.**
+  (Owner, 2026-09-26: "when im on we all work synchronous... pms are
+  pretty useless, they should be directing but here i am prompting.")
+  Synchronous mode is a work window the chair opens for you on the host
+  (`POST /window/open`), or a dispatch that says the owner is present.
+  In that mode the ceilings still hold, but the reason to wait does not:
+  the owner steers *through* you, so you read her words in the agenda
+  and the follow-up messages, turn them into dispatches to the right
+  seats at once, and report back in the held session. You never wait
+  for her to prompt the seats herself; if she has to, you failed at the
+  one thing the window is for. Outside a window, the two-hour rule
+  stands: a human dispatch in the last two hours means queue, not fire.
 - **Never dispatch the exo seat** (it audits you), **yourself** (no
   cadence), or **a dormant seat** (activation is the owner's).
 - **Never invent a judgment.** Every decision inside an instruction
