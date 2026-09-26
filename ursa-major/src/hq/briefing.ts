@@ -29,6 +29,19 @@ import { buildQuery, compareScored, normalizePath, recurrenceBonus, score } from
 export const DEFAULT_MAX_RULES = 8
 export const DEFAULT_MAX_CASES = 3
 
+/**
+ * Relevance floor for a filtered request.
+ *
+ * One incidental word in common is not a reason to put something in an
+ * agent's context: 'page' appears in half the paths a web project has.
+ * Two points is the first score that requires a real signal — a domain
+ * match, a file match, or two distinct query words — so anything below
+ * it is dropped rather than ranked last. An unfiltered request (no
+ * domain, no files) has no floor, because there is nothing to be
+ * irrelevant to.
+ */
+export const MIN_RELEVANCE = 2
+
 /** Guardrails are few by nature — each one exists because an agent once
  *  overreached badly enough that the owner wrote a rule against it — but
  *  the ceiling is stated rather than assumed. */
@@ -144,7 +157,7 @@ export function buildBriefing(
       axiom,
       unit: toRuleUnit(axiom, score(query, axiom.domain, axiomFiles(axiom, records, loops), axiom.statement)),
     }))
-    .filter(({ unit }) => query.empty || unit.why.score > 0)
+    .filter(({ unit }) => query.empty || unit.why.score >= MIN_RELEVANCE)
     .sort((a, b) =>
       compareScored(
         a,
@@ -170,7 +183,7 @@ export function buildBriefing(
         )
       ),
     }))
-    .filter(({ unit }) => query.empty || unit.why.score > 0)
+    .filter(({ unit }) => query.empty || unit.why.score >= MIN_RELEVANCE)
     .sort((a, b) =>
       compareScored(
         a,
@@ -183,9 +196,12 @@ export function buildBriefing(
 
   const nearestCases = scoredCases.slice(0, maxCases).map(({ unit }) => unit)
 
-  // Guardrails ride with the rules they belong to: an agent that is
-  // being told "prefer X here" also needs "and the last agent that
-  // touched this went too far, here is what she said about it."
+  // Guardrails ride with the rules they belong to: an agent being told
+  // "prefer X here" also needs "and the last agent that touched this went
+  // further than asked, here is what she said about it." Scope is every
+  // axiom that cleared the relevance floor, including ones ranked below
+  // the maxRules cut — a guardrail is cheap to read and expensive to
+  // rediscover, so it is not dropped for being ninth.
   const relevantAxiomIds = new Set(scoredRules.map(({ axiom }) => axiom.id))
   const guardrails: GuardrailUnit[] = []
   for (const axiom of servable) {
@@ -294,8 +310,8 @@ export function renderBriefing(briefing: Briefing): string {
     lines.push('Each of these exists because an agent once went further than asked.')
     lines.push('')
     for (const g of briefing.guardrails) {
-      lines.push(`- ${g.statement} (${g.axiomId}, from ${g.recordId} step ${g.steps.join(', ')})`)
-      if (g.quote) lines.push(`  - Her words: "${g.quote}"`)
+      lines.push(`- From ${g.axiomId} ("${g.statement}"), ${g.recordId} step ${g.steps.join(', ')}:`)
+      lines.push(g.quote ? `  - Her words: "${g.quote}"` : '  - No verbatim words recorded; the rule above is the whole receipt.')
     }
     lines.push('')
   }

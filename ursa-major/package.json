@@ -6,7 +6,9 @@
   "description": "Ursa Major provenance resolver — joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
   "scripts": {
     "test": "vitest run",
-    "resolve": "tsx src/cli.ts"
+    "resolve": "tsx src/cli.ts",
+    "brief": "tsx src/hq/cli.ts brief",
+    "hq:demo": "tsx src/hq/seed.ts"
   },
   "dependencies": {
     "diff": "^8.0.2"

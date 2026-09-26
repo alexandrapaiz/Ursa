@@ -5,13 +5,14 @@
 // carries its receipt.
 
 import { describe, expect, it } from 'vitest'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { buildBriefing, renderBriefing } from './briefing'
+import { buildBriefing, MIN_RELEVANCE, renderBriefing } from './briefing'
 import { buildQuery, score, words } from './retrieval'
 import { RECORDS, TUNING } from './fixtures'
 import { loadRecords, loadTuning, main } from './cli'
+import { writeFixtureStore } from './seed'
 
 const NOW = '2026-09-26T12:00:00.000Z'
 const brief = (input: Parameters<typeof buildBriefing>[2]) => buildBriefing(TUNING, RECORDS, input, NOW)
@@ -91,6 +92,18 @@ describe('buildBriefing', () => {
     expect(brief({ domain: 'copy' }).guardrails).toHaveLength(0)
   })
 
+  it('drops a unit that matches only on an incidental word', () => {
+    // 'about page copy oversells' shares exactly the word 'page' with a
+    // request about src/app/page.tsx, and shares no file and no domain.
+    const b = brief({ domain: 'motion', files: ['src/app/page.tsx'] })
+    const incidental = b.nearestCases.find((c) => c.loopId === 'loop-c')
+    expect(incidental).toBeUndefined()
+    expect(MIN_RELEVANCE).toBe(2)
+    // The same case is served when the request has nothing to be
+    // irrelevant to.
+    expect(brief({}).nearestCases.map((c) => c.loopId)).toContain('loop-c')
+  })
+
   it('honours the rule and case ceilings', () => {
     const b = brief({ maxRules: 1, maxCases: 1 })
     expect(b.rules).toHaveLength(1)
@@ -127,7 +140,8 @@ describe('renderBriefing', () => {
     expect(text).toContain('ax-001, domain motion, mixed, seen 2x')
     expect(text).toContain('Her words: "it looks like the page is crashing"')
     expect(text).toContain('Surfaced because: exact domain match; learned on src/app/page.tsx')
-    expect(text).toContain('only touch the hero, do not restyle the rest of the page')
+    expect(text).toContain('From ax-001 ("keep entrance motion under 8px of travel"), rec-site-001 step 27:')
+    expect(text).toContain('Her words: "only touch the hero, do not restyle the rest of the page"')
     expect(text).toContain('Ranking: lexical-v0.')
   })
 })
@@ -135,11 +149,7 @@ describe('renderBriefing', () => {
 describe('the brief CLI', () => {
   it('reads .ursa/tuning.json and .ursa/records/ and prints JSON on --json', () => {
     const root = mkdtempSync(join(tmpdir(), 'ursa-hq-'))
-    mkdirSync(join(root, '.ursa', 'records'), { recursive: true })
-    writeFileSync(join(root, '.ursa', 'tuning.json'), JSON.stringify(TUNING))
-    for (const r of RECORDS) {
-      writeFileSync(join(root, '.ursa', 'records', `${r.task.id}.json`), JSON.stringify(r))
-    }
+    expect(writeFixtureStore(root)).toBe(join(root, '.ursa'))
 
     expect(loadTuning(join(root, '.ursa', 'tuning.json')).axioms).toHaveLength(4)
     expect(loadRecords(join(root, '.ursa', 'records'))).toHaveLength(2)
