@@ -101,7 +101,9 @@ next run (and the owner) can see the priorities were read, not missed.
    window. This is the same item queued and attempted 2026-09-25; if
    you see no prior partial work, start fresh.'
    ```
-   Result: **succeeded.** Run:
+   Result: **succeeded, PR #21 shipped**
+   ("Market: landscape.md — 9+ competitors, three categories", branch
+   `market/2026-09-26`, `scan: pass`). Run:
    https://github.com/alexandrapaiz/Ursa/actions/runs/36207791476.
    This session's token (a personal access token per `gh auth status`,
    distinct from the GitHub App installation token the scheduled
@@ -111,7 +113,8 @@ next run (and the owner) can see the priorities were read, not missed.
    dispatch mechanism itself — worth the owner's attention (see
    pending.md) since it means synchronous-window dispatches can work
    today even though the daily standup's automated dispatch still
-   cannot.
+   cannot. This closes out sprint item 4, the last unstarted item on
+   this sprint's backlog.
 
 ## Not dispatched
 

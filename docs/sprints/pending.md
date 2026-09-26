@@ -8,19 +8,20 @@ against `gh pr list --state all`, `gh pr checks` on every open PR,
 
 ## Awaiting the owner's merge
 
-- 2026-09-24 through 2026-09-26 — **six open PRs, all green, none
+- 2026-09-24 through 2026-09-26 — **seven open PRs, all green, none
   reviewed yet:** #13 (`engineer/2026-09-24-trace-stage-loops`, sprint
   item 1), #14 (`skill/2026-09-24-outcome-record-provenance`, skill's
   first Ursa run), #15 (`fe/2026-09-24-visual-review`, frontend's
   first Ursa run), #16 (`engineer/2026-09-25-artifact-kind`, sprint
   item 2), #18 (`engineer/2026-09-25-fixture-browsable-record`, sprint
-  item 3), #19 (`research/2026-09-25`, weekly curation). Checked
-  `gh pr checks` on all six this run: every one shows `scan: pass`,
+  item 3), #19 (`research/2026-09-25`, weekly curation), #21
+  (`market/2026-09-26`, sprint item 4, shipped this run). Checked
+  `gh pr checks` on all seven this run: every one shows `scan: pass`,
   nothing red anywhere in the open-PR set. Oldest (#13) is under 48
   hours old, so none trips the "owner-merge PR older than seven days"
-  line yet. **Engineer's full sprint backlog (items 1–3) is now
-  attempted** across #13/#16/#18; merge order matters most among those
-  three since all touch `ursa-major/src`.
+  line yet. **This sprint's entire four-item backlog is now
+  attempted** across #13/#16/#18/#21; merge order matters most among
+  #13/#16/#18 since all three touch `ursa-major/src`.
 
 ## Waiting on an owner-only action
 
@@ -73,12 +74,12 @@ dispatch reasoning (see dispatch-queue.md).
   engineer sprint items have been attempted; nothing left owed by
   engineer against this sprint's backlog until the owner merges and a
   new sprint opens.
-- **Dispatched this run** — 2026-09-21 market sprint item 4,
+- **Resolved this run** — 2026-09-21 market sprint item 4,
   `docs/market/landscape.md`, serving KR2.3 (due 2026-10-31). Zero
   runs ever before this run; dispatched for real in this synchronous
-  window (run https://github.com/alexandrapaiz/Ursa/actions/runs/36207791476,
-  see docs/sprints/dispatch-queue.md). Not yet known whether it
-  produced a PR — check next run.
+  window and shipped PR #21 (`market/2026-09-26`, green), closing out
+  the last unstarted item on this sprint's backlog. See
+  docs/sprints/dispatch-queue.md.
 - 2026-09-18 through 2026-09-20 — three `proposed` ledger entries still
   have no owner verdict: repo split (2026-09-18, now 8 days), tuning
   packs (2026-09-19, now 7 days), the merge-commits/PR-reader finding
