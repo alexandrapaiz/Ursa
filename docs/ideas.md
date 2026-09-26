@@ -143,3 +143,63 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-09-26 — The page reads the local channel first, the sync route second
+- Trigger: today's engineer run added `GET /payload` to the bridge
+  (`ursa-major/src/bridge/index.ts`), closing S0's "serves `.ursa/`
+  over the local socket" clause. The page
+  (`ursa-major/overlay/app/page.tsx`) still polls
+  `/api/sync/<blobId>` every four seconds even when the bridge is
+  running on the same machine, so the owner's own data makes a round
+  trip through Vercel to travel between two processes on her laptop.
+- What: in the page's poll, try `http://127.0.0.1:7817/payload`
+  first; if it answers, render it and skip the download and the
+  decryption entirely. Fall back to the sync route when the bridge is
+  not reachable, which is the second-machine case sync exists for.
+  This is most of plan §16.7's S1, and it also means the page works
+  with sync switched off, which §16.8 risk 2 names as the mitigation
+  it wants.
+- First step: a `source: 'bridge' | 'sync'` indicator in the page
+  header and a five-line race in the existing `poll` callback.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-26 — Which records a verdict actually covers
+- Trigger: `applyVerdict` (`ursa-major/src/bridge/declare.ts`, shipped
+  today) applies a session's verdict to every record in the project,
+  because no join exists from a record back to the session that
+  produced it. A session spent on the parser while the owner declares
+  satisfaction with the viewer will label the parser's records too.
+- What: join each record to the session that produced it, using the
+  episode's `openedAt`/`closedAt` window against the session log's
+  own timestamps and the overlap between the episode's `touchedFiles`
+  and the files the session's generations wrote. Records outside the
+  session that carried the verdict stay undeclared, which is the
+  honest answer rather than the convenient one.
+- First step: `sessionWindow(record): {from, to, files}` in
+  `src/bridge/declare.ts` plus one test where two episodes exist and
+  only the one inside the session's window is declared.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-26 — The tuning review is itself an outcome record
+- Trigger: today's competitive scan (below). Cursor's
+  rules-from-chat-history prompt reads its own JSONL transcripts and
+  emits `.cursor/rules/*.mdc` for the developer to accept, edit or
+  reject as a diff — and records nothing about which way each one
+  went. The accept/edit/reject decision is exactly the span
+  classification Ursa already has a schema for.
+- What: render the distiller's output
+  (`ursa-major/src/tuning/distill.ts`) as a reviewable diff, and
+  treat the owner's pass over it as a finished artifact in its own
+  right: an accepted axiom is `survived_verbatim`, an edited one is
+  `survived_mutated` with the edit as the correction, a rejected one
+  is `generated_deleted`, and an axiom the owner writes in herself is
+  `no_generation_provenance` — the most valuable class, and here it
+  means the distiller never saw the thing that mattered most.
+- First step: `ursa tuning review --tuning <project>/.ursa/tuning.json`
+  writing the review's own outcome record to `.ursa/records/`.
+- Cost: $0
+- Status: proposed
+
+- 2026-09-26 (engineer, competitive scan): **Cursor's rules-from-chat-history.** Cursor stores agent sessions as JSONL transcripts on disk, and the pattern popularized by Eric Zakariasson in April 2026 points the agent at its own past transcripts to propose `.cursor/rules/*.mdc` and `.cursor/skills/<slug>/SKILL.md` files. The developer reviews a diff, accepts what is useful, and the next chat starts smarter. **Worth stealing:** the review artifact. Cursor hands the user a diff of concrete proposed files rather than a settings screen, and the instruction to accept only rules that "read like a sentence you would have written yourself" is a better acceptance test than any confidence score; Ursa's distiller produces the same kind of object and shows it as a list. **What Ursa does better:** the scan's own source says it plainly — "the prompt does not capture acceptance metrics," and "no feedback loop feeds back into the system." Cursor's user does the labeling work and the label evaporates. Ursa's whole design is that the accept/edit/reject is the signal, and as of today the verdict the user states in chat is written into the record rather than displayed and dropped. That gap is the ledger entry above. Sources: https://aicatchup.com/skills/cursor-rules-from-chat-history, https://forum.cursor.com/t/rules-vs-memories-and-global-vs-project/137149
