@@ -667,7 +667,7 @@ evidence, never orders; commanding agents would be the central planner
 the principles reject. Dogfood target: Ursa's own seat org. Full spec
 owed when this stub graduates to a milestone.
 
-## 16. The overlay: the first surface (planned 2026-09-20, not yet built)
+## 16. The overlay: the first surface (planned 2026-09-20; S0 shipped 2026-09-25)
 
 Owner's picture: a hovering, terminal-like, slightly translucent
 screen over Claude Code. Decisions taken with the owner in the planning
