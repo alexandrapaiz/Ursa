@@ -139,3 +139,28 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - Status: rejected — owner abandoned Linear after one cycle (ADR-006); the repo is the board
 
 - 2026-09-25 (chair): alexandria MCP queried for Minor; four claims with consequences recorded in docs/research/minor-training-fit.md (trace-not-label validated by Harness-Zero; adapters-not-sequential for Major imports). Connector is chair-only.
+
+### 2026-09-26 (market) — Neutrality as a named, sellable asset in the Minor pitch
+- Trigger: this run's landscape watch (docs/market/landscape.md,
+  Category 1). Meta's $14.3B stake for 49% of Scale AI (June 2025)
+  triggered Google, OpenAI, and Microsoft to cut or scale back their
+  Scale contracts on neutrality grounds alone — they could no longer
+  trust that training data and roadmap details stayed away from a
+  competing lab's parent company. Sources: [Computerworld](https://www.computerworld.com/article/4009714/metas-14-3b-stake-triggers-scale-ai-customer-exodus-could-be-a-windfall-for-rivals-like-mercor.html), [TechCrunch](https://techcrunch.com/2025/06/18/openai-drops-scale-ai-as-a-data-provider-following-meta-deal).
+- What: CLAUDE.md §5 already names "model providers are simultaneously
+  the platform, the customer, and the entity most capable of shutting
+  Ursa down" as the central strategic problem, but Ursa has no equity
+  or ownership tie to any single lab today and nothing in the current
+  materials states that as a sellable guarantee. The Scale/Meta episode
+  is a live, dated precedent that buyers act on neutrality concerns
+  with real contract dollars, not just in principle. Turn the
+  already-true fact (no lab holds equity in or control over Ursa) into
+  a named, citable clause in whatever the Minor sales/lab-brief
+  material becomes (KR4.1's one-page lab brief), with the Scale episode
+  as the evidence a technical buyer can independently verify.
+- First step: when KR4.1's lab brief is drafted, add a short
+  "structural neutrality" section stating the ownership fact plainly
+  and citing this precedent; no code or product change required.
+- Cost: $0
+- Status: proposed
+
