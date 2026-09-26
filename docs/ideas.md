@@ -137,3 +137,5 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - First step: PM carries this to HQ as a ledger note per §1c
 - Cost: $0
 - Status: rejected — owner abandoned Linear after one cycle (ADR-006); the repo is the board
+
+- 2026-09-25 (chair): alexandria MCP queried for Minor; four claims with consequences recorded in docs/research/minor-training-fit.md (trace-not-label validated by Harness-Zero; adapters-not-sequential for Major imports). Connector is chair-only.
