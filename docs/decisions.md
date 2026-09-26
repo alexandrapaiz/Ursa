@@ -180,3 +180,15 @@ post to Slack should follow the same shape once their charters are
 amended; this ADR does not itself edit any charter.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+**ADR-007 amendment (owner, 2026-09-26): "make the slack prose be in
+bullets, otherwise it is a lot of stuff to read."** Correction to the
+decision above, same day: every Slack post is bullets, one line each,
+five bullets at most per post — plan, dispatches, what's needed from
+the owner, closing paragraph all become five-bullet-or-fewer lists,
+never paragraphs. Every PR description opens with a five-bullet
+summary; the run report posts those same bullets rather than
+composing separate prose for Slack. The three-to-six-sentence prose
+form above lasted about ten minutes of the same window before the
+owner corrected it — recorded so the next run doesn't reintroduce
+paragraphs from this entry's first version.
