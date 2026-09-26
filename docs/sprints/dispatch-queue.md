@@ -101,7 +101,17 @@ next run (and the owner) can see the priorities were read, not missed.
    window. This is the same item queued and attempted 2026-09-25; if
    you see no prior partial work, start fresh.'
    ```
-   Result: **[recorded below once attempted]**
+   Result: **succeeded.** Run:
+   https://github.com/alexandrapaiz/Ursa/actions/runs/36207791476.
+   This session's token (a personal access token per `gh auth status`,
+   distinct from the GitHub App installation token the scheduled
+   standup runs use) hit no 403 at all on `gh workflow run`. The
+   credential wall documented on 2026-09-24 and 2026-09-25 is
+   therefore specific to the automated run's token, not to the
+   dispatch mechanism itself — worth the owner's attention (see
+   pending.md) since it means synchronous-window dispatches can work
+   today even though the daily standup's automated dispatch still
+   cannot.
 
 ## Not dispatched
 
