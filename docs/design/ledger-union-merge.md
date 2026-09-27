@@ -64,6 +64,7 @@ TypeScript type.
 │  pull request  ──mergeable: "CONFLICTING"──▶  the owner's merge queue │
 │       │                                                              │
 │       └──pull_request event──▶ .github/workflows/ledger-gate.yml      │
+│                                 (proposed; see §9)                    │
 └──────────────────────────────────────────────────────────────────────┘
                                    │
    .github/workflows/ledger-gate.yml runs two commands:
@@ -214,8 +215,12 @@ tools/ledger/install-driver.sh      registers the driver in this clone
 tools/ledger/requeue.sh             drains conflicting pull requests
 tools/ledger/ledger.test.mjs        12 tests, node:test
 tools/ledger/check.test.mjs         9 tests, node:test
-.github/workflows/ledger-gate.yml   runs both test files and the checker
-.github/workflows/tests.yml         runs ursa-major's 36 vitest tests
+tools/ledger/ci/ledger-gate.yml     PROPOSED workflow: both test files plus
+                                    the checker, on every pull request
+tools/ledger/ci/tests.yml           PROPOSED workflow: ursa-major's 36 vitest
+                                    tests, which nothing ran in CI before today
+tools/ledger/ci/README.md           why those two are a proposal and not
+                                    installed, and the two commands to install
 ```
 
 `.gitattributes`, in full, as committed:
@@ -393,9 +398,30 @@ git push origin main
 | `node:test` and `node:assert/strict` (built into Node 22) | The 21 tests for the driver and the checker | `vitest` 2.1.8 is the repository's test runner and is deliberately **not** used for these files: it lives in `ursa-major/package.json`, so running it requires `ursa-major/node_modules`, which reintroduces exactly the install dependency the driver must not have. `node:test` needs nothing. `ursa-major`'s own 36 tests stay on vitest and are now run in CI by `.github/workflows/tests.yml`. |
 | git 2.55.0 | Supplies the merge driver interface (`%O %A %B %L %P`), the `merge=<name>` path attribute, and `git worktree` for repairing a branch without disturbing the working tree | This is git's own documented extension point for exactly this problem (`gitattributes(5)`, "Defining a custom merge driver"). The alternative was git's built-in `merge=union`, which takes both sides of every hunk: it would have resolved these five conflicts, and it would also silently duplicate an entry whenever the owner edited one while a seat appended, because it understands lines and not entries. |
 | GitHub CLI `gh` 2.101.0 | `requeue.sh` reads `mergeable` per pull request and resolves numbers to branch names | The same data is available from the REST API with a token, but `gh` is already authenticated in every seat workflow through `GH_TOKEN` and is already how every charter inspects the queue. |
-| `actions/checkout@v4`, `actions/setup-node@v4` | The two steps in `ledger-gate.yml` and `tests.yml` | Already the versions pinned by `.github/workflows/redaction-gate.yml` and the eleven seat workflows; matching them keeps one upgrade surface. |
+| `actions/checkout@v4`, `actions/setup-node@v4` | The two steps in the proposed `ledger-gate.yml` and `tests.yml` | Already the versions pinned by `.github/workflows/redaction-gate.yml` and the eleven seat workflows; matching them keeps one upgrade surface. |
 
-## 8. What this does not solve
+## 8. The seat cannot install its own guardrail
+
+Both workflows in `tools/ledger/ci/` were written into
+`.github/workflows/` first, and the push was rejected:
+
+```
+! [remote rejected] engineer/2026-09-27-ledger-union-merge -> engineer/2026-09-27-ledger-union-merge
+  (refusing to allow a GitHub App to create or update workflow
+  `.github/workflows/ledger-gate.yml` without `workflows` permission)
+```
+
+The engineer seat's GitHub App token carries `contents: write` and
+`pull-requests: write`, and GitHub gates `.github/workflows/` behind a
+separate `workflows` permission that the token does not have. The
+consequence is general and outlives this pull request: no engineer run
+can ship a CI gate, only propose one. Every guardrail an engineer run
+concludes is necessary arrives as a file the owner copies by hand, which
+is exactly the kind of step that silently does not happen. Filed in
+`docs/ideas.md` today with status `urgent` for that reason, not because
+these two workflows are urgent.
+
+## 9. What this does not solve
 
 GitHub's merge button will still report a conflict, because it cannot
 see `.git/config`. Once one of the five blocked pull requests merges,
