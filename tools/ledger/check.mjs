@@ -19,16 +19,53 @@ const REQUIRED = ['Trigger', 'What', 'First step', 'Cost', 'Status'];
 
 /** @type {string[]} */
 const violations = [];
+/** block key -> its word set, for the near-duplicate pass */
 const seen = new Map();
+
+/** Words of three or more letters or digits, lowercased. Punctuation, markdown
+ *  and section-symbol noise do not distinguish two blocks. */
+function wordSet(text) {
+  return new Set(
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((w) => w.length >= 3),
+  );
+}
+
+/** |A ∩ B| / |A ∪ B|. 1 means the same words, 0 means no shared word. */
+function jaccard(a, b) {
+  let shared = 0;
+  for (const w of a) if (b.has(w)) shared += 1;
+  return shared / (a.size + b.size - shared);
+}
+
+// Two blocks sharing nine out of ten words are the same block written twice.
+// Measured on docs/ideas.md at 2026-09-27: the duplicated pair of chair notes
+// scores 0.98, and the closest genuinely unrelated pair in the whole file (the
+// preamble against the "Agentic-forward" entry) scores 0.17. Nothing sits in
+// between, so the threshold is not a tuned knob.
+const DUPLICATE_THRESHOLD = 0.9;
+
+// Below this many distinct words, two blocks can share 90% of them by being
+// short rather than by being duplicates.
+const DUPLICATE_MIN_WORDS = 12;
 
 for (const block of blocks) {
   if (block.kind === 'entry') {
     const heading = block.text.split('\n')[0];
+    const present = REQUIRED.filter((f) => new RegExp(`^-\\s+${f}:`, 'm').test(block.text));
+    // Not every `###` block is an idea. Seats also file competitive-scan notes
+    // and the PM files grooming sections under headings, and §4's five fields
+    // do not apply to those. The trigger line is the discriminator: §4 says an
+    // idea must name its trigger, so a block carrying any of the five fields
+    // is an idea and owes all five, and a block carrying none is a note.
+    if (present.length > 0) {
     if (!/^###\s+\d{4}-\d{2}-\d{2}\s+—\s+\S/.test(heading)) {
       violations.push(`${path}: heading is not "### YYYY-MM-DD — Idea name": ${heading}`);
     }
     for (const field of REQUIRED) {
-      if (!new RegExp(`^-\\s+${field}:`, 'm').test(block.text)) {
+      if (!present.includes(field)) {
         violations.push(`${path}: ${heading} is missing the "- ${field}:" line (pm.md §4)`);
       }
     }
@@ -38,21 +75,27 @@ for (const block of blocks) {
         `${path}: ${heading} has status "${status}"; allowed: ${STATUSES.join(', ')}`,
       );
     }
+    }
   }
 
-  // Near-duplicate detection. Compare on letters and digits only, so the
-  // pair that differs by "§16.2" versus "plan 16.2" still collides.
-  const shape = block.text.toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (shape.length < 40) continue;
-  const fingerprint = shape.slice(0, 200);
-  if (seen.has(fingerprint)) {
-    violations.push(
-      `${path}: near-duplicate block. "${block.key.slice(0, 60)}" repeats "${seen
-        .get(fingerprint)
-        .slice(0, 60)}". A hand-resolved append collision leaves exactly this.`,
-    );
-  } else {
-    seen.set(fingerprint, block.key);
+  // Near-duplicate detection. A prefix comparison is the obvious way and the
+  // wrong one: the pair this repository actually contains is identical for its
+  // first two hundred characters and differs only in the tail ("§16.2" versus
+  // "plan 16.2"), while a shorter pair differs at the front. Word-set overlap
+  // (Jaccard) catches both, because a duplicate is a block that says the same
+  // words, wherever the difference happens to fall.
+  const words = wordSet(block.text);
+  if (words.size >= DUPLICATE_MIN_WORDS) {
+    for (const [otherKey, otherWords] of seen) {
+      if (jaccard(words, otherWords) >= DUPLICATE_THRESHOLD) {
+        violations.push(
+          `${path}: near-duplicate block. "${block.key.slice(0, 60)}" repeats ` +
+            `"${otherKey.slice(0, 60)}". A hand-resolved append collision leaves exactly this.`,
+        );
+        break;
+      }
+    }
+    seen.set(block.key, words);
   }
 }
 
