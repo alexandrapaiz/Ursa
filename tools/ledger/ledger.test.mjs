@@ -121,3 +121,31 @@ test('an empty ancestor (both sides added the file) merges both sides', () => {
   assert.match(merged, /Ledger blocks/);
   assert.match(merged, /Landscape scan/);
 });
+
+// The case the first real merge exposed. `main` renamed an entry's heading
+// ("Upstream: Linear board-of-record practice to HQ" gained "(WITHDRAWN
+// 2026-09-25, ADR-006)"), which under identity merging is a deletion of one
+// block plus an addition of another, and the driver reported "1 removed".
+// That is correct, and it is only correct while a concurrent edit to the same
+// entry still conflicts instead of vanishing with the old heading.
+const RENAMED = BASE.replace(
+  '### 2026-09-18 — Repo split: Major and Minor',
+  '### 2026-09-18 — Repo split: Major and Minor (WITHDRAWN 2026-09-25)',
+);
+
+test('a heading renamed on one side replaces the old block, not duplicates it', () => {
+  const { merged, conflicts, removed } = mergeLedgers(BASE, withEntry(BASE, ENGINEER_ENTRY), RENAMED);
+  assert.deepEqual(conflicts, []);
+  assert.equal(removed.length, 1);
+  assert.equal((merged.match(/Repo split: Major and Minor/g) ?? []).length, 1);
+  assert.match(merged, /\(WITHDRAWN 2026-09-25\)/);
+  assert.match(merged, /Ledger blocks, not ledger lines/);
+});
+
+test('a body edit does not vanish when the other side renames that heading', () => {
+  const ours = BASE.replace('- Status: proposed', '- Status: accepted (owner-directed)');
+  const { merged, conflicts } = mergeLedgers(BASE, ours, RENAMED);
+  assert.equal(conflicts.length, 1, 'the rename and the edit are a real disagreement');
+  assert.match(merged, /- Status: accepted \(owner-directed\)/, 'our edit is still in the file');
+  assert.match(merged, /<<<<<<< ours/);
+});
