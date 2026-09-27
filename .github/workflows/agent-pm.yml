@@ -24,6 +24,8 @@ jobs:
     env:
       OPENROUTE: ${{ secrets.OPENROUTE_API_KEY }}
       GH_TOKEN: ${{ github.token }}
+      BOARD_API_URL: ${{ secrets.BOARD_API_URL }}
+      BOARD_RUNTIME_TOKEN: ${{ secrets.BOARD_RUNTIME_TOKEN }}
       PM_DISPATCH_ENABLED: ${{ vars.PM_DISPATCH_ENABLED }}
       RUN_MODE: ${{ github.event.schedule == '0 12 * * 1' && 'ceremony' || (github.event_name == 'schedule' && 'standup' || 'dispatch') }}
       PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
