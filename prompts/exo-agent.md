@@ -169,7 +169,7 @@ PROJECTS_TOKEN is read by no seat. Do not go looking for one.
 
 The old rule here was to flag any open PR older than seven days. That
 rule is blind to the thing that actually went wrong. On 2026-09-27 the
-repository held fifteen open PRs with exactly one merge in the previous
+repository held seventeen open PRs with exactly one merge in the previous
 three days, and not one of them had reached seven days, so the rule
 never fired while the queue grew to swallow an entire sprint. Depth is
 the measure, because every seat's output funnels through one owner.
