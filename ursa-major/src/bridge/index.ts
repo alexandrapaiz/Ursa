@@ -174,11 +174,20 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
   }
   const server = createServer((req, res) => {
     const origin = allowed(req.headers.origin as string | undefined)
-    const cors: Record<string, string> = origin
+    const cors: Record<string, string> = { vary: 'Origin', ...(origin
       ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'POST, OPTIONS' }
-      : {}
+      : {}) }
     if (req.method === 'OPTIONS') { res.writeHead(204, cors); res.end(); return }
     if (req.method === 'POST' && req.url === '/run') {
+      // The origin check gates the run itself, not just the reply headers.
+      // A cross-site POST with no content-type is a CORS "simple request":
+      // the browser sends it without a preflight and hides only the
+      // response, so any page open while the bridge is up could spawn
+      // `ursa run` on the owner's machine. Refusing before execFile is
+      // what actually stops it. Requests with no Origin are refused too;
+      // every browser sends one on a cross-origin POST, so the header's
+      // absence never describes the caller we mean to serve.
+      if (!origin) { res.writeHead(403, cors); res.end('origin not allowed'); return }
       if (running) { res.writeHead(409, cors); res.end('a run is already in progress'); return }
       running = true
       log('run requested from the page')
