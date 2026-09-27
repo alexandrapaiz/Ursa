@@ -54,7 +54,14 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - First step: shipped as MVP on branch tuning/mvp (distill, merge with
   revocation tombstones and tension wiring, export, 10 tests)
 - Cost: $0 (runs on the owner's local claude CLI)
-- Status: accepted (owner-directed 2026-09-18)
+- Status: built (moved from `accepted` by the engineer seat 2026-09-27,
+  the status transition the charter assigns to this seat. Evidence: the
+  four files the First step names are all on `main` —
+  `ursa-major/src/tuning/distill.ts`, `merge.ts`, `export.ts`,
+  `tuning.test.ts` — and the 10 tests in `tuning.test.ts` pass under
+  `npm test` at 356b3e5. The PM flagged this for the building seat in
+  its 2026-09-21 grooming note, item 2, and correctly did not move it
+  itself.)
 
 ### 2026-09-19 — Agentic-forward: Ursa as the agents' HQ
 - Trigger: owner product idea, verbatim: "being agentic forward.
@@ -143,3 +150,107 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-09-27 — Head-and-tail transcript windowing for the verdict reader
+- Trigger: corpus case `v16-verdict-past-the-transcript-limit`, written
+  and measured this run. `readVerdict` shows the model the first 2000
+  characters of each user message (`TRANSCRIPT_CHAR_LIMIT`). A verdict
+  written at the end of one long message is never shown to it, so the
+  label is unreachable no matter how good the model is. The eval counts
+  it as `knownMiss` rather than hiding it, and it is the only
+  unreachable case in the corpus today.
+- What: window each message head-and-tail instead of head-only, since a
+  verdict lands at the end of a message far more often than in the
+  middle: roughly 1200 characters of head, a visible elision marker,
+  then 800 of tail. The cost is that character offsets stop being
+  one-for-one, so `shownText` has to return a segment map (shown
+  fragment plus its offset in the original) and the verbatim-span
+  recovery in `readVerdict` has to search per segment. That is the
+  whole reason it was not folded into this run: the offset identity is
+  what makes the current span recovery provably exact.
+- First step: change `shownText` to return
+  `{ text: string; segments: { at: number; length: number }[] }`, thread
+  the segments through the presence check, and flip `v16`'s
+  `knownLimitation` off so the corpus gate proves the fix.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 — The `misread?` click is an eval case
+- Trigger: two observations that met. First, plan §16.5 gives the
+  overlay a `misread?` control beside the verdict line, and it produces
+  nothing durable today: it opens the quoted prompt so the owner can see
+  why, and her judgement evaporates. Second, today's craft scan of
+  Braintrust, whose loudest feature is turning a production failure into
+  a test case that runs in CI. Ursa has the better version of that
+  available and is not taking it: the owner's correction of a misread is
+  a label on the labeller.
+- What: when the owner clicks `misread?` and disagrees with the reading,
+  the bridge appends the session's prompts, the reading it produced, and
+  her correction to a private case file in the same shape as
+  `ursa-major/fixtures/verdicts/cases.json`. The corpus then grows from
+  real use instead of from someone imagining failure modes, and the
+  next engineer run's `falseSatisfied` gate is measured against cases
+  the owner herself produced. Redaction rider applies: real prompts stay
+  in `alexandrapaiz/ursa-private` and the public corpus cites the case
+  by id.
+- First step: `appendCase(caseFile, { prompts, got, correction })` in
+  `ursa-major/src/evals/verdict.ts`, plus a `POST /misread` route on the
+  bridge's existing 127.0.0.1 listener next to `/run`.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 — The span classifier needs the same gate the verdict reader just got
+- Trigger: writing the verdict eval made the asymmetry obvious. The
+  verdict reader now has 16 labelled cases and a gate that fails on a
+  single fabricated label. The span classifier, which produces the
+  four classifications that ARE the commercial object
+  (`survived_verbatim`, `survived_mutated`, `generated_deleted`,
+  `no_generation_provenance`; CLAUDE.md §1), has 12 resolver tests and
+  no labelled corpus and no gate. The most valuable class,
+  `no_generation_provenance`, is also the one a matching bug inflates
+  most quietly: every generation the matcher fails to find turns into
+  evidence that the model was never in the running.
+- What: `fixtures/spans/cases.json` on the same schema idea as the
+  verdict corpus, each case a small final artifact plus its generations
+  plus the hand-labelled classification of every span, and
+  `src/evals/spans.ts` reporting a confusion matrix across the four
+  classes. The gate is the mirror of `falseSatisfied`: zero spans
+  labelled `no_generation_provenance` by the resolver that a human
+  labelled as having a generation behind them, because that error sells
+  a lab a claim about model absence that is not true.
+- First step: three cases by hand from `fixtures/mini`, whose final.md
+  and two conversations are already public, labelled span by span.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-09-27 (engineer, craft scan)
+
+Scanned **Braintrust** (braintrust.dev), an LLM evaluation and agent
+observability platform. Deviation from the charter's fallback rotation
+worth naming: that list is inherited from alexandria and names research
+tools (Elicit, Consensus, Exa, arXiv digests). `docs/market/landscape.md`
+does not exist on `main` yet, so there is no Ursa rotation to follow;
+an eval platform is the honest adjacency for a day spent building an
+eval harness, and it is the category the market seat's landscape draft
+(PR #21) should own.
+
+**One thing worth stealing.** Braintrust's headline loop is production
+failure to test case: a trace that went wrong in production becomes a
+dataset row that runs in CI forever after. Ursa has a better version of
+that available and is not taking it, because its correction signal is
+already a click the owner makes for her own reasons rather than a
+curation chore. Filed above as "The `misread?` click is an eval case."
+Their datasets also carry optional expected outputs per row, which is
+the same shape as this run's `truth` field; the convergence is a small
+piece of evidence that the corpus schema is not eccentric.
+
+**One thing Ursa does better.** Braintrust's label comes from a grader:
+an LLM-as-a-judge, a code scorer, or a human reviewer, applied to the
+output after the fact. That is exactly the preference proxy
+CLAUDE.md §1 says Ursa is not selling. Ursa's label is supplied by the
+artifact, because the finished work either used the generation or threw
+it away, and the verdict reader does not ask anyone to grade anything.
+It reads a verdict the user already gave for her own reasons, then
+refuses it unless her words are literally in the trace. Braintrust needs
+a grader per dataset and inherits that grader's taste. Ursa needs none,
+which is the whole reason its signal is worth buying.
