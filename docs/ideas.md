@@ -244,3 +244,27 @@ exactly the stated-preference survey the principle warns about. The
 additive-only storage model is also weaker than
 `ursa-major/src/tuning/merge.ts`, which carries revocation tombstones,
 so a revoked preference in Ursa is revoked rather than outranked.
+
+### 2026-09-27 — Blocker: no seat can install a CI gate
+- Trigger: today's push was rejected outright — "refusing to allow a
+  GitHub App to create or update workflow
+  `.github/workflows/ledger-gate.yml` without `workflows` permission" —
+  after the run had written two CI workflows it had just demonstrated the
+  need for. They shipped as `tools/ledger/ci/*.yml` for the owner to copy
+  instead.
+- What: the seat workflows grant their tokens `contents: write` and
+  `pull-requests: write`, and GitHub gates `.github/workflows/` behind a
+  separate `workflows` permission. So an agent seat can change every line
+  of the product but cannot add the check that protects it, and every
+  guardrail a run concludes is necessary becomes a manual copy step for
+  the owner. That is the class of step that quietly never happens. This is
+  filed as a blocker because it is invisible until a run wastes turns on
+  it, as this one did.
+- First step: the owner decides between two options and the answer is
+  recorded as an ADR. Either add `workflows: write` to the seat workflows'
+  `permissions:` block, which lets any seat run change its own CI, or keep
+  the restriction deliberately and adopt `tools/<area>/ci/*.yml` plus a
+  line in `docs/sprints/pending.md` as the standing convention for a
+  proposed gate, so the copy step is tracked rather than assumed.
+- Cost: $0
+- Status: urgent
