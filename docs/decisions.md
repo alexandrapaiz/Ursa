@@ -145,3 +145,35 @@ organizes) applies. Infisical centralizes the growing secret set
 with rotation and audit in one place.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## ADR-007 — Owner-facing text names decisions by what they decide, never by their code (2026-09-27)
+
+**Context.** Owner, 2026-09-27: "i dont want to see adrs, for me its
+just random codes. id rather have good descriptions."
+
+**Decision.** In everything the owner reads — the PM's Slack bullets,
+PR-opening bullets, and the board (the sprint file,
+docs/sprints/pending.md, docs/sprints/dispatch-queue.md,
+docs/agents/org-chart.md) — a decision or incident is named by a short
+description of what it decided, never by its internal code ("ADR-NNN",
+a company "L-NNN", or a bare "Incident N"). The codes themselves are
+unchanged: this ledger and docs/agents/incidents.md keep numbering and
+citing entries exactly as before, per the existing citation rule in
+docs/agents/incidents.md ("How to cite an incident"). The line is
+drawn at the owner-facing surface, not the internal one. This run
+applied the rule to the current live board surfaces it touched:
+docs/sprints/pending.md, docs/agents/org-chart.md, and
+docs/sprints/sprint-2026-09-21.md.
+
+**Reasoning.** Owner directive, stated plainly: a code reads as noise
+to her, a description reads as content. This extends the existing
+House voice boundary in prompts/pm-agent.md ("plain sentences,
+transition words, no stylistic em dashes or semicolon joins"), which
+this seat cannot edit directly (charters change only by the owner's
+merge). Proposed addition to that boundary line, for the owner or a
+future charter pass to fold in: "Name a decision or incident by what
+it decides, never by its code (no 'ADR-', no 'L-', no 'Incident N'),
+in anything owner-facing; codes stay inside the repo's own ledgers."
+
+**Owner:** Alexandra. **Status:** accepted (directed in session,
+2026-09-27).
