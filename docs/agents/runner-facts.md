@@ -1,0 +1,122 @@
+# Runner facts — what is measurably true about Ursa's GitHub Actions runs
+
+Every seat runs in a fresh cloud session with no memory, so every seat
+rediscovers the runner by hand. This week three different seats probed
+the same boundaries and one of them drew the wrong conclusion from a
+probe that cannot answer the question it was asked. This file is the
+shared answer, so a run can read it instead of re-deriving it.
+
+Two rules for using this file.
+
+1. **Every line carries the command that produced it and the date it
+   was measured.** A claim with no probe is not a fact, and a fact with
+   no date rots. If you find a line to be false, fix it in the same PR
+   that discovers it and say so in the PR description.
+2. **Prefer attempting to trusting.** This file exists to stop waste,
+   not to stop verification. When the cost of the attempt is low, make
+   the attempt. When it is not, this file is the next best thing.
+
+Owned by the ExO seat (prompts/exo-agent.md §5b). Any seat may append a
+measured line.
+
+## 1. What the runner's token can and cannot do
+
+The seat workflows authenticate with `GH_TOKEN: ${{ github.token }}`,
+the repository's default `GITHUB_TOKEN`, scoped by each workflow's own
+`permissions:` block. It is an installation token, so its refusals all
+read the same: `Resource not accessible by integration`, HTTP 403. That
+single message covers three very different causes, which is why it is
+worth writing down which is which.
+
+| Action | Result | Probe | Measured |
+|---|---|---|---|
+| Push to `.github/workflows/**` | refused | attempted push from an ExO run | 2026-09-20, reconfirmed by the security seat 2026-09-27 |
+| Push any other path, open a PR | works | every seat PR this week | 2026-09-27 |
+| `gh label create` / `delete` / `gh pr edit --add-label` | works | ExO run | 2026-09-20 |
+| Delete a remote branch (`git push origin --delete`) | works | ExO run deleted three merged branches | 2026-09-27 |
+| `gh pr comment` | works | ExO run | 2026-09-20 |
+| `gh repo edit` (description, homepage, topics) | refused | ExO run | 2026-09-20 |
+| `gh secret list` | refused | ExO run | 2026-09-20 |
+| `gh api /repos/{owner}/{repo}/actions/permissions` | refused **always** | see below | 2026-09-27 |
+
+### The probe that does not measure what it looks like it measures
+
+`GET /repos/{owner}/{repo}/actions/permissions` needs the
+`administration` scope, which no `GITHUB_TOKEN` has and no
+`permissions:` block can grant. It therefore returns 403 on every run
+of every seat, whatever that seat's dispatch capability actually is.
+
+This was demonstrated on 2026-09-27 rather than argued. The ExO run
+(36348527979) called the endpoint once, having attempted no dispatch of
+any kind, and received the identical response the PM seat has been
+reporting as dispatch evidence since 2026-09-24:
+
+```
+{"message":"Resource not accessible by integration",
+ "documentation_url":".../actions/permissions#get-github-actions-permissions-for-a-repository",
+ "status":"403"}
+```
+
+So a 403 from that endpoint is not evidence about dispatch. **The only
+probe that measures dispatch is an attempted dispatch**, `gh workflow
+run <workflow>.yml`, which the PM run of 2026-09-25 also performed and
+which also returned 403. That second result is the real finding, and it
+stands on its own. The permissions-endpoint call beside it added
+nothing and cost the owner four days of a duplicated action item.
+
+Note that `agent-pm.yml` already declares `actions: write` (line 16),
+so the workflow's own permissions block is not the cause. Whatever is
+refusing the dispatch sits above it, in the installation's own grant.
+That is the question for the owner, and it is narrower than the one
+currently written in `docs/sprints/pending.md`.
+
+## 2. Scheduled runs fire late, always, by two to five hours
+
+GitHub's cron is a queue, not a clock. Ursa's own measurements, every
+`schedule` run in the repository's history as of 2026-09-27, taken from
+`gh run list --workflow=agent-<seat>.yml --json event,createdAt`:
+
+| Seat | Cron (UTC) | Fired (UTC) | Late by |
+|---|---|---|---|
+| exo | Sun 18:00 | 2026-09-20 19:56 | 1h56 |
+| skill | Thu 13:55 | 2026-09-24 18:01 | 4h06 |
+| frontend | Mon/Thu 14:15 | 2026-09-24 18:24 | 4h09 |
+| pm | 11:05 | 2026-09-25 15:44 | 4h39 |
+| engineer | 11:26 | 2026-09-25 15:51 | 4h25 |
+| research | Tue/Fri 13:15 | 2026-09-25 17:55 | 4h40 |
+| engineer | 23:26 | 2026-09-26 01:46 | 2h20 |
+| pm | 11:05 | 2026-09-26 14:54 | 3h49 |
+| engineer | 11:26 | 2026-09-26 15:02 | 3h36 |
+| engineer | 23:26 | 2026-09-27 01:37 | 2h11 |
+| pm | 11:05 | 2026-09-27 15:32 | 4h27 |
+| engineer | 11:26 | 2026-09-27 15:42 | 4h16 |
+| security | Sun 15:15 | 2026-09-27 18:58 | 3h43 |
+| exo | Sun 18:00 | 2026-09-27 20:34 | 2h34 |
+
+Fourteen scheduled runs, fourteen late, none early, none on time. The
+range is 1h56 to 4h40 and the median is close to 4h. The one clear
+pattern is time of day: the 23:26 UTC engineer slot is consistently the
+least late at just over two hours, and every midday slot runs three and
+a half to nearly five hours behind. That is the shape of a shared
+scheduler draining a backlog, and it is the documented behaviour of
+GitHub's hosted cron rather than a fault in any workflow here.
+
+Three consequences that seats keep getting wrong.
+
+- **Lateness is the norm, so lateness is not an incident.** The PM
+  standup of 2026-09-25 spent a `pending.md` entry on research being
+  "2.5+ hours late" and asked for an ExO look if it happened a third
+  day. It has happened on every scheduled run ever made in this
+  repository. The signal worth escalating is a **missed occurrence**,
+  meaning a cron window that produced no run at all, not a late one.
+- **Reason in windows, never in clock times.** A run that needs to
+  observe another seat's output should assume it may start up to five
+  hours after its nominal time, and a run that needs to land before a
+  deadline should have its cron set five hours early.
+- **The cron comments in `.github/workflows/` are wrong about local
+  time.** `agent-exo.yml` says "18:00 UTC (early afternoon ET)" and the
+  seat has in fact never started before 19:56 UTC. A comment that has
+  quietly gone false is the same defect as a lying diagram. The
+  corrected crons are queued as PWC-7 in
+  `docs/agents/pending-workflow-changes.md`, because this seat cannot
+  write that directory.
