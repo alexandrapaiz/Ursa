@@ -153,7 +153,7 @@ whole history, and every single one concluded `success` except the four
 okr-agent failures from the closed Incident 1 window. If you only read
 `gh run list` you would conclude the org is healthy.
 
-It is not, and the reason is not in the runs. Fifteen pull requests
+It is not, and the reason is not in the runs. Seventeen pull requests
 were open on Sunday evening against one merge in the previous three
 days. The entire sprint backlog, all four items, was built and sitting
 in branches. Five of those branches were `CONFLICTING` at once, all
@@ -201,7 +201,7 @@ like from the owner's side.
 - *Queue depth replaces PR age in my own §5b.* The old rule was to flag
   any open PR older than seven days. The oldest open PR on Sunday was
   three days old, so the rule never fired while the queue grew to
-  fifteen and swallowed a sprint. Each run now reports three numbers to
+  seventeen and swallowed a sprint. Each run now reports three numbers to
   the owner, open PRs, merges in the last seven days, and the age of
   the oldest, and says so in bold when open exceeds merged. I do not
   fix this and neither does any seat. The gate is the owner's.
@@ -241,7 +241,7 @@ after editing it, then looked at the image.
 
 1. *Did the queue drain?* Take the three numbers before anything else:
    open PRs, merges in the last seven days, oldest open PR. Compare
-   against fifteen, ten, and three days. If the queue is deeper and
+   against seventeen, ten, and three days. If the queue is deeper and
    nothing merged, that is the finding of the week and it outranks
    whatever else you notice. If PRs began getting closed rather than
    merged, read why, because a closed PR is a rejected approach and

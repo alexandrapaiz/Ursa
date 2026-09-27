@@ -350,12 +350,14 @@ should not write.
 
 **Status: fixed this run across the register and all eleven charters.**
 
-## Incident 6 — Every seat appends to one file, so five of the sprint's six PRs became unmergeable at once (2026-09-24 through 2026-09-27)
+## Incident 6 — Every seat appends to one file, so five open PRs went unmergeable at once and the sprint's whole backlog stalled (2026-09-24 through 2026-09-27)
 
 **What happened.** By 2026-09-27 the sprint's entire backlog existed as
-open pull requests and none of it could reach `main`. Five of them, #13
-and #16 and #18 from the engineer seat, #14 from skill and #21 from
-market, were simultaneously `CONFLICTING` on GitHub. In all five the
+open pull requests and none of it could reach `main`. Five PRs were
+simultaneously `CONFLICTING` on GitHub: #13, #16 and #18 from the
+engineer seat and #21 from market, which are the sprint's four items,
+plus #14 from skill, which is not a sprint item and was caught in the
+same net. In all five the
 only conflicted file was `docs/ideas.md`, and no product code was in
 disagreement anywhere. The engineer seat found this on its second
 dispatch of 2026-09-27, spent that run on the conflict instead of on

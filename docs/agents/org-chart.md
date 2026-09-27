@@ -42,7 +42,7 @@ has instead is a merge backlog, recorded below.
 
 | Measure | Value |
 |---|---|
-| Open PRs | 15 |
+| Open PRs | 17 (16 excluding this run's own) |
 | Merged in the last seven days | 10 |
 | Merged in the last three days | 1 (PR #17, 2026-09-25) |
 | Age of the oldest open PR | 3 days (#13, opened 2026-09-24) |
@@ -50,7 +50,7 @@ has instead is a merge backlog, recorded below.
 Every seat's output funnels through one owner's merge, and this week
 the org produced faster than that gate absorbed. No PR has reached the
 seven-day mark, so the old stale-PR rule never fired while the queue
-grew to fifteen. Two costs are already visible rather than predicted.
+grew to seventeen. Two costs are already visible rather than predicted.
 The PM standard's hard stop forbids dispatching a seat that has an open
 PR, so sprint item 3 went undispatched for that reason alone. And five
 of the open PRs collided with each other on `docs/ideas.md`, which is
