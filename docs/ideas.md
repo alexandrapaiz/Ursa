@@ -143,3 +143,73 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-09-27 — Who may write to the sync route
+- Trigger: security seat, first audit (docs/security/audit-2026-09-27.md
+  findings 2 and 6). `PUT /api/sync/<64hex>` takes a write from anyone,
+  at any key, with no authentication, no rate limit, and
+  `allowOverwrite: true`
+- What: a write credential, or a proof that the caller holds the AES
+  key, so that only the bridge that owns a blob can replace it. Two
+  exposures close with it. Anyone can fill the owner's Vercel Blob
+  store 2 MB at a time, billed to her, with no ceiling. And anyone who
+  learns a blob id can overwrite that user's payload with bytes that
+  fail authentication, after which the overlay reads "cannot decrypt"
+  forever. The id travels in the request URL, so it reaches access
+  logs, browser history, and any proxy between. Confidentiality is not
+  at stake: AES-GCM means the server never held the plaintext and an
+  attacker cannot forge valid ciphertext. Integrity and cost are.
+  Decide `access: 'public'` at the same time, since a blob that also
+  sits at a predictable public URL cannot be rate limited or revoked
+  whatever the route does
+- First step: pick the mechanism, since the rest follows from it. The
+  cheap one is an HMAC over the body under a third slice of the same
+  PBKDF2 output, checked by the route, which needs no new secret and no
+  account. Ursa has no user accounts and finding 5 argues against
+  inventing them here
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 — One salt for every user
+- Trigger: security seat, first audit (finding 5). `SALT =
+  'ursa-overlay-v1'` is one application-wide constant in both
+  `ursa-major/src/bridge/crypto.ts` and
+  `ursa-major/overlay/lib/crypto.ts`
+- What: the code documents this as a deliberate tradeoff and the
+  reasoning holds, since the server must not learn whose blob it holds
+  and so has no per-user salt to hand out. Two consequences follow
+  anyway. Attacking one passphrase is attacking all of them: 600,000
+  PBKDF2-SHA256 iterations is a real cost per guess, but it is paid
+  once per candidate across the whole user base rather than once per
+  user, and nothing in the product enforces or even measures passphrase
+  strength. And two users who choose the same passphrase derive the
+  same blob id and, with `allowOverwrite: true`, silently overwrite
+  each other. That second one is data loss, and it arrives exactly when
+  the product succeeds
+- First step: a user-supplied salt the user keeps alongside the
+  passphrase, or a random local one written to `.ursa/` and shown once
+  for the user to save. Either ends both consequences without the
+  server learning anything. Decide with the sync-route entry above,
+  since both turn on what the blob id is allowed to be
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 — Upgrade Next in ursa-minor past the image-optimization RCE
+- Trigger: security seat, first audit (finding 7). `npm audit` in
+  `ursa-minor` reports 8 advisories, 1 critical and 5 high
+- What: the critical is `next` below 16.3.6, carrying unauthenticated
+  remote code execution in the image optimization API when AVIF files
+  are used, plus a Windows-hosted variant. `npm audit` gives 16.3.6 as
+  the fix and it is not a semver-major move from the declared range;
+  the high entries in `postcss` and `sharp` clear with the same
+  upgrade, and `fast-uri`, `js-yaml`, and `nanoid` clear with a plain
+  `npm audit fix`. The site is public and has no user data behind it,
+  which is why this is a ledger entry and not a same-run fix. It was
+  left for the frontend seat because a Next bump wants a PR someone can
+  look at in a browser
+- First step: `npm audit fix` for the three transitive ones, then
+  `npm i next@^16.3.6` and a visual check of the landing page and the
+  404, against the screenshots already in
+  `docs/design/reviews/2026-09-24/`
+- Cost: $0
+- Status: proposed
