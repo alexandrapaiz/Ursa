@@ -56,6 +56,17 @@ test('a missing trigger fails, because §4 says an idea must name one', () => {
   assert.match(res.out, /missing the "- Trigger:" line/);
 });
 
+test('a seat tag after the date is accepted, as the market seat writes it', () => {
+  const res = run(GOOD.replace('### 2026-09-27 —', '### 2026-09-27 (market) —'));
+  assert.equal(res.code, 0, res.out);
+});
+
+test('a heading with no date fails', () => {
+  const res = run(GOOD.replace('### 2026-09-27 — A well-formed idea', '### A well-formed idea'));
+  assert.equal(res.code, 1);
+  assert.match(res.out, /heading is not/);
+});
+
 test('a status outside the five allowed words fails', () => {
   const res = run(GOOD.replace('- Status: proposed', '- Status: maybe'));
   assert.equal(res.code, 1);

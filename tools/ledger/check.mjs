@@ -61,7 +61,10 @@ for (const block of blocks) {
     // idea must name its trigger, so a block carrying any of the five fields
     // is an idea and owes all five, and a block carrying none is a note.
     if (present.length > 0) {
-    if (!/^###\s+\d{4}-\d{2}-\d{2}\s+—\s+\S/.test(heading)) {
+    // `### 2026-09-26 (market) — Name` is accepted as well as the bare
+    // `### 2026-09-26 — Name` of §4: seats already tag their ledger notes with
+    // the seat that filed them, and the tag carries information the date does not.
+    if (!/^###\s+\d{4}-\d{2}-\d{2}(\s+\([^)]+\))?\s+—\s+\S/.test(heading)) {
       violations.push(`${path}: heading is not "### YYYY-MM-DD — Idea name": ${heading}`);
     }
     for (const field of REQUIRED) {
