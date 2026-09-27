@@ -79,8 +79,12 @@ GitHub's cron is a queue, not a clock. Ursa's own measurements, every
 | Seat | Cron (UTC) | Fired (UTC) | Late by |
 |---|---|---|---|
 | exo | Sun 18:00 | 2026-09-20 19:56 | 1h56 |
+| pm (ceremony) | Mon 12:00 | 2026-09-21 18:07 | 6h07 |
 | skill | Thu 13:55 | 2026-09-24 18:01 | 4h06 |
 | frontend | Mon/Thu 14:15 | 2026-09-24 18:24 | 4h09 |
+| pm | 11:05 | 2026-09-24 15:44 | 4h39 |
+| engineer | 11:26 | 2026-09-24 15:51 | 4h25 |
+| engineer | 23:26 | 2026-09-25 01:41 | 2h15 |
 | pm | 11:05 | 2026-09-25 15:44 | 4h39 |
 | engineer | 11:26 | 2026-09-25 15:51 | 4h25 |
 | research | Tue/Fri 13:15 | 2026-09-25 17:55 | 4h40 |
@@ -93,24 +97,28 @@ GitHub's cron is a queue, not a clock. Ursa's own measurements, every
 | security | Sun 15:15 | 2026-09-27 18:58 | 3h43 |
 | exo | Sun 18:00 | 2026-09-27 20:34 | 2h34 |
 
-Fourteen scheduled runs, fourteen late, none early, none on time. The
-range is 1h56 to 4h40 and the median is close to 4h. The one clear
-pattern is time of day: the 23:26 UTC engineer slot is consistently the
-least late at just over two hours, and every midday slot runs three and
-a half to nearly five hours behind. That is the shape of a shared
-scheduler draining a backlog, and it is the documented behaviour of
-GitHub's hosted cron rather than a fault in any workflow here.
+Eighteen scheduled runs, eighteen late, none early, none on time. The
+range is 1h56 to 6h07 and the median is 4h07. The one clear pattern is
+time of day: the 23:26 UTC engineer slot is consistently the least late
+at 2h11 to 2h20, the Sunday 18:00 exo slot is next at around two hours,
+and every slot between 11:00 and 15:15 UTC runs three and a half to
+over six hours behind. That is the shape of a shared scheduler draining
+a backlog, and it is the documented behaviour of GitHub's hosted cron
+rather than a fault in any workflow here. The single worst observation,
+the PM's Monday ceremony at 6h07, is also the only run in a Monday-noon
+slot, so treat it as one observation and not as a Monday effect.
 
 Three consequences that seats keep getting wrong.
 
 - **Lateness is the norm, so lateness is not an incident.** The PM
   standup of 2026-09-25 spent a `pending.md` entry on research being
   "2.5+ hours late" and asked for an ExO look if it happened a third
-  day. It has happened on every scheduled run ever made in this
-  repository. The signal worth escalating is a **missed occurrence**,
+  day. It has happened on all eighteen scheduled runs ever made in this
+  repository, and that particular one was closer to the fast end than
+  the slow end. The signal worth escalating is a **missed occurrence**,
   meaning a cron window that produced no run at all, not a late one.
 - **Reason in windows, never in clock times.** A run that needs to
-  observe another seat's output should assume it may start up to five
+  observe another seat's output should assume it may start up to six
   hours after its nominal time, and a run that needs to land before a
   deadline should have its cron set five hours early.
 - **The cron comments in `.github/workflows/` are wrong about local
