@@ -7,6 +7,15 @@ of the product plan's own §16.4, which has always read "Ursa's servers
 store ciphertext and the SHA-256 of it for integrity, nothing else" while
 the shipped route stored neither a hash nor checked one.
 
+**One dangling reference, on purpose.** This document cites
+`docs/security/audit-2026-09-27.md` several times and that file is not on
+`main`: it exists only on `sec/2026-09-27`, the security seat's open
+PR #28. The citations resolve as soon as #28 merges, which is also the
+order those two branches want for an unrelated reason — #28 fixes the
+bridge's run channel and the verdict reader, and this branch touches
+neither. If #28 is closed unmerged instead, the four references here
+should be rewritten to quote the finding rather than link it.
+
 Written to the engineering-artifact standard in `prompts/engineer-agent.md`:
 a system diagram whose nodes are real, interfaces as TypeScript
 signatures, on-disk layouts with a real payload, exact commands, a
@@ -285,8 +294,18 @@ truncated, because a full blob id is a live read capability.
 **The session log the bridge tails** (read-only; Claude Code owns it):
 
 ```
-~/.claude/projects/-Users-<you>-Desktop-ursa-minor-site/<session-uuid>.jsonl
+~/.claude/projects/-Users-you-Desktop-ursa-minor-site/a3f9c21e....jsonl
 ```
+
+Two notes on that line, both about the gate rather than about the path.
+The project slug is written `-Users-you-` with no angle brackets, because
+`.github/workflows/redaction-gate.yml` allowlists exactly that spelling
+and rejects `-Users-<you>-`; the charter's `/Users/<you>/` form is for a
+real path separator, not for Claude Code's munged slug, where every
+separator has already become a dash. And the session id is truncated to
+its first eight hex characters, per the rider, because a full session UUID
+is one of the three classes Ursa incident 2 purged from this repository's
+history.
 
 **The tuning record the payload carries** (read-only; `ursa run` owns it):
 
