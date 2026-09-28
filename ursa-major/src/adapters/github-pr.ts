@@ -248,19 +248,54 @@ export function statedCorrectionsFor(
 }
 
 /**
- * The pairs one pull request yields. At most one pair per agent commit,
- * taking the earliest closure that fired, in the order branch-edit,
- * merge-resolution, merge-as-accepted.
+ * A merge commit the human may have written content into while resolving.
+ * `index` is the position in the pull request's commit order, and the
+ * pull request's own merge commit takes the position after the last of
+ * them. Ordering is positional rather than by timestamp because agent
+ * commits arrive in same-second bursts, which makes a timestamp
+ * comparison decide closures by coin flip (src/pairfinder.ts takes the
+ * same care with --topo-order for the same reason).
+ */
+interface ResolutionSite {
+  sha: string
+  index: number
+  at: string
+  author: string
+}
+
+/**
+ * Paths at a merge whose blob is in neither parent. Content that is in
+ * the merge and in no parent was written by whoever resolved the merge,
+ * which is the one case where a merge commit carries a human edit rather
+ * than someone else's work. Git calls this an evil merge; for Ursa it is
+ * the owner choosing between two texts, which is a correction.
+ */
+function resolvedPaths(reader: RepoReader, mergeSha: string, candidates: string[]): string[] {
+  const parents = reader.parents(mergeSha)
+  if (parents.length < 2) return []
+  return candidates.filter((p) => {
+    const atMerge = reader.blobId(mergeSha, p)
+    if (atMerge === null) return false
+    return parents.every((parent) => reader.blobId(parent, p) !== atMerge)
+  })
+}
+
+/**
+ * The pairs one pull request yields. At most one pair per agent commit:
+ * the earliest closure by timestamp wins, so a correction on the branch
+ * is never overwritten by the merge that followed it.
  */
 export function pairsFromPullRequest(
   snap: PullRequestSnapshot,
   reader: RepoReader,
   opts: PullRequestAdapterOptions = {},
 ): PullRequestPair[] {
+  // Array#sort is stable, so commits that share a timestamp keep the
+  // order the API returned, which is the branch's own order.
   const commits = [...snap.commits].sort((a, b) => a.authoredAt.localeCompare(b.authoredAt))
   const merge = snap.mergeCommitSha
-  const mergeParents = merge ? reader.parents(merge) : []
-  const squashed = merge !== null && mergeParents.length === 1
+  const mergeParentCount = merge ? reader.parents(merge).length : 0
+  const squashed = merge !== null && mergeParentCount === 1
   const acceptance = acceptanceOf(snap)
   const base = {
     repo: snap.repo,
@@ -270,71 +305,89 @@ export function pairsFromPullRequest(
     ...(snap.revertedBy ? { regression: snap.revertedBy } : {}),
   }
 
+  // Every merge that could hold a resolution: the merges the branch took
+  // from its base while the PR was open, then the PR's own merge commit.
+  const sites: ResolutionSite[] = commits
+    .map((c, index) => ({ c, index }))
+    .filter(({ c }) => c.parentCount > 1)
+    .map(({ c, index }) => ({ sha: c.sha, index, at: c.authoredAt, author: c.authorName }))
+  if (merge !== null && snap.outcome === 'merged' && mergeParentCount > 1) {
+    sites.push({ sha: merge, index: commits.length, at: snap.mergedAt ?? '', author: snap.mergedByLogin ?? 'unknown' })
+  }
+
   const pairs: PullRequestPair[] = []
   for (let i = 0; i < commits.length; i++) {
     const gen = commits[i]
     if (gen.parentCount > 1) continue // a merge of the base into the branch generated nothing
     const marker = agentMarkerOf(gen, opts)
     if (!marker) continue
-    const genFiles = new Set(gen.files)
-    if (genFiles.size === 0) continue
+    const genFiles = [...new Set(gen.files)]
+    if (genFiles.length === 0) continue
 
-    const emit = (
-      closure: PullRequestClosure,
-      finalSha: string,
-      finalAuthor: string,
-      finalAt: string,
-      paths: string[],
-    ) => {
-      pairs.push({
-        generatedSha: gen.sha,
-        finalSha,
-        paths,
-        generatedAuthor: gen.authorName,
-        finalAuthor,
-        generatedAt: gen.authoredAt,
-        finalAt,
-        agentMarker: marker,
-        subject: gen.subject,
-        pullRequest: {
-          ...base,
-          closure,
-          statedCorrections: statedCorrectionsFor(snap, paths, gen.sha),
-        },
-      })
+    type Candidate = {
+      closure: PullRequestClosure
+      sha: string
+      index: number
+      at: string
+      author: string
+      paths: string[]
     }
+    const candidates: Candidate[] = []
 
-    // 1. branch-edit: the human corrected the file on the branch.
-    let paired = false
+    // branch-edit: a human, non-merge commit later on the branch edited the same path.
     for (let j = i + 1; j < commits.length; j++) {
       const fin = commits[j]
       if (agentMarkerOf(fin, opts)) continue
       if (fin.parentCount > 1) continue
-      const overlap = fin.files.filter((p) => genFiles.has(p))
+      const overlap = fin.files.filter((p) => genFiles.includes(p))
       if (overlap.length === 0) continue
-      emit('branch-edit', fin.sha, fin.authorName, fin.authoredAt, overlap)
-      paired = true
+      candidates.push({ closure: 'branch-edit', sha: fin.sha, index: j, at: fin.authoredAt, author: fin.authorName, paths: overlap })
       break
     }
-    if (paired || merge === null || snap.outcome !== 'merged') continue
 
-    // 2. merge-resolution: content in the merge that is in neither parent.
-    if (mergeParents.length >= 2) {
-      const resolved = [...genFiles].filter((p) => {
-        const atMerge = reader.blobId(merge, p)
-        if (atMerge === null) return false
-        return mergeParents.every((parent) => reader.blobId(parent, p) !== atMerge)
-      })
-      if (resolved.length > 0) {
-        emit('merge-resolution', merge, snap.mergedByLogin ?? 'unknown', snap.mergedAt ?? '', resolved)
-        continue
-      }
+    // merge-resolution: a later merge carries content in neither parent.
+    for (const site of sites) {
+      if (site.index <= i) continue
+      const resolved = resolvedPaths(reader, site.sha, genFiles)
+      if (resolved.length === 0) continue
+      candidates.push({ closure: 'merge-resolution', sha: site.sha, index: site.index, at: site.at, author: site.author, paths: resolved })
+      break
     }
 
-    // 3. merge-as-accepted: merged, still present, nobody edited it.
-    const kept = [...genFiles].filter((p) => reader.blobId(merge, p) !== null)
-    if (kept.length === 0) continue
-    emit('merge-as-accepted', merge, snap.mergedByLogin ?? 'unknown', snap.mergedAt ?? '', kept)
+    let chosen = candidates.sort((a, b) => a.index - b.index)[0]
+
+    // merge-as-accepted: merged, the path is still there, nobody edited it.
+    if (!chosen && merge !== null && snap.outcome === 'merged') {
+      const kept = genFiles.filter((p) => reader.blobId(merge, p) !== null)
+      if (kept.length > 0) {
+        chosen = {
+          closure: 'merge-as-accepted',
+          sha: merge,
+          index: commits.length,
+          at: snap.mergedAt ?? '',
+          author: snap.mergedByLogin ?? 'unknown',
+          paths: kept,
+        }
+      }
+    }
+    if (!chosen) continue
+
+    pairs.push({
+      generatedSha: gen.sha,
+      finalSha: chosen.sha,
+      paths: chosen.paths,
+      generatedAuthor: gen.authorName,
+      finalAuthor: chosen.author,
+      generatedAt: gen.authoredAt,
+      finalAt: chosen.at,
+      agentMarker: marker,
+      subject: gen.subject,
+      pullRequest: {
+        ...base,
+        closure: chosen.closure,
+        statedCorrections: statedCorrectionsFor(snap, chosen.paths, gen.sha),
+      },
+    })
   }
   return pairs
 }
