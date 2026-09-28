@@ -12,10 +12,19 @@
 //   gh api repos/o/r/pulls/N/comments --paginate
 //   gh api repos/o/r/commits/<sha>            (once per commit, for files and patches)
 //
-// The per-commit call is the expensive one: one request per branch
-// commit. `--no-patches` skips it, which costs review-comment evidence
-// its line precision (see StatedCorrection.evidenceBasis) and is the
-// right trade when a PR has hundreds of commits and no review comments.
+// The per-commit call is the expensive one, at one request per branch
+// commit, and it is not optional: `pulls/N/commits` returns no file list,
+// and per-commit file lists are what pairing is built on. What `gh api
+// repos/o/r/pulls/N/files` returns instead is the union of paths across
+// the whole PR with no per-commit attribution, which cannot tell an
+// agent's commit from the human's edit of it.
+//
+// `noPatches` therefore saves no requests. It drops the parsed hunk
+// ranges from the stored snapshot, which shrinks a large snapshot by
+// roughly the size of its diffs and downgrades review-comment evidence
+// from 'line-overlap' to 'path-only' (see StatedCorrection.evidenceBasis).
+// It is the right trade for a survey across many PRs, and the wrong one
+// for a PR whose review comments matter.
 
 import { execFileSync } from 'node:child_process'
 import { parseHunkRanges, type PullRequestCommit, type PullRequestSnapshot, type ReviewComment } from './github-pr'
@@ -80,7 +89,11 @@ export function coAuthoredBy(message: string): string {
 }
 
 export interface CaptureOptions {
-  /** skip the per-commit patch calls; review-comment evidence degrades to path-only */
+  /**
+   * Omit parsed hunk ranges from the snapshot. Saves snapshot size, not
+   * requests: the per-commit call still runs, because file lists come
+   * from it. Review-comment evidence degrades to 'path-only'.
+   */
   noPatches?: boolean
   /** local clone used for revert detection; skipped when absent */
   repoPath?: string
@@ -92,11 +105,13 @@ export function capturePullRequest(repo: string, number: number, opts: CaptureOp
   const rawComments = gh<ApiReviewComment[]>(['api', `repos/${repo}/pulls/${number}/comments`, '--paginate'])
 
   const commits: PullRequestCommit[] = rawCommits.map((c) => {
-    const detail = opts.noPatches ? undefined : gh<ApiCommit>(['api', `repos/${repo}/commits/${c.sha}`])
-    const files = detail?.files ?? []
+    const detail = gh<ApiCommit>(['api', `repos/${repo}/commits/${c.sha}`])
+    const files = detail.files ?? []
     const changedRanges: Record<string, Array<[number, number]>> = {}
-    for (const f of files) {
-      if (f.patch) changedRanges[f.filename] = parseHunkRanges(f.patch)
+    if (!opts.noPatches) {
+      for (const f of files) {
+        if (f.patch) changedRanges[f.filename] = parseHunkRanges(f.patch)
+      }
     }
     return {
       sha: c.sha,
