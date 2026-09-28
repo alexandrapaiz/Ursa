@@ -1,5 +1,6 @@
 import Constellation from "@/components/ui/constellation";
 import PixelSky from "@/components/ui/pixel-sky";
+import ScrollCue from "@/components/ui/scroll-cue";
 
 const NORTH_STARS = [
   {
@@ -44,6 +45,8 @@ export default function Home() {
           </div>
         </header>
 
+        <ScrollCue />
+
         <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20 portrait:mt-[92svh]">
           <p className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
             <em className="not-italic text-[var(--polar)]">Polaris</em> —
@@ -55,7 +58,7 @@ export default function Home() {
             type="button"
             disabled
             aria-disabled="true"
-            className="mt-10 border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)] disabled:cursor-not-allowed disabled:opacity-55"
+            className="cta mt-10 border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)] disabled:cursor-not-allowed disabled:opacity-55"
           >
             Get Polaris
           </button>
