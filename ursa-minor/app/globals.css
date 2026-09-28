@@ -133,7 +133,10 @@
 :root {
   --night: #020308;
   --star: #e8edf7;
-  --dim: #5d6a85;
+  /* small text token: measured 3.59:1 on the hero sky and 3.77:1 on the
+     scrolled footer sky at #5d6a85, below the 4.5:1 WCAG AA floor for
+     text under 18.66px. Same hue, one step lighter, now 4.86:1. */
+  --dim: #707fa0;
   --polar: #a8c7fa;
   --line: #141b2b;
   /* display face: the light grotesque the hero is set in */
