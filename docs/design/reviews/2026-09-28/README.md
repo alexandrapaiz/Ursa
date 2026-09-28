@@ -23,6 +23,16 @@ from the identity as the charter states it directly, from the dispatch,
 and from what the site already is. Standing up Ursa's own three files is
 the first proposal below.
 
+## Reading the full-page shots
+
+The `home-full` captures show a hard horizontal edge partway down, where
+the sky stops and flat `--night` begins. That is a capture artifact, not
+a defect. The starfield canvas is `fixed inset-0`, and Chromium paints
+fixed elements once at the top of a full-page screenshot. In a browser
+the sky follows the viewport the whole way down. The `hero`,
+`northstars` and `footer` shots are viewport captures and show the real
+thing.
+
 ## What was found, and what was done
 
 ### 1. `--dim` fails WCAG AA everywhere it is used — fixed
