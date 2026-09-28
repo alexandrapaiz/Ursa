@@ -102,11 +102,15 @@ export async function main(argv: string[]): Promise<number> {
       : capturePullRequest(repo, Number(values.pr), { noPatches: values['no-patches'] === true, repoPath: projectPath })
     for (const w of checkLocalObjects(projectPath, snap)) console.error(`warning: ${w}`)
     const pairs = pairsFor(projectPath, snap)
-    console.log(`${snap.repo}#${snap.number} "${snap.title}" — ${snap.outcome}, ${snap.commits.length} commits, ${pairs.length} pairs`)
+    const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
+    console.log(
+      `${snap.repo}#${snap.number} "${snap.title}": ${snap.outcome}, ` +
+      `${plural(snap.commits.length, 'commit')}, ${plural(pairs.length, 'pair')}`,
+    )
     for (const p of pairs) {
       console.log(
-        `  ${p.pullRequest.closure.padEnd(17)} ${p.generatedSha.slice(0, 9)} → ${p.finalSha.slice(0, 9)}  ` +
-        `${p.paths.length} path${p.paths.length === 1 ? '' : 's'}  accepted=${p.pullRequest.acceptance.accepted}` +
+        `  ${p.pullRequest.closure.padEnd(17)} ${p.generatedSha.slice(0, 9)} -> ${p.finalSha.slice(0, 9)}  ` +
+        `${plural(p.paths.length, 'path')}  accepted=${p.pullRequest.acceptance.accepted}` +
         (p.pullRequest.statedCorrections.length ? `  stated=${p.pullRequest.statedCorrections.length}` : ''),
       )
     }
@@ -131,7 +135,10 @@ export async function main(argv: string[]): Promise<number> {
     saveEpisodes(projectPath, episodes)
     const mutated = records.reduce((n, r) => n + r.stats.byClass.survived_mutated.chars, 0)
     const verbatim = records.reduce((n, r) => n + r.stats.byClass.survived_verbatim.chars, 0)
-    console.log(`${snap.repo}#${snap.number}: ${episodes.length} work units, ${records.length} records.`)
+    console.log(
+      `${snap.repo}#${snap.number}: ${episodes.length} work unit${episodes.length === 1 ? '' : 's'}, ` +
+      `${records.length} record${records.length === 1 ? '' : 's'}.`,
+    )
     console.log(`${verbatim.toLocaleString()} chars survived verbatim, ${mutated.toLocaleString()} survived edited.`)
     console.log(`Records: ${projectPath}/.ursa/records/`)
     return 0
