@@ -106,8 +106,12 @@ export interface BriefingCoverage {
   recordsConsidered: number
   loopsConsidered: number
   casesReturned: number
-  /** ranking implementation that produced the order; see retrieval.ts */
-  retrieval: 'lexical-v0'
+  /** ranking implementation that produced the order; see retrieval.ts.
+   *  'lexical-v0' = word overlap only. 'semantic-v1' = MiniLM cosine
+   *  similarity blended into the case score (plan §12). The value is the
+   *  ranker that actually ran, so a briefing that silently fell back to
+   *  lexical because no embedder was available says so here. */
+  retrieval: 'lexical-v0' | 'semantic-v1'
   /** true when the request named neither a domain nor any files */
   unfiltered: boolean
 }
