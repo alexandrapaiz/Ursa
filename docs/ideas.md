@@ -241,3 +241,125 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
   HQ surface shipped today: Ursa cannot brief its own seats until the PR
   reader lands, because its own store stays empty. That is an argument
   for the PR reader's promotion, not against the briefing.
+
+### 2026-09-29 — Retrieve wide, then let the distiller pick: a two-stage case funnel
+- Trigger: today's craft scan of Continue's `@Codebase` retrieval, which
+  retrieves `nRetrieve: 25` candidates from the vector index and then
+  reranks down to `nFinal: 5` with an LLM call. Ursa's briefing does one
+  pass: score every case, drop everything under `MIN_RELEVANCE` (2), take
+  the top `maxCases` (3). Measured today, that floor is doing real work
+  and also real damage — on the request `transitions
+  src/components/Banner.tsx` the contrast loop scored 0.92 and was
+  dropped, correctly; but a case one hundredth of a point under the floor
+  is equally invisible, and nothing about the score's absolute value says
+  which of those two it was.
+- What: split case retrieval into a wide cheap stage and a narrow
+  expensive one, the way Continue does, but with the reranker Ursa
+  already has on the user's machine instead of a new dependency.
+  Stage one: cosine plus the lexical terms, floor removed, take the top
+  ten. Stage two: one `claude -p` call, the same local subscription path
+  `src/tuning/distill.ts` already uses, handed the ten cases and the
+  agent's actual request, returning at most three with one sentence each
+  on why this case bears on this task. The model never invents a case and
+  never ranks by its own taste: it selects from a fixed candidate list
+  and its output is checked against that list, which is the same
+  code-owns-the-arithmetic, model-owns-the-judgment division
+  `tuning/types.ts` already states.
+- First step: `rankSemantic` already returns every case with its score,
+  so stage one is a parameter, not a rewrite. Add
+  `--rerank` to `ursa brief`, a `rerankCases(candidates, request)` in a
+  new `src/hq/rerank.ts` behind the same null-degrades seam
+  `loadMiniLM` uses, and one test that the reranker's output is a subset
+  of its input.
+- Cost: $0 (the owner's existing local claude CLI, one call per briefing,
+  only under an opt-in flag)
+- Status: proposed
+
+### 2026-09-29 — A briefing that returns nothing is the most valuable thing the HQ measures
+- Trigger: verified today. `ursa brief --semantic --domain
+  database-migrations --files scripts/migrate.sql` against the fixture
+  store returns zero rules and zero cases, correctly: every case sits at
+  or below cosine 0.027 and the floor holds. That silence is printed to
+  stdout and then discarded. Nothing records that the question was asked.
+- What: the coverage gap is the same object as
+  `no_generation_provenance`, one level up. That span class is the
+  ledger's most valuable category because it marks where the model was
+  never in the running; a briefing miss marks where the owner's tuning
+  has never been in the running. Every `--domain X` that returns nothing
+  is a domain this person works in and has never been corrected on, which
+  is exactly the shape of the "commissioned signal collection" CLAUDE.md
+  §4 sells to labs: a lab that knows it is weak somewhere pays for
+  outcome records concentrated there, and a population of briefing misses
+  is a map of where records do not yet exist. It is also directly useful
+  to the user with nothing aggregated at all: "you have been briefed on
+  motion eleven times and on database work never" is a true statement
+  about their own store.
+- What it must not become: a second ambient-collection surface. The log
+  is local, it records the request (domain, file paths) and the counts
+  returned, never the briefing's contents, and it obeys the same
+  inspect/edit/delete rule as everything else in `.ursa/`. Nothing about
+  it syncs without the consent path plan §12 already specifies.
+- First step: append one line per briefing to
+  `<project>/.ursa/briefing-log.jsonl` — `{ at, domain, files,
+  rulesReturned, casesReturned, retrieval }` — and a
+  `ursa brief --gaps` that reads it back and lists the domains most often
+  asked about with nothing to say. Roughly a day, entirely local, no
+  schema change to any record.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-29 — 831MB of runtime for 23MB of model: pin ONNX to the host platform
+- Trigger: measured today while adding the embedding runtime.
+  `@huggingface/transformers@4.3.0` installs **831MB** into
+  `node_modules`, of which `onnxruntime-node` is 548MB and
+  `onnxruntime-web` 141MB — prebuilt binaries for every platform and
+  accelerator, on a machine that will only ever use one. The model those
+  binaries run is 23MB. Plan §13 distributes this CLI as
+  `npx @ursa-major/cli run <project>`, so the ratio is a user-facing
+  install cost, not a build-time detail. It is why the dependency went in
+  as `optionalDependencies` today rather than as a dependency, which
+  solves it only for people who know to pass `--omit=optional`.
+- What: get the ratio down so semantic briefing can eventually be on by
+  default instead of behind a flag. Three routes, cheapest first:
+  `npm_config_onnxruntime_node_install_cuda=skip` and the equivalent
+  platform filters at install time; `onnxruntime-common` plus a single
+  explicitly-chosen backend rather than the meta-package; or dropping to
+  a WASM-only build, which is one file and costs some inference speed
+  Ursa does not need at tens of cases. Also worth measuring: whether a
+  fixed 384-dimension MiniLM even needs a general ONNX runtime, since the
+  alternative is ~200 lines of matrix multiply over the same weights and
+  no native dependency at all.
+- First step: install with each of the three routes, record the resulting
+  `du -sh node_modules` and whether `semantic.live.test.ts` still passes,
+  and put the table in `docs/design/semantic-retrieval.md` §10. That is a
+  measurement, not a refactor, and it decides the rest.
+- Cost: $0
+- Status: proposed
+
+- 2026-09-29 (engineer, craft scan): **Continue's `@Codebase` retrieval**
+  (docs.continue.dev/reference/deprecated-codebase, fetched today).
+  Worth stealing, and taken as a ledger entry above: the two-stage
+  funnel, `nRetrieve: 25` candidates from the vector index reranked by an
+  LLM down to `nFinal: 5`, which separates "cheap and wide" from
+  "expensive and narrow" instead of making one threshold do both jobs.
+  Convergent validation worth naming too: Continue computes its
+  embeddings locally with `transformers.js` and stores them in
+  `~/.continue/index`, which is the same library and the same
+  on-the-user's-machine shape this PR arrived at independently, and its
+  retrieval is explicitly "a combination of embeddings-based retrieval
+  and keyword search" rather than embeddings alone — the same blend-do
+  not-replace conclusion, reached by a team with far more retrieval
+  mileage. What Ursa does better: Continue retrieves **code that looks
+  like your query**, so its answer is "here is a similar function." Ursa
+  retrieves **corrections**, so its answer is "here is what this owner
+  already made an agent redo three times on a file like this one, here
+  are her exact words, and here is the spec nobody could state up front."
+  The second is not a better version of the first, it is a different
+  object: one is context, the other is a priced lesson. And where
+  Continue's own documentation recommends Voyage or OpenAI embeddings for
+  "noticeably stronger retrievals on real codebases," Ursa cannot take
+  that trade at any quality level, because sending the owner's
+  correction text to a hosted embedding API breaks the constraint the
+  whole company rests on. That refusal is recorded as a rejected
+  alternative in `docs/design/semantic-retrieval.md` §10, not left
+  implicit.
