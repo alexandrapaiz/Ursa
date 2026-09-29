@@ -444,19 +444,30 @@ that: zero critical anywhere, zero high in any production tree.
 
 ### 6.2 It is an `optionalDependency`, not a `dependency`
 
-Measured: `node_modules` for `@huggingface/transformers` alone is
-**831MB**, of which 548MB is `onnxruntime-node` and 141MB
-`onnxruntime-web` — prebuilt binaries for every platform. Plan §13
-distributes this CLI as `npx @ursa-major/cli run <project>`. Making the
-embedding runtime mandatory would put 831MB in front of every user of
-`ursa run`, a command that never embeds anything, for a briefing flag
-that is off by default.
+Measured on this package, both from the committed lockfile:
+
+```
+npm ci                      ursa-major/node_modules = 825M
+npm ci --omit=optional      ursa-major/node_modules =  61M
+```
+
+A **764MB** difference, of which `onnxruntime-node` alone is 548MB —
+prebuilt binaries for every platform and accelerator, on a machine that
+will only ever use one. The model they run is 23MB.
+
+Plan §13 distributes this CLI as `npx @ursa-major/cli run <project>`.
+Making the embedding runtime mandatory would put 825MB in front of
+every user of `ursa run`, a command that never embeds anything, for a
+briefing flag that is off by default.
 
 `optionalDependencies` states the true relationship — the code handles
-absence, and handles it on a tested path — and `npm install
---omit=optional` gives the lean install. The whole test suite passes
-with the package deleted from `node_modules`, verified rather than
-assumed.
+absence, and handles it on a tested path — and `npm ci --omit=optional`
+gives the 61MB install. Verified rather than assumed: the whole suite
+passes (71 passed, 4 skipped) with `node_modules/@huggingface` deleted,
+and `--semantic` on that tree prints its note and ranks lexically at
+exit 0. The ratio itself is filed as a ledger entry dated 2026-09-29,
+because 825MB to serve a 23MB model is a defect even when it is
+optional.
 
 ### 6.3 The cache is content-hashed in its own file, not a field on the unit
 
@@ -664,11 +675,22 @@ npm test
 mv /tmp/hf-hidden node_modules/@huggingface
 ```
 
-**Typecheck and audit:**
+**Typecheck, clean install, and the audit comparison:**
 ```bash
-npx tsc --noEmit -p .        # exit 0
-npm audit                    # unchanged from before the install
+npx tsc --noEmit -p .                     # exit 0
+rm -rf node_modules && npm ci             # exit 0, then npm test: 71 passed
+du -sh node_modules                       # 825M
+npm audit --json | jq -r '.vulnerabilities | keys[]'
 ```
+Identical advisory sets before and after this change, compared as sets
+rather than as counts — the dependency adds none of them:
+```
+before (engineer/2026-09-26-get-briefing):
+  @vitest/mocker, esbuild, nanoid, vite, vite-node, vitest
+after  (this branch):
+  @vitest/mocker, esbuild, nanoid, vite, vite-node, vitest
+```
+All six are the `vitest` chain that PR #36 bumps; see §11.
 
 ---
 
