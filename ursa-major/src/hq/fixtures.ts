@@ -211,3 +211,20 @@ export const TUNING: TuningRecord = {
     },
   ],
 }
+
+/** The requests the semantic tests take against the fixture store. Each
+ *  one is here because it separates the two rankers in a specific way;
+ *  hq.test.ts names which. */
+export const RECORDED_QUERIES: Array<{ domain?: string; files?: string[] }> = [
+  // cross-vocabulary hit: no word in common with any loop, one true match
+  { domain: 'transitions', files: ['src/components/Banner.tsx'] },
+  // cross-vocabulary hit in the other record, against the copy loop
+  { domain: 'marketing-claims', files: ['src/content/pricing.md'] },
+  // a domain the store has never seen: the ranker must return nothing
+  { domain: 'database-migrations', files: ['scripts/migrate.sql'] },
+  // the lexical ranker's home ground: an exact file match
+  { files: ['src/app/page.tsx'] },
+  // domain and file both hit lexically: the case that must show rules
+  // carrying no semantic reason while cases carry one
+  { domain: 'motion', files: ['src/app/page.tsx'] },
+]
