@@ -31,6 +31,22 @@ export interface BriefingInput {
   maxCases?: number
 }
 
+/** What the semantic ranker concluded about one case (semantic.ts).
+ *  All four numbers are printed in the briefing, because the lead term
+ *  is the one part of the score that depends on the other cases in the
+ *  store, so the raw cosine and the mean subtracted from it are what
+ *  make the arithmetic recomputable by hand. */
+export interface SemanticReason {
+  /** raw cosine of the case against the request, in [-1, 1] */
+  cosine: number
+  /** mean cosine of every OTHER case: the anisotropy offset removed */
+  fieldMean: number
+  /** cosine - fieldMean: how far this case stands above the field */
+  lead: number
+  /** points the lead bought, 0 to semantic.ts's SEMANTIC_CAP */
+  term: number
+}
+
 /** Why one unit surfaced for this request. Printed in the rendered
  *  briefing so ranking is auditable instead of an opaque score. */
 export interface MatchReason {
@@ -42,7 +58,12 @@ export interface MatchReason {
   filesByName: string[]
   /** query words found in the unit's own text */
   textTokens: string[]
-  /** sum of the weighted contributions above; see retrieval.ts WEIGHTS */
+  /** how the model ranked this case against the request. null when no
+   *  embedder ran, which is every rule and every lexical-only briefing —
+   *  null means "not measured", never "measured and found unrelated". */
+  semantic: SemanticReason | null
+  /** sum of the weighted contributions above, including semantic.term;
+   *  see retrieval.ts WEIGHTS and semantic.ts SEMANTIC_CAP */
   score: number
 }
 
@@ -112,6 +133,10 @@ export interface BriefingCoverage {
    *  ranker that actually ran, so a briefing that silently fell back to
    *  lexical because no embedder was available says so here. */
   retrieval: 'lexical-v0' | 'semantic-v1'
+  /** the embedding model behind a 'semantic-v1' ranking, absent for
+   *  'lexical-v0'. Present so that two briefings taken months apart are
+   *  comparable, or knowably not. */
+  retrievalModel?: string
   /** true when the request named neither a domain nor any files */
   unfiltered: boolean
 }
