@@ -308,13 +308,14 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - Cost: $0
 - Status: proposed
 
-### 2026-09-29 — 831MB of runtime for 23MB of model: pin ONNX to the host platform
+### 2026-09-29 — 825MB of runtime for 23MB of model: pin ONNX to the host platform
 - Trigger: measured today while adding the embedding runtime.
-  `@huggingface/transformers@4.3.0` installs **831MB** into
-  `node_modules`, of which `onnxruntime-node` is 548MB and
-  `onnxruntime-web` 141MB — prebuilt binaries for every platform and
-  accelerator, on a machine that will only ever use one. The model those
-  binaries run is 23MB. Plan §13 distributes this CLI as
+  measured from the committed lockfile, `npm ci` gives **825MB** of
+  `node_modules` against **61MB** for `npm ci --omit=optional`. The
+  764MB difference is almost all prebuilt ONNX binaries for every
+  platform and accelerator — `onnxruntime-node` alone is 548MB — on a
+  machine that will only ever use one of them. The model those binaries
+  run is 23MB. Plan §13 distributes this CLI as
   `npx @ursa-major/cli run <project>`, so the ratio is a user-facing
   install cost, not a build-time detail. It is why the dependency went in
   as `optionalDependencies` today rather than as a dependency, which
