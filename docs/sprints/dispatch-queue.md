@@ -1,59 +1,59 @@
-# Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)
+# Dispatch queue — 2026-09-29 (standup, ~16:48 UTC scheduled run)
 
-`PM_DISPATCH_ENABLED` is exactly `true`. Read alongside PR #20
-(`ursa-pm/2026-09-26-window`, the owner's synchronous session that ran
-01:15-01:26Z tonight and already fired one dispatch — see below).
-
-Since that window closed at 01:26Z, one new thing happened: engineer's
-23:26 UTC cron fired at 01:46Z and opened PR #22 (`get_briefing`,
-against the accepted "Agentic-forward" ledger entry, not a sprint
-item). Nothing else changed. `gh run list --limit 100` shows no
-failures since the last standup.
+`PM_DISPATCH_ENABLED` is exactly `true`. Read: `gh run list --limit 30`,
+`gh pr list --state open` (18 open PRs, checked individually for
+draft state, CI and reviews), `docs/sprints/pending.md`, the current
+sprint file (`docs/sprints/sprint-2026-09-21.md`, still the one on
+`main`), `docs/decisions.md`, and the open milestone.
 
 ## Proposed
 
 None. Two independent reasons, either one sufficient on its own:
 
-1. **Every active seat's most recent PR is currently open**: engineer
-   (#22), market (#21), skill (#14), frontend (#15), research (#19).
-   §11.4's hard stop forbids dispatching any seat whose last PR is
-   still open unless the instruction tells it, in those words, to build
-   on that exact branch — and nothing observed this run names a
-   continuation of any of those five branches. This alone empties the
-   queue regardless of the credential question.
-2. **The scheduled standup's own token still cannot reach the Actions
-   API**, reconfirmed fresh this run:
+1. **Every active seat's most recent PR is currently open.** engineer
+   (#36, opened today 02:41 UTC), frontend (#35), market (#21), skill
+   (#14), research (#19), security (#28). §11.4's hard stop forbids
+   dispatching any seat whose last PR is open unless an instruction
+   names that exact branch to build on — nothing observed this run does
+   that for any seat. This alone empties the queue.
+2. **Nothing in §11.3 fires.** Checked each row against this run's
+   evidence:
+   - No seat run failed in the last 24h (`gh run list --limit 30`:
+     every run since 2026-09-28T18:39Z is `success`; the one `failure`
+     in the window, `engineer/2026-09-28-record-integrity-gate` at
+     02:03:39Z, is outside 24h and was already fixed by the next push
+     on the same PR three minutes later).
+   - No open PR has failing CI or an unanswered review comment: all 18
+     open PRs show `SUCCESS` on every check, zero are draft, and all
+     but #20 have zero reviews and zero comments. PR #20's one comment
+     is the owner's own note on her own PR (ADR-007 proposal,
+     2026-09-26), not a question waiting on this seat.
+   - No ADR or ruling merged since the last run names a seat with no
+     run following: `docs/decisions.md` still ends at ADR-006; the
+     ADR-007 proposal in PR #20 is still open, not merged.
+   - The open milestone ("Sprint 2026-09-28", #2) is due 2026-10-04,
+     five days out, outside the three-day window.
+   - No owner-merge PR has crossed seven days yet: oldest open PR is
+     #13, opened 2026-09-24 15:53Z, five days old.
 
-   ```
-   $ gh api /repos/alexandrapaiz/Ursa/actions/permissions
-   {"message":"Resource not accessible by integration","status":"403"}
-   ```
+## Observed, not queued
 
-   Same 403 as 2026-09-24 and 2026-09-25 — third day running from this
-   specific credential. Not retried as an actual `gh workflow run` this
-   time since reason 1 above already forecloses every candidate seat;
-   no point spending an attempt against a hard stop that already blocks
-   it. See `docs/sprints/pending.md` for the standing owner action this
-   implies.
-
-Milestone #1 ("Sprint 2026-09-21") is due tomorrow
-(`due_on: 2026-09-27T00:00:00Z`) with all four backlog items already
-carrying open PRs (#13/#16/#18 engineer, #21 market). The §11.3
-"milestone due within three days" row is observed but not queued: the
-seats that would receive it are exactly the ones hard-stop (1) already
-blocks, and what's actually left to close the milestone is a merge, an
-owner action, not a dispatch.
-
-security, finance, okr: nothing observed against §11.3 this run. No
-new ADR names any of them without a run. Neither security nor finance
-has reached its first scheduled occurrence yet (tomorrow and
-2026-10-01 respectively).
+- **`research-agent`'s Tuesday 13:15 UTC cron (today) has not fired.**
+  `gh run list --workflow=research-agent` shows exactly one run ever,
+  2026-09-25 (Friday), nothing today by 16:48Z. This isn't
+  log-diagnosable (there is no log — the run never started), so §11.3's
+  first row doesn't apply as written, and hard stop 1 above blocks a
+  research dispatch regardless (its last PR, #19, is still open). Worth
+  a second look at tomorrow's standup if Friday's occurrence also goes
+  missing; a single miss matches the "cron fires late" pattern already
+  seen and self-resolved for four other seats in the 2026-09-24/25
+  window (see prior `pending.md` entries), so it isn't flagged as an
+  owner action yet.
+- **Engineer's `next-rce-breakfix` PR (#36)** already answers the
+  critical Next.js RCE the security audit (#28) surfaced — the org
+  responding to a ledger finding within two days without needing a PM
+  dispatch, so no action needed here either.
 
 ## Dispatched by the PM
 
-None this run (see "Proposed" above for why). For the record, PR #20's
-synchronous-session window already dispatched `agent-market.yml`
-tonight at 01:15Z under a different credential path (an interactive
-session token, not this scheduled run's), and it succeeded and shipped
-PR #21 — logged in that PR's own description, not duplicated here
-since this run did not perform that dispatch.
+None this run.
