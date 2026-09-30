@@ -129,6 +129,31 @@ obviously fire prove nothing about a description, since a description
 naming its own topic will always match its own topic. The pair that
 must not fire is what shows the description has an edge.
 
+**Once the library holds more than one skill in an area, at least one
+near miss must be the adjacent skill's own trigger prompt.** (Added
+2026-09-30, second run.) Two skills about outcome records share almost
+every noun, so the boundary between siblings is where a false positive
+is both most likely and most costly: the load goes to the wrong skill
+and the right one never runs. A near miss drawn from outside the
+library tests the description against the world, which matters less,
+because the world does not usually ask in our vocabulary.
+
+## 5b. Facts the skill measured rather than read
+
+(Added 2026-09-30, second run, after a step's own instruction was tested
+against this repository and turned a caveat into a defect.)
+
+A skill will sometimes state something true that no source in the
+repository says, because the author ran something and looked. That is
+not evidence under either scheme and it is not ordinary judgment either.
+Write it as **Ours:** and give the command that reproduces it, inline,
+so a reader can re-run the measurement instead of trusting the number.
+
+The rule exists because a measured claim is the most persuasive kind a
+skill can make and the easiest kind to get away with. An evidence ref
+can be checked by tooling. A number somebody once measured cannot, so
+the command is the receipt.
+
 ## 6. Rendering
 
 Whatever a skill cites has to be readable by someone who did not write
