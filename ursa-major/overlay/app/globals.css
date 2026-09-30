@@ -1,0 +1,23 @@
+:root {
+  --ground: #050810;
+  --panel: #0a101e;
+  --accent: #a8c7fa;
+  --ink: #e8edf6;
+  --dim: #8b93a7;
+  --satisfied: #9ce0b9;
+  --unsatisfied: #f2b8b5;
+  --tension: #e8c47c;
+  --line: rgba(168, 199, 250, 0.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  /* dark glass at roughly 85% opacity so terminal text reads through faintly (§16.5) */
+  background: rgba(5, 8, 16, 0.85);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+main { width: 380px; margin: 0 auto; padding: 14px 16px 16px; }
+code, .mono { font-family: var(--font-mono), ui-monospace, monospace; }
