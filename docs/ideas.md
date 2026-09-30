@@ -164,3 +164,65 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - Cost: $0
 - Status: proposed
 
+### 2026-09-30 (market) — Total-addressable-spend bound for Minor's pricing target
+- Trigger: this run's positioning ceremony (docs/market/positioning.md,
+  "A bound on Minor's target, not a price"). Each major frontier lab
+  reportedly spends roughly $1B/year on human-generated training data
+  overall, and Mercor alone is now at $2B in annualized gross revenue,
+  up from $760M nine months earlier. Sources:
+  [Forbes](https://www.forbes.com/sites/richardnieva/2026/07/09/mercor-fundraise/),
+  [Sacra](https://sacra.com/c/mercor/).
+- What: no disclosed per-contract price for anything outcome-record-
+  shaped exists yet (the gap named in last run's positioning entry
+  still stands), but this figure bounds the question differently: a
+  six-to-seven-figure deal (CLAUDE.md §4) is a rounding error against a
+  $1B/year lab budget. When KR4.1's lab brief sets an ask, include this
+  as a one-line sizing sanity-check so the target reads as a
+  differentiation test, not an affordability test.
+- First step: add a short "total addressable spend" context line to
+  KR4.1's lab brief when it's drafted, citing this figure.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-30 (market) — Lead with portability, not transparency, in Major's positioning
+- Trigger: this run's landscape watch (docs/market/landscape.md,
+  ChatGPT Memory entry, Category 3). OpenAI shipped "Memory Sources"
+  across all ChatGPT plans, giving users per-response visibility into
+  what saved memories, past chats, or files fed an answer. Source:
+  [OpenAI](https://openai.com/index/memory-and-new-controls-for-chatgpt/).
+- What: this closes the transparency half of the gap Ursa Major's
+  "fully inspectable" pitch (CLAUDE.md non-negotiable #2) counts on —
+  OpenAI now offers a version of it inside its own walled garden. The
+  half that does not close, by construction, is portability: that
+  memory cannot follow a user to Claude or Gemini. Major's public
+  messaging should lead with "portable across every model you use"
+  rather than "fully inspectable," since the latter now describes a
+  ChatGPT feature too.
+- First step: when Major's site copy or pitch materials are next
+  revised, test portability-first framing against the current
+  transparency-first framing.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-30 (market) — Publish methodology against the eval-frustration quote, not just forward
+- Trigger: this run's demand-signals ceremony. A widely-read builder
+  post states the AI-evals complaint in almost CLAUDE.md §1's own
+  language: "The benchmark was not fake. It was just answering a
+  narrower question than the product needed," describing coding
+  assistants and support bots that pass benchmarks and fail in
+  production. Source:
+  [dev.to](https://dev.to/jenueldev/ai-evals-are-broken-but-builders-still-need-them-nh3).
+  Also echoed in academic framing (Princeton's "AI Agents That Matter"
+  project, agents.cs.princeton.edu).
+- What: CLAUDE.md §2 already names publishing methodology openly as
+  simultaneously the enterprise sales channel and the user trust
+  proof. This gives that content a concrete hook: open with the
+  builder's own complaint about benchmarks answering the wrong
+  question, then introduce the outcome record as the direct answer to
+  the complaint as stated, rather than pitching the outcome record
+  forward on its own terms first.
+- First step: whoever next drafts public methodology content uses this
+  quote (with attribution) as the opening hook.
+- Cost: $0
+- Status: proposed
+

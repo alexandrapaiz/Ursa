@@ -8,9 +8,10 @@ notes; never silently deleted.
 
 This file opened 2026-09-26 (sprint 2026-09-21 item 4, serving O2
 KR2.3, due 2026-10-31). First run: 12 entries across the three
-categories the KR names. The weekly rhythm (visit a handful of
-entries plus anything new, cover the full map monthly) starts next
-run.
+categories the KR names. Second run (2026-09-30): revisited six
+existing entries and added one new one (Handshake AI, Category 1, now
+13 total). The weekly rhythm (a handful of entries plus anything new,
+full map monthly) continues from here.
 
 A note on "weaknesses against Ursa": Ursa Minor does not yet sell
 anything, so this is a read of structural gaps the outcome-record
@@ -45,6 +46,13 @@ revealed preference from real finished work, and the rater never has
 skin in the outcome the way a person shipping their own work does.
 Last observed 2026-09-26: [Surge AI on Sacra](https://sacra.com/c/surge-ai/), [Surge AI, Wikipedia](https://en.wikipedia.org/wiki/Surge_AI).
 
+Update 2026-09-30: confirmed OpenAI, a Surge customer since 2021,
+dropped Surge as a vendor in 2025 — reported as a vendor-choice
+decision rather than a move away from purchased human feedback data
+altogether, since OpenAI still holds contracts with Mercor and
+Invisible. Surge's own revenue is reported at $1.4B (2026). Last
+observed 2026-09-30: [Sacra: Surge AI](https://sacra.com/c/surge-ai/), [Getlatka: Surge AI revenue](https://getlatka.com/companies/surgehq.ai).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
@@ -64,6 +72,17 @@ central strategic problem (CLAUDE.md §5): a data vendor that is
 perceived as compromised loses its top customers overnight, no matter
 its scale. Last observed 2026-09-26: [Scale AI, Wikipedia](https://en.wikipedia.org/wiki/Scale_AI), [Computerworld on the Meta-triggered exodus](https://www.computerworld.com/article/4009714/metas-14-3b-stake-triggers-scale-ai-customer-exodus-could-be-a-windfall-for-rivals-like-mercor.html), [TechCrunch: OpenAI drops Scale AI](https://techcrunch.com/2025/06/18/openai-drops-scale-ai-as-a-data-provider-following-meta-deal).
 
+Update 2026-09-30: several pre-IPO data-aggregator sites (TechStackIPO,
+Forge, EquityZen) circulated a specific claim this week — an S-1 filed
+September 11, 2026 at a $32.4B valuation — but none link to an actual
+SEC filing, a direct EDGAR company search turned up no matching S-1,
+and other sources instead describe an IPO still targeted for H2 2027 at
+a $30B valuation. Recording this as an unconfirmed, internally
+conflicting claim rather than a fact, per this charter's sourcing bar.
+Worth a direct EDGAR check next run instead of repeating an
+aggregator's unlinked number. Last observed 2026-09-30 (unverified):
+[TechStackIPO](https://www.techstackipo.com/company/scale-ai), [Forge Global valuation tracker](https://forgeglobal.com/scale-ai-inc_stock/).
+
 ### Mercor
 
 What it is: an expert-contractor marketplace that pivoted into RLHF,
@@ -78,6 +97,18 @@ business that left Scale post-Meta. Weakness against Ursa: still
 solicited, task-assigned expert labor, priced by the hour of grading
 rather than derived from work the expert was doing anyway. Last
 observed 2026-09-26: [Mercor, Wikipedia](https://en.wikipedia.org/wiki/Mercor), [Mercor on RLHF](https://www.mercor.com/resources/experts/what-is-rlhf/).
+
+Update 2026-09-30: valuation reportedly doubling to $20B (from the
+$10B Series C priced in this entry) in talks reported July 2026,
+alongside $2B in annualized gross revenue by June 2026, up from $760M
+at the end of 2025 — a run-rate that nearly tripled in six months.
+Contractor payouts alone were reported above $1.5M/day (roughly
+$547M/year annualized) as of October 2025. This is the fastest-growing
+name in the category and reads as evidence that lab spend on solicited
+human feedback is still accelerating, not commoditizing away — it
+sharpens rather than undercuts the read that Minor isn't trying to
+take share from this market, only to sell a different thing to the
+same buyers. Last observed 2026-09-30: [Forbes: Mercor in talks for $500M at $20B](https://www.forbes.com/sites/richardnieva/2026/07/09/mercor-fundraise/), [Sacra: Mercor revenue](https://sacra.com/c/mercor/).
 
 ### Prolific
 
@@ -109,6 +140,33 @@ base. Weakness against Ursa: same solicited-feedback structure as the
 category, layered under enterprise-services positioning rather than a
 consumer relationship of its own. Last observed 2026-09-26: [Invisible on Sacra](https://sacra.com/c/invisible/), [SiliconANGLE on the $100M raise](https://siliconangle.com/2025/09/16/ai-data-provider-invisible-raises-100m-2b-valuation/).
 
+Update 2026-09-30: expanding beyond data-labeling into AI governance
+and assessment — joined the World Economic Forum (January 2026) and
+agreed to acquire WeCP, an AI-native technical-assessment platform
+(announced March 2026). Reads as this labeling vendor converging
+toward Category 2 below: a company that sells solicited feedback now
+also wants to sell the grading rubric. Last observed 2026-09-30:
+[Invisible Technologies Newsroom](https://invisibletech.ai/newsroom), [Yahoo Finance: Invisible joins WEF](https://finance.yahoo.com/news/invisible-technologies-joins-world-economic-140000900.html).
+
+### Handshake AI
+
+What it is: an expert network for frontier-lab RLHF and model
+evaluation, built on the Handshake career platform's existing base of
+roughly 18 million students and alumni across 1,600+ universities,
+funneling credentialed talent (math, physics, computer science) into
+model-training work through its MOVE Fellowship. Who it serves:
+frontier labs wanting high-credential domain expertise; reportedly
+eight of the top labs are customers, including OpenAI. Pricing: no
+public buyer-side rate card; experts reportedly paid $100-125/hr, with
+the business at roughly $1.1B in annualized gross revenue by April
+2026. Strengths: a genuinely distinct talent-sourcing pipeline (an
+existing 18M-person career network turned into a labor supply
+overnight) rather than a labeling workforce built from scratch.
+Weakness against Ursa: the identical structural gap as the rest of
+this category — a credentialed expert paid to grade or generate on
+request, not a person's own real work observed after the fact. New
+entry, added this run. Last observed 2026-09-30: [Handshake: Introducing Handshake AI](https://joinhandshake.com/blog/our-team/introducing-handshake-ai/), [Annotation Academy: What is Handshake AI](https://annotation.academy/glossary/what-is-handshake-ai-and-how-does-it-work).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -133,6 +191,12 @@ prompt nobody actually needed answered for real reasons — closer to the
 "stated-preference survey" the vision doc's third principle warns
 against than to revealed preference from finished work. Last observed
 2026-09-26: [LMArena, Wikipedia](https://en.wikipedia.org/wiki/LMArena), [Arena (AI platform), Wikipedia](https://en.wikipedia.org/wiki/Arena_(AI_platform)).
+
+Update 2026-09-30: reached $100M in annualized run-rate revenue as of
+June 2026, eight months after launching its commercial product — the
+fastest revenue ramp observed in any category this map covers. Its
+Fall 2026 Academic Partnerships cycle opens with proposals due October
+30, 2026. Last observed 2026-09-30: [TechCrunch: Arena is now a $100M business](https://techcrunch.com/2026/06/29/arena-the-ai-leaderboard-everyone-uses-is-now-a-100m-business/).
 
 ### Artificial Analysis
 
@@ -250,8 +314,27 @@ starkest test of that promise: OpenAI has every incentive to keep
 closing the UX gap without ever opening the portability one. Last
 observed 2026-09-26: [OpenAI: Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/), [ChatGPT memory guide, 2026](https://www.datastudios.org/post/can-chatgpt-remember-previous-conversations-memory-behavior-session-limits-and-persistence).
 
+Update 2026-09-30: OpenAI shipped "Memory Sources" across all ChatGPT
+plans, giving users direct visibility into exactly what saved
+memories, past chats, or knowledge files informed a given response,
+with controls to manage each source individually. This narrows the
+transparency half of this entry's "weakness against Ursa": OpenAI is
+no longer just improving edit/delete controls, it is now surfacing
+per-response provenance, which is close in spirit to the auditability
+Ursa Major claims as differentiation (CLAUDE.md §3). What does not
+narrow is portability: this is still a single-vendor memory that
+cannot follow the user to Claude or Gemini. Worth taking seriously as
+a sign OpenAI is closing gaps faster than last week's entry assumed,
+rather than dismissing it. Last observed 2026-09-30: [OpenAI: Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
   evaluation/arena products, 4 personalization/memory layers), opened
   for sprint 2026-09-21 item 4 / O2 KR2.3.
+- 2026-09-30 — second run: added Handshake AI (Category 1, 13th entry).
+  Dated update notes added to Surge AI, Scale AI, Mercor, Invisible
+  Technologies, Arena, and ChatGPT Memory covering this week's funding
+  and revenue moves. Flagged a circulating Scale AI IPO/S-1 claim as
+  unconfirmed rather than reporting it as fact (no EDGAR match, no
+  linked source, conflicts with other reporting).

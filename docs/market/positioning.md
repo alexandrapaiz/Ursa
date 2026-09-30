@@ -93,9 +93,51 @@ CLAUDE.md's own naming of model providers as a competitive threat, but
 not impossible under regulatory pressure), that closes Ursa Major's gap
 overnight. Nothing found this run suggests that's in motion.
 
+## A bound on Minor's target, not a price (2026-09-30)
+
+Last run flagged a gap: no disclosed per-unit or per-contract price
+exists for anything resembling an outcome-record license, so nothing
+anchors CLAUDE.md's six-to-seven-figure target inside its range. This
+run didn't find that number either, but it found the market's size
+instead, which bounds the question differently. Each major frontier
+lab reportedly spends roughly $1 billion a year on human-generated
+training data overall, and the category's fastest-growing named vendor
+(Mercor) alone is now at $2B in annualized gross revenue, up from
+$760M nine months earlier
+([source](https://www.forbes.com/sites/richardnieva/2026/07/09/mercor-fundraise/)).
+Against a $1B/year total spend per lab, a six-to-seven-figure deal is
+a rounding error, not a stretch. That changes what the pricing test
+should be: the open question is not "can a lab afford this," it's
+"is the outcome record differentiated enough to earn a line item at
+all" — a positioning question, not an affordability one. No pricing
+recommendation follows from this; it just narrows where the owner's
+attention should go if a number is ever tested.
+
+## Portability over transparency (2026-09-30)
+
+Category 3's read from the first entry named OpenAI's steadily
+improving edit/delete controls as the risk to watch. This run found a
+sharper version: OpenAI shipped "Memory Sources," giving users
+per-response visibility into what fed their answer
+([source](https://openai.com/index/memory-and-new-controls-for-chatgpt/)).
+That is a transparency feature, and it means Ursa Major's "you can
+always see what's been inferred" claim (CLAUDE.md's non-negotiable #2)
+is no longer a clean differentiator against the single largest
+consumer AI memory product. What OpenAI's feature still cannot do, by
+construction, is follow the user to a different vendor's model. The
+honest positioning update: Major's remaining edge against this
+specific competitor is portability, not transparency, and public
+messaging that leads with "portable across every model" tests better
+against what ChatGPT actually ships today than messaging that leads
+with "fully inspectable."
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
   model rather than the charter's vendored alexandria language (flagged
   above). No pricing recommendation made; the owner has no comp
   precise enough yet to act on.
+- 2026-09-30 — added a total-addressable-spend bound for Minor's
+  target (still no per-contract anchor) and narrowed Major's Category 3
+  differentiation claim from transparency to portability, following
+  OpenAI's Memory Sources launch. No pricing recommendation made.
