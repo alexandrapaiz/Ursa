@@ -143,3 +143,86 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-09-30 — The union is the thing CI should test, on a schedule
+- Trigger: today's stack integration. GitHub computes mergeability one
+  branch against `main` at a time, so with 25 pull requests open it
+  reported most of them mergeable while the answer to "would these land
+  together" was unknown to everyone. Run by hand,
+  `tools/stack/integrate.sh` found the union green on 153 tests and a
+  passing site build, and found that merge order alone moves the number
+  that lands from 9 to 18. None of that was visible from the pull
+  request list, and by tomorrow it is stale.
+- What: run `tools/stack/integrate.sh --json` on a daily schedule and
+  publish the result where the owner and the PM already look. The map is
+  worth more than a pass/fail: it names which pull request is worth
+  merging first (today, #27, because it unblocks twelve others), which
+  conflicts are mechanical, and which belong to a named seat. A seat that
+  wakes with no memory could read the latest report instead of
+  rediscovering the queue, which is the L-E10 survey done for it before
+  it starts.
+- First step: a workflow that runs the harness on a cron, uploads the
+  JSON and markdown as artifacts, and writes the table into the PM's
+  pending file or a comment on the oldest open pull request. Workflow
+  changes in this repo go through `docs/agents/pending-workflow-changes.md`,
+  so the first step is the proposal there plus the workflow file, not a
+  merge.
+- Cost: $0. One scheduled run of about six minutes, inside the free
+  Actions allowance for a public repository.
+- Status: proposed
+
+### 2026-09-30 — The idea ledger should be a directory, not one file
+- Trigger: `docs/ideas.md` was the only conflicted file in twelve of the
+  sixteen conflicts measured today, and #27's merge driver fixes it only
+  for merges a human performs in a clone. A merge driver is named in
+  `.gitattributes` but defined in `.git/config`, which is per-clone and
+  never committed, so GitHub's own server-side merge cannot use it. The
+  consequence is written in #27's own description: after every merge,
+  someone re-runs `requeue.sh --push` to make the others mergeable
+  again. That loop is not closable on GitHub's side.
+- What: every seat charter ends with "append today's new ideas to
+  `docs/ideas.md`", so every run adds lines to the end of one file, and
+  git reads two appends at the same end of the same file as one
+  conflicting hunk. Give each entry its own file,
+  `docs/ideas/YYYY-MM-DD-slug.md`, with `docs/ideas.md` becoming a
+  generated index. Two seats then add two different files, which is not
+  a conflict for git, for GitHub, or for anyone, with no driver, no
+  per-clone install, and no requeue loop. The conflict class disappears
+  rather than being merged more cleverly.
+- First step: this needs charter edits (every seat charter names the file)
+  and it touches a surface whose statuses the owner controls, so the
+  first step is the owner's decision, not a commit. If accepted: a
+  migration script that splits the current file by `^### ` heading, an
+  index generator, and the one-line change in each charter, in a single
+  pull request so no seat is ever pointed at a file that has moved.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-30 — Lessons inbox: a substring assertion on generated code is not a test of that code
+- Trigger: #16 shipped green with a `SyntaxError` in the viewer script it
+  generates, which meant every `outcome_record.html` from that branch
+  opened as an empty shell. Its three viewer tests were
+  `expect(html).toContain(...)` substring checks, and all three passed
+  against a script that could not run, because a substring check never
+  parses what it finds. The defect surfaced only when #18, whose test
+  executes the script, arrived in the same tree.
+- What: propose to the company lessons inbox, for the ExO centralizer to
+  generalize and give an identifier: when a function emits a program,
+  the test parses the emitted program. That covers JavaScript in a
+  `<script>` block, SQL, a generated shell script, or a rendered
+  template. The safe form ships with the rule, per L-A14: extract the
+  block and compile it without running it, which for JavaScript is
+  `expect(() => new Function(src)).not.toThrow()` and is three lines with
+  no browser and no new dependency. The generalization worth having is
+  wider than escaping, and it is that a test asserting on the *text* of
+  an artifact that is really a *program* has chosen the weaker of two
+  available checks for no saving.
+- First step: append it to the inbox at the bottom of
+  `docs/standards/lessons.md` with a title, today's date, and the roles
+  it binds, and no `L-` identifier, since only the centralizer issues
+  those. That file is a vendored copy this seat does not edit, so the
+  append belongs to the centralizer or the chair.
+- Cost: $0
+- Status: proposed
+
+- 2026-09-30 (engineer, craft scan): GitHub's own merge queue is the incumbent product for the problem this run spent the day on, so it got today's scan. Verified against this repository rather than from memory: `gh api repos/alexandrapaiz/Ursa/rulesets` returns `[]`, `allow_auto_merge` is `false`, and branch protection is not readable by the Actions token, so no queue is configured. Worth stealing, and it is the whole idea of the product: a merge queue tests each candidate against the prospective post-merge state of `main` including everything ahead of it in the queue, never against current `main`. That is exactly the gap measured today, where 25 pull requests each reported mergeable against `main` and nobody knew whether the union built. Where Ursa's harness is better for this repository: the queue needs required status checks and a ruleset before it does anything, it serializes into one CI run per candidate, and its output is a verdict rather than a map. `tools/stack/integrate.sh` answers the whole-union question in one run with zero repository configuration, and it reports which pull request unblocks the most others and which conflicts are mechanical, which is what an owner deciding a merge order actually needs. The honest limit on the comparison: a merge queue prevents the broken union from ever landing, and the harness only tells you about it.
