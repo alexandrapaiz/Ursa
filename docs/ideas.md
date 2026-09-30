@@ -226,3 +226,168 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - First step: owner or PM picks one and amends the charter.
 - Cost: $0
 - Status: proposed
+
+### 2026-09-30 — Finding: the pair finder misses squash merges, and its bot patterns miss Ursa's own bots
+- Trigger: the skill agent's second run, writing
+  `skills/running-an-outcome-record-trial` step 2, which tells a trial
+  runner to test a candidate subject against the detector before
+  committing to it. Testing that instruction against this repository
+  turned the caveat into a defect.
+- What: three things compose into a wrong label rather than a missing
+  one. (1) `ursa-major/src/pairfinder.ts:108-111` excludes a pairing
+  target by parent count, because a merge brings in work the human did
+  not write. A squash merge has one parent, so it is not excluded, and
+  it carries the agent's entire branch diff, which is exactly what that
+  comment says must not be counted as the person's corrections. Squash
+  is GitHub's default in many repositories and it is how this one
+  lands PRs. (2) The trailer pattern at
+  `ursa-major/src/pairfinder.ts:30` matches `claude|codex|cursor|gpt`.
+  The wider pattern at line 31, the only one that knows about
+  `github-actions` and `[bot]` names, is applied to the commit's author
+  name at line 94 and never to its trailer. (3) GitHub rewrites the
+  trailer on squash. This repo's `8c453f0` is a squash merge authored by
+  the owner whose trailer reads
+  `Co-authored-by: exo-centralizer[bot]`, which matches neither
+  pattern, so it reads as a human commit editing agent work.
+- Measured here, not hypothetical. Of the 88 commits reachable in a
+  working clone, 78 are agent-marked non-merge commits, 8 are merge
+  commits the exclusion drops, and 2 are root or graft boundaries.
+  Reproduce with
+  `git log --all --pretty=format:'%h%x09%an%x09%p%x09%(trailers:key=Co-Authored-By,valueonly)'`.
+- Why it matters more than an empty record: on a squash-merge repo with
+  bots named outside the pattern, the polarity inverts. The agent's
+  whole contribution arrives inside a commit labelled human, so
+  generated text is classified `no_generation_provenance`, the category
+  CLAUDE.md §1 calls the most valuable, and here it would be entirely
+  artifact. A confident wrong label is worse for a buyer than a thin
+  record, and this is the one span class a lab cannot check against its
+  own telemetry.
+- First step: engineer applies the trailer pattern to the trailer as
+  well as the author, adds the `[bot]` and `github-actions` alternates
+  to the trailer test, and decides what a one-parent commit whose
+  message ends in `(#N)` should be treated as. A test case built from
+  a squash commit with a rewritten trailer is the regression guard.
+  `pairfinder.ts` is outside this seat's write surface, so the skill
+  documents the trap instead of fixing it.
+- Cost: $0, small
+- Status: proposed
+
+### 2026-09-30 — Finding: `ursa run` reports the depth of the clone, not the history of the project
+- Trigger: the same step 2. The episode count the skill asks for was
+  measured in an agent's working clone, which is shallow.
+- What: `listCommits` walks `git log --all`
+  (`ursa-major/src/pairfinder.ts:52-58`), so the history it sees is
+  whatever the fetch brought. In this run's clone `main` is grafted at
+  one commit, and nothing in the code detects the graft or says so in
+  the record. A run against a CI checkout, which is shallow by
+  default, silently produces a record of the checkout rather than of
+  the project. That lands directly on the GitHub spine milestone
+  (`docs/design/product-plan.md` §5), whose whole mechanism is an
+  Action firing on a merged PR in the user's own account.
+- First step: engineer checks for `.git/shallow` at the start of a run
+  and either refuses or records the graft boundary in the record, so a
+  reader can tell a short history from a truncated one. Same write
+  surface point as above.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-30 — Finding: one human commit can be the correction for several episodes
+- Trigger: reading the pairing loop closely enough to write the skill's
+  judgment section.
+- What: `findCommitPairs` scans forward independently for each
+  generated commit and stops at its own first match
+  (`ursa-major/src/pairfinder.ts:99-127`), and agent commits are
+  skipped as pairing targets at line 107. So two consecutive agent
+  commits touching the same path both pair to the same following human
+  commit, and that one edit is counted as the correction in more than
+  one episode. Episode count is therefore not a count of distinct
+  corrections. Separately, because the walk is `--all`, a branch the
+  project abandoned entirely still yields episodes.
+- Neither is wrong for the retention label, since the text really was
+  written and really was changed. Both inflate any trajectory claim
+  built on episode counts, which is the kind of claim
+  `docs/beyond-preference-pairs.md` makes.
+- First step: engineer decides whether a reused `finalSha` should be
+  deduplicated or simply reported, and whether episodes from unmerged
+  branches should be marked as such. Either way the record should carry
+  the fact rather than leave it to be inferred.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-30 — Finding: the two capture paths accept different file extensions
+- Trigger: writing the skill's step 4, which tells a trial runner to
+  check the subject's file types against the chosen path.
+- What: the git path reads `.py`, `.yml`, `.yaml`, `.toml` and `.sql`
+  (`ursa-major/src/bin/ursa.ts:18-21`) and the session path does not
+  (`ursa-major/src/cli.ts:15-18`). So a Python project's finished work
+  is invisible to the session path, which is the only path that carries
+  user words and turns-to-acceptance. The two paths also cap file size
+  at different limits, 500KB against 300,000 characters, and only the
+  session path warns when it skips
+  (`ursa-major/src/cli.ts:21,67-69`, `ursa-major/src/bin/ursa.ts:23`).
+  This reads as drift between two entry points rather than a decision,
+  and it narrows KR1.3's pool of eligible subjects for no stated reason.
+- First step: engineer either unifies the two extension sets and the
+  two size caps behind one constant, or records why they differ. If
+  they are meant to differ, the skill's step 4 should cite the reason
+  instead of the asymmetry.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-30 — The evidence checker validated only the first range of a multi-range source (fixed)
+- Trigger: writing a source line holding two paths, and noticing the
+  checker had no way to tell the two commas apart.
+- What: `skills/check-evidence.mjs` split each source line on commas
+  before parsing ranges, because a comma separates two paths. A comma
+  also separates two ranges of one path, so every range after the
+  first was silently never checked, and
+  `ursa-major/src/segment.ts:1-3,900-999` passed against a 70-line
+  file. Fixing it exposed two more: `Number('')` is `0` rather than
+  `NaN`, so a trailing comma invented an out-of-bounds line 0 and
+  failed three sources in the first skill; and `split('\n')` counts the
+  trailing newline as a line, so a citation one past the end of a file
+  passed.
+- All three are fixed in this PR, with the reasoning in the code's own
+  comments. Recorded here rather than left silent because the checker
+  is the thing that makes "skills with receipts" enforceable, and a
+  checker that passes a bad range is worse than no checker. It is in
+  this seat's write surface, so this entry is history rather than a
+  request.
+- First step: none. Verify with `node skills/check-evidence.mjs`.
+- Cost: $0
+- Status: shipped, this PR
+
+### 2026-09-30 — Repeat: the skill seat's Data access section has now cost two runs the same detour
+- Trigger: the skill agent's second run. `NEON_RO_URL` was unset again,
+  so the run again opened by saying so and again spent itself on the
+  parts that need no database.
+- What: this is not a new finding. It is the 2026-09-24 entry above,
+  "Ursa has no claims database, so the skill seat cannot extract",
+  unchanged and now reproduced. Under L-A4 a correction that repeats
+  belongs to the register and the charter that failed to bind it rather
+  than to the artifact, and the same logic applies to a finding that
+  repeats: the second occurrence is evidence that filing it was not
+  enough. `prompts/skill-agent.md` still instructs this seat to query a
+  database that does not exist, and it still points at a gold specimen
+  (`skills/harness-engineering/SKILL.md`) that lives in alexandria.
+  Option (a) from that entry is now load-bearing rather than proposed,
+  because two skills have shipped through `evidence_scheme: repo` and
+  neither could have been written any other way.
+- Two of the other three 2026-09-24 findings are also unchanged. There
+  is still no skills route in `ursa-minor/`, verified this run, so the
+  receipts remain readable only with the repo checked out. The
+  duplicate ADR-005 and the ADR-22 reference are untouched.
+- The branch-name collision resolved itself in practice, in favour of
+  the cheaper option. This run's dispatch named the branch
+  `ursa-skill/2026-09-30-window`, which carries no slug at all, and the
+  skill's slug lives where it is load-bearing, in the directory name.
+  That is the run-shaped branch the 2026-09-24 entry asked for, arrived
+  at by the runtime rather than by a charter amendment, so the charter
+  and the practice now disagree in the other direction.
+- First step: unchanged. Owner or PM amends `prompts/skill-agent.md`
+  "Data access" to name repo evidence as the Ursa source, replaces the
+  gold-specimen pointer with `prompts/skill-extract.md`, and reconciles
+  the branch-name rule with what the runtime actually does. All three
+  are charter edits, outside this seat's write surface.
+- Cost: $0
+- Status: proposed, second occurrence
