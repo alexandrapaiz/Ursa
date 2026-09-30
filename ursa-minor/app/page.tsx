@@ -54,7 +54,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-2xl px-8">
+      <main className="w-full px-[clamp(2rem,8vw,6rem)] lg:mx-auto lg:max-w-2xl lg:px-8">
         <section className="border-t border-[var(--line)] py-22">
           <div className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> North stars
@@ -78,7 +78,7 @@ export default function Home() {
       </main>
 
       <footer className="mt-8 border-t border-[var(--line)]">
-        <div className="mx-auto flex w-full max-w-2xl flex-wrap gap-x-10 gap-y-2 px-8 pb-20 pt-14 font-mono text-[0.7rem] tracking-[0.1em] text-[var(--dim)]">
+        <div className="flex w-full flex-wrap gap-x-10 gap-y-2 px-[clamp(2rem,8vw,6rem)] pb-20 pt-14 font-mono text-[0.7rem] tracking-[0.1em] text-[var(--dim)] lg:mx-auto lg:max-w-2xl lg:px-8">
           <span>Alexandra Paiz Delgado · Systems Engineer</span>
           <span>Fatima Michel Giron · Computer &amp; Artificial Intelligence Engineer</span>
           <span>© ursa</span>
