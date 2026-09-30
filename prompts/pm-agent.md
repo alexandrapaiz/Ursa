@@ -119,44 +119,19 @@ minutes per week and a review date on which it dies by default unless
 it visibly paid for itself. Anything portable goes into
 docs/playbook.md so other projects inherit it.
 
-## 1f. The Linear board of record (owner directive, 2026-09-23)
+## 1f. The board of record is the repo (ADR-006, 2026-09-25)
 
-Linear is Ursa's board of record, and builder agents build from it:
-workspace "Alexandra Personal", team URSA (key URS), the current
-quarter's project (Q4 2026: "Q4 2026 — prove the record, publish the
-method"). Resolve ids at runtime; never hardcode workspace UUIDs here
-(the redaction gate scans for UUID shapes).
-The repo stays the source of truth for specs; Linear is the work
-queue the owner watches and the builders draw from. This supersedes
-the company's GitHub-Projects default (HQ ADR-008) for Ursa; recorded
-as ADR-005 in docs/decisions.md.
-
-Mechanics, every run, via the Linear GraphQL API with the
-`LINEAR_API_KEY` secret (if the secret is absent, skip this section
-and say so once in your PR description; never fail the run over it):
-
-- Resolve the team and list issues by key, no hardcoded ids:
-  `curl -s https://api.linear.app/graphql -H "Authorization: $LINEAR_API_KEY" -H "Content-Type: application/json" -d '{"query":"{ teams(filter: { key: { eq: \"URS\" } }) { nodes { id issues(first: 50) { nodes { identifier title state { name } } } } } }"}'`
-  The project id comes from `{ projects(filter: { name: { contains: \"Q4 2026\" } }) { nodes { id name } } }` the same way.
-- Create an issue (ceremony run, one per new sprint item):
-  mutation `issueCreate(input: { teamId, projectId, title, description, priority })` — title prefixed `[seat]`, description self-contained (repo paths, done-means, the KR served) so a builder can work from the issue alone.
-- Move an issue (standup run): mutation `issueUpdate(id, input: { stateId })` — In Progress when the seat is dispatched, In Review when its PR opens, Done when the owner merges, Canceled when the ledger rejects it.
-
-Rules:
-- The ceremony run mirrors every sprint backlog item to an issue and
-  writes the issue identifiers back into the sprint file (item 1 →
-  `URS-n`), so dispatch instructions carry them: every §0b dispatch
-  instruction includes "your assignment is URS-n; its description is
-  the spec".
-- The standup run reconciles statuses against `gh pr list` and the
-  merge history, and keeps the `[owner]` issues in sync with
-  docs/sprints/pending.md: one issue per owner-only action, closed
-  when the action lands, never nagging in duplicate.
-- Issues are created and moved, never deleted; a superseded issue is
-  Canceled with one line saying why.
-- The board never carries raw record content, prompts, or anything
-  the redaction standard would gate; titles and descriptions reference
-  repo paths instead.
+Linear was trialed as the board of record (ADR-005) and abandoned by
+the owner after one cycle: the 2026-09-24/25 build cycle shipped six
+PRs from five seats with Linear entirely dead, proving the repo's own
+machinery sufficient. The board of record is GitHub: the sprint file
+is the backlog, `docs/sprints/pending.md` is the owner's queue,
+`docs/sprints/dispatch-queue.md` is the dispatch plan, and the labels
+(`seat:<name>`, `horizon:*`, `blocked`, `owner-action`) and one
+milestone per sprint (docs/standards/pm.md §2b) are the board view.
+Maintain those every run; never resurrect a second board without an
+ADR. A framework must never consume more than the work it organizes,
+and this one did.
 
 ## 2. Backlog grooming
 

@@ -5,6 +5,14 @@
 // after.
 //
 //   npx tsx src/bin/ursa.ts run <projectPath> [--limit N] [--min-chars N]
+//
+// ursa bridge <project> — the overlay's local half (plan §16.2): tails
+// the project's session log, reads the stated verdict, encrypts, and
+// syncs ciphertext for the hosted page. Resident while open, exits on
+// close, started by nothing but the owner.
+//
+//   URSA_PASSPHRASE=... npx tsx src/bin/ursa.ts bridge <projectPath> \
+//     [--sync-url https://...] [--session <file>] [--interval ms] [--port 7817]
 
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
@@ -92,12 +100,36 @@ export async function main(argv: string[]): Promise<number> {
       limit: { type: 'string' },
       'min-chars': { type: 'string' },
       declare: { type: 'string' },
+      'sync-url': { type: 'string' },
+      session: { type: 'string' },
+      interval: { type: 'string' },
+      port: { type: 'string' },
     },
   })
   const [cmd, project] = positionals
-  if (cmd !== 'run' || !project) {
+  if ((cmd !== 'run' && cmd !== 'bridge') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
+    console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
     return 2
+  }
+  if (cmd === 'bridge') {
+    const passphrase = process.env.URSA_PASSPHRASE ?? (await promptHidden('passphrase (held in memory only): '))
+    if (!passphrase) { console.error('a passphrase is required; it derives the key and the blob id'); return 2 }
+    const { startBridge } = await import('../bridge/index')
+    const handle = await startBridge({
+      projectPath: absPath(project),
+      passphrase,
+      syncUrl: (values['sync-url'] ?? 'https://ursa-overlay.vercel.app').replace(/\/$/, ''),
+      session: values.session,
+      intervalMs: values.interval ? Number(values.interval) : undefined,
+      port: values.port ? Number(values.port) : undefined,
+      allowOrigins: ['https://ursa-overlay.vercel.app'],
+    })
+    await new Promise<void>((resolve) => {
+      process.on('SIGINT', () => { void handle.stop().then(resolve) })
+      process.on('SIGTERM', () => { void handle.stop().then(resolve) })
+    })
+    return 0
   }
   const projectPath = absPath(project)
   const minChars = Number(values['min-chars'] ?? 200)
@@ -124,6 +156,42 @@ export async function main(argv: string[]): Promise<number> {
   console.log(renderRunSummary(records, episodes))
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
   return 0
+}
+
+/** Read a line from the tty without echoing it. */
+function promptHidden(question: string): Promise<string> {
+  return new Promise((resolve) => {
+    process.stdout.write(question)
+    const stdin = process.stdin
+    if (!stdin.isTTY) {
+      let buf = ''
+      stdin.setEncoding('utf8')
+      stdin.on('data', (d: string) => { buf += d })
+      stdin.on('end', () => resolve(buf.trim()))
+      return
+    }
+    stdin.setRawMode(true)
+    stdin.resume()
+    let value = ''
+    const onData = (ch: Buffer) => {
+      const c = ch.toString('utf8')
+      if (c === '\n' || c === '\r' || c === '\u0004') {
+        stdin.setRawMode(false)
+        stdin.pause()
+        stdin.off('data', onData)
+        process.stdout.write('\n')
+        resolve(value)
+      } else if (c === '\u0003') {
+        process.stdout.write('\n')
+        process.exit(130)
+      } else if (c === '\u007f') {
+        value = value.slice(0, -1)
+      } else {
+        value += c
+      }
+    }
+    stdin.on('data', onData)
+  })
 }
 
 const invokedDirectly = process.argv[1]?.endsWith('ursa.ts')
