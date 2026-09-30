@@ -145,3 +145,60 @@ organizes) applies. Infisical centralizes the growing secret set
 with rotation and audit in one place.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## ADR-008 — Sync window 2026-09-30: milestones over sprint files, Slack retired, every run ends on the board (record, not full implementation)
+
+**Context.** Owner, live in this window: "Tonight the sprints became
+milestones, Slack is retired, and every run must end with a done on
+the board." Relayed to the PM directly in its session, not through a
+board message this seat could read — see the note below on why.
+
+**Decision, as directed.** Three changes, recorded here so they survive
+past this session:
+
+1. The sprint is the milestone. Its goal closes the milestone when the
+   goal ships; the PM names the next one. This supersedes treating the
+   milestone as a secondary label on top of a separate sprint file
+   (pm.md §2b's original framing).
+2. Slack is retired as a PM/seat reporting surface. This supersedes
+   ADR-007 (proposed in PR #20, itself still unmerged) before that
+   proposal ever took effect — the bullets-format correction in ADR-007
+   is now moot along with the channel it was written for.
+3. Every run ends by leaving a "done" on the board (pm.md §14), not by
+   a PR description alone.
+
+**What this run could actually do about it.** This session has no
+`BOARD_API_URL` or `BOARD_RUNTIME_TOKEN` in its environment and no
+board tool loaded, so it cannot read the board's PM inbox, post a
+reply there, or leave a "done" there — despite pm.md §14 describing
+exactly this access as available "on the host (epitod / Temporal
+runs)." That's a real gap in this session's wiring, not a decision to
+route around: I'm recording the owner's three directives here in the
+repo, the surface I can reach, and flagging the board-access gap as
+something the chair needs to fix for this seat's host sessions rather
+than pretending to have posted a reply I could not send.
+
+On the milestone half: `Sprint 2026-09-28` (milestone #2, due
+2026-10-04) is open but its goal has not shipped — the ceremony PR that
+would land it on `main` (#34) is itself still unmerged, six days into
+the standing merge-queue backlog this file already tracks. Closing it
+now would be fiction; it closes once #34 lands and its items actually
+merge, and I said so rather than closing it to match the instruction's
+letter.
+
+**Reasoning.** The owner is steering directly in a synchronous window
+(L-P7); her words bind, but a seat that cannot reach the surface she's
+asking it to write to should say that plainly rather than fabricate the
+write. Recording the directive here means the next run — mine or any
+seat's — inherits it even if this exact conversation is not replayed.
+
+**Consequences.** `docs/standards/pm.md` §11.3's "Slack report" line
+and §14's board-access description are now stale against this ADR;
+both are HQ-vendored, so this Ursa deviation is recorded here per
+CLAUDE.md rather than hand-edited in the vendored file. Proposed
+upstream note for HQ: the board-access wiring described in pm.md §14
+is not present on at least this seat's host runtime as of tonight.
+
+**Owner:** Alexandra. **Status:** proposed — recorded as directed;
+merge formalizes it, and the board-access gap needs a chair-side fix
+before instruction 3 is followable at all.
