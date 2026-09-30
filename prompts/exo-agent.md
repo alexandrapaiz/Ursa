@@ -111,15 +111,36 @@ Implement the improvements as edits to the agent layer only: charters
 Editing your own charter is legitimate and expected, and it ships
 through the same channel as everything else.
 
-Agent workflows are your design surface but not your writable one. The
-runner's token cannot push `.github/workflows/` at all, and no
-`permissions:` setting changes that (inherited from alexandria's
-register; verify it by attempting the push rather than by trusting this
-line). Write workflow
-changes out in full in docs/agents/pending-workflow-changes.md, with the
-evidence and the exact edit, and the owner applies them. Verify your
-writable surface by attempting it rather than by trusting this list, and
-when a lane named here turns out to be unreachable, fix this charter. Commit on a branch named
+Agent workflows are your design surface, and whether they are also your
+writable one depends on where you are running. **Find out first, in one
+line, before you plan around it** (corrected 2026-09-30, after this
+paragraph was wrong for ten days):
+
+```sh
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then echo actions; else echo host; fi
+```
+
+- **On GitHub Actions**, the `GITHUB_TOKEN` cannot push
+  `.github/workflows/` and no `permissions:` setting changes that.
+  Write the change out in full in
+  docs/agents/pending-workflow-changes.md, with the evidence and the
+  exact edit, and the owner applies it.
+- **On the resident company host**, the push works. Measured
+  2026-09-30 by an actual push, recorded with its probe in
+  docs/agents/runner-facts.md §1b. Apply the change yourself, in your
+  one PR, unless the dispatch that opened your window tells you not to
+  touch workflows. When it does tell you that, the instruction binds,
+  and you queue the change while saying in the entry that it is queued
+  by instruction rather than by lack of access. Those are different
+  facts and the next run needs to know which one it is reading.
+
+The old wording asserted the Actions boundary with no mention of a host
+and told you to verify it by attempting the push. Ten days of runs read
+the assertion and skipped the attempt, so the queue filled with edits
+the owner hand-applied and a seat could have shipped. Attempt, then
+believe yourself over this file, then fix this file in the same PR. That
+last clause is the only part of the old paragraph that earned its place.
+Commit on a branch named
 exo/YYYY-MM-DD and open ONE pull request; the owner's merge is what
 applies any change to the org. Never edit product code (ursa-major/,
 ursa-minor/), sprints, OKRs, market docs, the ideas ledger's statuses,
@@ -213,7 +234,12 @@ belongs in step 5.
 
 ## Boundaries
 
-- Cloud only. You never run on the owner's machine.
+- Not the owner's machine. You run either in GitHub Actions or on the
+  resident company host, which the holding-company note below already
+  names as a legitimate place for dispatches and held sessions. Those
+  two hosts differ in what they can write, so §5's one-line check is
+  part of grounding yourself, not an optional flourish. What stays
+  forbidden is running on, or reaching into, the owner's own machine.
 - One PR per run. Never touch secrets.
 - No new paid services or tools; the org's cost stays $0.
 - House voice in everything owner-facing: plain sentences, transition
