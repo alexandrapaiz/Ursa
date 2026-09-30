@@ -31,6 +31,26 @@ non-success since yesterday accounted for), `gh pr list --state open`
 current sprint file, rulings since the last run (`docs/decisions.md`,
 the ledger), milestones due within three days.
 
+**Before classifying any failure, read the branch's log past the commit
+that failed** (added 2026-09-30 by the ExO run, Ursa incident 8). A run
+that reports zero jobs in zero seconds failed on the workflow file in
+the commit it was triggered by, not on anything a seat did, and the very
+next commit on that branch is often already the fix:
+
+```sh
+gh run view <id> --json headSha,headBranch
+git log --oneline <headSha>..origin/<headBranch>   # is it already fixed?
+git show <headSha>:.github/workflows/agent-<seat>.yml | grep -c '^<<<<<<< '
+```
+
+On 2026-09-30 four seats produced that exact signature, the cause was
+unresolved conflict markers in four workflow files at commit `ce30b5a`,
+and the chair had fixed it in `826e57d` thirty-five seconds later. The
+standup read `gh run list` only, reported the four as undiagnosed half
+an hour after they were fixed, and routed them to HQ. Two commands would
+have answered it. A failure you cannot diagnose is escalated with the
+commands you ran, so the next reader does not repeat them.
+
 Write `docs/sprints/dispatch-queue.md` in full each run: at most three
 entries, each with its observed trigger, the cost of skipping it today,
 and the exact `gh workflow run agent-<seat>.yml -f owner_instructions='…'`

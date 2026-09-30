@@ -50,6 +50,31 @@ sandbox. Treat it as a starting point and not as a ceiling. When the
 cost of an attempt is low, attempt it anyway, and when a line there
 turns out to be false, correct it in the same PR that discovers it.
 
+## 2b. Read both halves of every charter (L-X11, added 2026-09-30)
+
+A seat's instructions live in two files: `prompts/<seat>-agent.md`,
+which the seat can read and often edit, and the inline `prompt:` block
+in `.github/workflows/agent-<seat>.yml`, which the seat usually cannot
+edit and which arrives last and closest to the model's attention. Where
+they contradict each other, **expect the workflow block to win**. So a
+charter edit is not a duty performed, and an audit that read only
+`prompts/` has read half of every charter it judged.
+
+Run the sweep every run. It is mechanical and it takes one script:
+extract each workflow's `prompt:` block, extract the matching charter,
+and list every instruction present in one and absent or contradicted in
+the other. Report the count, not a sample, because eleven seats sharing
+one defect and one seat having it are different findings.
+
+The first sweep, this run, found the same gap in eleven of eleven
+seats: every charter says `gh pr create --draft` and carries the
+ship-first rule, and **not one of the eleven workflow prompt blocks
+mentions either**. That is Ursa incident 7, and it is the mechanism
+behind the sentence in §2 above: draft-PR-first was assigned to this
+seat and sat unapplied while the owner carried it by hand. It was
+written into the file the seat reads first and left out of the file
+that reaches it last.
+
 Cite incidents by the convention at the top of that register: "Ursa
 incident N" for this repo, "<repo> incident N" for any other, and for
 an inherited rule whose number you have not looked up, cite the rule
@@ -93,6 +118,30 @@ the PWC entries, for a number used twice or a number cited but absent.
 Fix what is yours and queue the rest for the owner, and never renumber
 an accepted ADR yourself, because the number is the owner's decision
 and other files already cite it.
+
+### 3e. Count what reached the owner (L-X12, added 2026-09-30)
+
+Every other audit in this company measures a seat against its charter,
+so none of them can see work the owner did herself. A duty that falls to
+whoever is present reads as covered in every report. Three numbers, in
+your standing observations every run:
+
+1. **Rounds per artifact.** How many times did one artifact reach the
+   owner before it converged. One is a healthy probe. Two is a pattern.
+   Eight is a missing seat.
+2. **Dispatches by author.** A dispatch list whose every entry names
+   the owner or the chair says the dispatching seat is not there.
+3. **Failures by reporter.** A failure the owner found first is a
+   detection failure, not an input.
+
+Measured this run, on number 3. The four seat-workflow failures of
+2026-09-30 02:16 UTC were diagnosed and fixed by the chair in commit
+826e57d at 02:17:22 UTC, thirty-five seconds after the push that caused
+them. The PM's standup reported them at 02:47 UTC as undiagnosed and
+routed them to HQ. The seat that owns failed-run triage was half an hour
+behind the owner's side and reached the wrong destination, and no audit
+that reads `gh run list` alone can see that, because both the failure
+and its fix are in the same branch's log. That is Ursa incident 8.
 
 Stay in your lane: the OKR agent audits purpose drift in
 the work, you audit the workers and their design. Use its findings, do
