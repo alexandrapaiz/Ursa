@@ -1,28 +1,9 @@
-// Self-contained viewer: one portable HTML file with the record inlined.
-// The ownership surface — "here is what AI actually contributed to your work."
-// Class identity never rides on color alone: mutated is underlined, human text
-// is italic, deleted is struck through; colors are the validated dark palette.
-//
-// Navigation contract (sprint 2026-09-21 item 3): from any classified span the
-// reader reaches two things without leaving the page — the generation that
-// produced it, opened and highlighted at the exact source range, and the user's
-// own words that elicited that generation. A span with neither says so in words
-// rather than showing an empty panel.
-
-import type { OutcomeRecord } from './types'
-import { elicitingPrompts } from './audit'
-
-export function renderViewer(record: OutcomeRecord): string {
-  const json = JSON.stringify(record).replace(/</g, '\\u003c')
-  // eliciting prompt per generationIndex, resolved once here so the browser and
-  // the audit agree on the same rule instead of each having their own
-  const elicited = JSON.stringify(elicitingPrompts(record)).replace(/</g, '\\u003c')
-  return `<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Outcome Record — ${escapeHtml(record.task.id)}</title>
+<title>Outcome Record — mini-fixture</title>
 <style>
   :root {
     color-scheme: dark;
@@ -135,8 +116,8 @@ export function renderViewer(record: OutcomeRecord): string {
 </style>
 </head>
 <body>
-<script id="record" type="application/json">${json}</script>
-<script id="elicited" type="application/json">${elicited}</script>
+<script id="record" type="application/json">{"schemaVersion":"0.1.0","task":{"id":"mini-fixture","finished":true,"generatedAt":"2026-09-25T00:00:00.000Z"},"files":[{"path":"final.md","mode":"prose","text":"# Field Notes on Provenance\n\nThe resolver joins finished work back to every generation that fed it. Provenance is established by the artifact itself, not by any human grader. I wrote this closing sentence entirely on my own, without any model in the loop. Outcome records give labs a verifier for open-ended work.\n","spans":[{"start":0,"end":27,"text":"# Field Notes on Provenance","class":"no_generation_provenance"},{"start":29,"end":99,"text":"The resolver joins finished work back to every generation that fed it.","class":"survived_verbatim","score":1,"source":{"conversationId":"01-claude","model":"claude-opus-5","turnIndex":1,"generationIndex":0,"start":0,"end":70}},{"start":100,"end":174,"text":"Provenance is established by the artifact itself, not by any human grader.","class":"survived_mutated","score":0.701,"source":{"conversationId":"01-claude","model":"claude-opus-5","turnIndex":1,"generationIndex":0,"start":71,"end":159},"diff":[{"value":"Provenance is established by the artifact "},{"value":"itself","added":true},{"value":", "},{"value":"and no","removed":true},{"value":"not by any","added":true},{"value":" human grader"},{"value":" is involved at any point","removed":true},{"value":"."}]},{"start":175,"end":255,"text":"I wrote this closing sentence entirely on my own, without any model in the loop.","class":"no_generation_provenance"},{"start":256,"end":313,"text":"Outcome records give labs a verifier for open-ended work.","class":"survived_verbatim","score":1,"source":{"conversationId":"02-chatgpt","model":"gpt-5","turnIndex":1,"generationIndex":1,"start":0,"end":57}}]}],"conversations":[{"id":"01-claude","title":"01-claude","adapter":"paste","model":"claude-opus-5","source":"claude.ai","date":"2026-08-05","turns":2,"userTurns":1,"prompts":[{"step":0,"text":"Draft two sentences about the resolver."}]},{"id":"02-chatgpt","title":"02-chatgpt","adapter":"paste","model":"gpt-5","source":"chatgpt.com","date":"2026-08-05","turns":2,"userTurns":1,"prompts":[{"step":0,"text":"One line on what labs get."}]}],"generations":[{"conversationId":"01-claude","model":"claude-opus-5","turnIndex":1,"kind":"assistant_text","text":"The resolver joins finished work back to every generation that fed it. Provenance is established by the artifact, and no human grader is involved at any point. This throwaway filler sentence about unrelated marketing copy should never survive anywhere.","generationIndex":0,"spans":[{"start":0,"end":70,"text":"The resolver joins finished work back to every generation that fed it.","fate":"survived_verbatim"},{"start":71,"end":159,"text":"Provenance is established by the artifact, and no human grader is involved at any point.","fate":"survived_mutated"},{"start":160,"end":252,"text":"This throwaway filler sentence about unrelated marketing copy should never survive anywhere.","fate":"generated_deleted"}],"totalChars":250,"survivedChars":158,"survivalRate":0.632},{"conversationId":"02-chatgpt","model":"gpt-5","turnIndex":1,"kind":"assistant_text","text":"Outcome records give labs a verifier for open-ended work.","generationIndex":1,"spans":[{"start":0,"end":57,"text":"Outcome records give labs a verifier for open-ended work.","fate":"survived_verbatim"}],"totalChars":57,"survivedChars":57,"survivalRate":1}],"stats":{"finalChars":314,"coveredChars":308,"byClass":{"survived_verbatim":{"spans":2,"chars":127,"pct":0.412},"survived_mutated":{"spans":1,"chars":74,"pct":0.24},"no_generation_provenance":{"spans":2,"chars":107,"pct":0.347}},"uncertainSpans":0,"trivialSpans":0,"byModel":{"claude-opus-5":{"chars":144,"pctOfCovered":0.468},"gpt-5":{"chars":57,"pctOfCovered":0.185}},"generated":{"totalChars":307,"survivedChars":215,"deletedChars":92,"deletedPct":0.3},"perFile":[{"path":"final.md","coveredChars":308,"byClass":{"survived_verbatim":127,"survived_mutated":74,"no_generation_provenance":107}}],"perConversation":[{"conversationId":"01-claude","title":"01-claude","generations":1,"generatedChars":250,"survivedChars":158,"survivalRate":0.632,"turnsToAcceptance":1},{"conversationId":"02-chatgpt","title":"02-chatgpt","generations":1,"generatedChars":57,"survivedChars":57,"survivalRate":1,"turnsToAcceptance":1}]}}</script>
+<script id="elicited" type="application/json">[{"step":0,"text":"Draft two sentences about the resolver."},{"step":0,"text":"One line on what labs get."}]</script>
 <header>
   <div class="wordmark">Ursa Major ✦ provenance-resolved outcome record</div>
   <h1 id="title"></h1>
@@ -521,9 +502,3 @@ export function renderViewer(record: OutcomeRecord): string {
 </script>
 </body>
 </html>
-`
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}

@@ -4,13 +4,14 @@
 //     --final <file-or-dir>... \
 //     [--sessions <claude-code .jsonl>...] [--path-filter <substring>] \
 //     [--conversations <dir of paste-format .md>] \
-//     [--out <dir>] [--abandoned]
+//     [--out <dir>] [--abandoned] [--generated-at <ISO timestamp>]
 
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from 'node:fs'
 import { join, resolve as absPath, relative, basename, extname } from 'node:path'
 import { parseClaudeSession, parsePasteConversation, type ParsedConversation } from './parse'
 import { resolve } from './resolve'
 import { renderViewer } from './viewer'
+import { auditProvenance, formatAudit } from './audit'
 
 const FINAL_EXTS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.css', '.scss', '.html',
@@ -29,6 +30,8 @@ interface Args {
   pathFilter?: string
   annotations?: string
   finished: boolean
+  /** pins record.task.generatedAt so a regenerated record diffs only on real changes */
+  generatedAt?: string
 }
 
 function parseArgs(argv: string[]): Args {
@@ -46,6 +49,7 @@ function parseArgs(argv: string[]): Args {
       case 'path-filter': args.pathFilter = a; key = null; break
       case 'conversations': args.conversations = a; key = null; break
       case 'annotations': args.annotations = a; key = null; break
+      case 'generated-at': args.generatedAt = a; key = null; break
       case 'final': args.final.push(a); break
       case 'sessions': args.sessions.push(a); break
       default:
@@ -108,7 +112,7 @@ function main() {
   const generations = parsed.flatMap((p) => p.generations)
   console.log(`final files: ${files.length} · conversations: ${conversations.length} · generations: ${generations.length}`)
   console.time('resolve')
-  const record = resolve({ taskId: args.id, files, conversations, generations, finished: args.finished })
+  const record = resolve({ taskId: args.id, files, conversations, generations, finished: args.finished, generatedAt: args.generatedAt })
   console.timeEnd('resolve')
 
   if (args.annotations) {
@@ -135,6 +139,14 @@ function main() {
     console.log(`  ${c.title}: ${c.generations} gens, survival ${pct(c.survivalRate)}, turns-to-acceptance ${c.turnsToAcceptance ?? '—'}`)
   }
   console.log(`\nwrote ${jsonPath}\nwrote ${htmlPath}`)
+
+  // Every pointer the viewer will follow, walked before anyone opens the HTML.
+  const audit = auditProvenance(record)
+  console.log('\n' + formatAudit(audit))
+  if (audit.broken.length > 0) {
+    console.error(`\n${audit.broken.length} broken pointer(s): the record above is not fully navigable.`)
+    process.exitCode = 1
+  }
 }
 
 main()
