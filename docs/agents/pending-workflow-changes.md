@@ -1,10 +1,17 @@
 # Pending owner-applied changes
 
-The ExO seat designs `.github/workflows/` but cannot write it. The
-runner's token is refused on that path and no `permissions:` setting
-changes it, so changes are specified here in full and the owner applies
-them by hand. Each entry carries the evidence, the exact file, and the
-exact content. Delete an entry once it is applied.
+The ExO seat designs `.github/workflows/`. Whether it can also write it
+depends on where the run is happening, which was not understood until
+2026-09-30: on GitHub Actions the `GITHUB_TOKEN` is refused on that path
+and no `permissions:` setting changes it, and on the resident company
+host the push works. Both are measured, with their probes, in
+docs/agents/runner-facts.md §1b.
+
+So an entry here means one of two different things, and **every entry
+must say which**: queued because the run could not apply it, or queued
+because the run's dispatch told it not to. Each entry carries the
+evidence, the exact file, and the exact content. Delete an entry once it
+is applied.
 
 The file's name says workflows and its contents are broader, which is
 how it has actually been used since PWC-4, the repository description.
@@ -127,3 +134,142 @@ numbers. That is the owner's edit and nobody else's.
    docs/agents/org-chart.md is fixed in the same PR that queues this
    entry, using the rulings rather than the numbers where a number is
    ambiguous.
+
+---
+
+## PWC-9 — Draft-PR-first is missing from all eleven workflow prompt blocks (queued 2026-09-30, ExO)
+
+**Queued by instruction, not by access.** This run had write access to
+`.github/workflows/` and proved it (docs/agents/runner-facts.md §1b).
+Its dispatch said in its own words never to touch workflows, so the
+edit is specified here instead. A future ExO run on the resident host
+whose dispatch does not forbid it should apply this directly and delete
+the entry.
+
+**Evidence.** Ursa incident 7. All eleven charters in `prompts/` say
+`gh pr create --draft` and carry the ship-first section. Zero of the
+eleven `prompt:` blocks in `.github/workflows/agent-*.yml` mention
+`--draft` or ship-first ordering. Per L-X11 the workflow block arrives
+last and closest, so it wins. Reproduce with:
+
+```sh
+python3 - <<'PY'
+import yaml, glob, os
+for f in sorted(glob.glob('.github/workflows/agent-*.yml')):
+    seat = os.path.basename(f)[6:-4]
+    d = yaml.safe_load(open(f))
+    pr = ''.join(s['with']['prompt'] for s in d['jobs']['run']['steps']
+                 if isinstance(s, dict) and isinstance(s.get('with'), dict)
+                 and 'prompt' in s['with'])
+    ch = open(f'prompts/{seat}-agent.md').read()
+    print(f"{seat:<10} workflow --draft: {'--draft' in pr!s:<5}  charter --draft: {'--draft' in ch}")
+PY
+```
+
+**The exact edit, ten workflows.** In each `prompt:` block, replace the
+literal string `gh pr create` with `gh pr create --draft`, then add the
+ordering sentence immediately after the sentence that contains it. The
+ten occurrences, by file and by the line that carries them:
+
+| File | The line to edit |
+|---|---|
+| `agent-engineer.yml` | `exactly one pull request with \`gh pr create\`, appending new ideas to` |
+| `agent-exo.yml` | `request with \`gh pr create\`. Never edit product code` |
+| `agent-finance.yml` | `open exactly one pull request with \`gh pr create\`. Never merge` (appears twice, both in the primary and the fallback step; edit both) |
+| `agent-frontend.yml` | `on a branch named fe/YYYY-MM-DD-slug via \`gh pr create\`. Protect` |
+| `agent-market.yml` | `` `gh pr create`. You write only docs/market/ and proposed entries `` (twice; edit both) |
+| `agent-okr.yml` | `exactly one pull request with \`gh pr create\`. You write only` (twice; edit both) |
+| `agent-pm.yml` | `exactly one pull request with \`gh pr create\`. You write only` (twice; edit both) |
+| `agent-research.yml` | `pull request with \`gh pr create\`. Never write to the database,` |
+| `agent-sales.yml` | `open exactly one pull request with \`gh pr create\`. Never merge` |
+| `agent-security.yml` | `sec/YYYY-MM-DD and open exactly one pull request with \`gh pr` (the flag goes after `create\``, which wraps to the next line) |
+
+Note that the four workflows with two prompt blocks (finance, market,
+okr, pm) carry the open-routing primary step and the subscription
+fallback, and **both** blocks need the flag. A run that takes the
+fallback path reads only the second one.
+
+**The sentence to add**, once per prompt block, immediately after the
+sentence containing `gh pr create --draft`:
+
+```
+            Open that draft PR in your first few turns, before the
+            substantial work, then commit as you go and call `gh pr
+            ready` when the run is finished. A run that dies at turn 90
+            with a draft PR open has delivered most of its value; the
+            same run with nothing pushed has delivered none of it.
+```
+
+Match the surrounding block's indentation exactly, which is twelve
+spaces in every one of the eleven files.
+
+**`agent-skill.yml` is the eleventh and needs more than a flag.** Its
+prompt block does not mention opening a pull request at all. It needs
+the branch-and-PR instruction its charter already carries, in the shape
+the other ten use, and then the sentence above.
+
+**How to know it worked.** Re-run the reproduction script. Every row
+must read `workflow --draft: True`. Ursa incident 7 closes on that
+output.
+
+## PWC-10 — The one gate that runs on every push cannot see a conflict marker (queued 2026-09-30, ExO)
+
+**Queued by instruction, not by access.** Same reason as PWC-9.
+
+**Evidence.** Ursa incident 8. Commit `ce30b5a` on
+`chair/langfuse-traces` carried unresolved conflict markers in four seat
+workflow files. GitHub's own workflow validator caught it, producing
+four zero-job failed runs; `redaction-gate.yml` ran on the same push
+(run 36659158568) and reported `success`. GitHub validates
+`.github/workflows/` and nothing else, so the same defect in `docs/` or
+`ursa-major/src/` would pass every check this repository runs.
+
+**Tested before being proposed**, per L-A21's requirement that a gate be
+tried against an artifact known to fail it. Against a `git archive` of
+`ce30b5a`'s tree: exit 1, all twelve marker lines listed by file and
+line number. Against this run's tree: exit 0, "Conflict-marker gate
+clean."
+
+**The exact edit.** Add one step to `.github/workflows/redaction-gate.yml`,
+immediately after the existing `Scan for private paths and identifiers`
+step, at the same indentation:
+
+```yaml
+      # Ursa incident 8. A hand-resolved merge shipped conflict markers
+      # into four workflow files on 2026-09-30. GitHub's validator caught
+      # it because they were workflows; nothing here would have caught
+      # the same markers in docs/ or in product source. This is the
+      # cheapest repo-wide version of that check, and it belongs in the
+      # command that already runs on every push and pull request (L-A22).
+      - name: Scan for unresolved conflict markers
+        run: |
+          set -uo pipefail
+          markers=$(grep -rInE '^(<{7}|={7}|>{7})( |$)' . \
+            --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.ursa \
+            --exclude=redaction-gate.yml 2>/dev/null || true)
+          if [ -n "$markers" ]; then
+            echo "::error::Unresolved git conflict markers are committed. See Ursa incident 8 in docs/agents/incidents.md."
+            printf '%s\n' "$markers" | head -20
+            exit 1
+          fi
+          echo "Conflict-marker gate clean."
+```
+
+**Two properties of that pattern worth keeping.** The three marker
+shapes are written as `{7}` quantifiers rather than as literal runs of
+seven characters, so this file and the incident register can describe the
+check without tripping it (L-A23, a prohibition must not quote the banned
+specimen where the gate can see it). And the trailing `( |$)` is what
+keeps a markdown `=======` table rule or a row of `<<<<<<<` in prose from
+matching, since a real marker is either bare or followed by a space and a
+branch name.
+
+**The known hole, stated rather than hidden.** The step excludes
+`redaction-gate.yml` itself, inherited from the existing scan's
+`--exclude`, so the gate cannot see conflict markers in its own file. That
+is the right trade while the patterns live in the same file as the data
+they match, and it is a real gap: a conflicted merge of this workflow
+would ship. The alternative is moving both scans into
+`tools/redaction-scan.sh` and having the workflow call it, which removes
+the exclusion and is the better end state. That is an engineer-seat
+change, not queued here.
