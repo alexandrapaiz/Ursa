@@ -133,8 +133,15 @@ the git path, a subject is only visible if the pair finder finds pairs in
 it, so run the finder and count episodes first. A pair needs a commit
 marked as generated and then a later commit, not a merge, with no agent
 marker, touching at least one of the same paths [E2, E4]. Nothing else in
-the repo's history matters. *Output: an episode count, or a rejected
-subject.*
+the repo's history matters.
+
+Two things make this count lie. The walk is `--all` over the clone's
+history [E5], so a shallow clone reports the depth of the fetch rather
+than the history of the project, and an agent running in a CI checkout
+gets the shallow answer by default. And the subject's merge style decides
+whether the human side is visible at all, which the judgment section
+below treats as the skill's first real decision. *Output: an episode
+count taken on a full clone, or a rejected subject.*
 
 **3. Choose the capture path on what you need to measure, not on what is
 easier to get.** The two paths are separate entry points and they sit at
@@ -203,6 +210,43 @@ reason a run comes back with zero episodes. The subject you want is a repo
 where someone pulls the agent's branch and commits fixes on top, or
 commits directly after the agent does. Check for that shape in step 2
 rather than discovering it after the run.
+
+**A squash merge is not a merge commit, and that is the dangerous case.**
+The exclusion is written against parent count [E4], so it catches the
+merge-commit form of the problem and misses the squash form, which is
+GitHub's default in many repositories. A squash commit has one parent, is
+authored by the person who clicked the button, and carries the agent's
+entire branch diff. Every condition for a legal pairing target is met, and
+the diff it supplies is precisely what the exclusion's own comment says
+must not be counted as the person's corrections [E4].
+
+Whether it is caught depends on the trailer that survives the squash, and
+the marker test is narrower than it looks. The trailer pattern matches
+`claude|codex|cursor|gpt`, and the author fallback, which is the only test
+that knows about `[bot]` names, is applied to the commit's author name and
+never to its trailer [E3]. A bot whose name contains none of those four
+substrings therefore passes through as human.
+
+Ours: this is measurable in this repository, and it is not hypothetical.
+Across the 88 commits reachable in a working clone, 78 are agent-marked
+non-merge commits, 8 are merge commits the exclusion drops, and the
+remaining 2 are root or graft boundaries. One of those is a squash merge
+whose trailer GitHub rewrote to `Co-authored-by: exo-centralizer[bot]`,
+which matches neither pattern, so it reads as a human commit editing the
+agent's work.
+
+```bash
+git log --all --pretty=format:'%h%x09%an%x09%p%x09%(trailers:key=Co-Authored-By,valueonly)'
+```
+
+Ours: the consequence is worse than an empty record. On a squash-merge
+repo with bots named outside the pattern, the polarity inverts: the
+agent's whole contribution arrives inside a commit labelled human, so
+generated text is classified `no_generation_provenance`, the category
+CLAUDE.md calls the most valuable and which here would be entirely
+artifact. Check two things about a candidate subject before trusting any
+label out of it, the repository's merge style and the literal names of its
+bots, and prefer a subject whose humans commit directly.
 
 **Choosing the git path buys the label and costs the trace.** Deletion
 rate looks like a quality measurement and is not one. It is a statement
