@@ -1,33 +1,61 @@
 # Org Chart — Ursa
 
-**Refreshed 2026-09-24** (owner-present, ceremony-lite dispatch)
-against `gh run list`, `gh pr list --state all`, the seat charter
-headers in `prompts/`, and the cron lines in `.github/workflows/`.
+**Refreshed 2026-09-27** by the ExO Sunday run, against `gh run list
+--workflow=agent-<seat>.yml --json event,createdAt,conclusion` for
+every seat, `gh pr list --state all`, the charter headers in
+`prompts/`, and the cron lines in `.github/workflows/`.
 
-Every seat but sales is ACTIVE as of ADR-005 (2026-09-24): sales stays
-dormant because Ursa is private R&D and never for sale (ADR-001). This
-supersedes the wave-1/wave-2 split below as the operative status; the
-governance-cycle gate that wave 2 was meant to wait on (an OKR file, a
-sprint, and an ExO audit, each merged) was **not fully met** when
-ADR-005 fired — the sprint (PR #9) and the ExO audit (PR #7) are both
-still open, unmerged, three and four days respectively as of this
-update. That's the owner's prerogative to override, not a process
-failure; it's recorded here so the gate's original text doesn't read
-as still binding.
+Every seat but sales is active, by the owner's ruling of 2026-09-24
+(the seat-activation ADR, currently numbered ADR-005 at line 84 of
+docs/decisions.md; that number is ambiguous because a second ADR-005
+sits at line 100, see PWC-8). Sales stays dormant because Ursa is
+private R&D and never for sale (ADR-001). This supersedes the
+wave-1/wave-2 split below as the operative status.
 
-| Seat | Charter | Status | Cadence | Runs so far |
-|---|---|---|---|---|
-| pm | prompts/pm-agent.md | active | daily: Mon ceremony, other 6 days standup (ADR-033) | 2 scheduled + this dispatch |
-| okr | prompts/okr-agent.md | active | monthly, 1st | 1 success, 3 earlier failures (Incident 1, closed) |
-| exo | prompts/exo-agent.md | active | weekly, Sunday | 1 (PR #7, still open) |
-| engineer | prompts/engineer-agent.md | active (2026-09-24) | twice daily, 11:26 + 23:26 UTC | 0 — first fire is today |
-| research | prompts/research-agent.md | active (2026-09-24) | Tue + Fri, 13:15 UTC | 0 — first fire Fri 2026-09-25 |
-| frontend | prompts/frontend-agent.md | active (2026-09-24) | Mon + Thu, 14:15 UTC | 0 — first fire today |
-| market | prompts/market-agent.md | active (2026-09-24) | Wed, 13:35 UTC | 0 — first fire 2026-09-30 |
-| security | prompts/security-agent.md | active (2026-09-24) | Sun, 15:15 UTC | 0 — first fire 2026-09-27 |
-| skill | prompts/skill-agent.md | active (2026-09-24) | Thu, 13:55 UTC | 0 — first fire today |
-| finance | prompts/finance-agent.md | active (2026-09-24) | monthly, 1st, 11:30 UTC | 0 — first fire 2026-10-01 |
-| sales | prompts/sales-agent.md | dormant | none — Ursa is private R&D (ADR-001) | 0 |
+**Read the "last run" column against docs/agents/runner-facts.md §2.**
+Every scheduled run in this repository's history has started between
+two and six hours after its cron. A seat that has not fired by its
+nominal time is on time. A seat that produced no run at all in a cron
+window is the thing to escalate.
+
+| Seat | Charter | Status | Cadence (UTC) | Runs to 2026-09-27 | Last scheduled run |
+|---|---|---|---|---|---|
+| pm | prompts/pm-agent.md | active | Mon 12:00 ceremony, other six days 11:05 standup | 5 scheduled, all success, plus 2 dispatches | 09-27 15:32 |
+| engineer | prompts/engineer-agent.md | active | daily 11:26 and 23:26 | 7 scheduled, all success | 09-27 15:42 |
+| exo | prompts/exo-agent.md | active | Sun 18:00 | 2 scheduled, both success | 09-27 20:34 (this run) |
+| security | prompts/security-agent.md | active | Sun 15:15 | 1 scheduled, success (first run) | 09-27 18:58 |
+| research | prompts/research-agent.md | active | Tue and Fri 13:15 | 1 scheduled, success (first run) | 09-25 17:55 |
+| skill | prompts/skill-agent.md | active | Thu 13:55 | 1 scheduled, success (first run) | 09-24 18:01 |
+| frontend | prompts/frontend-agent.md | active | Mon and Thu 14:15 | 1 scheduled, success (first run) | 09-24 18:24 |
+| market | prompts/market-agent.md | active | Wed 13:35 | 1 dispatch, success; 0 scheduled | none yet, first is 09-30 |
+| okr | prompts/okr-agent.md | active | monthly, 1st, 13:00 | 1 dispatch success, 3 dispatch failures (Incident 1, closed) | none yet, first is 10-01 |
+| finance | prompts/finance-agent.md | active | monthly, 1st, 11:30 | 0 | none yet, first is 10-01 |
+| sales | prompts/sales-agent.md | dormant | none, Ursa is private R&D (ADR-001) | 0 | not scheduled |
+
+Ten seats have now run at least once and every run in the repository's
+history has concluded `success` except the four okr-agent failures of
+2026-09-18 and 2026-09-19, all of which belong to the closed Incident 1
+window. There is no failing workflow to report this week. What the org
+has instead is a merge backlog, recorded below.
+
+## The merge queue, 2026-09-27
+
+| Measure | Value |
+|---|---|
+| Open PRs | 17 (16 excluding this run's own) |
+| Merged in the last seven days | 10 |
+| Merged in the last three days | 1 (PR #17, 2026-09-25) |
+| Age of the oldest open PR | 3 days (#13, opened 2026-09-24) |
+
+Every seat's output funnels through one owner's merge, and this week
+the org produced faster than that gate absorbed. No PR has reached the
+seven-day mark, so the old stale-PR rule never fired while the queue
+grew to seventeen. Two costs are already visible rather than predicted.
+The PM standard's hard stop forbids dispatching a seat that has an open
+PR, so sprint item 3 went undispatched for that reason alone. And five
+of the open PRs collided with each other on `docs/ideas.md`, which is
+Incident 6. The ExO charter §5b now measures depth each run and reports
+it to the owner. Only the owner can change it.
 
 ## Initiative coverage
 
@@ -47,14 +75,18 @@ as still binding.
 
 ## Board of record
 
-Linear (workspace "Alexandra Personal", team URSA), per ADR-005's
-second decision (2026-09-23, charter §1f) — supersedes GitHub
-Projects as Ursa's board. `LINEAR_API_KEY` is unset in this run's
-environment, so this update did not sync issues; see
-docs/sprints/pending.md. GitHub labels (`seat:<name>`,
-`horizon:now|next|later`, `blocked`, `owner-action`) and one milestone
-per sprint are maintained regardless, per docs/standards/pm.md §2b,
-since neither depends on Linear or `PROJECTS_TOKEN`.
+**This repository is the board.** Linear was abandoned on 2026-09-25
+after a one-day trial, in the same owner ruling that moved secrets to
+Infisical (the second ADR-006, line 123 of docs/decisions.md). GitHub
+Projects had already been superseded before that. So the queue lives in
+`docs/sprints/sprint-*.md`, `docs/sprints/pending.md`,
+`docs/sprints/dispatch-queue.md`, the `seat:*` and `horizon:*` labels,
+and one milestone per sprint, all of which the PM maintains under
+docs/standards/pm.md §2b.
+
+`PROJECTS_TOKEN` is still handed to all eleven workflows and read by
+none; the security seat queued its removal as PWC-6. No seat should
+reconcile an external board, and no seat should wait on `LINEAR_API_KEY`.
 
 The chair (interactive session) continues to cover any dormant seat's
 functions; today, only sales is dormant.
@@ -70,13 +102,15 @@ with the evidence that settles each:
 | Condition | Status | Evidence |
 |---|---|---|
 | An OKR file merged by the owner | **met** | `docs/okrs/2026-q4.md` is on main via commit 52ce5d5, "All-Hands 002: full roster convened, Q4 OKR draft filed", 2026-09-18. PR #2 carried it and was closed rather than merged, because its branch was destroyed in the incident-2 history rewrite. The owner landed the commit on main directly. The artifact is what the gate asks for, so this counts. |
-| A sprint merged by the owner | **not met** | `docs/sprints/` holds only README.md. The PM seat has never run. Its first scheduled run is Monday 2026-09-21 at 12:00 UTC, and it has missed no cadence, having been activated on Friday 2026-09-18. |
-| An ExO audit merged by the owner | **not met** | No ExO audit has merged. PR #5, the only merged branch under `exo/`, changed one file, `docs/standards/lessons.md`, and was a company lessons sync rather than a cycle. The first real audit is the PR carrying this tracker. |
+| A sprint merged by the owner | **met** (recorded 2026-09-27) | PR #9, `pm/sprint-2026-09-21`, merged 2026-09-24. It carried `docs/sprints/sprint-2026-09-21.md`, the first sprint file. |
+| An ExO audit merged by the owner | **met** (recorded 2026-09-27) | PR #7, `exo/2026-09-20`, merged 2026-09-24. That was the first full ExO cycle, and this run records it because the tracker's own rule forbids a run marking its own condition. |
 
-**Superseded 2026-09-24:** ADR-005 activated the seats by owner override; kept for the record. Original conclusion: wave 2 does not begin yet. Two conditions are outstanding
-and both have a known path: the PM seat's Monday run, and the owner's
-merge of this PR. If both land, the cycle completes and the engineer
-seat may be activated by an ADR.
+**Superseded 2026-09-24**, then satisfied anyway. The owner activated
+every seat by override before the gate closed, which was her
+prerogative and is kept here for the record. As of 2026-09-27 all three
+conditions are met on their own terms: the OKR file, PR #9, and PR #7.
+The gate is therefore open and moot at the same time, and this table's
+remaining job is the rules below it, which apply to any future gate.
 
 Rules for maintaining this table, so it does not rot:
 

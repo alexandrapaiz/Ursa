@@ -269,8 +269,35 @@ one will not discover the other by reading its own charter. Checking
 that intersection is the ExO seat's job and belongs in its orient step,
 which this run added.
 
-**Status: fix applied for the standard and specified for the workflow;
-the two leaked lines are owner-routed. Open until both are edited.**
+**Closure verification (2026-09-27, ExO Sunday run).** Closed. All four
+of the incident's parts are now on `main` and were checked here rather
+than taken from the PWC file's own claim that they were applied.
+
+1. *The redaction gate exists and runs.* `.github/workflows/redaction-gate.yml`
+   is on `main` and fires on every push and every pull request. It has
+   executed roughly forty times this week and passed every time, which
+   is the future-facing half Ursa incident 2 never got.
+2. *The home-directory path is gone.* `grep -rnE '/Users/[a-z]+|/home/[a-z]+/[A-Z]'`
+   over docs/design/product-plan.md and ursa-major/trial/README.md
+   returns nothing.
+3. *The session identifier is truncated everywhere it survives.* The
+   four remaining occurrences of the string carry the eight-character
+   prefix only, which is the placeholder form element 3's redaction
+   rider asks for, and the gate's own UUID pattern confirms it by
+   passing. Realism was kept and the machine identity was dropped,
+   which was the whole point of the rider.
+4. *The rider itself is still in prompts/engineer-agent.md.*
+
+One note for the register rather than for the incident. This closure
+was owed a week ago. The 2026-09-20 learning log named it the next
+run's first check, the underlying leaks were fixed on 2026-09-24, and
+two PM standups then carried a line saying the status field still read
+open and that the field belonged to the ExO seat. The artifact was
+correct and the record about the artifact was wrong for three days.
+Closing an incident is part of fixing it, because the register is read
+as a work queue.
+
+**Status: closed (2026-09-27), all four parts verified on main.**
 
 ## Incident 5 — Eleven charters cite a local incident number for a different incident (2026-09-18 through 2026-09-20)
 
@@ -322,3 +349,79 @@ register's preamble: a number you did not look up is a citation you
 should not write.
 
 **Status: fixed this run across the register and all eleven charters.**
+
+## Incident 6 — Every seat appends to one file, so five open PRs went unmergeable at once and the sprint's whole backlog stalled (2026-09-24 through 2026-09-27)
+
+**What happened.** By 2026-09-27 the sprint's entire backlog existed as
+open pull requests and none of it could reach `main`. Five PRs were
+simultaneously `CONFLICTING` on GitHub: #13, #16 and #18 from the
+engineer seat and #21 from market, which are the sprint's four items,
+plus #14 from skill, which is not a sprint item and was caught in the
+same net. In all five the
+only conflicted file was `docs/ideas.md`, and no product code was in
+disagreement anywhere. The engineer seat found this on its second
+dispatch of 2026-09-27, spent that run on the conflict instead of on
+the sprint, and said so plainly at the top of PR #27, which is the
+trace that made this write-up possible.
+
+**Why, technically.** Six charters end with an instruction to append
+the run's new ideas to `docs/ideas.md`. Six seats therefore add lines
+to the end of one file on most days they run. Git's merge is line
+based, so two appends at the same end of the same file are one
+conflicting hunk, and the conflict appears between branches that have
+nothing to do with each other.
+
+The standing mitigation is in the vendored HQ standard,
+docs/standards/pm.md §4: before any PR that appends to the ledger,
+check for other open PRs touching it and name the expected merge order
+in the description. Every charter carries that text and the seats
+obeyed it. It did not help, and could not, because naming a merge order
+tells the owner that a conflict is coming without preventing one. A
+warning label is not a fix. This is the failure mode the ExO orient
+step was built for after Ursa incident 4, one rule correct in isolation
+and insufficient once six seats run on overlapping days, and this run
+is the first to check it under that step.
+
+Queue depth is the amplifier rather than the cause. The same six
+appends against a queue that drains daily produce one conflict at a
+time, which is a nuisance. Against a queue fifteen deep they produce a
+combinatorial mess, because every branch that stays open keeps drifting
+from `main` and from every sibling.
+
+**Fix.** The engineer seat built the real one in PR #27, unmerged at
+the time of writing: a git merge driver that merges the ledger by entry
+identity rather than by line hunks, so two seats adding two different
+dated entries is an addition of two keys and not a conflict, plus a
+contract check for pm.md §4's five required fields and a requeue script
+that drains the blocked PRs. Verified in that PR against the five real
+branches rather than against synthetic ones. Two caveats the org should
+hold onto. The driver has to be installed per clone, because
+`.gitattributes` can name a driver but only `.git/config` can define
+one, so GitHub's own merge computation on the PR page is unchanged and
+the requeue has to be re-run after each merge. And the fix is tooling,
+which means it lives under `tools/` and is the engineer's to maintain,
+not this seat's.
+
+The charter-layer half is this entry plus the queue-depth rule added to
+prompts/exo-agent.md §5b on 2026-09-27. Moving the ledger to one file
+per entry would remove the collision at the source and is the obvious
+alternative, but `docs/ideas.md` is fixed by an HQ standard, so that
+change needs an Ursa ADR recording the deviation and is the owner's to
+make. It is not queued as a recommendation here, because the driver may
+well prove sufficient and the cheaper fix should get its chance first.
+
+**What the org grew.** A shared append-only file is a shared mutable
+resource, and a coordination rule that only asks seats to announce
+their collisions is not coordination. When N seats are told to write to
+one place, either the merge is made associative or the place is split.
+The second lesson is about the ExO lane specifically: the standards
+check added after Ursa incident 4 asked what a seat obeying two rules
+would have to do, and it needs a second question beside it, which is
+what the rule does once six seats obey it on the same day. A rule that
+works at one writer and fails at six is not a wrong rule, it is an
+unscaled one, and nobody but this seat is positioned to notice the
+difference.
+
+**Status: open. The tooling fix is in PR #27 and unmerged; this entry
+closes when that PR merges and a subsequent seat PR merges clean
+through the driver.**

@@ -81,7 +81,7 @@ flowchart TB
     CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
     PR["a branch and one pull request"]
     OWN{{"the owner's merge<br/>the only authority"}}
-    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md,<br/>org-chart.md, pending-workflow-changes.md")]
+    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md, org-chart.md,<br/>runner-facts.md, pending-workflow-changes.md")]
 
     WF -->|"prompt plus claude_args"| CH
     CH -->|"commits"| PR
@@ -129,7 +129,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 25 tests
+npm test                                   # the unit suite
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -196,6 +196,9 @@ Other governance files:
   postmortems
 - [`docs/agents/learning-log.md`](docs/agents/learning-log.md), what
   each ExO run observed and what the next one must check first
+- [`docs/agents/runner-facts.md`](docs/agents/runner-facts.md), what is
+  measurably true about this repository's Actions runs, so a memoryless
+  seat does not rediscover it
 - [`docs/agents/org-chart.md`](docs/agents/org-chart.md), the seats,
   their cadences, and the governance-cycle tracker
 - [`docs/agents/pending-workflow-changes.md`](docs/agents/pending-workflow-changes.md),

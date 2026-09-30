@@ -139,6 +139,129 @@ where it described a surface I do not have.
    assume, and if something I wrote turns out to be false, fix the
    charter in the same PR that discovers it.
 
+## 2026-09-27 — Third entry: nothing failed, everything jammed
+
+Second run on the cadence (run 36348527979, schedule trigger, fired
+20:34 UTC against an 18:00 cron). The previous entry left four checks.
+All four are answered below.
+
+**What I observed.**
+
+No workflow failed this week. Not one. Ten of the eleven seats have now
+run at least once, eighteen scheduled runs exist in the repository's
+whole history, and every single one concluded `success` except the four
+okr-agent failures from the closed Incident 1 window. If you only read
+`gh run list` you would conclude the org is healthy.
+
+It is not, and the reason is not in the runs. Seventeen pull requests
+were open on Sunday evening against one merge in the previous three
+days. The entire sprint backlog, all four items, was built and sitting
+in branches. Five of those branches were `CONFLICTING` at once, all
+five on the same file. That is what a week of clean green runs looked
+like from the owner's side.
+
+**The four carried checks, answered.**
+
+1. *Is Ursa incident 4 closed?* It is now. Every part of the fix landed
+   on `main` on 2026-09-24 and I verified all four here rather than
+   trusting the PWC file's claim: the redaction gate exists and has
+   passed roughly forty times, the home path greps clean, the session
+   identifier survives only as its eight-character prefix, and the
+   rider is still in the engineer charter. The uncomfortable part is
+   the three-day gap. The artifact was fixed on the 24th and the
+   status field said "open" until today, and two PM standups carried a
+   line telling this seat so. Closing an incident is part of fixing it,
+   because the register is read as a work queue.
+2. *Did the PM's Monday run happen and did a sprint merge?* Both. PR #9
+   merged 2026-09-24 and PR #7, the previous ExO cycle, merged the same
+   day. The governance tracker's last two conditions are marked met,
+   with PR numbers, by this run, since the rule there says a run does
+   not mark its own condition.
+3. *Did the okr seat's 2026-10-01 run open a PR?* Not yet, that date is
+   still ahead. Finance fires the same morning. Both are the next
+   run's check.
+4. *Check the surfaces before trusting the charter.* Done, and the
+   answer got its own file, below.
+
+**What I changed and why. Three improvements, each with a trigger.**
+
+- *`docs/agents/runner-facts.md`, the measured runner register.* Three
+  seats reprobed the same boundaries this week, and one of them drew a
+  wrong conclusion from a probe that cannot answer the question asked
+  of it. The PM has reported a 403 from
+  `GET /repos/{owner}/{repo}/actions/permissions` as evidence about
+  dispatch for four days running. That endpoint needs the
+  `administration` scope, which no `GITHUB_TOKEN` has and no
+  `permissions:` block can grant, so it returns 403 on every run of
+  every seat regardless. I proved it rather than argued it: this run
+  called it once, having attempted no dispatch of any kind, and got the
+  identical response. The real evidence is the PM's other probe, an
+  actual `gh workflow run` that also 403'd, and that one stands alone.
+  The file also carries the schedule-delay table.
+- *Queue depth replaces PR age in my own §5b.* The old rule was to flag
+  any open PR older than seven days. The oldest open PR on Sunday was
+  three days old, so the rule never fired while the queue grew to
+  seventeen and swallowed a sprint. Each run now reports three numbers to
+  the owner, open PRs, merges in the last seven days, and the age of
+  the oldest, and says so in bold when open exceeds merged. I do not
+  fix this and neither does any seat. The gate is the owner's.
+- *An identifier-collision check in my orient step.* `docs/decisions.md`
+  uses ADR-005 twice and ADR-006 twice, for four unrelated rulings. Two
+  PM standups flagged it and both correctly declined to fix it, because
+  decisions.md belongs to no seat. This is Ursa incident 5 one scope
+  in: a number that resolves to two documents teaches a memoryless run
+  that citations are decorative. The renumbering is queued as PWC-8
+  rather than applied, because an accepted ADR's number is the owner's
+  record, and I fixed the citing file that is mine.
+
+**Ursa incident 6, written this run.** Six charters end by telling the
+seat to append its ideas to `docs/ideas.md`, so six seats add lines to
+the end of one file. Git reads two appends at the same end as one
+conflict. The standing mitigation, from the HQ standard, asks each seat
+to name the expected merge order in its PR description. Every seat
+obeyed it and five PRs conflicted anyway, because announcing a
+collision is not preventing one. The engineer seat built the real fix
+in PR #27, a merge driver that merges the ledger by entry identity. The
+lesson for this lane is a second question to sit beside the standards
+check added after incident 4. That check asks what a seat obeying two
+rules would have to do. It now also has to ask what a rule does once
+six seats obey it on the same day. A rule that works at one writer and
+fails at six is not wrong, it is unscaled, and nobody else is
+positioned to see the difference.
+
+**Standing duties.** Deleted three merged remote branches. Applied
+`seat:*` labels to all seventeen open PRs, none of which had any, so
+the owner can see whose work the queue is made of. Refreshed the org
+chart, whose "Board of record" section still described Linear as
+current three days after the owner abandoned it. Fixed the README's
+test count, which claimed 25, and rendered the architecture diagram
+after editing it, then looked at the image.
+
+**What the next run must check first.**
+
+1. *Did the queue drain?* Take the three numbers before anything else:
+   open PRs, merges in the last seven days, oldest open PR. Compare
+   against seventeen, ten, and three days. If the queue is deeper and
+   nothing merged, that is the finding of the week and it outranks
+   whatever else you notice. If PRs began getting closed rather than
+   merged, read why, because a closed PR is a rejected approach and
+   belongs in the ledger.
+2. *Did PR #27 merge, and did a seat PR then merge clean through the
+   driver?* Those two events together close Ursa incident 6. If #27 was
+   closed instead, the incident needs a different fix and the ledger
+   file is the likely place to change.
+3. *Did okr and finance fire on 2026-10-01?* Both are monthly and both
+   have their first scheduled run that morning. Expect them two to six
+   hours late and do not call that a failure. A cron window that
+   produced no run at all is the thing to escalate.
+4. *Re-measure the schedule delays.* The table in runner-facts.md §2
+   has eighteen observations from one week. PWC-7 Part B deliberately
+   recommends moving no cron until someone has thirty or more. If you
+   are that run, do the measurement before the recommendation.
+5. *Is PWC-8 applied, and did PR #20's ADR-007 draft collide with it?*
+   If the owner renumbered, the citing files need a sweep, and
+   docs/agents/ is the part of that sweep that is yours.
+
 ## 2026-09-30 — run opened (ExO, window dispatch)
 
 Placeholder committed at the start of the run so the draft PR exists
