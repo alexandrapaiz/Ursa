@@ -38,6 +38,13 @@ const DOOMED = [
   'which lets this module skip asking whoever owns the work whether they were happy.',
 ].join('\n')
 
+// Two more agent paragraphs, together in one file. The resolver merges
+// adjacent same-class prose, so these arrive as a single span; later work
+// deletes only the second. A span-level presence test would call the whole
+// thing durable, which is the reason tracing runs per sentence.
+const GUIDE_KEPT = 'Run it once against a project you already finished, and read what it tells you about the parts you threw away.'
+const GUIDE_CUT = 'Scheduling it hourly gives a denser signal, so most people leave a timer running in the background.'
+
 // Written by the human at the closing commit, so it resolves to
 // `no_generation_provenance` and becomes the durability baseline.
 const HUMAN = [
@@ -65,13 +72,15 @@ function repoWithAfterlife(): string {
 
   writeFileSync(join(dir, 'notes.md'), `# Notes\n\n${KEPT}\n`)
   writeFileSync(join(dir, 'basis.md'), `# Basis\n\n${DOOMED}\n`)
+  writeFileSync(join(dir, 'guide.md'), `# Guide\n\n${GUIDE_KEPT}\n${GUIDE_CUT}\n`)
   sh(dir, ['add', '.'])
   sh(dir, ['commit', '-q', '-m', 'Write the notes\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
 
   writeFileSync(join(dir, 'notes.md'), `# Resolver notes\n\n${KEPT}\n\n${HUMAN}\n`)
   writeFileSync(join(dir, 'basis.md'), `# Acceptance basis\n\n${DOOMED}\n`)
+  writeFileSync(join(dir, 'guide.md'), `# Using it\n\n${GUIDE_KEPT}\n${GUIDE_CUT}\n`)
   sh(dir, ['add', '.'])
-  sh(dir, ['commit', '-q', '-m', 'Retitle both, and say who owns a verdict'])
+  sh(dir, ['commit', '-q', '-m', 'Retitle all three, and say who owns a verdict'])
 
   writeFileSync(join(dir, 'basis.md'), [
     '# Acceptance basis',
@@ -80,8 +89,9 @@ function repoWithAfterlife(): string {
     'undeclared never becomes approval no matter how much later traffic arrives.',
     '',
   ].join('\n'))
+  writeFileSync(join(dir, 'guide.md'), `# Using it\n\n${GUIDE_KEPT}\n`)
   sh(dir, ['add', '.'])
-  sh(dir, ['commit', '-q', '-m', 'Drop the retention-is-acceptance rule: it was never true'])
+  sh(dir, ['commit', '-q', '-m', 'Drop the retention-is-acceptance rule and the timer advice'])
 
   writeFileSync(join(dir, 'notes.md'), `# Resolver notes\n\n${KEPT}\n\n${HUMAN}\n\nSee lifespan.ts for the time dimension.\n`)
   sh(dir, ['add', '.'])
@@ -158,7 +168,10 @@ describe('annotateDurability: what later work did to each span', () => {
     // ...and the time dimension says the work disagreed one commit later.
     expect(doomed.lifespan!.fate).toBe('decayed')
     expect(doomed.lifespan!.liveAtTip).toBe(false)
-    expect(doomed.lifespan!.survivedRevisions).toBe(0)
+    expect(doomed.lifespan!.unitsSurviving).toBe(0)
+    expect(doomed.lifespan!.unitsTraced).toBeGreaterThan(0)
+    expect(doomed.lifespan!.survivingChars).toBe(0)
+    expect(doomed.lifespan!.decayedChars).toBeGreaterThan(0)
     const killer = sh(repo, ['log', '-1', '--format=%s', doomed.lifespan!.diedAtSha!]).trim()
     expect(killer).toMatch(/Drop the retention-is-acceptance rule/)
     expect(doomed.lifespan!.diedAt).toBeTruthy()
@@ -172,9 +185,11 @@ describe('annotateDurability: what later work did to each span', () => {
     expect(kept.lifespan!.fate).toBe('durable')
     expect(kept.lifespan!.liveAtTip).toBe(true)
     expect(kept.lifespan!.diedAtSha).toBeNull()
-    expect(kept.lifespan!.survivedRevisions).toBe(1)
+    expect(kept.lifespan!.intactRevisions).toBe(1)
+    expect(kept.lifespan!.unitsSurviving).toBe(kept.lifespan!.unitsTraced)
+    expect(kept.lifespan!.decayedChars).toBe(0)
     expect(kept.lifespan!.basis).toBe('verbatim')
-    expect(kept.lifespan!.survivedSeconds).toBeGreaterThanOrEqual(0)
+    expect(kept.lifespan!.intactSeconds).toBeGreaterThanOrEqual(0)
   })
 
   it('reports a decay rate over chars, with the closing and tip shas that produced it', () => {
@@ -184,13 +199,14 @@ describe('annotateDurability: what later work did to each span', () => {
     expect(d.method).toBe('git-forward-walk')
     expect(d.closingSha).toBe(ep.finalSha)
     expect(d.tipSha).toBe(sh(repo, ['rev-parse', 'HEAD']).trim())
-    expect(d.testedSpans).toBe(2)
-    expect(d.decayedSpans).toBe(1)
-    expect(d.durableSpans).toBe(1)
+    expect(d.testedSpans).toBe(3)
+    expect(d.decayedSpans).toBe(1)   // basis.md, replaced wholesale
+    expect(d.erodedSpans).toBe(1)    // guide.md, one sentence of two cut
+    expect(d.durableSpans).toBe(1)   // notes.md, untouched
     expect(d.decayRate).toBeGreaterThan(0)
     expect(d.decayRate).toBeLessThan(1)
     expect(d.decayRate).toBeCloseTo(d.decayedChars / (d.decayedChars + d.durableChars), 10)
-    expect(d.medianDecayedLifetimeSeconds).not.toBeNull()
+    expect(d.medianIntactSeconds).not.toBeNull()
   })
 
   it('scores human-written text separately as the churn baseline', () => {
@@ -202,10 +218,27 @@ describe('annotateDurability: what later work did to each span', () => {
     expect(human!.class).toBe('no_generation_provenance')
     expect(human!.lifespan!.fate).toBe('durable')
     // It survived, so the repo's background churn is 0 and the agent
-    // text's decay is not explained by the file being volatile.
+    // text's decay is not explained by the files being volatile.
     expect(record.durability!.baselineDecayRate).toBe(0)
-    // ...and it is counted in the baseline, never in the commercial claim.
-    expect(record.durability!.durableSpans).toBe(1)
+    expect(record.durability!.decayRate).toBeGreaterThan(0)
+  })
+
+  it('a span that lost one sentence of two is eroded, and only those chars count as decayed', () => {
+    const repo = repoWithAfterlife()
+    const { record } = annotated(repo)
+    const guide = mainSpan(record, 'guide.md')
+    expect(guide.text).toContain('Scheduling it hourly')
+    expect(guide.text).toContain('Run it once against a project')
+    // One span, both sentences: whole-span presence would call this durable.
+    expect(guide.lifespan!.unitsTraced).toBe(2)
+    expect(guide.lifespan!.fate).toBe('eroded')
+    expect(guide.lifespan!.unitsSurviving).toBe(1)
+    expect(guide.lifespan!.liveAtTip).toBe(true)
+    expect(guide.lifespan!.survivingChars).toBeGreaterThan(0)
+    expect(guide.lifespan!.decayedChars).toBeGreaterThan(0)
+    expect(guide.lifespan!.decayedChars).toBeLessThan(guide.text.length)
+    expect(sh(repo, ['log', '-1', '--format=%s', guide.lifespan!.diedAtSha!]).trim())
+      .toMatch(/timer advice/)
   })
 
   it('a record with no later revisions is untested everywhere, and decayRate is null not zero', () => {

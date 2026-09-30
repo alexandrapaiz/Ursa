@@ -42,23 +42,35 @@ export interface DiffPart {
 export interface SpanLifespan {
   /** revisions of this span's file, after the closing commit, that were examined */
   revisionsChecked: number
-  /** how many of those still contained the span */
-  survivedRevisions: number
-  /** seconds from the closing commit to the newest revision that still contained it */
-  survivedSeconds: number
-  /** the first revision that no longer contained it; null when it never died */
+  /**
+   * The span is traced sentence by sentence (prose) or line by line (code),
+   * because resolve() merges adjacent same-class text and a whole file often
+   * arrives here as one span. These count the units long enough to carry
+   * evidence; see MIN_TRACEABLE_LEN in lifespan.ts.
+   */
+  unitsTraced: number
+  unitsSurviving: number
+  /** chars of this span whose units were still present at the last revision examined */
+  survivingChars: number
+  /** chars of this span whose units later work removed */
+  decayedChars: number
+  /** revisions in which every one of the span's units was still present */
+  intactRevisions: number
+  /** seconds from the closing commit to the newest revision at which it was wholly intact */
+  intactSeconds: number
+  /** the revision that took the span's first unit; null when it lost none */
   diedAtSha: string | null
   diedAt: string | null
-  /** still present at the newest revision examined */
+  /** at least one unit was still present at the newest revision examined */
   liveAtTip: boolean
   /**
-   * durable  = present in every later revision examined
-   * decayed  = kept at the closing commit, removed by later work — a false
-   *            positive in the span's own class label
-   * untested = nothing later to test against, or the span is too short to carry evidence
+   * durable  = every unit survived to the tip
+   * eroded   = some units survived, some did not
+   * decayed  = every unit is gone — a false positive in the span's own class
+   * untested = nothing later to test against, or no unit long enough to carry evidence
    */
-  fate: 'durable' | 'decayed' | 'untested'
-  /** how presence was judged at the last revision that had it */
+  fate: 'durable' | 'eroded' | 'decayed' | 'untested'
+  /** how presence was last judged */
   basis: 'verbatim' | 'token-containment' | null
   /** why `untested`, when it is untested */
   skipped: 'too-short' | 'no-later-revisions' | null
@@ -73,14 +85,17 @@ export interface Durability {
   /** surviving spans (survived_verbatim + survived_mutated) with a later revision to test */
   testedSpans: number
   durableSpans: number
+  erodedSpans: number
   decayedSpans: number
   durableChars: number
   decayedChars: number
   /**
-   * decayedChars / (durableChars + decayedChars). The fraction of this record's
+   * decayedChars / (durableChars + decayedChars). The share of this record's
    * own "the user kept it" verdict that later real work overturned. Null when
-   * nothing was testable. A conservative floor: see spanPresent() in lifespan.ts
-   * for the bag-of-tokens presence test that can only over-report survival.
+   * nothing was testable — "nothing decayed" and "nothing was measured" are
+   * different claims and only one of them is sellable. A conservative floor:
+   * see spanPresent() in lifespan.ts for the presence test, which can only
+   * over-report survival.
    */
   decayRate: number | null
   /**
@@ -89,8 +104,8 @@ export interface Durability {
    * the baseline is not decaying because it was agent text.
    */
   baselineDecayRate: number | null
-  /** median seconds a decayed span lasted before removal; null when none decayed */
-  medianDecayedLifetimeSeconds: number | null
+  /** median seconds a span that lost something stayed wholly intact; null when none did */
+  medianIntactSeconds: number | null
   maxRevisionsWalked: number
   minTraceableLen: number
 }
