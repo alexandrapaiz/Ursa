@@ -7,8 +7,28 @@ import { findCommitPairs } from './pairfinder'
 import { buildEpisodes } from './episodes'
 import { main, resolveEpisode } from './bin/ursa'
 
+// The fixture's declared identity has to be the one git actually uses.
+// `git config user.name` loses to GIT_AUTHOR_NAME / GIT_COMMITTER_NAME in
+// the ambient environment, and agent runtimes set those, so these tests
+// used to pass or fail depending on whose machine ran them. The stakes
+// are not cosmetic: pairfinder classifies a commit as generated when its
+// author matches /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/,
+// so an ambient identity matching that pattern turns the fixture's human
+// commit into an agent commit and the assertions below stop testing what
+// they name.
+const FIXTURE_IDENTITY = {
+  GIT_AUTHOR_NAME: 'Human Owner',
+  GIT_AUTHOR_EMAIL: 'human@example.com',
+  GIT_COMMITTER_NAME: 'Human Owner',
+  GIT_COMMITTER_EMAIL: 'human@example.com',
+}
+
 function sh(cwd: string, cmd: string, args: string[], env: Record<string, string> = {}) {
-  execFileSync(cmd, args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8' })
+  execFileSync(cmd, args, {
+    cwd,
+    env: { ...process.env, ...FIXTURE_IDENTITY, ...env },
+    encoding: 'utf8',
+  })
 }
 
 function fixtureRepo(): string {
@@ -44,6 +64,23 @@ describe('M0: ursa run over a git repo', () => {
     expect(pairs[0].paths).toEqual(['digest.js'])
     expect(pairs[0].agentMarker).toMatch(/Claude/)
     expect(pairs[0].finalAuthor).toBe('Human Owner')
+  })
+
+  // Regression: the ambient git identity must not reach the fixture. An
+  // agent runtime that exports GIT_AUTHOR_NAME=claude used to make the
+  // human's correcting commit look generated, which empties `pairs` and
+  // silently turns the two assertions above into vacuous ones.
+  it('is not steered by an agent-shaped identity in the environment', () => {
+    const saved = process.env.GIT_AUTHOR_NAME
+    process.env.GIT_AUTHOR_NAME = 'claude'
+    try {
+      const pairs = findCommitPairs(fixtureRepo())
+      expect(pairs).toHaveLength(1)
+      expect(pairs[0].finalAuthor).toBe('Human Owner')
+    } finally {
+      if (saved === undefined) delete process.env.GIT_AUTHOR_NAME
+      else process.env.GIT_AUTHOR_NAME = saved
+    }
   })
 
   it('never pairs an agent commit with a merge commit', () => {
