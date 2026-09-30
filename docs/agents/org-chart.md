@@ -1,60 +1,65 @@
 # Org Chart — Ursa
 
-**Refreshed 2026-09-24** (owner-present, ceremony-lite dispatch)
-against `gh run list`, `gh pr list --state all`, the seat charter
-headers in `prompts/`, and the cron lines in `.github/workflows/`.
+**Refreshed 2026-09-28** (PM ceremony run) against `gh run list`, `gh
+pr list --state all`, the seat charter headers in `prompts/`, and the
+cron lines in `.github/workflows/`. A fuller pass (renaming bare ADR
+codes on this page to descriptions, per the owner's 2026-09-27
+directive) is drafted in PR #29, still open; this update only refreshes
+the counts and initiatives below and does not duplicate that rename.
 
-Every seat but sales is ACTIVE as of ADR-005 (2026-09-24): sales stays
-dormant because Ursa is private R&D and never for sale (ADR-001). This
-supersedes the wave-1/wave-2 split below as the operative status; the
-governance-cycle gate that wave 2 was meant to wait on (an OKR file, a
-sprint, and an ExO audit, each merged) was **not fully met** when
-ADR-005 fired — the sprint (PR #9) and the ExO audit (PR #7) are both
-still open, unmerged, three and four days respectively as of this
-update. That's the owner's prerogative to override, not a process
-failure; it's recorded here so the gate's original text doesn't read
-as still binding.
+Every seat but sales is active, decided by the owner 2026-09-24: sales
+stays dormant because Ursa is private R&D and never for sale. See
+docs/decisions.md for the full record of that decision and the two
+board-of-record calls that followed it (Linear tried, then abandoned
+for the repo itself, both 2026-09-25).
 
 | Seat | Charter | Status | Cadence | Runs so far |
 |---|---|---|---|---|
-| pm | prompts/pm-agent.md | active | daily: Mon ceremony, other 6 days standup (ADR-033) | 2 scheduled + this dispatch |
-| okr | prompts/okr-agent.md | active | monthly, 1st | 1 success, 3 earlier failures (Incident 1, closed) |
-| exo | prompts/exo-agent.md | active | weekly, Sunday | 1 (PR #7, still open) |
-| engineer | prompts/engineer-agent.md | active (2026-09-24) | twice daily, 11:26 + 23:26 UTC | 0 — first fire is today |
-| research | prompts/research-agent.md | active (2026-09-24) | Tue + Fri, 13:15 UTC | 0 — first fire Fri 2026-09-25 |
-| frontend | prompts/frontend-agent.md | active (2026-09-24) | Mon + Thu, 14:15 UTC | 0 — first fire today |
-| market | prompts/market-agent.md | active (2026-09-24) | Wed, 13:35 UTC | 0 — first fire 2026-09-30 |
-| security | prompts/security-agent.md | active (2026-09-24) | Sun, 15:15 UTC | 0 — first fire 2026-09-27 |
-| skill | prompts/skill-agent.md | active (2026-09-24) | Thu, 13:55 UTC | 0 — first fire today |
+| pm | prompts/pm-agent.md | active | daily: Mon ceremony, other 6 days standup | 8 scheduled runs, this one included |
+| okr | prompts/okr-agent.md | active | monthly, 1st | 5 total (1 success, 3 early failures closed as an incident, 1 more since) |
+| exo | prompts/exo-agent.md | active | weekly, Sunday | 2 (PR #7 merged as lessons-only; PR #30 open) |
+| engineer | prompts/engineer-agent.md | active (2026-09-24) | twice daily, 11:26 + 23:26 UTC | 9 runs, 9 open PRs (#13, #16, #18, #22, #24, #25, #27, #32, #33) |
+| research | prompts/research-agent.md | active (2026-09-24) | Tue + Fri, 13:15 UTC | 1 (PR #19, open) |
+| frontend | prompts/frontend-agent.md | active (2026-09-24) | Mon + Thu, 14:15 UTC | 1 (PR #15, open) |
+| market | prompts/market-agent.md | active (2026-09-24) | Wed, 13:35 UTC | 1 (PR #21, open, sprint item 4) |
+| security | prompts/security-agent.md | active (2026-09-24) | Sun, 15:15 UTC | 1 (PR #28, open, first full audit) |
+| skill | prompts/skill-agent.md | active (2026-09-24) | Thu, 13:55 UTC | 1 (PR #14, open) |
 | finance | prompts/finance-agent.md | active (2026-09-24) | monthly, 1st, 11:30 UTC | 0 — first fire 2026-10-01 |
-| sales | prompts/sales-agent.md | dormant | none — Ursa is private R&D (ADR-001) | 0 |
+| sales | prompts/sales-agent.md | dormant | none — Ursa is private R&D | 0 |
+
+**16 PRs are open across the roster right now, all green, none
+reviewed.** This is the dominant operational fact of the week; see
+sprint-2026-09-21.md's retrospective and pending.md for the detail and
+the single highest-leverage one to merge first (#27).
 
 ## Initiative coverage
 
 - **O1** (outcome-record fidelity): engineer, sprint-2026-09-21 items
-  1-3. No run yet — see docs/sprints/pending.md.
-- **O2** (landscape / provenance de-risking): market, sprint item 4
-  (`docs/market/landscape.md`, due via KR2.3 2026-10-31). No run yet.
-- **Governance spine** (this cycle, OKR/sprint/ExO): okr done
-  (2026-q4.md merged), sprint and ExO audit both stuck in open PRs
-  (#9, #7) — see pending.md for what's blocking each.
-- **research, frontend, security, skill, finance**: no sprint item
-  currently names any of them. Each will smoke-test itself on its
-  first scheduled run per ADR-005's own note ("each newly active
-  seat's first run is a smoke run by definition"); flagging here per
-  §1b since an active seat with no initiative is exactly what this
-  section exists to surface.
+  1-3 all shipped as PRs (#13, #16, #18), all unmerged. Sprint-2026-09-28
+  item 2 continues the agentic-forward sub-thread (#22) with the last
+  documented step, embedding retrieval.
+- **O2** (landscape / provenance de-risking): market's item 4 shipped
+  (#21, unmerged). Sprint-2026-09-28 item 1 (security: the redaction
+  standard) gates KR2.2, the next O2 KR still fully open.
+- **Governance spine**: complete in substance (okr, pm, and exo have
+  each run and shipped), though the ExO audit itself (#30) is still an
+  open PR, same backlog as everything else.
+- **finance**: no initiative yet; first run is 2026-10-01, nothing owed
+  before then.
+- **research, frontend, skill**: each smoke-tested on its first run
+  this week (#19, #15, #14) with no sprint item naming a next step yet;
+  not a gap by itself, since none has a second occurrence due before
+  the next ceremony.
 
 ## Board of record
 
-Linear (workspace "Alexandra Personal", team URSA), per ADR-005's
-second decision (2026-09-23, charter §1f) — supersedes GitHub
-Projects as Ursa's board. `LINEAR_API_KEY` is unset in this run's
-environment, so this update did not sync issues; see
-docs/sprints/pending.md. GitHub labels (`seat:<name>`,
-`horizon:now|next|later`, `blocked`, `owner-action`) and one milestone
-per sprint are maintained regardless, per docs/standards/pm.md §2b,
-since neither depends on Linear or `PROJECTS_TOKEN`.
+The repo itself: the sprint file is the backlog, `docs/sprints/pending.md`
+is the owner's queue, `docs/sprints/dispatch-queue.md` is the dispatch
+plan, and GitHub labels (`seat:<name>`, `horizon:now|next|later`,
+`blocked`, `owner-action`) plus one milestone per sprint are the board
+view (docs/decisions.md, the board-of-record decision of 2026-09-25;
+charter §1f). Linear was trialed for one day and abandoned; do not
+resurrect it without a new decision recorded there.
 
 The chair (interactive session) continues to cover any dormant seat's
 functions; today, only sales is dormant.

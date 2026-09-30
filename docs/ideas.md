@@ -2,6 +2,50 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Grooming (2026-09-28)
+
+Re-read end to end against `gh pr list --state all`. No status changed
+(the PM does not move statuses it owns nothing of); this section
+records what the seats' own PRs mean for the entries below and what
+now needs the owner's verdict.
+
+1. **The GitHub-PR reader is no longer a paragraph** — "Finding: merge
+   commits are not edits; the PR reader is load-bearing" (2026-09-20,
+   still `proposed`, now 8 days without a verdict, past the one-week
+   mark) has a working implementation behind it: PR #33 built the
+   adapter its own "First step" describes (`src/adapters/`), measured
+   on this repository's real history (23 pairs from 13 merged PRs, 56
+   passing tests), and deliberately left the `proposed` status alone
+   per the ledger contract. Escalating for the owner's verdict now
+   rather than waiting the full two weeks, since the PR itself is a
+   sunk decision point: reviewing working code is a different, cheaper
+   ask than reviewing a paragraph. See "Awaiting your verdict" below.
+2. **The ledger-append conflict is structural, not incidental** — not
+   an existing entry, but PR #27's own diagnosis belongs recorded here
+   for whoever grooms next: every seat charter closes with "append to
+   `docs/ideas.md`," so concurrent seats produce concurrent appends to
+   the same file tail, which git reads as a conflict even when nothing
+   in the content disagrees. §4's current mitigation (warn the owner in
+   the PR description) is a label, not a fix. #27 proposes a real one
+   (a git merge driver, `tools/ledger/`); it is unmerged as of this
+   grooming. If the owner accepts it, this contract section should
+   eventually note the driver as the enforced mechanism, not just the
+   warning.
+3. **Agentic-forward, step (a), is done** — `get_briefing` (PR #22)
+   shipped the interface this entry's split names, returning empty
+   `rules`/`nearestCases`/`guardrails` arrays with a test, exactly as
+   scoped. Step (b) — wiring domain/file-based rule lookup — is pulled
+   into sprint-2026-09-28 item 1.
+4. **The tuning pipeline** — still flagged (carried from 2026-09-21) as
+   appearing already shipped on `main`; status is still `accepted`, not
+   `built`. Carrying the flag again rather than repeating the
+   reasoning.
+
+No `proposed` entry has crossed two weeks. Ages as of this grooming:
+repo split (2026-09-18) 10 days, tuning packs (2026-09-19) 9 days, the
+PR-reader finding (2026-09-20) 8 days — escalated above on its own
+merits, not the clock.
+
 ## Grooming (2026-09-21, first PM run)
 
 Accepted entries below, ordered by leverage against docs/vision.md
