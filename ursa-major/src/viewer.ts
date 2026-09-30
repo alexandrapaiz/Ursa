@@ -155,7 +155,15 @@ export function renderViewer(record: OutcomeRecord): string {
   if (art.renderRef) {
     var ref = el('span', 'chip');
     ref.appendChild(document.createTextNode('rendered at '));
-    if (/^https?:\/\//i.test(art.renderRef)) {
+    // Deliberately not a regex literal. This entire function body is one
+    // JavaScript template literal (the one opened by renderViewer's return),
+    // so a backslash written here is consumed by the template and never
+    // reaches the emitted script: /^https?:\\/\\//i arrives in the HTML as
+    // /^https?:///i, which is a SyntaxError, and one SyntaxError anywhere in
+    // this script means the browser runs none of it and the viewer renders as
+    // an empty shell. Scheme matching by string comparison needs no escape.
+    var scheme = art.renderRef.toLowerCase();
+    if (scheme.indexOf('http://') === 0 || scheme.indexOf('https://') === 0) {
       var a = el('a', '', art.renderRef);
       a.href = art.renderRef;
       a.target = '_blank';
