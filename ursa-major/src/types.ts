@@ -33,6 +33,68 @@ export interface DiffPart {
   removed?: boolean
 }
 
+// ---------------------------------------------------------------------------
+// The time dimension (CLAUDE.md §1). A span's class is a verdict taken at
+// one instant — the episode's closing commit. Its lifespan is what the work
+// that came afterwards did to it. See lifespan.ts for how it is measured.
+// ---------------------------------------------------------------------------
+
+export interface SpanLifespan {
+  /** revisions of this span's file, after the closing commit, that were examined */
+  revisionsChecked: number
+  /** how many of those still contained the span */
+  survivedRevisions: number
+  /** seconds from the closing commit to the newest revision that still contained it */
+  survivedSeconds: number
+  /** the first revision that no longer contained it; null when it never died */
+  diedAtSha: string | null
+  diedAt: string | null
+  /** still present at the newest revision examined */
+  liveAtTip: boolean
+  /**
+   * durable  = present in every later revision examined
+   * decayed  = kept at the closing commit, removed by later work — a false
+   *            positive in the span's own class label
+   * untested = nothing later to test against, or the span is too short to carry evidence
+   */
+  fate: 'durable' | 'decayed' | 'untested'
+  /** how presence was judged at the last revision that had it */
+  basis: 'verbatim' | 'token-containment' | null
+  /** why `untested`, when it is untested */
+  skipped: 'too-short' | 'no-later-revisions' | null
+}
+
+export interface Durability {
+  method: 'git-forward-walk'
+  /** the revision the walk ended at */
+  tipSha: string | null
+  /** the episode's closing commit — the instant the span classes were taken at */
+  closingSha: string
+  /** surviving spans (survived_verbatim + survived_mutated) with a later revision to test */
+  testedSpans: number
+  durableSpans: number
+  decayedSpans: number
+  durableChars: number
+  decayedChars: number
+  /**
+   * decayedChars / (durableChars + decayedChars). The fraction of this record's
+   * own "the user kept it" verdict that later real work overturned. Null when
+   * nothing was testable. A conservative floor: see spanPresent() in lifespan.ts
+   * for the bag-of-tokens presence test that can only over-report survival.
+   */
+  decayRate: number | null
+  /**
+   * The same rate over `no_generation_provenance` spans — text the user wrote
+   * themselves. This is the repo's background churn, so agent text decaying at
+   * the baseline is not decaying because it was agent text.
+   */
+  baselineDecayRate: number | null
+  /** median seconds a decayed span lasted before removal; null when none decayed */
+  medianDecayedLifetimeSeconds: number | null
+  maxRevisionsWalked: number
+  minTraceableLen: number
+}
+
 export interface FinalSpan {
   start: number
   end: number
@@ -48,6 +110,8 @@ export interface FinalSpan {
   candidate?: { score: number; text: string; source: SourcePointer }
   /** matched by exact equality of a very short segment — weak evidence */
   trivial?: boolean
+  /** what later work did to this span; set by annotateDurability, absent on non-git records */
+  lifespan?: SpanLifespan
 }
 
 export interface FinalFile {
@@ -244,4 +308,6 @@ export interface OutcomeRecord {
   generations: GenerationRecord[]
   stats: Stats
   signals?: LabSignals
+  /** the time dimension; present only for git-backed records, where later revisions exist */
+  durability?: Durability
 }
