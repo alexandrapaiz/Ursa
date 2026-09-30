@@ -34,6 +34,7 @@ interface Payload {
   userTurns: number
   verdict: Verdict
   tuning: TuningLine[]
+  declaredRecords: string[]
   lastRunSummary: string | null
 }
 
@@ -207,6 +208,12 @@ export default function Overlay() {
         {showQuote && v?.quote && (
           <p className="mono" style={{ color: 'var(--dim)', fontSize: 11, marginTop: 6 }}>
             step {v.step}: “{v.quote}”
+          </p>
+        )}
+        {v?.accepted !== null && (payload?.declaredRecords?.length ?? 0) > 0 && (
+          <p className="mono" style={{ color: 'var(--dim)', fontSize: 10, marginTop: 6 }}>
+            written into {payload!.declaredRecords.length} record
+            {payload!.declaredRecords.length === 1 ? '' : 's'} · your words are the label
           </p>
         )}
       </footer>

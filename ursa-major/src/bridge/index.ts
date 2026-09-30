@@ -6,12 +6,18 @@
 // Each tick: tail the project's Claude Code session JSONL → parse →
 // read the stated verdict (§16.3, only when the prompt count changed,
 // so `claude -p` runs once per new user message, not once per tick) →
-// assemble the overlay payload → encrypt with the owner's key →
-// push ciphertext to the sync route. The run channel is a local HTTP
-// listener on 127.0.0.1 (plan §16.2 sketched a WebSocket; plain HTTP
-// on localhost does the same job with zero dependencies, and pages
-// served over https may call it because browsers exempt loopback from
-// mixed-content blocking).
+// write that verdict into the project's records as their declaration
+// (`./declare.ts`, S0's "writes records with it") → assemble the
+// overlay payload → encrypt with the owner's key → push ciphertext to
+// the sync route.
+//
+// The local channel is an HTTP listener on 127.0.0.1 (plan §16.2
+// sketched a WebSocket; plain HTTP on localhost does the same job with
+// zero dependencies, and pages served over https may call it because
+// browsers exempt loopback from mixed-content blocking). It serves
+// `.ursa/` in the clear to loopback and to the page's own origin —
+// `GET /payload`, `GET /records`, `GET /records/<id>` — and takes the
+// run request on `POST /run`.
 
 import { execFile } from 'node:child_process'
 import { createServer } from 'node:http'
@@ -21,6 +27,8 @@ import { basename, join } from 'node:path'
 import { parseClaudeSession } from '../parse'
 import { readVerdict, NO_VERDICT, type Verdict, type VerdictRunner, claudeVerdictRunner } from '../verdict'
 import type { TuningRecord } from '../tuning/types'
+import { listRecordIds, loadRecord } from '../store'
+import { applyVerdict, NOTHING_APPLIED, type AppliedVerdict } from './declare'
 import { deriveKeys, encryptJson, type DerivedKeys } from './crypto'
 
 export interface OverlayTuningLine {
@@ -42,6 +50,8 @@ export interface OverlayPayload {
   userTurns: number
   verdict: Verdict
   tuning: OverlayTuningLine[]
+  /** ids of the records now carrying this verdict as their declaration */
+  declaredRecords: string[]
   lastRunSummary: string | null
 }
 
@@ -111,7 +121,9 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
 
   let lastUserTurns = -1
   let verdict: Verdict = NO_VERDICT
+  let applied: AppliedVerdict = NOTHING_APPLIED
   let lastRunSummary: string | null = null
+  let lastPayload: OverlayPayload | null = null
   let lastPushedHash = ''
   let running = false
 
@@ -139,6 +151,10 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
           log(verdict.accepted === null
             ? `verdict: no verdict yet (${userTurns} prompts read)`
             : `verdict: reads as ${verdict.accepted ? 'satisfied' : 'unsatisfied'} at step ${verdict.step} — "${verdict.quote}"`)
+          applied = applyVerdict(opts.projectPath, verdict)
+          if (applied.declared.length > 0) {
+            log(`declared: ${applied.declared.length} record${applied.declared.length === 1 ? '' : 's'} now carry it${applied.changed.length ? ` (${applied.changed.length} rewritten)` : ' (already on disk)'}`)
+          }
         } catch (e) {
           log(`verdict reader failed, keeping last reading: ${(e as Error).message}`)
         }
@@ -152,8 +168,10 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
       userTurns,
       verdict,
       tuning: tuningLines(opts.projectPath),
+      declaredRecords: applied.declared,
       lastRunSummary,
     }
+    lastPayload = payload
     // push only when something changed; the payload minus the clock
     const hash = JSON.stringify({ ...payload, updatedAt: '' })
     if (hash !== lastPushedHash) {
@@ -175,7 +193,7 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
   const server = createServer((req, res) => {
     const origin = allowed(req.headers.origin as string | undefined)
     const cors: Record<string, string> = origin
-      ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'POST, OPTIONS' }
+      ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS' }
       : {}
     if (req.method === 'OPTIONS') { res.writeHead(204, cors); res.end(); return }
     if (req.method === 'POST' && req.url === '/run') {
@@ -187,10 +205,41 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
         (err, stdout, stderr) => {
           running = false
           lastRunSummary = err ? `run failed: ${stderr || err.message}` : stdout.trim()
+          // A run writes records that start out undeclared, so the
+          // verdict already read has to reach the new ones too.
+          if (!err && verdict.accepted !== null) {
+            applied = applyVerdict(opts.projectPath, verdict)
+            log(`declared: ${applied.declared.length} record(s) after the run`)
+          }
           lastPushedHash = '' // force a sync with the fresh summary
           res.writeHead(err ? 500 : 200, { ...cors, 'content-type': 'application/json' })
           res.end(JSON.stringify({ summary: lastRunSummary }))
         })
+      return
+    }
+    // `.ursa/` over the local channel, in the clear: this is the owner's
+    // own machine talking to the owner's own page. Nothing here crosses
+    // the network, and the sync route only ever sees the ciphertext.
+    const sendJson = (code: number, body: unknown) => {
+      res.writeHead(code, { ...cors, 'content-type': 'application/json' })
+      res.end(JSON.stringify(body))
+    }
+    if (req.method === 'GET' && req.url === '/payload') {
+      if (!lastPayload) { sendJson(503, { error: 'no tick has completed yet' }); return }
+      sendJson(200, lastPayload)
+      return
+    }
+    if (req.method === 'GET' && req.url === '/records') {
+      sendJson(200, { project, ids: listRecordIds(opts.projectPath) })
+      return
+    }
+    if (req.method === 'GET' && req.url?.startsWith('/records/')) {
+      const id = decodeURIComponent(req.url.slice('/records/'.length))
+      const record = loadRecord(opts.projectPath, id)
+      // loadRecord refuses an id outside SAFE_RECORD_ID rather than
+      // joining it onto a path, so a traversal attempt reads as 404.
+      if (!record) { sendJson(404, { error: `no record ${id}` }); return }
+      sendJson(200, record)
       return
     }
     if (req.method === 'GET' && req.url === '/health') {
