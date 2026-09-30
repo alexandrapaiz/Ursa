@@ -32,6 +32,7 @@
 import { execFileSync } from 'node:child_process'
 import { normalize } from './normalize'
 import { containment, tokens, THETA_HIGH } from './match'
+import { segment, modeForPath } from './segment'
 import type { FinalSpan, OutcomeRecord, SpanLifespan, Durability } from './types'
 
 /**
@@ -162,8 +163,18 @@ export function spanPresent(spanNorm: string, fileNorm: string, fileTokens: Set<
 
 /**
  * Walk one file's spans forward through `revisions` and stamp each with
- * how long it lasted. Mutates the spans in place and returns them, so a
- * caller that already holds the record does not rebuild it.
+ * what later work did to it. Mutates the spans in place and returns
+ * them, so a caller that already holds the record does not rebuild it.
+ *
+ * Granularity is the point. resolve() merges adjacent same-class prose,
+ * so a whole markdown file often arrives here as ONE span. Asking "is
+ * this span still present" of a 2,000-character span answers almost
+ * nothing: delete a third of it and the bag-of-tokens tier still says
+ * yes. So each span is decomposed with the same segmenter resolve()
+ * used — sentences for prose, lines for code — and each unit is traced
+ * on its own. A span is then durable, `eroded`, or decayed depending on
+ * how its units fared, and the char counts are apportioned between the
+ * units that lasted and the units that did not.
  */
 export function traceFile(
   repoPath: string,
@@ -172,58 +183,92 @@ export function traceFile(
   closedAt: string,
   revisions: FileRevision[],
 ): FinalSpan[] {
-  const traceable = spans.filter((s) => normalize(s.text).norm.length >= MIN_TRACEABLE_LEN)
+  const mode = modeForPath(path)
+  const closedMs = Date.parse(closedAt)
+
+  interface Unit {
+    span: FinalSpan
+    norm: string
+    chars: number
+    /** null while still present; set to the revision that lost it */
+    diedAt: FileRevision | null
+  }
+
+  const unitsBySpan = new Map<FinalSpan, Unit[]>()
+  const live: Unit[] = []
   for (const span of spans) {
+    const units: Unit[] = segment(span.text, mode)
+      .map((u) => ({ span, norm: normalize(u.text).norm, chars: u.text.length, diedAt: null as FileRevision | null }))
+      .filter((u) => u.norm.length >= MIN_TRACEABLE_LEN)
+    unitsBySpan.set(span, units)
     span.lifespan = {
       revisionsChecked: 0,
-      survivedRevisions: 0,
-      survivedSeconds: 0,
+      unitsTraced: units.length,
+      unitsSurviving: units.length,
+      survivingChars: 0,
+      decayedChars: 0,
+      intactRevisions: 0,
+      intactSeconds: 0,
       diedAtSha: null,
       diedAt: null,
       liveAtTip: false,
       fate: 'untested',
       basis: null,
-      skipped: traceable.includes(span) ? (revisions.length === 0 ? 'no-later-revisions' : null) : 'too-short',
+      skipped: units.length === 0 ? 'too-short' : revisions.length === 0 ? 'no-later-revisions' : null,
     }
+    live.push(...units)
   }
   if (revisions.length === 0) return spans
 
-  const closedMs = Date.parse(closedAt)
-  // Spans still alive as of the last revision examined. A span leaves
-  // this set exactly once, at the first revision that lost it, so a
-  // span deleted and later re-added still reads as decayed — the work
-  // did reject it, and the re-add is a different generation's span.
-  const alive = new Map<FinalSpan, { norm: string; basis: 'verbatim' | 'token-containment' }>()
-  for (const span of traceable) alive.set(span, { norm: normalize(span.text).norm, basis: 'verbatim' })
-
+  let remaining = live.length
   for (const rev of revisions) {
-    if (alive.size === 0) break
+    if (remaining === 0) break
     const text = blobAt(repoPath, rev.sha, path)
     // A null blob means this revision deleted the file. That is a real
-    // death for every span in it, not a reason to skip the revision.
+    // death for every unit in it, not a reason to skip the revision.
     const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? '' : normalize(text).norm
     const fileTokens = new Set(tokens(fileNorm))
     const revMs = Date.parse(rev.at)
-    for (const [span, state] of [...alive]) {
+    const touchedSpans = new Set<FinalSpan>()
+    for (const unit of live) {
+      if (unit.diedAt) continue
+      touchedSpans.add(unit.span)
+      const presence = spanPresent(unit.norm, fileNorm, fileTokens)
+      if (presence.present) {
+        unit.span.lifespan!.basis = presence.basis
+      } else {
+        unit.diedAt = rev
+        remaining--
+      }
+    }
+    for (const span of touchedSpans) {
       const life = span.lifespan!
       life.revisionsChecked++
-      const presence = spanPresent(state.norm, fileNorm, fileTokens)
-      if (presence.present) {
-        life.survivedRevisions++
-        life.survivedSeconds = Math.max(0, Math.round((revMs - closedMs) / 1000))
-        state.basis = presence.basis
-        life.basis = presence.basis
-      } else {
-        life.diedAtSha = rev.sha
-        life.diedAt = rev.at
-        life.fate = 'decayed'
-        alive.delete(span)
+      const units = unitsBySpan.get(span)!
+      if (units.every((u) => !u.diedAt)) {
+        life.intactRevisions++
+        life.intactSeconds = Math.max(0, Math.round((revMs - closedMs) / 1000))
       }
     }
   }
-  for (const span of alive.keys()) {
-    span.lifespan!.fate = 'durable'
-    span.lifespan!.liveAtTip = true
+
+  for (const [span, units] of unitsBySpan) {
+    const life = span.lifespan!
+    if (units.length === 0) continue
+    const lost = units.filter((u) => u.diedAt)
+    life.unitsSurviving = units.length - lost.length
+    life.survivingChars = units.filter((u) => !u.diedAt).reduce((n, u) => n + u.chars, 0)
+    life.decayedChars = lost.reduce((n, u) => n + u.chars, 0)
+    life.liveAtTip = life.unitsSurviving > 0
+    if (lost.length > 0) {
+      // The first loss, in revision order — `revisions` is oldest-first
+      // and units only ever die once, so the earliest diedAt wins.
+      const first = lost.reduce((a, b) =>
+        revisions.indexOf(a.diedAt!) <= revisions.indexOf(b.diedAt!) ? a : b)
+      life.diedAtSha = first.diedAt!.sha
+      life.diedAt = first.diedAt!.at
+    }
+    life.fate = lost.length === 0 ? 'durable' : lost.length === units.length ? 'decayed' : 'eroded'
   }
   return spans
 }
@@ -245,7 +290,9 @@ const SURVIVING = new Set(['survived_verbatim', 'survived_mutated'])
  *
  * Returns the same record for convenience. Safe on a repo where the
  * closing commit is not an ancestor of HEAD: every span reads
- * `untested` and `decayRate` is null.
+ * `untested` and every rate is null rather than zero, because "nothing
+ * decayed" and "nothing was measured" are different claims and only one
+ * of them is sellable.
  */
 export function annotateDurability(
   repoPath: string,
@@ -260,10 +307,10 @@ export function annotateDurability(
     traceFile(repoPath, file.path, file.spans, closedAt, revisions)
   }
 
-  let testedSpans = 0, durableSpans = 0, decayedSpans = 0
+  let testedSpans = 0, durableSpans = 0, erodedSpans = 0, decayedSpans = 0
   let durableChars = 0, decayedChars = 0
-  let baselineDurable = 0, baselineDecayed = 0
-  const decayedLifetimes: number[] = []
+  let baseDurable = 0, baseDecayed = 0
+  const lifetimes: number[] = []
 
   for (const file of record.files) {
     for (const span of file.spans) {
@@ -271,40 +318,39 @@ export function annotateDurability(
       if (!life || life.fate === 'untested') continue
       if (SURVIVING.has(span.class)) {
         testedSpans++
-        if (life.fate === 'durable') {
-          durableSpans++
-          durableChars += span.text.length
-        } else {
-          decayedSpans++
-          decayedChars += span.text.length
-          decayedLifetimes.push(life.survivedSeconds)
-        }
+        if (life.fate === 'durable') durableSpans++
+        else if (life.fate === 'eroded') erodedSpans++
+        else decayedSpans++
+        durableChars += life.survivingChars
+        decayedChars += life.decayedChars
+        if (life.decayedChars > 0) lifetimes.push(life.intactSeconds)
       } else if (span.class === 'no_generation_provenance') {
-        // The control. This text the user wrote themselves, so its
-        // decay rate is the repo's own churn. Agent text that decays at
-        // the baseline is not decaying because it was agent text.
-        if (life.fate === 'durable') baselineDurable++
-        else baselineDecayed++
+        // The control. This text the user wrote themselves, so its decay
+        // is the repo's own churn. Agent text decaying at the baseline is
+        // not decaying because it was agent text.
+        baseDurable += life.survivingChars
+        baseDecayed += life.decayedChars
       }
     }
   }
 
-  const baselineTested = baselineDurable + baselineDecayed
-  const durability: Durability = {
+  const baseTotal = baseDurable + baseDecayed
+  const total = durableChars + decayedChars
+  record.durability = {
     method: 'git-forward-walk',
     tipSha: tip,
     closingSha,
     testedSpans,
     durableSpans,
+    erodedSpans,
     decayedSpans,
     durableChars,
     decayedChars,
-    decayRate: testedSpans === 0 ? null : decayedChars / (durableChars + decayedChars || 1),
-    baselineDecayRate: baselineTested === 0 ? null : baselineDecayed / baselineTested,
-    medianDecayedLifetimeSeconds: median(decayedLifetimes),
+    decayRate: total === 0 ? null : decayedChars / total,
+    baselineDecayRate: baseTotal === 0 ? null : baseDecayed / baseTotal,
+    medianIntactSeconds: median(lifetimes),
     maxRevisionsWalked: maxRevisions,
     minTraceableLen: MIN_TRACEABLE_LEN,
   }
-  record.durability = durability
   return record
 }
