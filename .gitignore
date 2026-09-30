@@ -4,3 +4,6 @@ node_modules/
 .env
 .env.*
 .DS_Store
+
+# per-project outcome records and tuning (raw data, never committed)
+.ursa/
