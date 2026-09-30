@@ -158,6 +158,23 @@ describe('artifact.kind on the record', () => {
     expect(html).toContain("a.rel = 'noreferrer noopener'")
   })
 
+  // Regression, 2026-09-30. The three assertions above are substring checks on
+  // the HTML, and every one of them passed while the viewer's inline script had
+  // a SyntaxError in it, because a substring check never parses what it finds.
+  // The script is a program, so the test that guards it has to parse it.
+  it('the viewer\'s inline script parses as JavaScript', () => {
+    const repo = fixtureRepo({ CNAME: 'minor.example.com\n' })
+    const html = renderViewer(resolveEpisode(repo, onlyEpisode(repo))!)
+    const blocks = html.match(/<script>([\s\S]*?)<\/script>/g) ?? []
+    expect(blocks.length).toBeGreaterThan(0)
+    for (const block of blocks) {
+      const src = block.replace(/^<script>/, '').replace(/<\/script>$/, '')
+      // new Function compiles without running, so this is a parse check and
+      // nothing in the script touches document here.
+      expect(() => new Function(src)).not.toThrow()
+    }
+  })
+
   it('writes artifact into the saved record JSON', () => {
     const repo = fixtureRepo({ CNAME: 'minor.example.com\n' })
     const ep = onlyEpisode(repo)
