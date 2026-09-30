@@ -27,18 +27,24 @@ for (const entry of readdirSync(skillsDir)) {
   for (const m of fm[1].matchAll(/- ref:\s*(\S+)\n(?:.*\n)*?\s*source:\s*(.+)/g)) {
     const [, ref, sourceLine] = m
     declared.add(ref)
-    // one source line may hold several comma-separated path[:ranges] plus prose
-    for (const piece of sourceLine.split(/[,;]/)) {
-      const hit = piece.trim().match(/^([\w./-]+\.(?:ts|md|json|mjs))(?::([\d,-]+))?/)
-      if (!hit) continue
+    // One source line may hold several path[:ranges] plus prose. Scan it
+    // rather than splitting on commas first: a comma separates two paths
+    // AND two ranges of one path, so splitting dropped every range after
+    // the first, and `segment.ts:1-3,900-999` passed on a 70-line file.
+    for (const hit of sourceLine.matchAll(/([\w./-]+\.(?:ts|md|json|mjs))(?::([\d,-]+))?/g)) {
       const [, path, ranges] = hit
       checked++
       const abs = join(root, path)
       if (!existsSync(abs)) { problems.push(`${entry} ${ref}: missing ${path}`); continue }
       if (!ranges) continue
-      const lines = readFileSync(abs, 'utf8').split('\n').length
+      // Trailing newline makes split() yield one empty extra element, which
+      // let a citation one line past the end of the file pass.
+      const lines = readFileSync(abs, 'utf8').replace(/\n$/, '').split('\n').length
       for (const part of ranges.split(',')) {
-        const nums = part.split('-').map(Number).filter((n) => !Number.isNaN(n))
+        // Only well-formed N or N-M. Number('') is 0, not NaN, so a trailing
+        // comma used to invent a line 0 and fail an otherwise fine source.
+        if (!/^\d+(?:-\d+)?$/.test(part)) continue
+        const nums = part.split('-').map(Number)
         for (const n of nums)
           if (n < 1 || n > lines)
             problems.push(`${entry} ${ref}: ${path}:${n} out of bounds (${lines} lines)`)
