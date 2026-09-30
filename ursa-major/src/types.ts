@@ -232,6 +232,34 @@ export interface LabSignals {
   notes?: string[]
 }
 
+
+// ---------------------------------------------------------------------------
+// What kind of finished thing this record is about. Ursa does not only read
+// chats: the artifact the record joins backward from can be a chat trace, a
+// git repository, a deployed/published page, or something the user judged by
+// eye. The capture path names which, because the correction channel differs
+// per kind (prose edits vs. commits vs. "still too dark" on a render).
+// ---------------------------------------------------------------------------
+
+export type ArtifactKind =
+  /** the finished work is the conversation itself (transcript, pasted thread) */
+  | 'chat'
+  /** the finished work is source under version control; commits are the edits */
+  | 'repo'
+  /** the finished work is reachable at a URL — a deployed site, a published page */
+  | 'hosted'
+  /** the finished work was accepted or corrected by eye — a render, a design */
+  | 'visual'
+
+export interface Artifact {
+  kind: ArtifactKind
+  /**
+   * Where the accepted state can be seen as the user saw it: a deploy URL for
+   * `hosted`, a screenshot path for `visual`. Absent when no render exists.
+   */
+  renderRef?: string
+}
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
@@ -239,6 +267,8 @@ export interface OutcomeRecord {
     finished: boolean
     generatedAt: string
   }
+  /** what kind of finished thing this is, and where its rendered state lives */
+  artifact: Artifact
   files: FinalFile[]
   conversations: ConversationMeta[]
   generations: GenerationRecord[]
