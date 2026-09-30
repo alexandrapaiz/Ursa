@@ -145,3 +145,53 @@ organizes) applies. Infisical centralizes the growing secret set
 with rotation and audit in one place.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## ADR-008 — Owner-facing text names decisions by what they decide, never by their code (2026-09-27)
+
+**Context.** Owner, 2026-09-27: "i dont want to see adrs, for me its
+just random codes. id rather have good descriptions." Said in the
+same vocabulary as the still-open Slack-bullets ruling below (PR #20,
+2026-09-26, drafting an ADR-007 not yet on `main` as this entry is
+written): this decision is about what goes inside those bullets, not
+a replacement for them.
+
+**Decision.** In everything the owner reads — the PM's Slack bullets,
+PR-opening bullets, and the board (the sprint file,
+docs/sprints/pending.md, docs/sprints/dispatch-queue.md,
+docs/agents/org-chart.md) — a decision or incident is named by a short
+description of what it decided, never by its internal code ("ADR-NNN",
+a company "L-NNN", or a bare "Incident N"). The codes themselves are
+unchanged: this ledger and docs/agents/incidents.md keep numbering and
+citing entries exactly as before, per the existing citation rule in
+docs/agents/incidents.md ("How to cite an incident"). The line is
+drawn at the owner-facing surface, not the internal one. This run
+applied the rule to the current live board surfaces it could safely
+touch without colliding with other open work: docs/agents/org-chart.md
+and docs/sprints/sprint-2026-09-21.md. docs/sprints/pending.md and
+docs/sprints/dispatch-queue.md were left alone this run: PR #26
+(today's standup, open) already fully reconciled both files with
+fresher content than this run started from, including its own fix of
+the same stale Linear-board line and its own, more complete writeup of
+the ADR-005/006 numbering collision this run had also found; editing
+either file again here would have added a third, redundant hand to
+files two other open PRs are already reconciling.
+
+**Reasoning.** Owner directive, stated plainly: a code reads as noise
+to her, a description reads as content. This extends the existing
+House voice boundary in prompts/pm-agent.md ("plain sentences,
+transition words, no stylistic em dashes or semicolon joins"), which
+this seat cannot edit directly (charters change only by the owner's
+merge). Proposed addition to that boundary line, for the owner or a
+future charter pass to fold in: "Name a decision or incident by what
+it decides, never by its code (no 'ADR-', no 'L-', no 'Incident N'),
+in anything owner-facing; codes stay inside the repo's own ledgers."
+
+**Numbered ADR-008, not ADR-007, on purpose.** PR #20 (open,
+2026-09-26) already used ADR-007 in this same file for the
+Slack-bullets ruling; that PR has not merged as this entry is written.
+Using ADR-008 here avoids adding a third number collision on top of
+the two (ADR-005, ADR-006) already on record, regardless of which of
+the two PRs merges first.
+
+**Owner:** Alexandra. **Status:** accepted (directed in session,
+2026-09-27).

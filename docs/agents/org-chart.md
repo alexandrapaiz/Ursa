@@ -4,21 +4,22 @@
 against `gh run list`, `gh pr list --state all`, the seat charter
 headers in `prompts/`, and the cron lines in `.github/workflows/`.
 
-Every seat but sales is ACTIVE as of ADR-005 (2026-09-24): sales stays
-dormant because Ursa is private R&D and never for sale (ADR-001). This
-supersedes the wave-1/wave-2 split below as the operative status; the
+Every seat but sales is ACTIVE as of the seat-activation decision
+(2026-09-24): sales stays dormant because Ursa is private R&D and
+never for sale (the join-Alexandra-Systems decision). This supersedes
+the wave-1/wave-2 split below as the operative status; the
 governance-cycle gate that wave 2 was meant to wait on (an OKR file, a
-sprint, and an ExO audit, each merged) was **not fully met** when
-ADR-005 fired — the sprint (PR #9) and the ExO audit (PR #7) are both
-still open, unmerged, three and four days respectively as of this
-update. That's the owner's prerogative to override, not a process
-failure; it's recorded here so the gate's original text doesn't read
-as still binding.
+sprint, and an ExO audit, each merged) was **not fully met** when the
+seat-activation decision fired — the sprint (PR #9) and the ExO audit
+(PR #7) are both still open, unmerged, three and four days
+respectively as of this update. That's the owner's prerogative to
+override, not a process failure; it's recorded here so the gate's
+original text doesn't read as still binding.
 
 | Seat | Charter | Status | Cadence | Runs so far |
 |---|---|---|---|---|
-| pm | prompts/pm-agent.md | active | daily: Mon ceremony, other 6 days standup (ADR-033) | 2 scheduled + this dispatch |
-| okr | prompts/okr-agent.md | active | monthly, 1st | 1 success, 3 earlier failures (Incident 1, closed) |
+| pm | prompts/pm-agent.md | active | daily: Mon ceremony, other 6 days standup (docs/standards/pm.md §11) | 2 scheduled + this dispatch |
+| okr | prompts/okr-agent.md | active | monthly, 1st | 1 success, 3 earlier failures (the bad-token incident, closed) |
 | exo | prompts/exo-agent.md | active | weekly, Sunday | 1 (PR #7, still open) |
 | engineer | prompts/engineer-agent.md | active (2026-09-24) | twice daily, 11:26 + 23:26 UTC | 0 — first fire is today |
 | research | prompts/research-agent.md | active (2026-09-24) | Tue + Fri, 13:15 UTC | 0 — first fire Fri 2026-09-25 |
@@ -27,7 +28,7 @@ as still binding.
 | security | prompts/security-agent.md | active (2026-09-24) | Sun, 15:15 UTC | 0 — first fire 2026-09-27 |
 | skill | prompts/skill-agent.md | active (2026-09-24) | Thu, 13:55 UTC | 0 — first fire today |
 | finance | prompts/finance-agent.md | active (2026-09-24) | monthly, 1st, 11:30 UTC | 0 — first fire 2026-10-01 |
-| sales | prompts/sales-agent.md | dormant | none — Ursa is private R&D (ADR-001) | 0 |
+| sales | prompts/sales-agent.md | dormant | none — Ursa is private R&D (the join-Alexandra-Systems decision) | 0 |
 
 ## Initiative coverage
 
@@ -40,21 +41,25 @@ as still binding.
   (#9, #7) — see pending.md for what's blocking each.
 - **research, frontend, security, skill, finance**: no sprint item
   currently names any of them. Each will smoke-test itself on its
-  first scheduled run per ADR-005's own note ("each newly active
-  seat's first run is a smoke run by definition"); flagging here per
-  §1b since an active seat with no initiative is exactly what this
-  section exists to surface.
+  first scheduled run per the seat-activation decision's own note
+  ("each newly active seat's first run is a smoke run by definition");
+  flagging here per §1b since an active seat with no initiative is
+  exactly what this section exists to surface.
 
 ## Board of record
 
-Linear (workspace "Alexandra Personal", team URSA), per ADR-005's
-second decision (2026-09-23, charter §1f) — supersedes GitHub
-Projects as Ursa's board. `LINEAR_API_KEY` is unset in this run's
-environment, so this update did not sync issues; see
-docs/sprints/pending.md. GitHub labels (`seat:<name>`,
-`horizon:now|next|later`, `blocked`, `owner-action`) and one milestone
-per sprint are maintained regardless, per docs/standards/pm.md §2b,
-since neither depends on Linear or `PROJECTS_TOKEN`.
+**Corrected this run — was stale since the 2026-09-24 refresh, and
+described an abandoned setup as current.** GitHub is the board of
+record, not Linear: the sprint file is the backlog,
+docs/sprints/pending.md is the owner's queue,
+docs/sprints/dispatch-queue.md is the dispatch plan, and the labels
+(`seat:<name>`, `horizon:now|next|later`, `blocked`, `owner-action`)
+and one milestone per sprint are the board view, maintained per
+docs/standards/pm.md §2b, regardless of Linear or `PROJECTS_TOKEN`.
+Linear was trialed as the board of record (2026-09-23) and abandoned
+by the owner after one cycle (2026-09-25): the 2026-09-24/25 build
+cycle shipped six PRs from five seats with Linear entirely dead,
+proving the repo's own machinery sufficient (charter §1f).
 
 The chair (interactive session) continues to cover any dormant seat's
 functions; today, only sales is dormant.
@@ -73,7 +78,7 @@ with the evidence that settles each:
 | A sprint merged by the owner | **not met** | `docs/sprints/` holds only README.md. The PM seat has never run. Its first scheduled run is Monday 2026-09-21 at 12:00 UTC, and it has missed no cadence, having been activated on Friday 2026-09-18. |
 | An ExO audit merged by the owner | **not met** | No ExO audit has merged. PR #5, the only merged branch under `exo/`, changed one file, `docs/standards/lessons.md`, and was a company lessons sync rather than a cycle. The first real audit is the PR carrying this tracker. |
 
-**Superseded 2026-09-24:** ADR-005 activated the seats by owner override; kept for the record. Original conclusion: wave 2 does not begin yet. Two conditions are outstanding
+**Superseded 2026-09-24:** the seat-activation decision activated the seats by owner override; kept for the record. Original conclusion: wave 2 does not begin yet. Two conditions are outstanding
 and both have a known path: the PM seat's Monday run, and the owner's
 merge of this PR. If both land, the cycle completes and the engineer
 seat may be activated by an ADR.
