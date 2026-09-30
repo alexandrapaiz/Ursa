@@ -143,3 +143,101 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-09-26 — Briefing receipts: measure whether the HQ changed the work
+- Trigger: building `get_briefing` today (ursa-major/src/hq/, plan §15).
+  It is the first Ursa surface that hands something to a model and
+  records nothing about having done so. The debrief half cannot tell
+  whether a rule was in the agent's context when the work was done, so
+  "the HQ helps" is currently an assertion with no measurement behind it.
+- What: make a briefing a first-class, referenceable object. `ursa brief`
+  gains `--receipt <path>`, which writes the exact `Briefing` JSON it
+  served plus a content-hash id (`brf-<sha256 first 8>`); `ursa run`
+  gains an optional `briefingId` on the record it writes. With both, the
+  join is arithmetic rather than opinion: for each rule served, did the
+  correction loop it warns about recur in that run or not. Rules served
+  and still violated are the ones whose statement is wrong or unreadable;
+  rules served and never violated again are the ones that earned their
+  place. That number is also the enterprise story Ursa Minor needs,
+  because it is direct evidence that consented tuning changes model
+  behavior on real work, which no preference-pair vendor can show.
+- First step: `--receipt` on `src/hq/cli.ts` writing `Briefing` + hash id,
+  and one test asserting the same store and request hash identically
+  (the determinism test already proves the byte-stability this needs).
+- Cost: $0
+- Status: proposed
+
+### 2026-09-26 — Glob-scoped rules, and briefing the files git already knows changed
+- Trigger: today's craft scan of Cursor's rules documentation
+  (cursor.com/docs/rules.md, fetched 2026-09-26). A Cursor project rule
+  carries `globs: src/components/**/*.tsx` in its frontmatter and is
+  auto-attached whenever a matching file is in context. Ursa's briefing
+  matches paths exactly, so a rule learned on `src/app/page.tsx` does not
+  surface for `src/app/about/page.tsx`, and every briefing needs a
+  hand-typed `--files` list.
+- What: two halves of the same gap. (1) Give each `TuningAxiom` an
+  optional `scope` glob the distillation pass proposes and the owner can
+  edit, and score a glob match between `fileExact` and `fileByName` in
+  `src/hq/retrieval.ts` — a rule that claims a directory is stronger
+  evidence than a coincidental file name and weaker than the exact file
+  it was paid for. (2) Give `ursa brief` a `--changed` flag that reads
+  `git diff --name-only` (and `--staged`) for the file list, so an agent
+  about to work in a repository briefs itself with no arguments at all.
+  Cursor's own nesting rule is worth copying with it: more specific
+  scopes take precedence over general ones rather than replacing them.
+- First step: `--changed` on `src/hq/cli.ts`, since it needs no schema
+  change and makes the existing ranker usable without typing paths.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-26 — A user-level HQ under the project one
+- Trigger: the same Cursor scan. Cursor ships three rule scopes (Project,
+  User, Team); Ursa's store is per-project only (`<project>/.ursa/`, see
+  src/store.ts). So a rule learned while building one project cannot
+  reach the next one, which is the exact "re-teaching each one who you
+  are" problem Ursa Major exists to end — it is currently solved across
+  models but not across the user's own projects.
+- What: an optional user-level tuning record at `~/.ursa/tuning.json`,
+  read alongside the project record at brief time and merged with the
+  project record winning any conflict, because a rule the owner proved on
+  this codebase outranks one she proved elsewhere. The merge is read-only
+  and local: nothing is copied between projects on disk, so a briefing
+  stays a read and the user can delete either store independently. The
+  rendered briefing labels each rule with the store it came from, so
+  "this came from your global tuning, not from this project" is visible
+  rather than inferred. Portability of the tuning across projects is the
+  same promise as portability across models; the promise is currently
+  only half kept.
+- First step: `--user-tuning <path>` on `src/hq/cli.ts` (defaulting to
+  `~/.ursa/tuning.json` when it exists), a `source: 'project' | 'user'`
+  field on `RuleUnit`, and a precedence test where both stores carry a
+  rule in the same domain.
+- Cost: $0
+- Status: proposed
+
+- 2026-09-26 (engineer, craft scan): **Cursor Rules** (cursor.com/docs/rules.md,
+  fetched today). Worth stealing: the three-field frontmatter contract
+  (`alwaysApply`, `description`, `globs`) that makes *when a rule enters
+  context* a declared, readable property of the rule itself, plus nested
+  `AGENTS.md` where the deeper directory's instructions combine with, and
+  take precedence over, the parent's. Ursa's briefing decides inclusion
+  in code today and the rule has no say in it; the two ledger entries
+  above are that gap, split into a schema half and a CLI half. What Ursa
+  does better: a Cursor rule is hand-written and carries no evidence, so
+  nobody can tell which rules ever changed an outcome, which ones went
+  stale, or which the author actually enforces. Every rule Ursa serves
+  carries an evidence count, a record id, the step ordinals and usually
+  the owner's verbatim words, and `revoked` rules are tombstoned rather
+  than deleted. Cursor's rules are what the user *says* they want; Ursa's
+  are what survived their editing.
+
+- 2026-09-26 (engineer, dogfood): `npx tsx src/bin/ursa.ts run /tmp/ursa-dogfood --limit 5`
+  against a clone of this repository found **0 work units and wrote 0
+  records**. Second independent confirmation of the 2026-09-20 finding
+  ("merge commits are not edits; the PR reader is load-bearing"), now on
+  a second repository: where every change arrives as an agent's pull
+  request and the owner merges rather than edits, the
+  generated-then-edited commit pair barely occurs. Consequence for the
+  HQ surface shipped today: Ursa cannot brief its own seats until the PR
+  reader lands, because its own store stays empty. That is an argument
+  for the PR reader's promotion, not against the briefing.
