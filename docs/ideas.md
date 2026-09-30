@@ -129,15 +129,6 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - Cost: $0
 - Status: proposed
 
-### 2026-09-23 — Upstream: Linear board-of-record practice to HQ
-- Trigger: ADR-005; the owner runs Linear across the portfolio (teams
-  already exist for epitome, Alexandria, Atelier, Alexandra Systems)
-- What: propose the §1f Linear mechanics as a company standard at HQ,
-  replacing or amending ADR-008's GitHub-Projects default
-- First step: PM carries this to HQ as a ledger note per §1c
-- Cost: $0
-- Status: proposed
-
 ### 2026-09-25 — Craft scan: Vercel preview deployments, where the visual correction actually happens
 - Product scanned: Vercel Preview Deployments and their PR comment
   layer, read against today's `artifact.kind` work.
@@ -242,3 +233,18 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
   aggregation layer, nothing leaves the machine.
 - Cost: $0
 - Status: proposed
+
+### 2026-09-23 — Upstream: Linear board-of-record practice to HQ (WITHDRAWN 2026-09-25, ADR-006)
+- Trigger: ADR-005; the owner runs Linear across the portfolio (teams
+  already exist for epitome, Alexandria, Atelier, Alexandra Systems)
+- What: propose the §1f Linear mechanics as a company standard at HQ,
+  replacing or amending ADR-008's GitHub-Projects default
+- First step: PM carries this to HQ as a ledger note per §1c
+- Cost: $0
+- Status: rejected — owner abandoned Linear after one cycle (ADR-006); the repo is the board
+
+- 2026-09-25 (chair): alexandria MCP queried for Minor; four claims with consequences recorded in docs/research/minor-training-fit.md (trace-not-label validated by Harness-Zero; adapters-not-sequential for Major imports). Connector is chair-only.
+
+- 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+- 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
