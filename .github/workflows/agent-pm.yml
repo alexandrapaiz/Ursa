@@ -95,6 +95,7 @@ jobs:
             "${{ vars.PM_DISPATCH_ENABLED }}": fire dispatches only when it is
             exactly true, under docs/standards/pm.md §11.4.
             You also own merges and failed runs: merge Tier B pull requests under standards/pm.md §10, and triage this company's failed runs under §11.7, every run.
+            The board is where you plan (standards/pm.md §14): read it first, keep every item you touch in a column, comment PR links; when the owner is on, you are on: run the standup from the board and its Messages and answer what is addressed to pm.
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
