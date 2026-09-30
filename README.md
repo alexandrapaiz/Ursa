@@ -54,6 +54,25 @@ span of the final text classified by what happened to it.
 | `generated_deleted` | produced and thrown away |
 | `no_generation_provenance` | in the finished work but traceable to no generation. The model was never in the running. |
 
+A class is a verdict taken at one instant: the first commit in which
+the person edited the agent's output. When the project's git history
+continues past that commit, every surviving span also carries **how
+long it lasted**, because text kept at the time and removed by the work
+three commits later is not the same as text that was kept.
+
+| Fate | Meaning |
+|---|---|
+| `durable` | still there at the newest commit |
+| `eroded` | partly removed by later work |
+| `decayed` | gone. The span's own class is a false positive. |
+| `untested` | nothing came after it, so nothing is claimed |
+
+The record's `decayRate` is the share of its own "the user kept it"
+verdict that later work overturned, scored against the person's own
+prose in the same files so a volatile repo is not read as a bad model.
+How it is measured is in
+[`docs/design/span-lifespan.md`](docs/design/span-lifespan.md).
+
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
 generated commit followed by the person's edit of it. A full record
@@ -158,6 +177,7 @@ HTML viewer.
 | `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
 | `src/resolve.ts` | joins final text to generations and classifies every span |
+| `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
