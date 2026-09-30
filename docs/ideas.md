@@ -143,3 +143,117 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-09-30 — URGENT: every pair collapses to one final commit when the agent authors everything
+- Trigger: running `ursa run` against a clone of Ursa's own repo while
+  building the time dimension (docs/design/span-lifespan.md §8). All
+  five records came back with `closingSha == tipSha`, so durability had
+  nothing to walk. The cause is not durability. An exhaustive scan of
+  all 93 commits on `main`: 87 classify agent-side under
+  `pairfinder.ts`'s `DEFAULT_AUTHOR`
+  (`/claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i`), 6
+  human-side, and of those six only 2 are non-merge commits. This
+  repo's git identity is literally `claude[bot]`.
+- What: `findCommitPairs` pairs an agent commit with the *next*
+  non-agent, non-merge commit touching an overlapping path. In a repo
+  where agents author nearly everything, that "next" commit can be
+  dozens of commits and days later, and the pair then attributes the
+  entire intervening history to one generation. The run on Ursa's own
+  repo reports `179,360 chars survived your editing verbatim` across
+  five records, nearly all of `docs/standards/lessons.md`, credited to
+  single agent commits that did not write most of it. That is not a
+  cosmetic error: survival is the product's headline number and the
+  thing Ursa Minor sells. Same root cause as the accepted 2026-09-20
+  finding "merge commits are not edits" — that fix excluded merges as
+  pairing targets, which was necessary and, on an all-agent repo, left
+  the far-reach problem untouched. Candidate fixes, cheapest first: cap
+  the search window (pair only within N commits or M hours); require
+  the final commit to be a *descendant* whose diff actually overlaps the
+  agent commit's own hunks rather than merely its paths; or treat a
+  repo whose human non-merge commit count is below a floor as
+  unpairable and say so instead of emitting records.
+- First step: add a `--max-pair-distance` option to `findCommitPairs`
+  defaulting to something small, with a test asserting that the Ursa
+  repo fixture yields zero pairs rather than five inflated ones, and
+  make `ursa run` print why it found nothing when a repo is unpairable.
+- Cost: $0
+- Status: urgent
+
+### 2026-09-30 — A decayed span is evidence against tacit acceptance
+- Trigger: building `lifespan.ts` today. `signals.ts` sets
+  `acceptanceBasis` from retention and `CorrectionLoop.resolution`
+  carries `'accepted_tacitly'`, defined in `types.ts` as
+  "shipped/retained without complaint". The new `SpanLifespan.fate`
+  is exactly the counter-evidence: a span the owner retained at the
+  closing commit and the work removed three commits later was not
+  tacitly accepted, it was tolerated and then rejected.
+- What: let `deriveSignals` read `record.durability`. A loop whose
+  resolving spans all read `decayed` should not close as
+  `accepted_tacitly`; it should close as `abandoned`, or stay `open`
+  with the decay as its evidence. Equally, `oneShotCorrections` drawn
+  from a `survived_mutated` span that later decayed are corrections the
+  owner made and then discarded, which is weaker evidence than a
+  correction that lasted. This is the cheapest available upgrade to the
+  honesty of the acceptance label, which the vision says is never
+  inferred from retention.
+- First step: add `durability` to `deriveSignals`'s inputs and downgrade
+  any `accepted_tacitly` resolution whose spans are all `decayed`, with
+  one test built on the four-commit fixture already in
+  `lifespan.test.ts`.
+- Cost: $0
+- Status: proposed
+- Held: deliberately out of today's PR. `signals.ts` is rewritten by
+  open PR #13 (sprint item 1, correction loops), and two writers on
+  that file would hand the owner a conflict for no gain.
+
+### 2026-09-30 — Report decay with error bars and a same-era baseline, not as a point estimate
+- Trigger: today's competitive scan (note below) found `shelf-life`,
+  which answers nearly the same question with real survival statistics,
+  and the contrast is unflattering in one specific place. Today's
+  `durability.decayRate` on the demo run is `0.3` computed over two
+  spans. Two spans is noise, and `0.3` printed without an interval
+  invites a lab to treat it as a measurement.
+- What: borrow the statistical shape without borrowing the unit.
+  `shelf-life` reports Kaplan–Meier survival with 95% bootstrap
+  confidence intervals resampled at the commit level (because lines
+  within a commit are not independent), and compares only against code
+  written since the first agent commit so the eras match. Ursa should
+  report `decayRate` as an interval, bootstrap-resampled at the
+  *episode* level for the same independence reason, and should refuse
+  to print a rate at all below a minimum tested-span count. Ursa
+  already has the same-era control that `shelf-life` has to construct
+  by hand: `baselineDecayRate` over `no_generation_provenance` spans is
+  the owner's own prose in the same files in the same episode.
+- First step: aggregate `durability` across every record in
+  `.ursa/records/` into one `ursa stats --durability` view that prints
+  decay with a bootstrap interval and suppresses the number below a
+  floor, rather than computing intervals per record where n is tiny.
+- Cost: $0
+- Status: proposed
+
+- 2026-09-30 (engineer, competitive scan): **`shelf-life`**
+  (github.com/sandeepsirodia/shelf-life) — "how long does your agent's
+  code survive?", survival analysis of agent versus human lines over a
+  repo's own git history, `uvx shelf-life [repo]`. Attribution is by
+  `Co-Authored-By:` commit trailer, the same signal `pairfinder.ts`
+  uses. **Worth stealing:** its statistical honesty. It reports
+  Kaplan–Meier survival with 95% bootstrap confidence intervals
+  resampled at the commit level, restricts comparison to the same era
+  (only code written since the first agent commit), excludes generated
+  files such as lockfiles, and states four limitations in its own
+  README including "survival ≠ code quality". Ursa printed a bare
+  `30%` today; that is the gap, and it is the ledger entry above.
+  **What Ursa does better:** the unit. `shelf-life` measures *lines*
+  and attributes them to a *commit*, so it can tell you agent lines
+  died faster and can never tell you which generation produced the line
+  or what the owner said before it was written. Ursa's unit is a span
+  joined to a `SourcePointer` — conversation, model, turn, char offsets
+  — sitting inside a record that also carries the owner's verbatim
+  prompts and the diff of her edit. `shelf-life` answers "did it last";
+  Ursa answers "did it last, which generation produced it, what did she
+  say to get it, and what did she change". Only the second is a reward
+  signal. Also noted in the same scan and relevant to Ursa Minor's
+  pitch: Causari's Survival Report #2 (2026-09-23) puts AI-line
+  survival at HEAD at 50.0% over 14.0M of 28.0M lines across 55 public
+  repos, which is a public benchmark Ursa's own numbers can be read
+  against.
