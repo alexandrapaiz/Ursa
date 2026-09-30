@@ -1,6 +1,7 @@
 # Org Chart — Ursa
 
-**Refreshed 2026-09-27** by the ExO Sunday run, against `gh run list
+**Refreshed 2026-09-30** by the ExO window run (previous refresh
+2026-09-27, in the same PR, which had not merged), against `gh run list
 --workflow=agent-<seat>.yml --json event,createdAt,conclusion` for
 every seat, `gh pr list --state all`, the charter headers in
 `prompts/`, and the cron lines in `.github/workflows/`.
@@ -30,7 +31,7 @@ window is the thing to escalate.
 | market | prompts/market-agent.md | active | Wed 13:35 | 1 dispatch, success; 0 scheduled | none yet, first is 09-30 |
 | okr | prompts/okr-agent.md | active | monthly, 1st, 13:00 | 1 dispatch success, 3 dispatch failures (Incident 1, closed) | none yet, first is 10-01 |
 | finance | prompts/finance-agent.md | active | monthly, 1st, 11:30 | 0 | none yet, first is 10-01 |
-| sales | prompts/sales-agent.md | dormant | none, Ursa is private R&D (ADR-001) | 0 | not scheduled |
+| sales | prompts/sales-agent.md | dormant on paper, ran on 2026-09-30 | none, no cron | 1 (PR #49, owner-dispatched window) | see the note below |
 
 Ten seats have now run at least once and every run in the repository's
 history has concluded `success` except the four okr-agent failures of
@@ -89,7 +90,28 @@ none; the security seat queued its removal as PWC-6. No seat should
 reconcile an external board, and no seat should wait on `LINEAR_API_KEY`.
 
 The chair (interactive session) continues to cover any dormant seat's
-functions; today, only sales is dormant.
+functions; today, only sales is dormant on paper.
+
+## The sales seat ran while marked dormant (flagged 2026-09-30, ExO)
+
+Not a violation, and not resolvable by this seat. On 2026-09-30 the
+owner's window dispatched every seat including sales, which opened PR
+#49. Charters permit owner-dispatched runs before activation, so the run
+itself is legitimate, and activation stays owner-only
+(docs/standards/pm.md §11.4, "what stays the owner's, always").
+
+What is now inconsistent is the record rather than the behaviour.
+`prompts/sales-agent.md` still carries a DORMANT header and is still
+written for alexandria's paid newsletter, which PR #49 says in its own
+description. ADR-005's stated reasoning was that "a sales seat has
+nothing to sell," and an owner dispatch of that seat is evidence against
+that reasoning rather than an exception to it.
+
+Two things the owner may want, neither of them this seat's to decide:
+an ADR recording whether sales is active and what it sells, and a
+cadence or an explicit "dispatch-only" in the table above. Until one of
+those exists, this row will keep reading as false to every memoryless
+run that reads it, which is the same defect class as Ursa incident 5.
 
 ## Historical: governance-cycle tracker (added 2026-09-20 by the ExO Sunday run)
 
