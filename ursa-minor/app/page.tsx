@@ -65,7 +65,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-2xl px-8">
+      <main className="w-full px-[clamp(2rem,8vw,6rem)] lg:mx-auto lg:max-w-2xl lg:px-8">
         <section className="border-t border-[var(--line)] py-22">
           <div className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> North stars
