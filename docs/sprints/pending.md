@@ -1,117 +1,112 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Reconciled 2026-09-26, 14:54Z scheduled standup, against `gh pr list
---state all`, `gh run list --limit 100`, `gh run list --workflow=...`,
-and a fresh `gh api actions/permissions` probe.
+Reconciled 2026-09-30, ~03:50 UTC sync window, against this morning's
+standup (#45, 02:47Z) plus the delta the chair's all-hands dispatch
+produced after it. Four PM PRs are open at once right now (#20, #34,
+#37, #45) on top of this one (#53) — see "The merge queue" below before
+reading anything else here; it is the root cause behind most of this
+file.
 
-**Read this alongside PR #20** (`ursa-pm/2026-09-26-window`, opened
-2026-09-26 01:15Z by the owner's synchronous session, still open). It
-touches this same file, `docs/sprints/dispatch-queue.md`, and
-`docs/decisions.md` (an ADR-007 proposal, Tier B). This standup's copy
-of both sprint files is written to already reflect what #20 found, plus
-everything that happened after its window closed at 01:26Z. **Expected
-merge order:** #20 first — its substance is the Tier B ADR-007
-proposal in `docs/decisions.md`, which only the owner can merge anyway,
-and it is the earlier, fuller record of last night's window. This PR
-(#23) touches only `docs/sprints/`, so it is Tier A and would normally
-self-merge, but doing that before #20 lands would hand the owner a
-conflict on these same two files instead of a clean merge, so it is
-left open for her rather than self-merged.
+## The merge queue, not seat idleness, is the blocker
 
-## Awaiting the owner's merge
+Carried from #45, restated because it is still the single most
+important fact in this file: 27+ PRs are open, and no non-PM,
+non-lessons PR has merged since #9 on 2026-09-24. Four of the open PRs
+are the PM's own unmerged ceremony/standup/window output (#20 from
+2026-09-26, #34 the Monday 2026-09-28 ceremony, #37 the 2026-09-29
+standup, #45 this morning's standup), which is why this file is
+reconciled against #45's body rather than against `main`: `main`'s copy
+of this file is still whatever PR #23 (merged 2026-09-28) left it,
+several days stale. **Every PM PR from #20 onward, including this one,
+touches this file and `docs/sprints/dispatch-queue.md`; merge them in
+date order (#20, #34, #37, #45, #53) or later ones will conflict.**
 
-- **Every active seat now has an open, unmerged, green-CI PR** — all
-  four sprint backlog items are attempted, plus two more:
-  - #13 `engineer/2026-09-24-trace-stage-loops` (sprint item 1, opened
-    2026-09-24 15:53Z)
-  - #16 `engineer/2026-09-25-artifact-kind` (sprint item 2, opened
-    2026-09-25 01:43Z)
-  - #18 `engineer/2026-09-25-fixture-browsable-record` (sprint item 3,
-    opened 2026-09-25 15:52Z)
-  - #22 `engineer/2026-09-26-get-briefing` (**new since #20's window**,
-    opened 2026-09-26 01:48Z, engineer's own scheduled cron, not a
-    sprint item — builds against the accepted "Agentic-forward" ledger
-    entry, 2026-09-19)
-  - #14 `skill/2026-09-24-outcome-record-provenance` (skill's first run)
-  - #15 `fe/2026-09-24-visual-review` (frontend's first run)
-  - #19 `research/2026-09-25` (research's first run)
-  - #21 `market/2026-09-26` (sprint item 4, market's first run ever —
-    fired by #20's window dispatch after this run's own scheduled
-    credential wall blocked it twice, see below)
-  - #20 `ursa-pm/2026-09-26-window` (Tier B, ADR-007 proposal)
+## Awaiting the owner's merge (top of the queue)
 
-  Eight PRs open, zero reviewed, zero comments on any (`gh pr view
-  --json reviews,comments` checked on each). All show `scan` (redaction
-  gate) green. Oldest (#13) is just over two days old, still short of
-  the seven-day flag. Merge order across the four engineer PRs
-  (#13/#16/#18/#22) matters most since all four touch
-  `ursa-major/src`; #20 above stands apart as Tier B.
+1. **#34 `pm/sprint-2026-09-28`** — last Monday's ceremony PR. Until it
+   merges, `main`'s current sprint file is still `sprint-2026-09-21`,
+   over a week stale, and this file and the dispatch queue stay stale
+   on `main` too. This is the single highest-leverage merge available:
+   it unblocks the sprint file and lets the next ceremony (Monday
+   2026-10-05) reconcile cleanly.
+2. **#44 `chair/pm-merges`** — vendors HQ decision 041 (PMs get Tier B
+   merge authority plus failed-run triage). Until it merges, this
+   seat's boundaries stay as chartered today: no self-merge, no Tier B
+   authority. This run does not attempt either.
+3. **~20 seat PRs**, all green on `scan` (redaction gate), zero
+   reviewed: engineer has the deepest queue (#13, #16, #18, #22, #24,
+   #25, #27, #32, #33, #36, #38, #43 — twelve open PRs, several
+   superseding earlier ones in the same lane per #43's own title,
+   "land the stack"), plus #14/#50 (skill), #15/#35/#51 (frontend),
+   #19/#39/#48 (research), #21/#52 (market), #28/#47 (security),
+   #29 (PM message), #30/#46 (exo), #49 (sales, see below). Oldest is
+   #13 at six days, past the seven-day flag in all but a few hours.
 
-## Waiting on an owner-only action
+## This window's delta (since #45, 02:47Z)
 
-- 2026-09-24, reconfirmed 2026-09-25 and 2026-09-26 — `LINEAR_API_KEY`
-  is moot: ADR-006 (2026-09-25) abandoned Linear as the board of record
-  entirely, so this line is closed rather than carried further.
-- `PROJECTS_TOKEN` still unset — moot, same ADR-006: the repo is the
-  board (ADR-006, §1f rewritten).
-- **Reconfirmed again this run — the scheduled standup's own token
-  still cannot reach the Actions API.** Fresh probe this run: `gh api
-  /repos/alexandrapaiz/Ursa/actions/permissions` → 403 "Resource not
-  accessible by integration," identical to 2026-09-24 and 2026-09-25.
-  This is now confirmed on three separate days from this seat's
-  scheduled-run credential. New data point from #20's window: an
-  *interactive session's* token dispatched `agent-market.yml`
-  successfully the same night, so the wall is specific to the
-  automated standup's own installation grant, not to dispatch as a
-  mechanism. **Action for the owner, unchanged:** grant `actions:
-  write` to the GitHub App installation that runs the scheduled
-  `agent-pm.yml`, or confirm that installation is deliberately scoped
-  narrower than an interactive session's token and the standup should
-  stop attempting dispatches itself and only ever queue them.
-- Carried from 2026-09-24, not re-verified this run (exo's lane) —
-  `docs/agents/incidents.md` Incident 4's Status line still reads
-  "Open until both are edited." Flagging again so it isn't lost.
-- Three `proposed` ledger entries still have no owner verdict: repo
-  split (2026-09-18, now 8 days, past the one-week mark), tuning packs
-  (2026-09-19, now 7 days), the merge-commits/PR-reader finding
-  (2026-09-20, now 6 days). None has crossed two weeks yet.
-- The `docs/decisions.md` ADR numbering collision (two entries each
-  numbered ADR-005 and ADR-006, for four different rulings across
-  2026-09-23 through 2026-09-25) is still unfixed, carried from
-  2026-09-25. Still outside this seat's writable surface.
+The chair's all-hands dispatch (L-A13) fired every seat for this
+synchronous window between 03:48 and 03:50Z, opening eight new draft
+PRs in about ninety seconds: #46 (exo), #47 (security, first full
+audit), #48 (research), #49 (sales), #50 (skill), #51 (frontend), #52
+(market), and this one (#53, PM). Two things worth flagging:
+
+- **#49 is sales' first Ursa run, and sales is chartered dormant**
+  (ADR-001, ADR-005: "Ursa is private R&D and never for sale," and this
+  charter names sales as a seat the PM must never dispatch). Its own PR
+  body states the run "was dispatched by the owner (window, 2026-09-30)"
+  — activating a dormant seat is explicitly an owner-only action
+  (pm.md §11.4), so this is the owner exercising that reserved power
+  directly through the window, not a process gap. Noted here so it is
+  visible, not because it needs fixing.
+- **Engineer and okr did not open new window PRs.** Engineer's last PR
+  (#43) was already open when the window opened, so its own hard stop
+  correctly held it back rather than opening a tenth-plus duplicate.
+  `ursa-okr/2026-09-30-window` exists as a pushed branch with no PR yet
+  as of this run; worth a look in a later run if it still has no PR by
+  the next standup.
 
 ## This run's dispatch reasoning — nothing queued
 
-Every active seat's most recent PR is currently open (see above), which
-means §11.4's hard stop — never dispatch a seat whose last PR is still
-open, unless told in those words to build on that branch — blocks every
-seat at once regardless of what else fires. Combined with the standing
-credential wall, this run had two independent reasons to queue nothing,
-so it queued nothing. Full reasoning in `docs/sprints/dispatch-queue.md`.
+Every seat now has an open PR (the window's all-hands dispatch just
+guaranteed this for six more seats), so §11.4's hard stop — never
+dispatch a seat whose last PR is still open, unless told in those exact
+words to build on that branch — blocks every candidate at once. No
+follow-up message naming a concrete Ursa action has arrived in this
+session yet; per §11.4 ("never invent a judgment"), nothing is
+dispatched on inference alone. Full reasoning in
+`docs/sprints/dispatch-queue.md`. This session stays held for the rest
+of the window; a follow-up message that names an action gets acted on
+against this same state rather than a fresh read.
 
-The sprint milestone (#1) is now due tomorrow (`due_on:
-2026-09-27T00:00:00Z`, set by #20's window run via the same tracking-
-surface `gh api PATCH` this file already recorded) with all four
-backlog items already carrying open PRs. The milestone-due trigger is
-observed but not actionable: the gap left is a merge, an owner-only
-action, not a dispatch.
+## Waiting on an owner-only action
 
-## Newly active, first crons now fired
+- **Four+ PM PRs need a merge pass**, in date order: #20, #34, #37,
+  #45, then #53. See "Awaiting the owner's merge" above.
+- The scheduled standup's own token still cannot reach the Actions API
+  (`gh api actions/permissions` → 403, confirmed on multiple separate
+  days from that credential). This session's own interactive token
+  reached it fine for the read-only checks in this run. Action for the
+  owner, unchanged: grant `actions: write` to the GitHub App
+  installation behind the scheduled `agent-pm.yml`, or confirm it is
+  deliberately narrower and the scheduled standup should only ever
+  queue, never attempt, a dispatch.
+- Three `proposed` ledger entries still have no owner verdict: repo
+  split (2026-09-18, 12 days), tuning packs (2026-09-19, 11 days), the
+  merge-commits/PR-reader finding (2026-09-20, 10 days). None has
+  crossed the two-week flag yet.
+- The `docs/decisions.md` ADR numbering collision (ADR-005 and ADR-006
+  each used twice, for four different rulings across 2026-09-23 through
+  2026-09-25) is still unfixed, carried since 2026-09-25. Outside this
+  seat's writable surface.
+- `docs/agents/incidents.md` Incident 4's Status line still reads "Open
+  until both are edited" (exo's lane, carried since 2026-09-24, not
+  re-verified this run).
 
-- research, skill, frontend, and now market have all had their delayed
-  first occurrence fire and ship a PR (#19, #14, #15, #21
-  respectively). The "cron fires late" pattern flagged 2026-09-25
-  self-resolved across all four seats without needing an exo escalation
-  — no longer worth tracking here.
-- security (Sun 15:15 UTC, next occurrence tomorrow 2026-09-27),
-  finance (1st of month, next 2026-10-01) still have their first
-  occurrence ahead of them. Nothing owed yet; `gh run list` confirms
-  zero runs ever for either workflow.
+## Workflow-file failures (HQ/chair lane, not re-litigated)
 
-## Noticed in passing, not this seat's lane
-
-- `docs/decisions.md` gained four commits since the last standup
-  (Overlay S0 build, Slack run-report prose, pm.md §11.4 + L-P7
-  vendoring, ADR-006 Linear/Infisical) — all already landed on `main`
-  directly, not sitting as rulings awaiting a seat. No gap found.
+#45 classified this morning's four 0-jobs-in-0-seconds failures
+(pm-agent, okr-agent, market-agent, finance-agent, all off the same
+`chair/langfuse-traces` push at 02:16Z) as a workflow-file
+configuration issue, HQ/chair's lane per the 2026-09-30 board note.
+Not rerun here either; `gh run list` shows no new failures since.

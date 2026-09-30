@@ -1,8 +1,48 @@
 # Dispatch queue — 2026-09-30 (sync window, ~03:50 UTC)
 
 Window opened by the chair (docs/standards/pm.md §11.4, L-P7, L-A13).
-Full reasoning below; superseding the 2026-09-26 record kept for
-reference underneath it.
+Read alongside this morning's standup (#45, 02:47Z), which already
+found nothing to dispatch. This window's own all-hands pass (03:48-
+03:50Z) then opened new draft PRs for exo (#46), security (#47),
+research (#48), sales (#49, owner-directed — dormant seats only
+activate on her word), skill (#50), frontend (#51), and market (#52),
+which closes off every remaining candidate on its own.
+
+## Proposed
+
+None.
+
+§11.4's hard stop — never dispatch a seat whose last PR is still open,
+unless told in those exact words to build on that branch — now covers
+every active seat at once:
+
+| Seat | Last/open PR |
+|---|---|
+| engineer | #43 (already open before the window; correctly did not open a duplicate) |
+| exo | #46 |
+| security | #47 |
+| research | #48 |
+| sales | #49 (dormant; this run itself is the owner's exception) |
+| skill | #50 |
+| frontend | #51 |
+| market | #52 |
+| pm | #53 (this PR) |
+
+okr and finance have no open PR, but neither has an observed trigger
+under §11.3 tonight: no ADR since the last run names either, and
+finance's first scheduled occurrence is still 2026-10-01. `ursa-okr/
+2026-09-30-window` exists as a pushed branch with no PR yet — not a
+dispatch candidate, just a note to check next run.
+
+No follow-up message naming a concrete owner-directed action has
+arrived in this session. Per §11.4 ("never invent a judgment"), this
+run dispatches nothing on inference. If a message arrives later in this
+same held session naming a seat and an action, it gets fired then and
+logged here in an update to this same PR, not queued for tomorrow.
+
+## Dispatched by the PM
+
+None this run.
 
 ---
 
