@@ -119,3 +119,29 @@ chair: project "Q4 2026 — prove the record, publish the method",
 issues URS-1 through URS-7 from sprint-2026-09-21 and pending.md.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## ADR-006 — Linear abandoned; secrets move to Infisical (2026-09-25)
+
+**Decision.** Two owner rulings. (1) Linear is abandoned as the board
+of record after a one-day trial (ADR-005 partially reverted): the
+2026-09-24/25 cycle shipped six PRs from five seats with Linear
+non-functional throughout, so the repo's own machinery (sprint file,
+pending.md, dispatch-queue.md, labels, milestones) is the board. The
+PM charter §1f is rewritten accordingly, LINEAR_API_KEY is removed
+from workflows and deleted from the repo, the Linear project's open
+issues are canceled with a pointer here, and the HQ upstream proposal
+is withdrawn. (2) Secret management moves to Infisical as the source
+of truth: secrets live in an Infisical project and sync to GitHub
+Actions through Infisical's native GitHub integration, so workflows
+keep reading `secrets.*` unchanged. The owner holds the Infisical
+account; seats never see it.
+
+**Reasoning.** Owner verdict on Linear: "nully useful" — the board
+duplicated the repo and its one integration point (the API key) failed
+twice at the paste step, a cost with no observed benefit; the
+frameworks law (a framework must never consume more than the work it
+organizes) applies. Infisical centralizes the growing secret set
+(CLAUDE_CODE_OAUTH_TOKEN, OPENROUTE_*, SLACK_WEBHOOK_URL, EXO_TOKEN)
+with rotation and audit in one place.
+
+**Owner:** Alexandra. **Status:** accepted (directed in session).
