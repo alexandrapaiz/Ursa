@@ -211,7 +211,7 @@ if [ -n "$JSON_OUT" ]; then
     printf '{\n'
     printf '  "generatedAt": "%s",\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     printf '  "baseSha": "%s",\n' "$MAIN_SHA"
-    printf '  "orderRationale": "%s",\n' "${ORDER_RATIONALE:-PR number ascending}"
+    printf '  "orderRationale": "%s",\n' "${ORDER_RATIONALE:-as given on the command line}"
     printf '  "branches": [\n'
     first=1
     for row in "${PAIRS[@]}"; do
