@@ -26,6 +26,19 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       BOARD_API_URL: ${{ secrets.BOARD_API_URL }}
       BOARD_RUNTIME_TOKEN: ${{ secrets.BOARD_RUNTIME_TOKEN }}
+      # Traces: this run lands in Langfuse as one trace, a span per tool call
+      # (runtime/langfuse/ in the HQ repo). The auth header is set by the step below.
+      CLAUDE_CODE_ENABLE_TELEMETRY: "1"
+      CLAUDE_CODE_ENHANCED_TELEMETRY_BETA: "1"
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.LANGFUSE_HOST }}/api/public/otel
+      OTEL_LOG_USER_PROMPTS: "1"
+      OTEL_LOG_ASSISTANT_RESPONSES: "1"
+      OTEL_LOG_TOOL_DETAILS: "1"
+      OTEL_RESOURCE_ATTRIBUTES: service.name=Ursa-pm,langfuse.environment=Ursa,langfuse.user.id=pm,langfuse.session.id=${{ github.run_id }}
       PM_DISPATCH_ENABLED: ${{ vars.PM_DISPATCH_ENABLED }}
       RUN_MODE: ${{ github.event.schedule == '0 12 * * 1' && 'ceremony' || (github.event_name == 'schedule' && 'standup' || 'dispatch') }}
       PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
@@ -37,6 +50,19 @@ jobs:
       # concurrency, and three runs (2026-09-21 x2, 2026-09-24) died at turn one
       # while another Kimi run was in progress. If this step fails, the Claude
       # step below runs instead on the subscription (HQ Incident 4).
+      - name: Trace this run to Langfuse
+        env:
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+        run: |
+          if [ -z "$LANGFUSE_PUBLIC_KEY" ] || [ -z "$LANGFUSE_SECRET_KEY" ]; then
+            echo "No Langfuse keys on this repo; this run is not traced."
+            echo "OTEL_TRACES_EXPORTER=none" >> "$GITHUB_ENV"; exit 0
+          fi
+          auth=$(printf '%s:%s' "$LANGFUSE_PUBLIC_KEY" "$LANGFUSE_SECRET_KEY" | base64 -w0)
+          echo "::add-mask::$auth"
+          echo "OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic $auth" >> "$GITHUB_ENV"
+          echo "Traced: seat pm of Ursa, run ${{ github.run_id }}."
       - name: Seat run (open-routed)
         id: openrouted
         if: env.OPENROUTE != ''
