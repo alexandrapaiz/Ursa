@@ -47,7 +47,12 @@ jobs:
       # concurrency, and three runs (2026-09-21 x2, 2026-09-24) died at turn one
       # while another Kimi run was in progress. If this step fails, the Claude
       # step below runs instead on the subscription (HQ Incident 4).
-<<<<<<< HEAD
+      # The route is switched by a repository variable, never by the presence of
+      # its key (lessons register L-E8): turning a paid route off should cost a
+      # flag, not a deleted secret. Off by default, because every Kimi attempt
+      # so far has died at turn one and each one burned ~3 minutes first.
+      # Flip it on:  gh variable set OPEN_ROUTING --body on
+      # Flip it off: gh variable set OPEN_ROUTING --body off   (or delete it)
       - name: Trace this run to Langfuse
         env:
           LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
@@ -61,14 +66,6 @@ jobs:
           echo "::add-mask::$auth"
           echo "OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic $auth" >> "$GITHUB_ENV"
           echo "Traced: seat finance of Ursa, run ${{ github.run_id }}."
-=======
-      # The route is switched by a repository variable, never by the presence of
-      # its key (lessons register L-E8): turning a paid route off should cost a
-      # flag, not a deleted secret. Off by default, because every Kimi attempt
-      # so far has died at turn one and each one burned ~3 minutes first.
-      # Flip it on:  gh variable set OPEN_ROUTING --body on
-      # Flip it off: gh variable set OPEN_ROUTING --body off   (or delete it)
->>>>>>> origin/exo/2026-09-30-workflow-l-e8
       - name: Seat run (open-routed)
         id: openrouted
         if: vars.OPEN_ROUTING == 'on' && env.OPENROUTE != ''
