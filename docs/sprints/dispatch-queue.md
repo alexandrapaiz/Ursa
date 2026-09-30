@@ -1,3 +1,11 @@
+# Dispatch queue — 2026-09-30 (sync window, ~03:50 UTC)
+
+Window opened by the chair (docs/standards/pm.md §11.4, L-P7, L-A13).
+Full reasoning below; superseding the 2026-09-26 record kept for
+reference underneath it.
+
+---
+
 # Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)
 
 `PM_DISPATCH_ENABLED` is exactly `true`. Read alongside PR #20
