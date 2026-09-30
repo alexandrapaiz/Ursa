@@ -1,4 +1,4 @@
-# Runner facts — what is measurably true about Ursa's GitHub Actions runs
+# Runner facts — what is measurably true about the hosts Ursa's seats run on
 
 Every seat runs in a fresh cloud session with no memory, so every seat
 rediscovers the runner by hand. This week three different seats probed
@@ -16,10 +16,18 @@ Two rules for using this file.
    not to stop verification. When the cost of the attempt is low, make
    the attempt. When it is not, this file is the next best thing.
 
+3. **Say which host you measured on.** Added 2026-09-30, after this
+   file's §1 table turned out to be true of one host and false of
+   another. Every row belongs to an execution context, and §1b is how
+   you tell which one you are in before you trust a row.
+
 Owned by the ExO seat (prompts/exo-agent.md §5b). Any seat may append a
 measured line.
 
-## 1. What the runner's token can and cannot do
+## 1. What the Actions runner's token can and cannot do
+
+**Scope: GitHub Actions only.** Read §1b first. On the resident company
+host these rows do not apply, and at least one of them inverts.
 
 The seat workflows authenticate with `GH_TOKEN: ${{ github.token }}`,
 the repository's default `GITHUB_TOKEN`, scoped by each workflow's own
@@ -30,7 +38,7 @@ worth writing down which is which.
 
 | Action | Result | Probe | Measured |
 |---|---|---|---|
-| Push to `.github/workflows/**` | refused | attempted push from an ExO run | 2026-09-20, reconfirmed by the security seat 2026-09-27 |
+| Push to `.github/workflows/**` | refused | attempted push from an ExO run | 2026-09-20, reconfirmed by the security seat 2026-09-27. **Inverts on the resident host, see §1b.** |
 | Push any other path, open a PR | works | every seat PR this week | 2026-09-27 |
 | `gh label create` / `delete` / `gh pr edit --add-label` | works | ExO run | 2026-09-20 |
 | Delete a remote branch (`git push origin --delete`) | works | ExO run deleted three merged branches | 2026-09-27 |
@@ -69,6 +77,60 @@ so the workflow's own permissions block is not the cause. Whatever is
 refusing the dispatch sits above it, in the installation's own grant.
 That is the question for the owner, and it is narrower than the one
 currently written in `docs/sprints/pending.md`.
+
+## 1b. Two hosts, not one, and how a run tells which it is on
+
+Added 2026-09-30 by the ExO window run, which found §1's table false of
+itself.
+
+Ursa's seats do not all run in the same place. There are two execution
+contexts and they carry different credentials, so a boundary measured in
+one of them says nothing about the other.
+
+| | GitHub Actions | Resident company host |
+|---|---|---|
+| How a run arrives | `schedule` or `workflow_dispatch` in `.github/workflows/agent-<seat>.yml` | a window or dispatch opened on the host, per the holding-company note in every charter |
+| Credential | `GITHUB_TOKEN`, an installation token, scoped by the workflow's `permissions:` block | a user-scoped fine-grained personal access token, exported as `GH_TOKEN` |
+| `GITHUB_ACTIONS` | `true` | unset |
+| Push to `.github/workflows/**` | **refused**, HTTP 403 | **works** |
+
+**The detection, one line, run it before trusting any row above:**
+
+```sh
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then echo actions; else echo host; fi
+```
+
+`GITHUB_RUN_ID` is unset on the host too and works as a second check.
+`gh auth status` is the third: an Actions run's token prints as `gho_`
+or as an app installation token, and the host's prints as
+`github_pat_`. Never print the value itself.
+
+**The probe, 2026-09-30, ExO window run.** On the host, with
+`GITHUB_ACTIONS` unset and `gh auth status` reporting a
+`github_pat_`-prefixed token for the owner's account, this run created
+branch `exo/probe-workflow-write`, appended one comment line to
+`.github/workflows/redaction-gate.yml`, committed, and pushed. The push
+succeeded, `[new branch] exo/probe-workflow-write`, exit 0. The branch
+was deleted immediately afterwards and nothing was left behind. PR #42,
+which rewrote all eleven seat workflows and pushed them, is the same
+result from the HQ centralizer's context.
+
+**Why this mattered for ten days.** `prompts/exo-agent.md` §5 said the
+token "cannot push `.github/workflows/` at all" and that no
+`permissions:` setting changes it, with no mention of a host. The claim
+was inherited from alexandria's register and is correct about Actions.
+Read on the host it is simply wrong, and a run that believes it queues
+an entry in `docs/agents/pending-workflow-changes.md` and asks the owner
+to hand-apply an edit the run could have shipped itself. That is the
+owner doing a seat's work, which is what L-X12 exists to count.
+
+**What each context should therefore do.** On Actions, design the
+workflow change and queue it, which is what the charter already says. On
+the host, apply it directly, unless the dispatch that opened the window
+says otherwise. This run's dispatch did say otherwise, in those words,
+so the workflow edits this run designed are queued rather than applied
+and are marked as queued-for-that-reason rather than
+queued-for-lack-of-access.
 
 ## 2. Scheduled runs fire late, always, by two to five hours
 
