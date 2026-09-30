@@ -22,6 +22,58 @@ several days stale. **Every PM PR from #20 onward, including this one,
 touches this file and `docs/sprints/dispatch-queue.md`; merge them in
 date order (#20, #34, #37, #45, #53) or later ones will conflict.**
 
+## Follow-up mid-window (owner live, ~04:05 UTC): board unreachable
+
+The owner asked this seat to read its board inbox, act on it, and
+reply there in first person, and separately relayed three directives
+(sprints become milestones, Slack retired, every run ends on the
+board — recorded in full as ADR-008). This session has no
+`BOARD_API_URL`/`BOARD_RUNTIME_TOKEN` and no board tool loaded, so the
+inbox could not be read and no reply was posted there. Said plainly
+rather than fabricated. **Chair action needed:** wire board access into
+this seat's synchronous-window host sessions, not just its scheduled
+GitHub Actions runs.
+
+**Milestones, checked directly (`gh api .../milestones`).** #1 "Sprint
+2026-09-21" is already closed. #2 "Sprint 2026-09-28" is open, due
+2026-10-04, and its goal has not shipped — the ceremony PR that would
+land it on `main` (#34) is still unmerged, so there's nothing to close
+yet and no successor to name. It closes the run #34 merges and that
+sprint's items land, not before.
+
+**Failed runs, last 24 hours (§11.7 triage, `gh run list --status
+failure`).** Only the four already found this morning: `pm-agent`,
+`okr-agent`, `market-agent`, `finance-agent`, all off the same
+`chair/langfuse-traces` push at 02:16Z, all 0 jobs in 0 seconds.
+Classification unchanged: **configuration**, not a defect in any
+seat's own code (nothing ran) and not transient (a workflow-file parse
+failure doesn't clear on rerun) — asked of HQ/chair, not rerun. No new
+failures since. `PM_DISPATCH_ENABLED` could not be read this run either
+(`gh variable get` → 403 under this session's token), consistent with
+the standing credential-wall note below.
+
+**Tier B merge list, not merged.** #44 (`chair/pm-merges`, the PM-merge
+authority change itself) is still open and unmerged on `main`, so this
+seat has no Tier B/Tier C merge authority yet — today's charter still
+reads "never merge your own PR," and more generally there is no
+authority to exercise. If #44 lands, applying its six conditions to
+today's open PRs gives this eligible set (checks green, not draft, not
+a PM PR, no Tier C path — `prompts/`, `.github/workflows/`, or the
+tiers section itself — and no merge conflict): **#15, #22, #24, #25,
+#28, #32, #33, #35, #36, #38, #43, #55**, plus **#27** with one caveat
+(it ships `tools/ledger/ci/ledger-gate.yml`, a workflow file outside
+`.github/workflows/` today but meant to become one — worth a second
+look before treating it as routine).
+
+Excluded and why: #19, #30, #39 touch a charter (`prompts/`); #40, #42,
+#44 touch `.github/workflows/`; #13, #14, #16, #18, #21 conflict
+(engineer's own stack, which #27's union driver and #43's landing plan
+exist to resolve); #20, #29, #34, #37, #45 are the PM's own PRs,
+excluded under condition 1 even once the authority lands. Thirteen
+clean PRs in one pass is a lot of blast radius for a first exercise of
+new authority — worth sequencing rather than merging all at once even
+once #44 is live, and this run takes no merge action either way.
+
 ## Awaiting the owner's merge (top of the queue)
 
 1. **#34 `pm/sprint-2026-09-28`** — last Monday's ceremony PR. Until it
