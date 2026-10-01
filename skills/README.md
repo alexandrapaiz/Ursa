@@ -13,10 +13,17 @@ run, quality over count. The owner's merge is the gate.
 |---|---|---|---|
 | [adjudicating-uncertain-spans](adjudicating-uncertain-spans/SKILL.md) | Whether a span the resolver flagged `uncertain` really descends from a generation, and what to retune afterwards | 15 | draft, `validated: false` |
 | [running-an-outcome-record-trial](running-an-outcome-record-trial/SKILL.md) | Which finished work to resolve, which capture path it needs, and what the resulting numbers are allowed to mean | 21 | draft, `validated: false` |
+| [quoting-a-number-from-an-outcome-record](quoting-a-number-from-an-outcome-record/SKILL.md) | What a record statistic is a share of, and whether two records' numbers may be compared or added | 31 | draft, `validated: false` |
 
-The two are adjacent and share almost all their vocabulary, so each
-ships a `TRIGGER-TEST.md` whose near misses include the other's
-trigger. Read those before adding a third skill in the same area.
+The three are adjacent and share almost all their vocabulary, so each
+ships a `TRIGGER-TEST.md` whose near misses include its siblings'
+triggers. Read those before adding a fourth skill in the same area.
+
+The three sit in order along one pipeline. The trial skill chooses what
+to resolve and runs it, the adjudication skill settles the labels the
+resolver could not, and the quoting skill decides what the resulting
+totals may be said to mean. A prompt that spans two of them should be
+handled in that order.
 
 ## Checking the receipts
 
