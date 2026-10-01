@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PixelSky from "@/components/ui/pixel-sky";
+import SiteHeader from "@/components/ui/site-header";
 import SiteFooter from "@/components/ui/site-footer";
 
 export default function NotFound() {
@@ -8,17 +9,7 @@ export default function NotFound() {
       <PixelSky />
 
       <div className="relative flex min-h-svh flex-col justify-between">
-        <header className="relative z-10 flex items-baseline justify-between px-[clamp(2rem,8vw,6rem)] pt-14 pb-8">
-          <Link
-            href="/"
-            className="font-[family-name:var(--font-inter-tight)] text-[0.95rem] font-extralight uppercase tracking-[0.34em] text-[var(--star)]"
-          >
-            Ursa Minor
-          </Link>
-          <div className="font-mono text-[0.72rem] tracking-[0.08em] text-[var(--dim)]">
-            for frontier labs
-          </div>
-        </header>
+        <SiteHeader href="/" />
 
         <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20">
           <div className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
