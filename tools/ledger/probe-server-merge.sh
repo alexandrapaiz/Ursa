@@ -31,7 +31,7 @@
 # and not a difference in what was merged.
 #
 # SAFETY. Runs entirely inside a throwaway `git worktree` under /tmp, so it
-# never touches the caller's working tree or index (the first version of this
+# never touches the caller's working tree, index, or `.git/config` (the first version of this
 # script did `git add -A` in the caller's clone and committed an uncommitted
 # file into a branch it then deleted; that is why the worktree is here). It
 # never uses a protected branch as a merge base, never opens a pull request,
@@ -73,8 +73,20 @@ echo "merge.* config registered in this clone: $(git -C "$ROOT" config --get-reg
 trap cleanup EXIT INT TERM
 git -C "$ROOT" worktree add --quiet --detach "$WT" "$START_SHA"
 cd "$WT"
-git config user.email "engineer@ursa.invalid"
-git config user.name  "ursa-engineer-probe"
+
+# Identity for the probe's throwaway commits, as EXPORTED ENVIRONMENT, never
+# `git config`. A linked worktree shares `.git/config` with the clone that
+# created it, so `git config user.email` inside this worktree silently
+# overwrites the caller's identity for every later commit in the real clone,
+# including the ones the seat makes after the probe returns. This script did
+# exactly that on 2026-10-01: two commits on the run's own branch went out
+# authored `ursa-engineer-probe <engineer@ursa.invalid>`, which is the same
+# ambient-identity break PR #56 had already fixed once. Environment variables
+# are scoped to this process and its children and touch no config file.
+export GIT_AUTHOR_NAME="ursa-engineer-probe"
+export GIT_AUTHOR_EMAIL="engineer@ursa.invalid"
+export GIT_COMMITTER_NAME="ursa-engineer-probe"
+export GIT_COMMITTER_EMAIL="engineer@ursa.invalid"
 
 append_entry() {   # $1 = BASE | HEAD
   cat >> docs/ideas.md <<E

@@ -394,3 +394,31 @@ the two numbers necessarily wrong. The lesson generalizes past this probe
 and is filed in the ledger for the centralizer: **a measurement harness
 needs a control arm it is expected to fail, or it reports its own bugs as
 findings.** Three of this run's numbers were its own bugs.
+
+A fourth defect in the same script did not affect any number but did break
+the clone, and is worth recording because it is a repeat. The probe set its
+commit identity with `git config user.email` inside the scratch worktree.
+**A linked worktree shares `.git/config` with the clone that created it**,
+so that call overwrote the caller's `user.name` and `user.email` for every
+later commit in the real repository, and two commits on this run's own
+branch went out authored `ursa-engineer-probe <engineer@ursa.invalid>`.
+That is the same ambient-identity break PR #56 fixed once already, caused a
+different way. Both halves are fixed here: the probe now exports
+`GIT_AUTHOR_*` and `GIT_COMMITTER_*` as environment, which is scoped to the
+process and writes no config file, and the two commits were re-authored with
+`git rebase origin/main --exec 'git commit --amend --no-edit
+--reset-author'`. Verified by running the probe again and confirming
+`git var GIT_AUTHOR_IDENT` still reports `claude[bot]` afterwards; the
+result table was byte-identical on that third run.
+
+The safe form, per L-A14, for any seat that needs a throwaway commit
+identity:
+
+```bash
+# correct: scoped to this process, touches no config file
+export GIT_AUTHOR_NAME="..." GIT_AUTHOR_EMAIL="..."
+export GIT_COMMITTER_NAME="..." GIT_COMMITTER_EMAIL="..."
+
+# wrong, even inside `git worktree add`: writes the shared .git/config
+git config user.name "..."
+```
