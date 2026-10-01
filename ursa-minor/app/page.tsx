@@ -1,5 +1,6 @@
 import Constellation from "@/components/ui/constellation";
 import PixelSky from "@/components/ui/pixel-sky";
+import SiteHeader from "@/components/ui/site-header";
 import ScrollCue from "@/components/ui/scroll-cue";
 import SiteFooter from "@/components/ui/site-footer";
 
@@ -29,14 +30,7 @@ export default function Home() {
 
       <div className="relative flex min-h-svh flex-col justify-between">
         <Constellation />
-        <header className="relative z-10 flex items-baseline justify-between px-[clamp(2rem,8vw,6rem)] pt-14 pb-8">
-          <div className="font-[family-name:var(--font-inter-tight)] text-[0.95rem] font-extralight uppercase tracking-[0.34em] text-[var(--star)]">
-            Ursa Minor
-          </div>
-          <div className="font-mono text-[0.72rem] tracking-[0.08em] text-[var(--dim)]">
-            for frontier labs
-          </div>
-        </header>
+        <SiteHeader />
 
         <ScrollCue />
 
