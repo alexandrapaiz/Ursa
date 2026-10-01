@@ -89,3 +89,36 @@ the body. A description can pass this test and still front a procedure
 that fails on contact with a real trial, and the skill's own Limits
 section says the procedure is untested for that reason. The trigger test
 and `validated: false` are answering two different questions.
+
+## Added 2026-10-01, third run: the near miss this test was missing
+
+`prompts/skill-extract.md` §5c now asks for one near miss per adjacent
+skill, and this test was written when this skill had one neighbour. It
+now has two, so a sixth prompt is owed. It is appended rather than
+folded into the list above, because the list above belongs to the run
+that wrote it and that run's pull request is still open.
+
+**6. "The viewer's tiles say 41, 24, 35 and 30 percent. That is 130.
+What is broken?"**
+
+Should not fire. This is `quoting-a-number-from-an-outcome-record`'s
+trigger. The record already exists, no subject is being chosen and no
+capture path is in question, so nothing in this skill's procedure
+applies. The answer is a denominator fact about the tiles, not a fact
+about how the trial was run.
+
+## Ours: a collision this skill's fire-prompt 3 has with the new sibling
+
+Fire-prompt 3 above, "7 percent against 82 percent, did the model get
+better", is also a legitimate trigger for the quoting skill, and that
+skill's own fire-prompt 3 is the same shape. Both descriptions claim it.
+This is a real overlap and not a wording slip, because the question has
+two halves: the capture paths differ, which is this skill's fact, and
+the two rates are shares of different generation populations, which is
+the quoting skill's. Neither half alone is a complete answer.
+
+Recorded rather than resolved. Resolving it means editing this skill's
+description, which belongs to the run that wrote it and to a pull
+request the owner has not merged. The ledger entry asks for the ruling
+and `skills/README.md` carries the interim order, which puts this skill
+first because it owns the path fact the quoting skill cites as evidence.

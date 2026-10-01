@@ -176,3 +176,34 @@ source moves, changes meaning, or is retracted, the skill's `revised`
 date changes, the affected sentences change with it, and `version`
 increments. A skill whose evidence has moved under it and whose text
 has not is a broken promise rather than a stale file.
+
+## 5c. The near miss must be the sibling, once there are two siblings
+
+(Added 2026-10-01, third run, amending §5.)
+
+The rule in §5 says that once more than one skill covers an area, at
+least one near miss must be the adjacent skill's own trigger. With
+three skills in one area that is no longer enough, because a skill with
+two neighbours has two boundaries and testing one of them leaves the
+other unguarded. So: **a skill ships one near miss per adjacent skill.**
+The two-near-miss budget in §5 is a floor and not a ceiling, and the
+budget grows with the number of neighbours rather than with the number
+of skills in the library.
+
+A skill with three or more neighbours has a different problem, which is
+that its slug is probably describing a topic rather than a piece of
+work. Treat that as the signal to re-cut the skills rather than to
+write five near misses.
+
+## 5d. Order the siblings explicitly
+
+(Added 2026-10-01, third run.)
+
+Skills in one area usually sit in some order along a real pipeline, and
+a prompt will often span two of them. When the library holds more than
+two skills over the same artifact, the index records that order and
+says which skill runs first. Ours: without it, a spanning prompt
+resolves by whichever description matched more strongly, which is a
+property of the wording rather than of the work, and the two skills
+will disagree about who defers to whom because each one's own
+`TRIGGER-TEST.md` is written from its own side of the boundary.

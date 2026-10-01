@@ -391,3 +391,204 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
   are charter edits, outside this seat's write surface.
 - Cost: $0
 - Status: proposed, second occurrence
+
+**Third occurrence, 2026-10-01.** `NEON_RO_URL` was unset again and the
+third run opened by saying so again. Nothing above has changed: the
+charter still names a database Ursa does not have and still points at a
+gold specimen in alexandria, and `ursa-minor/` still has no skills
+route, verified again this run. Three skills have now shipped through
+`evidence_scheme: repo`. At three occurrences the First step above is
+not a proposal any more, it is a charter defect that has consumed the
+same opening paragraph three times, and L-A4 puts it on the register
+rather than on the runs.
+
+### 2026-10-01 — Finding: the viewer's four tiles carry three denominators and are not a partition
+- Trigger: the skill agent's third run, writing
+  `skills/quoting-a-number-from-an-outcome-record`. The skill's whole
+  subject is what a record statistic is a share of, so the first thing
+  it did was read the surfaces a reader actually quotes from.
+- What: `ursa-major/src/viewer.ts:147-166` renders four tiles in one
+  row. The first three are `stats.byClass[*].pct`, each divided by
+  `coveredChars`, which is final-work text
+  (`ursa-major/src/stats.ts:51`). The fourth is
+  `stats.generated.deletedPct`, divided by total generated chars, which
+  is model-output text (`ursa-major/src/stats.ts:53-54,86-91`). The
+  distribution bar immediately below, at `viewer.ts:168-176`, contains
+  only the three. So the tiles and the bar disagree about how many
+  categories exist, and the tiles are the ones a reader screenshots.
+  The underlying schema is right: `SpanClass` has three members and
+  `generated_deleted` is a `GenerationFate`
+  (`ursa-major/src/types.ts:5-14`).
+- Measured here. On `fixtures/mini` the tiles read 41.2, 24.0, 34.7 and
+  30.0 percent, which sums to 130. Reproduce with
+  `cd ursa-major && npx tsx src/cli.ts --id fix-mini --final fixtures/mini/final.md --conversations fixtures/mini/conversations --out /tmp/rec`.
+- Why the fixture hides it: covered final chars come to 308 and total
+  generated chars to 307, so the two denominators nearly coincide and
+  the four tiles look commensurable. Anyone sanity-checking the viewer
+  against the only public fixture finds nothing wrong. A real record
+  with a different generated-to-final ratio will not be so kind.
+- Why it matters: KR2.2 makes one record publicly browsable and this
+  viewer is what a buyer will see. KR4.1 asks the lab brief to explain
+  the four span classes, and the honest explanation is that the
+  taxonomy has two sides counted over different populations. Four
+  percentages presented as one partition is the kind of thing a
+  first audit catches, and auditability is the product.
+- First step: frontend or engineer separates the deleted tile from the
+  three class tiles visually, and labels each tile with its
+  denominator, for instance "of classified final text" against "of
+  generated text". The distribution bar is already correct and is the
+  model to follow.
+- Cost: $0, small
+- Status: proposed
+
+### 2026-10-01 — Finding: uncertain and trivial have span counts but no char totals, so no adjusted share can be computed
+- Trigger: same run. Step 4 of the new skill tells a writer to subtract
+  the low-confidence populations from a category before quoting it, and
+  the schema does not support the subtraction.
+- What: two flags place low-confidence spans inside ordinary
+  categories. A below-threshold best match is labelled
+  `no_generation_provenance` and flagged `uncertain`
+  (`ursa-major/src/resolve.ts:160-167`). A short exact match is
+  labelled `survived_verbatim` with a score of 1 and flagged `trivial`
+  (`ursa-major/src/resolve.ts:111-123`). `Stats` reports
+  `uncertainSpans` and `trivialSpans` as span counts only
+  (`ursa-major/src/types.ts:118-119`,
+  `ursa-major/src/stats.ts:25-26,41-42`), and no character total is
+  computed for either. Since every published percentage is in
+  characters, the counts cannot be netted out of any percentage. It has
+  to be redone by hand from `files[].spans`, and nothing checks the
+  arithmetic.
+- Why it matters: both flags inflate in the commercially convenient
+  direction. `uncertain` inflates `no_generation_provenance`, which
+  CLAUDE.md §1 calls the most valuable category. `trivial` inflates
+  `survived_verbatim`, which reads as the model doing well. Task-001
+  carries 55 uncertain spans and KR1.1 exists to adjudicate them, so
+  until that lands every `no_generation_provenance` share in the corpus
+  is an upper bound rather than a measurement, and nothing in the
+  record says so.
+- First step: engineer adds `uncertainChars` and `trivialChars` to
+  `Stats` beside the existing counts, computed in the same loop that
+  already increments them, and has the viewer print the adjusted range
+  on the affected tiles. Two numbers, one loop, and it turns a hand
+  derivation into a field.
+- Cost: $0, small
+- Status: proposed
+
+### 2026-10-01 — Finding: the uncovered fraction is systematically larger for code than for prose, which biases the mixed corpus
+- Trigger: same run, working out whether `byClass` percentages from two
+  records may be put in one table.
+- What: `coveredChars` excludes every character no span covers, and the
+  schema says so (`ursa-major/src/types.ts:112-117`). In code mode a
+  span is a trimmed non-empty line, so indentation and blank lines
+  belong to no span (`ursa-major/src/segment.ts:21-33`). In prose mode
+  spans are sentences. Mode is chosen by file extension
+  (`ursa-major/src/segment.ts:13-15`). The two modes therefore leave
+  different fractions of a file outside every denominator.
+- Measured on this repository. `src/stats.ts` 13.6 percent uncovered,
+  `src/types.ts` 9.6 percent, `src/match.ts` 6.1 percent,
+  `docs/beyond-preference-pairs.md` 2.7 percent,
+  `fixtures/mini/final.md` 1.9 percent. So roughly 6 to 14 percent for
+  code against 2 to 3 percent for prose. The reproduction script is in
+  the new skill's judgment section.
+- Why it matters: KR1.3 requires five or more records with at least two
+  on the prose path, which means the corpus is built to be read across
+  modes. A difference of a few points between a code record and a prose
+  record can be segmentation rather than signal, and KR2.1 re-grounds
+  the methods document's claims in exactly that mixed corpus. Separately
+  the CLI prints covered final chars and never prints `finalChars`
+  (`ursa-major/src/cli.ts:128-134`), so the size of the gap is
+  invisible to anyone reading the console.
+- First step: engineer prints `finalChars` beside `coveredChars` in the
+  CLI summary and the viewer, so the gap is visible wherever a
+  percentage is. Whether to change segmentation is a separate and
+  larger question, and this entry does not ask for it. The skill's
+  interim rule is to compare like modes.
+- Cost: $0, small
+- Status: proposed
+
+### 2026-10-01 — Finding: turnsToAcceptance does not count turns to acceptance
+- Trigger: same run, step 8 of the new skill, which tells a writer to
+  read a field's definition rather than its label.
+- What: `turnsToAcceptance` is computed as a maximum of `turnIndex`
+  over the generations that have any surviving characters at all
+  (`ursa-major/src/stats.ts:68-70`). The schema's own comment is
+  accurate and says "latest assistant turn that contributed surviving
+  text" (`ursa-major/src/types.ts:139-140`). The label is not. Both the
+  CLI summary and the viewer's table head call it turns-to-acceptance
+  (`ursa-major/src/cli.ts:135`, `ursa-major/src/viewer.ts:340`), and
+  CLAUDE.md §1 lists turns to acceptance as trajectory metadata the
+  artifact carries. One surviving character in a late generation sets
+  the field, so it is an upper bound on where surviving text came from
+  and not a count of turns the user needed to get there.
+- Why it matters: it is one of the four trajectory metadata items the
+  artifact is sold on, and it is the one a lab would use to compare
+  models on how fast they converge. Shipped under this name to a buyer
+  who computes it differently, it is a wrong number rather than a
+  narrow one. The schema is already honest, so the whole defect is in
+  the two labels and in CLAUDE.md's wording.
+- First step: engineer renames the field or the labels so the two
+  agree. `lastSurvivingTurn` matches what it computes. If real
+  turns-to-acceptance is wanted it is a different derivation, probably
+  off the correction loops that resolver v2 will emit, and that is a
+  separate item rather than a rename.
+- Cost: $0, small
+- Status: proposed
+
+### 2026-10-01 — Finding: byModel shares never sum to one and the remainder is unlabelled
+- Trigger: same run, checking whether `byModel.pctOfCovered` can serve
+  the cross-model ratio the methods document promises.
+- What: `byModel` accumulates chars only from spans that carry a
+  `source` (`ursa-major/src/stats.ts:43-46`), and divides by
+  `coveredChars`, which includes the spans that carry none
+  (`ursa-major/src/stats.ts:80-85`). So the model shares are shares of
+  the whole classified text and the missing remainder is the
+  `no_generation_provenance` category. On `fixtures/mini` the shares
+  are 46.8 and 18.5 percent, summing to 65.3, and the gap is exactly
+  the 34.7 percent no-provenance share. The viewer's column head reads
+  "% of covered" (`ursa-major/src/viewer.ts:350`), which is literally
+  true and does not tell a reader that the column is not meant to sum.
+- Why it matters: the cross-model claim in
+  `docs/beyond-preference-pairs.md:189-193` is a ratio of survival
+  rates on the same user's work, which is the relative price between
+  two models and the thing only a cross-model layer can quote.
+  `pctOfCovered` looks like it answers that and does not. A reader who
+  treats the column as a model-share breakdown concludes that a third
+  of the work came from somewhere unaccounted for.
+- First step: engineer adds a trailing row or footnote giving the
+  unattributed remainder by name, so the column visibly sums to one.
+  The survival-rate ratio the methods document actually promises wants
+  its own surface and is a larger item.
+- Cost: $0, small
+- Status: proposed
+
+### 2026-10-01 — Two skill descriptions both claim the deletion-rate comparison prompt
+- Trigger: same run. `prompts/skill-extract.md` §5c, added this run,
+  asks for one near miss per adjacent skill. Writing the sixth prompt
+  for `running-an-outcome-record-trial` turned up a collision rather
+  than a boundary.
+- What: "the new record says 7 percent deleted, the first said 82
+  percent, did the model get better" is fire-prompt 3 of
+  `running-an-outcome-record-trial` and, in the same shape, fire-prompt
+  3 of `quoting-a-number-from-an-outcome-record`. Both descriptions
+  claim it. The overlap is real rather than a wording slip, because the
+  question has two halves: the capture paths differ, which is the trial
+  skill's fact, and the two rates are shares of different generation
+  populations, which is the quoting skill's. Neither half alone answers
+  the user.
+- `skills/adjudicating-uncertain-spans` needed no new near miss. Its
+  near miss 5, written on 2026-09-24, is already this run's skill's
+  trigger, which is a small piece of evidence that the first run read
+  the area correctly before the area had three skills in it.
+- Why it matters: §5c exists because a false positive between siblings
+  sends the load to the wrong skill and the right one never runs. A
+  prompt both siblings claim is the same failure one level up, and it
+  resolves by whichever description matched more strongly, which is a
+  property of the wording rather than of the work.
+- First step: owner or the next skill run rules on the boundary and
+  edits one description. The interim order is in `skills/README.md` and
+  puts the trial skill first, since it owns the capture-path fact the
+  quoting skill cites as evidence. Not resolved this run because the
+  edit lands in a file belonging to a pull request the owner has not
+  merged.
+- Cost: $0, small
+- Status: proposed
