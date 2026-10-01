@@ -30,7 +30,6 @@ import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
-import { isForgotten, loadConsent } from '../consent'
 import type { OutcomeRecord, RawGeneration } from '../types'
 
 const TEXT_EXTS = new Set([
@@ -172,6 +171,11 @@ export async function main(argv: string[]): Promise<number> {
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a
   // record the next run recreates, which is not deletion.
+  // Imported here rather than at the top of the file, following this
+  // module's existing pattern for `startBridge`. It also keeps the import
+  // block untouched, which is where this change would otherwise collide
+  // with every other open PR that edits `../types`.
+  const { isForgotten, loadConsent } = await import('../consent')
   const consent = loadConsent(projectPath)
   let suppressed = 0
   const records: OutcomeRecord[] = []
