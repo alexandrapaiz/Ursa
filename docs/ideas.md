@@ -143,3 +143,90 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-10-01 — The bridge is a live transmission path with no consent gate
+- Trigger: building the consent gate (`src/consent.ts`,
+  `src/disclosure.ts`) meant reading every path by which bytes leave the
+  machine. There is exactly one that exists and runs today, and it is
+  not the one the gate covers. `src/bridge/index.ts` assembles an
+  `OverlayPayload` every five seconds and `PUT`s it to
+  `https://ursa-overlay.vercel.app/api/sync/<blobId>`. It reads
+  `.ursa/consent.json` nowhere, because nothing did before this change.
+- What: the payload is end-to-end encrypted under a passphrase the
+  server never sees (`src/bridge/crypto.ts`, PBKDF2 600k, AES-256-GCM),
+  and it carries the user's own tuning to the user's own browser, so it
+  is genuinely not an aggregation edge and plan §12's wall is not
+  breached. Two things are still true and worth the owner's ruling.
+  First, the payload includes `verdict.quote`, which is the user's
+  verbatim words, and `tuning[].statement`, which is every active
+  inference about her, so the ciphertext in Vercel Blob is derived from
+  raw data even though nobody at Ursa can read it. Second, there is no
+  switch. A user who wants nothing to leave has no way to say so other
+  than not running `ursa bridge`, and "don't run the feature" is the
+  shape of consent this product exists to replace. Proposal: add a
+  `local-only` scope to `DisclosureScope` that `startBridge` checks
+  before its first `push()`, defaulting, like every scope, to withheld,
+  so sync is something she turns on rather than something she gets.
+- First step: `startBridge` calls `isGranted(loadConsent(projectPath),
+  'overlay-sync')` before the first tick and exits with a message naming
+  the grant command when it is withheld. One test: a bridge started
+  without the grant performs zero `fetch` calls.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-01 — survival_stats cannot be aggregated exactly, and it collapses the correction
+- Trigger: writing `aggregate()` against the table in
+  `docs/design/product-plan.md` §12, and finding two things the column
+  list cannot express. Both were found by implementing the schema, not
+  by reading it.
+- What: first, merging contributors. The row carries
+  `survival_scalar NUMERIC(5,4)` and `sample_generations INT` and no
+  character totals, so combining two contributors' scalars can only
+  weight them by generation count, and a generation is not a fixed
+  number of characters. The merged number is a generation-weighted mean
+  rather than the character-weighted ratio a single device computes.
+  A `sample_chars BIGINT` column makes the merge exact and costs one
+  integer per row. Second, and larger: `survivedChars` in
+  `src/resolve.ts` counts `survived_verbatim` and `survived_mutated`
+  together, so one scalar cannot tell the two apart. `CLAUDE.md` §1 says
+  the mutation *is* the correction, expressed as an edit rather than a
+  complaint, which makes that distinction the most informative thing in
+  the record and the reason a lab would pay for it rather than for a
+  preference pair. Selling a column that averages them away sells the
+  part that was never scarce. Proposal: replace `survival_scalar` with
+  `verbatim_chars`, `mutated_chars` and `generated_chars`, let the
+  consumer form whatever ratio it wants, and keep the k-anonymity floor
+  on the row as it is.
+- First step: widen `SurvivalStatsRow` in `src/disclosure.ts` to the
+  three char counts, since the data is already on
+  `FinalSpan.class` and only the projection discards it. The audit and
+  the floor need no change, because counts are numbers and the
+  vocabulary check already requires every non-listed value to be one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-01 — `.ursa/` should be legible to `cat` and `grep`, not only to a viewer
+- Trigger: today's craft scan, below. Writing `ursa consent show` meant
+  admitting that a user who wants to know what Ursa holds about her has
+  to run a command, because a record is a multi-thousand-line JSON blob
+  and `tuning.json` is not something anyone reads at a terminal. The
+  transparency promise in `CLAUDE.md` currently depends on a program
+  being willing to tell the truth.
+- What: write a plain-text sidecar beside each JSON artifact, as the
+  format a human reads and ordinary tools search:
+  `.ursa/records/<id>.md` listing each span's class, its model, and the
+  user's own words that produced it, and `.ursa/tuning.md` listing each
+  axiom with its evidence. The JSON stays the machine format and the
+  sidecar is generated, never authored, so the two cannot drift. The
+  property worth having is that `grep -r northwind ~/project/.ursa`
+  answers "what does Ursa know about this client" without trusting any
+  Ursa code to answer honestly, which is a stronger claim than any
+  inspection command can make about itself.
+- First step: `renderRecordSidecar(record: OutcomeRecord): string` in
+  `src/viewer.ts`, written by `saveRecord` beside the JSON. One test
+  asserting every span in the JSON appears in the sidecar, so the
+  sidecar cannot silently omit.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-01 (engineer craft scan): **Claude Code's own on-disk data surface**, checked by looking rather than from memory, since `ursa-major/src/parse.ts` and `src/bridge/index.ts` read these exact files. `ls ~/.claude` shows `projects/`, `sessions/`, `shell-snapshots/`, `settings.json`; a session is one plain JSONL file at `~/.claude/projects/<path-with-every-non-alphanumeric-dashed>/<uuid>.jsonl`; `claude --help` offers `rm <id>` for a background session and no export or privacy subcommand at all. **Worth stealing: the storage layout is the transparency surface.** Directory per project, one file per session, plain text, so inspection is `cat`, search is `grep`, and deletion is `rm`. Nothing needs to be built, trusted, or kept honest, which is a stronger guarantee than any inspection command can give about itself. That became today's third ledger entry. **Where Ursa is ahead: deletion that survives re-derivation.** `rm` on a session file is final because nothing rebuilds it, whereas `rm` on an Ursa record is undone by the next `ursa run`, since records are derived from git history rather than captured. Claude Code never had to solve that, and the tombstone in `.ursa/consent.json` shipped today is the answer to it. **Honest limit on the comparison:** Claude Code discloses nothing to anyone, so it needs no consent state and no disclosure gate, and scoring it on their absence would be unfair. The fair axis is inspectability, and on that axis it is ahead of Ursa today.
