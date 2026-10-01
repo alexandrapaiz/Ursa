@@ -13,6 +13,15 @@
 //
 //   URSA_PASSPHRASE=... npx tsx src/bin/ursa.ts bridge <projectPath> \
 //     [--sync-url https://...] [--session <file>] [--interval ms] [--port 7817]
+//
+// ursa consent / ursa forget — the user's side of the boundary: see what
+// has been derived, revoke one inference, grant or withhold the only
+// scope that may cross the device boundary, emit the consented aggregate
+// (audited, never on trust), and erase a record together with everything
+// derived from it. See src/consent.ts and src/disclosure.ts.
+//
+//   npx tsx src/bin/ursa.ts consent show <projectPath>
+//   npx tsx src/bin/ursa.ts forget <projectPath> --record <recordId>
 
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
@@ -93,6 +102,19 @@ export function renderRunSummary(records: OutcomeRecord[], episodes: Episode[]):
 }
 
 export async function main(argv: string[]): Promise<number> {
+  // Dispatched BEFORE parseArgs, deliberately. `parseArgs` is configured
+  // with `run`'s and `bridge`'s options and throws
+  // ERR_PARSE_ARGS_UNKNOWN_OPTION on anything else, so a consent flag like
+  // `--out` never reached a dispatch placed after it. The consent commands
+  // parse their own flags and take the raw argv.
+  if (argv[0] === 'consent') {
+    const { runConsentCommand } = await import('../consent.cli')
+    return runConsentCommand(argv.slice(1))
+  }
+  if (argv[0] === 'forget') {
+    const { runForgetCommand } = await import('../consent.cli')
+    return runForgetCommand(argv.slice(1))
+  }
   const { positionals, values } = parseArgs({
     args: argv,
     allowPositionals: true,
@@ -110,6 +132,8 @@ export async function main(argv: string[]): Promise<number> {
   if ((cmd !== 'run' && cmd !== 'bridge') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
+    console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
+    console.error('       ursa forget <projectPath> --record <recordId>')
     return 2
   }
   if (cmd === 'bridge') {
@@ -144,8 +168,19 @@ export async function main(argv: string[]): Promise<number> {
 
   const pairs = findCommitPairs(projectPath)
   const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
+  // Erasure has to survive re-derivation. Every episode here was rebuilt
+  // from git history, so without this filter `ursa forget` would delete a
+  // record the next run recreates, which is not deletion.
+  // Imported here rather than at the top of the file, following this
+  // module's existing pattern for `startBridge`. It also keeps the import
+  // block untouched, which is where this change would otherwise collide
+  // with every other open PR that edits `../types`.
+  const { isForgotten, loadConsent } = await import('../consent')
+  const consent = loadConsent(projectPath)
+  let suppressed = 0
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
+    if (isForgotten(consent, ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep)
     if (!record || record.stats.generated.totalChars < minChars) continue
     record.signals = deriveSignals(record, declaration)
@@ -153,7 +188,16 @@ export async function main(argv: string[]): Promise<number> {
     records.push(record)
   }
   saveEpisodes(projectPath, episodes)
-  console.log(renderRunSummary(records, episodes))
+  // Reciting zeros at someone whose only work unit they erased reads as a
+  // failed run. Say what actually happened instead.
+  if (records.length === 0 && suppressed > 0) {
+    console.log(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, and ${suppressed === episodes.length ? 'every one of them is' : `${suppressed} of them are`} erased. Nothing was rebuilt.`)
+  } else {
+    console.log(renderRunSummary(records, episodes))
+    if (suppressed > 0) {
+      console.log(`\n${suppressed} work unit${suppressed === 1 ? '' : 's'} you erased stayed erased.`)
+    }
+  }
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
   return 0
 }
