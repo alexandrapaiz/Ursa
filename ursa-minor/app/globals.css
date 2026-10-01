@@ -150,6 +150,26 @@
   background: rgba(168, 199, 250, 0.25);
 }
 
+/* One focus treatment for the whole site.
+
+   Benchmarked 2026-10-01: claude.com declares :focus-visible once, globally,
+   at 2px solid var(--color-focus) with a 2px offset; Linear and Vercel route
+   every component through a single named token (--focus-ring-outline,
+   --ds-focus-ring). None of the three hangs focus styles off individual
+   component classes. Ours did, in .cta and .quiet-link, so everything else
+   focusable fell through to the shadcn base ring from @layer base: outline
+   auto 1px at 50% grey with a 1px offset, which on #020308 reads as a thin
+   grey box belonging to no identity here. The 404's word-mark link, the first
+   tab stop on that page, was getting exactly that.
+
+   The values are the ones the two controls already used, so nothing that was
+   already styled changes. Unlayered, so it beats @layer base; lower
+   specificity than any component rule, so a component can still override it. */
+:focus-visible {
+  outline: 1px solid var(--polar);
+  outline-offset: 3px;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -236,11 +256,6 @@ html {
   transition-duration: 90ms;
 }
 
-.cta:focus-visible {
-  outline: 1px solid var(--polar);
-  outline-offset: 3px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .cta {
     transition:
@@ -280,11 +295,11 @@ html {
 }
 
 /* keyboard parity, and the state touch devices land on */
+/* the wash and border only; the ring itself comes from the site-wide
+   :focus-visible rule above */
 .quiet-link:focus-visible {
   background-color: rgba(232, 237, 247, 0.06);
   border-color: rgba(168, 199, 250, 0.75);
-  outline: 1px solid rgba(168, 199, 250, 0.75);
-  outline-offset: 3px;
   transition-duration: 160ms;
 }
 

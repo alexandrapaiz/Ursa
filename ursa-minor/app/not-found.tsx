@@ -15,7 +15,12 @@ export default function NotFound() {
           <div className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> 404
           </div>
-          <p className="mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
+          {/* no text-balance here. Measured at 390, where this is the only
+              width it takes two lines, balance returns 114/215 and plain
+              wrapping returns 185/143: the balancer makes its one multi-line
+              case both wider and more lopsided. The hero keeps text-balance,
+              where it earns it. */}
+          <p className="mt-9 text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
             No star at these coordinates.
           </p>
           <Link
