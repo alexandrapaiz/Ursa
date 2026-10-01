@@ -5,6 +5,10 @@ MRR, ARR, and unit economics **once revenue exists**, from figures the
 owner provides or a read-only subscribers channel exposes — this seat
 never touches Stripe or any billing surface directly.
 
+**Update, 2026-10-01:** re-checked for any new contract, subscribers
+table, or read-only revenue channel. None exists. Status below is
+unchanged from the first close.
+
 ## Status at first close (2026-09-30): zero, by design on one side
 
 Ursa Major (the consumer product) has **no revenue stream, permanently,

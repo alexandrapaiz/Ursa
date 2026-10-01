@@ -63,6 +63,50 @@ would break this line is the repo going private — flag that decision
 to finance if it's ever made, since it converts free minutes into a
 metered bill.
 
+## Update: 2026-10-01 — September reconciled, October opened
+
+`gh repo view alexandrapaiz/Ursa` still returns `visibility: PUBLIC`, so
+the $0 Actions-minutes line continues to hold without re-deriving the
+argument above.
+
+**September, reconciled against the full month** (the 2026-09-30 pull
+above was taken a day early and missed the month's last runs). Pulled
+via `gh api "repos/alexandrapaiz/Ursa/actions/runs?created=2026-09-01..2026-09-30"`,
+completed runs only:
+
+| Workflow | Runs | Successes | Total wall-minutes (proxy, see note) |
+|---|---|---|---|
+| engineer-agent | 13 | 13 | 230.0 |
+| pm-agent | 11 | 11 | 73.9 |
+| redaction-gate | 170 | 168 | 24.5 |
+| frontend-agent | 2 | 2 | 52.3 |
+| exo-agent | 2 | 2 | 25.6 |
+| research-agent | 2 | 2 | 13.9 |
+| market-agent | 2 | 2 | 10.1 |
+| security-agent | 1 | 1 | 12.8 |
+| skill-agent | 1 | 1 | 8.2 |
+| okr-agent | 5 | 1 | 3.3 |
+| finance-agent | 1 | 0 | 0.0 |
+
+213 completed runs for the full month (up from the 172 seen on 2026-09-30),
+10 non-success. Total still $0 — the growth is in volume, not cost.
+"Wall-minutes" is `updated_at − run_started_at` per run, the same proxy
+the 2026-09-30 table used; it is not GitHub's own billed-minutes figure
+(that would need one `.../runs/{id}/timing` call per run, 200+ calls,
+for a number that doesn't change the $0 conclusion), so treat the
+minute columns in this file as a volume indicator, not a billing figure.
+
+**October, month to date (2026-10-01, a few hours in).** 12 runs so far
+(2 engineer-agent, 1 pm-agent, 8 redaction-gate, this finance-agent run),
+~29 wall-minutes, repo still public. Too little of the month has
+elapsed for this to mean anything on its own; it will roll into the
+2026-11-01 close as the real October figure.
+
+**Open questions carried forward unchanged** (Claude subscription
+allocation, OpenRouter balance, `NEON_RO_URL` ownership, the Groq/
+Clerk/Modal charter-vs-reality mismatches): see below. None has been
+answered since the first close; none is re-asked as new.
+
 ## Open questions for the owner
 
 1. Claude subscription: is there a rate or allocation you want Ursa's

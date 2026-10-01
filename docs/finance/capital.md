@@ -5,6 +5,11 @@ Living ledger. Maintained by the finance agent. Owner priority, recorded
 file tracks invested capital, CapEx separately from OPEX, ROIC once
 revenue exists, and the EVA framework as the operating lens throughout.
 
+**Update, 2026-10-01:** nothing below has changed since the first close.
+No new paid service, domain, or durable asset appeared in the repo;
+none of the four open questions at the bottom has been answered yet.
+This file is being re-read, not rewritten, this run.
+
 ## Invested-capital base
 
 What has actually been put into Ursa, as far as this seat can see from
