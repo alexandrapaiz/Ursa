@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PixelSky from "@/components/ui/pixel-sky";
+import SiteFooter from "@/components/ui/site-footer";
 
 export default function NotFound() {
   return (
@@ -34,13 +35,7 @@ export default function NotFound() {
           </Link>
         </div>
 
-        <footer className="relative z-10 border-t border-[var(--line)]">
-          <div className="flex w-full flex-wrap gap-x-10 gap-y-2 px-[clamp(2rem,8vw,6rem)] pb-20 pt-14 font-mono text-[0.7rem] tracking-[0.1em] text-[var(--dim)] lg:mx-auto lg:max-w-2xl lg:px-8">
-            <span>Alexandra Paiz Delgado · Systems Engineer</span>
-            <span>Fatima Michel Giron · Computer &amp; Artificial Intelligence Engineer</span>
-            <span>© ursa</span>
-          </div>
-        </footer>
+        <SiteFooter className="relative z-10" />
       </div>
     </>
   );
