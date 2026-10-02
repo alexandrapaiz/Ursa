@@ -52,6 +52,17 @@ export function computeStats(
 
   const generatedTotal = generations.reduce((a, g) => a + g.totalChars, 0)
   const generatedSurvived = generations.reduce((a, g) => a + g.survivedChars, 0)
+  // A merge can destroy a generation without the human ever choosing to
+  // drop it, so the gross deletion figure is split by cause. Only the
+  // human half is a discard, and only it carries correction signal.
+  const mergeDeleted = generations.reduce(
+    (a, g) => a + g.spans
+      .filter((s) => s.fate === 'generated_deleted' && s.deletion?.cause === 'merge')
+      .reduce((b, s) => b + (s.end - s.start), 0),
+    0,
+  )
+  const generatedDeleted = generatedTotal - generatedSurvived
+  const humanDeleted = generatedDeleted - mergeDeleted
 
   const perConversation = conversations.map((conv) => {
     const convGens = generations.filter((g) => g.conversationId === conv.id)
@@ -86,8 +97,11 @@ export function computeStats(
     generated: {
       totalChars: generatedTotal,
       survivedChars: generatedSurvived,
-      deletedChars: generatedTotal - generatedSurvived,
-      deletedPct: generatedTotal ? r3((generatedTotal - generatedSurvived) / generatedTotal) : 0,
+      deletedChars: generatedDeleted,
+      deletedPct: generatedTotal ? r3(generatedDeleted / generatedTotal) : 0,
+      humanDeletedChars: humanDeleted,
+      humanDeletedPct: generatedTotal ? r3(humanDeleted / generatedTotal) : 0,
+      mergeDeletedChars: mergeDeleted,
     },
     perFile,
     perConversation,

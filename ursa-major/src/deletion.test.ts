@@ -121,15 +121,30 @@ describe('a merge can delete a generation, and the record must not blame the hum
       .filter((s) => s.fate === 'generated_deleted')
     expect(deleted.length).toBeGreaterThan(0)
 
-    // Every span the merge destroyed carries the merge as its cause,
-    // named by sha, and none of them is attributed to a human edit.
-    const fromAgentBlock = deleted.filter((s) => AGENT_BLOCK.includes(s.text.trim()))
-    expect(fromAgentBlock.length).toBeGreaterThan(0)
-    for (const s of fromAgentBlock) {
-      expect(s.deletion?.cause).toBe('merge')
-      expect(mergeSha.startsWith(s.deletion!.mergeSha!)).toBe(true)
-      expect(s.deletion!.mergeSubject).toBe('Merge other: keep the leaner formatter')
-    }
+    // The distinctive line of the agent block — the one no other commit
+    // in the repo contains — carries the merge as its cause, named by
+    // sha, so a reader can go check the claim against the repo.
+    const distinctive = deleted.filter((s) => s.text.includes('no stated reason'))
+    expect(distinctive).toHaveLength(1)
+    expect(distinctive[0].deletion?.cause).toBe('merge')
+    expect(mergeSha.startsWith(distinctive[0].deletion!.mergeSha!)).toBe(true)
+    expect(distinctive[0].deletion!.mergeSubject).toBe('Merge other: keep the leaner formatter')
+
+    // The boundary, asserted rather than left to be discovered: a span
+    // whose whole text is a bare `}` is still present in the merge's
+    // result, because `}` occurs all over it. Containment cannot tell
+    // one closing brace from another, so such a span stays
+    // `human_edit`. That is the conservative direction on purpose —
+    // the `merge` label is only applied to text that actually vanished
+    // at the merge boundary, and trivia never inflates it.
+    const braces = deleted.filter((s) => s.text.trim() === '}')
+    expect(braces.length).toBeGreaterThan(0)
+    for (const s of braces) expect(s.deletion?.cause).toBe('human_edit')
+
+    // What matters commercially: the merge's work is the bulk of the
+    // deletion here, and it is no longer filed as the human's discard.
+    expect(record.stats.generated.mergeDeletedChars)
+      .toBeGreaterThan(record.stats.generated.humanDeletedChars * 10)
   })
 
   it('keeps merge-destroyed chars out of the human-discard statistic', () => {

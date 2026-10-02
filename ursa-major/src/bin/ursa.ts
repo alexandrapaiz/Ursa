@@ -17,6 +17,7 @@
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
 import { blobAt, findCommitPairs } from '../pairfinder'
+import { gitDeletionAttributor } from '../deletion'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
@@ -56,6 +57,10 @@ export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord 
   return resolve({
     taskId: ep.id,
     files,
+    // A merge walked past on the way to ep.finalSha can have destroyed
+    // generated text that no human ever chose to drop. Without this the
+    // record would call that a discard and name ep.finalSha's author.
+    attributeDeletion: gitDeletionAttributor(projectPath, ep.interveningMerges ?? []),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
@@ -73,19 +78,23 @@ export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord 
 
 export function renderRunSummary(records: OutcomeRecord[], episodes: Episode[]): string {
   const lines: string[] = []
-  let verbatim = 0, mutated = 0, generated = 0, deleted = 0
+  let verbatim = 0, mutated = 0, generated = 0, humanDeleted = 0, mergeDeleted = 0
   for (const r of records) {
     verbatim += r.stats.byClass.survived_verbatim.chars
     mutated += r.stats.byClass.survived_mutated.chars
     generated += r.stats.generated.totalChars
-    deleted += r.stats.generated.deletedChars
+    humanDeleted += r.stats.generated.humanDeletedChars
+    mergeDeleted += r.stats.generated.mergeDeletedChars
   }
   lines.push(`${episodes.length} work units found, ${records.length} resolved into records.`)
   lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
   lines.push(`That's the part worth noticing: not what got written, what got kept.`)
   if (generated > 0) {
-    const pct = Math.round((deleted / generated) * 100)
+    const pct = Math.round((humanDeleted / generated) * 100)
     lines.push(`${generated.toLocaleString()} chars were generated to get there; ${pct}% were drafts you discarded on the way.`)
+  }
+  if (mergeDeleted > 0) {
+    lines.push(`A further ${mergeDeleted.toLocaleString()} chars were destroyed by merges rather than by you, so they are not counted against you.`)
   }
   const edited = records.filter((r) => r.stats.byClass.survived_mutated.chars > 0).length
   if (edited > 0) lines.push(`${edited} record${edited === 1 ? '' : 's'} carry your corrections — the whys live there.`)
