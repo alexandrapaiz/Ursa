@@ -51,7 +51,15 @@ four standups have already named, not a new trigger:
 
 ## Dispatched by the PM
 
-- 2026-10-02, ~16:3x UTC: **engineer**, instruction as written above
-  (run cited, PR #66 named, "build on the open branch"). Run URL
-  logged here once `gh workflow run` returns it; see this PR's
-  description for the live link if the API didn't echo one back.
+- 2026-10-02, ~16:35 UTC: **engineer** — attempted, not fired.
+  `gh workflow run agent-engineer.yml -f owner_instructions='...'` (the
+  exact instruction above, run 36955429726 cited, PR #66 named, "build
+  on the open branch") returned `HTTP 403: Resource not accessible by
+  integration` on the dispatches endpoint. This is the same credential
+  wall flagged 2026-09-24 through 2026-09-26 against the permissions
+  probe, now reproduced directly against a real dispatch attempt from
+  this seat's own scheduled-run token. Logged here as an attempt, not
+  a success — see `docs/sprints/pending.md` for the owner action this
+  implies (grant `actions: write` to the scheduled `agent-pm.yml`
+  installation, or confirm the standup should only ever queue and
+  never fire).
