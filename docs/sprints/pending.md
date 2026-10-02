@@ -46,12 +46,21 @@ carried forward here with current numbers.
 
 ## Waiting on an owner-only action
 
-- The scheduled standup's own token question (raised 2026-09-24
-  through 2026-09-26: `gh api .../actions/permissions` → 403) is now
-  moot in practice — this run successfully called `gh workflow run`
-  (see dispatch below), and no standup since 2026-09-26 has logged that
-  probe failing. Not re-tested directly this run since the real test
-  (an actual dispatch) just happened and worked; closing this line.
+- **The scheduled standup's credential wall is back, confirmed by the
+  real test this time, not just the permissions probe.** This run
+  tried to fire the one dispatch its own reasoning justified
+  (`gh workflow run agent-engineer.yml ...`) and got `HTTP 403:
+  Resource not accessible by integration` on the dispatches endpoint
+  itself — the same failure mode flagged 2026-09-24 through
+  2026-09-26 and believed dormant since, now reproduced directly
+  rather than inferred from the permissions probe. **Action for the
+  owner, unchanged from 2026-09-26:** grant `actions: write` to the
+  GitHub App installation that runs the scheduled `agent-pm.yml`, or
+  confirm the standup should only ever queue dispatches and never
+  attempt to fire them itself. Until one of those happens, every
+  "Dispatched by the PM" line this seat writes should be read as "the
+  PM proposed and tried; the attempt itself failed" unless a future
+  run reports otherwise.
 - Three `proposed` ledger entries still have no owner verdict: repo
   split (2026-09-18, now 14 days — past the two-week mark, will head
   the grooming ceremony's "Awaiting your verdict" on the next Monday
@@ -71,14 +80,18 @@ carried forward here with current numbers.
 
 ## This run's dispatch
 
-One dispatch fired, under the §11.4 exception for a seat's open draft
-PR with no progress since open (not the general "last PR open" hard
-stop, which still blocks every other seat): **engineer**, pointed at
-run [36955429726](https://github.com/alexandrapaiz/Ursa/actions/runs/36955429726)
+One dispatch judged correct under the §11.4 exception for a seat's
+open draft PR with no progress since open (not the general "last PR
+open" hard stop, which still blocks every other seat): **engineer**,
+pointed at run
+[36955429726](https://github.com/alexandrapaiz/Ursa/actions/runs/36955429726)
 (cancelled, exceeded the 45-minute ceiling, sandbox annotation confirms
-uncommitted work lost) and told to build on PR #66's open branch,
-committing incrementally this time. Full reasoning and the exact
-command in `docs/sprints/dispatch-queue.md`.
+uncommitted work lost), told to build on PR #66's open branch and
+commit incrementally this time. **The attempt itself failed**: `gh
+workflow run agent-engineer.yml` returned `HTTP 403: Resource not
+accessible by integration` — the credential wall, not a judgment
+error. Full reasoning and the exact command in
+`docs/sprints/dispatch-queue.md`.
 
 ## Noticed in passing, not this seat's lane
 
