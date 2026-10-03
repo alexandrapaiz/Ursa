@@ -23,6 +23,8 @@ import {
   type RuleUnit,
 } from './types'
 import { buildQuery, compareScored, normalizePath, recurrenceBonus, score } from './retrieval'
+import { caseKey, caseText, embedAndRank, queryText, type SemanticIndex } from './semantic'
+import type { Embedder, EmbeddingCache } from './embedding'
 
 /** Defaults sized for an agent's opening context: enough to change how
  *  it writes the first draft, small enough that it reads all of them. */
@@ -48,15 +50,16 @@ export const MIN_RELEVANCE = 2
 export const GUARDRAIL_CAP = 10
 
 /** Every correction loop in the store, tagged with the record it came
- *  from and the owner's own words where the record carried them. */
-interface IndexedLoop {
+ *  from and the owner's own words where the record carried them.
+ *  Exported because semantic.ts embeds exactly this text. */
+export interface IndexedLoop {
   recordId: string
   loop: CorrectionLoop
   complaint?: string
   mechanism?: string
 }
 
-function indexLoops(records: OutcomeRecord[]): IndexedLoop[] {
+export function indexLoops(records: OutcomeRecord[]): IndexedLoop[] {
   const out: IndexedLoop[] = []
   for (const record of records) {
     const signals = record.signals
@@ -139,12 +142,24 @@ function toCaseUnit(indexed: IndexedLoop, why: MatchReason): CaseUnit {
  * sovereignty (plan §4, tuning/types.ts): a revoked rule survives as a
  * tombstone so a re-distill cannot resurrect it, and the tombstone is
  * exactly the thing an agent must not read.
+ *
+ * @param semantics  case rankings from semantic.ts, or undefined for a
+ *                   lexical-only briefing. Passing them in rather than
+ *                   computing them keeps this function pure and
+ *                   synchronous: the same store, request and semantic
+ *                   index produce the same briefing byte for byte, and
+ *                   no model runs inside it. `briefWithSemantics` is the
+ *                   async wrapper that produces the index.
+ * @param semanticModel  the embedding model behind `semantics`, recorded
+ *                   in coverage so a reader can tell which model ranked.
  */
 export function buildBriefing(
   tuning: TuningRecord,
   records: OutcomeRecord[],
   input: BriefingInput = {},
-  now: string = new Date().toISOString()
+  now: string = new Date().toISOString(),
+  semantics?: SemanticIndex,
+  semanticModel?: string
 ): Briefing {
   const query = buildQuery(input.domain, input.files)
   const maxRules = input.maxRules ?? DEFAULT_MAX_RULES
@@ -179,7 +194,8 @@ export function buildBriefing(
           query,
           '',
           indexed.loop.targetFiles,
-          `${indexed.loop.theme} ${indexed.loop.discoveredSpec} ${indexed.complaint ?? ''}`
+          caseText(indexed),
+          semantics?.get(caseKey(indexed.recordId, indexed.loop.id)) ?? null
         )
       ),
     }))
@@ -225,7 +241,8 @@ export function buildBriefing(
       recordsConsidered: records.length,
       loopsConsidered: loops.length,
       casesReturned: nearestCases.length,
-      retrieval: 'lexical-v0',
+      retrieval: semantics ? 'semantic-v1' : 'lexical-v0',
+      ...(semantics && semanticModel ? { retrievalModel: semanticModel } : {}),
       unfiltered: query.empty,
     },
     disclaimer: BRIEFING_DISCLAIMER,
@@ -239,6 +256,19 @@ function renderWhy(why: MatchReason): string {
   if (why.filesExact.length > 0) parts.push(`learned on ${why.filesExact.join(', ')}`)
   if (why.filesByName.length > 0) parts.push(`same file name as ${why.filesByName.join(', ')}`)
   if (why.textTokens.length > 0) parts.push(`words in common: ${why.textTokens.join(', ')}`)
+  // The semantic term is printed with the arithmetic that produced it,
+  // not as a bare number, because it is the one term that depends on the
+  // rest of the store and so cannot be checked from this line alone.
+  const sem = why.semantic
+  if (sem && sem.term > 0) {
+    parts.push(
+      `close in meaning (cosine ${sem.cosine}, ${sem.lead >= 0 ? '+' : ''}${sem.lead} over the ` +
+        `${sem.fieldMean} field average, worth ${sem.term})`
+    )
+  }
+  if (parts.length === 0 && sem) {
+    parts.push(`nothing in common but the request; nearest by meaning at cosine ${sem.cosine}`)
+  }
   return `${parts.join('; ')} (score ${why.score})`
 }
 
@@ -325,9 +355,45 @@ export function renderBriefing(briefing: Briefing): string {
       `${cov.recordsConsidered} outcome record${cov.recordsConsidered === 1 ? '' : 's'}; ` +
       `returned ${cov.axiomsReturned} rule${cov.axiomsReturned === 1 ? '' : 's'} and ` +
       `${cov.casesReturned} case${cov.casesReturned === 1 ? '' : 's'}. ` +
-      `Ranking: ${cov.retrieval}.`
+      `Ranking: ${cov.retrieval}${cov.retrievalModel ? ` (${cov.retrievalModel})` : ''}.`
   )
   lines.push('')
 
   return lines.join('\n')
+}
+
+/**
+ * The briefing with semantic case ranking: `buildBriefing`, plus the one
+ * await that the pure function above deliberately does not contain.
+ *
+ * This is the entry point `ursa brief --semantic` and an MCP
+ * `get_briefing` handler call. It degrades rather than fails: when
+ * `embedder` is null — no model downloaded, no network, the optional
+ * dependency omitted at install — it returns exactly what
+ * `buildBriefing` would have returned, and the briefing's coverage block
+ * says `lexical-v0` so the caller can tell which ranking it got. A
+ * briefing that silently claimed to be semantic when it was not would be
+ * worse than one that never offered semantics at all.
+ *
+ * `cache.vectors` is mutated with anything newly computed. Persisting is
+ * the caller's job (`saveCache`), so a briefing taken against a fixture
+ * leaves no trace on disk.
+ */
+export async function briefWithSemantics(
+  tuning: TuningRecord,
+  records: OutcomeRecord[],
+  input: BriefingInput,
+  embedder: Embedder | null,
+  cache: EmbeddingCache,
+  now: string = new Date().toISOString()
+): Promise<Briefing> {
+  if (!embedder) return buildBriefing(tuning, records, input, now)
+  const request = queryText(input.domain, input.files)
+  const cases = indexLoops(records).map((indexed) => ({
+    key: caseKey(indexed.recordId, indexed.loop.id),
+    text: caseText(indexed),
+  }))
+  const semantics = await embedAndRank(embedder, cache, request, cases)
+  if (semantics.size === 0) return buildBriefing(tuning, records, input, now)
+  return buildBriefing(tuning, records, input, now, semantics, embedder.id)
 }

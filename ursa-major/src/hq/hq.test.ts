@@ -147,7 +147,7 @@ describe('renderBriefing', () => {
 })
 
 describe('the brief CLI', () => {
-  it('reads .ursa/tuning.json and .ursa/records/ and prints JSON on --json', () => {
+  it('reads .ursa/tuning.json and .ursa/records/ and prints JSON on --json', async () => {
     const root = mkdtempSync(join(tmpdir(), 'ursa-hq-'))
     expect(writeFixtureStore(root)).toBe(join(root, '.ursa'))
 
@@ -159,7 +159,7 @@ describe('the brief CLI', () => {
     console.log = (line: string) => printed.push(line)
     let code: number
     try {
-      code = main(['brief', root, '--files', 'src/app/page.tsx', '--json'])
+      code = await main(['brief', root, '--files', 'src/app/page.tsx', '--json'])
     } finally {
       console.log = realLog
     }
@@ -176,13 +176,13 @@ describe('the brief CLI', () => {
     expect(loadRecords(join(root, '.ursa', 'records'))).toEqual([])
   })
 
-  it('refuses an unknown command with a usage line and a non-zero code', () => {
+  it('refuses an unknown command with a usage line and a non-zero code', async () => {
     const errs: string[] = []
     const realError = console.error
     console.error = (line: string) => errs.push(line)
     let code: number
     try {
-      code = main(['explain', '.'])
+      code = await main(['explain', '.'])
     } finally {
       console.error = realError
     }
