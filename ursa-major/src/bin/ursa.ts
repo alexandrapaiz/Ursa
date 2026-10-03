@@ -19,6 +19,7 @@ import { resolve as absPath, extname } from 'node:path'
 import { blobAt, findCommitPairsWithDiagnostics, type PairFinderDiagnostics } from '../pairfinder'
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
+import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
@@ -146,6 +147,18 @@ export function renderRunSummary(
       )
     }
   }
+
+  const tested = records.reduce((n, r) => n + (r.durability?.testedSpans ?? 0), 0)
+  if (tested > 0) {
+    let durable = 0, decayed = 0
+    for (const r of records) {
+      durable += r.durability?.durableChars ?? 0
+      decayed += r.durability?.decayedChars ?? 0
+    }
+    const pct = Math.round((decayed / (durable + decayed || 1)) * 100)
+    lines.push(`Of what you kept at the time, ${pct}% was gone by the latest commit.`)
+    lines.push(`Surviving your first edit is not the same as surviving the work.`)
+  }
   return lines.join('\n')
 }
 
@@ -205,6 +218,11 @@ export async function main(argv: string[]): Promise<number> {
   for (const ep of episodes) {
     const record = resolveEpisode(projectPath, ep)
     if (!record || record.stats.generated.totalChars < minChars) continue
+    // The time dimension: the span classes above are a verdict taken at
+    // ep.finalSha. This walks the commits after it and records what the
+    // real work did to each span. Git-only, so it lives here and not in
+    // resolve(), which also serves pasted conversations with no history.
+    annotateDurability(projectPath, record, ep.finalSha, ep.closedAt)
     record.signals = deriveSignals(record, declaration)
     saveRecord(projectPath, record)
     records.push(record)

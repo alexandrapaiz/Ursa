@@ -63,6 +63,24 @@ the person accepted or corrected it by eye. When a rendered state exists,
 a lab reading the record can go and look at the thing that was actually
 judged. `ursa run` fills `repo` on every run and upgrades it to `hosted`
 when the episode's own commit names a domain.
+A class is a verdict taken at one instant: the first commit in which
+the person edited the agent's output. When the project's git history
+continues past that commit, every surviving span also carries **how
+long it lasted**, because text kept at the time and removed by the work
+three commits later is not the same as text that was kept.
+
+| Fate | Meaning |
+|---|---|
+| `durable` | still there at the newest commit |
+| `eroded` | partly removed by later work |
+| `decayed` | gone. The span's own class is a false positive. |
+| `untested` | nothing came after it, so nothing is claimed |
+
+The record's `decayRate` is the share of its own "the user kept it"
+verdict that later work overturned, scored against the person's own
+prose in the same files so a volatile repo is not read as a bad model.
+How it is measured is in
+[`docs/design/span-lifespan.md`](docs/design/span-lifespan.md).
 
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
@@ -186,6 +204,7 @@ npx tsx src/cli.ts --id ursa-minor-site \
 | `src/resolve.ts` | joins final text to generations and classifies every span |
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
 | `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
+| `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 | `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
