@@ -30,6 +30,11 @@ import type { TuningRecord } from '../tuning/types'
 import { listRecordIds, loadRecord } from '../store'
 import { applyVerdict, NOTHING_APPLIED, type AppliedVerdict } from './declare'
 import { deriveKeys, encryptJson, type DerivedKeys } from './crypto'
+import {
+  HEADER_BODY_SHA256,
+  HEADER_WRITE_SECRET,
+  sha256HexBytes,
+} from '../../overlay/lib/write-capability'
 
 export interface OverlayTuningLine {
   statement: string
@@ -127,13 +132,29 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
   let lastPushedHash = ''
   let running = false
 
+  // The write secret is the bridge's proof that this blob is its own to
+  // replace, and the body digest is plan §16.4's integrity half. Both go
+  // out as headers rather than in the URL: the path is already logged by
+  // every hop, and the write secret is the one derived value that must
+  // not be.
   async function push(payload: OverlayPayload): Promise<void> {
     const blob = await encryptJson(keys, payload)
     const res = await fetch(`${opts.syncUrl}/api/sync/${keys.blobId}`, {
       method: 'PUT',
-      headers: { 'content-type': 'application/octet-stream' },
+      headers: {
+        'content-type': 'application/octet-stream',
+        [HEADER_WRITE_SECRET]: keys.writeSecret,
+        [HEADER_BODY_SHA256]: await sha256HexBytes(blob),
+      },
       body: new Blob([blob.buffer as ArrayBuffer]),
     })
+    if (res.status === 403) {
+      throw new Error(
+        'sync push refused: the write secret does not name this blob. The sync '
+        + 'server is running an older derivation than this bridge, or the other '
+        + 'way round. Redeploy the overlay so both are on ursa-overlay-v2.',
+      )
+    }
     if (!res.ok) throw new Error(`sync push failed: ${res.status} ${await res.text()}`)
   }
 

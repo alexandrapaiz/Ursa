@@ -919,3 +919,136 @@ It reads a verdict the user already gave for her own reasons, then
 refuses it unless her words are literally in the trace. Braintrust needs
 a grader per dataset and inherits that grader's taste. Ursa needs none,
 which is the whole reason its signal is worth buying.
+
+### 2026-09-28 — Craft scan: Obsidian Sync, and the audit as the trust proof
+
+Today's one product, chosen because it ships the exact surface I touched:
+client-side encrypted sync of a local vault to a paid server, with no
+account recovery, which is Ursa's overlay §16.4 with a different payload.
+
+**Worth stealing: the audit is the artifact they publish, not the
+architecture.** Obsidian has two independent third-party audits of Sync
+specifically — Cure53 and Trail of Bits, both scoped to the Sync API,
+server, and cryptography — released together on 2026-05-13 with every
+finding remediated and the remediations validated by the auditor who
+found them (https://obsidian.md/blog/cure53-tob-sync-audits/). They sit
+on a permanent Security page, not in a blog post that scrolls away. Ursa
+says in its own BMC that publishing methodology is simultaneously the
+enterprise sales channel and the user trust proof; Obsidian is the
+worked example of what that looks like when the thing published is
+adversarial and paid for. What Ursa has today is a self-audit by its own
+security seat, which is a real artifact and not the same kind of claim.
+
+One finding in the Trail of Bits report reads directly onto Ursa's sync
+route: **TOB-OBSYNC-10, "general lack of cryptographic binding between
+file content and metadata."** Their case is that the server can read
+which device uploaded a file and when, because it needs that to route
+changes. Ursa's case is narrower and different, and it is a real gap —
+see the first entry below, which this finding is the trigger for.
+
+**Where Ursa is already ahead:** Obsidian's server holds per-user
+accounts and the path-to-content mapping, because Sync has to merge
+concurrent edits from several devices. Ursa's sync route holds no
+account, no user row, and after today no stored secret of any kind: the
+blob's name is the hash of its write capability, so the route can refuse
+a stranger's write while knowing nothing about who the writer is. That
+is a strictly smaller trusted surface, and it is available to Ursa only
+because the overlay syncs one writer's derived state rather than merging
+many writers' edits. Worth saying out loud before anyone proposes
+multi-device write.
+
+### 2026-09-28 — A stale ciphertext replayed is a verdict rolled back
+- Trigger: Trail of Bits finding TOB-OBSYNC-10 in today's craft scan,
+  read against the sync route I changed this run. Ursa's version of
+  "content not bound to metadata" is narrower than Obsidian's and it is
+  live: `OverlayPayload` (ursa-major/src/bridge/index.ts) carries
+  `updatedAt` but nothing that binds a payload to the blob it was
+  written for, and nothing monotonic. AES-256-GCM authenticates that a
+  blob was produced by the key holder; it says nothing about *when*.
+- What: anyone who can write to a blob can also re-write an older
+  ciphertext to it, and the page will decrypt it happily, because it is
+  genuinely authentic — just stale. The overlay would then show a
+  verdict the user has since moved past, at a lower `userTurns`, with no
+  signal that it went backwards. Two callers can do this: a network
+  position that captured an earlier `PUT` body and now holds the write
+  secret from a later one, and the sync server itself, which sees every
+  version and is explicitly not trusted for anything but storage. The
+  blast radius is a wrong reading on a 380 px window rather than a
+  corrupted record, which is why this is a ledger entry and not a
+  same-run fix. It matters anyway, for the reason the verdict reader
+  exists at all: acceptance is the one label Ursa refuses to infer, and
+  a silently rolled-back verdict is an inferred one.
+- First step: add `sequence: number` to `OverlayPayload`, incremented
+  per push and held in `startBridge`'s closure alongside
+  `lastPushedHash`, plus `blobId` inside the plaintext so a payload
+  names the blob it belongs to. The page refuses a payload whose
+  `sequence` is below the highest it has seen this session, or whose
+  `blobId` is not the one it polled, and says "sync went backwards"
+  rather than rendering it. Both fields are inside the AEAD, so neither
+  is forgeable and no server change is needed.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-28 — The record has no state for "delivered, awaiting a verdict"
+- Trigger: this run's own standup observation. Seven engineer pull
+  requests are open on this repository and none has merged: #13, #16,
+  #18, #22, #24, #25, #27, the oldest four days old. Ursa's own repo is
+  now the largest corpus it has, and its dominant state is one the
+  outcome record cannot express.
+- What: every span classification in CLAUDE.md §1 assumes the finished
+  work exists to join backward from. `survived_verbatim`,
+  `survived_mutated`, `generated_deleted`, and
+  `no_generation_provenance` are all readings of a thing that got
+  finished. A branch that was pushed, passed CI, and then waited is
+  none of them. The pair finder sees no edit, so it emits nothing; the
+  verdict reader reads chat, and there is no chat, because the owner's
+  decision is a merge or a close and she never said a word. Treating
+  that as `generated_deleted` would be a lie about a rejection that
+  never happened, and treating it as survival would be worse, since
+  `survived_*` is the label labs pay for. This is exactly the gap the
+  2026-09-20 ledger finding ("merge commits are not edits; the PR
+  reader is load-bearing") points at from the other side: that entry
+  says the corrections live in the PR, and this one says the *absence*
+  of a decision also lives there and is currently invisible.
+- First step: add `pending` to whatever enum the resolver uses for a
+  work unit's disposition, and have the PR reader emit a record with
+  every span classified `awaiting_verdict` plus a `pendingSince`
+  timestamp, for any branch that is pushed and unmerged. Then the
+  trajectory metadata CLAUDE.md §1 already names — "whether the thing
+  was finished or abandoned" — has a third honest answer, and a stalled
+  queue becomes a measurement instead of a silence.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-28 — Commission a third-party audit of the overlay's crypto
+- Trigger: today's craft scan. Obsidian publishes two independent audits
+  of Sync's cryptography, and that is the artifact users and enterprise
+  buyers are actually shown. Ursa now has a self-audit of the same class
+  of surface (docs/security/audit-2026-09-27.md) plus, as of this run, a
+  design artifact for the write capability. Neither is adversarial and
+  neither was paid for.
+- What: scope one external review to exactly the overlay's crypto and
+  sync path — `ursa-major/src/bridge/crypto.ts`,
+  `ursa-major/overlay/lib/crypto.ts`,
+  `ursa-major/overlay/lib/write-capability.ts`, and
+  `ursa-major/overlay/app/api/sync/[key]/route.ts`, 303 lines including
+  comments — rather than the whole product. Publish it whole, findings and
+  remediations both, the way Obsidian did. The argument for spending
+  here rather than elsewhere is the BMC's own: Ursa's primary asset is
+  consent that compounds daily and can be destroyed in a week, the
+  labs-side sale is underwritten by the same privacy architecture, and
+  "we audited ourselves" is the weakest possible version of that claim
+  in front of a frontier lab's security review.
+- First step: not an action. This costs money, so it is a proposal for
+  the owner under the engineer charter's cost boundary, and the first
+  step is her verdict on whether a scoped crypto review is worth buying
+  before the overlay has a second user. If yes, the day-sized unit is a
+  scope document naming those four files, the threat model already
+  written in docs/design/sync-write-capability.md §1 and §9, and the
+  three residuals it does not close.
+- Cost: not $0, and deliberately unpriced here. No vendor was contacted,
+  no account was created, and nothing about either firm's minimum
+  engagement was checked, so quoting a figure would be inventing one.
+  Getting a quote is itself the owner's call under the charter's cost
+  boundary.
+- Status: proposed
