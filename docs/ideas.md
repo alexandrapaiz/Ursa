@@ -1983,3 +1983,140 @@ seventeen times over, exactly as `npm test` did, because the check that
 found the four defects did not exist until this run added it. A gate is
 only as good as the step it runs, and that is the half neither product
 can supply.
+
+### 2026-10-03 — The record forgets which pull request it came from
+- Trigger: closing the merge-attribution gap on the pull-request path
+  needed a place to say "a merge sat here and I could not read it," so
+  the field went on `PullRequestProvenance`. Then
+  `grep -rn pullRequest ursa-major/src --include=*.ts`, with
+  `src/adapters/` excluded, returned nothing at all. The whole
+  `pullRequest` block — the closure kind, the acceptance basis sentence,
+  the stated corrections lifted from review comments, the regression,
+  and now `unreadableMerges` — reaches `.ursa/episodes.json` and stops
+  there. `OutcomeRecord` has no field for any of it.
+- What: a record produced from a pull request currently cannot tell a
+  reader, or a lab, that it came from one. The acceptance basis is the
+  sharpest loss: `acceptanceOf` writes a full sentence of evidence
+  ("alexandrapaiz merged owner/name#42 at <time>: an explicit act, not
+  retention") which exists precisely so retention is never read as
+  acceptance, and the record that gets sold carries none of it. Give
+  `OutcomeRecord` a `source` block that holds the provenance of the
+  capture path, with `pullRequest?: PullRequestProvenance` as its first
+  member, and render it in `src/viewer.ts` beside the verdict. The
+  unreadable-merge warning then reaches the user who can fix it with one
+  `git fetch`, instead of only the terminal that happened to run
+  `cli.ts run`.
+- First step: add `source?: { pullRequest?: PullRequestProvenance }` to
+  `OutcomeRecord` in `src/types.ts`, fill it in `resolveEpisode` when the
+  episode's `closureHeuristic` is `github-pr`, and assert in
+  `src/adapters/github-pr.test.ts` that the resolved record for the
+  Ursa#13 fixture carries the acceptance basis string. One slice,
+  because the viewer and the HQ fixtures both construct records and will
+  need the field threaded.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-03 — An unknown deletion cause is not the human's
+- Trigger: the same fix, one level down. `gitDeletionAttributor` reads a
+  merge's tree through `blobAt`, which returns `null` for anything it
+  cannot read. When the merge's own blob and every parent's blob come
+  back `null` — a shallow clone, a pruned object, a fork whose objects
+  were never fetched — the loop finds no parent holding the text and
+  falls through to `HUMAN`. So the function that exists to stop
+  "unknown" being read as "the person discarded it" still does exactly
+  that whenever the repository cannot be read, and silently.
+- What: `DeletionCause` has two values, `human_edit` and `merge`, and
+  the honest answer needs a third. A span whose merge boundary could not
+  be inspected is `unknown`, its chars belong in neither
+  `humanDeletedChars` nor `mergeDeletedChars`, and `humanDeletedPct` —
+  which `src/types.ts` documents as "the only deletion rate safe to call
+  a discard rate" — must not have them in its numerator. The viewer
+  should say how many chars could not be judged and why, because a
+  reader who sees a 17% discard rate deserves to know if a third of it
+  was a failed `git show`. This is the shape of defect the product is
+  built to refuse, so it should not survive in the product's own code.
+- First step: add `'unknown'` to `DeletionCause` in `src/types.ts` and
+  make it fall out of a positive test rather than a default:
+  `gitDeletionAttributor` returns it when a merge in `m.paths` has an
+  unreadable tree. Then follow the type error, which is the whole point
+  of the `tsc --noEmit` gate added on 2026-10-03 — it will name every
+  site that must decide what to do with the new value:
+  `src/stats.ts:102`, `src/viewer.ts:236`, `src/bin/ursa.ts:119` and
+  `src/hq/fixtures.ts`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-03 — What a run excluded from history belongs in the record, not in a comment
+- Trigger: today's craft scan of CodeScene, below. Its handling of
+  merge commits is a documented, per-project configuration setting with
+  a stated default. Ursa's handling of merge commits is four code
+  comments in three files, and the only way to know what a given record
+  excluded is to read `src/pairfinder.ts` and
+  `src/adapters/github-pr.ts` at the commit that produced it.
+- What: every capture run makes a set of history decisions that change
+  what the record means. Merges are refused as pairing targets. Commits
+  whose author matches the agent pattern are not eligible as finals, and
+  that fallback is suppressed entirely when the pattern matches the
+  whole history. Files outside `TEXT_EXTS` are skipped, as are blobs
+  over `MAX_BLOB_CHARS`. Each of those is reasoned and each is
+  invisible in the output. `PairFinderDiagnostics` already proves the
+  pattern is worth it for one of them. Put a `historyPolicy` block on
+  the record naming every exclusion that fired, with its count, so a lab
+  auditing a record can see what the denominator was built from.
+  "Publish methodology openly" (CLAUDE.md §5) is a claim about files
+  like this one, and it is cheaper to honour per record than per blog
+  post.
+- First step: inventory the exclusions. One test that asserts, for the
+  `fixtures/pr/ursa-pr-13.json` capture, the exact count of commits
+  refused for each reason, which is the data a `historyPolicy` block
+  would carry and is worth having even before the block exists.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-03, second dispatch (engineer's craft scan)
+
+Scanned **CodeScene** (codescene.com, behavioural code analysis), picked
+because it is the mature product that does the thing this run did: mine
+a git history for a signal about the work rather than about the code's
+current text. Read from search results against its own documentation
+today, not from memory. Limit stated plainly: no account was created and
+nothing was installed, per the no-new-paid-services boundary, so this is
+a read of public docs and not of the running product.
+
+**Worth stealing, and it lands on the exact decision this run made.**
+CodeScene filters merge commits out of its analyses by default, and it
+walks history explicitly first-parent with merge diffs off:
+`git log --first-parent --diff-merges=off --name-only --pretty=format:
+--diff-filter=ACMR <base>..HEAD`. Two things are worth taking. First,
+the policy is a *documented project setting with a stated default*
+rather than an implementation detail, and CodeScene applies the same
+treatment to another history artefact that biases its numbers, letting
+a project exclude the contributions in an initial import commit. That
+is the "declared history policy" ledger entry above. Second, the flag
+detail is a direct check on today's change: `--first-parent` alone still
+emits merge-introduced paths on current git versions, which is why
+`--diff-merges=off` is needed. This run's walk filters a merge by
+`c.files`, the file list GitHub's commits API returns, and that list is
+the diff against the merge's first parent. If GitHub ever returns a
+combined diff there instead, the filter gets *wider*, and the direction
+of that error is safe: a merge wrongly admitted still has to pass
+`gitDeletionAttributor`'s containment test, which asks whether the text
+was in a parent and absent from the result, so the cost is two extra
+`git show` calls and never a wrong label. Truncation is the unsafe
+direction, and the commits API caps at 300 files per commit. Recorded in
+`docs/design/pr-path-merge-attribution.md` §8.
+
+**Where Ursa does better.** CodeScene's answer to a merge is to drop it.
+That is right for its question, which is how much human work happened
+where, and it is wrong for Ursa's, because the span the merge destroyed
+is still a span of generated text whose fate the record has to state.
+Dropping the merge throws away the event along with the mislabel: the
+`generated_deleted` count falls and nobody learns that the text died
+mechanically. Ursa keeps the span, keeps the count, and corrects the
+cause, which is why `mergeDeletedChars` exists as its own column beside
+`humanDeletedChars` rather than as a filter applied before counting. For
+a reward signal, a discarded event is lost data and a relabelled event
+is better data. The deeper difference is upstream of both: CodeScene
+reads commits and has no join to the model generation that proposed the
+line, so it can say a file churned and never which model's output
+churned. That join is the whole artifact (CLAUDE.md §1).
