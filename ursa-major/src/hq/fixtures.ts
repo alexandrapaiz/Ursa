@@ -25,7 +25,10 @@ export function zeroStats(): Stats {
     uncertainSpans: 0,
     trivialSpans: 0,
     byModel: {},
-    generated: { totalChars: 0, survivedChars: 0, deletedChars: 0, deletedPct: 0 },
+    generated: {
+      totalChars: 0, survivedChars: 0, deletedChars: 0, deletedPct: 0,
+      humanDeletedChars: 0, humanDeletedPct: 0, mergeDeletedChars: 0,
+    },
     perFile: [],
     perConversation: [],
   }
@@ -58,6 +61,9 @@ export function makeRecord(
   return {
     schemaVersion: '0.1.0',
     task: { id, finished: true, generatedAt: '2026-09-26T00:00:00.000Z' },
+    // The briefing fixture is a repo's records, so `repo` is the honest kind.
+    // No renderRef: nothing in this synthetic store is served anywhere.
+    artifact: { kind: 'repo' },
     files: filePaths.map((path) => ({ path, mode: 'code' as const, text: '', spans: [] })),
     conversations: [],
     generations: [],
