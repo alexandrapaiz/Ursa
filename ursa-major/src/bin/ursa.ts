@@ -16,7 +16,7 @@
 
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
-import { blobAt, findCommitPairs } from '../pairfinder'
+import { blobAt, findCommitPairsWithDiagnostics, type PairFinderDiagnostics } from '../pairfinder'
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { buildEpisodes, type Episode } from '../episodes'
@@ -90,7 +90,11 @@ export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord 
   })
 }
 
-export function renderRunSummary(records: OutcomeRecord[], episodes: Episode[]): string {
+export function renderRunSummary(
+  records: OutcomeRecord[],
+  episodes: Episode[],
+  diagnostics?: PairFinderDiagnostics,
+): string {
   const lines: string[] = []
   let verbatim = 0, mutated = 0, generated = 0, deleted = 0
   for (const r of records) {
@@ -116,6 +120,31 @@ export function renderRunSummary(records: OutcomeRecord[], episodes: Episode[]):
   )]
   for (const url of hosted) {
     lines.push(`This work is also live at ${url}, so the records carry where to go and look at it.`)
+  }
+
+  // An empty run used to print "0 work units found" and stop, which reads as
+  // "this project has no correction work in it". Often it means the opposite,
+  // so say what was looked at and what the walk decided.
+  if (diagnostics) {
+    const suppressed = diagnostics.authorFallbackSuppressed
+    if (suppressed) {
+      const names = suppressed.authors.map((a) => `"${a}"`).join(', ')
+      lines.push('')
+      lines.push(`Every commit in this history is authored ${names}.`)
+      lines.push(
+        'That name matches the agent-identity pattern, so on its own it cannot tell a generated commit from one of yours, and it was set aside for this run. Only the Co-Authored-By trailer classified commits.',
+      )
+      lines.push(
+        'If your own commits really do carry that name, set a different one for them, or pass a narrower author pattern, and run again.',
+      )
+    }
+    if (episodes.length === 0) {
+      const looked = diagnostics.generatedByTrailer + diagnostics.generatedByAuthorName
+      lines.push('')
+      lines.push(
+        `Scanned ${diagnostics.commitsScanned} commit${diagnostics.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${diagnostics.generatedByTrailer} by trailer, ${diagnostics.generatedByAuthorName} by author name), and none of those was followed by an edit of the same file without an agent marker.`,
+      )
+    }
   }
   return lines.join('\n')
 }
@@ -170,7 +199,7 @@ export async function main(argv: string[]): Promise<number> {
     declaration = { accepted: false, basis: 'owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed' }
   }
 
-  const pairs = findCommitPairs(projectPath)
+  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath)
   const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
@@ -181,7 +210,7 @@ export async function main(argv: string[]): Promise<number> {
     records.push(record)
   }
   saveEpisodes(projectPath, episodes)
-  console.log(renderRunSummary(records, episodes))
+  console.log(renderRunSummary(records, episodes, diagnostics))
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
   return 0
 }
