@@ -1,0 +1,229 @@
+{
+  "snapshot": {
+    "repo": "alexandrapaiz/Ursa",
+    "number": 7,
+    "title": "ExO weekly cycle 2026-09-20",
+    "baseRef": "main",
+    "headRef": "exo/2026-09-20",
+    "headSha": "e4aed8ee2d54e4530c791749d53318266314b3d7",
+    "outcome": "merged",
+    "mergedAt": "2026-09-24T04:42:34Z",
+    "closedAt": "2026-09-24T04:42:34Z",
+    "mergedByLogin": "alexandrapaiz",
+    "mergeCommitSha": "ef8e28373d825c9d957d760b4074e3f3589f9122",
+    "commits": [
+      {
+        "sha": "a1ce6c16004f650f063029231ec23d582f4a1bd6",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T19:57:23Z",
+        "subject": "ExO cycle 2026-09-20: open draft",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": []
+      },
+      {
+        "sha": "c58e1ce6be69ba1327871ecc59a111c3d1acceeb",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:00:56Z",
+        "subject": "Incidents: citation rule, close 2 and 3 with verification, file 4 and 5",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/agents/incidents.md"
+        ]
+      },
+      {
+        "sha": "3aa1237da0cb64bdb7a602b20ffb3bcb66960067",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:01:27Z",
+        "subject": "Charters: redaction rider on artifact standard; namespaced incident citations",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "prompts/engineer-agent.md",
+          "prompts/exo-agent.md",
+          "prompts/finance-agent.md",
+          "prompts/frontend-agent.md",
+          "prompts/market-agent.md",
+          "prompts/okr-agent.md",
+          "prompts/pm-agent.md",
+          "prompts/research-agent.md",
+          "prompts/sales-agent.md",
+          "prompts/security-agent.md",
+          "prompts/skill-agent.md"
+        ]
+      },
+      {
+        "sha": "971527491f773b2695caab545700a2f23b2ab2fa",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:02:37Z",
+        "subject": "Queue the redaction gate and the two owner-routed redactions (Ursa incident 4)",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/agents/incidents.md",
+          "docs/agents/pending-workflow-changes.md"
+        ]
+      },
+      {
+        "sha": "8d3e4207dd0744aa1835f11f9257dd3dbaed16b1",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:03:01Z",
+        "subject": "Org chart: governance-cycle tracker with evidence per condition",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/agents/org-chart.md"
+        ]
+      },
+      {
+        "sha": "3a6f09ea0aa499ea4697570ee7202b8a89064c58",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:05:06Z",
+        "subject": "README: both-layer architecture diagram (rendered) and the missing docs/agents links",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "README.md"
+        ]
+      },
+      {
+        "sha": "f27a74ca76b9a192b9aebb0326af8d9eb3d4151b",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:05:57Z",
+        "subject": "Charter 5b: record the verified housekeeping surface; queue the repo description",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/agents/pending-workflow-changes.md",
+          "prompts/exo-agent.md"
+        ]
+      },
+      {
+        "sha": "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-20T20:06:44Z",
+        "subject": "Learning log: 2026-09-20 entry, and the Incident 1 failure-mode addendum",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/agents/incidents.md",
+          "docs/agents/learning-log.md"
+        ]
+      },
+      {
+        "sha": "e4aed8ee2d54e4530c791749d53318266314b3d7",
+        "authorName": "alexandrapaiz",
+        "authorLogin": "alexandrapaiz",
+        "authoredAt": "2026-09-24T04:42:12Z",
+        "subject": "Merge main into exo/2026-09-20: keep refreshed chart, tracker as history",
+        "trailers": "Claude Fable 5 <noreply@anthropic.com>",
+        "parentCount": 2,
+        "files": [
+          ".github/workflows/agent-engineer.yml",
+          ".github/workflows/agent-finance.yml",
+          ".github/workflows/agent-frontend.yml",
+          ".github/workflows/agent-market.yml",
+          ".github/workflows/agent-pm.yml",
+          ".github/workflows/agent-research.yml",
+          ".github/workflows/agent-security.yml",
+          ".github/workflows/agent-skill.yml",
+          "CLAUDE.md",
+          "README.md",
+          "docs/agents/org-chart.md",
+          "docs/decisions.md",
+          "docs/design/product-plan.md",
+          "docs/ideas.md",
+          "docs/research/minor-training-fit.md",
+          "docs/sprints/dispatch-queue.md",
+          "docs/sprints/pending.md",
+          "docs/sprints/sprint-2026-09-21.md",
+          "docs/standards/lessons.md",
+          "docs/standards/pm.md",
+          "prompts/engineer-agent.md",
+          "prompts/exo-agent.md",
+          "prompts/finance-agent.md",
+          "prompts/frontend-agent.md",
+          "prompts/market-agent.md",
+          "prompts/okr-agent.md",
+          "prompts/pm-agent.md",
+          "prompts/research-agent.md",
+          "prompts/sales-agent.md",
+          "prompts/security-agent.md",
+          "prompts/skill-agent.md"
+        ]
+      }
+    ],
+    "reviewComments": [],
+    "capturedAt": "2026-09-28T18:52:16.846Z"
+  },
+  "repo": {
+    "parents": {
+      "ef8e28373d825c9d957d760b4074e3f3589f9122": [
+        "fa0aea62c14a782f05ad7672fde414c9b04c34dc"
+      ],
+      "e4aed8ee2d54e4530c791749d53318266314b3d7": [
+        "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a",
+        "fa0aea62c14a782f05ad7672fde414c9b04c34dc"
+      ]
+    },
+    "blobs": {
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:docs/agents/incidents.md": "1c639bf40adb766a738ee949a3e71eb282574ae7",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:docs/agents/incidents.md": "1c639bf40adb766a738ee949a3e71eb282574ae7",
+      "ef8e28373d825c9d957d760b4074e3f3589f9122:docs/agents/incidents.md": "1c639bf40adb766a738ee949a3e71eb282574ae7",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/engineer-agent.md": "4c14fa05258795843c2a5123c8c47f9b16a7af4a",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/engineer-agent.md": "188112eeec0cd55deb1156db0f4bef1d4186fa17",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/engineer-agent.md": "9e542a6b3813a38cab4dd1edb0d3a06d9cab013a",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/exo-agent.md": "8b85b647fbb20808538a9449e23b8a51c4bb457f",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/exo-agent.md": "631fa18df0de3f41cbafab9b9f2af15ccbdbeb11",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/exo-agent.md": "6b8559670c35b3457346cda9ee19bd1c031256b7",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/finance-agent.md": "2bd6f78d8ce28cefe6a0a9e462bd83c2496673e4",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/finance-agent.md": "996119435520e9549dc5bb6e1fb8a89abf218f46",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/finance-agent.md": "228d5ef7205c7acf0d0236b3bbd9ceb85f200d5e",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/frontend-agent.md": "dafad804ada59860e098514af579ff0ead95e444",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/frontend-agent.md": "4410795d8b82b97d4c48aa29a8142271a7f16340",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/frontend-agent.md": "9a748bee0229b28cfb8edc9e953fcaa74e89d386",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/market-agent.md": "b89616cf1abc79acca25b5059dcf7b9696b1a8f0",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/market-agent.md": "b897abe1dc1b0324b4caf179e34c1cdc68c98a6b",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/market-agent.md": "cb9381ecd9819f0a207f84206794f1979dee9375",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/okr-agent.md": "02ca95d201caa7b61d853ff1096bc46403a74490",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/okr-agent.md": "e3bb66b863b25964c6a6d38edcb8e7575d5caa01",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/okr-agent.md": "e64e135bd95916a139cf9e219913548b55597728",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/pm-agent.md": "4c10474e6f5332df0a31ccc66d3007d7d2710fa2",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/pm-agent.md": "f4bc08132e9d4c60055784e7a5e757b0df3debc3",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/pm-agent.md": "e62c9bbd628ee4996ec0c9c8898997ca4fd1847a",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/research-agent.md": "1c70fdfbdff5914f0a366ef09088bc994ffa3983",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/research-agent.md": "6f04906b139eaba8b42541ce06e9ee55a9471570",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/research-agent.md": "43e701bb9449017dedb0f11d80c4208c4a9bf5b4",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/sales-agent.md": "54080f685cc1b2828e1c846163220198aa596c07",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/sales-agent.md": "c10460416f58c482950c69583a020bc940f968e7",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/sales-agent.md": "e12a4a764fb935947f3a967e78d7c9b0c69d38e3",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/security-agent.md": "3ed0fca5b88d9b957b141bf62bb961ecef30d4ca",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/security-agent.md": "e7c7e75978267e789c5a8b7bab2015156fdee062",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/security-agent.md": "0a95d33ac8246682c9683ac12295e3b881d79886",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:prompts/skill-agent.md": "6f900c7fe6b663e9709ebf2ca3f71e8af952ff2a",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:prompts/skill-agent.md": "ba65b84406d05adf854d53d1519cbae5477c7882",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:prompts/skill-agent.md": "9714347083885c8d14f8a426ba04b7800977ceba",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:docs/agents/pending-workflow-changes.md": "3c517b6e97bf3c3ba4b278dfb531fb5f63eff658",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:docs/agents/pending-workflow-changes.md": "3c517b6e97bf3c3ba4b278dfb531fb5f63eff658",
+      "ef8e28373d825c9d957d760b4074e3f3589f9122:docs/agents/pending-workflow-changes.md": "3c517b6e97bf3c3ba4b278dfb531fb5f63eff658",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:docs/agents/org-chart.md": "7d0ed48ec0e2b08156b9b345ac75d4b2744e2928",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:docs/agents/org-chart.md": "715297762e7c847a3a7f3422f553df50a2de734a",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:docs/agents/org-chart.md": "a5a709ce0a48308df490ec62302cde90bb2bec9c",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:README.md": "8b64a689b79f3e3086576de57cae8183e8dcf5a8",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:README.md": "6ddf33b2a87921677618c66bb90586cf5ac81bbc",
+      "fa0aea62c14a782f05ad7672fde414c9b04c34dc:README.md": "c00f5557b476da5b4e97f649122b121be847390b",
+      "e4aed8ee2d54e4530c791749d53318266314b3d7:docs/agents/learning-log.md": "73240f219a54951871e27638a70249b71b34ffbe",
+      "3520b6da6a1c10bc5b39d29590c9ee3604a18a1a:docs/agents/learning-log.md": "73240f219a54951871e27638a70249b71b34ffbe",
+      "ef8e28373d825c9d957d760b4074e3f3589f9122:docs/agents/learning-log.md": "73240f219a54951871e27638a70249b71b34ffbe"
+    }
+  }
+}
