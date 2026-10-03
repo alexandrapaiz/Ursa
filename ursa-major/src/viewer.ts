@@ -45,6 +45,7 @@ export function renderViewer(record: OutcomeRecord): string {
     display: inline-block; border: 1px solid var(--border); border-radius: 99px;
     padding: 1px 10px; margin-left: 8px; font-size: 12px; color: var(--text-secondary);
   }
+  header .meta .chip a { color: inherit; text-decoration: underline; }
   .tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 14px; }
   .tile {
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
@@ -141,6 +142,38 @@ export function renderViewer(record: OutcomeRecord): string {
   var meta = document.getElementById('meta');
   meta.textContent = 'generated ' + R.task.generatedAt.slice(0, 10) + ' · ' + R.files.length + ' files · ' + R.generations.length + ' generations · ' + R.conversations.length + ' conversation' + (R.conversations.length === 1 ? '' : 's');
   meta.appendChild(el('span', 'chip', R.task.finished ? 'finished' : 'abandoned'));
+  // What kind of finished thing this record is about. Spelled out rather than
+  // abbreviated, because 'hosted' alone is a bare term to anyone outside Ursa.
+  var ARTIFACT_KINDS = {
+    chat: 'chat trace: the finished work is the conversation',
+    repo: 'repository: the finished work is versioned source',
+    hosted: 'hosted: the finished work is served at a URL',
+    visual: 'visual: the finished work was judged by eye'
+  };
+  var art = R.artifact || { kind: 'chat' };
+  meta.appendChild(el('span', 'chip', ARTIFACT_KINDS[art.kind] || art.kind));
+  if (art.renderRef) {
+    var ref = el('span', 'chip');
+    ref.appendChild(document.createTextNode('rendered at '));
+    // Deliberately not a regex literal. This entire function body is one
+    // JavaScript template literal (the one opened by renderViewer's return),
+    // so a backslash written here is consumed by the template and never
+    // reaches the emitted script: /^https?:\\/\\//i arrives in the HTML as
+    // /^https?:///i, which is a SyntaxError, and one SyntaxError anywhere in
+    // this script means the browser runs none of it and the viewer renders as
+    // an empty shell. Scheme matching by string comparison needs no escape.
+    var scheme = art.renderRef.toLowerCase();
+    if (scheme.indexOf('http://') === 0 || scheme.indexOf('https://') === 0) {
+      var a = el('a', '', art.renderRef);
+      a.href = art.renderRef;
+      a.target = '_blank';
+      a.rel = 'noreferrer noopener';
+      ref.appendChild(a);
+    } else {
+      ref.appendChild(document.createTextNode(art.renderRef));
+    }
+    meta.appendChild(ref);
+  }
 
   // tiles
   var tiles = document.getElementById('tiles');
