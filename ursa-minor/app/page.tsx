@@ -1,5 +1,6 @@
 import Constellation from "@/components/ui/constellation";
 import PixelSky from "@/components/ui/pixel-sky";
+import ScrollCue from "@/components/ui/scroll-cue";
 
 const NORTH_STARS = [
   {
@@ -20,6 +21,14 @@ const NORTH_STARS = [
   },
 ];
 
+const CREDITS = [
+  { name: "Alexandra Paiz Delgado", role: "Systems Engineer" },
+  {
+    name: "Fatima Michel Giron",
+    role: "Computer & Artificial Intelligence Engineer",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -36,18 +45,20 @@ export default function Home() {
           </div>
         </header>
 
+        <ScrollCue />
+
         <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20 portrait:mt-[92svh]">
           <p className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
             <em className="not-italic text-[var(--polar)]">Polaris</em> —
             peer-to-peer supervised fine-tuning; outcome reward for open-ended
-            generation. A new approach to reinforcement learning from human
-            feedback.
+            generation. A{"\u00a0"}new approach to reinforcement learning from
+            human feedback.
           </p>
           <button
             type="button"
             disabled
             aria-disabled="true"
-            className="mt-10 border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)] disabled:cursor-not-allowed disabled:opacity-55"
+            className="cta mt-10 border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)] disabled:cursor-not-allowed disabled:opacity-55"
           >
             Get Polaris
           </button>
@@ -78,9 +89,17 @@ export default function Home() {
       </main>
 
       <footer className="mt-8 border-t border-[var(--line)]">
-        <div className="mx-auto flex w-full max-w-2xl flex-wrap gap-x-10 gap-y-2 px-8 pb-20 pt-14 font-mono text-[0.7rem] tracking-[0.1em] text-[var(--dim)]">
-          <span>Alexandra Paiz Delgado · Systems Engineer</span>
-          <span>Fatima Michel Giron · Computer &amp; Artificial Intelligence Engineer</span>
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-y-2 px-8 pb-20 pt-14 font-mono text-[0.7rem] tracking-[0.1em] text-[var(--dim)]">
+          {CREDITS.map((person) => (
+            <span key={person.name}>
+              <span className="whitespace-nowrap">{person.name}</span>
+              <span className="max-sm:hidden"> · </span>
+              {/* below sm the role takes its own line: the inline form wrapped
+                  mid-role ("Systems / Engineer") at 390px. Balanced so a long
+                  title splits evenly instead of orphaning its last word. */}
+              <span className="block text-balance sm:inline">{person.role}</span>
+            </span>
+          ))}
           <span>© ursa</span>
         </div>
       </footer>
