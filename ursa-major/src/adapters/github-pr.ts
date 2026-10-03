@@ -11,12 +11,20 @@
 // inside the pull requests. This module reads the four places a PR puts
 // them, named by `PullRequestClosure` below.
 //
+// It also carries the merge attribution the git walker carries. A seat
+// branch in this repository takes `Merge main into <branch>` commits
+// while its pull request is open, and such a merge can overwrite text
+// the agent generated without any person reading it. Those merges are
+// reported on each pair as `interveningMerges`, in the same `MergeEvent`
+// shape src/deletion.ts already reads, so a span that died at a merge
+// boundary is never labelled a human discard.
+//
 // Everything here is pure over a `PullRequestSnapshot` plus an injected
 // `RepoReader`. Nothing in this file touches the network or the
 // filesystem; src/adapters/gh.ts captures the snapshot and
 // src/adapters/git-reader.ts reads blobs.
 
-import type { CommitPair } from '../pairfinder'
+import type { CommitPair, MergeEvent } from '../pairfinder'
 import type { Episode } from '../episodes'
 import { basename } from 'node:path'
 
@@ -39,6 +47,15 @@ export interface PullRequestCommit {
   trailers: string
   /** 2 or more = a merge of another branch into this one */
   parentCount: number
+  /**
+   * Parent shas as the GitHub API reported them, first parent first.
+   * Carried on the snapshot so merge attribution does not depend on the
+   * commit being reachable in the user's clone: a pull request from a
+   * fork, or one whose branch was deleted after merge, has commits that
+   * `git rev-list` cannot see. Absent on snapshots captured before this
+   * field existed, and `RepoReader.parents` is the fallback for those.
+   */
+  parents?: string[]
   files: string[]
   /**
    * New-side line ranges this commit changed, per path, parsed from the
@@ -124,6 +141,18 @@ export interface PullRequestProvenance {
   regression?: { sha: string; subject: string; at: string }
   /** the merge has one parent, so the branch's commit sequence is not in the base history */
   squashed: boolean
+  /**
+   * Shas of merges that sat between this generation and its closure,
+   * touched one of its paths, and whose parentage could not be read
+   * from either the snapshot or the clone. Deletion attribution could
+   * not run over those boundaries, so a `generated_deleted` span on
+   * this pair may have been destroyed by one of them rather than by the
+   * person. Set only when non-empty: an absent field means every
+   * intervening merge was readable, which is what makes
+   * `interveningMerges: []` on this adapter mean "none" rather than
+   * "unknown".
+   */
+  unreadableMerges?: string[]
 }
 
 export interface PullRequestPair extends CommitPair {
@@ -281,6 +310,57 @@ function resolvedPaths(reader: RepoReader, mergeSha: string, candidates: string[
 }
 
 /**
+ * The merges the pull request's own commit list places between a
+ * generation and the closure that paired with it, in the pull request's
+ * commit order, as `MergeEvent`s that `gitDeletionAttributor` can read.
+ *
+ * Same contract as the git walker's (`src/pairfinder.ts`): a merge is
+ * reported when it sits strictly between the pair's two commits and
+ * touched at least one path the generation touched. The closure itself
+ * is never reported, because a span's fate is judged at `finalSha` and
+ * the commit that decided it is not an intervening event. The pull
+ * request's own merge commit sits at index `commits.length`, which is
+ * the last closure any pair can take, so it is never intervening either.
+ *
+ * A merge whose parents are unknown is returned in `unreadable` rather
+ * than as a `MergeEvent` with an empty `parents` array. The attributor's
+ * test is "present in a parent, absent from the merge", so a parentless
+ * event can never earn the `merge` label and would silently read as
+ * proof that the merge destroyed nothing.
+ */
+export function interveningMergesFor(
+  commits: PullRequestCommit[],
+  reader: RepoReader,
+  genIndex: number,
+  closureIndex: number,
+  genFiles: string[],
+): { merges: MergeEvent[]; unreadable: string[] } {
+  const merges: MergeEvent[] = []
+  const unreadable: string[] = []
+  const end = Math.min(closureIndex, commits.length)
+  for (let j = genIndex + 1; j < end; j++) {
+    const c = commits[j]
+    if (c.parentCount <= 1) continue
+    const paths = c.files.filter((p) => genFiles.includes(p))
+    if (paths.length === 0) continue
+    const parents = c.parents ?? reader.parents(c.sha)
+    if (parents.length < 2) {
+      unreadable.push(c.sha)
+      continue
+    }
+    merges.push({
+      sha: c.sha,
+      parents,
+      paths,
+      author: c.authorName,
+      date: c.authoredAt,
+      subject: c.subject,
+    })
+  }
+  return { merges, unreadable }
+}
+
+/**
  * The pairs one pull request yields. At most one pair per agent commit:
  * the earliest closure by timestamp wins, so a correction on the branch
  * is never overwritten by the merge that followed it.
@@ -372,6 +452,13 @@ export function pairsFromPullRequest(
     }
     if (!chosen) continue
 
+    // What a merge destroyed is not what the person discarded. The git
+    // walker has reported this since the merge-aware attribution change;
+    // this path reports it from the pull request's own commit list,
+    // which is where a repository run through pull requests keeps its
+    // merges in the first place.
+    const walked = interveningMergesFor(commits, reader, i, chosen.index, genFiles)
+
     pairs.push({
       generatedSha: gen.sha,
       finalSha: chosen.sha,
@@ -382,18 +469,12 @@ export function pairsFromPullRequest(
       finalAt: chosen.at,
       agentMarker: marker,
       subject: gen.subject,
-      // This adapter walks a pull request's own commit list, not a git range
-      // between two shas, so it has not looked for merges between the pair and
-      // must not claim any. Empty means "nothing known", which attributes every
-      // deletion to the human exactly as the resolver did before merge-aware
-      // attribution existed. Populating it for the pull-request path is real
-      // work, filed in docs/ideas.md as "Merge attribution stops at the git
-      // walker".
-      interveningMerges: [],
+      interveningMerges: walked.merges,
       pullRequest: {
         ...base,
         closure: chosen.closure,
         statedCorrections: statedCorrectionsFor(snap, chosen.paths, gen.sha),
+        ...(walked.unreadable.length > 0 ? { unreadableMerges: walked.unreadable } : {}),
       },
     })
   }

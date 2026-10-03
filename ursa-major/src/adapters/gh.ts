@@ -121,6 +121,11 @@ export function capturePullRequest(repo: string, number: number, opts: CaptureOp
       subject: c.commit.message.split('\n')[0],
       trailers: coAuthoredBy(c.commit.message),
       parentCount: c.parents.length,
+      // The API already answers this on the list call, so recording it
+      // costs nothing and makes merge attribution work on a pull request
+      // whose commits are not in the local clone (a fork, or a branch
+      // deleted after merge).
+      parents: c.parents.map((p) => p.sha),
       files: files.map((f) => f.filename),
       ...(opts.noPatches ? {} : { changedRanges }),
     }
