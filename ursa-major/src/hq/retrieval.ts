@@ -10,12 +10,14 @@
 // named constant, so the order a briefing came out in can be recomputed
 // by hand from the printed `why` blocks.
 //
-// The seam is deliberate: `rankRules` and `rankCases` take the query and
-// the units and return scored units. Swapping in an embedding ranker
-// means replacing these two functions' bodies, not the briefing, the CLI,
-// or the record format. See docs/design/hq-briefing.md §"Retrieval".
+// The seam held. The embedding ranker arrived in semantic.ts (plan §12,
+// sprint-2026-09-28 item 2) and did NOT replace any of this: it adds one
+// more term to `score`, computed elsewhere and passed in. The lexical
+// terms below still decide every ranking where the agent named a file
+// this owner has actually been corrected on, which is the case the HQ
+// answers best. See docs/design/semantic-retrieval.md.
 
-import type { MatchReason } from './types'
+import type { MatchReason, SemanticReason } from './types'
 
 /**
  * Scoring weights, in the order a human would rank these signals.
@@ -43,6 +45,13 @@ export const WEIGHTS = {
   /** ceiling on the recurrence tiebreak (evidenceCount-1, or loop recurrences) */
   recurrenceCap: 2,
 } as const
+
+/** Total scores carry a fractional semantic term, so they are rounded to
+ *  the precision the briefing prints. Without this, 4 + 2.24 renders as
+ *  6.239999999999999 in a block whose entire purpose is being read. */
+export function roundScore(value: number): number {
+  return Math.round(value * 100) / 100
+}
 
 /** Words of three or more characters, lowercased, camelCase split. Three
  *  because two-letter tokens ('ui', 'js') match everything and rank
@@ -108,8 +117,19 @@ function domainMatch(query: Query, domain: string): MatchReason['domain'] {
  *                   or the files of the records behind an axiom)
  * @param text       the unit's own words: a rule statement, or a loop's
  *                   theme plus its discovered spec
+ * @param semantic   what the embedding ranker concluded about this unit,
+ *                   or null when none ran. Computed in semantic.ts and
+ *                   passed in rather than computed here, because it needs
+ *                   the whole field of cases and an await; this function
+ *                   stays pure, synchronous and per-unit.
  */
-export function score(query: Query, domain: string, unitFiles: string[], text: string): MatchReason {
+export function score(
+  query: Query,
+  domain: string,
+  unitFiles: string[],
+  text: string,
+  semantic: SemanticReason | null = null
+): MatchReason {
   const dm = domainMatch(query, domain)
   const normalizedUnitFiles = unitFiles.map(normalizePath)
   const unitPaths = new Set(normalizedUnitFiles)
@@ -133,7 +153,8 @@ export function score(query: Query, domain: string, unitFiles: string[], text: s
     filesExact,
     filesByName,
     textTokens,
-    score: domainTerm + fileTerm + textTerm,
+    semantic,
+    score: roundScore(domainTerm + fileTerm + textTerm + (semantic?.term ?? 0)),
   }
 }
 
