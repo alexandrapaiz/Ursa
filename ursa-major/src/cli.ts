@@ -4,7 +4,7 @@
 //     --final <file-or-dir>... \
 //     [--sessions <claude-code .jsonl>...] [--path-filter <substring>] \
 //     [--conversations <dir of paste-format .md>] \
-//     [--out <dir>] [--abandoned] \
+//     [--out <dir>] [--abandoned] [--generated-at <ISO timestamp>] \
 //     [--artifact-kind chat|repo|hosted|visual] [--render-ref <url-or-path>]
 
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from 'node:fs'
@@ -13,6 +13,7 @@ import { parseClaudeSession, parsePasteConversation, type ParsedConversation } f
 import { resolve } from './resolve'
 import { deriveSignals } from './signals'
 import { renderViewer } from './viewer'
+import { auditProvenance, formatAudit } from './audit'
 import type { Artifact, ArtifactKind } from './types'
 
 const ARTIFACT_KINDS: ArtifactKind[] = ['chat', 'repo', 'hosted', 'visual']
@@ -35,6 +36,8 @@ interface Args {
   annotations?: string
   finished: boolean
   artifact: Artifact
+  /** pins record.task.generatedAt so a regenerated record diffs only on real changes */
+  generatedAt?: string
 }
 
 function parseArgs(argv: string[]): Args {
@@ -64,6 +67,7 @@ function parseArgs(argv: string[]): Args {
         break
       }
       case 'render-ref': args.artifact.renderRef = a; key = null; break
+      case 'generated-at': args.generatedAt = a; key = null; break
       case 'final': args.final.push(a); break
       case 'sessions': args.sessions.push(a); break
       default:
@@ -128,7 +132,7 @@ function main() {
   console.time('resolve')
   const record = resolve({
     taskId: args.id, files, conversations, generations,
-    finished: args.finished, artifact: args.artifact,
+    finished: args.finished, artifact: args.artifact, generatedAt: args.generatedAt,
   })
   console.timeEnd('resolve')
 
@@ -164,6 +168,14 @@ function main() {
     console.log(`  ${c.title}: ${c.generations} gens, survival ${pct(c.survivalRate)}, turns-to-acceptance ${c.turnsToAcceptance ?? '—'}`)
   }
   console.log(`\nwrote ${jsonPath}\nwrote ${htmlPath}`)
+
+  // Every pointer the viewer will follow, walked before anyone opens the HTML.
+  const audit = auditProvenance(record)
+  console.log('\n' + formatAudit(audit))
+  if (audit.broken.length > 0) {
+    console.error(`\n${audit.broken.length} broken pointer(s): the record above is not fully navigable.`)
+    process.exitCode = 1
+  }
 }
 
 main()
