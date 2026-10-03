@@ -1,0 +1,132 @@
+{
+  "snapshot": {
+    "repo": "alexandrapaiz/Ursa",
+    "number": 12,
+    "title": "PM standup — 2026-09-24 (second pass, 15:44Z)",
+    "baseRef": "main",
+    "headRef": "pm/standup-2026-09-24",
+    "headSha": "00701ccde2ad34a3f84249cd7dd7de7b739ed0fe",
+    "outcome": "merged",
+    "mergedAt": "2026-09-24T15:51:39Z",
+    "closedAt": "2026-09-24T15:51:40Z",
+    "mergedByLogin": "claude[bot]",
+    "mergeCommitSha": "351309c1d3fa415013455d853a0dead0c3035a6e",
+    "commits": [
+      {
+        "sha": "dba7d7a966af23cc78fa104ebc02e253a699fd30",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T04:41:44Z",
+        "subject": "Start standup run: 2026-09-24",
+        "trailers": "",
+        "parentCount": 1,
+        "files": [
+          "docs/sprints/dispatch-queue.md"
+        ]
+      },
+      {
+        "sha": "b22567143c161fe0ecd4afbe514157b791141c84",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T04:43:47Z",
+        "subject": "Standup 2026-09-24: dispatch queue, pending reconciliation, Linear key does not authenticate",
+        "trailers": "",
+        "parentCount": 1,
+        "files": [
+          "docs/sprints/dispatch-queue.md",
+          "docs/sprints/pending.md"
+        ]
+      },
+      {
+        "sha": "045c3b0f2e2d87e3ea3b70f90d79c6cef93e7fc9",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T15:48:06Z",
+        "subject": "Merge main into standup branch: pick up redaction-gate live, Incident 4/5 closure",
+        "trailers": "",
+        "parentCount": 2,
+        "files": [
+          ".github/workflows/agent-finance.yml",
+          ".github/workflows/agent-market.yml",
+          ".github/workflows/agent-okr.yml",
+          ".github/workflows/agent-pm.yml",
+          ".github/workflows/redaction-gate.yml",
+          "README.md",
+          "docs/agents/frameworks.md",
+          "docs/agents/incidents.md",
+          "docs/agents/learning-log.md",
+          "docs/agents/org-chart.md",
+          "docs/agents/pending-workflow-changes.md",
+          "docs/design/product-plan.md",
+          "docs/ideas.md",
+          "docs/prfaq/overlay.md",
+          "docs/sprints/pending.md",
+          "prompts/engineer-agent.md",
+          "prompts/exo-agent.md",
+          "prompts/finance-agent.md",
+          "prompts/frontend-agent.md",
+          "prompts/market-agent.md",
+          "prompts/okr-agent.md",
+          "prompts/pm-agent.md",
+          "prompts/research-agent.md",
+          "prompts/sales-agent.md",
+          "prompts/security-agent.md",
+          "prompts/skill-agent.md",
+          "ursa-major/trial/README.md"
+        ]
+      },
+      {
+        "sha": "6351d5acdf6eadf95efc50528bf0e991e3a49766",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T15:50:22Z",
+        "subject": "Standup 2026-09-24 (15:44Z pass): reconcile against merged PR #7/#9, confirm Incident 4 closed, flag LINEAR_API_KEY value and missed first-occurrence crons",
+        "trailers": "Claude Sonnet 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/sprints/dispatch-queue.md",
+          "docs/sprints/pending.md"
+        ]
+      },
+      {
+        "sha": "00701ccde2ad34a3f84249cd7dd7de7b739ed0fe",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T15:51:17Z",
+        "subject": "Correct dispatch-queue: both attempts failed 403 (Actions scope missing), not fired",
+        "trailers": "Claude Sonnet 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "files": [
+          "docs/sprints/dispatch-queue.md",
+          "docs/sprints/pending.md"
+        ]
+      }
+    ],
+    "reviewComments": [],
+    "capturedAt": "2026-09-28T18:52:20.210Z"
+  },
+  "repo": {
+    "parents": {
+      "351309c1d3fa415013455d853a0dead0c3035a6e": [
+        "104697abdc9399ef6ad15ee8e5eb185a52e74f1c",
+        "00701ccde2ad34a3f84249cd7dd7de7b739ed0fe"
+      ],
+      "045c3b0f2e2d87e3ea3b70f90d79c6cef93e7fc9": [
+        "b22567143c161fe0ecd4afbe514157b791141c84",
+        "104697abdc9399ef6ad15ee8e5eb185a52e74f1c"
+      ]
+    },
+    "blobs": {
+      "045c3b0f2e2d87e3ea3b70f90d79c6cef93e7fc9:docs/sprints/dispatch-queue.md": "616d13ee56b6eb400448b63667923dc9696d8c74",
+      "b22567143c161fe0ecd4afbe514157b791141c84:docs/sprints/dispatch-queue.md": "616d13ee56b6eb400448b63667923dc9696d8c74",
+      "351309c1d3fa415013455d853a0dead0c3035a6e:docs/sprints/dispatch-queue.md": "bfc5a4af6e03c89bac474a7bb43c39d66cf584f1",
+      "104697abdc9399ef6ad15ee8e5eb185a52e74f1c:docs/sprints/dispatch-queue.md": "2e36de8eff36dc6dfb9e8dc2c69f477326c95b34",
+      "00701ccde2ad34a3f84249cd7dd7de7b739ed0fe:docs/sprints/dispatch-queue.md": "bfc5a4af6e03c89bac474a7bb43c39d66cf584f1",
+      "045c3b0f2e2d87e3ea3b70f90d79c6cef93e7fc9:docs/sprints/pending.md": "626c587b2e527ad6261ebbd6105e86754bdc664d",
+      "b22567143c161fe0ecd4afbe514157b791141c84:docs/sprints/pending.md": "ed0e4614e8739b0cd0f88a3e1182d4f66df6a07e",
+      "104697abdc9399ef6ad15ee8e5eb185a52e74f1c:docs/sprints/pending.md": "c304344a7e163943490bcf421ce5ff596e5af870",
+      "351309c1d3fa415013455d853a0dead0c3035a6e:docs/sprints/pending.md": "ccffc53a4b4ee608c52f83e76a2d87a7235dbf3a",
+      "00701ccde2ad34a3f84249cd7dd7de7b739ed0fe:docs/sprints/pending.md": "ccffc53a4b4ee608c52f83e76a2d87a7235dbf3a"
+    }
+  }
+}

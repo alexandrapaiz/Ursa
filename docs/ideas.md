@@ -1052,3 +1052,120 @@ multi-device write.
   Getting a quote is itself the owner's call under the charter's cost
   boundary.
 - Status: proposed
+
+### 2026-09-28 — Tuning units carry a use ledger, so a dead rule is visible
+- Trigger: today's craft scan of CodeRabbit's "learnings" feature
+  (docs.coderabbit.ai/guides/learnings, read 2026-09-28). Its dashboard
+  at app.coderabbit.ai/learnings lists every stored learning in a
+  sortable table with usage metrics, a creation date and a last-used
+  timestamp. Ursa's own `tuning.md` export
+  (`ursa-major/src/tuning/export.ts`) renders units with their evidence
+  and nothing about whether any unit has ever done anything.
+- What: give each `TuningUnit` a use ledger: the count of exports it
+  appeared in, the last export that carried it, and, once the overlay can
+  observe it, the count of records where the behaviour it asks for was
+  already present before correction. Render the three columns in
+  `tuning.md` and in the overlay. This is the cheapest possible
+  revocation surface, because the unit a user wants to delete first is
+  the one that has never been used, and constraint 2 of the vision (see,
+  edit, revoke, delete) is currently satisfied only in the sense that the
+  file is editable by hand.
+- First step: add `use: { exports: number; lastExportAt: string | null }`
+  to `TuningUnit` in `ursa-major/src/tuning/types.ts`, increment it in
+  `export.ts`, merge it in `merge.ts` under the existing deterministic
+  merge rules, and render it as a column. One test that two exports leave
+  `exports: 2`.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-28 — Rank paths by unprovenanced share, because that is where the agent is never in the running
+- Trigger: the first real records the PR adapter produced today. In
+  `.ursa/records/ursa-pr7-8d3e420.json`, over
+  `docs/agents/org-chart.md`, 57.8 percent of the covered final text is
+  `no_generation_provenance`: 58 spans and 3,542 characters the owner
+  wrote that no generation produced. That is the category CLAUDE.md calls
+  the most valuable one, and no command surfaces it. `renderRunSummary`
+  in `ursa-major/src/bin/ursa.ts` leads with what survived.
+- What: report, per path, the share of final text with no generation
+  provenance, ranked highest first, across all records in a run. A path
+  at the top of that list is a file where the model is not competitive
+  at all, which is a sharper instruction to a lab than any survival
+  percentage. It is also the honest answer to "where is this agent
+  useless", which is the question a user trusts a tool for answering
+  about itself.
+- First step: a `ursa paths <project>` subcommand that reads
+  `<project>/.ursa/records/*.json`, sums `perFile` by path across
+  records, and prints path, covered characters, and unprovenanced share
+  sorted descending. Read-only, no schema change, one test over the
+  records the PR adapter writes for a synthetic repository.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-28 — Teach the local M0 path the merge-resolution closure
+- Trigger: building the PR adapter today. Before writing it, a scan of
+  every merge commit in this repository compared each path's blob at the
+  merge against the same path in both parents: 10 merges, 1 carrying
+  content present in neither parent (`docs/sprints/pending.md` at
+  045c3b0). `ursa-major/src/pairfinder.ts` skips all merges as pairing
+  targets, correctly, because a merge brings in another author's work.
+  But the content a human writes while resolving a conflict is in no
+  parent, and it is a correction. The PR adapter now reads that case
+  (`merge-resolution`, `ursa-major/src/adapters/github-pr.ts`); the
+  local path still cannot, so `ursa run` over a repo with no GitHub
+  access misses it.
+- What: add the same closure to `findCommitPairs`: for each merge
+  commit, pair the merged-in agent commit with the merge for any path
+  whose blob differs from that path's blob in every parent. This needs no
+  network and no `gh`, so it works on a private clone and on a repo that
+  was never on GitHub. Keep the existing rule that a merge is not an
+  edit, since this is narrower: not the merge's whole diff, only the
+  paths in no parent.
+- First step: lift `resolvedPaths` out of
+  `ursa-major/src/adapters/github-pr.ts` into a shared helper, call it
+  from `findCommitPairs`, and reuse the synthetic conflict repository
+  from `ursa-major/src/adapters/github-pr.test.ts` as the test. Note the
+  file contention: `pairfinder.ts` is also edited by PR #16, so this
+  waits for that merge.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-28 — URGENT: the merge queue now costs the engineer seat working surface, measurably
+- Trigger: today's run. Every engineer item on sprint-2026-09-21 already
+  has an open pull request from an earlier run of this seat (item 1 is
+  PR #13, item 2 is PR #16, item 3 is PR #18), so none of them could be
+  worked without duplicating unmerged work. 18 pull requests are open,
+  and between them they hold 7 of `ursa-major/src`'s most central files:
+  `types.ts`, `pairfinder.ts`, `resolve.ts`, `viewer.ts`, `cli.ts`,
+  `bin/ursa.ts`, `store.ts`, plus `README.md` and `package.json`. The PR
+  adapter shipped today was routed entirely around that set, which is why
+  it ships its own `src/adapters/cli.ts` instead of an `ursa pr`
+  subcommand, and why the README module table still does not mention it.
+- What: this is not a request for a different plan, it is the cost
+  reading the PM's standup cannot see from PR counts alone. Two
+  consequences worth a decision. First, each additional day of queue
+  depth pushes the engineer further into greenfield modules and away from
+  the sprint, because greenfield is the only conflict-free surface left.
+  Second, the deferred integrations (README rows, `ursa pr`, the
+  `pairfinder.ts` merge-resolution closure above) are now a growing debt
+  that only merging can discharge.
+- First step: the owner's merge, in any order that suits her. PR #27
+  installs a union merge driver for `docs/ideas.md`, so merging it first
+  makes the rest of the queue cheaper.
+- Cost: $0
+- Status: urgent
+
+- 2026-09-28 (engineer craft scan): CodeRabbit's learnings
+  (docs.coderabbit.ai/guides/learnings, read 2026-09-28). Worth
+  stealing: the acknowledgement is in band and immediate. When a reply
+  to a review comment becomes a learning, the bot answers in the same
+  thread with a "Learnings Added" section naming what it took, and the
+  dashboard then shows each learning's creation date, last-used
+  timestamp and usage count. Ursa's plan §14 wants exactly this
+  encouragement loop and today has no moment where a user is told what
+  was just learned from them. What Ursa does better: the unit itself.
+  CodeRabbit learns from what a user states to the bot, and stores it in
+  CodeRabbit's own database scoped to a Git platform organization. Ursa
+  learns from what the user did to the work, keeps it on the user's
+  machine, and hands it back as a file the user owns. A stated
+  preference is the failure mode vision.md names in principle 3: much of
+  what people know shows up only in action.

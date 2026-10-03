@@ -11,7 +11,13 @@ export interface Episode {
   status: 'closed'
   openedAt: string
   closedAt: string
-  closureHeuristic: 'git-commit-pair'
+  /**
+   * How this episode's boundary was decided. 'git-commit-pair' is M0's
+   * local-history adapter (src/pairfinder.ts); 'github-pr' is the PR
+   * adapter (src/adapters/github-pr.ts), where the pull request bounds
+   * the work and the merge closes it. Never a timeout, per ADR-003.
+   */
+  closureHeuristic: 'git-commit-pair' | 'github-pr'
   touchedFiles: string[]
   generatedSha: string
   finalSha: string
