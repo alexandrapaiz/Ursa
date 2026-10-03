@@ -142,4 +142,129 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
-- 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+### 2026-09-27 — Provenance by three-way merge, not by lexical similarity
+- Trigger: writing `mergeLedgers` in `tools/ledger/ledger.mjs` today. Its
+  return value is `{ added, removed, conflicts }` per block, and those are
+  the outcome record's span classes under different names: a block taken
+  from the other branch is `survived_verbatim`, a block deleted is
+  `generated_deleted`, a block edited on both sides is
+  `survived_mutated`. The merge knows which is which exactly, from the
+  common ancestor, with no similarity threshold anywhere. Meanwhile
+  `ursa-major/src/resolve.ts` reconstructs the same classification after
+  the fact by lexical matching, which is why task-001 carries 55
+  uncertain spans against O1 KR1.1.
+- What: for the file-write path, where Ursa does see both the file state
+  before a generation and the file state after, classify spans by running
+  a three-way merge instead of a diff-and-match. The ancestor is the file
+  as it stood before the model's generation, one side is the generation
+  the model proposed, the other side is the file as the human left it.
+  Every span's class then falls out of the merge algebra rather than out
+  of a similarity score, and the uncertain-span count for that path goes
+  to zero by construction. Chat-only spans keep the current resolver;
+  this is not a replacement, it is an exact path for the cases that admit
+  one.
+- First step: take one `Write`/`Edit` tool call already parsed by
+  `ursa-major/src/parse.ts`, reconstruct its three inputs, run
+  `diff3`-style merging over them, and compare the resulting span classes
+  against what `resolve.ts` produced for the same spans on
+  `fixtures/mini`. Report the disagreement count. That number is the
+  whole argument.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 — The ledger wants to be a directory
+- Trigger: five open pull requests (#13, #14, #16, #18, #21) were
+  unmergeable today, and `git merge-tree` named the same single cause in
+  every one: `docs/ideas.md`. The merge driver shipped today fixes the
+  merge wherever a clone does the merging, but GitHub's own merge button
+  runs without the repository's `.git/config` and will keep reporting the
+  conflict.
+- What: give each ledger entry its own file, `docs/ideas/YYYY-MM-DD-slug.md`,
+  and generate `docs/ideas.md` from them as a read-only index. Two seats
+  appending on two branches then add two different files, which no merge
+  algorithm on any host can call a conflict. The merge driver stays, since
+  it still covers the generated index and any repository that keeps a
+  single-file ledger.
+- First step: a migration script that splits the current 10 blocks into
+  files, an index generator, and a rewrite of `tools/ledger/check.mjs` to
+  read the directory. Gate it on the five blocked pull requests merging
+  first, because the migration touches the very file they collide on.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 — One-click requeue: a dispatch workflow that drains the blocked queue
+- Trigger: §8 of `docs/design/ledger-union-merge.md`. Once any one of the
+  five blocked pull requests merges, `main` moves and the other four are
+  stale again, so the owner needs `tools/ledger/requeue.sh --push` after
+  every single merge, on a laptop with the driver installed.
+- What: a `workflow_dispatch`-only workflow that runs `requeue.sh --push`
+  on the runner, so draining the queue is a button in the Actions tab
+  rather than a local checkout. It writes only to pull request branches
+  and never to `main`. Deliberately not built today: a workflow that
+  updates other seats' branches is an operating decision about who may
+  move whose work, and that belongs to the owner rather than to an
+  engineer run that happened to notice the need.
+- First step: `.github/workflows/ledger-requeue.yml`, `permissions:
+  contents: write`, one `bash tools/ledger/requeue.sh --push` step, with
+  a `dry_run` input defaulting to true.
+- Cost: $0
+- Status: proposed
+
+### 2026-09-27 (engineer) — Competitive scan: mem0, the memory layer with no provenance
+Read today: mem0's own documentation at
+`docs.mem0.ai/core-concepts/memory-operations`. It is the closest
+competitor to Ursa Major's portability claim, so it is the right one to
+read carefully rather than dismiss.
+
+**What it does.** Conversations go through an LLM that "pulls out key
+facts, decisions, or preferences to remember." Storage is additive: new
+memories are added without overwriting or deleting existing ones.
+Retrieval ranks the most relevant memories for a query.
+
+**Worth stealing: the `infer=False` switch.** A caller can set
+`infer=False` and mem0 stores the raw messages instead of running the
+extraction pass at all. That is a single, legible affordance for the
+user who wants the record but not the inference, and Ursa has no
+equivalent today: `ursa run` always distills. An `ursa run --no-distill`
+that produces the outcome record and stops short of the tuning axioms
+would serve the same user, and it serves the second load-bearing
+constraint in `CLAUDE.md` in its strongest form, which is not "you can
+edit what was inferred about you" but "nothing was inferred about you."
+
+**What Ursa does better, confirmed from the documentation rather than
+assumed.** The docs describe no way to trace a memory back to the
+message that produced it, and no way to check a memory against an
+outcome. So a mem0 memory is an LLM's reading of what a user said about
+themselves, which is a stated preference with the source discarded. An
+Ursa span is joined backward to the specific generation that produced it
+and classified by what the finished work did with it. That is the third
+principle in the README, tacit intelligence, holding: the preference
+shows up in action on a particular case, and mem0's extraction step is
+exactly the stated-preference survey the principle warns about. The
+additive-only storage model is also weaker than
+`ursa-major/src/tuning/merge.ts`, which carries revocation tombstones,
+so a revoked preference in Ursa is revoked rather than outranked.
+
+### 2026-09-27 — Blocker: no seat can install a CI gate
+- Trigger: today's push was rejected outright — "refusing to allow a
+  GitHub App to create or update workflow
+  `.github/workflows/ledger-gate.yml` without `workflows` permission" —
+  after the run had written two CI workflows it had just demonstrated the
+  need for. They shipped as `tools/ledger/ci/*.yml` for the owner to copy
+  instead.
+- What: the seat workflows grant their tokens `contents: write` and
+  `pull-requests: write`, and GitHub gates `.github/workflows/` behind a
+  separate `workflows` permission. So an agent seat can change every line
+  of the product but cannot add the check that protects it, and every
+  guardrail a run concludes is necessary becomes a manual copy step for
+  the owner. That is the class of step that quietly never happens. This is
+  filed as a blocker because it is invisible until a run wastes turns on
+  it, as this one did.
+- First step: the owner decides between two options and the answer is
+  recorded as an ADR. Either add `workflows: write` to the seat workflows'
+  `permissions:` block, which lets any seat run change its own CI, or keep
+  the restriction deliberately and adopt `tools/<area>/ci/*.yml` plus a
+  line in `docs/sprints/pending.md` as the standing convention for a
+  proposed gate, so the copy step is tracked rather than assumed.
+- Cost: $0
+- Status: urgent

@@ -1,0 +1,32 @@
+name: tests
+
+# Nothing ran ursa-major's test suite in CI until 2026-09-27. The suite is 36
+# tests and 2.2 seconds, and five pull requests were open against the resolver
+# at the time, so the cost of not running it was entirely on the reviewer.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "ursa-major/**"
+      - ".github/workflows/tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ursa-major:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ursa-major/package-lock.json
+      - run: npm ci
+        working-directory: ursa-major
+      - run: npm test
+        working-directory: ursa-major
