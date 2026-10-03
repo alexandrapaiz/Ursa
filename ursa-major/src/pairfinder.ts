@@ -3,7 +3,12 @@
 // trailer matches the agent pattern (the convention agent commits
 // already carry) or, as a fallback, when its author name matches the
 // agent-identity list. Its pairing "final" commit is the next commit by
-// author date touching an overlapping path, with no agent marker.
+// author date touching an overlapping path, with no agent marker. Merges
+// and other agents' commits between the two are skipped as pairing
+// targets but not forgotten: a merge between them can destroy the
+// generation's text without any human choosing to drop it, so each
+// skipped merge that touched a paired path is reported on the pair as an
+// `interveningMerges` entry for deletion attribution to read.
 //
 // The author-name fallback used to be described here as safe because it
 // "errs toward matching": a generated commit mistaken for a human one
@@ -30,6 +35,18 @@
 
 import { execFileSync } from 'node:child_process'
 
+/** a merge commit sitting between the generated and final commit */
+export interface MergeEvent {
+  sha: string
+  /** the merge's parents, in git's order; parents[0] is the first parent */
+  parents: string[]
+  /** paths this merge touched that the generation also touched */
+  paths: string[]
+  author: string
+  date: string
+  subject: string
+}
+
 export interface CommitPair {
   generatedSha: string
   finalSha: string
@@ -41,6 +58,12 @@ export interface CommitPair {
   /** the trailer or author string that classified the generated side */
   agentMarker: string
   subject: string
+  /**
+   * Merges walked past on the way from generatedSha to finalSha that
+   * touched at least one of the generation's paths, oldest first. Text
+   * these destroyed is not the human's discard.
+   */
+  interveningMerges: MergeEvent[]
 }
 
 export interface PairFinderOptions {
@@ -75,8 +98,8 @@ interface CommitInfo {
   date: string
   trailers: string
   subject: string
-  /** more than one parent = a merge; a merge is never an edit */
-  parentCount: number
+  /** parent shas in git's order; length > 1 = a merge, and a merge is never an edit */
+  parents: string[]
 }
 
 function git(repoPath: string, args: string[], opts: { quiet?: boolean } = {}): string {
@@ -102,16 +125,27 @@ export function listCommits(repoPath: string): CommitInfo[] {
     const [sha, authorName, authorEmail, date, parents, trailers, ...rest] = line.split('\t')
     return {
       sha, authorName, authorEmail, date,
-      parentCount: parents ? parents.split(' ').length : 0,
+      parents: parents ? parents.split(' ').filter(Boolean) : [],
       trailers: trailers ?? '',
       subject: rest.join('\t'),
     }
   })
 }
 
+/**
+ * Paths a commit touched, including merges.
+ *
+ * `-m` is load-bearing: without it `git show --name-only` prints NOTHING
+ * for a merge commit, because git shows no diff for a merge by default.
+ * That blindness is why `findCommitPairs` appeared to refuse merges as
+ * pairing targets even before the explicit parent check — a merge simply
+ * never reported an overlapping path. With `-m` git diffs the merge
+ * against each parent in turn, so a path is listed once per parent that
+ * differs; dedupe, since callers only ask whether the path was touched.
+ */
 export function commitFiles(repoPath: string, sha: string): string[] {
-  return git(repoPath, ['show', '--name-only', "--format=", sha])
-    .split('\n').filter(Boolean)
+  const out = git(repoPath, ['show', '-m', '--name-only', "--format=", sha])
+  return [...new Set(out.split('\n').filter(Boolean))]
 }
 
 export function blobAt(repoPath: string, sha: string, path: string): string | null {
@@ -178,13 +212,28 @@ export function findCommitPairsWithDiagnostics(
     if (!agentMarker) continue
     const genFiles = new Set(touched(gen.sha))
     if (genFiles.size === 0) continue
+    const interveningMerges: MergeEvent[] = []
     for (let j = i + 1; j < commits.length; j++) {
       const fin = commits[j]
       if (marker(fin)) continue
       // A merge brings in other commits' work; the human did not write
-      // that diff. Skip it as a pairing target rather than count another
-      // agent's changes as this person's corrections.
-      if (fin.parentCount > 1) continue
+      // that diff. It is not a pairing target. But it can still have
+      // destroyed this generation's text, so record it before moving on
+      // and let deletion attribution decide whose deletion it was.
+      if (fin.parents.length > 1) {
+        const mergeOverlap = touched(fin.sha).filter((p) => genFiles.has(p))
+        if (mergeOverlap.length > 0) {
+          interveningMerges.push({
+            sha: fin.sha,
+            parents: fin.parents,
+            paths: mergeOverlap,
+            author: fin.authorName,
+            date: fin.date,
+            subject: fin.subject,
+          })
+        }
+        continue
+      }
       const overlap = touched(fin.sha).filter((p) => genFiles.has(p))
       if (overlap.length === 0) continue
       pairs.push({
@@ -197,6 +246,7 @@ export function findCommitPairsWithDiagnostics(
         finalAt: fin.date,
         agentMarker,
         subject: gen.subject,
+        interveningMerges,
       })
       break
     }
