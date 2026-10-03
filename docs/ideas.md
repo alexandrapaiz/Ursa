@@ -1840,3 +1840,146 @@ https://github.com/mem0ai/mem0
   deletion cause had to be fixed rather than tuned: a grader can be
   approximately right, an outcome record claiming the human discarded
   text they never saw is simply false.
+
+### 2026-10-03 — A required field on a shared type is a CI gate, not a review question
+- Trigger: landing seventeen engineer branches today produced four type
+  errors that exist in no branch and in the union only. Three branches
+  added a required field to a type a fourth branch constructs
+  (`interveningMerges` from #66 into #33's pull-request adapter; three
+  stats fields from #66 and `artifact` from #16 into #22's briefing
+  fixture). Measured at the merge commit: `npx tsc --noEmit` reported 4
+  errors in 2 files while `npx vitest run` reported 309 passed. The
+  suites cannot see it because vitest transpiles through esbuild and
+  never typechecks.
+- What: today's run closed the local half, `npm test` now runs
+  `tsc --noEmit` first and `tools/stack/integrate.sh` reports the
+  typecheck as its own step. The half still missing is the gate: nothing
+  in `.github/workflows/` typechecks `ursa-major` on a pull request, so
+  a branch can still be opened, reported green, and break the union
+  silently. The gate should also be union-aware rather than
+  branch-local, because a branch-local typecheck is exactly the check
+  that passed seventeen times today. The shape that catches it is a
+  scheduled job that runs `tools/stack/integrate.sh --json` across every
+  open pull request and fails on `green: false`, which is the whole-union
+  question GitHub's per-branch mergeability check cannot ask.
+- First step: write the workflow to `docs/design/` as a proposal file
+  rather than to `.github/workflows/`, because this seat's token has no
+  `workflows` permission and the push is rejected outright. PR #27 and
+  PR #36 both already park CI proposals this way
+  (`tools/ledger/ci/ledger-gate.yml`, `docs/design/dep-floor.workflow.yml`),
+  so the pattern exists and the owner applies it with one `cp`.
+- Cost: $0. It runs on the same GitHub-hosted runner the seat workflows
+  already use, once a day rather than per push.
+- Status: proposed
+
+### 2026-10-03 — Merge attribution stops at the git walker
+- Trigger: resolving PR #66 against PR #33 while landing the stack. PR
+  #66 made `interveningMerges` a required field and taught the resolver
+  to attribute a deleted span to the merge that destroyed it rather than
+  to the human, on the evidence that 65% of that label was wrong. PR
+  #33's pull-request adapter builds the same `CommitPair` and
+  `Episode` types from a pull request's own commit list instead of a git
+  range, so it has nothing to put in the field. Today it passes `[]`,
+  which type-checks and means "nothing known," but reads downstream as
+  "no merge destroyed anything" and so reproduces exactly the label #66
+  removed from the git path.
+- What: give the pull-request adapter the same merge awareness the git
+  walker has. The information is available on the surface it already
+  reads: a pull request's commit list distinguishes merge commits by
+  their parent count, and the adapter already handles the case where the
+  pairing final commit is itself the merge (`chosen.closure`). What is
+  missing is the merges that sit *between* the generated commit and the
+  final one, which is the population `interveningMerges` exists to name.
+  Until that lands, every deletion on the pull-request capture path is
+  attributed to a human who may never have seen the text, and that is a
+  false label in the one field CLAUDE.md §1 says the artifact's value
+  rests on.
+- First step: a failing test in `src/adapters/github-pr.test.ts` that
+  builds a pull request whose generated commit is followed by a merge
+  that drops the generated lines, and asserts the resulting span is
+  attributed to the merge rather than to the human. Then fill
+  `interveningMerges` from the commit list and delete the `[]` and the
+  comment that currently marks the gap in `src/adapters/github-pr.ts`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-03 — The landing is the product's own best trial
+- Trigger: today's run produced, as a side effect of merging seventeen
+  branches, a real correction record of exactly the kind Ursa Major
+  exists to capture, and threw it away. Five branches collided on
+  `ursa-major/src/bin/ursa.ts` and `README.md`, and each resolution was
+  a human judgement over two model-generated alternatives. One of them
+  was a genuine correction worth training on: PR #66's header comment
+  reasserted a claim about the author-name fallback that PR #56 had
+  already corrected, and the right resolution kept #56's paragraph and
+  carried over only #66's new fact. That is a `survived_mutated` span
+  whose mutation is a real correction of a real generation, and no
+  record holds it.
+- What: capture a landing as an episode. A merge resolution is a
+  near-perfect outcome record: the two sides are both model generations
+  with full provenance, the resolved text is the finished work, and the
+  human's choice between them is the label, with no retention inference
+  anywhere. It is also the one capture path where `interveningMerges`,
+  `artifact.kind: 'repo'` and the resolver's span classes all already
+  apply. The trial would run `ursa run` over this repository after the
+  owner merges, and the interesting number is how the resolver
+  classifies the hand-resolved hunks against the two parents.
+- First step: run `npx tsx src/bin/ursa.ts run .` against this
+  repository once PR #69 merges, with `--declare` set to the owner's
+  verdict, and read what the resolver makes of a merge commit with two
+  generated parents. That is an observation, not a build, and it tells
+  us whether the resolver needs a merge-resolution episode kind before
+  anything is designed.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-03 (engineer's craft scan)
+
+Scanned **Graphite** (graphite.com, formerly graphite.dev), the product
+whose entire thesis is the stack this run spent the day landing by hand.
+Read from its own documentation today rather than from memory, and the
+limit on this scan is stated plainly: `graphite.com/docs` and
+`graphite.com/docs/graphite-merge-queue` returned content, while the
+command reference and cheatsheet pages 404ed from this runner, so the
+`gt` command names are not quoted here and nothing below depends on
+them. No account was created and nothing was installed, per the
+no-new-paid-services boundary.
+
+**Worth stealing, and it is the exact gap this run hit.** Graphite's
+merge queue is *stack-aware*: when a stack is added to the queue it can
+"process and validate the entire stack in parallel," and on success it
+merges without re-running CI because, in its own words, "no need for CI
+to run again since we have already validated the CI against that exact
+change (this is also known as fast-forward merge)." The load-bearing
+idea is that the validated artifact and the merged artifact are the
+same commit. Ursa's harness does not have that property. This run
+validated a union, and the owner's merge button will then build a
+*different* commit, because GitHub re-merges server-side, and PR #61
+already measured that the server-side merge does not honour the ledger
+driver this union depended on. So the tree the owner lands is not the
+tree that was tested. The fix shaped by Graphite's answer is a
+fast-forward landing: the owner merges this branch with a merge commit
+whose tree is byte-identical to the one that passed, rather than
+letting GitHub recompute it. Worth a ledger entry once the first
+landing has actually happened and we know which of the two GitHub
+produces.
+
+**What Ursa does better, for this repository.** Graphite's queue is a
+product you adopt: it wants an installed app, a configured trunk, and
+required status checks before it does anything, and its unit of work is
+a stack the author declared as a stack with `gt` while writing it. Ursa
+has seventeen branches that were never declared a stack by anybody,
+written by seventeen fresh sessions with no memory of each other, each
+branched independently off `main`. `tools/stack/integrate.sh` answers
+the question that shape actually poses, which is "does any order of
+these build," with zero repository configuration and no author
+cooperation, and it reports a conflict map rather than a verdict. The
+honest limit, carried forward from the 2026-09-30 scan of GitHub's own
+merge queue and still true: a queue prevents a broken union from ever
+landing, and the harness only tells you about it. Today sharpened that
+limit in the harness's favour on one point, though. A queue tests the
+candidate's own checks, so it would have reported today's union green
+seventeen times over, exactly as `npm test` did, because the check that
+found the four defects did not exist until this run added it. A gate is
+only as good as the step it runs, and that is the half neither product
+can supply.
