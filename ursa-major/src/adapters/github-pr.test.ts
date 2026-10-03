@@ -310,6 +310,40 @@ describe('replay against Ursa pull requests that really merged', () => {
     expect(resolution[0].paths).toEqual(['docs/sprints/pending.md'])
   })
 
+  it('both fixtures report zero intervening merges, and the zero is computed', () => {
+    // Each of these pull requests contains exactly one base-into-branch
+    // merge, which is the commit shape this repository produces on every
+    // seat branch. Both zeros are correct, for the two different reasons
+    // the walker distinguishes, and neither is hardcoded any more. A
+    // future capture whose merge does clobber a path a generation wrote
+    // will fail this test rather than quietly charge the person.
+    const twelve = fixture('ursa-pr-12.json')
+    const pairs12 = pairsFromPullRequest(twelve.snapshot, replayReader(twelve.repo))
+    expect(pairs12.every((p) => p.interveningMerges.length === 0)).toBe(true)
+    expect(pairs12.every((p) => p.pullRequest.unreadableMerges === undefined)).toBe(true)
+
+    // Reason one: the branch merge is itself the closure of the pair
+    // whose paths it touched, and a closure is never intervening.
+    const resolution = pairs12.find((p) => p.pullRequest.closure === 'merge-resolution')!
+    expect(resolution.finalSha.startsWith('045c3b0f')).toBe(true)
+
+    // Reason two: the pair that closed past that merge wrote a path the
+    // merge never touched, so nothing of it could have died there.
+    const branchMerge = twelve.snapshot.commits.find((c) => c.parentCount > 1)!
+    expect(branchMerge.sha.startsWith('045c3b0f')).toBe(true)
+    expect(branchMerge.files).toContain('docs/sprints/pending.md')
+    expect(branchMerge.files).not.toContain('docs/sprints/dispatch-queue.md')
+    const past = pairs12.find(
+      (p) => p.pullRequest.closure === 'merge-as-accepted' && p.paths.includes('docs/sprints/dispatch-queue.md'),
+    )!
+    expect(past.interveningMerges).toEqual([])
+
+    const seven = fixture('ursa-pr-7.json')
+    const pairs7 = pairsFromPullRequest(seven.snapshot, replayReader(seven.repo))
+    expect(pairs7.every((p) => p.interveningMerges.length === 0)).toBe(true)
+    expect(pairs7.every((p) => p.pullRequest.unreadableMerges === undefined)).toBe(true)
+  })
+
   it('no fixture pair claims acceptance from a bot merge', () => {
     for (const name of ['ursa-pr-7.json', 'ursa-pr-12.json']) {
       const { snapshot: snap, repo } = fixture(name)
@@ -319,5 +353,200 @@ describe('replay against Ursa pull requests that really merged', () => {
         }
       }
     }
+  })
+})
+
+/**
+ * The pull-request path's own merge-deletion case.
+ *
+ * `src/deletion.test.ts` pins this down for the git walker: a merge
+ * destroys an agent's text, the pair's final commit is a later human
+ * commit that never saw it, and the record used to call that text
+ * `generated_deleted` and name the human. On a repository run through
+ * pull requests the same thing happens one level in — the merge is the
+ * `Merge main into <seat branch>` commit the branch takes mid-review,
+ * which is the single most common commit shape in this repository's own
+ * history (both PR fixtures above contain one). This adapter handed
+ * every pair `interveningMerges: []`, so the attributor had nothing to
+ * read and every such deletion was the human's.
+ */
+describe('a merge inside the pull request deletes a generation', () => {
+  function sh(cwd: string, args: string[]): string {
+    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+  }
+
+  const BASE_A = ['export function header() {', "  return 'The frontier, read for you.'", '}'].join('\n')
+  const BASE_B = ['export function footer() {', "  return 'Unsubscribe any time.'", '}'].join('\n')
+  // Long and distinctive so the resolver's verbatim pass cannot match it
+  // anywhere else in the tree by accident.
+  const AGENT_BLOCK = [
+    'export function formatItem(item) {',
+    '  const why = item.why ?? "no stated reason"',
+    '  return `- ${item.title}: ${item.claim} — so what: ${why}`',
+    '}',
+  ].join('\n')
+  const RIVAL_BLOCK = [
+    'export function formatItem(item) {',
+    '  return [item.title, item.claim].join(": ")',
+    '}',
+  ].join('\n')
+
+  /**
+   * C0 (human, main)       digest.js = A + B
+   * G  (agent, seat/branch) digest.js = A + AGENT_BLOCK + B   <- the generation
+   * C1 (agent, main)       digest.js = A + RIVAL_BLOCK + B    someone else's work
+   * M  (merge, seat/branch) merge main into the branch, resolved to A + RIVAL_BLOCK + B
+   *                        <- AGENT_BLOCK dies HERE, inside the pull request
+   * F  (human, seat/branch) digest.js = A + RIVAL_BLOCK + B'  an unrelated tweak
+   * PRM (merge, main)      the pull request's own merge commit
+   *
+   * `M`'s file list is the diff against its first parent, which is the
+   * branch head, because that is what the GitHub commits API returns for
+   * a merge commit. So `digest.js` is in it: relative to the branch, the
+   * merge changed that file.
+   */
+  function prMergeDeletionRepo(): { dir: string; snap: PullRequestSnapshot; mergeSha: string } {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-prmerge-'))
+    sh(dir, ['init', '-q', '-b', 'main'])
+    sh(dir, ['config', 'user.email', 'human@example.com'])
+    sh(dir, ['config', 'user.name', 'Human Owner'])
+    const file = join(dir, 'digest.js')
+    const write = (body: string) => writeFileSync(file, body + '\n')
+    const at = (n: number) => `2026-09-28T1${n}:00:00Z`
+    const commitAt = (msg: string, n: number, author?: string) => {
+      sh(dir, ['add', '.'])
+      const args = ['commit', '-q', '-m', msg, '--date', at(n)]
+      if (author) args.push('--author', author)
+      sh(dir, args)
+    }
+    const trailer = `\n\nCo-Authored-By: ${AGENT_TRAILER}`
+    const AGENT = 'claude[bot] <bot@example.com>'
+
+    write([BASE_A, BASE_B].join('\n\n'))
+    commitAt('Baseline digest module', 0)
+
+    sh(dir, ['checkout', '-q', '-b', 'seat/branch'])
+    write([BASE_A, AGENT_BLOCK, BASE_B].join('\n\n'))
+    commitAt('Generate the item formatter' + trailer, 1, AGENT)
+    const genSha = sh(dir, ['rev-parse', 'HEAD']).trim()
+
+    sh(dir, ['checkout', '-q', 'main'])
+    write([BASE_A, RIVAL_BLOCK, BASE_B].join('\n\n'))
+    commitAt('Generate a leaner item formatter' + trailer, 2, AGENT)
+
+    // The branch takes main, conflicts on the same region, and the
+    // resolution keeps main's version. Nobody read the agent's block and
+    // rejected it; it was overwritten by someone else's branch.
+    sh(dir, ['checkout', '-q', 'seat/branch'])
+    try {
+      sh(dir, ['merge', '--no-ff', '--no-commit', 'main'])
+    } catch {
+      // expected: the two formatters conflict
+    }
+    write([BASE_A, RIVAL_BLOCK, BASE_B].join('\n\n'))
+    sh(dir, ['add', '.'])
+    sh(dir, ['commit', '-q', '-m', 'Merge main into seat/branch: keep the leaner formatter', '--date', at(3)])
+    const mergeSha = sh(dir, ['rev-parse', 'HEAD']).trim()
+
+    write([BASE_A, RIVAL_BLOCK, BASE_B.replace('Unsubscribe any time.', 'Unsubscribe whenever.')].join('\n\n'))
+    commitAt('Soften the footer wording', 4)
+    const finSha = sh(dir, ['rev-parse', 'HEAD']).trim()
+
+    sh(dir, ['checkout', '-q', 'main'])
+    sh(dir, ['merge', '-q', '--no-ff', '-m', 'Merge pull request #42 from seat/branch', 'seat/branch'])
+    const prMergeSha = sh(dir, ['rev-parse', 'HEAD']).trim()
+
+    const authoredAt = (sha: string) => sh(dir, ['show', '-s', '--format=%aI', sha]).trim()
+    const snap = snapshot({
+      number: 42,
+      headSha: finSha,
+      mergeCommitSha: prMergeSha,
+      mergedAt: authoredAt(prMergeSha),
+      commits: [
+        commit({ sha: genSha, authoredAt: authoredAt(genSha), files: ['digest.js'], subject: 'Generate the item formatter' }),
+        commit({
+          sha: mergeSha, authoredAt: authoredAt(mergeSha), parentCount: 2, files: ['digest.js'],
+          authorName: 'Human Owner', trailers: '', subject: 'Merge main into seat/branch: keep the leaner formatter',
+        }),
+        commit({
+          sha: finSha, authoredAt: authoredAt(finSha), files: ['digest.js'],
+          authorName: 'Human Owner', trailers: '', subject: 'Soften the footer wording',
+        }),
+      ],
+    })
+    return { dir, snap, mergeSha }
+  }
+
+  it('reports the branch merge as intervening, with its parents and the path it touched', () => {
+    const { dir, snap, mergeSha } = prMergeDeletionRepo()
+    const pairs = pairsFromPullRequest(snap, gitRepoReader(dir))
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].pullRequest.closure).toBe('branch-edit')
+    expect(pairs[0].interveningMerges).toHaveLength(1)
+    const m = pairs[0].interveningMerges[0]
+    expect(m.sha).toBe(mergeSha)
+    expect(m.paths).toEqual(['digest.js'])
+    expect(m.parents).toHaveLength(2)
+    expect(m.subject).toBe('Merge main into seat/branch: keep the leaner formatter')
+    expect(pairs[0].pullRequest.unreadableMerges).toBeUndefined()
+  })
+
+  it('the resolved record blames the merge, not the person who made the next commit', () => {
+    const { dir, snap, mergeSha } = prMergeDeletionRepo()
+    const episodes = episodesFromPullRequest(pairsFromPullRequest(snap, gitRepoReader(dir)), dir)
+    const record = resolveEpisode(dir, episodes[0])!
+    const deleted = record.generations.flatMap((g) => g.spans).filter((s) => s.fate === 'generated_deleted')
+    const distinctive = deleted.filter((s) => s.text.includes('no stated reason'))
+    expect(distinctive).toHaveLength(1)
+    expect(distinctive[0].deletion?.cause).toBe('merge')
+    expect(mergeSha.startsWith(distinctive[0].deletion!.mergeSha!)).toBe(true)
+    expect(distinctive[0].deletion!.mergeSubject).toBe('Merge main into seat/branch: keep the leaner formatter')
+    expect(record.stats.generated.mergeDeletedChars).toBeGreaterThan(0)
+  })
+
+  it('with the merge withheld, the same text is charged to the human — the defect, pinned', () => {
+    const { dir, snap } = prMergeDeletionRepo()
+    const episodes = episodesFromPullRequest(pairsFromPullRequest(snap, gitRepoReader(dir)), dir)
+    // Exactly what this adapter shipped before: the episode reaches the
+    // resolver with no merges to read.
+    const blind = { ...episodes[0], interveningMerges: [] }
+    const record = resolveEpisode(dir, blind)!
+    const distinctive = record.generations
+      .flatMap((g) => g.spans)
+      .filter((s) => s.fate === 'generated_deleted' && s.text.includes('no stated reason'))
+    expect(distinctive).toHaveLength(1)
+    expect(distinctive[0].deletion?.cause).toBe('human_edit')
+    expect(record.stats.generated.mergeDeletedChars).toBe(0)
+  })
+
+  it('snapshot parentage is enough: a fork PR whose commits are not in the clone still attributes', () => {
+    const { dir, snap, mergeSha } = prMergeDeletionRepo()
+    const parents = gitRepoReader(dir).parents(mergeSha)
+    const withParents = {
+      ...snap,
+      commits: snap.commits.map((c) => (c.sha === mergeSha ? { ...c, parents } : c)),
+    }
+    // A reader that refuses to answer `parents` for the branch merge, the
+    // way a clone without the fork's objects would.
+    const inner = gitRepoReader(dir)
+    const forkReader: RepoReader = {
+      blobId: inner.blobId,
+      parents: (sha) => (sha === mergeSha ? [] : inner.parents(sha)),
+    }
+    const pairs = pairsFromPullRequest(withParents, forkReader)
+    expect(pairs[0].interveningMerges.map((m) => m.sha)).toEqual([mergeSha])
+    expect(pairs[0].interveningMerges[0].parents).toEqual(parents)
+  })
+
+  it('an unreadable merge is named on the record, never silently treated as harmless', () => {
+    const { dir, snap, mergeSha } = prMergeDeletionRepo()
+    const inner = gitRepoReader(dir)
+    const forkReader: RepoReader = {
+      blobId: inner.blobId,
+      parents: (sha) => (sha === mergeSha ? [] : inner.parents(sha)),
+    }
+    const pairs = pairsFromPullRequest(snap, forkReader)
+    expect(pairs[0].interveningMerges).toEqual([])
+    expect(pairs[0].pullRequest.unreadableMerges).toEqual([mergeSha])
   })
 })
