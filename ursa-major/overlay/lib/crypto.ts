@@ -2,9 +2,17 @@
 // same algorithm, `window.crypto` for `node:crypto.webcrypto`. The
 // passphrase is entered once per page session and held in memory only
 // (plan §16.4). The server stores ciphertext; decryption happens here.
+//
+// One deliberate asymmetry with the bridge: this side derives the write
+// secret (it has to, since the blob id is that secret's SHA-256) and
+// then drops it instead of returning it. The page's whole job is to
+// read, so the write capability is absent from the type a component can
+// reach, not merely unused by one. See docs/design/sync-write-capability.md.
+
+import { blobIdFor } from './write-capability'
 
 export const PBKDF2_ITERATIONS = 600_000
-export const SALT = new TextEncoder().encode('ursa-overlay-v1')
+export const SALT = new TextEncoder().encode('ursa-overlay-v2')
 
 export interface DerivedKeys {
   aesKey: CryptoKey
@@ -22,9 +30,9 @@ export async function deriveKeys(passphrase: string): Promise<DerivedKeys> {
   const aesKey = await crypto.subtle.importKey(
     'raw', bits.slice(0, 32) as BufferSource, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt'],
   )
-  const blobId = Array.from(bits.slice(32))
+  const writeSecret = Array.from(bits.slice(32))
     .map((b) => b.toString(16).padStart(2, '0')).join('')
-  return { aesKey, blobId }
+  return { aesKey, blobId: await blobIdFor(writeSecret) }
 }
 
 export async function decryptJson<T = unknown>(keys: DerivedKeys, blob: Uint8Array): Promise<T> {

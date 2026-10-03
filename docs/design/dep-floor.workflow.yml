@@ -1,0 +1,43 @@
+# This file belongs at .github/workflows/dep-floor.yml and is parked here
+# because no agent seat can put it there. Verified on 2026-09-29 by
+# attempting the push rather than trusting the claim:
+#
+#   ! [remote rejected] engineer/2026-09-29-next-rce-breakfix
+#     (refusing to allow a GitHub App to create or update workflow
+#      `.github/workflows/dep-floor.yml` without `workflows` permission)
+#
+# The owner installs it with two commands and nothing else:
+#
+#   cp docs/design/dep-floor.workflow.yml .github/workflows/dep-floor.yml
+#   git add .github/workflows/dep-floor.yml && git commit -m 'Wire the dependency floor gate into CI'
+#
+# Until that happens the gate exists and runs (`node scripts/dep-floor.mjs`)
+# but nothing forces anyone to run it, which is the exact condition that let a
+# critical RCE sit on main for two days. See docs/design/dependency-floor.md.
+
+name: dep-floor
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Advisories land without anyone touching the repo, so the floor is also
+    # checked on a clock, not only on a diff.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  floor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # No install step: dep-floor.mjs has no dependencies and npm audit reads
+      # the lockfile, so nothing vulnerable has to be fetched to check it.
+      - run: node scripts/dep-floor.mjs

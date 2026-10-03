@@ -12,6 +12,28 @@ export type GenerationFate =
   | 'survived_mutated'
   | 'generated_deleted'
 
+/**
+ * What destroyed a generation span, when its fate is `generated_deleted`.
+ *
+ * `human_edit` — absent from the human's final blob and no mechanical
+ * cause was found. This is the label Ursa Minor sells: the person had
+ * the text in front of them and did not keep it.
+ *
+ * `merge` — the text was present in a parent of an intervening merge
+ * commit and absent from the merge's own result. A merge brings in
+ * another branch's work; nobody read this text and rejected it, so it
+ * carries no correction signal and must not be counted as one.
+ */
+export type DeletionCause = 'human_edit' | 'merge'
+
+export interface DeletionAttribution {
+  cause: DeletionCause
+  /** short sha of the merge that destroyed it; set only when cause is 'merge' */
+  mergeSha?: string
+  /** that merge's subject line, so the record is readable without the repo */
+  mergeSubject?: string
+}
+
 export type GenerationKind = 'write' | 'edit' | 'assistant_text'
 
 export type SegmentMode = 'prose' | 'code'
@@ -33,6 +55,83 @@ export interface DiffPart {
   removed?: boolean
 }
 
+// ---------------------------------------------------------------------------
+// The time dimension (CLAUDE.md §1). A span's class is a verdict taken at
+// one instant — the episode's closing commit. Its lifespan is what the work
+// that came afterwards did to it. See lifespan.ts for how it is measured.
+// ---------------------------------------------------------------------------
+
+export interface SpanLifespan {
+  /** revisions of this span's file, after the closing commit, that were examined */
+  revisionsChecked: number
+  /**
+   * The span is traced sentence by sentence (prose) or line by line (code),
+   * because resolve() merges adjacent same-class text and a whole file often
+   * arrives here as one span. These count the units long enough to carry
+   * evidence; see MIN_TRACEABLE_LEN in lifespan.ts.
+   */
+  unitsTraced: number
+  unitsSurviving: number
+  /** chars of this span whose units were still present at the last revision examined */
+  survivingChars: number
+  /** chars of this span whose units later work removed */
+  decayedChars: number
+  /** revisions in which every one of the span's units was still present */
+  intactRevisions: number
+  /** seconds from the closing commit to the newest revision at which it was wholly intact */
+  intactSeconds: number
+  /** the revision that took the span's first unit; null when it lost none */
+  diedAtSha: string | null
+  diedAt: string | null
+  /** at least one unit was still present at the newest revision examined */
+  liveAtTip: boolean
+  /**
+   * durable  = every unit survived to the tip
+   * eroded   = some units survived, some did not
+   * decayed  = every unit is gone — a false positive in the span's own class
+   * untested = nothing later to test against, or no unit long enough to carry evidence
+   */
+  fate: 'durable' | 'eroded' | 'decayed' | 'untested'
+  /** how presence was last judged */
+  basis: 'verbatim' | 'token-containment' | null
+  /** why `untested`, when it is untested */
+  skipped: 'too-short' | 'no-later-revisions' | null
+}
+
+export interface Durability {
+  method: 'git-forward-walk'
+  /** the revision the walk ended at */
+  tipSha: string | null
+  /** the episode's closing commit — the instant the span classes were taken at */
+  closingSha: string
+  /** surviving spans (survived_verbatim + survived_mutated) with a later revision to test */
+  testedSpans: number
+  durableSpans: number
+  erodedSpans: number
+  decayedSpans: number
+  durableChars: number
+  decayedChars: number
+  /**
+   * decayedChars / (durableChars + decayedChars). The share of this record's
+   * own "the user kept it" verdict that later real work overturned. Null when
+   * nothing was testable — "nothing decayed" and "nothing was measured" are
+   * different claims and only one of them is sellable. A conservative floor:
+   * see spanPresent() in lifespan.ts for the presence test, which can only
+   * over-report survival.
+   */
+  decayRate: number | null
+  /**
+   * The same rate over `no_generation_provenance` spans — text the user wrote
+   * themselves. This is the repo's background churn, so agent text decaying at
+   * the baseline is not decaying because it was agent text.
+   */
+  baselineDecayRate: number | null
+  /** median seconds a span that lost something stayed wholly intact; null when none did */
+  medianIntactSeconds: number | null
+  maxRevisionsWalked: number
+  minTraceableLen: number
+}
+
 export interface FinalSpan {
   start: number
   end: number
@@ -48,6 +147,8 @@ export interface FinalSpan {
   candidate?: { score: number; text: string; source: SourcePointer }
   /** matched by exact equality of a very short segment — weak evidence */
   trivial?: boolean
+  /** what later work did to this span; set by annotateDurability, absent on non-git records */
+  lifespan?: SpanLifespan
 }
 
 export interface FinalFile {
@@ -62,6 +163,8 @@ export interface GenerationSpan {
   end: number
   text: string
   fate: GenerationFate
+  /** set only when fate is 'generated_deleted': what destroyed it, and why that is not a correction */
+  deletion?: DeletionAttribution
 }
 
 export interface RawGeneration {
@@ -121,8 +224,16 @@ export interface Stats {
   generated: {
     totalChars: number
     survivedChars: number
+    /** every deleted char, whatever destroyed it: humanDeletedChars + mergeDeletedChars */
     deletedChars: number
+    /** deletedChars / totalChars — the gross figure, not a claim about the human */
     deletedPct: number
+    /** chars the human had in front of them and did not keep — the correction signal */
+    humanDeletedChars: number
+    /** humanDeletedChars / totalChars — the only deletion rate safe to call a discard rate */
+    humanDeletedPct: number
+    /** chars an intervening merge destroyed mechanically; carries no correction signal */
+    mergeDeletedChars: number
   }
   perFile: Array<{
     path: string
@@ -150,6 +261,8 @@ export interface Stats {
 
 export interface CorrectionLoop {
   id: string
+  /** conversation the steps below belong to; step ordinals are per-conversation */
+  conversationId?: string
   theme: string
   targetFiles: string[]
   openedStep: number
@@ -188,6 +301,8 @@ export interface RepairAttempt {
 }
 
 export interface RegressionEvent {
+  /** conversation the steps below belong to; step ordinals are per-conversation */
+  conversationId?: string
   /** step at which the user reported it */
   step: number
   brokenState: string
@@ -232,6 +347,34 @@ export interface LabSignals {
   notes?: string[]
 }
 
+
+// ---------------------------------------------------------------------------
+// What kind of finished thing this record is about. Ursa does not only read
+// chats: the artifact the record joins backward from can be a chat trace, a
+// git repository, a deployed/published page, or something the user judged by
+// eye. The capture path names which, because the correction channel differs
+// per kind (prose edits vs. commits vs. "still too dark" on a render).
+// ---------------------------------------------------------------------------
+
+export type ArtifactKind =
+  /** the finished work is the conversation itself (transcript, pasted thread) */
+  | 'chat'
+  /** the finished work is source under version control; commits are the edits */
+  | 'repo'
+  /** the finished work is reachable at a URL — a deployed site, a published page */
+  | 'hosted'
+  /** the finished work was accepted or corrected by eye — a render, a design */
+  | 'visual'
+
+export interface Artifact {
+  kind: ArtifactKind
+  /**
+   * Where the accepted state can be seen as the user saw it: a deploy URL for
+   * `hosted`, a screenshot path for `visual`. Absent when no render exists.
+   */
+  renderRef?: string
+}
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
@@ -239,9 +382,13 @@ export interface OutcomeRecord {
     finished: boolean
     generatedAt: string
   }
+  /** what kind of finished thing this is, and where its rendered state lives */
+  artifact: Artifact
   files: FinalFile[]
   conversations: ConversationMeta[]
   generations: GenerationRecord[]
   stats: Stats
   signals?: LabSignals
+  /** the time dimension; present only for git-backed records, where later revisions exist */
+  durability?: Durability
 }
