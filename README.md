@@ -205,6 +205,8 @@ npx tsx src/cli.ts --id ursa-minor-site \
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
 | `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
 | `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
+| `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, or a merge commit, which overwrote it mechanically and carries no correction signal |
+| `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 | `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
