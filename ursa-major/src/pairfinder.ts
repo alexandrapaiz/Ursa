@@ -41,10 +41,14 @@ interface CommitInfo {
   parentCount: number
 }
 
-function git(repoPath: string, args: string[]): string {
+function git(repoPath: string, args: string[], opts: { quiet?: boolean } = {}): string {
   return execFileSync('git', ['-C', repoPath, ...args], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
+    // `quiet` drops git's stderr. Only blobAt uses it, because a missing path
+    // at a given commit is an expected answer there (deploy detection probes
+    // for files that may not exist), not a failure worth printing.
+    stdio: opts.quiet ? ['ignore', 'pipe', 'ignore'] : undefined,
   })
 }
 
@@ -74,7 +78,7 @@ export function commitFiles(repoPath: string, sha: string): string[] {
 
 export function blobAt(repoPath: string, sha: string, path: string): string | null {
   try {
-    return git(repoPath, ['show', `${sha}:${path}`])
+    return git(repoPath, ['show', `${sha}:${path}`], { quiet: true })
   } catch {
     return null
   }

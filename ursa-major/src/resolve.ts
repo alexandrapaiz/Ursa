@@ -11,8 +11,8 @@ import {
   tokens, levSimilarity, containment, combinedScore,
 } from './match'
 import type {
-  ConversationMeta, FinalFile, FinalSpan, GenerationFate, GenerationRecord,
-  OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
+  Artifact, ConversationMeta, FinalFile, FinalSpan, GenerationFate,
+  GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
 } from './types'
 import { computeStats } from './stats'
 
@@ -23,6 +23,13 @@ export interface ResolveInput {
   generations: RawGeneration[]
   finished: boolean
   generatedAt?: string
+  /**
+   * What kind of finished thing this is. Omitted means `chat`: the resolver's
+   * original path joins final files against a conversation transcript, so the
+   * correction stream is chat. Callers that know better say so — `ursa run`
+   * passes `repo` or `hosted` because it walks git.
+   */
+  artifact?: Artifact
 }
 
 interface GenSentence extends Span {
@@ -204,6 +211,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       finished: input.finished,
       generatedAt: input.generatedAt ?? new Date().toISOString(),
     },
+    artifact: input.artifact ?? { kind: 'chat' },
     files,
     conversations: input.conversations,
     generations,
