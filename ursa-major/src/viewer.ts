@@ -228,8 +228,15 @@ export function renderViewer(record: OutcomeRecord): string {
   var dot = el('span', 'dot'); dot.style.background = 'var(--deleted)';
   lab.appendChild(dot); lab.appendChild(document.createTextNode(LABELS.generated_deleted));
   t.appendChild(lab);
-  t.appendChild(el('div', 'value num', pct(g.deletedPct)));
-  t.appendChild(el('div', 'sub num', fmt(g.deletedChars) + ' of ' + fmt(g.totalChars) + ' generated chars'));
+  // Headline the human's own discard, not the gross figure. A merge can
+  // destroy generated text with nobody reading it, and that is not a
+  // discard; it is reported on its own line so the tile is not a claim
+  // about the reader that the record cannot support.
+  t.appendChild(el('div', 'value num', pct(g.humanDeletedPct)));
+  t.appendChild(el('div', 'sub num', fmt(g.humanDeletedChars) + ' of ' + fmt(g.totalChars) + ' generated chars'));
+  if (g.mergeDeletedChars > 0) {
+    t.appendChild(el('div', 'sub num', '+ ' + fmt(g.mergeDeletedChars) + ' chars destroyed by a merge, not by you'));
+  }
   tiles.appendChild(t);
 
   // distribution bar over covered chars
@@ -244,7 +251,7 @@ export function renderViewer(record: OutcomeRecord): string {
 
   // legend
   var legend = document.getElementById('legend');
-  [['survived_verbatim', 'kept unchanged'], ['survived_mutated', 'kept, edited (dotted underline)'], ['no_generation_provenance', 'no model was in the running (italic)'], ['generated_deleted', 'produced, thrown away (struck)']].forEach(function (pair) {
+  [['survived_verbatim', 'kept unchanged'], ['survived_mutated', 'kept, edited (dotted underline)'], ['no_generation_provenance', 'no model was in the running (italic)'], ['generated_deleted', 'produced, not in the final work (struck; hover a span for whether you dropped it or a merge did)']].forEach(function (pair) {
     var item = el('span');
     var sw = el('span', 'sw');
     sw.style.background = pair[0] === 'generated_deleted' ? 'var(--deleted)' : COLORS[pair[0]];
@@ -330,6 +337,14 @@ export function renderViewer(record: OutcomeRecord): string {
         + (span.uncertain ? ' c-uncertain' : '') + (span.trivial ? ' c-trivial' : '')
         + (lit ? ' hl' : '');
       var node = el('span', cls, text.slice(span.start, span.end));
+      // In the generations panel a deleted span says which kind of
+      // deletion it was, so the struck text is never read as a discard
+      // the person made when a merge is what destroyed it.
+      if (fateMode && span.deletion) {
+        node.title = span.deletion.cause === 'merge'
+          ? 'destroyed by merge ' + span.deletion.mergeSha + ' (' + span.deletion.mergeSubject + '), not dropped by you'
+          : 'you had this and did not keep it';
+      }
       if (!fateMode) {
         node.addEventListener('mouseenter', function () { showSpan(span); });
         node.addEventListener('click', function (ev) { ev.stopPropagation(); showSpan(span); });

@@ -2,6 +2,15 @@
 //   Pass 1 — verbatim: normalized containment in any generation.
 //   Pass 2 — mutated: best fuzzy match over generation segments, thresholded.
 //   Residue → no_generation_provenance; unclaimed generation segments → generated_deleted.
+//
+// An unclaimed generation segment is absent from the final file, which
+// is not the same as the human having discarded it: a merge between the
+// generation and the final commit can have destroyed it mechanically.
+// resolve() stays a pure function of its input and does not read git,
+// so the caller injects `attributeDeletion` to say which it was. With
+// no attributor every deletion is the human's, which is correct for the
+// chat path (src/cli.ts), where the final file is the file on disk and
+// no merge sits in between.
 
 import { diffWords } from 'diff'
 import { normalize, type Normalized } from './normalize'
@@ -11,7 +20,7 @@ import {
   tokens, levSimilarity, containment, combinedScore,
 } from './match'
 import type {
-  Artifact, ConversationMeta, FinalFile, FinalSpan, GenerationFate,
+  Artifact, ConversationMeta, DeletionAttribution, FinalFile, FinalSpan, GenerationFate,
   GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
 } from './types'
 import { computeStats } from './stats'
@@ -30,6 +39,12 @@ export interface ResolveInput {
    * passes `repo` or `hosted` because it walks git.
    */
   artifact?: Artifact
+  /**
+   * Why a generation span is missing from the final file. Called once
+   * per deleted span with the generation's own path and the span's text.
+   * Omit it and every deletion is attributed to the human.
+   */
+  attributeDeletion?: (filePath: string, spanText: string) => DeletionAttribution
 }
 
 interface GenSentence extends Span {
@@ -183,13 +198,17 @@ export function resolve(input: ResolveInput): OutcomeRecord {
   const overlaps = (claims: Claim[] | undefined, s: Span) =>
     !!claims && claims.some((c) => c.start < s.end && c.end > s.start)
 
+  const attribute = input.attributeDeletion ?? (() => ({ cause: 'human_edit' as const }))
+
   const generations: GenerationRecord[] = preps.map((p) => {
     const gi = p.gen.generationIndex
     const spans = p.sentences.map((gs) => {
       const v = overlaps(verbatimClaims.get(gi), gs)
       const m = !v && overlaps(mutatedClaims.get(gi), gs)
       const fate: GenerationFate = v ? 'survived_verbatim' : m ? 'survived_mutated' : 'generated_deleted'
-      return { start: gs.start, end: gs.end, text: gs.text, fate }
+      const base = { start: gs.start, end: gs.end, text: gs.text, fate }
+      if (fate !== 'generated_deleted') return base
+      return { ...base, deletion: attribute(p.gen.filePath ?? '', gs.text) }
     })
     const totalChars = spans.reduce((a, s) => a + (s.end - s.start), 0)
     const survivedChars = spans

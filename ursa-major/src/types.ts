@@ -12,6 +12,28 @@ export type GenerationFate =
   | 'survived_mutated'
   | 'generated_deleted'
 
+/**
+ * What destroyed a generation span, when its fate is `generated_deleted`.
+ *
+ * `human_edit` — absent from the human's final blob and no mechanical
+ * cause was found. This is the label Ursa Minor sells: the person had
+ * the text in front of them and did not keep it.
+ *
+ * `merge` — the text was present in a parent of an intervening merge
+ * commit and absent from the merge's own result. A merge brings in
+ * another branch's work; nobody read this text and rejected it, so it
+ * carries no correction signal and must not be counted as one.
+ */
+export type DeletionCause = 'human_edit' | 'merge'
+
+export interface DeletionAttribution {
+  cause: DeletionCause
+  /** short sha of the merge that destroyed it; set only when cause is 'merge' */
+  mergeSha?: string
+  /** that merge's subject line, so the record is readable without the repo */
+  mergeSubject?: string
+}
+
 export type GenerationKind = 'write' | 'edit' | 'assistant_text'
 
 export type SegmentMode = 'prose' | 'code'
@@ -141,6 +163,8 @@ export interface GenerationSpan {
   end: number
   text: string
   fate: GenerationFate
+  /** set only when fate is 'generated_deleted': what destroyed it, and why that is not a correction */
+  deletion?: DeletionAttribution
 }
 
 export interface RawGeneration {
@@ -200,8 +224,16 @@ export interface Stats {
   generated: {
     totalChars: number
     survivedChars: number
+    /** every deleted char, whatever destroyed it: humanDeletedChars + mergeDeletedChars */
     deletedChars: number
+    /** deletedChars / totalChars — the gross figure, not a claim about the human */
     deletedPct: number
+    /** chars the human had in front of them and did not keep — the correction signal */
+    humanDeletedChars: number
+    /** humanDeletedChars / totalChars — the only deletion rate safe to call a discard rate */
+    humanDeletedPct: number
+    /** chars an intervening merge destroyed mechanically; carries no correction signal */
+    mergeDeletedChars: number
   }
   perFile: Array<{
     path: string

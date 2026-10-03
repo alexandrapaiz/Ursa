@@ -1707,3 +1707,136 @@ https://github.com/mem0ai/mem0
   one. Honest limit on the comparison: changesets has no equivalent of the
   owner's verdict, so its files never need to be found and edited in place
   the way an `accepted` entry does.
+
+### 2026-10-02 — A high fuzzy score is treated as proof of descent, and it is only proof of similarity
+- Trigger: debugging today's merge-attribution fix. In the synthetic
+  repo two agent branches each wrote a `formatItem` function and the
+  human kept branch B's version. Branch A's generation is the one in the
+  record. Its line
+  `return \`- ${item.title}: ${item.claim} — so what: ${why}\`` came
+  back classified `survived_mutated`, carrying a word-level diff from
+  A's line to B's line, presented as the human's correction. The text in
+  the final file is B's line, written by a different agent on a branch
+  the human never edited. Nobody performed that diff.
+- What: `resolve.ts` Pass 2 takes the best-scoring generation segment
+  above THETA_HIGH and labels the span `survived_mutated`, treating
+  similarity as descent. It cannot do otherwise with what it is given:
+  branch B's generation is not in the record at all, because
+  `resolveEpisode` builds generations only from the episode's own
+  `generatedSha`. So there is no rival candidate to tie-break against
+  and no tuning of THETA_HIGH helps — the evidence that would settle it
+  is outside the record. This matters more than the deletion case fixed
+  today. `generated_deleted` carried a false label; this carries a
+  fabricated artifact, a `diff` that CLAUDE.md §1 sells as "the mutation
+  is the correction" and that corresponds to no edit any human made. A
+  lab training on it is training on an invented correction.
+- What would settle it is the same evidence the merge fix used: git. If
+  the span's text is present verbatim in some other commit's blob for
+  that path, the human did not derive it by editing this generation, and
+  the label should fall back to `no_generation_provenance` for this
+  record rather than claim a mutation.
+- First step: a test asserting that when a final span matches a
+  generation above THETA_HIGH but is also present verbatim in a sibling
+  commit's blob, the span is not labelled `survived_mutated`. Then add
+  an optional `corroborate` hook to `ResolveInput`, injected from
+  `bin/ursa.ts` exactly as `attributeDeletion` now is, so `resolve()`
+  stays a pure function and the git lookup stays at the edge.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-02 — Nothing enforces that a pairing target descends from the generation
+- Trigger: running `ursa run` over a clone of this repo. With only
+  `main` fetched it found 6 work units; after fetching two unmerged
+  engineer branches it found 19, which looked like cross-branch pairing.
+  It was not. Checking every pair with
+  `git merge-base --is-ancestor <generatedSha> <finalSha>` returned 0
+  non-ancestral out of 19, and the extra episodes are legitimate pairs
+  among the fetched branches' own commits. Two synthetic repos with
+  sibling branches, built in both creation orders, produced 0 pairs
+  rather than a bad pair. So the bug I went looking for is not there.
+  What is there is that the invariant holds by accident: `listCommits`
+  walks `git log --all --reverse --topo-order` and the forward scan
+  accepts `commits[j]` for any `j > i`. Topo order guarantees ancestors
+  precede descendants, but it says nothing about siblings, and in both
+  synthetic repos git happened to place the agent commit last, which is
+  why no pair formed. Ref ordering is doing the work that a correctness
+  check should be doing.
+- What: if a pairing target that is not a descendant of the generation
+  ever is accepted, the resulting record is false throughout rather than
+  wrong in one field. The generation's text is absent from an unrelated
+  branch's blob, so it reads as `generated_deleted`; that branch's own
+  text reads as `no_generation_provenance`, which CLAUDE.md §1 calls the
+  most valuable category. Today's merge attribution cannot help, since
+  no merge is involved and the two commits simply have no ancestry
+  relationship. With 48 open branches in this repo and `--all` in the
+  walk, the exposure grows with every branch, and the thing standing
+  between it and the labels is the order git happens to emit refs in.
+  The guard is one git call and it makes the invariant explicit.
+- First step: in `findCommitPairs`, require
+  `git merge-base --is-ancestor <generatedSha> <finalSha>` (exit 0)
+  before accepting a pairing target, memoized per candidate pair. Add a
+  test that constructs a sibling-branch repo and asserts the guard
+  itself fires — not merely that the pair count is 0, which is what
+  passes today for the wrong reason, exactly the trap the
+  silent-empty-on-merge entry below describes.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-02 — Audit every git read for the silent-empty-on-merge failure
+- Trigger: today's fix. `commitFiles` ran
+  `git show --name-only --format= <sha>`, which prints nothing at all
+  for a merge commit, because git shows no diff for a merge unless told
+  to. It never errored and never returned a wrong path; it returned an
+  empty list. That is why `findCommitPairs` appeared to refuse merges
+  as pairing targets even before its explicit parent check: the merge
+  reported no overlapping path, so the check never had to fire. A guard
+  and a bug were masking each other, and the 2026-09-20 ledger finding
+  ("the pair finder now skips merge commits, test added") recorded the
+  guard as the reason when it was not.
+- What: the dangerous shape here is a git invocation whose failure mode
+  is empty output rather than a non-zero exit, because every caller
+  treats empty as "nothing to see". `blobAt` already swallows errors
+  into `null` by design. Each git read in `pairfinder.ts` should be
+  exercised against a merge commit specifically, and any that returns
+  empty where content exists should be fixed or documented. The general
+  lesson is worth a line in the standard too: a test that passes
+  because of a second defect is not evidence, and the way to tell the
+  difference is to assert the guard fires, not just that the outcome
+  looks right.
+- First step: a test file that builds a repo with one merge and asserts,
+  for each exported helper in `pairfinder.ts`, that it returns non-empty
+  output for the merge commit. Then assert the parent check fires, by
+  constructing a case where a merge does report an overlapping path and
+  checking it is still refused as a pairing target.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-02 (engineer, competitive scan): **GitClear** (code-analytics
+  product, the "Diff Delta" / "Line Impact" metric). No live browse was
+  performed this run, so this is a craft read from prior knowledge of
+  the product and should be re-checked against its current docs before
+  anything is built on it. Worth stealing: GitClear's headline metric
+  refuses to count mechanical change as work. It explicitly classifies
+  and then discounts moved code, copy-pasted code, and churn — code
+  deleted within a short window of being written — on the argument that
+  a diff line is not evidence of value until you know what kind of line
+  it is. That is the same move Ursa made today, arrived at from the
+  opposite direction: they discount churn so a productivity number is
+  not inflated, Ursa splits deletion by cause so a training label is not
+  falsified. Their taxonomy is more developed than Ursa's and the next
+  categories to look at are theirs: moved code and copy-paste, both of
+  which currently reach Ursa's resolver as ordinary deletions and
+  additions. A generation whose text was moved to another file reads as
+  `generated_deleted` plus `no_generation_provenance` today, which is
+  two wrong labels from one mechanical event, and it is a strictly
+  harder case than the merge because no commit boundary marks it.
+  Where Ursa does better: GitClear measures diffs and nothing else. It
+  has no join to the model generation that proposed the line, so it can
+  tell you code churned but not which model's output churned, nor
+  whether the human's edit was a correction of a specific generation or
+  an unrelated rewrite. Its labels are also computed by its own grader
+  over heuristics; Ursa's come from whether the work kept the text. That
+  is the distinction CLAUDE.md §1 rests on, and it is the reason the
+  deletion cause had to be fixed rather than tuned: a grader can be
+  approximately right, an outcome record claiming the human discarded
+  text they never saw is simply false.
