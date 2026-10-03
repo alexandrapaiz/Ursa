@@ -7,7 +7,9 @@
   "scripts": {
     "test": "vitest run",
     "resolve": "tsx src/cli.ts",
-    "record:fixture": "tsx src/cli.ts --id mini-fixture --final fixtures/mini/final.md --conversations fixtures/mini/conversations --out fixtures/mini/record --generated-at 2026-09-25T00:00:00.000Z"
+    "record:fixture": "tsx src/cli.ts --id mini-fixture --final fixtures/mini/final.md --conversations fixtures/mini/conversations --out fixtures/mini/record --generated-at 2026-09-25T00:00:00.000Z",
+    "brief": "tsx src/hq/cli.ts brief",
+    "hq:demo": "tsx src/hq/seed.ts"
   },
   "dependencies": {
     "diff": "^8.0.2"
