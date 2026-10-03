@@ -1,0 +1,176 @@
+{
+  "schemaVersion": "0.1.0",
+  "about": "Labeled evaluation corpus for the verdict reader (product-plan 16.3). Every case is synthetic: written here by hand, modelled on verdict shapes that appear in Ursa's own trials, never copied from a private session. The one exception is 'yesss finallyyy!! lol', which is already public in product-plan 16.1, prompts/engineer-agent.md's history and src/verdict.test.ts, and is the acceptance quote the reader was built against. No case carries a home path, a macOS username, or a full session UUID (redaction rider, prompts/engineer-agent.md).",
+  "fields": {
+    "id": "stable case name; the harness reports per-id so a regression names itself",
+    "why": "the failure mode or verdict shape this case exists to hold down",
+    "prompts": "the UserPrompt[] handed to readVerdict, exactly the shape src/types.ts declares",
+    "truth": "the human label. accepted: true stated satisfaction, false stated dissatisfaction, null no stated verdict. step: the prompt that carried it, null when accepted is null. quote: the exact verbatim span the reader must return, newlines included, null when accepted is null.",
+    "padding": "the token PADDING_<n> inside a prompt expands, at load time, to n characters of neutral filler. It keeps a case that needs a message longer than TRANSCRIPT_CHAR_LIMIT readable in this file instead of pasting 2200 literal characters.",
+    "modelReply": "the exact string the injected VerdictRunner returns in replay mode. Hand-written to stand for one plausible `claude -p` reply, including the misbehaving ones; it is NOT a capture of a real model call, and replay mode therefore measures the verification layer, not the model.",
+    "knownLimitation": "present only when the reader provably cannot pass this case today. Counted as knownMiss, reported, and excluded from the pass/fail gate."
+  },
+  "cases": [
+    {
+      "id": "v01-plain-acceptance",
+      "why": "the n=1's own verdict shape: exclamation, no punctuation discipline, arrives hundreds of steps in",
+      "prompts": [
+        { "step": 3, "text": "make the constellation smaller and move it behind the headline" },
+        { "step": 12, "text": "no, that is not it, try the other layout" },
+        { "step": 730, "text": "yesss finallyyy!! lol" }
+      ],
+      "truth": { "accepted": true, "step": 730, "quote": "yesss finallyyy!!" },
+      "modelReply": "{\"accepted\": true, \"step\": 730, \"quote\": \"yesss finallyyy!!\"}"
+    },
+    {
+      "id": "v02-acceptance-across-a-newline",
+      "why": "the verdict message has two lines. The transcript flattens newlines to spaces before the model sees it, so the model's verbatim quote carries a space where the source carries a newline. Before 2026-09-27 the reader compared the quote against the unflattened text and discarded this true verdict as a hallucination.",
+      "prompts": [
+        { "step": 8, "text": "the hover state is too loud" },
+        { "step": 44, "text": "that is exactly it\nthank you, leave it there" }
+      ],
+      "truth": { "accepted": true, "step": 44, "quote": "that is exactly it\nthank you" },
+      "modelReply": "{\"accepted\": true, \"step\": 44, \"quote\": \"that is exactly it thank you\"}"
+    },
+    {
+      "id": "v03-last-verdict-governs",
+      "why": "two stated verdicts in opposite directions; the instruction says the most recent governs",
+      "prompts": [
+        { "step": 20, "text": "i am unhappy with the prose, it reads like a brochure" },
+        { "step": 51, "text": "rewrite the second paragraph in plain sentences" },
+        { "step": 90, "text": "ok this is good now, that reads like a person wrote it" }
+      ],
+      "truth": { "accepted": true, "step": 90, "quote": "this is good now, that reads like a person wrote it" },
+      "modelReply": "{\"accepted\": true, \"step\": 90, \"quote\": \"this is good now, that reads like a person wrote it\"}"
+    },
+    {
+      "id": "v04-plain-rejection",
+      "why": "stated dissatisfaction, the owner's own 2026-09-19 wording, which the plan quotes",
+      "prompts": [
+        { "step": 4, "text": "resolve the repo and show me the record" },
+        { "step": 18, "text": "i was dissatisfied with that product" }
+      ],
+      "truth": { "accepted": false, "step": 18, "quote": "i was dissatisfied with that product" },
+      "modelReply": "{\"accepted\": false, \"step\": 18, \"quote\": \"i was dissatisfied with that product\"}"
+    },
+    {
+      "id": "v05-rejection-after-an-earlier-acceptance",
+      "why": "acceptance early, dissatisfaction later, because the work kept going and got worse; the record must carry the later one",
+      "prompts": [
+        { "step": 12, "text": "nice, i like that" },
+        { "step": 33, "text": "now add the tension colour" },
+        { "step": 60, "text": "this is wrong, you have buried the thing i actually cared about" }
+      ],
+      "truth": { "accepted": false, "step": 60, "quote": "this is wrong, you have buried the thing i actually cared about" },
+      "modelReply": "{\"accepted\": false, \"step\": 60, \"quote\": \"this is wrong, you have buried the thing i actually cared about\"}"
+    },
+    {
+      "id": "v06-corrections-only-is-undeclared",
+      "why": "the commonest honest null. Every message steers the work and none evaluates it. Silence is never converted to acceptance by retention (vision 0b, the 2026-09-19 rule).",
+      "prompts": [
+        { "step": 2, "text": "use the deck's accent colour, not blue" },
+        { "step": 9, "text": "move the footer up" },
+        { "step": 15, "text": "now run the tests" }
+      ],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "{\"accepted\": null, \"step\": null, \"quote\": null}"
+    },
+    {
+      "id": "v07-politeness-is-not-a-verdict",
+      "why": "'thanks' with no evaluation attached is the single most tempting false positive, and the instruction excludes it explicitly",
+      "prompts": [
+        { "step": 5, "text": "add the health route" },
+        { "step": 11, "text": "thanks" },
+        { "step": 14, "text": "ok" },
+        { "step": 19, "text": "continue" }
+      ],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "{\"accepted\": null, \"step\": null, \"quote\": null}"
+    },
+    {
+      "id": "v08-questions-are-not-verdicts",
+      "why": "an interrogative can sound evaluative without stating a verdict",
+      "prompts": [
+        { "step": 6, "text": "is this the layout you would pick?" },
+        { "step": 13, "text": "why did you drop the second column?" }
+      ],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "{\"accepted\": null, \"step\": null, \"quote\": null}"
+    },
+    {
+      "id": "v09-hallucinated-quote-is-discarded",
+      "why": "the model invents a verdict the user never wrote. Verbatim verification is what stops it, and a false satisfied is plan 16.8 risk 1, the worst outcome in the system.",
+      "prompts": [
+        { "step": 2, "text": "use the deck's accent colour, not blue" },
+        { "step": 9, "text": "move the footer up" }
+      ],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "{\"accepted\": true, \"step\": 9, \"quote\": \"this is perfect, ship it\"}"
+    },
+    {
+      "id": "v10-neutral-token-quoted-as-a-verdict",
+      "why": "the hole verbatim verification alone does not close. The model returns accepted=true quoting a word the user really did type, so presence-in-the-trace passes, but the word carries no verdict. Before 2026-09-27 this produced a false satisfied out of the word 'continue'.",
+      "prompts": [
+        { "step": 5, "text": "add the health route" },
+        { "step": 19, "text": "continue" }
+      ],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "{\"accepted\": true, \"step\": 19, \"quote\": \"continue\"}"
+    },
+    {
+      "id": "v11-one-character-quote-is-discarded",
+      "why": "the cheapest hallucination shape: a quote so short it is present in almost any trace by accident and cannot carry a stated verdict",
+      "prompts": [
+        { "step": 3, "text": "smaller" },
+        { "step": 7, "text": "again" }
+      ],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "{\"accepted\": true, \"step\": 3, \"quote\": \"s\"}"
+    },
+    {
+      "id": "v12-misnumbered-step-is-repaired-from-the-trace",
+      "why": "observed in the real n=1 acceptance run: the model quoted the verdict exactly and misnumbered its step, 710 for 730. The trace is the authority, not the model's pointer.",
+      "prompts": [
+        { "step": 12, "text": "no, that is not it, try the other layout" },
+        { "step": 730, "text": "yesss finallyyy!! lol" }
+      ],
+      "truth": { "accepted": true, "step": 730, "quote": "yesss finallyyy!! lol" },
+      "modelReply": "{\"accepted\": true, \"step\": 710, \"quote\": \"yesss finallyyy!! lol\"}"
+    },
+    {
+      "id": "v13-fenced-reply-still-parses",
+      "why": "claude -p wraps JSON in a markdown fence often enough that a parse failure here would silently cost every label in the session",
+      "prompts": [
+        { "step": 7, "text": "this is wrong, the prose is dead" }
+      ],
+      "truth": { "accepted": false, "step": 7, "quote": "this is wrong, the prose is dead" },
+      "modelReply": "```json\n{\"accepted\": false, \"step\": 7, \"quote\": \"this is wrong, the prose is dead\"}\n```"
+    },
+    {
+      "id": "v14-prose-around-the-json-still-parses",
+      "why": "the model prefaces the object with a sentence despite being told not to; the object is still extractable and the label is still real",
+      "prompts": [
+        { "step": 25, "text": "i love it, that is the one" }
+      ],
+      "truth": { "accepted": true, "step": 25, "quote": "i love it, that is the one" },
+      "modelReply": "Here is the verdict I read:\n{\"accepted\": true, \"step\": 25, \"quote\": \"i love it, that is the one\"}\nThat was the last stated verdict."
+    },
+    {
+      "id": "v15-empty-session-never-calls-the-model",
+      "why": "zero prompts must cost zero tokens on the owner's subscription and must not produce a reading",
+      "prompts": [],
+      "truth": { "accepted": null, "step": null },
+      "modelReply": "MUST NOT BE CALLED"
+    },
+    {
+      "id": "v16-verdict-past-the-transcript-limit",
+      "why": "a known limitation, measured rather than hidden. The verdict sits past TRANSCRIPT_CHAR_LIMIT inside one very long message, so the model is never shown it and the label is structurally unreachable. Counted as knownMiss; the fix (head-and-tail windowing) is a ledger entry, not this run's work.",
+      "prompts": [
+        { "step": 40, "text": "PADDING_2200 that is exactly right, thank you, we are done" }
+      ],
+      "truth": { "accepted": true, "step": 40, "quote": "that is exactly right, thank you, we are done" },
+      "modelReply": "{\"accepted\": null, \"step\": null, \"quote\": null}",
+      "knownLimitation": "the verdict falls past TRANSCRIPT_CHAR_LIMIT (2000) in src/verdict.ts, so the reader never sees it"
+    }
+  ]
+}
