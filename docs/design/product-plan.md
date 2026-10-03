@@ -799,7 +799,16 @@ the SHA-256 of it for integrity, nothing else.
   `.ursa/` over the local socket. Done when, on the owner's machine,
   the n=1 session file replayed through the bridge produces the
   verdict `accepted: true, step 730, quote "yesss finallyyy!! lol"`
-  with no hand annotation.
+  with no hand annotation. **Complete 2026-09-26.** The first two
+  clauses shipped 2026-09-25 (`356b3e5`); the third and fourth shipped
+  2026-09-26, and the reason they were owed is that the reading was
+  being displayed on the page while every record on disk still said
+  `"accepted": null`. `src/bridge/declare.ts` now writes the stated
+  verdict into each record as its `Declaration`, carrying the step and
+  the verbatim quote in `signals.episode.acceptanceBasis`, and the
+  bridge serves `.ursa/` over `GET /payload`, `GET /records` and
+  `GET /records/<task-id>` on `127.0.0.1:7817`. Silence still writes
+  nothing and retracts nothing. See `docs/design/verdict-to-record.md`.
 - **S1 (page, local bridge):** the hosted page reads from the local
   socket and renders tuning, verdict, and run summary. Done when the
   owner has it open over Claude Code during one real session and the
