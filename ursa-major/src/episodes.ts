@@ -3,7 +3,7 @@
 // work; 'idle-timeout' does not exist in the type.
 
 import { basename } from 'node:path'
-import type { CommitPair } from './pairfinder'
+import type { CommitPair, MergeEvent } from './pairfinder'
 
 export interface Episode {
   id: string
@@ -18,6 +18,12 @@ export interface Episode {
   agentMarker: string
   subject: string
   distilled: boolean
+  /**
+   * Merges between generatedSha and finalSha that touched a paired path.
+   * Carried onto the episode so deletion attribution can ask whether a
+   * merge, rather than the human, destroyed a generation's text.
+   */
+  interveningMerges: MergeEvent[]
 }
 
 export function buildEpisodes(pairs: CommitPair[], projectPath: string): Episode[] {
@@ -35,5 +41,6 @@ export function buildEpisodes(pairs: CommitPair[], projectPath: string): Episode
     agentMarker: p.agentMarker,
     subject: p.subject,
     distilled: false,
+    interveningMerges: p.interveningMerges,
   }))
 }
