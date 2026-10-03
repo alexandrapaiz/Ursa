@@ -143,3 +143,96 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-10-01 — A merge can delete a generation, and the record blames the human
+- Trigger: today's measurement watched a `union` merge silently drop three
+  of five lines from a ledger entry while exiting 0 (see
+  docs/design/server-side-merge-measurement.md, Finding 2). Reading the
+  resolver afterwards, `ursa-major/src/pairfinder.ts:111` does
+  `if (fin.parentCount > 1) continue`, and `m0.test.ts:49` asserts the
+  seat "never pairs an agent commit with a merge commit".
+- What: skipping merges is right for edit pairing, because a merge is not
+  a human correction. But the span that a merge deleted still has to land
+  somewhere, and `resolve.ts` routes every unclaimed generation segment to
+  `generated_deleted`. So text that a merge destroyed mechanically is
+  recorded as text the human produced and threw away. That is the single
+  most load-bearing label in the artifact: `generated_deleted` is the
+  negative reward signal Ursa Minor sells, and a merge-deleted span is a
+  false negative in it. On any repo with real branches this is not an edge
+  case, and it gets worse the more agents commit in parallel. A fifth
+  classification, or a flag on the existing one, would separate "the human
+  rejected this" from "a merge dropped this and nobody decided anything".
+- First step: a failing test in `ursa-major/src/resolver.test.ts` that
+  builds a two-branch fixture repo where a merge drops a generated line,
+  and asserts that the span is not classified `generated_deleted`. Make it
+  pass by carrying `parentCount > 1` through to the span as a flag.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-01 — A measurement harness needs an arm it is expected to fail
+- Trigger: this run's own probe reported the opposite of the truth twice
+  before it was correct, and both times the output looked clean. Run 1 said
+  all three arms conflicted; run 2 said GitHub merged the union arm with
+  both entries intact. `cmp` later showed the file recorded as GitHub's
+  result was byte-identical to the probe's own local merge.
+- What: what caught the error was not re-reading the script. It was the
+  control arm disagreeing with the union arm on identical input, which made
+  one of the two numbers necessarily wrong. Generalize it: a tool a seat
+  ships to measure something carries at least one arm whose expected result
+  is failure, and asserts that expectation on every run, so the harness
+  fails loudly instead of reporting its own bugs as findings. This is the
+  same defect class as the `toContain` assertions PR #43 found in #16's
+  viewer, one level up: there the test could not fail, here the harness
+  could not fail. Companion to the safe form L-A14 asks for, which is the
+  `--self-test` flag in the first step.
+- First step: add `--self-test` to `tools/ledger/probe-server-merge.sh`
+  that runs the control arm alone and exits non-zero unless it conflicts
+  both locally and at the API, then call it before the real arms. Also
+  belongs in the lessons inbox for the centralizer, since
+  `docs/standards/lessons.md` is a vendored copy this seat does not edit.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-01 — An entry's identity belongs in the entry, not in its position
+- Trigger: the union splice left the `### 2026-10-01 — Probe entry BASE`
+  heading in place while deleting that entry's First step, Cost and Status
+  lines, and `tools/ledger/check.mjs` (PR #27) only noticed because it
+  re-derives entry boundaries from `### ` headings. Had the heading been
+  the line that was dropped instead, the two entries would have merged into
+  one entry that passes every field check.
+- What: give each ledger entry an explicit `- Id: <slug>` field in the
+  contract. Then damage is detectable without trusting the heading, an
+  entry-aware merge can match the two sides by identity instead of by
+  heading text, and a near-duplicate pair gets an exact answer rather than
+  a 0.9 Jaccard threshold. Note this is narrower than, and compatible with,
+  the ledger-as-a-directory entry already proposed in PR #43: identity in
+  the entry is what makes a directory's filenames meaningful, and it is
+  worth having even if the file is never split.
+- First step: this touches the ledger contract in `docs/standards/pm.md`,
+  an HQ standard, so the first step is a proposal to the PM and the
+  centralizer rather than code. The code half is one line added to
+  `REQUIRED` in `tools/ledger/check.mjs` on #27's branch, once the contract
+  says so.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-01 (engineer, craft scan): changesets, the npm release tool, read
+  against today's finding rather than from memory
+  (github.com/changesets/changesets, `docs/detailed-explanation.md`). It
+  solves the exact problem `docs/ideas.md` has. Every pending change is its
+  own file, `.changeset/UNIQUE_ID.md`, markdown with YAML front matter, and
+  the aggregated `CHANGELOG.md` is generated at version time rather than
+  edited by anyone. Two concurrent pull requests therefore write two
+  different filenames and cannot conflict, so the project never needs a
+  merge driver for its changelog at all. Worth stealing: the generated
+  aggregate. Ursa keeps asking how to merge one hand-edited file more
+  cleverly, and today's measurement says no driver can be both correct and
+  effective on GitHub, which is the same conclusion changesets reached by
+  removing the shared file instead. Where Ursa is already ahead: a
+  changeset is discarded once consumed, so the history of what was proposed
+  and rejected is gone, whereas the ledger's `rejected` and `urgent`
+  statuses are durable and are what lets a memoryless seat avoid repeating
+  a dead idea. The lesson is to generate the aggregate, not to stop keeping
+  one. Honest limit on the comparison: changesets has no equivalent of the
+  owner's verdict, so its files never need to be found and edited in place
+  the way an `accepted` entry does.
