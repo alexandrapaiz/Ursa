@@ -54,6 +54,10 @@ function pairsFor(projectPath: string, snap: PullRequestSnapshot): PullRequestPa
   return pairsFromPullRequest(snap, gitRepoReader(projectPath), {})
 }
 
+function plural2(n: number, word: string): string {
+  return `${n} ${word}${n === 1 ? '' : 's'}`
+}
+
 function closureCounts(pairs: PullRequestPair[]): Record<string, number> {
   const counts: Record<string, number> = {}
   for (const p of pairs) counts[p.pullRequest.closure] = (counts[p.pullRequest.closure] ?? 0) + 1
@@ -111,7 +115,15 @@ export async function main(argv: string[]): Promise<number> {
       console.log(
         `  ${p.pullRequest.closure.padEnd(17)} ${p.generatedSha.slice(0, 9)} -> ${p.finalSha.slice(0, 9)}  ` +
         `${plural(p.paths.length, 'path')}  accepted=${p.pullRequest.acceptance.accepted}` +
-        (p.pullRequest.statedCorrections.length ? `  stated=${p.pullRequest.statedCorrections.length}` : ''),
+        (p.pullRequest.statedCorrections.length ? `  stated=${p.pullRequest.statedCorrections.length}` : '') +
+        // Printed because it changes what a deletion on this pair means:
+        // text that vanished at one of these boundaries is not a discard.
+        (p.interveningMerges.length
+          ? `  merges=${p.interveningMerges.map((m) => m.sha.slice(0, 9)).join(',')}`
+          : '') +
+        (p.pullRequest.unreadableMerges?.length
+          ? `  unreadable-merges=${p.pullRequest.unreadableMerges.map((m) => m.slice(0, 9)).join(',')}`
+          : ''),
       )
     }
     return 0
@@ -135,11 +147,25 @@ export async function main(argv: string[]): Promise<number> {
     saveEpisodes(projectPath, episodes)
     const mutated = records.reduce((n, r) => n + r.stats.byClass.survived_mutated.chars, 0)
     const verbatim = records.reduce((n, r) => n + r.stats.byClass.survived_verbatim.chars, 0)
+    const humanDeleted = records.reduce((n, r) => n + r.stats.generated.humanDeletedChars, 0)
+    const mergeDeleted = records.reduce((n, r) => n + r.stats.generated.mergeDeletedChars, 0)
+    const unreadable = [...new Set(episodes.flatMap((ep) => ep.pullRequest.unreadableMerges ?? []))]
     console.log(
       `${snap.repo}#${snap.number}: ${episodes.length} work unit${episodes.length === 1 ? '' : 's'}, ` +
       `${records.length} record${records.length === 1 ? '' : 's'}.`,
     )
     console.log(`${verbatim.toLocaleString()} chars survived verbatim, ${mutated.toLocaleString()} survived edited.`)
+    console.log(
+      `${humanDeleted.toLocaleString()} chars the person dropped, ` +
+      `${mergeDeleted.toLocaleString()} destroyed by a merge inside the pull request.`,
+    )
+    if (unreadable.length > 0) {
+      console.log(
+        `warning: ${plural2(unreadable.length, 'intervening merge')} could not be read ` +
+        `(${unreadable.map((x) => x.slice(0, 9)).join(', ')}), so a deletion at those boundaries ` +
+        `is charged to the person. Fix: git -C ${projectPath} fetch --no-tags origin ${snap.baseRef}.`,
+      )
+    }
     console.log(`Records: ${projectPath}/.ursa/records/`)
     return 0
   }

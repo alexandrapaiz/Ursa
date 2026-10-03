@@ -344,6 +344,34 @@ describe('replay against Ursa pull requests that really merged', () => {
     expect(pairs7.every((p) => p.pullRequest.unreadableMerges === undefined)).toBe(true)
   })
 
+  it('alexandrapaiz/Ursa#13: a merge sits between the pair and is still correctly not reported', () => {
+    // The third reason a computed zero is right, and the only one of the
+    // three that exercises the position check rather than the path
+    // check. The pair runs 57a750abe -> 4f9a7b0b8, and c5484dabc is a
+    // base-into-branch merge strictly between them, so position alone
+    // would report it. It touched only docs/sprints/dispatch-queue.md
+    // and docs/sprints/pending.md, and the generation wrote README.md,
+    // docs/design/trace-stage-loops.md and docs/ideas.md. No path in
+    // common, so nothing of this generation could have died there.
+    //
+    // #13 was open at capture time, so `mergeCommitSha` is GitHub's
+    // ephemeral test-merge commit, which is not in any clone. That is
+    // why no merge-as-accepted pair forms here and `squashed` is false.
+    const { snapshot: snap, repo } = fixture('ursa-pr-13.json')
+    const pairs = pairsFromPullRequest(snap, replayReader(repo))
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].generatedSha.startsWith('57a750abe')).toBe(true)
+    expect(pairs[0].finalSha.startsWith('4f9a7b0b8')).toBe(true)
+
+    const between = snap.commits.find((c) => c.sha.startsWith('c5484dabc'))!
+    expect(between.parentCount).toBe(2)
+    expect(between.authoredAt > snap.commits.find((c) => c.sha.startsWith('57a750abe'))!.authoredAt).toBe(true)
+    expect(between.files.some((f) => pairs[0].paths.includes(f))).toBe(false)
+
+    expect(pairs[0].interveningMerges).toEqual([])
+    expect(pairs[0].pullRequest.unreadableMerges).toBeUndefined()
+  })
+
   it('no fixture pair claims acceptance from a bot merge', () => {
     for (const name of ['ursa-pr-7.json', 'ursa-pr-12.json']) {
       const { snapshot: snap, repo } = fixture(name)
