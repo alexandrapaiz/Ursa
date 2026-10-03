@@ -33,6 +33,83 @@ export interface DiffPart {
   removed?: boolean
 }
 
+// ---------------------------------------------------------------------------
+// The time dimension (CLAUDE.md §1). A span's class is a verdict taken at
+// one instant — the episode's closing commit. Its lifespan is what the work
+// that came afterwards did to it. See lifespan.ts for how it is measured.
+// ---------------------------------------------------------------------------
+
+export interface SpanLifespan {
+  /** revisions of this span's file, after the closing commit, that were examined */
+  revisionsChecked: number
+  /**
+   * The span is traced sentence by sentence (prose) or line by line (code),
+   * because resolve() merges adjacent same-class text and a whole file often
+   * arrives here as one span. These count the units long enough to carry
+   * evidence; see MIN_TRACEABLE_LEN in lifespan.ts.
+   */
+  unitsTraced: number
+  unitsSurviving: number
+  /** chars of this span whose units were still present at the last revision examined */
+  survivingChars: number
+  /** chars of this span whose units later work removed */
+  decayedChars: number
+  /** revisions in which every one of the span's units was still present */
+  intactRevisions: number
+  /** seconds from the closing commit to the newest revision at which it was wholly intact */
+  intactSeconds: number
+  /** the revision that took the span's first unit; null when it lost none */
+  diedAtSha: string | null
+  diedAt: string | null
+  /** at least one unit was still present at the newest revision examined */
+  liveAtTip: boolean
+  /**
+   * durable  = every unit survived to the tip
+   * eroded   = some units survived, some did not
+   * decayed  = every unit is gone — a false positive in the span's own class
+   * untested = nothing later to test against, or no unit long enough to carry evidence
+   */
+  fate: 'durable' | 'eroded' | 'decayed' | 'untested'
+  /** how presence was last judged */
+  basis: 'verbatim' | 'token-containment' | null
+  /** why `untested`, when it is untested */
+  skipped: 'too-short' | 'no-later-revisions' | null
+}
+
+export interface Durability {
+  method: 'git-forward-walk'
+  /** the revision the walk ended at */
+  tipSha: string | null
+  /** the episode's closing commit — the instant the span classes were taken at */
+  closingSha: string
+  /** surviving spans (survived_verbatim + survived_mutated) with a later revision to test */
+  testedSpans: number
+  durableSpans: number
+  erodedSpans: number
+  decayedSpans: number
+  durableChars: number
+  decayedChars: number
+  /**
+   * decayedChars / (durableChars + decayedChars). The share of this record's
+   * own "the user kept it" verdict that later real work overturned. Null when
+   * nothing was testable — "nothing decayed" and "nothing was measured" are
+   * different claims and only one of them is sellable. A conservative floor:
+   * see spanPresent() in lifespan.ts for the presence test, which can only
+   * over-report survival.
+   */
+  decayRate: number | null
+  /**
+   * The same rate over `no_generation_provenance` spans — text the user wrote
+   * themselves. This is the repo's background churn, so agent text decaying at
+   * the baseline is not decaying because it was agent text.
+   */
+  baselineDecayRate: number | null
+  /** median seconds a span that lost something stayed wholly intact; null when none did */
+  medianIntactSeconds: number | null
+  maxRevisionsWalked: number
+  minTraceableLen: number
+}
+
 export interface FinalSpan {
   start: number
   end: number
@@ -48,6 +125,8 @@ export interface FinalSpan {
   candidate?: { score: number; text: string; source: SourcePointer }
   /** matched by exact equality of a very short segment — weak evidence */
   trivial?: boolean
+  /** what later work did to this span; set by annotateDurability, absent on non-git records */
+  lifespan?: SpanLifespan
 }
 
 export interface FinalFile {
@@ -278,4 +357,6 @@ export interface OutcomeRecord {
   generations: GenerationRecord[]
   stats: Stats
   signals?: LabSignals
+  /** the time dimension; present only for git-backed records, where later revisions exist */
+  durability?: Durability
 }
