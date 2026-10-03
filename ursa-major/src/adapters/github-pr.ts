@@ -382,6 +382,14 @@ export function pairsFromPullRequest(
       finalAt: chosen.at,
       agentMarker: marker,
       subject: gen.subject,
+      // This adapter walks a pull request's own commit list, not a git range
+      // between two shas, so it has not looked for merges between the pair and
+      // must not claim any. Empty means "nothing known", which attributes every
+      // deletion to the human exactly as the resolver did before merge-aware
+      // attribution existed. Populating it for the pull-request path is real
+      // work, filed in docs/ideas.md as "Merge attribution stops at the git
+      // walker".
+      interveningMerges: [],
       pullRequest: {
         ...base,
         closure: chosen.closure,
@@ -407,6 +415,7 @@ export function episodesFromPullRequest(pairs: PullRequestPair[], projectPath: s
     closedAt: p.finalAt,
     closureHeuristic: 'github-pr',
     touchedFiles: p.paths,
+    interveningMerges: p.interveningMerges,
     generatedSha: p.generatedSha,
     finalSha: p.finalSha,
     agentMarker: p.agentMarker,

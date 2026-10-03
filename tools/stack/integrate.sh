@@ -180,10 +180,31 @@ FAILED=0
 
 MAJOR_RESULT="skipped"
 MINOR_RESULT="skipped"
+TYPES_RESULT="skipped"
 if [ "$RUN_TESTS" = 1 ]; then
+  # Typecheck is its own reported step, ahead of the suites and ahead of any
+  # `npm test` that happens to include it, because in a union a type error and
+  # a failing assertion have different causes and the report should say which
+  # one happened. A branch that adds a REQUIRED field to a shared type merges
+  # clean against every branch that constructs that type, passes its own suite,
+  # and only breaks when both are in the same tree. `vitest` transpiles through
+  # esbuild and never typechecks, so the suites cannot see it. Run 2026-10-03
+  # landed 17 engineer branches and found exactly four of these, all invisible
+  # to 309 passing tests: `interveningMerges` (PR #66) missing in the
+  # pull-request adapter (#33), and three stats fields plus `artifact`
+  # (#66, #16) missing in the HQ briefing fixture (#22).
   echo ""
-  echo "ursa-major: npm ci && npm test"
-  if ( cd "$WORKTREE/ursa-major" && npm ci --silent >/dev/null 2>&1 && npm test >/tmp/ursa-stack-major.log 2>&1 ); then
+  echo "ursa-major: npm ci && npx tsc --noEmit"
+  if ( cd "$WORKTREE/ursa-major" && npm ci --silent >/dev/null 2>&1 && npx tsc --noEmit >/tmp/ursa-stack-types.log 2>&1 ); then
+    TYPES_RESULT="pass (0 type errors)"
+  else
+    TYPES_RESULT="FAIL ($(grep -c 'error TS' /tmp/ursa-stack-types.log 2>/dev/null || echo '?') type errors, see /tmp/ursa-stack-types.log)"
+    FAILED=1
+  fi
+  echo "  $TYPES_RESULT"
+
+  echo "ursa-major: npm test"
+  if ( cd "$WORKTREE/ursa-major" && npm test >/tmp/ursa-stack-major.log 2>&1 ); then
     MAJOR_RESULT=$(sed -e 's/\x1b\[[0-9;]*m//g' /tmp/ursa-stack-major.log \
       | grep -oE 'Tests +[0-9]+ passed.*' | tail -1 | tr -s ' ')
     MAJOR_RESULT="pass (${MAJOR_RESULT:-summary not found in log})"
@@ -231,8 +252,8 @@ if [ -n "$JSON_OUT" ]; then
     printf '\n  ],\n'
     printf '  "ledger": { "entries": %s, "conflictMarkers": %s },\n' \
       "$(grep -c '^### ' "$WORKTREE/docs/ideas.md" 2>/dev/null || echo 0)" "$MARKERS"
-    printf '  "suites": { "ursaMajorTest": "%s", "ursaMinorBuild": "%s" },\n' \
-      "$MAJOR_RESULT" "$MINOR_RESULT"
+    printf '  "suites": { "ursaMajorTypecheck": "%s", "ursaMajorTest": "%s", "ursaMinorBuild": "%s" },\n' \
+      "$TYPES_RESULT" "$MAJOR_RESULT" "$MINOR_RESULT"
     printf '  "merged": %s,\n  "conflicted": %s,\n' "${#OK[@]}" "${#CONFLICTED[@]}"
     printf '  "green": %s\n}\n' "$([ $FAILED = 0 ] && echo true || echo false)"
   } > "$JSON_OUT"
@@ -259,6 +280,7 @@ if [ -n "$REPORT" ]; then
       fi
     done
     echo ""
+    echo "- \`ursa-major\` \`npx tsc --noEmit\` on the union: $TYPES_RESULT"
     echo "- \`ursa-major\` \`npm test\` on the union: $MAJOR_RESULT"
     echo "- \`ursa-minor\` \`npm run build\` on the union: $MINOR_RESULT"
     echo "- \`docs/ideas.md\` committed conflict markers: $MARKERS"
