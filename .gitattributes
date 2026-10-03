@@ -1,0 +1,4 @@
+# The ledger is append-only and every seat appends to its end. Merge it by
+# entry identity, not by line hunks. The driver behind this name is registered
+# per clone by tools/ledger/install-driver.sh; see docs/design/ledger-union-merge.md.
+docs/ideas.md merge=ledger
