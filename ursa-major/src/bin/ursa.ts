@@ -124,7 +124,7 @@ export function renderRunSummary(
     mergeDeleted += r.stats.generated.mergeDeletedChars
     unknownDeleted += r.stats.generated.unknownDeletedChars
   }
-  lines.push(`${episodes.length} work units found, ${records.length} resolved into records.`)
+  lines.push(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, ${records.length} resolved into record${records.length === 1 ? '' : 's'}.`)
   lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
   lines.push(`That's the part worth noticing: not what got written, what got kept.`)
   if (generated > 0) {
@@ -141,7 +141,7 @@ export function renderRunSummary(
     lines.push(`${unknownDeleted.toLocaleString()} more chars are gone with no readable cause, because a merge on the way could not be read from this clone. They are not counted against you either. Run git fetch and ursa run again to settle them.`)
   }
   const edited = records.filter((r) => r.stats.byClass.survived_mutated.chars > 0).length
-  if (edited > 0) lines.push(`${edited} record${edited === 1 ? '' : 's'} carry your corrections — the whys live there.`)
+  if (edited > 0) lines.push(`${edited} record${edited === 1 ? '' : 's'} ${edited === 1 ? 'carries' : 'carry'} your corrections — the whys live there.`)
   // Say where the work is live. If the owner judged it by looking at a page
   // rather than by reading a diff, the page is the thing that was accepted.
   const hosted = [...new Set(
@@ -173,6 +173,45 @@ export function renderRunSummary(
       lines.push('')
       lines.push(
         `Scanned ${diagnostics.commitsScanned} commit${diagnostics.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${diagnostics.generatedByTrailer} by trailer, ${diagnostics.generatedByAuthorName} by author name), and none of those was followed by an edit of the same file without an agent marker.`,
+      )
+    }
+
+    // What the walk REFUSED to claim, said out loud whether or not the run
+    // found anything. Before the bounds existed this run reported 239,976
+    // chars survived on this repository's own history and 60,616 after,
+    // because five of six pairs were crediting one generation with a file
+    // five others had written. A number that drops by three quarters
+    // without explanation is not more trustworthy than the wrong one, so
+    // the reason ships next to it.
+    const { abandoned, bounds } = diagnostics
+    const dropped = abandoned.distance + abandoned.age + abandoned.interposedGeneration
+    if (dropped > 0) {
+      const why: string[] = []
+      if (abandoned.interposedGeneration > 0) {
+        why.push(
+          `${abandoned.interposedGeneration} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`,
+        )
+      }
+      if (abandoned.distance > 0) {
+        why.push(
+          `${abandoned.distance} found no edit within ${bounds.maxPairDistance} commits`,
+        )
+      }
+      if (abandoned.age > 0) {
+        why.push(`${abandoned.age} found none within ${bounds.maxPairAgeHours} hours`)
+      }
+      lines.push('')
+      lines.push(
+        `${dropped} generation${dropped === 1 ? '' : 's'} were left out rather than guessed at: ${why.join('; ')}.`,
+      )
+      lines.push(
+        'Those are claims this run could not stand behind, so it did not make them. Raise --max-pair-distance, --max-pair-age-hours or --max-interposed-generations to see them anyway.',
+      )
+    }
+    if (diagnostics.mergeGenerationsRefused > 0) {
+      lines.push('')
+      lines.push(
+        `${diagnostics.mergeGenerationsRefused} merge commit${diagnostics.mergeGenerationsRefused === 1 ? '' : 's'} carried an agent marker and were not counted as generations. A merge restates work other commits did; it wrote nothing of its own.`,
       )
     }
   }
@@ -211,6 +250,9 @@ export async function main(argv: string[]): Promise<number> {
     options: {
       limit: { type: 'string' },
       'min-chars': { type: 'string' },
+      'max-pair-distance': { type: 'string' },
+      'max-pair-age-hours': { type: 'string' },
+      'max-interposed-generations': { type: 'string' },
       declare: { type: 'string' },
       'sync-url': { type: 'string' },
       session: { type: 'string' },
@@ -221,6 +263,7 @@ export async function main(argv: string[]): Promise<number> {
   const [cmd, project] = positionals
   if ((cmd !== 'run' && cmd !== 'bridge') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
+    console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
@@ -256,7 +299,24 @@ export async function main(argv: string[]): Promise<number> {
     declaration = { accepted: false, basis: 'owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed' }
   }
 
-  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath)
+  // `Infinity` is reachable on purpose: `--max-pair-distance Infinity`
+  // restores the unbounded walk for someone who wants to see what the
+  // bounds removed, which is how the measurement in
+  // docs/design/pairing-window.md §8 was taken.
+  const bound = (
+    flag: 'max-pair-distance' | 'max-pair-age-hours' | 'max-interposed-generations',
+  ): number | undefined => {
+    const raw = values[flag]
+    if (raw === undefined) return undefined
+    const n = Number(raw)
+    if (!Number.isFinite(n) && raw !== 'Infinity') return undefined
+    return n
+  }
+  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath, {
+    maxPairDistance: bound('max-pair-distance'),
+    maxPairAgeHours: bound('max-pair-age-hours'),
+    maxInterposedGenerations: bound('max-interposed-generations'),
+  })
   const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a

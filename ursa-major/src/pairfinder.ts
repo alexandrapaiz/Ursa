@@ -69,6 +69,27 @@ export interface CommitPair {
 export interface PairFinderOptions {
   agentTrailerPattern?: RegExp
   agentAuthorPattern?: RegExp
+  /**
+   * Commits walked forward from a generation before the pair claim is
+   * abandoned. A generation and an edit 42 commits apart are not a
+   * correction loop, they are two unrelated visits to the same file.
+   */
+  maxPairDistance?: number
+  /**
+   * Hours between the generation's author date and the edit's before the
+   * pair claim is abandoned. Separate from distance because a dense
+   * same-session burst and a sparse ten-day history look identical by
+   * commit count and nothing alike as correction work.
+   */
+  maxPairAgeHours?: number
+  /**
+   * How many OTHER generations may rewrite one of this generation's own
+   * paths before the pair claim is abandoned. Zero is the default and the
+   * honest value: if another generation rewrote the file first, the human's
+   * commit is a correction of that one, and this generation's text was
+   * never the thing in front of them.
+   */
+  maxInterposedGenerations?: number
 }
 
 /** What a pair-finding walk decided, so a caller can explain an empty result. */
@@ -86,9 +107,53 @@ export interface PairFinderDiagnostics {
    * the thing to change (or to override with agentAuthorPattern).
    */
   authorFallbackSuppressed: { pattern: string; authors: string[] } | null
+  /** the bounds this walk ran under, so a caller can name them to the user */
+  bounds: {
+    maxPairDistance: number
+    maxPairAgeHours: number
+    maxInterposedGenerations: number
+  }
+  /**
+   * Generations that found no edit because the walk hit a bound, counted by
+   * whichever bound stopped it FIRST. A generation appears at most once
+   * here, and never here if it produced a pair.
+   */
+  abandoned: {
+    distance: number
+    age: number
+    interposedGeneration: number
+  }
+  /**
+   * Commits that carried an agent marker, were merges, and were therefore
+   * refused as generations. A merge's diff is other commits' work; it
+   * generated nothing of its own.
+   */
+  mergeGenerationsRefused: number
 }
 
 const DEFAULT_TRAILER = /claude|codex|cursor|gpt/i
+/**
+ * The pairing bounds' defaults, with the reasoning that chose each number
+ * rather than a round figure.
+ *
+ * 25 commits: measured on this repository's own `main` at 0d68df0 (98
+ * commits), where the unbounded walk produced six pairs whose generated
+ * sides sat 1, 4, 9, 37, 39 and 42 commits from the single edit all six
+ * claimed. The three far pairs are the ones that credit a generation with
+ * a file it did not write. 25 sits above every pair a reviewer would call
+ * real here and below all three of those.
+ *
+ * 168 hours (7 days): the same six pairs spanned 30.6, 48.4, 97.0, 217.1,
+ * 223.2 and 234.6 hours. A correction arriving after a working week is not
+ * a correction loop; it is a later visit to the same file.
+ *
+ * 0 interposed generations: not a tuning parameter. One other generation
+ * rewriting the path is enough to mean the human never had this
+ * generation's text in front of them.
+ */
+const DEFAULT_MAX_PAIR_DISTANCE = 25
+const DEFAULT_MAX_PAIR_AGE_HOURS = 168
+const DEFAULT_MAX_INTERPOSED_GENERATIONS = 0
 const DEFAULT_AUTHOR = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i
 
 interface CommitInfo {
@@ -217,6 +282,9 @@ export function findCommitPairsWithDiagnostics(
 ): { pairs: CommitPair[]; diagnostics: PairFinderDiagnostics } {
   const trailerPattern = opts.agentTrailerPattern ?? DEFAULT_TRAILER
   const authorPattern = opts.agentAuthorPattern ?? DEFAULT_AUTHOR
+  const maxDistance = opts.maxPairDistance ?? DEFAULT_MAX_PAIR_DISTANCE
+  const maxAgeHours = opts.maxPairAgeHours ?? DEFAULT_MAX_PAIR_AGE_HOURS
+  const maxInterposed = opts.maxInterposedGenerations ?? DEFAULT_MAX_INTERPOSED_GENERATIONS
   const commits = listCommits(repoPath)
   const files = new Map<string, string[]>()
   const touched = (sha: string) => {
@@ -240,6 +308,13 @@ export function findCommitPairsWithDiagnostics(
           authors: [...new Set(commits.map((c) => c.authorName))].sort(),
         }
       : null,
+    bounds: {
+      maxPairDistance: maxDistance,
+      maxPairAgeHours: maxAgeHours,
+      maxInterposedGenerations: maxInterposed,
+    },
+    abandoned: { distance: 0, age: 0, interposedGeneration: 0 },
+    mergeGenerationsRefused: 0,
   }
 
   const marker = (c: CommitInfo): string | null => {
@@ -255,21 +330,56 @@ export function findCommitPairsWithDiagnostics(
     }
   }
 
+  const hoursBetween = (from: string, to: string) =>
+    (Date.parse(to) - Date.parse(from)) / 3_600_000
+
   const pairs: CommitPair[] = []
   for (let i = 0; i < commits.length; i++) {
     const gen = commits[i]
     const agentMarker = marker(gen)
     if (!agentMarker) continue
+    // A merge is not a generation, for the same reason it is not an edit:
+    // its diff against a parent is other commits' work, restated. Before
+    // this guard a merge authored by the harness identity matched the
+    // author fallback, became a generation, and claimed the whole file at
+    // the merge point as text it had produced. Two of the six pairs this
+    // repository's own history produced were merges.
+    if (gen.parents.length > 1) {
+      diagnostics.mergeGenerationsRefused += 1
+      continue
+    }
     const genFiles = new Set(touched(gen.sha))
     if (genFiles.size === 0) continue
     const interveningMerges: MergeEvent[] = []
+    // Other generations that have already rewritten one of this
+    // generation's own paths. Counted, not just flagged, so the bound can
+    // be relaxed by a caller who wants the looser claim.
+    let interposedGenerations = 0
     for (let j = i + 1; j < commits.length; j++) {
       const fin = commits[j]
-      if (marker(fin)) continue
+      // The bounds, checked before the commit is classified, so a walk
+      // through a long all-agent stretch stops instead of running to the
+      // end of history. Distance is checked first and the counter records
+      // whichever bound stopped the walk, so a generation is attributed
+      // once rather than to every bound it exceeded.
+      if (j - i > maxDistance) { diagnostics.abandoned.distance += 1; break }
+      if (hoursBetween(gen.date, fin.date) > maxAgeHours) {
+        diagnostics.abandoned.age += 1
+        break
+      }
       // A merge brings in other commits' work; the human did not write
       // that diff. It is not a pairing target. But it can still have
       // destroyed this generation's text, so record it before moving on
       // and let deletion attribution decide whose deletion it was.
+      //
+      // This test runs BEFORE the agent-marker test, and the order is the
+      // whole point. A merge authored by a harness identity, or carrying a
+      // Co-Authored-By trailer in its message, matches `marker` and used to
+      // be skipped by it, so it was never recorded here — and deletion
+      // attribution, finding no intervening merge, charged the merge's
+      // destruction to the person. That is the defect src/deletion.ts was
+      // built to prevent, re-entering one level up through classification
+      // order.
       if (fin.parents.length > 1) {
         const mergeOverlap = touched(fin.sha).filter((p) => genFiles.has(p))
         if (mergeOverlap.length > 0) {
@@ -281,6 +391,19 @@ export function findCommitPairsWithDiagnostics(
             date: fin.date,
             subject: fin.subject,
           })
+        }
+        continue
+      }
+      if (marker(fin)) {
+        // Another generation, and if it touched this generation's paths it
+        // replaced the text before any human saw it. The edit that follows
+        // corrects that generation, not this one.
+        if (touched(fin.sha).some((p) => genFiles.has(p))) {
+          interposedGenerations += 1
+          if (interposedGenerations > maxInterposed) {
+            diagnostics.abandoned.interposedGeneration += 1
+            break
+          }
         }
         continue
       }
