@@ -138,3 +138,5 @@ where it described a surface I do not have.
    refused. Those are recorded in the charter now. Attempt rather than
    assume, and if something I wrote turns out to be false, fix the
    charter in the same PR that discovers it.
+
+<!-- exo cycle 2026-10-04: run in progress -->
