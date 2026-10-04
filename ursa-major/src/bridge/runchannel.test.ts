@@ -31,7 +31,7 @@ async function bridge() {
     port: PORT,
     intervalMs: 10 ** 9,
     allowOrigins: [ALLOWED],
-    runner: async () => '{"accepted":null,"step":null,"quote":null}',
+    runner: () => '{"accepted":null,"step":null,"quote":null}',
     log: (l) => logs.push(l),
   })
   return handle
