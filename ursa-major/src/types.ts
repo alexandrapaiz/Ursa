@@ -23,15 +23,52 @@ export type GenerationFate =
  * commit and absent from the merge's own result. A merge brings in
  * another branch's work; nobody read this text and rejected it, so it
  * carries no correction signal and must not be counted as one.
+ *
+ * `unknown` — an intervening merge sat between the generation and its
+ * closure, and the evidence that would settle whether that merge
+ * destroyed the text could not be read: the merge's own tree, one of its
+ * parents' trees, or the merge commit itself is missing from this clone.
+ * `human_edit` and `merge` are both claims, and neither is supportable
+ * here. This value exists so an unreadable repository produces an
+ * unreadable label rather than an accusation: `humanDeletedChars` is the
+ * number Ursa Minor sells as a discard rate, and a missing git object is
+ * not a person's decision.
  */
-export type DeletionCause = 'human_edit' | 'merge'
+export type DeletionCause = 'human_edit' | 'merge' | 'unknown'
+
+/**
+ * Why a deletion could not be attributed. Set only when cause is
+ * 'unknown', and specific because each value has a different fix.
+ *
+ * `unreadable_merge_result` — the merge touched the path and a parent
+ * held the text, but the merge's own tree could not be read, so the
+ * second half of the `merge` test never ran.
+ *
+ * `unreadable_merge_parents` — the merge's result is readable and lacks
+ * the text, but no parent could be read, so whether the text was ever
+ * there to destroy is unknown.
+ *
+ * `unreadable_merge_commit` — a merge was known to sit on this pair by
+ * sha alone and its parentage is absent from the clone, so its paths
+ * were never compared. Fixed by fetching the base ref.
+ */
+export type UnknownDeletionReason =
+  | 'unreadable_merge_result'
+  | 'unreadable_merge_parents'
+  | 'unreadable_merge_commit'
 
 export interface DeletionAttribution {
   cause: DeletionCause
-  /** short sha of the merge that destroyed it; set only when cause is 'merge' */
+  /**
+   * short sha of the merge this attribution is about: the one that
+   * destroyed the text when cause is 'merge', or the one that could not
+   * be read when cause is 'unknown'
+   */
   mergeSha?: string
   /** that merge's subject line, so the record is readable without the repo */
   mergeSubject?: string
+  /** set only when cause is 'unknown'; names which evidence was missing */
+  unknownReason?: UnknownDeletionReason
 }
 
 export type GenerationKind = 'write' | 'edit' | 'assistant_text'
@@ -224,7 +261,10 @@ export interface Stats {
   generated: {
     totalChars: number
     survivedChars: number
-    /** every deleted char, whatever destroyed it: humanDeletedChars + mergeDeletedChars */
+    /**
+     * every deleted char, whatever destroyed it:
+     * humanDeletedChars + mergeDeletedChars + unknownDeletedChars
+     */
     deletedChars: number
     /** deletedChars / totalChars — the gross figure, not a claim about the human */
     deletedPct: number
@@ -234,6 +274,14 @@ export interface Stats {
     humanDeletedPct: number
     /** chars an intervening merge destroyed mechanically; carries no correction signal */
     mergeDeletedChars: number
+    /**
+     * chars that are gone and whose cause could not be read — see
+     * DeletionCause 'unknown'. Excluded from humanDeletedChars rather
+     * than folded into it, because a repository this run could not read
+     * is not evidence about the person. Re-running after fetching the
+     * missing objects moves these chars into one of the other two.
+     */
+    unknownDeletedChars: number
   }
   perFile: Array<{
     path: string

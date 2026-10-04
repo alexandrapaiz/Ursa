@@ -27,7 +27,7 @@ export function zeroStats(): Stats {
     byModel: {},
     generated: {
       totalChars: 0, survivedChars: 0, deletedChars: 0, deletedPct: 0,
-      humanDeletedChars: 0, humanDeletedPct: 0, mergeDeletedChars: 0,
+      humanDeletedChars: 0, humanDeletedPct: 0, mergeDeletedChars: 0, unknownDeletedChars: 0,
     },
     perFile: [],
     perConversation: [],

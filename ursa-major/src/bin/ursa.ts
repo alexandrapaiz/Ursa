@@ -88,7 +88,11 @@ export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord 
     // A merge walked past on the way to ep.finalSha can have destroyed
     // generated text that no human ever chose to drop. Without this the
     // record would call that a discard and name ep.finalSha's author.
-    attributeDeletion: gitDeletionAttributor(projectPath, ep.interveningMerges ?? []),
+    // `unreadableMerges` carries the boundaries this clone cannot test at
+    // all, so those deletions come back `unknown` instead of as a discard.
+    attributeDeletion: gitDeletionAttributor(projectPath, ep.interveningMerges ?? [], {
+      unreadableMerges: ep.unreadableMerges,
+    }),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
@@ -111,13 +115,14 @@ export function renderRunSummary(
   diagnostics?: PairFinderDiagnostics,
 ): string {
   const lines: string[] = []
-  let verbatim = 0, mutated = 0, generated = 0, humanDeleted = 0, mergeDeleted = 0
+  let verbatim = 0, mutated = 0, generated = 0, humanDeleted = 0, mergeDeleted = 0, unknownDeleted = 0
   for (const r of records) {
     verbatim += r.stats.byClass.survived_verbatim.chars
     mutated += r.stats.byClass.survived_mutated.chars
     generated += r.stats.generated.totalChars
     humanDeleted += r.stats.generated.humanDeletedChars
     mergeDeleted += r.stats.generated.mergeDeletedChars
+    unknownDeleted += r.stats.generated.unknownDeletedChars
   }
   lines.push(`${episodes.length} work units found, ${records.length} resolved into records.`)
   lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
@@ -128,6 +133,12 @@ export function renderRunSummary(
   }
   if (mergeDeleted > 0) {
     lines.push(`A further ${mergeDeleted.toLocaleString()} chars were destroyed by merges rather than by you, so they are not counted against you.`)
+  }
+  // Said out loud rather than folded into the discard figure. The run can
+  // see the text is gone and cannot see what took it, and the user is owed
+  // that distinction before anyone reads the number as their own judgement.
+  if (unknownDeleted > 0) {
+    lines.push(`${unknownDeleted.toLocaleString()} more chars are gone with no readable cause, because a merge on the way could not be read from this clone. They are not counted against you either. Run git fetch and ursa run again to settle them.`)
   }
   const edited = records.filter((r) => r.stats.byClass.survived_mutated.chars > 0).length
   if (edited > 0) lines.push(`${edited} record${edited === 1 ? '' : 's'} carry your corrections — the whys live there.`)

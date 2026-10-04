@@ -149,6 +149,7 @@ export async function main(argv: string[]): Promise<number> {
     const verbatim = records.reduce((n, r) => n + r.stats.byClass.survived_verbatim.chars, 0)
     const humanDeleted = records.reduce((n, r) => n + r.stats.generated.humanDeletedChars, 0)
     const mergeDeleted = records.reduce((n, r) => n + r.stats.generated.mergeDeletedChars, 0)
+    const unknownDeleted = records.reduce((n, r) => n + r.stats.generated.unknownDeletedChars, 0)
     const unreadable = [...new Set(episodes.flatMap((ep) => ep.pullRequest.unreadableMerges ?? []))]
     console.log(
       `${snap.repo}#${snap.number}: ${episodes.length} work unit${episodes.length === 1 ? '' : 's'}, ` +
@@ -157,13 +158,15 @@ export async function main(argv: string[]): Promise<number> {
     console.log(`${verbatim.toLocaleString()} chars survived verbatim, ${mutated.toLocaleString()} survived edited.`)
     console.log(
       `${humanDeleted.toLocaleString()} chars the person dropped, ` +
-      `${mergeDeleted.toLocaleString()} destroyed by a merge inside the pull request.`,
+      `${mergeDeleted.toLocaleString()} destroyed by a merge inside the pull request, ` +
+      `${unknownDeleted.toLocaleString()} with no readable cause.`,
     )
     if (unreadable.length > 0) {
       console.log(
         `warning: ${plural2(unreadable.length, 'intervening merge')} could not be read ` +
         `(${unreadable.map((x) => x.slice(0, 9)).join(', ')}), so a deletion at those boundaries ` +
-        `is charged to the person. Fix: git -C ${projectPath} fetch --no-tags origin ${snap.baseRef}.`,
+        `is reported as unknown rather than as the person's discard. ` +
+        `Fix: git -C ${projectPath} fetch --no-tags origin ${snap.baseRef}.`,
       )
     }
     console.log(`Records: ${projectPath}/.ursa/records/`)

@@ -30,6 +30,16 @@ export interface Episode {
    * merge, rather than the human, destroyed a generation's text.
    */
   interveningMerges: MergeEvent[]
+  /**
+   * Shas of merges known to sit on this episode's boundary whose
+   * parentage could not be read, so they are absent from
+   * `interveningMerges` and their paths were never compared. Carried so
+   * deletion attribution can return `unknown` rather than charge a span
+   * to the person over a boundary it could not test. Absent means every
+   * intervening merge was readable, which is what makes an empty
+   * `interveningMerges` mean "none" rather than "unknown".
+   */
+  unreadableMerges?: string[]
 }
 
 export function buildEpisodes(pairs: CommitPair[], projectPath: string): Episode[] {
