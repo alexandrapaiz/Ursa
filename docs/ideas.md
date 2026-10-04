@@ -2120,3 +2120,133 @@ is better data. The deeper difference is upstream of both: CodeScene
 reads commits and has no join to the model generation that proposed the
 line, so it can say a file churned and never which model's output
 churned. That join is the whole artifact (CLAUDE.md §1).
+
+### 2026-10-04 — Two levels of "we are not sure who", not one
+- Trigger: today's craft scan of `git blame --ignore-rev`, verified
+  first-hand on this runner. git distinguishes two degrees of
+  attribution doubt that today's change collapses into one. A line an
+  ignored commit touched that git could reassign to an earlier commit
+  is marked `?`, meaning "this author is our second choice". A line it
+  could not reassign at all is marked `*`, meaning "we have nowhere to
+  put this". Ursa's new `unknown` cause is git's `*`. Ursa has no `?`.
+- What: there is a second, quieter doubt in the resolver already, and it
+  is not the deletion path. `resolve` matches a surviving span to a
+  generation by containment and similarity, and a span it matches
+  loosely is flagged `uncertain` on the span while the record still
+  states a single `source` pointer naming one model, one conversation,
+  one turn. That is the `?` case exactly: a confident-looking
+  attribution that is the resolver's second choice. A lab training on
+  `survived_mutated` spans cannot currently tell a span whose
+  provenance is certain from one where the match was close enough to
+  pass a threshold, because both carry the same shaped `source`. Put
+  the runner-up on the span: `sourceAlternatives: SourcePointer[]`,
+  populated only when another generation scored within a stated margin
+  of the winner, with the margin recorded on the record so the
+  denominator is auditable.
+- First step: measure before building. Instrument the matcher to report,
+  across the 40 records the #69 capture produces, how many
+  `survived_mutated` spans have a runner-up within 10 percent of the
+  winner's score. If the answer is near zero the idea is not worth the
+  schema change, and that result is worth knowing either way.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-04 — The unknown-cause rate belongs in the capture's exit status
+- Trigger: implementing `unknown` today produced a number that nothing
+  acts on. `cli.ts run` prints `N with no readable cause` and exits 0,
+  the same exit status it uses for a capture where every boundary was
+  readable. The measured counterfactual in
+  `docs/design/unknown-deletion-cause.md` §8 shows why that matters: on
+  alexandrapaiz/Ursa#69, withholding one of twenty-one merges moved up
+  to 98,726 of 150,631 chars out of the discard column. A capture that
+  bad is still a success as far as any script calling it can tell.
+- What: a capture whose unknown share crosses a threshold is a capture
+  that should be re-run after a fetch, not consumed. Add
+  `--max-unknown-pct <n>` to `src/adapters/cli.ts run`, defaulting to
+  off so nothing changes for today's callers, which exits non-zero with
+  the `git fetch` command in the message when
+  `unknownDeletedChars / deletedChars` exceeds `n`. The same ratio
+  belongs on the record as `stats.generated.unknownDeletedPct` so a
+  consumer downstream of the capture can apply its own floor without
+  recomputing. This is the discipline that already exists for
+  dependencies in `scripts/dep-floor.mjs`: a measured property of the
+  artifact that fails a gate rather than printing a warning nobody
+  reads.
+- First step: `unknownDeletedPct` on `Stats.generated` with the
+  partition test extended to it, plus the flag reading it. One day.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-04 — The clone the capture needs, fetched by the capture
+- Trigger: every real capture this run made printed the same warning —
+  `merge commit 3e9dcdf3e is not in this clone` on #13,
+  `d1a0f15ab` on #69, `177ac408a` on #43 — and the fix in every case is
+  one `git fetch` the user has to notice, read, and run. Three of three.
+  The repository's own agent workflows are the worst case, because
+  `actions/checkout` defaults to `fetch-depth: 1`, which is the exact
+  state that produces the `unreadable_merge_commit` label this run added.
+- What: `cli.ts` already knows every sha it needs before it reads a
+  single tree, because the snapshot lists the pull request's commits and
+  `checkLocalObjects` already probes which are missing. Turn that probe
+  into an action behind an explicit flag: `--fetch-missing` runs
+  `git fetch --no-tags origin <sha>...` for exactly the missing objects,
+  reports what it fetched, and re-probes. Opt-in rather than automatic,
+  because a capture that silently reaches the network changes what a
+  label depends on, which is the property
+  `docs/design/unknown-deletion-cause.md` §9 explicitly declines.
+- First step: `fetchMissingObjects(projectPath, snap): string[]` beside
+  `checkLocalObjects` in `src/adapters/cli.ts`, returning the shas it
+  fetched, with a test over a deliberately shallow clone of this
+  repository asserting that the second probe comes back empty.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-04 (engineer's craft scan)
+
+Scanned **`git blame`'s ignore-revs mechanism** (git 2.55.0), picked
+because it is the oldest and most widely deployed answer to the exact
+question this run spent the day on: what an attribution tool should say
+when a mechanical commit stands between a line of text and the person
+who really wrote it. Read by running it on this runner against a
+purpose-built two-commit repository and by reading `git blame --help`
+from the same binary, so every claim below is first-hand rather than
+from documentation found elsewhere.
+
+**What it does.** `git blame --ignore-rev <rev>` reassigns the lines an
+ignored commit touched to the previous commit that changed that line or
+a nearby one, as if the ignored change never happened. The standing form
+is `.git-blame-ignore-revs` with `blame.ignoreRevsFile`, which is how
+projects stop a repository-wide reformat from owning every line in the
+tree.
+
+**Worth stealing: it has two degrees of doubt where Ursa has one.** A
+line git reassigned to another commit can be marked `?` — the author
+printed is a second choice. A line it could not reassign anywhere is
+marked `*` — unblamable. Verified on a repository where a reformat
+commit inserted blank lines that no earlier commit ever touched:
+
+```
+$ git -c blame.markUnblamableLines=true blame --ignore-rev $REF f.txt
+^b40c326 (A 2026-10-04 03:07:59 +0000 1) alpha
+*d4fc28c (A 2026-10-04 03:07:59 +0000 2)
+^b40c326 (A 2026-10-04 03:07:59 +0000 3) beta
+```
+
+Today's `DeletionCause: 'unknown'` is git's `*`. The `?` case has no
+equivalent in an outcome record, and the resolver already produces it
+under a different name, which is the ledger entry "Two levels of 'we are
+not sure who', not one" above.
+
+**Where Ursa does better, and it is the same defect this run fixed.**
+Both markers are off by default: `git config --get
+blame.markIgnoredLines` and `blame.markUnblamableLines` both come back
+unset on a stock install, confirmed on this runner. So git's default
+output prints a confident author and a confident sha for a line it knows
+it guessed at, and the distinction exists only for the user who went
+looking for it. That is exactly the shape of the defect in
+`src/deletion.ts` before today: the uncertainty was known inside the
+code and absent from what the code said. Ursa's `unknown` is in the type
+rather than behind a flag, so a consumer cannot fail to receive it, and
+`humanDeletedChars` excludes it by construction rather than by
+configuration. For a signal sold to a lab, an uncertainty that is opt-in
+to see is an uncertainty that will not be seen.
