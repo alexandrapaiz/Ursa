@@ -370,6 +370,29 @@ describe('an unknown deletion cause is not the human\'s', () => {
     expect(g.unknownDeletedChars).toBe(0)
   })
 
+  it('a partial clone whose blobs are unreachable is unknown, not absent', () => {
+    // The shape that decided which probe discriminates. A
+    // `--filter=blob:none` clone holds every commit and every tree and
+    // fetches blobs from its promisor on demand, so when that remote is
+    // gone `git show <sha>:<path>` fails on a path that is plainly in the
+    // tree. `git cat-file -e <sha>^{commit}` answers "the commit is here",
+    // which would have made this a definite "the text is not in this
+    // tree" and charged the span to the person all over again. `ls-tree`
+    // prints the row, so it reads unreadable.
+    const { dir, merge } = realCase()
+    sh(dir, ['config', 'uploadpack.allowFilter', 'true'])
+    const clone = mkdtempSync(join(tmpdir(), 'ursa-partial-')) + '/clone'
+    sh(tmpdir(), ['clone', '-q', '--filter=blob:none', '--no-local', '--no-checkout', `file://${dir}`, clone])
+    // Cut the promisor off. A fork deleted, a host unreachable, an
+    // offline laptop: the blob is simply not obtainable from here.
+    sh(clone, ['remote', 'set-url', 'origin', `file://${dir}-gone`])
+
+    expect(sh(clone, ['ls-tree', merge.sha, '--', 'digest.js']).trim()).not.toBe('')
+    const got = gitDeletionAttributor(clone, [merge])('digest.js', AGENT_BLOCK)
+    expect(got.cause).toBe('unknown')
+    expect(got.unknownReason).toBe('unreadable_merge_parents')
+  })
+
   it('the three causes partition the gross deletion figure', () => {
     const { dir, pair } = realCase()
     for (const ep of [
