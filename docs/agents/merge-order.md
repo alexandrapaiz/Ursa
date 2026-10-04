@@ -106,8 +106,9 @@ worktree off `origin/main`, not by reasoning about them.
 2. **#65** (frontend line, 150 files). Clean.
 3. **#62** (finance close). Clean.
 4. **#40** (chair, Langfuse tracing, carries #42's workflow edits). Clean.
-5. **#76** (this PR, the ExO line). One conflict after step 1, on
-   `docs/agents/pending-workflow-changes.md`, described in §4b.
+5. **#76** (this PR, the ExO line). Two conflicts after step 1, on
+   `docs/agents/pending-workflow-changes.md` and on one line of
+   `README.md`. Both resolutions are in §4b.
 
 After those five, twenty PRs remain open. Of the ones that then still
 conflict, the cause is `docs/ideas.md` in every case except the PM's
