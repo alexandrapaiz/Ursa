@@ -155,15 +155,27 @@ export function commitFiles(repoPath: string, sha: string): string[] {
  *
  * `git show <sha>:<path>` fails for two reasons that mean opposite
  * things. Either the commit is right here and the path is simply not in
- * its tree, which is a definite answer, or the commit object itself is
- * missing from this clone — a shallow fetch, a pruned fork, a branch
- * deleted after merge — which is no answer at all. `blobAt` collapses
- * both to `null`, and the collapse is what let deletion attribution
- * charge an unreadable boundary to the person (see src/deletion.ts).
+ * its tree, which is a definite answer, or something the answer needs is
+ * missing from this clone — the commit itself after a shallow fetch, the
+ * blob in a `--filter=blob:none` clone whose promisor is unreachable —
+ * which is no answer at all. `blobAt` collapses both to `null`, and the
+ * collapse is what let deletion attribution charge an unreadable
+ * boundary to the person (see src/deletion.ts).
  *
- * The discriminator is a second probe: `git cat-file -e <sha>^{commit}`
- * exits 0 only when the commit object is present locally. Run only on
- * the failure path, so the common case still costs one process.
+ * The discriminator is `git ls-tree <sha> -- <path>`, run only on the
+ * failure path so the common case still costs one process. It reads the
+ * commit's tree objects and nothing else, which gives all three answers
+ * from one call:
+ *
+ *   - the command fails          the commit or its trees are not here
+ *   - it succeeds, prints nothing the path is genuinely not in this tree
+ *   - it succeeds, prints a row   the path is there and the blob itself
+ *                                 could not be read
+ *
+ * The third row is why this is `ls-tree` rather than
+ * `cat-file -e <sha>^{commit}`: a partial clone holds every commit and
+ * tree while the blob lives on a remote, so a commit-presence probe
+ * reports a definite "not in the tree" for a file that is in the tree.
  */
 export type BlobLookup =
   | { kind: 'present'; text: string }
@@ -174,17 +186,13 @@ export function blobLookup(repoPath: string, sha: string, path: string): BlobLoo
   try {
     return { kind: 'present', text: git(repoPath, ['show', `${sha}:${path}`], { quiet: true }) }
   } catch {
-    return commitPresent(repoPath, sha) ? { kind: 'absent' } : { kind: 'unreadable' }
-  }
-}
-
-/** Whether this clone holds the commit object itself, parentage included. */
-export function commitPresent(repoPath: string, sha: string): boolean {
-  try {
-    git(repoPath, ['cat-file', '-e', `${sha}^{commit}`], { quiet: true })
-    return true
-  } catch {
-    return false
+    let listed: string
+    try {
+      listed = git(repoPath, ['ls-tree', sha, '--', path], { quiet: true })
+    } catch {
+      return { kind: 'unreadable' }
+    }
+    return listed.trim() === '' ? { kind: 'absent' } : { kind: 'unreadable' }
   }
 }
 
