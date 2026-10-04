@@ -166,11 +166,26 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
 
   // The run channel: POST /run executes `ursa run <project>` and the
   // summary rides back both in the response and in the next sync.
+  // The allowlist gates the execution, not just the response headers.
+  // CORS only hides a reply from the caller, and POST with no custom
+  // header is a simple request, so a browser sends it with no preflight
+  // and the side effect lands before anything is hidden. A request with
+  // no Origin at all is a non-browser client (the CLI, curl, a test):
+  // no page can suppress that header, so it is not a forgery vector and
+  // stays allowed. An opaque origin arrives as the literal "null" and is
+  // matched by neither rule, so it is refused with every other stranger.
   const loopback = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
   const allowed = (origin: string | undefined): string | null => {
     if (!origin) return null
     if (loopback.test(origin) || (opts.allowOrigins ?? []).includes(origin)) return origin
     return null
+  }
+  /** true when the request may cause an effect: same-origin, allowlisted, or not from a browser. */
+  const mayAct = (req: { headers: { origin?: string | string[] } }): boolean => {
+    const raw = req.headers.origin
+    const origin = Array.isArray(raw) ? raw[0] : raw
+    if (origin === undefined) return true
+    return allowed(origin) !== null
   }
   const server = createServer((req, res) => {
     const origin = allowed(req.headers.origin as string | undefined)
@@ -179,6 +194,10 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
       : {}
     if (req.method === 'OPTIONS') { res.writeHead(204, cors); res.end(); return }
     if (req.method === 'POST' && req.url === '/run') {
+      if (!mayAct(req)) {
+        log(`refused a run from a disallowed origin: ${String(req.headers.origin)}`)
+        res.writeHead(403, cors); res.end('origin not allowed'); return
+      }
       if (running) { res.writeHead(409, cors); res.end('a run is already in progress'); return }
       running = true
       log('run requested from the page')
