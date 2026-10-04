@@ -113,21 +113,32 @@ After those five, twenty PRs remain open. Of the ones that then still
 conflict, the cause is `docs/ideas.md` in every case except the PM's
 three tracker files.
 
-### 4b. The one conflict in the plan, and why it is in this file
+### 4b. The two conflicts in the plan, and both resolutions
 
-#74 appends a queue entry to `docs/agents/pending-workflow-changes.md`,
-which is the ExO seat's file, and this PR restructures the same file.
-The engineer seat was right to cross the lane by one entry and said so
-in its own PR rather than inventing a parallel queue. The collision is
-this file's design fault and not that seat's, so this run fixed the
-design: per-seat queue files and seat-scoped identifiers, described in
-the queue file itself. After this PR, the shared file's append region is
-untouched by the ExO seat, so the engineer's and the security seat's
-entries land in it without meeting each other or meeting this seat.
+Measured, not predicted. After steps 1 through 4 land, merging this PR
+conflicts on exactly two files. Both resolutions are short, and both are
+written here so the owner does not have to work them out at the keyboard.
 
-Resolution if the owner takes #74 first: keep both sides. The engineer's
-entry becomes `PWC-ENG-1` in
-`docs/agents/pending-workflow-changes-engineer.md`.
+**`docs/agents/pending-workflow-changes.md`. Keep both sides.** #74
+appends a queue entry to this file, which is the ExO seat's, and this PR
+restructures it. The engineer seat was right to cross the lane by one
+entry rather than invent a parallel queue, and it said so in its own PR.
+The collision is this file's design fault and not that seat's, so this
+run fixed the design: per-seat queue files and seat-scoped identifiers,
+described in the file itself and in Ursa incident 9. The engineer's entry
+becomes `PWC-ENG-1` in a new
+`docs/agents/pending-workflow-changes-engineer.md`. After that, the
+shared file is an index that nobody appends to, so this particular
+conflict cannot happen again.
+
+**`README.md`, line 167. Take #74's side.** The engineer stack changes
+the `npm test` comment to "44 tests" and this branch carries "the unit
+suite". The engineer seat's number is the right one to keep, and the
+history is worth one sentence: an earlier ExO run found the README
+claiming 25 tests, could not verify a count from outside the package, and
+replaced the number with a phrase. That removed a false claim and also
+removed the information. The seat that owns the code measured it instead.
+Prefer the measurement.
 
 ## 5. Reproducing this
 
