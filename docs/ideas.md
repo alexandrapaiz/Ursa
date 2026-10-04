@@ -2250,3 +2250,172 @@ rather than behind a flag, so a consumer cannot fail to receive it, and
 `humanDeletedChars` excludes it by construction rather than by
 configuration. For a signal sold to a lab, an uncertainty that is opt-in
 to see is an uncertainty that will not be seen.
+
+### 2026-10-04 — The generated denominator is wrong in two directions, and nothing checks it
+- Trigger: today's pairing-window run (docs/design/pairing-window.md §1,
+  §9). `ursa run` against a clone of this repository's `main` at
+  `0d68df0` reported `239,976 chars survived your editing verbatim`
+  against `239,841 chars were generated to get there`. More text
+  survived verbatim than was ever generated, in all six records.
+  `survived_verbatim` means byte-identical in the generation and in the
+  finished work, so it is a subset of the generation by construction and
+  cannot exceed it. The pairing fix took the figure to 60,616 against
+  60,366, which is still 250 characters over, so the bound was only one
+  of two causes.
+- What: two defects in the same denominator, `GenerationRecord.totalChars`.
+  The first is a measurement bug: `ursa-major/src/match.ts` accepts a
+  fuzzy match wider than the generated text it matched against, so a
+  final span is credited with more characters than the generation
+  contained. The 250 characters are that. The second is a modelling
+  choice that is wrong on inspection: for a git pair, a generation's
+  `text` is the WHOLE FILE at the agent's commit, not the diff that
+  commit introduced. On the one surviving pair that is 60,366 characters
+  of `docs/standards/lessons.md` attributed to a sync commit that wrote
+  a few hundred of them. Both inflate the same number, and that number
+  is the denominator under `survivalRate`, `humanDeletedPct` and every
+  per-conversation figure Ursa Minor would sell. Neither is caught by
+  anything: 344 tests pass with the arithmetic impossible on real data.
+- First step: the invariant, as a gate, before either fix. Assert in
+  `ursa-major/src/stats.ts` that `byClass.survived_verbatim.chars <=
+  generated.totalChars` for every record, and run it over the public
+  fixture plus a clone of this repository, so the assertion is exercised
+  against real history and not only synthetic. It fails today, which is
+  the point: it is the cheapest check that would have caught a defect
+  that survived six records, four open pull requests and three runs of
+  deletion attribution. Then narrow the fuzzy match to the generation's
+  own extent, and decide the whole-file question explicitly, in an ADR
+  rather than in a diff, since it changes what every historical record
+  means.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-04 — The trailer pattern does not know the company's own bots, so a bot sync reads as a human correction
+- Trigger: the one pair that survives today's bounds on this
+  repository's history. Its edit is `8c453f04`, author `alexandrapaiz`,
+  whose `Co-Authored-By` trailer is `exo-centralizer[bot]`.
+  `DEFAULT_TRAILER` in `ursa-major/src/pairfinder.ts` is
+  `/claude|codex|cursor|gpt/i`, which that string does not match, so the
+  commit is eligible as a human edit. The only record this repository
+  now produces is therefore one bot's lessons sync being read as a
+  person's correction of another bot's lessons sync, and its 236
+  `survived_mutated` characters are offered as the user's own
+  corrections, which `CLAUDE.md` §1 calls the most commercially
+  distinctive thing in the artifact.
+- What: the agent-identity patterns are two hardcoded regexes naming
+  four vendors. Alexandra Systems runs at least `claude[bot]`,
+  `exo-centralizer[bot]` and the per-seat identities this charter
+  exports (`ursa-engineer`), and a customer will have their own. The
+  false-negative direction is the expensive one: an unrecognised agent
+  becomes a human, and its output becomes someone's revealed preference.
+  The fix is not a longer regex. It is a declared identity list the
+  project owns, read from the project rather than compiled into the
+  resolver, with the compiled list as a fallback, plus a run-time report
+  of which identities a history actually contains so an unrecognised one
+  is visible rather than silently promoted to a person.
+- First step: `agentIdentities` in a per-project config file under
+  `.ursa/`, read by `findCommitPairsWithDiagnostics`, defaulting to the
+  current patterns when absent; add the distinct trailer and author
+  strings a history contains to `PairFinderDiagnostics` and print the
+  unmatched ones in `renderRunSummary`, which is how a user would find
+  out that `exo-centralizer[bot]` was being counted as them. A test on a
+  fixture whose only edit carries an unlisted bot trailer, asserting
+  zero pairs rather than one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-04 — Capture the generation when it happens, instead of inferring the pair afterwards
+- Trigger: today's craft scan of Agent Blame and Git AI, below, read
+  against today's own defect list. All four defects fixed today
+  (docs/design/pairing-window.md §1) are defects of RECONSTRUCTION. The
+  distance bound, the age bound, the interposition rule and the
+  descent test are all guesses about which commit a person was looking
+  at, taken from a commit log days later. None of the four could exist
+  if the generation had recorded its own extent at the moment it was
+  written.
+- What: an edit-time capture path alongside the git walk. A hook on the
+  harness's file-write event records the generation's own diff, the
+  conversation it came from and the turn index, keyed by a content hash
+  of the lines it wrote. At commit time the hashes are matched against
+  what landed and the attribution is written to `git notes`, which
+  travels with any clone and rewrites no history. The pair then needs no
+  inference: the generation's extent is known exactly, so
+  `GenerationRecord.totalChars` becomes the diff rather than the whole
+  file (the entry above), interposition is answered by the hash rather
+  than by ancestry, and a merge that destroys a span is visible as the
+  hash disappearing rather than as a blob read that may be unreadable.
+  The git walk stays, as the path for repositories with no capture
+  installed, which is every repository Ursa did not watch being built.
+- First step: one hook, one harness, one direction. A Claude Code
+  `PostToolUse` hook on `Edit` and `Write` appending a JSON line per
+  write to `.ursa/captures/<session>.jsonl` with the file path, the
+  inserted line hashes and the turn index, plus a reader in
+  `ursa-major/src/adapters/` that pairs those hashes against `git
+  diff` at commit time. Measure it on one real session against the git
+  walk's answer for the same work, and report where the two disagree,
+  because the disagreements are the inference errors this entry claims
+  exist.
+- Cost: $0. The hook is local, the storage is git notes and a gitignored
+  directory, and no service is involved.
+- Status: proposed
+
+## Competitive scan — 2026-10-04, second dispatch (engineer's craft scan)
+
+**Agent Blame** (mesa.dev) and **Git AI** (git-ai-project/git-ai), with
+**blameprompt**, **gitwhy** and **Exceeds Ink** in the same bracket.
+`docs/market/landscape.md` still does not exist on `main` (it is inside
+PR #21, unmerged since 2026-09-26), so the rotation again falls back to
+the charter's list, and the product was chosen to sit on top of the
+defect this run spent the day on: how a tool decides which lines an
+agent is responsible for.
+
+**What they are.** Both attach line-level AI attribution to a
+repository. Agent Blame intercepts edit events from Cursor, Claude Code
+and OpenCode as they happen, hashes the written lines (exact and
+normalised, with confidence 1.0 and 0.95), matches them against what
+lands at commit time, and stores the result in `git notes`. A GitHub
+Actions workflow re-transfers attribution by content matching when a
+squash or rebase merge rewrites the shas. Git AI is the same idea as a
+git extension, with `git ai blame` as a drop-in for `git blame` that
+prints the agent, the model and the prompt behind each line.
+
+**Worth stealing: capture at the moment of the edit, and store it in
+git notes.** This is the one that matters, and it is this run's third
+ledger entry above. Every defect fixed today was a defect of inferring,
+days later, which commit a person had in front of them. Agent Blame
+does not have a pairing window because it never needs to guess the
+generation's extent. The storage choice is the other half: `git notes`
+travels with the clone, rewrites no history, and needs no sidecar
+directory, where Ursa's `.ursa/` is gitignored and therefore does not
+survive being cloned at all.
+
+**Where Ursa does better, and it is a difference in what is being sold.**
+Agent Blame states its principle as "false attribution is worse than
+missing attribution" and accepts two gaps on purpose: "heavily edited
+output won't match", and changes made outside hook capture are not
+attributed. For a code-review and adoption-metrics product that is the
+right trade. For Ursa it inverts the asset. A heavily edited generation
+is the MOST valuable record Ursa has, because `CLAUDE.md` §1 defines the
+mutation as the correction, expressed as an edit rather than a
+complaint, and `survived_mutated` is where the correction signal lives.
+Text present in the finished work that matches no capture is Ursa's
+`no_generation_provenance`, the class `CLAUDE.md` calls the most
+valuable of the four, because it is the evidence that the model was
+never in the running. Agent Blame discards both of those as noise. It
+measures how much AI code landed; Ursa measures what the work did to it,
+which is why it needs deletion causes, a survival rate and a time
+dimension that an adoption metric has no use for.
+
+**The uncomfortable half.** Their principle is the one this run arrived
+at independently and should be read as convergent evidence rather than
+as a borrowed slogan: today's change refuses 66 claims it cannot stand
+behind and prints the refusals rather than emitting weak records. The
+difference is that Agent Blame can afford to drop the hard cases and
+Ursa cannot, so Ursa has to get the hard cases right instead of
+skipping them, and that is a strictly harder engineering problem than
+the one the comparable products have taken on.
+
+Sources: [mesa.dev/blog/agentblame-deep-dive](https://www.mesa.dev/blog/agentblame-deep-dive),
+[git-ai-project/git-ai](https://github.com/git-ai-project/git-ai),
+[Ekaanth/blameprompt](https://github.com/Ekaanth/blameprompt),
+[mehrtam/gitwhy](https://github.com/mehrtam/gitwhy),
+[blog.exceeds.ai/track-ai-code-contributions-git](https://blog.exceeds.ai/track-ai-code-contributions-git/)
