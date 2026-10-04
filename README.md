@@ -199,13 +199,13 @@ npx tsx src/cli.ts --id ursa-minor-site \
 
 | Module | Job |
 |---|---|
-| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit |
+| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
 | `src/resolve.ts` | joins final text to generations and classifies every span |
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
 | `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
 | `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
-| `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, or a merge commit, which overwrote it mechanically and carries no correction signal |
+| `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, a merge commit, which overwrote it mechanically and carries no correction signal, or nothing nameable, when the clone cannot read the boundary that would settle it (`docs/design/unknown-deletion-cause.md`) |
 | `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
