@@ -1,7 +1,8 @@
 # Org Chart — Ursa
 
-**Refreshed 2026-09-30** by the ExO window run (previous refresh
-2026-09-27, in the same PR, which had not merged), against `gh run list
+**Refreshed 2026-10-04** by the ExO Sunday run (previous refreshes
+2026-09-27 and 2026-09-30, both in PRs that have still not merged, which
+is Ursa incident 9), against `gh run list
 --workflow=agent-<seat>.yml --json event,createdAt,conclusion` for
 every seat, `gh pr list --state all`, the charter headers in
 `prompts/`, and the cron lines in `.github/workflows/`.
@@ -39,14 +40,24 @@ history has concluded `success` except the four okr-agent failures of
 window. There is no failing workflow to report this week. What the org
 has instead is a merge backlog, recorded below.
 
-## The merge queue, 2026-09-27
+## The merge queue, 2026-10-04
 
-| Measure | Value |
-|---|---|
-| Open PRs | 17 (16 excluding this run's own) |
-| Merged in the last seven days | 10 |
-| Merged in the last three days | 1 (PR #17, 2026-09-25) |
-| Age of the oldest open PR | 3 days (#13, opened 2026-09-24) |
+**The landing plan lives in docs/agents/merge-order.md**, rewritten every
+ExO run. It names which PRs conflict, which are already contained in
+others, and the verified order. Read it before this table, because the
+table is the symptom and that file is the shortest path out of it.
+
+| Measure | 2026-09-27 | 2026-09-30 | 2026-10-04 |
+|---|---|---|---|
+| Open PRs | 17 | 37 | 52 |
+| Merged in the last seven days | 10 | 9 | 5 |
+| Age of the oldest open PR | 3.0 days (#13) | 5.5 days (#13) | 10.2 days (#13) |
+| Open PRs that conflict with `main` | 5 | 5 | 8, of which 5 are `docs/ideas.md` alone |
+| Seats with an open PR, so undispatchable under pm.md §11.4 | not measured | not measured | **11 of 11** |
+
+Every building-seat PR in the repository's history is still open. Five
+merges, #74, #65, #62, #40 and this run's own, would close thirty-two of
+the fifty-two and return five seats to dispatchable.
 
 Every seat's output funnels through one owner's merge, and this week
 the org produced faster than that gate absorbed. No PR has reached the

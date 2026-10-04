@@ -24,6 +24,34 @@ that the 2026-09-30 entry reported still holds: no pull request from the
 engineer, frontend, research, market, skill, finance or security seat
 has ever merged, in this repository's whole history.
 
+### What the depth costs, measured rather than predicted
+
+The PM standard's hard stop (docs/standards/pm.md §11.4) forbids
+dispatching a seat whose last PR is still open. Open PRs now carry a
+`seat:` label, so the count is exact:
+
+| seat | open PRs | | seat | open PRs |
+|---|---|---|---|---|
+| engineer | 21 | | skill | 3 |
+| research | 4 | | security | 3 |
+| pm | 4 | | okr | 2 |
+| frontend | 4 | | market | 2 |
+| exo | 4 | | finance | 2 |
+| | | | sales | 1 |
+
+**Every seat on the roster has an open PR, so under §11.4 the PM cannot
+dispatch anyone at all.** That is not a prediction. Three consecutive PM
+standups, 2026-10-02, 2026-10-03 and 2026-10-04, each concluded "nothing
+dispatchable", and this table is why. The PM seat has fired zero
+dispatches in its entire history. The five merges in §4 would return
+five seats to dispatchable in one sitting.
+
+PR #44, "PMs own merges and failed-run triage", is the proposal that
+addresses this from the other side. It has been open since 2026-09-30 and
+is itself caught in the queue it would drain. The 2026-09-30 learning-log
+entry named this pairing as the org's live structural problem, and it is
+unchanged.
+
 ## 2. The queue is not blocked by conflicts
 
 This is the new measurement, and it reverses what the last two entries
