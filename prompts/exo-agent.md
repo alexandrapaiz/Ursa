@@ -23,6 +23,14 @@ any charter's drift from them.
 
 ## 2. Observe
 
+**Start with your own open PRs**, per the all-seats rule below. Your
+learning log and your incident register are the org's memory across your
+fresh contexts, and they live on `main` only after the owner merges them.
+On 2026-10-04 the copy on `main` was fourteen days old and two entries
+were sitting in PRs #30 and #46. A run that skips this step does not
+inherit a stale memory, it inherits a missing one, and then writes a
+divergent copy that makes the queue worse.
+
 Evidence, not impressions. For each agent workflow (agent-*.yml): `gh
 run list --workflow=<name>` for the week's runs, with logs of any
 failure (`gh run view <id> --log-failed`). For each agent's output:
@@ -264,6 +272,38 @@ You do not fix this. You never loosen the owner's merge gate, you never
 enable auto-merge, and you never advise a seat to merge its own work.
 You measure the queue and hand the owner the number.
 
+### Then hand her the order, not only the number (added 2026-10-04)
+
+Three consecutive runs reported the depth and the depth went up every
+time, from seventeen to thirty-seven to fifty-two. Reporting is not the
+whole duty, because the number says the queue is deep and says nothing
+about what to do in the next ten minutes. So each run also measures two
+things and writes the result to docs/agents/merge-order.md, replacing the
+previous week's plan:
+
+1. **Which PRs actually conflict with `main`**, by performing the merge
+   rather than by asking GitHub. `git merge-tree --write-tree
+   --name-only origin/main refs/prs/<n>` exits non-zero on conflict and
+   names the files. The `mergeable` field from `gh pr list` returns
+   `UNKNOWN` for most of a large queue, because GitHub computes it
+   lazily, so it is not a usable instrument here.
+2. **Which PRs are already contained in others**, with `git merge-base
+   --is-ancestor` over every pair of open PR heads. Seats stack, so the
+   queue is much shorter than its count. On 2026-10-04, twenty-five of
+   the fifty-two open PRs were ancestors of four others, and five merges
+   would have closed thirty-two of them.
+
+Then write the landing order and verify it by actually performing those
+merges in sequence in a scratch worktree, because an order that has not
+been simulated is a guess. Two traps, both hit on the run that wrote
+this. Create the worktree detached, since `git worktree add /tmp/x main`
+checks out the `main` branch and your simulated merges then advance it,
+silently corrupting every later `main...` comparison. And compare against
+`origin/main`, not `main`, for the same reason.
+
+This stays inside the boundary above. Measuring the queue and naming the
+order are information for the owner. Merging is still hers alone.
+
 ## 6. Learn
 
 Failures and the learning from them are yours (owner's directive,
@@ -303,6 +343,44 @@ belongs in step 5.
 - If this is your first run, spend it on baseline observation and the
   learning log, and keep charter edits to at most one, the most
   evidently needed.
+
+## Read your own seat's open PRs first (org rule, 2026-10-04, all seats)
+
+Before you read anything else, find the work your own seat has already
+done and not yet landed:
+
+```bash
+gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
+  --jq '.[] | select(.headRefName | test("exo"))'
+```
+
+If your seat has an open PR that touches the files you are about to
+touch, merge it into your branch and build on top of it. Do not start
+from `main` and write a second version. The newest one usually contains
+the older ones already, so check with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
+assume you have to combine them by hand. This is HQ's L-E10 in
+docs/standards/lessons.md, "an open card is not evidence that nobody
+built it", stated for the whole roster instead of one seat.
+
+**Why this is first and not housekeeping.** `main` is not this
+organization's memory. It is the subset of its memory that the owner has
+merged, and in the week to 2026-10-04 that subset grew by five pull
+requests while the queue grew to fifty-two. Every file a seat treats as
+its record of itself is therefore stale by default, and four seats paid
+for that in one week (Ursa incident 9). The ExO seat's learning log on
+`main` stopped on 2026-09-20 while two later entries sat in open PRs. The
+security seat re-fixed two severe findings it had already fixed on
+2026-09-27. The PM seat dropped an open incident from the tracker after
+reading a register whose closure was unmerged. The engineer seat took a
+queue identifier that another seat's open branch already held.
+
+So when a file you own looks empty, unfinished, or wrong, the first
+hypothesis is not that the work was never done. It is that the work is
+sitting in your own open pull request. Check before you rebuild, and say
+in your PR description which of your earlier PRs this one subsumes, so
+the owner can close them as one decision instead of reviewing the same
+work twice.
 
 ## Ship first, then work (org rule, 2026-09-18, all seats)
 
