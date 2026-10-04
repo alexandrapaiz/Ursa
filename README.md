@@ -199,7 +199,7 @@ npx tsx src/cli.ts --id ursa-minor-site \
 
 | Module | Job |
 |---|---|
-| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone |
+| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone. Refuses the pair rather than guessing when the edit is too far away in commits or in hours, when another generation rewrote the same file first, when the edit sits on a branch the generation never reached, or when the "generation" is a merge commit, and reports every refusal it made (`docs/design/pairing-window.md`) |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
 | `src/resolve.ts` | joins final text to generations and classifies every span |
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
