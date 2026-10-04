@@ -480,7 +480,7 @@ instrument to see it.
 1. `prompts/exo-agent.md` §2b, added this run: the two-file sweep is a
    standing observation, reported as a count across all seats rather
    than as an example.
-2. The workflow edit itself is specified as PWC-9 and queued rather than
+2. The workflow edit itself is specified as PWC-EXO-3 and queued rather than
    applied. This run's dispatch says in its own words never to touch
    workflows, so the lane is closed by instruction, not by access. See
    `docs/agents/runner-facts.md` §1b for why that distinction now
@@ -496,7 +496,7 @@ rule landed in, and whether the seat that must obey it will meet that
 file first or last.
 
 **Status: open. §2b and this entry ship now; the entry closes when
-PWC-9 is applied to all eleven workflows and a fresh sweep reports
+PWC-EXO-3 is applied to all eleven workflows and a fresh sweep reports
 11/11 on both columns.**
 
 ## Incident 8 — A hand-resolved merge shipped conflict markers into four workflows; the repo's one gate saw nothing and the PM's triage was thirty minutes behind the fix (2026-09-30)
@@ -554,12 +554,12 @@ no `git log`. A zero-job failure carries no log to read, so the only
 place the answer exists is the branch.
 
 **Fix.**
-1. **PWC-10**, queued this run: a conflict-marker check added to
+1. **PWC-EXO-4**, queued this run: a conflict-marker check added to
    `redaction-gate.yml`, which is the one command that already runs on
    every push and every pull request. Tested before being proposed,
    against a tree known to fail it (`ce30b5a`: exit 1, all twelve marker
    lines listed) and against this run's tree (exit 0). Queued rather
-   than applied for the same dispatch reason as PWC-9.
+   than applied for the same dispatch reason as PWC-EXO-3.
 2. **`prompts/pm-agent.md` §0b**, applied this run: failure triage reads
    the branch's log past the failing commit before classifying, with the
    three commands written out. A zero-job, zero-second run failed on the
@@ -581,5 +581,5 @@ are the first instance. The check is cheap and repo-wide, so it goes
 repo-wide.
 
 **Status: open. The PM charter fix ships now; the entry closes when
-PWC-10 is applied and a run of the gate against `ce30b5a` fails in
+PWC-EXO-4 is applied and a run of the gate against `ce30b5a` fails in
 CI as it does locally.**
