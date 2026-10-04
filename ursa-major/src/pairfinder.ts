@@ -390,16 +390,20 @@ export function findCommitPairsWithDiagnostics(
     const interveningMerges: MergeEvent[] = []
     for (let j = i + 1; j < commits.length; j++) {
       const fin = commits[j]
-      // The bounds, checked before the commit is classified, so a walk
-      // through a long all-agent stretch stops instead of running to the
-      // end of history. Distance is checked first and the counter records
-      // whichever bound stopped the walk, so a generation is attributed
-      // once rather than to every bound it exceeded.
+      // The distance bound stops the walk, which is also what keeps it
+      // cheap: without it a generation in a long all-agent stretch walks
+      // to the end of history. Position in this list is monotonic, so
+      // breaking at the first commit past the bound is safe.
+      //
+      // The age bound is NOT checked here, and the reason is worth
+      // stating. Author dates are not monotonic in --topo-order: a
+      // rebased commit carries an old date, and a long-lived branch
+      // merged in carries a much later one than the commits that follow
+      // it. Testing every commit walked made a single oddly-dated commit
+      // in the middle abandon the generation, which a fixture caught
+      // immediately. The bound is a claim about the generation and the
+      // edit, so it is checked against the edit, below.
       if (j - i > maxDistance) { diagnostics.abandoned.distance += 1; break }
-      if (hoursBetween(gen.date, fin.date) > maxAgeHours) {
-        diagnostics.abandoned.age += 1
-        break
-      }
       // A merge brings in other commits' work; the human did not write
       // that diff. It is not a pairing target. But it can still have
       // destroyed this generation's text, so record it before moving on
@@ -430,8 +434,14 @@ export function findCommitPairsWithDiagnostics(
       if (marker(fin)) continue
       const overlap = touched(fin.sha).filter((p) => genFiles.has(p))
       if (overlap.length === 0) continue
-      // From here `fin` is a candidate, and the two remaining tests are
-      // about the shape of the graph rather than the order of the list.
+      // From here `fin` is a candidate, and the remaining tests are about
+      // this pair rather than about the walk.
+      if (hoursBetween(gen.date, fin.date) > maxAgeHours) {
+        diagnostics.abandoned.age += 1
+        break
+      }
+      // The next two are about the shape of the graph rather than the
+      // order of the list.
       //
       // First: the edit has to descend from the generation. An edit on a
       // branch that never contained this generation's text cannot be a
