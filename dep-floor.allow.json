@@ -1,0 +1,4 @@
+{
+  "_note": "Exceptions to the dependency floor enforced by scripts/dep-floor.mjs. Every field is required. `package` is the npm package npm audit names, not the advisory's subject. `advisory` is a GHSA id, or \"*\" for every advisory against that package. `scope` is prod, dev or any. `expires` is an ISO date, and an exception past it fails the gate instead of suppressing it, so an accepted risk comes back and asks again. Only the owner adds entries here.",
+  "exceptions": []
+}

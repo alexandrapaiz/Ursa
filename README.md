@@ -54,6 +54,34 @@ span of the final text classified by what happened to it.
 | `generated_deleted` | produced and thrown away |
 | `no_generation_provenance` | in the finished work but traceable to no generation. The model was never in the running. |
 
+Every record also names **what kind of finished thing** it is about,
+because finished work is not only chat. A record's `artifact.kind` is
+`chat` when the conversation is the product, `repo` when the product is
+versioned source, `hosted` when it is served at a URL, and `visual` when
+the person accepted or corrected it by eye. When a rendered state exists,
+`artifact.renderRef` points at it, a deploy URL or a screenshot path, so
+a lab reading the record can go and look at the thing that was actually
+judged. `ursa run` fills `repo` on every run and upgrades it to `hosted`
+when the episode's own commit names a domain.
+A class is a verdict taken at one instant: the first commit in which
+the person edited the agent's output. When the project's git history
+continues past that commit, every surviving span also carries **how
+long it lasted**, because text kept at the time and removed by the work
+three commits later is not the same as text that was kept.
+
+| Fate | Meaning |
+|---|---|
+| `durable` | still there at the newest commit |
+| `eroded` | partly removed by later work |
+| `decayed` | gone. The span's own class is a false positive. |
+| `untested` | nothing came after it, so nothing is claimed |
+
+The record's `decayRate` is the share of its own "the user kept it"
+verdict that later work overturned, scored against the person's own
+prose in the same files so a volatile repo is not read as a bad model.
+How it is measured is in
+[`docs/design/span-lifespan.md`](docs/design/span-lifespan.md).
+
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
 generated commit followed by the person's edit of it. A full record
@@ -104,11 +132,18 @@ flowchart TB
     EX["<code>src/tuning/export.ts</code>"]
     MD["<code>tuning.md</code><br/>pasted into any model"]
     MINOR["Ursa Minor aggregation<br/>not built yet"]
+    DEP["<code>src/deploy.ts</code>"]
+
+    GIT -->|"<code>CNAME</code>, <code>package.json</code>, <code>vercel.json</code><br/>at the episode's final commit"| DEP
+    DEP -->|"DeployDetection, which becomes<br/>OutcomeRecord.artifact"| RS
 
     GIT -->|"commits and Co-Authored-By trailers"| PF
     PF -->|"CommitPair[]"| EP
     EP -->|"Episode[]"| RS
     RS -->|"OutcomeRecord"| SG
+    LP["<code>src/loops.ts</code>"]
+    SG -->|"OutcomeRecord, when a chat trace is present"| LP
+    LP -->|"CorrectionLoop[], RegressionEvent[], OneShotCorrection[]"| SG
     SG -->|"OutcomeRecord plus LabSignals"| ST
     ST --> REC
     REC -->|"OutcomeRecord"| DI
@@ -129,7 +164,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 25 tests
+npm test                                   # 44 tests
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -151,16 +186,30 @@ acceptance; only the owner's declaration is.
 
 The older session-log path is `src/cli.ts`, which takes `--final` and
 `--sessions` flags and produces the same record plus a self-contained
-HTML viewer.
+HTML viewer. It defaults to `artifact.kind: 'chat'`, and takes
+`--artifact-kind` and `--render-ref` when the finished thing was
+something you looked at rather than something you read:
+
+```bash
+npx tsx src/cli.ts --id ursa-minor-site \
+  --final ~/Desktop/ursa-minor-site --conversations ./conversations \
+  --artifact-kind visual --render-ref screenshots/hero-accepted.png \
+  --out ./out
+```
 
 | Module | Job |
 |---|---|
-| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit |
+| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
 | `src/resolve.ts` | joins final text to generations and classifies every span |
-| `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
+| `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
+| `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
+| `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
+| `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, a merge commit, which overwrote it mechanically and carries no correction signal, or nothing nameable, when the clone cannot read the boundary that would settle it (`docs/design/unknown-deletion-cause.md`) |
+| `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
+| `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
 
 `.ursa/` belongs in the target project's `.gitignore`. Raw records and
 the tuning store never leave the machine they were made on.
