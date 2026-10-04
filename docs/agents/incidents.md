@@ -25,6 +25,17 @@ Numbers are never reused and never renumbered. When an entry turns out
 to be two incidents, suffix it (4a, 4b) rather than shifting anything
 after it.
 
+**Every status line names its own incident (rule, 2026-10-04).** Status
+lines read `**Incident N status: ...**` rather than `**Status: ...**`,
+because this file is read as a work queue and a bare status line one
+scroll away from the entry it belongs to gets attached to the wrong one.
+That happened on 2026-10-04: the PM standup dropped Incident 4 from
+docs/sprints/pending.md and quoted "closed (2026-09-20), fix verified
+element by element" as Incident 4's own line, which is Incident 3's. The
+security seat caught it the same day as F11 in PR #75. If you quote a
+status line, the incident number is now inside the quote, so a
+misattribution cannot survive being written down.
+
 ## Incident 1 — Invalid CLAUDE_CODE_OAUTH_TOKEN; two dispatched runs dead on arrival (2026-09-18)
 
 **What happened.** The owner created the repo secret from a pasted
@@ -76,7 +87,7 @@ is which of the two messages the log carries, because it separates
 "the owner has not set it" from "the owner set it wrong," and those
 have different fixes.
 
-**Status: closed (2026-09-19), fix confirmed by this run.**
+**Incident 1 status: closed (2026-09-19), fix confirmed by this run.**
 
 ## Incident 2 — Unredacted user data on the public repo; history purged (2026-09-18)
 
@@ -128,7 +139,7 @@ The accepted residual from the fix's clause (3) is unchanged and
 unverifiable from here by design: unreferenced objects stay
 SHA-addressable until GitHub's own GC.
 
-**Status: closed (2026-09-20), purge confirmed on a clean clone. The
+**Incident 2 status: closed (2026-09-20), purge confirmed on a clean clone. The
 permanent rule this incident created stayed open and was broken the
 next day. See Ursa incident 4.**
 
@@ -194,7 +205,7 @@ The standard held, and it held so literally that element 3 pulled a
 private path into a public file. That is Ursa incident 4, not a defect
 in this closure.
 
-**Status: closed (2026-09-20), fix verified element by element.**
+**Incident 3 status: closed (2026-09-20), fix verified element by element.**
 
 ## Incident 4 — The redaction rule and the artifact standard collided; a private path went public again (2026-09-19/20)
 
@@ -297,7 +308,7 @@ correct and the record about the artifact was wrong for three days.
 Closing an incident is part of fixing it, because the register is read
 as a work queue.
 
-**Status: closed (2026-09-27), all four parts verified on main.**
+**Incident 4 status: closed (2026-09-27), all four parts verified on main.**
 
 ## Incident 5 — Eleven charters cite a local incident number for a different incident (2026-09-18 through 2026-09-20)
 
@@ -348,7 +359,7 @@ part of what gets copied. The stronger form of the rule, now in the
 register's preamble: a number you did not look up is a citation you
 should not write.
 
-**Status: fixed this run across the register and all eleven charters.**
+**Incident 5 status: fixed this run across the register and all eleven charters.**
 
 ## Incident 6 — Every seat appends to one file, so five open PRs went unmergeable at once and the sprint's whole backlog stalled (2026-09-24 through 2026-09-27)
 
@@ -422,9 +433,43 @@ works at one writer and fails at six is not a wrong rule, it is an
 unscaled one, and nobody but this seat is positioned to notice the
 difference.
 
-**Status: open. The tooling fix is in PR #27 and unmerged; this entry
-closes when that PR merges and a subsequent seat PR merges clean
-through the driver.**
+**Addendum (2026-10-04, ExO Sunday run): the measurement, and why the
+tooling fix will not be enough.**
+
+This entry is now quantified rather than described. Every open PR was
+three-way merged against `origin/main` on 2026-10-04. Eight of the
+fifty-two conflict, and **five of those eight conflict on
+`docs/ideas.md` and on no other file**: #14, #21, #50, #52, #64. The
+remaining three conflict on the PM's own two tracker files. So this one
+file is the single largest cause of unmergeability in the repository, and
+it is a file no seat's work actually depends on.
+
+Two further facts the original entry could not know.
+
+1. **The merge driver in PR #27 will not fix the conflicts the owner
+   sees.** A `.gitattributes` merge driver runs on the client. GitHub's
+   server-side merge does not run it. The engineer seat established this
+   independently in PR #61, whose title says it plainly, and its one-line
+   server-side alternative was found to delete entries. So PR #27
+   remains worth merging for local work and it does not close this
+   incident.
+2. **The standard's own mitigation is the thing that failed, and it is
+   an HQ standard.** docs/standards/pm.md §4 fixes the path
+   `docs/ideas.md` and prescribes naming the expected merge order in the
+   PR description. Every seat obeyed that and five PRs conflict anyway,
+   for the reason this entry already gives: announcing a collision is not
+   preventing one. The fix that would work is a layout change, one file
+   per entry under a directory so that two seats never write the same
+   path. **That is not this seat's to apply.** The path is named in a
+   company standard, so changing it needs an Ursa ADR recording the
+   deviation or an amendment upstream at HQ, per the holding-company
+   note. It is written up here, routed to the owner in this run's PR,
+   and deliberately not done by charter edit, because a charter edit
+   cannot fix a defect whose cause is the file's location.
+
+**Incident 6 status: open.** The tooling fix is in PR #27, which is
+unmerged, so this entry closes when that PR merges and a later seat PR
+then merges clean through the driver.
 
 ## Incident 7 — The draft-PR-first rule is in every charter and in no workflow, so it has never bound (2026-09-18 through 2026-09-30)
 
@@ -495,7 +540,7 @@ seat writing a rule for another seat: ask which of the two files the
 rule landed in, and whether the seat that must obey it will meet that
 file first or last.
 
-**Status: open. §2b and this entry ship now; the entry closes when
+**Incident 7 status: open. §2b and this entry ship now; the entry closes when
 PWC-EXO-3 is applied to all eleven workflows and a fresh sweep reports
 11/11 on both columns.**
 
@@ -580,6 +625,95 @@ for that class, everywhere the vendor does not look. Conflict markers
 are the first instance. The check is cheap and repo-wide, so it goes
 repo-wide.
 
-**Status: open. The PM charter fix ships now; the entry closes when
+**Incident 8 status: open. The PM charter fix ships now; the entry closes when
 PWC-EXO-4 is applied and a run of the gate against `ce30b5a` fails in
 CI as it does locally.**
+
+## Incident 9 — Four seats acted on a stale `main` in one week, because the org's memory only exists after a merge (2026-09-27 through 2026-10-04)
+
+**What happened.** Four seats, four different costs, one cause, inside
+seven days.
+
+1. **The ExO seat.** `docs/agents/learning-log.md` on `main` ends on
+   2026-09-20. Entries 3 and 4, the 2026-09-27 cycle and the 2026-09-30
+   owner window, exist only inside PRs #30 and #46, both open. This run
+   is the fifth ExO cycle and it read a fourteen-day-old memory. It found
+   the missing entries only by going to look for its own unmerged work,
+   which no charter required it to do.
+2. **The security seat.** PR #75, 2026-10-04, states that two severe
+   findings were live on `main` that day, that both had been found on
+   2026-09-27, and that both were fixed in pull requests still open. It
+   re-fixed both off current `main`. Its own words: "the tree it audited
+   had absorbed nothing from the previous two."
+3. **The PM seat.** The 2026-10-04 standup removed Incident 4 from
+   docs/sprints/pending.md as resolved, quoting a status line that
+   belongs to Incident 3. The reason it had to quote anything is that
+   Incident 4's real closure, written by the 2026-09-27 ExO run, is in
+   the same unmerged PR #30, so the register on `main` still said open.
+   The misquote is the visible error. The stale register is why a quote
+   was needed at all.
+4. **The engineer seat.** It queued `PWC-7` in PR #74 while a different
+   `PWC-7` sat in PR #46. Its PR reasons explicitly that taking 7 rather
+   than 5 means "the two PRs do not have to be merged in a particular
+   order to keep the numbering honest." The reasoning is correct and the
+   collision happened anyway, because the number it needed to avoid was
+   inside a branch it could not see.
+
+**Why, technically.** Every one of these seats runs in a fresh session
+and reconstructs its state by reading files on `main`. That is sound only
+if `main` is the org's state. It is not. `main` is the subset of the
+org's state that the owner has merged, and in the week to 2026-10-04 that
+subset grew by five pull requests while fifty-two sat open, with no pull
+request from any building seat having ever merged in the repository's
+history. Under those conditions a file is stale by default, and the
+staleness is invisible, because a file that is merely behind looks
+exactly like a file that is complete.
+
+No charter said to look in the open PRs. HQ had already written the
+lesson, L-E10 in docs/standards/lessons.md, "an open card is not evidence
+that nobody built it," on 2026-09-30. It was synced into this repo and
+bound nobody, because nothing in the sync step turns a lesson addressed
+to seats into text inside a seat's charter. The 2026-09-30 ExO entry
+named that gap for the centralizer and did not close it for this rule.
+
+**The sharper form.** Three of the four costs are self-inflicted in a
+specific way: each seat failed to find *its own* previous output. This is
+not seats being unable to read each other. It is seats being unable to
+read themselves, which is a much cheaper problem to fix, because a seat
+can always enumerate its own branches.
+
+**Fix.**
+1. A new all-seats section in all eleven charters, "Read your own seat's
+   open PRs first," with the `gh pr list` filter and the
+   `git merge-base --is-ancestor` check, and the instruction to merge the
+   open one into the branch rather than starting again from `main` (this
+   run). It states L-E10 for the whole roster.
+2. The ExO observe step now begins there, naming its own fourteen-day
+   gap as the evidence (this run).
+3. Seat-scoped queue identifiers and per-seat queue files, so the one
+   collision in this list that is purely structural cannot recur even if
+   a seat forgets rule 1 (this run,
+   docs/agents/pending-workflow-changes.md).
+4. Status lines in this register now carry their own incident number, so
+   the PM's misquote cannot be made silently again (this run). The
+   security seat filed the same defect as F11 in PR #75 independently.
+5. This run practised the rule on itself before writing it: PR #46 was
+   merged into this branch rather than rewritten, so the ExO line is one
+   branch and not five.
+
+**What the org grew.** A fresh-session seat must treat `main` as a lower
+bound on the org's state rather than as its state. The first question
+when a file looks unfinished is whether the work is in an open pull
+request, and the first place to look is the seat's own. The deeper point
+belongs to whoever next proposes a memory mechanism for these agents: a
+memory that only becomes readable when a human merges it is not a memory
+at a cadence faster than the human. Everything in this register about the
+merge queue is downstream of that, which is why the queue is not only the
+PM's problem or the owner's but this seat's as well.
+
+**Incident 9 status: open.** The charter edits ship with this run and
+they bind nothing until this PR merges, which is the incident's own
+pathology applied to its own fix. It closes when a later ExO run reports
+that eleven of eleven charters carry the section on `main`, and that it
+found its own previous entry in the learning log without having to go
+looking in branches.
