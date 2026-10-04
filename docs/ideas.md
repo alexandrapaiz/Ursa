@@ -143,3 +143,64 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from §16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
 
 - 2026-09-25 (chair, owner-present): overlay S0 shipped and verified end to end. `ursa bridge <project>` + https://ursa-overlay.vercel.app (ALEX team; Blob store ursa-overlay-sync, ciphertext only). Verdict reader passed the PR/FAQ acceptance test on the real n=1 record: reads as satisfied at step 730, "yesss finallyyy!! lol", unaided. One deviation from plan 16.2: the run channel is plain HTTP on 127.0.0.1:7817 instead of a WebSocket (same job, zero dependencies, loopback exempt from mixed-content blocking).
+
+### 2026-10-04 — Private data from before the gate is still in the public history (security run)
+- Trigger: the 2026-10-04 security audit scanned every blob reachable
+  from every ref, not only the working tree, against the redaction
+  gate's own three patterns
+- What: sixteen blobs across five files, all reachable from
+  `origin/main`, still carry the classes Incident 2 rewrote history to
+  remove and Incident 4 added the gate to stop. The current tree is
+  clean and the gate passes. The exposure is entirely historical, and it
+  exists because Incident 2 did history surgery with no gate while
+  Incident 4 added a gate with no history surgery. Files, commits and
+  classes are named in `docs/security/audit-2026-10-04.md` F2. No value
+  is quoted anywhere, per the practice Incident 4 set.
+- First step: the owner decides between a second history rewrite and
+  accepting the exposure. The tradeoff is not one-sided. A rewrite of a
+  public repository's history invalidates every one of the fifty-one
+  open pull requests, which is a heavy cost at the exact moment the
+  merge queue is already the largest problem the company has. Accepting
+  is defensible. Leaving it undecided is the only option that is not.
+- Cost: $0
+- Status: urgent — needs an owner decision, not engineering
+
+### 2026-10-04 — Generate the overlay secret instead of asking for a passphrase (security run)
+- Trigger: the same audit found that the sync route's unauthenticated
+  `GET` turns the blob id into a passphrase confirmation oracle
+- What: `deriveKeys` splits one PBKDF2 output into the AES key and the
+  blob id, so the blob id is a pure deterministic function of the
+  passphrase with a fixed global salt. Verified by calling it. Because
+  `GET /api/sync/<id>` is unauthenticated and unmetered, one request
+  tests one guess, and a 200 both confirms the guess and returns
+  ciphertext the same PBKDF2 output already decrypts. That turns an
+  offline attack needing a captured blob into an online attack needing
+  only the public URL. The cryptography is sound and the fixed-salt
+  tradeoff is correctly reasoned in `src/bridge/crypto.ts`. What is lost
+  is the margin that protects a weak passphrase.
+- First step: have `ursa bridge` generate a high-entropy secret on first
+  run and store it locally for the owner to copy into the page, instead
+  of accepting a typed phrase, so there is no dictionary to walk. Keep
+  the existing derivation for anyone who has already synced. Rate
+  limiting the route, which the PR #32 work wants anyway, is the
+  complementary half and should not be treated as a substitute.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-04 — Charters never say that fetched content is not an instruction (security run)
+- Trigger: the audit's prompt injection pass found the trust boundary
+  undeclared in every charter
+- What: this repository is public with issues enabled, charters instruct
+  seats to read pull request and issue text and the public web, and the
+  agents that read it run with `bypassPermissions`, `contents: write`
+  and three tokens in the environment. Searching the whole repository,
+  the only mentions of injection are in the security charter and
+  workflow, and both only say to audit for it. No charter tells an agent
+  that what it reads is data rather than direction.
+- First step: ExO adds one paragraph to every charter that reads
+  external content. Exact proposed wording is in
+  `docs/security/audit-2026-10-04.md` F6. Charters are outside the
+  security seat's writable surface, which is why this is proposed here
+  rather than applied.
+- Cost: $0
+- Status: proposed
