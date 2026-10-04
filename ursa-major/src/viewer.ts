@@ -237,6 +237,12 @@ export function renderViewer(record: OutcomeRecord): string {
   if (g.mergeDeletedChars > 0) {
     t.appendChild(el('div', 'sub num', '+ ' + fmt(g.mergeDeletedChars) + ' chars destroyed by a merge, not by you'));
   }
+  // A third line only when there is something to say. The record can tell
+  // the text is gone and cannot tell what took it, and showing that as part
+  // of the discard figure would be the tile claiming more than it knows.
+  if (g.unknownDeletedChars > 0) {
+    t.appendChild(el('div', 'sub num', '+ ' + fmt(g.unknownDeletedChars) + ' chars gone with no readable cause'));
+  }
   tiles.appendChild(t);
 
   // distribution bar over covered chars

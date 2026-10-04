@@ -577,4 +577,34 @@ describe('a merge inside the pull request deletes a generation', () => {
     expect(pairs[0].interveningMerges).toEqual([])
     expect(pairs[0].pullRequest.unreadableMerges).toEqual([mergeSha])
   })
+
+  it('and that name reaches the episode, so the deletion is unknown rather than the person\'s', () => {
+    const { dir, snap, mergeSha } = prMergeDeletionRepo()
+    const inner = gitRepoReader(dir)
+    const forkReader: RepoReader = {
+      blobId: inner.blobId,
+      parents: (sha) => (sha === mergeSha ? [] : inner.parents(sha)),
+    }
+    const episodes = episodesFromPullRequest(pairsFromPullRequest(snap, forkReader), dir)
+    expect(episodes[0].unreadableMerges).toEqual([mergeSha])
+
+    const record = resolveEpisode(dir, episodes[0])!
+    const distinctive = record.generations
+      .flatMap((g) => g.spans)
+      .filter((s) => s.fate === 'generated_deleted' && s.text.includes('no stated reason'))
+    expect(distinctive).toHaveLength(1)
+    // Before this change the same episode reported `human_edit` here, on
+    // text a merge nobody could read is the likeliest destroyer of.
+    expect(distinctive[0].deletion?.cause).toBe('unknown')
+    expect(distinctive[0].deletion?.unknownReason).toBe('unreadable_merge_commit')
+    expect(record.stats.generated.humanDeletedChars).toBe(0)
+    expect(record.stats.generated.unknownDeletedChars).toBe(record.stats.generated.deletedChars)
+  })
+
+  it('a readable pull request names no unreadable merge, so its episode carries no hedge', () => {
+    const { dir, snap } = prMergeDeletionRepo()
+    const episodes = episodesFromPullRequest(pairsFromPullRequest(snap, gitRepoReader(dir)), dir)
+    expect(episodes[0].unreadableMerges).toBeUndefined()
+    expect(resolveEpisode(dir, episodes[0])!.stats.generated.unknownDeletedChars).toBe(0)
+  })
 })

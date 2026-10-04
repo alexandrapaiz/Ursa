@@ -53,16 +53,23 @@ export function computeStats(
   const generatedTotal = generations.reduce((a, g) => a + g.totalChars, 0)
   const generatedSurvived = generations.reduce((a, g) => a + g.survivedChars, 0)
   // A merge can destroy a generation without the human ever choosing to
-  // drop it, so the gross deletion figure is split by cause. Only the
-  // human half is a discard, and only it carries correction signal.
-  const mergeDeleted = generations.reduce(
-    (a, g) => a + g.spans
-      .filter((s) => s.fate === 'generated_deleted' && s.deletion?.cause === 'merge')
-      .reduce((b, s) => b + (s.end - s.start), 0),
-    0,
-  )
+  // drop it, and an unreadable boundary can leave the cause unknown, so
+  // the gross deletion figure is split three ways. Only the human share
+  // is a discard, and only it carries correction signal. The human share
+  // is computed by subtraction rather than by counting `human_edit`
+  // spans, so a cause added later is excluded from the discard rate by
+  // default instead of landing in it silently.
+  const deletedCharsWhere = (p: (cause: string | undefined) => boolean) =>
+    generations.reduce(
+      (a, g) => a + g.spans
+        .filter((s) => s.fate === 'generated_deleted' && p(s.deletion?.cause))
+        .reduce((b, s) => b + (s.end - s.start), 0),
+      0,
+    )
+  const mergeDeleted = deletedCharsWhere((c) => c === 'merge')
+  const unknownDeleted = deletedCharsWhere((c) => c === 'unknown')
   const generatedDeleted = generatedTotal - generatedSurvived
-  const humanDeleted = generatedDeleted - mergeDeleted
+  const humanDeleted = generatedDeleted - mergeDeleted - unknownDeleted
 
   const perConversation = conversations.map((conv) => {
     const convGens = generations.filter((g) => g.conversationId === conv.id)
@@ -102,6 +109,7 @@ export function computeStats(
       humanDeletedChars: humanDeleted,
       humanDeletedPct: generatedTotal ? r3(humanDeleted / generatedTotal) : 0,
       mergeDeletedChars: mergeDeleted,
+      unknownDeletedChars: unknownDeleted,
     },
     perFile,
     perConversation,

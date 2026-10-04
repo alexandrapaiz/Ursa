@@ -106,9 +106,10 @@ function git(repoPath: string, args: string[], opts: { quiet?: boolean } = {}): 
   return execFileSync('git', ['-C', repoPath, ...args], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
-    // `quiet` drops git's stderr. Only blobAt uses it, because a missing path
-    // at a given commit is an expected answer there (deploy detection probes
-    // for files that may not exist), not a failure worth printing.
+    // `quiet` drops git's stderr. Used by the blob and commit-presence
+    // probes, because a missing path or a missing commit at a given sha is
+    // an expected answer there (deploy detection probes for files that may
+    // not exist), not a failure worth printing.
     stdio: opts.quiet ? ['ignore', 'pipe', 'ignore'] : undefined,
   })
 }
@@ -148,12 +149,53 @@ export function commitFiles(repoPath: string, sha: string): string[] {
   return [...new Set(out.split('\n').filter(Boolean))]
 }
 
-export function blobAt(repoPath: string, sha: string, path: string): string | null {
+/**
+ * Three-state blob read, for callers that have to tell "the text is not
+ * there" from "this repository cannot say".
+ *
+ * `git show <sha>:<path>` fails for two reasons that mean opposite
+ * things. Either the commit is right here and the path is simply not in
+ * its tree, which is a definite answer, or the commit object itself is
+ * missing from this clone — a shallow fetch, a pruned fork, a branch
+ * deleted after merge — which is no answer at all. `blobAt` collapses
+ * both to `null`, and the collapse is what let deletion attribution
+ * charge an unreadable boundary to the person (see src/deletion.ts).
+ *
+ * The discriminator is a second probe: `git cat-file -e <sha>^{commit}`
+ * exits 0 only when the commit object is present locally. Run only on
+ * the failure path, so the common case still costs one process.
+ */
+export type BlobLookup =
+  | { kind: 'present'; text: string }
+  | { kind: 'absent' }
+  | { kind: 'unreadable' }
+
+export function blobLookup(repoPath: string, sha: string, path: string): BlobLookup {
   try {
-    return git(repoPath, ['show', `${sha}:${path}`], { quiet: true })
+    return { kind: 'present', text: git(repoPath, ['show', `${sha}:${path}`], { quiet: true }) }
   } catch {
-    return null
+    return commitPresent(repoPath, sha) ? { kind: 'absent' } : { kind: 'unreadable' }
   }
+}
+
+/** Whether this clone holds the commit object itself, parentage included. */
+export function commitPresent(repoPath: string, sha: string): boolean {
+  try {
+    git(repoPath, ['cat-file', '-e', `${sha}^{commit}`], { quiet: true })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * The two-state read. Kept for callers that probe for a file they do not
+ * expect to exist (deploy detection, lifespan sampling), where absent and
+ * unreadable both correctly mean "no text to read".
+ */
+export function blobAt(repoPath: string, sha: string, path: string): string | null {
+  const got = blobLookup(repoPath, sha, path)
+  return got.kind === 'present' ? got.text : null
 }
 
 /** The pairs alone. Unchanged signature, for callers that do not report. */

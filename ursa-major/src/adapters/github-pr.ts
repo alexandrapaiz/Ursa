@@ -497,6 +497,13 @@ export function episodesFromPullRequest(pairs: PullRequestPair[], projectPath: s
     closureHeuristic: 'github-pr',
     touchedFiles: p.paths,
     interveningMerges: p.interveningMerges,
+    // The merges that never became MergeEvents. Without this the
+    // attributor would see an empty-or-short merge list and read it as
+    // "nothing destroyed this", which is the accusation the `unknown`
+    // cause exists to avoid (src/deletion.ts).
+    ...(p.pullRequest.unreadableMerges?.length
+      ? { unreadableMerges: p.pullRequest.unreadableMerges }
+      : {}),
     generatedSha: p.generatedSha,
     finalSha: p.finalSha,
     agentMarker: p.agentMarker,
