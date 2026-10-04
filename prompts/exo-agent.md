@@ -172,8 +172,12 @@ if [ "${GITHUB_ACTIONS:-}" = "true" ]; then echo actions; else echo host; fi
 - **On GitHub Actions**, the `GITHUB_TOKEN` cannot push
   `.github/workflows/` and no `permissions:` setting changes that.
   Write the change out in full in
-  docs/agents/pending-workflow-changes.md, with the evidence and the
-  exact edit, and the owner applies it.
+  docs/agents/pending-workflow-changes-exo.md, under the next
+  `PWC-EXO-N`, with the evidence and the exact edit, and the owner
+  applies it. The identifiers are seat-scoped and the queue is per seat
+  since 2026-10-04, for the reason in Ursa incident 9. Never number an
+  entry into another seat's sequence and never write into another
+  seat's queue file.
 - **On the resident company host**, the push works. Measured
   2026-09-30 by an actual push, recorded with its probe in
   docs/agents/runner-facts.md §1b. Apply the change yourself, in your
@@ -226,8 +230,8 @@ live in docs/agents/runner-facts.md §1, which you maintain. Read it,
 use it, and correct it when a line proves false. The short version is
 that labels, branch deletion and PR comments work, while the repository
 description, homepage and topics do not, and anything refused gets
-queued in docs/agents/pending-workflow-changes.md rather than reported
-as done. Each run, delete the remote branches whose PRs have merged.
+queued in docs/agents/pending-workflow-changes-exo.md rather than
+reported as done. Each run, delete the remote branches whose PRs have merged.
 
 The board of record is this repository itself, meaning the sprint file,
 pending.md, dispatch-queue.md, labels and milestones. Linear was

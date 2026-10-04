@@ -187,6 +187,6 @@ Three consequences that seats keep getting wrong.
   time.** `agent-exo.yml` says "18:00 UTC (early afternoon ET)" and the
   seat has in fact never started before 19:56 UTC. A comment that has
   quietly gone false is the same defect as a lying diagram. The
-  corrected crons are queued as PWC-7 in
-  `docs/agents/pending-workflow-changes.md`, because this seat cannot
+  corrected crons are queued as PWC-EXO-1 in
+  `docs/agents/pending-workflow-changes-exo.md`, because this seat cannot
   write that directory.

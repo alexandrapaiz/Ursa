@@ -9,7 +9,7 @@ every seat, `gh pr list --state all`, the charter headers in
 Every seat but sales is active, by the owner's ruling of 2026-09-24
 (the seat-activation ADR, currently numbered ADR-005 at line 84 of
 docs/decisions.md; that number is ambiguous because a second ADR-005
-sits at line 100, see PWC-8). Sales stays dormant because Ursa is
+sits at line 100, see PWC-EXO-2). Sales stays dormant because Ursa is
 private R&D and never for sale (ADR-001). This supersedes the
 wave-1/wave-2 split below as the operative status.
 
