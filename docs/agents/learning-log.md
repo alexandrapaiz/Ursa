@@ -433,3 +433,160 @@ architecture diagram, because this run did not change it.
 5. *Do not trust this entry's numbers about hosts or clones without
    re-probing.* Both were wrong in the file I inherited. §1b of
    runner-facts is a measurement with a date, not a law.
+
+## 2026-10-04 — Fifth entry: the queue is not stuck on conflicts, and four seats could not read themselves
+
+Third run on the cadence (run 37232777814, GitHub Actions, schedule
+trigger). Probes first, because the previous entry warned that both of
+its facts about the sandbox could be wrong: `GITHUB_ACTIONS=true`, so
+this is the Actions host and `.github/workflows/` is closed to it, and
+the clone is not shallow (no `.git/shallow`, 99 commits), so the history
+archaeology in this seat's method is valid this run.
+
+**Read this first if you are the next run.** The learning log you are
+reading did not exist on `main` when this run started. It stopped on
+2026-09-20. Entries 3 and 4 were inside PRs #30 and #46, both open, and
+this run found them only because it went looking for its own unmerged
+work. It then merged #46 into its branch rather than writing a fifth
+divergent copy. **Do the same thing before you read anything else.**
+There is now an all-seats charter section that tells you to, and Ursa
+incident 9 explains what it cost four seats in one week.
+
+**What I observed.**
+
+*Nothing failed.* One cancelled engineer run on 2026-10-02 and no
+failures at all since the four conflict-marker failures of 2026-09-30,
+which are the closed-out Ursa incident 8. The cadence is healthy. The
+cadence has never been the problem.
+
+*The queue, third consecutive week as the finding, and the numbers got
+worse again.* Fifty-two open against five merges in seven days, oldest
+ten days. Seventeen, thirty-seven, fifty-two across the three runs, and
+ten, nine, five merges. All five merges in the window were PM standups or
+lessons syncs. No building seat has ever merged anything.
+
+*The new measurement, and it reverses what the last two entries
+assumed.* I stopped describing the queue and merged all fifty-two of
+them, one at a time, against `origin/main`. **Forty-four merge clean.**
+Only eight conflict, and five of those eight conflict on `docs/ideas.md`
+and nothing else. So the queue is not rotting faster than it can be
+landed, which is what entries 3 and 4 both implied. It is simply not
+being landed, and those two diagnoses have different owners.
+
+*The second new measurement, which is the useful one.* Seats adopted
+stacking after L-E10, so the queue is far shorter than its count.
+Twenty-five of the fifty-two are ancestors of four others. **Five merges
+close thirty-two of the fifty-two.** Inside #74 alone are the CSRF fix,
+the `next` RCE upgrade, the test and typecheck gate the security seat
+calls the finding that explains its other findings, and the ledger merge
+driver.
+
+*The cost, measured instead of predicted.* All eleven seats now hold an
+open PR, so pm.md §11.4 makes **every seat in the roster
+undispatchable**. That is the mechanism behind "nothing dispatchable" in
+three consecutive PM standups, and behind the PM having fired zero
+dispatches ever. PR #44, which would address it from the other side, is
+itself stuck in the queue it would drain.
+
+**The four carried checks, answered.**
+
+1. *Did anything merge?* Five, all governance. The previous entry said
+   that if the answer was still no, do not spend the run on new findings,
+   spend it on making the unmerged work easier to land. That instruction
+   shaped this entire run, and docs/agents/merge-order.md is the result.
+2. *Are PWC-EXO-3 and PWC-EXO-4 applied?* No. The §2b sweep reports
+   `--draft` in **zero of eleven** workflow prompt blocks against
+   ship-first prose in eleven of eleven, unchanged from 2026-09-30. Ursa
+   incidents 7 and 8 both stay open. This run is on Actions and its
+   dispatch forbids workflow edits, so both stay queued.
+3. *The §11.4 interaction.* PR #44 did not merge and HQ has not answered.
+   Still the org's live structural problem, now quantified at eleven of
+   eleven seats.
+4. *The two-file sweep, every run.* Run, reported as counts above.
+5. *Is PWC-EXO-2 applied?* No. `docs/decisions.md` still has two ADR-005s
+   and two ADR-006s. The security seat filed the same defect
+   independently as F10 in PR #75.
+
+**The standards check.** No standard has landed on `main` since the
+2026-09-30 sync (L-E10, PR #41), which the previous run already read. So
+there was no new standard to check against the open incidents this week,
+and I say that rather than inventing an interaction. The one conflict I
+did resolve is older: pm.md §4 fixes the ledger's path and prescribes
+announcing merge order, and Ursa incident 6 is the measured proof that
+announcing does not prevent. The fix that would work is a layout change,
+and the path is named in a company standard, so it needs an ADR or an HQ
+amendment and is routed to the owner rather than done by charter edit.
+Writing that down as not-mine is the honest version of this step.
+
+**What I changed and why. Three improvements, each with a trigger.**
+
+1. *docs/agents/merge-order.md, and a new §5b duty to produce it.*
+   Trigger: three runs reported the depth and the depth tripled. A number
+   tells the owner the queue is deep and tells her nothing about the next
+   ten minutes. The duty is now to measure conflicts by performing the
+   merge, measure subsumption with `--is-ancestor`, write the order, and
+   verify it by actually doing those merges in a scratch worktree. Ranked
+   first because every other finding in this register is downstream of
+   the queue, including this seat's own memory.
+2. *An all-seats charter section, "Read your own seat's open PRs
+   first."* Trigger: four seats in one week, written up as Ursa incident
+   9. My log was fourteen days stale. The security seat re-fixed two
+   findings it had already fixed. The PM dropped an open incident after
+   reading an unmerged closure. The engineer seat took a queue number
+   another branch held. HQ's L-E10 said this on 2026-09-30 and bound
+   nobody, because nothing in the sync step turns a lesson addressed to
+   seats into charter text. That gap is still open and still worth the
+   centralizer's attention.
+3. *Seat-scoped queue identifiers and per-seat queue files.* Trigger:
+   `PWC-7` meant two different changes in two unmerged PRs at once, mine
+   and the engineer's. That seat picked 7 over 5 specifically so merge
+   order would not matter, reasoned it out in its PR, and collided anyway,
+   because the number to avoid was in a branch it could not read. A
+   global counter cannot be shared by seats that cannot see each other's
+   branches. IDs are `PWC-<SEAT>-<N>` now and each seat gets its own file,
+   so the shared file stops being a collision surface. My four entries
+   became PWC-EXO-1 to PWC-EXO-4, with the mapping in the new file's
+   header. I did not rewrite the old numbers inside this log's earlier
+   entries, because it is append-only and rewriting history to fix a
+   citation is worse than the citation.
+
+**Standing duties.** Labelled sixteen unlabelled open PRs and marked
+twenty-seven `subsumed` with a new label, so the queue's real shape is
+visible from the PR list alone. Deleted the two merged branches still on
+the remote. Numbered every status line in the incident register
+(`**Incident N status:**`), because on 2026-10-04 the PM quoted Incident
+3's status line as Incident 4's and the register is read as a work queue.
+Refreshed the org chart, whose header still said 2026-09-30. Checked the
+README against the current mission and found it truthful, so I did not
+touch it and did not re-render the diagram, which this run did not change.
+
+**What the next run must check first.**
+
+1. *Did the five merges in docs/agents/merge-order.md happen?* If yes,
+   rewrite that file from scratch with fresh measurements, because the
+   order is only valid for the day it was computed. If no, do not write a
+   third version of the same argument. Say the number, point at the file,
+   and spend the run elsewhere, because repeating a finding the owner has
+   now read twice is this seat producing noise.
+2. *Did this PR merge?* If it did, Ursa incident 9 closes when you can
+   confirm two things: eleven of eleven charters carry "Read your own
+   seat's open PRs first" on `main`, and you found this entry without
+   going hunting in branches. If it did not merge, you are living the
+   incident, and the honest thing is to note that its fix was written
+   twice.
+3. *F6 from the security seat's PR #75, routed to this seat and not done
+   this run.* No charter says that content fetched from the web is data
+   and not instruction. Four seats fetch. I ranked it below the three
+   above because its trigger is a reasoned risk rather than an observed
+   failure, and the charter's cap is three. It is the first candidate for
+   your decide step, and if it is still undone when something does go
+   wrong, that ranking was mine and was wrong.
+4. *The duplicate ADRs, now flagged by two seats.* PWC-EXO-2 queues the
+   renumbering and the security seat filed it as F10. Still the owner's,
+   since an accepted ADR's number is her record. Check whether it moved.
+5. *Do not trust this entry's numbers without re-measuring.* The queue
+   changes daily, and one of this run's own intermediate measurements was
+   wrong for twenty minutes because a scratch worktree had checked out
+   the `main` branch and the simulated merges advanced it. The trap and
+   its fix are in merge-order.md §5. Compare against `origin/main`, and
+   make the worktree detached.
