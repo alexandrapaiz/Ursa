@@ -122,6 +122,8 @@ export interface PairFinderDiagnostics {
     distance: number
     age: number
     interposedGeneration: number
+    /** the only edit found was on a branch the generation is not an ancestor of */
+    notDescendant: number
   }
   /**
    * Commits that carried an agent marker, were merges, and were therefore
@@ -271,6 +273,34 @@ export function blobAt(repoPath: string, sha: string, path: string): string | nu
   return got.kind === 'present' ? got.text : null
 }
 
+/**
+ * Is `ancestor` reachable from `descendant` by walking parents?
+ *
+ * `git merge-base --is-ancestor` answers with an exit code: 0 yes, 1 no.
+ * A commit is its own ancestor by git's definition, which is the
+ * convention this wrapper keeps.
+ *
+ * Pairing needs this because "between" in a git history is a question
+ * about the graph and not about a list. The pair walk reads commits in
+ * `--topo-order`, which linearises branches that never touched each
+ * other, so a commit printed between two others may sit on a sibling
+ * branch and have had no part in what happened to them. See the
+ * interposition test in `findCommitPairsWithDiagnostics`, which is wrong
+ * in both directions without it: it drops a real pair when a rival
+ * branch's generation is mistaken for an interposed one, and keeps a
+ * false pair when an edit on another branch is mistaken for a
+ * correction of this generation.
+ */
+export function isAncestor(repoPath: string, ancestor: string, descendant: string): boolean {
+  if (ancestor === descendant) return true
+  try {
+    git(repoPath, ['merge-base', '--is-ancestor', ancestor, descendant], { quiet: true })
+    return true
+  } catch {
+    return false
+  }
+}
+
 /** The pairs alone. Unchanged signature, for callers that do not report. */
 export function findCommitPairs(repoPath: string, opts: PairFinderOptions = {}): CommitPair[] {
   return findCommitPairsWithDiagnostics(repoPath, opts).pairs
@@ -313,7 +343,7 @@ export function findCommitPairsWithDiagnostics(
       maxPairAgeHours: maxAgeHours,
       maxInterposedGenerations: maxInterposed,
     },
-    abandoned: { distance: 0, age: 0, interposedGeneration: 0 },
+    abandoned: { distance: 0, age: 0, interposedGeneration: 0, notDescendant: 0 },
     mergeGenerationsRefused: 0,
   }
 
@@ -333,6 +363,13 @@ export function findCommitPairsWithDiagnostics(
   const hoursBetween = (from: string, to: string) =>
     (Date.parse(to) - Date.parse(from)) / 3_600_000
 
+  const ancestry = new Map<string, boolean>()
+  const descends = (ancestor: string, descendant: string) => {
+    const key = `${ancestor}..${descendant}`
+    if (!ancestry.has(key)) ancestry.set(key, isAncestor(repoPath, ancestor, descendant))
+    return ancestry.get(key)!
+  }
+
   const pairs: CommitPair[] = []
   for (let i = 0; i < commits.length; i++) {
     const gen = commits[i]
@@ -351,10 +388,6 @@ export function findCommitPairsWithDiagnostics(
     const genFiles = new Set(touched(gen.sha))
     if (genFiles.size === 0) continue
     const interveningMerges: MergeEvent[] = []
-    // Other generations that have already rewritten one of this
-    // generation's own paths. Counted, not just flagged, so the bound can
-    // be relaxed by a caller who wants the looser claim.
-    let interposedGenerations = 0
     for (let j = i + 1; j < commits.length; j++) {
       const fin = commits[j]
       // The bounds, checked before the commit is classified, so a walk
@@ -394,21 +427,40 @@ export function findCommitPairsWithDiagnostics(
         }
         continue
       }
-      if (marker(fin)) {
-        // Another generation, and if it touched this generation's paths it
-        // replaced the text before any human saw it. The edit that follows
-        // corrects that generation, not this one.
-        if (touched(fin.sha).some((p) => genFiles.has(p))) {
-          interposedGenerations += 1
-          if (interposedGenerations > maxInterposed) {
-            diagnostics.abandoned.interposedGeneration += 1
-            break
-          }
-        }
-        continue
-      }
+      if (marker(fin)) continue
       const overlap = touched(fin.sha).filter((p) => genFiles.has(p))
       if (overlap.length === 0) continue
+      // From here `fin` is a candidate, and the two remaining tests are
+      // about the shape of the graph rather than the order of the list.
+      //
+      // First: the edit has to descend from the generation. An edit on a
+      // branch that never contained this generation's text cannot be a
+      // correction of it, however close it prints in --topo-order.
+      if (!descends(gen.sha, fin.sha)) {
+        diagnostics.abandoned.notDescendant += 1
+        break
+      }
+      // Second: no OTHER generation may sit on the path from the
+      // generation to the edit. "On the path" is the load-bearing phrase.
+      // A rival branch's generation that a merge later brought in is not
+      // on it — the merge is the mechanism there, it is already recorded
+      // in interveningMerges, and src/deletion.ts attributes the loss to
+      // it. What this test excludes is the straight-line case: the agent
+      // rewrote the same file again, so the text the human had in front
+      // of them at `fin` is that later generation's, and crediting this
+      // one with surviving it is the defect.
+      const interposed = commits.slice(i + 1, j).filter(
+        (c) =>
+          c.parents.length === 1 &&
+          marker(c) &&
+          touched(c.sha).some((p) => genFiles.has(p)) &&
+          descends(gen.sha, c.sha) &&
+          descends(c.sha, fin.sha),
+      )
+      if (interposed.length > maxInterposed) {
+        diagnostics.abandoned.interposedGeneration += 1
+        break
+      }
       pairs.push({
         generatedSha: gen.sha,
         finalSha: fin.sha,

@@ -184,7 +184,8 @@ export function renderRunSummary(
     // without explanation is not more trustworthy than the wrong one, so
     // the reason ships next to it.
     const { abandoned, bounds } = diagnostics
-    const dropped = abandoned.distance + abandoned.age + abandoned.interposedGeneration
+    const dropped =
+      abandoned.distance + abandoned.age + abandoned.interposedGeneration + abandoned.notDescendant
     if (dropped > 0) {
       const why: string[] = []
       if (abandoned.interposedGeneration > 0) {
@@ -199,6 +200,11 @@ export function renderRunSummary(
       }
       if (abandoned.age > 0) {
         why.push(`${abandoned.age} found none within ${bounds.maxPairAgeHours} hours`)
+      }
+      if (abandoned.notDescendant > 0) {
+        why.push(
+          `${abandoned.notDescendant} were only edited on a branch that never contained them`,
+        )
       }
       lines.push('')
       lines.push(
