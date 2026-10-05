@@ -164,6 +164,17 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
 - Cost: $0
 - Status: proposed
 
+- 2026-10-05 (market): a second, independent echo of this entry's
+  pattern. Nvidia, already paying Mercor to source Nemotron training
+  data, is reportedly in talks for an equity stake at a $20B
+  valuation — the identical shape (a paying platform buying into its
+  own data vendor) as the Meta/Scale episode this entry is built on.
+  Source: [Tech Startups](https://techstartups.com/2026/08/19/nvidia-in-talks-to-invest-in-ai-data-startup-mercor-at-20-billion-valuation/).
+  Worth watching whether Mercor's other lab customers respond the way
+  Scale's did; if so, this entry's "structural neutrality" clause has
+  two precedents instead of one. No status change (market does not own
+  this entry's verdict).
+
 ### 2026-09-30 (market) — Total-addressable-spend bound for Minor's pricing target
 - Trigger: this run's positioning ceremony (docs/market/positioning.md,
   "A bound on Minor's target, not a price"). Each major frontier lab
@@ -223,6 +234,75 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
   forward on its own terms first.
 - First step: whoever next drafts public methodology content uses this
   quote (with attribution) as the opening hook.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 (market) — Lead with "symmetric," not just "portable," in Major's positioning
+- Trigger: this run's landscape watch (docs/market/landscape.md,
+  Claude Memory Import entry). Anthropic shipped a Claude feature
+  (July 2026) that imports memory from ChatGPT, Gemini, or Grok but
+  does not export anything a competitor could read back — a one-way
+  acquisition funnel, not two-way portability. An independent test of
+  seven memory products (Claude included) found none achieve "import
+  symmetry." Sources: [PrimeTimer](https://www.primetimer.com/features/anthropic-opens-gate-for-importing-memories-from-chatgpt-gemini-and-more-to-claude-in-a-new-gamechanger-update), [dev.to](https://dev.to/stantyan/i-tested-7-ai-memory-products-for-portability-all-7-lock-you-in-31pm).
+- What: "portable" is now a word a competitor can gesture at (Claude's
+  own marketing can call the import feature a step toward
+  portability) even though it only runs one direction. Major's pitch
+  needs a word that a one-way feature cannot also claim.
+  "Symmetric" — works in both directions, for free, between vendors
+  with no commercial reason to cooperate — is that word, and nothing
+  else in the landscape map passes the test it implies. Full reasoning
+  in docs/market/positioning.md's "Symmetric portability, not
+  asymmetric import" section.
+- First step: when Major's site copy or pitch materials are next
+  revised, test "symmetric" as the headline differentiator, named
+  directly against Claude's one-way import as the contrast case.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 (market) — Cite the reward-model accuracy gap in Minor's lab brief
+- Trigger: this run's demand-signals ceremony. WritingPreferenceBench
+  (peer-reviewed, published 2026-08-24) found sequence-based reward
+  models score 52.7% mean accuracy against human judgment on
+  creative-writing preference pairs isolated from objective errors —
+  barely above chance — and 14 zero-shot LLM judges score 53.9%,
+  equally close to chance. Only generative reward models with explicit
+  reasoning chains reach 81.8%, an architecture too expensive and slow
+  to run at per-prompt pipeline scale. Source:
+  [arXiv](https://arxiv.org/abs/2510.14616).
+- What: CLAUDE.md §1's claim that open-ended domains have no working
+  verifier today had cost-based sourcing (rlhfbook.com) but no
+  accuracy numbers. This benchmark supplies one, and it is a sharper,
+  more concrete line for KR4.1's lab brief than a general claim: the
+  standard cheap way to grade open-ended output is close to a coin
+  flip.
+- First step: when KR4.1's lab brief is drafted, cite this benchmark's
+  accuracy numbers as the quantified version of the "no verifier
+  exists" claim.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 (market) — GDPR Article 20 / EU AI Act enforcement as a lab-facing compliance angle
+- Trigger: this run's landscape watch (docs/market/landscape.md,
+  cross-cutting note on the absence of a neutral portability
+  standard). EU AI Act enforcement activated 2026-08-02, and GDPR
+  Article 20's data-portability obligations carry penalties up to €15M
+  or 3% of global turnover. Source:
+  [stantyan.com](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+- What: not independently verified this run whether or how this
+  specifically applies to AI memory/preference data (the source names
+  the enforcement date and penalty range, not a specific AI-memory
+  enforcement action), so this is a research question, not a
+  confirmed angle. If it does apply, Ursa's existing consent/export
+  architecture (CLAUDE.md's non-negotiable #2 and #3) may already
+  satisfy obligations that labs' own single-vendor memory systems do
+  not, which would be a compliance-driven reason for a lab to care
+  about Ursa Major's user base beyond the data-licensing pitch alone.
+- First step: before KR4.1's lab brief is drafted, have someone with
+  legal/privacy context (not this seat) verify whether GDPR Article 20
+  or the EU AI Act actually reaches AI-memory portability specifically,
+  and whether Ursa's architecture would need any change to claim
+  compliance as a selling point.
 - Cost: $0
 - Status: proposed
 
