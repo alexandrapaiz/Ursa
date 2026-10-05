@@ -100,3 +100,83 @@ list.
   board") suggests the board UI has a gap beyond the known `PATCH` 501
   (item-update not supported). Not this seat's lane to diagnose
   further.
+
+## Two board handoffs, 2026-10-05 (message-triggered run, after #93/#95)
+
+This section is new content appended at the end, not a rewrite of the
+sections above (those are #93's and today's earlier standup/window
+PRs' content, still unmerged). This PR, #93, #95, and #90 all touch
+this file. Recommended order: #90 (earliest, smallest diff) → #93
+(the larger ceremony rewrite) → #95 → this PR, since each later one is
+additive at the end and rebases cleanly onto the one before it; any
+order works as long as each is rebased before merge.
+
+### 1. The merge-order handoff (chair:epitome → alexandra-systems/pm → here; board messages `0008900e`, `5302f4f5`)
+
+Checked before acting: PR #44 (`chair/pm-merges`, the Tier-B
+self-merge grant) is still **open**, unmerged, confirmed again this
+run via `gh pr view 44`. The board's own `chair:epitome` note
+(`e72e9d6d`, 03:57Z) confirms the same thing from the other side: the
+owner merged the HQ and epitome merge grants tonight, but "alexandria's
+and Ursa's copies of that decision are still open pull requests in
+their repos, so their PMs keep waiting on her." So this seat lands
+**nothing** itself this run, same as the HQ PM's own finding ("merged
+what I could, which was nothing").
+
+The five-merge order, from `docs/agents/merge-order.md` (written by
+PR #76, itself unmerged, so quoted here rather than linked to a stale
+path): in sequence, **#74** (engineer — closes 20 of 52, carries the
+CSRF fix on the bridge and the `next` RCE upgrade, both sitting
+unmerged a full week), **#65** (frontend — closes 3), **#62**
+(finance — closes 1), **#40** (chair — closes 1), **#76** (ExO's own,
+last, because its two conflicts are pre-resolved in writing in that
+same file's §4b). Taking all five returns every Ursa seat to
+dispatchable at once (§11.4's hard stop currently blocks all eleven).
+
+**Owner action needed, in this order, security first:** #74, #65,
+#62, #40, #76. Nothing is stuck on a defect or a review comment;
+every one is green CI. The only thing stuck is that no Ursa seat has
+merge authority yet.
+
+### 2. The dashboard scope-widening handoff (chair:ursa)
+
+The owner declared satisfaction with the surfaces today, in her own
+words, per the chair's handoff. Recording that as the design's
+declared acceptance: the four artboards are the frozen spec, built as
+shown, no redesign churn. The deliverable widens from the panel alone
+to a full working product: the dashboard becomes real alongside the
+resolver and the panel, all three reading one real local store.
+
+**Working Backwards gate (docs/standards/pm.md §2c, L-P5):** the
+existing `docs/prfaq/overlay.md` PR/FAQ covers the panel and the
+bridge. It does not cover the dashboard. The dashboard is a new
+surface that changes what the product is (a local web app, not just an
+overlay), which the standard says gets its own PR/FAQ before it enters
+a sprint as committed scope. The owner's own declared satisfaction is
+real acceptance of the *design*, but it is not a substitute for that
+PR/FAQ as the engineering go-decision — flagging this gap rather than
+drafting the document blind, since this run has not seen the four
+artboards itself and a PR/FAQ written without them would be inventing
+detail, not transcribing it. Next ceremony (or a dispatch naming the
+artboards' location) should close this gap before the dashboard
+becomes a committed sprint item rather than a board item under
+"This sprint."
+
+**Assignments, carried to the board directly** (items created/updated
+on board.alexandra-systems-company.com/Ursa rather than
+`sprint-2026-10-05.md`, since that file is only a draft inside #93 and
+is not yet on `main`):
+
+- **frontend** — dashboard and panel markup from the four artboards:
+  tuning units with evidence counts and survival bars, edit and revoke
+  with tombstones, the tension review that asks instead of averaging.
+- **engineer** — the wiring, in order: resolver first (already #92's
+  scope, item one of today's sprint per #93), then the store server
+  for the dashboard, then the bridge hookup for the panel.
+
+**Acceptance bar, as stated by the chair, carried forward unchanged:**
+the owner runs one install, opens the dashboard on her own real tuning
+from the trials, captures a chat in the panel, and sees the next
+resolver run land in the same store. Collect her verdict in her own
+words when it is in her hands — declared acceptance, not inferred from
+retention, per CLAUDE.md §0.
