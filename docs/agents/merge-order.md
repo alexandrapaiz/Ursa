@@ -16,12 +16,17 @@ produced by performing the merge.
 | | 2026-09-27 | 2026-09-30 | 2026-10-04 | 2026-10-05 |
 |---|---|---|---|---|
 | Open pull requests | 17 | 37 | 52 | **65** |
-| Merged in the last 7 days | 10 | 9 | 5 | **6** |
+| Merged in the last 7 days | 10 | 9 | 5 | **5** |
 | Age of the oldest open PR | — | — | 10.2 d | **10.5 d** (#13) |
 
-**Open pull requests outnumber the last seven days' merges by eleven to
-one.** The org produces faster than its only merge gate absorbs, which
-is an owner decision and nobody else's.
+**Open pull requests outnumber the last seven days' merges by thirteen
+to one.** The org produces faster than its only merge gate absorbs,
+which is an owner decision and nobody else's. The five are #78, #73,
+#70, #41 and #23, counted against a rolling seven days ending
+2026-10-05 03:40 UTC. Four of the five are lessons syncs or PM
+standups, which is the same shape the previous two runs reported: the
+merges that happen are the org's own paperwork, and the product work
+stacks.
 
 Thirteen of the thirteen new ones since yesterday arrived in two
 batches: a window dispatch that opened ten seat pull requests between
