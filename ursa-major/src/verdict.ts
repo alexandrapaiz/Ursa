@@ -8,6 +8,27 @@
 //
 // Runs on the bridge, on the owner's machine, on her subscription,
 // via the same `claude -p` runner shape the distiller uses.
+//
+// Verification, revised 2026-09-27 after the reader was measured for the
+// first time against fixtures/verdicts/cases.json (harness:
+// src/evals/verdict.ts, report: `npx tsx src/evals/cli.ts verdict`).
+// Two defects the corpus found, both now closed:
+//
+//   1. Two false satisfied readings. A quote was accepted on verbatim
+//      presence alone, so a model that returned `accepted: true` quoting
+//      the word "continue", or the single letter "s", produced a label
+//      the user never gave. Closed by the substance guards below,
+//      MIN_QUOTE_CHARS and NEUTRAL_ACKS, which can only ever discard.
+//   2. One lost label. Presence was tested against the raw message
+//      while the model was shown a newline-flattened one, so a verdict
+//      written across two lines came back as a hallucination and the
+//      session went undeclared. Closed by verifying against shownText,
+//      the exact string the model saw, and recovering the verbatim span
+//      from the original text afterwards.
+//
+// Still open and measured, not hidden: a verdict sitting past
+// TRANSCRIPT_CHAR_LIMIT inside one long message is never shown to the
+// model at all (cases.json, v16; counted as knownMiss).
 
 import { execFileSync } from 'node:child_process'
 import type { UserPrompt } from './types'
@@ -61,6 +82,64 @@ Reply with ONLY a JSON object, no fences, no prose:
 
 accepted=null means: no stated verdict exists in these messages. When accepted is null, step and quote are null. Never guess. A session with no stated verdict is a normal, honest outcome.`
 
+/** How much of one user message the model is shown. A verdict past this
+ *  offset inside a single message is structurally unreachable; the
+ *  corpus measures that as `knownMiss` rather than hiding it
+ *  (fixtures/verdicts/cases.json, v16-verdict-past-the-transcript-limit). */
+export const TRANSCRIPT_CHAR_LIMIT = 2000
+
+/**
+ * The exact string the model is shown for one prompt. Newlines are
+ * flattened so each message is one transcript line, and the message is
+ * truncated at TRANSCRIPT_CHAR_LIMIT. Both substitutions preserve
+ * character offsets one-for-one, so an index into this view is a valid
+ * index into `p.text` and the verbatim span can be recovered from the
+ * original. Verification reads this view and NOT `p.text`: a quote the
+ * model returns can only ever come from what the model could see.
+ */
+export function shownText(p: UserPrompt): string {
+  return p.text.replace(/[\r\n]/g, ' ').slice(0, TRANSCRIPT_CHAR_LIMIT)
+}
+
+/** A quote shorter than this cannot carry a stated verdict, and is
+ *  present in almost any trace by accident. Discard-only guard. */
+export const MIN_QUOTE_CHARS = 4
+
+/**
+ * Messages the reader refuses to treat as a verdict even when the model
+ * returns one of them verbatim. These are the same neutral
+ * acknowledgements INSTRUCTION already excludes; the guard enforces the
+ * instruction rather than trusting the model to have followed it,
+ * because verbatim presence alone cannot tell "continue" apart from a
+ * real verdict (cases.json, v10-neutral-token-quoted-as-a-verdict).
+ *
+ * Every entry here can only turn a reading into `undeclared`. No guard
+ * in this module can create a verdict, so none of them can manufacture
+ * the false `satisfied` that plan 16.8 risk 1 names as the worst
+ * outcome in the system.
+ */
+export const NEUTRAL_ACKS: readonly string[] = [
+  'ok', 'okay', 'k', 'kk', 'sure', 'yes', 'yep', 'yeah', 'no', 'nope',
+  'thanks', 'thank you', 'thx', 'ty', 'continue', 'go on', 'go ahead',
+  'proceed', 'next', 'done', 'fine', 'got it', 'understood', 'noted',
+  'cool', 'right', 'alright', 'please', 'please continue', 'keep going',
+  'carry on', 'yes please', 'do it', 'hmm', 'hm', 'mhm',
+]
+
+/** lowercase, collapse whitespace, strip surrounding punctuation */
+function normalizeAck(quote: string): string {
+  return quote
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/^[\s.,!?;:'"*_\-\u2026]+/, '')
+    .replace(/[\s.,!?;:'"*_\-\u2026]+$/, '')
+    .trim()
+}
+
+export function isNeutralAck(quote: string): boolean {
+  return NEUTRAL_ACKS.includes(normalizeAck(quote))
+}
+
 function extractJson(raw: string): { accepted: unknown; step: unknown; quote: unknown } {
   const trimmed = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
   const start = trimmed.indexOf('{')
@@ -83,7 +162,7 @@ export function readVerdict(
   if (prompts.length === 0) return NO_VERDICT
 
   const transcript = prompts
-    .map((p) => `[step ${p.step}] ${p.text.replace(/\n/g, ' ').slice(0, 2000)}`)
+    .map((p) => `[step ${p.step}] ${shownText(p)}`)
     .join('\n')
   const raw = runner(`${INSTRUCTION}\n\nThe user's messages:\n\n${transcript}`, model)
   const parsed = extractJson(raw)
@@ -91,25 +170,41 @@ export function readVerdict(
   if (parsed.accepted === null || typeof parsed.accepted !== 'boolean') return NO_VERDICT
 
   const claimedStep = typeof parsed.step === 'number' ? parsed.step : null
-  const quote = typeof parsed.quote === 'string' ? parsed.quote : null
-  if (quote === null) return NO_VERDICT
+  const claimedQuote = typeof parsed.quote === 'string' ? parsed.quote : null
+  if (claimedQuote === null) return NO_VERDICT
 
-  // Verify against the trace, quote first: the user's words must be
-  // literally present in some message, or the reading is a
-  // hallucination and the session stays undeclared. The step is then
-  // taken FROM the trace, not from the model — in the n=1 acceptance
-  // run the model quoted the verdict verbatim but misnumbered its step
-  // (710 for 730), and the trace, not the pointer, is the authority.
-  const candidates = prompts.filter((p) => p.text.includes(quote))
+  // Guard 1: substance. Too short to carry a verdict, or a neutral
+  // acknowledgement the instruction already excluded.
+  const needle = claimedQuote.trim()
+  if (needle.length < MIN_QUOTE_CHARS) return NO_VERDICT
+  if (isNeutralAck(needle)) return NO_VERDICT
+
+  // Guard 2: presence. The user's words must be literally present in
+  // what the model was shown (shownText, not the raw message), or the
+  // reading is a hallucination and the session stays undeclared. The
+  // step is then taken FROM the trace, not from the model — in the n=1
+  // acceptance run the model quoted the verdict verbatim but
+  // misnumbered its step (710 for 730), and the trace, not the
+  // pointer, is the authority.
+  const candidates: { prompt: UserPrompt; at: number }[] = []
+  for (const prompt of prompts) {
+    const at = shownText(prompt).indexOf(needle)
+    if (at !== -1) candidates.push({ prompt, at })
+  }
   if (candidates.length === 0) return NO_VERDICT
   const source =
-    candidates.find((p) => p.step === claimedStep) ??
+    candidates.find((c) => c.prompt.step === claimedStep) ??
     candidates[candidates.length - 1]
+
+  // Report the span from the ORIGINAL message, not from the flattened
+  // view: the record carries the user's words as she wrote them,
+  // newlines included. Offsets are one-for-one, so this is the same span.
+  const verbatim = source.prompt.text.slice(source.at, source.at + needle.length)
 
   return {
     accepted: parsed.accepted,
-    step: source.step,
-    quote,
+    step: source.prompt.step,
+    quote: verbatim,
     basis: 'read-from-chat',
     confidence: 'stated',
   }
