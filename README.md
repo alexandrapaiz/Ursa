@@ -153,6 +153,33 @@ The older session-log path is `src/cli.ts`, which takes `--final` and
 `--sessions` flags and produces the same record plus a self-contained
 HTML viewer.
 
+The second launch mode is the GitHub Action. Copy one workflow file into
+a repository where an AI agent commits, and every merged pull request
+from then on resolves itself: outcome records on that repository's own
+runner, and one comment on the pull request carrying the same five
+fields in the same order every time, zeros included.
+
+```bash
+# the whole consumer side
+mkdir -p .github/workflows
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml \
+  -o .github/workflows/ursa-resolve.yml
+
+# what the Action runs on the runner: one committed file, no install
+node ursa-major/dist/ursa.cjs ci "$GITHUB_WORKSPACE" \
+  --repo "$GITHUB_REPOSITORY" --event "$GITHUB_EVENT_PATH"
+```
+
+It installs nothing, because `ursa-major/dist/ursa.cjs` is one committed
+CommonJS file the runner's own node executes. With no model credential
+on the runner the distiller runs in CI mode: the records are still
+resolved, no interpretation pass runs, and the tuning delta is reported
+as a zero with the reason attached, so a zero from an absent model never
+reads as a model finding nothing. A 👍 on the run comment is read on the
+next run and recorded as a declared acceptance. No reaction records
+nothing, because retention is never acceptance. The design is
+[`docs/design/resolver-action.md`](docs/design/resolver-action.md).
+
 | Module | Job |
 |---|---|
 | `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit |
@@ -161,6 +188,8 @@ HTML viewer.
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
+| `src/ci/` | the CI launch: the merge window from the event payload, the five-field run comment, the thumbs-up read, CI mode for the distiller |
+| `action.yml`, `dist/ursa.cjs` | the reusable GitHub Action and the one-file bundle it runs |
 
 `.ursa/` belongs in the target project's `.gitignore`. Raw records and
 the tuning store never leave the machine they were made on.
