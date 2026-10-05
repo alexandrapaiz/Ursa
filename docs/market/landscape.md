@@ -10,8 +10,10 @@ This file opened 2026-09-26 (sprint 2026-09-21 item 4, serving O2
 KR2.3, due 2026-10-31). First run: 12 entries across the three
 categories the KR names. Second run (2026-09-30): revisited six
 existing entries and added one new one (Handshake AI, Category 1, now
-13 total). The weekly rhythm (a handful of entries plus anything new,
-full map monthly) continues from here.
+13 total). Third run (2026-10-05): revisited Scale AI, Mercor, and
+ChatGPT Memory, and added one new entry (Claude Memory Import,
+Category 3, now 14 total). The weekly rhythm (a handful of entries
+plus anything new, full map monthly) continues from here.
 
 A note on "weaknesses against Ursa": Ursa Minor does not yet sell
 anything, so this is a read of structural gaps the outcome-record
@@ -83,6 +85,17 @@ Worth a direct EDGAR check next run instead of repeating an
 aggregator's unlinked number. Last observed 2026-09-30 (unverified):
 [TechStackIPO](https://www.techstackipo.com/company/scale-ai), [Forge Global valuation tracker](https://forgeglobal.com/scale-ai-inc_stock/).
 
+Update 2026-10-05: new CEO. Francis deSouza (formerly COO and
+president of security products at Google Cloud; before that CEO of
+Illumina) was appointed CEO effective 2026-08-10, replacing interim
+CEO Jason Droege, who had led the company since founder Alexandr Wang
+left for Meta in 2025 following Meta's $14.3B stake. The public framing
+is an enterprise/government growth push, not a neutrality fix — the
+incoming CEO is himself a departing executive of a different
+platform giant (Google Cloud), which does not resolve the structural
+concern named above so much as restate it with a new name attached.
+Last observed 2026-10-05: [Axios: Scale AI hires Francis deSouza](https://www.axios.com/2026/07/30/scale-ai-google-cloud-coo-francis-desouza), [Wikipedia: Francis deSouza](https://en.wikipedia.org/wiki/Francis_deSouza).
+
 ### Mercor
 
 What it is: an expert-contractor marketplace that pivoted into RLHF,
@@ -109,6 +122,23 @@ human feedback is still accelerating, not commoditizing away — it
 sharpens rather than undercuts the read that Minor isn't trying to
 take share from this market, only to sell a different thing to the
 same buyers. Last observed 2026-09-30: [Forbes: Mercor in talks for $500M at $20B](https://www.forbes.com/sites/richardnieva/2026/07/09/mercor-fundraise/), [Sacra: Mercor revenue](https://sacra.com/c/mercor/).
+
+Update 2026-10-05: the $20B round now has a named lead investor, and
+it is also a customer. Reported 2026-08-19, Nvidia has discussed
+backing Mercor at the $20B valuation, having already paid Mercor "tens
+of millions per quarter" to source specialized human-expert data for
+its open-source Nemotron models; existing investor General Catalyst is
+reportedly in talks to lead the round itself. H1 2026 gross revenue is
+now disclosed at $614M, consistent with the $2B annualized run-rate
+reported last run. This is the identical structural shape as the
+Scale/Meta entry above — a compute platform that is simultaneously a
+paying customer taking an equity stake in its own data vendor — and it
+is worth watching for the same neutrality response (see the dated note
+added to docs/ideas.md's 2026-09-26 neutrality entry this run): if
+Mercor's other lab customers (OpenAI, Google, Anthropic, all reported
+clients) read an Nvidia stake the way they read Meta's stake in Scale,
+this entry could develop the same customer-exodus arc within months.
+Last observed 2026-10-05: [The Information via Tech Startups: Nvidia in talks to invest in Mercor at $20B](https://techstartups.com/2026/08/19/nvidia-in-talks-to-invest-in-ai-data-startup-mercor-at-20-billion-valuation/), [PYMNTS: Nvidia weighs investment in Mercor](https://www.pymnts.com/news/investment-tracker/2026/nvidia-weighs-investment-in-round-valuing-mercor-at-20-billion/).
 
 ### Prolific
 
@@ -327,6 +357,86 @@ cannot follow the user to Claude or Gemini. Worth taking seriously as
 a sign OpenAI is closing gaps faster than last week's entry assumed,
 rather than dismissing it. Last observed 2026-09-30: [OpenAI: Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/).
 
+Update 2026-10-05: last run's read that the transparency gap had
+narrowed needs a correction. OpenAI launched "Dreaming" on 2026-06-04
+(internally, reportedly "Dreaming V3"): a background process that
+synthesizes and rewrites what ChatGPT remembers across years of
+conversation without the user asking it to save anything, and the
+Memory Summary page is the user-facing surface for reviewing and
+editing that output. A dated, sourced critique published two days
+after launch (2026-06-06) found a disconnect: editing an entry in the
+Memory Summary only changes recent conversation history, not the
+underlying "User Knowledge Memories" that actually drive responses, so
+the summary "regenerates each time users access it, surfacing
+different memories each time," and an edit a user makes does not
+reliably persist against what the model actually uses. The author's
+read is that this is very likely a cost workaround (regenerating full
+memory state on demand for every user, every time, is expensive), not
+a design choice meant to mislead, but the practical effect is the same
+either way: the edit surface and the surface that actually drives the
+model's behavior are not the same thing. This matters directly for
+Ursa Major's "fully inspectable, fully editable" claim (CLAUDE.md
+non-negotiable #2) — if true end-to-end editability (an edit a user
+makes is guaranteed to be what the model uses next) is something Major
+can demonstrate and OpenAI's shipped feature cannot, that is a sharper,
+more defensible differentiation than last run's "transparency gap
+closing" read allowed for. Not verified independently this run; worth
+a direct product test next time rather than taking one critique at
+face value. Last observed 2026-10-05: [OpenAI: Dreaming launch](https://alternativeto.net/news/2026/6/openai-launches-scalable-dreaming-memory-system-for-chatgpt/), [shloked.com: ChatGPT's Memory Update Has a Packaging Problem](https://www.shloked.com/chatgpt-memory-2026).
+
+### Claude Memory Import (Anthropic)
+
+What it is: a feature Anthropic added to Claude in July 2026, labeled
+"experimental and still in active development," that lets a user
+extract their stored memory from a rival assistant (ChatGPT, Gemini,
+or Grok, via a generic prompt Anthropic provides) and paste the result
+into Claude, which parses it into Claude's own editable memory
+entries. New entry, added this run because it is the most directly
+on-point move any frontier lab has made in this category: an explicit
+answer to "how do I bring what another AI already knows about me."
+Who it serves: Claude's own user base, specifically people switching
+in from a competitor. Pricing: included with Claude access, no
+separate charge. Strengths: materially lowers the cost of switching
+into Claude, which is a real, user-facing improvement over having to
+re-teach a new assistant from zero. Weakness against Ursa, and the
+sharpest one in this entire map: the import is one-directional and
+lossy. It is a one-time copy-paste, not a sync; it carries over
+communication preferences, personal details, project context, and
+technical settings, but not chat history, uploaded files, or Custom
+GPTs; and critically, Claude accepts imports from competitors but does
+not export in a form a competitor could read back — an independent
+test of seven memory products (Claude included) found none of them
+achieve "import symmetry," the property that a competing platform can
+read a given product's export and reconstruct the memory with
+structure, attribution, and timestamps intact. This is not portability
+in the sense Ursa Major promises (a profile the *user* owns and can
+move in either direction between any model); it is a funnel built to
+acquire switchers, pointed in exactly one direction. It is also the
+clearest evidence yet of CLAUDE.md §5's central strategic problem in
+action: the platform most capable of building true portability has
+instead built a feature that makes portability look solved while only
+solving acquisition. Last observed 2026-10-05: [PrimeTimer: Anthropic opens gate for importing memories from ChatGPT, Gemini to Claude](https://www.primetimer.com/features/anthropic-opens-gate-for-importing-memories-from-chatgpt-gemini-and-more-to-claude-in-a-new-gamechanger-update), [dev.to: I Tested 7 AI Memory Products for Portability — All 7 Lock You In](https://dev.to/stantyan/i-tested-7-ai-memory-products-for-portability-all-7-lock-you-in-31pm).
+
+### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
+
+Checked whether a neutral, cross-vendor memory-portability standard
+exists or is in progress, since that would close Ursa Major's gap for
+everyone at once rather than leaving it to any single product. As of
+this run, none does. The Model Context Protocol, the nearest candidate
+infrastructure, moved under the Linux Foundation's Agentic AI
+Foundation and added an Extensions framework for independently
+versioned additions, but its 2026 roadmap names transport, agent
+communication, governance, and enterprise readiness as priorities and
+does not mention memory at all; no memory extension has been proposed
+through its own process. Two open-source projects (Cognee's COGX
+format, ByteRover's git-versioned markdown) preserve more structure
+than any incumbent's export, but neither has a competing product that
+reads its format back, so the same reviewer who tested all seven
+incumbent products called each one "a well-documented dialect," not a
+standard. Read plainly: every entry in this category, including this
+week's new one, is still solving portability for one vendor's benefit
+at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -338,3 +448,10 @@ rather than dismissing it. Last observed 2026-09-30: [OpenAI: Memory and new con
   and revenue moves. Flagged a circulating Scale AI IPO/S-1 claim as
   unconfirmed rather than reporting it as fact (no EDGAR match, no
   linked source, conflicts with other reporting).
+- 2026-10-05 — third run: added Claude Memory Import (Category 3,
+  14th entry) plus a cross-cutting note on the absence of any neutral
+  portability standard. Dated update notes added to Scale AI (new
+  CEO), Mercor (named investor, named neutrality-pattern echo of the
+  Scale/Meta entry), and ChatGPT Memory (walked back last run's
+  "transparency gap closing" read after a dated critique found the
+  edit surface doesn't reliably reach what the model actually uses).
