@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "0 12 * * 1"      # Monday: the ceremony run
     - cron: "5 11 * * 0,2-6"  # every other day: the standup run (charter §0b, standard §11)
+  repository_dispatch:
+    types: [asc.pm]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -98,6 +100,7 @@ jobs:
             date and the owner instructions). PM_DISPATCH_ENABLED is
             "${{ vars.PM_DISPATCH_ENABLED }}": fire dispatches only when it is
             exactly true, under docs/standards/pm.md §11.4.
+            Event that woke this run, when the event bus started it (empty on a schedule or a dispatch): ${{ github.event.client_payload.text }}
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
