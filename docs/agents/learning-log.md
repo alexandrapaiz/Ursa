@@ -138,3 +138,9 @@ where it described a surface I do not have.
    refused. Those are recorded in the charter now. Attempt rather than
    assume, and if something I wrote turns out to be false, fix the
    charter in the same PR that discovers it.
+
+## 2026-10-05 — ExO run (window dispatch)
+
+Run opened. Branch `ursa-exo/2026-10-05-window`, draft PR opened before
+the work, per the ship-first rule (docs/standards/pm.md §8). Findings,
+decisions and changes are appended below as this run produces them.
