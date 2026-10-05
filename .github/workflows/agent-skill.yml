@@ -3,6 +3,8 @@ name: skill-agent
 on:
   schedule:
     - cron: "55 13 * * 4"  # Thu 13:55 UTC; activated 2026-09-24 by owner directive (ADR below)
+  repository_dispatch:
+    types: [asc.skill]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -76,6 +78,7 @@ jobs:
             own PR, never push to main, never touch digests/. If the
             charter file is missing, stop and fail loudly instead of
             improvising.
+            Event that woke this run, when the event bus started it (empty on a schedule or a dispatch): ${{ github.event.client_payload.text }}
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}

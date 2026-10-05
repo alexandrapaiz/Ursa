@@ -3,6 +3,8 @@ name: okr-agent
 on:
   schedule:
     - cron: "0 13 1 * *" # monthly, 1st, 13:00 UTC (morning ET)
+  repository_dispatch:
+    types: [asc.okr]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -92,6 +94,7 @@ jobs:
             charters, sprints, or code. Never merge your own PR, never push to
             main, never touch secrets. If the charter file is
             missing, stop and fail loudly instead of improvising.
+            Event that woke this run, when the event bus started it (empty on a schedule or a dispatch): ${{ github.event.client_payload.text }}
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}

@@ -3,6 +3,8 @@ name: exo-agent
 on:
   schedule:
     - cron: "0 18 * * 0" # weekly, Sunday, 18:00 UTC (early afternoon ET)
+  repository_dispatch:
+    types: [asc.exo]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -73,6 +75,7 @@ jobs:
             vision.md. Never merge your own PR, never push to main, never
             touch secrets. If the charter file is missing, stop and fail
             loudly instead of improvising.
+            Event that woke this run, when the event bus started it (empty on a schedule or a dispatch): ${{ github.event.client_payload.text }}
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
