@@ -7,8 +7,24 @@ import { findCommitPairs } from './pairfinder'
 import { buildEpisodes } from './episodes'
 import { main, resolveEpisode } from './bin/ursa'
 
+// Git's identity environment variables outrank `git config`, so a
+// sandbox that exports GIT_AUTHOR_NAME (every agent runner does, and so
+// does a GitHub Actions job that sets one) would rename this fixture's
+// human author and break the assertions below. Pin the identity in the
+// environment, where it actually wins, and let a caller override it.
+const FIXTURE_IDENTITY = {
+  GIT_AUTHOR_NAME: 'Human Owner',
+  GIT_AUTHOR_EMAIL: 'human@example.com',
+  GIT_COMMITTER_NAME: 'Human Owner',
+  GIT_COMMITTER_EMAIL: 'human@example.com',
+}
+
 function sh(cwd: string, cmd: string, args: string[], env: Record<string, string> = {}) {
-  execFileSync(cmd, args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8' })
+  execFileSync(cmd, args, {
+    cwd,
+    env: { ...process.env, ...FIXTURE_IDENTITY, ...env },
+    encoding: 'utf8',
+  })
 }
 
 function fixtureRepo(): string {
