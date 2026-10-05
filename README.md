@@ -164,7 +164,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 44 tests
+npm test                                   # 375 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -208,6 +208,8 @@ npx tsx src/cli.ts --id ursa-minor-site \
 | `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, a merge commit, which overwrote it mechanically and carries no correction signal, or nothing nameable, when the clone cannot read the boundary that would settle it (`docs/design/unknown-deletion-cause.md`) |
 | `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
+| `src/invariants.ts` | checks a record's arithmetic against itself: ten bounds a record must satisfy to be internally consistent, each reported with both sides of the number it broke. `ursa run` exits non-zero when one is violated, after writing the records, because an impossible record is still the evidence (`docs/design/generated-denominator.md`) |
+| `src/intervals.ts` | the one definition of how many distinct characters a set of extents covers, shared by `src/stats.ts` and `src/invariants.ts` so a generated sentence reused in two places is counted once where it should be and twice where it should be |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 | `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
 

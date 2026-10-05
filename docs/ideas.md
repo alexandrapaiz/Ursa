@@ -2419,3 +2419,155 @@ Sources: [mesa.dev/blog/agentblame-deep-dive](https://www.mesa.dev/blog/agentbla
 [Ekaanth/blameprompt](https://github.com/Ekaanth/blameprompt),
 [mehrtam/gitwhy](https://github.com/mehrtam/gitwhy),
 [blog.exceeds.ai/track-ai-code-contributions-git](https://blog.exceeds.ai/track-ai-code-contributions-git/)
+
+### 2026-10-05 — `survived_mutated` credits the person's own additions to the model
+- Trigger: the invariant gate's first run, on the first record written to
+  exercise it (docs/design/generated-denominator.md §6). `CLAIM_NOT_WIDER`
+  fired with "82 final chars credited to a 75-char generation extent, 7 too
+  many". The span was right and the invariant was wrong: the person had
+  edited "holds it whole" into "holds the whole of it" and added seven
+  characters. The invariant was narrowed to `survived_verbatim`. What is
+  left standing is that `Stats.byClass.survived_mutated.chars` counts
+  finished characters inside edited spans, some of which the person typed,
+  and nothing distinguishes the two.
+- What: split the mutated class's character count where the edit split it.
+  `byClass.survived_mutated` gains `claimedChars` (characters of the
+  generation extent the span descends from) and `addedChars` (finished
+  characters beyond it, which the person wrote). `measure()` already
+  computes the second as `mutatedAddedChars`; this moves it from a
+  diagnostic into the record, so a lab buying "survived edited: 236 chars"
+  is told how many of those 236 the model is responsible for. It matters
+  more than the size of today's numbers suggests, because `CLAUDE.md` §1
+  makes the mutation the correction: on an edit that doubles a sentence's
+  length, more than half of what is sold as survived model text is the
+  person's own prose. The `diff` array is already on every mutated span,
+  so the split is derivable from stored data and needs no re-resolution.
+- First step: assert the identity on the public and real fixtures first —
+  for every mutated span, `addedChars` equals the sum of `added` segments
+  in its own `diff` array, which is an independent second route to the same
+  number and therefore a check rather than a restatement. Then add the two
+  fields and make `GEN_CLAIM_BOUNDED` cover the mutated class too.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 — The separator decision needs an ADR, because it moves the discard rate ninefold
+- Trigger: docs/design/generated-denominator.md §1.1 and §9 item 4. A
+  generation's segments do not cover its text: `segment()` leaves the blank
+  lines and indentation between segments in no segment, which is 123
+  characters of one real record and 2,996 of another, 4.73% of the
+  denominator under every rate the record reports. Today's change recorded
+  the quantity as `separatorChars` and deliberately did not move it, after
+  measuring what moving it would do: because `humanDeletedChars` is
+  computed by subtraction, making the spans partition the text would carry
+  every unclaimed separator into the human discard figure and take one real
+  record from 365 to roughly 3,361 characters discarded.
+- What: an ADR in docs/decisions.md that decides, with both options
+  measured on the same two real records, whether a generation's spans
+  partition its text. Option A leaves them as they are and accepts that
+  4.7% of what was generated carries no fate, which keeps every rate
+  conservative and leaves the numerator able to reach characters the
+  denominator does not hold. Option B extends each segment to absorb the
+  whitespace that follows it, which makes `totalChars` equal `charsWritten`
+  by construction and retires `GEN_CHARS_CONSISTENT`'s third clause, at the
+  cost of attributing layout whitespace a fate it did not earn. A third
+  option exists and should be priced: classify separators as their own
+  fate, `no_fate_assigned`, excluded from every rate by name rather than by
+  omission. This is a different question from the whole-file question in
+  the 2026-10-04 entry, which is about which TEXT a generation is; this one
+  is about which of that text carries a verdict. Both need the same kind of
+  decision and neither belongs in a diff.
+- First step: write the ADR with the three options, and for each one print
+  the before-and-after of `survivalRate`, `deletedPct` and
+  `humanDeletedPct` on `fixtures/real/ursa-main-4d5e401.json` and on the
+  1.2 MB record named in that fixture's README, using a throwaway branch
+  per option rather than a committed flag.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 — The gate checks seven of a record's nine top-level keys
+- Trigger: writing `checkRecord` against the real record
+  (`fixtures/real/ursa-main-4d5e401.json`) and then listing the file's own
+  keys: `schemaVersion`, `task`, `artifact`, `files`, `conversations`,
+  `generations`, `stats`, `durability`, `signals`. The ten bounds shipped
+  today reach `files`, `generations` and `stats`. Nothing checks
+  `durability`, which the run summary quotes directly ("59% was gone by the
+  latest commit"), and nothing checks `signals`, which is the block Ursa
+  Minor actually sells. Both are derived from the same spans the gate
+  already validates, so their arithmetic is checkable with the data in
+  hand.
+- What: extend the gate to the two remaining blocks. For `durability`: a
+  span's decayed share cannot exceed the characters that survived to begin
+  with, a span cannot be recorded as surviving past the latest commit
+  walked, and the per-span lifespans must sum to the aggregate the summary
+  prints. For `signals`: every `CorrectionLoop`'s `closedStep` is after its
+  `openedStep` and inside the conversation's step range, every excerpt a
+  signal quotes is a substring of the text it claims to quote (the cheapest
+  possible check that a sold signal is grounded), and every
+  `RegressionEvent`'s `regressionSteps` name steps that exist. The quoted
+  -excerpt check is the one worth doing first: a signal that misquotes the
+  user is the single worst defect this product can ship, and
+  `src/text.ts`'s `excerpt()` truncation makes a substring assertion
+  slightly non-trivial and therefore worth having a test for.
+- First step: the excerpt-grounding check alone, as an eleventh bound, run
+  over both fixtures and over a clone of this repository. It needs no new
+  data and it is the one whose failure would be a trust incident rather
+  than a wrong number.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-05 (engineer's craft scan)
+
+**dbt data tests and unit tests** (docs.getdbt.com), with **Great
+Expectations / GX Core** in the same bracket. `docs/market/landscape.md`
+still does not exist on `main` (it is inside PR #21, unmerged since
+2026-09-26), so the rotation again falls back off the charter's list, and
+the product was chosen to sit directly on top of the day's work: how a
+data product proves the numbers it sells. Yesterday's scan covered the
+AI-attribution bracket (Agent Blame, Git AI), so this is a deliberate
+rotation to a different shelf rather than a second look at the same one.
+
+**What they are.** dbt compiles each data test into a `SELECT` that is
+expected to return nothing: zero rows passes, one or more rows fails, and
+`dbt build` interleaves building a model with testing it in topological
+order, so a failing test with `severity: error` skips everything
+downstream instead of letting a bad table feed the next one. Its newer
+unit tests assert transformation logic against small static inputs before
+the full model is materialised. GX Core takes the declarative route
+instead: an Expectation Suite names the state data should conform to, a
+Checkpoint binds a suite to a batch and runs it, and Data Docs renders
+every run as browsable HTML showing which expectations passed, which
+failed, and the value actually observed.
+
+**Worth stealing: the failing rows are the output, not the message.** A
+dbt test does not report "3 rows violate this constraint", it hands back
+the three rows. Today's gate reports `Violation.observed` as a sentence of
+numbers, which is better than a boolean and worse than this: a reader who
+wants to see the offending span has to go find it. The cheap version is a
+`--json` flag on `src/invariants.cli.ts` emitting the violating spans
+themselves, which makes a violation directly pasteable into a test as a
+regression fixture. GX's second idea is worth more and costs more: a
+**persisted history of validation runs**, so the question "when did this
+record's arithmetic break" has an answer. Ursa has a time dimension in the
+product (`src/lifespan.ts`) and none at all in its own correctness, and
+the 2026-10-04 defect went unnoticed across three runs precisely because
+nothing compared this run's numbers to last run's.
+
+**Where Ursa does better, and it is structural rather than clever.** Both
+products put the assertion in a file beside the data, written by hand, and
+both therefore measure what someone remembered to assert. The schema
+`ursa-major/src/types.ts` defines is narrow enough that today's bounds are
+derivable from the type rather than from a judgement call: `survivedChars
+<= totalChars <= charsWritten` is true of every record that could ever
+exist, not of this dataset. There is no Expectation Suite to keep in sync,
+no `schema.yml` to drift, and no coverage question about which columns were
+tested, because the gate walks the whole record. The flip side, and the
+honest half of this comparison, is that a fixed set of bounds cannot
+express a project-specific rule the way a singular dbt test can, and
+nothing in Ursa would catch a *distribution* shift — a survival rate that
+is possible but ten times yesterday's. That is the same gap the persisted
+-history idea above would close, which is why it is the one worth taking.
+
+Sources: [docs.getdbt.com/docs/build/data-tests](https://docs.getdbt.com/docs/build/data-tests),
+[docs.getdbt.com/docs/build/unit-tests](https://docs.getdbt.com/docs/build/unit-tests),
+[docs.greatexpectations.io/docs/core/introduction/gx_overview](https://docs.greatexpectations.io/docs/core/introduction/gx_overview/),
+[datacoves.com/post/dbt-test-options](https://datacoves.com/post/dbt-test-options)
