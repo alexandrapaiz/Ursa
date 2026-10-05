@@ -4,13 +4,19 @@
 //     --final <file-or-dir>... \
 //     [--sessions <claude-code .jsonl>...] [--path-filter <substring>] \
 //     [--conversations <dir of paste-format .md>] \
-//     [--out <dir>] [--abandoned]
+//     [--out <dir>] [--abandoned] [--generated-at <ISO timestamp>] \
+//     [--artifact-kind chat|repo|hosted|visual] [--render-ref <url-or-path>]
 
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from 'node:fs'
 import { join, resolve as absPath, relative, basename, extname } from 'node:path'
 import { parseClaudeSession, parsePasteConversation, type ParsedConversation } from './parse'
 import { resolve } from './resolve'
+import { deriveSignals } from './signals'
 import { renderViewer } from './viewer'
+import { auditProvenance, formatAudit } from './audit'
+import type { Artifact, ArtifactKind } from './types'
+
+const ARTIFACT_KINDS: ArtifactKind[] = ['chat', 'repo', 'hosted', 'visual']
 
 const FINAL_EXTS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.css', '.scss', '.html',
@@ -29,10 +35,16 @@ interface Args {
   pathFilter?: string
   annotations?: string
   finished: boolean
+  artifact: Artifact
+  /** pins record.task.generatedAt so a regenerated record diffs only on real changes */
+  generatedAt?: string
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { id: 'task', out: '.', final: [], sessions: [], finished: true }
+  // Default `chat`: this entry point resolves final files against a
+  // conversation transcript, so unless the caller says otherwise the finished
+  // thing is the chat. `ursa run` is the one that knows it is looking at a repo.
+  const args: Args = { id: 'task', out: '.', final: [], sessions: [], finished: true, artifact: { kind: 'chat' } }
   let key: string | null = null
   for (const a of argv) {
     if (a.startsWith('--')) {
@@ -46,6 +58,16 @@ function parseArgs(argv: string[]): Args {
       case 'path-filter': args.pathFilter = a; key = null; break
       case 'conversations': args.conversations = a; key = null; break
       case 'annotations': args.annotations = a; key = null; break
+      case 'artifact-kind': {
+        if (!ARTIFACT_KINDS.includes(a as ArtifactKind)) {
+          throw new Error(`--artifact-kind must be one of ${ARTIFACT_KINDS.join(', ')}; got ${a}`)
+        }
+        args.artifact.kind = a as ArtifactKind
+        key = null
+        break
+      }
+      case 'render-ref': args.artifact.renderRef = a; key = null; break
+      case 'generated-at': args.generatedAt = a; key = null; break
       case 'final': args.final.push(a); break
       case 'sessions': args.sessions.push(a); break
       default:
@@ -108,13 +130,23 @@ function main() {
   const generations = parsed.flatMap((p) => p.generations)
   console.log(`final files: ${files.length} · conversations: ${conversations.length} · generations: ${generations.length}`)
   console.time('resolve')
-  const record = resolve({ taskId: args.id, files, conversations, generations, finished: args.finished })
+  const record = resolve({
+    taskId: args.id, files, conversations, generations,
+    finished: args.finished, artifact: args.artifact, generatedAt: args.generatedAt,
+  })
   console.timeEnd('resolve')
 
-  if (args.annotations) {
-    record.signals = JSON.parse(readFileSync(args.annotations, 'utf8'))
-    console.log(`signals: ${record.signals!.correctionLoops.length} loops, ${record.signals!.feedbackTranslations.length} translations, ${record.signals!.regressions.length} regressions (${record.signals!.method})`)
-  }
+  // Hand annotations win when they are supplied; otherwise the detector runs.
+  // No --declare flag here: the CLI offers the owner no declaration surface, so
+  // episode.accepted stays null rather than being read off retention.
+  record.signals = args.annotations
+    ? JSON.parse(readFileSync(args.annotations, 'utf8'))
+    : deriveSignals(record)
+  const sig = record.signals!
+  console.log(
+    `signals: ${sig.correctionLoops.length} loops, ${sig.regressions.length} regressions, ` +
+    `${sig.oneShotCorrections.length} one-shot corrections, ${sig.feedbackTranslations.length} translations (${sig.method})`,
+  )
 
   mkdirSync(args.out, { recursive: true })
   const jsonPath = join(args.out, 'outcome_record.json')
@@ -125,6 +157,7 @@ function main() {
   const s = record.stats
   const pct = (x: number) => (x * 100).toFixed(1) + '%'
   console.log('\n— outcome record —')
+  console.log(`artifact kind: ${record.artifact.kind}${record.artifact.renderRef ? ` · rendered at ${record.artifact.renderRef}` : ''}`)
   console.log(`covered final chars: ${s.coveredChars.toLocaleString()}`)
   for (const [cls, st] of Object.entries(s.byClass)) {
     console.log(`  ${cls.padEnd(26)} ${pct(st.pct).padStart(7)}  (${st.chars.toLocaleString()} chars, ${st.spans} spans)`)
@@ -135,6 +168,14 @@ function main() {
     console.log(`  ${c.title}: ${c.generations} gens, survival ${pct(c.survivalRate)}, turns-to-acceptance ${c.turnsToAcceptance ?? '—'}`)
   }
   console.log(`\nwrote ${jsonPath}\nwrote ${htmlPath}`)
+
+  // Every pointer the viewer will follow, walked before anyone opens the HTML.
+  const audit = auditProvenance(record)
+  console.log('\n' + formatAudit(audit))
+  if (audit.broken.length > 0) {
+    console.error(`\n${audit.broken.length} broken pointer(s): the record above is not fully navigable.`)
+    process.exitCode = 1
+  }
 }
 
 main()
