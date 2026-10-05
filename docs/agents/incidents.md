@@ -25,16 +25,74 @@ Numbers are never reused and never renumbered. When an entry turns out
 to be two incidents, suffix it (4a, 4b) rather than shifting anything
 after it.
 
-**Every status line names its own incident (rule, 2026-10-04).** Status
-lines read `**Incident N status: ...**` rather than `**Status: ...**`,
-because this file is read as a work queue and a bare status line one
-scroll away from the entry it belongs to gets attached to the wrong one.
-That happened on 2026-10-04: the PM standup dropped Incident 4 from
-docs/sprints/pending.md and quoted "closed (2026-09-20), fix verified
-element by element" as Incident 4's own line, which is Incident 3's. The
-security seat caught it the same day as F11 in PR #75. If you quote a
-status line, the incident number is now inside the quote, so a
-misattribution cannot survive being written down.
+**Every status line names its own incident (rule, 2026-10-04, amended
+2026-10-05).** A status line reads:
+
+```
+**Status:** <open | closed (date, how verified)>. (Incident N of this register.)
+```
+
+The reason for each half, because the two halves come from rules that
+contradicted each other on the literal string and were reconciled here.
+
+The number inside the line is the 2026-10-04 half. This file is read as
+a work queue, and a bare status line one scroll away from the entry it
+belongs to gets attached to the wrong one. That happened on 2026-10-04:
+the PM standup dropped Incident 4 from docs/sprints/pending.md and
+quoted "closed (2026-09-20), fix verified element by element" as
+Incident 4's own line, which is Incident 3's. The security seat caught
+it the same day as F11 in PR #75. If you quote a status line, the
+incident number comes with it, so a misattribution cannot survive being
+written down. That rule's original wording went further than its reason
+needed and forbade the string `**Status:`.
+
+The literal `**Status:**` prefix is the 2026-10-05 half, and it is why
+the original wording had to change. HQ's L-A28 landed on `main` on
+2026-10-05 and requires every incident register entry in the company to
+carry "an explicit `**Status:** open` or `**Status:** closed` line",
+because HQ's generated `docs/company/incidents.md` reads 57 entries
+across the portfolio and cannot say which are open. Under the
+holding-company note in CLAUDE.md the standard wins, and a prefix this
+register forbade was the exact prefix the company's reader needed. Read
+as two commands they are jointly impossible. Read as two reasons, the
+2026-10-04 rule wanted the number *in* the line and the standard wants a
+grep-able prefix *starting* the line, and one line gives both. So the
+deviation is nil and no Ursa ADR is needed: the format above satisfies
+both reasons, and quoting it still carries the number.
+
+The general shape of that failure is Ursa incident 4, and finding it is
+this seat's step 3 (prompts/exo-agent.md). Two individually correct
+standing rules, in two files, neither citing the other, where the seat
+can only see the one it was handed. Nine status lines were rewritten
+into the joint format on 2026-10-05.
+
+**Entries record what they became (L-A28, 2026-10-05).** When an
+incident here becomes a rule in `docs/standards/lessons.md`, the entry
+names the rule it became, because the side that was not written is the
+side a later reader consults. The mapping as of 2026-10-05, re-derived
+by grep rather than from any marker, which is the cost L-A28 is about:
+
+| Ursa incident | became company law as |
+|---|---|
+| 1 | L-X2 |
+| 2 | L-X1, L-S1 |
+| 3 | L-A15 |
+| 4 | L-X1, L-S3 |
+| 5 | L-A18 (via this seat's learning log, 2026-09-19) |
+| 6, 7, 8, 9 | not yet promoted |
+| 10 | not yet promoted |
+
+**Closing an entry now needs a detector (L-X1 as amended, 2026-10-05).**
+A repair in the tree is half of a closure. The other half is something
+in the tree that would notice the same thing happening again, checked
+against a real positive before the entry is called closed. Of the five
+closed entries here, only Incident 2 has one by that test: the redaction
+gate, which has run on every pull request since. Incidents 1, 3, 4 and 5
+were closed on verification of the repair alone. They are not reopened
+by this, since the rule is not retroactive and reopening five entries
+would make the queue unreadable, but the next run that touches a closed
+entry says whether a detector exists for it, and the gap is this
+register's standing debt.
 
 ## Incident 1 — Invalid CLAUDE_CODE_OAUTH_TOKEN; two dispatched runs dead on arrival (2026-09-18)
 
@@ -87,7 +145,7 @@ is which of the two messages the log carries, because it separates
 "the owner has not set it" from "the owner set it wrong," and those
 have different fixes.
 
-**Incident 1 status: closed (2026-09-19), fix confirmed by this run.**
+**Status:** closed (2026-09-19), fix confirmed by this run. (Incident 1 of this register.)
 
 ## Incident 2 — Unredacted user data on the public repo; history purged (2026-09-18)
 
@@ -139,9 +197,9 @@ The accepted residual from the fix's clause (3) is unchanged and
 unverifiable from here by design: unreferenced objects stay
 SHA-addressable until GitHub's own GC.
 
-**Incident 2 status: closed (2026-09-20), purge confirmed on a clean clone. The
-permanent rule this incident created stayed open and was broken the
-next day. See Ursa incident 4.**
+**Status:** closed (2026-09-20), purge confirmed on a clean clone. (Incident 2
+of this register.) The permanent rule this incident created stayed open
+and was broken the next day. See Ursa incident 4.
 
 ## Incident 3 — Product-plan delivered as a presentation; owner rejected it (2026-09-18/19)
 
@@ -205,7 +263,7 @@ The standard held, and it held so literally that element 3 pulled a
 private path into a public file. That is Ursa incident 4, not a defect
 in this closure.
 
-**Incident 3 status: closed (2026-09-20), fix verified element by element.**
+**Status:** closed (2026-09-20), fix verified element by element. (Incident 3 of this register.)
 
 ## Incident 4 — The redaction rule and the artifact standard collided; a private path went public again (2026-09-19/20)
 
@@ -308,7 +366,7 @@ correct and the record about the artifact was wrong for three days.
 Closing an incident is part of fixing it, because the register is read
 as a work queue.
 
-**Incident 4 status: closed (2026-09-27), all four parts verified on main.**
+**Status:** closed (2026-09-27), all four parts verified on main. (Incident 4 of this register.)
 
 ## Incident 5 — Eleven charters cite a local incident number for a different incident (2026-09-18 through 2026-09-20)
 
@@ -359,7 +417,7 @@ part of what gets copied. The stronger form of the rule, now in the
 register's preamble: a number you did not look up is a citation you
 should not write.
 
-**Incident 5 status: fixed this run across the register and all eleven charters.**
+**Status:** closed (2026-09-20), fixed across the register and all eleven charters. (Incident 5 of this register.)
 
 ## Incident 6 — Every seat appends to one file, so five open PRs went unmergeable at once and the sprint's whole backlog stalled (2026-09-24 through 2026-09-27)
 
@@ -467,9 +525,9 @@ Two further facts the original entry could not know.
    and deliberately not done by charter edit, because a charter edit
    cannot fix a defect whose cause is the file's location.
 
-**Incident 6 status: open.** The tooling fix is in PR #27, which is
-unmerged, so this entry closes when that PR merges and a later seat PR
-then merges clean through the driver.
+**Status:** open. (Incident 6 of this register.) The tooling fix is in PR
+#27, which is unmerged, so this entry closes when that PR merges and a
+later seat PR then merges clean through the driver.
 
 ## Incident 7 — The draft-PR-first rule is in every charter and in no workflow, so it has never bound (2026-09-18 through 2026-09-30)
 
@@ -540,9 +598,10 @@ seat writing a rule for another seat: ask which of the two files the
 rule landed in, and whether the seat that must obey it will meet that
 file first or last.
 
-**Incident 7 status: open. §2b and this entry ship now; the entry closes when
-PWC-EXO-3 is applied to all eleven workflows and a fresh sweep reports
-11/11 on both columns.**
+**Status:** open. (Incident 7 of this register.) §2b and this entry
+shipped on 2026-09-30. The entry closes when PWC-EXO-3 is applied to all
+eleven workflows and a fresh sweep reports 11/11 on both columns. The
+2026-10-05 sweep still reports 0 of 11.
 
 ## Incident 8 — A hand-resolved merge shipped conflict markers into four workflows; the repo's one gate saw nothing and the PM's triage was thirty minutes behind the fix (2026-09-30)
 
@@ -625,9 +684,9 @@ for that class, everywhere the vendor does not look. Conflict markers
 are the first instance. The check is cheap and repo-wide, so it goes
 repo-wide.
 
-**Incident 8 status: open. The PM charter fix ships now; the entry closes when
-PWC-EXO-4 is applied and a run of the gate against `ce30b5a` fails in
-CI as it does locally.**
+**Status:** open. (Incident 8 of this register.) The PM charter fix
+shipped on 2026-09-30. The entry closes when PWC-EXO-4 is applied and a
+run of the gate against `ce30b5a` fails in CI as it does locally.
 
 ## Incident 9 — Four seats acted on a stale `main` in one week, because the org's memory only exists after a merge (2026-09-27 through 2026-10-04)
 
@@ -711,7 +770,7 @@ at a cadence faster than the human. Everything in this register about the
 merge queue is downstream of that, which is why the queue is not only the
 PM's problem or the owner's but this seat's as well.
 
-**Incident 9 status: open.** The charter edits ship with this run and
+**Status:** open. (Incident 9 of this register.) The charter edits ship with PR #76 and
 they bind nothing until this PR merges, which is the incident's own
 pathology applied to its own fix. It closes when a later ExO run reports
 that eleven of eleven charters carry the section on `main`, and that it
