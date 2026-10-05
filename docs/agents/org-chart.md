@@ -47,16 +47,23 @@ as still binding.
 
 ## Board of record
 
-Linear (workspace "Alexandra Personal", team URSA), per ADR-005's
-second decision (2026-09-23, charter §1f) — supersedes GitHub
-Projects as Ursa's board. `LINEAR_API_KEY` is unset in this run's
-environment, so this update did not sync issues; see
-docs/sprints/pending.md. GitHub labels (`seat:<name>`,
-`horizon:now|next|later`, `blocked`, `owner-action`) and one milestone
-per sprint are maintained regardless, per docs/standards/pm.md §2b,
-since neither depends on Linear or `PROJECTS_TOKEN`.
+**Corrected 2026-10-05** (this run): the paragraph below was stale.
+Linear was trialed (ADR-005's second decision) and abandoned after one
+cycle (ADR-006, 2026-09-25): the repo itself is the board of record —
+the sprint file, `docs/sprints/pending.md`,
+`docs/sprints/dispatch-queue.md`, and GitHub labels/milestones
+(charter §1f). Separately, the company board
+(board.alexandra-systems-company.com) is now a surface every seat reads
+and writes per docs/standards/pm.md §14 (owner directive,
+2026-09-27) — a different, newer mechanism than the Linear trial this
+paragraph originally described, not a reinstatement of it. This run
+also found the board carries a seat-to-seat message inbox (a chair
+handoff addressed to `pm`/`Ursa` triggered this very run); the
+vendored standard doesn't yet document that inbox's mechanics past §14,
+see docs/sprints/pending.md.
 
-The chair (interactive session) continues to cover any dormant seat's
+The chair (interactive session, and now also board/message-driven
+handoffs per the above) continues to cover any dormant seat's
 functions; today, only sales is dormant.
 
 ## Historical: governance-cycle tracker (added 2026-09-20 by the ExO Sunday run)

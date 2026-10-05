@@ -30,10 +30,15 @@ idea entered.
    `nearestCases`; (d) dogfood against one of Ursa's own seats and
    record what it actually returned. Not pulled into this sprint.
 
-No `proposed` entry has sat two or more weeks without a verdict yet
-(the oldest, repo split, is 3 days old as of this grooming), so nothing
-escalates to "Awaiting your verdict" this run. Tracked instead in
-docs/sprints/pending.md under "Owed by a seat, not yet started."
+**Grooming update, 2026-10-05.** Three `proposed` entries have now sat
+without a verdict for two or more weeks and escalate to "Awaiting your
+verdict" in this ceremony's PR description, per charter §2: repo split
+(2026-09-18, 17 days), tuning packs (2026-09-19, 16 days), and the
+merge-commits/PR-reader finding (2026-09-20, 15 days). None of their
+underlying facts changed this run; the PM does not change a status it
+does not own, so each stays `proposed` here and the escalation is the
+visibility mechanism, not a verdict. No entry is stale or superseded
+this run.
 
 ### 2026-09-18 — Repo split: Major and Minor
 - Trigger: owner at bootstrap: combine now, "then we'll split it in two different ones"
