@@ -13,63 +13,26 @@
 //
 //   URSA_PASSPHRASE=... npx tsx src/bin/ursa.ts bridge <projectPath> \
 //     [--sync-url https://...] [--session <file>] [--interval ms] [--port 7817]
+//
+// ursa ci <project> — the same resolve, fired by a merged pull request on
+// a GitHub runner instead of typed by a person (plan §8). Reads the merge
+// window out of $GITHUB_EVENT_PATH, writes records under <project>/.ursa/,
+// and posts the five-field run comment. Needs no install: the Action runs
+// the bundled dist/ursa.cjs with the runner's own node.
+//
+//   ursa ci <projectPath> --repo owner/name --event "$GITHUB_EVENT_PATH" \
+//     [--run-url URL] [--min-chars N] [--no-post]
 
 import { parseArgs } from 'node:util'
-import { resolve as absPath, extname } from 'node:path'
-import { blobAt, findCommitPairs } from '../pairfinder'
+import { resolve as absPath } from 'node:path'
+import { findCommitPairs } from '../pairfinder'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { buildEpisodes, type Episode } from '../episodes'
-import { resolve } from '../resolve'
+import { resolveEpisode } from '../resolve-episode'
 import { saveEpisodes, saveRecord } from '../store'
-import type { OutcomeRecord, RawGeneration } from '../types'
+import type { OutcomeRecord } from '../types'
 
-const TEXT_EXTS = new Set([
-  '.ts', '.tsx', '.js', '.jsx', '.py', '.css', '.scss', '.html',
-  '.md', '.mdx', '.txt', '.tex', '.json', '.yml', '.yaml', '.toml', '.sql',
-])
-const SKIP_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'])
-const MAX_BLOB_CHARS = 300_000
-
-export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord | null {
-  const files: Array<{ path: string; text: string }> = []
-  const generations: RawGeneration[] = []
-  let turn = 0
-  for (const path of ep.touchedFiles) {
-    if (!TEXT_EXTS.has(extname(path)) || SKIP_FILES.has(path.split('/').pop() ?? '')) continue
-    const genText = blobAt(projectPath, ep.generatedSha, path)
-    const finText = blobAt(projectPath, ep.finalSha, path)
-    if (genText === null || finText === null) continue
-    if (genText.length > MAX_BLOB_CHARS || finText.length > MAX_BLOB_CHARS) continue
-    turn++
-    files.push({ path, text: finText })
-    generations.push({
-      conversationId: `git-${ep.generatedSha.slice(0, 7)}`,
-      model: ep.agentMarker,
-      turnIndex: turn,
-      kind: 'write',
-      filePath: path,
-      timestamp: ep.openedAt,
-      text: genText,
-    })
-  }
-  if (files.length === 0 || generations.length === 0) return null
-  return resolve({
-    taskId: ep.id,
-    files,
-    conversations: [{
-      id: `git-${ep.generatedSha.slice(0, 7)}`,
-      title: ep.subject,
-      adapter: 'git',
-      model: ep.agentMarker,
-      date: ep.openedAt,
-      turns: turn,
-      userTurns: 0,
-    }],
-    generations,
-    finished: true,
-    generatedAt: ep.closedAt,
-  })
-}
+export { resolveEpisode } from '../resolve-episode'
 
 export function renderRunSummary(records: OutcomeRecord[], episodes: Episode[]): string {
   const lines: string[] = []
@@ -104,13 +67,41 @@ export async function main(argv: string[]): Promise<number> {
       session: { type: 'string' },
       interval: { type: 'string' },
       port: { type: 'string' },
+      repo: { type: 'string' },
+      event: { type: 'string' },
+      'run-url': { type: 'string' },
+      'no-post': { type: 'boolean' },
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'bridge') || !project) {
+  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
+    console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--no-post]')
     return 2
+  }
+  if (cmd === 'ci') {
+    const repo = values.repo ?? process.env.GITHUB_REPOSITORY
+    const eventPath = values.event ?? process.env.GITHUB_EVENT_PATH
+    const token = process.env.GITHUB_TOKEN ?? process.env.INPUT_GITHUB_TOKEN ?? ''
+    if (!repo) { console.error('ursa ci needs --repo owner/name or GITHUB_REPOSITORY'); return 2 }
+    if (!eventPath) { console.error('ursa ci needs --event <path> or GITHUB_EVENT_PATH'); return 2 }
+    if (!token && values['no-post'] !== true) {
+      console.error('ursa ci needs GITHUB_TOKEN to post the run comment; pass --no-post to print it instead')
+      return 2
+    }
+    const { runCi } = await import('../ci/run')
+    const result = await runCi({
+      projectPath: absPath(project),
+      eventPath,
+      repo,
+      token,
+      apiBaseUrl: process.env.GITHUB_API_URL,
+      runUrl: values['run-url'] ?? null,
+      minChars: values['min-chars'] ? Number(values['min-chars']) : undefined,
+      post: values['no-post'] !== true,
+    })
+    return result.exitCode
   }
   if (cmd === 'bridge') {
     const passphrase = process.env.URSA_PASSPHRASE ?? (await promptHidden('passphrase (held in memory only): '))
