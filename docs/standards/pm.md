@@ -404,3 +404,15 @@ curl -s "$BOARD_API_URL/api/items/<id>?company=alexandria" -H "Authorization: Be
 
 Rules: the PM's ceremonies plan on the board (the sprint file in `docs/sprints/` is a rendered export of it from now on); a seat that starts work moves its item to In progress and comments the PR link when it ships; a run that finds no item for its work creates one. The daily standup reads the board before `gh pr list`.
 \n
+## 19. The PM creates seats and switches them on and off (owner directive, 2026-10-05)
+
+The owner: "pms should have authority to create and turn on agents." A PM that can plan but cannot staff is a planner, not a PM.
+
+**What the PM may do, in its own company, without asking the owner.**
+- **Create a seat**: a role that exists in `standards/roles/` gets a holder here with `tools/new-seat.py <role> --company <this one>`, which writes the assignment charter (`prompts/<role>-agent.md`: one line naming the role charter, then the standing assignment), the workflow from the template, and for HQ the manifest under `runtime/agents/`. A role that does not exist yet is a new charter, which is Tier C: the PM drafts it in the same pull request and the owner merges that one.
+- **Turn a seat on or off**: `tools/new-seat.py <role> --on` or `--off` enables or comments the schedule and marks the manifest. Off is dormant, not deleted; the files stay.
+- **Set its cadence, model and turn cap** inside the company's budget line in the finance register.
+
+**The limits.** One seat per role per company. A new seat is a pull request the PM merges under tier B, because the files it writes are the generated workflow, the assignment and the manifest, not a charter. The owner is told on the board with a note that says why the seat exists and what it will cost. A seat that has not shipped anything in two weeks is switched off by the PM and the reason filed.
+
+**Why.** The owner should hear about a new agent as news, not as a request.
