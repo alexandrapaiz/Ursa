@@ -33,7 +33,32 @@ divergent copy that makes the queue worse.
 
 Evidence, not impressions. For each agent workflow (agent-*.yml): `gh
 run list --workflow=<name>` for the week's runs, with logs of any
-failure (`gh run view <id> --log-failed`). For each agent's output:
+failure (`gh run view <id> --log-failed`).
+
+**Measure every run's duration against its own cap, before you judge
+any conclusion word.** GitHub reports a job that reaches
+`timeout-minutes` as `cancelled`, so the word in `gh run list` names
+the mechanism and says nothing about the cause. Run this, every run:
+
+```bash
+gh run list --limit 200 --json workflowName,conclusion,createdAt,updatedAt \
+  --jq '.[] | select(.workflowName|test("agent")) |
+        [.workflowName, .createdAt[0:16], .conclusion,
+         (((.updatedAt|fromdate)-(.createdAt|fromdate))/60|floor)] | @tsv'
+grep -n "timeout-minutes" .github/workflows/agent-*.yml
+```
+
+Any run whose duration is within five minutes of its workflow's cap was
+killed by the cap, whatever the conclusion column says. A non-success is
+never called benign without naming the threshold it ran into, and if no
+threshold can be named, say that rather than saying healthy. This exists
+because the 2026-10-04 cycle read `cancelled` against a list of failure
+words, found it absent, and wrote "the cadence is healthy and has never
+been the problem" over a run that GitHub had stopped at 45m19s against a
+45-minute cap. The duration and the cap were both in the data it already
+had. That is Ursa incident 10.
+
+For each agent's output:
 `gh pr list --state all`, noting merged, closed without merge, and
 stale-open PRs, and reading the PR descriptions where charters require
 deviations to be confessed. Read the week's sprint file and retro, the
