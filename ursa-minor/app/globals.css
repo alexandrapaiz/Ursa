@@ -133,7 +133,11 @@
 :root {
   --night: #020308;
   --star: #e8edf7;
-  --dim: #5d6a85;
+  /* lifted from #5d6a85 (2026-10-05 frontend review): measured 3.59:1 on the
+     navy sky behind the header, below the 4.5:1 AA floor at the 10.9-11.5px
+     sizes it is used at. #7886a4 measures 5.33:1 in the same worst case and
+     stays the quietest tier under --star and the body grey. */
+  --dim: #7886a4;
   --polar: #a8c7fa;
   --line: #141b2b;
   /* display face: the light grotesque the hero is set in */

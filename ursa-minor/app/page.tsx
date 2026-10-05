@@ -54,7 +54,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-2xl px-8">
+      <main className="mx-auto w-full max-w-2xl px-8 max-lg:mx-0 max-lg:max-w-4xl max-lg:px-[clamp(2rem,8vw,6rem)]">
         <section className="border-t border-[var(--line)] py-22">
           <div className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> North stars
@@ -77,11 +77,13 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="mt-8 border-t border-[var(--line)]">
-        <div className="mx-auto flex w-full max-w-2xl flex-wrap gap-x-10 gap-y-2 px-8 pb-20 pt-14 font-mono text-[0.7rem] tracking-[0.1em] text-[var(--dim)]">
-          <span>Alexandra Paiz Delgado · Systems Engineer</span>
-          <span>Fatima Michel Giron · Computer &amp; Artificial Intelligence Engineer</span>
-          <span>© ursa</span>
+      <footer className="mt-8">
+        <div className="mx-auto w-full max-w-2xl px-8 max-lg:mx-0 max-lg:max-w-4xl max-lg:px-[clamp(2rem,8vw,6rem)]">
+          <div className="flex flex-col gap-y-3 border-t border-[var(--line)] pb-20 pt-14 font-mono text-[0.7rem] leading-[1.6] tracking-[0.1em] text-[var(--dim)]">
+            <span>Alexandra Paiz Delgado · Systems Engineer</span>
+            <span>Fatima Michel Giron · Computer &amp; Artificial Intelligence Engineer</span>
+            <span>© ursa</span>
+          </div>
         </div>
       </footer>
     </>
