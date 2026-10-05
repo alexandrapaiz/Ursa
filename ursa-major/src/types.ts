@@ -217,7 +217,27 @@ export interface RawGeneration {
 export interface GenerationRecord extends RawGeneration {
   generationIndex: number
   spans: GenerationSpan[]
+  /**
+   * Characters inside segments. `segment()` splits a generation into
+   * sentences or statements and the characters BETWEEN those segments —
+   * blank lines, indentation, the newline after a heading — belong to no
+   * segment, so they are absent from this sum. It is the denominator of
+   * `survivalRate` and of every deletion rate, because a fate is only
+   * ever assigned to a segment.
+   *
+   * It is NOT the number of characters the generation wrote. That is
+   * `charsWritten`, and the difference is `separatorChars`. Keeping the
+   * two apart is load-bearing: a verbatim claim is matched against the
+   * normalization of the WHOLE generation text, so a claim can cover
+   * separator characters that `totalChars` never counted, and comparing
+   * a claim total against this field produces arithmetic that cannot be
+   * true. See src/invariants.ts and docs/design/generated-denominator.md.
+   */
   totalChars: number
+  /** `text.length` — every character the generation wrote, separators included */
+  charsWritten: number
+  /** `charsWritten - totalChars` — characters between segments, carrying no fate */
+  separatorChars: number
   survivedChars: number
   survivalRate: number
 }
@@ -259,7 +279,26 @@ export interface Stats {
   trivialSpans: number
   byModel: Record<string, { chars: number; pctOfCovered: number }>
   generated: {
+    /** sum of every generation's `totalChars` — segment characters only */
     totalChars: number
+    /**
+     * sum of every generation's `charsWritten` — the characters actually
+     * written, separators included. The only generation-side figure a
+     * final-side character count may be compared against, since a span's
+     * source extent can cover separators. Always >= totalChars.
+     */
+    charsWritten: number
+    /** sum of every generation's `separatorChars` */
+    separatorChars: number
+    /**
+     * Generation characters covered by at least one `survived_verbatim`
+     * claim, counted once each. `byClass.survived_verbatim.chars` counts
+     * final-file characters instead, so it double-counts a generation
+     * whose text was reused in two places and can exceed any
+     * generation-side total. This field is the deduplicated figure, and
+     * it is what the run summary prints next to `charsWritten`.
+     */
+    verbatimClaimedChars: number
     survivedChars: number
     /**
      * every deleted char, whatever destroyed it:
