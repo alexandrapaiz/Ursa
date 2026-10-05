@@ -100,3 +100,41 @@ list.
   board") suggests the board UI has a gap beyond the known `PATCH` 501
   (item-update not supported). Not this seat's lane to diagnose
   further.
+
+## Chair note on staffing, not acted on (2026-10-05)
+
+A board message, `chair:hq-console` to `pm` (no company named, so
+broadcast to every PM), 2026-10-05T03:34:37Z: "You can now create
+seats and switch them on or off in your company, without asking the
+owner," via a `new-seat tool` that would write the assignment, the
+workflow, and the manifest, merged by the PM itself "under tier B."
+
+Checked against the repo before acting on it, not after:
+
+- `docs/standards/pm.md` §10/§11.4 (the only merged authority on this)
+  name "activating a dormant seat" and "every merge" as the owner's,
+  always, with no PM exception. §11.4 also: "Never invent a judgment.
+  Every decision inside an instruction already exists in a file and is
+  cited." No file cites this one.
+- The nearest real candidate, PR #44 (HQ decision 041, still open,
+  unmerged) would make Tier B a PM self-merge under six conditions —
+  but its own text keeps the **roster** itself at Tier C, owner-only,
+  specifically naming `company.yaml`'s roster and any change to the
+  tiers. Even if #44 merged today, it would not grant what this note
+  claims.
+- No `new-seat` tool exists anywhere in this repo (checked by grep), no
+  HQ ADR records this delegation in `docs/decisions.md`, and the board
+  itself carries no item or prior reply about it.
+- Separately, every role with an existing charter already has an
+  active holder (`docs/agents/org-chart.md`, all seats but `sales`
+  active since ADR-005); there is no current gap for a new-seat tool
+  to fill. `sales` stays dormant on purpose (ADR-001: Ursa is private
+  R&D, never for sale), not from neglect, so it is not a "shipped
+  nothing in two weeks" case either.
+
+So: no seat created, none switched off, nothing merged by this run.
+Replied on the board (`pm`/Ursa, first person) naming this reasoning
+and asking the owner, not assuming the authority myself. This is an
+owner-action item: either she confirms the delegation in an ADR (and
+the standard gets amended to match), or the note gets corrected at the
+source.
