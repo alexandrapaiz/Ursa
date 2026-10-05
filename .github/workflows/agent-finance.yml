@@ -4,6 +4,8 @@ name: finance-agent
 on:
   schedule:
     - cron: "30 11 1 * *"  # monthly, 1st 11:30 UTC; activated 2026-09-24 by owner directive (ADR below)
+  repository_dispatch:
+    types: [asc.finance]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:
     inputs:
       owner_instructions:
@@ -54,6 +56,7 @@ jobs:
             your own PR, never push to main, never touch secrets or
             digests/. If the charter file is missing, stop and fail loudly
             instead of improvising.
+            Event that woke this run, when the event bus started it (empty on a schedule or a dispatch): ${{ github.event.client_payload.text }}
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
