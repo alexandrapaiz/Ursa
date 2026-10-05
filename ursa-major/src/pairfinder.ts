@@ -25,6 +25,14 @@ export interface CommitPair {
 export interface PairFinderOptions {
   agentTrailerPattern?: RegExp
   agentAuthorPattern?: RegExp
+  /**
+   * A git revision range (`<base>..<head>`) to walk instead of every ref.
+   * The local launch wants `--all`, because the user pointed at a whole
+   * finished project. A CI launch wants one merged pull request's own
+   * commits and nothing else, or every record would be re-derived from
+   * the repository's entire history on every merge.
+   */
+  range?: string
 }
 
 const DEFAULT_TRAILER = /claude|codex|cursor|gpt/i
@@ -48,12 +56,12 @@ function git(repoPath: string, args: string[]): string {
   })
 }
 
-export function listCommits(repoPath: string): CommitInfo[] {
+export function listCommits(repoPath: string, range?: string): CommitInfo[] {
   // --reverse with --topo-order: ancestors before descendants, so the
   // pairing scan walks forward in history even when commits share a
   // timestamp (same-second bursts are common in agent workflows).
   const out = git(repoPath, [
-    'log', '--all', '--reverse', '--topo-order', '--date=iso-strict',
+    'log', range ?? '--all', '--reverse', '--topo-order', '--date=iso-strict',
     '--pretty=format:%H%x09%an%x09%ae%x09%aI%x09%P%x09%(trailers:key=Co-Authored-By,valueonly,separator=|)%x09%s',
   ])
   return out.split('\n').filter(Boolean).map((line) => {
@@ -83,7 +91,7 @@ export function blobAt(repoPath: string, sha: string, path: string): string | nu
 export function findCommitPairs(repoPath: string, opts: PairFinderOptions = {}): CommitPair[] {
   const trailerPattern = opts.agentTrailerPattern ?? DEFAULT_TRAILER
   const authorPattern = opts.agentAuthorPattern ?? DEFAULT_AUTHOR
-  const commits = listCommits(repoPath)
+  const commits = listCommits(repoPath, opts.range)
   const files = new Map<string, string[]>()
   const touched = (sha: string) => {
     if (!files.has(sha)) files.set(sha, commitFiles(repoPath, sha))
