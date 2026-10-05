@@ -1,9 +1,8 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Reconciled 2026-10-04, ~15:41Z scheduled standup, against `gh pr list
---state open --limit 200`, `gh run list --limit 30`, and
-`gh api repos/.../milestones`.
+Reconciliation in progress, 2026-10-05 ~23:3X Z, against the chair's
+Tier B merge-order handoff. Full detail follows in this same run.
 
 ## Awaiting the owner's merge
 
