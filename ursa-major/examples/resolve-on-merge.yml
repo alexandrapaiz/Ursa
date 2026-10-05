@@ -1,0 +1,56 @@
+# The whole consumer side of stage one. Copy this file to
+# .github/workflows/ursa-resolve.yml in any repository where an AI agent
+# commits, and every merged pull request from then on produces outcome
+# records and one run comment, with nobody running anything by hand.
+#
+# What it costs the consumer: one checkout and one node invocation per
+# merge, on their own runner, on their own minutes. No install step, no
+# container pull, no secret. Ursa operates none of it.
+#
+# Why `types: [closed]` and not `types: [merged]`: GitHub has no merged
+# activity type. The event fires on every close and the Action's own
+# `if` below drops the ones that closed without merging, because a pull
+# request nobody merged accepted nothing and there is nothing to resolve.
+
+name: Ursa resolve
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  # The run comment, and the 👍 read back off the previous one, both need
+  # this. Nothing here needs write access to the code.
+  pull-requests: write
+
+jobs:
+  resolve:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 because the resolver compares a generated commit's
+      # file content with the next human commit's file content, and a
+      # depth-1 checkout has neither. The Action deepens a shallow clone
+      # itself as a safety net, but fetching once here is cheaper.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - id: ursa
+        uses: alexandrapaiz/Ursa/ursa-major@main
+        with:
+          # Optional; these are the defaults, written out so the shape of
+          # the knob is visible without reading action.yml.
+          min-chars: '200'
+          post-comment: 'true'
+
+      # Everything below is optional. The Action is complete without it.
+      - name: Print the five fields the comment carries
+        run: |
+          echo "units resolved:            ${{ steps.ursa.outputs.units-resolved }} of ${{ steps.ursa.outputs.units-found }}"
+          echo "chars survived verbatim:   ${{ steps.ursa.outputs.chars-survived-verbatim }}"
+          echo "chars survived edited:     ${{ steps.ursa.outputs.chars-survived-edited }}"
+          echo "most corrected artifact:   ${{ steps.ursa.outputs.most-corrected-artifact || 'none' }}"
+          echo "tuning delta:              ${{ steps.ursa.outputs.tuning-delta }} (${{ steps.ursa.outputs.tuning-mode }})"
+          echo "run comment:               ${{ steps.ursa.outputs.comment-url }}"
