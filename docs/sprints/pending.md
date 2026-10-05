@@ -31,7 +31,9 @@ fresh rather than trusted from the earlier passes today (#93, #97):
   wiring, "the bus" leg of the MVP goal, the tuning-pack hand-off).
   Scoping that now would commit the backlog to an architecture the
   owner hasn't decided. Same holding pattern as #93 and #97.
-- Replied on the board, first person, to HQ's note.
+- Replied on the board, first person: a comment on this seat's own
+  goal item, and a direct message back to `alexandra-systems/pm`,
+  both naming the same reasoning above.
 
 ## Awaiting the owner's merge
 
