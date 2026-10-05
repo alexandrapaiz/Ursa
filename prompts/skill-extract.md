@@ -207,3 +207,42 @@ resolves by whichever description matched more strongly, which is a
 property of the wording rather than of the work, and the two skills
 will disagree about who defers to whom because each one's own
 `TRIGGER-TEST.md` is written from its own side of the boundary.
+
+## 5e. Count artifacts, not neighbours
+
+(Added 2026-10-05, fourth run, amending §5c.)
+
+§5c says a skill with three or more neighbours is probably describing a
+topic rather than a piece of work, and that the remedy is to re-cut.
+That test misfires as soon as the library covers a second artifact.
+`distilling-a-tuning-record` has three neighbours and is not a topic:
+the three existing skills all work on `outcome_record.json`, it works
+on `tuning.json`, and its three boundaries are one edge counted three
+times.
+
+So the test is: **do this skill's inputs and outputs name the same file
+as its neighbours' do?** If yes, the §5c warning stands and the cut is
+probably wrong. If no, the skill sits across a handoff in the pipeline,
+the near-miss budget is still one per neighbour, and the index records
+which side of the edge a spanning prompt is handled on first.
+
+Ours: an edge is also where a skill is most worth having, because a
+handoff between two artifacts is exactly where the vocabulary stays the
+same and the object changes underneath it.
+
+## 5f. A step that mutates user-owned state carries its reversal
+
+(Added 2026-10-05, fourth run.)
+
+When a procedure step runs a command that writes to a file the user
+owns, the step gives the reader the way back before it gives the
+command. The tuning CLI is what earned this: one invocation distills,
+merges and writes, so the arithmetic is in the store before any axiom
+has been read by a person, and there is no dry-run flag. The skill's
+step copies the store first and reads the pass as a diff.
+
+This is not general caution. It is a consequence of the first property
+in §1: a reader must be able to check a sentence against its evidence.
+A step whose effect cannot be inspected or undone cannot be checked
+either, and a skill that ships such a step is asking for trust rather
+than offering receipts.
