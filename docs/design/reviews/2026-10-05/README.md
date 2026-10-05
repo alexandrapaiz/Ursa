@@ -1,10 +1,17 @@
-# Frontend visual review — 2026-10-05
+# Frontend visual review, 2026-10-05
 
-Frontend engineer run (ADR-005, frontend seat active). Evidence for the
-pull request on branch `fe/2026-10-05-visual-review`.
+The write-up is in [review.md](review.md). This folder holds the
+evidence for it.
 
-Target: the Ursa Minor site (`ursa-minor/`, Next.js). Viewports are
-iPhone 390x844, iPad 820x1180, desktop 1440x900, all at 1x scale.
+Surface is the Ursa Minor site in `ursa-minor/`. Captures are Playwright
+with Chromium at 1x scale, at iPhone 390x844, iPad 820x1180 and desktop
+1440x900. WebGL was live in the capture browser, so the sky shader
+renders as a visitor sees it.
 
-Screenshots land here as the run proceeds. Before shots are named
-`before-<page>-<viewport>.png`, after shots `after-<page>-<viewport>.png`.
+- `before-home-*` and `after-home-*`, by state and viewport. States are
+  `top`, `full` for the whole page, `northstars`, `footer`,
+  `hover-cta` and `reducedmotion`.
+- `bench-*` are the benchmark captures of Elicit, Linear and Vercel.
+
+Compressed to a 128 colour palette at native capture size, so the pixels
+are unscaled and the folder stays under a megabyte.
