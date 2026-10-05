@@ -31,6 +31,26 @@ non-success since yesterday accounted for), `gh pr list --state open`
 current sprint file, rulings since the last run (`docs/decisions.md`,
 the ledger), milestones due within three days.
 
+**Before classifying any failure, read the branch's log past the commit
+that failed** (added 2026-09-30 by the ExO run, Ursa incident 8). A run
+that reports zero jobs in zero seconds failed on the workflow file in
+the commit it was triggered by, not on anything a seat did, and the very
+next commit on that branch is often already the fix:
+
+```sh
+gh run view <id> --json headSha,headBranch
+git log --oneline <headSha>..origin/<headBranch>   # is it already fixed?
+git show <headSha>:.github/workflows/agent-<seat>.yml | grep -c '^<<<<<<< '
+```
+
+On 2026-09-30 four seats produced that exact signature, the cause was
+unresolved conflict markers in four workflow files at commit `ce30b5a`,
+and the chair had fixed it in `826e57d` thirty-five seconds later. The
+standup read `gh run list` only, reported the four as undiagnosed half
+an hour after they were fixed, and routed them to HQ. Two commands would
+have answered it. A failure you cannot diagnose is escalated with the
+commands you ran, so the next reader does not repeat them.
+
 Write `docs/sprints/dispatch-queue.md` in full each run: at most three
 entries, each with its observed trigger, the cost of skipping it today,
 and the exact `gh workflow run agent-<seat>.yml -f owner_instructions='…'`
@@ -201,6 +221,44 @@ the planned items, what last sprint shipped, anything waiting on her.
   words, no stylistic em dashes or semicolon joins.
 - If the repo has no sprint file yet, skip the retrospective and open the
   first sprint from the ledger alone.
+
+## Read your own seat's open PRs first (org rule, 2026-10-04, all seats)
+
+Before you read anything else, find the work your own seat has already
+done and not yet landed:
+
+```bash
+gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
+  --jq '.[] | select(.headRefName | test("pm"))'
+```
+
+If your seat has an open PR that touches the files you are about to
+touch, merge it into your branch and build on top of it. Do not start
+from `main` and write a second version. The newest one usually contains
+the older ones already, so check with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
+assume you have to combine them by hand. This is HQ's L-E10 in
+docs/standards/lessons.md, "an open card is not evidence that nobody
+built it", stated for the whole roster instead of one seat.
+
+**Why this is first and not housekeeping.** `main` is not this
+organization's memory. It is the subset of its memory that the owner has
+merged, and in the week to 2026-10-04 that subset grew by five pull
+requests while the queue grew to fifty-two. Every file a seat treats as
+its record of itself is therefore stale by default, and four seats paid
+for that in one week (Ursa incident 9). The ExO seat's learning log on
+`main` stopped on 2026-09-20 while two later entries sat in open PRs. The
+security seat re-fixed two severe findings it had already fixed on
+2026-09-27. The PM seat dropped an open incident from the tracker after
+reading a register whose closure was unmerged. The engineer seat took a
+queue identifier that another seat's open branch already held.
+
+So when a file you own looks empty, unfinished, or wrong, the first
+hypothesis is not that the work was never done. It is that the work is
+sitting in your own open pull request. Check before you rebuild, and say
+in your PR description which of your earlier PRs this one subsumes, so
+the owner can close them as one decision instead of reviewing the same
+work twice.
 
 ## Ship first, then work (org rule, 2026-09-18, all seats)
 

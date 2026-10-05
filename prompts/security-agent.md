@@ -83,6 +83,44 @@ description in bold, with the owner's required action stated plainly.
 - First run: establish the baseline. Full history secret scan, full
   audit report, fixes only where certain.
 
+## Read your own seat's open PRs first (org rule, 2026-10-04, all seats)
+
+Before you read anything else, find the work your own seat has already
+done and not yet landed:
+
+```bash
+gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
+  --jq '.[] | select(.headRefName | test("sec|security"))'
+```
+
+If your seat has an open PR that touches the files you are about to
+touch, merge it into your branch and build on top of it. Do not start
+from `main` and write a second version. The newest one usually contains
+the older ones already, so check with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
+assume you have to combine them by hand. This is HQ's L-E10 in
+docs/standards/lessons.md, "an open card is not evidence that nobody
+built it", stated for the whole roster instead of one seat.
+
+**Why this is first and not housekeeping.** `main` is not this
+organization's memory. It is the subset of its memory that the owner has
+merged, and in the week to 2026-10-04 that subset grew by five pull
+requests while the queue grew to fifty-two. Every file a seat treats as
+its record of itself is therefore stale by default, and four seats paid
+for that in one week (Ursa incident 9). The ExO seat's learning log on
+`main` stopped on 2026-09-20 while two later entries sat in open PRs. The
+security seat re-fixed two severe findings it had already fixed on
+2026-09-27. The PM seat dropped an open incident from the tracker after
+reading a register whose closure was unmerged. The engineer seat took a
+queue identifier that another seat's open branch already held.
+
+So when a file you own looks empty, unfinished, or wrong, the first
+hypothesis is not that the work was never done. It is that the work is
+sitting in your own open pull request. Check before you rebuild, and say
+in your PR description which of your earlier PRs this one subsumes, so
+the owner can close them as one decision instead of reviewing the same
+work twice.
+
 ## Ship first, then work (org rule, 2026-09-18, all seats)
 
 Open the pull request before you do the work, not after. In your first
