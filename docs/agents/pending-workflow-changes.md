@@ -76,15 +76,18 @@ appending to one file's end). See Ursa incident 9.
 
 | Seat | File | Entries |
 |---|---|---|
-| exo | `pending-workflow-changes-exo.md` | PWC-EXO-1 to PWC-EXO-4 |
-| engineer | `pending-workflow-changes-engineer.md` | queued in PR #74, not yet merged |
+| exo | `pending-workflow-changes-exo.md` | PWC-EXO-1 to PWC-EXO-6 |
+| engineer | `pending-workflow-changes-engineer.md` | PWC-ENG-1 |
 | security | `pending-workflow-changes-security.md` | queued in PR #28 as PWC-5 and PWC-6, not yet merged |
 
-The engineer and security rows describe branches, not files on `main`.
-Neither seat's file exists here yet, because this seat does not write
-into another seat's lane. When either PR merges, whoever lands it moves
-the entry into that seat's file under its seat-scoped identifier, and the
-resolution for #74's one conflict with this file is written out in
+The security row describes a branch and not a file on `main`. The
+engineer's file now exists, created by the ExO seat on 2026-10-05 with
+the engineer's own entry moved into it byte-for-byte and renumbered
+PWC-ENG-1. That is the promise in the paragraph this replaces, kept
+early rather than late: the landing plan showed that resolving the
+engineer stack's conflict with this file the obvious way deletes the
+engineer's entry, so the entry was moved to safety before the merge
+instead of after it. The resolution is written out in
 docs/agents/merge-order.md §4b.
 
 **What an entry must still say.** Which of the two reasons put it here,
