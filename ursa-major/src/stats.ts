@@ -1,5 +1,6 @@
 // Summary + trajectory statistics over a resolved record.
 
+import { mergedLength } from './intervals'
 import type {
   ConversationMeta, FinalFile, GenerationRecord, SpanClass, Stats,
 } from './types'
@@ -51,7 +52,10 @@ export function computeStats(
   for (const c of CLASSES) byClass[c].pct = coveredChars ? r3(byClass[c].chars / coveredChars) : 0
 
   const generatedTotal = generations.reduce((a, g) => a + g.totalChars, 0)
+  const generatedWritten = generations.reduce((a, g) => a + g.charsWritten, 0)
+  const generatedSeparators = generations.reduce((a, g) => a + g.separatorChars, 0)
   const generatedSurvived = generations.reduce((a, g) => a + g.survivedChars, 0)
+  const verbatimClaimed = claimedChars(files, 'survived_verbatim')
   // A merge can destroy a generation without the human ever choosing to
   // drop it, and an unreadable boundary can leave the cause unknown, so
   // the gross deletion figure is split three ways. Only the human share
@@ -103,6 +107,9 @@ export function computeStats(
     ),
     generated: {
       totalChars: generatedTotal,
+      charsWritten: generatedWritten,
+      separatorChars: generatedSeparators,
+      verbatimClaimedChars: verbatimClaimed,
       survivedChars: generatedSurvived,
       deletedChars: generatedDeleted,
       deletedPct: generatedTotal ? r3(generatedDeleted / generatedTotal) : 0,
@@ -114,4 +121,31 @@ export function computeStats(
     perFile,
     perConversation,
   }
+}
+
+/**
+ * Generation characters claimed by final spans of one class, counted once
+ * each. The per-class figures in `byClass` count FINAL-file characters, so
+ * a generated sentence reused in two files is counted twice there and the
+ * total can exceed every generation-side figure. Here the claims are
+ * merged per generation first, which makes the result a measurement of the
+ * generation and therefore comparable to `charsWritten`.
+ *
+ * Claims are keyed by `source.generationIndex`, so two files claiming the
+ * same extent of the same generation collapse to one, and two files
+ * claiming the same extent of different generations do not.
+ */
+export function claimedChars(files: FinalFile[], cls: SpanClass): number {
+  const byGen = new Map<number, Array<[number, number]>>()
+  for (const f of files) {
+    for (const s of f.spans) {
+      if (s.class !== cls || !s.source) continue
+      const arr = byGen.get(s.source.generationIndex)
+      if (arr) arr.push([s.source.start, s.source.end])
+      else byGen.set(s.source.generationIndex, [[s.source.start, s.source.end]])
+    }
+  }
+  let total = 0
+  for (const intervals of byGen.values()) total += mergedLength(intervals)
+  return total
 }
