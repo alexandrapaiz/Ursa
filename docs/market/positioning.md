@@ -131,6 +131,73 @@ messaging that leads with "portable across every model" tests better
 against what ChatGPT actually ships today than messaging that leads
 with "fully inspectable."
 
+## The reward-model gap, quantified (2026-10-05)
+
+CLAUDE.md §1's claim — labs have no verifier for open-ended domains and
+fall back on preference proxies — had sourcing (rlhfbook.com's cost
+numbers) but no accuracy numbers. A peer-reviewed benchmark published
+2026-08-24, WritingPreferenceBench, supplies one: 1,800 human-annotated
+preference pairs across 8 creative-writing genres, built specifically
+to isolate subjective quality (originality, emotional resonance) from
+objective confounds (grammar, factual errors). Result: sequence-based
+reward models score 52.7% mean accuracy against human judgment,
+barely above a coin flip; 14 language models used as zero-shot judges
+score 53.9%, equally close to chance. Only generative reward models
+that produce an explicit reasoning chain before judging reach 81.8%,
+and that architecture is the expensive, slow exception, not the
+default production setup. Read plainly: the standard, cheap way labs
+grade open-ended output today is barely better than guessing, and the
+one approach that works well does not scale the way a per-prompt
+preference-pair pipeline needs to. This is independent, quantified
+support for positioning the outcome record as a different kind of
+signal rather than a cheaper version of the same one — the record
+doesn't need a reward model to guess at quality at all, because the
+label is "did real work survive contact with it," supplied by the
+work itself. Last observed 2026-10-05: [WritingPreferenceBench, arXiv](https://arxiv.org/abs/2510.14616).
+
+## Symmetric portability, not asymmetric import (2026-10-05)
+
+Last run's "Portability over transparency" entry named transparency as
+the half of Major's pitch that had closed (OpenAI's Memory Sources)
+and portability as the half that hadn't. This run's landscape watch
+sharpens both halves, in Major's favor on net.
+
+First, transparency: a dated critique (2026-06-06, two days after
+OpenAI's "Dreaming" memory overhaul shipped) found that editing an
+entry in ChatGPT's Memory Summary does not reliably change the
+underlying memory that drives the model's actual responses — the
+user-facing edit surface and the surface that governs behavior are not
+the same thing (docs/market/landscape.md, ChatGPT Memory entry).
+Last run's "transparency gap closing" read should be walked back to
+"a transparency *surface* shipped; whether it is end-to-end truthful
+is now in question." If Major can show that an edit a user makes is
+guaranteed to be what every subsequent response uses, that is a claim
+OpenAI's own shipped feature currently cannot make, pending
+independent verification neither this run nor last could do from the
+outside.
+
+Second, and the sharper update: Anthropic shipped a Claude feature in
+July 2026 that imports memory from ChatGPT, Gemini, or Grok — the
+single most direct move any frontier lab has made toward Major's own
+promise. But it imports only, it does not export anything a competitor
+could read back, and an independent test of seven memory products
+(Claude included) found none of them let a competing platform
+reconstruct an exported memory with structure and attribution intact
+(docs/market/landscape.md, Claude Memory Import entry). That is not
+portability, it is an acquisition funnel dressed in portability's
+language, and it hands Major's positioning a sharper, more specific
+word to use than "portable": **symmetric**. The honest test for any
+future competitor claiming portability, including Major's own: does
+it work in both directions, for free, without a copy-paste prompt
+trick, between vendors that have no commercial reason to cooperate? As
+of this run, nothing in the landscape passes that test except what
+Major is built to be. The risk this doesn't resolve is CLAUDE.md §5's
+own: the platform most able to build a true two-way standard (a
+frontier lab, or several acting jointly) has instead built a one-way
+funnel, which is the economically rational thing for a lab to do and
+exactly why nobody should expect one to build the symmetric version
+voluntarily.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -141,3 +208,11 @@ with "fully inspectable."
   target (still no per-contract anchor) and narrowed Major's Category 3
   differentiation claim from transparency to portability, following
   OpenAI's Memory Sources launch. No pricing recommendation made.
+- 2026-10-05 — added a quantified reward-model accuracy gap
+  (WritingPreferenceBench) supporting Minor's "different signal, not a
+  cheaper one" pitch, and sharpened Major's portability claim to
+  "symmetric" after finding Anthropic's new Claude memory-import
+  feature is one-directional. Walked back part of last run's
+  transparency-gap-closing read after a dated critique found ChatGPT's
+  edit surface doesn't reliably reach what the model uses. No pricing
+  recommendation made.
