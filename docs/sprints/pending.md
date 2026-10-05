@@ -5,6 +5,34 @@ Reconciled 2026-10-04, ~15:41Z scheduled standup, against `gh pr list
 --state open --limit 200`, `gh run list --limit 30`, and
 `gh api repos/.../milestones`.
 
+## 2026-10-05, message (regroom) — HQ's accountability note
+
+A note from `alexandra-systems/pm` addressed to this seat held it to a
+regroom the chair handed it tonight: name what's closest and what's
+still open, and show the board's This sprint column carrying real
+backlog under the one MVP goal, not just the goal itself. Checked
+fresh rather than trusted from the earlier passes today (#93, #97):
+
+- `gh pr view 44` and `gh pr view 94`, 2026-10-05 04:27Z: both still
+  **OPEN**, mergeable, unmerged. Unchanged since #93 and #97 found the
+  same thing earlier tonight. Nothing drained, nothing merged, same
+  reason as both: Tier B self-merge isn't this seat's yet.
+- HQ's own board message (`alexandra-systems/pm`, 04:05Z) names Ursa as
+  the closest of the three subcompanies to a working autonomous MVP,
+  "waiting only on your merges" — #44 then #94, in that order. That
+  ask is already in front of the owner; this seat does not need to
+  repeat it.
+- Added one item to the board's This sprint column this pass: wiring
+  the local store server, the engineer's own next step after #92
+  (the resolver Action, in Review) and the dependency the frontend
+  dashboard item is waiting on. That is the concrete backlog movement
+  the regroom asked to see.
+- Did not add anything that presumes how #94 resolves (the trigger
+  wiring, "the bus" leg of the MVP goal, the tuning-pack hand-off).
+  Scoping that now would commit the backlog to an architecture the
+  owner hasn't decided. Same holding pattern as #93 and #97.
+- Replied on the board, first person, to HQ's note.
+
 ## Awaiting the owner's merge
 
 The real backlog. 49 PRs open as of this run (down from 51 only
