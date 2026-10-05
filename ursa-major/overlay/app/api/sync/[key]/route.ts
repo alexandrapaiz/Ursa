@@ -12,7 +12,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ key: string }> 
   const { key } = await ctx.params
   if (!KEY.test(key)) return new Response('bad key', { status: 400 })
   const body = new Uint8Array(await req.arrayBuffer())
-  if (body.length === 0 || body.length > MAX_BYTES) return new Response('bad size', { status: 413 })
+  if (body.length === 0) return new Response('empty body', { status: 400 })
+  if (body.length > MAX_BYTES) return new Response('too large', { status: 413 })
   await put(`sync/${key}.bin`, new Blob([body.buffer as ArrayBuffer]), {
     access: 'public',
     addRandomSuffix: false,
