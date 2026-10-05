@@ -101,6 +101,7 @@ jobs:
             "${{ vars.PM_DISPATCH_ENABLED }}": fire dispatches only when it is
             exactly true, under docs/standards/pm.md §11.4.
             Event that woke this run, when the event bus started it (empty on a schedule or a dispatch): ${{ github.event.client_payload.text }}
+            You create seats and switch them on or off in this company (standards/pm.md §19, tools/new-seat.py); a new seat is a pull request you merge under tier B, and you tell the owner on the board why it exists and what it costs.
             Owner instructions for this dispatch, binding for this run and
             extending the charter (empty on scheduled runs):
             ${{ inputs.owner_instructions }}
