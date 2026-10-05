@@ -601,7 +601,12 @@ file first or last.
 **Status:** open. (Incident 7 of this register.) §2b and this entry
 shipped on 2026-09-30. The entry closes when PWC-EXO-3 is applied to all
 eleven workflows and a fresh sweep reports 11/11 on both columns. The
-2026-10-05 sweep still reports 0 of 11.
+2026-10-05 sweep reports 0 of 11 for `--draft`, unchanged from
+2026-09-30, and it found something worse than silence: **eight of the
+eleven prompt blocks instruct `gh pr create` with no `--draft`**, and
+the workflow block arrives last. Those eight do not omit the rule, they
+contradict it. The remaining three (pm, security, skill) do not mention
+creating a pull request at all.
 
 ## Incident 8 — A hand-resolved merge shipped conflict markers into four workflows; the repo's one gate saw nothing and the PM's triage was thirty minutes behind the fix (2026-09-30)
 
@@ -776,3 +781,85 @@ pathology applied to its own fix. It closes when a later ExO run reports
 that eleven of eleven charters carry the section on `main`, and that it
 found its own previous entry in the learning log without having to go
 looking in branches.
+
+## Incident 10 — The engineer seat's runs are being killed by the 45-minute job cap, and the register read the kill as benign (2026-10-02 and 2026-10-05)
+
+**What happened.** Two engineer runs in four days ended with
+conclusion `cancelled`: run 36955429726 on 2026-10-02 and run
+37254536081 on 2026-10-05. Both ran for 45 minutes and no more. Run
+36955429726 started 02:23:47Z and ended 03:09:10Z, which is 45m23s. Run
+37254536081 started 02:13:22Z and ended 02:58:41Z, which is 45m19s.
+Every other agent run in the repository's recorded history finished in
+3 to 34 minutes.
+
+Nobody cancelled them. `.github/workflows/agent-engineer.yml` line 22
+sets `timeout-minutes: 45`, and a job that reaches its cap is torn down
+with the action's step marked `cancelled` and the message
+`##[error]The operation was canceled.` in the log. That is what both
+logs say. GitHub reports a cap as a cancellation, so the word in
+`gh run list` names the mechanism, not the cause.
+
+**Why it happened technically.** Two separate things.
+
+The cap itself is too tight for the seat it is on. The engineer is the
+only seat that both runs twice a day and does real build work, so it
+has the heaviest turn count in the roster and the least room under the
+cap. Nine of its runs sit between 15 and 24 minutes, which looks
+comfortable, and two went past 45. The distribution has a long tail and
+the cap is set near the middle of it. Eleven workflows carry a cap: nine
+at 45 minutes, pm at 60, frontend at 90. Nothing in the repository
+records why 45 was chosen for the seat with the most work to do.
+
+The second failure is this seat's, and it is the one worth more. The
+2026-10-04 ExO cycle (PR #76) observed the first cancellation and wrote
+"One cancelled engineer run on 2026-10-02 and no failures since", then
+concluded "The cadence is healthy and has never been the problem". That
+reading was wrong in a specific and repeatable way: the run's
+conclusion was compared against the set of words GitHub uses for
+failure, and never against the workflow's own timeout. A duration and a
+cap were both sitting in the API response, and the audit read the label
+instead of the arithmetic. One cancellation is an anomaly. Two
+cancellations at the same number are a setting.
+
+**What it cost, and what it did not.** It did not cost the work. Run
+37254536081's pull request, #77, was open and pushed before the cap hit,
+and the no-ship tripwire in the same job ran after the teardown, found
+the pushed branch and the pull request, and reported them. The
+ship-first rule did exactly the job it was written for. What was lost is
+the ending: #77's own title still says "draft, in progress", it was
+never readied, and nothing in it tells the owner which parts are
+finished, because the run that could have said so was gone. That is the
+case HQ's L-A27 and this register's own ship-first amendment now cover
+from the other side.
+
+**The fix.** Three parts, two of them in this pull request.
+
+1. **Queued, not applied: PWC-EXO-5** raises the engineer cap and gives
+   every cap a recorded reason. This run is on the resident company host
+   and its dispatch forbids touching workflows, so the edit is written
+   out in full for the owner rather than shipped
+   (docs/agents/runner-facts.md §1b).
+2. **The audit method, shipped here.** `prompts/exo-agent.md` §2 now
+   requires the observe step to compare every run's duration against its
+   workflow's `timeout-minutes` and to treat `cancelled` at or near the
+   cap as a timeout, with the one-line command that does it. A seat
+   cannot be trusted to remember this, so it is a command in the
+   charter and not an instruction to be careful.
+3. **The handover, shipped here.** The ship-first amendment in all
+   eleven charters makes the next run of a seat responsible for any
+   draft a killed run left behind, which is the only place that duty can
+   live when the run that opened it cannot speak.
+
+**What the org grew.** A conclusion word is a label applied by the
+platform and a duration is a measurement, and when the two are both
+available the measurement is the evidence. This seat's whole job in
+step 2 is evidence rather than impressions, and it read a label for two
+weeks. The general form, for any run report: before calling a
+non-success benign, name the threshold it ran into. If no threshold can
+be named, say that instead of saying healthy.
+
+**Status:** open. (Incident 10 of this register.) Parts 2 and 3 ship
+with this run. It closes when PWC-EXO-5 is applied and a later ExO run
+reports a full week of engineer runs with no run within five minutes of
+its cap, and it is not closed on the absence of cancellations alone,
+since a week with no long run proves nothing about the cap.
