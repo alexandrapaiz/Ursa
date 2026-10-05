@@ -1666,6 +1666,7 @@ var init_comment = __esm({
 // src/ci/run.ts
 var run_exports = {};
 __export(run_exports, {
+  renderStepOutputs: () => renderStepOutputs,
   runCi: () => runCi
 });
 async function runCi(opts) {
@@ -1695,7 +1696,8 @@ async function runCi(opts) {
     throw err;
   }
   log(`ursa ci: pull request #${window.prNumber}, window ${window.range} (${window.style})`);
-  const { priorAcceptance, ownAcceptance, ownComment } = await readReactions(api, window.prNumber, log);
+  const canRead = opts.api !== void 0 || opts.token.length > 0;
+  const { priorAcceptance, ownAcceptance, ownComment } = canRead ? await readReactions(api, window.prNumber, log) : (log("ursa ci: no token, so no reaction can be read; acceptance stays undeclared"), { priorAcceptance: null, ownAcceptance: null, ownComment: null });
   if (priorAcceptance?.mark) {
     appendAcceptance(opts.projectPath, priorAcceptance);
     log(
@@ -1740,6 +1742,8 @@ async function runCi(opts) {
     commentUrl = written.html_url;
     log(`ursa ci: run comment ${ownComment ? "updated" : "posted"} \u2014 ${commentUrl}`);
   }
+  const outputsPath = opts.outputsPath ?? env.GITHUB_OUTPUT ?? null;
+  if (outputsPath) writeStepOutputs(outputsPath, fields, commentUrl);
   return {
     exitCode: 0,
     window,
@@ -1751,6 +1755,23 @@ async function runCi(opts) {
     mode,
     recordPaths
   };
+}
+function renderStepOutputs(fields, commentUrl) {
+  const delta = fields.tuningDelta;
+  return [
+    `units-resolved=${fields.unitsResolved}`,
+    `units-found=${fields.unitsFound}`,
+    `chars-survived-verbatim=${fields.charsSurvivedVerbatim}`,
+    `chars-survived-edited=${fields.charsSurvivedEdited}`,
+    `most-corrected-artifact=${fields.mostCorrectedArtifact ?? ""}`,
+    `tuning-delta=${delta.unitsAdded}/${delta.unitsReinforced}`,
+    `tuning-mode=${delta.mode}`,
+    `comment-url=${commentUrl ?? ""}`,
+    ""
+  ].join("\n");
+}
+function writeStepOutputs(path, fields, commentUrl) {
+  (0, import_node_fs3.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
 }
 async function readReactions(api, prNumber, log) {
   try {

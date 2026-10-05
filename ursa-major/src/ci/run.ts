@@ -63,6 +63,13 @@ export interface CiOptions {
   env?: Record<string, string | undefined>
   /** false writes nothing to GitHub and prints the comment instead */
   post?: boolean
+  /**
+   * $GITHUB_OUTPUT. When present the five fields are written there as
+   * step outputs, so a consumer workflow can gate on them without
+   * re-parsing the log. Written by the one run that produced them; there
+   * is no second invocation.
+   */
+  outputsPath?: string | null
   api?: GitHubApi
   log?: (line: string) => void
 }
@@ -108,7 +115,14 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   log(`ursa ci: pull request #${window.prNumber}, window ${window.range} (${window.style})`)
 
   // 2. The reaction on the previous run's comment, read before any work.
-  const { priorAcceptance, ownAcceptance, ownComment } = await readReactions(api, window.prNumber, log)
+  // With no token there is nothing to read it with, and an unauthenticated
+  // call would only earn a 401 and a confusing log line, so say so once
+  // and move on.
+  const canRead = opts.api !== undefined || opts.token.length > 0
+  const { priorAcceptance, ownAcceptance, ownComment } = canRead
+    ? await readReactions(api, window.prNumber, log)
+    : (log('ursa ci: no token, so no reaction can be read; acceptance stays undeclared'),
+       { priorAcceptance: null, ownAcceptance: null, ownComment: null })
   if (priorAcceptance?.mark) {
     appendAcceptance(opts.projectPath, priorAcceptance)
     log(
@@ -164,10 +178,38 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     log(`ursa ci: run comment ${ownComment ? 'updated' : 'posted'} — ${commentUrl}`)
   }
 
+  const outputsPath = opts.outputsPath ?? env.GITHUB_OUTPUT ?? null
+  if (outputsPath) writeStepOutputs(outputsPath, fields, commentUrl)
+
   return {
     exitCode: 0, window, fields, comment, commentUrl,
     priorAcceptance, declaration, mode, recordPaths,
   }
+}
+
+/**
+ * The same five fields, in the same order, as GitHub Actions step
+ * outputs. Values are plain scalars so a consumer workflow can compare
+ * them between merges; `most-corrected-artifact` is the empty string
+ * when nothing was edited, which is the zero of a path.
+ */
+export function renderStepOutputs(fields: RunCommentFields, commentUrl: string | null): string {
+  const delta = fields.tuningDelta
+  return [
+    `units-resolved=${fields.unitsResolved}`,
+    `units-found=${fields.unitsFound}`,
+    `chars-survived-verbatim=${fields.charsSurvivedVerbatim}`,
+    `chars-survived-edited=${fields.charsSurvivedEdited}`,
+    `most-corrected-artifact=${fields.mostCorrectedArtifact ?? ''}`,
+    `tuning-delta=${delta.unitsAdded}/${delta.unitsReinforced}`,
+    `tuning-mode=${delta.mode}`,
+    `comment-url=${commentUrl ?? ''}`,
+    '',
+  ].join('\n')
+}
+
+function writeStepOutputs(path: string, fields: RunCommentFields, commentUrl: string | null): void {
+  appendFileSync(path, renderStepOutputs(fields, commentUrl))
 }
 
 /**
