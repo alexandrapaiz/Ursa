@@ -32,6 +32,117 @@ human verdict are the verifier. Minor sells RLVR's extension into
 unverifiable domains, which is the one thing the recipe wants and
 cannot generate internally.
 
+## 1b. The slot is not empty, so the claim is the label's provenance
+
+*Added by the research seat, 2026-10-05, on the recommendation carried
+unchanged by the briefs of 2026-09-29, 09-30 and 10-02. §1 above is
+left standing because its catalog is correct; this section corrects the
+one sentence in it that the field has overtaken.*
+
+§1 says Minor sells "the one thing the recipe wants and cannot generate
+internally," and rests that on the open question of "what verifies
+prose, design, research, and judgment." **That question is no longer
+open in the form stated.** Since mid-2026 the field has filled the slot
+with rubrics: *Rubrics as Rewards* and a corpus of at least a dozen
+successors (OpenRS, EvoRubric, Rubric-ARROW, DeepRubric, Prompt-Level
+Reward Specifications and others, surveyed in the briefs of 09-30 and
+10-02) train open-ended domains against LLM-judged rubric scores, and
+the subfield is mature enough to have built dedicated reward-hacking
+infrastructure for itself (CHERRL, arXiv:2606.04923). A buyer reading
+§1's original framing will answer it in one sentence, and they will be
+right.
+
+**The claim that survives is not absence, it is provenance.** A rubric
+is a specification written in advance by whoever wrote the rubric, and
+scored by a judge model standing in for a human who never saw the work.
+Both halves are central assessment: the axes are declared before the
+task, and the score is assigned by a proxy. The record's label is
+neither. Its axes are discovered from what users actually corrected
+(`discoveredSpec`, the correction basis), and its score is assigned by
+the finished work — kept, edited, or deleted — by a person who was not
+grading anything. So the two products are not competitors for one slot.
+A rubric answers *does this output match the criteria someone
+specified*. The record answers *did this output survive contact with
+the work someone was actually doing*. Labs will buy both, and the
+second cannot be manufactured in-house at any budget, because its
+ground truth is created days later in a repository the lab never sees.
+
+**The field has now measured why a fixed grader decays, which is the
+strongest external support this argument has.** EvoRS (arXiv:2609.12459,
+11 Sep 2026) states the mechanism directly: "as the policy optimizes the
+current reward, an initially useful reward system may become unreliable
+due to reward hacking or reduced response discriminability," and its
+ablations "confirm that a comprehensive fixed reward system cannot
+remain reliable in open-ended tasks and must evolve throughout
+training." That is the fourth principle of intelligence
+(`docs/vision.md` §0b) and `docs/beyond-preference-pairs.md` §2's third
+assumption, measured by researchers with no interest in Ursa's thesis.
+
+**Read its remedy, because that is where the two positions part.**
+EvoRS's answer is an agentic designer that rewrites an executable
+Reward-DAG from the policy's own rollouts. The loop never leaves the
+system; no information the policy cannot already see enters it. The
+measure is kept discriminative against the policy rather than
+re-anchored to anything outside it. Ursa's answer is structural instead
+of architectural: outcome labels regenerate from new finished work, so
+the measure is re-anchored to the world at exactly the rate the world
+produces work. **The sentence for the lab one-pager (O4 KR4.1): the
+field's own best answer to reward staleness is a grader that rewrites
+itself; ours is a grader we do not own.**
+
+Consequence for the one-pager and for the public methods document
+(O2 KR2.1): do not claim an empty slot. Claim the provenance of the
+label, name rubrics as the complement rather than the competitor, and
+let EvoRS carry the argument that a self-contained grader decays.
+
+## 1c. Prior art, named before a buyer names it
+
+*Added 2026-10-05. The research brief of that date records the failure
+to surface this earlier as a detection failure of its own seat.*
+
+The label type is not new, and the honest version of that is an asset.
+Two references matter, and both should appear in Minor's materials
+before a post-training researcher raises them.
+
+**Post-edits.** *Post-edits Are Preferences Too* (arXiv:2410.02320,
+Oct 2024, rev. Feb 2025) makes Ursa's §3.2 argument in machine
+translation: in preference optimization an annotator judges two given
+sequences, whereas "for post-editing, editors create s₁ and know that
+it should be better than s₂", which makes post-edits "a source of
+reliable human preferences **by construction**." It also cites Kreutzer
+et al. (2018) for pairwise preferences being *less reliable* than other
+feedback forms, and finds the best results come from SFT on post-edits
+before preference optimization — a sequencing result that bears directly
+on §5's ordering here. **The distinction to state: MT post-edits are
+solicited from paid editors as the task itself.** The edit exists
+because someone was employed to produce it, which is why those corpora
+do not reach population scale. The record's `survived_mutated` spans are
+a byproduct of work nobody was paid to label. The paper establishes that
+the label type works; it does not and cannot supply the label at scale.
+
+**Implicit feedback.** IFLLM (arXiv:2606.20482, 18 Jun 2026) is the
+measured case for the economics: explicit feedback is rare and
+expensive, existing methods "do not leverage implicit human feedback,
+which has proven vital to the economic moats of Internet giants," and a
+reward model built on implicit signals lifts text-based reward-model
+accuracy "from 55% to 64%" and "nearly triples" relative response-quality
+gains after DPO across eight models. **The distinction to state: its
+implicit signals are attention proxies, ours are outcomes.** Mouse
+trajectory and webcam eye-gaze measure whether a user looked at a
+response; survival measures whether the finished work kept it. Ursa's
+signal sits strictly downstream of the moment of decision, and it
+carries the category gaze cannot produce at all:
+`no_generation_provenance`, the spans of finished work traceable to no
+generation. The study's collection method — 59 Mechanical Turk workers
+with webcams, 1,336 questions — is also the argument for on-device
+processing from the opposite direction: it cannot be offered to a real
+user base, and it is why that dataset is bounded at lab scale while
+ours is not.
+
+Sources added 2026-10-05: arXiv:2410.02320; arXiv:2606.20482;
+arXiv:2609.12459; arXiv:2608.13622; arXiv:2606.04923;
+arXiv:2506.01937 (RewardBench 2, the incumbent in §3's eval slot).
+
 ## 2. GRPO makes the reward slot concrete
 
 Raschka implements GRPO by hand: sample a group of rollouts, score
@@ -52,7 +163,18 @@ set, not a corpus: tension cases where stated preference contradicts
 revealed behavior (steps 650 vs 710 of the n=1), tacit closures where
 the right label is silence-plus-retention, and regression cases where
 an accepted state was destroyed. A reward model that scores these
-wrong is provably miscalibrated on real revealed preference. An eval
+wrong is provably miscalibrated on real revealed preference.
+
+*Added 2026-10-05:* the incumbent in this slot is now **RewardBench 2**
+(arXiv:2506.01937, ICLR 2026), where models score about 20 points lower
+than on the original and the prompts are unseen rather than recycled
+from downstream evaluations. It is credible and it is still built from
+curated prompts with constructed answers, so Minor's eval differs on
+one axis and that axis is the entire pitch: its cases come from work
+that actually happened, and its labels were assigned by the work rather
+than by the benchmark's authors. Tension cases, tacit closures and
+regressions are not harder RewardBench 2 items; they are items its
+construction method cannot produce. An eval
 ships redacted, small, and public-methodology-first, which matches
 O2 and the zero-cold-outreach posture of O4.
 
