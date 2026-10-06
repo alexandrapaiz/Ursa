@@ -44,13 +44,47 @@ function mutationCorrections(record: OutcomeRecord): OneShotCorrection[] {
   for (const file of record.files) {
     for (const span of file.spans) {
       if (span.class !== 'survived_mutated' || !span.diff || !span.source) continue
-      const agent = span.diff.filter((p) => !p.added).map((p) => p.value).join('')
-      const hers = span.diff.filter((p) => !p.removed).map((p) => p.value).join('')
+      const gen = record.generations[span.source.generationIndex]
+      if (!gen) continue
+      // Both sides are read from where the record already stores them: the
+      // generation's own extent and the span's own text. Neither is rebuilt
+      // from `span.diff`.
+      //
+      // Rebuilding is what this did until 2026-10-06, and the quote-grounding
+      // bound caught it the first time it ran on a label-stage record.
+      // `diffWords` tokenizes on whitespace and does not promise that
+      // joining the non-added parts reproduces the old string byte for byte:
+      // on "No single observer holds it whole, and a central grader pretends
+      // otherwise." it returned "holds it whole , and", with a space before
+      // the comma that the agent never wrote. So the single most-produced
+      // quote in the product — `oneShotCorrections[].text` is the only signal
+      // `ursa run` emits on a repo — was a reconstruction being sold as a
+      // verbatim quote. The extents are right there in the record and are
+      // what every other part of it is addressed by.
+      const agent = gen.text.slice(span.source.start, span.source.end)
+      const hers = span.text
       if (!agent.trim() || !hers.trim()) continue
+      // Two quotes, not one. The agent side is grounded in
+      // generations[gi].text; the final side is grounded in the finished
+      // file. Addressing them separately is what lets the gate re-read each
+      // one — a single blob labelled "the correction" is a string nobody can
+      // check.
+      const agentQuote = excerpt(agent)
+      const finalQuote = excerpt(hers)
       out.push({
         step: span.source.turnIndex,
-        text: `AGENT: ${excerpt(agent)}\nFINAL: ${excerpt(hers)}`,
+        text: `AGENT: ${agentQuote}\nFINAL: ${finalQuote}`,
         domain: file.path,
+        quotes: [
+          {
+            of: 'generation',
+            conversationId: span.source.conversationId,
+            step: span.source.turnIndex,
+            generationIndex: span.source.generationIndex,
+            text: agentQuote,
+          },
+          { of: 'final_span', filePath: file.path, text: finalQuote },
+        ],
       })
     }
   }
