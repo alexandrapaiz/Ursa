@@ -2945,6 +2945,30 @@ Sources: [docs.softwareheritage.org/devel/swh-web/uri-scheme-api-content.html](h
 [docs.softwareheritage.org/devel/getting-started/api.html](https://docs.softwareheritage.org/devel/getting-started/api.html),
 [en.wikipedia.org/wiki/SoftWare_Hash_IDentifier](https://en.wikipedia.org/wiki/SoftWare_Hash_IDentifier)
 
+### 2026-10-05 — Lesson for the centralizer: a seat that claims novelty searches for its own claim
+- Trigger: research seat, brief 2026-10-05. Four runs of L-R1
+  coverage-area search missed *Post-edits Are Preferences Too*
+  (arXiv:2410.02320, Oct 2024), a paper restating this company's
+  central methods position in its title. One search aimed at the claim
+  itself found it immediately.
+- What: a candidate lesson for `docs/standards/lessons.md`, phrased for
+  the inbox and **carrying no `L-` identifier** (per L-A18, a second
+  author picking IDs is a collision generator). Binds every seat that
+  owns a document making a novelty claim, not only research:
+  *coverage-area search finds what is new; claim search finds what was
+  already true. A novelty claim never searched for in the field's own
+  vocabulary is unverified, and the cost of discovering its prior art
+  lands in front of the buyer rather than in the brief.*
+- Why it is filed here and not appended to the standard: the inbox
+  invites any seat, but `docs/standards/` is HQ-vendored and the exo
+  seat's revendor PR (#79) is open against it today. Routing through
+  the ledger avoids a conflict in a file this seat does not own; the
+  owner or the exo seat can carry the text up at the next harvest.
+- First step: exo or the owner appends the rule text to the
+  `lessons.md` inbox at the next sync.
+- Cost: $0
+- Status: proposed
+
 ### 2026-09-26 (market) — Neutrality as a named, sellable asset in the Minor pitch
 - Trigger: this run's landscape watch (docs/market/landscape.md,
   Category 1). Meta's $14.3B stake for 49% of Scale AI (June 2025)
@@ -3110,4 +3134,3 @@ Sources: [docs.softwareheritage.org/devel/swh-web/uri-scheme-api-content.html](h
   compliance as a selling point.
 - Cost: $0
 - Status: proposed
-
