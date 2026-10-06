@@ -96,8 +96,13 @@ const SHORT = 7
  * so classifying a rival costs no subprocess at all. The alternative,
  * `git merge-base --is-ancestor` per candidate commit, is one process per
  * question and the questions are per (path, commit).
+ *
+ * Exported because src/vendored.ts asks the same question of a whole file
+ * that this module asks of a span, and the answer is the same partition
+ * of the graph. One definition of "outside this generation's descent"
+ * keeps the file-level refusal and the span-level one from disagreeing.
  */
-function relatives(commits: CommitInfo[], generatedSha: string): {
+export function relatives(commits: CommitInfo[], generatedSha: string): {
   ancestors: Set<string>
   descendants: Set<string>
 } {
