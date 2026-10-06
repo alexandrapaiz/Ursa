@@ -96,6 +96,11 @@ finding is the shape of the queue, not its enumeration.
 - `company.yaml` (#80): a new HQ-facing manifest naming Ursa's seat
   roster. Tier C by its own text ("company.yaml's roster... anything
   that incurs or approves spend, anything that touches secrets").
+- The board's own sprint record still names `sprint-2026-09-21` with
+  an empty goal, while `main` now carries `sprint-2026-10-05` as the
+  live sprint file (merged this run). Setting the board's sprint name
+  and goal is Monday ceremony work (§3), not standup's; flagging the
+  gap now so it isn't missed.
 
 ## Answered this run
 
