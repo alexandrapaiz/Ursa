@@ -158,7 +158,7 @@ const DEFAULT_MAX_PAIR_AGE_HOURS = 168
 const DEFAULT_MAX_INTERPOSED_GENERATIONS = 0
 const DEFAULT_AUTHOR = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i
 
-interface CommitInfo {
+export interface CommitInfo {
   sha: string
   authorName: string
   authorEmail: string
@@ -271,6 +271,39 @@ export function blobLookup(repoPath: string, sha: string, path: string): BlobLoo
 export function blobAt(repoPath: string, sha: string, path: string): string | null {
   const got = blobLookup(repoPath, sha, path)
   return got.kind === 'present' ? got.text : null
+}
+
+/** one commit that touched a given path, as `commitsTouchingPath` reports it */
+export interface PathCommit {
+  sha: string
+  subject: string
+}
+
+/**
+ * Every commit reachable from any ref whose diff touched `path`, newest
+ * first. `null` means the question could not be asked of this clone at
+ * all, which is different from "no commit touched it": a caller that
+ * treats the two the same turns a hole in the repository into a positive
+ * finding, which is the defect src/deletion.ts was rewritten to remove.
+ *
+ * `--all` is deliberate and is the point of the call. Descent
+ * corroboration (src/corroborate.ts) asks whether a span's text exists
+ * OUTSIDE the generation's line of descent, and the commits that answer
+ * it are precisely the ones a single-branch walk would not see.
+ */
+export function commitsTouchingPath(repoPath: string, path: string): PathCommit[] | null {
+  let out: string
+  try {
+    out = git(repoPath, [
+      'log', '--all', '--pretty=format:%H%x09%s', '--', path,
+    ], { quiet: true })
+  } catch {
+    return null
+  }
+  return out.split('\n').filter((l) => l.includes('\t')).map((l) => {
+    const [sha, ...rest] = l.split('\t')
+    return { sha, subject: rest.join('\t') }
+  })
 }
 
 /**

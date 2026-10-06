@@ -2735,3 +2735,179 @@ is built for.
 Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/introducing-citations-api),
 [docs.ragas.io/en/stable/concepts/metrics/available_metrics/faithfulness/](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/faithfulness/),
 [techcrunch.com/2025/01/23/anthropics-new-citations-feature-aims-to-reduce-ai-errors](https://techcrunch.com/2025/01/23/anthropics-new-citations-feature-aims-to-reduce-ai-errors/)
+
+### 2026-10-06 — `model` on a source pointer is a git trailer, not a model identity
+- Trigger: reading a real record while writing today's design artifact.
+  `ursa-probe-2026-10-04-4d7e8b7.json` carries
+  `"model": "Claude Fable 5.1 <noreply@anthropic.com>"` on every source
+  pointer. Traced it: `resolveEpisode` sets `model: ep.agentMarker`, and
+  `agentMarker` is whatever `marker()` returned in
+  `src/pairfinder.ts:383` — the raw `Co-Authored-By` trailer value, or,
+  when the trailer pattern misses and the author fallback fires, the
+  commit's AUTHOR NAME. So the field can hold a model name glued to an
+  email, or a person's name, and nothing distinguishes the two.
+- What: this is not cosmetic, because `model` is the join key for the
+  first of the three properties Ursa Minor sells. `CLAUDE.md` §4 lists
+  cross-model comparison first: "what did the same user prefer between
+  your model and your competitor's". A lab doing that grouping on this
+  field gets one bucket per trailer spelling rather than one per model.
+  Two commits from the same model with different trailer formatting are
+  two models; a commit whose trailer was missing is a model named after
+  a person. And the damage is silent, because every bound in
+  `src/invariants.ts` reads numbers and none reads this string. Note the
+  direction: it inflates apparent model diversity, which is the
+  flattering direction for a dataset sold on cross-model breadth, so
+  nobody downstream has an incentive to notice.
+- First step: split the one field into two on `SourcePointer`. Keep the
+  raw string as `agentMarker` (provenance, never joined on) and add
+  `model: string | null`, parsed from it by a `parseAgentIdentity()` in
+  `src/pairfinder.ts` that strips a trailing `<email>`, and returns null
+  rather than guessing when the marker came from the author fallback. A
+  bound in `src/invariants.ts` that fires when two source pointers in one
+  record share a `conversationId` and disagree on `model`, plus a
+  measurement counting pointers whose `model` is null, so "we could not
+  tell which model wrote this" is a number a buyer sees rather than a
+  name they trust. Run it over the seven probe records and report how
+  many distinct `model` values collapse.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — A vendored file is an import, and no span of it is anyone's correction
+- Trigger: today's seven demotions, all in one file. Every rival the
+  corroborator found on real history was in `docs/standards/pm.md`, and
+  every one named the same commit, `b59add9`, "Re-vendor
+  docs/standards/pm.md from HQ main @ 683c7dd". That file is a copy of a
+  standard owned by `alexandrapaiz/alexandra-systems` (`CLAUDE.md`, "The
+  holding company"). Today's change caught the seven spans one at a
+  time, span by span, each needing its own blob read and its own
+  verdict. The thing that was actually true is simpler and larger: the
+  whole file arrived from outside, in one commit, and not one character
+  of it is evidence about this user's preferences.
+- What: a file-level refusal before the span-level one. A path whose
+  final blob was introduced wholesale by a single commit that did not
+  write it — a vendoring commit, a `git subtree` pull, a copied
+  template, a generated lockfile — produces no correction signal at all,
+  and resolving it span by span is both expensive and a chance to be
+  wrong 47 times instead of once. The present bound is the right
+  backstop and the wrong primary: it is a per-span containment test
+  where the available fact is per-file. Doing it at file level also
+  catches what the span level cannot, namely a vendored file whose spans
+  are each too short to clear `MIN_VERBATIM_LEN` (the entry below), and
+  it makes the record honest in the user's own terms, because "this file
+  came from HQ" is a sentence the owner would recognise and "span 23 of
+  118 was demoted" is not.
+- First step: `vendoredPaths(repoPath, ep)` in a new
+  `src/vendored.ts`, returning the episode's touched paths whose blob at
+  `finalSha` equals the blob at some non-descendant commit of
+  `generatedSha` ENTIRELY, not merely containing a span of it — one
+  `git rev-parse <sha>:<path>` per candidate, comparing blob hashes
+  rather than text, so it is a hash comparison and not a diff. Skip
+  those paths in `resolveEpisode`'s file loop and report them in
+  `renderRunSummary` as "N files came in whole from elsewhere and were
+  not read as your work", naming one. Measure it on the probe: the
+  prediction is that `docs/standards/pm.md` is excluded outright and all
+  seven of today's demotions plus the nine `span_too_short` verdicts in
+  that file disappear together.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — Ten of the forty-seven mutation labels are too short to check at all
+- Trigger: the verdict tally from today's probe, which is the first run
+  of the descent bound over real history. Thirty spans came back
+  `corroborated`, seven `rival`, and ten `unverified` — and every one of
+  the ten is `span_too_short`, nine of them in the same vendored file as
+  the seven demotions. No `unreadable_blob`, no `rival_search_capped`:
+  on a complete clone the only thing stopping the check is the length
+  floor, not the repository.
+- What: `MIN_VERBATIM_LEN` is 12 normalized characters, and the floor is
+  right for the test it guards, because a span like `return null` is
+  eleven characters and appears in every TypeScript file ever written,
+  so raw containment there is coincidence rather than evidence. But that
+  reasoning is about the span IN ISOLATION, and a span is never
+  isolated: it sits between two neighbours at known offsets. A short
+  span whose neighbours on both sides are themselves rival-held is not a
+  coincidence, it is the middle of an imported block. The check that
+  works at any length is contiguity — does the rival blob contain this
+  span's text at a position consistent with the span before it and the
+  span after it — and it needs no new git reads, because the rival blob
+  is already in the per-path cache by the time the question is asked.
+- First step: give the corroborator the span's neighbours instead of
+  just its text: change the hook's third argument to the file's span
+  list and the span's index, and for a span under the floor return
+  `rival` only when the immediately preceding and following spans both
+  resolved to the same rival sha at adjoining offsets in that blob. Keep
+  `span_too_short` for a short span with no corroborated neighbour, so
+  the conservative answer is still reachable. The test is the probe's
+  own ten: nine of them are interior to a vendored file and should flip
+  to `rival`, and whichever one does not is the case worth reading.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-06, second dispatch (engineer's craft scan)
+
+**Software Heritage** (`archive.softwareheritage.org`), read against
+today's work, with `ScanCode Toolkit` and `FOSSA`'s snippet matching in
+the same bracket. `docs/market/landscape.md` still does not exist on
+`main` (PR #21, unmerged since 2026-09-26), so the rotation again falls
+back to the charter's list. The product was chosen for the same reason
+as yesterday's: it sits directly on top of the question this run spent
+the day on, which is how a tool decides that a piece of text has a
+source other than the one in front of it.
+
+**What it is.** The universal archive of source code: a crawl of GitHub,
+GitLab, PyPI, Debian and more, stored as a single deduplicated Merkle
+DAG. Every object has a SWHID, `swh:1:cnt:<id>` for a file's contents,
+and the identifier for a blob is **git's own `sha1_git`** — the same
+hash `git hash-object` computes. The archive is queryable by it:
+`GET /api/1/content/sha1_git:<hash>/` answers whether that exact
+content exists anywhere the crawl has reached, and
+`GET /api/1/content/sha1_git:<hash>/raw/` returns it.
+
+**Worth stealing: corroborate against a corpus wider than the clone, and
+do it with the hash git already computed.** Today's bound answers "does
+this text exist elsewhere in THIS repository". That is the question the
+local clone can answer, and it is strictly narrower than the question
+that matters, which is "did this text exist before this generation
+anywhere at all". The seven demotions this run found are the vendored
+case, and the archive is built for exactly that: a vendored file's blob
+is almost certainly in it, keyed by a hash Ursa does not have to invent
+or compute, because `git rev-parse <sha>:<path>` already prints it.
+The cheapest honest version is not a span-level query at all, it is one
+blob-level query per file, which is the second ledger entry above
+arriving from a second direction and is why that entry is scoped at
+blob-hash comparison rather than at text.
+
+**Where Ursa does better, and it is the harder half.** Software Heritage
+answers existence, and existence is a weaker fact than the one Ursa
+sells. A blob in the archive tells you the content is out there; it
+tells you nothing about whether a person read it and kept it, edited it,
+or threw it away, which is the whole of `CLAUDE.md` §1. The archive also
+cannot see the thing Ursa calls `no_generation_provenance`, text present
+in the finished work that traces to no generation, because the archive
+has no notion of a generation at all. Ursa is measuring an event; the
+archive is indexing an artifact.
+
+**The half that should stop us, and it is a consent problem rather than
+an engineering one.** Sending `sha1_git` of a user's file to a third
+party crosses the boundary `CLAUDE.md` constraint 3 draws: raw
+processing happens on-device and raw data never touches the aggregation
+layer. A content hash is not raw data, which is the tempting reading,
+and the tempting reading is wrong. A hash is a confirmable fingerprint,
+so the query discloses that this user holds a file with that exact
+content, and a miss is as informative as a hit: it tells the recipient
+the file is private. For a public vendored standard that is harmless;
+for the file next to it in the same episode it is a disclosure the user
+never consented to, performed silently, on a path chosen by a loop. So
+the steal is the mechanism and not the hosted service: Ursa should keep
+the blob-hash comparison and keep the corpus local, and any query that
+leaves the device belongs behind the same explicit grant
+`src/consent.ts` already governs, named in the ledger before it is
+built, never as an ambient lookup. Worth writing down because this is
+the first idea in the register whose cheapest implementation is also a
+privacy regression, and the cheapest implementation is the one a future
+run in a hurry would reach for.
+
+Sources: [docs.softwareheritage.org/devel/swh-web/uri-scheme-api-content.html](https://docs.softwareheritage.org/devel/swh-web/uri-scheme-api-content.html),
+[docs.softwareheritage.org/devel/swh-model/persistent-identifiers.html](https://docs.softwareheritage.org/devel/swh-model/persistent-identifiers.html),
+[docs.softwareheritage.org/devel/getting-started/api.html](https://docs.softwareheritage.org/devel/getting-started/api.html),
+[en.wikipedia.org/wiki/SoftWare_Hash_IDentifier](https://en.wikipedia.org/wiki/SoftWare_Hash_IDentifier)
