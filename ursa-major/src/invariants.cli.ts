@@ -62,6 +62,17 @@ export function runGate(target: string, quiet = false): { violations: number; li
               ? `, and ${m.signalEntriesWithoutQuote} entr${m.signalEntriesWithoutQuote === 1 ? 'y quotes' : 'ies quote'} nothing addressable`
               : ''),
       )
+      // Same reason, for the same kind of bound. DESCENT_CHECKED_UNIFORMLY
+      // is vacuous on a record with no corroborator, and every chat-path
+      // record is one. Saying so is the difference between "the mutation
+      // labels were checked" and "nothing asked".
+      lines.push(
+        m.descentChecked === 0
+          ? '  descent: no mutation label carries a corroboration verdict, so similarity was accepted as descent'
+          : `  descent: ${m.descentChecked} mutation label${m.descentChecked === 1 ? '' : 's'} corroborated against the commit graph` +
+            (m.descentUnverified > 0 ? `, ${m.descentUnverified} unguarded because the search could not settle them` : '') +
+            (m.descentDemoted > 0 ? `, and ${m.descentDemoted} span${m.descentDemoted === 1 ? '' : 's'} demoted for holding text a non-descendant commit already had` : ''),
+      )
     }
     if (found.length === 0) {
       lines.push('  OK — every stated bound holds')

@@ -552,3 +552,95 @@ describe('SIGNAL_QUOTE_GROUNDED fires on each way a quote can be wrong', () => {
     expect(fired(r).length).toBeGreaterThan(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// DESCENT_CHECKED_UNIFORMLY — the twelfth bound, and the only one that is
+// about whether a claim was checked rather than about two numbers agreeing.
+// The thing it guards is src/corroborate.ts's demotion; the thing it catches
+// is that demotion being computed and then not reaching the label.
+// ---------------------------------------------------------------------------
+
+describe('the descent verdict behind a mutation label', () => {
+  /** a record with one survived_mutated span and no corroborator anywhere */
+  function unchecked(): OutcomeRecord {
+    const r = resolvedRecord()
+    const mutated = r.files[0].spans.filter((s) => s.class === 'survived_mutated')
+    expect(mutated.length).toBeGreaterThan(0)
+    return r
+  }
+
+  it('passes, and reports zero, on a record no corroborator ever saw', () => {
+    const r = unchecked()
+    // Vacuous, which is exactly why it is also a measurement. The chat
+    // path has no repository to ask and this must not read as a failure.
+    expect(checkRecord(r)).toEqual([])
+    expect(measure(r).descentChecked).toBe(0)
+    expect(measure(r).descentDemoted).toBe(0)
+  })
+
+  it('fires when a span names the rival that disproves its own descent and keeps the label', () => {
+    const r = unchecked()
+    const span = r.files[0].spans.find((s) => s.class === 'survived_mutated')!
+    span.descent = { basis: 'rival', sha: 'deadbee', subject: 'Sibling branch wrote it', relation: 'sibling' }
+    const v = checkRecord(r)
+    expect(v.map((x) => x.code)).toContain('DESCENT_CHECKED_UNIFORMLY')
+    expect(v[0].observed).toContain('deadbee')
+  })
+
+  it('fires when the corroborator reached some spans and not others', () => {
+    const r = unchecked()
+    const mutated = r.files[0].spans.filter((s) => s.class === 'survived_mutated')
+    // One file, one checked span, and at least one mutation label with no
+    // verdict at all. A corroborator wired per-file rather than per-record
+    // produces exactly this, and the record as a whole looks checked.
+    r.files.push({
+      path: 'other.md',
+      mode: 'prose',
+      text: mutated[0].text,
+      spans: [{
+        start: 0, end: mutated[0].text.length, text: mutated[0].text,
+        class: 'survived_mutated', score: 0.9,
+        descent: { basis: 'corroborated', rivalsSearched: 3 },
+      }],
+    })
+    const v = checkRecord(r)
+    expect(v.map((x) => x.code)).toContain('DESCENT_CHECKED_UNIFORMLY')
+    expect(v.find((x) => x.code === 'DESCENT_CHECKED_UNIFORMLY')!.observed)
+      .toMatch(/survived_mutated spans carry none/)
+  })
+
+  it('passes when every mutation label carries a verdict, including an unverified one', () => {
+    const r = unchecked()
+    for (const s of r.files[0].spans) {
+      if (s.class !== 'survived_mutated') continue
+      s.descent = { basis: 'unverified', reason: 'span_too_short' }
+    }
+    expect(checkRecord(r).map((x) => x.code)).not.toContain('DESCENT_CHECKED_UNIFORMLY')
+    const m = measure(r)
+    expect(m.descentChecked).toBeGreaterThan(0)
+    expect(m.descentUnverified).toBe(m.descentChecked)
+  })
+
+  it('counts a demoted span without counting it as a checked mutation label', () => {
+    const r = unchecked()
+    const span = r.files[0].spans.find((s) => s.class === 'survived_mutated')!
+    span.class = 'no_generation_provenance'
+    delete span.diff
+    delete span.source
+    delete span.score
+    span.uncertain = true
+    span.descent = { basis: 'rival', sha: 'cafe123', subject: 'Other branch', relation: 'sibling' }
+
+    const m = measure(r)
+    expect(m.descentDemoted).toBe(1)
+    // A demotion is not a checked mutation label. The two counters answer
+    // different questions and a buyer reads them differently: one is how
+    // much of the correction signal is guarded, the other is how much of
+    // it the guard removed.
+    expect(m.descentChecked).toBe(0)
+    // This record's only mutation label was the demoted one, so there is
+    // no unguarded label left and the uniformity clause is silent. The
+    // half-wired state is the case above, where one survives.
+    expect(checkRecord(r)).toEqual([])
+  })
+})
