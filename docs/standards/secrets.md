@@ -1,8 +1,12 @@
-# Standard: Secrets
+<!-- vendored-from: standards/secrets.md @ 290f9281f8c6e3287519e812523140b03c0488ec -->
+> **Vendored copy — do not edit here.** Source of truth is
+> `alexandrapaiz/alexandra-systems` `standards/secrets.md` at commit `290f928`,
+> vendored 2026-10-05. Changes to a company standard are HQ
+> ADRs (standards/README.md). Deviations for this product belong in this
+> repo's own decisions file, not in this copy.
+<!-- end vendored header -->
 
-> Vendored from alexandra-systems `standards/secrets.md` (HQ ADR-038,
-> 2026-09-25). Ursa's adoption is ADR-006. Deviations go in
-> docs/decisions.md.
+# Standard: Secrets
 
 How every Alexandra Systems company stores, moves, and rotates
 credentials. Decided at Ursa (Ursa ADR-006, 2026-09-25) and generalized

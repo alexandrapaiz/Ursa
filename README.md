@@ -54,6 +54,34 @@ span of the final text classified by what happened to it.
 | `generated_deleted` | produced and thrown away |
 | `no_generation_provenance` | in the finished work but traceable to no generation. The model was never in the running. |
 
+Every record also names **what kind of finished thing** it is about,
+because finished work is not only chat. A record's `artifact.kind` is
+`chat` when the conversation is the product, `repo` when the product is
+versioned source, `hosted` when it is served at a URL, and `visual` when
+the person accepted or corrected it by eye. When a rendered state exists,
+`artifact.renderRef` points at it, a deploy URL or a screenshot path, so
+a lab reading the record can go and look at the thing that was actually
+judged. `ursa run` fills `repo` on every run and upgrades it to `hosted`
+when the episode's own commit names a domain.
+A class is a verdict taken at one instant: the first commit in which
+the person edited the agent's output. When the project's git history
+continues past that commit, every surviving span also carries **how
+long it lasted**, because text kept at the time and removed by the work
+three commits later is not the same as text that was kept.
+
+| Fate | Meaning |
+|---|---|
+| `durable` | still there at the newest commit |
+| `eroded` | partly removed by later work |
+| `decayed` | gone. The span's own class is a false positive. |
+| `untested` | nothing came after it, so nothing is claimed |
+
+The record's `decayRate` is the share of its own "the user kept it"
+verdict that later work overturned, scored against the person's own
+prose in the same files so a volatile repo is not read as a bad model.
+How it is measured is in
+[`docs/design/span-lifespan.md`](docs/design/span-lifespan.md).
+
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
 generated commit followed by the person's edit of it. A full record
@@ -81,7 +109,7 @@ flowchart TB
     CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
     PR["a branch and one pull request"]
     OWN{{"the owner's merge<br/>the only authority"}}
-    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md, org-chart.md,<br/>runner-facts.md, pending-workflow-changes.md")]
+    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md,<br/>org-chart.md, pending-workflow-changes.md")]
 
     WF -->|"prompt plus claude_args"| CH
     CH -->|"commits"| PR
@@ -104,11 +132,18 @@ flowchart TB
     EX["<code>src/tuning/export.ts</code>"]
     MD["<code>tuning.md</code><br/>pasted into any model"]
     MINOR["Ursa Minor aggregation<br/>not built yet"]
+    DEP["<code>src/deploy.ts</code>"]
+
+    GIT -->|"<code>CNAME</code>, <code>package.json</code>, <code>vercel.json</code><br/>at the episode's final commit"| DEP
+    DEP -->|"DeployDetection, which becomes<br/>OutcomeRecord.artifact"| RS
 
     GIT -->|"commits and Co-Authored-By trailers"| PF
     PF -->|"CommitPair[]"| EP
     EP -->|"Episode[]"| RS
     RS -->|"OutcomeRecord"| SG
+    LP["<code>src/loops.ts</code>"]
+    SG -->|"OutcomeRecord, when a chat trace is present"| LP
+    LP -->|"CorrectionLoop[], RegressionEvent[], OneShotCorrection[]"| SG
     SG -->|"OutcomeRecord plus LabSignals"| ST
     ST --> REC
     REC -->|"OutcomeRecord"| DI
@@ -129,7 +164,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # the unit suite
+npm test                                   # 375 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -151,16 +186,34 @@ acceptance; only the owner's declaration is.
 
 The older session-log path is `src/cli.ts`, which takes `--final` and
 `--sessions` flags and produces the same record plus a self-contained
-HTML viewer.
+HTML viewer. It defaults to `artifact.kind: 'chat'`, and takes
+`--artifact-kind` and `--render-ref` when the finished thing was
+something you looked at rather than something you read:
+
+```bash
+npx tsx src/cli.ts --id ursa-minor-site \
+  --final ~/Desktop/ursa-minor-site --conversations ./conversations \
+  --artifact-kind visual --render-ref screenshots/hero-accepted.png \
+  --out ./out
+```
 
 | Module | Job |
 |---|---|
-| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit |
+| `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone. Refuses the pair rather than guessing when the edit is too far away in commits or in hours, when another generation rewrote the same file first, when the edit sits on a branch the generation never reached, or when the "generation" is a merge commit, and reports every refusal it made (`docs/design/pairing-window.md`) |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
 | `src/resolve.ts` | joins final text to generations and classifies every span |
-| `src/signals.ts` | derives correction signals from a record; carries the owner's declaration |
+| `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
+| `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
+| `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
+| `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, a merge commit, which overwrote it mechanically and carries no correction signal, or nothing nameable, when the clone cannot read the boundary that would settle it (`docs/design/unknown-deletion-cause.md`) |
+| `src/corroborate.ts` | asks git whether a span's text already existed outside the generation's line of descent, so a high similarity score is not mistaken for proof that the person edited this generation. A span found verbatim in a commit that is not a descendant of the generation loses the `survived_mutated` label and the word-level diff that goes with it, because text that already existed elsewhere was not composed here (`docs/design/corroborated-descent.md`) |
+| `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
+| `src/invariants.ts` | checks a record against itself: twelve bounds a record must satisfy, ten of them arithmetic and reported with both sides of the number they broke, one that re-reads every excerpt a signal quotes against the raw text it names, and one that checks the record did not keep a mutation label it had already found the evidence against. `ursa run` exits non-zero when one is violated, after writing the records, because an impossible record is still the evidence (`docs/design/generated-denominator.md`, `docs/design/signal-grounding.md`, `docs/design/corroborated-descent.md`) |
+| `src/intervals.ts` | the one definition of how many distinct characters a set of extents covers, shared by `src/stats.ts` and `src/invariants.ts` so a generated sentence reused in two places is counted once where it should be and twice where it should be |
+| `src/text.ts` | the one definition of a quoted, truncated excerpt, shared by `src/signals.ts` and `src/loops.ts`, plus the predicate `src/invariants.ts` uses to decide whether a quote really appears in the text it claims to come from |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
+| `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
 
 `.ursa/` belongs in the target project's `.gitignore`. Raw records and
 the tuning store never leave the machine they were made on.
@@ -196,14 +249,11 @@ Other governance files:
   postmortems
 - [`docs/agents/learning-log.md`](docs/agents/learning-log.md), what
   each ExO run observed and what the next one must check first
-- [`docs/agents/runner-facts.md`](docs/agents/runner-facts.md), what is
-  measurably true about this repository's Actions runs, so a memoryless
-  seat does not rediscover it
 - [`docs/agents/org-chart.md`](docs/agents/org-chart.md), the seats,
   their cadences, and the governance-cycle tracker
 - [`docs/agents/pending-workflow-changes.md`](docs/agents/pending-workflow-changes.md),
-  workflow and other edits this seat designed but did not apply, each
-  saying whether it was blocked or instructed
+  workflow edits specified for the owner to apply, because the runner's
+  token cannot write them
 - [`docs/allhands/`](docs/allhands/), meeting minutes
 - [`docs/presentations/`](docs/presentations/), slide sources
 
@@ -213,12 +263,10 @@ Ursa is a portfolio product of
 [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems)
 and runs on its agent-seat model. Charters live in `prompts/`,
 workflows in `.github/workflows/`, and the standards in
-`docs/standards/`. Every seat but sales is active on a schedule
-(ADR-005, 2026-09-24), which superseded the earlier wave-1 and wave-2
-split; sales is dormant because Ursa is private R&D. The owner's merge
-is the only authority. See
-[`docs/agents/org-chart.md`](docs/agents/org-chart.md) for the current
-roster and cadences.
+`docs/standards/`. The OKR, PM, and ExO seats are active on a schedule.
+The builder seats are dormant until one full governance cycle has been
+merged. The owner's merge is the only authority. See
+[`docs/agents/org-chart.md`](docs/agents/org-chart.md).
 
 ## Constraints that do not move
 

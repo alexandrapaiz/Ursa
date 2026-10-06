@@ -1,0 +1,1180 @@
+{
+  "schemaVersion": "0.1.0",
+  "task": {
+    "id": "probe-2026-09-26-4d5e401",
+    "finished": true,
+    "generatedAt": "2026-09-30T03:49:49Z"
+  },
+  "artifact": {
+    "kind": "repo"
+  },
+  "files": [
+    {
+      "path": "docs/sprints/dispatch-queue.md",
+      "mode": "prose",
+      "text": "# Dispatch queue — 2026-09-30 (sync window, ~03:50 UTC)\n\nWindow opened by the chair (docs/standards/pm.md §11.4, L-P7, L-A13).\nFull reasoning below; superseding the 2026-09-26 record kept for\nreference underneath it.\n\n---\n\n# Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)\n\n`PM_DISPATCH_ENABLED` is exactly `true`. Read alongside PR #20\n(`ursa-pm/2026-09-26-window`, the owner's synchronous session that ran\n01:15-01:26Z tonight and already fired one dispatch — see below).\n\nSince that window closed at 01:26Z, one new thing happened: engineer's\n23:26 UTC cron fired at 01:46Z and opened PR #22 (`get_briefing`,\nagainst the accepted \"Agentic-forward\" ledger entry, not a sprint\nitem). Nothing else changed. `gh run list --limit 100` shows no\nfailures since the last standup.\n\n## Proposed\n\nNone. Two independent reasons, either one sufficient on its own:\n\n1. **Every active seat's most recent PR is currently open**: engineer\n   (#22), market (#21), skill (#14), frontend (#15), research (#19).\n   §11.4's hard stop forbids dispatching any seat whose last PR is\n   still open unless the instruction tells it, in those words, to build\n   on that exact branch — and nothing observed this run names a\n   continuation of any of those five branches. This alone empties the\n   queue regardless of the credential question.\n2. **The scheduled standup's own token still cannot reach the Actions\n   API**, reconfirmed fresh this run:\n\n   ```\n   $ gh api /repos/alexandrapaiz/Ursa/actions/permissions\n   {\"message\":\"Resource not accessible by integration\",\"status\":\"403\"}\n   ```\n\n   Same 403 as 2026-09-24 and 2026-09-25 — third day running from this\n   specific credential. Not retried as an actual `gh workflow run` this\n   time since reason 1 above already forecloses every candidate seat;\n   no point spending an attempt against a hard stop that already blocks\n   it. See `docs/sprints/pending.md` for the standing owner action this\n   implies.\n\nMilestone #1 (\"Sprint 2026-09-21\") is due tomorrow\n(`due_on: 2026-09-27T00:00:00Z`) with all four backlog items already\ncarrying open PRs (#13/#16/#18 engineer, #21 market). The §11.3\n\"milestone due within three days\" row is observed but not queued: the\nseats that would receive it are exactly the ones hard-stop (1) already\nblocks, and what's actually left to close the milestone is a merge, an\nowner action, not a dispatch.\n\nsecurity, finance, okr: nothing observed against §11.3 this run. No\nnew ADR names any of them without a run. Neither security nor finance\nhas reached its first scheduled occurrence yet (tomorrow and\n2026-10-01 respectively).\n\n## Dispatched by the PM\n\nNone this run (see \"Proposed\" above for why). For the record, PR #20's\nsynchronous-session window already dispatched `agent-market.yml`\ntonight at 01:15Z under a different credential path (an interactive\nsession token, not this scheduled run's), and it succeeded and shipped\nPR #21 — logged in that PR's own description, not duplicated here\nsince this run did not perform that dispatch.\n",
+      "spans": [
+        {
+          "start": 0,
+          "end": 55,
+          "text": "# Dispatch queue — 2026-09-30 (sync window, ~03:50 UTC)",
+          "class": "no_generation_provenance",
+          "uncertain": true,
+          "candidate": {
+            "score": 0.531,
+            "text": "# Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)",
+            "source": {
+              "conversationId": "git-4d5e401",
+              "model": "claude[bot]",
+              "turnIndex": 1,
+              "generationIndex": 0,
+              "start": 0,
+              "end": 64
+            }
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 55,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 57,
+          "end": 126,
+          "text": "Window opened by the chair (docs/standards/pm.md §11.4, L-P7, L-A13).",
+          "class": "no_generation_provenance",
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 69,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 127,
+          "end": 191,
+          "text": "Full reasoning below; superseding the 2026-09-26 record kept for",
+          "class": "no_generation_provenance",
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 64,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 192,
+          "end": 216,
+          "text": "reference underneath it.",
+          "class": "no_generation_provenance",
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 24,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 218,
+          "end": 221,
+          "text": "---",
+          "class": "no_generation_provenance",
+          "lifespan": {
+            "revisionsChecked": 0,
+            "unitsTraced": 0,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 0,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": false,
+            "fate": "untested",
+            "basis": null,
+            "skipped": "too-short"
+          }
+        },
+        {
+          "start": 223,
+          "end": 939,
+          "text": "# Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)\n\n`PM_DISPATCH_ENABLED` is exactly `true`. Read alongside PR #20\n(`ursa-pm/2026-09-26-window`, the owner's synchronous session that ran\n01:15-01:26Z tonight and already fired one dispatch — see below).\n\nSince that window closed at 01:26Z, one new thing happened: engineer's\n23:26 UTC cron fired at 01:46Z and opened PR #22 (`get_briefing`,\nagainst the accepted \"Agentic-forward\" ledger entry, not a sprint\nitem). Nothing else changed. `gh run list --limit 100` shows no\nfailures since the last standup.\n\n## Proposed\n\nNone. Two independent reasons, either one sufficient on its own:\n\n1. **Every active seat's most recent PR is currently open**: engineer",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 0,
+            "end": 716
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 11,
+            "unitsSurviving": 6,
+            "survivingChars": 306,
+            "decayedChars": 323,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": true,
+            "fate": "eroded",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 943,
+          "end": 1008,
+          "text": "(#22), market (#21), skill (#14), frontend (#15), research (#19).",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 720,
+            "end": 785
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 65,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1012,
+          "end": 1075,
+          "text": "§11.4's hard stop forbids dispatching any seat whose last PR is",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 789,
+            "end": 852
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 63,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1079,
+          "end": 1147,
+          "text": "still open unless the instruction tells it, in those words, to build",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 856,
+            "end": 924
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 68,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1151,
+          "end": 1211,
+          "text": "on that exact branch — and nothing observed this run names a",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 928,
+            "end": 988
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 60,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1215,
+          "end": 1281,
+          "text": "continuation of any of those five branches. This alone empties the",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 992,
+            "end": 1058
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 43,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1285,
+          "end": 1399,
+          "text": "queue regardless of the credential question.\n2. **The scheduled standup's own token still cannot reach the Actions",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1062,
+            "end": 1176
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 2,
+            "unitsSurviving": 1,
+            "survivingChars": 66,
+            "decayedChars": 44,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": true,
+            "fate": "eroded",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1403,
+          "end": 1437,
+          "text": "API**, reconfirmed fresh this run:",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1180,
+            "end": 1214
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 34,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1442,
+          "end": 1445,
+          "text": "```",
+          "class": "survived_verbatim",
+          "score": 1,
+          "trivial": true,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1219,
+            "end": 1222
+          },
+          "lifespan": {
+            "revisionsChecked": 0,
+            "unitsTraced": 0,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 0,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": false,
+            "fate": "untested",
+            "basis": null,
+            "skipped": "too-short"
+          }
+        },
+        {
+          "start": 1449,
+          "end": 1503,
+          "text": "$ gh api /repos/alexandrapaiz/Ursa/actions/permissions",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1226,
+            "end": 1280
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 54,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1507,
+          "end": 1574,
+          "text": "{\"message\":\"Resource not accessible by integration\",\"status\":\"403\"}",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1284,
+            "end": 1351
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 67,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1578,
+          "end": 1581,
+          "text": "```",
+          "class": "survived_verbatim",
+          "score": 1,
+          "trivial": true,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1219,
+            "end": 1222
+          },
+          "lifespan": {
+            "revisionsChecked": 0,
+            "unitsTraced": 0,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 0,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": false,
+            "fate": "untested",
+            "basis": null,
+            "skipped": "too-short"
+          }
+        },
+        {
+          "start": 1586,
+          "end": 1653,
+          "text": "Same 403 as 2026-09-24 and 2026-09-25 — third day running from this",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1363,
+            "end": 1430
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 67,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1657,
+          "end": 1725,
+          "text": "specific credential. Not retried as an actual `gh workflow run` this",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1434,
+            "end": 1502
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 47,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1729,
+          "end": 1795,
+          "text": "time since reason 1 above already forecloses every candidate seat;",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1506,
+            "end": 1572
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 66,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1799,
+          "end": 1867,
+          "text": "no point spending an attempt against a hard stop that already blocks",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1576,
+            "end": 1644
+          },
+          "lifespan": {
+            "revisionsChecked": 1,
+            "unitsTraced": 1,
+            "unitsSurviving": 0,
+            "survivingChars": 0,
+            "decayedChars": 68,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": false,
+            "fate": "decayed",
+            "basis": null,
+            "skipped": null
+          }
+        },
+        {
+          "start": 1871,
+          "end": 1939,
+          "text": "it. See `docs/sprints/pending.md` for the standing owner action this",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1648,
+            "end": 1716
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 1,
+            "unitsSurviving": 1,
+            "survivingChars": 64,
+            "decayedChars": 0,
+            "intactRevisions": 2,
+            "intactSeconds": 388427,
+            "diedAtSha": null,
+            "diedAt": null,
+            "liveAtTip": true,
+            "fate": "durable",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        },
+        {
+          "start": 1943,
+          "end": 3017,
+          "text": "implies.\n\nMilestone #1 (\"Sprint 2026-09-21\") is due tomorrow\n(`due_on: 2026-09-27T00:00:00Z`) with all four backlog items already\ncarrying open PRs (#13/#16/#18 engineer, #21 market). The §11.3\n\"milestone due within three days\" row is observed but not queued: the\nseats that would receive it are exactly the ones hard-stop (1) already\nblocks, and what's actually left to close the milestone is a merge, an\nowner action, not a dispatch.\n\nsecurity, finance, okr: nothing observed against §11.3 this run. No\nnew ADR names any of them without a run. Neither security nor finance\nhas reached its first scheduled occurrence yet (tomorrow and\n2026-10-01 respectively).\n\n## Dispatched by the PM\n\nNone this run (see \"Proposed\" above for why). For the record, PR #20's\nsynchronous-session window already dispatched `agent-market.yml`\ntonight at 01:15Z under a different credential path (an interactive\nsession token, not this scheduled run's), and it succeeded and shipped\nPR #21 — logged in that PR's own description, not duplicated here\nsince this run did not perform that dispatch.",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "git-4d5e401",
+            "model": "claude[bot]",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 1720,
+            "end": 2794
+          },
+          "lifespan": {
+            "revisionsChecked": 2,
+            "unitsTraced": 19,
+            "unitsSurviving": 8,
+            "survivingChars": 322,
+            "decayedChars": 684,
+            "intactRevisions": 0,
+            "intactSeconds": 0,
+            "diedAtSha": "19f6535464936d166290f23bad2f6b3b59836feb",
+            "diedAt": "2026-10-03T15:10:13Z",
+            "liveAtTip": true,
+            "fate": "eroded",
+            "basis": "token-containment",
+            "skipped": null
+          }
+        }
+      ]
+    }
+  ],
+  "conversations": [
+    {
+      "id": "git-4d5e401",
+      "title": "PM standup 2026-09-26: pending tracker and dispatch queue",
+      "adapter": "git",
+      "model": "claude[bot]",
+      "date": "2026-09-26T14:59:57Z",
+      "turns": 1,
+      "userTurns": 0
+    }
+  ],
+  "generations": [
+    {
+      "conversationId": "git-4d5e401",
+      "model": "claude[bot]",
+      "turnIndex": 1,
+      "kind": "write",
+      "filePath": "docs/sprints/dispatch-queue.md",
+      "timestamp": "2026-09-26T14:59:57Z",
+      "text": "# Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)\n\n`PM_DISPATCH_ENABLED` is exactly `true`. Read alongside PR #20\n(`ursa-pm/2026-09-26-window`, the owner's synchronous session that ran\n01:15-01:26Z tonight and already fired one dispatch — see below).\n\nSince that window closed at 01:26Z, one new thing happened: engineer's\n23:26 UTC cron fired at 01:46Z and opened PR #22 (`get_briefing`,\nagainst the accepted \"Agentic-forward\" ledger entry, not a sprint\nitem). Nothing else changed. `gh run list --limit 100` shows no\nfailures since the last standup.\n\n## Proposed\n\nNone. Two independent reasons, either one sufficient on its own:\n\n1. **Every active seat's most recent PR is currently open**: engineer\n   (#22), market (#21), skill (#14), frontend (#15), research (#19).\n   §11.4's hard stop forbids dispatching any seat whose last PR is\n   still open unless the instruction tells it, in those words, to build\n   on that exact branch — and nothing observed this run names a\n   continuation of any of those five branches. This alone empties the\n   queue regardless of the credential question.\n2. **The scheduled standup's own token still cannot reach the Actions\n   API**, reconfirmed fresh this run:\n\n   ```\n   $ gh api /repos/alexandrapaiz/Ursa/actions/permissions\n   {\"message\":\"Resource not accessible by integration\",\"status\":\"403\"}\n   ```\n\n   Same 403 as 2026-09-24 and 2026-09-25 — third day running from this\n   specific credential. Not retried as an actual `gh workflow run` this\n   time since reason 1 above already forecloses every candidate seat;\n   no point spending an attempt against a hard stop that already blocks\n   it. See `docs/sprints/pending.md` for the standing owner action this\n   implies.\n\nMilestone #1 (\"Sprint 2026-09-21\") is due tomorrow\n(`due_on: 2026-09-27T00:00:00Z`) with all four backlog items already\ncarrying open PRs (#13/#16/#18 engineer, #21 market). The §11.3\n\"milestone due within three days\" row is observed but not queued: the\nseats that would receive it are exactly the ones hard-stop (1) already\nblocks, and what's actually left to close the milestone is a merge, an\nowner action, not a dispatch.\n\nsecurity, finance, okr: nothing observed against §11.3 this run. No\nnew ADR names any of them without a run. Neither security nor finance\nhas reached its first scheduled occurrence yet (tomorrow and\n2026-10-01 respectively).\n\n## Dispatched by the PM\n\nNone this run (see \"Proposed\" above for why). For the record, PR #20's\nsynchronous-session window already dispatched `agent-market.yml`\ntonight at 01:15Z under a different credential path (an interactive\nsession token, not this scheduled run's), and it succeeded and shipped\nPR #21 — logged in that PR's own description, not duplicated here\nsince this run did not perform that dispatch.\n",
+      "generationIndex": 0,
+      "spans": [
+        {
+          "start": 0,
+          "end": 64,
+          "text": "# Dispatch queue — 2026-09-26 (standup, 14:54 UTC scheduled run)",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 66,
+          "end": 106,
+          "text": "`PM_DISPATCH_ENABLED` is exactly `true`.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 107,
+          "end": 128,
+          "text": "Read alongside PR #20",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 129,
+          "end": 199,
+          "text": "(`ursa-pm/2026-09-26-window`, the owner's synchronous session that ran",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 200,
+          "end": 265,
+          "text": "01:15-01:26Z tonight and already fired one dispatch — see below).",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 267,
+          "end": 337,
+          "text": "Since that window closed at 01:26Z, one new thing happened: engineer's",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 338,
+          "end": 403,
+          "text": "23:26 UTC cron fired at 01:46Z and opened PR #22 (`get_briefing`,",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 404,
+          "end": 469,
+          "text": "against the accepted \"Agentic-forward\" ledger entry, not a sprint",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 470,
+          "end": 476,
+          "text": "item).",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 477,
+          "end": 498,
+          "text": "Nothing else changed.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 499,
+          "end": 533,
+          "text": "`gh run list --limit 100` shows no",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 534,
+          "end": 566,
+          "text": "failures since the last standup.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 568,
+          "end": 579,
+          "text": "## Proposed",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 581,
+          "end": 586,
+          "text": "None.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 587,
+          "end": 645,
+          "text": "Two independent reasons, either one sufficient on its own:",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 647,
+          "end": 649,
+          "text": "1.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 650,
+          "end": 716,
+          "text": "**Every active seat's most recent PR is currently open**: engineer",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 720,
+          "end": 785,
+          "text": "(#22), market (#21), skill (#14), frontend (#15), research (#19).",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 789,
+          "end": 852,
+          "text": "§11.4's hard stop forbids dispatching any seat whose last PR is",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 856,
+          "end": 924,
+          "text": "still open unless the instruction tells it, in those words, to build",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 928,
+          "end": 988,
+          "text": "on that exact branch — and nothing observed this run names a",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 992,
+          "end": 1035,
+          "text": "continuation of any of those five branches.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1036,
+          "end": 1058,
+          "text": "This alone empties the",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1062,
+          "end": 1106,
+          "text": "queue regardless of the credential question.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1107,
+          "end": 1109,
+          "text": "2.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1110,
+          "end": 1176,
+          "text": "**The scheduled standup's own token still cannot reach the Actions",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1180,
+          "end": 1214,
+          "text": "API**, reconfirmed fresh this run:",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1219,
+          "end": 1222,
+          "text": "```",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1226,
+          "end": 1280,
+          "text": "$ gh api /repos/alexandrapaiz/Ursa/actions/permissions",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1284,
+          "end": 1351,
+          "text": "{\"message\":\"Resource not accessible by integration\",\"status\":\"403\"}",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1355,
+          "end": 1358,
+          "text": "```",
+          "fate": "generated_deleted",
+          "deletion": {
+            "cause": "human_edit"
+          }
+        },
+        {
+          "start": 1363,
+          "end": 1430,
+          "text": "Same 403 as 2026-09-24 and 2026-09-25 — third day running from this",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1434,
+          "end": 1454,
+          "text": "specific credential.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1455,
+          "end": 1502,
+          "text": "Not retried as an actual `gh workflow run` this",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1506,
+          "end": 1572,
+          "text": "time since reason 1 above already forecloses every candidate seat;",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1576,
+          "end": 1644,
+          "text": "no point spending an attempt against a hard stop that already blocks",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1648,
+          "end": 1651,
+          "text": "it.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1652,
+          "end": 1716,
+          "text": "See `docs/sprints/pending.md` for the standing owner action this",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1720,
+          "end": 1728,
+          "text": "implies.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1730,
+          "end": 1780,
+          "text": "Milestone #1 (\"Sprint 2026-09-21\") is due tomorrow",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1781,
+          "end": 1849,
+          "text": "(`due_on: 2026-09-27T00:00:00Z`) with all four backlog items already",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1850,
+          "end": 1903,
+          "text": "carrying open PRs (#13/#16/#18 engineer, #21 market).",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1904,
+          "end": 1913,
+          "text": "The §11.3",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1914,
+          "end": 1983,
+          "text": "\"milestone due within three days\" row is observed but not queued: the",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 1984,
+          "end": 2054,
+          "text": "seats that would receive it are exactly the ones hard-stop (1) already",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2055,
+          "end": 2125,
+          "text": "blocks, and what's actually left to close the milestone is a merge, an",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2126,
+          "end": 2155,
+          "text": "owner action, not a dispatch.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2157,
+          "end": 2221,
+          "text": "security, finance, okr: nothing observed against §11.3 this run.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2222,
+          "end": 2224,
+          "text": "No",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2225,
+          "end": 2265,
+          "text": "new ADR names any of them without a run.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2266,
+          "end": 2294,
+          "text": "Neither security nor finance",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2295,
+          "end": 2355,
+          "text": "has reached its first scheduled occurrence yet (tomorrow and",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2356,
+          "end": 2381,
+          "text": "2026-10-01 respectively).",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2383,
+          "end": 2406,
+          "text": "## Dispatched by the PM",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2408,
+          "end": 2453,
+          "text": "None this run (see \"Proposed\" above for why).",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2454,
+          "end": 2478,
+          "text": "For the record, PR #20's",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2479,
+          "end": 2543,
+          "text": "synchronous-session window already dispatched `agent-market.yml`",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2544,
+          "end": 2611,
+          "text": "tonight at 01:15Z under a different credential path (an interactive",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2612,
+          "end": 2682,
+          "text": "session token, not this scheduled run's), and it succeeded and shipped",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2683,
+          "end": 2748,
+          "text": "PR #21 — logged in that PR's own description, not duplicated here",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 2749,
+          "end": 2794,
+          "text": "since this run did not perform that dispatch.",
+          "fate": "survived_verbatim"
+        }
+      ],
+      "totalChars": 2672,
+      "charsWritten": 2795,
+      "separatorChars": 123,
+      "survivedChars": 2669,
+      "survivalRate": 0.999
+    }
+  ],
+  "stats": {
+    "finalChars": 3018,
+    "coveredChars": 2939,
+    "byClass": {
+      "survived_verbatim": {
+        "spans": 18,
+        "chars": 2724,
+        "pct": 0.927
+      },
+      "survived_mutated": {
+        "spans": 0,
+        "chars": 0,
+        "pct": 0
+      },
+      "no_generation_provenance": {
+        "spans": 5,
+        "chars": 215,
+        "pct": 0.073
+      }
+    },
+    "uncertainSpans": 1,
+    "trivialSpans": 2,
+    "byModel": {
+      "claude[bot]": {
+        "chars": 2724,
+        "pctOfCovered": 0.927
+      }
+    },
+    "generated": {
+      "totalChars": 2672,
+      "charsWritten": 2795,
+      "separatorChars": 123,
+      "verbatimClaimedChars": 2721,
+      "survivedChars": 2669,
+      "deletedChars": 3,
+      "deletedPct": 0.001,
+      "humanDeletedChars": 3,
+      "humanDeletedPct": 0.001,
+      "mergeDeletedChars": 0,
+      "unknownDeletedChars": 0
+    },
+    "perFile": [
+      {
+        "path": "docs/sprints/dispatch-queue.md",
+        "coveredChars": 2939,
+        "byClass": {
+          "survived_verbatim": 2724,
+          "survived_mutated": 0,
+          "no_generation_provenance": 215
+        }
+      }
+    ],
+    "perConversation": [
+      {
+        "conversationId": "git-4d5e401",
+        "title": "PM standup 2026-09-26: pending tracker and dispatch queue",
+        "generations": 1,
+        "generatedChars": 2672,
+        "survivedChars": 2669,
+        "survivalRate": 0.999,
+        "turnsToAcceptance": 1
+      }
+    ]
+  },
+  "durability": {
+    "method": "git-forward-walk",
+    "tipSha": "0d68df0d6084e275ba71ddc0f474e6d711296591",
+    "closingSha": "9e017a97e5ee4114c5d88e3fa3bd074bbd07f261",
+    "testedSpans": 16,
+    "durableSpans": 6,
+    "erodedSpans": 3,
+    "decayedSpans": 7,
+    "durableChars": 1039,
+    "decayedChars": 1472,
+    "decayRate": 0.586220629231382,
+    "baselineDecayRate": 0.41509433962264153,
+    "medianIntactSeconds": 0,
+    "maxRevisionsWalked": 50,
+    "minTraceableLen": 24
+  },
+  "signals": {
+    "method": "auto-detected",
+    "annotatedAt": "2026-10-05T02:40:48.078Z",
+    "episode": {
+      "steps": 1,
+      "generations": 1,
+      "accepted": false,
+      "acceptanceStatedInChat": false,
+      "acceptanceBasis": "owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed"
+    },
+    "correctionLoops": [],
+    "feedbackTranslations": [],
+    "repairAttempts": [],
+    "regressions": [],
+    "defensiveGuardrails": [],
+    "oneShotCorrections": [],
+    "notes": [
+      "label-stage record (git commit pair): corrections appear once, as edits;",
+      "recurrence and loops are unobservable without the chat trace."
+    ]
+  }
+}
