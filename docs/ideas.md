@@ -2,6 +2,39 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Grooming (2026-10-05, ceremony run 2026-10-06)
+
+Two `accepted` entries below (not reproduced here, see their dated
+sections) appear substantially shipped, checked directly against
+`main` this run:
+
+- **"Finished work is not only chat"** (2026-09-20) — `artifact.kind`
+  and `artifact.renderRef` both exist on `OutcomeRecord`
+  (`ursa-major/src/types.ts`), and `ursa run` fills `kind: 'repo'`
+  per the entry's own first step. The PM does not change statuses it
+  does not own (pm.md §4); flagging so the engineer seat moves this
+  to `built` on its next run, same as the tuning-pipeline note below
+  did on 2026-09-27.
+- **"Agentic-forward: Ursa as the agents' HQ"** (2026-09-19) — the
+  split first step, (a) `get_briefing`'s interface, is built and
+  tested (`ursa-major/src/hq/briefing.ts`, `hq.test.ts`, `hq/README.md`).
+  Sub-step (c), semantic `nearestCases` ranking, also shipped
+  (`engineer/2026-09-29-semantic-nearest-cases`, merged). Only (d),
+  dogfooding against one of Ursa's own seats, is unverified from the
+  repo alone. Flagging for the same reason as above.
+
+**Awaiting your verdict** (pm.md §4, two weeks with no ruling): three
+`proposed` entries, oldest first — repo split (2026-09-18, 18 days),
+tuning packs (2026-09-19, 17 days), the merge-commits/PR-reader
+finding (2026-09-20, 16 days). Unchanged from every grooming pass
+since 2026-09-24; no entry has newly crossed the two-week line this
+run (the next-oldest `proposed` entry is 2026-10-04, 2 days old).
+
+No entries marked stale or superseded this run. Ordering `accepted`
+entries by leverage is moot this pass — both `accepted` entries are
+flagged above as effectively done, and no new entry was promoted to
+`accepted` (only the owner moves that status).
+
 ## Grooming (2026-09-21, first PM run)
 
 Accepted entries below, ordered by leverage against docs/vision.md
