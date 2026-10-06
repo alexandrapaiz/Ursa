@@ -456,12 +456,12 @@ question it is long enough to ask.
 ```sh
 cd /Users/<you>/src/Ursa/ursa-major
 npm test                              # tsc --noEmit && vitest run
-npx vitest run src/corroborate.test.ts # the ten cases in §6
-npx vitest run src/invariants.test.ts  # includes the six for the new bound
+npx vitest run src/corroborate.test.ts # the eleven cases described in §2 and §8.1
+npx vitest run src/invariants.test.ts  # includes the five for the new bound
 ```
 
-`npm test` on this branch: **411 passed, 4 skipped, 0 failed**, over 25
-test files. Fifteen of those are new (10 in `src/corroborate.test.ts`, 5
+`npm test` on this branch: **412 passed, 4 skipped, 0 failed**, over 25
+test files. Sixteen of those are new (11 in `src/corroborate.test.ts`, 5
 in `src/invariants.test.ts`); the other 396 existed before this change
 and were run unmodified with corroboration **on by default**, per §4.5.
 That is the regression evidence: no existing fixture's labels moved.
