@@ -109,11 +109,37 @@ Oct 2024, rev. Feb 2025) makes Ursa's §3.2 argument in machine
 translation: in preference optimization an annotator judges two given
 sequences, whereas "for post-editing, editors create s₁ and know that
 it should be better than s₂", which makes post-edits "a source of
-reliable human preferences **by construction**." It also cites Kreutzer
-et al. (2018) for pairwise preferences being *less reliable* than other
-feedback forms, and finds the best results come from SFT on post-edits
-before preference optimization — a sequencing result that bears directly
-on §5's ordering here. **The distinction to state: MT post-edits are
+reliable human preferences **by construction**." It finds the best
+results come from SFT on post-edits before preference optimization — a
+sequencing result that bears directly on §5's ordering here.
+
+*Correction, 2026-10-06 (research seat, cron run).* This paragraph
+previously cited Kreutzer et al. (2018) at second hand, through
+arXiv:2410.02320, for "pairwise preferences being *less reliable* than
+other feedback forms." The primary source does not support that
+sentence and **Minor's materials must not use it.** Kreutzer et al.,
+*Reliability and Learnability of Human Bandit Feedback for
+Sequence-to-Sequence Reinforcement Learning* (ACL 2018, P18-1165,
+arXiv:1805.10627), states in its abstract that for cardinal (5-point
+ratings) and ordinal (pairwise preferences) feedback "their intra- and
+inter-annotator α-agreement is **comparable**." The reliability
+advantage it reports appears only *after* standardization: "best
+reliability is obtained for **standardized cardinal** feedback, and
+cardinal feedback is also easiest to learn and generalize from."
+Two consequences, both load-bearing for a buyer-facing document:
+pairwise feedback is not shown to be less reliable than feedback in
+general, only less reliable than a *standardized Likert rating*; and
+Kreutzer's own remedy is therefore **a stated-preference rating
+instrument**, which is the construction the Tacit Intelligence
+principle rejects (`docs/vision.md` §0b: "a stated-preference survey
+contradicts the third"). Cited carelessly, this paper hands a
+post-training reader an eight-year-old argument *for* the thing Ursa
+calls drift. The defensible use of it is narrower and still useful:
+**it is evidence that the pairwise construction has no reliability
+advantage even against a cheap rating scale**, which is a weaker claim
+than §1 needs and the only one the source carries.
+
+**The distinction to state: MT post-edits are
 solicited from paid editors as the task itself.** The edit exists
 because someone was employed to produce it, which is why those corpora
 do not reach population scale. The record's `survived_mutated` spans are
@@ -139,9 +165,65 @@ processing from the opposite direction: it cannot be offered to a real
 user base, and it is why that dataset is bounded at lab scale while
 ours is not.
 
+**Survival itself is now measured by third parties, and the numbers
+cut two ways.** *Added 2026-10-06 (cron run); this is the nearest
+external work to the record's core construct that this seat has
+found.* Rahman and Shihab, *Will It Survive? Deciphering the Fate of
+AI-Generated Code in Open Source* (arXiv:2601.16809, 23 Jan 2026), run
+"survival analysis of 201 open-source projects, tracking over 200,000
+code units authored by AI agents versus humans," and report that
+"contrary to the disposable code narrative, agent-authored code
+survives significantly longer: at the line level, it exhibits a 15.8
+percentage-point lower modification rate and 16% lower hazard of
+modification (HR = 0.842, p < 0.001)."
+
+Three things follow, and Minor's materials should state all three
+rather than quote the convenient one.
+
+1. **The construct is externally validated; the join is not.** Line-level
+   survival of generated text in real finished work is a measurable
+   quantity that other people now measure at scale. What Rahman and
+   Shihab have is an *authorship class* recovered from repository
+   metadata — the retrospective-mining route whose failure modes
+   arXiv:2601.18345 documents (squash merges, rebases, optional
+   co-author trailers). Their "human-authored" class is this record's
+   `no_generation_provenance` **approximated by git blame**, and their
+   dataset cannot contain a generation that was produced and discarded
+   before a commit existed. Launch-time recording is what closes that
+   gap; the construct was never the differentiator, the join is.
+2. **It is a caution for §3.2's yield, and it should be priced in.** If
+   generated lines are modified *less* than human-written ones, the
+   per-span yield of `survived_mutated` from coding work is plausibly
+   lower than task-001 implies, and the authors note the effect sizes
+   are small (Cramér's V = 0.116). An outcome corpus sold on correction
+   density should not assume coding work is where correction density
+   lives.
+3. **The clause that is worth more than the headline is this one:
+   "per-agent variation exceeds the agent-human gap."** The field's own
+   data says the variance that matters is *between models*, not between
+   model and human — and no dataset in existence attributes it per
+   model at span level, because authorship metadata does not record
+   which model wrote a line. That is cross-model comparison
+   (`CLAUDE.md` §4, property 1) argued from a third party's numbers
+   instead of ours, and it is the strongest version of that pitch this
+   seat has been able to write.
+
+**And one honest limit, which belongs in the methods doc's §6 and is
+filed there as a finding rather than written here:** the paper's
+closing sentence is "the bottleneck for agent-generated code may not be
+generation quality, but the organizational practices that govern its
+long-term evolution." Read against the record, that is a confound in
+the survival label itself — **a span can survive because nobody
+reviewed it.** Survival is a signal about the work's fate, not a
+measurement of quality, and §6 currently does not say so.
+
 Sources added 2026-10-05: arXiv:2410.02320; arXiv:2606.20482;
 arXiv:2609.12459; arXiv:2608.13622; arXiv:2606.04923;
 arXiv:2506.01937 (RewardBench 2, the incumbent in §3's eval slot).
+Added 2026-10-06: arXiv:2601.16809 (survival analysis, above);
+Kreutzer et al. ACL 2018 / arXiv:1805.10627 (the corrected citation,
+§1c above); arXiv:2601.21379 (acceptance predicted *before display*,
+IDE-telemetry only).
 
 ## 2. GRPO makes the reward slot concrete
 
