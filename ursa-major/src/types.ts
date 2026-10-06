@@ -217,7 +217,27 @@ export interface RawGeneration {
 export interface GenerationRecord extends RawGeneration {
   generationIndex: number
   spans: GenerationSpan[]
+  /**
+   * Characters inside segments. `segment()` splits a generation into
+   * sentences or statements and the characters BETWEEN those segments —
+   * blank lines, indentation, the newline after a heading — belong to no
+   * segment, so they are absent from this sum. It is the denominator of
+   * `survivalRate` and of every deletion rate, because a fate is only
+   * ever assigned to a segment.
+   *
+   * It is NOT the number of characters the generation wrote. That is
+   * `charsWritten`, and the difference is `separatorChars`. Keeping the
+   * two apart is load-bearing: a verbatim claim is matched against the
+   * normalization of the WHOLE generation text, so a claim can cover
+   * separator characters that `totalChars` never counted, and comparing
+   * a claim total against this field produces arithmetic that cannot be
+   * true. See src/invariants.ts and docs/design/generated-denominator.md.
+   */
   totalChars: number
+  /** `text.length` — every character the generation wrote, separators included */
+  charsWritten: number
+  /** `charsWritten - totalChars` — characters between segments, carrying no fate */
+  separatorChars: number
   survivedChars: number
   survivalRate: number
 }
@@ -259,7 +279,26 @@ export interface Stats {
   trivialSpans: number
   byModel: Record<string, { chars: number; pctOfCovered: number }>
   generated: {
+    /** sum of every generation's `totalChars` — segment characters only */
     totalChars: number
+    /**
+     * sum of every generation's `charsWritten` — the characters actually
+     * written, separators included. The only generation-side figure a
+     * final-side character count may be compared against, since a span's
+     * source extent can cover separators. Always >= totalChars.
+     */
+    charsWritten: number
+    /** sum of every generation's `separatorChars` */
+    separatorChars: number
+    /**
+     * Generation characters covered by at least one `survived_verbatim`
+     * claim, counted once each. `byClass.survived_verbatim.chars` counts
+     * final-file characters instead, so it double-counts a generation
+     * whose text was reused in two places and can exceed any
+     * generation-side total. This field is the deduplicated figure, and
+     * it is what the run summary prints next to `charsWritten`.
+     */
+    verbatimClaimedChars: number
     survivedChars: number
     /**
      * every deleted char, whatever destroyed it:
@@ -307,6 +346,47 @@ export interface Stats {
 // raw generations and the user's own words.
 // ---------------------------------------------------------------------------
 
+/**
+ * Where one excerpt inside a signal came from, as data rather than as prose.
+ *
+ * Every signal Ursa Minor sells quotes somebody: `CorrectionLoop.
+ * discoveredSpec` quotes the user's last statement of what she wanted,
+ * `RegressionEvent.evidence` quotes her report that something broke, and
+ * `OneShotCorrection.text` quotes either her prompt or the agent text she
+ * edited. Those quotes used to exist only inside the sentence a reader sees,
+ * which means a buyer auditing the signal had to find the raw text by hand
+ * and nothing could check the quote mechanically. A `QuoteRef` names the raw
+ * text the excerpt was taken from, precisely enough that `checkRecord`
+ * re-reads it and asserts the excerpt is really in there
+ * (`SIGNAL_QUOTE_GROUNDED`, src/invariants.ts).
+ */
+export interface QuoteRef {
+  /**
+   * which raw text in this record the excerpt was taken from:
+   *   `user_prompt` — the `conversations[].prompts[]` entry with this
+   *                   `conversationId` and this `step`
+   *   `generation`  — the `generations[]` entry at this `generationIndex`,
+   *                   whose `turnIndex` is this `step`
+   *   `final_span`  — the finished file at this `filePath`, i.e. `files[].text`
+   */
+  of: 'user_prompt' | 'generation' | 'final_span'
+  /** required for `user_prompt` and `generation`; absent for `final_span` */
+  conversationId?: string
+  /** `prompts[].step` or `generations[].turnIndex`; absent for `final_span` */
+  step?: number
+  /** exact address of the generation quoted; set only when `of` is `generation` */
+  generationIndex?: number
+  /** `files[].path`; set only when `of` is `final_span` */
+  filePath?: string
+  /**
+   * the excerpt exactly as it appears in the signal's own prose field, as
+   * produced by `excerpt()` in src/text.ts: whitespace collapsed to single
+   * spaces, trimmed, and truncated with a trailing ellipsis past
+   * `MAX_EXCERPT` characters.
+   */
+  text: string
+}
+
 export interface CorrectionLoop {
   id: string
   /** conversation the steps below belong to; step ordinals are per-conversation */
@@ -327,6 +407,8 @@ export interface CorrectionLoop {
   resolvingSteps: number[]
   /** the spec the user could not state in advance, articulated post-hoc */
   discoveredSpec: string
+  /** every excerpt `discoveredSpec` carries, with the raw text it came from */
+  quotes: QuoteRef[]
 }
 
 export interface FeedbackTranslation {
@@ -357,6 +439,8 @@ export interface RegressionEvent {
   /** user's verbatim words */
   evidence: string
   causedBySteps?: number[]
+  /** `evidence` again, with the prompt it was quoted from */
+  quotes: QuoteRef[]
 }
 
 export interface DefensiveGuardrail {
@@ -371,6 +455,12 @@ export interface OneShotCorrection {
   text: string
   /** why it closed in one shot — the stateable domain it belongs to */
   domain: string
+  /**
+   * every excerpt inside `text`, with the raw text each came from. One entry
+   * at the trace stage (the user's prompt); two at the label stage, where
+   * `text` is `AGENT: <generation extent>` over `FINAL: <finished span>`.
+   */
+  quotes: QuoteRef[]
 }
 
 export interface LabSignals {

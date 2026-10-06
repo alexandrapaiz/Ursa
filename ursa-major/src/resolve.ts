@@ -214,10 +214,18 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     const survivedChars = spans
       .filter((s) => s.fate !== 'generated_deleted')
       .reduce((a, s) => a + (s.end - s.start), 0)
+    // charsWritten is the generation's own length, separatorChars the part
+    // of it no segment covers. totalChars stays segment-only, because a fate
+    // is only ever assigned to a segment, but a verbatim claim is matched
+    // against the normalization of the whole text and can therefore cover
+    // separators. Recording all three is what lets src/invariants.ts state
+    // a bound a claim total can actually be checked against.
     return {
       ...p.gen,
       spans,
       totalChars,
+      charsWritten: p.gen.text.length,
+      separatorChars: p.gen.text.length - totalChars,
       survivedChars,
       survivalRate: totalChars ? r3(survivedChars / totalChars) : 0,
     }

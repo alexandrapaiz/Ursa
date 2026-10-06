@@ -26,7 +26,8 @@ export function zeroStats(): Stats {
     trivialSpans: 0,
     byModel: {},
     generated: {
-      totalChars: 0, survivedChars: 0, deletedChars: 0, deletedPct: 0,
+      totalChars: 0, charsWritten: 0, separatorChars: 0, verbatimClaimedChars: 0,
+      survivedChars: 0, deletedChars: 0, deletedPct: 0,
       humanDeletedChars: 0, humanDeletedPct: 0, mergeDeletedChars: 0, unknownDeletedChars: 0,
     },
     perFile: [],
@@ -90,6 +91,11 @@ export const RECORDS: OutcomeRecord[] = [
         resolvingSteps: [33],
         discoveredSpec:
           'entrance motion may reposition an element by at most 8px; anything larger reads as breakage, not polish',
+        // Distilled, not quoted: this briefing fixture carries no
+        // conversations, so there is no raw prompt for a QuoteRef to point
+        // at. An empty array is the honest value, and `measure()` counts it
+        // under `signalEntriesWithoutQuote` rather than failing the gate.
+        quotes: [],
       },
       {
         id: 'loop-b',
@@ -103,6 +109,7 @@ export const RECORDS: OutcomeRecord[] = [
         resolution: 'accepted_tacitly',
         resolvingSteps: [45],
         discoveredSpec: 'body text on the dark section holds at least 7:1 against its background',
+        quotes: [],
       },
     ],
     feedbackTranslations: [
@@ -129,6 +136,7 @@ export const RECORDS: OutcomeRecord[] = [
         resolution: 'accepted',
         resolvingSteps: [10],
         discoveredSpec: 'claims name the mechanism or get cut; no adjective survives without one',
+        quotes: [],
       },
     ],
   }),

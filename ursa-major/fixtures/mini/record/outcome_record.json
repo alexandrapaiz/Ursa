@@ -5,6 +5,9 @@
     "finished": true,
     "generatedAt": "2026-09-25T00:00:00.000Z"
   },
+  "artifact": {
+    "kind": "chat"
+  },
   "files": [
     {
       "path": "final.md",
@@ -160,10 +163,15 @@
           "start": 160,
           "end": 252,
           "text": "This throwaway filler sentence about unrelated marketing copy should never survive anywhere.",
-          "fate": "generated_deleted"
+          "fate": "generated_deleted",
+          "deletion": {
+            "cause": "human_edit"
+          }
         }
       ],
       "totalChars": 250,
+      "charsWritten": 252,
+      "separatorChars": 2,
       "survivedChars": 158,
       "survivalRate": 0.632
     },
@@ -183,6 +191,8 @@
         }
       ],
       "totalChars": 57,
+      "charsWritten": 57,
+      "separatorChars": 0,
       "survivedChars": 57,
       "survivalRate": 1
     }
@@ -221,9 +231,16 @@
     },
     "generated": {
       "totalChars": 307,
+      "charsWritten": 309,
+      "separatorChars": 2,
+      "verbatimClaimedChars": 127,
       "survivedChars": 215,
       "deletedChars": 92,
-      "deletedPct": 0.3
+      "deletedPct": 0.3,
+      "humanDeletedChars": 92,
+      "humanDeletedPct": 0.3,
+      "mergeDeletedChars": 0,
+      "unknownDeletedChars": 0
     },
     "perFile": [
       {
@@ -255,6 +272,28 @@
         "survivalRate": 1,
         "turnsToAcceptance": 1
       }
+    ]
+  },
+  "signals": {
+    "method": "auto-detected",
+    "annotatedAt": "2026-10-05T02:39:33.927Z",
+    "episode": {
+      "steps": 1,
+      "generations": 2,
+      "accepted": null,
+      "acceptanceStatedInChat": false,
+      "acceptanceBasis": "undeclared: no owner declaration surface was offered; retention is NOT acceptance"
+    },
+    "correctionLoops": [],
+    "feedbackTranslations": [],
+    "repairAttempts": [],
+    "regressions": [],
+    "defensiveGuardrails": [],
+    "oneShotCorrections": [],
+    "notes": [
+      "trace-stage record: loops, regressions and one-shot corrections are auto-detected from conversations[].prompts[];",
+      "every step joins to generations[].turnIndex and conversations[].prompts[].step, so each entry is re-derivable from the trace (theme overlap 0.34, minimum 2 shared terms).",
+      "feedbackTranslations and repairAttempts stay empty by design: naming the mechanism behind a complaint, or the strategy behind a repair, is a language judgment the detector does not make. The distiller does it downstream."
     ]
   }
 }

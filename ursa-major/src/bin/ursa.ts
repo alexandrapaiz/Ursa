@@ -33,6 +33,7 @@ import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
+import { checkRecord, formatViolations } from '../invariants'
 import type { Artifact, OutcomeRecord, RawGeneration } from '../types'
 
 const TEXT_EXTS = new Set([
@@ -115,11 +116,24 @@ export function renderRunSummary(
   diagnostics?: PairFinderDiagnostics,
 ): string {
   const lines: string[] = []
-  let verbatim = 0, mutated = 0, generated = 0, humanDeleted = 0, mergeDeleted = 0, unknownDeleted = 0
+  let verbatim = 0, mutated = 0, written = 0, traced = 0, claimed = 0
+  let humanDeleted = 0, mergeDeleted = 0, unknownDeleted = 0
   for (const r of records) {
     verbatim += r.stats.byClass.survived_verbatim.chars
     mutated += r.stats.byClass.survived_mutated.chars
-    generated += r.stats.generated.totalChars
+    // Three different generation-side totals, because the summary used to
+    // print one of them against a final-side total and produce arithmetic
+    // that cannot be true: on 2026-10-04 it claimed 239,976 chars survived
+    // verbatim out of 239,841 generated. `written` is every character the
+    // generations wrote and is the only one a final-side count may be set
+    // beside. `traced` counts only characters inside segments, which is
+    // what carries a fate and therefore the only denominator a deletion
+    // rate may use. `claimed` is the generated text that reached the
+    // finished work, counted once per generated character rather than once
+    // per place it appears. See src/invariants.ts.
+    written += r.stats.generated.charsWritten
+    traced += r.stats.generated.totalChars
+    claimed += r.stats.generated.verbatimClaimedChars
     humanDeleted += r.stats.generated.humanDeletedChars
     mergeDeleted += r.stats.generated.mergeDeletedChars
     unknownDeleted += r.stats.generated.unknownDeletedChars
@@ -127,9 +141,12 @@ export function renderRunSummary(
   lines.push(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, ${records.length} resolved into record${records.length === 1 ? '' : 's'}.`)
   lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
   lines.push(`That's the part worth noticing: not what got written, what got kept.`)
-  if (generated > 0) {
-    const pct = Math.round((humanDeleted / generated) * 100)
-    lines.push(`${generated.toLocaleString()} chars were generated to get there; ${pct}% were drafts you discarded on the way.`)
+  if (written > 0) {
+    lines.push(`${written.toLocaleString()} chars were generated to get there, and ${claimed.toLocaleString()} of them reached the finished work unedited.`)
+  }
+  if (traced > 0 && humanDeleted > 0) {
+    const pct = Math.round((humanDeleted / traced) * 100)
+    lines.push(`You discarded ${humanDeleted.toLocaleString()} chars of draft on the way, ${pct}% of the ${traced.toLocaleString()} whose fate this run could trace.`)
   }
   if (mergeDeleted > 0) {
     lines.push(`A further ${mergeDeleted.toLocaleString()} chars were destroyed by merges rather than by you, so they are not counted against you.`)
@@ -360,6 +377,21 @@ export async function main(argv: string[]): Promise<number> {
     }
   }
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
+
+  // The gate runs on every run, after the records are on disk, and its
+  // failure is the exit code. Records are saved first on purpose: a record
+  // whose arithmetic is impossible is still the evidence of the defect, so
+  // nothing is withheld from the user. What changes is that the run stops
+  // reporting success. This is deliberately not behind a flag — the defect
+  // it exists for (src/invariants.ts) survived six records, four open pull
+  // requests and 344 passing tests, and an opt-in check would have been
+  // off for all of them.
+  const violations = records.flatMap((r) => checkRecord(r))
+  if (violations.length > 0) {
+    console.error(`\n${violations.length} record invariant${violations.length === 1 ? '' : 's'} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.`)
+    console.error(formatViolations(violations))
+    return 1
+  }
   return 0
 }
 
