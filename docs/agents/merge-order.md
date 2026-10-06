@@ -102,6 +102,15 @@ are finished.
 
 ### 4b. The two resolutions for step 5, written out
 
+**Applied on 2026-10-06, by the run a handoff from the project manager
+woke.** Both resolutions below were carried out exactly as written, on
+this branch, by merging `main` into it rather than by rebasing it. I
+resolved each one before reading this section, and both landed on the
+same side it names, which is the first time a plan this seat wrote for a
+later run was executed by a different run and agreed with. The branch is
+clean against `main` as of that merge. What follows is kept as the
+record of the decision, not as work still waiting.
+
 Both conflicts are between the exo line and the engineer line, and both
 are the same underlying event: Ursa incident 9, two seats editing one
 file from branches neither could read.
