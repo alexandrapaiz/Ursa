@@ -2,6 +2,26 @@
 //   Pass 1 — verbatim: normalized containment in any generation.
 //   Pass 2 — mutated: best fuzzy match over generation segments, thresholded.
 //   Residue → no_generation_provenance; unclaimed generation segments → generated_deleted.
+//
+// An unclaimed generation segment is absent from the final file, which
+// is not the same as the human having discarded it: a merge between the
+// generation and the final commit can have destroyed it mechanically.
+// resolve() stays a pure function of its input and does not read git,
+// so the caller injects `attributeDeletion` to say which it was. With
+// no attributor every deletion is the human's, which is correct for the
+// chat path (src/cli.ts), where the final file is the file on disk and
+// no merge sits in between.
+//
+// Pass 2 has the mirror-image problem on the survival side. A score above
+// THETA_HIGH says the final text is SIMILAR to a generation segment; the
+// `survived_mutated` label says the person DERIVED it by editing that
+// segment. Those are different claims, and the second one is the one
+// CLAUDE.md §1 sells. The evidence that separates them is outside the
+// record, so it arrives the same way: the caller injects `corroborate`,
+// which answers whether the span's text also exists outside the
+// generation's line of descent. See src/corroborate.ts for the case that
+// forced it. With no corroborator every above-threshold match is labelled
+// `survived_mutated` as before.
 
 import { diffWords } from 'diff'
 import { normalize, type Normalized } from './normalize'
@@ -11,8 +31,8 @@ import {
   tokens, levSimilarity, containment, combinedScore,
 } from './match'
 import type {
-  ConversationMeta, FinalFile, FinalSpan, GenerationFate, GenerationRecord,
-  OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
+  Artifact, ConversationMeta, DeletionAttribution, DescentEvidence, FinalFile, FinalSpan,
+  GenerationFate, GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
 } from './types'
 import { computeStats } from './stats'
 
@@ -23,6 +43,29 @@ export interface ResolveInput {
   generations: RawGeneration[]
   finished: boolean
   generatedAt?: string
+  /**
+   * What kind of finished thing this is. Omitted means `chat`: the resolver's
+   * original path joins final files against a conversation transcript, so the
+   * correction stream is chat. Callers that know better say so — `ursa run`
+   * passes `repo` or `hosted` because it walks git.
+   */
+  artifact?: Artifact
+  /**
+   * Why a generation span is missing from the final file. Called once
+   * per deleted span with the generation's own path and the span's text.
+   * Omit it and every deletion is attributed to the human.
+   */
+  attributeDeletion?: (filePath: string, spanText: string) => DeletionAttribution
+  /**
+   * Whether a final span's text exists outside the generation's line of
+   * descent, asked once per span the fuzzy pass scores above THETA_HIGH,
+   * with the final file's path and the span's own text. A `rival` verdict
+   * drops the `survived_mutated` label and the diff that goes with it,
+   * because an edit of this generation is then not the only account of
+   * the text. Omit it and similarity is accepted as descent, which is the
+   * right reading only when no other text was in evidence.
+   */
+  corroborate?: (filePath: string, spanText: string) => DescentEvidence
 }
 
 interface GenSentence extends Span {
@@ -145,18 +188,42 @@ export function resolve(input: ResolveInput): OutcomeRecord {
           if (!best || score > best.score) best = { p: c.p, sent: c.sent, score }
         }
         if (best && best.score >= THETA_HIGH) {
-          span = {
-            ...base,
-            class: 'survived_mutated',
-            score: r3(best.score),
-            source: srcPtr(best.p, best.sent.start, best.sent.end),
-            diff: diffWords(best.sent.text, s.text).map((d) => ({
-              value: d.value,
-              ...(d.added ? { added: true } : {}),
-              ...(d.removed ? { removed: true } : {}),
-            })),
+          const descent = input.corroborate?.(f.path, s.text)
+          if (descent?.basis === 'rival') {
+            // The text exists outside this generation's descent, so the
+            // person did not reach it by editing this generation. Demoted
+            // to the same shape the below-threshold branch produces: no
+            // `source`, no `diff`, the evidence kept as a candidate for a
+            // human to adjudicate. No claim is added, so the generation
+            // segment stays unclaimed and is reported `generated_deleted`
+            // — which is what happened to it.
+            span = {
+              ...base,
+              class: 'no_generation_provenance',
+              uncertain: true,
+              candidate: { score: r3(best.score), text: best.sent.text, source: srcPtr(best.p, best.sent.start, best.sent.end) },
+              descent,
+            }
+          } else {
+            span = {
+              ...base,
+              class: 'survived_mutated',
+              score: r3(best.score),
+              source: srcPtr(best.p, best.sent.start, best.sent.end),
+              diff: diffWords(best.sent.text, s.text).map((d) => ({
+                value: d.value,
+                ...(d.added ? { added: true } : {}),
+                ...(d.removed ? { removed: true } : {}),
+              })),
+              // `uncertain` is deliberately NOT set on an `unverified`
+              // verdict. It is stats.uncertainSpans' own definition (a
+              // below-threshold candidate awaiting adjudication) and that
+              // count is O1 KR1.1's metric; widening it here would move
+              // the KR's number without any span changing.
+              ...(descent ? { descent } : {}),
+            }
+            addClaim(mutatedClaims, { genIndex: best.p.gen.generationIndex, start: best.sent.start, end: best.sent.end })
           }
-          addClaim(mutatedClaims, { genIndex: best.p.gen.generationIndex, start: best.sent.start, end: best.sent.end })
         } else if (best && best.score >= THETA_LOW) {
           span = {
             ...base,
@@ -176,22 +243,34 @@ export function resolve(input: ResolveInput): OutcomeRecord {
   const overlaps = (claims: Claim[] | undefined, s: Span) =>
     !!claims && claims.some((c) => c.start < s.end && c.end > s.start)
 
+  const attribute = input.attributeDeletion ?? (() => ({ cause: 'human_edit' as const }))
+
   const generations: GenerationRecord[] = preps.map((p) => {
     const gi = p.gen.generationIndex
     const spans = p.sentences.map((gs) => {
       const v = overlaps(verbatimClaims.get(gi), gs)
       const m = !v && overlaps(mutatedClaims.get(gi), gs)
       const fate: GenerationFate = v ? 'survived_verbatim' : m ? 'survived_mutated' : 'generated_deleted'
-      return { start: gs.start, end: gs.end, text: gs.text, fate }
+      const base = { start: gs.start, end: gs.end, text: gs.text, fate }
+      if (fate !== 'generated_deleted') return base
+      return { ...base, deletion: attribute(p.gen.filePath ?? '', gs.text) }
     })
     const totalChars = spans.reduce((a, s) => a + (s.end - s.start), 0)
     const survivedChars = spans
       .filter((s) => s.fate !== 'generated_deleted')
       .reduce((a, s) => a + (s.end - s.start), 0)
+    // charsWritten is the generation's own length, separatorChars the part
+    // of it no segment covers. totalChars stays segment-only, because a fate
+    // is only ever assigned to a segment, but a verbatim claim is matched
+    // against the normalization of the whole text and can therefore cover
+    // separators. Recording all three is what lets src/invariants.ts state
+    // a bound a claim total can actually be checked against.
     return {
       ...p.gen,
       spans,
       totalChars,
+      charsWritten: p.gen.text.length,
+      separatorChars: p.gen.text.length - totalChars,
       survivedChars,
       survivalRate: totalChars ? r3(survivedChars / totalChars) : 0,
     }
@@ -204,6 +283,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       finished: input.finished,
       generatedAt: input.generatedAt ?? new Date().toISOString(),
     },
+    artifact: input.artifact ?? { kind: 'chat' },
     files,
     conversations: input.conversations,
     generations,

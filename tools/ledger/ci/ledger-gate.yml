@@ -1,0 +1,31 @@
+name: ledger-gate
+
+# The ledger is the one file every seat writes to on every run, which made it
+# the only thing blocking five open pull requests on 2026-09-27. This gate
+# keeps the two failure modes it is prone to out of `main`: an entry that does
+# not meet the pm.md §4 contract, and a block that says the same thing twice
+# because an append collision was resolved by hand.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # No `npm ci`: tools/ledger has no dependencies, because the merge driver
+      # has to run during a `git merge` in a checkout where nothing is installed.
+      - name: Merge driver and checker tests
+        run: node --test tools/ledger/ledger.test.mjs tools/ledger/check.test.mjs
+      - name: Ledger contract
+        run: node tools/ledger/check.mjs docs/ideas.md

@@ -1,0 +1,211 @@
+{
+  "snapshot": {
+    "repo": "alexandrapaiz/Ursa",
+    "number": 13,
+    "title": "Engineer 2026-09-24: auto-detect correction loops and regressions from a chat trace (sprint item 1)",
+    "baseRef": "main",
+    "headRef": "engineer/2026-09-24-trace-stage-loops",
+    "headSha": "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5",
+    "outcome": "open",
+    "mergedAt": null,
+    "closedAt": null,
+    "mergedByLogin": null,
+    "mergeCommitSha": "878d9b746313b72777e5871118eedcb76bb4ea27",
+    "commits": [
+      {
+        "sha": "023735bdc98c89c95cd029257960aac3cfce020a",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T15:52:50Z",
+        "subject": "WIP: open the run for sprint item 1 (trace-stage loop and regression detection)",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "parents": [
+          "104697abdc9399ef6ad15ee8e5eb185a52e74f1c"
+        ],
+        "files": [
+          "docs/design/trace-stage-loops.md"
+        ]
+      },
+      {
+        "sha": "a7fc1193547f0604b5be30b66b3ae1b25b17c8bb",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T15:59:52Z",
+        "subject": "Trace-stage loop detector: loops.ts, two-stage deriveSignals, schema conversationId",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "parents": [
+          "023735bdc98c89c95cd029257960aac3cfce020a"
+        ],
+        "files": [
+          "ursa-major/src/loops.ts",
+          "ursa-major/src/signals.ts",
+          "ursa-major/src/text.ts",
+          "ursa-major/src/types.ts"
+        ]
+      },
+      {
+        "sha": "755f3139479e0c540779935196ac2685be40c7c8",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T16:02:11Z",
+        "subject": "Fixture, 18 tests, CLI auto-detect wiring, viewer verdict fix",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "parents": [
+          "a7fc1193547f0604b5be30b66b3ae1b25b17c8bb"
+        ],
+        "files": [
+          "ursa-major/fixtures/loops/conversations/01-claude.md",
+          "ursa-major/fixtures/loops/final.md",
+          "ursa-major/src/cli.ts",
+          "ursa-major/src/loops.test.ts",
+          "ursa-major/src/loops.ts",
+          "ursa-major/src/viewer.ts"
+        ]
+      },
+      {
+        "sha": "57a750abe71734a0bb0c444e2ce5d14859cbc97d",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T16:06:30Z",
+        "subject": "Design note, README status, three ledger entries and the craft scan",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 1,
+        "parents": [
+          "755f3139479e0c540779935196ac2685be40c7c8"
+        ],
+        "files": [
+          "README.md",
+          "docs/design/trace-stage-loops.md",
+          "docs/ideas.md"
+        ]
+      },
+      {
+        "sha": "c5484dabc206675c92e13005628131b25639051f",
+        "authorName": "claude[bot]",
+        "authorLogin": "github-actions[bot]",
+        "authoredAt": "2026-09-24T16:08:20Z",
+        "subject": "Merge main (PM standup #12) into engineer/2026-09-24-trace-stage-loops",
+        "trailers": "Claude Opus 5 <noreply@anthropic.com>",
+        "parentCount": 2,
+        "parents": [
+          "57a750abe71734a0bb0c444e2ce5d14859cbc97d",
+          "351309c1d3fa415013455d853a0dead0c3035a6e"
+        ],
+        "files": [
+          "docs/sprints/dispatch-queue.md",
+          "docs/sprints/pending.md"
+        ]
+      },
+      {
+        "sha": "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5",
+        "authorName": "ursa-engineer",
+        "authoredAt": "2026-09-30T03:52:22Z",
+        "subject": "Merge remote-tracking branch 'origin/main' into HEAD",
+        "trailers": "",
+        "parentCount": 2,
+        "parents": [
+          "c5484dabc206675c92e13005628131b25639051f",
+          "8c453f049e996c6a9592fd5a719f1221ea0be652"
+        ],
+        "files": [
+          ".github/workflows/agent-engineer.yml",
+          ".github/workflows/agent-exo.yml",
+          ".github/workflows/agent-finance.yml",
+          ".github/workflows/agent-frontend.yml",
+          ".github/workflows/agent-market.yml",
+          ".github/workflows/agent-okr.yml",
+          ".github/workflows/agent-pm.yml",
+          ".github/workflows/agent-research.yml",
+          ".github/workflows/agent-sales.yml",
+          ".github/workflows/agent-security.yml",
+          ".github/workflows/agent-skill.yml",
+          ".gitignore",
+          "docs/decisions.md",
+          "docs/design/product-plan.md",
+          "docs/ideas.md",
+          "docs/research/minor-training-fit.md",
+          "docs/sprints/dispatch-queue.md",
+          "docs/sprints/pending.md",
+          "docs/standards/lessons.md",
+          "docs/standards/pm.md",
+          "docs/standards/secrets.md",
+          "prompts/pm-agent.md",
+          "ursa-major/overlay/.gitignore",
+          "ursa-major/overlay/app/api/sync/[key]/route.ts",
+          "ursa-major/overlay/app/globals.css",
+          "ursa-major/overlay/app/layout.tsx",
+          "ursa-major/overlay/app/page.tsx",
+          "ursa-major/overlay/lib/crypto.ts",
+          "ursa-major/overlay/next-env.d.ts",
+          "ursa-major/overlay/next.config.ts",
+          "ursa-major/overlay/package-lock.json",
+          "ursa-major/overlay/package.json",
+          "ursa-major/overlay/tsconfig.json",
+          "ursa-major/src/bin/ursa.ts",
+          "ursa-major/src/bridge/crypto.test.ts",
+          "ursa-major/src/bridge/crypto.ts",
+          "ursa-major/src/bridge/index.ts",
+          "ursa-major/src/verdict.test.ts",
+          "ursa-major/src/verdict.ts"
+        ]
+      }
+    ],
+    "reviewComments": [],
+    "capturedAt": "2026-10-03T15:20:02.758Z"
+  },
+  "repo": {
+    "parents": {
+      "878d9b746313b72777e5871118eedcb76bb4ea27": [],
+      "c5484dabc206675c92e13005628131b25639051f": [
+        "57a750abe71734a0bb0c444e2ce5d14859cbc97d",
+        "351309c1d3fa415013455d853a0dead0c3035a6e"
+      ],
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5": [
+        "c5484dabc206675c92e13005628131b25639051f",
+        "8c453f049e996c6a9592fd5a719f1221ea0be652"
+      ]
+    },
+    "blobs": {
+      "c5484dabc206675c92e13005628131b25639051f:docs/design/trace-stage-loops.md": "c6c75ba61c433419632b26e6bd4ed93cf799a3e9",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:docs/design/trace-stage-loops.md": "c6c75ba61c433419632b26e6bd4ed93cf799a3e9",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:docs/design/trace-stage-loops.md": "c6c75ba61c433419632b26e6bd4ed93cf799a3e9",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/loops.ts": "7b5a727bd48591198a0940f6ce393ed4b8238256",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/loops.ts": "7b5a727bd48591198a0940f6ce393ed4b8238256",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/signals.ts": "7b804c906092f44bf0d27fdd92e21b2d21a0a7b6",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/signals.ts": "7b804c906092f44bf0d27fdd92e21b2d21a0a7b6",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/text.ts": "9bd4570d9c8837eeae15246d40cfb50ac1609089",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/text.ts": "9bd4570d9c8837eeae15246d40cfb50ac1609089",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/types.ts": "9417b34d112d6908fd62c2dfe440f4c9f14eced2",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/types.ts": "9417b34d112d6908fd62c2dfe440f4c9f14eced2",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/loops.ts": "7b5a727bd48591198a0940f6ce393ed4b8238256",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/signals.ts": "7b804c906092f44bf0d27fdd92e21b2d21a0a7b6",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/text.ts": "9bd4570d9c8837eeae15246d40cfb50ac1609089",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/types.ts": "9417b34d112d6908fd62c2dfe440f4c9f14eced2",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/fixtures/loops/conversations/01-claude.md": "cff5943136351235f31d357018fe5f61ceed58ce",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/fixtures/loops/conversations/01-claude.md": "cff5943136351235f31d357018fe5f61ceed58ce",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/fixtures/loops/final.md": "4c3ea73e59ad4b2effca941725a310e46231dff6",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/fixtures/loops/final.md": "4c3ea73e59ad4b2effca941725a310e46231dff6",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/cli.ts": "a73b0bb7ec52607795996046974109cc94d600d1",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/cli.ts": "a73b0bb7ec52607795996046974109cc94d600d1",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/loops.test.ts": "e41f695c58c06d645d413e0805f83dfb7b753933",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/loops.test.ts": "e41f695c58c06d645d413e0805f83dfb7b753933",
+      "c5484dabc206675c92e13005628131b25639051f:ursa-major/src/viewer.ts": "e22c2de0994ecc75a2b6d44ce29560f2aacc235f",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:ursa-major/src/viewer.ts": "e22c2de0994ecc75a2b6d44ce29560f2aacc235f",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/fixtures/loops/conversations/01-claude.md": "cff5943136351235f31d357018fe5f61ceed58ce",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/fixtures/loops/final.md": "4c3ea73e59ad4b2effca941725a310e46231dff6",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/cli.ts": "a73b0bb7ec52607795996046974109cc94d600d1",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/loops.test.ts": "e41f695c58c06d645d413e0805f83dfb7b753933",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:ursa-major/src/viewer.ts": "e22c2de0994ecc75a2b6d44ce29560f2aacc235f",
+      "c5484dabc206675c92e13005628131b25639051f:README.md": "d5e9c833e0904a580cf3ea6473a632f40fbd6714",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:README.md": "d5e9c833e0904a580cf3ea6473a632f40fbd6714",
+      "c5484dabc206675c92e13005628131b25639051f:docs/ideas.md": "c335cd5dc07ce9b1d2643dab373f78ffc9052b65",
+      "57a750abe71734a0bb0c444e2ce5d14859cbc97d:docs/ideas.md": "c335cd5dc07ce9b1d2643dab373f78ffc9052b65",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:README.md": "d5e9c833e0904a580cf3ea6473a632f40fbd6714",
+      "4f9a7b0b806f5d59a703ebee9b27bde4740b10f5:docs/ideas.md": "5b8c9e122bdcef68fbc110d977a76ffcb660b2d7",
+      "8c453f049e996c6a9592fd5a719f1221ea0be652:docs/ideas.md": "67d3c27771cd613200c0188314e1c713f9ce0c43"
+    }
+  }
+}
