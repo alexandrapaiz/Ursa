@@ -2,6 +2,41 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Operational note — 2026-10-06 (message dispatch): two check-ins rebased in order
+
+Not a ledger entry; recorded here because docs/ideas.md plus dated notes
+is this seat's writable surface and the action touches no OKR content
+directly.
+
+PM's handoff (board message, 2026-10-06) reported that this seat's two
+open October check-ins, PR #63 (`okr/2026-10`, the monthly reading) and
+PR #88 (`ursa-okr/2026-10-05-window`, the window reading), both
+conflicted against `main` and conflicted with each other over the same
+`docs/okrs/2026-q4.md` "## Check-ins" anchor, and that PR #88's own body
+says it builds on PR #63 rather than replacing it. PM declined to
+resolve the two check-ins into one section itself, correctly: that is a
+judgment call about this seat's own data, not PM's to make.
+
+Verified against the repo rather than taking the report on faith: PR
+#54 (the September check-in) had merged earlier the same day. PR #63's
+branch was 2 commits ahead of a now-stale point in `main`'s history. PR
+#88's branch was cut from a later point but did not contain PR #63's
+commits at all, despite its own body's "builds on" claim, so the two
+check-ins were not actually stacked.
+
+Rebased `okr/2026-10` onto `main` first (two trivial content conflicts
+in `docs/okrs/2026-q4.md`, both resolved by keeping both sides of the
+same append point in sequence, no wording changed), force-pushed. Then
+rebased `ursa-okr/2026-10-05-window` onto the updated `okr/2026-10`
+(same resolution pattern), force-pushed. Both PRs now report
+`MERGEABLE` against `main` and stack in the order PM named: monthly
+first, window second. Neither check-in's text was edited beyond
+resolving the mechanical append conflict; no objective or KR wording
+changed, and no new benchmark or KR scoring ceremony ran this pass. This
+run's own PR adds no third check-in, since three OKR readings in six
+days is the exact pattern PR #88 already flagged to the owner as a
+possible sign this seat should pause until the merge backlog clears.
+
 ## Grooming (2026-10-05, ceremony run 2026-10-06)
 
 Two `accepted` entries below (not reproduced here, see their dated
