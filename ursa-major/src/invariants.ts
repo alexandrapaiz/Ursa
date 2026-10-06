@@ -32,7 +32,8 @@
 import { mergedLength } from './intervals'
 import { isExcerptOf } from './text'
 import type {
-  FinalFile, FinalSpan, GenerationRecord, LabSignals, OutcomeRecord, QuoteRef, SpanClass,
+  DescentEvidence, FinalFile, FinalSpan, GenerationRecord, LabSignals, OutcomeRecord, QuoteRef,
+  SpanClass,
 } from './types'
 
 /** Stable identifier for each invariant, so a violation can be grepped for. */
@@ -48,6 +49,7 @@ export type InvariantCode =
   | 'COVERED_BOUNDED'
   | 'RATES_MATCH_FIELDS'
   | 'SIGNAL_QUOTE_GROUNDED'
+  | 'DESCENT_CHECKED_UNIFORMLY'
 
 export interface Violation {
   code: InvariantCode
@@ -124,6 +126,28 @@ export interface Measurement {
    * defect this measurement is the only thing that would show.
    */
   signalEntriesWithoutQuote: number
+  /**
+   * `survived_mutated` spans carrying a descent verdict
+   * (src/corroborate.ts). Zero on a record resolved with no corroborator,
+   * which every chat-path record is, and which is why this is a
+   * measurement: "no violations" on such a record means the bound was
+   * vacuous, not that the mutation labels were checked.
+   */
+  descentChecked: number
+  /**
+   * Of those, the ones the search could not settle — `basis: 'unverified'`.
+   * The label stands on these and is unguarded. A buyer who wants only
+   * corroborated corrections filters on exactly this number, so it is
+   * reported rather than left to be recomputed from the spans.
+   */
+  descentUnverified: number
+  /**
+   * Spans demoted to `no_generation_provenance` because a commit outside
+   * the generation's descent held their text verbatim. Each one is a
+   * word-level diff the record would otherwise have sold as the user's
+   * correction, so a non-zero count here is the bound earning its place.
+   */
+  descentDemoted: number
 }
 
 const BOUNDS: Record<InvariantCode, string> = {
@@ -149,6 +173,8 @@ const BOUNDS: Record<InvariantCode, string> = {
     'every stored rate equals its own numerator over its own denominator, rounded to three places',
   SIGNAL_QUOTE_GROUNDED:
     'every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()\'s whitespace normalization, and the same excerpt appears in the signal\'s own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.',
+  DESCENT_CHECKED_UNIFORMLY:
+    'if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
@@ -425,6 +451,29 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
     }
   }
 
+  // Descent — the guard on the one label that carries a `diff`, and so the
+  // only bound here that is about whether a claim was CHECKED rather than
+  // about whether two numbers agree. See src/corroborate.ts.
+  const descentSpans: Array<{ where: string; span: FinalSpan; descent: DescentEvidence }> = []
+  const mutatedWithout: string[] = []
+  for (const f of record.files) {
+    for (const [i, s] of f.spans.entries()) {
+      const at = `file ${f.path} span ${i} [${s.start},${s.end})`
+      if (s.descent) descentSpans.push({ where: at, span: s, descent: s.descent })
+      else if (s.class === 'survived_mutated') mutatedWithout.push(at)
+    }
+  }
+  if (descentSpans.length > 0 && mutatedWithout.length > 0) {
+    push('DESCENT_CHECKED_UNIFORMLY', mutatedWithout[0],
+      `${descentSpans.length} spans carry a descent verdict, ${mutatedWithout.length} survived_mutated spans carry none`)
+  }
+  for (const d of descentSpans) {
+    if (d.span.class === 'survived_mutated' && d.descent.basis === 'rival') {
+      push('DESCENT_CHECKED_UNIFORMLY', d.where,
+        `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`)
+    }
+  }
+
   return out
 }
 
@@ -440,6 +489,21 @@ export function measure(record: OutcomeRecord): Measurement {
       if (s.class !== 'survived_mutated' || !s.source) continue
       const excess = (s.end - s.start) - (s.source.end - s.source.start)
       if (excess > 0) mutatedAddedChars += excess
+    }
+  }
+
+  let descentChecked = 0
+  let descentUnverified = 0
+  let descentDemoted = 0
+  for (const f of record.files) {
+    for (const s of f.spans) {
+      if (!s.descent) continue
+      if (s.class === 'survived_mutated') {
+        descentChecked++
+        if (s.descent.basis === 'unverified') descentUnverified++
+      } else if (s.descent.basis === 'rival') {
+        descentDemoted++
+      }
     }
   }
 
@@ -469,6 +533,9 @@ export function measure(record: OutcomeRecord): Measurement {
     signalEntries,
     signalQuotes,
     signalEntriesWithoutQuote,
+    descentChecked,
+    descentUnverified,
+    descentDemoted,
   }
 }
 

@@ -284,6 +284,25 @@ export function renderViewer(record: OutcomeRecord): string {
     var src = span.source || (span.candidate && span.candidate.source);
     if (span.score !== undefined) inspector.appendChild(el('div', 'num', 'score ' + span.score));
     if (span.candidate) inspector.appendChild(el('div', 'num', 'best rejected candidate · score ' + span.candidate.score));
+    // Why it was rejected. Without this a demoted span shows a 0.948
+    // candidate and no account of why it is not a match, which reads as
+    // the resolver being coy about a near-certainty. The user can always
+    // see what was inferred about them (CLAUDE.md §2), and "a commit you
+    // did not write already contained this text" is the inference.
+    if (span.descent && span.descent.basis === 'rival') {
+      var rel = span.descent.relation === 'pre_existing'
+        ? 'an earlier commit this generation replaced'
+        : 'a branch this generation is not an ancestor of';
+      inspector.appendChild(el('div', 'nolink',
+        'Not counted as your edit: this exact text is already in commit ' + span.descent.sha
+        + ' ("' + span.descent.subject + '"), ' + rel
+        + '. You did not reach it by editing the generation above.'));
+    }
+    if (span.descent && span.descent.basis === 'unverified') {
+      inspector.appendChild(el('div', 'nolink',
+        'This edit was not checked against the rest of the history ('
+        + span.descent.reason.replace(/_/g, ' ') + '), so the label stands unguarded.'));
+    }
     if (src) {
       inspector.appendChild(el('div', '', convTitle(src.conversationId) + ' · turn ' + src.turnIndex + ' · ' + src.model));
       var gen = R.generations[src.generationIndex];

@@ -25,9 +25,10 @@
 
 import { parseArgs } from 'node:util'
 import { resolve as absPath, extname } from 'node:path'
-import { blobAt, findCommitPairsWithDiagnostics, type PairFinderDiagnostics } from '../pairfinder'
+import { blobAt, findCommitPairsWithDiagnostics, listCommits, type CommitInfo, type PairFinderDiagnostics } from '../pairfinder'
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { gitDeletionAttributor } from '../deletion'
+import { gitDescentCorroborator } from '../corroborate'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
@@ -60,7 +61,18 @@ export function artifactFor(projectPath: string, ep: Episode): { artifact: Artif
   return { artifact: { kind: 'hosted', renderRef: deploy.url }, deploy }
 }
 
-export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord | null {
+/**
+ * @param commits `listCommits(projectPath)`, when the caller already has it.
+ *   Descent corroboration needs the commit graph to tell a rival commit
+ *   from a descendant of the generation, and `ursa run` walks that graph
+ *   once for every episode it resolves. Omitted, this reads it per
+ *   episode, which is correct and costs one `git log` call.
+ */
+export function resolveEpisode(
+  projectPath: string,
+  ep: Episode,
+  commits?: CommitInfo[],
+): OutcomeRecord | null {
   const files: Array<{ path: string; text: string }> = []
   const generations: RawGeneration[] = []
   let turn = 0
@@ -94,6 +106,17 @@ export function resolveEpisode(projectPath: string, ep: Episode): OutcomeRecord 
     attributeDeletion: gitDeletionAttributor(projectPath, ep.interveningMerges ?? [], {
       unreadableMerges: ep.unreadableMerges,
     }),
+    // A fuzzy match above THETA_HIGH says the final text resembles this
+    // generation; `survived_mutated` says the person got there by editing
+    // it. On the git path the two come apart whenever the text was already
+    // in the file before the agent wrote (a generation here is the whole
+    // blob) or came off a sibling branch. Without this the record ships a
+    // word-level diff nobody performed.
+    corroborate: gitDescentCorroborator(
+      projectPath,
+      ep.generatedSha,
+      commits ?? listCommits(projectPath),
+    ),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
@@ -341,6 +364,10 @@ export async function main(argv: string[]): Promise<number> {
     maxInterposedGenerations: bound('max-interposed-generations'),
   })
   const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
+  // One graph read for the whole run. Every episode's corroborator needs
+  // the same parent/child edges to tell a rival commit from a descendant
+  // of its own generation.
+  const commits = listCommits(projectPath)
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a
   // record the next run recreates, which is not deletion.
@@ -354,7 +381,7 @@ export async function main(argv: string[]): Promise<number> {
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
     if (isForgotten(consent, ep.id)) { suppressed++; continue }
-    const record = resolveEpisode(projectPath, ep)
+    const record = resolveEpisode(projectPath, ep, commits)
     if (!record || record.stats.generated.totalChars < minChars) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the

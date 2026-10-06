@@ -86,6 +86,75 @@ export interface SourcePointer {
   end: number
 }
 
+/**
+ * Why the descent claim behind a `survived_mutated` label does or does not
+ * stand. Set only when the caller supplied a corroborator (`ursa run`
+ * does; the chat path has no git to ask), so its absence means the check
+ * never ran rather than that it passed.
+ *
+ * The label it guards is the one CLAUDE.md §1 sells as "the mutation IS
+ * the correction, expressed as an edit rather than a complaint". The
+ * resolver reaches it from a similarity score alone, and similarity is
+ * not descent: on 2026-10-02 two agent branches each wrote a
+ * `formatItem` function, the human kept branch B's version, and branch
+ * A's generation came back `survived_mutated` carrying a word-level diff
+ * from A's line to B's line presented as the human's correction. Nobody
+ * performed that diff. The evidence that settles it is outside the
+ * record, because branch B's generation is not in the record at all.
+ */
+export type DescentEvidence =
+  /**
+   * Searched and nothing outside the generation's line of descent holds
+   * this span's text, so an edit of this generation is the only account
+   * of it left. `rivalsSearched` is how many commits were read; zero
+   * means the path has no history besides the generation itself.
+   */
+  | { basis: 'corroborated'; rivalsSearched: number }
+  /**
+   * Found verbatim in a commit that is not a descendant of the
+   * generation, so the person did not derive it by editing this
+   * generation. The label fell back to `no_generation_provenance` and no
+   * diff was emitted.
+   *
+   *   pre_existing — the commit is an ancestor of the generation. In
+   *     practice this is a restore: an ancestor held the text, the
+   *     generation replaced it, and the person put it back. Found by a
+   *     failing test, because the obvious reading of this relation —
+   *     text that was in the file all along — never reaches Pass 2 at
+   *     all, since the verbatim pass claims untouched text first.
+   *   sibling — the commit is on a branch the generation is not an
+   *     ancestor of: another branch's work, which the person merged or
+   *     checked out rather than typed.
+   *
+   * Neither verdict says nothing happened. The person did reject the
+   * generation's wording, and that rejection survives as the span's
+   * `candidate` and as the generation segment's `generated_deleted`
+   * fate. What the demotion refuses is the stronger claim `diff` makes:
+   * that the final text was composed by editing this generation. Text
+   * that already existed verbatim elsewhere was not composed here.
+   */
+  | { basis: 'rival'; sha: string; subject: string; relation: 'pre_existing' | 'sibling' }
+  /**
+   * The search did not settle the question, so the `survived_mutated`
+   * label stands unchanged and says why it is unguarded.
+   *
+   *   span_too_short — the span normalizes to fewer than MIN_VERBATIM_LEN
+   *     characters, the same floor the verbatim pass uses, below which
+   *     containment in another blob is coincidence rather than evidence.
+   *   unreadable_blob — a rival commit is in the graph but its blob could
+   *     not be read from this clone (shallow clone, partial clone, blob on
+   *     a remote). `sha` names the first such commit.
+   *   path_history_unreadable — `git log` over the path failed, so the
+   *     rival set could not be enumerated at all.
+   *   rival_search_capped — the path has more rival commits than
+   *     MAX_RIVAL_BLOBS and the unsearched remainder may hold the text.
+   */
+  | {
+      basis: 'unverified'
+      reason: 'span_too_short' | 'unreadable_blob' | 'path_history_unreadable' | 'rival_search_capped'
+      sha?: string
+    }
+
 export interface DiffPart {
   value: string
   added?: boolean
@@ -184,6 +253,14 @@ export interface FinalSpan {
   candidate?: { score: number; text: string; source: SourcePointer }
   /** matched by exact equality of a very short segment — weak evidence */
   trivial?: boolean
+  /**
+   * Whether the span's text exists outside this generation's line of
+   * descent; set by the resolver's `corroborate` hook on any span the
+   * fuzzy pass scored above THETA_HIGH, and on the
+   * `no_generation_provenance` span a `rival` verdict demotes one to.
+   * Absent on records resolved without a corroborator.
+   */
+  descent?: DescentEvidence
   /** what later work did to this span; set by annotateDurability, absent on non-git records */
   lifespan?: SpanLifespan
 }
