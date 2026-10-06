@@ -11,6 +11,17 @@
 // no attributor every deletion is the human's, which is correct for the
 // chat path (src/cli.ts), where the final file is the file on disk and
 // no merge sits in between.
+//
+// Pass 2 has the mirror-image problem on the survival side. A score above
+// THETA_HIGH says the final text is SIMILAR to a generation segment; the
+// `survived_mutated` label says the person DERIVED it by editing that
+// segment. Those are different claims, and the second one is the one
+// CLAUDE.md §1 sells. The evidence that separates them is outside the
+// record, so it arrives the same way: the caller injects `corroborate`,
+// which answers whether the span's text also exists outside the
+// generation's line of descent. See src/corroborate.ts for the case that
+// forced it. With no corroborator every above-threshold match is labelled
+// `survived_mutated` as before.
 
 import { diffWords } from 'diff'
 import { normalize, type Normalized } from './normalize'
@@ -20,8 +31,8 @@ import {
   tokens, levSimilarity, containment, combinedScore,
 } from './match'
 import type {
-  Artifact, ConversationMeta, DeletionAttribution, FinalFile, FinalSpan, GenerationFate,
-  GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
+  Artifact, ConversationMeta, DeletionAttribution, DescentEvidence, FinalFile, FinalSpan,
+  GenerationFate, GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
 } from './types'
 import { computeStats } from './stats'
 
@@ -45,6 +56,16 @@ export interface ResolveInput {
    * Omit it and every deletion is attributed to the human.
    */
   attributeDeletion?: (filePath: string, spanText: string) => DeletionAttribution
+  /**
+   * Whether a final span's text exists outside the generation's line of
+   * descent, asked once per span the fuzzy pass scores above THETA_HIGH,
+   * with the final file's path and the span's own text. A `rival` verdict
+   * drops the `survived_mutated` label and the diff that goes with it,
+   * because an edit of this generation is then not the only account of
+   * the text. Omit it and similarity is accepted as descent, which is the
+   * right reading only when no other text was in evidence.
+   */
+  corroborate?: (filePath: string, spanText: string) => DescentEvidence
 }
 
 interface GenSentence extends Span {
@@ -167,18 +188,42 @@ export function resolve(input: ResolveInput): OutcomeRecord {
           if (!best || score > best.score) best = { p: c.p, sent: c.sent, score }
         }
         if (best && best.score >= THETA_HIGH) {
-          span = {
-            ...base,
-            class: 'survived_mutated',
-            score: r3(best.score),
-            source: srcPtr(best.p, best.sent.start, best.sent.end),
-            diff: diffWords(best.sent.text, s.text).map((d) => ({
-              value: d.value,
-              ...(d.added ? { added: true } : {}),
-              ...(d.removed ? { removed: true } : {}),
-            })),
+          const descent = input.corroborate?.(f.path, s.text)
+          if (descent?.basis === 'rival') {
+            // The text exists outside this generation's descent, so the
+            // person did not reach it by editing this generation. Demoted
+            // to the same shape the below-threshold branch produces: no
+            // `source`, no `diff`, the evidence kept as a candidate for a
+            // human to adjudicate. No claim is added, so the generation
+            // segment stays unclaimed and is reported `generated_deleted`
+            // — which is what happened to it.
+            span = {
+              ...base,
+              class: 'no_generation_provenance',
+              uncertain: true,
+              candidate: { score: r3(best.score), text: best.sent.text, source: srcPtr(best.p, best.sent.start, best.sent.end) },
+              descent,
+            }
+          } else {
+            span = {
+              ...base,
+              class: 'survived_mutated',
+              score: r3(best.score),
+              source: srcPtr(best.p, best.sent.start, best.sent.end),
+              diff: diffWords(best.sent.text, s.text).map((d) => ({
+                value: d.value,
+                ...(d.added ? { added: true } : {}),
+                ...(d.removed ? { removed: true } : {}),
+              })),
+              // `uncertain` is deliberately NOT set on an `unverified`
+              // verdict. It is stats.uncertainSpans' own definition (a
+              // below-threshold candidate awaiting adjudication) and that
+              // count is O1 KR1.1's metric; widening it here would move
+              // the KR's number without any span changing.
+              ...(descent ? { descent } : {}),
+            }
+            addClaim(mutatedClaims, { genIndex: best.p.gen.generationIndex, start: best.sent.start, end: best.sent.end })
           }
-          addClaim(mutatedClaims, { genIndex: best.p.gen.generationIndex, start: best.sent.start, end: best.sent.end })
         } else if (best && best.score >= THETA_LOW) {
           span = {
             ...base,
