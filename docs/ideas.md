@@ -2968,3 +2968,173 @@ Sources: [docs.softwareheritage.org/devel/swh-web/uri-scheme-api-content.html](h
   `lessons.md` inbox at the next sync.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-06 — An imported final file still has a discard story
+- Trigger: building the file-level refusal today
+  (`docs/design/vendored-paths.md`). Two existing tests failed on the
+  first implementation, and both failed for the same real reason rather
+  than a fixture detail. `deletion.test.ts`'s
+  "a merge that deleted the whole file is still a merge deletion, not
+  unknown" had the agent write a block, a merge destroy it, and the
+  person restore the file from a sibling branch byte for byte. The
+  refusal correctly saw an import and skipped the path, and the
+  `generated_deleted` span with `cause: 'merge'` went with it. The
+  finished file carried no correction, which is what the refusal
+  proves. The generation still carried a real discard, which the
+  refusal threw away.
+- What: the refusal is sound about the FINAL side and overreaches on the
+  generation side. An exact revert is the clean case: the agent wrote
+  X, the person discarded all of X, and the file is now what it was
+  before. The true record is a full `generated_deleted`, and today's
+  code emits nothing at all for that path. The fix is to split the
+  refusal in two. Skip the path from `ResolveInput.files`, so no span
+  of the imported file is classified, and keep it in
+  `ResolveInput.generations`, so the agent's text still gets a fate.
+  The reason this is not a one-line change is the measurement in
+  `docs/design/vendored-paths.md` §2.2: keeping the generation naively
+  moves the whole imported document into `generated_deleted` and
+  inflates the discard figure by about what the survival figure was
+  inflated by before, because on the `ursa run` path a "generation" is
+  the whole file blob and a vendored file's generation is itself an
+  import. So the generation side needs its own test, not the final
+  side's: was the generation's blob composed here, or did it also
+  arrive from outside?
+- First step: `vendoredPaths` already answers that question if asked
+  about the generation instead of the finish. Call it a second time
+  with `{ generatedSha: ep.generatedSha, finalSha: ep.generatedSha }`,
+  which asks whether the generation's own blob exists outside its line
+  of descent, and keep the generation only when the answer is no. Then
+  relax `resolveEpisode`'s `files.length === 0` guard so a record can
+  exist with generations and no final files, and change the expectation
+  in `src/vendored.test.ts`'s "loses the discard story when the person
+  reverts a file outright" from the cost to the fix. That test exists
+  to be the thing that changes.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — Two thirds of the headline number is a file the holding company wrote
+- Trigger: counting today's probe by file before changing anything.
+  Of the 93,420 characters `ursa run` reported as "survived your
+  editing verbatim" over a clone of this repository, 60,616 of them
+  (65%) are in one file, `docs/standards/lessons.md`. That file is
+  synced into this repo from `alexandrapaiz/alexandra-systems`
+  (`CLAUDE.md`, "The holding company"). The 2026-09-30 urgent entry
+  named the same file as the symptom of the pairing-distance defect,
+  and the pairing window fixed the distance. The file is still there,
+  and it is still the majority of the number.
+- What: today's file-level refusal does not catch it, and the reason is
+  informative. `lessons.md` is not an exact copy of any blob outside
+  the generation's descent, because the person's own commit appended to
+  it in the same episode. So it is a file that is 95% import and 5%
+  authorship, and both the file-level test (byte-identical, so no) and
+  the span-level test (Pass 1 claims the import verbatim before
+  `corroborate` is ever consulted) decline it. The missing test is
+  containment rather than equality: is the finished blob a SUPERSET of
+  a blob outside the line of descent, and if so, are the spans inside
+  that subset the ones being credited? That is one `git diff
+  <rival>:<path> <final>:<path> --numstat` per candidate, and the
+  answer separates "the person appended 2KB to HQ's 54KB standard" from
+  "the person wrote a 56KB document".
+- First step: measure before designing. For each resolvable path in the
+  probe's six episodes, compute the length of the longest common prefix
+  and suffix between the finished blob and each non-descendant
+  candidate blob, and print the fraction of the finished file those two
+  cover. The prediction worth testing is that `lessons.md` comes back
+  above 0.9 and `docs/finance/close-2026-10.md`, a file the finance
+  seat genuinely wrote in its own episode, comes back near 0. If the
+  separation is that clean, the bound is a threshold on that fraction
+  and the spans inside the covered region are demoted as a block.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — The record never says a file was left out, only the summary does
+- Trigger: today's change writes the exclusion to
+  `.ursa/episodes.json` and prints it in the run summary, and puts
+  nothing in `.ursa/records/<id>.json`. A buyer reads records.
+  `ursa-probe-2026-09-30-124d880.json` was simply not written this
+  run, and the record that would have explained why does not exist,
+  which makes the one thing a lab should be able to audit — what the
+  run refused to claim and on what evidence — the one thing that only
+  reaches a terminal nobody kept.
+- What: this is the already-proposed 2026-10-03 entry "What a run
+  excluded from history belongs in the record, not in a comment",
+  now with a concrete second instance and a concrete shape. An
+  `exclusions` block on `OutcomeRecord`, parallel to `durability`,
+  carrying one entry per refused path: the path, the reason code
+  (`imported_whole` today), the commit the content was found in, the
+  relation, and the character count that left the figures because of
+  it. Two consequences worth the field. First, `src/invariants.ts` can
+  then bound it, because "characters excluded plus characters
+  classified equals characters in the touched files" is exactly the
+  kind of same-set arithmetic that module exists to check. Second, an
+  episode that resolves to nothing becomes a record that says why
+  rather than an absence.
+- First step: the arithmetic before the field. Add a `measure()` line
+  to `src/invariants.ts` reporting excluded characters per record from
+  `ep.vendoredPaths`, run `npx tsx src/invariants.cli.ts` on the probe,
+  and confirm the excluded count equals the 21,656 + 8,415 that left
+  the probe's figures today. A field whose number cannot be
+  reconciled against the figures it moved is a field that will drift.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-06, third dispatch (engineer's craft scan)
+
+**GitHub Linguist** (github.com/github-linguist/linguist), against
+**git's own `blame.ignoreRevsFile`** as the contrast.
+`docs/market/landscape.md` still does not exist on `main`, so the
+charter's rotation falls back off its list for the fourth day running.
+The shelf was picked to sit on today's work, because both of these
+products exist for exactly the question this run spent the day on: how
+do you stop attributing bulk-imported content to the person who
+committed it.
+
+Linguist is the library behind GitHub's per-repository language bar and
+its blame and diff rendering. It carries two concepts Ursa has been
+missing. The first is `vendor.yml`, a long list of path patterns —
+`node_modules/`, `vendor/`, `third_party/`, `*.min.js`, and a few
+hundred more — that Linguist excludes from language statistics by
+default, with `linguist-vendored` in `.gitattributes` as the
+per-repository override. The second is `linguist-generated`, which
+marks a path as machine-produced and collapses it in diffs rather than
+asking a reviewer to read it. Git's own facility is narrower and
+sharper: `git blame --ignore-revs-file <file>`, with
+`blame.ignoreRevsFile` as the config form, takes a list of commit shas
+whose changes blame should look through rather than at. The convention
+that grew around it is a `.git-blame-ignore-revs` file in the repo
+root holding the shas of bulk reformats, and GitHub honours it.
+
+**What is worth stealing: the declaration, not just the inference.**
+Both products let the repository's owner *state* what is not their
+work, instead of inferring it every time. Ursa infers, and today's
+change is pure inference: a blob comparison per path per episode, with
+a documented miss (`docs/standards/lessons.md`, the entry above) and a
+documented overreach (the discard story, the entry above that). Git's
+answer to the same class of problem is one file of shas that the owner
+maintains and every tool respects. The obvious Ursa shape is a
+`.ursa/not-mine` file listing paths and commits the owner declares are
+imports, read by `vendoredPaths` as a first pass before any git call,
+and it has a property no inference has: it is the user editing what has
+been derived about them, which is load-bearing constraint 2 in
+`CLAUDE.md` rather than a feature. It also costs one file read. Recorded
+here as this scan's stealable finding rather than filed as its own
+entry or built today, because a declaration surface the owner maintains
+belongs to the consent machinery in `src/consent.ts` and to
+`ursa consent`, which is a product decision for the owner and not an
+ad-hoc dotfile an engineer run adds.
+
+**What Ursa does better: the evidence travels with the verdict.**
+Linguist's `vendor.yml` is a list of regexes over paths, which means it
+is right about `node_modules/` and silent about a document vendored
+into `docs/`. It cannot see that a file arrived from elsewhere, only
+that its path looks like the kind of place such files live, and a
+repository that vendors a standard into `docs/standards/` gets no help
+at all. `.git-blame-ignore-revs` is the same trade in the other
+direction: exact rather than heuristic, and entirely dependent on
+somebody remembering to add the sha. Ursa's `VendoredPath` names the
+commit, its subject, and the relation it stands in to the generation,
+derived from the object graph with nothing declared in advance, and
+`renderRunSummary` says it in the user's own words: "byte-identical to
+its copy in commit 96ed4e5". A path-pattern list cannot produce that
+sentence, and a hand-maintained sha list cannot produce it for the
+import nobody remembered.
