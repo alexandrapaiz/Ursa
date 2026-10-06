@@ -116,13 +116,22 @@ export type DescentEvidence =
    * generation. The label fell back to `no_generation_provenance` and no
    * diff was emitted.
    *
-   *   pre_existing — the commit is an ancestor of the generation: the
-   *     text was already in the file before the agent wrote. `ursa run`
-   *     feeds whole-file blobs as generations, so a generation "contains"
-   *     everything the file already held.
+   *   pre_existing — the commit is an ancestor of the generation. In
+   *     practice this is a restore: an ancestor held the text, the
+   *     generation replaced it, and the person put it back. Found by a
+   *     failing test, because the obvious reading of this relation —
+   *     text that was in the file all along — never reaches Pass 2 at
+   *     all, since the verbatim pass claims untouched text first.
    *   sibling — the commit is on a branch the generation is not an
    *     ancestor of: another branch's work, which the person merged or
    *     checked out rather than typed.
+   *
+   * Neither verdict says nothing happened. The person did reject the
+   * generation's wording, and that rejection survives as the span's
+   * `candidate` and as the generation segment's `generated_deleted`
+   * fate. What the demotion refuses is the stronger claim `diff` makes:
+   * that the final text was composed by editing this generation. Text
+   * that already existed verbatim elsewhere was not composed here.
    */
   | { basis: 'rival'; sha: string; subject: string; relation: 'pre_existing' | 'sibling' }
   /**
