@@ -1,6 +1,12 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
+
+_2026-10-06 six-hour pass in progress on `ursa-pm/2026-10-06-message-2`
+(this PR supersedes the stalled draft #106 on `ursa-pm/2026-10-06-message`,
+which never got past its opening stub). Rewriting this file against a
+fresh `gh pr list` and `gh run list` now._
+
 Reconciled 2026-10-04, ~15:41Z scheduled standup, against `gh pr list
 --state open --limit 200`, `gh run list --limit 30`, and
 `gh api repos/.../milestones`.
