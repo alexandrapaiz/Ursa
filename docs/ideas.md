@@ -2571,3 +2571,167 @@ Sources: [docs.getdbt.com/docs/build/data-tests](https://docs.getdbt.com/docs/bu
 [docs.getdbt.com/docs/build/unit-tests](https://docs.getdbt.com/docs/build/unit-tests),
 [docs.greatexpectations.io/docs/core/introduction/gx_overview](https://docs.greatexpectations.io/docs/core/introduction/gx_overview/),
 [datacoves.com/post/dbt-test-options](https://datacoves.com/post/dbt-test-options)
+
+### 2026-10-06 — A loop's spec is either quoted or distilled, and the record never says which
+- Trigger: writing `SIGNAL_QUOTE_GROUNDED` and finding it could not require a
+  quote. `src/hq/fixtures.ts` holds three `CorrectionLoop`s whose
+  `discoveredSpec` is a statement in the detector's own words ("entrance
+  motion may reposition an element by at most 8px"), with no conversations in
+  the record for a `QuoteRef` to point at. Those loops quote nobody and are
+  not defective, so "every signal carries a quote" is legitimately false and
+  had to become a measurement (`signalEntriesWithoutQuote`) instead of a
+  bound. See docs/design/signal-grounding.md §3.5.
+- What: add `specProvenance: 'quoted' | 'distilled'` to `CorrectionLoop`.
+  `specFrom` in `src/loops.ts` sets `quoted`, because it quotes a prompt by
+  construction; a distiller writing a spec in its own words sets `distilled`
+  and may carry zero quotes. The bound then becomes total: a `quoted` spec
+  with an empty `quotes` array is a violation, and a `distilled` one with a
+  non-empty array must still ground every entry in it. This matters beyond
+  the gate, because the two are different products. A quote is evidence a
+  lab can check against its own copy of the conversation. A distillation is
+  Ursa's judgment about what the user meant, which is the distiller's output
+  and carries the distiller's error rate. Selling them in one field means a
+  buyer cannot tell which one they received, and `CLAUDE.md` §4 sells
+  "revealed preference — behavior, not performance", which only the first
+  kind is.
+- First step: the field, plus the bound's two new clauses, plus one test per
+  clause. Then audit what already exists: `src/hq/fixtures.ts`'s three loops
+  and `src/bridge/declare.test.ts`'s one are `distilled`, and everything
+  `loops.ts` produces is `quoted`, so the migration is four literals and no
+  re-resolution.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — A correction the spans can see reaches none of the signals when the trace is thin
+- Trigger: `measure()` reporting `signalEntries: 0` on
+  `fixtures/mini/record/outcome_record.json`, a record that carries a
+  74-character `survived_mutated` span. An edit is a correction —
+  `CLAUDE.md` §1 says the mutation *is* the correction — so that record holds
+  one and reports none. The cause is the branch, not the detector: the
+  fixture's two conversations have one prompt each, so `hasChatTrace` is
+  true, `detectTraceSignals` runs and finds no cluster with two members, and
+  `mutationCorrections` is never reached because it lives on the other side
+  of the `if`. The two stages are exclusive, and the label-stage signal is
+  the one that does not need a trace.
+- What: make the stages additive rather than exclusive for the one signal
+  that does not depend on a trace. `deriveSignals` runs
+  `mutationCorrections` in both branches and merges its output into
+  `oneShotCorrections` alongside whatever the trace produced, de-duplicated
+  by `(step, domain)` so an edit the trace already explained is not counted
+  twice. The note the trace stage emits gains a sentence saying how many
+  corrections came from edits rather than from prompts, because the two have
+  different evidential weight and a buyer should not have to guess the mix.
+  The de-duplication rule is the part that needs care and is why this is not
+  a one-line change: a trace-stage one-shot correction is keyed on a prompt
+  step and a label-stage one on a generation's `turnIndex`, and those are
+  the same ordinal space, so a naive merge would collide on exactly the
+  records where both fire.
+- First step: assert the defect before fixing it — a test that
+  `fixtures/mini`'s record carries at least one `survived_mutated` span and
+  zero signals, which pins today's behaviour so the fix has something to
+  change. Then the merge, with `fixtures/mini` as the acceptance case: it
+  should report one one-shot correction whose two quotes ground in the
+  generation and the final file.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — The gate re-reads the quote on the one machine the buyer will never have
+- Trigger: `SIGNAL_QUOTE_GROUNDED` resolves a `QuoteRef` against
+  `conversations[].prompts[].text`, `generations[].text` and `files[].text` —
+  all three of which stay on the device by constraint (`CLAUDE.md`, load-bearing
+  constraint 3: raw data never touches the aggregation layer). Reading
+  `projectForMinor` in `src/disclosure.ts` afterwards: the only consented
+  export path emits scalar buckets of `{ survived, total, generations }`
+  keyed by domain, model and window. No quote crosses, so no lab can run the
+  check this run just shipped, and `CLAUDE.md` §5's "publish methodology
+  openly ... simultaneously the enterprise sales channel and the user trust
+  proof" currently means publishing a check the buyer has to take on faith.
+- What: ship the verdict, not the text. A `GroundingAttestation` block on the
+  aggregate batch, carrying per-record: the record id, the gate's commit
+  SHA, the eleven bound codes that ran, the count of quotes re-read, and the
+  count of violations — and nothing quoted. That is a statement a buyer can
+  reason about ("8 quotes were re-read against their sources on the user's
+  own machine by gate `abc1234`, 0 failed") without a character of raw text
+  leaving the device, and it is checkable in the one way that matters,
+  because the gate is open source and the SHA says which version made the
+  claim. It also gives the aggregate a reason to carry a version of the gate
+  at all, which today it does not.
+- First step: the shape and one honest limitation written down before any
+  code. The limitation is that an attestation produced by the same party
+  that produced the data is not proof, and saying so in the artifact is the
+  difference between this and marketing. Then `attestationFor(record,
+  violations): GroundingAttestation` in `src/invariants.ts`, carried through
+  `projectForMinor` behind the existing `minor-aggregate` scope so it is
+  covered by consent the user already granted or withheld, with
+  `src/disclosure.test.ts` asserting the attestation contains no string from
+  `rawStringsOf(record)`.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-06 (engineer's craft scan)
+
+**Anthropic's Citations API** (claude.com/blog/introducing-citations-api),
+against **Ragas** faithfulness (docs.ragas.io) as the contrast. `docs/market/landscape.md`
+still does not exist on `main` — it is inside PR #21, unmerged since
+2026-09-26 — so the rotation falls back off the charter's list for the
+third day running. The shelf was picked to sit on the day's work:
+how a product proves a quote is a quote. Yesterday covered data-test
+frameworks (dbt, Great Expectations) and the day before covered AI
+attribution (Agent Blame, Git AI), so this is a third shelf rather than a
+second look.
+
+**What they are.** Citations chunks a user-supplied document into
+sentences, passes them through the model with the query, and returns the
+response as text blocks where each block carries citations pointing at
+locations in the source — character ranges for plain text, page numbers
+for PDFs, content-block indices for custom content. The load-bearing
+detail is that `cited_text` is extracted from the document rather than
+generated by the model, so a citation is guaranteed to point at real
+source text. Ragas takes the other route entirely: its faithfulness
+metric has an LLM break the response into claims, has an LLM check each
+claim against the retrieved context, and scores the ratio of supported
+claims to total claims, 0 to 1. Vectara's HHEM-2.1-Open, a fine-tuned T5
+classifier, can replace the second model.
+
+**Worth stealing: extracted, not generated, as a stated guarantee.**
+This is the same correction this run made and did not know had a name.
+`mutationCorrections` built the agent side of its quote by joining
+`span.diff`'s non-added parts, which is generation — a reconstruction
+that happens to usually agree with the source — and it was changed to
+read the extent the record already stores, which is extraction. The
+stealable part is not the technique, it is that Citations makes the
+property a documented guarantee of the interface rather than a property
+of one code path, and that is what let a reader of their docs know it
+without reading their implementation. Ursa should state it the same way
+in `types.ts`: a `QuoteRef.text` is sliced from the record, never
+assembled. The second idea worth taking is the citation's *shape* —
+character ranges rather than text — because a range is both smaller and
+unforgeable, and `QuoteRef` carries text where it could carry
+`[start, end)` into a text the record already holds. That is a real
+design question and it is not free: the text is what survives redaction
+of the source, and a range into a stripped conversation points at
+nothing.
+
+**Where Ursa does better, structurally.** Ragas is the comparison that
+makes the point. It answers "is this claim supported by this context"
+with a model, which means its verdict has a confidence and an error
+rate, and it is answering a semantic question because that is the only
+question available when the response was generated freely. Ursa's
+question is narrower and therefore decidable: the quote either is or is
+not a substring of a text in the same file, and `isExcerptOf` answers it
+with `String.prototype.includes` and no model, no threshold, no score
+between 0 and 1. That is not cleverness, it is the schema — a quote in
+an outcome record has an address, and an LLM-generated citation in the
+general case does not. Citations earns the same decidability by
+construction and is the right comparison for that reason. The honest
+limit on Ursa's side: a substring check proves the words were typed and
+proves nothing about whether this quote is the *right* one for the loop
+it is attached to, and `specFrom` picks which prompt to quote by a rule
+("the loop's last statement of what was wanted, regression reports
+excluded") that no bound can check. Choosing the wrong quote is still
+the open hole, and it is a semantic question of exactly the kind Ragas
+is built for.
+
+Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/introducing-citations-api),
+[docs.ragas.io/en/stable/concepts/metrics/available_metrics/faithfulness/](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/faithfulness/),
+[techcrunch.com/2025/01/23/anthropics-new-citations-feature-aims-to-reduce-ai-errors](https://techcrunch.com/2025/01/23/anthropics-new-citations-feature-aims-to-reduce-ai-errors/)

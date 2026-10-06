@@ -679,13 +679,20 @@ open; §10's third ledger entry carries them forward.
 
 Filed in `docs/ideas.md` under 2026-10-06, status `proposed`:
 
-1. **A loop's spec is either quoted or distilled, and the record does
-   not say which.** The discriminator that would let
-   `SIGNAL_QUOTE_GROUNDED` require a quote where one is owed.
-2. **A correction visible in the spans reaches none of the signals when
-   the trace is thin.** `fixtures/mini`'s 74-character edit, §7.2.
-3. **The two blocks still unread: `durability` and the loops' own step
-   ranges.** The rest of the 2026-10-05 entry's `What`.
+1. **A loop's spec is either quoted or distilled, and the record never
+   says which.** The discriminator that would let
+   `SIGNAL_QUOTE_GROUNDED` require a quote where one is owed, §3.5.
+2. **A correction the spans can see reaches none of the signals when the
+   trace is thin.** `fixtures/mini`'s 74-character edit, §7.2.
+3. **The gate re-reads the quote on the one machine the buyer will never
+   have.** `projectForMinor` in `src/disclosure.ts` exports scalar
+   buckets only, so no quote crosses the device boundary and no lab can
+   run this bound. The proposal is to export the gate's verdict rather
+   than the text.
+
+`durability` and the correction loops' own step ranges stay open under
+the 2026-10-05 entry that already names them in its `What`; no new entry
+duplicates them.
 
 ---
 
