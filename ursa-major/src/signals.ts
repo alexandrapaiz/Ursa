@@ -47,10 +47,28 @@ function mutationCorrections(record: OutcomeRecord): OneShotCorrection[] {
       const agent = span.diff.filter((p) => !p.added).map((p) => p.value).join('')
       const hers = span.diff.filter((p) => !p.removed).map((p) => p.value).join('')
       if (!agent.trim() || !hers.trim()) continue
+      // Two quotes, not one. The agent side is the generation extent the span
+      // descends from, so it is grounded in generations[gi].text; the final
+      // side is the span as the user left it, so it is grounded in the
+      // finished file. Addressing them separately is what lets the gate
+      // re-read each one — a single blob labelled "the correction" is a
+      // string nobody can check.
+      const agentQuote = excerpt(agent)
+      const finalQuote = excerpt(hers)
       out.push({
         step: span.source.turnIndex,
-        text: `AGENT: ${excerpt(agent)}\nFINAL: ${excerpt(hers)}`,
+        text: `AGENT: ${agentQuote}\nFINAL: ${finalQuote}`,
         domain: file.path,
+        quotes: [
+          {
+            of: 'generation',
+            conversationId: span.source.conversationId,
+            step: span.source.turnIndex,
+            generationIndex: span.source.generationIndex,
+            text: agentQuote,
+          },
+          { of: 'final_span', filePath: file.path, text: finalQuote },
+        ],
       })
     }
   }

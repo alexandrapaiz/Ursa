@@ -51,6 +51,17 @@ export function runGate(target: string, quiet = false): { violations: number; li
       if (m.mutatedFinalChars > 0) {
         lines.push(`  survived edited: ${m.mutatedFinalChars.toLocaleString()} chars, of which ${m.mutatedAddedChars.toLocaleString()} were added by the person and are credited to the model anyway`)
       }
+      // Printed even when it is zero. SIGNAL_QUOTE_GROUNDED is vacuously
+      // true on a record that quotes nobody, and a gate that silently
+      // checked nothing reads exactly like a gate that passed.
+      lines.push(
+        m.signalEntries === 0
+          ? '  signals: no correction loops, regressions or one-shot corrections, so no quote was checked'
+          : `  signals: ${m.signalQuotes} quote${m.signalQuotes === 1 ? '' : 's'} re-read across ${m.signalEntries} entr${m.signalEntries === 1 ? 'y' : 'ies'}` +
+            (m.signalEntriesWithoutQuote > 0
+              ? `, and ${m.signalEntriesWithoutQuote} entr${m.signalEntriesWithoutQuote === 1 ? 'y quotes' : 'ies quote'} nothing addressable`
+              : ''),
+      )
     }
     if (found.length === 0) {
       lines.push('  OK — every stated bound holds')
