@@ -93,3 +93,5 @@ following. Full reasoning in `docs/sprints/dispatch-queue.md`.
   (PR #104's own finding, independently consistent with what this run
   observed reading the file). Not this seat's lane; #104 already
   proposes the fix.
+
+<!-- message pass 2026-10-06 (third pass): in progress -->
