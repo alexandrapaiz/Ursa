@@ -19,7 +19,9 @@ import { renderRunSummary } from './bin/ursa'
 import { mergedLength } from './intervals'
 import { checkRecord, measure, type InvariantCode } from './invariants'
 import { runGate } from './invariants.cli'
+import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
+import { deriveSignals } from './signals'
 import type { OutcomeRecord } from './types'
 
 const PUBLIC_FIXTURE = 'fixtures/mini/record/outcome_record.json'
@@ -368,5 +370,185 @@ describe('the run summary never prints a pair that cannot both be true', () => {
     )
     expect(discarded).toBe(500)
     expect(traced).toBe(real.stats.generated.totalChars)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SIGNAL_QUOTE_GROUNDED — the eleventh bound.
+//
+// Ledger: "The gate checks seven of a record's nine top-level keys"
+// (docs/ideas.md, 2026-10-05). Its named first step was the excerpt check
+// alone, "the one whose failure would be a trust incident rather than a wrong
+// number". The ten bounds above all compare numbers; this one re-reads the
+// quotes, which is the only part of a record a buyer can check against their
+// own copy of the conversation.
+//
+// Both directions are covered, and the second one matters more: these tests
+// run the whole pipeline (parse → resolve → deriveSignals) over the public
+// trace fixture and over a label-stage record, then break one quote at a time
+// in each of the five ways it can be wrong.
+// ---------------------------------------------------------------------------
+
+describe('SIGNAL_QUOTE_GROUNDED on records the pipeline really produced', () => {
+  function traceRecord(): OutcomeRecord {
+    const conv = parsePasteConversation(
+      readFileSync(join('fixtures', 'loops', 'conversations', '01-claude.md'), 'utf8'),
+      '01-claude',
+    )
+    const record = resolve({
+      taskId: 'quote-grounding-trace',
+      files: [{ path: 'final.md', text: readFileSync(join('fixtures', 'loops', 'final.md'), 'utf8') }],
+      conversations: [conv.conversation],
+      generations: conv.generations,
+      finished: true,
+    })
+    record.signals = deriveSignals(record)
+    return record
+  }
+
+  /** the label stage: a git commit pair, no prompts, corrections as edits */
+  function labelRecord(): OutcomeRecord {
+    const record = resolvedRecord()
+    record.signals = deriveSignals(record)
+    return record
+  }
+
+  it('grounds every quote the trace stage emits, across all three signal kinds', () => {
+    const record = traceRecord()
+    const s = record.signals!
+    expect(s.correctionLoops.length).toBeGreaterThan(0)
+    expect(s.regressions.length).toBeGreaterThan(0)
+    expect(s.oneShotCorrections.length).toBeGreaterThan(0)
+    const m = measure(record)
+    expect(m.signalQuotes).toBe(m.signalEntries)
+    expect(m.signalEntriesWithoutQuote).toBe(0)
+    expect(checkRecord(record)).toEqual([])
+  })
+
+  it('points each trace quote at the user prompt it came from, by conversation and step', () => {
+    const loop = traceRecord().signals!.correctionLoops[0]
+    expect(loop.quotes).toHaveLength(1)
+    expect(loop.quotes[0].of).toBe('user_prompt')
+    expect(loop.quotes[0].conversationId).toBe('01-claude')
+    expect(loop.discoveredSpec).toContain(loop.quotes[0].text)
+  })
+
+  it('carries two quotes at the label stage, grounded in two different texts', () => {
+    const record = labelRecord()
+    const [correction] = record.signals!.oneShotCorrections
+    expect(correction.quotes.map((q) => q.of)).toEqual(['generation', 'final_span'])
+    // The agent side is the generation extent the span descends from; the
+    // final side is the span as the person left it. Checking both against
+    // one text would make the bound unfalsifiable for whichever side lost.
+    const [agent, final] = correction.quotes
+    expect(record.generations[agent.generationIndex!].text).toContain(agent.text)
+    expect(record.files.find((f) => f.path === final.filePath)!.text).toContain(final.text)
+    expect(checkRecord(record)).toEqual([])
+  })
+
+  it('counts a distilled spec as quoting nobody, and does not fail it', () => {
+    const record = labelRecord()
+    record.signals!.correctionLoops = [{
+      id: 'distilled', theme: 'copy oversells', targetFiles: ['notes.md'],
+      openedStep: 1, promptSteps: [1, 4], recurrences: 1, regressionSteps: [],
+      closedStep: 5, resolution: 'accepted', resolvingSteps: [5],
+      discoveredSpec: 'claims name the mechanism or get cut',
+      quotes: [],
+    }]
+    expect(checkRecord(record)).toEqual([])
+    expect(measure(record).signalEntriesWithoutQuote).toBe(1)
+  })
+
+  it('reports zero quotes checked on the two fixtures committed here, rather than passing silently', () => {
+    // Both are real records and neither carries a signal, so the bound is
+    // vacuously true on both. The measurement is the only thing standing
+    // between that and a green gate that read nothing.
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      const m = measure(load(p))
+      expect(m.signalEntries).toBe(0)
+      expect(m.signalQuotes).toBe(0)
+    }
+  })
+})
+
+describe('SIGNAL_QUOTE_GROUNDED fires on each way a quote can be wrong', () => {
+  function groundedTrace(): OutcomeRecord {
+    const conv = parsePasteConversation(
+      readFileSync(join('fixtures', 'loops', 'conversations', '01-claude.md'), 'utf8'),
+      '01-claude',
+    )
+    const record = resolve({
+      taskId: 'quote-grounding-break',
+      files: [{ path: 'final.md', text: readFileSync(join('fixtures', 'loops', 'final.md'), 'utf8') }],
+      conversations: [conv.conversation],
+      generations: conv.generations,
+      finished: true,
+    })
+    record.signals = deriveSignals(record)
+    return record
+  }
+
+  const fired = (r: OutcomeRecord) =>
+    checkRecord(r).filter((v) => v.code === 'SIGNAL_QUOTE_GROUNDED')
+
+  it('a word changed inside the quote — the misquote this bound exists for', () => {
+    const r = groundedTrace()
+    const reg = r.signals!.regressions[0]
+    const bad = reg.quotes[0].text.replace('dark', 'bright')
+    expect(bad).not.toBe(reg.quotes[0].text)
+    reg.quotes[0].text = bad
+    reg.evidence = bad
+    const v = fired(r)
+    expect(v).toHaveLength(1)
+    expect(v[0].observed).toContain('does not appear in')
+    expect(v[0].where).toContain('signals.regressions[0]')
+  })
+
+  it('the structured quote drifting from the prose a reader sees', () => {
+    const r = groundedTrace()
+    // The quote is still perfectly grounded in the prompt. What broke is
+    // that the sentence shipped to the buyer no longer contains it, so the
+    // two can say different things and only one of them is checked.
+    r.signals!.oneShotCorrections[0].text = 'the user asked for less padding'
+    const v = fired(r)
+    expect(v).toHaveLength(1)
+    expect(v[0].observed).toContain('not present in the prose field')
+  })
+
+  it('a step that no prompt in the conversation has', () => {
+    const r = groundedTrace()
+    r.signals!.regressions[0].quotes[0].step = 9999
+    expect(fired(r)[0].observed).toMatch(/no prompt at step 9999/)
+  })
+
+  it('a conversation id this record does not contain', () => {
+    const r = groundedTrace()
+    r.signals!.regressions[0].quotes[0].conversationId = 'not-a-conversation'
+    expect(fired(r)[0].observed).toMatch(/no conversation not-a-conversation/)
+  })
+
+  it('a conversation whose prompts were stripped, so nothing can be re-read', () => {
+    const r = groundedTrace()
+    delete r.conversations[0].prompts
+    // Every quote in the record points at those prompts, so all three fire.
+    const v = fired(r)
+    expect(v.length).toBe(measure(r).signalQuotes)
+    expect(v[0].observed).toContain('carries no prompts[]')
+  })
+
+  it('a generation quote whose step disagrees with the generation it addresses', () => {
+    const r = groundedTrace()
+    const label = resolvedRecord()
+    label.signals = deriveSignals(label)
+    const q = label.signals!.oneShotCorrections[0].quotes[0]
+    q.step = q.step! + 7
+    expect(fired(label)[0].observed).toMatch(/turnIndex \d+, the quote claims step \d+/)
+    expect(fired(r)).toEqual([])
+  })
+
+  it('an emptied quote, which a substring check alone would call grounded', () => {
+    const r = groundedTrace()
+    r.signals!.regressions[0].quotes[0].text = ''
+    expect(fired(r).length).toBeGreaterThan(0)
   })
 })
