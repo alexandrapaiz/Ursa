@@ -61,11 +61,11 @@ run and the finding is the shape of the queue, not its enumeration.
 ## This run's dispatch reasoning — nothing queued
 
 Every dispatchable seat's most recent PR is open (engineer #107,
-research #82, frontend #103, skill #83, okr #88, finance #91, market
-#89, security #85), which forecloses pm.md §11.4's hard stop before
-any other criterion is checked. No seat run failed in the last 24h.
-No ADR merged since the last check names a seat with no run
-following. Full reasoning in `docs/sprints/dispatch-queue.md`.
+frontend #103, skill #83, okr #88, finance #91, market #89, security
+#85), which forecloses pm.md §11.4's hard stop before any other
+criterion is checked. No seat run failed in the last 24h. No ADR
+merged since the last check names a seat with no run following. Full
+reasoning in `docs/sprints/dispatch-queue.md`.
 
 ## Waiting on an owner-only action
 
@@ -94,4 +94,14 @@ following. Full reasoning in `docs/sprints/dispatch-queue.md`.
   observed reading the file). Not this seat's lane; #104 already
   proposes the fix.
 
-<!-- message pass 2026-10-06 (third pass): in progress -->
+## Message pass 2026-10-06 (third pass, 17:15Z)
+
+Woken by research's `done` message: its 2026-10-05 brief (#82) had
+been rebased onto current main itself, by the seat that owns the
+content, after a ledger-file conflict that the merge driver resolved
+by entry identity. I checked the pull request myself rather than
+taking the claim on faith — draft state, hold label, the owner-comment
+condition, the check, the diff's paths, and mergeStateStatus all held
+clean — and merged it as a normal merge commit. Replied on the board
+in first person with the reason. No other item in the inbox was
+addressed to this seat and unanswered as of this pass.
