@@ -275,10 +275,12 @@ export function detectTraceSignals(record: OutcomeRecord): TraceSignals {
           unresolvedSingleCorrections++
           continue
         }
+        const quoted = excerpt(members[0].text)
         oneShotCorrections.push({
           step: members[0].step,
-          text: excerpt(members[0].text),
+          text: quoted,
           domain: targetFiles(record, conv.id, members[0].step, closedStep, members).join(', ') || theme,
+          quotes: [{ of: 'user_prompt', conversationId: conv.id, step: members[0].step, text: quoted }],
         })
         continue
       }
@@ -298,11 +300,13 @@ export function detectTraceSignals(record: OutcomeRecord): TraceSignals {
       )
       for (const m of regressionMembers) {
         const prior = members.filter((x) => x.step < m.step).pop()!
+        const evidence = excerpt(m.text)
         regressions.push({
           conversationId: conv.id,
           step: m.step,
           brokenState: `theme "${theme}" was already raised at step ${prior.step} and is reported broken again here`,
-          evidence: excerpt(m.text),
+          evidence,
+          quotes: [{ of: 'user_prompt', conversationId: conv.id, step: m.step, text: evidence }],
           causedBySteps: gens
             .filter((g) => g.turnIndex > prior.step && g.turnIndex <= m.step)
             .map((g) => g.turnIndex)
@@ -323,7 +327,7 @@ export function detectTraceSignals(record: OutcomeRecord): TraceSignals {
         closedStep,
         resolution,
         resolvingSteps,
-        discoveredSpec: specFrom(members, promptSteps),
+        ...specFrom(members, promptSteps, conv.id),
       })
     }
   }
@@ -378,18 +382,25 @@ export function detectTraceSignals(record: OutcomeRecord): TraceSignals {
  * (docs/design/product-plan.md §10: contradictions survive as separate trail
  * entries, they are never resolved into one true preference).
  */
-function specFrom(members: TracePrompt[], promptSteps: number[]): string {
+function specFrom(
+  members: TracePrompt[],
+  promptSteps: number[],
+  conversationId: string,
+): Pick<CorrectionLoop, 'discoveredSpec' | 'quotes'> {
   const wanted = members.filter((m) => !m.regressionCue)
   const pool = wanted.length > 0 ? wanted : members
   const chosen = pool[pool.length - 1]
   const others = promptSteps.filter((s) => s !== chosen.step)
-  return (
-    `quoted from step ${chosen.step}, the loop's last statement of what was wanted ` +
-    `(regression reports excluded): "${excerpt(chosen.text)}"` +
-    (others.length > 0
-      ? ` — the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(', ')}`
-      : '')
-  )
+  const quoted = excerpt(chosen.text)
+  return {
+    discoveredSpec:
+      `quoted from step ${chosen.step}, the loop's last statement of what was wanted ` +
+      `(regression reports excluded): "${quoted}"` +
+      (others.length > 0
+        ? ` — the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(', ')}`
+        : ''),
+    quotes: [{ of: 'user_prompt', conversationId, step: chosen.step, text: quoted }],
+  }
 }
 
 /**

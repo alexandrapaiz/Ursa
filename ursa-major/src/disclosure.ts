@@ -430,6 +430,14 @@ export function rawStringsOf(record: OutcomeRecord): string[] {
   }
   for (const t of record.signals?.feedbackTranslations ?? []) out.push(t.complaint, t.mechanism)
   for (const r of record.signals?.regressions ?? []) out.push(r.brokenState, r.evidence)
+  // Found 2026-10-06, writing the quote-grounding bound: these two carry
+  // verbatim quotes of the user and were not in the audit's definition of
+  // "raw". `oneShotCorrections[].text` is the one that matters, because it
+  // is the only signal `ursa run` ever emits on a label-stage record, so the
+  // single most-produced quote in the product was the one string the
+  // disclosure audit never read.
+  for (const c of record.signals?.oneShotCorrections ?? []) out.push(c.text)
+  for (const g of record.signals?.defensiveGuardrails ?? []) out.push(g.text)
   return out.filter((s) => typeof s === 'string' && s.length > 0)
 }
 

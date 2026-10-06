@@ -145,6 +145,7 @@ describe('applyVerdict over a real project', () => {
         resolution: 'accepted',
         resolvingSteps: [21],
         discoveredSpec: 'the digest states the claim, never sells it',
+        quotes: [],
       }],
       notes: ['hand-annotated during the n=1 trial'],
     }

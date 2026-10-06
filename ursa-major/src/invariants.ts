@@ -30,8 +30,9 @@
 //      by `measure()` and never fails the gate.
 
 import { mergedLength } from './intervals'
+import { isExcerptOf } from './text'
 import type {
-  FinalFile, FinalSpan, GenerationRecord, OutcomeRecord, SpanClass,
+  FinalFile, FinalSpan, GenerationRecord, LabSignals, OutcomeRecord, QuoteRef, SpanClass,
 } from './types'
 
 /** Stable identifier for each invariant, so a violation can be grepped for. */
@@ -46,6 +47,7 @@ export type InvariantCode =
   | 'FINAL_SPANS_IN_FILE'
   | 'COVERED_BOUNDED'
   | 'RATES_MATCH_FIELDS'
+  | 'SIGNAL_QUOTE_GROUNDED'
 
 export interface Violation {
   code: InvariantCode
@@ -103,6 +105,25 @@ export interface Measurement {
    * edit in the record shortened or rewrote at equal length.
    */
   mutatedAddedChars: number
+  /**
+   * Correction loops, regressions and one-shot corrections in this record —
+   * the entries `SIGNAL_QUOTE_GROUNDED` walks. Reported because the bound is
+   * vacuously true on a record with no signals, and both fixtures committed
+   * to this repository are exactly that: a gate that checked nothing has to
+   * say so, or "no violations" reads as "the quotes are grounded".
+   */
+  signalEntries: number
+  /** quote references checked across those entries */
+  signalQuotes: number
+  /**
+   * Signal entries carrying no quote reference at all. Legitimate for a
+   * distilled spec, which states what was wanted in the detector's words
+   * rather than the user's (src/hq/fixtures.ts has three). Not legitimate
+   * for anything `loops.ts` or `signals.ts` produces, since both quote
+   * verbatim — so a non-zero count on a record written by `ursa run` is a
+   * defect this measurement is the only thing that would show.
+   */
+  signalEntriesWithoutQuote: number
 }
 
 const BOUNDS: Record<InvariantCode, string> = {
@@ -126,9 +147,14 @@ const BOUNDS: Record<InvariantCode, string> = {
     'classified characters are a subset of the finished work: coveredChars = sum of final span extents <= finalChars',
   RATES_MATCH_FIELDS:
     'every stored rate equals its own numerator over its own denominator, rounded to three places',
+  SIGNAL_QUOTE_GROUNDED:
+    'every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()\'s whitespace normalization, and the same excerpt appears in the signal\'s own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
+
+/** a violation message quotes the offending string; 60 chars is enough to find it */
+const abbrev = (s: string) => (s.length > 60 ? s.slice(0, 60) + '…' : s)
 
 function claimsByGeneration(
   files: FinalFile[],
@@ -144,6 +170,86 @@ function claimsByGeneration(
     }
   }
   return byGen
+}
+
+/**
+ * Every quoting signal in a record, flattened to one shape: the prose field a
+ * lab actually reads, and the quote references attached to it. Written as a
+ * generator over the three arrays rather than three near-identical loops,
+ * because the three differ only in which field carries the prose and a fourth
+ * signal type that quotes is a matter of when, not if.
+ */
+function* quotingSignals(
+  signals: LabSignals,
+): Generator<{ where: string; prose: string; quotes: QuoteRef[] }> {
+  for (const [i, l] of signals.correctionLoops.entries()) {
+    yield {
+      where: `signals.correctionLoops[${i}] (${l.id}) discoveredSpec`,
+      prose: l.discoveredSpec,
+      quotes: l.quotes ?? [],
+    }
+  }
+  for (const [i, r] of signals.regressions.entries()) {
+    yield {
+      where: `signals.regressions[${i}] (step ${r.step}) evidence`,
+      prose: r.evidence,
+      quotes: r.quotes ?? [],
+    }
+  }
+  for (const [i, c] of signals.oneShotCorrections.entries()) {
+    yield {
+      where: `signals.oneShotCorrections[${i}] (step ${c.step}) text`,
+      prose: c.text,
+      quotes: c.quotes ?? [],
+    }
+  }
+}
+
+/**
+ * The raw text one `QuoteRef` names, or a sentence saying why this record
+ * does not contain it. A string return is the text; an `Error` is the
+ * unresolvable case, which is a violation in its own right — an excerpt whose
+ * source cannot be found is not a grounded quote, it is an assertion.
+ */
+function rawTextFor(record: OutcomeRecord, q: QuoteRef): string | Error {
+  if (q.of === 'user_prompt') {
+    if (q.conversationId === undefined || q.step === undefined) {
+      return new Error('of=user_prompt needs both conversationId and step')
+    }
+    const conv = record.conversations.find((c) => c.id === q.conversationId)
+    if (!conv) {
+      return new Error(`no conversation ${q.conversationId} in this record (has ${record.conversations.map((c) => c.id).join(', ') || 'none'})`)
+    }
+    if (!conv.prompts) {
+      return new Error(`conversation ${q.conversationId} carries no prompts[], so the quote cannot be re-read from this record`)
+    }
+    const prompt = conv.prompts.find((p) => p.step === q.step)
+    if (!prompt) {
+      return new Error(`conversation ${q.conversationId} has no prompt at step ${q.step} (steps present: ${conv.prompts.map((p) => p.step).join(', ') || 'none'})`)
+    }
+    return prompt.text
+  }
+
+  if (q.of === 'generation') {
+    if (q.generationIndex === undefined) {
+      return new Error('of=generation needs generationIndex, the record\'s own address for a generation')
+    }
+    const gen = record.generations[q.generationIndex]
+    if (!gen || gen.generationIndex !== q.generationIndex) {
+      return new Error(`no generation at index ${q.generationIndex} (record has ${record.generations.length})`)
+    }
+    if (q.step !== undefined && gen.turnIndex !== q.step) {
+      return new Error(`generation ${q.generationIndex} is at turnIndex ${gen.turnIndex}, the quote claims step ${q.step}`)
+    }
+    return gen.text
+  }
+
+  if (q.filePath === undefined) return new Error('of=final_span needs filePath')
+  const file = record.files.find((f) => f.path === q.filePath)
+  if (!file) {
+    return new Error(`no file ${q.filePath} in this record (has ${record.files.map((f) => f.path).join(', ') || 'none'})`)
+  }
+  return file.text
 }
 
 /**
@@ -285,6 +391,31 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
         `survivalRate ${c.survivalRate}, but ${c.survivedChars}/${c.generatedChars} is ${actual}`)
     }
   }
+  // Signals — the block Ursa Minor sells. Ten bounds above read `files`,
+  // `generations` and `stats`; this one reads the quotes, because a wrong
+  // number is an arithmetic defect and a misquote of the user is a trust
+  // incident (CLAUDE.md §5: the primary asset can be destroyed in a week).
+  if (record.signals) {
+    for (const sig of quotingSignals(record.signals)) {
+      for (const [qi, q] of sig.quotes.entries()) {
+        const at = `${sig.where} quote ${qi} (of=${q.of})`
+        const raw = rawTextFor(record, q)
+        if (raw instanceof Error) {
+          push('SIGNAL_QUOTE_GROUNDED', at, `unresolvable: ${raw.message}`)
+          continue
+        }
+        if (!isExcerptOf(q.text, raw)) {
+          push('SIGNAL_QUOTE_GROUNDED', at,
+            `quote ${JSON.stringify(abbrev(q.text))} does not appear in the ${raw.length}-char text it names`)
+        }
+        if (!sig.prose.includes(q.text)) {
+          push('SIGNAL_QUOTE_GROUNDED', at,
+            `quote ${JSON.stringify(abbrev(q.text))} is not present in the prose field a reader sees, so the two can disagree`)
+        }
+      }
+    }
+  }
+
   const classes: SpanClass[] = ['survived_verbatim', 'survived_mutated', 'no_generation_provenance']
   for (const c of classes) {
     const actual = r3(st.coveredChars ? st.byClass[c].chars / st.coveredChars : 0)
@@ -312,6 +443,17 @@ export function measure(record: OutcomeRecord): Measurement {
     }
   }
 
+  let signalEntries = 0
+  let signalQuotes = 0
+  let signalEntriesWithoutQuote = 0
+  if (record.signals) {
+    for (const sig of quotingSignals(record.signals)) {
+      signalEntries++
+      signalQuotes += sig.quotes.length
+      if (sig.quotes.length === 0) signalEntriesWithoutQuote++
+    }
+  }
+
   const verbatimFinalChars = record.stats.byClass.survived_verbatim.chars
   return {
     recordId: record.task.id,
@@ -324,6 +466,9 @@ export function measure(record: OutcomeRecord): Measurement {
     finalSeparatorChars: record.stats.finalChars - record.stats.coveredChars,
     mutatedFinalChars: record.stats.byClass.survived_mutated.chars,
     mutatedAddedChars,
+    signalEntries,
+    signalQuotes,
+    signalEntriesWithoutQuote,
   }
 }
 
