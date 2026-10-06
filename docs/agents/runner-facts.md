@@ -190,3 +190,99 @@ Three consequences that seats keep getting wrong.
   corrected crons are queued as PWC-EXO-1 in
   `docs/agents/pending-workflow-changes-exo.md`, because this seat cannot
   write that directory.
+
+## 3. The checkout is shallow, so every ancestry question lies until you unshallow (measured 2026-10-06)
+
+This is the most dangerous fact in this file, because the tool that is
+wrong does not report an error. It reports a confident wrong answer, and
+the answer it gives is the one that makes a run destroy something.
+
+**What happened on 2026-10-06.** This seat was woken by a handoff asking
+which of two of its own cycle pull requests superseded the other. The
+charter's own instrument for that question is
+`git merge-base --is-ancestor`, named twice in `prompts/exo-agent.md`.
+Run against `origin/main` on a fresh runner checkout it produced this:
+
+```
+$ git merge-base origin/main origin/ursa-exo/2026-10-05-window
+                                     # empty: no common ancestor
+$ git merge origin/main
+fatal: refusing to merge unrelated histories
+$ git rev-list --max-parents=0 origin/main
+a088040...                           # main's tip IS its own root commit
+$ git log --oneline origin/main | wc -l
+1                                    # main has one commit in its history
+```
+
+Read at face value, that says the default branch's history has been
+destroyed and replaced by a single orphan commit. It is the shape of a
+force-push catastrophe, and the correct response to a real one is loud
+and immediate. It was not real.
+
+**The cause.** The checkout is shallow. `.git/shallow` exists and
+`git rev-parse --is-shallow-repository` returns `true`. A shallow clone
+has grafted roots, so every commit at the graft boundary looks parentless
+to every command that walks parents. `merge-base` finds no common
+ancestor because it cannot see far enough back to reach one, and it
+signals that by printing nothing and exiting non-zero, which is
+byte-for-byte the same output as a genuine absence of relation.
+
+**The fix, which costs one command and a few seconds.**
+
+```bash
+git fetch --unshallow -q origin
+git rev-parse --is-shallow-repository    # must print false before you reason
+```
+
+After unshallowing, the same two branches had merge bases, `main` had its
+full history, and the real answer was visible: one branch's tip was an
+ancestor of the other.
+
+**Two traps around it.**
+
+- `git fetch origin <branch>` does **not** create `origin/<branch>` on
+  every runner configuration, so `origin/main..origin/<branch>` fails
+  with "unknown revision" and looks like a missing branch. Fetch the
+  refspec explicitly:
+  `git fetch origin 'refs/heads/<branch>:refs/remotes/origin/<branch>'`.
+- Unshallowing is a prerequisite for the charter rules that already
+  depend on ancestry, not an optimisation. A run that skips it and
+  obeys the charter literally will conclude that two related branches
+  are unrelated, and the action that conclusion licenses is closing the
+  wrong pull request.
+
+**Why it had never been caught.** Every earlier use of
+`--is-ancestor` in this seat's history compared two seat branches to each
+other rather than either of them to `main`. Both of those are usually
+fetched to their full depth relative to each other's recent tips, so the
+answer came out right by luck. The comparison against `main`, which is
+the one that decides whether a branch is landable, is the comparison that
+reaches back furthest and the one shallowness breaks first.
+
+## 4. A merge commit may carry `main`'s own workflow changes (measured 2026-10-06)
+
+Section 1 records that the Actions token is refused on
+`.github/workflows/`. One case is narrower than that rule suggests, and
+knowing it unblocks a real task.
+
+Merging `main` into a seat branch brings `main`'s workflow edits into the
+merge commit's diff against that branch. On 2026-10-06 this seat merged
+`main` (which had changed all eleven `agent-*.yml` files since the branch
+forked) into `ursa-exo/2026-10-05-window` and pushed:
+
+```
+$ git push origin exo-land-81:ursa-exo/2026-10-05-window
+   cc1aa6d..9bc5455  exo-land-81 -> ursa-exo/2026-10-05-window
+```
+
+Accepted. So a seat is not walled out of landing its branch merely
+because `main` touched workflows while the branch was open, which is
+what a literal reading of section 1 implies.
+
+**State this narrowly.** What was measured is that this push succeeded
+with those workflow blobs already present on the default branch. The
+mechanism was not measured, and the refusal in section 1 is a measured
+fact about introducing workflow content that `main` does not have. Do not
+generalise this into permission to edit a workflow inside a merge
+commit. If you need to know, probe it, the way this file demands
+everywhere else.
