@@ -6,7 +6,7 @@ open --limit 200`, `gh run list --limit 50`, the board
 (board.libraryofalexandria.dev/Ursa) and its message inbox, and `gh api
 repos/.../milestones`.
 
-## The headline: the sprint ceremony finally landed, and the queue is down to 23
+## The headline: the sprint ceremony finally landed, and five seats are already rebasing
 
 `main` had no live sprint file for 15 days (the last two Mondays'
 ceremony PRs, #34 and #93, both joined the same stuck queue instead of
@@ -20,14 +20,23 @@ similarity-vs-descent) were already shipped and merged by the time this
 run started (#107, #109); the third (security, the redaction standard)
 has no seat work in flight yet — see `dispatch-queue.md`.
 
-This run also closed 17 stale pull requests that were pure superseded
+This run also closed 18 stale pull requests that were pure superseded
 snapshots or conflicting work already overtaken by later runs (eleven
 of this seat's own repeated `pending.md`/`dispatch-queue.md`
-message-pass drafts, two of its own sync-window passes, two exo cycles
-marked `subsumed`, one stale skill run, and one stale security run),
-each closed with the specific PR or seat that supersedes it named in
-the close comment. The open-PR count fell from 43 at the start of this
-run to 23.
+message-pass drafts — #90, 93, 95, 97, 98, 99, 100, 101, 102, 106, 110
+— two of its own sync-window passes — #20, #53 — one more of its own,
+a nine-day-idle `docs/decisions.md` proposal no merger but the owner
+could take — #29 — two exo cycles marked `subsumed` — #30, #46 — one
+stale skill run — #14 — and one stale security run — #28), each closed
+with the specific PR or seat that supersedes it named in the close
+comment. 42 PRs were open at the start of this run; by the end, the
+event bus had already woken five seats off this run's own board
+handoffs (§17 — a message addressed to a seat wakes it) and they
+opened their own draft rebase runs before this standup even finished:
+security, exo, research, engineer and market all have a fresh draft PR
+in flight addressing exactly what was asked of them. Those five are
+left untouched and in progress; everything else is reconciled below
+against the queue as it stands at the end of this run.
 
 ## Top three for the owner
 
@@ -54,8 +63,14 @@ run to 23.
    naming what to rebase and in what order. None of this needs the
    owner; it needs the six seats' next runs to open with the rebase.
 
-## Everything else open (23 total)
+## Everything else open (27 total, five of them brand new)
 
+- **Already being rebased, as of this run**: five seats — security,
+  exo, research, engineer, market — were woken by this run's own board
+  handoffs (§17: a message addressed to a seat wakes it) and opened
+  draft pull requests addressing exactly what was asked, within
+  minutes of the handoff going out. Left untouched and in progress;
+  the next standup should find them ready or close to it.
 - **Tier C, held for the owner or a chair, never this seat's to
   merge**: `company.yaml` (#80, the roster — Tier C by name in
   `docs/standards/pm.md` §10), and five pull requests from research
@@ -65,12 +80,12 @@ run to 23.
   this seat's own standing instruction to never edit charters itself,
   merge included. All five are otherwise clean and green; they are not
   stale, just outside this seat's merge authority.
-- **Conflicting, handed off this run** (see "Top three," item 3 for
-  the sprint-critical ones): #63, #75, #76, #81, #82, #85, #88, #89,
-  #92, #103. #76 and #81 are both exo's own weekly cycles and both
-  conflicting; the handoff asked exo to say which one is current and
-  close the other, since this seat cannot tell from the repo alone
-  without risking a dropped finding.
+- **Conflicting, handed off this run, superseding draft now in
+  flight** (see "Top three," item 3 for the sprint-critical ones):
+  #63, #75, #76, #81, #82, #85, #88, #89, #92, #103. #76 and #81 are
+  both exo's own weekly cycles and both conflicting; the handoff asked
+  exo to say which one is current and close the other, since this seat
+  cannot tell from the repo alone without risking a dropped finding.
 - **Draft, idle, not failing CI**: #47, #49, #83, #84, #86, #87, #91 —
   leftover window-session work from 2026-09-30 through 2026-10-05,
   still marked draft by the seats that opened them. None has failing
@@ -78,10 +93,15 @@ run to 23.
   criteria do not fire on them, and every one of their seats has an
   open PR anyway (the same §11.4 hard stop that blocks fresh
   dispatch). Left for each seat's own next run to finish or abandon.
+- **This standup's own PR** (#111): pure Tier A scope, clean, but not
+  self-merged — this run's own instructions say never to merge its own
+  PR, without the Tier A carve-out §9 otherwise allows, so it waits for
+  the owner or a chair.
 
 Full list, oldest first, is `gh pr list --state open`; not reproduced
-line by line since a static list goes stale by the next run and the
-finding is the shape of the queue, not its enumeration.
+line by line since a static list goes stale by the next run (already
+true twice over within this run itself) and the finding is the shape
+of the queue, not its enumeration.
 
 ## Waiting on an owner-only action
 
