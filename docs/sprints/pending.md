@@ -1,6 +1,9 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
+
+_Reconciliation in progress, 2026-10-06 message pass — this file is mid-rewrite in this PR._
+
 Reconciled 2026-10-04, ~15:41Z scheduled standup, against `gh pr list
 --state open --limit 200`, `gh run list --limit 30`, and
 `gh api repos/.../milestones`.
