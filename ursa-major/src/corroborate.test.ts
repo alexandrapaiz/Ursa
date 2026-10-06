@@ -317,3 +317,26 @@ describe('the chat path is unchanged', () => {
     expect(span.descent).toBeUndefined()
   })
 })
+
+describe('the viewer accounts for a demotion rather than going quiet', () => {
+  it('names the rival commit and its subject in the span inspector', async () => {
+    const { renderViewer } = await import('./viewer')
+    const { r, generatedSha } = twoBranchesOneSurvivor()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)!
+    const html = renderViewer(resolveEpisode(r.dir, ep)!)
+    // The record carries a rejected candidate scoring above THETA_HIGH. A
+    // viewer that shows the score and not the reason reads as the
+    // resolver being coy about a near-certainty, and the user is owed the
+    // inference (CLAUDE.md §2).
+    expect(html).toContain('Not counted as your edit')
+    // Branch B's OWN commit, not the merge that brought it in. The first
+    // version of this assertion named the merge subject and passed, which
+    // was a false positive: that string is already in the HTML because
+    // the merge destroyed branch A's line and `deletion.mergeSubject`
+    // records it. Asserting the subject the descent verdict actually
+    // carries is the only version of this test that can fail.
+    expect(html).toContain('Rich label, other wording')
+    expect(html).toContain('a branch this generation is not an ancestor of')
+  })
+})
