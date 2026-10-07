@@ -1,32 +1,39 @@
-# Dispatch queue — 2026-10-07, second message pass (~12:30 UTC)
+# Dispatch queue — 2026-10-07, third pass (~18:15 UTC, triage of the
+17:52 UTC engineer-agent failure)
 
-`PM_DISPATCH_ENABLED` is not set to `true` (checked `gh variable list`
-directly). No owner instructions carried on this pass (a scheduled
-message pass, not an owner-present window).
+`PM_DISPATCH_ENABLED` is unset this pass (checked directly in the run
+environment). This is a message-triggered triage of one failed run,
+not an owner-present window, so no owner instructions carry.
 
 ## Proposed
 
-None. Every seat this charter may dispatch, except market and okr,
-already carries an open pull request, which forecloses
-`docs/standards/pm.md` §11.4's hard stop before any other criterion is
-checked:
+None. Nothing changed since the second pass's reconciliation that
+would unlock a dispatch, and the failure this pass exists to triage
+makes engineer's own hard stop stronger, not weaker: it now carries
+three open pull requests (#92, #126, #130, see pending.md) instead of
+one.
 
 | Seat | Most recent open PR | Opened | State |
 |---|---|---|---|
-| engineer | #126 | 2026-10-07 | draft, in progress (subsumes #92) |
+| engineer | #130 | 2026-10-07 17:53 | draft, mislabeled (see pending.md); #92 and #126 still open behind it |
 | research | #114 | 2026-10-06 | draft, in progress |
 | frontend | #125 | 2026-10-07 | draft, in progress |
 | skill | #123 | 2026-10-07 | draft, in progress |
 | security | #124 | 2026-10-07 | draft, in progress (also #112, #85, #75 still open behind it) |
 | finance | #91 | 2026-10-05 | draft, idle |
-| market | none | — | #127 merged this pass; no open PR |
-| okr | none | — | #88 and #63 both merged |
+| market | none | — | no open PR |
+| okr | none | — | no open PR |
 
 Checked market and okr against the rest of §11.3 anyway, since neither
 is walled by an open PR:
 
-- **No seat run failed in the last 24h.** `gh run list --status
-  failure --created ">=24 hours ago"` returns empty.
+- **One seat run failed in the last 24h** — engineer, 17:52 UTC today,
+  the subject of this pass's triage. It does not fire a dispatch for
+  market or okr (neither is the failing seat), and does not fire one
+  for engineer either: engineer is already walled by three open PRs
+  under §11.4, and the hard stop forecloses re-dispatching a seat with
+  open work of its own unless told to build on it, which no owner
+  instruction says here.
 - **No sprint item names market or okr.** sprint-2026-10-05's three
   items are engineer (x2, both shipped — #107, #109) and security (x1,
   open). Neither market nor okr owns anything on the live sprint.
@@ -44,9 +51,7 @@ completeness:
   (item 3, gates O2 KR2.2) — no PR touches it, which would ordinarily
   fire "a sprint item is due this week and its owning seat has not run"
   under §11.3, except security already has four open pull requests,
-  which forecloses it under §11.4 regardless. The real unlock is
-  security clearing its own queue first; already asked of it, unchanged
-  this pass.
+  which forecloses it under §11.4 regardless.
 - exo, sales: never dispatched by this charter (exo audits this seat;
   sales is dormant, posture private-R&D, never for sale per ADR-001).
 
