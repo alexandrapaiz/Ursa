@@ -50,6 +50,7 @@ export type InvariantCode =
   | 'RATES_MATCH_FIELDS'
   | 'SIGNAL_QUOTE_GROUNDED'
   | 'DESCENT_CHECKED_UNIFORMLY'
+  | 'EXCLUSION_NOT_CLASSIFIED'
 
 export interface Violation {
   code: InvariantCode
@@ -148,6 +149,28 @@ export interface Measurement {
    * correction, so a non-zero count here is the bound earning its place.
    */
   descentDemoted: number
+  /**
+   * Paths in `record.exclusions` — files the episode touched and the run
+   * refused to classify. A measurement and not a bound, because zero is the
+   * normal answer: most episodes import nothing. Reported because a
+   * reviewer cannot otherwise tell a record that asked the question from
+   * one whose capture path never could.
+   */
+  excludedPaths: number
+  /**
+   * Characters in those files, summed. This is the quantity that left this
+   * record's survival and discard figures by being excluded, so it is the
+   * number a reader needs to compare one run against an earlier one.
+   */
+  excludedChars: number
+  /**
+   * `stats.finalChars + excludedChars`: characters in every path the run was
+   * willing to read, classified and refused together. The reconciliation
+   * `excludedChars` exists for — a record whose excluded count cannot be
+   * added back to the finished size is a record whose exclusions have
+   * drifted from the files they describe.
+   */
+  consideredChars: number
 }
 
 const BOUNDS: Record<InvariantCode, string> = {
@@ -173,6 +196,8 @@ const BOUNDS: Record<InvariantCode, string> = {
     'every stored rate equals its own numerator over its own denominator, rounded to three places',
   SIGNAL_QUOTE_GROUNDED:
     'every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()\'s whitespace normalization, and the same excerpt appears in the signal\'s own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.',
+  EXCLUSION_NOT_CLASSIFIED:
+    'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
   DESCENT_CHECKED_UNIFORMLY:
     'if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.',
 }
@@ -474,6 +499,26 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
     }
   }
 
+  // The file-level refusal, checked the way the span-level one is. The
+  // failure this catches is the mirror of DESCENT_CHECKED_UNIFORMLY's
+  // second clause: there, the demotion is computed and not applied to the
+  // span; here, the exclusion is computed and not applied to the file. Both
+  // produce a record that names its own counter-evidence and sells the
+  // claim anyway, which is the one defect a buyer could catch before we do.
+  const classified = new Set(record.files.map((f) => f.path))
+  for (const [i, x] of (record.exclusions ?? []).entries()) {
+    const at = `exclusions[${i}] (${x.path})`
+    if (classified.has(x.path)) {
+      const f = record.files.find((ff) => ff.path === x.path)!
+      push('EXCLUSION_NOT_CLASSIFIED', at,
+        `excluded as ${x.reason} from ${x.sha} and also present in files[] with ${f.spans.length} classified span${f.spans.length === 1 ? '' : 's'} over ${f.text.length} chars`)
+    }
+    if (x.chars <= 0 || x.sha.length === 0) {
+      push('EXCLUSION_NOT_CLASSIFIED', at,
+        `chars=${x.chars}, sha=${x.sha ? x.sha : '(empty)'}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`)
+    }
+  }
+
   return out
 }
 
@@ -518,6 +563,9 @@ export function measure(record: OutcomeRecord): Measurement {
     }
   }
 
+  const exclusions = record.exclusions ?? []
+  const excludedChars = exclusions.reduce((a, x) => a + x.chars, 0)
+
   const verbatimFinalChars = record.stats.byClass.survived_verbatim.chars
   return {
     recordId: record.task.id,
@@ -536,6 +584,9 @@ export function measure(record: OutcomeRecord): Measurement {
     descentChecked,
     descentUnverified,
     descentDemoted,
+    excludedPaths: exclusions.length,
+    excludedChars,
+    consideredChars: record.stats.finalChars + excludedChars,
   }
 }
 

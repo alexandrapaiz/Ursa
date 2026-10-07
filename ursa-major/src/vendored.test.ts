@@ -23,6 +23,8 @@ import { buildEpisodes, type Episode } from './episodes'
 import { findCommitPairs, listCommits } from './pairfinder'
 import { renderRunSummary, resolveEpisode, resolvablePaths } from './bin/ursa'
 import { vendoredPaths } from './vendored'
+import { checkRecord, measure } from './invariants'
+import { resolve } from './resolve'
 
 // Author identity through the environment, not `git config`, for the
 // reason m0.test.ts and corroborate.test.ts both give: GIT_AUTHOR_NAME
@@ -193,24 +195,81 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
     expect(summary).toContain('Re-vendor standard.md from HQ main')
   })
 
-  it('still reports the exclusion when every resolvable path was imported, and there is no record', () => {
-    // The case a silent run would be most misread in. The episode
-    // resolves to nothing, so there is no record to carry the finding,
-    // which is why the annotation lives on the episode.
+  it('writes a record that states the refusal when every resolvable path was imported', () => {
+    // The case a silent run would be most misread in, and the one this
+    // test pinned the other way on 2026-10-06: the episode resolved to
+    // nothing, and the only account of why reached `.ursa/episodes.json`
+    // and the terminal. A record that is absent from `.ursa/records/` is
+    // indistinguishable from a run that found no work, so the episode now
+    // resolves to a record carrying no files, no generations, and the one
+    // exclusion that explains both.
     const r = repo()
     r.commit({ 'standard.md': doc('drafts') }, 'Baseline')
     const baseline = r.at('HEAD')
     r.git(['checkout', '-q', '-b', 'hq-sync'])
-    r.commit({ 'standard.md': HQ }, 'Re-vendor standard.md from HQ main')
+    const vendorSha = r.commit({ 'standard.md': HQ }, 'Re-vendor standard.md from HQ main')
     r.git(['checkout', '-q', baseline])
     const generatedSha = r.commit({ 'standard.md': doc('rewrites') }, 'Rewrite it' + TRAILER, BOT)
     r.commit({ 'standard.md': HQ }, 'Take HQ\'s version')
 
     const ep = annotated(r, episodeFor(r, generatedSha))
-    expect(resolveEpisode(r.dir, ep)).toBeNull()
-    const summary = renderRunSummary([], [ep])
+    const record = resolveEpisode(r.dir, ep)!
+    expect(record.files).toEqual([])
+    expect(record.generations).toEqual([])
+    expect(record.exclusions).toEqual([{
+      path: 'standard.md',
+      reason: 'imported_whole',
+      sha: vendorSha.slice(0, 7),
+      subject: 'Re-vendor standard.md from HQ main',
+      relation: 'sibling',
+      chars: HQ.length,
+    }])
+    // It claims nothing, and claiming nothing is not the same as being
+    // unarithmetic: the gate holds on it like any other record.
+    expect(checkRecord(record)).toEqual([])
+    expect(record.stats.byClass.survived_verbatim.chars).toBe(0)
+
+    const summary = renderRunSummary([record], [ep])
     expect(summary).toContain('came in whole from elsewhere')
     expect(summary).toContain('standard.md')
+  })
+
+  it('carries the exclusion on a record that also has files to classify', () => {
+    // The ordinary shape: one import beside one real generation. The
+    // record keeps the labels the agent earned on `module.ts` AND says
+    // why `standard.md` has none, which is the pairing a buyer audits.
+    const { r, generatedSha, vendorSha } = vendoredOnASibling()
+    const record = resolveEpisode(r.dir, annotated(r, episodeFor(r, generatedSha)))!
+
+    expect(record.files.map((f) => f.path)).toContain('module.ts')
+    expect(record.files.map((f) => f.path)).not.toContain('standard.md')
+    expect(record.exclusions).toHaveLength(1)
+    expect(record.exclusions![0]).toMatchObject({
+      path: 'standard.md',
+      reason: 'imported_whole',
+      sha: vendorSha.slice(0, 7),
+      relation: 'sibling',
+    })
+    // The reconciliation the field exists for: what left the figures,
+    // added back, is the size of every path the run was willing to read.
+    const m = measure(record)
+    expect(m.excludedChars).toBe(HQ.length)
+    expect(m.consideredChars).toBe(record.stats.finalChars + HQ.length)
+  })
+
+  it('does not carry an exclusions field at all when nothing was asked', () => {
+    // `resolve()` called without `exclusions` leaves the key off rather
+    // than setting it to an empty array. On a chat-path record the
+    // question cannot be asked, and "asked and found nothing" is a
+    // different claim from "never asked" — only the first is evidence.
+    const record = resolve({
+      taskId: 'no-exclusions-asked',
+      files: [{ path: 'a.md', text: 'one two three four five six seven eight.' }],
+      conversations: [],
+      generations: [],
+      finished: true,
+    })
+    expect('exclusions' in record).toBe(false)
   })
 })
 
