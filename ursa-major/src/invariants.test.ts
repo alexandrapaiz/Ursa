@@ -22,7 +22,7 @@ import { runGate } from './invariants.cli'
 import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
 import { deriveSignals } from './signals'
-import type { OutcomeRecord } from './types'
+import type { Exclusion, OutcomeRecord } from './types'
 
 const PUBLIC_FIXTURE = 'fixtures/mini/record/outcome_record.json'
 const REAL_FIXTURE = 'fixtures/real/ursa-main-4d5e401.json'
@@ -31,7 +31,7 @@ const load = (p: string): OutcomeRecord => JSON.parse(readFileSync(p, 'utf8')) a
 const clone = (r: OutcomeRecord): OutcomeRecord => JSON.parse(JSON.stringify(r)) as OutcomeRecord
 
 /** A record with one verbatim span, one fuzzy-matched span and one deletion. */
-function resolvedRecord(): OutcomeRecord {
+function resolvedRecord(exclusions?: Exclusion[]): OutcomeRecord {
   const generated = [
     'The information a decision needs is dispersed across many individuals.',
     'No single observer holds it whole, and a central grader pretends otherwise.',
@@ -54,6 +54,7 @@ function resolvedRecord(): OutcomeRecord {
     }],
     finished: true,
     generatedAt: '2026-10-05T00:00:00.000Z',
+    ...(exclusions ? { exclusions } : {}),
   })
 }
 
@@ -654,18 +655,26 @@ describe('the descent verdict behind a mutation label', () => {
 // ---------------------------------------------------------------------------
 
 describe('a path the record excludes and the figures it left', () => {
-  /** the unit record, with its one file declared an import as well as classified */
-  function excludedAndClassified(): OutcomeRecord {
-    const r = resolvedRecord()
-    r.exclusions = [{
-      path: r.files[0].path,
+  /**
+   * The unit record with one exclusion, built THROUGH `resolve()` rather than
+   * patched onto a finished record. The patch form was the original shape
+   * here and it stopped being usable once `stats.perFile` had to enumerate
+   * excluded paths too (PERFILE_ENUMERATES_PATHS): a record with
+   * `exclusions` bolted on afterwards is missing the row the resolver would
+   * have written, so every assertion below would have been reading a record
+   * no run could produce. `patch` defaults to excluding the record's own one
+   * classified path, which is the illegal overlap the first test is about.
+   */
+  function excludedAndClassified(patch: Partial<Exclusion> = {}): OutcomeRecord {
+    return resolvedRecord([{
+      path: 'notes.md',
       reason: 'imported_whole',
       sha: '96ed4e5',
       subject: 'market: rebase #89\'s landscape onto main',
       relation: 'sibling',
-      chars: r.files[0].text.length,
-    }]
-    return r
+      chars: 199,
+      ...patch,
+    }])
   }
 
   it('fires when a path is excluded and classified at the same time', () => {
@@ -681,14 +690,11 @@ describe('a path the record excludes and the figures it left', () => {
   })
 
   it('passes when the excluded path is the one path not in files[]', () => {
-    const r = excludedAndClassified()
-    r.exclusions![0].path = 'docs/standards/pm.md'
-    expect(checkRecord(r)).toEqual([])
+    expect(checkRecord(excludedAndClassified({ path: 'docs/standards/pm.md' }))).toEqual([])
   })
 
   it('fires on an exclusion whose number cannot be added back to the figures', () => {
-    const r = excludedAndClassified()
-    r.exclusions = [{ ...r.exclusions![0], path: 'docs/standards/pm.md', chars: 0 }]
+    const r = excludedAndClassified({ path: 'docs/standards/pm.md', chars: 0 })
     const v = checkRecord(r)
     expect(v.map((x) => x.code)).toContain('EXCLUSION_NOT_CLASSIFIED')
     expect(v[0].observed).toContain('chars=0')
@@ -696,8 +702,7 @@ describe('a path the record excludes and the figures it left', () => {
   })
 
   it('fires on an exclusion that names no commit', () => {
-    const r = excludedAndClassified()
-    r.exclusions = [{ ...r.exclusions![0], path: 'docs/standards/pm.md', sha: '' }]
+    const r = excludedAndClassified({ path: 'docs/standards/pm.md', sha: '' })
     expect(checkRecord(r)[0].observed).toContain('sha=(empty)')
   })
 
@@ -712,9 +717,7 @@ describe('a path the record excludes and the figures it left', () => {
     expect(m0.excludedChars).toBe(0)
     expect(m0.consideredChars).toBe(clean.stats.finalChars)
 
-    const r = excludedAndClassified()
-    r.exclusions![0].path = 'docs/standards/pm.md'
-    r.exclusions![0].chars = 21_656
+    const r = excludedAndClassified({ path: 'docs/standards/pm.md', chars: 21_656 })
     const m = measure(r)
     expect(m.excludedPaths).toBe(1)
     expect(m.excludedChars).toBe(21_656)

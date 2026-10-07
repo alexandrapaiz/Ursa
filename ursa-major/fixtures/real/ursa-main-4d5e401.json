@@ -1083,17 +1083,20 @@
       "survived_verbatim": {
         "spans": 18,
         "chars": 2724,
-        "pct": 0.927
+        "pct": 0.927,
+        "pctOfFinal": 0.903
       },
       "survived_mutated": {
         "spans": 0,
         "chars": 0,
-        "pct": 0
+        "pct": 0,
+        "pctOfFinal": 0
       },
       "no_generation_provenance": {
         "spans": 5,
         "chars": 215,
-        "pct": 0.073
+        "pct": 0.073,
+        "pctOfFinal": 0.071
       }
     },
     "uncertainSpans": 1,

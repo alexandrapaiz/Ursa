@@ -166,10 +166,23 @@ export function auditProvenance(record: OutcomeRecord): ProvenanceAudit {
     })
   })
 
+  // A perFile row resolves to a classified file, or to an exclusion. The
+  // second case is a row the record deliberately carries for a path it read
+  // and refused (see Stats.perFile in src/types.ts), so the pointer is live;
+  // what the audit still has to catch is a row whose `excluded` reason does
+  // not match the entry in `exclusions[]`, because then the row and the
+  // evidence it points at disagree about why the path produced nothing.
+  const excludedBy = new Map((record.exclusions ?? []).map((x) => [x.path, x]))
   record.stats.perFile.forEach((r, i) => {
     pointersChecked++
-    if (!filePaths.has(r.path)) {
-      add('stats_path_unknown', `stats.perFile[${i}].path`, `no final file with path "${r.path}"`)
+    const exclusion = excludedBy.get(r.path)
+    if (filePaths.has(r.path)) return
+    if (!exclusion) {
+      add('stats_path_unknown', `stats.perFile[${i}].path`,
+        `no final file and no exclusion with path "${r.path}"`)
+    } else if (r.excluded !== exclusion.reason) {
+      add('stats_path_unknown', `stats.perFile[${i}].excluded`,
+        `row says ${r.excluded ?? '(nothing)'}, exclusions[] says ${exclusion.reason} for path "${r.path}"`)
     }
   })
   record.stats.perConversation.forEach((r, i) => {
