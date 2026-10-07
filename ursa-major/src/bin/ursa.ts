@@ -29,6 +29,7 @@ import { blobAt, findCommitPairsWithDiagnostics, listCommits, type CommitInfo, t
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { gitDeletionAttributor } from '../deletion'
 import { gitDescentCorroborator } from '../corroborate'
+import { vendoredPaths } from '../vendored'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
@@ -43,6 +44,21 @@ const TEXT_EXTS = new Set([
 ])
 const SKIP_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'])
 const MAX_BLOB_CHARS = 300_000
+
+/**
+ * The episode's touched paths this run would read at all.
+ *
+ * Lifted out of `resolveEpisode`'s loop so `main` can ask the same
+ * question before resolving, since the import check (src/vendored.ts)
+ * must run over exactly the paths the resolver would otherwise classify
+ * and no others. A git call spent on `package-lock.json` would be spent
+ * on a file the resolver already skips.
+ */
+export function resolvablePaths(ep: Episode): string[] {
+  return ep.touchedFiles.filter(
+    (path) => TEXT_EXTS.has(extname(path)) && !SKIP_FILES.has(path.split('/').pop() ?? ''),
+  )
+}
 
 /**
  * What kind of finished thing an episode is, as of its own final commit.
@@ -75,9 +91,21 @@ export function resolveEpisode(
 ): OutcomeRecord | null {
   const files: Array<{ path: string; text: string }> = []
   const generations: RawGeneration[] = []
+  const graph = commits ?? listCommits(projectPath)
+  const candidates = resolvablePaths(ep)
+  // The file-level refusal, ahead of the span-level one. A path whose
+  // finished blob is byte-identical to a blob outside this generation's
+  // descent arrived whole from elsewhere, so classifying its spans would
+  // attach `survived_verbatim` and `survived_mutated` labels to text
+  // nobody in this episode wrote. `ep.vendoredPaths` when `main` already
+  // asked; computed here when a caller resolves an episode directly, so
+  // the refusal does not depend on which entry point was used.
+  const imported = new Set(
+    (ep.vendoredPaths ?? vendoredPaths(projectPath, ep, candidates, graph)).map((v) => v.path),
+  )
   let turn = 0
-  for (const path of ep.touchedFiles) {
-    if (!TEXT_EXTS.has(extname(path)) || SKIP_FILES.has(path.split('/').pop() ?? '')) continue
+  for (const path of candidates) {
+    if (imported.has(path)) continue
     const genText = blobAt(projectPath, ep.generatedSha, path)
     const finText = blobAt(projectPath, ep.finalSha, path)
     if (genText === null || finText === null) continue
@@ -112,11 +140,7 @@ export function resolveEpisode(
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(
-      projectPath,
-      ep.generatedSha,
-      commits ?? listCommits(projectPath),
-    ),
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
@@ -190,6 +214,34 @@ export function renderRunSummary(
   )]
   for (const url of hosted) {
     lines.push(`This work is also live at ${url}, so the records carry where to go and look at it.`)
+  }
+
+  // Files the run declined to read as the person's work, said out loud.
+  // Before this, `docs/standards/pm.md` was resolved span by span on
+  // every run over this repository's own history, and it produced seven
+  // demoted mutations and nine spans the length floor could not judge,
+  // for a file that arrived complete from the holding company in one
+  // commit. Silence here would mean a record that simply omits a file the
+  // episode touched, which is the kind of gap a buyer is right to
+  // distrust. Deduplicated by path across episodes, because the same
+  // vendored file is commonly touched by several.
+  const vendored = [...new Map(
+    episodes.flatMap((e) => e.vendoredPaths ?? []).map((v) => [v.path, v]),
+  ).values()]
+  if (vendored.length > 0) {
+    const one = vendored[0]
+    lines.push('')
+    lines.push(
+      `${vendored.length} file${vendored.length === 1 ? '' : 's'} came in whole from elsewhere and ${vendored.length === 1 ? 'was' : 'were'} not read as your work, starting with ${one.path}.`,
+    )
+    lines.push(
+      one.relation === 'sibling'
+        ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
+        : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
+    )
+    lines.push(
+      `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`,
+    )
   }
 
   // An empty run used to print "0 work units found" and stop, which reads as
@@ -363,11 +415,19 @@ export async function main(argv: string[]): Promise<number> {
     maxPairAgeHours: bound('max-pair-age-hours'),
     maxInterposedGenerations: bound('max-interposed-generations'),
   })
-  const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
   // One graph read for the whole run. Every episode's corroborator needs
   // the same parent/child edges to tell a rival commit from a descendant
-  // of its own generation.
+  // of its own generation, and so does the import check below.
   const commits = listCommits(projectPath)
+  // Annotated before resolving, not during it, so the exclusion reaches
+  // `saveEpisodes` and `renderRunSummary` even for an episode that
+  // resolves to nothing. An episode whose every resolvable path was
+  // imported produces no record at all, and that is precisely the case
+  // where a silent run would be most misread.
+  const episodes = buildEpisodes(pairs, projectPath).slice(0, limit).map((ep) => ({
+    ...ep,
+    vendoredPaths: vendoredPaths(projectPath, ep, resolvablePaths(ep), commits),
+  }))
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a
   // record the next run recreates, which is not deletion.
