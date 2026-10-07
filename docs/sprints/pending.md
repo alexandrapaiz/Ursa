@@ -1,12 +1,9 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Reconciled 2026-10-06 (ceremony run), against `gh pr list --state
-open --limit 200`, `gh run list --limit 30`, and `gh api
-repos/.../milestones`. Local `main` was 162 commits behind
-`origin/main` at the start of this run (a fast-forward merge, not a
-conflict) — the count and content below are read from the real,
-current `main`, not the stale snapshot this run started from.
+Reconciliation for the 2026-10-07 message pass in progress; this file
+is mid-rewrite in the same PR, against a fresh `gh pr list --state
+open`, `gh run list`, and the board inbox.
 
 ## The headline: PR #44 merged, and the queue finally drained
 
