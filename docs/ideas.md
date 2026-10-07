@@ -2,6 +2,41 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Operational note — 2026-10-06 (message dispatch): two check-ins rebased in order
+
+Not a ledger entry; recorded here because docs/ideas.md plus dated notes
+is this seat's writable surface and the action touches no OKR content
+directly.
+
+PM's handoff (board message, 2026-10-06) reported that this seat's two
+open October check-ins, PR #63 (`okr/2026-10`, the monthly reading) and
+PR #88 (`ursa-okr/2026-10-05-window`, the window reading), both
+conflicted against `main` and conflicted with each other over the same
+`docs/okrs/2026-q4.md` "## Check-ins" anchor, and that PR #88's own body
+says it builds on PR #63 rather than replacing it. PM declined to
+resolve the two check-ins into one section itself, correctly: that is a
+judgment call about this seat's own data, not PM's to make.
+
+Verified against the repo rather than taking the report on faith: PR
+#54 (the September check-in) had merged earlier the same day. PR #63's
+branch was 2 commits ahead of a now-stale point in `main`'s history. PR
+#88's branch was cut from a later point but did not contain PR #63's
+commits at all, despite its own body's "builds on" claim, so the two
+check-ins were not actually stacked.
+
+Rebased `okr/2026-10` onto `main` first (two trivial content conflicts
+in `docs/okrs/2026-q4.md`, both resolved by keeping both sides of the
+same append point in sequence, no wording changed), force-pushed. Then
+rebased `ursa-okr/2026-10-05-window` onto the updated `okr/2026-10`
+(same resolution pattern), force-pushed. Both PRs now report
+`MERGEABLE` against `main` and stack in the order PM named: monthly
+first, window second. Neither check-in's text was edited beyond
+resolving the mechanical append conflict; no objective or KR wording
+changed, and no new benchmark or KR scoring ceremony ran this pass. This
+run's own PR adds no third check-in, since three OKR readings in six
+days is the exact pattern PR #88 already flagged to the owner as a
+possible sign this seat should pause until the merge backlog clears.
+
 ## Grooming (2026-10-05, ceremony run 2026-10-06)
 
 Two `accepted` entries below (not reproduced here, see their dated
@@ -2876,6 +2911,39 @@ Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/int
 - Cost: $0
 - Status: proposed
 
+### 2026-10-06 — Evaluate and refine alexandria's skills with Ursa's own pipeline
+- Trigger: a board handoff from `chair:alexandria` to this seat
+  (2026-10-05T03:42), carrying the owner's own words from that night —
+  "I'd love to use Ursa to evaluate and refine the skills" — plus the
+  concrete shape alexandria offers: a skill is a file an agent loads,
+  every load is an outcome in Ursa's sense (kept, edited, or ignored,
+  with a consumer's own declared satisfaction), and alexandria already
+  has the provenance, the harness eval results, the consumer-reports
+  lane, and the version history to hand over. This entry exists so the
+  handoff has a card and an owner, per this seat's own pending-tracker
+  duty (docs/standards/pm.md §5); logged rather than acted on, because
+  committing Ursa's pipeline to a second product's data is a product
+  decision, not a standup's to make.
+- What: run Ursa's resolver over alexandria's own skills history (the
+  harness skill's consumer report is, in alexandria's words, "exactly
+  an outcome record in prose") and over this repo's own use of the
+  harness skill, and hand back a survival signal per skill section —
+  which parts a consumer acted on, which it discarded, and the
+  distilled units the pipeline already produces from the accepted
+  parts. Alexandria's own maintenance gate (ADR-37 there) would merge a
+  proposed skill revision on its own when the eval does not regress, so
+  the loop closes without a person once Ursa hands back a result.
+- First step: the trial alexandria itself proposes is the cheapest one
+  — run the existing pipeline, unmodified, over the one outcome record
+  that already exists (this seat's own chair's harness-skill report)
+  and report what it finds, before committing to building anything new
+  against alexandria's `skills/*/evals/results.json` or
+  `skills/*/reviews/` paths.
+- Cost: $0 for the trial; a cross-repo read dependency on
+  `alexandrapaiz/alexandria` if it goes further than the one trial,
+  which is itself a scope question for whoever gives this a verdict.
+- Status: proposed
+
 ## Competitive scan — 2026-10-06, second dispatch (engineer's craft scan)
 
 **Software Heritage** (`archive.softwareheritage.org`), read against
@@ -2968,3 +3036,325 @@ Sources: [docs.softwareheritage.org/devel/swh-web/uri-scheme-api-content.html](h
   `lessons.md` inbox at the next sync.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-06 — An imported final file still has a discard story
+- Trigger: building the file-level refusal today
+  (`docs/design/vendored-paths.md`). Two existing tests failed on the
+  first implementation, and both failed for the same real reason rather
+  than a fixture detail. `deletion.test.ts`'s
+  "a merge that deleted the whole file is still a merge deletion, not
+  unknown" had the agent write a block, a merge destroy it, and the
+  person restore the file from a sibling branch byte for byte. The
+  refusal correctly saw an import and skipped the path, and the
+  `generated_deleted` span with `cause: 'merge'` went with it. The
+  finished file carried no correction, which is what the refusal
+  proves. The generation still carried a real discard, which the
+  refusal threw away.
+- What: the refusal is sound about the FINAL side and overreaches on the
+  generation side. An exact revert is the clean case: the agent wrote
+  X, the person discarded all of X, and the file is now what it was
+  before. The true record is a full `generated_deleted`, and today's
+  code emits nothing at all for that path. The fix is to split the
+  refusal in two. Skip the path from `ResolveInput.files`, so no span
+  of the imported file is classified, and keep it in
+  `ResolveInput.generations`, so the agent's text still gets a fate.
+  The reason this is not a one-line change is the measurement in
+  `docs/design/vendored-paths.md` §2.2: keeping the generation naively
+  moves the whole imported document into `generated_deleted` and
+  inflates the discard figure by about what the survival figure was
+  inflated by before, because on the `ursa run` path a "generation" is
+  the whole file blob and a vendored file's generation is itself an
+  import. So the generation side needs its own test, not the final
+  side's: was the generation's blob composed here, or did it also
+  arrive from outside?
+- First step: `vendoredPaths` already answers that question if asked
+  about the generation instead of the finish. Call it a second time
+  with `{ generatedSha: ep.generatedSha, finalSha: ep.generatedSha }`,
+  which asks whether the generation's own blob exists outside its line
+  of descent, and keep the generation only when the answer is no. Then
+  relax `resolveEpisode`'s `files.length === 0` guard so a record can
+  exist with generations and no final files, and change the expectation
+  in `src/vendored.test.ts`'s "loses the discard story when the person
+  reverts a file outright" from the cost to the fix. That test exists
+  to be the thing that changes.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — Two thirds of the headline number is a file the holding company wrote
+- Trigger: counting today's probe by file before changing anything.
+  Of the 93,420 characters `ursa run` reported as "survived your
+  editing verbatim" over a clone of this repository, 60,616 of them
+  (65%) are in one file, `docs/standards/lessons.md`. That file is
+  synced into this repo from `alexandrapaiz/alexandra-systems`
+  (`CLAUDE.md`, "The holding company"). The 2026-09-30 urgent entry
+  named the same file as the symptom of the pairing-distance defect,
+  and the pairing window fixed the distance. The file is still there,
+  and it is still the majority of the number.
+- What: today's file-level refusal does not catch it, and the reason is
+  informative. `lessons.md` is not an exact copy of any blob outside
+  the generation's descent, because the person's own commit appended to
+  it in the same episode. So it is a file that is 95% import and 5%
+  authorship, and both the file-level test (byte-identical, so no) and
+  the span-level test (Pass 1 claims the import verbatim before
+  `corroborate` is ever consulted) decline it. The missing test is
+  containment rather than equality: is the finished blob a SUPERSET of
+  a blob outside the line of descent, and if so, are the spans inside
+  that subset the ones being credited? That is one `git diff
+  <rival>:<path> <final>:<path> --numstat` per candidate, and the
+  answer separates "the person appended 2KB to HQ's 54KB standard" from
+  "the person wrote a 56KB document".
+- First step: measure before designing. For each resolvable path in the
+  probe's six episodes, compute the length of the longest common prefix
+  and suffix between the finished blob and each non-descendant
+  candidate blob, and print the fraction of the finished file those two
+  cover. The prediction worth testing is that `lessons.md` comes back
+  above 0.9 and `docs/finance/close-2026-10.md`, a file the finance
+  seat genuinely wrote in its own episode, comes back near 0. If the
+  separation is that clean, the bound is a threshold on that fraction
+  and the spans inside the covered region are demoted as a block.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-06 — The record never says a file was left out, only the summary does
+- Trigger: today's change writes the exclusion to
+  `.ursa/episodes.json` and prints it in the run summary, and puts
+  nothing in `.ursa/records/<id>.json`. A buyer reads records.
+  `ursa-probe-2026-09-30-124d880.json` was simply not written this
+  run, and the record that would have explained why does not exist,
+  which makes the one thing a lab should be able to audit — what the
+  run refused to claim and on what evidence — the one thing that only
+  reaches a terminal nobody kept.
+- What: this is the already-proposed 2026-10-03 entry "What a run
+  excluded from history belongs in the record, not in a comment",
+  now with a concrete second instance and a concrete shape. An
+  `exclusions` block on `OutcomeRecord`, parallel to `durability`,
+  carrying one entry per refused path: the path, the reason code
+  (`imported_whole` today), the commit the content was found in, the
+  relation, and the character count that left the figures because of
+  it. Two consequences worth the field. First, `src/invariants.ts` can
+  then bound it, because "characters excluded plus characters
+  classified equals characters in the touched files" is exactly the
+  kind of same-set arithmetic that module exists to check. Second, an
+  episode that resolves to nothing becomes a record that says why
+  rather than an absence.
+- First step: the arithmetic before the field. Add a `measure()` line
+  to `src/invariants.ts` reporting excluded characters per record from
+  `ep.vendoredPaths`, run `npx tsx src/invariants.cli.ts` on the probe,
+  and confirm the excluded count equals the 21,656 + 8,415 that left
+  the probe's figures today. A field whose number cannot be
+  reconciled against the figures it moved is a field that will drift.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-06, third dispatch (engineer's craft scan)
+
+**GitHub Linguist** (github.com/github-linguist/linguist), against
+**git's own `blame.ignoreRevsFile`** as the contrast.
+`docs/market/landscape.md` still does not exist on `main`, so the
+charter's rotation falls back off its list for the fourth day running.
+The shelf was picked to sit on today's work, because both of these
+products exist for exactly the question this run spent the day on: how
+do you stop attributing bulk-imported content to the person who
+committed it.
+
+Linguist is the library behind GitHub's per-repository language bar and
+its blame and diff rendering. It carries two concepts Ursa has been
+missing. The first is `vendor.yml`, a long list of path patterns —
+`node_modules/`, `vendor/`, `third_party/`, `*.min.js`, and a few
+hundred more — that Linguist excludes from language statistics by
+default, with `linguist-vendored` in `.gitattributes` as the
+per-repository override. The second is `linguist-generated`, which
+marks a path as machine-produced and collapses it in diffs rather than
+asking a reviewer to read it. Git's own facility is narrower and
+sharper: `git blame --ignore-revs-file <file>`, with
+`blame.ignoreRevsFile` as the config form, takes a list of commit shas
+whose changes blame should look through rather than at. The convention
+that grew around it is a `.git-blame-ignore-revs` file in the repo
+root holding the shas of bulk reformats, and GitHub honours it.
+
+**What is worth stealing: the declaration, not just the inference.**
+Both products let the repository's owner *state* what is not their
+work, instead of inferring it every time. Ursa infers, and today's
+change is pure inference: a blob comparison per path per episode, with
+a documented miss (`docs/standards/lessons.md`, the entry above) and a
+documented overreach (the discard story, the entry above that). Git's
+answer to the same class of problem is one file of shas that the owner
+maintains and every tool respects. The obvious Ursa shape is a
+`.ursa/not-mine` file listing paths and commits the owner declares are
+imports, read by `vendoredPaths` as a first pass before any git call,
+and it has a property no inference has: it is the user editing what has
+been derived about them, which is load-bearing constraint 2 in
+`CLAUDE.md` rather than a feature. It also costs one file read. Recorded
+here as this scan's stealable finding rather than filed as its own
+entry or built today, because a declaration surface the owner maintains
+belongs to the consent machinery in `src/consent.ts` and to
+`ursa consent`, which is a product decision for the owner and not an
+ad-hoc dotfile an engineer run adds.
+
+**What Ursa does better: the evidence travels with the verdict.**
+Linguist's `vendor.yml` is a list of regexes over paths, which means it
+is right about `node_modules/` and silent about a document vendored
+into `docs/`. It cannot see that a file arrived from elsewhere, only
+that its path looks like the kind of place such files live, and a
+repository that vendors a standard into `docs/standards/` gets no help
+at all. `.git-blame-ignore-revs` is the same trade in the other
+direction: exact rather than heuristic, and entirely dependent on
+somebody remembering to add the sha. Ursa's `VendoredPath` names the
+commit, its subject, and the relation it stands in to the generation,
+derived from the object graph with nothing declared in advance, and
+`renderRunSummary` says it in the user's own words: "byte-identical to
+its copy in commit 96ed4e5". A path-pattern list cannot produce that
+sentence, and a hand-maintained sha list cannot produce it for the
+import nobody remembered.
+
+### 2026-10-07 — Every class percentage is a share of the classified part, not of the finished work, and the error is always upward
+- Trigger: measuring the probe's five classified records while
+  reconciling today's `exclusions` field. `stats.byClass[c].pct` is
+  computed in `src/stats.ts` as `chars / coveredChars`, and
+  `coveredChars` is smaller than `finalChars` on every record of the
+  run. On `ursa-probe-2026-09-27-7c739cf`, `survived_verbatim.pct`
+  reads `0.949` where the same characters are 0.910 of the finished
+  file, because 2,706 of that file's 66,586 characters are inside no
+  span. The direction is the same on all five: `+0.024`, `+0.039`,
+  `+0.008`, `+0.014`, `+0.000`. The denominator is never larger than
+  the file, so the error can only flatter the model.
+- What: the three class percentages sum to 1.0 by construction, which
+  makes them read as a partition of the finished work, and they are a
+  partition of the part of it that any span covered. For the headline
+  claim — "95% of this file survived verbatim" — the two readings differ
+  by up to four points on real history, and the difference is the
+  quantity `measure()` already reports as `finalSeparatorChars`. This
+  is not the 2026-10-04 defect, which compared two different character
+  sets; both numbers here are final-side. It is a denominator that is
+  correct for the question "of the text we classified, what fate did it
+  have" and wrong for the question a buyer asks, which is "of this
+  finished file, how much is the model's". `pct` is the field a lab's
+  pipeline reads first, and nothing in the record says which question
+  it answers.
+- First step: do not change `pct`, which some consumer may already be
+  calibrated against. Add a second field beside it,
+  `pctOfFinal = chars / finalChars`, computed in `src/stats.ts`, and an
+  invariant in `src/invariants.ts` asserting `pctOfFinal <= pct` for
+  every class with a test that fails when the two are swapped. Then
+  measure both on the probe and decide which one `renderRunSummary`
+  should print, because the summary currently prints character counts
+  rather than percentages and is therefore not yet wrong.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 — `stats.perFile` omits the path the record excludes, so the row-level view still has a silent gap
+- Trigger: today's craft scan of coverage.py 7.14.1 (below) read
+  against the record this run produced. `exclusions` is a top-level
+  array; `stats.perFile` is the per-path array a consuming pipeline
+  iterates. On the probe, `perFile` for the five classified records
+  holds exactly one path each and the excluded record's `perFile` is
+  `[]`. So a reader who iterates `perFile`, which is the obvious thing
+  to do, sees a record whose path list omits a path the episode touched
+  and gets no signal that anything is missing. Today's change moved the
+  absence from the record to one of the record's two file lists.
+- What: coverage.py reports excluded statements as a column on the
+  file's own row, so there is no way to read a file's coverage number
+  without seeing how many statements were taken out of its
+  denominator. The two cannot drift apart because they are one row.
+  Ursa now has the same information in two places that a reader has to
+  join by path. The shape that fixes it: an entry in `perFile` for
+  every excluded path too, carrying `coveredChars: 0`, an empty
+  `byClass`, and the `reason` from its `Exclusion`, so iterating
+  `perFile` enumerates every path the run read rather than only the
+  ones that produced spans. `exclusions` stays as the place the
+  evidence lives — the sha, the subject, the relation — because that is
+  not row data.
+- First step: one test in `src/invariants.test.ts` asserting that the
+  set of paths in `stats.perFile` equals the set in `files[]` union the
+  set in `exclusions[]`, which fails today on the probe's excluded
+  record. That test is the specification; the `src/stats.ts` change
+  that satisfies it is four lines.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 — The per-record reconciliation closes and the run-level one is not even printed
+- Trigger: building `consideredChars` today. Per record,
+  `stats.finalChars + sum(exclusions[].chars)` is the size of every
+  path the run was willing to read, and the gate prints both sides on
+  every record. The user never sees a record. They see
+  `renderRunSummary`, which prints `71,764 chars survived your editing
+  verbatim` and, in a separate paragraph lower down, `1 file came in
+  whole from elsewhere`. The file's size is in neither sentence. So the
+  number a person actually reads has no exclusion arithmetic behind it
+  at all, and the only place the sum closes is a CLI that exists for
+  the gate.
+- What: the run-level form of the bound — characters the run read
+  equals characters it classified plus characters it refused, summed
+  over every record — cannot be stated today because
+  `renderRunSummary` never computes the pair. It should, for the same
+  reason the per-record version exists: an excluded count with nothing
+  to add back to is unfalsifiable, and 30,287 characters is 27.0% of
+  what this run read, which is not a footnote. Summed over the probe's
+  six records, `consideredChars` is 112,346 and `excludedChars` is
+  30,287, and neither figure appears anywhere a user looks. The
+  sentence to aim at is one the summary can say in the user's own
+  words: "of the 112,346 characters this run read, 30,287 came in whole
+  from elsewhere and were not read as your work".
+- First step: sum `measure(r).consideredChars` and
+  `measure(r).excludedChars` across the run inside
+  `renderRunSummary`, print the pair in the paragraph that already
+  names the imported files, and add a case to
+  `src/invariants.test.ts`'s "the run summary never prints a pair that
+  cannot both be true" block asserting the printed excluded figure is
+  never larger than the printed read figure.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 — Craft scan: coverage.py 7.14.1, and exclusion as a column rather than a footnote
+
+Scanned instead of `docs/market/landscape.md`, which does not exist on
+`main` — it is the market seat's file, live only on an unmerged branch,
+which is exactly why today's probe reports it as an import. The
+charter's fallback list applies. `.git-blame-ignore-revs` and GitHub
+Linguist were yesterday's scan and are in the entry above; today's
+target is the maturest tool in the adjacent craft of *reporting a
+denominator that something was taken out of*.
+
+**What coverage.py does.** A line marked `# pragma: no cover` is still
+executed and still recorded; what changes is the report. Its own
+documentation states the arithmetic directly: the denominator is "the
+number of executable statements minus the number of excluded
+statements", and the percentage is executions over that. Two properties
+follow that Ursa should want.
+
+**The stealable one: exclusion is a column on the file's own row, not a
+separate list.** `coverage report` prints statements, missing, excluded
+and percent on one line per file, so a reader cannot see a file's
+number without seeing how much was removed from its denominator. The
+two figures are structurally inseparable. Ursa, as of today, has
+`exclusions` at the top of the record and `stats.perFile` lower down,
+and the excluded path appears in the first and not the second — filed
+as its own entry above. The deeper version of the same idea, which
+Ursa does not have at all, is that coverage.py treats "excluded" as a
+*first-class outcome alongside* covered and missing, in one table,
+rather than as an annotation about the table. Ursa's four span classes
+in `CLAUDE.md` §1 are the covered/missing axis; the excluded axis is
+currently a different array with a different shape.
+
+**The second stealable one, smaller: exclusion has scope.** A pragma on
+a line that opens a clause excludes the whole clause. Ursa's exclusion
+granularity is the whole file and nothing else, which is why
+`docs/standards/lessons.md` — 95% HQ import, 5% the person's own
+append — escapes both the file-level test and the span-level one. That
+case is already filed (2026-10-06, "Two thirds of the headline number
+is a file the holding company wrote") and the region-level answer it
+proposes is the same idea coverage.py got to first.
+
+**What Ursa does better: the exclusion is proved, not declared.** Every
+exclusion in coverage.py is a human writing a comment, so its report
+answers "what did somebody decide not to count" and cannot answer "what
+should not have been counted". A `# pragma: no cover` on code that
+genuinely needs a test is indistinguishable in the report from one on a
+platform branch that cannot run. Ursa's `Exclusion` is derived from the
+object graph with nothing declared in advance, and it carries the
+evidence to its own disproof: the commit, its subject, and the relation
+that commit stands in to the generation. A reader who doubts
+`imported_whole` on `docs/market/landscape.md` can run one
+`git rev-parse 96ed4e5:docs/market/landscape.md` and settle it. No
+coverage report has ever been falsifiable in that way, and for a
+dataset sold to a lab that difference is the whole product.

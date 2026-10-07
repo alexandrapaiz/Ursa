@@ -29,13 +29,14 @@ import { blobAt, findCommitPairsWithDiagnostics, listCommits, type CommitInfo, t
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { gitDeletionAttributor } from '../deletion'
 import { gitDescentCorroborator } from '../corroborate'
+import { vendoredPaths } from '../vendored'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
 import { checkRecord, formatViolations } from '../invariants'
-import type { Artifact, OutcomeRecord, RawGeneration } from '../types'
+import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 const TEXT_EXTS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.py', '.css', '.scss', '.html',
@@ -43,6 +44,21 @@ const TEXT_EXTS = new Set([
 ])
 const SKIP_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'])
 const MAX_BLOB_CHARS = 300_000
+
+/**
+ * The episode's touched paths this run would read at all.
+ *
+ * Lifted out of `resolveEpisode`'s loop so `main` can ask the same
+ * question before resolving, since the import check (src/vendored.ts)
+ * must run over exactly the paths the resolver would otherwise classify
+ * and no others. A git call spent on `package-lock.json` would be spent
+ * on a file the resolver already skips.
+ */
+export function resolvablePaths(ep: Episode): string[] {
+  return ep.touchedFiles.filter(
+    (path) => TEXT_EXTS.has(extname(path)) && !SKIP_FILES.has(path.split('/').pop() ?? ''),
+  )
+}
 
 /**
  * What kind of finished thing an episode is, as of its own final commit.
@@ -75,9 +91,36 @@ export function resolveEpisode(
 ): OutcomeRecord | null {
   const files: Array<{ path: string; text: string }> = []
   const generations: RawGeneration[] = []
+  const graph = commits ?? listCommits(projectPath)
+  const candidates = resolvablePaths(ep)
+  // The file-level refusal, ahead of the span-level one. A path whose
+  // finished blob is byte-identical to a blob outside this generation's
+  // descent arrived whole from elsewhere, so classifying its spans would
+  // attach `survived_verbatim` and `survived_mutated` labels to text
+  // nobody in this episode wrote. `ep.vendoredPaths` when `main` already
+  // asked; computed here when a caller resolves an episode directly, so
+  // the refusal does not depend on which entry point was used.
+  const vendored = ep.vendoredPaths ?? vendoredPaths(projectPath, ep, candidates, graph)
+  const imported = new Set(vendored.map((v) => v.path))
+  // The refusal, turned from a silent drop into a claim the record makes.
+  // `chars` is the size of the finished blob, which is exactly what left
+  // this record's figures by being excluded, so `stats.finalChars` plus
+  // these counts is the size of every path the run was willing to read.
+  // `?? 0` is unreachable on the normal path — `vendoredPaths` only returns
+  // a path whose blob at `ep.finalSha` it already read an object id for —
+  // and is written rather than asserted because a blob that vanishes
+  // between two git calls should cost the record a number, not the run.
+  const exclusions: Exclusion[] = vendored.map((v) => ({
+    path: v.path,
+    reason: 'imported_whole',
+    sha: v.sha,
+    subject: v.subject,
+    relation: v.relation,
+    chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0,
+  }))
   let turn = 0
-  for (const path of ep.touchedFiles) {
-    if (!TEXT_EXTS.has(extname(path)) || SKIP_FILES.has(path.split('/').pop() ?? '')) continue
+  for (const path of candidates) {
+    if (imported.has(path)) continue
     const genText = blobAt(projectPath, ep.generatedSha, path)
     const finText = blobAt(projectPath, ep.finalSha, path)
     if (genText === null || finText === null) continue
@@ -94,10 +137,38 @@ export function resolveEpisode(
       text: genText,
     })
   }
-  if (files.length === 0 || generations.length === 0) return null
+  // An episode whose every resolvable path was an import used to resolve to
+  // nothing, and on the probe that is a real episode: the record
+  // `ursa-probe-2026-09-30-124d880.json` was simply not written, and an
+  // absent file in `.ursa/records/` is indistinguishable from a run that
+  // found no work (docs/design/vendored-paths.md §5.2). With the evidence
+  // in hand the absence can state itself instead, as a record with no
+  // files, no generations and one exclusion saying which commit the
+  // finished file came from. A record that claims nothing is still a record
+  // that explains itself, which is the auditable thing; an absence is not.
+  //
+  // Only when there is evidence. An episode that resolved to nothing for
+  // any other reason — an unreadable blob, a file over MAX_BLOB_CHARS, a
+  // path with no generation side — still returns null, because a record
+  // saying nothing for no stated reason is worse than the absence it
+  // replaces.
+  if (files.length === 0 || generations.length === 0) {
+    if (exclusions.length === 0) return null
+    return resolve({
+      taskId: ep.id,
+      files: [],
+      conversations: [],
+      generations: [],
+      exclusions,
+      finished: true,
+      generatedAt: ep.closedAt,
+      artifact: artifactFor(projectPath, ep).artifact,
+    })
+  }
   return resolve({
     taskId: ep.id,
     files,
+    exclusions,
     // A merge walked past on the way to ep.finalSha can have destroyed
     // generated text that no human ever chose to drop. Without this the
     // record would call that a discard and name ep.finalSha's author.
@@ -112,11 +183,7 @@ export function resolveEpisode(
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(
-      projectPath,
-      ep.generatedSha,
-      commits ?? listCommits(projectPath),
-    ),
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
@@ -190,6 +257,34 @@ export function renderRunSummary(
   )]
   for (const url of hosted) {
     lines.push(`This work is also live at ${url}, so the records carry where to go and look at it.`)
+  }
+
+  // Files the run declined to read as the person's work, said out loud.
+  // Before this, `docs/standards/pm.md` was resolved span by span on
+  // every run over this repository's own history, and it produced seven
+  // demoted mutations and nine spans the length floor could not judge,
+  // for a file that arrived complete from the holding company in one
+  // commit. Silence here would mean a record that simply omits a file the
+  // episode touched, which is the kind of gap a buyer is right to
+  // distrust. Deduplicated by path across episodes, because the same
+  // vendored file is commonly touched by several.
+  const vendored = [...new Map(
+    episodes.flatMap((e) => e.vendoredPaths ?? []).map((v) => [v.path, v]),
+  ).values()]
+  if (vendored.length > 0) {
+    const one = vendored[0]
+    lines.push('')
+    lines.push(
+      `${vendored.length} file${vendored.length === 1 ? '' : 's'} came in whole from elsewhere and ${vendored.length === 1 ? 'was' : 'were'} not read as your work, starting with ${one.path}.`,
+    )
+    lines.push(
+      one.relation === 'sibling'
+        ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
+        : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
+    )
+    lines.push(
+      `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`,
+    )
   }
 
   // An empty run used to print "0 work units found" and stop, which reads as
@@ -363,11 +458,19 @@ export async function main(argv: string[]): Promise<number> {
     maxPairAgeHours: bound('max-pair-age-hours'),
     maxInterposedGenerations: bound('max-interposed-generations'),
   })
-  const episodes = buildEpisodes(pairs, projectPath).slice(0, limit)
   // One graph read for the whole run. Every episode's corroborator needs
   // the same parent/child edges to tell a rival commit from a descendant
-  // of its own generation.
+  // of its own generation, and so does the import check below.
   const commits = listCommits(projectPath)
+  // Annotated before resolving, not during it, so the exclusion reaches
+  // `saveEpisodes` and `renderRunSummary` even for an episode that
+  // resolves to nothing. An episode whose every resolvable path was
+  // imported produces no record at all, and that is precisely the case
+  // where a silent run would be most misread.
+  const episodes = buildEpisodes(pairs, projectPath).slice(0, limit).map((ep) => ({
+    ...ep,
+    vendoredPaths: vendoredPaths(projectPath, ep, resolvablePaths(ep), commits),
+  }))
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a
   // record the next run recreates, which is not deletion.
@@ -382,7 +485,13 @@ export async function main(argv: string[]): Promise<number> {
   for (const ep of episodes) {
     if (isForgotten(consent, ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep, commits)
-    if (!record || record.stats.generated.totalChars < minChars) continue
+    // `--min-chars` filters out an episode too small to carry signal, and
+    // it is measured on the generation side, which a refusal-only record
+    // has none of. Without the second clause the record this run writes to
+    // explain an import would be dropped by a threshold aimed at something
+    // else, and the absence would be back.
+    if (!record) continue
+    if (record.stats.generated.totalChars < minChars && (record.exclusions?.length ?? 0) === 0) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the
     // real work did to each span. Git-only, so it lives here and not in

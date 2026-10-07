@@ -590,6 +590,63 @@ export interface Artifact {
   renderRef?: string
 }
 
+// ---------------------------------------------------------------------------
+// What the run refused to classify, and on what evidence.
+//
+// `resolveEpisode` in src/bin/ursa.ts drops a path before the resolver sees
+// it when src/vendored.ts proves the finished blob came in whole from
+// outside the generation's line of descent. That refusal is correct and it
+// was, until this field existed, invisible: it was written to
+// `.ursa/episodes.json` and printed in the run summary, and the record a lab
+// reads carried no trace of it. So the one thing a buyer should be able to
+// audit — what the run declined to claim, and why — reached only a terminal
+// nobody kept.
+//
+// The field is the record's own statement of that. It is the final-side twin
+// of `Durability`: parallel in shape, present only on records whose capture
+// path can answer the question, and absent rather than empty when nothing
+// was asked.
+// ---------------------------------------------------------------------------
+
+/** Why a path the run touched is in no span, no class and no percentage. */
+export type ExclusionReason =
+  /**
+   * The finished blob at the episode's final commit is byte-identical to a
+   * blob held by a commit that is neither the generation nor a descendant of
+   * it, so no character of the file was composed in this episode. Proven by
+   * `vendoredPaths` in src/vendored.ts by comparing git blob object ids; see
+   * that file's header for what an equal oid does and does not prove.
+   */
+  'imported_whole'
+
+export interface Exclusion {
+  /** repo-relative path, spelled as `Episode.touchedFiles` spells it */
+  path: string
+  reason: ExclusionReason
+  /** short sha of the commit outside the generation's descent holding the identical blob */
+  sha: string
+  /** that commit's subject line, so the record names the import in the author's own words */
+  subject: string
+  /**
+   * How that commit stands to the generation. `pre_existing` means the
+   * matching commit is an ancestor, so the episode's net effect on the file
+   * was nothing. `sibling` means neither ancestor nor descendant, so the
+   * content came off another branch the person merged or checked out rather
+   * than typed.
+   */
+  relation: 'pre_existing' | 'sibling'
+  /**
+   * Characters of the finished file at the episode's final commit, which is
+   * exactly what left this record's figures by being excluded. Stated here so
+   * the exclusion can be reconciled against the numbers it moved:
+   * `stats.finalChars + sum(exclusions[].chars)` is the size of every path
+   * the run was willing to read, and `measure()` in src/invariants.ts reports
+   * both sides. A field whose number cannot be reconciled against the figures
+   * it moved is a field that drifts.
+   */
+  chars: number
+}
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
@@ -606,4 +663,11 @@ export interface OutcomeRecord {
   signals?: LabSignals
   /** the time dimension; present only for git-backed records, where later revisions exist */
   durability?: Durability
+  /**
+   * Paths the run touched and refused to classify, one entry each. Absent on
+   * a record whose capture path cannot ask the question (every chat-path
+   * record is one), and an empty array when it asked and found nothing — the
+   * two are different claims and only the second one is evidence.
+   */
+  exclusions?: Exclusion[]
 }
