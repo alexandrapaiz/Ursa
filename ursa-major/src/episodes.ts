@@ -4,6 +4,7 @@
 
 import { basename } from 'node:path'
 import type { CommitPair, MergeEvent } from './pairfinder'
+import type { VendoredPath } from './vendored'
 
 export interface Episode {
   id: string
@@ -40,6 +41,20 @@ export interface Episode {
    * `interveningMerges` mean "none" rather than "unknown".
    */
   unreadableMerges?: string[]
+  /**
+   * Resolvable paths whose blob at `finalSha` is byte-identical to a blob
+   * outside `generatedSha`'s line of descent, so the finished file came
+   * in whole from elsewhere and carries no correction of this generation.
+   * Computed at the edge by `vendoredPaths` (src/vendored.ts), carried
+   * here because it is a git-derived fact about the episode's file set
+   * exactly as `interveningMerges` is one about its boundary, and because
+   * `saveEpisodes` then puts the exclusion on disk instead of leaving it
+   * in a line of console output.
+   *
+   * `undefined` means nobody asked. An empty array means the question was
+   * asked and no path came in whole.
+   */
+  vendoredPaths?: VendoredPath[]
 }
 
 export function buildEpisodes(pairs: CommitPair[], projectPath: string): Episode[] {
