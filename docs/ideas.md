@@ -3206,3 +3206,155 @@ derived from the object graph with nothing declared in advance, and
 its copy in commit 96ed4e5". A path-pattern list cannot produce that
 sentence, and a hand-maintained sha list cannot produce it for the
 import nobody remembered.
+
+### 2026-10-07 — Every class percentage is a share of the classified part, not of the finished work, and the error is always upward
+- Trigger: measuring the probe's five classified records while
+  reconciling today's `exclusions` field. `stats.byClass[c].pct` is
+  computed in `src/stats.ts` as `chars / coveredChars`, and
+  `coveredChars` is smaller than `finalChars` on every record of the
+  run. On `ursa-probe-2026-09-27-7c739cf`, `survived_verbatim.pct`
+  reads `0.949` where the same characters are 0.910 of the finished
+  file, because 2,706 of that file's 66,586 characters are inside no
+  span. The direction is the same on all five: `+0.024`, `+0.039`,
+  `+0.008`, `+0.014`, `+0.000`. The denominator is never larger than
+  the file, so the error can only flatter the model.
+- What: the three class percentages sum to 1.0 by construction, which
+  makes them read as a partition of the finished work, and they are a
+  partition of the part of it that any span covered. For the headline
+  claim — "95% of this file survived verbatim" — the two readings differ
+  by up to four points on real history, and the difference is the
+  quantity `measure()` already reports as `finalSeparatorChars`. This
+  is not the 2026-10-04 defect, which compared two different character
+  sets; both numbers here are final-side. It is a denominator that is
+  correct for the question "of the text we classified, what fate did it
+  have" and wrong for the question a buyer asks, which is "of this
+  finished file, how much is the model's". `pct` is the field a lab's
+  pipeline reads first, and nothing in the record says which question
+  it answers.
+- First step: do not change `pct`, which some consumer may already be
+  calibrated against. Add a second field beside it,
+  `pctOfFinal = chars / finalChars`, computed in `src/stats.ts`, and an
+  invariant in `src/invariants.ts` asserting `pctOfFinal <= pct` for
+  every class with a test that fails when the two are swapped. Then
+  measure both on the probe and decide which one `renderRunSummary`
+  should print, because the summary currently prints character counts
+  rather than percentages and is therefore not yet wrong.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 — `stats.perFile` omits the path the record excludes, so the row-level view still has a silent gap
+- Trigger: today's craft scan of coverage.py 7.14.1 (below) read
+  against the record this run produced. `exclusions` is a top-level
+  array; `stats.perFile` is the per-path array a consuming pipeline
+  iterates. On the probe, `perFile` for the five classified records
+  holds exactly one path each and the excluded record's `perFile` is
+  `[]`. So a reader who iterates `perFile`, which is the obvious thing
+  to do, sees a record whose path list omits a path the episode touched
+  and gets no signal that anything is missing. Today's change moved the
+  absence from the record to one of the record's two file lists.
+- What: coverage.py reports excluded statements as a column on the
+  file's own row, so there is no way to read a file's coverage number
+  without seeing how many statements were taken out of its
+  denominator. The two cannot drift apart because they are one row.
+  Ursa now has the same information in two places that a reader has to
+  join by path. The shape that fixes it: an entry in `perFile` for
+  every excluded path too, carrying `coveredChars: 0`, an empty
+  `byClass`, and the `reason` from its `Exclusion`, so iterating
+  `perFile` enumerates every path the run read rather than only the
+  ones that produced spans. `exclusions` stays as the place the
+  evidence lives — the sha, the subject, the relation — because that is
+  not row data.
+- First step: one test in `src/invariants.test.ts` asserting that the
+  set of paths in `stats.perFile` equals the set in `files[]` union the
+  set in `exclusions[]`, which fails today on the probe's excluded
+  record. That test is the specification; the `src/stats.ts` change
+  that satisfies it is four lines.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 — The per-record reconciliation closes and the run-level one is not even printed
+- Trigger: building `consideredChars` today. Per record,
+  `stats.finalChars + sum(exclusions[].chars)` is the size of every
+  path the run was willing to read, and the gate prints both sides on
+  every record. The user never sees a record. They see
+  `renderRunSummary`, which prints `71,764 chars survived your editing
+  verbatim` and, in a separate paragraph lower down, `1 file came in
+  whole from elsewhere`. The file's size is in neither sentence. So the
+  number a person actually reads has no exclusion arithmetic behind it
+  at all, and the only place the sum closes is a CLI that exists for
+  the gate.
+- What: the run-level form of the bound — characters the run read
+  equals characters it classified plus characters it refused, summed
+  over every record — cannot be stated today because
+  `renderRunSummary` never computes the pair. It should, for the same
+  reason the per-record version exists: an excluded count with nothing
+  to add back to is unfalsifiable, and 30,287 characters is 27.0% of
+  what this run read, which is not a footnote. Summed over the probe's
+  six records, `consideredChars` is 112,346 and `excludedChars` is
+  30,287, and neither figure appears anywhere a user looks. The
+  sentence to aim at is one the summary can say in the user's own
+  words: "of the 112,346 characters this run read, 30,287 came in whole
+  from elsewhere and were not read as your work".
+- First step: sum `measure(r).consideredChars` and
+  `measure(r).excludedChars` across the run inside
+  `renderRunSummary`, print the pair in the paragraph that already
+  names the imported files, and add a case to
+  `src/invariants.test.ts`'s "the run summary never prints a pair that
+  cannot both be true" block asserting the printed excluded figure is
+  never larger than the printed read figure.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 — Craft scan: coverage.py 7.14.1, and exclusion as a column rather than a footnote
+
+Scanned instead of `docs/market/landscape.md`, which does not exist on
+`main` — it is the market seat's file, live only on an unmerged branch,
+which is exactly why today's probe reports it as an import. The
+charter's fallback list applies. `.git-blame-ignore-revs` and GitHub
+Linguist were yesterday's scan and are in the entry above; today's
+target is the maturest tool in the adjacent craft of *reporting a
+denominator that something was taken out of*.
+
+**What coverage.py does.** A line marked `# pragma: no cover` is still
+executed and still recorded; what changes is the report. Its own
+documentation states the arithmetic directly: the denominator is "the
+number of executable statements minus the number of excluded
+statements", and the percentage is executions over that. Two properties
+follow that Ursa should want.
+
+**The stealable one: exclusion is a column on the file's own row, not a
+separate list.** `coverage report` prints statements, missing, excluded
+and percent on one line per file, so a reader cannot see a file's
+number without seeing how much was removed from its denominator. The
+two figures are structurally inseparable. Ursa, as of today, has
+`exclusions` at the top of the record and `stats.perFile` lower down,
+and the excluded path appears in the first and not the second — filed
+as its own entry above. The deeper version of the same idea, which
+Ursa does not have at all, is that coverage.py treats "excluded" as a
+*first-class outcome alongside* covered and missing, in one table,
+rather than as an annotation about the table. Ursa's four span classes
+in `CLAUDE.md` §1 are the covered/missing axis; the excluded axis is
+currently a different array with a different shape.
+
+**The second stealable one, smaller: exclusion has scope.** A pragma on
+a line that opens a clause excludes the whole clause. Ursa's exclusion
+granularity is the whole file and nothing else, which is why
+`docs/standards/lessons.md` — 95% HQ import, 5% the person's own
+append — escapes both the file-level test and the span-level one. That
+case is already filed (2026-10-06, "Two thirds of the headline number
+is a file the holding company wrote") and the region-level answer it
+proposes is the same idea coverage.py got to first.
+
+**What Ursa does better: the exclusion is proved, not declared.** Every
+exclusion in coverage.py is a human writing a comment, so its report
+answers "what did somebody decide not to count" and cannot answer "what
+should not have been counted". A `# pragma: no cover` on code that
+genuinely needs a test is indistinguishable in the report from one on a
+platform branch that cannot run. Ursa's `Exclusion` is derived from the
+object graph with nothing declared in advance, and it carries the
+evidence to its own disproof: the commit, its subject, and the relation
+that commit stands in to the generation. A reader who doubts
+`imported_whole` on `docs/market/landscape.md` can run one
+`git rev-parse 96ed4e5:docs/market/landscape.md` and settle it. No
+coverage report has ever been falsifiable in that way, and for a
+dataset sold to a lab that difference is the whole product.

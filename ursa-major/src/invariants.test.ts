@@ -644,3 +644,82 @@ describe('the descent verdict behind a mutation label', () => {
     expect(checkRecord(r)).toEqual([])
   })
 })
+
+// ---------------------------------------------------------------------------
+// EXCLUSION_NOT_CLASSIFIED — the thirteenth bound, and the file-level twin of
+// DESCENT_CHECKED_UNIFORMLY's second clause. There, the demotion is computed
+// and does not reach the span. Here, the exclusion is computed and does not
+// reach the file, so the record names the commit the content came from and
+// sells `survived_verbatim` over its spans anyway.
+// ---------------------------------------------------------------------------
+
+describe('a path the record excludes and the figures it left', () => {
+  /** the unit record, with its one file declared an import as well as classified */
+  function excludedAndClassified(): OutcomeRecord {
+    const r = resolvedRecord()
+    r.exclusions = [{
+      path: r.files[0].path,
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'market: rebase #89\'s landscape onto main',
+      relation: 'sibling',
+      chars: r.files[0].text.length,
+    }]
+    return r
+  }
+
+  it('fires when a path is excluded and classified at the same time', () => {
+    const v = checkRecord(excludedAndClassified())
+    expect(v.map((x) => x.code)).toContain('EXCLUSION_NOT_CLASSIFIED')
+    const fired = v.find((x) => x.code === 'EXCLUSION_NOT_CLASSIFIED')!
+    expect(fired.where).toContain('notes.md')
+    // Both sides of the bound in the message, which is this module's rule:
+    // the exclusion's own evidence and the classification it contradicts.
+    expect(fired.observed).toContain('imported_whole')
+    expect(fired.observed).toContain('96ed4e5')
+    expect(fired.observed).toMatch(/classified spans? over \d+ chars/)
+  })
+
+  it('passes when the excluded path is the one path not in files[]', () => {
+    const r = excludedAndClassified()
+    r.exclusions![0].path = 'docs/standards/pm.md'
+    expect(checkRecord(r)).toEqual([])
+  })
+
+  it('fires on an exclusion whose number cannot be added back to the figures', () => {
+    const r = excludedAndClassified()
+    r.exclusions = [{ ...r.exclusions![0], path: 'docs/standards/pm.md', chars: 0 }]
+    const v = checkRecord(r)
+    expect(v.map((x) => x.code)).toContain('EXCLUSION_NOT_CLASSIFIED')
+    expect(v[0].observed).toContain('chars=0')
+    expect(v[0].observed).toContain(`stats.finalChars is ${r.stats.finalChars}`)
+  })
+
+  it('fires on an exclusion that names no commit', () => {
+    const r = excludedAndClassified()
+    r.exclusions = [{ ...r.exclusions![0], path: 'docs/standards/pm.md', sha: '' }]
+    expect(checkRecord(r)[0].observed).toContain('sha=(empty)')
+  })
+
+  it('reports the reconciliation, and reports it on a record that excluded nothing', () => {
+    // Vacuously clean, which is the case the measurement exists for. A
+    // record with no `exclusions` key never asked the question, and a
+    // reader who sees only "no violations" cannot tell that from a record
+    // that asked and found nothing.
+    const clean = resolvedRecord()
+    const m0 = measure(clean)
+    expect(m0.excludedPaths).toBe(0)
+    expect(m0.excludedChars).toBe(0)
+    expect(m0.consideredChars).toBe(clean.stats.finalChars)
+
+    const r = excludedAndClassified()
+    r.exclusions![0].path = 'docs/standards/pm.md'
+    r.exclusions![0].chars = 21_656
+    const m = measure(r)
+    expect(m.excludedPaths).toBe(1)
+    expect(m.excludedChars).toBe(21_656)
+    // The sum the field exists to make checkable: what the run read is
+    // what it classified plus what it refused.
+    expect(m.consideredChars).toBe(r.stats.finalChars + 21_656)
+  })
+})
