@@ -31,8 +31,9 @@ import {
   tokens, levSimilarity, containment, combinedScore,
 } from './match'
 import type {
-  Artifact, ConversationMeta, DeletionAttribution, DescentEvidence, FinalFile, FinalSpan,
-  GenerationFate, GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer, SegmentMode,
+  Artifact, ConversationMeta, DeletionAttribution, DescentEvidence, Exclusion, FinalFile,
+  FinalSpan, GenerationFate, GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer,
+  SegmentMode,
 } from './types'
 import { computeStats } from './stats'
 
@@ -66,6 +67,20 @@ export interface ResolveInput {
    * right reading only when no other text was in evidence.
    */
   corroborate?: (filePath: string, spanText: string) => DescentEvidence
+  /**
+   * Paths the caller touched and declined to pass in `files`, with the
+   * evidence for declining. Carried onto the record unchanged: deciding
+   * which paths are imports needs git, so it happens at the edge
+   * (src/vendored.ts, called from src/bin/ursa.ts) for the same reason
+   * `attributeDeletion` and `corroborate` do, and this function stays a pure
+   * function of its input.
+   *
+   * Passing it is what turns a silent drop into a claim the record makes.
+   * Omit it and the record carries no `exclusions` field at all, which is
+   * the honest answer for a caller that never asked — an empty array would
+   * say the question was asked and came back clean.
+   */
+  exclusions?: Exclusion[]
 }
 
 interface GenSentence extends Span {
@@ -288,6 +303,10 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     conversations: input.conversations,
     generations,
     stats: computeStats(files, generations, input.conversations),
+    // Spread rather than assigned so a caller that did not ask produces a
+    // record with no `exclusions` key, instead of one with the key set to
+    // undefined, which `JSON.stringify` drops and a schema check does not.
+    ...(input.exclusions ? { exclusions: input.exclusions } : {}),
   }
 }
 
