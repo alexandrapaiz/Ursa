@@ -73,6 +73,15 @@ export function runGate(target: string, quiet = false): { violations: number; li
             (m.descentUnverified > 0 ? `, ${m.descentUnverified} unguarded because the search could not settle them` : '') +
             (m.descentDemoted > 0 ? `, and ${m.descentDemoted} span${m.descentDemoted === 1 ? '' : 's'} demoted for holding text a non-descendant commit already had` : ''),
       )
+      // Printed with the reconciliation beside it, never the excluded count
+      // alone. The count on its own is unfalsifiable; the sum says what it
+      // has to add back up to, so a reader who re-measures the files can
+      // tell whether the field still describes them.
+      lines.push(
+        m.excludedPaths === 0
+          ? `  exclusions: none — every one of this record's ${m.consideredChars.toLocaleString()} chars was read as the person's work`
+          : `  exclusions: ${m.excludedPaths} path${m.excludedPaths === 1 ? '' : 's'} came in whole from elsewhere and ${m.excludedPaths === 1 ? 'was' : 'were'} not classified, taking ${m.excludedChars.toLocaleString()} chars out of the ${m.consideredChars.toLocaleString()} this run read`,
+      )
     }
     if (found.length === 0) {
       lines.push('  OK — every stated bound holds')

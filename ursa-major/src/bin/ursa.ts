@@ -36,7 +36,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 import { resolve } from '../resolve'
 import { saveEpisodes, saveRecord } from '../store'
 import { checkRecord, formatViolations } from '../invariants'
-import type { Artifact, OutcomeRecord, RawGeneration } from '../types'
+import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 const TEXT_EXTS = new Set([
   '.ts', '.tsx', '.js', '.jsx', '.py', '.css', '.scss', '.html',
@@ -100,9 +100,24 @@ export function resolveEpisode(
   // nobody in this episode wrote. `ep.vendoredPaths` when `main` already
   // asked; computed here when a caller resolves an episode directly, so
   // the refusal does not depend on which entry point was used.
-  const imported = new Set(
-    (ep.vendoredPaths ?? vendoredPaths(projectPath, ep, candidates, graph)).map((v) => v.path),
-  )
+  const vendored = ep.vendoredPaths ?? vendoredPaths(projectPath, ep, candidates, graph)
+  const imported = new Set(vendored.map((v) => v.path))
+  // The refusal, turned from a silent drop into a claim the record makes.
+  // `chars` is the size of the finished blob, which is exactly what left
+  // this record's figures by being excluded, so `stats.finalChars` plus
+  // these counts is the size of every path the run was willing to read.
+  // `?? 0` is unreachable on the normal path — `vendoredPaths` only returns
+  // a path whose blob at `ep.finalSha` it already read an object id for —
+  // and is written rather than asserted because a blob that vanishes
+  // between two git calls should cost the record a number, not the run.
+  const exclusions: Exclusion[] = vendored.map((v) => ({
+    path: v.path,
+    reason: 'imported_whole',
+    sha: v.sha,
+    subject: v.subject,
+    relation: v.relation,
+    chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0,
+  }))
   let turn = 0
   for (const path of candidates) {
     if (imported.has(path)) continue
@@ -122,10 +137,38 @@ export function resolveEpisode(
       text: genText,
     })
   }
-  if (files.length === 0 || generations.length === 0) return null
+  // An episode whose every resolvable path was an import used to resolve to
+  // nothing, and on the probe that is a real episode: the record
+  // `ursa-probe-2026-09-30-124d880.json` was simply not written, and an
+  // absent file in `.ursa/records/` is indistinguishable from a run that
+  // found no work (docs/design/vendored-paths.md §5.2). With the evidence
+  // in hand the absence can state itself instead, as a record with no
+  // files, no generations and one exclusion saying which commit the
+  // finished file came from. A record that claims nothing is still a record
+  // that explains itself, which is the auditable thing; an absence is not.
+  //
+  // Only when there is evidence. An episode that resolved to nothing for
+  // any other reason — an unreadable blob, a file over MAX_BLOB_CHARS, a
+  // path with no generation side — still returns null, because a record
+  // saying nothing for no stated reason is worse than the absence it
+  // replaces.
+  if (files.length === 0 || generations.length === 0) {
+    if (exclusions.length === 0) return null
+    return resolve({
+      taskId: ep.id,
+      files: [],
+      conversations: [],
+      generations: [],
+      exclusions,
+      finished: true,
+      generatedAt: ep.closedAt,
+      artifact: artifactFor(projectPath, ep).artifact,
+    })
+  }
   return resolve({
     taskId: ep.id,
     files,
+    exclusions,
     // A merge walked past on the way to ep.finalSha can have destroyed
     // generated text that no human ever chose to drop. Without this the
     // record would call that a discard and name ep.finalSha's author.
@@ -442,7 +485,13 @@ export async function main(argv: string[]): Promise<number> {
   for (const ep of episodes) {
     if (isForgotten(consent, ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep, commits)
-    if (!record || record.stats.generated.totalChars < minChars) continue
+    // `--min-chars` filters out an episode too small to carry signal, and
+    // it is measured on the generation side, which a refusal-only record
+    // has none of. Without the second clause the record this run writes to
+    // explain an import would be dropped by a threshold aimed at something
+    // else, and the absence would be back.
+    if (!record) continue
+    if (record.stats.generated.totalChars < minChars && (record.exclusions?.length ?? 0) === 0) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the
     // real work did to each span. Git-only, so it lives here and not in
