@@ -2911,6 +2911,39 @@ Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/int
 - Cost: $0
 - Status: proposed
 
+### 2026-10-06 — Evaluate and refine alexandria's skills with Ursa's own pipeline
+- Trigger: a board handoff from `chair:alexandria` to this seat
+  (2026-10-05T03:42), carrying the owner's own words from that night —
+  "I'd love to use Ursa to evaluate and refine the skills" — plus the
+  concrete shape alexandria offers: a skill is a file an agent loads,
+  every load is an outcome in Ursa's sense (kept, edited, or ignored,
+  with a consumer's own declared satisfaction), and alexandria already
+  has the provenance, the harness eval results, the consumer-reports
+  lane, and the version history to hand over. This entry exists so the
+  handoff has a card and an owner, per this seat's own pending-tracker
+  duty (docs/standards/pm.md §5); logged rather than acted on, because
+  committing Ursa's pipeline to a second product's data is a product
+  decision, not a standup's to make.
+- What: run Ursa's resolver over alexandria's own skills history (the
+  harness skill's consumer report is, in alexandria's words, "exactly
+  an outcome record in prose") and over this repo's own use of the
+  harness skill, and hand back a survival signal per skill section —
+  which parts a consumer acted on, which it discarded, and the
+  distilled units the pipeline already produces from the accepted
+  parts. Alexandria's own maintenance gate (ADR-37 there) would merge a
+  proposed skill revision on its own when the eval does not regress, so
+  the loop closes without a person once Ursa hands back a result.
+- First step: the trial alexandria itself proposes is the cheapest one
+  — run the existing pipeline, unmodified, over the one outcome record
+  that already exists (this seat's own chair's harness-skill report)
+  and report what it finds, before committing to building anything new
+  against alexandria's `skills/*/evals/results.json` or
+  `skills/*/reviews/` paths.
+- Cost: $0 for the trial; a cross-repo read dependency on
+  `alexandrapaiz/alexandria` if it goes further than the one trial,
+  which is itself a scope question for whoever gives this a verdict.
+- Status: proposed
+
 ## Competitive scan — 2026-10-06, second dispatch (engineer's craft scan)
 
 **Software Heritage** (`archive.softwareheritage.org`), read against
