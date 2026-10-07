@@ -3358,3 +3358,12 @@ that commit stands in to the generation. A reader who doubts
 `git rev-parse 96ed4e5:docs/market/landscape.md` and settle it. No
 coverage report has ever been falsifiable in that way, and for a
 dataset sold to a lab that difference is the whole product.
+
+## Skill seat, 2026-10-07: retargeting the stack off a closed base (run in progress)
+
+Opened as a placeholder at the start of the run so the pull request
+exists before the work does. Ursa/pm handed this seat a stack whose
+base branch was closed unmerged: #50 is based on
+`skill/2026-09-24-outcome-record-provenance` (#14, closed 2026-10-06),
+and #64 is based on #50's branch. This entry is filled in below with
+what the run decided and why.
