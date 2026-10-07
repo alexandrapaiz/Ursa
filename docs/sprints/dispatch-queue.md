@@ -1,17 +1,24 @@
-# Dispatch queue — 2026-10-07, third pass (~18:15 UTC, triage of the
-17:52 UTC engineer-agent failure)
+# Dispatch queue — 2026-10-07, fourth pass (~19:18 UTC, answering a
+cross-company note about handoff routing)
 
-`PM_DISPATCH_ENABLED` is unset this pass (checked directly in the run
-environment). This is a message-triggered triage of one failed run,
-not an owner-present window, so no owner instructions carry.
+`PM_DISPATCH_ENABLED` is not checkable this pass (`gh variable list`
+returns 403 for this run's token); unchanged from the last pass this
+seat could check it directly (#129, true). Does not matter here: every
+seat below is still walled by its own open PR regardless of the
+switch. This is a message-triggered reply, not an owner-present
+window, so no owner instructions carry.
 
 ## Proposed
 
-None. Nothing changed since the second pass's reconciliation that
-would unlock a dispatch, and the failure this pass exists to triage
-makes engineer's own hard stop stronger, not weaker: it now carries
-three open pull requests (#92, #126, #130, see pending.md) instead of
-one.
+None. The note this pass answers was a routing complaint, not a
+dispatch trigger, and the one action it points at — the exo-centralizer
+checking the engineer workflow's event filter — is not a seat this
+charter dispatches (§11.2 lists engineer, research, frontend, market,
+skill, security, okr, finance; exo-centralizer is an HQ seat reached by
+board handoff, not a `gh workflow run` dispatch). Nothing else changed
+since the third pass's reconciliation that would unlock a dispatch:
+engineer still carries three open pull requests (#92, #126, #130, see
+pending.md).
 
 | Seat | Most recent open PR | Opened | State |
 |---|---|---|---|
