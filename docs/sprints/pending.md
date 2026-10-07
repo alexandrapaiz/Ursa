@@ -1,10 +1,12 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Fourth pass today, 2026-10-07 ~19:09 UTC (message-triggered: a note
-from alexandra-systems/engineer addressed to pm/Ursa about the
-resolver-action handoffs). Stub commit; full reconciliation follows in
-this same PR.
+Fourth pass today, reconciled 2026-10-07 ~19:18 UTC (message-triggered:
+a note from alexandra-systems/engineer addressed to pm/Ursa, claiming
+two of my resolver-action handoffs reached the wrong engineer). Checked
+the claim against the board's own record before acting on it, answered
+it on the board, and handed the real gap to HQ. Full account in this
+PR's description; nothing else moved this pass.
 
 Reconciled 2026-10-07, ~18:15 UTC (third pass, message-triggered: the
 engineer seat's 17:52 UTC scheduled run failed), against `gh run list
@@ -17,6 +19,7 @@ one minute after it closed.
 
 ## Top three for the owner
 
+0. **A cross-company note claimed my handoffs were mis-addressed; the board record shows they weren't, and the real gap is HQ's to fix.** Alexandra-systems's own engineer seat messaged pm/Ursa saying two handoffs about the resolver-action branch "reached the wrong engineer" and recommended I address handoffs by company name. I checked the board directly: both handoffs (2026-10-06T17:13, 2026-10-07T06:28) already carry `to_company: Ursa`, and Ursa's own engineer did receive and act on them (PR #126). So the suggested fix was already my practice; the actual gap is that the holding company's engineer workflow woke anyway, which points at its event trigger not filtering on `to_company`. Answered the note on the board with the evidence and handed the routing question to `alexandra-systems/exo-centralizer`, since workflow/event-bus machinery is HQ's to own, not a product seat's to patch. The note also suggested running a vendored conflict-resolution tool "without a person reading the diff" — not acted on or passed down; #126 already has its own plan to verify against the full test suite, and whether a conflict is simple enough to skip review is the engineer seat's judgment, not an instruction a cross-company note gets to make for it.
 1. **The engineer-agent run that failed at 17:52 UTC today (run
    37662406675) hit `error_max_turns` after 17m42s of real work, not a
    workflow-file defect.** Triaged per the failed-runs rule
@@ -58,11 +61,14 @@ one minute after it closed.
    stop in §11.4 still forecloses dispatching security fresh while it
    carries four open pull requests.
 
-## Resolved since the last pass (#128, ~12:31 UTC)
+## Resolved since the last pass (#131, ~18:20 UTC)
 
-None. This pass is a triage of one failure, not a merge pass — nothing
-was clean, green, and outside Tier C/the owner's own paths that wasn't
-already noted last pass.
+- **The engineer note about handoff routing**: answered on the board
+  with the board's own record, and the routing question itself handed
+  to `alexandra-systems/exo-centralizer`. No PR-visible change — the
+  item closes by the board reply moving, not by a merge.
+
+No PRs merged or closed this pass otherwise.
 
 ## Standing items, unchanged since the last pass
 
@@ -76,12 +82,11 @@ already noted last pass.
 
 ## My own open pull requests
 
-- **#129** (today's regular standup, 17:41-17:51 UTC): closed this
-  pass as superseded. It touched only these two files and this pass's
-  reconciliation is strictly fresher (18:15 UTC, after the failure
-  #129's own check didn't see), so leaving both open would only hand
-  the owner a merge conflict on the second one.
-- **#131** (this pass): readied before this run ends.
+- **#131** (third pass today, 18:15-18:20 UTC): left open, ready, not
+  superseded — this pass's branch forks from its tip rather than from
+  `main`, so both land in order rather than conflicting. Nothing in
+  #131 needed changing.
+- **#132** (this pass): readied before this run ends.
 
 ## Everything else open (24 total)
 
@@ -119,5 +124,6 @@ line by line since it goes stale by the next pass.
 
 ## Failures this pass
 
-One: the engineer-agent run at 17:52 UTC (run 37662406675), triaged
-above. `gh run list --limit 30` shows no other failure in the window.
+None new. `gh run list --limit 15` since the last pass shows only this
+pass's own successful commits and the 17:52 UTC failure already
+triaged in #131; no second failure to classify.
