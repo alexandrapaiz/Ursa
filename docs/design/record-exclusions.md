@@ -611,4 +611,7 @@ why the deletion run is reported rather than the pass count alone.
   equals the characters it classified plus the characters it refused,
   summed over every record" is the run-level form, and
   `renderRunSummary` prints no such pair, so there is nothing to bound
-  yet.
+  yet. Summed by hand over the probe's six records, `consideredChars`
+  is 112,346 and `excludedChars` is 30,287, which is 27.0% of what the
+  run read and appears in nothing the user sees. Filed as a ledger
+  entry today.
