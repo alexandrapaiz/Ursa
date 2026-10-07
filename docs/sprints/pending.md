@@ -1,6 +1,11 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
+Fourth pass today, 2026-10-07 ~19:09 UTC (message-triggered: a note
+from alexandra-systems/engineer addressed to pm/Ursa about the
+resolver-action handoffs). Stub commit; full reconciliation follows in
+this same PR.
+
 Reconciled 2026-10-07, ~18:15 UTC (third pass, message-triggered: the
 engineer seat's 17:52 UTC scheduled run failed), against `gh run list
 --limit 30`, `gh pr list --state open --limit 200`, the board's inbox
