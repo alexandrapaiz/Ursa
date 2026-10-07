@@ -279,7 +279,7 @@
   },
   "signals": {
     "method": "auto-detected",
-    "annotatedAt": "2026-10-07T17:59:48.339Z",
+    "annotatedAt": "2026-10-07T18:06:43.086Z",
     "episode": {
       "steps": 1,
       "generations": 2,

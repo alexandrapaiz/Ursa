@@ -15,6 +15,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { auditProvenance } from './audit'
 import { renderRunSummary } from './bin/ursa'
 import { mergedLength } from './intervals'
 import { checkRecord, measure, type InvariantCode } from './invariants'
@@ -229,6 +230,33 @@ const BREAKAGES: Array<{ code: InvariantCode; what: string; break: (r: OutcomeRe
     code: 'RATES_MATCH_FIELDS',
     what: 'a stored discard rate that does not match the characters behind it',
     break: (r) => { r.stats.generated.humanDeletedPct = 0.42 },
+  },
+  {
+    code: 'RATES_MATCH_FIELDS',
+    what: 'a share-of-the-finished-work figure that is not its own chars over finalChars',
+    break: (r) => { r.stats.byClass.survived_verbatim.pctOfFinal = 0.99 },
+  },
+  {
+    code: 'PCT_DENOMINATORS_ORDERED',
+    what: 'the two denominators exchanged, so the flattering figure carries the honest field\'s name',
+    break: (r) => {
+      const st = r.stats.byClass.survived_verbatim
+      const swap = st.pct
+      st.pct = st.pctOfFinal
+      st.pctOfFinal = swap
+    },
+  },
+  {
+    code: 'PERFILE_ENUMERATES_PATHS',
+    what: 'a path in files[] with no row in the array a pipeline iterates',
+    break: (r) => { r.stats.perFile = [] },
+  },
+  {
+    code: 'PERFILE_ENUMERATES_PATHS',
+    what: 'a row for a path the record carries under neither files[] nor exclusions[]',
+    break: (r) => {
+      r.stats.perFile = [...r.stats.perFile, { ...r.stats.perFile[0], path: 'docs/standards/pm.md' }]
+    },
   },
 ]
 
@@ -724,5 +752,167 @@ describe('a path the record excludes and the figures it left', () => {
     // The sum the field exists to make checkable: what the run read is
     // what it classified plus what it refused.
     expect(m.consideredChars).toBe(r.stats.finalChars + 21_656)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The fourteenth and fifteenth bounds. Both are about a record that states a
+// true number and does not state which question it answers.
+//
+// PCT_DENOMINATORS_ORDERED guards the pair of class percentages. `pct`
+// divides by the characters some span covered, `pctOfFinal` by the whole
+// finished file, and the second is the question a buyer is asking when they
+// read the first percentage in the record. See ClassStat in src/types.ts.
+//
+// PERFILE_ENUMERATES_PATHS guards the row list. `stats.perFile` is the array
+// a consuming pipeline iterates, and before excluded paths were emitted into
+// it an excluded record's row list was empty while its episode had touched a
+// file. The absence had been moved out of the record and into one of the
+// record's two file lists, which a reader has to know to join.
+// ---------------------------------------------------------------------------
+
+describe('the two denominators a class percentage can have', () => {
+  const real = load(REAL_FIXTURE)
+
+  it('differ on real history, and the whole difference is the text no span covered', () => {
+    const st = real.stats.byClass.survived_verbatim
+    // The headline class of the record a lab would read first.
+    expect(st.pct).toBe(0.927)
+    expect(st.pctOfFinal).toBe(0.903)
+    // Where the 2.4 points live: 79 characters of this file are inside no
+    // span at all, and `pct` divides by a file 79 characters smaller than
+    // the one the user finished.
+    expect(real.stats.finalChars - real.stats.coveredChars).toBe(79)
+    expect(measure(real).finalSeparatorChars).toBe(79)
+    expect(st.chars / real.stats.coveredChars).toBeCloseTo(st.pct, 3)
+    expect(st.chars / real.stats.finalChars).toBeCloseTo(st.pctOfFinal, 3)
+  })
+
+  it('sum to one under the narrow denominator and to less than one under the wide one', () => {
+    const classes = Object.values(real.stats.byClass)
+    expect(classes.reduce((a, c) => a + c.pct, 0)).toBeCloseTo(1, 2)
+    const ofFinal = classes.reduce((a, c) => a + c.pctOfFinal, 0)
+    expect(ofFinal).toBeLessThan(1)
+    // And the shortfall is the unclassified share, which is the fact the
+    // partition-looking triple of `pct` figures cannot express.
+    expect(1 - ofFinal).toBeCloseTo(79 / real.stats.finalChars, 2)
+  })
+
+  it('are ordered on every record the resolver produces, both fixtures included', () => {
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      const r = load(p)
+      for (const [cls, st] of Object.entries(r.stats.byClass)) {
+        expect(st.pctOfFinal, `${p} ${cls}`).toBeLessThanOrEqual(st.pct)
+      }
+      expect(checkRecord(r)).toEqual([])
+    }
+  })
+
+  it('fires when the two are swapped, which is the only way the flattering one gets the honest name', () => {
+    const broken = clone(real)
+    const st = broken.stats.byClass.survived_verbatim
+    st.pct = 0.903
+    st.pctOfFinal = 0.927
+    const codes = checkRecord(broken).map((v) => v.code)
+    expect(codes).toContain('PCT_DENOMINATORS_ORDERED')
+    const v = checkRecord(broken).find((x) => x.code === 'PCT_DENOMINATORS_ORDERED')!
+    // Both denominators in the message, because the bound is about which
+    // one was used and the numbers alone do not say.
+    expect(v.observed).toContain('2939')
+    expect(v.observed).toContain('3018')
+  })
+
+  it('does not fire on an equal pair, which is what a fully classified file has', () => {
+    const broken = clone(real)
+    broken.stats.coveredChars = broken.stats.finalChars
+    for (const st of Object.values(broken.stats.byClass)) {
+      st.pct = Math.round((st.chars / broken.stats.finalChars) * 1000) / 1000
+      st.pctOfFinal = st.pct
+    }
+    expect(checkRecord(broken).map((v) => v.code)).not.toContain('PCT_DENOMINATORS_ORDERED')
+  })
+})
+
+describe('the row list enumerates every path the run read', () => {
+  /** the unit record with one path classified and one path excluded */
+  function withExcludedPath(): OutcomeRecord {
+    return resolvedRecord([{
+      path: 'docs/standards/lessons.md',
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'Sync lessons from HQ',
+      relation: 'sibling',
+      chars: 21_656,
+    }])
+  }
+
+  it('gives the excluded path a row of its own, all zeros, naming why', () => {
+    const r = withExcludedPath()
+    expect(r.stats.perFile.map((x) => x.path)).toEqual(['notes.md', 'docs/standards/lessons.md'])
+    const row = r.stats.perFile.find((x) => x.path === 'docs/standards/lessons.md')!
+    expect(row.coveredChars).toBe(0)
+    expect(Object.values(row.byClass)).toEqual([0, 0, 0])
+    expect(row.excluded).toBe('imported_whole')
+    // And the classified row is untouched by the addition.
+    expect(r.stats.perFile[0].excluded).toBeUndefined()
+    expect(r.stats.perFile[0].coveredChars).toBe(r.stats.coveredChars)
+    expect(checkRecord(r)).toEqual([])
+  })
+
+  it('leaves the row out of every figure, so the excluded path moves no percentage', () => {
+    const withRow = withExcludedPath()
+    const without = resolvedRecord()
+    expect(withRow.stats.finalChars).toBe(without.stats.finalChars)
+    expect(withRow.stats.coveredChars).toBe(without.stats.coveredChars)
+    expect(withRow.stats.byClass).toEqual(without.stats.byClass)
+    // The excluded characters are reconciled by `measure`, not by `stats`:
+    // what the run read is what it classified plus what it refused.
+    expect(measure(withRow).consideredChars).toBe(without.stats.finalChars + 21_656)
+  })
+
+  it('emits one row, not two, when a path is both classified and excluded', () => {
+    // The illegal overlap EXCLUSION_NOT_CLASSIFIED exists to catch. The row
+    // list must not paper over it by carrying the path twice, which would
+    // leave the record self-consistent from this bound's point of view.
+    const r = resolvedRecord([{
+      path: 'notes.md',
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'Sync lessons from HQ',
+      relation: 'sibling',
+      chars: 199,
+    }])
+    expect(r.stats.perFile.map((x) => x.path)).toEqual(['notes.md'])
+    const codes = checkRecord(r).map((v) => v.code)
+    expect(codes).toContain('EXCLUSION_NOT_CLASSIFIED')
+    expect(codes).not.toContain('PERFILE_ENUMERATES_PATHS')
+  })
+
+  it('reads as a live pointer to the provenance audit, not as a dangling path', () => {
+    const r = withExcludedPath()
+    // Only the path-pointer kind is in question here. The unit record
+    // carries no user prompts, so the audit legitimately reports
+    // `no_eliciting_prompt` for its spans, and asserting an empty list would
+    // be asserting something else.
+    const paths = (rec: OutcomeRecord) =>
+      auditProvenance(rec).broken.filter((b) => b.kind === 'stats_path_unknown')
+    expect(paths(r)).toEqual([])
+    // What the audit still catches: a row that sits under neither list, and
+    // a row for an excluded path that does not say so. The second is the
+    // one this change introduced the possibility of — a zero row with no
+    // `excluded` reason is indistinguishable from a classified file that
+    // produced no spans, and those are opposite facts.
+    const silent = clone(r)
+    delete silent.stats.perFile[1].excluded
+    const quiet = paths(silent)
+    expect(quiet).toHaveLength(1)
+    expect(quiet[0].at).toBe('stats.perFile[1].excluded')
+    expect(quiet[0].detail).toContain('row says (nothing)')
+
+    const stray = clone(r)
+    stray.stats.perFile[1].path = 'docs/standards/pm.md'
+    const dangling = paths(stray)
+    expect(dangling).toHaveLength(1)
+    expect(dangling[0].detail).toContain('no final file and no exclusion')
   })
 })
