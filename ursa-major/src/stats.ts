@@ -2,7 +2,7 @@
 
 import { mergedLength } from './intervals'
 import type {
-  ConversationMeta, FinalFile, GenerationRecord, SpanClass, Stats,
+  ConversationMeta, Exclusion, FinalFile, GenerationRecord, SpanClass, Stats,
 } from './types'
 
 const CLASSES: SpanClass[] = [
@@ -13,13 +13,23 @@ const CLASSES: SpanClass[] = [
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
 
+/**
+ * Every figure the record states about itself.
+ *
+ * `exclusions` is the same array the record carries at top level, passed in
+ * so `perFile` can enumerate the paths the run read rather than only the
+ * paths it classified. It is optional because the chat path (src/cli.ts)
+ * excludes nothing: there is no repository to prove an import against, so
+ * `files` already is every path.
+ */
 export function computeStats(
   files: FinalFile[],
   generations: GenerationRecord[],
   conversations: ConversationMeta[],
+  exclusions: Exclusion[] = [],
 ): Stats {
   const byClass = Object.fromEntries(
-    CLASSES.map((c) => [c, { spans: 0, chars: 0, pct: 0 }]),
+    CLASSES.map((c) => [c, { spans: 0, chars: 0, pct: 0, pctOfFinal: 0 }]),
   ) as Stats['byClass']
   let coveredChars = 0
   let finalChars = 0
@@ -28,7 +38,7 @@ export function computeStats(
   const byModelChars = new Map<string, number>()
   const byConvChars = new Map<string, number>()
 
-  const perFile = files.map((f) => {
+  const perFile: Stats['perFile'] = files.map((f) => {
     finalChars += f.text.length
     const fileByClass = Object.fromEntries(CLASSES.map((c) => [c, 0])) as Record<SpanClass, number>
     let fileCovered = 0
@@ -49,7 +59,31 @@ export function computeStats(
     return { path: f.path, coveredChars: fileCovered, byClass: fileByClass }
   })
 
-  for (const c of CLASSES) byClass[c].pct = coveredChars ? r3(byClass[c].chars / coveredChars) : 0
+  // Two denominators, both stored, neither inferable from the other without
+  // the reader knowing which characters each counts. See ClassStat in
+  // src/types.ts for why `pct` keeps the narrower one.
+  for (const c of CLASSES) {
+    byClass[c].pct = coveredChars ? r3(byClass[c].chars / coveredChars) : 0
+    byClass[c].pctOfFinal = finalChars ? r3(byClass[c].chars / finalChars) : 0
+  }
+
+  // A row for every path the run read, not only the ones that produced
+  // spans. An excluded path's row is all zeros and names its reason: the
+  // resolver never saw the path, so there is nothing to apportion, and the
+  // row exists so that iterating `perFile` enumerates the run's whole
+  // reading list. Paths already classified are skipped rather than
+  // overwritten, which keeps this loop a no-op on the malformed record
+  // EXCLUSION_NOT_CLASSIFIED exists to catch instead of hiding it.
+  const classifiedPaths = new Set(files.map((f) => f.path))
+  for (const x of exclusions) {
+    if (classifiedPaths.has(x.path)) continue
+    perFile.push({
+      path: x.path,
+      coveredChars: 0,
+      byClass: Object.fromEntries(CLASSES.map((c) => [c, 0])) as Record<SpanClass, number>,
+      excluded: x.reason,
+    })
+  }
 
   const generatedTotal = generations.reduce((a, g) => a + g.totalChars, 0)
   const generatedWritten = generations.reduce((a, g) => a + g.charsWritten, 0)
