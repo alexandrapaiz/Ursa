@@ -254,7 +254,17 @@ function mergeDeletesTheFileRepo(): { dir: string; mergeSha: string } {
   sh(dir, ['commit', '-q', '-m', 'Merge other: drop the module, it needs rewriting'])
   const mergeSha = sh(dir, ['rev-parse', 'HEAD']).trim()
 
-  write([BASE_A, RIVAL_BLOCK, BASE_B].join('\n\n'))
+  // The human restores the module, taking the other branch's formatter
+  // and adding a line of their own.
+  //
+  // That trailing line was added when src/vendored.ts landed. Restoring
+  // the other branch's content EXACTLY makes the finished blob
+  // byte-identical to the blob on branch `other`, which is a whole-file
+  // import, and the file-level refusal then skips digest.js before the
+  // resolver reads it. This fixture is about a merge destroying a
+  // generation, not about importing a file, so the human leaves a mark
+  // and the merge-deletion assertions below are unchanged.
+  write([BASE_A, RIVAL_BLOCK, BASE_B, '// restored by hand after the merge'].join('\n\n'))
   commit('Restore the module with the leaner formatter')
   return { dir, mergeSha }
 }
