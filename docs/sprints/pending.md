@@ -71,13 +71,14 @@ already noted last pass.
 
 ## My own open pull requests
 
-- **#129** (today's regular standup, 17:41-17:51 UTC): open, not a
-  draft, mergeable. Not superseded by this pass — it covers the last
-  six hours before this failure and is the owner's to merge on its own
-  terms.
+- **#129** (today's regular standup, 17:41-17:51 UTC): closed this
+  pass as superseded. It touched only these two files and this pass's
+  reconciliation is strictly fresher (18:15 UTC, after the failure
+  #129's own check didn't see), so leaving both open would only hand
+  the owner a merge conflict on the second one.
 - **#131** (this pass): readied before this run ends.
 
-## Everything else open (25 total)
+## Everything else open (24 total)
 
 - **Engineer's own queue, see "Top three" above**: #92, #126, #130.
 - **In flight from earlier handoffs, untouched this pass**: #123
@@ -106,7 +107,6 @@ line by line since it goes stale by the next pass.
   rulings each, 2026-09-23 through 2026-09-25) is still unfixed.
   Outside this seat's writable surface.
 - `company.yaml` (#80), and #39/#48 under `prompts/`.
-- #129, this seat's own standup PR, same route as #111/#117 before it.
 - Milestone "Sprint 2026-10-05" (#3, due 2026-10-11) has zero
   issues/PRs attached through GitHub's own milestone field. Still four
   days out, not yet inside the three-day dispatch window; wiring it is
