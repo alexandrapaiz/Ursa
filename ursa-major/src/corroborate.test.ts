@@ -221,8 +221,19 @@ describe('the human restoring text the agent had replaced', () => {
     const original = r.commit('label.ts', file(B_LINE), 'The human writes the label')
     // The agent replaces the human's line with its own wording.
     const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
-    // The human puts their own wording back.
-    r.commit('label.ts', file(B_LINE), 'Put my wording back')
+    // The human puts their own wording back, and leaves a mark of their
+    // own alongside it.
+    //
+    // The extra line is load-bearing and was added when src/vendored.ts
+    // landed. Without it the final blob is byte-for-byte the blob at
+    // `original`, which is a whole-file import: the episode's net effect
+    // on label.ts would be nothing, the file-level refusal would skip the
+    // path before any span of it was classified, and this test would be
+    // asserting about a span the record no longer contains. With it the
+    // file is genuinely this episode's, while the RESTORED LINE is still
+    // text the repository already held, which is the span-level claim
+    // under test here and is unchanged.
+    r.commit('label.ts', file(B_LINE) + 'export const restored = true\n', 'Put my wording back')
     return { r, generatedSha, original }
   }
 
