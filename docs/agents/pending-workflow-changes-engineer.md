@@ -148,6 +148,9 @@ No secret is required. The default `GITHUB_TOKEN` with
 `pull-requests: write` is enough, and no Anthropic credential is passed,
 so the distiller runs in CI mode and the tuning delta is an honest zero.
 
-Apply after pull request #92 merges, since the workflow references
-`./ursa-major/action.yml` and `ursa-major/dist/ursa.cjs`, neither of
-which exists on `main` until then.
+Apply after the reconciliation pull request #134 merges, since the
+workflow references `./ursa-major/action.yml` and
+`ursa-major/dist/ursa.cjs`, neither of which exists on `main` until then.
+(#134 replaces #92 as the branch that carries them; #92 had stopped
+merging. The 2026-10-08 engineer run checked both files are present and
+the bundle current on #134's branch before rewriting this line.)

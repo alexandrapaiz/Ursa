@@ -337,9 +337,9 @@ outputs are the contract a consumer workflow writes against:
 |---|---|---|
 | `units-resolved` | `1` | work units that became outcome records |
 | `units-found` | `1` | work units found in the window, resolved or not |
-| `chars-survived-verbatim` | `101` | characters of generated text kept unchanged |
-| `chars-survived-edited` | `128` | characters of generated text kept after editing |
-| `most-corrected-artifact` | `digest.js` | file with the most edited characters; empty string when none |
+| `chars-survived-verbatim` | `27` | characters of generated text kept unchanged |
+| `chars-survived-edited` | `0` | characters of generated text kept after editing |
+| `most-corrected-artifact` | `` (empty) | file with the most edited characters; empty string when none, which is this fixture's case |
 | `tuning-delta` | `0/0` | preference units added, then reinforced |
 | `tuning-mode` | `ci-no-model` | `distilled` if a model interpreted; `ci-no-model` if none was reachable |
 | `comment-url` | `https://github.com/…#issuecomment-99` | the run comment; empty string when `post-comment: false` |
@@ -354,7 +354,7 @@ outputs are the contract a consumer workflow writes against:
 ursa-major/
   action.yml                      the reusable composite Action
   build/bundle.mjs                the esbuild script that writes the bundle
-  dist/ursa.cjs                   the committed single-file CLI, 75,631 bytes
+  dist/ursa.cjs                   the committed single-file CLI, 166,859 bytes
   examples/resolve-on-merge.yml   the consumer workflow, copy-paste ready
   src/ci/
     window.ts  reactions.ts  github.ts  comment.ts  distill-mode.ts  run.ts
@@ -392,23 +392,25 @@ record id's slug is that directory's name; it is written below in the
 placeholder form the standard's redaction rider requires, and the commit
 hashes are truncated to seven characters.
 
-`.ursa/records/<project-slug>-2026-10-05-54d837a.json`, abridged to the
+`.ursa/records/<project-slug>-2026-10-08-e70e06c.json`, abridged to the
 fields this surface reads:
 
 ```json
 {
   "schemaVersion": "0.1.0",
-  "task": { "id": "<project-slug>-2026-10-05-54d837a", "finished": true, "generatedAt": "2026-10-05T03:43:00Z" },
+  "task": { "id": "<project-slug>-2026-10-08-e70e06c", "finished": true, "generatedAt": "2026-10-08T03:02:52Z" },
   "stats": {
+    "finalChars": 68,
+    "coveredChars": 63,
     "byClass": {
-      "survived_verbatim": { "spans": 4, "chars": 101, "pct": 0.441 },
-      "survived_mutated": { "spans": 2, "chars": 128, "pct": 0.559 },
-      "no_generation_provenance": { "spans": 0, "chars": 0, "pct": 0 }
+      "survived_verbatim": { "spans": 2, "chars": 27, "pct": 0.429, "pctOfFinal": 0.397 },
+      "survived_mutated": { "spans": 0, "chars": 0, "pct": 0, "pctOfFinal": 0 },
+      "no_generation_provenance": { "spans": 1, "chars": 36, "pct": 0.571, "pctOfFinal": 0.529 }
     },
-    "generated": { "totalChars": 258, "survivedChars": 258, "deletedChars": 0, "deletedPct": 0 },
+    "generated": { "totalChars": 42, "charsWritten": 47, "survivedChars": 27, "deletedChars": 15, "deletedPct": 0.357 },
     "perFile": [
-      { "path": "digest.js", "coveredChars": 229,
-        "byClass": { "survived_verbatim": 101, "survived_mutated": 128, "no_generation_provenance": 0 } }
+      { "path": "digest.js", "coveredChars": 63,
+        "byClass": { "survived_verbatim": 27, "survived_mutated": 0, "no_generation_provenance": 36 } }
     ]
   },
   "signals": {
@@ -442,9 +444,9 @@ GitHub:
 ```
 units-resolved=1
 units-found=1
-chars-survived-verbatim=101
-chars-survived-edited=128
-most-corrected-artifact=digest.js
+chars-survived-verbatim=27
+chars-survived-edited=0
+most-corrected-artifact=
 tuning-delta=0/0
 tuning-mode=ci-no-model
 comment-url=
@@ -463,9 +465,9 @@ rows are the contract: same fields, same order, every run, zeros printed.
 | Field | Value |
 | --- | --- |
 | Units resolved — work units found in this merge, and how many became outcome records | 1 of 1 |
-| Characters survived verbatim — generated text you kept unchanged | 101 |
-| Characters survived edited — generated text you kept after editing it; the edit is the correction | 128 |
-| Most corrected artifact — the file carrying the most edited characters | `digest.js` (128 edited characters) |
+| Characters survived verbatim — generated text you kept unchanged | 27 |
+| Characters survived edited — generated text you kept after editing it; the edit is the correction | 0 |
+| Most corrected artifact — the file carrying the most edited characters | none — no generated text was edited in this window |
 | Tuning delta — preference units this run added to, or reinforced in, the tuning store | 0 new, 0 reinforced (no interpretation ran: no model credential in the environment (looked for ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN)) |
 
 That's the part worth noticing: not what got written, what got kept.
@@ -525,7 +527,7 @@ git -C <repo> rev-list --parents -n 1 <mergeCommitSha>
 npm install                 # once, for the toolchain; the runner needs none of this
 npm run bundle              # writes dist/ursa.cjs and prints its sha256
 npm run bundle:check        # rebuilds into memory, fails if the committed bytes differ
-npm test                    # 59 tests, 23 of them this surface's
+npm test                    # 467 tests, 23 of them this surface's
 npx tsc --noEmit -p tsconfig.json
 ```
 
@@ -548,9 +550,12 @@ cat > event.json <<EOF
  "pull_request":{"number":7,"merged":true,"merge_commit_sha":null,
   "base":{"sha":"$(git rev-parse HEAD~2)"},"head":{"sha":"$(git rev-parse HEAD)"}}}
 EOF
+# --min-chars 1 is load-bearing on this fixture and was not needed before the
+# reconciliation. digest.js is a 42-character generation, and the default
+# --min-chars 200 drops it, so the run exits 0 and reports "0 of 1". See §8.2.
 GITHUB_OUTPUT="$WORK/step-output.txt" \
   node <path-to>/ursa-major/dist/ursa.cjs ci "$WORK" \
-  --repo alexandrapaiz/ursa-demo --event "$WORK/event.json" --no-post
+  --repo alexandrapaiz/ursa-demo --event "$WORK/event.json" --no-post --min-chars 1
 cat "$WORK/step-output.txt"
 ```
 
@@ -584,7 +589,7 @@ alternative that was actually considered.
 | Tool | Version | Job in this surface | Why over the alternative |
 |---|---|---|---|
 | Node.js | 22, the runner's own | executes `dist/ursa.cjs` | already installed on `ubuntu-latest`, `macos-latest` and `windows-latest`; `actions/setup-node` would add a step and a cache lookup to every merge for a runtime that is already there |
-| esbuild | 0.25.10, pinned | bundles `src/bin/bundle-entry.ts` and everything it imports into one CommonJS file | one dependency, no configuration file, sub-second builds, and it inlines the `diff` package the resolver needs. Rollup needs a plugin chain for CommonJS output and TypeScript; `tsc` emits a file tree rather than one file; `ncc` is archived; Bun's bundler would add a second runtime to a repository that targets Node |
+| esbuild | 0.28.2, from the `^0.28.0` range in `ursa-major/package.json` (`^0.25.10` until the 2026-10-08 reconciliation, which moved it to the major vitest's own vite already resolves, because npm cannot place two esbuild majors in this tree) | bundles `src/bin/bundle-entry.ts` and everything it imports into one CommonJS file | one dependency, no configuration file, sub-second builds, and it inlines the `diff` package the resolver needs. Rollup needs a plugin chain for CommonJS output and TypeScript; `tsc` emits a file tree rather than one file; `ncc` is archived; Bun's bundler would add a second runtime to a repository that targets Node |
 | CommonJS output format | — | the bundle's module format | `.cjs` is unambiguous wherever the file is copied. A `.js` next to this repository's `"type": "module"` would be read as ESM, and the bundle has no `package.json` beside it to say otherwise |
 | Node's global `fetch` | built-in since Node 18 | the four GitHub REST calls | needs no install, which is the whole constraint. `@octokit/rest` and `@actions/github` would each have to be installed on the runner or inlined; the `gh` binary is guaranteed only on GitHub-hosted runners, not self-hosted ones |
 | system `git` via `execFileSync` | the runner's installed git | the pair finder's `log`, `show` and `rev-list` calls | the repository is already a git checkout, and `src/pairfinder.ts` and `src/tuning/distill.ts` already shell out exactly this way — one pattern, not two. `isomorphic-git` reimplements git in JavaScript for no gain here |
@@ -675,7 +680,7 @@ happened.
 
 ## 8. What is not done, and what it would take
 
-Honest list, so the project manager can plan rather than discover.
+### 8.1 Honest list, so the project manager can plan rather than discover
 
 1. **Nothing has run on a real GitHub runner yet.** The end-to-end
    evidence is the bundle executing against a real git repository and a
@@ -699,3 +704,61 @@ Honest list, so the project manager can plan rather than discover.
    block in `CLAUDE.md`/`AGENTS.md`, plan §8), not this one's.
 5. **The `ghcr.io` image is unbuilt**, so §5's deviation stands until it
    is.
+
+### 8.2 What the 2026-10-08 reconciliation changed in this document
+
+This artifact was written on 2026-10-05 against the branch
+`ursa-engineer/2026-10-05-message`. By 2026-10-07 that branch no longer
+merged into `main`, and the reconciliation that landed it had to change
+four of the numbers quoted above. They are corrected in place rather than
+annotated line by line, and this section says what moved and why, because
+a payload a reader cannot reproduce is worse than no payload.
+
+1. **`src/resolve-episode.ts` is now the one definition of the resolve
+   step, and it is `main`'s, not this branch's.** The branch extracted the
+   function out of `src/bin/ursa.ts` on 2026-10-05 to keep the CI launch
+   from importing the CLI entrypoint. That reason still holds and the
+   module stays. What changed is whose body is inside it: between
+   2026-10-05 and 2026-10-07 `main` grew the file-level import refusal
+   (`src/vendored.ts`), descent corroboration (`src/corroborate.ts`), the
+   deploy detector (`src/deploy.ts`) and the exclusion-only record, none
+   of which the branch's copy had. Merging the branch as written would
+   have given `ursa ci` a resolver four features older than `ursa run`,
+   under the same name and the same signature, with no test comparing the
+   two. The stale copy is deleted. `src/bin/ursa.ts` re-exports the three
+   functions that eight test files and `src/adapters/cli.ts` import from
+   it, so no caller moved.
+
+2. **The record this document quotes is smaller, because the
+   generation-side character accounting was fixed on `main` on
+   2026-10-04.** `stats.generated.totalChars` counts the characters a
+   generation wrote, and the fix stopped a final-side total from being set
+   beside it (`src/invariants.ts`; the run that claimed 239,976 characters
+   survived out of 239,841 generated). The §4 fixture's `digest.js` is a
+   42-character generation, so §3.3's figures fall from 101 and 128
+   characters to 27 and 0, and the span the branch labelled
+   `survived_mutated` is now `no_generation_provenance`: the edited line
+   scores below `THETA_HIGH` against the generated one, and `main` no
+   longer reaches for the nearest match above a looser bar.
+
+3. **The §4 recipe now needs `--min-chars 1`.** At the default
+   `--min-chars 200`, a 42-character generation is filtered out, the run
+   exits 0, and the comment reads `0 of 1` with the prose "Nothing
+   resolved in this window. That is a reading, not a failure." That is the
+   filter working. It is also a recipe that teaches a reader the surface
+   is broken, so the flag is in the command and this is why.
+
+4. **The bundle is 166,859 bytes, up from 75,631, and esbuild is 0.28.2.**
+   The size is the four features in item 1 arriving in the same file; the
+   requires are still only `node:child_process`, `node:fs`, `node:path`
+   and `node:util`, so the no-install property holds. The esbuild range
+   moved from `^0.25.10` to `^0.28.0` because `vitest@5.0.2` resolves
+   `esbuild@~0.28.0` through vite, and npm could not place the two majors
+   side by side in this tree (`Cannot read properties of null (reading
+   'edgesOut')` on `npm install --package-lock-only`).
+
+Item 1 of §8.1 still stands: nothing has run on a real GitHub runner.
+What ran on 2026-10-08 is the reconciled bundle against a throwaway git
+repository and a fake GitHub, exit 0, five fields in the fixed order,
+eight step outputs, 467 tests passing and `npm run bundle:check` current
+at sha256 `61b24bb1`.
