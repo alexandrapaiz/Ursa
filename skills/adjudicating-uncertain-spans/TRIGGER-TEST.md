@@ -1,9 +1,17 @@
 # Trigger test — adjudicating-uncertain-spans
 
 Five prompts, written against the `description` field in `SKILL.md` as
-of version 0.1.0, per `prompts/skill-extract.md` section 5. Three should
+of version 0.2.0, per `prompts/skill-extract.md` section 5. Three should
 activate the skill and two should not. When this test fails, the
 description is what changes, not the test.
+
+Version 0.2.0 widened both the skill and the description. The resolver
+now sets `uncertain` in two places, and the second one is not a
+low-score span at all: a match at or above `THETA_HIGH` whose descent
+corroborates as `rival` is demoted into the same queue. Prompt 3 is new
+and exists to test that clause, because before it the description's
+every hook was about low confidence and a high-scoring demoted span
+would have missed the skill that now spends a procedure step on it.
 
 The description under test:
 
@@ -12,10 +20,12 @@ The description under test:
 > span by span whether the flagged text descends from a model generation
 > or from the person. Fires for adjudicating uncertain or low-confidence
 > span labels, for building the ground-truth set that match thresholds
-> are retuned against, and for judging whether a final span and a
-> candidate generation are actually ancestor and descendant. Does not
-> fire for producing a record in the first place, for labelling
-> generations, or for reading a record's summary statistics.
+> are retuned against, for judging whether a final span and a candidate
+> generation are actually ancestor and descendant, and for settling a
+> span the descent check demoted as rival, where the score was high and
+> the ancestry was not. Does not fire for producing a record in the
+> first place, for labelling generations, or for reading a record's
+> summary statistics.
 
 ## Should fire
 
@@ -23,53 +33,60 @@ The description under test:
 and decide which ones really came from a generation, then commit the
 adjudication next to the record."**
 
-Fires. This is the skill's exact situation and the wording matches three
-separate hooks in the description: an outcome record, spans flagged
-uncertain, and a span-by-span decision about descent. It is also the
-literal shape of O1 KR1.1, which is the work the skill was written to
-serve.
+Fires. The skill's exact situation, matching three separate hooks: an
+outcome record, spans flagged uncertain, and a span-by-span decision
+about descent. It is the literal shape of O1 KR1.1, the work the skill
+was written to serve. Under 0.2.0 the skill's first useful act on this
+prompt is to refuse the premise slightly, because "55 uncertain spans"
+is now two populations and step 2 splits them before any judging.
 
-**2. "Our false-positive rate on survived_mutated is too high. Build a
+**2. "Our false-positive rate on `survived_mutated` is too high. Build a
 ground-truth set from the low-confidence matches so we can retune the
 0.35 and 0.6 thresholds."**
 
-Fires. The prompt never says "uncertain" and never says "adjudicate",
-which is the point of including it. It reaches the skill through the
-second clause of the description, building the ground-truth set that
-thresholds are retuned against. The description was written with that
-clause specifically so a threshold-tuning request lands here, since
-step 6 of the procedure is the only place that says retuning comes
-after adjudication rather than before it.
+Fires, and never says "uncertain" or "adjudicate". It reaches the skill
+through the ground-truth clause, which exists in the description exactly
+so that threshold-tuning requests land here. Step 6 is the only place
+that says retuning comes after adjudication rather than before, and in
+0.2.0 it is also the only place that says the rate is computed over the
+low-score queue alone, since a demoted span carries no information about
+where a threshold belongs.
 
-**3. "This paragraph in the finished doc scored 0.48 against a model
-turn. Is that the ancestor of it or did I write it myself?"**
+**3. "This span scored 0.82 against a generation but the corroborator
+came back `rival`, so the resolver dropped it to
+`no_generation_provenance`. Is that right, or did the person really edit
+that generation?"**
 
-Fires. One span, one candidate, one descent question. The description's
-third clause covers exactly this, and the judgment section's
-idea-versus-vocabulary test is the answer the prompt is asking for. It
-is a useful case because it is small enough that a reader might not
-think of it as needing a skill at all.
+Fires on the demoted-rival clause. This is the prompt that version 0.1.0
+would have missed. Every hook in the old description pointed at low
+confidence, and this span's score is 0.82, so a reader matching on
+"low-confidence" would have ruled the skill out precisely when it had
+the most to say: the judgment section's idea-versus-vocabulary test is
+what settles a high lexical score against an absent ancestry, and a
+threshold change cannot touch this span at all.
 
 ## Should not fire
 
-**4. "Run the resolver over fixtures/mini and generate the outcome
+**4. "Run the resolver over `fixtures/mini` and generate the outcome
 record and viewer."**
 
-Does not fire. This is production of a record, which the description
-excludes by name. The near miss is real, because the prompt shares
-almost all of the skill's vocabulary: resolver, outcome record, viewer,
-spans by implication. What separates them is that no verdict is being
-asked for and nothing has been flagged yet. Sprint item 3 of
-`sprint-2026-09-21` is this prompt, and it belongs to the engineer seat.
+Does not fire. Production of a record, excluded in the description by
+name. It shares nearly all of the skill's vocabulary and differs in that
+no verdict is asked for and nothing is flagged yet. This is sprint item
+3 and belongs to the engineer.
 
 **5. "Read the record's stats and tell me the survival rate per model
 and how much of the final work has no generation provenance."**
 
-Does not fire. Summary statistics, excluded by name in the last clause.
-This one is the sharper near miss of the two, because it names
-`no_generation_provenance` directly, which is the class the skill spends
-most of its judgment section on. The distinction is that the prompt
-consumes labels the resolver already assigned and asks no one to decide
-anything, whereas the skill exists to change labels. Worth watching: if
-in practice this prompt does activate the skill, the fix is to move
-"decide" earlier and make it the first verb in the description.
+Does not fire. Summary statistics, excluded by name, and the sharper of
+the two near misses because it names `no_generation_provenance`, the
+class the skill spends most of its judgment on. The line is that this
+prompt consumes labels and asks nobody to decide anything, whereas the
+skill exists to change labels. If it fires in practice, the fix is to
+make "decide" the first verb in the description.
+
+A sibling near miss worth naming, since 0.2.0 makes it live: a prompt
+about what a `deletedPct` or an uncertain *count* is a share of belongs
+to `quoting-a-number-from-an-outcome-record`, not here, even though both
+skills now cite `uncertainSpans`. This skill changes labels; that one
+rules on what a number may be said to mean.
