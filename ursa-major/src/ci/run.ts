@@ -139,9 +139,14 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
   const recordPaths: string[] = []
+  // Counted so the run comment can say which bound dropped a unit instead of
+  // asserting the one reason it is most likely NOT to be (src/ci/comment.ts,
+  // emptyWindowSentence).
+  const dropped = { unresolvable: 0, belowMinChars: 0, minChars }
   for (const episode of episodes) {
     const record = resolveEpisode(opts.projectPath, episode)
-    if (!record || record.stats.generated.totalChars < minChars) continue
+    if (!record) { dropped.unresolvable++; continue }
+    if (record.stats.generated.totalChars < minChars) { dropped.belowMinChars++; continue }
     const signals = deriveSignals(record, declaration)
     signals.notes = [...(signals.notes ?? []), `CI launch: ${window.note}`]
     record.signals = signals
@@ -163,6 +168,7 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     windowNote: window.note,
     declarationBasis: declaration.basis,
     recordsPath: join(ursaDir(opts.projectPath), 'records'),
+    dropped,
     runUrl: opts.runUrl ?? null,
   })
 

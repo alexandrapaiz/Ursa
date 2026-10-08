@@ -354,7 +354,7 @@ outputs are the contract a consumer workflow writes against:
 ursa-major/
   action.yml                      the reusable composite Action
   build/bundle.mjs                the esbuild script that writes the bundle
-  dist/ursa.cjs                   the committed single-file CLI, 166,859 bytes
+  dist/ursa.cjs                   the committed single-file CLI, 168,111 bytes
   examples/resolve-on-merge.yml   the consumer workflow, copy-paste ready
   src/ci/
     window.ts  reactions.ts  github.ts  comment.ts  distill-mode.ts  run.ts
@@ -527,7 +527,7 @@ git -C <repo> rev-list --parents -n 1 <mergeCommitSha>
 npm install                 # once, for the toolchain; the runner needs none of this
 npm run bundle              # writes dist/ursa.cjs and prints its sha256
 npm run bundle:check        # rebuilds into memory, fails if the committed bytes differ
-npm test                    # 467 tests, 23 of them this surface's
+npm test                    # 472 tests, 28 of them this surface's
 npx tsc --noEmit -p tsconfig.json
 ```
 
@@ -552,7 +552,8 @@ cat > event.json <<EOF
 EOF
 # --min-chars 1 is load-bearing on this fixture and was not needed before the
 # reconciliation. digest.js is a 42-character generation, and the default
-# --min-chars 200 drops it, so the run exits 0 and reports "0 of 1". See §8.2.
+# --min-chars 200 drops it, so the run exits 0, reports "0 of 1", and the
+# comment names the floor as the reason. See §8.2 and §8.3.
 GITHUB_OUTPUT="$WORK/step-output.txt" \
   node <path-to>/ursa-major/dist/ursa.cjs ci "$WORK" \
   --repo alexandrapaiz/ursa-demo --event "$WORK/event.json" --no-post --min-chars 1
@@ -742,13 +743,13 @@ a payload a reader cannot reproduce is worse than no payload.
    longer reaches for the nearest match above a looser bar.
 
 3. **The §4 recipe now needs `--min-chars 1`.** At the default
-   `--min-chars 200`, a 42-character generation is filtered out, the run
-   exits 0, and the comment reads `0 of 1` with the prose "Nothing
-   resolved in this window. That is a reading, not a failure." That is the
-   filter working. It is also a recipe that teaches a reader the surface
-   is broken, so the flag is in the command and this is why.
+   `--min-chars 200`, a 42-character generation is filtered out and the run
+   exits 0 reporting `0 of 1`. That is the filter working. It is also a
+   recipe that teaches a reader the surface is broken, so the flag is in
+   the command and this is why. Running the recipe at the default is what
+   found the defect in §8.3.
 
-4. **The bundle is 166,859 bytes, up from 75,631, and esbuild is 0.28.2.**
+4. **The bundle is 168,111 bytes, up from 75,631, and esbuild is 0.28.2.**
    The size is the four features in item 1 arriving in the same file; the
    requires are still only `node:child_process`, `node:fs`, `node:path`
    and `node:util`, so the no-install property holds. The esbuild range
@@ -760,5 +761,52 @@ a payload a reader cannot reproduce is worse than no payload.
 Item 1 of §8.1 still stands: nothing has run on a real GitHub runner.
 What ran on 2026-10-08 is the reconciled bundle against a throwaway git
 repository and a fake GitHub, exit 0, five fields in the fixed order,
-eight step outputs, 467 tests passing and `npm run bundle:check` current
-at sha256 `61b24bb1`.
+eight step outputs, 472 tests passing and `npm run bundle:check` current
+at sha256 `db8ebdf7`.
+
+### 8.3 The empty-window sentence was asserting a cause it had not checked
+
+Found on 2026-10-08 by running §4's recipe at the default `--min-chars`,
+which is the first time anyone ran it on a generation smaller than the
+floor.
+
+`renderRunComment` chose its closing sentence on `unitsResolved === 0`
+alone and, on every zero, printed:
+
+> Nothing resolved in this window. That is a reading, not a failure: no
+> commit here carried an agent marker that a later human commit then
+> edited.
+
+The run that printed it also wrote `units-found=1` to `$GITHUB_OUTPUT`.
+A commit did carry an agent marker and a later human commit did edit it;
+the pair was found, resolved, and then dropped by `--min-chars`. So the
+comment stated a cause it had no evidence for, in the same comment that
+reported the evidence against it, and it sent the reader to go fix their
+commit trailers when the fix was one flag. Three distinct facts were
+collapsed into one sentence: no pair found at all (a question about
+authorship), a pair found and dropped under the size floor (a question
+about `--min-chars`), and a pair that resolved to nothing (a question
+about the clone).
+
+**The fix.** `src/ci/comment.ts` gains `emptyWindowSentence`, which keeps
+the authorship sentence for `unitsFound === 0` and otherwise reports the
+counts `src/ci/run.ts` now tracks per bound, carried on
+`RunCommentContext.dropped` rather than in the five fields, because the
+field order is fixed and a sixth row would break it. A caller that tracks
+nothing gets "This run did not record which bound dropped them," which
+says the run does not know instead of guessing. Five tests, one of them
+asserting the five-field table and its order are untouched.
+
+What the §4 recipe prints at the default now:
+
+```
+Nothing resolved in this window. That is a reading, not a failure: 1 work
+unit was found, and it did not become a record. The reason: 1 carried
+fewer than 200 generated characters, the `--min-chars` floor, which is
+small enough that a survival figure over it would be noise.
+```
+
+This is the same class of defect as the two the branch's own description
+reported finding by running the thing: a surface that reads as working
+while saying something untrue. It was reachable only by executing the
+documented recipe rather than the convenient variant of it.

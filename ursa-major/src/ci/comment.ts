@@ -57,6 +57,26 @@ export interface RunCommentContext {
   declarationBasis: string
   recordsPath: string
   runUrl: string | null
+  /**
+   * Why the work units this window found did not become records, when some
+   * did not. The comment's empty-window sentence is otherwise a guess: it
+   * used to assert "no commit here carried an agent marker that a later
+   * human commit then edited" on every zero, including the zeros where a
+   * pair WAS found and then dropped. On 2026-10-08 a run printed that
+   * sentence beside `units-found=1`, which is the one thing the sentence
+   * says did not happen.
+   *
+   * Omitted by a caller that does not track it, in which case the sentence
+   * says a count was not resolved rather than inventing a reason for it.
+   */
+  dropped?: {
+    /** units `resolveEpisode` returned nothing for, with no exclusion to state */
+    unresolvable: number
+    /** units whose generation was smaller than the `--min-chars` floor */
+    belowMinChars: number
+    /** the floor those units fell under, so the reader can raise it */
+    minChars: number
+  }
 }
 
 /**
@@ -131,17 +151,48 @@ export function renderRunCommentFieldTable(f: RunCommentFields): string {
   ].join('\n')
 }
 
+/**
+ * What the comment says when the window produced no records.
+ *
+ * Three different facts hide behind one zero, and the reader acts on them
+ * differently. No pair at all means this repository's commits do not carry
+ * an agent marker, which is a question about authorship. A pair found and
+ * dropped under the size floor means the work was real and small, which is
+ * a question about `--min-chars`. A pair that resolved to nothing means the
+ * blobs could not be read, which is a question about the clone. Reporting
+ * the first for all three, which this comment did until 2026-10-08, tells a
+ * user to go fix their commit trailers when the actual fix is one flag.
+ */
+function emptyWindowSentence(f: RunCommentFields, ctx: RunCommentContext): string {
+  const opening = 'Nothing resolved in this window. That is a reading, not a failure:'
+  if (f.unitsFound === 0) {
+    return `${opening} no commit here carried an agent marker that a later human commit then edited.`
+  }
+  const one = f.unitsFound === 1
+  const found = one
+    ? '1 work unit was found, and it did not become a record.'
+    : `${f.unitsFound} work units were found, and none of them became a record.`
+  const d = ctx.dropped
+  if (!d) return `${opening} ${found} This run did not record which bound dropped them.`
+  const because: string[] = []
+  if (d.belowMinChars > 0) {
+    because.push(`${d.belowMinChars} carried fewer than ${d.minChars} generated characters, the \`--min-chars\` floor, which is small enough that a survival figure over it would be noise`)
+  }
+  if (d.unresolvable > 0) {
+    because.push(`${d.unresolvable} resolved to nothing this clone could stand behind, which is usually a blob the runner could not read or a file over the size ceiling`)
+  }
+  if (because.length === 0) return `${opening} ${found}`
+  const lead = one ? 'The reason:' : 'Of those,'
+  return `${opening} ${found} ${lead} ${because.join(', and ')}.`
+}
+
 export function renderRunComment(f: RunCommentFields, ctx: RunCommentContext): string {
   const lines: string[] = [RUN_COMMENT_MARKER, '']
   lines.push(`**Ursa Major resolved this merge.** Pull request #${ctx.prNumber} in \`${ctx.repo}\`.`)
   lines.push('')
   lines.push(renderRunCommentFieldTable(f))
   lines.push('')
-  lines.push(
-    f.unitsResolved === 0
-      ? 'Nothing resolved in this window. That is a reading, not a failure: no commit here carried an agent marker that a later human commit then edited.'
-      : "That's the part worth noticing: not what got written, what got kept."
-  )
+  lines.push(f.unitsResolved === 0 ? emptyWindowSentence(f, ctx) : "That's the part worth noticing: not what got written, what got kept.")
   lines.push('')
   lines.push('<details><summary>How this run was bounded</summary>')
   lines.push('')
