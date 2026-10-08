@@ -1,69 +1,57 @@
-# Dispatch queue — 2026-10-08, scheduled standup run (~17:50 UTC)
+# Dispatch queue — 2026-10-08, message-triggered pass (~20:15 UTC)
 
-`PM_DISPATCH_ENABLED` is confirmed `true` this run: this run's job
-carries it as an environment variable directly (`echo
-$PM_DISPATCH_ENABLED` → `true`), unlike the host window passes earlier
-today, which only had `gh variable list` to try and got a 403 from
-that call every time. This is the Actions-triggered standup, not an
-owner-present window, so no owner instructions carry — the dispatch
-decision rests entirely on §11.3's criteria below.
+This is a message-triggered run, not a scheduled standup: the event
+named the skill seat's run `37832775208` as failed and asked for it to
+be triaged under the failed-runs rule (§11.7). The last full pass was
+the 17:50 UTC standup (PR #138, merged); this replaces that pass's
+queue rather than redoing the whole walk, since nothing material to
+dispatch changed in the intervening two and a half hours except the
+two items below.
 
 ## Proposed
 
-None. Checked every row of §11.3 against the state five hours after
-the last pass (#137, 12:28 UTC), which found nothing changed in
-between (no new commits, no new PRs, no new runs, no new messages):
+None.
 
-| Seat | Most recent open PR | Opened | State |
-|---|---|---|---|
-| engineer | none | — | #134 merged this morning; no open PR |
-| research | #114 | 2026-10-06 | draft, in progress |
-| frontend | #125 | 2026-10-07 | draft, in progress |
-| skill | #123 | 2026-10-07 | draft, in progress |
-| security | #124 | 2026-10-07 | draft, in progress (also #112, #85, #75, #47 open behind it) |
-| finance | #91 | 2026-10-05 | draft, idle |
-| market | none | — | #127 merged 2026-10-07; no open PR |
-| okr | none | — | no open PR |
+- **Skill already produced real, non-draft, mergeable work this pass**
+  (#140), so §11.4's hard stop forecloses a fresh dispatch to it
+  regardless of anything else: a seat with an open PR is not dispatched
+  again unless told to build on that branch in those words, and nobody
+  has said that.
+- **No other seat's state changed** in a way that fires any row of
+  §11.3 since the 17:50 UTC pass. Two new PRs appeared in the interim
+  (#139, engineer's second run of the day, already shipped and not a
+  dispatch target; #141, frontend's visual review, draft, in progress,
+  walled by its own open PR same as before) — neither changes any
+  dispatch criterion.
+- `PM_DISPATCH_ENABLED`: not re-checked this pass (no dispatch
+  candidate exists to gate on it either way).
 
-- **No seat run failed in the last 24 hours that isn't already
-  triaged.** `gh run list --status failure` over the last 24h shows
-  only the two runs with triage commits already on `main`
-  (`37719675527`, `37662406675`).
-- **No open PR shows failing CI.** Every open PR's latest check is
-  green or has none configured on its changed paths.
-- **The one sprint item still open** is security's redaction standard
-  (item 3, gates O2 KR2.2). This would ordinarily fire "a sprint item
-  is due this week and its owning seat has not run" under §11.3, but
-  the §11.4 hard stop — never dispatch a seat whose last PR is still
-  open, unless told to build on that branch in those words — forecloses
-  it: security carries five open PRs (#47, #75, #85, #112, #124), none
-  of which touch a redaction path, so there is no existing branch to
-  tell it to build on that would actually advance item 3. Dispatching
-  a sixth PR onto a seat that hasn't moved the first five would not
-  move the item; the open queue is the blocker, not an undecided
-  question. Unchanged from the last five passes.
-- **No ADR merged since the last pass names any seat.**
-  `docs/decisions.md` is unchanged since 2026-09-25 (verified via `git
-  log` directly, not just "no new file").
-- **Engineer carries no open PR** but no criterion fires for it either:
-  both of its two sprint items (#107, #109/#134) are already shipped,
-  and no ADR or failed run names it since.
-- **Market and okr** own nothing on the live sprint and no ADR names
-  either since the last pass; neither is walled by an open PR, but
-  nothing in §11.3 asks for anything from them right now.
-- **Milestone "Sprint 2026-10-05" is due within three days**
-  (2026-10-11) but carries zero attached issues/PRs through GitHub's
-  own milestone field (confirmed again via the API this run), so the
-  §11.3 milestone row has no open items to name and does not fire.
-  The gap is the milestone's wiring, not a seat's work — ceremony-lane
-  per §2b, named in `pending.md`.
-- exo, sales: never dispatched by this charter (exo audits this seat;
-  sales is dormant, posture private-R&D, never for sale per ADR-001).
+## Failed-run triage this pass (§11.7, full detail in the PR body)
 
-So even with the switch confirmed on, nothing in the criteria asks for
-a dispatch this pass. The three hard-stop ceilings (three dispatches a
-day, one per seat, ten a week) are therefore unused and have no effect
-on this conclusion either way.
+Three failed runs in the last 24 hours. One already triaged in an
+earlier pass today (`37719675527`, engineer, tripwire false alarm, PR
+#134 — unchanged). Two new:
+
+- **`37819090675`** (pm-agent, 17:46 UTC standup): tripwire false
+  alarm, a new variant. The run shipped and self-merged PR #138, then
+  ended its session with its checkout back on `main`, which reads to
+  the no-ship tripwire as zero commits, no pushed branch and no PR on
+  `HEAD`. No rerun — the work is already merged. Handoff posted to
+  Ursa's exo seat: the tripwire doesn't yet account for a run that
+  ends on the base branch after a self-merge.
+- **`37832775208`** (skill-agent, 19:32 UTC): `error_max_turns` after
+  101 turns, but PR #140 was already pushed, non-draft and mergeable
+  28 seconds before the session ended. No rerun — same pattern as the
+  engineer's two max-turns runs this week. Separately, the run's own
+  body re-surfaces a charter defect (the Data access section's
+  dependency on a Neon claims database Ursa does not have) that has
+  now been independently found **four** times since 2026-09-24 (#14,
+  #50, #64, #140), not three as #140 itself says, and has never once
+  reached `main` because every PR carrying it got stuck. Handed off to
+  Ursa's exo seat, since `prompts/skill-agent.md` is Tier C and outside
+  this seat's write surface. Named for the owner directly in
+  `pending.md` given the 14-day age and the fact the normal route has
+  structurally failed to land it so far.
 
 ## Dispatched by the PM
 
