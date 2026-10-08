@@ -198,6 +198,66 @@ funnel, which is the economically rational thing for a lab to do and
 exactly why nobody should expect one to build the symmetric version
 voluntarily.
 
+## Trust has a provenance axis too, not just an equity one (2026-10-07)
+
+The two existing neutrality entries (docs/ideas.md, 2026-09-26 and its
+2026-10-05 echo) both argue from equity: a lab that buys into its data
+vendor compromises that vendor's neutrality. This run's landscape
+watch surfaces a second, independent axis that doesn't depend on any
+ownership stake at all. A Forbes investigation found Surge AI, Mercor,
+AfterQuery, and Turing — four of the named vendors in landscape.md's
+Category 1 — collectively sell roughly $500M/year of training data to
+Chinese AI labs (Tencent, Alibaba, ByteDance) from the same contractor
+pools and pipelines that serve their US frontier-lab customers
+(docs/market/landscape.md, Surge AI and Mercor updates). No equity
+changes hands here; the concern a buyer would have is simpler and more
+direct: the same humans, process, and infrastructure that produce your
+training data also produce a geopolitical rival's.
+
+Ursa Minor has never sold data to anyone, so this isn't a comparison
+either company can make about a live customer relationship yet. What
+it is: a second, concrete, dated answer to "why trust Minor's
+provenance over an incumbent's," one that doesn't require the owner to
+make an equity-structure argument at all. The honest limit, stated
+plainly: Ursa's own consent architecture (CLAUDE.md's non-negotiables)
+governs who sees derived signal, but nothing in CLAUDE.md today commits
+to a no-dual-sale or single-buyer-tier guarantee the way this entry
+would need for a lab-facing pitch to cite it directly. That commitment,
+if the owner wants it, is a product decision this seat can't make.
+
+A second, related finding from the same week's landscape watch: a
+Gazetteer SF investigation into working conditions at Mercor (punishing
+hours, abrupt terminations, no formal HR/payment policy before late
+2025) is evidence of a cost the solicited-labor model carries
+structurally — a human has to be assigned the task, under some
+deadline, by someone managing them, for the label to exist at all. The
+outcome record's real-work-derived signal has no equivalent assigned
+labor force to manage, mistreat, or lose. This is a different claim
+than "cheaper" (rlhfbook.com's cost comparison in this file's first
+section already covers cheaper) — it's "structurally has no labor
+force to be exposed about," which is a trust claim, not a cost one.
+
+## A pitch-collision risk, not yet a pricing one (2026-10-07)
+
+Surge AI, the largest named vendor in landscape.md's Category 1,
+launched three new benchmarks this cycle (DAYJOB, GDP.xlsx, and the
+umbrella "Tuesday Work Index") explicitly framed around "economically
+valuable work" and whether an agent can "survive a 9 to 5"
+(docs/market/landscape.md, Surge AI update). That is close enough to
+Ursa's own language — CLAUDE.md §1 calls outcome records relevant to
+"writing, research, applied engineering, everything without a unit
+test," and Minor's pitch leans on "economically valuable" framing too
+— that a lab buyer skimming both could mistake Surge's benchmarks for
+a competing version of the outcome record. They are not: DAYJOB and
+GDP.xlsx are constructed task sets graded against a rubric, the exact
+"label supplied by a grader" structure CLAUDE.md §1 contrasts the
+outcome record against, not real finished work joined backward to its
+own generation history. No pricing or positioning change is needed
+today because Minor isn't selling against Surge in the market yet, but
+whoever drafts KR4.1's lab brief should name the distinction
+explicitly rather than let a buyer discover the overlap and ask Minor
+to explain it unprompted.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -216,3 +276,11 @@ voluntarily.
   transparency-gap-closing read after a dated critique found ChatGPT's
   edit surface doesn't reliably reach what the model uses. No pricing
   recommendation made.
+- 2026-10-07 — added a provenance-based trust differentiator (no
+  dual-sale to geopolitical rivals, no exploited-contractor exposure),
+  distinct from the equity-based neutrality argument made in earlier
+  runs, following a Forbes investigation into vendor sales to Chinese
+  labs and a labor-conditions investigation at Mercor. Also flagged a
+  pitch-collision risk: Surge AI's new benchmarks use language close
+  to Minor's own and should be explicitly distinguished in the lab
+  brief before a buyer asks. No pricing recommendation made.
