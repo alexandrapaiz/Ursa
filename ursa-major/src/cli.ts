@@ -158,9 +158,16 @@ function main() {
   const pct = (x: number) => (x * 100).toFixed(1) + '%'
   console.log('\n— outcome record —')
   console.log(`artifact kind: ${record.artifact.kind}${record.artifact.renderRef ? ` · rendered at ${record.artifact.renderRef}` : ''}`)
-  console.log(`covered final chars: ${s.coveredChars.toLocaleString()}`)
+  // Both denominators, each named. The first column is the share of the
+  // whole finished work, which is the question a reader of this table is
+  // asking; the second is the share of the characters some span covered,
+  // which is what the three figures sum to 1.0 under. Printing only the
+  // second, as this table did, hands over the larger number without saying
+  // that its denominator is smaller than the file.
+  console.log(`final chars: ${s.finalChars.toLocaleString()} · of which classified by some span: ${s.coveredChars.toLocaleString()}`)
+  console.log(`  ${''.padEnd(26)} ${'of final'.padStart(9)} ${'of classified'.padStart(14)}`)
   for (const [cls, st] of Object.entries(s.byClass)) {
-    console.log(`  ${cls.padEnd(26)} ${pct(st.pct).padStart(7)}  (${st.chars.toLocaleString()} chars, ${st.spans} spans)`)
+    console.log(`  ${cls.padEnd(26)} ${pct(st.pctOfFinal).padStart(9)} ${pct(st.pct).padStart(14)}  (${st.chars.toLocaleString()} chars, ${st.spans} spans)`)
   }
   console.log(`  uncertain: ${s.uncertainSpans} spans · trivial: ${s.trivialSpans} spans`)
   console.log(`generated: ${s.generated.totalChars.toLocaleString()} chars → deleted ${pct(s.generated.deletedPct)}`)
