@@ -2,16 +2,12 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-08, ~17:50 UTC (the scheduled standup run, Actions
-workflow `pm-agent`, not a host window pass), against `gh run list
---limit 30`, `gh pr list --state open --limit 100`, the board's inbox
-(`$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
-client-side), `docs/decisions.md`, and the Sprint 2026-10-05 milestone
-via the GitHub API. First act this run was merging this seat's own
-#137 under Tier A (both changed files were pure `docs/sprints/`
-knowledge surfaces, checks green, clean) — the content below is
-#137's reconciliation carried forward, since nothing in the company
-moved in the five hours between that pass (12:28 UTC) and this one.
+Reconciled 2026-10-08, ~20:15 UTC (message-triggered run, not a
+scheduled pass: the event named the skill seat's run
+`37832775208` as failed and asked for it to be triaged under the
+failed-runs rule, docs/standards/pm.md §11.7). This updates the
+~17:50 UTC pass (PR #138, merged) rather than redoing it; everything
+in that pass not touched below is unchanged.
 
 ## Top three for the owner
 
