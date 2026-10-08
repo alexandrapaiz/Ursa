@@ -3525,3 +3525,75 @@ dataset sold to a lab that difference is the whole product.
   compliance as a selling point.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-07 (market) — A provenance-based trust guarantee, distinct from the equity-based neutrality pitch
+- Trigger: this run's landscape watch (docs/market/landscape.md, Surge
+  AI and Mercor updates). A Forbes investigation (2026-08-05, via
+  aggregator, original paywalled) reported Surge AI, Mercor,
+  AfterQuery, and Turing collectively sold roughly $500M/year of
+  training data to top Chinese AI labs (Tencent, Alibaba, ByteDance)
+  from the same contractor pools serving their US frontier-lab
+  customers. Source: [aiweekly.co](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to).
+- What: the existing neutrality entry (2026-09-26, echoed 2026-10-05)
+  argues from equity — a lab buying into its vendor compromises that
+  vendor's neutrality. This is a second, independent axis that needs
+  no equity stake at all: the same pipeline serving a frontier-lab
+  customer also serves a geopolitical rival, with no disclosure
+  mechanism visible to the buyer. Ursa Minor has sold nothing yet, so
+  there's no live comparison to make, but nothing in CLAUDE.md today
+  commits to a no-dual-sale or single-buyer-tier guarantee a lab brief
+  could cite the way it could cite "no lab holds equity in Ursa."
+  Full reasoning in docs/market/positioning.md's "Trust has a
+  provenance axis too, not just an equity one" section.
+- First step: this is a product/policy decision, not a research one —
+  flagging for the owner whether Ursa Minor should commit to (and
+  later disclose) a data-provenance guarantee before KR4.1's lab brief
+  is drafted, so the brief can cite a real commitment rather than an
+  absence of one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 (market) — No exploited-contractor exposure, as a trust claim distinct from "cheaper"
+- Trigger: this run's landscape watch (docs/market/landscape.md,
+  Mercor update). A Gazetteer SF investigation (2026-05-05, by Cydney
+  Hayes, based on multiple anonymous former-employee interviews plus a
+  December 2025 internal survey) reported punishing hours, abrupt
+  terminations without severance, and no formal HR/payment/legal
+  policy at Mercor before late 2025; Mercor's spokesperson disputed or
+  contextualized several specific claims. Source: [Gazetteer SF](https://sf.gazetteer.co/new-troubles-at-mercor-infighting-face-time-slavery-and-inhumane-working-conditions).
+- What: this file's existing cost-based positioning (rlhfbook.com's
+  per-prompt price comparison) already argues the outcome record isn't
+  trying to win on price. This is a different, trust-shaped claim: the
+  solicited-labor model requires an assigned, managed, deadline-bound
+  workforce to exist at all, and that workforce is a liability surface
+  (the kind that produces an investigative exposé) the outcome
+  record's real-work-derived signal does not carry by construction,
+  since nobody is assigned the task of producing it. Worth testing as
+  a line in Minor's methodology-publishing content (CLAUDE.md §2) once
+  that content exists — not a pricing change, a trust-narrative one.
+- First step: when methodology content is next drafted, include this
+  contrast (no assigned-labor liability surface) alongside the
+  existing cost and verifier-gap arguments.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-07 (market) — Name the distinction against Surge's new economically-valuable-work benchmarks before a buyer asks
+- Trigger: this run's landscape watch (docs/market/landscape.md, Surge
+  AI update). Surge AI's own blog confirms it launched three new
+  benchmarks this cycle — DAYJOB, GDP.xlsx, and the "Tuesday Work
+  Index" umbrella — explicitly framed around "economically valuable
+  work" and whether an agent can "survive a 9 to 5." Source: [Surge AI blog](https://surgehq.ai/blog).
+- What: this framing sits close enough to Minor's own language
+  (CLAUDE.md §1's "writing, research, applied engineering,
+  everything without a unit test") that a lab buyer skimming both
+  could mistake Surge's benchmarks for a competing outcome record.
+  They aren't: DAYJOB and GDP.xlsx are constructed, rubric-graded task
+  sets, the exact "label supplied by a grader" structure CLAUDE.md §1
+  contrasts the outcome record against. Full reasoning in
+  docs/market/positioning.md's "A pitch-collision risk, not yet a
+  pricing one" section.
+- First step: when KR4.1's lab brief is drafted, name this distinction
+  explicitly (benchmark-graded vs. outcome-record/real-work-derived)
+  rather than leaving a buyer to notice the overlap unprompted.
+- Cost: $0
+- Status: proposed
