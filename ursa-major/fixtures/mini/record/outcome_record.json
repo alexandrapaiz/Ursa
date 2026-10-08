@@ -204,17 +204,20 @@
       "survived_verbatim": {
         "spans": 2,
         "chars": 127,
-        "pct": 0.412
+        "pct": 0.412,
+        "pctOfFinal": 0.404
       },
       "survived_mutated": {
         "spans": 1,
         "chars": 74,
-        "pct": 0.24
+        "pct": 0.24,
+        "pctOfFinal": 0.236
       },
       "no_generation_provenance": {
         "spans": 2,
         "chars": 107,
-        "pct": 0.347
+        "pct": 0.347,
+        "pctOfFinal": 0.341
       }
     },
     "uncertainSpans": 0,
@@ -276,7 +279,7 @@
   },
   "signals": {
     "method": "auto-detected",
-    "annotatedAt": "2026-10-05T02:39:33.927Z",
+    "annotatedAt": "2026-10-07T18:06:43.086Z",
     "episode": {
       "steps": 1,
       "generations": 2,

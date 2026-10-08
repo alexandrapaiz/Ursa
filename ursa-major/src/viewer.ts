@@ -67,6 +67,7 @@ export function renderViewer(record: OutcomeRecord): string {
   .tile .sub { font-size: 12px; color: var(--text-muted); }
   .distbar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; gap: 2px; background: var(--surface-1); margin: 6px 0 10px; }
   .distbar div { height: 100%; }
+  .barnote { font-size: 12px; color: var(--text-muted); margin: -4px 0 10px; }
   .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--text-secondary); margin-bottom: 26px; }
   .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
   nav.tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
@@ -145,6 +146,7 @@ export function renderViewer(record: OutcomeRecord): string {
 </header>
 <div class="tiles" id="tiles"></div>
 <div class="distbar" id="distbar"></div>
+<div class="barnote" id="barnote"></div>
 <div class="legend" id="legend"></div>
 <nav class="tabs" id="tabs"></nav>
 <div id="panels"></div>
@@ -218,8 +220,18 @@ export function renderViewer(record: OutcomeRecord): string {
     var dot = el('span', 'dot'); dot.style.background = COLORS[c];
     lab.appendChild(dot); lab.appendChild(document.createTextNode(LABELS[c]));
     t.appendChild(lab);
-    t.appendChild(el('div', 'value num', pct(s.pct)));
+    // The headline is the share of the WHOLE finished file, not of the part
+    // some span covered. A reader looking at a tile labelled "kept
+    // unchanged" above a document is asking how much of the document that
+    // is, and the pct field answers a narrower question: 94.9% of the classified
+    // characters on this record's own real-history probe, where the same
+    // characters are 91.0% of the file. Both numbers are shown, each named,
+    // because the narrower one is what the bar below is built from and a
+    // tile and a bar that disagree with no explanation is worse than either.
+    t.appendChild(el('div', 'value num', pct(s.pctOfFinal)));
+    t.appendChild(el('div', 'sub num', 'of the whole finished work'));
     t.appendChild(el('div', 'sub num', fmt(s.chars) + ' chars · ' + fmt(s.spans) + ' spans'));
+    t.appendChild(el('div', 'sub num', pct(s.pct) + ' of the ' + fmt(R.stats.coveredChars) + ' chars any span covered'));
     tiles.appendChild(t);
   });
   var g = R.stats.generated;
@@ -254,6 +266,18 @@ export function renderViewer(record: OutcomeRecord): string {
     seg.title = LABELS[c] + ' ' + pct(R.stats.byClass[c].pct);
     bar.appendChild(seg);
   });
+
+  // What the bar is a bar of, stated under it. The three segments sum to the
+  // full width by construction, so without this line the bar reads as the
+  // whole finished file; it is the classified part of it, and the remainder
+  // is text no span covered rather than text with no fate.
+  var unclassified = R.stats.finalChars - R.stats.coveredChars;
+  var note = document.getElementById('barnote');
+  note.textContent = unclassified > 0
+    ? 'Full width is the ' + fmt(R.stats.coveredChars) + ' characters some span covered, which is '
+      + pct(R.stats.coveredChars / R.stats.finalChars) + ' of this work. The other '
+      + fmt(unclassified) + ' characters sit between spans and are in no segment above.'
+    : 'Full width is all ' + fmt(R.stats.finalChars) + ' characters of this work. Every one of them is inside a classified span.';
 
   // legend
   var legend = document.getElementById('legend');

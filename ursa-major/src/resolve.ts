@@ -302,7 +302,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     files,
     conversations: input.conversations,
     generations,
-    stats: computeStats(files, generations, input.conversations),
+    stats: computeStats(files, generations, input.conversations, input.exclusions),
     // Spread rather than assigned so a caller that did not ask produces a
     // record with no `exclusions` key, instead of one with the key set to
     // undefined, which `JSON.stringify` drops and a schema check does not.
