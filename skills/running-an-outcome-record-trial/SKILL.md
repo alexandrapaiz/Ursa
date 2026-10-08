@@ -11,12 +11,12 @@ description: >
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
   code, or for redacting a record so it can be published.
-version: 0.1.0
+version: 0.2.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-30
-revised: 2026-09-30
+revised: 2026-10-08
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -24,40 +24,40 @@ evidence:
     source: ursa-major/src/cli.ts:1-7; ursa-major/src/bin/ursa.ts:1-7
   - ref: E2
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
-    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:99-127
+    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:415-443
   - ref: E3
     what: what marks a commit as generated, including the author fallback that matches bots and github-actions
-    source: ursa-major/src/pairfinder.ts:30-31; ursa-major/src/pairfinder.ts:92-96
+    source: ursa-major/src/pairfinder.ts:144,167; ursa-major/src/pairfinder.ts:391-395
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff
-    source: ursa-major/src/pairfinder.ts:108-111
+    source: ursa-major/src/pairfinder.ts:448-451
   - ref: E5
-    what: the commit walk covers every branch, not just the default one
-    source: ursa-major/src/pairfinder.ts:52-58
+    what: the commit walk covers every branch by default, and walks one revision range instead when a caller passes one
+    source: ursa-major/src/pairfinder.ts:193-199
   - ref: E6
     what: the git path records zero user turns, so it carries no user words and no turns-to-acceptance
-    source: ursa-major/src/bin/ursa.ts:51-59
+    source: ursa-major/src/resolve-episode.ts:179-187
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
-    source: ursa-major/src/bin/ursa.ts:39; ursa-major/src/bin/ursa.ts:55; ursa-major/src/episodes.ts:18
+    source: ursa-major/src/resolve-episode.ts:124,183; ursa-major/src/episodes.ts:25
   - ref: E8
-    what: min-chars defaults to 200 and limit truncates, and both drop episodes without saying which
-    source: ursa-major/src/bin/ursa.ts:103-104; ursa-major/src/bin/ursa.ts:118
+    what: min-chars defaults to 200 and limit truncates; ursa run drops below-threshold episodes without naming them, while the CI path counts its drops
+    source: ursa-major/src/bin/ursa.ts:316-317; ursa-major/src/bin/ursa.ts:377; ursa-major/src/ci/run.ts:149
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
-    source: ursa-major/src/cli.ts:15-18; ursa-major/src/bin/ursa.ts:18-21
+    source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
   - ref: E10
     what: both paths cap file size, at different limits, and only the session path says so on stderr
-    source: ursa-major/src/cli.ts:21; ursa-major/src/cli.ts:67-69; ursa-major/src/bin/ursa.ts:23
+    source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:38
   - ref: E11
     what: path-filter narrows which generations are kept at parse time, before any matching happens
-    source: ursa-major/src/cli.ts:97; ursa-major/src/parse.ts:71-72
+    source: ursa-major/src/cli.ts:119; ursa-major/src/parse.ts:71-72
   - ref: E12
     what: prose segments by sentence and code by line, and the choice is made from the file extension alone
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
   - ref: E13
     what: acceptance is a declaration, and the undeclared default states that retention is not acceptance
-    source: ursa-major/src/signals.ts:18-27; ursa-major/src/bin/ursa.ts:106-111
+    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:319-324
   - ref: E14
     what: the two paths measure different stages of the funnel, 82 percent deletion against 7 percent, and a record should state which stage it measured
     source: docs/beyond-preference-pairs.md:229-237
@@ -72,13 +72,13 @@ evidence:
     source: docs/beyond-preference-pairs.md:154-157
   - ref: E18
     what: raw records are private-repo material by default, and nothing generated from one ships public before the redaction pass and the owner's per-record sign-off
-    source: docs/agents/incidents.md:106-112
+    source: docs/agents/incidents.md:175-181
   - ref: E19
     what: the session path's two input shapes, a Claude Code JSONL where every Write or Edit is a generation, and a paste format that carries real user turns
     source: ursa-major/trial/README.md:19-40; ursa-major/src/parse.ts:62-63; ursa-major/src/parse.ts:131-141
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
-    source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:40
+    source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52
   - ref: E21
     what: ADR-003 makes capture launch-based, scopes it to building, makes git the interface, and names alexandria as n=2
     source: docs/decisions.md:43-56
@@ -176,9 +176,11 @@ record [E20]. *Output: the record, plus a declaration with a basis.*
 
 **7. Reconcile the episode count against what the run reported.** The git
 path drops any episode whose generated side is under 200 characters, and
-truncates to `--limit` when given, without naming what it dropped [E8]. If
-step 2 counted more pairs than the run produced records, that gap is the
-default threshold, not a bug. *Output: the two counts, and the reason for
+truncates to `--limit` when given. `ursa run` does not name what it
+dropped; the CI path does, counting its below-threshold drops [E8]. So
+on a local run, if step 2 counted more pairs than the run produced
+records, that gap is the default threshold rather than a bug, and you
+have to reconstruct it yourself. *Output: the two counts, and the reason for
 any difference.*
 
 **8. Write down what the record measured, next to the record.** A record
@@ -297,7 +299,8 @@ one agent and one bot will report two models.
 **One human commit can be the correction for several generations.** The
 finder scans forward independently for each generated commit and stops at
 the first match [E2], and the walk covers every branch rather than the
-default one [E5].
+default one, unless a caller hands it one revision range, which is what
+the CI launch does [E5].
 
 Ours: two consequences follow, and both change how a count is read. Two
 consecutive agent commits on the same path both pair to the same following

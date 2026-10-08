@@ -11,23 +11,23 @@ description: >
   that already exists against the field it cites. Does not fire for
   producing a record, for choosing a trial subject, or for deciding
   the label on any individual span.
-version: 0.1.0
+version: 0.2.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-01
-revised: 2026-10-01
+revised: 2026-10-08
 evidence_scheme: repo
 evidence:
   - ref: E1
     what: there are three span classes over the final work, and generated_deleted is a generation fate rather than a span class
     source: ursa-major/src/types.ts:5-14
   - ref: E2
-    what: byClass covers only the three span classes, and every pct in it is divided by coveredChars
-    source: ursa-major/src/stats.ts:7-11,51
+    what: byClass covers only the three span classes, and each class carries two percentages, pct over coveredChars and pctOfFinal over finalChars
+    source: ursa-major/src/stats.ts:8-12,66-67
   - ref: E3
     what: the schema says coveredChars excludes text no span covers, and reports it separately from finalChars
-    source: ursa-major/src/types.ts:112-117
+    source: ursa-major/src/types.ts:388-393
   - ref: E4
     what: in code mode a span is a trimmed non-empty line, so indentation and blank lines are never covered by any span
     source: ursa-major/src/segment.ts:21-33
@@ -36,22 +36,22 @@ evidence:
     source: ursa-major/src/segment.ts:13-15
   - ref: E6
     what: deletedPct is deleted generated chars over total generated chars, a different population from the final work
-    source: ursa-major/src/stats.ts:53-54,86-91
+    source: ursa-major/src/stats.ts:88-91,109,147-149
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
-    source: ursa-major/src/viewer.ts:147-176
+    source: ursa-major/src/viewer.ts:216-245
   - ref: E8
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:160-167, ursa-major/src/match.ts:7-8
+    source: ursa-major/src/resolve.ts:242-249, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short exact match is labelled survived_verbatim with score 1 and flagged trivial, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:111-123, ursa-major/src/match.ts:9-10
+    source: ursa-major/src/resolve.ts:169-181, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
-    source: ursa-major/src/resolve.ts:170
+    source: ursa-major/src/resolve.ts:252
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
-    source: ursa-major/src/types.ts:118-119, ursa-major/src/stats.ts:25-26,41-42
+    source: ursa-major/src/types.ts:394-395, ursa-major/src/stats.ts:36-37,52-53
   - ref: E12
     what: CLAUDE.md lists all four classifications under one heading and calls no_generation_provenance the most valuable
     source: CLAUDE.md, section 1, span classifications
@@ -60,25 +60,25 @@ evidence:
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
-    source: ursa-major/src/types.ts:139-140, ursa-major/src/stats.ts:68-70
+    source: ursa-major/src/types.ts:478-479, ursa-major/src/stats.ts:124-126
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
-    source: ursa-major/src/cli.ts:135, ursa-major/src/viewer.ts:340
+    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:530
   - ref: E16
     what: CLAUDE.md lists turns to acceptance as trajectory metadata wrapped around the record
     source: CLAUDE.md, section 1, trajectory metadata
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
-    source: ursa-major/src/stats.ts:43-46,80-85
+    source: ursa-major/src/stats.ts:54-57,136-141
   - ref: E18
     what: path-filter drops generations at parse time, before any denominator is computed
-    source: ursa-major/src/parse.ts:130, ursa-major/src/cli.ts:46,97
+    source: ursa-major/src/parse.ts:130, ursa-major/src/cli.ts:58,119
   - ref: E19
     what: the record carries a finished flag, set false by --abandoned, and the viewer shows it as a chip
-    source: ursa-major/src/cli.ts:40, ursa-major/src/resolve.ts:204, ursa-major/src/viewer.ts:143
+    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:298, ursa-major/src/viewer.ts:180
   - ref: E20
-    what: the CLI prints covered final chars and the class percentages, and never prints finalChars
-    source: ursa-major/src/cli.ts:128-134
+    what: the CLI prints finalChars and coveredChars on one line, and gives every class both an of-final and an of-classified column
+    source: ursa-major/src/cli.ts:167-173
   - ref: E21
     what: the methods document's own limit, n=1 demonstrates label types rather than statistics and every quantitative claim is an existence proof
     source: docs/beyond-preference-pairs.md:154-157
@@ -149,15 +149,21 @@ because the thing being sold is auditability itself.
 
 **1. Find the field, not the printout.** Open
 `outcome_record.json` and locate the actual field behind the number.
-The CLI prints covered final chars and the class percentages and never
-prints `finalChars` at all [E20], so a number read off the console has
-already lost the information you need to interpret it. Output: the
+The CLI prints `finalChars` and `coveredChars` on one line and gives
+every class two columns, one of final and one of classified [E20].
+That is a change since this skill was first written, and it is the
+engineer's fix for the denominator defect this skill reported. Read
+the field anyway: the console now tells you which denominator each
+column used, but only the record names the field, and a number quoted
+from a screenshot carries neither. Output: the
 field path, such as `stats.byClass.survived_verbatim.pct` or
 `stats.generated.deletedPct`.
 
 **2. Name the population the denominator is drawn from.** There are
 two, and they are not the same set of characters. Everything in
-`byClass` is divided by `coveredChars`, which is final-work text [E2].
+`byClass` now carries both percentages: `pct` over `coveredChars`, and
+`pctOfFinal` over `finalChars` [E2]. Both are final-work text, and
+which one a sentence means is the whole question.
 `deletedPct` is divided by total generated chars, which is model output
 text [E6]. Output: one sentence of the form "this is a share of X",
 where X is either covered final characters or generated characters.
@@ -238,7 +244,11 @@ disagree about how many categories there are, and the tiles are the
 ones a reader screenshots. The three class percentages do sum to one.
 The fourth number is a share of a different population entirely
 [E2, E6], so the four do not partition anything and must never be
-presented as though they do.
+presented as though they do. Since this skill was written the deleted
+tile also changed numerator: it headlines the human's own discard
+rather than the gross figure, because a merge can destroy generated
+text with nobody reading it [E7]. That makes the tile more honest and
+the arithmetic no more additive.
 
 This matters beyond the viewer, because KR4.1 asks the lab brief to
 explain the four span classes [E26] and CLAUDE.md presents all four

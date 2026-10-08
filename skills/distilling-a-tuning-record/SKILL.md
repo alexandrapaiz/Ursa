@@ -11,12 +11,12 @@ description: >
   Does not fire for producing an outcome record, for settling the
   label on an individual span, or for quoting a statistic out of a
   record.
-version: 0.1.0
+version: 0.2.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-05
-revised: 2026-10-05
+revised: 2026-10-08
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -75,25 +75,25 @@ evidence:
     source: ursa-major/src/tuning/export.ts:9-15,27-50
   - ref: E19
     what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted
-    source: ursa-major/src/signals.ts:1-7,44-63
+    source: ursa-major/src/signals.ts:1-7,95-121
   - ref: E20
     what: a one-shot correction's domain field is the file path, and its text is an agent-against-final excerpt pair
-    source: ursa-major/src/signals.ts:37-41
+    source: ursa-major/src/signals.ts:74-77
   - ref: E21
     what: the undeclared default says in its own words that retention is not acceptance, and null means no declaration surface was offered
-    source: ursa-major/src/signals.ts:18-27
+    source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/bin/ursa.ts:56-71
+    source: ursa-major/src/resolve-episode.ts:161,179-187
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
-    source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:101-102
+    source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:338-339
   - ref: E24
     what: an episode id is the project slug, the generated commit date, and the first seven characters of the generated commit sha
-    source: ursa-major/src/episodes.ts:23-27
+    source: ursa-major/src/episodes.ts:60-64
   - ref: E25
     what: the designed distillation watermark, a distilled flag on each episode and an isDistilled lookup against it
-    source: ursa-major/src/episodes.ts:20,37, ursa-major/src/store.ts:35-37
+    source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:35-37
   - ref: E26
     what: records, the episode index and the distillation watermark live in a per-project .ursa directory, nothing global and nothing commingled
     source: ursa-major/src/store.ts:1-3,10-20
@@ -111,7 +111,7 @@ evidence:
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md, O1 KR1.2
   - ref: E31
     what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
-    source: ursa-major/src/bridge/index.ts:67-83,118-126
+    source: ursa-major/src/bridge/index.ts:82-98,140-148
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
@@ -130,6 +130,9 @@ evidence:
   - ref: E37
     what: the tuning test's only fixture declares the episode accepted with an acceptance basis of retention
     source: ursa-major/src/tuning/tuning.test.ts:18-26
+  - ref: E38
+    what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
+    source: ursa-major/src/signals.ts:49-63
 supersedes: []
 ---
 
@@ -351,8 +354,13 @@ text.** The prompt asks the model for the general why rather than the
 incident, which is the right instruction and also the whole risk [E7].
 On a commit-pair record the only evidence is a pair of excerpts showing
 what the agent wrote and what the user left behind, tagged with a file
-path as its domain [E20]. One such edit supports an axiom about that
-edit. It does not support an axiom about how the user likes prose. Our
+path as its domain [E20]. Both sides of that pair are now read from the
+extents the record already stores rather than rebuilt from the diff,
+after a rebuild was found returning text with a space the agent never
+wrote and presenting it as a verbatim quote [E38]. Treat that as the
+standard the whole distillation is held to, since a quote is the only
+part of a tuning block a user can check against their own memory. One
+such edit supports an axiom about that edit. It does not support an axiom about how the user likes prose. Our
 third principle is why the generalisation is worth attempting at all,
 since what people know shows up only in action on a particular case
 [E34]. The same principle is why the inference has to stay close to the

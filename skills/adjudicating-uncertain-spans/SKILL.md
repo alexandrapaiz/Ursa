@@ -10,12 +10,12 @@ description: >
   candidate generation are actually ancestor and descendant. Does not
   fire for producing a record in the first place, for labelling
   generations, or for reading a record's summary statistics.
-version: 0.1.0
+version: 0.2.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-24
-revised: 2026-09-24
+revised: 2026-10-08
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -25,11 +25,11 @@ evidence:
     what: the two thresholds, 0.35 and 0.6, and the combined score they apply to
     source: ursa-major/src/match.ts:6,8,49-52
   - ref: E3
-    what: uncertain is set in exactly one place, and the losing candidate is kept on the span
-    source: ursa-major/src/resolve.ts:160-167, ursa-major/src/types.ts:47-48
+    what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
+    source: ursa-major/src/resolve.ts:242-249, ursa-major/src/types.ts:252-253
   - ref: E4
     what: trivial is a different flag with a different cause, set on short exact matches
-    source: ursa-major/src/resolve.ts:112-123, ursa-major/src/match.ts:10, ursa-major/src/types.ts:50
+    source: ursa-major/src/resolve.ts:170-181, ursa-major/src/match.ts:10, ursa-major/src/types.ts:255
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3
@@ -50,7 +50,7 @@ evidence:
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E11
     what: a generation's fate is derived from claim overlap rather than adjudicated directly, and survivalRate follows from it
-    source: ursa-major/src/resolve.ts:176-198
+    source: ursa-major/src/resolve.ts:258-290
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
     source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
@@ -62,7 +62,13 @@ evidence:
     source: docs/beyond-preference-pairs.md:154-170
   - ref: E15
     what: the viewer marks uncertain spans with a dashed underline and prints the count needing adjudication
-    source: ursa-major/src/viewer.ts:77,188-189,201
+    source: ursa-major/src/viewer.ts:89,292-293,305
+  - ref: E16
+    what: a second branch sets uncertain, where an above-threshold match whose descent is corroborated as rival is demoted to no_generation_provenance with the candidate and a descent field kept
+    source: ursa-major/src/resolve.ts:205-221
+  - ref: E17
+    what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
+    source: ursa-major/src/resolve.ts:228-233
 supersedes: []
 ---
 
@@ -89,17 +95,30 @@ The JSON is what you will actually read from, because it carries the
 candidate that the viewer only hints at. Output: the list of uncertain
 spans with file path and character offsets.
 
-**2. Know what the flag means before you judge it.** `uncertain` is set
-in exactly one place. The resolver's fuzzy pass found a best match, the
-combined score landed at or above 0.35 and below 0.6, and the span was
+**2. Know which kind of uncertain you are looking at, because there are
+now two.** Sort the queue by whether the span carries a `descent` field
+before judging anything.
+
+*Low-score uncertain.* The fuzzy pass found a best match, the combined
+score landed at or above 0.35 and below 0.6, and the span was
 provisionally labelled `no_generation_provenance` with the losing
-candidate retained on the span [E3, E2]. Two consequences follow.
-Every uncertain span already has a specific candidate attached, so
-adjudication is a binary call about that candidate rather than an open
-search. And the provisional label is already the conservative one, so
-a verdict of "no ancestor" changes nothing and a verdict of "ancestor"
-changes the record. Output: nothing, but skipping this step is how
-adjudication turns into free-form opinion.
+candidate retained [E3, E2]. No `descent` field. This is the case the
+thresholds govern.
+
+*Demoted uncertain.* The match scored at or above 0.6, so lexically it
+looked like a descendant, and then the descent corroborator found the
+same text outside this generation's ancestry and returned `rival`. The
+span is demoted to the same shape the low-score branch produces, with
+no `source`, no `diff`, the candidate kept, and a `descent` field
+recording the basis [E16].
+
+Three consequences follow. Every uncertain span already has a specific
+candidate attached, so adjudication is a binary call about that
+candidate rather than an open search. The provisional label is already
+the conservative one, so a verdict of "no ancestor" changes nothing and
+a verdict of "ancestor" changes the record. And retuning the thresholds
+cannot move a demoted span, because its score was never the reason it
+is in the queue. Output: the queue split in two, with a count for each.
 
 **3. Judge each span against its candidate, in three verdicts.** Read
 the span text and `span.candidate.text` side by side and decide. Two of
@@ -135,8 +154,20 @@ threshold.** The target is 10 percent or lower on the adjudicated set
 because that is the error that credits a model with text it did not
 produce. Moving `THETA_HIGH` or `THETA_LOW` relabels every span in the
 affected band and not only the ones you looked at [E2], so re-run the
-resolver and re-count rather than editing the record by hand. Output:
-a rate, a proposed threshold pair, and the re-run numbers.
+resolver and re-count rather than editing the record by hand. Compute
+the rate over the low-score queue alone, because a demoted span is not
+evidence about where a threshold belongs [E16]. Output: a rate, the
+demoted count reported separately, a proposed threshold pair, and the
+re-run numbers.
+
+Ours: the resolver already treats `uncertainSpans` as a number with an
+owner. It deliberately declines to set `uncertain` on an `unverified`
+descent verdict, on the stated grounds that the count is KR1.1's metric
+and widening it would move the KR without any span changing [E17]. Read
+that as a standing instruction rather than an implementation detail: if
+adjudication wants a new population counted, it says so in the
+adjudication file and leaves the resolver's metric where the KR can
+still be read against it.
 
 **7. Redact before anything leaves the machine.** Spans quote the final
 work, candidates quote model generations, and source pointers carry
