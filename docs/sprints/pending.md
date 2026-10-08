@@ -1,96 +1,120 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Fourth pass today, reconciled 2026-10-07 ~19:18 UTC (message-triggered:
-a note from alexandra-systems/engineer addressed to pm/Ursa, claiming
-two of my resolver-action handoffs reached the wrong engineer). Checked
-the claim against the board's own record before acting on it, answered
-it on the board, and handed the real gap to HQ. Full account in this
-PR's description; nothing else moved this pass.
 
-Reconciled 2026-10-07, ~18:15 UTC (third pass, message-triggered: the
-engineer seat's 17:52 UTC scheduled run failed), against `gh run list
---limit 30`, `gh pr list --state open --limit 200`, the board's inbox
+Reconciled 2026-10-08, ~03:30 UTC (fifth message pass since 2026-10-07,
+triggered by the engineer seat's run failing: run 37719675527, triaged
+below under pm.md §11.7), against `gh run list --limit 30`, `gh pr
+list --state open --limit 200`, the board's inbox
 (`$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`), and
-`docs/decisions.md`. This pass is a targeted triage, not a full
-standup — the day's regular standup (#129, 17:41-17:51 UTC) already
-ran and found nothing to triage, because the failure below happened
-one minute after it closed.
+`docs/decisions.md`. This branch builds on this seat's own #131 and
+#132 (forked from #132's tip; #131 is already an ancestor of #132,
+confirmed with `git merge-base --is-ancestor`), not from `main`.
 
 ## Top three for the owner
 
-0. **A cross-company note claimed my handoffs were mis-addressed; the board record shows they weren't, and the real gap is HQ's to fix.** Alexandra-systems's own engineer seat messaged pm/Ursa saying two handoffs about the resolver-action branch "reached the wrong engineer" and recommended I address handoffs by company name. I checked the board directly: both handoffs (2026-10-06T17:13, 2026-10-07T06:28) already carry `to_company: Ursa`, and Ursa's own engineer did receive and act on them (PR #126). So the suggested fix was already my practice; the actual gap is that the holding company's engineer workflow woke anyway, which points at its event trigger not filtering on `to_company`. Answered the note on the board with the evidence and handed the routing question to `alexandra-systems/exo-centralizer`, since workflow/event-bus machinery is HQ's to own, not a product seat's to patch. The note also suggested running a vendored conflict-resolution tool "without a person reading the diff" — not acted on or passed down; #126 already has its own plan to verify against the full test suite, and whether a conflict is simple enough to skip review is the engineer seat's judgment, not an instruction a cross-company note gets to make for it.
-1. **The engineer-agent run that failed at 17:52 UTC today (run
-   37662406675) hit `error_max_turns` after 17m42s of real work, not a
-   workflow-file defect.** Triaged per the failed-runs rule
-   (pm-agent.md §0b): the log's only error is `##[error]Execution
-   failed: Reached maximum number of turns (120)`, not the
-   zero-jobs-in-zero-seconds signature. In that window it opened draft
-   PR #130, pushed three commits, and all three passed CI. But its own
-   plan was stale: PR #130's run-log doc and title both claim it is
-   building sprint-2026-10-05 item 2 (the `corroborate` hook), which
-   **already shipped on `main` via #109 on 2026-10-06** — confirmed
-   directly, `ursa-major/src/corroborate.ts` exists on `origin/main`
-   and `resolve.ts` already calls it. This seat's own pending.md said
-   so as of the 12:30 UTC pass, six hours before this run started, so
-   the run's first commit re-derived a stale plan instead of reading
-   its own seat's current state. What the run actually built, in
-   commits 2 and 3, is real and unrelated: `pctOfFinal` beside `pct`
-   and `perFile` rows for excluded paths (the generated-denominator
-   line of work in `docs/ideas.md`). It never reached its own plan's
-   item 4 (resolving #126 and #92) before running out of turns, and it
-   never rewrote the stub title/description to match what it actually
-   built. Left a comment on #130 naming the mismatch; it is the
-   engineer seat's to retitle and finish, not mine to rewrite. Nothing
-   dispatched — `PM_DISPATCH_ENABLED` is unset this pass, and engineer
-   is walled by its own open PRs regardless (§11.4).
-2. **Engineer's own open-PR queue is now three deep and none of them
-   have moved in the last six-plus hours**: #92 (conflicting, superseded
-   in substance by #126), #126 (draft, subsumes #92, clean since
-   06:29 UTC, still not readied), and now #130 (draft, mislabeled, see
-   above). This is the exact shape the "ready it, or hand it over in
-   writing" rule exists for. No dispatch can fire for engineer while
-   this stands (§11.4), so the unlock is either the owner merging #126
-   to retire #92, or engineer's next run resolving its own backlog
-   before opening a fourth.
-3. **Security's redaction-standard item (sprint-2026-10-05's item 3,
-   gates O2 KR2.2) still has no open PR touching it.** Unchanged from
-   the last two passes: `find docs/security -iname '*redaction*'`
-   still returns nothing, and none of security's four open pull
-   requests (#75, #85, #112, #124) touch a redaction path. The hard
-   stop in §11.4 still forecloses dispatching security fresh while it
-   carries four open pull requests.
+1. **#134 (engineer) is ready to merge and clears that seat's entire
+   open-PR queue in one shot.** It subsumes and closes #92, #126 and
+   #130 itself (two contained as merge commits inside its own branch,
+   confirmed with `git merge-base --is-ancestor`; the third, #126, held
+   one stub commit and no work). CI green (`scan` passed),
+   `mergeable: MERGEABLE`, not a draft, 472 tests passing per its own
+   evidence table. The run that produced it (37719675527) reported an
+   overall GitHub Actions *failure* — see "Failures this pass" below —
+   but the failure was the harness hitting its 120-turn ceiling after
+   the real work was already done and pushed, not a defect in what it
+   shipped. Merging #134 is the one action that actually unwalls the
+   engineer seat: three open PRs down to one (itself), as of this pass.
+2. **Security's redaction-standard item (sprint-2026-10-05's item 3,
+   gates O2 KR2.2) still has no open PR touching it.** Confirmed again
+   directly: `docs/security/` does not exist as a directory in this
+   repo, and none of security's four open pull requests (#47, #85,
+   #112, #124) touch a redaction path. The sprint's milestone (#3) is
+   now due in three days (2026-10-11) and this is the only one of its
+   three items still open — the other two (#107, #109) are shipped,
+   and #134's own independent investigation reconfirmed that a third
+   time this pass. Nothing new for the owner to do here directly: the
+   hard stop in `docs/standards/pm.md` §11.4 still forecloses
+   dispatching security fresh while it already carries four open pull
+   requests, which is probably why this is stuck.
+3. **Three ledger entries are now 18 to 20 days past the two-week
+   verdict mark**, unchanged in substance since first flagged: repo
+   split (2026-09-18, 20 days), tuning packs (2026-09-19, 19 days), the
+   merge-commits/PR-reader finding (2026-09-20, 18 days). Full entries
+   in `docs/ideas.md`. Grooming them into the ledger with a verdict is
+   Monday's ceremony (2026-10-12), not this pass's, but they stay old
+   enough to keep naming directly every pass until she rules.
 
-## Resolved since the last pass (#131, ~18:20 UTC)
+## Failures this pass
 
-- **The engineer note about handoff routing**: answered on the board
-  with the board's own record, and the routing question itself handed
-  to `alexandra-systems/exo-centralizer`. No PR-visible change — the
-  item closes by the board reply moving, not by a merge.
+**Run 37719675527** (`engineer-agent`, triggered off `main` at
+`2e74d98`, completed 2026-10-08T03:14:37Z, `conclusion: failure`).
+Triaged per `docs/standards/pm.md` §11.7, in order:
 
-No PRs merged or closed this pass otherwise.
+1. **List** — the only failure in the last 24h besides the one #131
+   already triaged (37662406675, 2026-10-07, closed out there).
+2. **Read** — `gh run view 37719675527 --log-failed`: the sole error is
+   `##[error]Execution failed: Reached maximum number of turns (120)`
+   (`"subtype": "error_max_turns"`, 121 turns, $9.28, 1,546,922ms). Not
+   the zero-jobs-in-zero-seconds workflow-file signature — checked
+   directly, `git show 2e74d98:.github/workflows/agent-engineer.yml |
+   grep -c '^<<<<<<< '` returns 0, no conflict markers at the commit
+   that triggered it.
+3. **Classify** — **tripwire false alarm**: the run's PR exists. #134,
+   pushed and opened at 03:14:06Z (28 seconds before the max-turns
+   error ended the session), is complete: not a draft, CI green,
+   mergeable, closes #92/#126/#130, 472 tests passing, `tsc --noEmit`
+   clean, bundle check current. The overall run `conclusion: failure`
+   reflects the harness's turn ceiling, not a defect in the shipped
+   work. Checked whether the tripwire itself is "still the old one"
+   per §11.7's handoff clause: `.github/workflows/agent-engineer.yml`'s
+   no-ship tripwire already excludes the base branch from the
+   `--contains HEAD` check and reports the PR number directly — this is
+   the fixed version (the lessons file's L-E8/L-X7 fix), not the one
+   that false-failed on a trivial branch. No exo-centralizer handoff
+   needed.
+4. **Act** — no rerun (rerunning would waste turns reproducing work
+   already shipped in #134; the same 120-turn ceiling would likely bite
+   again on a run this large — 39 files, 8,200 insertions). Noted here
+   and as a `note` on the board. No incident entry: nothing broke, the
+   seat's own queue is smaller than before the run, not bigger.
 
-## Standing items, unchanged since the last pass
+**Pattern worth naming for Monday's retro, not acted on now:** this is
+the second engineer run in two days to end in `error_max_turns` after
+real, large reconciliation work (37662406675 on 2026-10-07, 37719675527
+today). Both times the work mostly survived. Whether `--max-turns 120`
+is enough for this seat's reconciliation-shaped tasks is a charter
+question, not this pass's to answer or fix — flagging it as a retro
+input rather than touching `.github/workflows/agent-engineer.yml`,
+which is outside this seat's writable surface.
 
-- **Three ledger entries are now 17 to 19 days past the two-week
-  verdict mark**: repo split (2026-09-18), tuning packs (2026-09-19),
-  the merge-commits/PR-reader finding (2026-09-20). Full entries in
-  `docs/ideas.md`; grooming them with a verdict is Monday's ceremony.
-- **Three pull requests stay Tier C no matter how clean they merge**:
-  #80 (`company.yaml`'s roster), #39 and #48 (both touch files under
-  `prompts/`). None is mine or any PM's to merge.
+## Resolved since the last pass (#132, ~19:22 UTC 2026-10-07)
+
+- **#92, #126, #130** (all engineer's own): closed by #134 itself with
+  pointers, not by this seat. Reflected here as landed-in-substance,
+  pending the owner's merge of #134.
+- **#121, #128, #129, #131** (this seat's own prior passes): all
+  already closed as superseded before this pass started; #132 (which
+  contains #131) is being superseded by this pass's #135 the same way.
 
 ## My own open pull requests
 
-- **#131** (third pass today, 18:15-18:20 UTC): left open, ready, not
-  superseded — this pass's branch forks from its tip rather than from
-  `main`, so both land in order rather than conflicting. Nothing in
-  #131 needed changing.
-- **#132** (this pass): readied before this run ends.
+- **#131**: superseded by #132 (confirmed ancestor) before this pass
+  started; already closed with a pointer by that pass.
+- **#132**: superseded by this pass. Closing it with a pointer to this
+  PR — this branch forks from its tip, so nothing in #132 is lost, it
+  is carried forward and current in what this pass opens.
 
-## Everything else open (24 total)
+## Everything else open (24 total, before this pass closes #131/#132)
 
-- **Engineer's own queue, see "Top three" above**: #92, #126, #130.
+- **Engineer's queue, see "Top three" item 1**: down to #134 alone.
+- **docs/ideas.md append conflicts to expect on merge**: #134, #123,
+  #75, #64 and #50 all touch `docs/ideas.md`. #134 appends new entries
+  at the end *and* inserts #92's four 2026-10-05 entries in date order
+  rather than at the end (per #134's own description), so whichever of
+  #123/#75/#64/#50 the owner merges second against #134 will conflict.
+  Expected resolution in every case, per #134, is keep-both — naming it
+  here so the owner doesn't learn the merge order from a failed merge.
 - **In flight from earlier handoffs, untouched this pass**: #123
   (skill, retarget off the closed base), #124 (security, rebase the
   severe-findings PR), #125 (frontend, rebase the visual review) — all
@@ -112,18 +136,28 @@ line by line since it goes stale by the next pass.
 
 ## Waiting on an owner-only action
 
-- The three ledger entries above.
+- **Merging #134** — the single highest-leverage merge available right
+  now (see "Top three" item 1).
+- The three ledger entries at "Top three" item 3.
 - The `docs/decisions.md` ADR-005/ADR-006 numbering collision (two
   rulings each, 2026-09-23 through 2026-09-25) is still unfixed.
   Outside this seat's writable surface.
 - `company.yaml` (#80), and #39/#48 under `prompts/`.
-- Milestone "Sprint 2026-10-05" (#3, due 2026-10-11) has zero
-  issues/PRs attached through GitHub's own milestone field. Still four
-  days out, not yet inside the three-day dispatch window; wiring it is
-  ceremony-lane work (§2b).
+- **Milestone "Sprint 2026-10-05" (#3, due 2026-10-11) has zero
+  issues/PRs attached through GitHub's own milestone field, and is now
+  inside the three-day window** (3 days out as of this pass, was 4 as
+  of the last). Still nothing fires under §11.3's milestone row — it
+  requires open items *attached to the milestone*, and this one has
+  none to name. Wiring attachment is ceremony-lane (§2b), and the next
+  ceremony (Monday, 2026-10-12) falls one day after this milestone's
+  due date — naming that gap here rather than letting the owner notice
+  it from an empty milestone page when the sprint closes.
 
-## Failures this pass
+## Board message check
 
-None new. `gh run list --limit 15` since the last pass shows only this
-pass's own successful commits and the 17:52 UTC failure already
-triaged in #131; no second failure to classify.
+Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`
+directly (filtering client-side on `to_company == "Ursa"`, since the
+query params alone return other companies' traffic too). Six messages
+address Ursa's pm seat total, all dated 2026-10-06T17:15 through
+2026-10-07T19:09, all already answered or reflected in prior passes
+(#132 answered the newest, 19:09 UTC). Nothing new since #132.
