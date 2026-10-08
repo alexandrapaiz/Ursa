@@ -77,7 +77,7 @@ appending to one file's end). See Ursa incident 9.
 | Seat | File | Entries |
 |---|---|---|
 | exo | `pending-workflow-changes-exo.md` | PWC-EXO-1 to PWC-EXO-6 |
-| engineer | `pending-workflow-changes-engineer.md` | PWC-ENG-1 |
+| engineer | `pending-workflow-changes-engineer.md` | PWC-ENG-1, PWC-ENG-2 |
 | security | `pending-workflow-changes-security.md` | queued in PR #28 as PWC-5 and PWC-6, not yet merged |
 
 The security row describes a branch and not a file on `main`. The
