@@ -339,11 +339,50 @@ export interface ConversationMeta {
   prompts?: UserPrompt[]
 }
 
+// ---------------------------------------------------------------------------
+// Two denominators, because the record answers two different questions and
+// only ever stated one of them.
+//
+// `pct` divides by `coveredChars`, the characters some span covered. The
+// three class percentages therefore sum to 1.0 by construction, which is
+// what makes them read as a partition of the finished work when they are a
+// partition of the classified part of it. On the real-history fixture
+// (fixtures/real/ursa-main-4d5e401.json) 79 of 3,018 final characters are
+// inside no span, so `survived_verbatim.pct` is 0.927 where the same
+// characters are 0.903 of the file. The gap is exactly `measure()`'s
+// `finalSeparatorChars`, the denominator can never exceed the file, and so
+// the error has one direction: it flatters the model.
+//
+// Both numbers are correct answers. `pct` answers "of the text we
+// classified, what fate did it have", which is the right question when
+// reading the distribution bar in the viewer. `pctOfFinal` answers "of this
+// finished file, how much is the model's", which is the question a lab's
+// pipeline is asking when it reads the first percentage it finds. Before
+// this field existed, the record offered one number and no statement of
+// which question it answered.
+//
+// `pct` is unchanged rather than repaired, deliberately: it is the field the
+// viewer's bar is built on and any consumer already reading records is
+// calibrated against it. The repair is a second field and a bound between
+// them (`PCT_DENOMINATORS_ORDERED` in src/invariants.ts), not a redefinition
+// nobody downstream would notice.
+// ---------------------------------------------------------------------------
+
 export interface ClassStat {
   spans: number
   chars: number
-  /** fraction of covered final chars */
+  /**
+   * `chars / stats.coveredChars` — this class's share of the characters that
+   * any span covered. Sums to 1.0 across the three classes.
+   */
   pct: number
+  /**
+   * `chars / stats.finalChars` — this class's share of the whole finished
+   * work, counting characters no span covered. Sums to at most 1.0, and to
+   * less than 1.0 whenever the record has unclassified text. Never larger
+   * than `pct`.
+   */
+  pctOfFinal: number
 }
 
 export interface Stats {
@@ -399,10 +438,35 @@ export interface Stats {
      */
     unknownDeletedChars: number
   }
+  /**
+   * One row per path the run read, which is every path in `files` plus every
+   * path in `exclusions`. A consuming pipeline iterates this array, so a row
+   * missing for an excluded path is a path that silently does not exist from
+   * the row-level view: before excluded rows were emitted here, an excluded
+   * record's `perFile` was `[]` while its episode had touched a file, and
+   * nothing in the iteration said anything was left out. coverage.py reports
+   * excluded statements as a column on the file's own row for the same
+   * reason — a coverage number and what was taken out of its denominator
+   * cannot drift apart when they are one row.
+   *
+   * The evidence for an exclusion (the rival commit's sha, its subject, the
+   * relation) stays in `OutcomeRecord.exclusions` and is not duplicated
+   * here, because that is not row data. What a row carries is the reason, so
+   * that iterating `perFile` is enough to know a path produced no spans and
+   * why.
+   */
   perFile: Array<{
     path: string
     coveredChars: number
     byClass: Record<SpanClass, number>
+    /**
+     * Present only on a row for an excluded path, carrying the `reason` of
+     * the matching `Exclusion`. Such a row has `coveredChars: 0` and zero in
+     * every class, since the resolver never saw the path. Absent on a
+     * classified path's row, so `'excluded' in row` is the test for which
+     * kind of row this is.
+     */
+    excluded?: ExclusionReason
   }>
   perConversation: Array<{
     conversationId: string
