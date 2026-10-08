@@ -294,7 +294,7 @@ html {
   }
 }
 
-/* keyboard parity, and the state touch devices land on */
+/* keyboard parity */
 /* the wash and border only; the ring itself comes from the site-wide
    :focus-visible rule above */
 .quiet-link:focus-visible {
@@ -303,10 +303,85 @@ html {
   transition-duration: 160ms;
 }
 
+/* the press, and the only feedback a tap gets.
+
+   Benchmarked 2026-10-08 on the rendered page rather than the stylesheet:
+   Linear's primary control is the one of four that answers a press
+   distinctly from a hover, scaling to 0.97 on the same 160ms
+   cubic-bezier(0.25,0.46,0.45,0.94) it uses everywhere else. Vercel's
+   changes on hover and then holds. claude.com has no press on the control
+   this run could reach. Elicit's public pages serve unstyled UA links, so
+   their press is the browser's red, which is the third independent
+   confirmation in this lane that their craft lives in the application.
+
+   This control is the only one on the site that works: .cta ships disabled,
+   so every hover, focus and press rule on it is gated off. Until 2026-10-08
+   .quiet-link had a hover and a focus state and no press, which meant a
+   touch visitor, who gets neither of the other two, tapped the only live
+   link on the site and saw nothing happen until the page changed.
+
+   Translated rather than copied: no scale, because the lift and settle
+   idiom already belongs to .cta and this is a text-sized control. The press
+   is the same starlight wash taken deeper and the border taken to full
+   --polar, arriving in 90ms, which is .cta's own press timing. Nothing new
+   enters the palette. */
+.quiet-link:active {
+  background-color: rgba(232, 237, 247, 0.11);
+  border-color: var(--polar);
+  transition-duration: 90ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .quiet-link,
   .quiet-link:hover,
-  .quiet-link:focus-visible {
+  .quiet-link:focus-visible,
+  .quiet-link:active {
+    transition-duration: 1ms;
+  }
+}
+
+/* ---------- the word-mark as a link ----------
+   On the 404 the word-mark is a link and the first tab stop on the page. It
+   had a focus ring from the site-wide rule and no hover state at all, so a
+   pointer visitor had no way to learn it was a link. Benchmarked 2026-10-08:
+   of Linear, Vercel, claude.com and Elicit, claude.com is the one that
+   announces its header word-mark on hover, with a plain underline and no
+   transition. Underline is the idea; a hairline is this site's word for it,
+   so the mark gets one in --dim, offset far enough to clear the descender,
+   fading in on the same curve the rest of the site uses.
+
+   The negative right margin trims the trailing letter-space that 0.34em
+   tracking leaves after the final R, so the rule stops under the letter
+   rather than 5px past it. On the home page the mark is not a link and this
+   never applies. */
+
+.mark-link .mark {
+  margin-right: -0.34em;
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.45em;
+  transition: text-decoration-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (hover: hover) {
+  .mark-link:hover .mark {
+    text-decoration-color: var(--dim);
+  }
+}
+
+/* touch parity: the press is the one thing a tap can see.
+   Not keyed to :focus-visible on purpose. Rendered at 3x, the ring and the
+   hairline together put two horizontal lines 23px apart under the mark and
+   the pair reads as doubled. The ring already says focused, and on this page
+   the only focusable things are links, so the hairline has nothing left to
+   tell a keyboard visitor. */
+.mark-link:active .mark {
+  text-decoration-color: var(--dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark-link .mark {
     transition-duration: 1ms;
   }
 }
