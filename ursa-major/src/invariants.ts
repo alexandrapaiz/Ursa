@@ -48,6 +48,8 @@ export type InvariantCode =
   | 'FINAL_SPANS_IN_FILE'
   | 'COVERED_BOUNDED'
   | 'RATES_MATCH_FIELDS'
+  | 'PCT_DENOMINATORS_ORDERED'
+  | 'PERFILE_ENUMERATES_PATHS'
   | 'SIGNAL_QUOTE_GROUNDED'
   | 'DESCENT_CHECKED_UNIFORMLY'
   | 'EXCLUSION_NOT_CLASSIFIED'
@@ -194,6 +196,10 @@ const BOUNDS: Record<InvariantCode, string> = {
     'classified characters are a subset of the finished work: coveredChars = sum of final span extents <= finalChars',
   RATES_MATCH_FIELDS:
     'every stored rate equals its own numerator over its own denominator, rounded to three places',
+  PCT_DENOMINATORS_ORDERED:
+    'a class\'s share of the finished work is never larger than its share of the classified part: byClass[c].pctOfFinal <= byClass[c].pct. The two fields differ only in denominator — coveredChars for pct, finalChars for pctOfFinal — and COVERED_BOUNDED already holds coveredChars <= finalChars, so the bound is the same-set statement that the wider denominator produced the smaller number. It fires when the two are computed from each other\'s denominator, which is the one way a reader could be handed the flattering figure under the honest field\'s name.',
+  PERFILE_ENUMERATES_PATHS:
+    'the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.',
   SIGNAL_QUOTE_GROUNDED:
     'every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()\'s whitespace normalization, and the same excerpt appears in the signal\'s own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.',
   EXCLUSION_NOT_CLASSIFIED:
@@ -474,6 +480,40 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       push('RATES_MATCH_FIELDS', `stats.byClass.${c}.pct`,
         `stored ${st.byClass[c].pct}, but ${st.byClass[c].chars}/${st.coveredChars} is ${actual}`)
     }
+    const actualOfFinal = r3(st.finalChars ? st.byClass[c].chars / st.finalChars : 0)
+    if (actualOfFinal !== st.byClass[c].pctOfFinal) {
+      push('RATES_MATCH_FIELDS', `stats.byClass.${c}.pctOfFinal`,
+        `stored ${st.byClass[c].pctOfFinal}, but ${st.byClass[c].chars}/${st.finalChars} is ${actualOfFinal}`)
+    }
+    // The ordering of the two denominators, checked separately from each
+    // field matching its own arithmetic. A record can have both fields
+    // internally consistent and still be built the wrong way round, if the
+    // two divisions were swapped at the point they were computed; then each
+    // field equals a real ratio and the one a lab reads first is the
+    // flattering one. Rounding cannot invert the order, since r3 is
+    // monotonic, so an equal pair is legal and only a strict inversion
+    // fires.
+    if (st.byClass[c].pctOfFinal > st.byClass[c].pct) {
+      push('PCT_DENOMINATORS_ORDERED', `stats.byClass.${c}`,
+        `pctOfFinal ${st.byClass[c].pctOfFinal} > pct ${st.byClass[c].pct}, with coveredChars ${st.coveredChars} and finalChars ${st.finalChars}`)
+    }
+  }
+
+  // The row list against the two path lists it is built from. This is the
+  // same-set arithmetic of EXCLUSION_NOT_CLASSIFIED read from the other
+  // side: that bound says `files` and `exclusions` do not overlap, this one
+  // says `perFile` loses neither of them.
+  const readPaths = [...record.files.map((f) => f.path), ...(record.exclusions ?? []).map((x) => x.path)]
+  const rowPaths = st.perFile.map((r) => r.path)
+  const missing = readPaths.filter((pth) => !rowPaths.includes(pth))
+  const extra = rowPaths.filter((pth) => !readPaths.includes(pth))
+  const duplicated = rowPaths.filter((pth, i) => rowPaths.indexOf(pth) !== i)
+  if (missing.length > 0 || extra.length > 0 || duplicated.length > 0) {
+    push('PERFILE_ENUMERATES_PATHS', 'stats.perFile',
+      `${rowPaths.length} row${rowPaths.length === 1 ? '' : 's'} against ${record.files.length} classified + ${(record.exclusions ?? []).length} excluded path${readPaths.length === 1 ? '' : 's'}`
+      + (missing.length > 0 ? `; no row for ${missing.map((pth) => JSON.stringify(pth)).join(', ')}` : '')
+      + (extra.length > 0 ? `; row for unknown path ${extra.map((pth) => JSON.stringify(pth)).join(', ')}` : '')
+      + (duplicated.length > 0 ? `; repeated row for ${duplicated.map((pth) => JSON.stringify(pth)).join(', ')}` : ''))
   }
 
   // Descent — the guard on the one label that carries a `diff`, and so the
