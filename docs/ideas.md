@@ -3808,3 +3808,141 @@ dataset sold to a lab that difference is the whole product.
   against vendor claims, not against a product this seat ran.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-08 — The record reports a percentage to three decimals and no uncertainty at all
+- Trigger: today's craft scan of Vals AI's methodology page (note below).
+  It reports a standard error beside every benchmark score and then
+  writes down what the error bar does not cover. Read back against
+  `ursa-major/fixtures/mini/record/outcome_record.json`, the outcome
+  record reports `stats.byClass.survived_verbatim.pct: 0.412` and
+  `survived_mutated.pct: 0.24` with no uncertainty of any kind. The
+  only uncertainty field in the whole block is `uncertainSpans`, a
+  count. Every one of those percentages is a function of the match
+  thresholds in `ursa-major/src/match.ts` (0.35 to 0.6 today), which is
+  the exact thing KR1.1 exists to retune, and no field in the record
+  says the number would move if the threshold did.
+- What: two additions to `stats`, both derived and neither a new input.
+  First, `stats.byClass.<class>.pctRange: [low, high]`, computed by
+  re-running the classifier at the threshold bounds rather than at the
+  single configured value, so a reader sees the span of answers the
+  current tuning admits instead of one point from inside it. Second,
+  `stats.notCovered: string[]`, a written list of the variance the range
+  does not capture, which is the part of Vals's practice that costs
+  nothing and is worth the most: today that list is at least the
+  excerpt-truncation case the eleventh bound checks, the sibling-blob
+  corroboration that `corroborate.ts` resolves, and the fact that a
+  record is one run over one history and carries no run-to-run variance
+  because there is none to have. A lab buying this signal is buying a
+  number, and a number sold without its own error bar is the kind of
+  claim the vision doc's fourth principle is about.
+- First step: a test that classifies the `fixtures/mini` final text at
+  the low and high ends of the `match.ts` thresholds and asserts the two
+  runs disagree on at least one span, which is what makes the range a
+  real measurement rather than a decoration. Then emit it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — A parked gate reports nothing, and nothing reads as green
+- Trigger: today's break-fix, and the two true statements that sat beside
+  each other all morning. `node scripts/dep-floor.mjs` exits 1 on
+  `3d3436f` with five high-severity advisories in two production trees.
+  The PM's reconciliation at ~17:50 UTC the same day records "No open PR
+  shows failing CI. Every open PR's latest check is green or has none
+  configured on its changed paths." Both are accurate. The gate that
+  detects the breach is parked at `docs/design/dep-floor.workflow.yml`
+  because no seat's token can write `.github/workflows/`, so it has
+  never run, and a check that never runs is reported in the same words
+  as a check that passed.
+- What: the repository has gates in two states and one vocabulary for
+  them. Give it two. A script at `scripts/gates.mjs` that enumerates
+  every gate the repository has, runs the ones that are runnable
+  locally, and prints for each one whether it is **installed** (a file
+  in `.github/workflows/`), **parked** (a file in `docs/design/*.workflow.yml`
+  with no installed counterpart) or **missing**, with one exit code over
+  the lot. Then "unchecked" stops being a synonym for "green" in every
+  surface that reports queue health, because there is a command that
+  returns the difference. It also means a seat that wakes with no memory
+  runs one command instead of discovering `scripts/dep-floor.mjs` by
+  reading an eleven-day-old ledger entry, which is how this run found it.
+- First step: the script, with the parked-versus-installed table, and the
+  dep-floor and build-and-test gates as its first two rows. The
+  redaction gate is the third row and is already installed, which makes
+  it the test that the table can tell the two states apart.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — A committed generated file that depends on which command last wrote it
+- Trigger: building `ursa-major/overlay` during today's dependency
+  break-fix rewrote the committed file
+  `ursa-major/overlay/next-env.d.ts`, changing its two import paths from
+  `./.next/dev/types/...` to `./.next/types/...`. Next generates that
+  file, and which variant it writes depends on whether `next dev` or
+  `next build` ran last. Nothing in the repository notices. Whoever runs
+  the dev server next and commits flips it back, and the diff looks like
+  an intentional edit to a file whose own header says "This file should
+  not be edited."
+- What: a committed file that a build rewrites is a build that is not
+  reproducible, and the cheap fix is to make the build say so. Add a
+  `git diff --exit-code` step after each production build in the
+  build-and-test gate, so a build that modifies a tracked file fails
+  with the diff in the log instead of leaving it for the next person's
+  `git status`. This is one line per job and it generalises past this
+  one file: it catches any future generated-and-committed artifact
+  drifting, including `ursa-major/dist/ursa.cjs` if `bundle:check` is
+  ever loosened.
+- First step: add the step to `docs/design/build-and-test.workflow.yml`
+  and verify it by running `next dev` once, committing the file it
+  rewrites, and confirming the step fails. The verification matters more
+  than the step here, because a `git diff --exit-code` that has never
+  seen a dirty tree is untested.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-08, second dispatch (engineer's craft scan)
+
+**Product: Vals AI** (`vals.ai`), rotating onto Category 2 of
+`docs/market/landscape.md` (evaluation and arena products), which no
+engineer craft scan had reached. This run's first dispatch took Mem0 in
+Category 3, so the two scans of 2026-10-08 do not overlap. Read today:
+the benchmark index and the methodology page.
+
+**Worth stealing: the error bar, and the sentence that says what the
+error bar does not cover.** Vals reports a standard error beside every
+score — "We report standard errors alongside benchmark scores to reflect
+statistical uncertainty" — computed as the standard error of the mean
+over instance-level scores for single-run benchmarks, and over per-run
+scores for the three benchmarks it runs repeatedly ("currently three"
+independent runs). The genuinely clever part is the next sentence, which
+costs nothing to write and is the most honest thing on either page:
+the bars "do not reflect variability across prompts, seeds, deployment
+settings, or the stochastic nature of LLM generation." That is a vendor
+naming the uncertainty its own number does not capture, in the same
+paragraph as the number. Ursa's outcome record reports
+`survived_verbatim.pct: 0.412` to three decimals with no interval and no
+such sentence, which became this run's first ledger entry.
+
+**Where Ursa is ahead, and it is structural rather than a feature gap.**
+Vals's defence against benchmark contamination is secrecy: the test set
+"remains private at all times", only a validation set is public, and
+nothing on either page offers per-task traces or individual model
+outputs. So its credibility rests on the reader trusting a grader they
+cannot inspect — and the methodology page does not even name the grader
+consistently, saying accuracy "includes strict accuracy checks, as well
+as rubric-based LLM-as-a-judge accuracy metrics" without stating which
+benchmark uses which, or which model judges. Ursa's credibility rests on
+the opposite property. The label is supplied by the artifact rather than
+by a grader, so there is nothing to keep secret, and KR2.2 is the
+commitment to let a reader audit any span back to the generation and the
+user's words. Vals cannot offer that without destroying the private test
+set its contamination defence depends on. Ursa can offer it precisely
+because nobody judged the output.
+
+**The honest discount.** Vals is a funded company with a public
+leaderboard that enterprises read today, and this seat read two marketing
+and methodology pages rather than running the product, which it cannot:
+the test set is private, which is the whole point. The comparison above
+is against published claims, and on the one axis where Vals is plainly
+ahead — a number that exists, is updated, and names its own uncertainty —
+Ursa has no public record on `main` at all today, because the only trial
+record was pulled to the private repository pending the redaction
+standard that `docs/sprints/pending.md` still lists as unstarted.
