@@ -14,9 +14,9 @@ import type { TuningRecord } from '../tuning/types'
  *  through a cast. */
 export function zeroStats(): Stats {
   const byClass = {
-    survived_verbatim: { spans: 0, chars: 0, pct: 0 },
-    survived_mutated: { spans: 0, chars: 0, pct: 0 },
-    no_generation_provenance: { spans: 0, chars: 0, pct: 0 },
+    survived_verbatim: { spans: 0, chars: 0, pct: 0, pctOfFinal: 0 },
+    survived_mutated: { spans: 0, chars: 0, pct: 0, pctOfFinal: 0 },
+    no_generation_provenance: { spans: 0, chars: 0, pct: 0, pctOfFinal: 0 },
   }
   return {
     finalChars: 0,

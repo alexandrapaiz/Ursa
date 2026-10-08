@@ -197,6 +197,33 @@ npx tsx src/cli.ts --id ursa-minor-site \
   --out ./out
 ```
 
+The second launch mode is the GitHub Action. Copy one workflow file into
+a repository where an AI agent commits, and every merged pull request
+from then on resolves itself: outcome records on that repository's own
+runner, and one comment on the pull request carrying the same five
+fields in the same order every time, zeros included.
+
+```bash
+# the whole consumer side
+mkdir -p .github/workflows
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml \
+  -o .github/workflows/ursa-resolve.yml
+
+# what the Action runs on the runner: one committed file, no install
+node ursa-major/dist/ursa.cjs ci "$GITHUB_WORKSPACE" \
+  --repo "$GITHUB_REPOSITORY" --event "$GITHUB_EVENT_PATH"
+```
+
+It installs nothing, because `ursa-major/dist/ursa.cjs` is one committed
+CommonJS file the runner's own node executes. With no model credential
+on the runner the distiller runs in CI mode: the records are still
+resolved, no interpretation pass runs, and the tuning delta is reported
+as a zero with the reason attached, so a zero from an absent model never
+reads as a model finding nothing. A 👍 on the run comment is read on the
+next run and recorded as a declared acceptance. No reaction records
+nothing, because retention is never acceptance. The design is
+[`docs/design/resolver-action.md`](docs/design/resolver-action.md).
+
 | Module | Job |
 |---|---|
 | `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone. Refuses the pair rather than guessing when the edit is too far away in commits or in hours, when another generation rewrote the same file first, when the edit sits on a branch the generation never reached, or when the "generation" is a merge commit, and reports every refusal it made (`docs/design/pairing-window.md`) |
@@ -215,6 +242,8 @@ npx tsx src/cli.ts --id ursa-minor-site \
 | `src/text.ts` | the one definition of a quoted, truncated excerpt, shared by `src/signals.ts` and `src/loops.ts`, plus the predicate `src/invariants.ts` uses to decide whether a quote really appears in the text it claims to come from |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 | `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
+| `src/ci/` | the CI launch: the merge window from the event payload, the five-field run comment, the thumbs-up read, CI mode for the distiller |
+| `action.yml`, `dist/ursa.cjs` | the reusable GitHub Action and the one-file bundle it runs |
 
 `.ursa/` belongs in the target project's `.gitignore`. Raw records and
 the tuning store never leave the machine they were made on.

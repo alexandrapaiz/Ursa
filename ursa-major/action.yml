@@ -1,0 +1,142 @@
+# The resolver as a reusable GitHub Action — stage one of the surfaces.
+#
+# A consumer repository adds one workflow that calls this Action when a
+# pull request merges. From then on every merge produces outcome records
+# on its own runner and one run comment on the pull request, and nobody
+# runs anything by hand.
+#
+# Reference it as:
+#   uses: alexandrapaiz/Ursa/ursa-major@main
+#
+# Composite rather than a docker container, per the product plan §9: the
+# runner's own checkout happens first, with the runner's own git and
+# token, and the step that reads the repository is plain auditable YAML
+# the consumer can read before it runs anything.
+#
+# It installs nothing. The step below runs ursa-major/dist/ursa.cjs, one
+# committed CommonJS file, with the node that is already on the runner.
+# No npm install, no npx download, no container pull, no registry
+# reachability. That is deliberate: the resolver must never block on what
+# a runner lacks.
+#
+# Where the data goes: records are written to .ursa/ inside the runner's
+# workspace and the workspace is destroyed when the job ends. Nothing is
+# uploaded. The only thing that leaves the runner is the run comment,
+# which carries five aggregate numbers and one file path, and the
+# consumer's own GITHUB_TOKEN writes it to the consumer's own pull
+# request. No Ursa-operated compute is involved at any point.
+
+name: 'Ursa Major resolver'
+description: 'Resolve a merged pull request into outcome records and post the five-field run comment. Installs nothing; runs on the runner you already have.'
+author: 'Ursa'
+
+branding:
+  icon: 'git-merge'
+  color: 'blue'
+
+inputs:
+  project-path:
+    description: 'Path to the checked-out repository to resolve. Defaults to the workspace the consumer''s checkout step wrote.'
+    required: false
+    default: ${{ github.workspace }}
+  github-token:
+    description: 'Token used to post the run comment and read the 👍 on the previous one. Needs pull-requests: write. The default GITHUB_TOKEN is enough.'
+    required: false
+    default: ${{ github.token }}
+  min-chars:
+    description: 'Smallest generated-character count worth a record. Matches the local launch''s default of 200; raise it on a repository full of small generated commits.'
+    required: false
+    default: '200'
+  post-comment:
+    description: 'Set to false to print the run comment in the job log instead of posting it. Useful for a first dry run on a repository nobody wants commented on yet.'
+    required: false
+    default: 'true'
+  anthropic-api-key:
+    description: 'Optional. With no key the distiller runs in CI mode: records are resolved, no interpretation pass runs, and the tuning delta is an honest zero. Pass a key only if you also install the claude CLI in the job; the Action never installs it for you.'
+    required: false
+    default: ''
+
+outputs:
+  units-resolved:
+    description: 'Number of work units that became outcome records in this merge.'
+    value: ${{ steps.resolve.outputs.units-resolved }}
+  units-found:
+    description: 'Number of work units found in the merge window, resolved or not.'
+    value: ${{ steps.resolve.outputs.units-found }}
+  chars-survived-verbatim:
+    description: 'Characters of generated text kept unchanged.'
+    value: ${{ steps.resolve.outputs.chars-survived-verbatim }}
+  chars-survived-edited:
+    description: 'Characters of generated text kept after editing.'
+    value: ${{ steps.resolve.outputs.chars-survived-edited }}
+  most-corrected-artifact:
+    description: 'Path of the file carrying the most edited characters, or the empty string when nothing was edited.'
+    value: ${{ steps.resolve.outputs.most-corrected-artifact }}
+  tuning-delta:
+    description: 'Preference units added and reinforced, as "<added>/<reinforced>".'
+    value: ${{ steps.resolve.outputs.tuning-delta }}
+  tuning-mode:
+    description: 'Either "distilled" (a model interpreted the corrections) or "ci-no-model" (none was reachable, so the delta is a zero from absence, not from a model finding nothing).'
+    value: ${{ steps.resolve.outputs.tuning-mode }}
+  comment-url:
+    description: 'URL of the run comment, or the empty string when post-comment was false.'
+    value: ${{ steps.resolve.outputs.comment-url }}
+
+runs:
+  using: composite
+  steps:
+    # The pair finder compares a generated commit's blob with the next
+    # human commit's blob, so both commits have to be in the local object
+    # store. A default checkout is depth 1 and has neither. Deepening
+    # here, rather than asking every consumer to remember
+    # fetch-depth: 0, is the difference between the Action working and
+    # the Action silently resolving nothing.
+    - name: Deepen history to the pull request's base
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "${{ inputs.project-path }}"
+        if [ -f "$(git rev-parse --git-dir)/shallow" ]; then
+          echo "shallow clone: fetching full history so both sides of each commit pair exist"
+          git fetch --quiet --unshallow origin || git fetch --quiet --depth=500 origin
+        else
+          echo "full clone: no deepening needed"
+        fi
+
+    - name: Resolve the merge into outcome records and post the run comment
+      id: resolve
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+      run: |
+        set -euo pipefail
+        node --version
+        args=(
+          ci "${{ inputs.project-path }}"
+          --repo "${{ github.repository }}"
+          --event "${{ github.event_path }}"
+          --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          --min-chars "${{ inputs.min-chars }}"
+        )
+        if [ "${{ inputs.post-comment }}" != "true" ]; then args+=(--no-post); fi
+        # One invocation. It writes the five fields to $GITHUB_OUTPUT
+        # itself, so the outputs below come from the run that produced
+        # them rather than from a second pass over the log.
+        node "$GITHUB_ACTION_PATH/dist/ursa.cjs" "${args[@]}" | tee "$RUNNER_TEMP/ursa-ci.log"
+
+    # The five fields again, in the same order, in the job summary. The
+    # comment is the feedback a person reads on the pull request; this is
+    # the same reading for whoever opens the run instead.
+    - name: Repeat the run comment in the job summary
+      if: always()
+      shell: bash
+      run: |
+        set -euo pipefail
+        {
+          echo "## Ursa Major resolver"
+          echo
+          echo '```'
+          cat "$RUNNER_TEMP/ursa-ci.log" 2>/dev/null || echo "the resolve step wrote no log"
+          echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"

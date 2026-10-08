@@ -208,6 +208,42 @@ describe('the rendered viewer, opened and clicked (jsdom)', () => {
     })
   })
 
+  // Added 2026-10-07 with `pctOfFinal`. The tile is the surface where the
+  // ambiguous percentage actually reached a person: a value of 41.2% under
+  // the label "Survived verbatim", over a document of which those characters
+  // are 40.4%. The record now carries both figures and this is the test that
+  // the page states which is which, since a field no surface reads fixes
+  // nothing.
+  it('each class tile leads with the share of the whole work and names the other denominator', () => {
+    const dom = open()
+    const tiles = Array.from(dom.window.document.querySelectorAll('#tiles .tile'))
+    const verbatim = tiles.find((t) => t.textContent?.includes('Survived verbatim'))!
+    const st = record.stats.byClass.survived_verbatim
+    expect(st.pctOfFinal).toBeLessThan(st.pct)
+    expect(verbatim.querySelector('.value')!.textContent)
+      .toBe((st.pctOfFinal * 100).toFixed(1) + '%')
+    expect(verbatim.textContent).toContain('of the whole finished work')
+    // And the narrower figure is present, named by its own denominator
+    // rather than left to be inferred from the one above it.
+    expect(verbatim.textContent).toContain((st.pct * 100).toFixed(1) + '%')
+    expect(verbatim.textContent).toContain('chars any span covered')
+  })
+
+  it('the distribution bar says what its full width is, since the segments always fill it', () => {
+    const dom = open()
+    const note = dom.window.document.getElementById('barnote')!.textContent!
+    const unclassified = record.stats.finalChars - record.stats.coveredChars
+    expect(unclassified).toBeGreaterThan(0)
+    expect(note).toContain(record.stats.coveredChars.toLocaleString('en-US'))
+    expect(note).toContain(unclassified.toLocaleString('en-US'))
+    expect(note).toContain('characters some span covered')
+    // The segment widths are the narrow figures, which is exactly what the
+    // note now accounts for: three widths summing to the full bar.
+    const widths = Array.from(dom.window.document.querySelectorAll('#distbar div'))
+      .map((d) => parseFloat((d as HTMLElement).style.width))
+    expect(widths.reduce((a, b) => a + b, 0)).toBeCloseTo(100, 0)
+  })
+
   it('the Generations panel carries the user prompts inline, ahead of the turn they produced', () => {
     const dom = open()
     const genPanel = dom.window.document.querySelectorAll('.panel')[1]
