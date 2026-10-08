@@ -120,6 +120,55 @@ issues URS-1 through URS-7 from sprint-2026-09-21 and pending.md.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
 
+## Finding — the skill seat's Data access section was never adapted to Ursa, and the finding never reached `main` (recorded 2026-10-08, PM pass)
+
+Not an ADR: no decision is asked of the owner here beyond what's
+already named in `docs/sprints/pending.md`. Recorded under §1c's
+instruction to log a deviation between the vendored standard's
+assumption and Ursa's practice, since this one has now cost four
+independent runs the same opening paragraph.
+
+**What's wrong.** `prompts/skill-agent.md`'s "Data access" section is
+inherited verbatim from alexandria: it tells the seat to query a Neon
+database of silver-layer claims via `NEON_RO_URL`. Ursa has no research
+pipeline and no such database. ADR-001 already says charters are
+"inherited verbatim and adapted at activation, seat by seat" — the
+skill seat's own activation banner even states the alexandria-specific
+references "do not apply here" — but the Data access section itself was
+never edited to match. It is the one section of the charter that
+contradicts its own banner.
+
+**How long it's gone unfixed.** First found 2026-09-24 (PR #14, first
+Ursa skill run), reproduced 2026-09-30 (#50), 2026-10-01 (#64), and
+again 2026-10-08 (#140, which undercounts it as "the third consecutive
+run" — it's the fourth). Every one of those four PRs correctly
+identified that the fix is a charter edit outside the skill seat's
+write surface (`prompts/` is Tier C), and every one filed a ledger
+entry asking for it. None of those ledger entries ever reached `main`:
+#14 closed unmerged, #50 and #64 are still open but stuck on #14's dead
+branch, and #140 (open, mergeable) is the first of the four actually in
+a position to land. Fourteen days, four findings, zero charter fixes —
+not because nobody found it, but because the PRs carrying the finding
+kept getting stuck for unrelated reasons.
+
+**What's already working as a substitute.** All four skills shipped so
+far used `evidence_scheme: repo` (citing paths and line ranges in this
+repository) instead of a claim id, because there's nothing else to
+cite. That's a real, in-use answer to "what does this seat's evidence
+section need to say instead" — the fix is closer to documenting what
+already happened than to designing something new.
+
+**Handoff.** This seat can't edit `prompts/skill-agent.md` (Tier C).
+Handed to Ursa's exo seat by board message (its weekly run is Sunday,
+2026-10-11) to draft the charter edit for the owner's merge, per §16's
+vendoring role. Also named directly in `pending.md`'s top three, since
+the normal route has had 14 days to land this and hasn't.
+
+**Status:** open, handed to exo. Closes when `prompts/skill-agent.md`'s
+Data access section is amended on `main` to name `evidence_scheme:
+repo` as Ursa's actual evidence source, with the Neon path documented
+as what to do only if a `NEON_RO_URL`-backed pipeline is ever stood up.
+
 ## ADR-006 — Linear abandoned; secrets move to Infisical (2026-09-25)
 
 **Decision.** Two owner rulings. (1) Linear is abandoned as the board
