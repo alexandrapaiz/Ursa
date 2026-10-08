@@ -6,10 +6,12 @@ description: >
   span by span whether the flagged text descends from a model generation
   or from the person. Fires for adjudicating uncertain or low-confidence
   span labels, for building the ground-truth set that match thresholds
-  are retuned against, and for judging whether a final span and a
-  candidate generation are actually ancestor and descendant. Does not
-  fire for producing a record in the first place, for labelling
-  generations, or for reading a record's summary statistics.
+  are retuned against, for judging whether a final span and a candidate
+  generation are actually ancestor and descendant, and for settling a
+  span the descent check demoted as rival, where the score was high and
+  the ancestry was not. Does not fire for producing a record in the
+  first place, for labelling generations, or for reading a record's
+  summary statistics.
 version: 0.2.0
 status: draft
 validated: false

@@ -246,3 +246,42 @@ in §1: a reader must be able to check a sentence against its evidence.
 A step whose effect cannot be inspected or undone cannot be checked
 either, and a skill that ships such a step is asking for trust rather
 than offering receipts.
+
+## 5g. A line anchor is a claim with a date on it, so fingerprint it
+
+(Added 2026-10-08, fifth run, after measuring the cost of not doing it.)
+
+Under `evidence_scheme: repo` a citation is a path and a line range into
+a repository that other seats are changing daily. The anchor was true
+when it was written and nothing about it stays true on its own. This is
+the one failure mode that is worse than a dead link, because a dead link
+announces itself and a moved anchor does not: the reader follows the
+citation, finds plausible code, and believes the claim.
+
+It has already happened here, at scale. The 2026-10-05 run re-landed the
+library onto a newer `main` and said in its own commit message that the
+files rode along verbatim. The anchors rode along too. By 2026-10-08,
+58 of 117 line-anchored citations pointed at unrelated code while
+`check-evidence.mjs` reported OK on all 133 sources, because in-bounds
+was all it checked. `resolve.ts:160-167` had been the branch that sets
+`uncertain`; it was the verbatim-match pass by then.
+
+So:
+
+1. **Every cited range is fingerprinted** in `skills/evidence.lock.json`,
+   and `node skills/check-evidence.mjs` fails when one moves. The hash
+   covers the cited lines trimmed, so reformatting is not an alarm.
+2. **A failure is a reading task, not a rebase.** Re-point the anchor,
+   then re-read the claim against the new lines, because the two come
+   apart: of the drifted citations in this library five had claims that
+   were no longer true, and those needed rewriting rather than moving.
+3. **`--update` goes in the same commit as the re-anchoring**, so the
+   lock diff shows a person decided rather than a script having its way.
+4. **A new citation fails too**, until its fingerprint is recorded. That
+   is deliberate: it puts the "read it once, deliberately" step on the
+   author rather than on the reviewer.
+
+Ours: carrying a skill forward onto a newer tree is a re-grounding job
+and should be budgeted as one. It is not a file copy, and the run that
+treats it as a file copy will pass its own checker while breaking the
+only property the product sells.
