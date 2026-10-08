@@ -34,8 +34,23 @@ export default function Home() {
 
         <ScrollCue />
 
-        <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20 portrait:mt-[92svh]">
-          <p className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
+          {/* landscape:max-w-[46vw] keeps the copy on its own side of the
+              sky. Constellation places the dipper at (0.42 + x * 0.52) * w in
+              landscape, "floating in the open sky beside the hero text", so
+              its leftmost star lands at 0.6155w and Polaris' glow reaches
+              36px further left again. The copy was never told to stay on its
+              side. Measured 2026-10-08, longest rendered line against the
+              mark's left edge: 844x390 overlapped by 210px, 960x540 by 234,
+              1024x600 by 61 and 1180x700 by 40, with the dotted edges and two
+              stars running straight through "reinforcement learning from
+              human feedback". 46vw is the widest flat measure that clears the
+              mark at every landscape width, because the clearance the
+              geometry allows bottoms out at 46.4% of the viewport, at 844.
+              Wide screens bind on nothing: 1440 and 1920 still render five
+              lines ending at the same 732.3px. The mark is not moved, and
+              portrait is untouched, where the copy already sits 92svh below
+              it. */}
+          <p className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)] landscape:max-w-[46vw]">
             <em className="not-italic text-[var(--polar)]">Polaris</em> —
             peer-to-peer supervised fine-tuning; outcome reward for open-ended
             generation. A{"\u00a0"}new approach to reinforcement learning from
