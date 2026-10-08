@@ -55,6 +55,25 @@ altogether, since OpenAI still holds contracts with Mercor and
 Invisible. Surge's own revenue is reported at $1.4B (2026). Last
 observed 2026-09-30: [Sacra: Surge AI](https://sacra.com/c/surge-ai/), [Getlatka: Surge AI revenue](https://getlatka.com/companies/surgehq.ai).
 
+Update 2026-10-07, two separate moves. First: a Forbes investigation
+(2026-08-05, by Anna Tong) reported Surge AI, Mercor, AfterQuery, and
+Turing collectively sold roughly $500M/year of training data to top
+Chinese AI labs (Tencent, Alibaba, ByteDance named), with Surge CEO
+Edwin Chen reportedly traveling to China to meet lab executives
+directly, while the same vendors hold US government and frontier-lab
+contracts simultaneously. The original Forbes article is paywalled;
+recording this secondhand via an aggregator rather than skipping it,
+per this charter's rule for paywalled evidence. Second: Surge's own
+blog confirms it launched DAYJOB (2026-09-23, with Healthcare and
+Finance sub-benchmarks added by 2026-10-04) and GDP.xlsx (2026-09-30),
+both under its "Tuesday Work Index" umbrella (started 2026-08-18) —
+benchmarks explicitly framed around "economically valuable work" and
+whether an agent can "survive a 9 to 5." That is Surge's language
+converging on the same territory Ursa Minor's pitch occupies, while
+the mechanism stays a constructed, graded task set rather than real
+work observed after the fact — see the new positioning.md section this
+run. Last observed 2026-10-07: [aiweekly.co: Forbes — Surge AI, Mercor, AfterQuery and Turing sold ~$500M/year to Chinese labs](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to), [Surge AI blog](https://surgehq.ai/blog).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
@@ -139,6 +158,27 @@ Mercor's other lab customers (OpenAI, Google, Anthropic, all reported
 clients) read an Nvidia stake the way they read Meta's stake in Scale,
 this entry could develop the same customer-exodus arc within months.
 Last observed 2026-10-05: [The Information via Tech Startups: Nvidia in talks to invest in Mercor at $20B](https://techstartups.com/2026/08/19/nvidia-in-talks-to-invest-in-ai-data-startup-mercor-at-20-billion-valuation/), [PYMNTS: Nvidia weighs investment in Mercor](https://www.pymnts.com/news/investment-tracker/2026/nvidia-weighs-investment-in-round-valuing-mercor-at-20-billion/).
+
+Update 2026-10-07, two items, both weakening the "scale and incumbency"
+read above. First: the same Forbes investigation covered in this run's
+Surge AI update reports roughly 2% of Mercor's Q2 2026 revenue came
+from Chinese AI labs, and that Mercor hired an engagement manager
+focused specifically on that market — a smaller share than Surge's but
+the identical structural fact, a vendor serving frontier US labs and
+Chinese labs from the same contractor pool at the same time. Second: a
+Gazetteer SF investigation (2026-05-05, by Cydney Hayes, based on
+interviews with multiple anonymous former employees plus a December
+2025 internal survey) reported punishing, unpredictable hours,
+abrupt terminations without severance, and no formal HR, payment, or
+legal policies before late 2025; Mercor's spokesperson disputed or
+contextualized several of the specific claims. Neither item changes
+Mercor's growth trajectory, but both bear directly on the
+solicited-labor model itself: the category's fastest-growing vendor is
+now documented as running on contractor conditions substantial enough
+to draw a dedicated investigative piece, which is a cost the
+real-work-derived outcome record does not carry by construction (no
+one is assigned graded tasks under deadline pressure to produce it).
+Last observed 2026-10-07: [aiweekly.co: Forbes — Surge AI, Mercor, AfterQuery and Turing sold ~$500M/year to Chinese labs](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to), [Gazetteer SF: New troubles at Mercor](https://sf.gazetteer.co/new-troubles-at-mercor-infighting-face-time-slavery-and-inhumane-working-conditions).
 
 ### Prolific
 
@@ -455,3 +495,10 @@ at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Perman
   Scale/Meta entry), and ChatGPT Memory (walked back last run's
   "transparency gap closing" read after a dated critique found the
   edit surface doesn't reliably reach what the model actually uses).
+- 2026-10-07 — fourth run: dated update notes added to Surge AI (a
+  Forbes investigation reporting ~$500M/year in vendor sales to
+  Chinese AI labs, plus Surge's own new DAYJOB/GDP.xlsx/Tuesday Work
+  Index benchmarks converging on "economically valuable work" framing)
+  and Mercor (the same Forbes finding's smaller Mercor echo, plus a
+  labor-conditions investigation). No new entries added this run; the
+  monthly full-map pass is not due until around 2026-10-26.
