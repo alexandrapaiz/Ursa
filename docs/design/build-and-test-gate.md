@@ -413,7 +413,7 @@ not a defect in the file.
 ```
 docs/design/
   build-and-test-gate.md          <- this file, the artifact
-  build-and-test.workflow.yml     <- the verbatim content of the workflow, 133 lines
+  build-and-test.workflow.yml     <- the verbatim content of the workflow, 132 lines
   dep-floor.workflow.yml          <- the sibling gate, parked 2026-09-29
   dependency-floor.md             <- the sibling gate's artifact
 docs/agents/
