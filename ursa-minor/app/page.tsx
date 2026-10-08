@@ -34,6 +34,7 @@ export default function Home() {
 
         <ScrollCue />
 
+        <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20 portrait:mt-[92svh]">
           {/* landscape:max-w-[46vw] keeps the copy on its own side of the
               sky. Constellation places the dipper at (0.42 + x * 0.52) * w in
               landscape, "floating in the open sky beside the hero text", so
