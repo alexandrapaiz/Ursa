@@ -3689,3 +3689,122 @@ dataset sold to a lab that difference is the whole product.
   rather than leaving a buyer to notice the overlap unprompted.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-08 — Two launches share one resolver and nothing checks they agree
+- Trigger: reconciling PR #92 onto `main` today. The branch had extracted
+  `resolveEpisode` into `src/resolve-episode.ts` on 2026-10-05 so the CI
+  launch would not import the CLI entrypoint, and git merged that import
+  line without conflict. The result was two live definitions of the
+  resolve step: `main`'s, carrying the import refusal, descent
+  corroboration, the deploy detector and the exclusion-only record, and
+  the branch's copy of the same function from four features earlier, which
+  is the one `src/ci/run.ts` imports. Same name, same signature, different
+  behaviour. The full suite passed on that merge. Nothing failed, because
+  no test resolves one repository through both launches and compares.
+- What: `ursa run` and `ursa ci` are sold as the same resolve fired two
+  ways, and that claim is the whole premise of the Action surface: a lab
+  auditing a record made in CI is auditing the local resolver's behaviour
+  or it is auditing nothing. Today the claim is held up by one import path
+  nobody checks. A single fixture repository resolved both ways, with the
+  records compared field by field, turns the claim into a test. The
+  comparison cannot be exact everywhere, since the CI path carries a
+  window and a declaration the local path does not, so the test should
+  compare `stats`, `files` and every span's class and extents, and assert
+  the differences are confined to a named allowlist of fields rather than
+  asserting deep equality and then loosening it whenever it fails.
+- First step: one test that builds the four-commit fixture already in
+  `src/ci/ci.test.ts`, runs `resolveEpisode` through `main()` with `run`
+  and through `runCi` with a synthesized event payload, and asserts the
+  two records' `stats.byClass` and per-span classifications are identical.
+  It should fail today if either path is pointed back at a stale module.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — A design artifact's real payload is a claim with no test behind it
+- Trigger: the engineering-artifact standard's element 3 requires at least
+  one real example payload, and `docs/design/resolver-action.md` §3.3 held
+  one: a record with `survived_verbatim` 101 characters and
+  `survived_mutated` 128. By today those numbers were wrong in four
+  places, because `main`'s generation-side character accounting changed on
+  2026-10-04 and the recipe in §4 of the same document now yields 27 and
+  0. Nothing detected the drift for three days. The document was read, by
+  seats and by the PM, as current.
+- What: element 3 makes a design doc carry executable evidence, and
+  executable evidence that nobody executes decays faster than prose,
+  because prose at least reads as a claim from its own date while a JSON
+  payload reads as a fact about now. The repository already has the
+  machinery to check this: `ursa-major/fixtures/` holds committed records,
+  `src/invariants.ts` checks a record against itself, and
+  `npm run bundle:check` is exactly this pattern applied to bytes. The
+  same shape fits a documented payload: mark the fenced block with the
+  command that produces it, and have a test regenerate and diff.
+- First step: pick the one payload that is cheapest to regenerate,
+  §3.3's, move it into `ursa-major/fixtures/` as a committed file,
+  have `docs/design/resolver-action.md` include it by path rather than
+  inline, and add a test that rebuilds it from the §4 recipe and fails on
+  drift. Then the standard's element 3 is satisfied by a file that cannot
+  silently go stale, and the remaining inline payloads can follow one at a
+  time.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — The tuning store says what Ursa believes and never when it started believing it
+- Trigger: today's craft scan (note below). Mem0's SDK exposes memory
+  history, which tracks how a stored memory changed over time. Ursa's
+  tuning store has no equivalent: `grep -rn 'history|supersed|previousValue'
+  ursa-major/src/tuning/` returns nothing. A unit carries its current
+  value, its basis and its revocation tombstone, and that is all.
+- What: the user-facing promise is "see, edit, revoke, delete", and three
+  of those four are built and tested (`src/consent.ts`, including the hard
+  case that `ursa run` does not rebuild a forgotten record). "See" is the
+  weak one, because a preference the user does not recognise is one they
+  cannot evaluate without knowing where it came from and when. A unit that
+  says "reinforced 6 times, first from the record of 2026-09-25, last
+  changed 2026-10-02, and here is what it said before" is auditable in a
+  way a current value is not. It is also the Minor-side story: a lab
+  buying a preference unit should be able to see it was stable for three
+  weeks rather than written yesterday, which is the same longitudinal
+  depth CLAUDE.md §2 lists under Key Resources.
+- First step: `mergeDistill` already decides reinforce-versus-new per
+  unit, so the information exists at the moment it is thrown away. Append
+  a bounded `history` array to the unit at that point, each entry carrying
+  the record id, the timestamp and the value it replaced, and surface it
+  in `ursa consent show`. Bounded because an unbounded history on a store
+  that syncs is a size problem, and the first N plus the last N answers
+  the question the user actually asks.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — Craft scan: Mem0, and memory history as a user-facing surface
+- Trigger: the daily craft scan, rotating onto Category 3 of
+  docs/market/landscape.md (personalization and memory layers), which no
+  craft scan had reached. Mem0 is the closest thing to Ursa Major's
+  inference layer sold as a product.
+- Worth stealing: two things, one feature and one practice. The feature is
+  **memory history**, a per-memory record of how it changed over time,
+  which Ursa's tuning store has no equivalent for; that is the ledger
+  entry above. The practice is sharper and cheaper: Mem0's own guidance
+  for deletion is **a test that proves it**, written out as a recipe —
+  create memories for one test user across several agents and runs, issue
+  the scoped delete, then confirm retrieval returns nothing. Shipping the
+  verification recipe beside the deletion API, as documentation, treats
+  "we deleted it" as a claim the reader is invited to check rather than
+  one they are asked to accept.
+- Where Ursa is ahead, concretely: Mem0's own documentation states that
+  deletion does not reach conversation logs, analytics stores, file
+  uploads, backups or training pipelines, which need their own retention
+  controls. That is the whole difficulty of the promise, left to the
+  integrator. Ursa's `forget` is tested against the hardest version of it
+  (`src/consent.e2e.test.ts`, "forget erases the record, and ursa run does
+  not rebuild it from the same git history"), and its answer to derived
+  data is `forgetRecordInTuning`, which strips the record's contribution
+  from the tuning store rather than deleting a row and leaving the
+  inference standing. Mem0 also ships the operations and leaves the
+  interface and authorization to the application; Ursa's `ursa consent
+  show` is the interface, which is the part the user judges.
+- The honest discount: Mem0 has a hosted dashboard serving real users
+  today and Ursa has a CLI. Most of what is readable about Mem0's
+  transparency features is its own marketing, so the comparison above is
+  against vendor claims, not against a product this seat ran.
+- Cost: $0
+- Status: proposed
