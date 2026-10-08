@@ -3526,6 +3526,98 @@ dataset sold to a lab that difference is the whole product.
 - Cost: $0
 - Status: proposed
 
+### 2026-10-05 — Craft scan: CodeRabbit's "Learnings Added" block
+- Trigger: building the run comment for the resolver Action and needing
+  to decide how much the tuning-delta field should say. CodeRabbit is
+  the closest comparable surface: an AI reviewer that posts a structured
+  comment on every pull request and keeps a per-organization memory.
+- Worth stealing: CodeRabbit makes its memory writes **visible in the
+  same comment that made them**, as a collapsible "Learnings Added"
+  section. The user sees what was learned at the moment it is learned,
+  on the surface they are already reading. Ursa's tuning delta currently
+  reports two integers ("3 new, 1 reinforced"), which is auditable only
+  by going and reading `.ursa/tuning.json` — and on a runner that file
+  is destroyed with the workspace, so in practice it is auditable by
+  nobody. Naming the units in a collapsible block costs nothing and
+  turns the delta from a number into the inspect-and-edit promise
+  CLAUDE.md constraint 2 already makes.
+- What Ursa does better: CodeRabbit's learnings are **stated** — you
+  type your preference in a comment and it stores what you said. That is
+  the stated-preference survey `docs/vision.md` §0b rejects on the third
+  principle, and it inherits the known gap between what people say they
+  want and what they keep. Ursa reads the edit instead of the
+  explanation, so a preference the user cannot articulate still lands.
+  CodeRabbit also cannot compare across models; it reviews whatever the
+  human wrote, with no provenance join back to which model generated it.
+- Source: https://docs.coderabbit.ai/knowledge-base/learnings
+
+### 2026-10-05 — Name the units behind the tuning delta in the run comment
+- Trigger: the craft scan above, against the comment this run shipped.
+  `renderRunCommentFieldTable` prints the tuning delta as "3 new, 1
+  reinforced" with no way to see which three, and on a GitHub runner
+  `.ursa/tuning.json` is deleted when the job ends, so the only copy of
+  the answer dies with the workspace.
+- What: extend `TuningDelta` with `added: Array<{ id, statement, domain,
+  polarity }>` and `reinforced: Array<{ id, statement, evidenceCount }>`,
+  populated by `distillAll` from the values `mergeDistill` already
+  computes, and render them inside the existing collapsed detail block as
+  one line per unit. The five-field table does not change: the delta row
+  keeps its counts, and the names sit under the fold. This keeps the
+  comment's fixed shape while making the number checkable, and it is the
+  only durable record of a model-mode run on an ephemeral runner.
+- First step: widen `TuningDelta` in `ursa-major/src/ci/comment.ts` and
+  have `distillAll` in `src/ci/run.ts` collect the merged axioms it
+  already walks past; one test asserting the five-row table is byte-identical
+  with and without the named units.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 — Resolve the pull request before it merges, as a check instead of a comment
+- Trigger: writing `examples/resolve-on-merge.yml` and noticing that
+  `pull_request: types: [closed]` means the record exists only after the
+  decision is made. Every number in the run comment describes work that
+  can no longer be changed, which makes the comment a receipt rather
+  than feedback.
+- What: a second trigger on `pull_request: types: [opened,
+  synchronize]` that runs the same resolver over the branch's own
+  commits and reports survived-verbatim against the repository's recent
+  median as a non-blocking check. The signal is already computable: the
+  branch carries agent commits and human edits of them before the merge
+  button is pressed. A reviewer would see "this branch needed more
+  correction than the last ten" while the branch is still open. Nothing
+  about the record schema or the resolver changes; only the trigger and
+  the rendering do. The merge-time comment stays, because acceptance is
+  still declared at merge.
+- First step: add `ursa ci --mode branch` that takes the window from
+  `pull_request.base.sha..pull_request.head.sha` on an open pull request
+  and writes a check run instead of a comment, and measure it against
+  the last ten merged pull requests in this repository.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-05 — Make the bundle's freshness a merge gate, not a convention
+- Trigger: `ursa-major/dist/ursa.cjs` is a committed build artifact and
+  the Action runs it, not the source. `npm run bundle:check` exists and
+  fails on drift, but nothing runs it, so the first silent divergence
+  between `src/` and `dist/` would ship a resolver that is one or more
+  merges behind its own tests while every test stays green.
+- What: this repository has no continuous-integration workflow for
+  `ursa-major` at all — `npm test` has never run anywhere but a seat's
+  sandbox. One workflow running `npm ci`, `npx tsc --noEmit`, `npm test`
+  and `npm run bundle:check` on pull requests touching `ursa-major/**`
+  closes both gaps at once, and the bundle-check is the part that cannot
+  be recovered by a careful reviewer, because the drift is invisible in
+  a diff of 75,000 generated bytes.
+- First step: queue it in the engineer seat's own queue file,
+  `docs/agents/pending-workflow-changes-engineer.md`, beside PWC-ENG-2
+  (this branch's dogfood entry, renumbered from PWC-5 when the per-seat
+  convention of 2026-10-04 reached it), since the seat cannot write
+  `.github/workflows/` itself, and
+  specify it to run only on the `ursa-major/**` path filter so it costs
+  nothing on documentation-only pull requests.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-07 (market) — A provenance-based trust guarantee, distinct from the equity-based neutrality pitch
 - Trigger: this run's landscape watch (docs/market/landscape.md, Surge
   AI and Mercor updates). A Forbes investigation (2026-08-05, via
