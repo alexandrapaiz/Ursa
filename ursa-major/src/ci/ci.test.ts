@@ -103,6 +103,61 @@ describe('the run comment carries the same fields in the same order', () => {
   })
 })
 
+describe('the empty-window sentence names the bound that dropped the unit', () => {
+  // The defect this pins, found on 2026-10-08 by running the reconciled
+  // bundle against the throwaway repository in docs/design/resolver-action.md
+  // §4: the comment printed "no commit here carried an agent marker that a
+  // later human commit then edited" while its own step output said
+  // `units-found=1`. One commit did carry the marker. The record was dropped
+  // by --min-chars, and the reader was sent to fix their commit trailers.
+  const CTX = {
+    prNumber: 7, repo: 'alexandrapaiz/ursa-demo', range: 'abc1234..def5678',
+    windowNote: "merge style undetermined: window is the pull request's own commits",
+    declarationBasis: 'undeclared', recordsPath: '/tmp/x/.ursa/records', runUrl: null,
+  }
+  const NO_MARKER = 'no commit here carried an agent marker'
+
+  it('still blames authorship when, and only when, no work unit was found at all', () => {
+    const body = renderRunComment(runCommentFields([], [], CI_ZERO), CTX)
+    expect(body).toContain(NO_MARKER)
+  })
+
+  it('does not blame authorship when a unit was found and then dropped', () => {
+    const body = renderRunComment(runCommentFields([], [fakeEpisode('a')], CI_ZERO), {
+      ...CTX, dropped: { unresolvable: 0, belowMinChars: 1, minChars: 200 },
+    })
+    expect(body).not.toContain(NO_MARKER)
+    expect(body).toContain('1 work unit was found, and it did not become a record.')
+    expect(body).toContain('The reason: 1 carried fewer than 200 generated characters')
+    expect(body).toContain('`--min-chars`')
+  })
+
+  it('separates the size floor from a unit this clone could not resolve', () => {
+    const body = renderRunComment(runCommentFields([], [fakeEpisode('a'), fakeEpisode('b'), fakeEpisode('c')], CI_ZERO), {
+      ...CTX, dropped: { unresolvable: 2, belowMinChars: 1, minChars: 200 },
+    })
+    expect(body).toContain('3 work units were found, and none of them became a record.')
+    expect(body).toContain('Of those, 1 carried fewer than 200 generated characters')
+    expect(body).toContain('2 resolved to nothing this clone could stand behind')
+  })
+
+  it('says it does not know rather than inventing a reason, when the caller tracked none', () => {
+    const body = renderRunComment(runCommentFields([], [fakeEpisode('a')], CI_ZERO), CTX)
+    expect(body).not.toContain(NO_MARKER)
+    expect(body).toContain('did not record which bound dropped them')
+  })
+
+  it('leaves the five-field table and its order alone', () => {
+    const body = renderRunComment(runCommentFields([], [fakeEpisode('a')], CI_ZERO), {
+      ...CTX, dropped: { unresolvable: 0, belowMinChars: 1, minChars: 200 },
+    })
+    const positions = FIELD_ORDER.map((label) => body.indexOf(label))
+    expect(positions.every((p) => p >= 0)).toBe(true)
+    expect(positions).toEqual([...positions].sort((a, b) => a - b))
+    expect(body).toContain('| 0 of 1 |')
+  })
+})
+
 describe('a thumbs up is a declaration and silence is not', () => {
   const comment: IssueComment = {
     id: 42, html_url: 'https://github.com/o/r/pull/7#issuecomment-42',

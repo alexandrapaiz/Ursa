@@ -3304,15 +3304,33 @@ function renderRunCommentFieldTable(f) {
     `| Tuning delta \u2014 preference units this run added to, or reinforced in, the tuning store | ${deltaCell} |`
   ].join("\n");
 }
+function emptyWindowSentence(f, ctx) {
+  const opening = "Nothing resolved in this window. That is a reading, not a failure:";
+  if (f.unitsFound === 0) {
+    return `${opening} no commit here carried an agent marker that a later human commit then edited.`;
+  }
+  const one = f.unitsFound === 1;
+  const found = one ? "1 work unit was found, and it did not become a record." : `${f.unitsFound} work units were found, and none of them became a record.`;
+  const d = ctx.dropped;
+  if (!d) return `${opening} ${found} This run did not record which bound dropped them.`;
+  const because = [];
+  if (d.belowMinChars > 0) {
+    because.push(`${d.belowMinChars} carried fewer than ${d.minChars} generated characters, the \`--min-chars\` floor, which is small enough that a survival figure over it would be noise`);
+  }
+  if (d.unresolvable > 0) {
+    because.push(`${d.unresolvable} resolved to nothing this clone could stand behind, which is usually a blob the runner could not read or a file over the size ceiling`);
+  }
+  if (because.length === 0) return `${opening} ${found}`;
+  const lead = one ? "The reason:" : "Of those,";
+  return `${opening} ${found} ${lead} ${because.join(", and ")}.`;
+}
 function renderRunComment(f, ctx) {
   const lines = [RUN_COMMENT_MARKER, ""];
   lines.push(`**Ursa Major resolved this merge.** Pull request #${ctx.prNumber} in \`${ctx.repo}\`.`);
   lines.push("");
   lines.push(renderRunCommentFieldTable(f));
   lines.push("");
-  lines.push(
-    f.unitsResolved === 0 ? "Nothing resolved in this window. That is a reading, not a failure: no commit here carried an agent marker that a later human commit then edited." : "That's the part worth noticing: not what got written, what got kept."
-  );
+  lines.push(f.unitsResolved === 0 ? emptyWindowSentence(f, ctx) : "That's the part worth noticing: not what got written, what got kept.");
   lines.push("");
   lines.push("<details><summary>How this run was bounded</summary>");
   lines.push("");
@@ -3385,9 +3403,17 @@ async function runCi(opts) {
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
   const recordPaths = [];
+  const dropped = { unresolvable: 0, belowMinChars: 0, minChars };
   for (const episode of episodes) {
     const record = resolveEpisode(opts.projectPath, episode);
-    if (!record || record.stats.generated.totalChars < minChars) continue;
+    if (!record) {
+      dropped.unresolvable++;
+      continue;
+    }
+    if (record.stats.generated.totalChars < minChars) {
+      dropped.belowMinChars++;
+      continue;
+    }
     const signals = deriveSignals(record, declaration);
     signals.notes = [...signals.notes ?? [], `CI launch: ${window.note}`];
     record.signals = signals;
@@ -3405,6 +3431,7 @@ async function runCi(opts) {
     windowNote: window.note,
     declarationBasis: declaration.basis,
     recordsPath: (0, import_node_path6.join)(ursaDir(opts.projectPath), "records"),
+    dropped,
     runUrl: opts.runUrl ?? null
   });
   let commentUrl = null;
