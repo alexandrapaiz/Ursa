@@ -1,39 +1,50 @@
-# Dispatch queue — 2026-10-07, second message pass (~12:30 UTC)
+# Dispatch queue — 2026-10-08, message pass (~12:30 UTC, the six-hour pass)
 
-`PM_DISPATCH_ENABLED` is not set to `true` (checked `gh variable list`
-directly). No owner instructions carried on this pass (a scheduled
-message pass, not an owner-present window).
+`PM_DISPATCH_ENABLED` is still not checkable from this run's token
+(`gh variable list` returns a 403, same as the last pass). Defaulting
+to not-enabled, the same conservative read an unset value gets, since
+nothing here would fire regardless (see below). This is a
+message-triggered pass, not an owner-present window, so no owner
+instructions carry.
 
 ## Proposed
 
-None. Every seat this charter may dispatch, except market and okr,
-already carries an open pull request, which forecloses
-`docs/standards/pm.md` §11.4's hard stop before any other criterion is
-checked:
+None. Every seat below is still walled by its own open PR, or has
+nothing a dispatch rule asks for:
 
 | Seat | Most recent open PR | Opened | State |
 |---|---|---|---|
-| engineer | #126 | 2026-10-07 | draft, in progress (subsumes #92) |
+| engineer | none | — | #134 merged this morning; the seat has no open PR right now |
 | research | #114 | 2026-10-06 | draft, in progress |
 | frontend | #125 | 2026-10-07 | draft, in progress |
 | skill | #123 | 2026-10-07 | draft, in progress |
-| security | #124 | 2026-10-07 | draft, in progress (also #112, #85, #75 still open behind it) |
+| security | #124 | 2026-10-07 | draft, in progress (also #112, #85, #75, #47 still open behind it) |
 | finance | #91 | 2026-10-05 | draft, idle |
-| market | none | — | #127 merged this pass; no open PR |
-| okr | none | — | #88 and #63 both merged |
+| market | none | — | #127 merged 2026-10-07; no open PR |
+| okr | none | — | no open PR |
 
-Checked market and okr against the rest of §11.3 anyway, since neither
-is walled by an open PR:
+Engineer now carries no open PR of its own, which is the one change
+since the last pass. Checked it against §11.3 anyway: no seat run
+failed in the last 24 hours (`gh run list` shows none since #136's
+check), no sprint item is due this week with engineer un-run (both of
+engineer's two sprint items, #107 and #109/#134, already shipped), and
+no ADR merged since the last pass names it. Nothing fires for engineer
+even with the queue clear.
 
-- **No seat run failed in the last 24h.** `gh run list --status
-  failure --created ">=24 hours ago"` returns empty.
+Checked market and okr again for completeness, since neither is
+walled by an open PR:
+
+- **No seat run failed in the last 24 hours.** Confirmed directly.
 - **No sprint item names market or okr.** sprint-2026-10-05's three
-  items are engineer (x2, both shipped — #107, #109) and security (x1,
-  open). Neither market nor okr owns anything on the live sprint.
+  items are engineer (×2, both shipped) and security (×1, open).
+  Neither market nor okr owns anything on the live sprint.
 - **No ADR merged since the last pass names either seat.**
   `docs/decisions.md` is unchanged since 2026-09-25.
-- **No milestone is due within three days.** The live milestone
-  ("Sprint 2026-10-05," #3) is due 2026-10-11, four days out.
+- **Milestone "Sprint 2026-10-05" (#3) is due within three days**
+  (2026-10-11) but carries zero attached issues/PRs through GitHub's
+  own milestone field, so the §11.3 row has no items to name and does
+  not fire for any seat. The gap is the milestone's wiring, not a
+  seat's work — ceremony-lane per §2b, flagged in `pending.md`.
 
 So nothing fires for them either. Checked the rest of §11.3 for
 completeness:
@@ -42,11 +53,10 @@ completeness:
   green or has no checks configured on its changed paths.
 - **The one sprint item still open** is security's redaction standard
   (item 3, gates O2 KR2.2) — no PR touches it, which would ordinarily
-  fire "a sprint item is due this week and its owning seat has not run"
-  under §11.3, except security already has four open pull requests,
-  which forecloses it under §11.4 regardless. The real unlock is
-  security clearing its own queue first; already asked of it, unchanged
-  this pass.
+  fire "a sprint item is due this week and its owning seat has not
+  run" under §11.3, except security already has five open pull
+  requests, which forecloses it under §11.4 regardless. Unchanged from
+  the last four passes.
 - exo, sales: never dispatched by this charter (exo audits this seat;
   sales is dormant, posture private-R&D, never for sale per ADR-001).
 

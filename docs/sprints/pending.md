@@ -1,86 +1,85 @@
 # Pending — what the org owes, and what waits on the owner
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
-Reconciled 2026-10-07, ~12:30 UTC (second message pass of the day,
-roughly six hours after the first, #121), against `gh pr list --state
-open --limit 200`, `gh run list --status failure` for the last 24h, the
-board's inbox (`$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`),
-and `docs/decisions.md`.
+
+Reconciled 2026-10-08, ~12:30 UTC (third message pass since 2026-10-07
+evening, the six-hour pass), against `gh run list --limit 30`, `gh pr
+list --state open --limit 100`, the board's inbox (`$BOARD_API_URL
+/api/messages?to_seat=pm&to_company=Ursa`, filtered client-side since
+the query params alone return other companies' traffic too), and
+`docs/decisions.md`. This branch builds on this seat's own #135 and
+#136 (forked from #136's tip, which already carries #135 as an
+ancestor, confirmed with `git merge-base --is-ancestor`), not from
+`main`.
 
 ## Top three for the owner
 
-1. **Security's redaction-standard item (sprint-2026-10-05's item 3,
-   gates O2 KR2.2) still has no open PR touching it.** Confirmed again
-   directly: `find docs/security -iname '*redaction*'` returns nothing,
-   and none of security's four open pull requests (#75, #85, #112,
-   #124) touch a redaction path. Nothing for the owner to do here
-   directly — the hard stop in `docs/standards/pm.md` §11.4 forecloses
-   dispatching security fresh while it already carries four open pull
-   requests — but it is the one sprint item at real risk of carrying
-   past the week, and the size of that seat's own queue is probably why.
-2. **Three ledger entries are now 17 to 19 days past the two-week
-   verdict mark**, unchanged in substance since they were first flagged:
-   repo split (2026-09-18, 19 days), tuning packs (2026-09-19, 18
-   days), the merge-commits/PR-reader finding (2026-09-20, 17 days).
-   Full entries in `docs/ideas.md`. Grooming them into the ledger with a
-   verdict is Monday's ceremony, not this pass's, but they are old
+1. **#134 is merged.** It merged at 2026-10-08T06:26:22Z, in #136's
+   pass, under Tier B (not this seat's own PR, not a draft, checks
+   green, no Tier C path, merged clean). It closed #92, #126 and #130
+   with it. The engineer seat's open-PR queue is down to zero of its
+   own work right now. Nothing left for the owner to do here.
+2. **Security's redaction-standard item (sprint-2026-10-05's item 3,
+   gates O2 KR2.2) still has no open PR touching it.** Checked again
+   directly: `docs/security/` still does not exist as a directory, and
+   none of security's five open pull requests (#47, #75, #85, #112,
+   #124) touch a redaction path. The sprint's milestone (#3) is due in
+   three days (2026-10-11) and this is the only one of its three items
+   still open — the other two (#107, #109) are shipped, and #134's
+   merge closes out the engineer side of the sprint entirely. Nothing
+   new for the owner to do here directly: the hard stop in
+   `docs/standards/pm.md` §11.4 still forecloses dispatching security
+   fresh while it already carries five open pull requests, which is
+   almost certainly why this is stuck.
+3. **Three ledger entries are now 20 to 21 days past the two-week
+   verdict mark**, unchanged in substance since first flagged: repo
+   split (2026-09-18, 20 days), tuning packs (2026-09-19, 19 days), the
+   merge-commits/PR-reader finding (2026-09-20, 18 days). Full entries
+   in `docs/ideas.md`. Grooming them into the ledger with a verdict is
+   Monday's ceremony (2026-10-12), not this pass's, but they stay old
    enough to keep naming directly every pass until she rules.
-3. **Three pull requests stay Tier C no matter how clean they merge**:
-   #80 (`company.yaml`'s roster), #39 and #48 (both touch files under
-   `prompts/`). All three are clean, green, and otherwise ready; none
-   is mine or any PM's to merge.
 
-## Resolved since the last pass (#121, 06:33 UTC)
+## Failures this pass
 
-- **#127** (market, landscape/positioning/four briefs plus a ledger
-  append) merged this pass under Tier B: clean, green, no Tier C path,
-  not this seat's own PR. It supersedes #116, #89, #52, and #21, all of
-  which market had already closed itself with pointers before this pass
-  started.
-- **#117** (this seat's own prior-day pass) was merged by HQ's PM at
-  12:26 UTC, the same route that already worked for #111 — confirmed on
-  the board, not assumed.
-- **#122** (engineer, the exclusions record) was already merged by the
-  prior pass; still showing here as landed, not pending.
+None. `gh run list` shows no failures since #136's pass (last checked
+2026-10-08T06:29Z); the only runs since are two successful
+`redaction-gate` checks. Nothing to triage or rerun.
 
-## Correction to this seat's own prior notes
+## Resolved since the last pass (#136, ~06:29 UTC 2026-10-08)
 
-The prior pass (#121) reported sprint-2026-10-05 item 2 ("stop labelling
-similarity as descent") as "still open with no run against it yet."
-That was wrong, checked directly this pass: **#109** ("similarity is
-not descent"), merged 2026-10-06T06:29 UTC, shipped exactly this item —
-`ursa-major/src/corroborate.ts` exists on `main`, wired into
-`resolve.ts`'s `corroborate` hook and called from `bin/ursa.ts` the same
-way `attributeDeletion` already is. Two of the sprint's three items are
-shipped (#107 for item 1, #109 for item 2); only item 3 (redaction
-standard, security) remains open. Recording the correction here so the
-error doesn't get repeated from this file a second time.
+- **#134**: merged, under Tier B, by #136's own pass. Closed #92, #126
+  and #130 with it.
+- **#135, #136** (this seat's own prior passes today): both superseded
+  by this pass. #135 is confirmed an ancestor of #136; #136 is being
+  closed with a pointer here, carrying both forward with nothing lost.
 
 ## My own open pull requests
 
-- **#121** (prior pass, 06:33 UTC): closed this pass as superseded.
-  Its only content was `docs/sprints/pending.md` and
-  `docs/sprints/dispatch-queue.md`, both rewritten in full again here;
-  nothing in it was unique once this file carries the fresher
-  reconciliation, and it had gone conflicting against `main` once #117
+- **#135**: superseded by #136 (confirmed ancestor), which was
+  superseded in turn by this pass. Closing both with a pointer to this
+  PR.
+- **#136**: carried forward in full — this branch forks from its tip,
+  so the Tier B merge of #134 and everything else it did is current in
+  what this pass opens, not redone.
+
+## Everything else open (22 total, before this pass closes #135/#136)
+
+- **Engineer's queue**: empty. #134 was the last open item and it is
   merged.
-- **#128** (this pass): readied before this run ends.
-
-## Everything else open (22 total)
-
-- **Tier C, held for the owner or a chair**: #80, #39, #48 (see "Top
-  three").
-- **In flight from last pass's handoffs, untouched this pass**: #123
+- **docs/ideas.md append conflicts to expect on merge**: #123, #75,
+  #64 and #50 all still touch `docs/ideas.md`, and #134 already landed
+  its own append (new entries at the end, plus #92's four 2026-10-05
+  entries inserted in date order). Whichever of #123/#75/#64/#50 the
+  owner merges next will conflict against the now-landed #134; expected
+  resolution in every case is keep-both, named here so the owner
+  doesn't learn the merge order from a failed merge.
+- **In flight from earlier handoffs, untouched this pass**: #123
   (skill, retarget off the closed base), #124 (security, rebase the
-  severe-findings PR), #125 (frontend, rebase the visual review), #126
-  (engineer, reconcile the resolver-Action branch, subsumes #92) — all
-  drafts, all green, none older than six hours, none with an unanswered
-  review comment. Nothing in `docs/standards/pm.md` §11.3 fires on any
-  of them yet.
-- **Conflicting, still waiting on the owning seat's rebase**: #92
-  (superseded in substance by #126, left open until engineer closes it
-  itself), #103 (frontend, handed off, #125 is the response), #75
-  (security, handed off, #112/#124 are the response).
+  severe-findings PR), #125 (frontend, rebase the visual review) — all
+  drafts, all green, none with an unanswered review comment.
+- **Conflicting, still waiting on the owning seat's rebase**: #103
+  (frontend, handed off, #125 is the response), #75 (security, handed
+  off, #112/#124 are the response).
 - **Draft, idle since 2026-10-05, not failing CI, seat already has a
   newer open PR**: #47, #49, #83, #84, #85, #87, #91. Left for each
   seat's own next run.
@@ -89,24 +88,36 @@ error doesn't get repeated from this file a second time.
   seat**: #50, #64 (skill) — both target a predecessor branch that
   closed without merging; handed to skill previously, unchanged this
   pass.
+- **Tier C, waiting on the owner directly**: #39, #48 (both touch
+  `prompts/`), #80 (touches `company.yaml`).
 
 Full list, oldest first, is `gh pr list --state open`; not reproduced
 line by line since it goes stale by the next pass.
 
 ## Waiting on an owner-only action
 
-- The three proposed ledger entries at item 2 above.
+- `company.yaml` (#80), and #39/#48 under `prompts/`.
+- The three ledger entries at "Top three" item 3.
 - The `docs/decisions.md` ADR-005/ADR-006 numbering collision (two
   rulings each, 2026-09-23 through 2026-09-25) is still unfixed.
-  Outside this seat's writable surface.
-- `company.yaml` (#80), and #39/#48 under `prompts/`.
-- Milestone "Sprint 2026-10-05" (#3, due 2026-10-11) has zero
-  issues/PRs attached through GitHub's own milestone field. Not yet
-  within the three-day dispatch window; wiring it is ceremony-lane work
-  (§2b).
+  Outside this seat's writable surface. Checked again this pass:
+  unchanged.
+- **Milestone "Sprint 2026-10-05" (#3, due 2026-10-11) has zero
+  issues/PRs attached through GitHub's own milestone field**, and is
+  now three days out, same as the last pass found. Still nothing fires
+  under §11.3's milestone row — it requires open items *attached to
+  the milestone*, and this one has none to name. Wiring attachment is
+  ceremony-lane (§2b), and the next ceremony (Monday, 2026-10-12) falls
+  one day after this milestone's due date — naming that gap here again
+  rather than letting the owner notice it from an empty milestone page
+  when the sprint closes.
 
-## Failures this pass
+## Board message check
 
-`gh run list --status failure --created ">=6 hours ago"` and the same
-query over the last 24 hours both returned empty. Nothing to classify,
-nothing to rerun.
+Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`
+directly (filtering client-side on `to_company == "Ursa"` and
+`to_seat == "pm"`, since the query params alone return other
+companies' traffic too). The newest message addressed to Ursa's pm
+seat is still the 2026-10-07T19:09 engineer note about the misrouted
+handoffs, answered the same pass (#132's work, carried forward through
+#135/#136 into this PR). Nothing new since.
