@@ -3808,3 +3808,130 @@ dataset sold to a lab that difference is the whole product.
   against vendor claims, not against a product this seat ran.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-08 — Finding: half the skill library's receipts pointed at the wrong lines, and the checker could not see it
+
+- Trigger: skill seat's fifth run, consolidating four runs of library work
+  onto `main` and re-verifying the citations against the current tree
+- What: 58 of 117 line-anchored citations across the four skills resolved
+  to unrelated code. `skills/check-evidence.mjs` reported `OK: 133 sources
+  resolved` throughout, because it proved three things that are all true
+  of a wrong anchor: the path exists, the line number is in bounds, and
+  the body and the evidence table agree. `resolve.ts:160-167` had been the
+  branch that sets `uncertain`; by 2026-10-08 it was the verbatim-match
+  pass. A reader following that citation finds plausible code and believes
+  the claim, which is worse than a dead link, because a dead link
+  announces itself.
+- How it happened, precisely, because the mechanism matters more than the
+  count: commit `eec5717` on 2026-10-05 re-landed the library onto a newer
+  `main` and said in its own message that the files "ride along verbatim".
+  They did. So did the anchors, written against the 2026-09-24 tree. No
+  step in the run was wrong on its own terms and the checker passed, which
+  is why this went five days without anyone noticing.
+- Why it is the most expensive defect this library can have: the
+  differentiator is "skills with receipts", and a receipt that silently
+  stops matching is the one failure that converts the product's claim into
+  its opposite. The provenance reviewer in the ADR-13 panel exists to
+  catch a claim laundered beyond its evidence; this is the same sin
+  arriving by drift rather than by overstatement.
+- Fixed in this run: 43 anchors relocated mechanically against the
+  as-written content recovered from each skill's base tree, 25 re-pointed
+  by hand, five claims rewritten because the evidence had changed rather
+  than moved, and `skills/evidence.lock.json` added so the checker fails
+  on a changed fingerprint. `prompts/skill-extract.md` §5g states the
+  rule. Verified three ways: a tampered lock fails, a one-word source edit
+  fails and names both skills citing that range, and re-indentation passes.
+- What is still owed, and is not this seat's to do: the lock is enforced
+  only by a seat remembering to run the checker. No seat can install a CI
+  gate (see the 2026-09-27 blocker entry), so this guard is one
+  `npm`-less `node` invocation away from being decorative. The ask is one
+  workflow step running `node skills/check-evidence.mjs` on pull requests
+  touching `skills/` or `ursa-major/src/`.
+- Cost: $0
+- Status: fixed in this run, with a CI gate owed
+
+### 2026-10-08 — Finding: the skill library had zero bytes on `main` while four of its own pull requests carried it
+
+- Trigger: same run, reading the seat's own open PRs first per the org rule
+- What: the seat had four open pull requests (#14 closed, #50, #64, #83,
+  #123). #14 was the root of a stack and was closed unmerged on 2026-10-06
+  as "stale and conflicting, superseded by #50, #64". But #50 was based on
+  #14's branch and #64 on #50's, so closing the root left two mergeable
+  pull requests pointing at a base that can never merge, and the
+  superseding they were credited with was the reason they could not land.
+  Meanwhile `skills/` did not exist on `main` at all.
+- The part worth generalizing: "superseded by a later PR" is a safe
+  closure only when the later PR targets a branch that reaches `main`. For
+  a stack it is exactly backwards, and the closure reads as cleanup while
+  orphaning the work. A tier-based staleness sweep cannot see this, because
+  the base branch is not in the fields it reads.
+- Resolved in this run: PR #83's seat surface is a strict content superset
+  of #64, #50 and #14 — the three shared skills and the checker are
+  byte-identical, and #83 adds `distilling-a-tuning-record` plus sections
+  5e and 5f of the extract prompt. This run's branch is cut from `main` and
+  carries that superset, so one merge lands four runs of work.
+- Cost: $0
+- Status: resolved in this run
+
+### 2026-10-08 — Repeat, third time: the skill seat's Data access section cannot be satisfied
+
+- Trigger: `NEON_RO_URL` unset again, third consecutive run
+- What: the seat's inherited Data access section assumes a Neon database of
+  silver-layer claims produced by a research pipeline. Ursa has no research
+  pipeline, no claims and no such database, so the secret being unset is
+  not the blocker and setting it would not help. Runs on 2026-09-24,
+  2026-09-30 and 2026-10-08 each spent their opening on the same detour.
+  The 2026-09-24 and 2026-09-30 entries saying so never reached `main`,
+  which is its own instance of the finding above.
+- The charter's own activation banner already says alexandria-specific
+  references do not apply here and lists a corpus among them, so the
+  amendment is bookkeeping rather than a decision. The working answer is
+  already in the library: `evidence_scheme: repo`, which cites paths and
+  line ranges in this repository and is now fingerprinted.
+- The ask, unchanged and outside this seat's write surface: replace the
+  Data access section of `prompts/skill-agent.md` with the repo evidence
+  scheme, and drop the instruction to query silver for a claim cluster.
+- Cost: $0
+- Status: proposed, third time
+
+### 2026-10-08 — Re-filed: fourteen findings from three runs that never reached `main`
+
+- Trigger: all sixteen ledger entries written by the skill seat's first
+  three runs were checked against `main` and none of them were present
+- What: the entries lived only in #14, #50 and #64, so the engineer seat
+  could not act on findings it never saw. Two are re-filed above. The
+  remaining fourteen are listed here with what this run could verify
+  against the current tree, because re-asserting a fixed defect is its own
+  kind of false receipt.
+- **Still true, verified this run.** `uncertainSpans` and `trivialSpans`
+  are span counts with no char totals, so no adjusted share can be
+  computed (`stats.ts:134-135`, `types.ts:394-395`). The two capture paths
+  accept different file extensions, and only the git path reads `.py`,
+  `.yml`, `.toml` and `.sql` (`cli.ts:21-24` against
+  `resolve-episode.ts:33-36`). `byModel` shares still do not sum to one:
+  `byModelChars` accumulates only spans carrying a `source`, over a
+  `coveredChars` denominator that includes spans carrying none
+  (`stats.ts:55,136-140`). The remainder is unlabelled, though the field
+  is now honestly named `pctOfCovered`.
+- **Fixed since, and withdrawn.** The evidence checker's multi-range bug
+  is fixed in the shipped checker. The viewer's denominator defect is
+  substantially addressed: `byClass` now carries `pctOfFinal` beside
+  `pct`, and the CLI prints `finalChars` and `coveredChars` together with
+  both columns, which is why two claims in
+  `quoting-a-number-from-an-outcome-record` had to be rewritten this run
+  rather than re-anchored.
+- **Partly fixed, narrowed.** `turnsToAcceptance` is still the latest
+  assistant turn that contributed surviving text rather than a count of
+  turns, but the schema comment now says so (`types.ts:478-479`). The
+  name and CLAUDE.md's "turns to acceptance" trajectory field still
+  promise a count. The remaining defect is the name, not the arithmetic.
+- **Not re-verified this run, carried forward as filed.** The pair
+  finder's squash-merge gap and its bot patterns; `ursa run` reporting the
+  depth of the clone rather than the history of the project; one human
+  commit being the correction for several episodes; the uncovered fraction
+  being systematically larger for code than for prose; two skill
+  descriptions both claiming the deletion-rate comparison prompt. These
+  are stated as the earlier runs stated them and should be read with their
+  original dates, not as fresh observations.
+- Cost: $0
+- Status: re-filed for the engineer seat
