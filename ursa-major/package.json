@@ -3,19 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Ursa Major provenance resolver \u2014 joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
+  "description": "Ursa Major provenance resolver — joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
   "scripts": {
     "test": "tsc --noEmit && vitest run",
     "typecheck": "tsc --noEmit",
     "resolve": "tsx src/cli.ts",
     "record:fixture": "tsx src/cli.ts --id mini-fixture --final fixtures/mini/final.md --conversations fixtures/mini/conversations --out fixtures/mini/record --generated-at 2026-09-25T00:00:00.000Z",
     "brief": "tsx src/hq/cli.ts brief",
+    "mcp": "tsx src/mcp/cli.ts",
     "hq:demo": "tsx src/hq/seed.ts",
     "bundle": "node build/bundle.mjs",
     "bundle:check": "node build/bundle.mjs --check"
   },
   "dependencies": {
-    "diff": "^8.0.2"
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "diff": "^8.0.2",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/jsdom": "^30.0.0",
