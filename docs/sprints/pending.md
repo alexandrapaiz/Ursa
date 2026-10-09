@@ -2,6 +2,12 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+**Run in progress, 2026-10-09 (six-hour pass).** Opening the record
+before the work, per the charter's ship-first rule. Built on #142 and
+#144's tip (both open, unmerged, this seat's own) rather than `main`,
+per "read your own seat's own PRs first." Full reconciliation follows
+in this same pass.
+
 Reconciled 2026-10-08, ~20:50 UTC (second message-triggered run this
 hour, not a scheduled pass). The event named the frontend seat's run
 `37835424738` as failed and asked for it to be triaged under the
