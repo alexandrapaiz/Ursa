@@ -164,7 +164,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 375 tests, 4 skipped
+npm test                                   # 486 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -178,6 +178,13 @@ npx tsx src/tuning/cli.ts distill --record <project>/.ursa/records/<id>.json \
 
 # Render the tuning store as a block any model can read.
 npx tsx src/tuning/cli.ts export --tuning <project>/.ursa/tuning.json --out tuning.md
+
+# Read the HQ before working: the rules that apply to these files, the
+# nearest prior corrections, and the guardrails already learned.
+npx tsx src/hq/cli.ts brief <projectPath> --files src/app/page.tsx
+
+# Or serve both of those to a model over MCP, so nothing is pasted.
+npx tsx src/mcp/cli.ts <projectPath>
 ```
 
 `--declare` records your own verdict on the project's current state.
@@ -241,6 +248,8 @@ nothing, because retention is never acceptance. The design is
 | `src/intervals.ts` | the one definition of how many distinct characters a set of extents covers, shared by `src/stats.ts` and `src/invariants.ts` so a generated sentence reused in two places is counted once where it should be and twice where it should be |
 | `src/text.ts` | the one definition of a quoted, truncated excerpt, shared by `src/signals.ts` and `src/loops.ts`, plus the predicate `src/invariants.ts` uses to decide whether a quote really appears in the text it claims to come from |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
+| `src/hq/` | the same store read forwards instead of backwards. Given a domain tag and the files an agent is about to touch, `get_briefing` returns the rules that apply, the nearest prior correction loops with the person's own words, and the guardrails they had to state after an agent went further than asked. Every unit carries where it came from, and the payload says in writing that it is evidence rather than orders (`docs/design/hq-briefing.md`, `docs/design/semantic-retrieval.md`) |
+| `src/mcp/` | serves the two reads above over the Model Context Protocol on stdio, so a model fetches them instead of the person pasting them. The resource `ursa://tuning/current` returns the exported tuning block and the tool `get_briefing` returns the briefing. Reads only, and a revoked rule reaches neither (`docs/design/hq-mcp.md`) |
 | `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
 | `src/ci/` | the CI launch: the merge window from the event payload, the five-field run comment, the thumbs-up read, CI mode for the distiller |
 | `action.yml`, `dist/ursa.cjs` | the reusable GitHub Action and the one-file bundle it runs |
