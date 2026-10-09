@@ -32,9 +32,20 @@
 //   node src/mcp/loaded-packages.mjs
 //   node src/mcp/loaded-packages.mjs @modelcontextprotocol/sdk/server/streamableHttp.js
 //
-// Output on stdout is one JSON object: `{ entries, packages, scripts }`,
-// where `packages` is the sorted list of node_modules package names whose
-// files were parsed and `scripts` is how many scripts were compiled in all.
+// Output on stdout is one JSON object: `{ entries, packages, scripts }`.
+//
+// `packages` is the sorted list of node_modules package names whose files
+// were compiled, and it is the stable part: three consecutive runs on one
+// machine give the same set, and so do two different entry points asked
+// the same question. That is the field anything should assert on.
+//
+// `scripts` is how many scripts V8 compiled in all, Node's own internals
+// included, and it is indicative rather than reproducible: observed
+// between 362 and 370 for the same stdio entry points on one machine in
+// one afternoon, because which internals get compiled lazily is not
+// something this probe controls. It is reported because a count that
+// collapses to near zero is the signature of a broken measurement, which
+// is worth being able to see. It is not reported as a figure to pin.
 
 import { Session } from 'node:inspector'
 

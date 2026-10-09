@@ -393,7 +393,9 @@ The probe then called `get_briefing` with
 `{ files: ['src/app/page.tsx'], maxRules: 3, maxCases: 1 }` and received
 the briefing below. It is quoted in full because it is the actual thing
 an agent reads, and because its last line is the deviation in §5 stating
-itself in the payload:
+itself in the payload. It is the payload **as of the morning of
+2026-10-09**; §10 quotes the same call again after that afternoon's
+change and the two differ by one sentence:
 
 ```markdown
 # Briefing
@@ -444,11 +446,14 @@ passing on `main` at b68e3f0. `node scripts/dep-floor.mjs` reports
 tree"; `ursa-major`'s one high advisory is `source-map-js`, dev-only, and
 it predates this branch.
 
-The probe is deliberately not committed. It needs a seeded store in
-`/tmp` and it spawns a child process per run, which makes it a slow and
-environment-dependent test rather than a unit one; the commands in §6
-reproduce it in full, which is the standard this repository already
-applies to `tools/stack/integrate.sh`-class checks.
+The process-layer probe is deliberately not committed. It needs a seeded
+store in `/tmp` and it spawns a child process per run, which makes it a
+slow and environment-dependent test rather than a unit one; the commands
+in §6 reproduce it in full, which is the standard this repository already
+applies to `tools/stack/integrate.sh`-class checks. The dependency probe
+added in §10 is a different case and *is* committed, for the reason given
+there: it needs no store, and the fact it measures can change without
+anyone touching this repository.
 
 ## 8. Tooling
 
@@ -457,7 +462,7 @@ alternative it beat.
 
 | Tool, at the version installed | Its job here | Why it, over what was considered |
 |---|---|---|
-| `@modelcontextprotocol/sdk` 1.32.1 (Anthropic's reference TypeScript SDK) | Implements the MCP server, the stdio transport, argument validation, and the `InMemoryTransport` pair the test uses | The plan's own choice (product-plan.md §9), and the alternative it beat there was hand-rolling the protocol. Against that alternative it also supplies the in-memory transport, which is what makes the test a real client rather than a mock. Its cost is honest and worth naming: it brings 17 production dependencies including `express` and `hono`, none of which the stdio path executes. They become live code only at M2.5. |
+| `@modelcontextprotocol/sdk` 1.32.1 (Anthropic's reference TypeScript SDK) | Implements the MCP server, the stdio transport, argument validation, and the `InMemoryTransport` pair the test uses | The plan's own choice (product-plan.md §9), and the alternative it beat there was hand-rolling the protocol. Against that alternative it also supplies the in-memory transport, which is what makes the test a real client rather than a mock. Its cost is honest, worth naming, and now measured rather than asserted: it brings 17 production dependencies, taking `ursa-major`'s production tree from 70 packages to 161, and `src/mcp/loaded-packages.mjs` shows that only 8 packages are compiled on the stdio path. `express`, `hono` and eight others are installed and never executed; they become live code only at M2.5. See §10. |
 | `zod` 4.6.5 | Declares `GET_BRIEFING_INPUT`, which the SDK compiles to the JSON Schema a client sees and validates arguments against before the handler runs | The SDK's `registerTool` accepts a zod shape, so this is the SDK's interface rather than a free choice. What was a choice: declaring it in `package.json` instead of relying on it as an undeclared transitive of the SDK. Two copies of zod in one tree break its instance checks, so the declared range `^4.6.5` is pinned to dedupe against the SDK's `^3.25 \|\| ^4.0`, verified by `find node_modules -name 'zod/package.json'` returning exactly one path. |
 | `tsx` 4.23.15 | Runs `src/mcp/cli.ts` directly, so the client's `command` needs no build step | Already this repository's pattern for every other entry point (`npm run resolve`, `npm run brief`). Compiling to `dist/` first would add a build step between an edit and the next conversation, and the bundle at `dist/ursa.cjs` deliberately does not include this surface. |
 | `vitest` 5.0.2 | Runs `src/mcp/mcp.test.ts` | Already the toolchain for all 486 tests. No reason to introduce a second runner for 14 of them. |
@@ -491,3 +496,282 @@ Two things a later day should take, neither of them blocking:
    remote transport it was specified for is a separate decision with its
    own authentication story, so adding the call before that decision
    would be building to a shape nobody has approved.
+
+## 10. Addendum, 2026-10-09 afternoon: what the briefing costs, and what the SDK carries
+
+Written by the second engineer run of 2026-10-09, against the surface the
+first one shipped in PR #146. Both items are ledger entries that run
+wrote while building it (`docs/ideas.md`, both dated 2026-10-09), and both
+are changes to this artifact rather than new artifacts, so they extend the
+elements above in place: §10.1 revises the payload in §4 and §7, §10.2
+revises the dependency claim in §8.
+
+### 10.1 `coverage.renderedChars`: the briefing reports its own size
+
+**The defect.** `get_briefing` takes two ceilings, `maxRules` and
+`maxCases`, and both are denominated in rules. A caller's real constraint
+is characters, and the two do not convert: in the fixture store, a rule
+carrying five evidence entries and a verbatim quote renders several times
+the length of a rule carrying one and none. So an agent choosing
+`maxRules: 8` was guessing at a number it could not translate into the
+thing it has to budget, which is the context window it is already
+partway through. `Briefing.coverage` answered in the same unit as the
+question ("returned 1 rule and 1 case") and so answered nothing.
+
+**The interface, as a caller writes it.** One new optional field on
+`BriefingCoverage` (`ursa-major/src/hq/types.ts`) and one new function
+beside `renderBriefing` (`ursa-major/src/hq/briefing.ts`):
+
+```ts
+export interface BriefingCoverage {
+  // ... axiomsConsidered, axiomsReturned, recordsConsidered,
+  //     loopsConsidered, casesReturned, retrieval, retrievalModel,
+  //     unfiltered, all unchanged
+  /** character count of renderBriefing's own output, including the
+   *  sentence that prints this number. Absent means not measured. */
+  renderedChars?: number
+}
+
+/** A briefing and the markdown that was measured to fill in its
+ *  coverage.renderedChars. The two are only true together. */
+export interface MeasuredBriefing {
+  briefing: Briefing
+  markdown: string
+}
+
+export function measureBriefing(briefing: Briefing): MeasuredBriefing
+```
+
+**Why a second function rather than a field `buildBriefing` fills in.**
+`buildBriefing` cannot know the number. It is a property of the
+rendering, and the renderer runs afterwards over the briefing's own
+`coverage` object. The field is therefore optional, and absent means not
+measured, never means zero. That matches `retrievalModel` in the same
+interface, which is absent rather than `'none'` when no model ranked.
+
+**Why the number is defined as a fixed point, which is the only
+interesting line of code here.** The sentence reporting the size is
+itself inside the string being measured. Render, measure, attach, and the
+attached figure is short by its own digits. Measured on the committed
+fixture store, the obvious one-pass implementation is wrong by this much:
+
+| Request | One-pass figure | True length | Error |
+|---|---|---|---|
+| `{}`, the whole active store | 2466 | 2633 | 167 characters short |
+| `{ files: ['src/app/page.tsx'], domain: 'motion' }` | 1452 | 1619 | 167 characters short |
+| `{ files: ['nothing/here.txt'] }`, no rules match | 610 | 776 | 166 characters short |
+
+The error is not even constant: the third row is short by 166 rather
+than 167 because its answer has three digits where the others have four.
+A figure wrong by a varying amount is worse than no figure, because a
+caller cannot correct for it.
+
+So `renderedChars` is defined as the value `n` for which rendering the
+briefing with `renderedChars: n` produces a string of length exactly
+`n`. `measureBriefing` seeds from the render with no size sentence at
+all, which is a strict lower bound, and iterates. Let `base` be the
+length of the rendered briefing with the sentence present and its digits
+removed; the recurrence is `n -> base + digits(n)`, which rises by at
+most one per pass once past the first, since only a change in the digit
+count can move it. It settles within four passes even in the awkward case
+where one pass lands on 999 and the next on 1000. `MEASURE_PASSES = 6`
+leaves margin, and exceeding it throws with both values named rather than
+returning the last candidate, because a thrown error is a defect report
+somebody fixes and a figure quietly off by four is the failure the
+function exists to prevent.
+
+**Both call sites now measure rather than render**, which is what makes
+the number checkable rather than advisory:
+
+- `ursa-major/src/hq/cli.ts` — `ursa brief` prints
+  `measured.markdown` by default and `JSON.stringify(measured.briefing)`
+  under `--json`, so the two output modes agree on one number.
+- `ursa-major/src/mcp/server.ts` — the `get_briefing` handler returns
+  `markdown` as its text content block and the measured `briefing` as
+  `structuredContent`. A client reading `coverage.renderedChars` is
+  therefore reading the length of the exact string its model was sent.
+
+**The real payload, regenerated.** The same probe and the same call as
+§7 (`{ files: ['src/app/page.tsx'], maxRules: 3, maxCases: 1 }`, over
+`StdioClientTransport` against a child `src/mcp/cli.ts` serving
+`/tmp/ursa-mcp-demo`), run after this change. Everything above
+`## Coverage` is byte-identical to §7 and is elided here for that
+reason; what is new is the last paragraph:
+
+```markdown
+## Coverage
+
+Considered 3 active rules and 3 correction loops across 2 outcome records; returned 1 rule and 1 case. Ranking: lexical-v0.
+
+Size: 1551 characters, counting this sentence. That is what reading this briefing costs you, so raise or lower maxRules and maxCases against it rather than guessing.
+```
+
+And the probe's own last three lines, which are the cross-boundary
+assertion stated as a measurement:
+
+```
+markdown.length                          = 1551
+structuredContent.coverage.renderedChars = 1551
+they agree                               = true
+```
+
+**Tests.** Six in `ursa-major/src/hq/hq.test.ts` and one in
+`ursa-major/src/mcp/mcp.test.ts`. The load-bearing one asserts
+`briefing.coverage.renderedChars === markdown.length` and that the
+markdown contains `Size: ${markdown.length} characters, counting this
+sentence.` — which is the assertion the one-pass implementation fails,
+in both directions, on every row of the table above. The others pin that
+an unmeasured briefing prints no size sentence at all, that re-rendering
+the measured briefing reproduces the measured string byte for byte, that
+measuring twice gives the same number, and that the figure grows when a
+wider request is made.
+
+### 10.2 The SDK's web half is carried, not run, and now there is a probe that says so
+
+**The fact.** Installing `@modelcontextprotocol/sdk` 1.32.1 took
+`ursa-major`'s production dependency tree from 70 packages to 161. The
+SDK earns its place and this is not an argument against it: it is the
+plan's own choice (`docs/design/product-plan.md` §9) and it supplies the
+`InMemoryTransport` pair that makes `mcp.test.ts` a real client rather
+than a mock. The argument is about what else arrived. The only transport
+this repository ships is stdio (`ursa-major/src/mcp/cli.ts`), and the
+largest part of the 91 new packages exists for the remote transports.
+
+**Why it needs a gate rather than a note.** `scripts/dep-floor.mjs`
+fails every pull request in this repository on a high advisory anywhere
+in a production tree. More than half of this tree is now code no shipped
+path executes, so the next high advisory in `express` would block the
+queue over a package Ursa does not run. The ledger entry offers the owner
+two answers — move the SDK to `optionalDependencies` the way
+`@huggingface/transformers` already is, or add a dep-floor exception path
+scoped to packages shown to be unreachable — and both depend on the
+reachability measurement staying true. A minor SDK release that moves one
+import to the top of `server/mcp.js` would invalidate both, silently.
+
+**The measurement, as a committed artifact.**
+`ursa-major/src/mcp/loaded-packages.mjs`, with
+`ursa-major/src/mcp/deps.test.ts` running it.
+
+```ts
+// loaded-packages.mjs, the one exported signature
+export async function loadedPackages(
+  entries?: string[]
+): Promise<{ entries: string[]; packages: string[]; scripts: number }>
+```
+
+**How it measures, and why not the obvious way.** There is no public
+registry of loaded ECMAScript modules the way `require.cache` lists
+loaded CommonJS ones. The SDK is dual-published
+(`exports` maps `import` to `dist/esm/*` and `require` to `dist/cjs/*`),
+so a `require`-based probe would have measured a build this package never
+loads: `ursa-major/package.json` declares `"type": "module"`. Instead the
+probe attaches a `node:inspector` `Session`, records every
+`Debugger.scriptParsed` event, and dynamically imports the entry points.
+That event fires once per script V8 compiles, for the build that actually
+ships, so a package whose name never appears in a parsed script's path
+was never executed.
+
+**Exact commands, and their real output.** From `ursa-major`:
+
+```bash
+node src/mcp/loaded-packages.mjs
+```
+
+```json
+{
+  "entries": [
+    "@modelcontextprotocol/sdk/server/mcp.js",
+    "@modelcontextprotocol/sdk/server/stdio.js"
+  ],
+  "packages": [
+    "@modelcontextprotocol/sdk",
+    "ajv",
+    "ajv-formats",
+    "fast-deep-equal",
+    "fast-uri",
+    "json-schema-traverse",
+    "zod",
+    "zod-to-json-schema"
+  ],
+  "scripts": 362
+}
+```
+
+Eight packages, and every one of them has a job on this path: the SDK
+itself, `zod` and `zod-to-json-schema` for the tool's argument schema,
+and `ajv` with its three helpers (`ajv-formats`, `fast-deep-equal`,
+`fast-uri`, `json-schema-traverse`) validating it.
+
+`packages` is the stable field and the only one anything asserts on:
+three consecutive runs give that same set. `scripts` is indicative and
+deliberately not pinned, because it counts every script V8 compiled
+including Node's own internals, and it was observed between 362 and 370
+for these same two entry points on one machine in one afternoon. It is
+reported only so that a count collapsing to near zero, which is the
+signature of a measurement that has stopped measuring, is visible;
+`deps.test.ts` asserts `scripts > 100` and nothing tighter.
+
+Ten production packages the SDK brought in are installed, therefore
+audited by `node scripts/dep-floor.mjs`, and absent from that list:
+
+| Package, installed under `ursa-major/node_modules` | What the SDK uses it for | Reached by the stdio path |
+|---|---|---|
+| `express` | HTTP server for the OAuth authorization router | No |
+| `express-rate-limit` | Rate limiting on those OAuth endpoints | No |
+| `cors` | Cross-origin response headers for a browser client | No |
+| `jose` | JSON Web Token verification for OAuth bearer tokens | No |
+| `hono` | HTTP server behind the Streamable HTTP transport | No |
+| `@hono/node-server` | Node adapter for hono's fetch-style request handlers | No |
+| `body-parser` | Request body decoding for the express router | No |
+| `raw-body` | Request body buffering for the same | No |
+| `pkce-challenge` | PKCE code challenges for the OAuth client flow | No |
+| `eventsource` | Client-side Server-Sent Events, a transport this server does not offer | No |
+
+**The arm the measurement is expected to fail**, which is what makes the
+ten "No" cells mean anything. Ten absence assertions are equally
+consistent with a probe that cannot see those packages at all, so
+`deps.test.ts` runs the same probe against the SDK path those packages
+exist for:
+
+```bash
+node src/mcp/loaded-packages.mjs '@modelcontextprotocol/sdk/server/auth/router.js'
+```
+
+That call compiles 72 packages against the stdio path's 8, among them
+`express`, `cors`, `body-parser`, `express-rate-limit` and
+`pkce-challenge`. The probe can see them. The stdio path does not reach
+them. For the middle
+case, `node src/mcp/loaded-packages.mjs
+'@modelcontextprotocol/sdk/server/streamableHttp.js'
+'@modelcontextprotocol/sdk/server/sse.js'` loads `hono`,
+`@hono/node-server`, `raw-body` and `content-type` and still no
+`express`, which places the express tree behind the OAuth router
+specifically rather than behind HTTP in general.
+
+**Why the test spawns a child process.** `deps.test.ts` does not call
+`loadedPackages()` in-process. By the time vitest reaches that file its
+worker may already have imported the SDK for `mcp.test.ts`, in which case
+nothing re-parses, every package reads as absent, and the test passes for
+exactly the wrong reason. `execFileSync(process.execPath, [PROBE])` with
+`cwd` at the package root cannot have that problem, and it is also the
+command in this document that a reader re-runs by hand.
+
+**What this does not do.** It does not choose between the owner's two
+answers. The ledger entry's first step is the probe, before the choice,
+because the choice depends on it; the decision itself is a dependency
+policy for the owner and belongs in an ADR, not in this PR.
+
+### 10.3 Tooling added by this addendum
+
+| Tool, at the version installed | Its job here | Why it, over what was considered |
+|---|---|---|
+| `node:inspector` `Session`, built into Node since 8.0 | Records `Debugger.scriptParsed` so `loaded-packages.mjs` can report which node_modules packages a module graph actually compiles | The alternatives were worse on precision or on cost. `require.cache` cannot see ECMAScript modules and would have measured the SDK's `dist/cjs` build, which this package never loads. A `module.register()` resolve hook sees requests rather than compilations, so it would count a specifier resolved and then tree-shaken away. Static analysis of the import graph has the same flaw and also needs a parser. The inspector protocol is already in the runtime, needs no dependency, and reports compilation, which is the thing "loaded" means. |
+| `node:child_process` `execFileSync`, built in | Runs the probe as its own process from `deps.test.ts` | A pristine module registry is a precondition of the measurement, and vitest's worker reuse cannot guarantee one. `execFileSync` over `fork` because the probe's whole output is one JSON object on stdout, so there is nothing an IPC channel would carry. |
+| `vitest` 5.0.2 | Runs the 9 tests this addendum adds, bringing the suite to 495 passing | Already the toolchain for the other 486. |
+
+**Suite totals after this addendum:** 495 tests passing and 4 skipped
+across 28 files, up from 486 passing on `main` at `b84a6f8`.
+`npx tsc --noEmit` is clean, `npm run bundle:check` reports
+`dist/ursa.cjs is current`, and `node scripts/dep-floor.mjs` from the
+repository root reports "Dependency floor holds: no critical anywhere, no
+high in any production tree".
