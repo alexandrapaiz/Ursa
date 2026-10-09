@@ -36,7 +36,7 @@ import { parseArgs } from 'node:util'
 import type { OutcomeRecord } from '../types'
 import type { TuningRecord } from '../tuning/types'
 import { emptyTuning } from '../tuning/merge'
-import { briefWithSemantics, DEFAULT_MAX_CASES, DEFAULT_MAX_RULES, renderBriefing } from './briefing'
+import { briefWithSemantics, DEFAULT_MAX_CASES, DEFAULT_MAX_RULES, measureBriefing } from './briefing'
 import { loadCache, loadMiniLM, saveCache } from './embedding'
 import type { BriefingInput } from './types'
 
@@ -121,7 +121,11 @@ export async function main(argv: string[]): Promise<number> {
   // over an unchanged store leaves the mtime alone.
   if (embedder && Object.keys(cache.vectors).length > before) saveCache(embeddingsPath, cache)
 
-  console.log(values.json ? JSON.stringify(briefing, null, 2) : renderBriefing(briefing))
+  // Measured, not merely rendered, so that `--json` and the default
+  // markdown agree on one number: `coverage.renderedChars` in the JSON
+  // is the length of the markdown the other branch prints.
+  const measured = measureBriefing(briefing)
+  console.log(values.json ? JSON.stringify(measured.briefing, null, 2) : measured.markdown)
   return 0
 }
 

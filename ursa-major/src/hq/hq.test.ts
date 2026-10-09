@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { buildBriefing, MIN_RELEVANCE, renderBriefing } from './briefing'
+import { buildBriefing, measureBriefing, MIN_RELEVANCE, renderBriefing } from './briefing'
 import { buildQuery, score, words } from './retrieval'
 import { RECORDS, TUNING } from './fixtures'
 import { loadRecords, loadTuning, main } from './cli'
@@ -144,6 +144,54 @@ describe('renderBriefing', () => {
     expect(text).toContain('Her words: "only touch the hero, do not restyle the rest of the page"')
     expect(text).toContain('Ranking: lexical-v0.')
   })
+
+  it('says nothing about size on a briefing that has not been measured', () => {
+    // Absent means not measured. A zero or a placeholder here would be a
+    // claim, and the renderer is not in a position to make one.
+    const b = brief({})
+    expect(b.coverage.renderedChars).toBeUndefined()
+    expect(renderBriefing(b)).not.toContain('Size:')
+  })
+})
+
+describe('measureBriefing', () => {
+  // The claim under test is the whole point of the field: the number the
+  // briefing reports is the length of the briefing that reports it. Any
+  // implementation that measures the render without its own size
+  // sentence passes an off-by-its-own-digits figure, and these two
+  // assertions are what catch that.
+  it('reports a size equal to the length of the markdown that prints it', () => {
+    const { briefing, markdown } = measureBriefing(brief({ files: ['src/app/page.tsx'], domain: 'motion' }))
+    expect(briefing.coverage.renderedChars).toBe(markdown.length)
+    expect(markdown).toContain(`Size: ${markdown.length} characters, counting this sentence.`)
+  })
+
+  it('holds the same identity on the empty briefing, which is a different order of magnitude', () => {
+    const { briefing, markdown } = measureBriefing(brief({ files: ['nothing/here.txt'] }))
+    expect(briefing.rules).toEqual([])
+    expect(briefing.coverage.renderedChars).toBe(markdown.length)
+    expect(markdown).toContain(`Size: ${markdown.length} characters`)
+  })
+
+  it('re-rendering the measured briefing reproduces the measured string exactly', () => {
+    // The pair is only true together, so this pins that the briefing
+    // returned is the one the number belongs to and not a sibling.
+    const { briefing, markdown } = measureBriefing(brief({ domain: 'motion' }))
+    expect(renderBriefing(briefing)).toBe(markdown)
+  })
+
+  it('is idempotent: measuring an already-measured briefing gives the same number', () => {
+    const once = measureBriefing(brief({ domain: 'motion' }))
+    const twice = measureBriefing(once.briefing)
+    expect(twice.briefing.coverage.renderedChars).toBe(once.briefing.coverage.renderedChars)
+    expect(twice.markdown).toBe(once.markdown)
+  })
+
+  it('grows the reported size when a bigger request is made, so the figure tracks the cost', () => {
+    const narrow = measureBriefing(brief({ domain: 'motion' })).briefing.coverage.renderedChars!
+    const everything = measureBriefing(brief({})).briefing.coverage.renderedChars!
+    expect(everything).toBeGreaterThan(narrow)
+  })
 })
 
 describe('the brief CLI', () => {
@@ -168,6 +216,9 @@ describe('the brief CLI', () => {
     const briefing = JSON.parse(printed.join('\n'))
     expect(briefing.rules[0].axiomId).toBe('ax-001')
     expect(briefing.request.files).toEqual(['src/app/page.tsx'])
+    // --json carries the measurement too, so a caller scripting against
+    // the CLI can read the cost without rendering the markdown itself.
+    expect(briefing.coverage.renderedChars).toBeGreaterThan(0)
   })
 
   it('treats a missing store as an empty one rather than crashing', () => {
