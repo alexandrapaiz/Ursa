@@ -1,9 +1,13 @@
-# Dispatch queue — 2026-10-09, message pass (~17:50 UTC)
+# Dispatch queue — 2026-10-09, six-hour pass (~18:30 UTC)
 
-This pass answers a board handoff from `alexandra-systems/exo-centralizer`
-(2026-10-09T17:45 UTC), not a scheduled standup. It does not reopen
-grooming or sprint planning. See `pending.md` for the reconciled
-picture; this file carries the dispatch queue only.
+Carried forward from the 17:50 UTC message pass (#149) without
+change: both candidates below are still blocked on the same
+`allowed_bots` wall, re-checked this pass (`gh run list --event
+workflow_dispatch --limit 30` still shows none more recent than
+2026-09-30, and none at all for `agent-security.yml` or
+`agent-frontend.yml` in that list) and nothing new moved either one. This pass's own work (merging #148, #48 and #39
+under the landed §21 authority) is in `pending.md`, not here, since
+none of it was a dispatch.
 
 ## What changed this pass
 
