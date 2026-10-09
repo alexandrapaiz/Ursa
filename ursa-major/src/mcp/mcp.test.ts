@@ -173,6 +173,22 @@ describe('get_briefing over MCP is the same call `ursa brief` makes', () => {
     expect(briefing.nearestCases.length).toBeLessThanOrEqual(1)
   })
 
+  // The cross-boundary form of the fixed point measureBriefing
+  // establishes. The tool answers twice over, in markdown for the model
+  // and in JSON for the client, and the size the JSON reports has to be
+  // the size of the markdown that was actually sent. If these two ever
+  // disagree, a client budgeting context against `renderedChars` is
+  // budgeting against a number from a different string.
+  it('reports a size in the JSON equal to the length of the markdown it sent', async () => {
+    const result = await withClient(memoryStore(), (c) =>
+      c.callTool({ name: 'get_briefing', arguments: { files: ['src/app/page.tsx'] } })
+    )
+    const briefing = result.structuredContent as unknown as Briefing
+    const markdown = firstText(result)
+    expect(briefing.coverage.renderedChars).toBe(markdown.length)
+    expect(markdown).toContain(`Size: ${markdown.length} characters, counting this sentence.`)
+  })
+
   it('reports lexical ranking rather than claiming a semantic one it did not run', async () => {
     const result = await withClient(memoryStore(), (c) =>
       c.callTool({ name: 'get_briefing', arguments: {} })
