@@ -183,7 +183,11 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
   path) to the record schema, and have `ursa run` fill `repo` and, when
   a deploy is detectable, `hosted`.
 - Cost: $0
-- Status: accepted (owner-directed 2026-09-20)
+- Status: built (accepted owner-directed 2026-09-20; shipped in `artifact.kind`
+  and `artifact.renderRef` on the record, `src/deploy.ts` filling `hosted`
+  from a commit's own CNAME/homepage/alias, and `docs/design/artifact-kind.md`.
+  Status corrected 2026-10-09 by the engineer seat, which found the entry
+  still reading `accepted` while looking for unbuilt accepted work.)
 
 ### 2026-09-20 — Finding: merge commits are not edits; the PR reader is load-bearing
 - Trigger: the M1 redo on alexandria. With merge commits excluded as
@@ -1515,7 +1519,12 @@ https://github.com/mem0ai/mem0
   repo fixture yields zero pairs rather than five inflated ones, and
   make `ursa run` print why it found nothing when a repo is unpairable.
 - Cost: $0
-- Status: urgent
+- Status: built (shipped as the `--max-pair-distance`, `--max-pair-age-hours`
+  and `--max-interposed-generations` bounds in `src/pairfinder.ts`, the
+  abandoned-claim reporting in `src/bin/ursa.ts`, `src/pairing-window.test.ts`
+  and `docs/design/pairing-window.md`. Status corrected 2026-10-09 by the
+  engineer seat; it had stayed `urgent` after the work landed, which
+  overstates the open queue every seat reads.)
 
 ### 2026-09-30 — A decayed span is evidence against tacit acceptance
 - Trigger: building `lifespan.ts` today. `signals.ts` sets
@@ -3946,3 +3955,168 @@ ahead — a number that exists, is updated, and names its own uncertainty —
 Ursa has no public record on `main` at all today, because the only trial
 record was pulled to the private repository pending the redaction
 standard that `docs/sprints/pending.md` still lists as unstarted.
+
+### 2026-10-09 — A briefing names how many rules it returned, never what it costs to read
+- Trigger: today's craft scan of Letta (see the scan note below) plus
+  today's own build. Letta's memory blocks carry a `limit`, "the size
+  limit (in characters) of the block", and its context window shows
+  `chars_current` against `chars_limit` as metadata the model itself can
+  read. Ursa's `get_briefing` has two ceilings, `maxRules` and
+  `maxCases`, and `Briefing.coverage` reports counts: "returned 1 rule
+  and 1 case". Both are denominated in rules, and a caller's real
+  constraint is characters. A rule with five evidence entries and a
+  verbatim quote is several times the size of one without, so an agent
+  choosing `maxRules: 8` is guessing at a number it cannot convert into
+  the thing it actually has to budget. Over MCP this stopped being
+  theoretical today: the tool is called inside a turn, by a model whose
+  context is already partly spent.
+- What: add a size field to `BriefingCoverage` — the character length of
+  `renderBriefing`'s own output, which is the string that actually enters
+  a context window, not the JSON. One number, computed after rendering,
+  reported in the markdown's `## Coverage` line and in the JSON. It
+  turns the ceilings into something a caller can calibrate: ask once,
+  read the cost, pick the ceiling. It also makes a regression visible,
+  because a briefing that silently doubles in size is today invisible to
+  every test.
+- First step: compute `renderedChars` in `renderBriefing`, thread it
+  back onto `coverage`, and assert in `hq.test.ts` that the number equals
+  the rendered string's own length for the fixture store. The honest
+  wrinkle to settle in that first step: `coverage` is part of the
+  `Briefing` that `renderBriefing` consumes, so the number cannot be
+  inside the thing it measures without a second pass. Render, measure,
+  then attach — and the test should pin that order, since computing it
+  the obvious way gives a figure that is wrong by its own length.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 — The tuning resource is unreachable from a client that only attaches tools
+- Trigger: today's craft scan of Letta's MCP documentation, read while
+  building Ursa's own MCP surface. Letta is an MCP client, not a server:
+  it registers a server by URL, lists the tools it offers, and attaches
+  those tools to agents. Its overview page says "MCP tools execute on
+  external MCP servers" and names no other MCP primitive anywhere.
+  Resources are not mentioned. Today's build put the tuning block at the
+  resource `ursa://tuning/current` and only `get_briefing` at a tool, on
+  the reasoning that tuning is a document and a document is a resource.
+  That reasoning is right about the protocol and possibly wrong about the
+  deployed clients, and a portability product whose whole promise is
+  "every model you use" cannot afford a delivery surface that one class
+  of client cannot see.
+- What: register the same tuning read as a tool as well as a resource,
+  `get_tuning`, returning exactly what `renderTuningBlock` returns, so
+  the surface works whether a client consumes resources, tools, or only
+  tools. Duplication is the right answer rather than a smell here: there
+  is one implementation and two advertisements of it, which is the shape
+  the protocol's own split forces on anyone who wants both audiences.
+  Worth doing before the first real client is wired, because the
+  alternative is discovering it as a user reporting that their rules
+  never arrived.
+- First step: measure before building. Run `claude mcp add` against
+  today's server and confirm whether Claude Code offers
+  `ursa://tuning/current` to the model on its own or only on request;
+  then read one more client's docs (Cursor is the cheapest second
+  sample). If either consumes resources only on explicit user action,
+  add `get_tuning` with a test asserting the tool and the resource return
+  byte-identical text. If both surface resources automatically, record
+  that and close this entry instead of building it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 — One stdio server grew the production audit tree from 70 packages to 161
+- Trigger: today's build, measured rather than estimated.
+  `@modelcontextprotocol/sdk` 1.32.1 declares 17 production dependencies
+  and resolves to 91 new production packages in `ursa-major`, taking the
+  tree from 70 to 161. The stdio transport, which is the only transport
+  this surface ships, loads none of the largest ones: a `require.cache`
+  probe after importing `server/mcp.js` and `server/stdio.js` shows
+  `zod` and `ajv` loaded and `express`, `hono`, `cors`, `jose`,
+  `express-rate-limit` and `body-parser` all absent. So Ursa's production
+  dependency tree now carries a web framework, a CORS handler, a rate
+  limiter and a JOSE implementation as dead code, and will keep carrying
+  them until M2.5 wires the remote transport those exist for.
+- What: this is not an argument against the SDK, which is the plan's own
+  choice (product-plan.md §9) and earns it by supplying the in-memory
+  transport that makes the MCP surface testable against a real client.
+  It is an argument that `scripts/dep-floor.mjs` now gates a surface
+  more than twice its previous size, where the added half is code no
+  shipped path executes. That changes what a dep-floor failure will mean:
+  a future high advisory in `express` would block every pull request in
+  this repository over a package Ursa does not run. Two candidate
+  answers, and the point of the entry is that the owner picks before the
+  first such advisory rather than during it. Either move the SDK to
+  `optionalDependencies` the way `@huggingface/transformers` already is,
+  so the MCP surface degrades to absent rather than gating the resolver,
+  or keep it required and add a dep-floor exception path scoped to
+  packages the loaded-module probe shows are unreachable.
+- First step: commit the probe as a test. It is six lines, it already
+  runs, and it is the only artifact here that would notice if a future
+  SDK version started loading `express` on the stdio path — which is the
+  fact both candidate answers depend on and neither would survive
+  without. Do that before choosing between them.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-09 (engineer's craft scan)
+
+**Product: Letta** (formerly MemGPT), rotating onto Category 3 of
+`docs/market/landscape.md` (personalization and memory layers). The
+previous engineer scans took CodeRabbit (2026-09-28), Claude Code
+(2026-10-01), and Mem0 plus Vals AI (2026-10-08), so Letta is the
+Category 3 entry no craft scan had reached. Read today: Letta's MCP
+overview page and its memory-blocks guide, both under `docs.letta.com`.
+Chosen because today's build was Ursa's own MCP surface, so the scan
+could inform the work rather than sit beside it, and it did: two of
+today's three ledger entries came out of it.
+
+**Worth stealing: the memory block tells the model its own size.** A
+Letta memory block has four fields — `label`, `description`, `value`,
+`limit` — where `limit` is "the size limit (in characters) of the
+block", and the agent's rendered context carries `chars_current` against
+`chars_limit` as metadata the model reads directly. Two things are good
+here and they are separable. The smaller one is the budget. The larger
+one is that the budget is denominated in the unit the constraint is
+actually in. Ursa's briefing has ceilings too, but they count rules and
+cases, and nothing anywhere reports the one number an agent has to
+manage, which is how many characters the briefing will occupy. That
+became today's first ledger entry.
+
+**Also worth noting: `read_only` is a declared field on the unit, not a
+property of the endpoint.** Letta makes mutability a fact about each
+block, so a block the agent must not edit says so in its own data.
+Ursa's briefing is read-only everywhere, and says so in three places
+that are all outside the data: a prose disclaimer, an MCP
+`readOnlyHint` annotation, and the absence of a write tool. That is
+sufficient today because there is nothing to write. It stops being
+sufficient the moment a user-editable surface and an agent-readable
+surface share one payload.
+
+**Where Ursa is ahead, and it is the authorship, not a feature.** In
+Letta the agent authors its own memory: it edits blocks through built-in
+memory tools, and the docs warn that an external write through the API
+"replaces the whole block" and that with concurrent writers "the last
+write wins and overwrites all earlier changes." So the record of what
+the system believes about you is written by the agent, overwritable in
+full, and carries no trail back to the moment that produced it. Every
+Ursa axiom is the inverse on all three counts. It is derived from
+finished work rather than asserted, it carries `evidence` pointers that
+join back to a record id, a signal kind and step ordinals, and
+`src/tuning/merge.ts` merges deterministically with revocation
+tombstones instead of letting a writer clobber the file. The principle
+underneath is vision's third: much of what people know shows up only in
+action. A block an agent writes about you is a stated preference with
+extra steps.
+
+**The honest discount, in two parts.** First, Letta and Ursa are not
+solving the same problem, and the comparison above flatters Ursa by
+scoring Letta on a promise it never made. Letta's memory is scoped to a
+deployed agent on purpose, for developers building that agent; it is
+not trying to be a portable user-owned profile, so "no consent surface
+for the end user" is a true observation about an absent goal rather than
+a weakness. Second, this seat read two documentation pages and did not
+run Letta, which is a real limit on every claim above: the docs page on
+memory blocks defines `limit` without stating what happens when a write
+exceeds it, and the scan did not establish that by experiment either.
+On the one axis where Letta is plainly ahead — a memory layer that
+real developers deploy today, against Ursa's surface that was written
+this morning and has been wired into zero clients — the gap is not
+close.
