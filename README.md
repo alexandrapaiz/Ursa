@@ -185,6 +185,10 @@ npx tsx src/hq/cli.ts brief <projectPath> --files src/app/page.tsx
 
 # Or serve both of those to a model over MCP, so nothing is pasted.
 npx tsx src/mcp/cli.ts <projectPath>
+
+# Which packages the stdio MCP surface actually loads, as opposed to
+# which ones are installed. Prints one JSON object.
+node src/mcp/loaded-packages.mjs
 ```
 
 `--declare` records your own verdict on the project's current state.
@@ -249,7 +253,8 @@ nothing, because retention is never acceptance. The design is
 | `src/text.ts` | the one definition of a quoted, truncated excerpt, shared by `src/signals.ts` and `src/loops.ts`, plus the predicate `src/invariants.ts` uses to decide whether a quote really appears in the text it claims to come from |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
 | `src/hq/` | the same store read forwards instead of backwards. Given a domain tag and the files an agent is about to touch, `get_briefing` returns the rules that apply, the nearest prior correction loops with the person's own words, and the guardrails they had to state after an agent went further than asked. Every unit carries where it came from, and the payload says in writing that it is evidence rather than orders (`docs/design/hq-briefing.md`, `docs/design/semantic-retrieval.md`) |
-| `src/mcp/` | serves the two reads above over the Model Context Protocol on stdio, so a model fetches them instead of the person pasting them. The resource `ursa://tuning/current` returns the exported tuning block and the tool `get_briefing` returns the briefing. Reads only, and a revoked rule reaches neither (`docs/design/hq-mcp.md`) |
+| `src/mcp/` | serves the two reads above over the Model Context Protocol on stdio, so a model fetches them instead of the person pasting them. The resource `ursa://tuning/current` returns the exported tuning block and the tool `get_briefing` returns the briefing. Reads only, and a revoked rule reaches neither. Every briefing reports its own size in characters, so an agent can set its ceilings against the context it has left rather than guessing (`docs/design/hq-mcp.md`) |
+| `src/mcp/loaded-packages.mjs` | which packages a module graph actually compiles, measured by recording V8's own script-compilation events rather than reasoned about. It exists because the MCP SDK's remote transports bring a web framework, a rate limiter and a JSON Web Token library into the production dependency tree that the stdio surface never executes, and the dependency gate audits all of them (`docs/design/hq-mcp.md` §10.2) |
 | `src/deploy.ts` | reads a commit's own `CNAME`, `package.json` `homepage` or `vercel.json` `alias` to find the URL the finished work is served from, which is what makes a record `hosted` rather than `repo` |
 | `src/ci/` | the CI launch: the merge window from the event payload, the five-field run comment, the thumbs-up read, CI mode for the distiller |
 | `action.yml`, `dist/ursa.cjs` | the reusable GitHub Action and the one-file bundle it runs |

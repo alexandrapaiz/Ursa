@@ -48,7 +48,7 @@ import type { OutcomeRecord } from '../types'
 import type { TuningRecord } from '../tuning/types'
 import { emptyTuning } from '../tuning/merge'
 import { renderTuningBlock } from '../tuning/export'
-import { buildBriefing, DEFAULT_MAX_CASES, DEFAULT_MAX_RULES, renderBriefing } from '../hq/briefing'
+import { buildBriefing, DEFAULT_MAX_CASES, DEFAULT_MAX_RULES, measureBriefing } from '../hq/briefing'
 import type { Briefing, BriefingInput } from '../hq/types'
 
 /** The server's whole view of the user's data. Two reads, called per
@@ -215,13 +215,19 @@ export function createUrsaServer(deps: ServerDeps): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     (args) => {
-      const briefing = briefingFor(store, args as BriefingInput, now())
+      // measureBriefing rather than renderBriefing: it returns the
+      // markdown together with the briefing whose
+      // `coverage.renderedChars` is that markdown's own length. Both
+      // halves of this response therefore carry the same number, which
+      // is the one a caller needs to calibrate `maxRules` against the
+      // context it has left.
+      const { briefing, markdown } = measureBriefing(briefingFor(store, args as BriefingInput, now()))
       return {
         // The markdown is the surface and the JSON is the interface, the
         // same split renderBriefing's own comment names. A client that
         // only shows text content to its model still gets the full
         // briefing; one that reads structuredContent gets it typed.
-        content: [{ type: 'text' as const, text: renderBriefing(briefing) }],
+        content: [{ type: 'text' as const, text: markdown }],
         structuredContent: briefing as unknown as Record<string, unknown>,
       }
     }

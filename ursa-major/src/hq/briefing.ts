@@ -357,9 +357,88 @@ export function renderBriefing(briefing: Briefing): string {
       `${cov.casesReturned} case${cov.casesReturned === 1 ? '' : 's'}. ` +
       `Ranking: ${cov.retrieval}${cov.retrievalModel ? ` (${cov.retrievalModel})` : ''}.`
   )
+  if (cov.renderedChars !== undefined) {
+    lines.push('')
+    lines.push(
+      `Size: ${cov.renderedChars} characters, counting this sentence. That is what ` +
+        `reading this briefing costs you, so raise or lower maxRules and maxCases ` +
+        `against it rather than guessing.`
+    )
+  }
   lines.push('')
 
   return lines.join('\n')
+}
+
+/** Passes `measureBriefing` will take before it gives up. The worst
+ *  case the recurrence in that function's comment can actually reach is
+ *  four; six leaves margin so that an edit to the size sentence cannot
+ *  turn a slower fixed point into a thrown error. */
+const MEASURE_PASSES = 6
+
+/** A briefing and the markdown that was measured to fill in its
+ *  `coverage.renderedChars`. Returned as a pair because the two are only
+ *  true together: the number is the length of this exact string, and
+ *  re-rendering the briefing after changing anything invalidates it. */
+export interface MeasuredBriefing {
+  briefing: Briefing
+  markdown: string
+}
+
+/**
+ * Fill in `coverage.renderedChars` and return the markdown it counts.
+ *
+ * The wrinkle this function exists for. `coverage` is part of the
+ * `Briefing` that `renderBriefing` consumes, so the number cannot be
+ * inside the thing it measures in one pass. Render, measure, attach, and
+ * the attached figure is now wrong by its own digits, because the
+ * sentence printing it is itself in the string. Measuring the render
+ * that omits the sentence and reporting that number would be the
+ * obvious implementation and would ship a figure nobody can reproduce:
+ * a reader who counts the characters they were handed gets a different
+ * answer than the one they were told.
+ *
+ * So the number is defined as a fixed point. It is the value `n` such
+ * that rendering the briefing with `renderedChars: n` produces a string
+ * of length exactly `n`, which is the only definition under which the
+ * figure and the string agree.
+ *
+ * It exists and is reached quickly. Let `base` be the length of the
+ * rendered briefing with the size sentence present but its digits
+ * removed, so the recurrence is `n -> base + digits(n)`. Seeded below
+ * `base` it is non-decreasing, and once past the first pass it rises by
+ * at most one per pass, since only a change in the digit count can move
+ * it at all. A digit count changes only when `n` crosses a power of
+ * ten, so the sequence settles within four passes even in the awkward
+ * case where the first pass lands on 999 and the second on 1000.
+ *
+ * Non-convergence would mean that reasoning is wrong, so it throws
+ * rather than returning the last candidate. A thrown error is a defect
+ * report somebody fixes; a figure that is quietly off by four is the
+ * exact failure this function was written to avoid.
+ */
+export function measureBriefing(briefing: Briefing): MeasuredBriefing {
+  // Seed: the render with no size sentence at all, which is a strict
+  // lower bound on the answer. Taken from a briefing with the field
+  // cleared rather than from the argument as given, so that measuring
+  // an already-measured briefing starts from the same place and returns
+  // the same number as measuring a fresh one.
+  const unmeasured: Briefing = {
+    ...briefing,
+    coverage: { ...briefing.coverage, renderedChars: undefined },
+  }
+  let renderedChars = renderBriefing(unmeasured).length
+  for (let pass = 0; pass < MEASURE_PASSES; pass++) {
+    const candidate: Briefing = { ...unmeasured, coverage: { ...unmeasured.coverage, renderedChars } }
+    const markdown = renderBriefing(candidate)
+    if (markdown.length === renderedChars) return { briefing: candidate, markdown }
+    renderedChars = markdown.length
+  }
+  throw new Error(
+    `measureBriefing: the rendered size did not settle in ${MEASURE_PASSES} passes ` +
+      `(last candidate ${renderedChars} characters). The size sentence in renderBriefing ` +
+      `has stopped being a fixed point of its own length; see this function's comment.`
+  )
 }
 
 /**

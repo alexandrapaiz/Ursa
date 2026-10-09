@@ -139,6 +139,26 @@ export interface BriefingCoverage {
   retrievalModel?: string
   /** true when the request named neither a domain nor any files */
   unfiltered: boolean
+  /**
+   * Character count of `renderBriefing`'s own output — the string that
+   * actually enters a context window — including the sentence in the
+   * `## Coverage` section that prints this number.
+   *
+   * Why characters and not rules. The two ceilings a caller can set,
+   * `maxRules` and `maxCases`, are denominated in units of wildly
+   * uneven size: a rule with five evidence entries and a verbatim quote
+   * runs several times the length of a rule with one and none. So an
+   * agent choosing `maxRules: 8` is guessing at a number it cannot
+   * convert into the thing it has to budget, which is context. This
+   * field closes that: ask once, read the cost, pick the ceiling.
+   *
+   * Why optional. `buildBriefing` cannot know it. The number is a
+   * property of the rendering, and the renderer runs after the briefing
+   * exists, so a briefing that has not been through `measureBriefing`
+   * leaves this absent rather than reporting a placeholder. Absent
+   * means not measured, never means zero.
+   */
+  renderedChars?: number
 }
 
 export interface Briefing {
