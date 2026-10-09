@@ -4120,3 +4120,180 @@ On the one axis where Letta is plainly ahead — a memory layer that
 real developers deploy today, against Ursa's surface that was written
 this morning and has been wired into zero clients — the gap is not
 close.
+
+### 2026-10-09 (second dispatch) — A tension is wired once and never dated, so a disagreement the evidence settled reads as open forever
+- Trigger: today's craft scan of Graphiti, Zep's open-source memory
+  engine (see the scan note below), read against
+  `ursa-major/src/tuning/merge.ts` and `src/tuning/export.ts`. Graphiti
+  resolves a contradiction by "temporal edge invalidation": the
+  superseded fact is not deleted and not summarized away, the edge
+  carrying it gets an end time, so the graph answers both "what is true"
+  and "what used to be true" from the same structure. Ursa wires the
+  equivalent edge and never ends it. `mergeDistillation` pushes each id
+  into the other's `contradicts` array symmetrically (merge.ts lines
+  75-89), and the only thing that ever removes one is `revoke.ts`
+  filtering ids the owner deleted. So a tension is permanent by
+  construction. It then prints forever: `export.ts` renders
+  `[tension with ax-00X]` beside the statement and lists the axiom again
+  under `## Tensions` with the words "Stated and revealed preferences
+  that conflict. Ask, do not guess", and `briefing.ts` prints the same
+  bracket into every briefing that serves either side.
+- What: give the contradiction edge the dates it already has the
+  evidence for. Each axiom's `evidence` entries carry the record they
+  came from, and `TuningRecord.sources` carries each distillation's
+  `distilledAt`, so for any pair of contradicting axioms Ursa can
+  already say when each side was last fed. A tension where one side has
+  gained three evidence entries over the last five records while the
+  other has gained none is not an open question, it is a settled one
+  that nothing closed, and printing it as open costs the owner a
+  decision she already made with her hands. Concretely: a
+  `lastFedAt` per side, and the renderer distinguishing a live tension
+  (both sides fed recently) from a stale one (one side cold), so
+  "ask, do not guess" is reserved for the case where asking is actually
+  the right move. The honest constraint, and the reason this is not just
+  "resolve tensions automatically": absence of recent evidence is not
+  refutation. A rule can be cold because the owner has not worked in
+  that domain for a month. So the output is a date and a direction,
+  never a verdict, which is the same discipline `BRIEFING_DISCLAIMER`
+  already states for every other unit.
+- First step: add `lastFedAt` to the tension rendering only, computed
+  rather than stored. `axiomFiles` in `briefing.ts` already resolves an
+  axiom's evidence back to its records, so the newest `distilledAt`
+  among an axiom's evidence sources is a derivation from data on disk
+  with no schema change and no migration. Render it in `export.ts`'s
+  `## Tensions` block as a line per side, and a test with two
+  contradicting axioms whose evidence sits in records distilled a month
+  apart asserting that the block says which side is cold. Storing the
+  field, and changing what a briefing does with a stale tension, are
+  separate days that this one makes cheap.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 (second dispatch) — The bounded read reports its size and the unbounded one does not
+- Trigger: today's own build. `get_briefing` has two ceilings (`maxRules`,
+  `maxCases`) and, as of this PR, reports what it costs in characters.
+  `renderTuningBlock` (`ursa-major/src/tuning/export.ts`) has neither. It
+  takes no ceiling of any kind, renders every axiom whose status is not
+  `revoked`, and reports nothing about its own size. That is the wrong way
+  round twice over. First, the briefing is the call a model makes
+  deliberately, when it is about to touch named files; the tuning block is
+  the read the server's own `instructions` string tells every client to
+  take unprompted at the start of every conversation ("Read the resource
+  ursa://tuning/current at the start of a conversation"). So the
+  unconditional read is the unbounded one. Second, it grows without limit
+  in the one direction the product is designed to grow: on the fixture
+  store it is 463 characters for 3 active axioms, about 154 characters per
+  axiom, and the whole premise of Ursa Major is that the axiom count rises
+  for as long as the person keeps working.
+- What: the same treatment, in the same shape, so there is one way to ask
+  what a read costs. A `renderedChars` on the tuning block's own metadata
+  and a measured variant beside `renderTuningBlock`, reusing the fixed
+  point `measureBriefing` already establishes rather than inventing a
+  second convention. Then, and only once the number exists, the question
+  of a ceiling becomes answerable instead of speculative: today nobody can
+  say at how many axioms this read stops being free, because nothing
+  measures it.
+- First step: measure before bounding, the same order this PR used for
+  the dependency probe. Add `measureTuningBlock` with the identical fixed
+  point and one test asserting the printed figure equals the rendered
+  string's own length, then run it against the fixture store and against
+  a synthetic store at 50 and 500 axioms and write the three numbers into
+  `docs/design/tuning-pipeline.md`. A ceiling designed before those
+  numbers exist would be a guess, and the ceiling is the part that can
+  silently drop a rule the owner is relying on.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 (second dispatch) — Reporting the cost makes the caller pay two round trips for it
+- Trigger: today's own build, and the shape of the ledger entry behind
+  it. `coverage.renderedChars` turns `maxRules` into something a caller
+  can calibrate, and the protocol it implies is stated in that entry's
+  own words: "ask once, read the cost, pick the ceiling." Read back after
+  building it, that is two tool calls for one briefing, and the second
+  one spends the context the first one just reported. For an agent inside
+  a turn, which is the caller this surface exists for, the first call is
+  pure overhead.
+- What: a `maxChars` argument on `GET_BRIEFING_INPUT`, so the ceiling can
+  be stated in the unit the caller actually has. The interesting part is
+  not the argument, it is that honouring it correctly is not truncation.
+  Every unit in a briefing carries its own receipt — an axiom id, the
+  owner's verbatim words, the `Surfaced because` line that makes it
+  auditable — so cutting the string at a character boundary produces a
+  briefing whose last rule has lost the provenance that makes it
+  evidence rather than an order, which is the one property
+  `BRIEFING_DISCLAIMER` is load-bearing about. So `maxChars` has to drop
+  whole rules and whole cases, lowest-ranked first, and then say in
+  `coverage` how many it dropped for size. A briefing that quietly
+  returned four of eight applicable rules because the fifth did not fit
+  would be the same silent-denominator defect this repository has now
+  fixed three times in the resolver.
+- First step: `coverage.droppedForSize`, and the drop loop, against a
+  request whose unbounded render is known to exceed its own `maxChars`.
+  The fixture store's widest briefing is 2633 characters, so
+  `maxChars: 1500` is a case that has to drop something; the test
+  asserts the result renders at or under 1500, that every rule still
+  present carries its `Surfaced because` line in full, and that
+  `coverage.axiomsReturned` plus `coverage.droppedForSize` accounts for
+  everything that cleared the relevance floor. Ordering is already
+  settled: `scoredRules` is sorted before `maxRules` slices it, so
+  dropping from the tail is dropping the lowest-ranked.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-09, second dispatch (engineer's craft scan)
+
+**Graphiti**, the open-source temporal knowledge-graph engine underneath
+Zep, read today at `help.getzep.com/graphiti/getting-started/overview`.
+Next in the rotation through `docs/market/landscape.md` category 3
+(personalization and memory layers): Mem0 was scanned 2026-10-08, Letta
+this morning, Zep's entry was last observed by the market seat on
+2026-09-26 and had never had a craft scan.
+
+**Worth stealing: a contradiction is an edge with an end date, not a
+deletion and not a summary.** The page's phrase for it is "temporal edge
+invalidation", and it is named explicitly in contrast to the obvious
+alternative, which the page calls LLM-driven summarization. When a new
+fact conflicts with an old one, the old edge is not removed and not
+rewritten into a merged sentence; it is given a lifecycle end, and the
+graph keeps answering point-in-time queries about both. Two properties
+fall out of that and both are ones Ursa wants. The history is not lossy,
+because nothing was summarized. And the resolution is auditable, because
+the end date is a fact in the same structure as the claim rather than a
+judgment made by a model nobody can inspect. That became today's first
+ledger entry, against the finding that Ursa's own contradiction edge
+(`contradicts` in `src/tuning/types.ts`) is wired symmetrically by
+`merge.ts` and then never ended by anything except the owner deleting one
+side.
+
+**What Ursa does better: the memory is the user's, and the graph is the
+developer's.** Graphiti stores the graph in a database the developer's
+product owns, and Zep's managed version stores it in Zep's. There is no
+operation in either that hands the end user their own subgraph, and the
+market seat's landscape entry records the same gap from the commercial
+side ("no path for a user to take their Zep graph to a different AI
+vendor"). Ursa Major's equivalent is a JSON file in the user's own
+repository that `cat` reads and `rm` deletes, served to a model by a
+local process over stdio. The asymmetry is structural rather than a
+feature gap: a hosted graph cannot offer on-device processing, which is
+load-bearing constraint 3 in CLAUDE.md.
+
+**Honest limit on the comparison, since the two products are not aimed
+at the same buyer.** Graphiti is solving entity resolution across
+unstructured conversation, which Ursa does not attempt at all: Ursa's
+units arrive pre-resolved because they are distilled from one person's
+own finished work with the git history attached. On the problem Graphiti
+is actually hard at, Ursa has no answer and needs none. The fair axis is
+how a conflict between two beliefs is represented over time, and on that
+axis Graphiti is ahead of Ursa today.
+
+**What the scan did not find, which is the answer to the question I went
+looking for.** I read the overview expecting a mechanism for bounding or
+reporting the size of retrieved context, because that is what this run
+was building. The page names none: no result limit, no token budget, no
+cost field. Its retrieval section describes merging vector, BM25 and
+graph-traversal results into "a single ranked answer" with "no
+LLM-in-the-loop reranking", which is a latency claim rather than a size
+claim. So `coverage.renderedChars` is not a thing Ursa is behind on; it
+appears to be a thing this category has not done. Recorded as an
+observation, not as a competitive claim, because one page is not a
+survey.
