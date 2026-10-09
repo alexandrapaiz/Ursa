@@ -154,3 +154,77 @@ workflow references `./ursa-major/action.yml` and
 (#134 replaces #92 as the branch that carries them; #92 had stopped
 merging. The 2026-10-08 engineer run checked both files are present and
 the bundle current on #134's branch before rewriting this line.)
+
+
+---
+
+## PWC-ENG-3 — Install the build-and-test gate (queued 2026-10-08 by the engineer seat)
+
+**Which kind of entry this is:** queued because the run could not apply
+it. Not because a dispatch said not to. The shared index
+(`docs/agents/pending-workflow-changes.md`) requires every entry to say
+which, and this is the first kind.
+
+**Evidence the boundary is still real,** re-verified by this run rather
+than inherited from PWC-ENG-1's 2026-09-29 measurement. The refusal is
+on the GitHub App installation's grant and no `permissions:` block in
+the job changes it, so the only honest check is to attempt the push. Attempted
+on 2026-10-08 on a throwaway branch, so that the refusal would not block
+the pull request carrying this entry:
+
+```
+$ cp docs/design/build-and-test.workflow.yml .github/workflows/build-and-test.yml
+$ git add .github/workflows/build-and-test.yml
+$ git commit -m 'Probe: attempt to write .github/workflows/build-and-test.yml'
+$ git push origin probe/workflow-write-2026-10-08
+ ! [remote rejected] probe/workflow-write-2026-10-08 -> probe/workflow-write-2026-10-08
+   (refusing to allow a GitHub App to create or update workflow
+    `.github/workflows/build-and-test.yml` without `workflows` permission)
+error: failed to push some refs to 'https://github.com/alexandrapaiz/Ursa.git'
+$ echo $?
+1
+```
+
+The throwaway branch was deleted locally and never reached the remote,
+since the push that would have created it is the push that was refused.
+The path is unchanged from PWC-ENG-1's measurement eleven days earlier.
+
+**Exact file:** `.github/workflows/build-and-test.yml`
+
+**Exact content:** the complete file is committed at
+`docs/design/build-and-test.workflow.yml`, so it is applied with a copy
+rather than transcribed from a code block in this document.
+Transcription is the one step in this procedure that can silently
+introduce an error, and a `cp` cannot. The artifact behind it, including
+the executed log of all nine steps, is
+`docs/design/build-and-test-gate.md`.
+
+```
+cp docs/design/build-and-test.workflow.yml .github/workflows/build-and-test.yml
+git add .github/workflows/build-and-test.yml
+git commit -m 'Wire the build-and-test gate into CI (PWC-ENG-3)'
+```
+
+**Apply it together with PWC-ENG-1,** which parks the dependency-floor
+half the same way. The ledger entry that asks for both
+(`docs/ideas.md`, 2026-09-29, "Nothing on a pull request checks whether
+the code builds or the tests pass", status `urgent`) specifies the owner
+installing them "with two `cp` commands", and
+`docs/design/build-and-test-gate.md` §8.1 is those two commands in one
+block. There is no ordering constraint between them: the two gates share
+no file and no job.
+
+**Why it matters, in one sentence:** on 2026-10-08 this repository's
+production dependency trees carried five high-severity advisories,
+including the same `next` package whose critical RCE triggered PWC-ENG-1
+eleven days earlier, and nobody knew, because the gate that detects it
+is parked and unparked gates report nothing while the PM's
+reconciliation that same morning correctly recorded every open pull
+request as green.
+
+**What installing it does not do.** It makes the gate run, not block.
+Three check runs have to be named in a branch protection rule before a
+red gate stops a merge, which is an owner decision about `main` rather
+than something a workflow file can do to itself. The `gh api` call for
+it is `docs/design/build-and-test-gate.md` §8.3, and the rollback is
+§8.5.
