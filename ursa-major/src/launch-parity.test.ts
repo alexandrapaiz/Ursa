@@ -32,7 +32,7 @@
 //   3. an erased episode rebuilt on the CI path
 
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -120,10 +120,19 @@ function comparable(record: OutcomeRecord): Record<string, unknown> {
   return out
 }
 
-/** Every record either launch wrote, keyed by task id, read off disk. */
+/**
+ * Every record either launch wrote, keyed by task id, read off disk.
+ *
+ * An absent `records/` directory is an empty map, not a throw. A launch
+ * that wrote nothing is exactly the defect this file was written to catch,
+ * and the comparison below says so in one line naming the ids; an ENOENT
+ * from `readdirSync` says it as a stack trace through the fixture's own
+ * temporary path, which is the same fact reported worse.
+ */
 function recordsOnDisk(repo: string): Map<string, OutcomeRecord> {
   const dir = join(repo, '.ursa', 'records')
   const out = new Map<string, OutcomeRecord>()
+  if (!existsSync(dir)) return out
   for (const name of readdirSync(dir).filter((n) => n.endsWith('.json'))) {
     const rec = JSON.parse(readFileSync(join(dir, name), 'utf8')) as OutcomeRecord
     out.set(rec.task.id, rec)
