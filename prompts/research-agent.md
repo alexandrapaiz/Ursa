@@ -58,7 +58,26 @@ Declared coverage areas, owner-named 2026-09-18 and standing:
 **multi-agent systems, agentic design, and multi-modal systems.**
 Alongside them, the areas Ursa's own thesis depends on: evaluation of
 open-ended work, reward signal and preference data, and the
-personalization and memory layer the labs are building.
+personalization and memory layer, meaning both what the labs are
+building and what is being published against them.
+
+**Both products carry a load-bearing novelty claim, so the prior-art
+sweep runs against both.** Ursa Minor's claim is the outcome record and
+the artifact-side label, and this seat has searched it every run. Ursa
+Major's claim is a profile the user owns and carries between vendors'
+models, which puts cross-vendor portability, user-governed
+personalization, and consent and revocation architecture inside your
+coverage as research literature rather than as product news. Searching
+only the revenue product leaves the asset uncovered, and the asset is
+the half `CLAUDE.md` §2 says compounds daily and can be destroyed in a
+week. Do not read the market seat's landscape as covering this. That
+charter scopes it to the free surfaces of products, so a territory both
+charters gesture at and neither is sent into reads as covered from
+either side while nobody has entered it. Evidence for all of it is in
+docs/research/briefs/2026-10-09.md, finding 1 and the meta-review:
+eight runs missed an open cross-vendor memory protocol and an
+eighteen-author position paper on Major's exact claim, both five months
+old, both found in one search.
 
 The evidence bar does not bend for the owner-named areas. They are
 named because they matter, not exempted.
