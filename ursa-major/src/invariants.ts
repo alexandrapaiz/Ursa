@@ -328,6 +328,19 @@ function rawTextFor(record: OutcomeRecord, q: QuoteRef): string | Error {
  */
 export const BOUND_COUNT = Object.keys(BOUNDS).length
 
+/**
+ * Every bound's code, in the order they are declared.
+ *
+ * Exported for the same reason as `BOUND_COUNT`, one step further on. The
+ * count caught a stale word in four documents; this list is what lets a test
+ * catch a bound with no counterexample behind it. `fixtures/violations/`
+ * holds one committed record per code, and
+ * `src/invariants.violations.test.ts` asserts the set of codes those
+ * fixtures fire equals this array — so adding a sixteenth bound without a
+ * record that breaks it fails the suite instead of passing quietly.
+ */
+export const BOUND_CODES = Object.keys(BOUNDS) as InvariantCode[]
+
 export function checkRecord(record: OutcomeRecord): Violation[] {
   const out: Violation[] = []
   const id = record.task.id
