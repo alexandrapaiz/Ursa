@@ -1,0 +1,44 @@
+# company.yaml — Ursa's declaration to HQ (standards/company-interface.md §1)
+#
+# Derived by reading the repo on 2026-09-20. Eleven seat workflows exist; only
+# three carry a live cron (pm, okr, exo — the wave-1 roster). The other eight
+# are installed charters with no schedule, recorded as dormant rather than
+# quietly listed as staff HQ could dispatch.
+company: alexandra-systems
+product: Ursa
+posture: private-rd
+priority: 3
+owner: alexandrapaiz
+surfaces:
+  incidents: docs/agents/incidents.md
+  pending: docs/backlog.md
+  sprints: docs/sprints/
+  okrs: docs/okrs/
+  decisions: docs/decisions.md
+  ideas: docs/ideas.md
+  prfaq: docs/prfaq/
+  # No local `lessons:` surface yet; only the vendored HQ register, pinned below.
+standards:
+  lessons: 47779de
+  pm: 49cc38e
+seats:
+  # Every cadence below is the cron actually live in the workflow file, read
+  # 2026-10-05. The previous version of this block said eight of these seats
+  # were "installed, no cron, not yet activated by the owner" and gave them
+  # `cadence: none, status: dormant`. The owner activated seven of them on
+  # 2026-09-24 and this manifest was never revised, so HQ's portfolio view
+  # reported Ursa as a three-seat product for eleven days while the repo ran
+  # ten scheduled seats and opened 52 pull requests. The manifest was the
+  # record; the workflow is the ground truth.
+  - { name: pm,       workflow: .github/workflows/agent-pm.yml,       cadence: daily,        model_class: structured, status: active }
+  - { name: exo,      workflow: .github/workflows/agent-exo.yml,      cadence: weekly-sun,   model_class: judgment,   status: active }
+  - { name: okr,      workflow: .github/workflows/agent-okr.yml,      cadence: monthly,      model_class: structured, status: active }
+  - { name: engineer, workflow: .github/workflows/agent-engineer.yml, cadence: daily,        model_class: build,      status: active }
+  - { name: frontend, workflow: .github/workflows/agent-frontend.yml, cadence: twice-weekly, model_class: build,      status: active }
+  - { name: security, workflow: .github/workflows/agent-security.yml, cadence: weekly-sun,   model_class: build,      status: active }
+  - { name: skill,    workflow: .github/workflows/agent-skill.yml,    cadence: weekly-thu,   model_class: build,      status: active }
+  - { name: research, workflow: .github/workflows/agent-research.yml, cadence: twice-weekly, model_class: judgment,   status: active }
+  - { name: market,   workflow: .github/workflows/agent-market.yml,   cadence: weekly-wed,   model_class: structured, status: active }
+  - { name: finance,  workflow: .github/workflows/agent-finance.yml,  cadence: monthly,      model_class: structured, status: active }
+  # The one seat that really is installed with no cron.
+  - { name: sales,    workflow: .github/workflows/agent-sales.yml,    cadence: none,         model_class: judgment,   status: dormant }
