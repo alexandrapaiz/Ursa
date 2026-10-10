@@ -44,7 +44,7 @@ import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
-import { checkRecord, formatViolations } from '../invariants'
+import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -356,17 +356,14 @@ export async function main(argv: string[]): Promise<number> {
   }))
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a
-  // record the next run recreates, which is not deletion.
-  // Imported here rather than at the top of the file, following this
-  // module's existing pattern for `startBridge`. It also keeps the import
-  // block untouched, which is where this change would otherwise collide
-  // with every other open PR that edits `../types`.
-  const { isForgotten, loadConsent } = await import('../consent')
-  const consent = loadConsent(projectPath)
+  // record the next run recreates, which is not deletion. The lookup moved
+  // to `src/launch.ts` on 2026-10-10 because the CI launch skipped it
+  // entirely and so resurrected what this one refuses to.
+  const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id))
   let suppressed = 0
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
-    if (isForgotten(consent, ep.id)) { suppressed++; continue }
+    if (erased.has(ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep, commits)
     // `--min-chars` filters out an episode too small to carry signal, and
     // it is measured on the generation side, which a refusal-only record
@@ -374,7 +371,7 @@ export async function main(argv: string[]): Promise<number> {
     // explain an import would be dropped by a threshold aimed at something
     // else, and the absence would be back.
     if (!record) continue
-    if (record.stats.generated.totalChars < minChars && (record.exclusions?.length ?? 0) === 0) continue
+    if (!clearsSizeFloor(record, minChars)) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the
     // real work did to each span. Git-only, so it lives here and not in
@@ -405,10 +402,9 @@ export async function main(argv: string[]): Promise<number> {
   // it exists for (src/invariants.ts) survived six records, four open pull
   // requests and 344 passing tests, and an opt-in check would have been
   // off for all of them.
-  const violations = records.flatMap((r) => checkRecord(r))
-  if (violations.length > 0) {
-    console.error(`\n${violations.length} record invariant${violations.length === 1 ? '' : 's'} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.`)
-    console.error(formatViolations(violations))
+  const gate = gateRecords(records)
+  if (gate.violations.length > 0) {
+    console.error(`\n${gate.report}`)
     return 1
   }
   return 0

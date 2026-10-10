@@ -4297,3 +4297,165 @@ claim. So `coverage.renderedChars` is not a thing Ursa is behind on; it
 appears to be a thing this category has not done. Recorded as an
 observation, not as a competitive claim, because one page is not a
 survey.
+
+### 2026-10-10 — A merge-time record is silent about the time dimension, and silence reads as "nothing decayed"
+- Trigger: writing the allowlist in `ursa-major/src/launch-parity.test.ts`
+  today. Two of its three entries are `durability` and the per-span
+  `lifespan`, both produced by `src/lifespan.ts`, which walks the commits
+  that came after an episode closed. `ursa run` runs it; `ursa ci` cannot,
+  because at merge time nothing has come after the merge yet. The
+  divergence is legitimate. What is not legitimate is its shape: the CI
+  record simply omits both keys, and an absent `decayRate` is
+  indistinguishable from a `decayRate` of zero to anything reading the
+  JSON. This project already made exactly this distinction once, for
+  exactly this reason: `no_generation_provenance` exists so that "traceable
+  to no generation" is a stated class rather than a missing field, and
+  `exclusions` exists so that a refused file is a claim rather than an
+  absence (`docs/design/record-exclusions.md`). The time dimension is the
+  one remaining place where the record still answers by saying nothing.
+- What: make the omission state itself. A record resolved by a launch that
+  did not measure durability carries
+  `durability: { measured: false, reason: "resolved at merge time; no
+  commit followed the episode's closing commit" }` instead of carrying no
+  `durability` key, and every surviving span carries
+  `lifespan: { fate: "unmeasured" }` rather than nothing. `unmeasured` is a
+  distinct value from the existing `untested`: `untested` means the walk
+  ran and found no later commit for that file, which is a measurement;
+  `unmeasured` means the walk did not run. A buyer reading a CI record can
+  then tell which question was asked. The second half, whether `ursa ci`
+  should walk the commits a later merge adds and amend the record, is a
+  product decision about what a merge-time record may assert and is
+  deliberately not bundled in here.
+- First step: add `measured: false` plus `reason` to the record-level
+  `durability` type in `ursa-major/src/types.ts`, set it in `src/ci/run.ts`
+  where `src/bin/ursa.ts` calls `annotateDurability`, add the `unmeasured`
+  fate, and add one bound to `src/invariants.ts`: a record with at least
+  one surviving span and no measured durability must carry the reason. The
+  parity test's allowlist then shrinks by nothing, but its entries stop
+  describing an absence and start describing two different stated answers.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 — Two of the three things that produce an outcome record are now compared, and the third is not
+- Trigger: §7.2 of `docs/design/launch-parity.md`, written today. Today's
+  test holds `ursa run` and `ursa ci` to the same record, which is what the
+  2026-10-08 entry asked for. Writing the limitation down surfaced that the
+  repository has a third producer of `OutcomeRecord` that nothing compares
+  against either of them: `ursa-major/src/cli.ts`, the older session-log
+  path that takes `--final` and `--sessions`, calls `resolve()` itself
+  rather than going through `src/resolve-episode.ts`, defaults
+  `artifact.kind` to `chat`, and emits the self-contained HTML viewer. It
+  is the path the n=1 trial was produced on and the path `docs/okrs/2026-q4.md`
+  KR1.3 names when it requires "at least two use the prose path" and "at
+  least one joins generations from more than one source." So the launch the
+  quarter's corpus KR depends on most is the one launch with no parity
+  check behind it.
+- What: the same differential comparison, one producer wider. `src/cli.ts`
+  cannot be compared to the git launches on the same input, because it
+  takes conversations and a final directory rather than a commit range, so
+  the comparison is not launch-against-launch. It is
+  launch-against-`resolve()`: build one `ResolveInput` from
+  `ursa-major/fixtures/mini/`, call `resolve()` directly, run `src/cli.ts`
+  over the same fixture, and assert the record the CLI wrote matches the
+  record `resolve()` returned on the same projection today's test already
+  defines, with a named allowlist for the fields the CLI adds on its own
+  (`artifact.kind`, `renderRef`, the viewer path, and `generatedAt` when
+  `--generated-at` is not passed). That turns "one resolver" from a claim
+  about two of three producers into a claim about all three.
+- First step: export `comparable()` and `topLevelDiff()` out of
+  `src/launch-parity.test.ts` into a small test helper module, then add one
+  test that runs `npm run record:fixture`'s own arguments through
+  `src/cli.ts` programmatically and compares against a direct `resolve()`
+  call on the same `fixtures/mini/` input. The fixture and the npm script
+  both already exist, so this is a comparison to write rather than a
+  fixture to build.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 — The record self-check can only be tested by replacing it, because no fixture is allowed to be wrong
+- Trigger: today's second negative check. Removing the `gateRecords` call
+  from `ursa-major/src/ci/run.ts` left all eight tests in
+  `src/launch-parity.test.ts` green, because a test that asserts a healthy
+  repository passes the gate passes identically whether the gate runs or
+  does not exist. Closing that hole needed a record whose arithmetic is
+  impossible, and no git fixture reliably produces one: the resolver is
+  correct, which is the entire reason the fifteen bounds exist. So
+  `src/ci/gate-wiring.test.ts` replaces `checkRecord` with `vi.mock` and
+  asserts the verdict reaches the exit code, the result object and the run
+  comment. That works, and it tests the wiring rather than the bounds, and
+  it is the only test in the repository that has to mock a module of this
+  project's own to say anything at all.
+- What: commit the impossible record as a fixture instead of mocking the
+  thing that would have caught it. One file,
+  `ursa-major/fixtures/violations/gen-claim-bounded.json`: a real
+  `OutcomeRecord`, hand-edited so exactly one bound fails, with a sibling
+  `.md` naming which bound and both sides of the number. Then
+  `src/invariants.test.ts` can assert `checkRecord` catches it, and the two
+  launch gates can be tested by resolving normally and then injecting the
+  fixture — no mock, and the fixture doubles as the worked example
+  `docs/design/generated-denominator.md` currently describes in prose. The
+  wider point, which is why this is worth an entry rather than a cleanup:
+  fifteen bounds exist and the repository holds zero records that violate
+  any of them, so fourteen of the fifteen have never been seen to fire
+  against a real artifact. A violations fixture directory is the cheapest
+  way to change that, one bound at a time. The count itself is a second
+  instance of the same problem: `README.md` and three design documents said
+  "thirteen" today, four days after `EXCLUSION_NOT_CLASSIFIED` became the
+  fifteenth, which is why `BOUND_COUNT` is now derived from `BOUNDS` and
+  the run comment reads the derived value.
+- First step: write the first one. Copy
+  `ursa-major/fixtures/mini/record/outcome_record.json`, raise one
+  generation's claimed characters above its `charsWritten`, commit it with
+  the note, and add one test asserting `checkRecord` returns exactly the
+  `GEN_CLAIM_BOUNDED` violation and nothing else. Fourteen more follow
+  one at a time, each as its own small unit of work.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-10 (engineer craft scan): **Letta's memory, read at
+  docs.letta.com/guides/agents/sleep-time-agents and the search result
+  summary for docs.letta.com/letta-agent/memory (the memory page itself
+  404s today), 2026-10-10.** Category 3 in `docs/market/landscape.md`,
+  picked because the rotation has scanned Mem0 twice and Zep's Graphiti
+  once and had not reached Letta.
+  **Worth stealing: the memory store is a git-backed directory, not a
+  document.** Letta calls it MemFS. The page says memory lives in "a
+  git-backed filesystem the agent can inspect and edit," that a user
+  reviews saved changes "in the desktop app's memory viewer or by
+  inspecting `$MEMORY_DIR` directly," and that before a large
+  reorganization the workflow "backs up the repository before splitting
+  files, merging duplicates, or restructuring the hierarchy." So every
+  change to what the system believes is a commit, and the history of the
+  belief is queryable with `git log` rather than reconstructed. Ursa
+  Major's equivalent, `<project>/.ursa/tuning.json`, is a single JSON
+  document with revocation tombstones: it records that a rule was revoked
+  and never records when the rule was first believed, which is exactly the
+  open ledger entry "The tuning store says what Ursa believes and never
+  when it started believing it" (2026-10-08). The scan's contribution is
+  not a new idea, it is that a competitor has shipped the mechanism that
+  entry proposes, and shipped it in the one form Ursa could adopt almost
+  free, since `.ursa/` already sits inside the user's own git repository.
+  **What Ursa does better: where the belief comes from, and who signs off
+  on it.** Letta's dream subagents "review recent conversations,
+  consolidate useful lessons, and update memory," and the same page states
+  plainly that "the agent does not ask for approval when it reviews
+  updates." That is a model reading a conversation, deciding what the
+  lesson is, and writing it into the user's memory unprompted, which is
+  the failure mode `docs/vision.md` names twice: principle 3, because a
+  lesson a model infers from what was said is a stated preference rather
+  than a revealed one, and principle 4, because the model is the central
+  assessor of its own evidence. Ursa's units come from what the person did
+  to the work, the edit is the correction, each unit carries a pointer back
+  to the span and the commit it came from, and the owner's declaration is
+  the only thing that counts as acceptance. Letta's `/remember` command is
+  the same stated-preference shape in the opposite direction: the user
+  tells the agent a lesson and the agent files it.
+  **Honest limit.** One documentation page, read once, and the memory
+  reference page it points at returns 404 today, so the mechanics of
+  per-block size limits and sharing could not be confirmed first-hand and
+  are not relied on above. Letta is also solving a different problem than
+  Ursa (keeping one long-running agent coherent across sessions, not making
+  one person's corrections portable across vendors), so the fair axis is
+  narrow: how a change in what the system believes is recorded over time.
+  On that axis Letta is ahead of Ursa today, and the gap is one already in
+  this ledger.

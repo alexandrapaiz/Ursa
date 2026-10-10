@@ -1124,6 +1124,178 @@ var init_store = __esm({
   }
 });
 
+// src/tuning/revoke.ts
+function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  const axiomsDeleted = [];
+  let evidenceStripped = 0;
+  const axioms = [];
+  for (const axiom of tuning.axioms) {
+    const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
+    const dropped = axiom.evidence.length - kept.length;
+    if (dropped === 0) {
+      axioms.push(axiom);
+      continue;
+    }
+    evidenceStripped += dropped;
+    if (kept.length === 0) {
+      axiomsDeleted.push(axiom.id);
+      continue;
+    }
+    axioms.push({ ...axiom, evidence: kept, evidenceCount: kept.length, lastSeen: now });
+  }
+  const deleted = new Set(axiomsDeleted);
+  const cleaned = axioms.map(
+    (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
+  );
+  const sources = tuning.sources.filter((s) => s.recordId !== recordId);
+  return {
+    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
+    axiomsDeleted,
+    evidenceStripped,
+    sourcesRemoved: tuning.sources.length - sources.length
+  };
+}
+function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  if (!(0, import_node_fs2.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
+  const tuning = JSON.parse((0, import_node_fs2.readFileSync)(tuningPath, "utf8"));
+  const target = tuning.axioms.find((a) => a.id === unitId);
+  if (!target) {
+    throw new Error(
+      `No axiom ${unitId} in ${tuningPath} (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
+    );
+  }
+  const updated = {
+    ...tuning,
+    updatedAt: now,
+    axioms: tuning.axioms.map(
+      (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
+    )
+  };
+  (0, import_node_fs2.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
+  return updated;
+}
+var import_node_fs2;
+var init_revoke = __esm({
+  "src/tuning/revoke.ts"() {
+    "use strict";
+    import_node_fs2 = require("node:fs");
+  }
+});
+
+// src/consent.ts
+function consentPath(projectRoot) {
+  return (0, import_node_path3.join)(ursaDir(projectRoot), "consent.json");
+}
+function tuningPathFor(projectRoot) {
+  return (0, import_node_path3.join)(ursaDir(projectRoot), "tuning.json");
+}
+function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt: now,
+    scopes: { "minor-aggregate": { state: "withheld", changedAt: null, history: [] } },
+    forgotten: []
+  };
+}
+function coerceScope(raw) {
+  const o = raw ?? {};
+  const state = o.state === "granted" ? "granted" : "withheld";
+  return {
+    state,
+    changedAt: typeof o.changedAt === "string" ? o.changedAt : null,
+    history: Array.isArray(o.history) ? o.history : []
+  };
+}
+function loadConsent(projectRoot) {
+  const path = consentPath(projectRoot);
+  if (!(0, import_node_fs3.existsSync)(path)) return withheldByDefault();
+  let parsed;
+  try {
+    parsed = JSON.parse((0, import_node_fs3.readFileSync)(path, "utf8"));
+  } catch {
+    return withheldByDefault();
+  }
+  if (parsed === null || typeof parsed !== "object") return withheldByDefault();
+  const o = parsed;
+  const scopes = o.scopes ?? {};
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt: typeof o.updatedAt === "string" ? o.updatedAt : (/* @__PURE__ */ new Date()).toISOString(),
+    scopes: { "minor-aggregate": coerceScope(scopes["minor-aggregate"]) },
+    forgotten: Array.isArray(o.forgotten) ? o.forgotten : []
+  };
+}
+function saveConsent(projectRoot, consent) {
+  (0, import_node_fs3.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  const path = consentPath(projectRoot);
+  (0, import_node_fs3.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
+  return path;
+}
+function isGranted(consent, scope) {
+  return consent.scopes[scope]?.state === "granted";
+}
+function isForgotten(consent, recordId) {
+  return consent.forgotten.some((t) => t.recordId === recordId);
+}
+function setState(projectRoot, scope, to, by, now) {
+  const consent = loadConsent(projectRoot);
+  const current = consent.scopes[scope];
+  const next = {
+    state: to,
+    changedAt: now,
+    history: [...current.history, { at: now, from: current.state, to, by }]
+  };
+  const updated = { ...consent, updatedAt: now, scopes: { ...consent.scopes, [scope]: next } };
+  saveConsent(projectRoot, updated);
+  return updated;
+}
+function grantScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return setState(projectRoot, scope, "granted", by, now);
+}
+function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return setState(projectRoot, scope, "withheld", by, now);
+}
+function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  const recordFile = (0, import_node_path3.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
+  const hadFile = (0, import_node_fs3.existsSync)(recordFile);
+  if (hadFile) (0, import_node_fs3.rmSync)(recordFile);
+  let axiomsDeleted = [];
+  let evidenceStripped = 0;
+  let sourcesRemoved = 0;
+  const tPath = tuningPathFor(projectRoot);
+  if ((0, import_node_fs3.existsSync)(tPath)) {
+    const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tPath, "utf8"));
+    const result = forgetRecordInTuning(tuning, recordId, now);
+    (0, import_node_fs3.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
+    axiomsDeleted = result.axiomsDeleted;
+    evidenceStripped = result.evidenceStripped;
+    sourcesRemoved = result.sourcesRemoved;
+  }
+  const tombstone = {
+    recordId,
+    forgottenAt: now,
+    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
+  };
+  const consent = loadConsent(projectRoot);
+  saveConsent(projectRoot, {
+    ...consent,
+    updatedAt: now,
+    forgotten: [...consent.forgotten.filter((t) => t.recordId !== recordId), tombstone]
+  });
+  return tombstone;
+}
+var import_node_fs3, import_node_path3, SCOPES;
+var init_consent = __esm({
+  "src/consent.ts"() {
+    "use strict";
+    import_node_fs3 = require("node:fs");
+    import_node_path3 = require("node:path");
+    init_revoke();
+    init_store();
+    SCOPES = ["minor-aggregate"];
+  }
+});
+
 // src/intervals.ts
 function mergedLength(intervals) {
   const sorted = [...intervals].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -1146,6 +1318,407 @@ function mergedLength(intervals) {
 var init_intervals = __esm({
   "src/intervals.ts"() {
     "use strict";
+  }
+});
+
+// src/invariants.ts
+function claimsByGeneration(files, include) {
+  const byGen = /* @__PURE__ */ new Map();
+  for (const f of files) {
+    for (const s of f.spans) {
+      if (!s.source || !include(s)) continue;
+      const arr = byGen.get(s.source.generationIndex);
+      if (arr) arr.push([s.source.start, s.source.end]);
+      else byGen.set(s.source.generationIndex, [[s.source.start, s.source.end]]);
+    }
+  }
+  return byGen;
+}
+function* quotingSignals(signals) {
+  for (const [i, l] of signals.correctionLoops.entries()) {
+    yield {
+      where: `signals.correctionLoops[${i}] (${l.id}) discoveredSpec`,
+      prose: l.discoveredSpec,
+      quotes: l.quotes ?? []
+    };
+  }
+  for (const [i, r] of signals.regressions.entries()) {
+    yield {
+      where: `signals.regressions[${i}] (step ${r.step}) evidence`,
+      prose: r.evidence,
+      quotes: r.quotes ?? []
+    };
+  }
+  for (const [i, c] of signals.oneShotCorrections.entries()) {
+    yield {
+      where: `signals.oneShotCorrections[${i}] (step ${c.step}) text`,
+      prose: c.text,
+      quotes: c.quotes ?? []
+    };
+  }
+}
+function rawTextFor(record, q) {
+  if (q.of === "user_prompt") {
+    if (q.conversationId === void 0 || q.step === void 0) {
+      return new Error("of=user_prompt needs both conversationId and step");
+    }
+    const conv = record.conversations.find((c) => c.id === q.conversationId);
+    if (!conv) {
+      return new Error(`no conversation ${q.conversationId} in this record (has ${record.conversations.map((c) => c.id).join(", ") || "none"})`);
+    }
+    if (!conv.prompts) {
+      return new Error(`conversation ${q.conversationId} carries no prompts[], so the quote cannot be re-read from this record`);
+    }
+    const prompt = conv.prompts.find((p) => p.step === q.step);
+    if (!prompt) {
+      return new Error(`conversation ${q.conversationId} has no prompt at step ${q.step} (steps present: ${conv.prompts.map((p) => p.step).join(", ") || "none"})`);
+    }
+    return prompt.text;
+  }
+  if (q.of === "generation") {
+    if (q.generationIndex === void 0) {
+      return new Error("of=generation needs generationIndex, the record's own address for a generation");
+    }
+    const gen = record.generations[q.generationIndex];
+    if (!gen || gen.generationIndex !== q.generationIndex) {
+      return new Error(`no generation at index ${q.generationIndex} (record has ${record.generations.length})`);
+    }
+    if (q.step !== void 0 && gen.turnIndex !== q.step) {
+      return new Error(`generation ${q.generationIndex} is at turnIndex ${gen.turnIndex}, the quote claims step ${q.step}`);
+    }
+    return gen.text;
+  }
+  if (q.filePath === void 0) return new Error("of=final_span needs filePath");
+  const file = record.files.find((f) => f.path === q.filePath);
+  if (!file) {
+    return new Error(`no file ${q.filePath} in this record (has ${record.files.map((f) => f.path).join(", ") || "none"})`);
+  }
+  return file.text;
+}
+function checkRecord(record) {
+  const out = [];
+  const id = record.task.id;
+  const push = (code, where, observed) => out.push({ code, invariant: BOUNDS[code], where: `${id} ${where}`.trim(), observed });
+  const gens = record.generations;
+  for (const f of record.files) {
+    let prevEnd = 0;
+    for (const [i, s] of f.spans.entries()) {
+      const at = `file ${f.path} span ${i} [${s.start},${s.end})`;
+      if (s.start < prevEnd || s.start > s.end || s.end > f.text.length) {
+        push(
+          "FINAL_SPANS_IN_FILE",
+          at,
+          `previous span ended at ${prevEnd}, file is ${f.text.length} chars`
+        );
+      } else if (s.text !== f.text.slice(s.start, s.end)) {
+        push(
+          "FINAL_SPANS_IN_FILE",
+          at,
+          `span.text is ${s.text.length} chars, text.slice(${s.start}, ${s.end}) is ${f.text.slice(s.start, s.end).length}`
+        );
+      }
+      prevEnd = Math.max(prevEnd, s.end);
+      if (!s.source) continue;
+      const gi = s.source.generationIndex;
+      const gen2 = gens[gi];
+      if (!gen2 || gen2.generationIndex !== gi) {
+        push(
+          "CLAIM_IN_GENERATION",
+          at,
+          `source.generationIndex ${gi}, record has ${gens.length} generations`
+        );
+        continue;
+      }
+      if (s.source.start < 0 || s.source.start >= s.source.end || s.source.end > gen2.text.length) {
+        push(
+          "CLAIM_IN_GENERATION",
+          at,
+          `claims [${s.source.start},${s.source.end}) of a generation ${gen2.text.length} chars long`
+        );
+      }
+      if (s.class === "survived_verbatim") {
+        const finalLen = s.end - s.start;
+        const srcLen = s.source.end - s.source.start;
+        if (finalLen > srcLen) {
+          push(
+            "CLAIM_NOT_WIDER",
+            at,
+            `${finalLen} final chars credited to a ${srcLen}-char generation extent, ${finalLen - srcLen} too many`
+          );
+        }
+      }
+    }
+  }
+  for (const g of gens) {
+    const at = `generation ${g.generationIndex}${g.filePath ? ` (${g.filePath})` : ""}`;
+    let prevEnd = 0;
+    let segmentChars = 0;
+    for (const [i, s] of g.spans.entries()) {
+      if (s.start < prevEnd || s.start > s.end || s.end > g.text.length) {
+        push(
+          "GEN_SPANS_PARTITION_ORDER",
+          `${at} span ${i} [${s.start},${s.end})`,
+          `previous span ended at ${prevEnd}, generation is ${g.text.length} chars`
+        );
+      } else if (s.text !== g.text.slice(s.start, s.end)) {
+        push(
+          "GEN_SPANS_PARTITION_ORDER",
+          `${at} span ${i} [${s.start},${s.end})`,
+          `span.text is ${s.text.length} chars, text.slice(${s.start}, ${s.end}) is ${g.text.slice(s.start, s.end).length}`
+        );
+      }
+      prevEnd = Math.max(prevEnd, s.end);
+      segmentChars += s.end - s.start;
+    }
+    if (g.totalChars !== segmentChars || g.charsWritten !== g.text.length || g.separatorChars !== g.charsWritten - g.totalChars) {
+      push(
+        "GEN_CHARS_CONSISTENT",
+        at,
+        `totalChars ${g.totalChars} vs span extents ${segmentChars}; charsWritten ${g.charsWritten} vs text.length ${g.text.length}; separatorChars ${g.separatorChars} vs ${g.charsWritten - g.totalChars}`
+      );
+    }
+    if (g.survivedChars > g.totalChars || g.totalChars > g.charsWritten) {
+      push(
+        "GEN_SURVIVED_BOUNDED",
+        at,
+        `survivedChars ${g.survivedChars}, totalChars ${g.totalChars}, charsWritten ${g.charsWritten}`
+      );
+    }
+    if (r3(g.totalChars ? g.survivedChars / g.totalChars : 0) !== g.survivalRate) {
+      push(
+        "RATES_MATCH_FIELDS",
+        at,
+        `survivalRate ${g.survivalRate}, but ${g.survivedChars}/${g.totalChars} is ${r3(g.totalChars ? g.survivedChars / g.totalChars : 0)}`
+      );
+    }
+  }
+  const allClaims = claimsByGeneration(record.files, () => true);
+  for (const [gi, intervals] of allClaims) {
+    const gen2 = gens[gi];
+    if (!gen2) continue;
+    const claimed = mergedLength(intervals);
+    if (claimed > gen2.charsWritten) {
+      push(
+        "GEN_CLAIM_BOUNDED",
+        `generation ${gi}${gen2.filePath ? ` (${gen2.filePath})` : ""}`,
+        `${claimed} distinct chars claimed by final spans, generation wrote ${gen2.charsWritten}`
+      );
+    }
+  }
+  const st = record.stats;
+  const gen = st.generated;
+  const split = gen.humanDeletedChars + gen.mergeDeletedChars + gen.unknownDeletedChars;
+  const expectedDeleted = gen.totalChars - gen.survivedChars;
+  if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0) {
+    push(
+      "DELETION_SPLIT_EXACT",
+      "stats.generated",
+      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars = ${expectedDeleted}`
+    );
+  }
+  const spanExtentSum = record.files.reduce(
+    (a, f) => a + f.spans.reduce((b, s) => b + (s.end - s.start), 0),
+    0
+  );
+  if (st.coveredChars !== spanExtentSum || st.coveredChars > st.finalChars) {
+    push(
+      "COVERED_BOUNDED",
+      "stats",
+      `coveredChars ${st.coveredChars}, span extents ${spanExtentSum}, finalChars ${st.finalChars}`
+    );
+  }
+  const rateChecks = [
+    ["generated.deletedPct", gen.deletedChars, gen.totalChars, gen.deletedPct],
+    ["generated.humanDeletedPct", gen.humanDeletedChars, gen.totalChars, gen.humanDeletedPct]
+  ];
+  for (const [name, num, den, stored] of rateChecks) {
+    const actual = r3(den ? num / den : 0);
+    if (actual !== stored) {
+      push(
+        "RATES_MATCH_FIELDS",
+        `stats.${name}`,
+        `stored ${stored}, but ${num}/${den} is ${actual}`
+      );
+    }
+  }
+  for (const c of record.stats.perConversation) {
+    const actual = r3(c.generatedChars ? c.survivedChars / c.generatedChars : 0);
+    if (actual !== c.survivalRate) {
+      push(
+        "RATES_MATCH_FIELDS",
+        `stats.perConversation ${c.conversationId}`,
+        `survivalRate ${c.survivalRate}, but ${c.survivedChars}/${c.generatedChars} is ${actual}`
+      );
+    }
+  }
+  if (record.signals) {
+    for (const sig of quotingSignals(record.signals)) {
+      for (const [qi, q] of sig.quotes.entries()) {
+        const at = `${sig.where} quote ${qi} (of=${q.of})`;
+        const raw = rawTextFor(record, q);
+        if (raw instanceof Error) {
+          push("SIGNAL_QUOTE_GROUNDED", at, `unresolvable: ${raw.message}`);
+          continue;
+        }
+        if (!isExcerptOf(q.text, raw)) {
+          push(
+            "SIGNAL_QUOTE_GROUNDED",
+            at,
+            `quote ${JSON.stringify(abbrev(q.text))} does not appear in the ${raw.length}-char text it names`
+          );
+        }
+        if (!sig.prose.includes(q.text)) {
+          push(
+            "SIGNAL_QUOTE_GROUNDED",
+            at,
+            `quote ${JSON.stringify(abbrev(q.text))} is not present in the prose field a reader sees, so the two can disagree`
+          );
+        }
+      }
+    }
+  }
+  const classes = ["survived_verbatim", "survived_mutated", "no_generation_provenance"];
+  for (const c of classes) {
+    const actual = r3(st.coveredChars ? st.byClass[c].chars / st.coveredChars : 0);
+    if (actual !== st.byClass[c].pct) {
+      push(
+        "RATES_MATCH_FIELDS",
+        `stats.byClass.${c}.pct`,
+        `stored ${st.byClass[c].pct}, but ${st.byClass[c].chars}/${st.coveredChars} is ${actual}`
+      );
+    }
+    const actualOfFinal = r3(st.finalChars ? st.byClass[c].chars / st.finalChars : 0);
+    if (actualOfFinal !== st.byClass[c].pctOfFinal) {
+      push(
+        "RATES_MATCH_FIELDS",
+        `stats.byClass.${c}.pctOfFinal`,
+        `stored ${st.byClass[c].pctOfFinal}, but ${st.byClass[c].chars}/${st.finalChars} is ${actualOfFinal}`
+      );
+    }
+    if (st.byClass[c].pctOfFinal > st.byClass[c].pct) {
+      push(
+        "PCT_DENOMINATORS_ORDERED",
+        `stats.byClass.${c}`,
+        `pctOfFinal ${st.byClass[c].pctOfFinal} > pct ${st.byClass[c].pct}, with coveredChars ${st.coveredChars} and finalChars ${st.finalChars}`
+      );
+    }
+  }
+  const readPaths = [...record.files.map((f) => f.path), ...(record.exclusions ?? []).map((x) => x.path)];
+  const rowPaths = st.perFile.map((r) => r.path);
+  const missing = readPaths.filter((pth) => !rowPaths.includes(pth));
+  const extra = rowPaths.filter((pth) => !readPaths.includes(pth));
+  const duplicated = rowPaths.filter((pth, i) => rowPaths.indexOf(pth) !== i);
+  if (missing.length > 0 || extra.length > 0 || duplicated.length > 0) {
+    push(
+      "PERFILE_ENUMERATES_PATHS",
+      "stats.perFile",
+      `${rowPaths.length} row${rowPaths.length === 1 ? "" : "s"} against ${record.files.length} classified + ${(record.exclusions ?? []).length} excluded path${readPaths.length === 1 ? "" : "s"}` + (missing.length > 0 ? `; no row for ${missing.map((pth) => JSON.stringify(pth)).join(", ")}` : "") + (extra.length > 0 ? `; row for unknown path ${extra.map((pth) => JSON.stringify(pth)).join(", ")}` : "") + (duplicated.length > 0 ? `; repeated row for ${duplicated.map((pth) => JSON.stringify(pth)).join(", ")}` : "")
+    );
+  }
+  const descentSpans = [];
+  const mutatedWithout = [];
+  for (const f of record.files) {
+    for (const [i, s] of f.spans.entries()) {
+      const at = `file ${f.path} span ${i} [${s.start},${s.end})`;
+      if (s.descent) descentSpans.push({ where: at, span: s, descent: s.descent });
+      else if (s.class === "survived_mutated") mutatedWithout.push(at);
+    }
+  }
+  if (descentSpans.length > 0 && mutatedWithout.length > 0) {
+    push(
+      "DESCENT_CHECKED_UNIFORMLY",
+      mutatedWithout[0],
+      `${descentSpans.length} spans carry a descent verdict, ${mutatedWithout.length} survived_mutated spans carry none`
+    );
+  }
+  for (const d of descentSpans) {
+    if (d.span.class === "survived_mutated" && d.descent.basis === "rival") {
+      push(
+        "DESCENT_CHECKED_UNIFORMLY",
+        d.where,
+        `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`
+      );
+    }
+  }
+  const classified = new Set(record.files.map((f) => f.path));
+  for (const [i, x] of (record.exclusions ?? []).entries()) {
+    const at = `exclusions[${i}] (${x.path})`;
+    if (classified.has(x.path)) {
+      const f = record.files.find((ff) => ff.path === x.path);
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `excluded as ${x.reason} from ${x.sha} and also present in files[] with ${f.spans.length} classified span${f.spans.length === 1 ? "" : "s"} over ${f.text.length} chars`
+      );
+    }
+    if (x.chars <= 0 || x.sha.length === 0) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `chars=${x.chars}, sha=${x.sha ? x.sha : "(empty)"}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`
+      );
+    }
+  }
+  return out;
+}
+function formatViolations(violations) {
+  return violations.map((v) => `${v.code}  ${v.where}
+    bound:    ${v.invariant}
+    observed: ${v.observed}`).join("\n");
+}
+var BOUNDS, r3, abbrev, BOUND_COUNT;
+var init_invariants = __esm({
+  "src/invariants.ts"() {
+    "use strict";
+    init_intervals();
+    init_text();
+    BOUNDS = {
+      CLAIM_NOT_WIDER: "a survived_verbatim final span is no wider than the generation extent it claims: span.end - span.start <= source.end - source.start. Verbatim means byte-identical, so the two extents describe the same characters. A survived_mutated span is exempt, because an edit may add text the generation never contained.",
+      CLAIM_IN_GENERATION: "a source pointer names a generation that exists and an extent inside that generation's text: 0 <= start < end <= text.length",
+      GEN_SPANS_PARTITION_ORDER: "a generation's spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)",
+      GEN_CHARS_CONSISTENT: "a generation's character counts agree: totalChars = sum of span extents, charsWritten = text.length, separatorChars = charsWritten - totalChars",
+      GEN_SURVIVED_BOUNDED: "a generation's surviving characters are a subset of its segment characters, which are a subset of what it wrote: survivedChars <= totalChars <= charsWritten",
+      GEN_CLAIM_BOUNDED: "the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten",
+      DELETION_SPLIT_EXACT: "the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars",
+      FINAL_SPANS_IN_FILE: "a final file's spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)",
+      COVERED_BOUNDED: "classified characters are a subset of the finished work: coveredChars = sum of final span extents <= finalChars",
+      RATES_MATCH_FIELDS: "every stored rate equals its own numerator over its own denominator, rounded to three places",
+      PCT_DENOMINATORS_ORDERED: "a class's share of the finished work is never larger than its share of the classified part: byClass[c].pctOfFinal <= byClass[c].pct. The two fields differ only in denominator \u2014 coveredChars for pct, finalChars for pctOfFinal \u2014 and COVERED_BOUNDED already holds coveredChars <= finalChars, so the bound is the same-set statement that the wider denominator produced the smaller number. It fires when the two are computed from each other's denominator, which is the one way a reader could be handed the flattering figure under the honest field's name.",
+      PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
+      SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
+      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
+      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it."
+    };
+    r3 = (x) => Math.round(x * 1e3) / 1e3;
+    abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
+    BOUND_COUNT = Object.keys(BOUNDS).length;
+  }
+});
+
+// src/launch.ts
+function clearsSizeFloor(record, minChars) {
+  if (record.stats.generated.totalChars >= minChars) return true;
+  return (record.exclusions?.length ?? 0) > 0;
+}
+function erasedEpisodeIds(projectPath, episodeIds) {
+  const consent = loadConsent(projectPath);
+  return new Set(episodeIds.filter((id) => isForgotten(consent, id)));
+}
+function gateRecords(records) {
+  const violations = records.flatMap((r) => checkRecord(r));
+  if (violations.length === 0) return { violations, report: "" };
+  const plural = violations.length === 1 ? "" : "s";
+  return {
+    violations,
+    report: `${violations.length} record invariant${plural} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.
+${formatViolations(violations)}`
+  };
+}
+var init_launch = __esm({
+  "src/launch.ts"() {
+    "use strict";
+    init_consent();
+    init_invariants();
   }
 });
 
@@ -2116,7 +2689,7 @@ var init_deletion = __esm({
 // src/resolve-episode.ts
 function resolvablePaths(ep) {
   return ep.touchedFiles.filter(
-    (path) => TEXT_EXTS.has((0, import_node_path3.extname)(path)) && !SKIP_FILES.has(path.split("/").pop() ?? "")
+    (path) => TEXT_EXTS.has((0, import_node_path4.extname)(path)) && !SKIP_FILES.has(path.split("/").pop() ?? "")
   );
 }
 function artifactFor(projectPath, ep) {
@@ -2205,11 +2778,11 @@ function resolveEpisode(projectPath, ep, commits) {
     artifact: artifactFor(projectPath, ep).artifact
   });
 }
-var import_node_path3, TEXT_EXTS, SKIP_FILES, MAX_BLOB_CHARS2;
+var import_node_path4, TEXT_EXTS, SKIP_FILES, MAX_BLOB_CHARS2;
 var init_resolve_episode = __esm({
   "src/resolve-episode.ts"() {
     "use strict";
-    import_node_path3 = require("node:path");
+    import_node_path4 = require("node:path");
     init_pairfinder();
     init_resolve();
     init_deploy();
@@ -2237,192 +2810,6 @@ var init_resolve_episode = __esm({
     ]);
     SKIP_FILES = /* @__PURE__ */ new Set(["package-lock.json", "yarn.lock", "pnpm-lock.yaml"]);
     MAX_BLOB_CHARS2 = 3e5;
-  }
-});
-
-// src/tuning/revoke.ts
-function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const axiomsDeleted = [];
-  let evidenceStripped = 0;
-  const axioms = [];
-  for (const axiom of tuning.axioms) {
-    const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
-    const dropped = axiom.evidence.length - kept.length;
-    if (dropped === 0) {
-      axioms.push(axiom);
-      continue;
-    }
-    evidenceStripped += dropped;
-    if (kept.length === 0) {
-      axiomsDeleted.push(axiom.id);
-      continue;
-    }
-    axioms.push({ ...axiom, evidence: kept, evidenceCount: kept.length, lastSeen: now });
-  }
-  const deleted = new Set(axiomsDeleted);
-  const cleaned = axioms.map(
-    (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
-  );
-  const sources = tuning.sources.filter((s) => s.recordId !== recordId);
-  return {
-    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
-    axiomsDeleted,
-    evidenceStripped,
-    sourcesRemoved: tuning.sources.length - sources.length
-  };
-}
-function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  if (!(0, import_node_fs2.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
-  const tuning = JSON.parse((0, import_node_fs2.readFileSync)(tuningPath, "utf8"));
-  const target = tuning.axioms.find((a) => a.id === unitId);
-  if (!target) {
-    throw new Error(
-      `No axiom ${unitId} in ${tuningPath} (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
-    );
-  }
-  const updated = {
-    ...tuning,
-    updatedAt: now,
-    axioms: tuning.axioms.map(
-      (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
-    )
-  };
-  (0, import_node_fs2.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
-  return updated;
-}
-var import_node_fs2;
-var init_revoke = __esm({
-  "src/tuning/revoke.ts"() {
-    "use strict";
-    import_node_fs2 = require("node:fs");
-  }
-});
-
-// src/consent.ts
-var consent_exports = {};
-__export(consent_exports, {
-  SCOPES: () => SCOPES,
-  consentPath: () => consentPath,
-  forget: () => forget,
-  grantScope: () => grantScope,
-  isForgotten: () => isForgotten,
-  isGranted: () => isGranted,
-  loadConsent: () => loadConsent,
-  revokeScope: () => revokeScope,
-  saveConsent: () => saveConsent,
-  tuningPathFor: () => tuningPathFor,
-  withheldByDefault: () => withheldByDefault
-});
-function consentPath(projectRoot) {
-  return (0, import_node_path4.join)(ursaDir(projectRoot), "consent.json");
-}
-function tuningPathFor(projectRoot) {
-  return (0, import_node_path4.join)(ursaDir(projectRoot), "tuning.json");
-}
-function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return {
-    schemaVersion: "0.1.0",
-    updatedAt: now,
-    scopes: { "minor-aggregate": { state: "withheld", changedAt: null, history: [] } },
-    forgotten: []
-  };
-}
-function coerceScope(raw) {
-  const o = raw ?? {};
-  const state = o.state === "granted" ? "granted" : "withheld";
-  return {
-    state,
-    changedAt: typeof o.changedAt === "string" ? o.changedAt : null,
-    history: Array.isArray(o.history) ? o.history : []
-  };
-}
-function loadConsent(projectRoot) {
-  const path = consentPath(projectRoot);
-  if (!(0, import_node_fs3.existsSync)(path)) return withheldByDefault();
-  let parsed;
-  try {
-    parsed = JSON.parse((0, import_node_fs3.readFileSync)(path, "utf8"));
-  } catch {
-    return withheldByDefault();
-  }
-  if (parsed === null || typeof parsed !== "object") return withheldByDefault();
-  const o = parsed;
-  const scopes = o.scopes ?? {};
-  return {
-    schemaVersion: "0.1.0",
-    updatedAt: typeof o.updatedAt === "string" ? o.updatedAt : (/* @__PURE__ */ new Date()).toISOString(),
-    scopes: { "minor-aggregate": coerceScope(scopes["minor-aggregate"]) },
-    forgotten: Array.isArray(o.forgotten) ? o.forgotten : []
-  };
-}
-function saveConsent(projectRoot, consent) {
-  (0, import_node_fs3.mkdirSync)(ursaDir(projectRoot), { recursive: true });
-  const path = consentPath(projectRoot);
-  (0, import_node_fs3.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
-  return path;
-}
-function isGranted(consent, scope) {
-  return consent.scopes[scope]?.state === "granted";
-}
-function isForgotten(consent, recordId) {
-  return consent.forgotten.some((t) => t.recordId === recordId);
-}
-function setState(projectRoot, scope, to, by, now) {
-  const consent = loadConsent(projectRoot);
-  const current = consent.scopes[scope];
-  const next = {
-    state: to,
-    changedAt: now,
-    history: [...current.history, { at: now, from: current.state, to, by }]
-  };
-  const updated = { ...consent, updatedAt: now, scopes: { ...consent.scopes, [scope]: next } };
-  saveConsent(projectRoot, updated);
-  return updated;
-}
-function grantScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return setState(projectRoot, scope, "granted", by, now);
-}
-function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return setState(projectRoot, scope, "withheld", by, now);
-}
-function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const recordFile = (0, import_node_path4.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
-  const hadFile = (0, import_node_fs3.existsSync)(recordFile);
-  if (hadFile) (0, import_node_fs3.rmSync)(recordFile);
-  let axiomsDeleted = [];
-  let evidenceStripped = 0;
-  let sourcesRemoved = 0;
-  const tPath = tuningPathFor(projectRoot);
-  if ((0, import_node_fs3.existsSync)(tPath)) {
-    const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tPath, "utf8"));
-    const result = forgetRecordInTuning(tuning, recordId, now);
-    (0, import_node_fs3.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
-    axiomsDeleted = result.axiomsDeleted;
-    evidenceStripped = result.evidenceStripped;
-    sourcesRemoved = result.sourcesRemoved;
-  }
-  const tombstone = {
-    recordId,
-    forgottenAt: now,
-    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
-  };
-  const consent = loadConsent(projectRoot);
-  saveConsent(projectRoot, {
-    ...consent,
-    updatedAt: now,
-    forgotten: [...consent.forgotten.filter((t) => t.recordId !== recordId), tombstone]
-  });
-  return tombstone;
-}
-var import_node_fs3, import_node_path4, SCOPES;
-var init_consent = __esm({
-  "src/consent.ts"() {
-    "use strict";
-    import_node_fs3 = require("node:fs");
-    import_node_path4 = require("node:path");
-    init_revoke();
-    init_store();
-    SCOPES = ["minor-aggregate"];
   }
 });
 
@@ -3338,6 +3725,10 @@ function renderRunComment(f, ctx) {
   lines.push(`- Why that window: ${ctx.windowNote}`);
   lines.push(`- Acceptance declaration carried into these records: ${ctx.declarationBasis}`);
   lines.push(`- Records written to \`${ctx.recordsPath}\` on this runner. They are not pushed anywhere.`);
+  const bad = ctx.invariantViolations ?? 0;
+  lines.push(
+    bad === 0 ? `- Self-check: every record above satisfies all ${BOUND_COUNT} of the bounds a record must satisfy, so the figures in the table are at least internally consistent.` : `- Self-check: **${bad} bound${bad === 1 ? "" : "s"} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
+  );
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`);
   lines.push("");
   lines.push("</details>");
@@ -3351,6 +3742,7 @@ var RUN_COMMENT_MARKER;
 var init_comment = __esm({
   "src/ci/comment.ts"() {
     "use strict";
+    init_invariants();
     RUN_COMMENT_MARKER = "<!-- ursa-major:run-comment:v1 -->";
   }
 });
@@ -3382,7 +3774,8 @@ async function runCi(opts) {
         priorAcceptance: null,
         declaration: NO_PRIOR,
         mode,
-        recordPaths: []
+        recordPaths: [],
+        invariantViolations: []
       };
     }
     throw err;
@@ -3404,13 +3797,19 @@ async function runCi(opts) {
   const records = [];
   const recordPaths = [];
   const dropped = { unresolvable: 0, belowMinChars: 0, minChars };
+  const erased = erasedEpisodeIds(opts.projectPath, episodes.map((e) => e.id));
+  let suppressed = 0;
   for (const episode of episodes) {
+    if (erased.has(episode.id)) {
+      suppressed++;
+      continue;
+    }
     const record = resolveEpisode(opts.projectPath, episode);
     if (!record) {
       dropped.unresolvable++;
       continue;
     }
-    if (record.stats.generated.totalChars < minChars) {
+    if (!clearsSizeFloor(record, minChars)) {
       dropped.belowMinChars++;
       continue;
     }
@@ -3422,6 +3821,11 @@ async function runCi(opts) {
   }
   saveEpisodes(opts.projectPath, episodes);
   log(`ursa ci: ${episodes.length} work units found, ${records.length} resolved`);
+  if (suppressed > 0) {
+    log(`ursa ci: ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased; nothing was rebuilt`);
+  }
+  const gate = gateRecords(records);
+  if (gate.violations.length > 0) log(`ursa ci: ${gate.report}`);
   const tuningDelta = distillAll(opts.projectPath, records, mode, log);
   const fields = runCommentFields(records, episodes, tuningDelta);
   const comment = renderRunComment(fields, {
@@ -3432,7 +3836,8 @@ async function runCi(opts) {
     declarationBasis: declaration.basis,
     recordsPath: (0, import_node_path6.join)(ursaDir(opts.projectPath), "records"),
     dropped,
-    runUrl: opts.runUrl ?? null
+    runUrl: opts.runUrl ?? null,
+    invariantViolations: gate.violations.length
   });
   let commentUrl = null;
   if (opts.post === false) {
@@ -3446,7 +3851,7 @@ async function runCi(opts) {
   const outputsPath = opts.outputsPath ?? env.GITHUB_OUTPUT ?? null;
   if (outputsPath) writeStepOutputs(outputsPath, fields, commentUrl);
   return {
-    exitCode: 0,
+    exitCode: gate.violations.length > 0 ? 1 : 0,
     window,
     fields,
     comment,
@@ -3454,7 +3859,8 @@ async function runCi(opts) {
     priorAcceptance,
     declaration,
     mode,
-    recordPaths
+    recordPaths,
+    invariantViolations: gate.violations
   };
 }
 function renderStepOutputs(fields, commentUrl) {
@@ -3545,6 +3951,7 @@ var init_run = __esm({
     init_signals();
     init_store();
     init_resolve_episode();
+    init_launch();
     init_distill();
     init_merge();
     init_window();
@@ -3770,375 +4177,7 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
 // src/bin/ursa.ts
 init_episodes();
 init_store();
-
-// src/invariants.ts
-init_intervals();
-init_text();
-var BOUNDS = {
-  CLAIM_NOT_WIDER: "a survived_verbatim final span is no wider than the generation extent it claims: span.end - span.start <= source.end - source.start. Verbatim means byte-identical, so the two extents describe the same characters. A survived_mutated span is exempt, because an edit may add text the generation never contained.",
-  CLAIM_IN_GENERATION: "a source pointer names a generation that exists and an extent inside that generation's text: 0 <= start < end <= text.length",
-  GEN_SPANS_PARTITION_ORDER: "a generation's spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)",
-  GEN_CHARS_CONSISTENT: "a generation's character counts agree: totalChars = sum of span extents, charsWritten = text.length, separatorChars = charsWritten - totalChars",
-  GEN_SURVIVED_BOUNDED: "a generation's surviving characters are a subset of its segment characters, which are a subset of what it wrote: survivedChars <= totalChars <= charsWritten",
-  GEN_CLAIM_BOUNDED: "the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten",
-  DELETION_SPLIT_EXACT: "the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars",
-  FINAL_SPANS_IN_FILE: "a final file's spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)",
-  COVERED_BOUNDED: "classified characters are a subset of the finished work: coveredChars = sum of final span extents <= finalChars",
-  RATES_MATCH_FIELDS: "every stored rate equals its own numerator over its own denominator, rounded to three places",
-  PCT_DENOMINATORS_ORDERED: "a class's share of the finished work is never larger than its share of the classified part: byClass[c].pctOfFinal <= byClass[c].pct. The two fields differ only in denominator \u2014 coveredChars for pct, finalChars for pctOfFinal \u2014 and COVERED_BOUNDED already holds coveredChars <= finalChars, so the bound is the same-set statement that the wider denominator produced the smaller number. It fires when the two are computed from each other's denominator, which is the one way a reader could be handed the flattering figure under the honest field's name.",
-  PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
-  SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
-  EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
-  DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it."
-};
-var r3 = (x) => Math.round(x * 1e3) / 1e3;
-var abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
-function claimsByGeneration(files, include) {
-  const byGen = /* @__PURE__ */ new Map();
-  for (const f of files) {
-    for (const s of f.spans) {
-      if (!s.source || !include(s)) continue;
-      const arr = byGen.get(s.source.generationIndex);
-      if (arr) arr.push([s.source.start, s.source.end]);
-      else byGen.set(s.source.generationIndex, [[s.source.start, s.source.end]]);
-    }
-  }
-  return byGen;
-}
-function* quotingSignals(signals) {
-  for (const [i, l] of signals.correctionLoops.entries()) {
-    yield {
-      where: `signals.correctionLoops[${i}] (${l.id}) discoveredSpec`,
-      prose: l.discoveredSpec,
-      quotes: l.quotes ?? []
-    };
-  }
-  for (const [i, r] of signals.regressions.entries()) {
-    yield {
-      where: `signals.regressions[${i}] (step ${r.step}) evidence`,
-      prose: r.evidence,
-      quotes: r.quotes ?? []
-    };
-  }
-  for (const [i, c] of signals.oneShotCorrections.entries()) {
-    yield {
-      where: `signals.oneShotCorrections[${i}] (step ${c.step}) text`,
-      prose: c.text,
-      quotes: c.quotes ?? []
-    };
-  }
-}
-function rawTextFor(record, q) {
-  if (q.of === "user_prompt") {
-    if (q.conversationId === void 0 || q.step === void 0) {
-      return new Error("of=user_prompt needs both conversationId and step");
-    }
-    const conv = record.conversations.find((c) => c.id === q.conversationId);
-    if (!conv) {
-      return new Error(`no conversation ${q.conversationId} in this record (has ${record.conversations.map((c) => c.id).join(", ") || "none"})`);
-    }
-    if (!conv.prompts) {
-      return new Error(`conversation ${q.conversationId} carries no prompts[], so the quote cannot be re-read from this record`);
-    }
-    const prompt = conv.prompts.find((p) => p.step === q.step);
-    if (!prompt) {
-      return new Error(`conversation ${q.conversationId} has no prompt at step ${q.step} (steps present: ${conv.prompts.map((p) => p.step).join(", ") || "none"})`);
-    }
-    return prompt.text;
-  }
-  if (q.of === "generation") {
-    if (q.generationIndex === void 0) {
-      return new Error("of=generation needs generationIndex, the record's own address for a generation");
-    }
-    const gen = record.generations[q.generationIndex];
-    if (!gen || gen.generationIndex !== q.generationIndex) {
-      return new Error(`no generation at index ${q.generationIndex} (record has ${record.generations.length})`);
-    }
-    if (q.step !== void 0 && gen.turnIndex !== q.step) {
-      return new Error(`generation ${q.generationIndex} is at turnIndex ${gen.turnIndex}, the quote claims step ${q.step}`);
-    }
-    return gen.text;
-  }
-  if (q.filePath === void 0) return new Error("of=final_span needs filePath");
-  const file = record.files.find((f) => f.path === q.filePath);
-  if (!file) {
-    return new Error(`no file ${q.filePath} in this record (has ${record.files.map((f) => f.path).join(", ") || "none"})`);
-  }
-  return file.text;
-}
-function checkRecord(record) {
-  const out = [];
-  const id = record.task.id;
-  const push = (code, where, observed) => out.push({ code, invariant: BOUNDS[code], where: `${id} ${where}`.trim(), observed });
-  const gens = record.generations;
-  for (const f of record.files) {
-    let prevEnd = 0;
-    for (const [i, s] of f.spans.entries()) {
-      const at = `file ${f.path} span ${i} [${s.start},${s.end})`;
-      if (s.start < prevEnd || s.start > s.end || s.end > f.text.length) {
-        push(
-          "FINAL_SPANS_IN_FILE",
-          at,
-          `previous span ended at ${prevEnd}, file is ${f.text.length} chars`
-        );
-      } else if (s.text !== f.text.slice(s.start, s.end)) {
-        push(
-          "FINAL_SPANS_IN_FILE",
-          at,
-          `span.text is ${s.text.length} chars, text.slice(${s.start}, ${s.end}) is ${f.text.slice(s.start, s.end).length}`
-        );
-      }
-      prevEnd = Math.max(prevEnd, s.end);
-      if (!s.source) continue;
-      const gi = s.source.generationIndex;
-      const gen2 = gens[gi];
-      if (!gen2 || gen2.generationIndex !== gi) {
-        push(
-          "CLAIM_IN_GENERATION",
-          at,
-          `source.generationIndex ${gi}, record has ${gens.length} generations`
-        );
-        continue;
-      }
-      if (s.source.start < 0 || s.source.start >= s.source.end || s.source.end > gen2.text.length) {
-        push(
-          "CLAIM_IN_GENERATION",
-          at,
-          `claims [${s.source.start},${s.source.end}) of a generation ${gen2.text.length} chars long`
-        );
-      }
-      if (s.class === "survived_verbatim") {
-        const finalLen = s.end - s.start;
-        const srcLen = s.source.end - s.source.start;
-        if (finalLen > srcLen) {
-          push(
-            "CLAIM_NOT_WIDER",
-            at,
-            `${finalLen} final chars credited to a ${srcLen}-char generation extent, ${finalLen - srcLen} too many`
-          );
-        }
-      }
-    }
-  }
-  for (const g of gens) {
-    const at = `generation ${g.generationIndex}${g.filePath ? ` (${g.filePath})` : ""}`;
-    let prevEnd = 0;
-    let segmentChars = 0;
-    for (const [i, s] of g.spans.entries()) {
-      if (s.start < prevEnd || s.start > s.end || s.end > g.text.length) {
-        push(
-          "GEN_SPANS_PARTITION_ORDER",
-          `${at} span ${i} [${s.start},${s.end})`,
-          `previous span ended at ${prevEnd}, generation is ${g.text.length} chars`
-        );
-      } else if (s.text !== g.text.slice(s.start, s.end)) {
-        push(
-          "GEN_SPANS_PARTITION_ORDER",
-          `${at} span ${i} [${s.start},${s.end})`,
-          `span.text is ${s.text.length} chars, text.slice(${s.start}, ${s.end}) is ${g.text.slice(s.start, s.end).length}`
-        );
-      }
-      prevEnd = Math.max(prevEnd, s.end);
-      segmentChars += s.end - s.start;
-    }
-    if (g.totalChars !== segmentChars || g.charsWritten !== g.text.length || g.separatorChars !== g.charsWritten - g.totalChars) {
-      push(
-        "GEN_CHARS_CONSISTENT",
-        at,
-        `totalChars ${g.totalChars} vs span extents ${segmentChars}; charsWritten ${g.charsWritten} vs text.length ${g.text.length}; separatorChars ${g.separatorChars} vs ${g.charsWritten - g.totalChars}`
-      );
-    }
-    if (g.survivedChars > g.totalChars || g.totalChars > g.charsWritten) {
-      push(
-        "GEN_SURVIVED_BOUNDED",
-        at,
-        `survivedChars ${g.survivedChars}, totalChars ${g.totalChars}, charsWritten ${g.charsWritten}`
-      );
-    }
-    if (r3(g.totalChars ? g.survivedChars / g.totalChars : 0) !== g.survivalRate) {
-      push(
-        "RATES_MATCH_FIELDS",
-        at,
-        `survivalRate ${g.survivalRate}, but ${g.survivedChars}/${g.totalChars} is ${r3(g.totalChars ? g.survivedChars / g.totalChars : 0)}`
-      );
-    }
-  }
-  const allClaims = claimsByGeneration(record.files, () => true);
-  for (const [gi, intervals] of allClaims) {
-    const gen2 = gens[gi];
-    if (!gen2) continue;
-    const claimed = mergedLength(intervals);
-    if (claimed > gen2.charsWritten) {
-      push(
-        "GEN_CLAIM_BOUNDED",
-        `generation ${gi}${gen2.filePath ? ` (${gen2.filePath})` : ""}`,
-        `${claimed} distinct chars claimed by final spans, generation wrote ${gen2.charsWritten}`
-      );
-    }
-  }
-  const st = record.stats;
-  const gen = st.generated;
-  const split = gen.humanDeletedChars + gen.mergeDeletedChars + gen.unknownDeletedChars;
-  const expectedDeleted = gen.totalChars - gen.survivedChars;
-  if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0) {
-    push(
-      "DELETION_SPLIT_EXACT",
-      "stats.generated",
-      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars = ${expectedDeleted}`
-    );
-  }
-  const spanExtentSum = record.files.reduce(
-    (a, f) => a + f.spans.reduce((b, s) => b + (s.end - s.start), 0),
-    0
-  );
-  if (st.coveredChars !== spanExtentSum || st.coveredChars > st.finalChars) {
-    push(
-      "COVERED_BOUNDED",
-      "stats",
-      `coveredChars ${st.coveredChars}, span extents ${spanExtentSum}, finalChars ${st.finalChars}`
-    );
-  }
-  const rateChecks = [
-    ["generated.deletedPct", gen.deletedChars, gen.totalChars, gen.deletedPct],
-    ["generated.humanDeletedPct", gen.humanDeletedChars, gen.totalChars, gen.humanDeletedPct]
-  ];
-  for (const [name, num, den, stored] of rateChecks) {
-    const actual = r3(den ? num / den : 0);
-    if (actual !== stored) {
-      push(
-        "RATES_MATCH_FIELDS",
-        `stats.${name}`,
-        `stored ${stored}, but ${num}/${den} is ${actual}`
-      );
-    }
-  }
-  for (const c of record.stats.perConversation) {
-    const actual = r3(c.generatedChars ? c.survivedChars / c.generatedChars : 0);
-    if (actual !== c.survivalRate) {
-      push(
-        "RATES_MATCH_FIELDS",
-        `stats.perConversation ${c.conversationId}`,
-        `survivalRate ${c.survivalRate}, but ${c.survivedChars}/${c.generatedChars} is ${actual}`
-      );
-    }
-  }
-  if (record.signals) {
-    for (const sig of quotingSignals(record.signals)) {
-      for (const [qi, q] of sig.quotes.entries()) {
-        const at = `${sig.where} quote ${qi} (of=${q.of})`;
-        const raw = rawTextFor(record, q);
-        if (raw instanceof Error) {
-          push("SIGNAL_QUOTE_GROUNDED", at, `unresolvable: ${raw.message}`);
-          continue;
-        }
-        if (!isExcerptOf(q.text, raw)) {
-          push(
-            "SIGNAL_QUOTE_GROUNDED",
-            at,
-            `quote ${JSON.stringify(abbrev(q.text))} does not appear in the ${raw.length}-char text it names`
-          );
-        }
-        if (!sig.prose.includes(q.text)) {
-          push(
-            "SIGNAL_QUOTE_GROUNDED",
-            at,
-            `quote ${JSON.stringify(abbrev(q.text))} is not present in the prose field a reader sees, so the two can disagree`
-          );
-        }
-      }
-    }
-  }
-  const classes = ["survived_verbatim", "survived_mutated", "no_generation_provenance"];
-  for (const c of classes) {
-    const actual = r3(st.coveredChars ? st.byClass[c].chars / st.coveredChars : 0);
-    if (actual !== st.byClass[c].pct) {
-      push(
-        "RATES_MATCH_FIELDS",
-        `stats.byClass.${c}.pct`,
-        `stored ${st.byClass[c].pct}, but ${st.byClass[c].chars}/${st.coveredChars} is ${actual}`
-      );
-    }
-    const actualOfFinal = r3(st.finalChars ? st.byClass[c].chars / st.finalChars : 0);
-    if (actualOfFinal !== st.byClass[c].pctOfFinal) {
-      push(
-        "RATES_MATCH_FIELDS",
-        `stats.byClass.${c}.pctOfFinal`,
-        `stored ${st.byClass[c].pctOfFinal}, but ${st.byClass[c].chars}/${st.finalChars} is ${actualOfFinal}`
-      );
-    }
-    if (st.byClass[c].pctOfFinal > st.byClass[c].pct) {
-      push(
-        "PCT_DENOMINATORS_ORDERED",
-        `stats.byClass.${c}`,
-        `pctOfFinal ${st.byClass[c].pctOfFinal} > pct ${st.byClass[c].pct}, with coveredChars ${st.coveredChars} and finalChars ${st.finalChars}`
-      );
-    }
-  }
-  const readPaths = [...record.files.map((f) => f.path), ...(record.exclusions ?? []).map((x) => x.path)];
-  const rowPaths = st.perFile.map((r) => r.path);
-  const missing = readPaths.filter((pth) => !rowPaths.includes(pth));
-  const extra = rowPaths.filter((pth) => !readPaths.includes(pth));
-  const duplicated = rowPaths.filter((pth, i) => rowPaths.indexOf(pth) !== i);
-  if (missing.length > 0 || extra.length > 0 || duplicated.length > 0) {
-    push(
-      "PERFILE_ENUMERATES_PATHS",
-      "stats.perFile",
-      `${rowPaths.length} row${rowPaths.length === 1 ? "" : "s"} against ${record.files.length} classified + ${(record.exclusions ?? []).length} excluded path${readPaths.length === 1 ? "" : "s"}` + (missing.length > 0 ? `; no row for ${missing.map((pth) => JSON.stringify(pth)).join(", ")}` : "") + (extra.length > 0 ? `; row for unknown path ${extra.map((pth) => JSON.stringify(pth)).join(", ")}` : "") + (duplicated.length > 0 ? `; repeated row for ${duplicated.map((pth) => JSON.stringify(pth)).join(", ")}` : "")
-    );
-  }
-  const descentSpans = [];
-  const mutatedWithout = [];
-  for (const f of record.files) {
-    for (const [i, s] of f.spans.entries()) {
-      const at = `file ${f.path} span ${i} [${s.start},${s.end})`;
-      if (s.descent) descentSpans.push({ where: at, span: s, descent: s.descent });
-      else if (s.class === "survived_mutated") mutatedWithout.push(at);
-    }
-  }
-  if (descentSpans.length > 0 && mutatedWithout.length > 0) {
-    push(
-      "DESCENT_CHECKED_UNIFORMLY",
-      mutatedWithout[0],
-      `${descentSpans.length} spans carry a descent verdict, ${mutatedWithout.length} survived_mutated spans carry none`
-    );
-  }
-  for (const d of descentSpans) {
-    if (d.span.class === "survived_mutated" && d.descent.basis === "rival") {
-      push(
-        "DESCENT_CHECKED_UNIFORMLY",
-        d.where,
-        `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`
-      );
-    }
-  }
-  const classified = new Set(record.files.map((f) => f.path));
-  for (const [i, x] of (record.exclusions ?? []).entries()) {
-    const at = `exclusions[${i}] (${x.path})`;
-    if (classified.has(x.path)) {
-      const f = record.files.find((ff) => ff.path === x.path);
-      push(
-        "EXCLUSION_NOT_CLASSIFIED",
-        at,
-        `excluded as ${x.reason} from ${x.sha} and also present in files[] with ${f.spans.length} classified span${f.spans.length === 1 ? "" : "s"} over ${f.text.length} chars`
-      );
-    }
-    if (x.chars <= 0 || x.sha.length === 0) {
-      push(
-        "EXCLUSION_NOT_CLASSIFIED",
-        at,
-        `chars=${x.chars}, sha=${x.sha ? x.sha : "(empty)"}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`
-      );
-    }
-  }
-  return out;
-}
-function formatViolations(violations) {
-  return violations.map((v) => `${v.code}  ${v.where}
-    bound:    ${v.invariant}
-    observed: ${v.observed}`).join("\n");
-}
-
-// src/bin/ursa.ts
+init_launch();
 init_resolve_episode();
 init_resolve_episode();
 function renderRunSummary(records, episodes, diagnostics) {
@@ -4385,18 +4424,17 @@ async function main(argv) {
     ...ep,
     vendoredPaths: vendoredPaths(projectPath, ep, resolvablePaths(ep), commits)
   }));
-  const { isForgotten: isForgotten2, loadConsent: loadConsent2 } = await Promise.resolve().then(() => (init_consent(), consent_exports));
-  const consent = loadConsent2(projectPath);
+  const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id));
   let suppressed = 0;
   const records = [];
   for (const ep of episodes) {
-    if (isForgotten2(consent, ep.id)) {
+    if (erased.has(ep.id)) {
       suppressed++;
       continue;
     }
     const record = resolveEpisode(projectPath, ep, commits);
     if (!record) continue;
-    if (record.stats.generated.totalChars < minChars && (record.exclusions?.length ?? 0) === 0) continue;
+    if (!clearsSizeFloor(record, minChars)) continue;
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt);
     record.signals = deriveSignals(record, declaration);
     saveRecord(projectPath, record);
@@ -4414,11 +4452,10 @@ ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`
   }
   console.log(`
 Records: ${projectPath}/.ursa/records/`);
-  const violations = records.flatMap((r) => checkRecord(r));
-  if (violations.length > 0) {
+  const gate = gateRecords(records);
+  if (gate.violations.length > 0) {
     console.error(`
-${violations.length} record invariant${violations.length === 1 ? "" : "s"} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.`);
-    console.error(formatViolations(violations));
+${gate.report}`);
     return 1;
   }
   return 0;
