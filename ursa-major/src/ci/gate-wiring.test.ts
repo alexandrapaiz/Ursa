@@ -16,6 +16,20 @@
 // the exit code, so the Action's step fails; the result object, so a
 // programmatic caller can see it; and the run comment, so the person
 // reading five confident fields is told not to trust them.
+//
+// What the mock is still for, narrowed 2026-10-10. `fixtures/violations/`
+// now holds fifteen committed records that each break one bound, so the
+// gate's own verdict and the two surfaces that read records off disk or out
+// of an array — `runGate` in `src/invariants.cli.ts` and `gateRecords` in
+// `src/launch.ts` — are all exercised against real broken records with no
+// mock at all (`src/invariants.violations.test.ts`). What those fixtures
+// cannot reach is this file's subject: the records `runCi` gates are the
+// ones it just resolved in-process, so there is no seam to hand a fixture
+// through without adding one to production code for a test's benefit. The
+// mock's remaining job is therefore only the plumbing from `gateRecords`'
+// verdict to the exit code, the result object and the comment — not whether
+// the gate detects anything, which is now tested elsewhere against files a
+// reviewer can read.
 
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'

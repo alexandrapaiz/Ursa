@@ -8,6 +8,8 @@
     "test": "tsc --noEmit && vitest run",
     "typecheck": "tsc --noEmit",
     "resolve": "tsx src/cli.ts",
+    "fixtures:violations": "tsx tools/make-violation-fixtures.ts",
+    "fixtures:violations:check": "tsx tools/make-violation-fixtures.ts --check",
     "record:fixture": "tsx src/cli.ts --id mini-fixture --final fixtures/mini/final.md --conversations fixtures/mini/conversations --out fixtures/mini/record --generated-at 2026-09-25T00:00:00.000Z",
     "brief": "tsx src/hq/cli.ts brief",
     "mcp": "tsx src/mcp/cli.ts",
