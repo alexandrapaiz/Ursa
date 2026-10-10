@@ -2,105 +2,130 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-09, ~17:28 UTC (scheduled standup, pm.md §11). Built
-on this seat's own #147 (open at the start of this pass, itself built
-on #145 and current `main`) rather than redone from `main`, per "read
-your own seat's open PRs first." A good deal of #147's content from
-the ~00:30 and ~06:22 UTC passes is now stale — #142, #144 and #146
-merged since, #92 and #145 closed — so this reconciliation is a fresh
-read of current state, not a diff against the old text.
+Reconciled 2026-10-09, ~18:30 UTC (six-hour pass). Builds on this
+seat's own #149 (open at the start of this pass, merged into this
+branch rather than redone from `main`, per "read your own seat's open
+PRs first"). The headline change this pass: **pm.md §21 ("Merges
+belong to the PMs and the chairs, not to the owner") is live in this
+repo's vendored standard and three stuck pull requests were sitting on
+the wrong side of a tier call that predates it.** Re-read §10 and §21
+together and merged what §21 actually frees.
+
+## What moved this pass
+
+1. **#148, #48 and #39 are merged.** All three were green, `CLEAN`,
+   and scoped to files that are not this seat's own charter and not an
+   authority section (§10, §19, §21, or the PM charter's grant) and
+   not spend, an account, or a secret. §21 says a PR meeting the
+   tiers' other conditions is the PM's or a chair's to merge, "Standards,
+   charters, workflows and decisions included" — so a charter edit to
+   `prompts/research-agent.md`, `prompts/engineer-agent.md` or
+   `prompts/skill-agent.md` is not automatically owner-only the way
+   §10 alone reads it. Prior passes (including this seat's own) called
+   these three "Tier C, waiting on the owner" by path without
+   re-checking them against §21, which has been in the vendored
+   standard since it was pinned 2026-10-05 — that was a standing
+   error, not a new fact. #48 and #39 were also both more than seven
+   days old by last commit, the Tier B age flag in §10; I read both
+   diffs in full before merging rather than landing them on the
+   strength of their green checks alone, and both were still correct
+   and still wanted (#48 replaces alexandria's pipeline assumptions in
+   the research charter with Ursa's actual evidence sources and the
+   mandatory ecosystem check; #39 is a one-word ADR-attribution fix
+   with no behavior change). #148 is this morning's second engineer
+   dispatch, same-day and unrelated to the age question.
+2. **#80 stays with the owner, and this is the one that proves the
+   check matters.** Same file class as #48 and #39 (`company.yaml`,
+   not an authority section), but `alexandrapaiz` commented on it
+   2026-10-05T02:41:43Z, 26 seconds after its last push. §10's Tier B
+   condition 2 ("no owner comment since the last push") still applies
+   under §21 — the rule says a PR meets "the conditions the tiers
+   already state," not that §21 waives them. So #80 is correctly still
+   yours, not a leftover of the old misreading.
+3. **#140 and #75 are still `CONFLICTING`** against `main`, which
+   blocks a merge under any tier regardless of path. Both need a
+   rebase from their own seat (skill, security) before anyone can act.
 
 ## Top three for the owner
 
-1. **Skill's #140 is still the single highest-leverage merge waiting
-   on you.** Checks are green, but it is `CONFLICTING` against `main`
-   as of this pass (checked directly) and touches
-   `prompts/skill-extract.md`, so it is Tier C and no PM route reaches
-   it even once rebased. It absorbs five stuck runs' work (#14, #50,
-   #64, #83, #123 — #50 and #64 already closed with a pointer here),
-   fixes a drifted citation checker, and adds a guard against the
-   drift recurring. Still open, still the right branch, nothing
-   superseded it, but it needs a rebase from its own seat before
-   anyone can merge it.
-2. **This pass tried to dispatch security and frontend to close two
-   sprint gaps and both attempts failed at the API call** (403,
-   `actions: write` not honored for this run's token, even though the
-   workflow file declares it — detail in `dispatch-queue.md`). That is
-   a configuration gap for HQ, not a decision for you, but it means
-   security's redaction-standard item (sprint-2026-10-05 item 3, gates
-   O2 KR2.2) still has no PR touching it one day before the
-   2026-10-11 milestone date, and the frontend WCAG contrast fix
-   (proposed three passes running) still hasn't moved either.
-3. **Three Tier C pull requests still wait on you directly**: #80
-   (`company.yaml`), #48 and #39 (both touch `prompts/research-agent.md`
-   or `prompts/engineer-agent.md`/`prompts/skill-agent.md`). All three
-   are green and `MERGEABLE`, unchanged in substance since earlier
-   passes flagged them, and no PM merge route reaches any of them.
+1. **#80 is the one real owner-action item left.** You commented on
+   it directly (2026-10-05), so it stays yours under §10's Tier B
+   condition 2 even with §21 in effect. Substance unchanged since it
+   was opened: the HQ company manifest, green and `MERGEABLE`.
+2. **Skill's #140** still needs a rebase from the skill seat before
+   any tier can reach it — `CONFLICTING` against `main`, not a
+   decision for you. See "Everything else open" below.
+3. **Security's redaction-standard item (sprint item 3, gates O2
+   KR2.2) and frontend's WCAG contrast fix are still real and still
+   undispatchable**, now for a reason fully diagnosed and routed to
+   HQ rather than open: HQ needs to add `allowed_bots` to
+   `agent-security.yml` and `agent-frontend.yml`, which is her
+   surface, not a seat's. Milestone "Sprint 2026-10-05" is due
+   2026-10-11, two days out.
 
 ## Failures this pass (§11.7)
 
 **No new failed runs.** `gh run list --status failure --created
-">=2026-10-08T17:28:57Z"` (the last 24 hours) returns the same three
-runs the 00:30 UTC pass already triaged and logged: engineer
-`37719675527` (older, already handled), pm-agent `37819090675`,
-skill-agent `37832775208`, frontend-agent `37835424738`. All four
-already carry a triage line in prior standup PRs (#135, #137, #144).
-Nothing new to rerun or hand off.
+">=2026-10-09T12:23:18Z"` (the last six hours) returns nothing. The
+last 30 runs (`gh run list --limit 30`) are all `success`. Nothing to
+rerun or hand off this pass.
 
-**This pass's own fire attempts failed, not a scheduled run** — see
-`dispatch-queue.md`. Handed to HQ as a workflow-permissions gap, not
-logged here as a run failure since no run ever started.
+**No dispatch attempted this pass** — see `dispatch-queue.md`. Both
+candidates (security building on #124, frontend building on #141)
+stay queued; firing either would still die at the `allowed_bots` wall
+per the exo-centralizer's diagnosis, answered in full by #149.
 
 ## Resolved this pass
 
-- **#92** (the resolver-Action board item, "Stage one of the
-  surfaces"): checked directly — the branch itself closed unmerged,
-  but `ursa-major/action.yml` has been on `main` since 2026-10-05,
-  landed by #134 (2026-10-08), which subsumed #92, #126 and #130.
-  Moved the board item from Review to Done and pointed its comment at
-  #134 instead of the dead branch.
-- **The HQ-engineer note about misrouted rebase handoffs** (board
-  message, 2026-10-07T19:09, addressed to this seat): the PR it was
-  about, #92, is closed and its content landed elsewhere (see above),
-  so the underlying ask is moot. No further action; noted here so the
-  next pass does not re-open it.
-- **#145**: closed as superseded by this pass's own branch (#147,
-  continued here), consistent with what #147 itself already said.
+- **#149**: this seat's own open PR at the start of this pass
+  (exo-centralizer's dispatch-403 handoff, fully answered). Its one
+  commit is carried unchanged as this branch's base; closing #149
+  itself as superseded once this PR exists, per "read your own seat's
+  open PRs first."
+- **The two board asks addressed to `pm`/`Ursa` since the last pass**
+  (the exo-centralizer handoff and the 2026-10-07 engineer note) were
+  both already answered before this pass started — the handoff by
+  #149, the note as moot once #92 closed. Re-checked the inbox this
+  pass (`to_seat=pm&to_company=Ursa`, filtered client-side): nothing
+  new and nothing unanswered.
 
 ## My own open pull requests
 
-This pass's own (continuing #147's branch, not opening a new one).
-Nothing else of this seat's is open.
+This pass's own (#150, continuing #149's branch). Nothing else of
+this seat's is open after #149 is closed as superseded.
 
 ## Tier B merge check this pass
 
-Every open, non-draft, mergeable PR was checked against §10 directly
-this pass (`gh pr diff --name-only` on each): #140 (`prompts/
-skill-extract.md`, Tier C, also `CONFLICTING`), #80 (`company.yaml`,
-Tier C), #48 (`prompts/research-agent.md`, Tier C), #39
-(`prompts/engineer-agent.md` and `prompts/skill-agent.md`, Tier C).
-#75 is `CONFLICTING` and blocked regardless of path. **No Tier B merge
-available this pass** — everything mergeable is Tier C by path, and
-everything else is a draft or conflicting.
+Every open, non-draft PR checked against §10 **and** §21 together
+(`gh pr diff --name-only`, `mergeStateStatus`, comments, labels on
+each): #148 (engineer, clean, no authority/spend/secret path) merged.
+#48 and #39 (research charters, same test, both old by last commit but
+re-verified fresh) merged. #80 (`company.yaml`, same file class as
+#48/#39, but held by an owner comment since its last push — §10
+condition 2 — so it is not mine) stays with the owner. #140 and #75
+are `CONFLICTING` and blocked regardless of path or tier.
 
-## Everything else open (17 total, via `gh pr list --state open`)
+## Everything else open (16 total, via `gh pr list --state open`)
 
-- **Skill**: #140 (Tier C, waiting on the owner — "Top three" item 1).
-- **Tier C, waiting on the owner directly**: #39, #48, #80 — "Top
-  three" item 3.
-- **Conflicting, waiting on the owning seat's rebase**: #75 (security
-  — a live CSRF/RCE defect, handed off 2026-10-06, still unrebased;
-  #124 was meant to be the response and is itself a dead draft, see
-  below).
+- **Owner-held**: #80 ("Top three" item 1).
+- **Conflicting, waiting on the owning seat's rebase**: #140 (skill —
+  "Top three" item 2), #75 (security — a live CSRF/RCE defect, handed
+  off 2026-10-06, still unrebased; #124 was meant to be the response
+  and is itself a dead draft, see below).
 - **Frontend's live draft**: #141 (real work in progress — benchmark
   write-up and after-shots still its own unfinished tail; the contrast
-  dispatch above would have built on it).
+  dispatch would build on it once the permissions gap closes).
 - **Dead drafts, each a stub with nothing committed since its own
   ship-first commit**: #124 (security, since 2026-10-07T06:29), #143
   (exo, since 2026-10-08T20:10 — exo's own to resolve, not this
   seat's; noted, not touched).
-- **Draft, idle since 2026-10-05–06, not failing CI, seat already has
-  a newer open PR**: #47, #49, #85, #87, #91, #112, #113, #114.
+- **Draft, idle since 2026-09-30–10-06, not failing CI, seat already
+  has a newer open PR or the gap it names is already resolved
+  elsewhere**: #47, #49, #85, #87, #91, #112, #113, #114. Unchanged
+  from the last two passes' read; resolving this backlog of drafts is
+  ceremony-weight triage (which of eight stubs are truly superseded
+  needs a per-seat check, not a path check) and is flagged for Monday
+  rather than attempted piecemeal in a six-hour pass.
 
 Full list, oldest first, is `gh pr list --state open`; not reproduced
 line by line since it goes stale by the next pass.
@@ -122,9 +147,11 @@ doing it in a standup pass.
 
 ## Waiting on an owner-only action
 
-- `company.yaml` (#80), `prompts/research-agent.md` (#48),
-  `prompts/engineer-agent.md` / `prompts/skill-agent.md` (#39).
-- #140 under `prompts/skill-extract.md`.
+- `company.yaml` (#80) — held by your own comment on it, not by tier.
+- #140 under `prompts/skill-extract.md`, once the skill seat rebases
+  it off `CONFLICTING` (it is not owner-only once clean; flagged here
+  only because it is currently stuck and the next thing to land on
+  it is the seat's rebase, not your merge).
 - The three ledger entries 20+ days past the two-week verdict mark
   (repo split, tuning packs, the merge-commits/PR-reader finding).
   Grooming them is Monday's ceremony (2026-10-12), not this pass's.
@@ -146,23 +173,27 @@ doing it in a standup pass.
   2026-10-08); exo's weekly run is Sunday 2026-10-11, not yet run.
   `prompts/skill-agent.md` is Tier C, so this seat cannot fix it
   directly.
-- **The workflow-permissions gap this pass found** (see
-  `dispatch-queue.md`): `.github/workflows/agent-pm.yml` declares
-  `actions: write` but this run's actual token still gets a 403 on
-  both a plain Actions-permissions read and a workflow-dispatch write.
-  Handed to HQ (`alexandra-systems/exo-centralizer`) as workflow
-  machinery, per pm.md §15 — not something this seat can fix by
-  editing `.github/workflows` itself even if it could, since that
-  file is HQ's surface.
+- **The workflow-permissions gap is now diagnosed in full, not just
+  handed off** (see `dispatch-queue.md`): exo-centralizer's board
+  handoff this pass explains the 403 as two stacked causes, both
+  confirmed against this repo, and says the fix (an `allowed_bots`
+  entry in `.github/workflows/agent-security.yml` and
+  `agent-frontend.yml`, plus a credential wrapper) is already routed
+  to HQ's own project manager and needs the owner's credential across
+  five checkouts. This seat cannot edit `.github/workflows` itself —
+  HQ's surface, per pm.md §15 — and has nothing further to chase here;
+  the two dispatches stay queued in `dispatch-queue.md` until HQ lands
+  the fix.
 
 ## Board message check
 
-Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`,
+Six-hour pass, scheduled rather than woken by a specific handoff.
+Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa` and
 filtered client-side for `to_company == "Ursa" && to_seat == "pm"`
-specifically (the query parameters alone still return other
-companies' broadcast traffic, as every pass this week has had to
-work around). Exactly one message has ever arrived addressed to this
-seat specifically: the 2026-10-07T19:09 note from HQ's engineer about
-the misrouted rebase handoff, resolved above (moot — #92 is closed).
-Nothing new since. This pass posted one board comment (the #92/#134
-pointer, on the board item) and no new ask, since nothing needed one.
+exactly, since the query parameters alone still return other
+companies' broadcast traffic. Exactly two messages have ever arrived
+addressed to this seat specifically, and both are already answered:
+the 2026-10-09T17:45 exo-centralizer handoff (answered by #149,
+carried into this PR) and the 2026-10-07T19:09 engineer note (moot,
+#92 closed). Nothing new since. Posted one board note this pass (see
+below) with the reason in first person, as required.
