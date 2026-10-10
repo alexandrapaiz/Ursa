@@ -1,17 +1,30 @@
-# Dispatch queue — 2026-10-09, scheduled standup (~17:28 UTC)
+# Dispatch queue — 2026-10-10, six-hour pass (~06:20 UTC)
 
-`PM_DISPATCH_ENABLED` is confirmed `true` for this run (stated in the
-dispatch's own owner instructions, since the repository token this
-seat holds cannot read Actions variables directly — `gh variable list`
-still returns a 403, the same limitation every host-window pass this
-week has hit). Firing below, under §11.4's hard stops.
+Carried forward from the 2026-10-09 ~18:30 UTC pass (#149/#150/#152)
+without change: both candidates below are still blocked on the same
+`allowed_bots` wall. Re-checked this pass — `grep -c '^allowed_bots'`
+against the current `main` copy of both target workflow files still
+returns nothing, and `DEFAULT_WORKFLOW_TOKEN` is still unset in this
+run's own environment — so nothing moved either one since the last
+check. This pass's own merge (#153, engineer, under the landed §21
+authority) is in `pending.md`, not here, since it was not a dispatch.
 
-**Ceiling check:** `gh run list --event workflow_dispatch --limit 30`
-shows zero dispatch-triggered runs since 2026-09-30 — zero today, zero
-this week before this pass. Two dispatches below stay under 3/day,
-1/seat/day, 10/week with room to spare.
+## What changed this pass
 
-## Proposed and fired
+Nothing on the wall itself. The one new fact this pass is the
+milestone clock: "Sprint 2026-10-05" is due 2026-10-11T00:00:00Z, under
+18 hours out at the time of this pass, with item 3 (the redaction
+standard, candidate 1 below) still unshipped. The wall is the same one
+HQ's exo-centralizer diagnosed in full on 2026-10-09 (board handoff,
+ref in `pending.md`): the run's own `GITHUB_TOKEN` is overwritten by a
+Claude-app installation token scoped to contents/PRs/issues only, the
+job's actual `actions: write` token lives under
+`DEFAULT_WORKFLOW_TOKEN` (not set here), and even a successful dispatch
+call would still be rejected by `agent-security.yml` and
+`agent-frontend.yml`'s human-actor check because neither file sets
+`allowed_bots`. Both parts re-checked fresh this pass, not assumed.
+
+## Proposed, not fired this pass
 
 1. **Security** — build on its own dead draft #124, finish the plan it
    already wrote, and close the sprint's one open item before the
@@ -32,26 +45,11 @@ this week before this pass. Two dispatches below stay under 3/day,
    a pass/fail note in the PR.'
    ```
 
-   **Trigger observed:** milestone "Sprint 2026-10-05" is due
-   2026-10-11 (`gh api repos/.../milestones`), two days out. Items 1
-   and 2 of that sprint merged on 2026-10-06 (#107, #109); item 3, the
-   redaction standard, still has no file anywhere in the repo
-   (`find docs/security -iname '*redaction*'` — the directory itself
-   doesn't exist) and no open PR touches the path, checked directly
-   this pass via `gh pr list --state all --search
-   "redaction-standard"`. GitHub's own milestone field shows 0 open
-   issues only because the wiring gap §2b flags every pass was never
-   closed, not because the item is done.
-   **Cost of skipping today:** the milestone's one unshipped item
-   stays untouched with one day left after today, and #75's live
-   security defect (CSRF + Next.js RCE, handed off 2026-10-06, still
-   `CONFLICTING`) stays unrebased a fifth day.
-   **Hard-stop check (§11.4):** security carries four other open
-   drafts (#47, #85, #112, #124), which would ordinarily block a fresh
-   dispatch — the instruction above satisfies the stated exception by
-   naming #124 and telling it to build on that branch in those words.
-   No new judgment: #124's own plan already named these steps, and the
-   redaction item is sprint-2026-10-05's own verbatim item 3.
+   **Trigger, sharper this pass:** milestone "Sprint 2026-10-05" is due
+   2026-10-11, now under 18 hours out; item 3 still has no file
+   anywhere in the repo and no open PR touches the path.
+   **Why it stays queued instead of firing:** both walls above block
+   it regardless of credential. Re-check before the next attempt.
 
 2. **Frontend** — build on its own live draft #141, port the one
    unmerged fix its ancestor PR carried:
@@ -64,42 +62,40 @@ this week before this pass. Two dispatches below stay under 3/day,
    measured at 3.59:1 (header tagline), 3.75:1 ("North stars" label)
    and 3.77:1 (footer credits), all under the 4.5:1 floor for text
    under 18.66px. Current main still has --dim: #707fa0 in
-   ursa-minor/app/globals.css (checked this pass); #141 touches that
-   file already but for unrelated hover-state work, confirmed by
-   reading its diff, and #103 proposed #7886a4 but predates the
-   site-header.tsx/site-footer.tsx extraction, so re-measure against
-   the current components rather than assuming the old value still
-   fits. Finish #141 own plan (benchmark writeup, after-shots for its
-   two refinements) in the same PR.'
+   ursa-minor/app/globals.css; #141 touches that file already for
+   unrelated hover-state work, so re-measure against the current
+   components rather than assuming the old proposed value still fits.
+   Finish #141 own plan (benchmark writeup, after-shots for its two
+   refinements) in the same PR.'
    ```
 
-   **Trigger observed:** `--dim` is still `#707fa0` on current `main`
-   (grepped this pass); #141's diff touches `globals.css` already (so
-   it is the right branch to extend) but not that variable (grepped
-   the diff for `dim:`, no match). #103, the PR that found this, is
-   now closed. Re-verified unchanged from the two prior passes that
-   carried this same proposal without firing.
-   **Cost of skipping today:** the contrast failure stays live another
-   day; it has now been proposed three passes running.
-   **Hard-stop check:** frontend has exactly one open PR, #141 — the
-   instruction tells it to build on that branch in those words, same
-   exception as item 1.
+   **Trigger, unchanged from the prior pass:** `--dim` is still
+   `#707fa0` on current `main`; the contrast failure has now been
+   proposed five passes running without moving.
+   **Why it stays queued instead of firing:** same two walls as above.
 
-No third entry: no other row in company §11.3 or Ursa's own criteria
-fires. The two Tier C research/charter PRs (#39, #48) and the
-company-manifest PR (#80) are owner-merge items, not dispatch
-triggers. No new failed run this pass (see `pending.md` §Failures).
+No third entry: nothing else in company §11.3 or Ursa's own criteria
+fires this pass, and a message pass does not re-run full grooming.
+
+## What this seat is not chasing further
+
+The actual fix (an `allowed_bots` entry in both workflow files, plus
+the credential wrapper) touches `.github/workflows`, which is HQ's
+surface, not this seat's, per pm.md §15. HQ's exo-centralizer said on
+2026-10-09 that it had already routed the fix to the holding company's
+own project manager, with the commands written out, and that the
+repair needs the owner's credential applied across five checkouts.
+That is tracked at HQ now, not an open item this seat needs to keep
+re-flagging beyond naming the milestone clock above.
 
 ## Failed-run triage this pass (§11.7)
 
-No new failed runs since the last pass (`gh run list --status failure
---created ">=2026-10-08T17:28:57Z"` returns the same three runs the
-prior pass already triaged, all in `pending.md`). Nothing to rerun or
-hand off this pass.
+No failed runs in the last six hours (`gh run list --status failure
+--created ">=2026-10-10T00:20:52Z"` returns nothing; the last 30 runs
+via `gh run list --limit 30` are all `success`). Nothing to rerun or
+hand off.
 
 ## Dispatched by the PM
 
-- 2026-10-09, security, `agent-security.yml`, instruction as item 1
-  above, run: <!-- filled in after firing -->
-- 2026-10-09, frontend, `agent-frontend.yml`, instruction as item 2
-  above, run: <!-- filled in after firing -->
+None this pass. Both candidates above are blocked for the reason
+stated and were not fired.
