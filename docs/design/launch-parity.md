@@ -40,7 +40,7 @@ leans on them:
   resolvable path in an episode was an import (`src/vendored.ts`), so that
   the absence states itself instead of being an absent file on disk. See
   `docs/design/record-exclusions.md`.
-- **The thirteen bounds** — the self-consistency checks in
+- **The fifteen bounds** — the self-consistency checks in
   `src/invariants.ts` that a record must satisfy, ten of them arithmetic.
 - **Erasure** — the user's deletion of a record and everything derived
   from it, recorded as a tombstone by `ursa forget` in
@@ -155,7 +155,7 @@ export interface GateResult {
   report: string
 }
 
-/** The thirteen bounds, run over everything a launch just wrote. */
+/** All fifteen bounds, run over everything a launch just wrote. */
 export function gateRecords(records: OutcomeRecord[]): GateResult
 ```
 
@@ -165,7 +165,7 @@ return:
 ```ts
 // ursa-major/src/bin/ursa.ts
 export async function main(argv: string[]): Promise<number>
-// 0 when every record satisfies the thirteen bounds, 1 when one does not,
+// 0 when every record satisfies all fifteen bounds, 1 when one does not,
 // 2 on a usage error. Unchanged by this work.
 
 // ursa-major/src/ci/run.ts
@@ -204,7 +204,7 @@ export interface RunCommentContext {
   recordsPath: string
   runUrl: string | null
   dropped?: { unresolvable: number; belowMinChars: number; minChars: number }
-  /** how many of the thirteen bounds the records violated; absent reads as 0 */
+  /** how many of the fifteen bounds the records violated; absent reads as 0 */
   invariantViolations?: number
 }
 ```
@@ -433,6 +433,58 @@ A test that cannot fail is not evidence, which is why
 `checkRecord` with one that reports a violation, because no git fixture
 reliably produces an arithmetically impossible record — the resolver is
 correct, which is the whole reason the bounds exist.
+
+---
+
+## 5b. One number this work had to get right first
+
+The run comment's new self-check line reports how many bounds the records
+passed, which makes the count a figure shown to a buyer rather than a
+figure in a comment. Writing it surfaced that the count in the repository
+was wrong.
+
+`README.md` and three design documents said **thirteen**. The union
+`InvariantCode` in `ursa-major/src/invariants.ts` has **fifteen** members
+and `BOUNDS` has fifteen keys, verified by counting both and comparing the
+sets:
+
+```bash
+cd ursa-major && node -e "
+const src=require('fs').readFileSync('src/invariants.ts','utf8');
+const t=src.match(/export type InvariantCode =([\s\S]*?)\n\nexport interface Violation/)[1];
+const codes=[...t.matchAll(/\|\s*'([A-Z_]+)'/g)].map(m=>m[1]);
+const b=src.match(/const BOUNDS: Record<InvariantCode, string> = \{([\s\S]*?)\n\}/)[1];
+const keys=[...b.matchAll(/^  ([A-Z_]+):/gm)].map(m=>m[1]);
+console.log(codes.length, keys.length,
+  JSON.stringify(codes.sort())===JSON.stringify(keys.sort()));
+"
+# → 15 15 true
+```
+
+The drift has a date. `docs/design/record-exclusions.md` §4.1 calls
+`EXCLUSION_NOT_CLASSIFIED` "the thirteenth bound," which it was on the day
+that document was written. `DESCENT_CHECKED_UNIFORMLY` and
+`SIGNAL_QUOTE_GROUNDED` landed around it, and the word in prose never
+moved. The README's breakdown was wrong in the same place: it said "ten of
+them arithmetic" where twelve are arithmetic or structural.
+
+So the number is no longer written as a word anywhere it is shown:
+
+```ts
+// ursa-major/src/invariants.ts
+export const BOUND_COUNT = Object.keys(BOUNDS).length
+```
+
+`src/ci/comment.ts` interpolates `BOUND_COUNT`, and both tests that assert
+on that sentence assert against `BOUND_COUNT` rather than against a
+literal, so neither can pin a stale count. Verified through the committed
+bundle, which is what the Action actually runs:
+
+```
+- Self-check: every record above satisfies all 15 of the bounds a record
+  must satisfy, so the figures in the table are at least internally
+  consistent.
+```
 
 ---
 

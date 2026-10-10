@@ -22,11 +22,17 @@ import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
+import { BOUND_COUNT, type Violation } from '../invariants'
 import type { GitHubApi } from './github'
 
-const VIOLATION = {
-  code: 'claims-exceed-generated' as const,
-  invariant: 'a generation cannot have more characters claimed than it wrote',
+// A real `InvariantCode` and that bound's real text, not an invented one.
+// The first draft used `claims-exceed-generated`, which is not a member of
+// the union: `vi.mock`'s factory is not type-checked against the module it
+// replaces, so `tsc --noEmit` accepted it, and the test would have gone on
+// passing while asserting against a code the gate can never emit.
+const VIOLATION: Violation = {
+  code: 'GEN_CLAIM_BOUNDED',
+  invariant: 'the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten',
   where: 'fixture generation 0',
   observed: 'claimed 400 > charsWritten 219',
 }
@@ -75,10 +81,10 @@ describe('the CI launch reports a violated bound instead of five confident field
     expect(result.comment).toContain('**1 bound violated**')
     expect(result.comment).toContain('cannot all be true at once')
     expect(result.comment).toContain('Units resolved')
-    expect(result.comment).not.toContain('satisfies all thirteen')
+    expect(result.comment).not.toContain(`satisfies all ${BOUND_COUNT} of the bounds`)
 
     // And the log, because that is where the numbers themselves go.
-    expect(logs.join('\n')).toContain('claims-exceed-generated')
+    expect(logs.join('\n')).toContain('GEN_CLAIM_BOUNDED')
   })
 
   it('writes the records anyway, because an impossible record is the evidence', async () => {
