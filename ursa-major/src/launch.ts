@@ -89,7 +89,7 @@ export interface GateResult {
 /**
  * The record's self-check, run over everything a launch just wrote.
  *
- * Thirteen bounds a record must satisfy (`src/invariants.ts`). The records
+ * Fifteen bounds a record must satisfy (`src/invariants.ts`). The records
  * are written BEFORE this runs, in both launches, and that order is the
  * point: a record whose arithmetic is impossible is still the evidence of
  * the defect, so nothing is withheld from the user. What changes is that

@@ -1666,7 +1666,7 @@ function formatViolations(violations) {
     bound:    ${v.invariant}
     observed: ${v.observed}`).join("\n");
 }
-var BOUNDS, r3, abbrev;
+var BOUNDS, r3, abbrev, BOUND_COUNT;
 var init_invariants = __esm({
   "src/invariants.ts"() {
     "use strict";
@@ -1691,6 +1691,7 @@ var init_invariants = __esm({
     };
     r3 = (x) => Math.round(x * 1e3) / 1e3;
     abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
+    BOUND_COUNT = Object.keys(BOUNDS).length;
   }
 });
 
@@ -3726,7 +3727,7 @@ function renderRunComment(f, ctx) {
   lines.push(`- Records written to \`${ctx.recordsPath}\` on this runner. They are not pushed anywhere.`);
   const bad = ctx.invariantViolations ?? 0;
   lines.push(
-    bad === 0 ? "- Self-check: every record above satisfies all thirteen of the bounds a record must satisfy, so the figures in the table are at least internally consistent." : `- Self-check: **${bad} bound${bad === 1 ? "" : "s"} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
+    bad === 0 ? `- Self-check: every record above satisfies all ${BOUND_COUNT} of the bounds a record must satisfy, so the figures in the table are at least internally consistent.` : `- Self-check: **${bad} bound${bad === 1 ? "" : "s"} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
   );
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`);
   lines.push("");
@@ -3741,6 +3742,7 @@ var RUN_COMMENT_MARKER;
 var init_comment = __esm({
   "src/ci/comment.ts"() {
     "use strict";
+    init_invariants();
     RUN_COMMENT_MARKER = "<!-- ursa-major:run-comment:v1 -->";
   }
 });

@@ -40,6 +40,7 @@ import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
 import { clearsSizeFloor } from './launch'
+import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
 import type { OutcomeRecord } from './types'
 
@@ -288,7 +289,10 @@ describe('the record self-check runs on both launches', () => {
     const { ciExitCode, localExitCode, ciComment } = await bothLaunches(repo, 10)
     expect(ciExitCode).toBe(0)
     expect(localExitCode).toBe(0)
-    expect(ciComment).toContain('Self-check: every record above satisfies all thirteen')
+    // Against the derived count, not a hardcoded word: this assertion is
+    // what would otherwise pin the stale "thirteen" the README carried for
+    // four days after the fifteenth bound was added.
+    expect(ciComment).toContain(`satisfies all ${BOUND_COUNT} of the bounds`)
   })
 
   it('fails the run and marks the comment when a record breaks a bound', () => {
