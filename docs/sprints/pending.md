@@ -2,58 +2,60 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-10, ~12:21 UTC (six-hour pass). Builds on this
-seat's own #152 (Tier A self-merge, pure `docs/sprints/` diff, merged
-at the top of this pass rather than left open) and continues from
-current `main`. Older passes' detail (2026-10-09 and before) is not
+Reconciled 2026-10-10, ~16:08 UTC (standup run, GitHub Actions). Opens
+by self-merging this seat's own #154 under Tier A (pure
+`docs/sprints/` diff, the six-hour pass's reconciliation) at the top
+of this run rather than leaving it open, then continues from current
+`main`. Older passes' detail (2026-10-10 12:21 UTC and before) is not
 repeated below; it is in `main`'s history of this file and in PRs
-#137/#147/#149/#150/#152.
+#137/#147/#149/#150/#152/#154.
 
-## This pass (2026-10-10, ~12:21 UTC)
+## This run (2026-10-10, ~16:08 UTC)
 
-1. **Inbox: nothing new.** Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`
-   and filtered client-side for `to_company == "Ursa" && to_seat ==
-   "pm"` exactly (the bare query still returns other companies'
-   broadcast traffic — 38 messages returned, 1 match). The one message
-   ever addressed to this seat specifically, the 2026-10-09T17:45
-   exo-centralizer dispatch-403 diagnosis, was already answered before
-   this pass started. No ask or handoff has arrived since the prior
-   pass's own board note (06:25:33Z). Nothing unanswered.
+1. **Inbox: nothing new.** Queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa` and
+   filtered client-side for `to_company == "Ursa" && to_seat == "pm"`
+   exactly. Two matches, both already answered before this run: the
+   2026-10-09T17:45 exo-centralizer dispatch-403 diagnosis (handoff,
+   answered by the 06:20 UTC pass) and a 2026-10-10T12:29:59 `done`
+   from HQ's own PM closing the loop on a stale ask about #142/#144
+   (both long since merged elsewhere). Nothing unanswered.
 2. **Failed runs: none.** `gh run list --status failure --created
-   ">=2026-10-10T06:00:00Z"` returns nothing, and the last 30 runs are
-   all `success`. Nothing to rerun or hand off.
+   ">=2026-10-09T16:08:00Z"` returns nothing; the last 30 runs are all
+   `success` except this run itself (`in_progress`). Nothing to rerun
+   or hand off.
 3. **Tier B merge check: nothing new to merge.** Every open, non-draft
-   PR checked fresh (`gh pr diff --name-only`, `mergeStateStatus`):
+   PR checked fresh (`gh pr view --json mergeable,mergeStateStatus`):
    #80 (`company.yaml`, `MERGEABLE`/`CLEAN`, held by an owner comment
-   since its last push — §10 condition 2, unchanged since 2026-10-05),
-   #140 and #75 (`CONFLICTING`, blocked regardless of tier until skill
-   and security rebase). No other non-draft PR is open. §21's standing
-   Tier B grant is live in this repo (exercised already today — #153
-   merged by the prior pass, #152 self-merged under Tier A by this
-   one) but it has nothing new to reach this pass: the only
-   non-draft candidates are the same three already decided.
-4. **No dispatch fired, for the same reason, now sharper.** Re-checked
-   both walls the exo-centralizer diagnosed 2026-10-09: this run is a
-   host-window run, not a GitHub Actions run (`env` has `GH_TOKEN` but
-   no `GITHUB_ACTIONS`/`RUNNER_*`), so the first wall — the GHA
-   credential swap that strands `agent-pm.yml`'s own dispatch call
-   behind an installation token scoped to contents/PRs/issues — likely
-   does not apply to this seat's host-window passes the way it does to
-   its scheduled Actions runs; worth HQ confirming, not assumed fixed.
-   The second wall still does: `grep -c '^allowed_bots'` against
-   `agent-security.yml` and `agent-frontend.yml` on current `main`
-   still returns nothing, and that check runs inside the dispatched
-   workflow itself regardless of who calls `gh workflow run`, so firing
-   from here would still die at the human-actor check. Not fired.
-5. **The milestone clock is now inside 12 hours.** "Sprint 2026-10-05"
-   is due 2026-10-11T00:00:00Z — 11h39m from this pass — with item 3
-   (the redaction standard) still unshipped: no file at
-   `docs/security/`, no open PR touching the path
-   (`gh pr list --state all --search "redaction-standard"` matches
-   nothing new). Blocked on the wall in line 4, HQ's surface, not a
-   gap this seat closes by trying harder. If it is still unshipped when
-   the date passes, the milestone closes with a written reason and the
-   item carries, per pm.md §3 — not yet, since the date hasn't passed.
+   26 seconds after its own last push — §10 condition 2, unchanged
+   since 2026-10-05), #140 and #75 (`CONFLICTING`, blocked regardless
+   of tier until the skill and security seats rebase them). No other
+   non-draft PR is open. §21's standing Tier B grant is live in this
+   repo but has nothing new to reach this run: the only non-draft
+   candidates are the same three already decided, unchanged from the
+   last several passes.
+4. **No dispatch fired, wall now fully diagnosed rather than half
+   diagnosed.** This run is the scheduled GitHub Actions run itself
+   (`agent-pm.yml`), not a host-window pass, so it can answer the
+   question the last several host-window passes could only flag: `env`
+   confirms `DEFAULT_WORKFLOW_TOKEN` is present alongside the swapped
+   `GH_TOKEN`/`GITHUB_TOKEN`, exactly as exo-centralizer's handoff said.
+   The credential wall is real and has a working fix
+   (`GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh workflow run ...`). It does
+   not matter: the second wall is independent of the caller's
+   credential. `grep -c '^allowed_bots'` against current `main`'s
+   `agent-security.yml` and `agent-frontend.yml` still returns `0` for
+   both, and `checkHumanActor` runs inside the dispatched workflow
+   against its own triggering actor. Firing either queued candidate
+   would be accepted by GitHub and die seconds later, never reading its
+   charter. Not fired, not tested by firing, per exo's own request to
+   read the reach check rather than reason from a 403.
+5. **The milestone clock is now about 8 hours out.** "Sprint 2026-10-05"
+   is due 2026-10-11T00:00:00Z. Item 3 (the redaction standard) is
+   still unshipped: no file at `docs/security/`, no open PR touching
+   the path. Blocked on the wall in line 4, HQ's surface, not a gap
+   this seat closes by trying harder. Not yet past the date, so the
+   milestone has not closed.
 
 ## Top three for the owner
 
@@ -61,8 +63,8 @@ repeated below; it is in `main`'s history of this file and in PRs
    2026-10-05: you commented on it directly, so it stays yours under
    §10's Tier B condition 2 even with §21 in effect. Still green and
    `MERGEABLE`.
-2. **The redaction standard (sprint item 3) is now inside 12 hours of
-   its milestone date and still cannot be dispatched.** The fix is an
+2. **The redaction standard (sprint item 3) is about 8 hours from its
+   milestone date and still cannot be dispatched.** The fix is an
    `allowed_bots` line in two workflow files, HQ's surface, already
    routed to HQ's own project manager. Nothing new to decide, only the
    clock.
@@ -76,12 +78,12 @@ repeated below; it is in `main`'s history of this file and in PRs
 redaction gate blocking KR2.2's public record.
 
 - **Shipped:** items 1 and 2 (excerpt-grounding bound, descent-vs-
-  similarity) — merged via #107 and #134, both before this pass.
-  Unrelated but landed today: #153 (engineer, the launch-parity test),
-  merged by the prior pass under Tier B.
-- **Moves today:** nothing. Item 3 (the redaction standard) cannot
+  similarity) — merged via #107 and #134. Unrelated but landed this
+  week: #153 (engineer, the launch-parity test).
+- **Moves this run:** nothing. Item 3 (the redaction standard) cannot
   move until HQ's `allowed_bots` fix lands; this seat has nothing
-  further to try that it hasn't already tried.
+  further to try that it hasn't already tried and confirmed again this
+  run.
 - **Hand-off:** item 3 stays with HQ's own project manager (the
   `allowed_bots` workflow fix, routed 2026-10-09) and, once that lands,
   with the security seat (drafting the standard itself, per sprint
@@ -91,8 +93,8 @@ redaction gate blocking KR2.2's public record.
 
 ## My own open pull requests
 
-This pass's own (#154, this PR). #152 is merged (Tier A, see above).
-Nothing else of this seat's is open.
+This run's own standup PR only. #152 and #154 are both merged (Tier A,
+see above). Nothing else of this seat's is open.
 
 ## Everything else open (13 total, via `gh pr list --state open`)
 
@@ -111,12 +113,12 @@ Nothing else of this seat's is open.
 - **Draft, idle since 2026-09-30–10-06, not failing CI, seat already
   has a newer open PR or the gap it names is already resolved
   elsewhere**: #47, #49, #85, #87, #91, #112, #113. Unchanged from the
-  last several passes' read; resolving this backlog of drafts is
-  ceremony-weight triage, flagged for Monday rather than attempted
-  piecemeal in a six-hour pass.
+  last several runs' read; resolving this backlog of drafts is
+  ceremony-weight triage, flagged for Monday (2026-10-12) rather than
+  attempted piecemeal in a standup run.
 
 Full list, oldest first, is `gh pr list --state open`; not reproduced
-line by line since it goes stale by the next pass.
+line by line since it goes stale by the next run.
 
 ## Board hygiene (unchanged today)
 
@@ -125,7 +127,7 @@ The board's `sprint` object still names `sprint-2026-09-21` (ends
 the real current sprint and the board was never moved to match.
 Re-pointing it and regrooming "This sprint" against what's actually in
 flight is ceremony-weight work, flagged for Monday (2026-10-12) rather
-than done piecemeal in a standup pass.
+than done piecemeal in a standup run.
 
 ## Waiting on an owner-only action
 
@@ -135,10 +137,10 @@ than done piecemeal in a standup pass.
   the next thing to land on it is the seat's rebase, not your merge).
 - The three ledger entries 20+ days past the two-week verdict mark
   (repo split, tuning packs, the merge-commits/PR-reader finding).
-  Grooming them is Monday's ceremony (2026-10-12), not this pass's.
+  Grooming them is Monday's ceremony (2026-10-12), not this run's.
 - The `docs/decisions.md` ADR numbering collision — two different
   entries both titled ADR-005 and two both titled ADR-006. Outside
-  this seat's writable surface. Checked again this pass: unchanged.
+  this seat's writable surface. Checked again this run: unchanged.
 - **The workflow-permissions gap** (`allowed_bots` missing from
   `agent-security.yml` and `agent-frontend.yml`): routed to HQ's
   project manager 2026-10-09, with the commands written out; needs the
@@ -152,9 +154,8 @@ than done piecemeal in a standup pass.
 
 ## Board message check
 
-Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`
-(38 messages returned, filtered client-side to the exact match, since
-the query parameters alone still return other companies' broadcast
-traffic). One match, already answered before this pass (see above).
-Posted one board note this pass with the reason in first person, as
-required.
+Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa` and
+filtered client-side to the exact match, since the query parameters
+alone still return other companies' broadcast traffic. Two matches,
+both already answered before this run (see above). Posted one board
+note this run with the reason in first person, as required.
