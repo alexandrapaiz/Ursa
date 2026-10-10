@@ -314,6 +314,20 @@ function rawTextFor(record: OutcomeRecord, q: QuoteRef): string | Error {
  * declared above. An empty array means the record's own arithmetic is
  * self-consistent; it does not mean the labels are right.
  */
+/**
+ * How many bounds a record is checked against.
+ *
+ * Derived from `BOUNDS` rather than written as a word, because the written
+ * word went stale twice without anybody noticing. `README.md` and three
+ * design documents said "thirteen" on 2026-10-10, when
+ * `EXCLUSION_NOT_CLASSIFIED` had been the fifteenth for four days and
+ * `docs/design/record-exclusions.md` §4.1 still called it "the thirteenth
+ * bound" from the day it was the thirteenth. The number is now reported to
+ * a user in the CI run comment (`src/ci/comment.ts`), and a run that tells
+ * a buyer how many checks it passed must not get the count wrong.
+ */
+export const BOUND_COUNT = Object.keys(BOUNDS).length
+
 export function checkRecord(record: OutcomeRecord): Violation[] {
   const out: Violation[] = []
   const id = record.task.id
