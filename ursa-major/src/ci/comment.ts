@@ -77,6 +77,20 @@ export interface RunCommentContext {
     /** the floor those units fell under, so the reader can raise it */
     minChars: number
   }
+  /**
+   * How many of this run's own bounds (`src/invariants.ts`) the records it
+   * just wrote violated. Zero on a healthy run, and zero is also what an
+   * older caller that does not pass it gets, which is wrong in only one
+   * direction: it understates.
+   *
+   * It appears in the detail block rather than in the five-field table on
+   * purpose. The table's shape is fixed, because two runs whose tables
+   * carry different rows are not comparable, and a row that is almost
+   * always "0" would train the reader to skip it. The detail block is where
+   * a reader goes to ask how far to trust the numbers, which is exactly the
+   * question a violated bound answers.
+   */
+  invariantViolations?: number
 }
 
 /**
@@ -200,6 +214,12 @@ export function renderRunComment(f: RunCommentFields, ctx: RunCommentContext): s
   lines.push(`- Why that window: ${ctx.windowNote}`)
   lines.push(`- Acceptance declaration carried into these records: ${ctx.declarationBasis}`)
   lines.push(`- Records written to \`${ctx.recordsPath}\` on this runner. They are not pushed anywhere.`)
+  const bad = ctx.invariantViolations ?? 0
+  lines.push(
+    bad === 0
+      ? '- Self-check: every record above satisfies all thirteen of the bounds a record must satisfy, so the figures in the table are at least internally consistent.'
+      : `- Self-check: **${bad} bound${bad === 1 ? '' : 's'} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
+  )
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`)
   lines.push('')
   lines.push('</details>')
