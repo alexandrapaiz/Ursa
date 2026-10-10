@@ -4459,3 +4459,146 @@ survey.
   narrow: how a change in what the system believes is recorded over time.
   On that axis Letta is ahead of Ursa today, and the gap is one already in
   this ledger.
+
+### 2026-10-10 (second dispatch) — A record is not reproducible from its own stated inputs, because one field is the wall clock
+- Trigger: `npm run fixtures:violations:check` reported 16 of 31 files
+  drifted immediately after `npm run fixtures:violations` had written
+  them. The 16 were every `.json`; the 15 `.md` notes matched. The whole
+  difference was one field: `deriveSignals` in
+  `ursa-major/src/signals.ts` sets `signals.annotatedAt` to
+  `new Date().toISOString()`, so resolving identical input twice, one
+  second apart, produces two records that are not byte-identical. The
+  fixture script now pins that field to the episode's own `generatedAt`,
+  which fixes the fixtures and not the resolver.
+- What: byte-equality is the cheapest audit a buyer can run and today it
+  is unavailable. A lab handed an outcome record plus the inputs it names
+  cannot re-resolve and compare, because the comparison fails on a
+  timestamp regardless of whether anything else matches, and the lab has
+  no way to tell that from a record that was edited after the fact. This
+  is the auditability story `CLAUDE.md` §2 sells to both sides, reduced to
+  one field. The fix is that every timestamp in a record is derived from
+  the episode rather than read from the clock at write time: `annotatedAt`
+  takes the episode's `generatedAt` by default, and anything that
+  genuinely needs wall-clock time (a `renderRef`, a run's own log) lives
+  outside the record. The second half, a `--reproduce` mode on
+  `src/invariants.cli.ts` that re-resolves a record from its own
+  `conversations` and `files` and diffs the result, is the thing that turns
+  the property into a check a buyer can run, and it is deliberately not
+  bundled here.
+- First step: give `deriveSignals(record)` its `annotatedAt` from
+  `record.task.generatedAt` instead of `new Date()`, then add one test
+  that calls `resolve()` twice on the same `ResolveInput` and asserts
+  `JSON.stringify` of the two records is identical. Then remove the pin in
+  `ursa-major/tools/make-violation-fixtures.ts` and confirm
+  `fixtures:violations:check` still passes, which is the negative check:
+  if the pin was the only thing holding determinism, dropping it fails.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 (second dispatch) — Twelve bounds are checked against real history with an assertion that cannot see how much else broke
+- Trigger: today's work asserted equality on the whole violation code
+  list for fifteen committed records, and that turned up two bounds that
+  cannot be violated in isolation at all — `GEN_CLAIM_BOUNDED` and
+  `PCT_DENOMINATORS_ORDERED` are implied by their neighbours. Neither fact
+  was visible from the `BREAKAGES` table in
+  `ursa-major/src/invariants.test.ts`, which asserts
+  `expect(found.map((v) => v.code)).toContain(c.code)`. That table is not
+  redundant with the new fixtures: its mutations are applied to
+  `fixtures/real/ursa-main-4d5e401.json`, a record made from this
+  repository's own git history, which is coverage the synthetic base in
+  `fixtures/violations/` does not have. So the repository now has
+  exclusivity on synthetic records and containment on the real one.
+- What: give each of the nineteen `BREAKAGES` entries a declared `codes`
+  list the way `Case` in `tools/make-violation-fixtures.ts` has one, and
+  assert equality instead of containment. The interesting part is not the
+  conversion, it is what fails: a mutation of a real record that fires
+  four bounds is telling us something about the real record that a
+  single-field edit to a 200-character synthetic base cannot. Each failure
+  is either a sharper mutation to write or a dependency between bounds to
+  document, and the second kind belongs beside the two already found.
+- First step: add `codes: InvariantCode[]` to the `BREAKAGES` entry type,
+  fill it in with the single code each entry already names, change
+  `toContain` to `toEqual`, and run the file. Report the list of entries
+  that fail and what each one additionally fires; fixing them is the next
+  unit of work, not this one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 (second dispatch) — The gate grew from ten bounds to fifteen in six days and nothing public says what each one was taught to refuse
+- Trigger: today's craft scan of Vals AI (see the scan note below), plus
+  a documentation defect found while writing this change up. §5 of
+  `docs/design/generated-denominator.md` is titled "The ten bounds" and
+  describes ten; the repository has fifteen. Its claim that each row "has
+  at least one test that breaks a record in exactly that way" is also now
+  provably false for two rows. Both are corrected in place by today's PR,
+  which is the third time in a week a hand-written count of the bounds has
+  gone stale in a document after `BOUND_COUNT` was derived specifically to
+  stop that.
+- What: stop writing the bound list by hand anywhere. One generated
+  document, `docs/design/bounds.md`, built from `BOUNDS` in
+  `ursa-major/src/invariants.ts` joined to the notes in
+  `ursa-major/fixtures/violations/*.md`, with a row per bound carrying the
+  code, the bound's own text, the universe both sides are measured over,
+  the committed record that violates it, and the date the bound was added.
+  Checked in CI the way `npm run bundle:check` already checks a generated
+  file, so a bound added without a counterexample or without a line here
+  fails the suite. The last column is the part that is worth more than
+  tidiness: it is the published record of which near-miss the gate was
+  taught to catch and when, which is what a buyer auditing the methodology
+  actually wants and what no document here provides today.
+- First step: write the generator as a `--check`-able script next to
+  `tools/make-violation-fixtures.ts`, emitting the code, the bound text
+  and the fixture filename for all fifteen. The "date added" column needs
+  `git log -S'<CODE>' -- ursa-major/src/invariants.ts` per code, which is
+  one line of shell and can come in the same pass or the one after.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-10 (engineer craft scan, second dispatch): **Vals AI, read
+  first-hand at vals.ai (2026-10-10), the one product in Category 2 of
+  `docs/market/landscape.md` the craft rotation had not reached. The page
+  is 218,178 characters and the read covered the first 100,000 of them,
+  which is stated because the limit matters to two of the claims below.**
+  **Worth stealing: the verifier publishes what it was taught to refuse.**
+  Vals' ProofBench entry states that its grader was changed to reject
+  proofs using `sorry`, `admit`, or added axioms — three specific ways an
+  answer had been passing while cheating, named in public, after the fact.
+  A second habit alongside it: one post is described as having "the
+  inputs, raw outputs and analysis code behind the post's numbers ... in a
+  ledger linked from the post," and another links "Lean sources, the paper
+  and the verification logs." So a reader who doubts a number is handed
+  the material to recompute it, and a reader who doubts the grader is
+  handed the history of the grader's own repairs. Ursa's gate went from
+  ten bounds to fifteen between 2026-10-04 and 2026-10-10, each one added
+  because a record had passed while being wrong in a new way, and nothing
+  public records that sequence. The ledger entry above is this scan's
+  contribution.
+  **What Ursa does better: who supplies the label.** Every grading
+  mechanism named on the page is an external judge applied to an output.
+  Legal Research Bench answers are graded "against rubrics authored and
+  peer-reviewed by practicing lawyers"; the Excel Modeling Benchmark is
+  graded "against expert-authored gold models"; SAFE-Teen conversations
+  are rated "on clinician-defined safety checks"; Code Migration is scored
+  on "hidden tests." Each is a careful, expensive answer to "how good does
+  this answer look to a qualified reader," which is exactly the proxy
+  `CLAUDE.md` §1 says labs already have and `docs/vision.md` principle 4
+  names as the failure: a central assessor standing in for the work. Ursa
+  Minor's label is supplied by the artifact. Nobody judged the output; the
+  work either used it or it did not. The second difference is the dataset:
+  Tax Agent Bench is "a private 193-question test set," Legal Research
+  Bench "a private benchmark," CyberBench and the Excel Modeling Benchmark
+  private, Code Migration "proprietary" with "hidden tests," so a buyer
+  can audit the methodology and never the questions. Ursa's unit of sale
+  is the record itself, which is the buyer's audit surface, and the
+  methodology is published on principle (`CLAUDE.md` §5).
+  **Honest limit.** One page, one read, and 118,178 of its characters were
+  not read, so "nothing says per-question results are released" is a
+  statement about the half that was read and not about the product. A
+  search result that appeared to describe Legal Research Bench's internals
+  came from an arXiv appendix the search tool itself flagged as uncertain
+  in provenance, and nothing above relies on it. Vals is also solving a
+  different problem than Ursa — scoring frontier models on curated
+  professional tasks, not making one person's corrections portable — so
+  the fair axis is narrow: how a product that sells a verdict lets a buyer
+  check the verdict. On the first half of that axis, publishing the
+  grader's own repair history, Vals is ahead of Ursa today.
