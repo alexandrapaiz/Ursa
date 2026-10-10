@@ -2,16 +2,93 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-09, ~18:30 UTC (six-hour pass). Builds on this
-seat's own #149 (open at the start of this pass, merged into this
-branch rather than redone from `main`, per "read your own seat's open
-PRs first"). The headline change this pass: **pm.md §21 ("Merges
-belong to the PMs and the chairs, not to the owner") is live in this
-repo's vendored standard and three stuck pull requests were sitting on
-the wrong side of a tier call that predates it.** Re-read §10 and §21
-together and merged what §21 actually frees.
+Reconciled 2026-10-10, ~06:20 UTC (six-hour pass). Builds on this
+seat's own #150 (absorbed into this branch's first commit, per "read
+your own seat's open PRs first") and the ~18:30 UTC pass it carries
+(#149 before it). The section immediately below is this pass's state;
+the section further down keeps the prior pass's record for anything
+that did not change today.
 
-## What moved this pass
+## This pass (2026-10-10, ~06:20 UTC)
+
+1. **#153 merged under Tier B.** Engineer's `launch-parity.test.ts`
+   work: green (`scan` check SUCCESS), `CLEAN`, not this seat's own,
+   no owner comment or `hold` label, scoped to `ursa-major/` product
+   code plus `docs/ideas.md` and `docs/design/` — no authority, spend
+   or secret path. §21 makes this an ordinary PM merge, not a decision
+   that needed naming beyond the check itself.
+2. **Inbox: nothing new.** Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`
+   and filtered client-side for `to_company == "Ursa" && to_seat ==
+   "pm"` exactly (the bare query still returns other companies'
+   broadcast traffic). Exactly one message has ever arrived addressed
+   to this seat specifically — the 2026-10-09T17:45 exo-centralizer
+   handoff on the dispatch-403 diagnosis — and it was already answered
+   by the prior pass (#149/#150). Nothing has arrived since.
+3. **Failed runs: none.** `gh run list --status failure --created
+   ">=2026-10-10T00:20:52Z"` (the last six hours) returns nothing, and
+   the last 30 runs (`gh run list --limit 30`) are all `success`.
+   Nothing to rerun or hand off.
+4. **No dispatch fired.** Both queued candidates (security on #124,
+   frontend on #141) are still blocked by the same `allowed_bots` wall
+   diagnosed in full by the 17:45 handoff: re-checked this pass,
+   neither `agent-security.yml` nor `agent-frontend.yml` has gained an
+   `allowed_bots` entry on `main` since, and `DEFAULT_WORKFLOW_TOKEN`
+   is still unset in this run's own environment. Firing either would
+   fail the same way. See `dispatch-queue.md`.
+5. **The milestone clock moved and nothing else did.** "Sprint
+   2026-10-05" is due 2026-10-11T00:00:00Z — under 18 hours from this
+   pass — with item 3 (the redaction standard) still unshipped and the
+   milestone's own `open_issues` count still 0 (`gh api
+   repos/alexandrapaiz/Ursa/milestones` — it has never been wired to
+   the three backlog items through GitHub's milestone field, a gap
+   named in the prior two passes and still unfixed). The item itself is
+   blocked on the same wall as line 4, which is HQ's surface (pm.md
+   §15), not a gap this seat can close by trying harder.
+6. **#80, #140 and #75 are unchanged** from the prior pass's read: #80
+   stays with the owner (her comment landed 26 seconds after the PR's
+   last push, so §10's Tier B condition 2 still holds under §21); #140
+   and #75 are both `CONFLICTING` against `main`, blocked regardless of
+   tier until their owning seats (skill, security) rebase.
+
+## Top three for the owner
+
+1. **#80 is the one real owner-action item.** Unchanged: you commented
+   on it directly (2026-10-05), so it stays yours under §10's Tier B
+   condition 2 even with §21 in effect. Still green and `MERGEABLE`.
+2. **The redaction standard (sprint item 3) is now inside 18 hours of
+   its milestone date and still cannot be dispatched.** The fix is an
+   `allowed_bots` line in two workflow files plus a credential wrapper,
+   both on HQ's surface, already routed to HQ's own project manager per
+   the prior pass's handoff. Nothing new to decide here, only the
+   clock, which is now close enough to name on its own.
+3. **Skill's #140 and security's #75 both need a rebase from their own
+   seat** before any tier can reach them. Not a decision for you, named
+   here so the queue count stays legible.
+
+## Resolved this pass
+
+- The exo-centralizer's 2026-10-09T17:45 handoff: re-confirmed
+  answered, nothing new to add.
+- #153: merged (see above).
+
+## My own open pull requests
+
+This pass's own, #152, continuing the branch #150 was building before
+it was killed mid-run. Nothing else of this seat's is open.
+
+---
+
+## Prior pass's record (2026-10-09, ~18:30 UTC, kept for continuity)
+
+Builds on this seat's own #149 (open at the start of that pass, merged
+into its branch rather than redone from `main`, per "read your own
+seat's open PRs first"). The headline change that pass: **pm.md §21
+("Merges belong to the PMs and the chairs, not to the owner") is live
+in this repo's vendored standard and three stuck pull requests were
+sitting on the wrong side of a tier call that predates it.** Re-read
+§10 and §21 together and merged what §21 actually frees.
+
+### What moved (2026-10-09 pass)
 
 1. **#148, #48 and #39 are merged.** All three were green, `CLEAN`,
    and scoped to files that are not this seat's own charter and not an
@@ -46,7 +123,7 @@ together and merged what §21 actually frees.
    blocks a merge under any tier regardless of path. Both need a
    rebase from their own seat (skill, security) before anyone can act.
 
-## Top three for the owner
+### Top three (2026-10-09 pass)
 
 1. **#80 is the one real owner-action item left.** You commented on
    it directly (2026-10-05), so it stays yours under §10's Tier B
@@ -63,7 +140,7 @@ together and merged what §21 actually frees.
    surface, not a seat's. Milestone "Sprint 2026-10-05" is due
    2026-10-11, two days out.
 
-## Failures this pass (§11.7)
+### Failures (2026-10-09 pass, §11.7)
 
 **No new failed runs.** `gh run list --status failure --created
 ">=2026-10-09T12:23:18Z"` (the last six hours) returns nothing. The
@@ -75,7 +152,7 @@ candidates (security building on #124, frontend building on #141)
 stay queued; firing either would still die at the `allowed_bots` wall
 per the exo-centralizer's diagnosis, answered in full by #149.
 
-## Resolved this pass
+### Resolved (2026-10-09 pass)
 
 - **#149**: this seat's own open PR at the start of this pass
   (exo-centralizer's dispatch-403 handoff, fully answered). Its one
@@ -89,12 +166,12 @@ per the exo-centralizer's diagnosis, answered in full by #149.
   pass (`to_seat=pm&to_company=Ursa`, filtered client-side): nothing
   new and nothing unanswered.
 
-## My own open pull requests
+### My own open pull requests (2026-10-09 pass)
 
 This pass's own (#150, continuing #149's branch). Nothing else of
 this seat's is open after #149 is closed as superseded.
 
-## Tier B merge check this pass
+### Tier B merge check (2026-10-09 pass)
 
 Every open, non-draft PR checked against §10 **and** §21 together
 (`gh pr diff --name-only`, `mergeStateStatus`, comments, labels on
@@ -105,7 +182,7 @@ re-verified fresh) merged. #80 (`company.yaml`, same file class as
 condition 2 — so it is not mine) stays with the owner. #140 and #75
 are `CONFLICTING` and blocked regardless of path or tier.
 
-## Everything else open (16 total, via `gh pr list --state open`)
+### Everything else open (as of the 2026-10-09 pass; #153 merged since, see above) (16 total, via `gh pr list --state open`)
 
 - **Owner-held**: #80 ("Top three" item 1).
 - **Conflicting, waiting on the owning seat's rebase**: #140 (skill —
@@ -130,7 +207,7 @@ are `CONFLICTING` and blocked regardless of path or tier.
 Full list, oldest first, is `gh pr list --state open`; not reproduced
 line by line since it goes stale by the next pass.
 
-## Board hygiene, found this pass
+### Board hygiene (found 2026-10-09 pass, unchanged today)
 
 The board's `sprint` object still names `sprint-2026-09-21` (ends
 2026-09-27), two cycles stale — `docs/sprints/sprint-2026-10-05.md` is
@@ -145,7 +222,7 @@ and regrooming "This sprint" against what's actually in flight is
 ceremony-weight work — flagging for Monday (2026-10-12) rather than
 doing it in a standup pass.
 
-## Waiting on an owner-only action
+### Waiting on an owner-only action (2026-10-09 pass, unchanged today)
 
 - `company.yaml` (#80) — held by your own comment on it, not by tier.
 - #140 under `prompts/skill-extract.md`, once the skill seat rebases
@@ -185,7 +262,7 @@ doing it in a standup pass.
   the two dispatches stay queued in `dispatch-queue.md` until HQ lands
   the fix.
 
-## Board message check
+### Board message check (2026-10-09 pass)
 
 Six-hour pass, scheduled rather than woken by a specific handoff.
 Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa` and
