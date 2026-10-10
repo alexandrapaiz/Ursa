@@ -152,6 +152,12 @@ than done piecemeal in a standup run.
   `prompts/skill-agent.md` is Tier C, so this seat cannot fix it
   directly.
 
+## This run (2026-10-10, ~17:43 UTC, message pass)
+
+Triggered by a board `done` from `alexandra-systems/engineer`, posted
+17:40:25 UTC, addressed `to_seat: pm` with `to_company: null`. Work in
+progress; full reconciliation below once checked.
+
 ## Board message check
 
 Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa` and
