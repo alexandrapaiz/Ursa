@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "0.1.0",
+  "task": {
+    "id": "violation-fixture-base",
+    "finished": true,
+    "generatedAt": "2026-10-10T00:00:00.000Z"
+  },
+  "artifact": {
+    "kind": "chat"
+  },
+  "files": [
+    {
+      "path": "notes.md",
+      "mode": "prose",
+      "text": "The information a decision needs is dispersed across many individuals.\n\nNo single observer holds the whole of it, and a central grader pretends otherwise.\n\nA line the model was never in the running for.",
+      "spans": [
+        {
+          "start": 0,
+          "end": 70,
+          "text": "The information a decision needs is dispersed across many individuals.",
+          "class": "survived_verbatim",
+          "score": 1,
+          "source": {
+            "conversationId": "c1",
+            "model": "test-model",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 0,
+            "end": 70
+          }
+        },
+        {
+          "start": 72,
+          "end": 154,
+          "text": "No single observer holds the whole of it, and a central grader pretends otherwise.",
+          "class": "survived_mutated",
+          "score": 0.874,
+          "source": {
+            "conversationId": "c1",
+            "model": "test-model",
+            "turnIndex": 1,
+            "generationIndex": 0,
+            "start": 72,
+            "end": 147
+          },
+          "diff": [
+            {
+              "value": "No single observer holds "
+            },
+            {
+              "value": "it",
+              "removed": true
+            },
+            {
+              "value": "the",
+              "added": true
+            },
+            {
+              "value": " whole "
+            },
+            {
+              "value": "of it",
+              "added": true
+            },
+            {
+              "value": ", and a central grader pretends otherwise."
+            }
+          ],
+          "descent": {
+            "basis": "corroborated",
+            "rivalsSearched": 3
+          }
+        },
+        {
+          "start": 156,
+          "end": 202,
+          "text": "A line the model was never in the running for.",
+          "class": "no_generation_provenance"
+        }
+      ]
+    }
+  ],
+  "conversations": [
+    {
+      "id": "c1",
+      "title": "principles",
+      "adapter": "paste",
+      "turns": 1,
+      "userTurns": 0
+    }
+  ],
+  "generations": [
+    {
+      "conversationId": "c1",
+      "model": "test-model",
+      "turnIndex": 1,
+      "kind": "assistant_text",
+      "text": "The information a decision needs is dispersed across many individuals.\n\nNo single observer holds it whole, and a central grader pretends otherwise.\n\nThis sentence is a draft that the person threw away entirely.",
+      "generationIndex": 0,
+      "spans": [
+        {
+          "start": 0,
+          "end": 70,
+          "text": "The information a decision needs is dispersed across many individuals.",
+          "fate": "survived_verbatim"
+        },
+        {
+          "start": 72,
+          "end": 147,
+          "text": "No single observer holds it whole, and a central grader pretends otherwise.",
+          "fate": "survived_mutated"
+        },
+        {
+          "start": 149,
+          "end": 210,
+          "text": "This sentence is a draft that the person threw away entirely.",
+          "fate": "generated_deleted",
+          "deletion": {
+            "cause": "human_edit"
+          }
+        }
+      ],
+      "totalChars": 206,
+      "charsWritten": 210,
+      "separatorChars": 4,
+      "survivedChars": 145,
+      "survivalRate": 0.5
+    }
+  ],
+  "stats": {
+    "finalChars": 202,
+    "coveredChars": 198,
+    "byClass": {
+      "survived_verbatim": {
+        "spans": 1,
+        "chars": 70,
+        "pct": 0.354,
+        "pctOfFinal": 0.347
+      },
+      "survived_mutated": {
+        "spans": 1,
+        "chars": 82,
+        "pct": 0.414,
+        "pctOfFinal": 0.406
+      },
+      "no_generation_provenance": {
+        "spans": 1,
+        "chars": 46,
+        "pct": 0.232,
+        "pctOfFinal": 0.228
+      }
+    },
+    "uncertainSpans": 0,
+    "trivialSpans": 0,
+    "byModel": {
+      "test-model": {
+        "chars": 152,
+        "pctOfCovered": 0.768
+      }
+    },
+    "generated": {
+      "totalChars": 206,
+      "charsWritten": 210,
+      "separatorChars": 4,
+      "verbatimClaimedChars": 70,
+      "survivedChars": 145,
+      "deletedChars": 61,
+      "deletedPct": 0.296,
+      "humanDeletedChars": 61,
+      "humanDeletedPct": 0.296,
+      "mergeDeletedChars": 0,
+      "unknownDeletedChars": 0
+    },
+    "perFile": [
+      {
+        "path": "notes.md",
+        "coveredChars": 198,
+        "byClass": {
+          "survived_verbatim": 70,
+          "survived_mutated": 82,
+          "no_generation_provenance": 46
+        }
+      },
+      {
+        "path": "docs/standards/pm.md",
+        "coveredChars": 0,
+        "byClass": {
+          "survived_verbatim": 0,
+          "survived_mutated": 0,
+          "no_generation_provenance": 0
+        },
+        "excluded": "imported_whole"
+      }
+    ],
+    "perConversation": [
+      {
+        "conversationId": "c1",
+        "title": "principles",
+        "generations": 1,
+        "generatedChars": 206,
+        "survivedChars": 145,
+        "survivalRate": 0.704,
+        "turnsToAcceptance": 1
+      }
+    ]
+  },
+  "exclusions": [
+    {
+      "path": "docs/standards/pm.md",
+      "reason": "imported_whole",
+      "sha": "96ed4e5",
+      "subject": "standards: sync pm.md from HQ",
+      "relation": "sibling",
+      "chars": 199
+    }
+  ],
+  "signals": {
+    "method": "auto-detected",
+    "annotatedAt": "2026-10-10T00:00:00.000Z",
+    "episode": {
+      "steps": 1,
+      "generations": 1,
+      "accepted": null,
+      "acceptanceStatedInChat": false,
+      "acceptanceBasis": "undeclared: no owner declaration surface was offered; retention is NOT acceptance"
+    },
+    "correctionLoops": [],
+    "feedbackTranslations": [],
+    "repairAttempts": [],
+    "regressions": [],
+    "defensiveGuardrails": [],
+    "oneShotCorrections": [
+      {
+        "step": 1,
+        "text": "AGENT: No single observer holds it whole, and a central grader pretends otherwise.\nFINAL: No single observer holds the whole of it, and a central grader pretends otherwise.",
+        "domain": "notes.md",
+        "quotes": [
+          {
+            "of": "generation",
+            "conversationId": "c1",
+            "step": 1,
+            "generationIndex": 0,
+            "text": "No single observer holds it whole, and a central grader pretends otherwise."
+          },
+          {
+            "of": "final_span",
+            "filePath": "notes.md",
+            "text": "No single observer holds the whole of it, and a central grader pretends otherwise."
+          }
+        ]
+      }
+    ],
+    "notes": [
+      "label-stage record (git commit pair): corrections appear once, as edits;",
+      "recurrence and loops are unobservable without the chat trace."
+    ]
+  }
+}
