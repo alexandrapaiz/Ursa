@@ -318,6 +318,13 @@ previous week's plan:
    the fifty-two open PRs were ancestors of four others, and five merges
    would have closed thirty-two of them.
 
+**Unshallow before you run either of those.** The runner's checkout is
+shallow, and on a shallow clone `merge-base` answers ancestry questions
+wrongly without saying so. `git fetch --unshallow -q origin`, then
+confirm `git rev-parse --is-shallow-repository` prints `false`. The full
+measurement, including the catastrophe it looks like if you skip it, is
+docs/agents/runner-facts.md §3.
+
 Then write the landing order and verify it by actually performing those
 merges in sequence in a scratch worktree, because an order that has not
 been simulated is a guess. Two traps, both hit on the run that wrote
@@ -384,7 +391,9 @@ touch, merge it into your branch and build on top of it. Do not start
 from `main` and write a second version. The newest one usually contains
 the older ones already, so check with
 `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
-assume you have to combine them by hand. This is HQ's L-E10 in
+assume you have to combine them by hand, and unshallow the clone first
+(runner-facts §3) or that check will tell you two related branches are
+unrelated. This is HQ's L-E10 in
 docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
 
