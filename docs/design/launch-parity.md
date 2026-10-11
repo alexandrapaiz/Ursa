@@ -23,7 +23,9 @@ one repository through both launches and compared the records.
 **What this document specifies.** The differential test that turns the
 claim into a check, the three divergences it found the first time it ran,
 and the one module that now holds the decisions both launches must make
-identically.
+identically. A fourth divergence arrived the day after this document was
+written and is recorded in §8, because the list is only useful if it
+keeps being added to.
 
 Terms used below, each defined once here because the rest of the document
 leans on them:
@@ -521,3 +523,75 @@ bundle, which is what the Action actually runs:
    the local summary are rendered from the same `stats`, so a record-level
    comparison covers the numbers in both; it does not assert the two
    surfaces word the same number the same way, and they should not.
+
+---
+
+## 8. The fourth divergence (2026-10-11): who the person is
+
+**Found by this document's own test**, one day after it was written, on
+the day the option it concerns was added.
+
+`--agent-identity` lets the owner of a repository declare which git
+identities belong to their agents, for the case the default vocabulary
+cannot reach: a seat the owner named themselves. Ursa's own seats commit
+as `ursa-pm` and `ursa-engineer` at `@agents.epito.me`, and no pattern
+shippable to every repository in the world matches those. It shipped on
+the local launch only. `src/ci/run.ts` called
+`findCommitPairs(projectPath, { range })` with no identity option and
+`action.yml` had no input that could carry one.
+
+**Why that is the same class as the other three.** The declaration
+decides which commits are eligible to be a person's edit, so the two
+launches answered "who was the person" differently from byte-identical
+history, on exactly the repositories the option exists for. Every
+`survived_*` span in every record rests on that one bit.
+
+**Why no existing test caught it.** The default vocabulary is a shared
+constant (`MACHINE_IDENTITY` in `src/pairfinder.ts`), so the other half
+of the same change reached both launches the moment it was written. Only
+the caller-supplied declaration did not, and only one line carried it.
+A parity gap can therefore be one unforwarded field inside a change that
+is otherwise symmetric by construction, which is the argument for
+running the differential test on any change that touches either launch's
+edges rather than only on changes that look asymmetric.
+
+**Where the fix and its evidence live.** `src/ci/run.ts`
+(`CiOptions.agentIdentities`), `src/bin/ursa.ts` (the `ci` dispatch), and
+`action.yml` (the `agent-identity` input, newline-separated, read from
+the environment rather than interpolated into the step's shell). Held by
+a new block in `src/launch-parity.test.ts` that asserts the declaration
+*changes* the answer on both paths, not merely that both paths agree: a
+test asserting agreement alone would also pass if both launches ignored
+the flag. Full specification, including the three missing edges and the
+four inputs the shell split was verified against:
+`docs/design/agent-coauthor-detection.md` §12.
+
+**The negative check, in this document's §4.3 idiom:**
+
+```bash
+# 5. the declaration on one launch only — the 2026-10-11 scenario.
+#    Revert just the CI call site and run the parity file.
+#    Expect exactly one failing case: "expected 1 to be +0", the CI
+#    launch writing a record the local launch refused.
+cd ursa-major
+python3 - <<'PY'
+p = 'src/ci/run.ts'
+s = open(p).read()
+s = s.replace(
+    "const pairs = findCommitPairs(opts.projectPath, {\n    range: window.range,\n    agentIdentities: opts.agentIdentities,\n  })",
+    "const pairs = findCommitPairs(opts.projectPath, { range: window.range })")
+open(p, 'w').write(s)
+PY
+npx vitest run src/launch-parity.test.ts
+git checkout src/ci/run.ts
+```
+
+**One claim in this document is now stale and is corrected here rather
+than edited in place**, per §5b's own reasoning about the thirteen/fifteen
+bounds: `src/launch.ts` holds the decisions behind **three** shared
+helpers (`clearsSizeFloor`, `erasedEpisodeIds`, `gateRecords`), and that
+is still true, because the fourth divergence was fixed by forwarding an
+existing option rather than by adding a fourth helper. There was nothing
+to centralise: the pair walk is already called from one place per launch.
+What changed is the count of divergences this test has found, which is
+four.
