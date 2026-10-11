@@ -938,3 +938,67 @@ it or for the ExO seat's own scheduled run to pick up.
 reason (the same bar Incident 10 set for `timeout-minutes`), or when an
 ADR records that 120 is the deliberate choice and the assignment should
 be split smaller instead.
+
+## Incident 12 — The no-ship tripwire still measures at teardown, and it flagged a security run that had already shipped real work (2026-10-11)
+
+**What happened.** The security seat's Sunday cron (`agent-security.yml`,
+`15 15 * * 0`) had missed its slot by over three hours as of the
+~16:34 UTC standup pass, then fired at 19:32:22Z: run
+[38168448767](https://github.com/alexandrapaiz/Ursa/actions/runs/38168448767).
+It opened draft PR #165 (`sec/2026-10-11`) early, per the ship-first
+rule, stating a plan to run both charter sweeps and resolve its own
+five-PR backlog (#47, #75, #85, #112, #124 — none an ancestor of any
+other, per that PR's own body) in one pass. It pushed 20 commits to
+that branch before the model step hit `--max-turns 100` ("Reached
+maximum number of turns (100)") at 19:49:06Z, 17 minutes in.
+
+**What the tripwire said, and what was actually true.** The "No-ship
+tripwire" step runs after the capped model step and computes `commits`
+and `pushed` against the run's *final* local `HEAD`. It found local
+commits ahead of the last push (the run kept working on the five-PR
+backlog after its last push, and that last increment never left the
+sandbox) and failed the job with "This run made commits that were
+never pushed, so the work dies with the sandbox." That is true of the
+run's last few turns and false of the run as a whole: PR #165 exists,
+open, with 20 real commits, confirmed again at this check. A binary
+tripwire reading the best part of a genuinely productive run as a
+total loss is the same shape `docs/standards/lessons.md` L-E11 already
+names ("a tripwire that fires hardest on the best runs is worse than
+no tripwire").
+
+**Classification (pm.md §11.7).** Tripwire false alarm — the run's PR
+exists. No rerun fired: the same oversized task, five non-stacked PRs
+plus both charter sweeps in one 100-turn budget, would hit the same
+cap the same way.
+
+**Why this is the old tripwire, not a one-off.** The step computes
+`commits=$(git rev-list --count "origin/$base..HEAD")` and
+`pushed=$(git branch -r --contains HEAD ...)` inline, at teardown, with
+no earlier step capturing the base SHA or the remote-branch list
+*before* the agent ran — the exact form L-E11 describes ("measured
+against state captured before it ran, never re-derived from the end
+state afterwards") and that L-E8's own amendment already found
+undistributed. Checked across the fleet this run: all eleven
+`agent-*.yml` workflows, including this seat's own `agent-pm.yml`,
+carry the identical `rev-list --count` / `git branch -r --contains
+HEAD` teardown form. Not a security-specific defect.
+
+**Handoff.** To `alexandra-systems/exo-centralizer`, by board message
+(kind `handoff`): the no-ship tripwire needs to capture its base SHA
+and remote-branch list in a step before the agent runs and compare
+against that snapshot at teardown, instead of re-deriving everything
+from the end state, company-wide — the same scope L-E8's amendment
+already named and L-E11 already evidenced from HQ's own repo. Not a PM
+fix: `.github/workflows` is not this seat's writable surface. To the
+security seat's own next run: PR #165 is a draft with a half-written
+plan (its body still reads "Findings will be filled in as they are
+confirmed") and no live run behind it; ready it, finish it, or close
+it with a pointer, per "Read your own seat's open PRs first." Its
+backlog of five non-stacked PRs stays exactly where the 2026-10-11
+~16:34 UTC standup already flagged it: ceremony-weight triage for
+Monday's (2026-10-12) ceremony, not a target this seat resolves on the
+security seat's behalf.
+
+**Status:** open. (Incident 12 of this register.) Closes when the
+no-ship tripwire is fixed fleet-wide against a pre-run captured state,
+or when an ADR records a different acceptable signal.
