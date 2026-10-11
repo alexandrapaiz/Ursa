@@ -2,11 +2,13 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-11, ~00:22 UTC (six-hour pass, message-triggered).
-Continues from current `main`; nothing of this seat's own was open to
-inherit (checked per "Read your own seat's open PRs first" below).
-Older passes' detail (2026-10-10 17:43 UTC and before) is not repeated
-below; it is in `main`'s history of this file and in PRs
+Reconciled 2026-10-11, ~02:34 UTC (message-triggered triage pass, one
+failed run). Branch built on top of the ~00:22 UTC pass's own open PR
+(#158) rather than starting a second version, per "Read your own seat's
+open PRs first": #158 is unmerged, this run's branch contains its
+commit, and merging this run's PR (#160) satisfies #158 too. Older
+passes' detail (2026-10-10 17:43 UTC and before) is not repeated below;
+it is in `main`'s history of this file and in PRs
 #137/#147/#149/#150/#152/#154.
 
 ## This run (2026-10-10, ~16:08 UTC)
@@ -92,10 +94,13 @@ redaction gate blocking KR2.2's public record.
 
 ## My own open pull requests
 
-This run's own standup PR only. #152 and #154 are both merged (Tier A,
-see above). Nothing else of this seat's is open.
+#158 (the ~00:22 UTC six-hour pass) and #160 (this pass, built on
+#158's branch and containing its commit — merging #160 also satisfies
+#158; the owner can close them as one decision). #152 and #154 are
+both merged (Tier A, see above). Nothing else of this seat's is open.
 
-## Everything else open (13 total, via `gh pr list --state open`)
+## Everything else open (15 total via `gh pr list --state open`, plus
+this seat's own #160)
 
 - **Owner-held**: #80 ("Top three" item 1).
 - **Conflicting, waiting on the owning seat's rebase**: #140 (skill —
@@ -105,6 +110,9 @@ see above). Nothing else of this seat's is open.
 - **Frontend's live draft**: #141 (real work in progress — benchmark
   write-up and after-shots still its own unfinished tail; the contrast
   dispatch would build on it once the permissions gap closes).
+- **Engineer's live draft, killed by the cap, real work inside**: #159
+  (Incident 11, above — owed by the engineer seat's next run, not
+  this seat's to ready).
 - **Dead drafts, nothing committed since their own ship-first commit**:
   #124 (security, since 2026-10-07T06:29), #143 (exo, since
   2026-10-08T20:10 — exo's own to resolve, not this seat's; noted, not
@@ -250,3 +258,40 @@ note this run with the reason in first person, as required.
    clean inbox, the zero failures, and the milestone passing with item
    3 still open, with the reason in prose and the identifiers in
    `data`/`ref` rather than the body, per the board-message protocol.
+
+## This run (2026-10-11, ~02:34 UTC, message-triggered: a failed run)
+
+Triggered by notice of one failed run, `engineer-agent` 38103816460
+(2026-10-11T02:02 UTC). Triaged under pm.md §11.7, full detail in
+`docs/agents/incidents.md` Incident 11:
+
+1. **Not a tripwire false alarm, not transient.** The no-ship tripwire
+   step passed (a PR exists, #159); the failing step was the model step
+   itself, exiting on "Reached maximum number of turns (120)" at
+   25m40s wall-clock, well inside the 45-minute job cap. Closest to
+   configuration, same genre as Incident 10 but a different constant
+   (`--max-turns`, not `timeout-minutes`), so PWC-EXO-5 would not have
+   prevented this one. No rerun fired: the same assignment would hit
+   the same cap again, and a rerun would throw away the real work
+   already pushed.
+2. **The run's own work is real and large, not a false start.** PR
+   #159 carries a genuine defect fix in `src/pairfinder.ts` (a
+   `Co-Authored-By` pattern narrower than the fallback it was meant to
+   be more reliable than), a second fix (an agent seat's own commits
+   read as "the person"), a ~650-line design document, a passing test
+   suite, a new CLI flag, four new `proposed` ledger entries, and a
+   competitive scan. The run was cut off before it could rewrite its
+   own PR description, so the draft does not yet say what is finished.
+3. **Owed by the engineer seat:** ready or resolve PR #159 on its next
+   run, under its own "read your own seat's open PRs first" duty — this
+   seat does not do that for it.
+4. **Owed by the ExO seat:** `PWC-EXO-6`, raising `--max-turns` for the
+   engineer workflow with a recorded reason, the same bar Incident 10
+   set for `timeout-minutes`. Not dispatched this pass — ExO already
+   holds an open draft (#143) and §11.4 stops a dispatch to a seat
+   holding one unless told to build on it. Named here for the next
+   standup to fire, or for ExO's own Sunday run (today, not yet landed
+   as of this pass) to pick up on its own.
+5. **Board:** posted one note this pass, first person, naming the one
+   failure, its classification, and the two handoffs, per the
+   board-message protocol.
