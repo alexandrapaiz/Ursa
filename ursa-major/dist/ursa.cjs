@@ -103,6 +103,14 @@ function findCommitPairs(repoPath, opts = {}) {
 function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
   const trailerPattern = opts.agentTrailerPattern ?? DEFAULT_TRAILER;
   const authorPattern = opts.agentAuthorPattern ?? DEFAULT_AUTHOR;
+  const declared = (opts.agentIdentities ?? []).map((v) => v.toLowerCase()).filter(Boolean);
+  const declaredMatch = (c) => {
+    if (declared.length === 0) return null;
+    const name = c.authorName.toLowerCase();
+    const email = c.authorEmail.toLowerCase();
+    const hit = declared.find((d) => name.includes(d) || email.includes(d));
+    return hit ? `${c.authorName} <${c.authorEmail}>` : null;
+  };
   const maxDistance = opts.maxPairDistance ?? DEFAULT_MAX_PAIR_DISTANCE;
   const maxAgeHours = opts.maxPairAgeHours ?? DEFAULT_MAX_PAIR_AGE_HOURS;
   const maxInterposed = opts.maxInterposedGenerations ?? DEFAULT_MAX_INTERPOSED_GENERATIONS;
@@ -118,6 +126,7 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
     commitsScanned: commits.length,
     generatedByTrailer: 0,
     generatedByAuthorName: 0,
+    generatedByDeclaredIdentity: 0,
     authorFallbackSuppressed: authorMatchesAll ? {
       pattern: String(authorPattern),
       authors: [...new Set(commits.map((c) => c.authorName))].sort()
@@ -128,15 +137,19 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
       maxInterposedGenerations: maxInterposed
     },
     abandoned: { distance: 0, age: 0, interposedGeneration: 0, notDescendant: 0 },
-    mergeGenerationsRefused: 0
+    mergeGenerationsRefused: 0,
+    editorIdentities: []
   };
   const marker = (c) => {
+    const own = declaredMatch(c);
+    if (own) return own;
     if (trailerPattern.test(c.trailers)) return c.trailers;
     if (useAuthorFallback && authorPattern.test(c.authorName)) return c.authorName;
     return null;
   };
   for (const c of commits) {
-    if (trailerPattern.test(c.trailers)) diagnostics.generatedByTrailer += 1;
+    if (declaredMatch(c)) diagnostics.generatedByDeclaredIdentity += 1;
+    else if (trailerPattern.test(c.trailers)) diagnostics.generatedByTrailer += 1;
     else if (useAuthorFallback && authorPattern.test(c.authorName)) {
       diagnostics.generatedByAuthorName += 1;
     }
@@ -204,6 +217,7 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
         paths: overlap,
         generatedAuthor: gen.authorName,
         finalAuthor: fin.authorName,
+        finalAuthorEmail: fin.authorEmail,
         generatedAt: gen.date,
         finalAt: fin.date,
         agentMarker,
@@ -213,18 +227,29 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
       break;
     }
   }
+  const byIdentity = /* @__PURE__ */ new Map();
+  for (const p of pairs) {
+    const key = `${p.finalAuthor}	${p.finalAuthorEmail ?? ""}`;
+    const seen = byIdentity.get(key);
+    if (seen) seen.pairs += 1;
+    else byIdentity.set(key, { name: p.finalAuthor, email: p.finalAuthorEmail ?? "", pairs: 1 });
+  }
+  diagnostics.editorIdentities = [...byIdentity.values()].sort(
+    (a, b) => b.pairs - a.pairs || a.name.localeCompare(b.name)
+  );
   return { pairs, diagnostics };
 }
-var import_node_child_process, DEFAULT_TRAILER, DEFAULT_MAX_PAIR_DISTANCE, DEFAULT_MAX_PAIR_AGE_HOURS, DEFAULT_MAX_INTERPOSED_GENERATIONS, DEFAULT_AUTHOR;
+var import_node_child_process, MACHINE_IDENTITY, DEFAULT_TRAILER, DEFAULT_MAX_PAIR_DISTANCE, DEFAULT_MAX_PAIR_AGE_HOURS, DEFAULT_MAX_INTERPOSED_GENERATIONS, DEFAULT_AUTHOR;
 var init_pairfinder = __esm({
   "src/pairfinder.ts"() {
     "use strict";
     import_node_child_process = require("node:child_process");
-    DEFAULT_TRAILER = /claude|codex|cursor|gpt/i;
+    MACHINE_IDENTITY = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i;
+    DEFAULT_TRAILER = MACHINE_IDENTITY;
     DEFAULT_MAX_PAIR_DISTANCE = 25;
     DEFAULT_MAX_PAIR_AGE_HOURS = 168;
     DEFAULT_MAX_INTERPOSED_GENERATIONS = 0;
-    DEFAULT_AUTHOR = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i;
+    DEFAULT_AUTHOR = MACHINE_IDENTITY;
   }
 });
 
@@ -1666,7 +1691,7 @@ function formatViolations(violations) {
     bound:    ${v.invariant}
     observed: ${v.observed}`).join("\n");
 }
-var BOUNDS, r3, abbrev, BOUND_COUNT;
+var BOUNDS, r3, abbrev, BOUND_COUNT, BOUND_CODES;
 var init_invariants = __esm({
   "src/invariants.ts"() {
     "use strict";
@@ -1692,6 +1717,7 @@ var init_invariants = __esm({
     r3 = (x) => Math.round(x * 1e3) / 1e3;
     abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
     BOUND_COUNT = Object.keys(BOUNDS).length;
+    BOUND_CODES = Object.keys(BOUNDS);
   }
 });
 
@@ -4248,11 +4274,21 @@ function renderRunSummary(records, episodes, diagnostics) {
       );
     }
     if (episodes.length === 0) {
-      const looked = diagnostics.generatedByTrailer + diagnostics.generatedByAuthorName;
+      const d = diagnostics;
+      const looked = d.generatedByTrailer + d.generatedByAuthorName + d.generatedByDeclaredIdentity;
+      const how = [`${d.generatedByTrailer} by trailer`, `${d.generatedByAuthorName} by author name`];
+      if (d.generatedByDeclaredIdentity > 0) {
+        how.push(`${d.generatedByDeclaredIdentity} by an identity you declared`);
+      }
       lines.push("");
       lines.push(
-        `Scanned ${diagnostics.commitsScanned} commit${diagnostics.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${diagnostics.generatedByTrailer} by trailer, ${diagnostics.generatedByAuthorName} by author name), and none of those was followed by an edit of the same file without an agent marker.`
+        `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${how.join(", ")}), and none of those was followed by an edit of the same file without an agent marker.`
       );
+      if (looked > 0) {
+        lines.push(
+          "If every commit here is an agent's, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads."
+        );
+      }
     }
     const { abandoned, bounds } = diagnostics;
     const dropped = abandoned.distance + abandoned.age + abandoned.interposedGeneration + abandoned.notDescendant;
@@ -4290,6 +4326,14 @@ function renderRunSummary(records, episodes, diagnostics) {
         `${diagnostics.mergeGenerationsRefused} merge commit${diagnostics.mergeGenerationsRefused === 1 ? "" : "s"} carried an agent marker and were not counted as generations. A merge restates work other commits did; it wrote nothing of its own.`
       );
     }
+    if (diagnostics.editorIdentities.length > 0) {
+      const who = diagnostics.editorIdentities.map((e) => `${e.name}${e.email ? ` <${e.email}>` : ""} (${e.pairs} pair${e.pairs === 1 ? "" : "s"})`).join(", ");
+      lines.push("");
+      lines.push(`The edits above were credited to ${who}.`);
+      lines.push(
+        "That is whoever authored each commit this run read as yours, and it is read from the commit rather than verified. If any of those is an agent rather than you, pass --agent-identity <name-or-email-substring> and run again: its commits become generations, and the records that rested on them are not written."
+      );
+    }
   }
   const tested = records.reduce((n2, r) => n2 + (r.durability?.testedSpans ?? 0), 0);
   if (tested > 0) {
@@ -4322,6 +4366,12 @@ async function main(argv) {
       "max-pair-distance": { type: "string" },
       "max-pair-age-hours": { type: "string" },
       "max-interposed-generations": { type: "string" },
+      // Repeatable. Each value is a substring matched case-insensitively
+      // against a commit's author name AND its author email, so an agent
+      // seat whose name no shippable pattern could match
+      // (`ursa-pm`, `ursa-exo`) can be declared by the only party who
+      // knows it: the person whose repository it is.
+      "agent-identity": { type: "string", multiple: true },
       declare: { type: "string" },
       "sync-url": { type: "string" },
       session: { type: "string" },
@@ -4337,6 +4387,7 @@ async function main(argv) {
   if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
+    console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
     console.error("       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]");
     console.error("       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]");
     console.error("       ursa forget <projectPath> --record <recordId>");
@@ -4417,7 +4468,8 @@ async function main(argv) {
   const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath, {
     maxPairDistance: bound("max-pair-distance"),
     maxPairAgeHours: bound("max-pair-age-hours"),
-    maxInterposedGenerations: bound("max-interposed-generations")
+    maxInterposedGenerations: bound("max-interposed-generations"),
+    agentIdentities: values["agent-identity"]
   });
   const commits = listCommits(projectPath);
   const episodes = buildEpisodes(pairs, projectPath).slice(0, limit).map((ep) => ({

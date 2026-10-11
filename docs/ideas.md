@@ -4602,3 +4602,195 @@ survey.
   the fair axis is narrow: how a product that sells a verdict lets a buyer
   check the verdict. On the first half of that axis, publishing the
   grader's own repair history, Vals is ahead of Ursa today.
+
+### 2026-10-11 — The record names which model generated a span and never names who kept it
+- Trigger: today's dogfood run. `ursa run` over a clone of this
+  repository produced four records whose "the person kept this" verdict
+  rested on commits authored `ursa-pm <ursa-pm@agents.epito.me>`, an
+  agent seat. The run summary now says so out loud
+  (`PairFinderDiagnostics.editorIdentities`,
+  `docs/design/agent-coauthor-detection.md` §3.1), but the record on
+  disk does not. `OutcomeRecord` carries `agentMarker` for the
+  generation side, copied into the generation's `model` field, and
+  carries nothing at all for the edit side. So a lab auditing a
+  purchased record can check which model wrote a span and cannot check
+  whether the party who kept it was a human being. That is the one
+  question the span classes depend on: `survived_verbatim` means "a
+  model wrote this and the person kept it", and "the person" is an
+  inference the record does not expose.
+- What: an `editor` block on the record, filled from the pair the
+  episode came from. Three fields, all already in memory at write time:
+  the author name and email of `finalSha`, and the basis on which that
+  commit was classified as the person's, which is one of four values —
+  `no-agent-marker` (it matched nothing, the inference-by-absence case
+  and the weakest), `declared-person` (the owner named this identity as
+  their own), `github-login` (the pull-request path, which has a login
+  and no email), or `review-closure` (the PR path's merge-as-accepted
+  closure, where the "editor" is whoever merged). Carry the run's own
+  `--agent-identity` declarations in the same block, because a record
+  resolved with the fleet declared and one resolved without it are
+  different claims from identical inputs, and nothing on disk currently
+  distinguishes them. Then add a sixteenth bound to
+  `src/invariants.ts`: a record whose editor basis is
+  `no-agent-marker` may not report a `survived_*` class without the
+  editor identity being present, so the weakest basis can never be
+  silent.
+  The same entry carries a launch-parity gap found while shipping this,
+  and it is the reason the first step below stops where it does. The
+  local launch takes `--agent-identity` and the CI launch cannot: `ursa
+  ci` calls `findCommitPairs(projectPath, { range })` in
+  `src/ci/run.ts` line 148 with no identity option, and `action.yml`
+  has no input that would carry one. So a repository whose seats are
+  declared locally has them undeclared on every merge, and the two
+  launches answer "who was the person" differently from the same
+  history, which is exactly the class of drift
+  `docs/design/launch-parity.md` and `src/launch.ts` exist to prevent.
+  The default pattern is shared, so the trailer half of today's fix
+  does reach the CI launch; only the declaration does not.
+- First step: add the `editor` block to `OutcomeRecord` in
+  `src/types.ts`, fill it in `src/resolve-episode.ts` from the
+  `Episode` (which needs `finalAuthor`/`finalAuthorEmail` copied across
+  from `CommitPair` in `src/episodes.ts`, two fields), and assert it in
+  `src/resolver.test.ts` plus one `fixtures/violations/` counterexample
+  for the new bound, per `docs/design/violation-fixtures.md`. Then, as
+  its own unit: an `agent-identity` input on `action.yml` threaded to
+  `ursa ci`, and a case in `src/launch-parity.test.ts` that declares an
+  identity and asserts both launches drop the same record.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 — A file synced from another repository is read as text a model composed
+- Trigger: today's dogfood run, and specifically the largest row of a
+  table written five days ago. `docs/standards/lessons.md` arrived in
+  this repository by a sync commit copying it from
+  `alexandrapaiz/alexandra-systems` at `775ce36`. The resolver read all
+  63,362 characters of it as model output and 60,616 of them as text
+  the person kept. `src/vendored.ts` exists to refuse exactly this and
+  could not: it detects an import by finding its source blob somewhere
+  in this repository's own object store, and this content never existed
+  here before the sync introduced it. An import from outside git's
+  reach is invisible to a check that works by looking inside it. Today's
+  trailer fix removes this particular claim by a different route (the
+  next sync is now read as a generation, so no pair forms), which means
+  the gap itself is untouched and will produce the same false claim the
+  first time a sync is followed by a genuine human edit.
+- What: read the import declaration the sync commit already writes.
+  Every sync commit in this repository names its upstream in its own
+  subject line — "Lessons sync 2026-09-28: HQ standards/lessons.md @
+  775ce36", "Re-vendor docs/standards/pm.md from HQ main @ 683c7dd" —
+  because the seat that made it knew it was importing. That is a
+  declaration, not a guess, and it is the same shape as the
+  `--agent-identity` answer shipped today: where the library cannot
+  know, let the party who does say so. Support a `Ursa-Imported-Path:
+  <path>` commit trailer, which `src/vendored.ts` reads as
+  authoritative for that commit's own paths and writes into the
+  record's `exclusions` with `relation: 'declared-import'` and the
+  commit that declared it. Do NOT parse subject lines: a regex over
+  prose would be the central-assessment overreach the fourth principle
+  names, and it would silently reclassify any commit whose message
+  happens to mention a sync.
+- First step: add the trailer to the `relation` union in
+  `src/vendored.ts` and read it in `vendoredPaths()`, which already
+  receives the `CommitInfo[]` it needs; test it in
+  `src/vendored.test.ts` with a fixture commit carrying the trailer and
+  no matching blob anywhere in the fixture repository, which is the
+  case the existing tests cannot construct.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 — Nothing re-runs the measurement a fix was aimed at, so a fix that half worked reads as a fix
+- Trigger: today's run, read against `docs/design/vendored-paths.md`
+  §1. That document's table has five rows and was written 2026-10-06 to
+  justify the import check. The fix shipped that day removed row two
+  (`docs/market/landscape.md`, 21,656 characters). Row one,
+  `docs/standards/lessons.md` at 60,616 characters, was the largest in
+  the table and stood untouched for five more days, until this run
+  resolved the same repository again and found it carrying 84.7% of the
+  headline survival figure. Nothing was wrong with the fix or the
+  document. What is missing is that the measurement which motivated the
+  fix was never repeated after it, so "the table that justified the
+  change" and "the state of the world after the change" were never
+  compared. Eleven design documents under `docs/design/` lead with a
+  measured number in exactly this shape.
+- What: a committed measurement baseline and one command that
+  re-derives it. `ursa-major/fixtures/baseline/ursa-self.json` holds
+  the `Totals` object `tools/measure-coauthor-detection.ts` already
+  emits, for a named commit of this repository, plus the per-file
+  character breakdown that `docs/design/vendored-paths.md` §1's table
+  is. A script re-clones that commit, re-resolves it, and diffs the two,
+  printing every figure that moved and by how much. Run on demand, not
+  in CI: cloning 470 commits and resolving them is minutes of work and
+  the build-and-test gate is already specified but not installed
+  (`docs/design/build-and-test.workflow.yml`). The point is not
+  automation, it is that the number in a design document stops being a
+  claim nobody can re-check and becomes a file with a command next to
+  it.
+- First step: `npm run baseline:write` and `npm run baseline:check` in
+  `ursa-major/package.json`, over the three-pass `Totals` this run's
+  tool already produces, pinned at `fe0da2a`.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-11 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 2, Arena (the product
+renamed from LMArena in January 2026). Picked over the category's two
+other entries because the craft question it answers is the one this
+run spent the day on: how a system tells a reader how much of its
+headline number to believe. Read today, 2026-10-11: Arena's
+`how-it-works` page, Arena's `arena-rank` announcement, and LMSYS's
+2024-08-28 style-control post.
+
+**Worth stealing: the confounder goes into the model, and the engine
+that fits it is a package anyone can install.** Arena's leaderboard
+score is not a raw win rate. Style is treated as an independent
+variable in the Bradley-Terry regression, so each model's rating is
+estimated net of it, and the first version of that control carried four
+features: answer token length, markdown headers, markdown bold
+elements, and markdown lists. The fitter is published as `arena-rank`
+on PyPI, Apache 2.0, at `lmarena/arena-rank`, with
+`compute_ratings_and_cis(dataset, significance_level=0.05)` returning
+95% confidence intervals computed in closed form rather than by
+bootstrap, a reweighting step so a model with fewer battles is not
+flattered by its own small sample, and a quickstart that loads the
+public `lmarena-ai/arena-human-preference-140k` dataset. A buyer can
+recompute the published number instead of trusting it.
+
+Ursa's outcome record has confounders of precisely that kind, and today
+measured the biggest one: who authored the edit. It moved the headline
+survival figure on this repository from 71,566 characters to 10,950 to
+zero, a factor of 6.5 and then to nothing, from one bit per commit. The
+record reports a single point estimate per class (`pct`,
+`pctOfFinal`), with no confounder named, no interval, and no weighting
+statement anywhere — `renderRunSummary` sums characters across records
+of 590 and 60,616 characters as though they carried equal evidential
+weight. Two transfers, both concrete. First, the identity confounder
+belongs in the record where a buyer can filter on it, which is the
+first ledger entry above. Second, Arena's reweighting is the answer to
+a problem Ursa has and has not named: a record built from a 590-
+character episode is not the same evidence as one built from 60,616,
+and the run summary currently adds them.
+
+**What Ursa does better: the correction, and what is being corrected.**
+Style control is a statistical repair applied after the fact to a
+signal Arena cannot change, because its label is a vote cast at the
+moment of asking. A voter who prefers the longer, better-formatted
+answer has stated a preference about how an answer looks, which is the
+failure mode `docs/vision.md` principle 3 names, and no regression
+recovers what the voter would have done with the text a week later.
+Ursa's label is not a vote at all: the work either used the text or it
+did not, so there is no "looks better" to subtract out. And where
+Arena's repair reweights a data point it keeps, today's repair deleted
+one. A 94.9% survival figure resting on a file nobody read is not a
+confounded measurement to be corrected, it is a claim that is false,
+and the honest move is to stop making it rather than to discount it.
+Arena cannot make that move, because its vote is all it has.
+
+**One thing worth watching rather than stealing.** Arena's own
+`how-it-works` page carries no confidence interval, no vote count per
+model, no tie handling and no statement of what a score cannot tell
+you. All of that lives in the package and the blog. The methodology is
+genuinely open and the product surface does not show it, which is the
+same split Ursa is one decision away from: `docs/design/` now holds
+thirty-three documents and `ursa-minor/app/page.tsx` still names none
+of them.

@@ -590,7 +590,16 @@ not silent gaps.
    git's reach is invisible to it. The pair that carried the claim is
    gone, but a sync followed by a genuine human edit would still produce
    a record reporting an imported file as model output.
-2. **Nothing re-runs the measurement a fix was aimed at.**
+2. **The CI launch cannot be told who the agents are.** `ursa ci` calls
+   `findCommitPairs(projectPath, { range })` (`src/ci/run.ts` line 148)
+   with no identity option, and `action.yml` exposes no input that
+   would carry one, so a project whose seats are declared locally has
+   them undeclared on every merge. The shared default means the trailer
+   half of this change does reach the CI launch; only the declaration
+   does not. That is a launch-parity gap of the kind
+   `docs/design/launch-parity.md` and `src/launch.ts` exist to catch,
+   and it is sliced out of this run rather than rushed.
+3. **Nothing re-runs the measurement a fix was aimed at.**
    `docs/design/vendored-paths.md` §1's table has five rows, the fix
    removed row two, and row one — the largest, at 60,616 characters —
    stood for five more days. Every number in that table came from a run
