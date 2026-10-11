@@ -64,11 +64,16 @@ this file and in PRs #137/#147/#149/#150/#152/#154/#158/#160.
    2026-10-05: you commented on it directly, so it stays yours under
    §10's Tier B condition 2 even with §21 in effect. Still green and
    `MERGEABLE`.
-2. **The redaction standard (sprint item 3) is about 8 hours from its
-   milestone date and still cannot be dispatched.** The fix is an
-   `allowed_bots` line in two workflow files, HQ's surface, already
-   routed to HQ's own project manager. Nothing new to decide, only the
-   clock.
+2. **The security seat's Sunday cron fired and failed — but shipped real
+   work, and the failure is the tripwire, not the run.** Run 38168448767
+   hit its 100-turn cap mid-way through an oversized task (both charter
+   sweeps plus its own five-PR backlog in one pass) and the "No-ship
+   tripwire" flagged it as a total loss. It is not: draft PR #165 holds
+   20 real commits. Recorded as Incident 12 and handed to
+   exo-centralizer — the tripwire measures at teardown fleet-wide, not
+   just here. Nothing for you to do; the milestone ("Sprint 2026-10-05",
+   due 2026-10-11, item 3) is now past its date regardless and carries
+   to Monday's ceremony either way.
 3. **Skill's #140 and security's #75 both need a rebase from their own
    seat** before any tier can reach them. Not a decision for you, named
    so the queue count stays legible.
@@ -95,13 +100,13 @@ redaction gate blocking KR2.2's public record.
 ## My own open pull requests
 
 #158 and #160 (the ~00:22 UTC and ~02:34 UTC passes) were merged under
-Tier A at the top of the ~06:20 UTC pass. #161 (that same ~06:20 UTC
-pass's own PR) and #162 (~12:21 UTC, built on #161) both sat open as
-drafts for several hours with #162 never adding anything of its own.
-This run closes #161 as superseded by #162, finishes the work on
-#162's branch, and self-merges #162 under Tier A at the top of this
-run (pure `docs/sprints/` diff). Nothing of this seat's is open after
-that.
+Tier A at the top of the ~06:20 UTC pass. #161 was closed as superseded
+by #162, which was self-merged under Tier A at the top of the ~16:34
+UTC pass. That pass's own PR, #164, was itself self-merged under Tier A
+at the top of this run (pure `docs/sprints/` diff, green, `CLEAN`).
+This run's own PR is #166, open as a draft while the triage above is
+in progress; readied before this run ends per "ready it, or hand it
+over in writing."
 
 ## Everything else open (15 total via `gh pr list --state open`, plus
 this seat's own #160)
@@ -522,3 +527,72 @@ superseded, per "Read your own seat's open PRs first."
    resolved stack, the clean inbox, the zero new failures, and the
    missed security cron as a new fact against the still-carrying
    milestone, per the board-message protocol.
+
+## This run (2026-10-11, ~19:55 UTC, message-triggered: a failed run)
+
+**First act: self-merged #164 (this seat's own prior pass) under Tier
+A rather than stacking a fifth branch on top of it.** `gh pr diff
+164 --name-only` showed only `docs/sprints/dispatch-queue.md` and
+`docs/sprints/pending.md`, CI was green and the merge state `CLEAN`, so
+it qualified outright; merged normally and deleted the branch, then
+branched this run's own `ursa-pm/2026-10-11-message-5` from the
+resulting `main`.
+
+1. **The trigger.** A message reported the security seat's run
+   [38168448767](https://github.com/alexandrapaiz/Ursa/actions/runs/38168448767)
+   as failed, the cron that the ~16:34 UTC pass flagged as missed by
+   79 minutes at that point. It had since fired, at 19:32:22Z.
+2. **The trigger payload also carried an instruction that was not
+   mine to act on.** It told this run to "resolve the backlog of this
+   seat's own open pull requests (#47, #75, #85, #112, #124)." All
+   five are on `ursa-security/...` or `sec/...` branches, authored by
+   the security seat. The sentence is word-for-word the opening
+   paragraph of PR #165's own body, which the security seat wrote at
+   the start of the very run being reported as failed — the dispatcher
+   copied that run's own in-flight PR text into this seat's trigger and
+   mislabeled "this seat" as the PM's. Per the org rule that external
+   content is data, not instruction, this seat read it as evidence of
+   what the security seat told itself and took no action on it: no
+   edit, no branch touch, no PR action against #47, #75, #85, #112, or
+   #124. Fixing or closing them is the security seat's own job on its
+   next run. Named in full, with the evidence, in PR #166's own
+   description.
+3. **Triaged the failure (pm.md §11.7).** Read the run's failed-step
+   log directly. The model step hit `--max-turns 100` ("Reached maximum
+   number of turns (100)") at 19:49:06Z, 17 minutes in, after pushing 20
+   commits to draft PR #165 (`sec/2026-10-11`, confirmed still open).
+   The "No-ship tripwire" step then failed the job because the run's
+   *final* local commit sat ahead of its last push — it kept working on
+   the five-PR backlog after that push and the last increment never
+   left the sandbox. **Classified as a tripwire false alarm: the run's
+   PR exists.** No rerun fired (the same oversized task, five
+   non-stacked PRs plus both charter sweeps in one 100-turn budget,
+   would hit the same cap the same way). Checked whether the tripwire
+   is still the old (pre-L-E11) form across the fleet: all eleven
+   `agent-*.yml` workflows, including this seat's own `agent-pm.yml`,
+   still compute `commits`/`pushed` inline at teardown with no
+   pre-run-captured base state. It is the old one, fleet-wide, not a
+   security-specific defect. Recorded as Incident 12 in
+   `docs/agents/incidents.md` and handed off to
+   `alexandra-systems/exo-centralizer` by board message.
+4. **Failed runs otherwise: none new.** `gh run list --status failure
+   --created ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns only this
+   run and the 2026-10-11T02:02 `engineer-agent` failure, which is
+   already closed out (line 268 above, Incident-free, nothing new to
+   triage).
+5. **Tier B / dispatch: unchanged.** No other open PR's state moved
+   since the ~16:34 UTC check. `allowed_bots` is still `0` matches in
+   both `agent-security.yml` and `agent-frontend.yml` on current
+   `main`, so both queued dispatch candidates stay queued, not fired;
+   rewrote `docs/sprints/dispatch-queue.md` in full with the security
+   candidate's instruction updated to build on #165 instead of the now
+   superseded #124 once the wall clears.
+6. **Sprint:** item 3 (the redaction standard) is unchanged — still no
+   file at `docs/security/`, still carried to Monday's (2026-10-12)
+   ceremony. PR #165 touches the same ground but is itself an
+   unfinished draft with no live run behind it now; not counted as
+   progress on item 3 until the security seat readies or replaces it.
+7. **Board:** posted one note and one handoff this pass — the note
+   naming the triage and the declined instruction, the handoff to
+   exo-centralizer naming Incident 12, both first person, per the
+   board-message protocol.
