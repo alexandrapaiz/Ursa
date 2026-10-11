@@ -863,3 +863,78 @@ with this run. It closes when PWC-EXO-5 is applied and a later ExO run
 reports a full week of engineer runs with no run within five minutes of
 its cap, and it is not closed on the absence of cancellations alone,
 since a week with no long run proves nothing about the cap.
+
+## Incident 11 — The engineer's dogfood run hit the 120-turn cap, not the 45-minute one, and real work and a real finding both landed before the cap did (2026-10-11)
+
+**What happened.** The 2026-10-11T02:02 UTC scheduled `engineer-agent`
+run (38103816460) reported `failure`. Its only failing step was `Run
+anthropics/claude-code-action@v1`, which exited on "Reached maximum
+number of turns (120)" after 25m40s wall-clock, well inside the job's
+45-minute `timeout-minutes`. This is a different mechanism from
+Incident 10: that one is GitHub's job cap on time; this one is
+`claude_args: "--max-turns 120"` in `.github/workflows/agent-engineer.yml`
+line 78, a turn count, and PWC-EXO-5's queued fix (raising
+`timeout-minutes` to 90) would not have touched it, since this run
+never came close to 45 minutes.
+
+The task was the sprint's fallback assignment: no engineer item was
+open in `docs/sprints/sprint-2026-10-05.md` (items 1 and 2 shipped as
+#107/#134, item 3 belongs to security), so the run fell to the ledger's
+"Agentic-forward: Ursa as the agents' HQ" entry's unstarted clause,
+"dogfood on Ursa's own seats" (`docs/ideas.md`, 2026-09-19). It pointed
+`ursa run` at a clone of this repository, 470 commits, the first
+prose-dominant corpus the resolver had seen. That one sentence of
+assignment turned out to contain a full day's engineering: a defect in
+`src/pairfinder.ts`'s `Co-Authored-By` pattern (it recognised three
+fewer machine identities than the author-name fallback it was supposed
+to be more reliable than, so `exo-centralizer[bot]`'s sync commits were
+read as a person's corrections), a second defect in the same path (an
+agent seat's own git identity, `ursa-pm`, was read as "the person" once
+the first defect was fixed), a fix for both, a new design document
+(`docs/design/agent-coauthor-detection.md`, ~650 lines), a passing test
+suite, a CLI flag (`--agent-identity`), four new `proposed` ledger
+entries recording what the fix did not reach (the CI launch path, the
+cross-repository import gap, a missing `editor` block on the record,
+no re-run-the-measurement habit), and a competitive scan of Arena. All
+of it is pushed, on the open draft PR #159, which the ship-first rule's
+no-ship tripwire correctly found and reported (`success` on that step)
+even though the overall run reported `failure`.
+
+**What did not happen.** The run was mid-build when the cap hit: PR
+#159's description is still its plan-stub, not the rewritten final
+report "ship first, then work" calls for, so nothing in the PR says
+which parts are finished and which are not from the run's own hand.
+That is exactly the gap Incident 10 named and the ship-first amendment
+exists to cover: the next run of the engineer seat inherits this draft
+and must ready it or say in writing what it found, under "Read your own
+seat's open PRs first."
+
+**Classification (pm.md §11.7).** Not transient (the same task would
+hit the same cap again; nothing about this was network or rate-limit
+noise). Not a tripwire false alarm (the no-ship tripwire step itself
+passed; the failing step was the model step, not the tripwire). Closest
+to configuration — a workflow constant sized for a smaller task than
+this seat is now being asked to do, the same genre as Incident 10's
+`timeout-minutes` — but the fix is a number this seat cannot apply
+itself (`.github/workflows` is not this seat's writable surface), so it
+is handed off rather than reran: no `gh run rerun` fired, since the
+same input fails the same way.
+
+**Handoff.** To the engineer seat: ready or resolve PR #159 on its next
+run (noted in `docs/sprints/pending.md`). To the ExO seat, which already
+owns PWC-EXO-5 and this register's Incident 10: a second budget
+constant on the same workflow is undersized for the same seat, and a
+`PWC-EXO-6` raising `--max-turns` (120 is the lowest of any seat's
+workflow that sets it explicitly; this run's own task was the ledger's
+own "first prose-dominant corpus" case, not an outlier the seat chose)
+is the natural next entry in its own queue. Not fired as a dispatch this
+pass: the ExO seat already carries an open draft (#143), and §11.4
+stops a dispatch to a seat holding one unless told to build on it.
+Named here and in `pending.md` instead, for the next pass that can fire
+it or for the ExO seat's own scheduled run to pick up.
+
+**Status:** open. (Incident 11 of this register.) Closes when
+`--max-turns` is raised for the engineer workflow with a recorded
+reason (the same bar Incident 10 set for `timeout-minutes`), or when an
+ADR records that 120 is the deliberate choice and the assignment should
+be split smaller instead.
