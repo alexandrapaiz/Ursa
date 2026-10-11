@@ -4927,3 +4927,46 @@ of them.
   per new option, which is exactly the line that was missing today.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-11 (second run) — The artifact standard's demand for real payloads has now produced a private string twice
+- Trigger: reviewing the inherited design document before readying it.
+  `docs/design/agent-coauthor-detection.md` §3's identity table was
+  built by running `git log --pretty=format:'%an%x09%ae' | sort | uniq
+  -c` over this repository, which is the right way to build it, and it
+  inlined all four of the owner's author emails including a personal
+  Gmail address and an address at her employer. Checked against `main`:
+  no committed file in this repository has ever contained either
+  string, so that document would have been the first. Redacted in this
+  run's PR (#163) with the reasoning kept in place rather than deleted.
+  What makes this worth an entry rather than a fix-and-forget is that it
+  is the second instance of one mechanism: the engineering-artifact
+  standard's element 3 requires a real on-disk payload, a seat obeys it
+  literally, and the real payload contains a private identity. Ursa
+  incident 4 was the first, one day after incident 2 purged the same
+  class of string from the history, and it is why the rider exists. The
+  rider was in the charter this run read, and the run that wrote the
+  table read it too.
+- What: give the rider a check instead of only a paragraph. A deny-list
+  scan over the files a PR adds or modifies, run by the seat itself
+  before it readies: the owner's known private identities, any
+  `/Users/<name>` or `/home/<name>` path, and anything matching a
+  session UUID, each in a single pattern file. The point is not that a
+  seat cannot be trusted to remember; it is that the three things the
+  rider names are exactly the strings a seat reproduces by correctly
+  following element 3, so the moment of highest compliance is the moment
+  of highest risk, and a paragraph cannot fire at that moment. The
+  pattern file carries no secrets: the owner's own public git identities
+  are in every commit's metadata already, and the private ones belong in
+  `alexandrapaiz/ursa-private` with the public pattern file matching on
+  shape (`@gmail.com` next to a name token, `/Users/`, a bare UUID)
+  rather than on the literal values.
+- First step: `ursa-major/tools/redaction-scan.ts` taking a list of
+  paths and exiting non-zero with the file, line and matched shape, plus
+  the three shape patterns and a test fixture per pattern. Wiring it
+  into a seat's run is the next unit and needs a decision this entry
+  does not make: whether it is advisory (printed, seat decides) or a
+  gate (non-zero blocks readying), which is the security seat's call
+  under `docs/security/redaction-standard.md`, the sprint item that
+  gates O2 KR2.2 and is still unbuilt.
+- Cost: $0
+- Status: proposed

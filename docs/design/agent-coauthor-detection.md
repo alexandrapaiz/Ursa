@@ -213,7 +213,7 @@ The identities in this repository's history, by commit count:
 | Author name | Author email | Commits | Matched any pattern? |
 |---|---|---|---|
 | `claude[bot]` | `41898282+claude[bot]@users.noreply.github.com` | 189 | yes, by name and trailer |
-| `alexandrapaiz` | `alexandrapaizdelgado@gmail.com` | 76 | no — the owner, correctly |
+| `alexandrapaiz` | `<owner-personal>@gmail.com` (redacted, see note) | 76 | no — the owner, correctly |
 | `alexandrapaiz` | `111912770+alexandrapaiz@users.noreply.github.com` | 48 | no — the owner, correctly |
 | `claude[bot]` | `noreply@anthropic.com` | 31 | yes |
 | `ursa-pm` | `ursa-pm@agents.epito.me` | 28 | **no — an agent seat, read as the person** |
@@ -224,7 +224,7 @@ The identities in this repository's history, by commit count:
 | `ursa-research`, `ursa-okr`, `ursa-frontend`, `ursa-market`, `ursa-finance`, `exo-centralizer` | `<seat>@agents.epito.me` | 22 | **no** |
 | `claude[bot]` | `claude[bot]@users.noreply.github.com` | 7 | yes |
 | `exo-centralizer[bot]` | `noreply@anthropic.com` | 3 | yes, by name — but NOT by the pre-change trailer pattern, which is §1 |
-| `alexandrapaiz` | `alexandra.paiz@grupopdc.com` | 2 | no — the owner, correctly |
+| `alexandrapaiz` | `<owner>@<employer>.com` (redacted, see note) | 2 | no — the owner, correctly |
 
 Eighteen distinct identities, 470 commits, complete. The bolded rows sum
 to 99, which is the number pass 3 in §8 reclassifies.
@@ -238,6 +238,28 @@ it is knows these names at a glance. The library cannot know them at
 all.
 
 So the library stops guessing and does two things instead.
+
+**Redaction note on the table above (added by the second 2026-10-11
+run).** Two of the owner's four identities are her private contact
+addresses, one personal and one at her employer. They are replaced with
+labelled placeholders of the same shape. Everything the table argues is
+unaffected: what matters is that `alexandrapaiz` appears under four
+distinct emails, that all four correctly match no agent pattern, and
+that the agent seats below her do not. The third identity is left whole
+because `111912770+alexandrapaiz@users.noreply.github.com` is the
+address GitHub issues for the express purpose of being the public one.
+
+This is the engineering-artifact standard's redaction rider
+(`prompts/engineer-agent.md`), which exists because element 3's demand
+for real payloads put a private path into
+`docs/design/product-plan.md` one day after Ursa incident 2 purged that
+same class of string. The rider's rule for a payload that cannot be
+shown without a private identity is that it is cited rather than
+inlined, so: the unredacted table is reproducible in one command by
+anyone with a clone, §7 command 5, and belongs nowhere in this
+repository. Note that it is reproducible *from git metadata*, which no
+redaction here can change; what the rider prevents is a searchable copy
+in a document body, which is a different and avoidable exposure.
 
 ### 3.1 It says who it credited
 
