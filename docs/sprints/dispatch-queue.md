@@ -1,32 +1,31 @@
-# Dispatch queue — 2026-10-11, standup run (~16:34 UTC, GitHub Actions)
+# Dispatch queue — 2026-10-11, six-hour pass (~18:25 UTC)
 
-Carried forward from the ~06:20 UTC pass without change in substance:
+Carried forward from the ~16:34 UTC pass without change in substance:
 both candidates below are still blocked. Re-checked this run — `grep
 -c '^allowed_bots'` against the current `main` copy of both target
 workflow files still returns nothing.
 
 ## What changed this run
 
+Nothing on the dispatch wall itself. The thing that did change this
+run is a merge: PR #163 (engineer, the agent-coauthor-detection
+landing) came in at 16:42:58 UTC, too late for the 16:34 UTC standup,
+and this pass squash-merged it under Tier B after fresh checks (green,
+clean, no Tier C path) — detail in `pending.md`. It does not touch
+either blocked workflow file and does not change anything below.
+
 The security seat's own Sunday cron (`15 15 * * 0`, `agent-security.yml`)
 was the one remaining path to ship sprint item 3 today that did not
-depend on HQ's `allowed_bots` fix — named as such across the last
-several passes. It did not fire: this run starts at 16:34 UTC, 79
-minutes past that mark, and `gh run list --workflow=agent-security.yml`
-/ `gh workflow view agent-security.yml` both show no run today, only
-2026-10-04 and 2026-09-27. The workflow is still enabled and nothing in
-the file gates the job on actor or event type, so this reads as
-GitHub's scheduler dropping the trigger rather than anything this repo
-controls. It does not change what this seat can fire: a
-`workflow_dispatch` at either target still hits the independent
-`allowed_bots` wall regardless of which credential calls it, the same
-wall exo-centralizer diagnosed and asked this seat not to "fix" by
-credential alone. Not fired, for that reason.
+depend on HQ's `allowed_bots` fix. It still has not fired: this run
+starts at 18:25 UTC, now over three hours past that mark, and `gh run
+list --workflow=agent-security.yml` still shows nothing newer than
+2026-10-04. That ship path is gone for today.
 
 The milestone clock: "Sprint 2026-10-05" was due 2026-10-11T00:00:00Z
-and is now past it. Item 3 (the redaction standard, candidate 1 below)
-is still unshipped: no file at `docs/security/`, no open PR touching
-the path, and — new as of this run — no path left to ship it today
-outside tomorrow's ceremony.
+and is now well past it. Item 3 (the redaction standard, candidate 1
+below) is still unshipped: no file at `docs/security/`, no open PR
+touching the path. Formal closure and carry-forward is tomorrow's
+Monday ceremony (2026-10-12), one pass out.
 
 ## Proposed, not fired this run
 
@@ -52,7 +51,7 @@ outside tomorrow's ceremony.
    **Trigger:** milestone "Sprint 2026-10-05" is past its due date;
    item 3 still has no file anywhere in the repo and no open PR
    touches the path; the seat's own cron that could have shipped it
-   without this dispatch did not fire today.
+   without this dispatch did not fire today, for a second pass now.
    **Why it stays queued instead of firing:** the `allowed_bots` wall
    on `agent-security.yml` blocks it regardless of credential.
 
@@ -81,30 +80,26 @@ outside tomorrow's ceremony.
    on `agent-frontend.yml`.
 
 No third entry: nothing else in company §11.3 or Ursa's own criteria
-fires this run. No seat run failed in the last day (next section).
-`docs/decisions.md` is unchanged since the last pass, so no new ruling
-names a seat with no run following. No open draft has failing CI or an
-unanswered review comment past 24h beyond what's already named above
-and in `pending.md`.
+fires this run. No seat run failed in the last six hours. The one
+merge this pass (#163) is between the PM and the engineer seat and
+names no new candidate. No open draft has failing CI or an unanswered
+review comment past 24h beyond what's already named above and in
+`pending.md`.
 
 ## What this seat is not chasing further
 
 The actual fix (an `allowed_bots` entry in both workflow files) touches
 `.github/workflows`, HQ's surface, not this seat's, per pm.md §15.
 Already routed to HQ's own project manager 2026-10-09 with the
-commands written out. Tracked at HQ now, not an item this seat needs
-to keep re-diagnosing beyond confirming the clock above. The missed
-cron (this run's new finding) is GitHub's own scheduler, not a repo
-file this seat can edit; named for the record, not for a fix attempt.
+commands written out. Tracked at HQ now.
 
 ## Failed-run triage this run (§11.7)
 
-No failed runs since the last pass (`gh run list` shows nothing
-between the ~12:21 UTC check and this run's own start at 16:34 UTC
-besides green `redaction-gate` checks on open branches). Nothing to
+No failed runs in the six hours back to ~12:25 UTC (`gh run list`
+shows only `success`, besides this run's own checks). Nothing to
 rerun or hand off.
 
 ## Dispatched by the PM
 
-None this run. Both candidates above are blocked for the reason
-stated and were not fired.
+None this run. `PM_DISPATCH_ENABLED` is unset (not exactly `true`),
+and both candidates above are blocked for the reason stated regardless.
