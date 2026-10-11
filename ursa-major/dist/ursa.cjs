@@ -3818,7 +3818,10 @@ async function runCi(opts) {
     log("ursa ci: no declared acceptance to read; silence stays undeclared");
   }
   const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
-  const pairs = findCommitPairs(opts.projectPath, { range: window.range });
+  const pairs = findCommitPairs(opts.projectPath, {
+    range: window.range,
+    agentIdentities: opts.agentIdentities
+  });
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
   const recordPaths = [];
@@ -4391,7 +4394,7 @@ async function main(argv) {
     console.error("       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]");
     console.error("       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]");
     console.error("       ursa forget <projectPath> --record <recordId>");
-    console.error("       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--no-post]");
+    console.error("       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]");
     return 2;
   }
   if (cmd === "ci") {
@@ -4419,6 +4422,11 @@ async function main(argv) {
       apiBaseUrl: process.env.GITHUB_API_URL,
       runUrl: values["run-url"] ?? null,
       minChars: values["min-chars"] ? Number(values["min-chars"]) : void 0,
+      // The same flag the local launch above reads. Both launches must
+      // answer "who was the person" from the same declaration or the
+      // one-resolver-two-launches claim is false for any repository
+      // whose agents git cannot recognise by name (src/launch.ts).
+      agentIdentities: values["agent-identity"],
       post: values["no-post"] !== true
     });
     return result.exitCode;
