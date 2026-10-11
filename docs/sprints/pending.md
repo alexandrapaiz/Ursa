@@ -369,6 +369,11 @@ UTC. This pass continues from the resulting `main`.
    self-merges, the clean inbox, the zero new failures, and the
    milestone still carrying, per the board-message protocol.
 
+## This run (2026-10-11, ~18:25 UTC, six-hour pass)
+
+Draft opened before the work, per the charter's "Ship first, then
+work." Filled in as the pass finishes.
+
 ## This run (2026-10-11, ~16:34 UTC, standup, scheduled GitHub Actions `pm-agent` run)
 
 **First act: resolved this seat's own open stack rather than opening a
