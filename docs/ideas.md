@@ -4602,3 +4602,371 @@ survey.
   the fair axis is narrow: how a product that sells a verdict lets a buyer
   check the verdict. On the first half of that axis, publishing the
   grader's own repair history, Vals is ahead of Ursa today.
+
+### 2026-10-11 — The record names which model generated a span and never names who kept it
+- Trigger: today's dogfood run. `ursa run` over a clone of this
+  repository produced four records whose "the person kept this" verdict
+  rested on commits authored `ursa-pm <ursa-pm@agents.epito.me>`, an
+  agent seat. The run summary now says so out loud
+  (`PairFinderDiagnostics.editorIdentities`,
+  `docs/design/agent-coauthor-detection.md` §3.1), but the record on
+  disk does not. `OutcomeRecord` carries `agentMarker` for the
+  generation side, copied into the generation's `model` field, and
+  carries nothing at all for the edit side. So a lab auditing a
+  purchased record can check which model wrote a span and cannot check
+  whether the party who kept it was a human being. That is the one
+  question the span classes depend on: `survived_verbatim` means "a
+  model wrote this and the person kept it", and "the person" is an
+  inference the record does not expose.
+- What: an `editor` block on the record, filled from the pair the
+  episode came from. Three fields, all already in memory at write time:
+  the author name and email of `finalSha`, and the basis on which that
+  commit was classified as the person's, which is one of four values —
+  `no-agent-marker` (it matched nothing, the inference-by-absence case
+  and the weakest), `declared-person` (the owner named this identity as
+  their own), `github-login` (the pull-request path, which has a login
+  and no email), or `review-closure` (the PR path's merge-as-accepted
+  closure, where the "editor" is whoever merged). Carry the run's own
+  `--agent-identity` declarations in the same block, because a record
+  resolved with the fleet declared and one resolved without it are
+  different claims from identical inputs, and nothing on disk currently
+  distinguishes them. Then add a sixteenth bound to
+  `src/invariants.ts`: a record whose editor basis is
+  `no-agent-marker` may not report a `survived_*` class without the
+  editor identity being present, so the weakest basis can never be
+  silent.
+  The same entry carries a launch-parity gap found while shipping this,
+  and it is the reason the first step below stops where it does. The
+  local launch takes `--agent-identity` and the CI launch cannot: `ursa
+  ci` calls `findCommitPairs(projectPath, { range })` in
+  `src/ci/run.ts` line 148 with no identity option, and `action.yml`
+  has no input that would carry one. So a repository whose seats are
+  declared locally has them undeclared on every merge, and the two
+  launches answer "who was the person" differently from the same
+  history, which is exactly the class of drift
+  `docs/design/launch-parity.md` and `src/launch.ts` exist to prevent.
+  The default pattern is shared, so the trailer half of today's fix
+  does reach the CI launch; only the declaration does not.
+- First step: add the `editor` block to `OutcomeRecord` in
+  `src/types.ts`, fill it in `src/resolve-episode.ts` from the
+  `Episode` (which needs `finalAuthor`/`finalAuthorEmail` copied across
+  from `CommitPair` in `src/episodes.ts`, two fields), and assert it in
+  `src/resolver.test.ts` plus one `fixtures/violations/` counterexample
+  for the new bound, per `docs/design/violation-fixtures.md`. Then, as
+  its own unit: an `agent-identity` input on `action.yml` threaded to
+  `ursa ci`, and a case in `src/launch-parity.test.ts` that declares an
+  identity and asserts both launches drop the same record.
+- Built so far: the second half of that first step, by the 2026-10-11
+  second run (PR #163). The `agent-identity` input exists on
+  `action.yml` and is threaded through `CiOptions.agentIdentities` to
+  the pair walk, and `src/launch-parity.test.ts` holds the case that
+  declares an identity and asserts both launches drop the same record,
+  plus the diagnostic behind it. Specified in
+  `docs/design/agent-coauthor-detection.md` §12 and
+  `docs/design/launch-parity.md` §8. Still unbuilt, and the reason the
+  status below is unchanged: the `editor` block on `OutcomeRecord`
+  itself, its four-value basis field, carrying the run's own
+  declarations onto the record, and the sixteenth bound in
+  `src/invariants.ts`. The launch-parity half was a defect in a change
+  already merged into this branch; the record-shape half is a new field
+  on the artifact a lab buys and wants the owner's verdict first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 — A file synced from another repository is read as text a model composed
+- Trigger: today's dogfood run, and specifically the largest row of a
+  table written five days ago. `docs/standards/lessons.md` arrived in
+  this repository by a sync commit copying it from
+  `alexandrapaiz/alexandra-systems` at `775ce36`. The resolver read all
+  63,362 characters of it as model output and 60,616 of them as text
+  the person kept. `src/vendored.ts` exists to refuse exactly this and
+  could not: it detects an import by finding its source blob somewhere
+  in this repository's own object store, and this content never existed
+  here before the sync introduced it. An import from outside git's
+  reach is invisible to a check that works by looking inside it. Today's
+  trailer fix removes this particular claim by a different route (the
+  next sync is now read as a generation, so no pair forms), which means
+  the gap itself is untouched and will produce the same false claim the
+  first time a sync is followed by a genuine human edit.
+- What: read the import declaration the sync commit already writes.
+  Every sync commit in this repository names its upstream in its own
+  subject line — "Lessons sync 2026-09-28: HQ standards/lessons.md @
+  775ce36", "Re-vendor docs/standards/pm.md from HQ main @ 683c7dd" —
+  because the seat that made it knew it was importing. That is a
+  declaration, not a guess, and it is the same shape as the
+  `--agent-identity` answer shipped today: where the library cannot
+  know, let the party who does say so. Support a `Ursa-Imported-Path:
+  <path>` commit trailer, which `src/vendored.ts` reads as
+  authoritative for that commit's own paths and writes into the
+  record's `exclusions` with `relation: 'declared-import'` and the
+  commit that declared it. Do NOT parse subject lines: a regex over
+  prose would be the central-assessment overreach the fourth principle
+  names, and it would silently reclassify any commit whose message
+  happens to mention a sync.
+- First step: add the trailer to the `relation` union in
+  `src/vendored.ts` and read it in `vendoredPaths()`, which already
+  receives the `CommitInfo[]` it needs; test it in
+  `src/vendored.test.ts` with a fixture commit carrying the trailer and
+  no matching blob anywhere in the fixture repository, which is the
+  case the existing tests cannot construct.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 — Nothing re-runs the measurement a fix was aimed at, so a fix that half worked reads as a fix
+- Trigger: today's run, read against `docs/design/vendored-paths.md`
+  §1. That document's table has five rows and was written 2026-10-06 to
+  justify the import check. The fix shipped that day removed row two
+  (`docs/market/landscape.md`, 21,656 characters). Row one,
+  `docs/standards/lessons.md` at 60,616 characters, was the largest in
+  the table and stood untouched for five more days, until this run
+  resolved the same repository again and found it carrying 84.7% of the
+  headline survival figure. Nothing was wrong with the fix or the
+  document. What is missing is that the measurement which motivated the
+  fix was never repeated after it, so "the table that justified the
+  change" and "the state of the world after the change" were never
+  compared. Eleven design documents under `docs/design/` lead with a
+  measured number in exactly this shape.
+- What: a committed measurement baseline and one command that
+  re-derives it. `ursa-major/fixtures/baseline/ursa-self.json` holds
+  the `Totals` object `tools/measure-coauthor-detection.ts` already
+  emits, for a named commit of this repository, plus the per-file
+  character breakdown that `docs/design/vendored-paths.md` §1's table
+  is. A script re-clones that commit, re-resolves it, and diffs the two,
+  printing every figure that moved and by how much. Run on demand, not
+  in CI: cloning 470 commits and resolving them is minutes of work and
+  the build-and-test gate is already specified but not installed
+  (`docs/design/build-and-test.workflow.yml`). The point is not
+  automation, it is that the number in a design document stops being a
+  claim nobody can re-check and becomes a file with a command next to
+  it.
+- First step: `npm run baseline:write` and `npm run baseline:check` in
+  `ursa-major/package.json`, over the three-pass `Totals` this run's
+  tool already produces, pinned at `fe0da2a`.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-11 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 2, Arena (the product
+renamed from LMArena in January 2026). Picked over the category's two
+other entries because the craft question it answers is the one this
+run spent the day on: how a system tells a reader how much of its
+headline number to believe. Read today, 2026-10-11: Arena's
+`how-it-works` page, Arena's `arena-rank` announcement, and LMSYS's
+2024-08-28 style-control post.
+
+**Worth stealing: the confounder goes into the model, and the engine
+that fits it is a package anyone can install.** Arena's leaderboard
+score is not a raw win rate. Style is treated as an independent
+variable in the Bradley-Terry regression, so each model's rating is
+estimated net of it, and the first version of that control carried four
+features: answer token length, markdown headers, markdown bold
+elements, and markdown lists. The fitter is published as `arena-rank`
+on PyPI, Apache 2.0, at `lmarena/arena-rank`, with
+`compute_ratings_and_cis(dataset, significance_level=0.05)` returning
+95% confidence intervals computed in closed form rather than by
+bootstrap, a reweighting step so a model with fewer battles is not
+flattered by its own small sample, and a quickstart that loads the
+public `lmarena-ai/arena-human-preference-140k` dataset. A buyer can
+recompute the published number instead of trusting it.
+
+Ursa's outcome record has confounders of precisely that kind, and today
+measured the biggest one: who authored the edit. It moved the headline
+survival figure on this repository from 71,566 characters to 10,950 to
+zero, a factor of 6.5 and then to nothing, from one bit per commit. The
+record reports a single point estimate per class (`pct`,
+`pctOfFinal`), with no confounder named, no interval, and no weighting
+statement anywhere — `renderRunSummary` sums characters across records
+of 590 and 60,616 characters as though they carried equal evidential
+weight. Two transfers, both concrete. First, the identity confounder
+belongs in the record where a buyer can filter on it, which is the
+first ledger entry above. Second, Arena's reweighting is the answer to
+a problem Ursa has and has not named: a record built from a 590-
+character episode is not the same evidence as one built from 60,616,
+and the run summary currently adds them.
+
+**What Ursa does better: the correction, and what is being corrected.**
+Style control is a statistical repair applied after the fact to a
+signal Arena cannot change, because its label is a vote cast at the
+moment of asking. A voter who prefers the longer, better-formatted
+answer has stated a preference about how an answer looks, which is the
+failure mode `docs/vision.md` principle 3 names, and no regression
+recovers what the voter would have done with the text a week later.
+Ursa's label is not a vote at all: the work either used the text or it
+did not, so there is no "looks better" to subtract out. And where
+Arena's repair reweights a data point it keeps, today's repair deleted
+one. A 94.9% survival figure resting on a file nobody read is not a
+confounded measurement to be corrected, it is a claim that is false,
+and the honest move is to stop making it rather than to discount it.
+Arena cannot make that move, because its vote is all it has.
+
+**One thing worth watching rather than stealing.** Arena's own
+`how-it-works` page carries no confidence interval, no vote count per
+model, no tie handling and no statement of what a score cannot tell
+you. All of that lives in the package and the blog. The methodology is
+genuinely open and the product surface does not show it, which is the
+same split Ursa is one decision away from: `docs/design/` now holds
+thirty-three documents and `ursa-minor/app/page.tsx` still names none
+of them.
+
+### 2026-10-11 (second run) — A declaration that matches everything reads as the honest answer
+- Trigger: probing `--agent-identity`, the flag the same day's earlier
+  run shipped, against a clone of this repository. The flag takes a
+  substring, so a short one matches every identity in the history:
+  `--agent-identity '@'` classified all 481 commits as agents' and
+  wrote zero records, and `--agent-identity 'a'` did the same. Measured
+  directly (`findCommitPairsWithDiagnostics`, `generatedByDeclaredIdentity`
+  481 of 481, `pairs` 0). The run exits 0 and prints "If every commit
+  here is an agent's, that is an answer rather than a failure", which on
+  this repository is the *correct* output (`docs/design/agent-coauthor-detection.md`
+  §3.3). So the failure mode and the honest answer are the same three
+  lines, and a typo in a workflow's `agent-identity:` block would
+  silently stop every record a repository produces while reporting
+  success. A single space is the quietest version: it matched 21
+  commits, because it matches any author name with two words in it.
+- What: make a declaration state its own reach, and refuse the
+  degenerate case. Three parts, smallest first. (1) Trim each
+  declaration and drop the ones that are empty after trimming, in
+  `src/pairfinder.ts` where `filter(Boolean)` already drops `''` but
+  keeps `'   '`; the Action's shell already skips blank lines
+  (`action.yml`, §12.3 of the design document) and the library should
+  not depend on its caller for that, which is the same parity argument
+  this run's own fix rests on. (2) Report the reach rather than only the
+  count: `PairFinderDiagnostics` gains `declaredIdentityMatches:
+  { declaration: string; commits: number }[]`, one row per declaration,
+  so a declaration that matched 481 of 481 commits is visible next to
+  one that matched 81. (3) Refuse the degenerate case loudly: when a
+  single declaration matches every commit in the history, exit non-zero
+  with the declaration quoted, by the same reasoning that gives the
+  author-name fallback its all-match suppression — a pattern that
+  describes the whole history has described the environment and not an
+  agent. Unlike that suppression this one must not proceed silently,
+  because the user typed it.
+- First step: part (1) and part (2), which are both in
+  `src/pairfinder.ts` and testable in `src/pairing-window.test.ts`
+  without touching either launch: a case declaring `'   '` and asserting
+  zero declared matches, and a case declaring two identities of
+  different reach and asserting both rows. Part (3) is a behaviour
+  change with an exit code and belongs in its own unit, with the
+  threshold question ("every commit" or "every commit and more than
+  one declaration") answered there rather than guessed here.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — A measured number names a commit, and the walk reads every ref
+- Trigger: reproducing this run's own inherited measurement. The design
+  document states its figures against "a clone of this repository at
+  fe0da2a (470 commits)", and 470 is what `git rev-list --count HEAD`
+  returns there. Resolving a clone checked out at that commit reported
+  `Scanned 481 commits`. Both numbers are right. `listCommits` passes
+  `--all` deliberately, documented in `src/pairfinder.ts` line 117,
+  because the user pointed at a whole repository rather than a branch;
+  so the walk saw the eleven commits that reached `main` after fe0da2a
+  and were present in the clone as a different ref. The consequence is
+  that a documented measurement is not reproducible from the commit it
+  names: it depends on which refs the clone happened to carry, which
+  depends on when it was cloned. Eleven design documents under
+  `docs/design/` lead with a measured number taken this way.
+- What: pin and report the ref set, not just the commit. Two halves.
+  First, `PairFinderDiagnostics` carries the refs the walk actually
+  read, from `git for-each-ref --format='%(refname) %(objectname)'`
+  filtered to those `git log --all` would reach, so a run states its own
+  input instead of leaving it to the clone's history. Second, a
+  documentation convention with teeth: any design document stating a
+  figure measured over a repository names the clone command that
+  produces that ref set, which for a single-commit claim is
+  `git clone --single-branch --branch <ref>` plus
+  `git checkout <sha>`, and for `--all` is the clone URL plus the date.
+  This is the same shape as the already-proposed baseline entry above
+  ("Nothing re-runs the measurement a fix was aimed at") and is
+  deliberately not folded into it: that entry re-runs a measurement, and
+  this one makes the measurement's input identifiable, which has to be
+  true first or the re-run compares two different corpora and reports
+  the difference as a regression.
+- First step: the diagnostics half, in `src/pairfinder.ts`, with a test
+  in `src/pairing-window.test.ts` that builds a fixture with a second
+  branch, asserts the walk reads it, and asserts the ref list names it.
+  That makes the discrepancy legible in any future run's own output,
+  which is what would have caught this one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — The parity test is the only thing that catches drift and nothing requires it to run
+- Trigger: today's fourth launch divergence
+  (`docs/design/launch-parity.md` §8). `--agent-identity` shipped on
+  `ursa run` and not on `ursa ci`, so the two launches answered "who
+  was the person" differently from byte-identical history. It was found
+  by reading the ledger entry that named it as a known slice, not by any
+  check. What makes it worth an entry rather than a shrug is why the
+  suite stayed green: the half of the change that could be shared WAS
+  shared, as one constant (`MACHINE_IDENTITY`), so the change was
+  symmetric by construction everywhere except one unforwarded field on
+  `CiOptions`. A parity gap can therefore be a single missing line
+  inside a change whose own author believed it was symmetric, which is
+  the hardest version to catch by reading.
+- What: a structural assertion that the two launches reach the same
+  option surface, so the next unforwarded field fails a test rather
+  than waiting for a reader. `PairFinderOptions` is the right surface
+  because it is where both launches' decisions about what counts as a
+  generation live. The check is that the set of its keys each launch can
+  set is equal: for `ursa run` the `parseArgs` option names in
+  `src/bin/ursa.ts` mapped to the fields they fill, and for `ursa ci`
+  the fields `src/ci/run.ts` forwards, with any deliberate exception
+  listed in the test with its reason, in the allowlist idiom
+  `src/launch-parity.test.ts` already uses for the fields a CI record
+  may differ on. Written that way round, adding an option to one launch
+  and not the other fails immediately, and a legitimate asymmetry costs
+  one line and a sentence.
+- First step: a `describe` block in `src/launch-parity.test.ts` holding
+  two literal arrays, one per launch, each naming the
+  `PairFinderOptions` keys that launch forwards today, asserted equal
+  after the allowlist is subtracted. Literal arrays rather than
+  reflection over the source text, because a test that parses
+  TypeScript to discover its own expectations fails for reasons that
+  have nothing to do with the claim; the maintenance cost is one line
+  per new option, which is exactly the line that was missing today.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — The artifact standard's demand for real payloads has now produced a private string twice
+- Trigger: reviewing the inherited design document before readying it.
+  `docs/design/agent-coauthor-detection.md` §3's identity table was
+  built by running `git log --pretty=format:'%an%x09%ae' | sort | uniq
+  -c` over this repository, which is the right way to build it, and it
+  inlined all four of the owner's author emails including a personal
+  Gmail address and an address at her employer. Checked against `main`:
+  no committed file in this repository has ever contained either
+  string, so that document would have been the first. Redacted in this
+  run's PR (#163) with the reasoning kept in place rather than deleted.
+  What makes this worth an entry rather than a fix-and-forget is that it
+  is the second instance of one mechanism: the engineering-artifact
+  standard's element 3 requires a real on-disk payload, a seat obeys it
+  literally, and the real payload contains a private identity. Ursa
+  incident 4 was the first, one day after incident 2 purged the same
+  class of string from the history, and it is why the rider exists. The
+  rider was in the charter this run read, and the run that wrote the
+  table read it too.
+- What: give the rider a check instead of only a paragraph. A deny-list
+  scan over the files a PR adds or modifies, run by the seat itself
+  before it readies: the owner's known private identities, any
+  `/Users/<name>` or `/home/<name>` path, and anything matching a
+  session UUID, each in a single pattern file. The point is not that a
+  seat cannot be trusted to remember; it is that the three things the
+  rider names are exactly the strings a seat reproduces by correctly
+  following element 3, so the moment of highest compliance is the moment
+  of highest risk, and a paragraph cannot fire at that moment. The
+  pattern file carries no secrets: the owner's own public git identities
+  are in every commit's metadata already, and the private ones belong in
+  `alexandrapaiz/ursa-private` with the public pattern file matching on
+  shape (`@gmail.com` next to a name token, `/Users/`, a bare UUID)
+  rather than on the literal values.
+- First step: `ursa-major/tools/redaction-scan.ts` taking a list of
+  paths and exiting non-zero with the file, line and matched shape, plus
+  the three shape patterns and a test fixture per pattern. Wiring it
+  into a seat's run is the next unit and needs a decision this entry
+  does not make: whether it is advisory (printed, seat decides) or a
+  gate (non-zero blocks readying), which is the security seat's call
+  under `docs/security/redaction-standard.md`, the sprint item that
+  gates O2 KR2.2 and is still unbuilt.
+- Cost: $0
+- Status: proposed

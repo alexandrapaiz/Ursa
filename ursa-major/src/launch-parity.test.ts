@@ -30,6 +30,13 @@
 //   1. a refusal-only record dropped by a generation-side size floor
 //   2. no record self-check at all on the CI path
 //   3. an erased episode rebuilt on the CI path
+//
+// A fourth was found on 2026-10-11, by this file, on the day the option
+// it concerns was added: `--agent-identity` reached the local launch and
+// not the CI one, so the two launches disagreed about who the person was
+// on any repository running agent seats of its own. Fixed in
+// `src/ci/run.ts` and `action.yml`, pinned in the last describe block
+// below.
 
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -40,6 +47,7 @@ import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
 import { clearsSizeFloor } from './launch'
+import { findCommitPairsWithDiagnostics } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
 import type { OutcomeRecord } from './types'
@@ -152,7 +160,11 @@ function recordsOnDisk(repo: string): Map<string, OutcomeRecord> {
  * `.ursa/` is removed between the two so neither run reads the other's
  * output.
  */
-async function bothLaunches(repo: string, minChars: number): Promise<{
+async function bothLaunches(
+  repo: string,
+  minChars: number,
+  agentIdentities: string[] = [],
+): Promise<{
   ci: Map<string, OutcomeRecord>
   local: Map<string, OutcomeRecord>
   ciExitCode: number
@@ -173,6 +185,7 @@ async function bothLaunches(repo: string, minChars: number): Promise<{
   const ciResult = await runCi({
     projectPath: repo, eventPath, repo: 'o/r', token: '',
     api: silentApi(), env: {}, post: false, minChars, log: () => {},
+    agentIdentities,
   })
   const ci = recordsOnDisk(repo)
   rmSync(join(repo, '.ursa'), { recursive: true, force: true })
@@ -183,7 +196,10 @@ async function bothLaunches(repo: string, minChars: number): Promise<{
   console.error = () => {}
   let localExitCode: number
   try {
-    localExitCode = await main(['run', repo, '--min-chars', String(minChars)])
+    localExitCode = await main([
+      'run', repo, '--min-chars', String(minChars),
+      ...agentIdentities.flatMap((i) => ['--agent-identity', i]),
+    ])
   } finally {
     console.log = realLog
     console.error = realError
@@ -193,6 +209,59 @@ async function bothLaunches(repo: string, minChars: number): Promise<{
     ciComment: ciResult.comment ?? '',
   }
 }
+
+describe('both launches read the same declaration of who is an agent', () => {
+  // The fourth drift, found on 2026-10-11 while landing `--agent-identity`
+  // itself (docs/design/agent-coauthor-detection.md). The flag reached
+  // `ursa run` and not `ursa ci`: `src/ci/run.ts` called
+  // `findCommitPairs(projectPath, { range })` with no identity option and
+  // `action.yml` had no input that could carry one. So a repository whose
+  // seats were declared locally had them undeclared on every merge, and
+  // the two launches answered "who was the person" differently from
+  // byte-identical history, which is the one thing `src/launch.ts` exists
+  // to prevent.
+  //
+  // Written as a pair of assertions rather than one, because the
+  // declaration's whole job is to CHANGE the answer: a test that only
+  // checked both launches agree would also pass if the flag were
+  // silently ignored by both.
+  it('without the declaration both launches write the record', async () => {
+    const repo = editedFixture()
+    const { ci, local } = await bothLaunches(repo, 10)
+    expect(ci.size).toBe(1)
+    expect([...ci.keys()]).toEqual([...local.keys()])
+  })
+
+  it('declaring the editor an agent drops the record on BOTH launches, not just the local one', async () => {
+    const repo = editedFixture()
+    // The fixture's "person" is Human Owner <human@example.com>, who
+    // makes the edit the single record rests on. Declaring that identity
+    // turns the edit into a generation, so no pair closes and neither
+    // launch has anything to resolve. Matched on the email here, which
+    // the built-in vocabulary never reads, so the assertion cannot pass
+    // by accident through the author-name fallback.
+    const { ci, local, ciExitCode, localExitCode } = await bothLaunches(
+      repo, 10, ['human@example.com'],
+    )
+    expect(ci.size).toBe(0)
+    expect(local.size).toBe(0)
+    // Zero records is an honest answer and not a failure, on both paths.
+    expect(ciExitCode).toBe(0)
+    expect(localExitCode).toBe(0)
+  })
+
+  it('counts the declared commits as generations on the CI launch, by the same diagnostic', () => {
+    // The projection above proves the record is gone; this proves WHY it
+    // is gone, so a future change that drops the record for some other
+    // reason cannot keep this file green.
+    const repo = editedFixture()
+    const { diagnostics } = findCommitPairsWithDiagnostics(repo, {
+      agentIdentities: ['human@example.com'],
+    })
+    expect(diagnostics.generatedByDeclaredIdentity).toBe(3)
+    expect(diagnostics.editorIdentities).toEqual([])
+  })
+})
 
 describe('one repository resolved through both launches produces the same record', () => {
   it('agrees on every span class, every span extent, and every stats block', async () => {

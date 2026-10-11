@@ -62,6 +62,24 @@ export interface CiOptions {
   runUrl?: string | null
   /** smallest generated-character count worth a record; matches `ursa run` */
   minChars?: number
+  /**
+   * Identities the consumer declares to be agents', the CI launch's half
+   * of `--agent-identity` (`PairFinderOptions.agentIdentities`).
+   *
+   * Here because the local launch had it and this one did not, which is
+   * the fourth entry in the drift list `src/launch.ts` opens with. A
+   * repository whose seats are declared locally had them undeclared on
+   * every merge, so the two launches answered "who was the person"
+   * differently from identical history: the exact failure that module
+   * exists to make impossible. The default pattern is a shared constant
+   * (`MACHINE_IDENTITY` in `src/pairfinder.ts`) and so already reached
+   * both launches; only the declaration did not.
+   *
+   * Carried from `action.yml`'s `agent-identity` input, one substring
+   * per line, so a consumer repository running agent seats of its own
+   * declares them once in the workflow rather than per invocation.
+   */
+  agentIdentities?: string[]
   env?: Record<string, string | undefined>
   /** false writes nothing to GitHub and prints the comment instead */
   post?: boolean
@@ -145,7 +163,10 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR
 
   // 3. Resolve.
-  const pairs = findCommitPairs(opts.projectPath, { range: window.range })
+  const pairs = findCommitPairs(opts.projectPath, {
+    range: window.range,
+    agentIdentities: opts.agentIdentities,
+  })
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
   const recordPaths: string[] = []

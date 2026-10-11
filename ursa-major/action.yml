@@ -51,6 +51,29 @@ inputs:
     description: 'Set to false to print the run comment in the job log instead of posting it. Useful for a first dry run on a repository nobody wants commented on yet.'
     required: false
     default: 'true'
+  agent-identity:
+    description: |
+      Identities in this repository that belong to an agent rather than to a person, one per line.
+      Each line is a substring matched case-insensitively against a commit's author name and its author email.
+
+      Leave it empty unless your repository has agents committing under their own git identity. The
+      resolver already recognises the harness and vendor names it can recognise (claude, codex, cursor,
+      gpt, copilot, github-actions, and GitHub's [bot] suffix) on both the Co-Authored-By trailer and the
+      author name. What it cannot recognise is a seat you named yourself: Ursa's own agents commit as
+      ursa-pm and ursa-engineer at agents.epito.me, and no default shippable to every repository matches
+      those. An identity the pattern has never heard of is promoted to "a human being" in silence, and
+      every survived_* span in every record rests on that one bit, so declaring them is how the party who
+      knows the fleet tells the resolver what it cannot infer.
+
+      Declaring an identity only ever narrows what a record claims: those commits become generations, so
+      they stop being eligible as a person's edit and the records that rested on them are never written.
+
+      Example:
+        agent-identity: |
+          ursa-pm
+          agents.epito.me
+    required: false
+    default: ''
   anthropic-api-key:
     description: 'Optional. With no key the distiller runs in CI mode: records are resolved, no interpretation pass runs, and the tuning delta is an honest zero. Pass a key only if you also install the claude CLI in the job; the Action never installs it for you.'
     required: false
@@ -109,6 +132,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        URSA_AGENT_IDENTITY: ${{ inputs.agent-identity }}
       run: |
         set -euo pipefail
         node --version
@@ -120,6 +144,15 @@ runs:
           --min-chars "${{ inputs.min-chars }}"
         )
         if [ "${{ inputs.post-comment }}" != "true" ]; then args+=(--no-post); fi
+        # One --agent-identity per non-blank line of the input. Read from
+        # the environment rather than interpolated into this script, so a
+        # value carrying a quote or a backtick stays data and never
+        # becomes shell. Blank lines are skipped because a YAML block
+        # scalar written in the natural way ends with one.
+        while IFS= read -r identity; do
+          [ -n "${identity//[[:space:]]/}" ] || continue
+          args+=(--agent-identity "$identity")
+        done <<< "$URSA_AGENT_IDENTITY"
         # One invocation. It writes the five fields to $GITHUB_OUTPUT
         # itself, so the outputs below come from the run that produced
         # them rather than from a second pass over the log.
