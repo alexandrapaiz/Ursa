@@ -2,13 +2,14 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-11, ~06:20 UTC (six-hour pass). Opens by self-
-merging this seat's own #158 and #160 under Tier A (pure
-`docs/sprints/`/`docs/agents/` diffs, base of the stack first) at the
-top of this run rather than leaving them open, then continues from
-current `main`. Older passes' detail (2026-10-11 02:34 UTC and before)
-is not repeated below; it is in `main`'s history of this file and in
-PRs #137/#147/#149/#150/#152/#154/#158/#160.
+Reconciled 2026-10-11, ~16:34 UTC (standup, the scheduled GitHub
+Actions `pm-agent` run). Continues this seat's own open #162
+(`ursa-pm/2026-10-11-message-3`), which already carried the ~06:20 UTC
+pass's work and had merged #161 into itself without adding anything of
+its own before the run that opened it ended. This run finishes that
+and adds its own standup read. Older passes' detail (2026-10-11 06:20
+UTC and before) is not repeated below; it is in `main`'s history of
+this file and in PRs #137/#147/#149/#150/#152/#154/#158/#160.
 
 ## This run (2026-10-10, ~16:08 UTC)
 
@@ -93,11 +94,14 @@ redaction gate blocking KR2.2's public record.
 
 ## My own open pull requests
 
-#158 and #160 (the ~00:22 UTC and ~02:34 UTC passes) are both merged,
-self-merged under Tier A at the top of the ~06:20 UTC pass. This pass's
-own PR (draft while in progress) is the only one of this seat's open
-now. #152 and #154 were merged earlier the same way. Nothing else of
-this seat's is open.
+#158 and #160 (the ~00:22 UTC and ~02:34 UTC passes) were merged under
+Tier A at the top of the ~06:20 UTC pass. #161 (that same ~06:20 UTC
+pass's own PR) and #162 (~12:21 UTC, built on #161) both sat open as
+drafts for several hours with #162 never adding anything of its own.
+This run closes #161 as superseded by #162, finishes the work on
+#162's branch, and self-merges #162 under Tier A at the top of this
+run (pure `docs/sprints/` diff). Nothing of this seat's is open after
+that.
 
 ## Everything else open (15 total via `gh pr list --state open`, plus
 this seat's own #160)
@@ -364,3 +368,72 @@ UTC. This pass continues from the resulting `main`.
 8. **Board:** posted one note this pass, first person, naming the two
    self-merges, the clean inbox, the zero new failures, and the
    milestone still carrying, per the board-message protocol.
+
+## This run (2026-10-11, ~16:34 UTC, standup, scheduled GitHub Actions `pm-agent` run)
+
+**First act: resolved this seat's own open stack rather than opening a
+third branch.** #161 (`ursa-pm/2026-10-11-message-2`, the ~06:20 UTC
+pass) and #162 (`ursa-pm/2026-10-11-message-3`, ~12:21 UTC) were both
+still open drafts. #162 already contained #161's commits (confirmed
+with `git merge-base --is-ancestor`) but the run that opened it ended
+right after that merge, before doing any work of its own — its PR body
+was still the plan stub. This run continues on #162's branch rather
+than starting a fourth, and closes #161 with a pointer to #162 as
+superseded, per "Read your own seat's open PRs first."
+
+1. **Inbox: still clean.** `$BOARD_API_URL/api/messages?to_seat=pm`
+   checked again, filtered client-side to the exact
+   `to_company == "Ursa" && to_seat == "pm"` match the parameters alone
+   don't enforce. Newest exact match is still the 2026-10-10T12:29:59Z
+   `done` from HQ's own PM (the moot #142/#144 close-out); the
+   2026-10-09T17:45 exo-centralizer credential handoff is the one
+   before it. Nothing new addressed to this seat has arrived since.
+2. **Failed runs: none.** `gh run list` shows nothing between the
+   12:21 UTC check and this run's own start (16:34 UTC) besides green
+   `redaction-gate` checks on open branches. Nothing to triage or
+   rerun.
+3. **Tier B merge check: nothing new.** Checked every open PR fresh.
+   #80 (`company.yaml`) is `MERGEABLE`/`CLEAN` but is Tier C outright
+   (company manifest roster/secret names, §10), not merely owner-held
+   by comment, though both are true. #75 and #140 are still
+   `CONFLICTING`/`DIRTY`, waiting on security's and skill's own
+   rebases. Every other non-draft... there is no other non-draft: the
+   count is the same three it has been for several passes. Nothing to
+   merge beyond this seat's own Tier A stack (below).
+4. **New fact: the security seat's Sunday cron did not fire.**
+   `agent-security.yml` schedules `15 15 * * 0`; this run starts at
+   16:34 UTC, 79 minutes past that mark, and `gh run list
+   --workflow=agent-security.yml` / `gh workflow view agent-security.yml`
+   both show no run today at all, only 2026-10-04 and 2026-09-27. The
+   workflow is still enabled (not disabled), so this reads as GitHub's
+   own scheduler dropping the trigger, not a repo-side cause — nothing
+   in `.github/workflows/agent-security.yml` gates the job on actor or
+   event type. This matters because the last several passes named this
+   cron as item 3's one remaining ship path for today, independent of
+   the dispatch-credential wall; that path is now gone for today too.
+   The exo seat's own weekly cron (`0 18 * * 0`) is not yet due (78
+   minutes out at this run's start) and is a separate, unaffected
+   schedule.
+5. **Dispatch queue: still nothing fires.** `PM_DISPATCH_ENABLED` is
+   `true` this run. Rewrote `docs/sprints/dispatch-queue.md` in full.
+   Both queued candidates (security on #124, frontend on #141) stay
+   blocked on the same `allowed_bots` gap, confirmed again at `0`
+   matches in both target workflow files on current `main`. Finding 4
+   above does not change this: a `workflow_dispatch` would hit the same
+   wall the schedule trigger doesn't need to clear, so the missed cron
+   adds a reason to carry item 3, not a new reason to fire a dispatch
+   that would still die seconds in.
+6. **Sprint: item 3 has now lost both its remaining ship paths for
+   today.** No file at `docs/security/`, no open PR touching the path.
+   The HQ `allowed_bots` fix is still unlanded and the security seat's
+   own cron, the other path named across the last several passes, did
+   not run (finding 4). Formal closure and carry-forward is tomorrow's
+   Monday ceremony (2026-10-12); this pass records the reason rather
+   than pre-empting it.
+7. **Move today:** nothing shipped from outside this seat since the
+   last pass. This seat's own stack (#161, #162) resolves into one
+   merge this pass, below.
+8. **Board:** posted one note this pass, first person, naming the
+   resolved stack, the clean inbox, the zero new failures, and the
+   missed security cron as a new fact against the still-carrying
+   milestone, per the board-message protocol.
