@@ -308,3 +308,114 @@ describe('the real history this was found in, reduced to a fixture', () => {
     expect(bounded.diagnostics.abandoned.interposedGeneration).toBe(4)
   })
 })
+
+describe("another agent's commit is not the person's edit", () => {
+  // Found 2026-10-11 by pointing `ursa run` at a clone of this
+  // repository itself (470 commits), the first prose-dominant corpus the
+  // resolver has been run against. One pair there claimed 60,616 of
+  // 63,362 generated characters survived verbatim, 94.9%, and that one
+  // claim carried 84.7% of the whole run's headline survival figure.
+  //
+  // Neither side of it was what the record said it was. The generated
+  // side, 7c739cf, carried `Co-Authored-By: claude[bot]`, matched, and
+  // became a generation. The "edit" side, 8c453f0, carried
+  // `Co-Authored-By: exo-centralizer[bot]` and was authored by the
+  // owner's GitHub account, so it matched neither the trailer pattern
+  // (four vendor words: claude, codex, cursor, gpt) nor the author
+  // pattern, and became eligible as the person's correction.
+  //
+  // The trailer pattern was strictly NARROWER than the author pattern
+  // it is trusted over: the author pattern already read `copilot`,
+  // `github-actions` and the bare `[bot]` suffix as machine identities.
+  // So the signal the walk trusts first recognised fewer agents than the
+  // fallback it overrides, and every co-author outside those four vendor
+  // words was read as a human being. Measurement and the full
+  // before/after: docs/design/agent-coauthor-detection.md.
+  const SEAT = '\n\nCo-Authored-By: exo-centralizer[bot] <noreply@anthropic.com>'
+  // The real shape: the owner's own account authors the squash-merge, so
+  // the author-name fallback cannot reach it. Only the trailer can.
+  const OWNER = AS('alexandrapaiz', '111912770+alexandrapaiz@users.noreply.github.com')
+  const OLD_TRAILER = /claude|codex|cursor|gpt/i
+
+  function twoSeatsOneFile() {
+    const r = repo()
+    r.commit('lessons.md', LONG('v0'), 'Baseline')
+    const genSha = r.commit(
+      'lessons.md', LONG('v1'),
+      'Lessons sync 2026-09-28: HQ standards/lessons.md @ 775ce36 (#31)' + TRAILER, OWNER,
+    )
+    const otherSeatSha = r.commit(
+      'lessons.md', LONG('v1') + '\nL-E10: survey the PRs before you build',
+      'Lessons sync from HQ @ 7e051c0 (#41)' + SEAT, OWNER,
+    )
+    return { r, genSha, otherSeatSha }
+  }
+
+  it('reads a [bot] co-author as a generation, so it cannot be the edit', () => {
+    const { r, otherSeatSha } = twoSeatsOneFile()
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir)
+    expect(diagnostics.generatedByTrailer).toBe(2)
+    expect(pairs.map((p) => p.finalSha)).not.toContain(otherSeatSha)
+    expect(pairs).toHaveLength(0)
+  })
+
+  it('pins what the old four-vendor pattern claimed, which is the defect', () => {
+    const { r, genSha, otherSeatSha } = twoSeatsOneFile()
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir, {
+      agentTrailerPattern: OLD_TRAILER,
+    })
+    expect(diagnostics.generatedByTrailer).toBe(1)
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].generatedSha).toBe(genSha)
+    // The number the real run reported: one machine's commit standing in
+    // for a person's correction.
+    expect(pairs[0].finalSha).toBe(otherSeatSha)
+  })
+
+  it('refuses the pair as interposed when a real human edit follows', () => {
+    // The generation, another seat's rewrite of the same file, then the
+    // person. The person's edit is real, but they were reading the
+    // second seat's text, not the first's, so the first generation gets
+    // no credit for what survived.
+    const { r, genSha } = twoSeatsOneFile()
+    const editSha = r.commit(
+      'lessons.md', LONG('v1') + '\nL-E10: survey the PRs first, by hand', 'Tighten L-E10',
+    )
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir)
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].finalSha).toBe(editSha)
+    expect(pairs[0].generatedSha).not.toBe(genSha)
+    expect(diagnostics.abandoned.interposedGeneration).toBe(1)
+  })
+})
+
+describe('the trailer pattern is never narrower than the author fallback', () => {
+  // The guard for the class, not the instance. The walk trusts the
+  // Co-Authored-By trailer over the author name and suppresses the
+  // author fallback when it matches everything, so a machine identity
+  // the author pattern knows and the trailer pattern does not is a
+  // commit that gets read as a person's work. Every identity below is
+  // one DEFAULT_AUTHOR in src/pairfinder.ts already calls a machine.
+  const MACHINE_IDENTITIES = [
+    'Claude <noreply@anthropic.com>',
+    'claude[bot] <noreply@anthropic.com>',
+    'exo-centralizer[bot] <noreply@anthropic.com>',
+    'dependabot[bot] <support@github.com>',
+    'Copilot <copilot@github.com>',
+    'github-actions[bot] <github-actions@github.com>',
+    'openai-codex[bot] <codex@openai.com>',
+    'Cursor Agent <agent@cursor.com>',
+    'ChatGPT <noreply@openai.com>',
+  ]
+
+  it.each(MACHINE_IDENTITIES)('reads a commit co-authored by %s as a generation', (who) => {
+    const r = repo()
+    r.commit('doc.md', LONG('v0'), 'Baseline')
+    r.commit('doc.md', LONG('v1'), `Write the thing\n\nCo-Authored-By: ${who}`)
+    const { diagnostics } = findCommitPairsWithDiagnostics(r.dir)
+    // Both commits here are authored HUMAN, so the author fallback is
+    // live and discriminating; only the trailer can classify this one.
+    expect(diagnostics.generatedByTrailer).toBe(1)
+    expect(diagnostics.generatedByAuthorName).toBe(0)
+  })
+})

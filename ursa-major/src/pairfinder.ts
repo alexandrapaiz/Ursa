@@ -32,6 +32,14 @@
 // discriminate. The decision is reported in PairFinderDiagnostics rather
 // than taken silently, because a suppressed fallback changes what a run
 // finds and the user is owed that.
+//
+// One thing that reasoning left unstated, and it mattered: trusting the
+// trailer over the author name is only sound while the trailer
+// recognises at least as many machine identities as the author pattern
+// does. Until 2026-10-11 it recognised fewer, so a repository with more
+// than one agent seat in it read the second seat's commits as the
+// person's corrections. See the note on DEFAULT_TRAILER below for what
+// that cost on this repository's own history.
 
 import { execFileSync } from 'node:child_process'
 
@@ -141,7 +149,52 @@ export interface PairFinderDiagnostics {
   mergeGenerationsRefused: number
 }
 
-const DEFAULT_TRAILER = /claude|codex|cursor|gpt/i
+/**
+ * Which Co-Authored-By trailers name a machine.
+ *
+ * Six of these are harness or vendor names. The seventh, the `[bot]`
+ * suffix, is GitHub's own: every GitHub App account is addressed as
+ * `<app-name>[bot]`, so a co-author carrying that suffix is a program
+ * whoever wrote the app, and the convention costs nothing to read.
+ *
+ * Until 2026-10-11 the trailer pattern was only the first four vendor
+ * words, which made it strictly NARROWER than the author-name fallback
+ * it is trusted over and overrides: that pattern already read
+ * `copilot`, `github-actions` and the bare `[bot]` suffix as machine
+ * identities. So the signal the walk trusts first recognised fewer
+ * agents than the signal it demotes, and any co-author outside those
+ * four words was read as a human being.
+ *
+ * What that cost, measured on a clone of this repository at fe0da2a
+ * (470 commits): one commit of the 470 carried
+ * `Co-Authored-By: exo-centralizer[bot]`, was authored by the owner's
+ * own GitHub account so the author fallback could not reach it either,
+ * and so became eligible as a person's edit. It paired with the
+ * preceding `claude[bot]` commit and produced a record claiming 60,616
+ * of 63,362 generated characters survived verbatim, 94.9%. That single
+ * claim carried 84.7% of the run's whole headline survival figure, and
+ * no person had read a character of it. Both commits were automated
+ * syncs of the same upstream file.
+ *
+ * Widening it narrows what a run claims rather than widening it,
+ * because a commit classified as a generation stops being eligible as
+ * a pairing target. That is the costly direction named in this file's
+ * header note, and it is the correct one here: these commits really
+ * were machine-written, and a refused pair is a claim not made where
+ * the alternative was a claim that was false.
+ *
+ * Unlike the author fallback this needs no all-match suppression. The
+ * suppression exists because GIT_AUTHOR_NAME is ambient: a harness
+ * exports it and it then labels every commit in the history including
+ * the person's own. A Co-Authored-By trailer is written into a commit
+ * message deliberately, one commit at a time, so a history where every
+ * commit carries one is a history where every commit really was
+ * co-authored by a machine, and no pair in it is a person's correction.
+ *
+ * Full measurement: docs/design/agent-coauthor-detection.md.
+ */
+const MACHINE_IDENTITY = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i
+const DEFAULT_TRAILER = MACHINE_IDENTITY
 /**
  * The pairing bounds' defaults, with the reasoning that chose each number
  * rather than a round figure.
@@ -164,7 +217,14 @@ const DEFAULT_TRAILER = /claude|codex|cursor|gpt/i
 const DEFAULT_MAX_PAIR_DISTANCE = 25
 const DEFAULT_MAX_PAIR_AGE_HOURS = 168
 const DEFAULT_MAX_INTERPOSED_GENERATIONS = 0
-const DEFAULT_AUTHOR = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i
+/**
+ * The author-name fallback reads the same vocabulary, deliberately the
+ * same constant rather than a second list that happens to agree today.
+ * The two lists disagreeing by three entries is the whole defect
+ * documented above, and a shared constant makes the superset structural
+ * instead of something a test has to keep asserting.
+ */
+const DEFAULT_AUTHOR = MACHINE_IDENTITY
 
 export interface CommitInfo {
   sha: string
