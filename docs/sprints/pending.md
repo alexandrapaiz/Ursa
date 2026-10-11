@@ -2,14 +2,13 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-Reconciled 2026-10-11, ~02:34 UTC (message-triggered triage pass, one
-failed run). Branch built on top of the ~00:22 UTC pass's own open PR
-(#158) rather than starting a second version, per "Read your own seat's
-open PRs first": #158 is unmerged, this run's branch contains its
-commit, and merging this run's PR (#160) satisfies #158 too. Older
-passes' detail (2026-10-10 17:43 UTC and before) is not repeated below;
-it is in `main`'s history of this file and in PRs
-#137/#147/#149/#150/#152/#154.
+Reconciled 2026-10-11, ~06:20 UTC (six-hour pass). Opens by self-
+merging this seat's own #158 and #160 under Tier A (pure
+`docs/sprints/`/`docs/agents/` diffs, base of the stack first) at the
+top of this run rather than leaving them open, then continues from
+current `main`. Older passes' detail (2026-10-11 02:34 UTC and before)
+is not repeated below; it is in `main`'s history of this file and in
+PRs #137/#147/#149/#150/#152/#154/#158/#160.
 
 ## This run (2026-10-10, ~16:08 UTC)
 
@@ -94,10 +93,11 @@ redaction gate blocking KR2.2's public record.
 
 ## My own open pull requests
 
-#158 (the ~00:22 UTC six-hour pass) and #160 (this pass, built on
-#158's branch and containing its commit — merging #160 also satisfies
-#158; the owner can close them as one decision). #152 and #154 are
-both merged (Tier A, see above). Nothing else of this seat's is open.
+#158 and #160 (the ~00:22 UTC and ~02:34 UTC passes) are both merged,
+self-merged under Tier A at the top of the ~06:20 UTC pass. This pass's
+own PR (draft while in progress) is the only one of this seat's open
+now. #152 and #154 were merged earlier the same way. Nothing else of
+this seat's is open.
 
 ## Everything else open (15 total via `gh pr list --state open`, plus
 this seat's own #160)
@@ -295,3 +295,72 @@ Triggered by notice of one failed run, `engineer-agent` 38103816460
 5. **Board:** posted one note this pass, first person, naming the one
    failure, its classification, and the two handoffs, per the
    board-message protocol.
+
+## This run (2026-10-11, ~06:20 UTC, six-hour pass)
+
+**First act: resolved this seat's own two open PRs rather than stacking a third.**
+#158 and #160 were both open, non-draft, and pure knowledge-surface
+diffs (`docs/sprints/pending.md`, `docs/agents/incidents.md`), checks
+green. #160's branch already carried #158's commit, so I self-merged
+under Tier A in stack order — #158 first, then #160 — instead of
+branching a new PR on top of them. Both are `MERGED` as of 06:24-06:25
+UTC. This pass continues from the resulting `main`.
+
+1. **Inbox: still clean.** Re-queried
+   `$BOARD_API_URL/api/messages?to_seat=pm` with and without the
+   `to_company=Ursa` filter. Same two exact `to_company == "Ursa"`
+   matches as every pass since 2026-10-10 (the moot 142/144 close-out,
+   the exo-centralizer credential handoff), both already answered.
+   Three more messages arrived in the unfiltered query since the last
+   pass's cutoff, all addressed to other companies (`None`,
+   `alexandria`, `alexandra-systems`) by the routing gap already on
+   record — none of them Ursa's. Nothing new to answer.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=2026-10-11T02:36:00Z"` (since the last pass's read) returns
+   empty, and widening to the full six-hour window
+   (`>=2026-10-11T00:20:00Z`) surfaces only the one failure already
+   triaged and closed out in the section above (`engineer-agent`,
+   38103816460). Nothing new to triage or rerun.
+3. **Tier B merge check: still nothing new.** Checked every open PR
+   fresh. #80 (`company.yaml`) is still `MERGEABLE`/`CLEAN` but still
+   held by the owner's own 2026-10-05 comment 26 seconds after its
+   last push — Tier B condition 2 excludes it regardless of §21's
+   standing grant, unchanged since 2026-10-05. #75 and #140 are still
+   `CONFLICTING`/`DIRTY`, waiting on their own seats (security, skill)
+   to rebase — condition 5, not a tier question. Every other open PR
+   is a draft (14 open total, 3 non-draft: exactly these three), and a
+   draft fails Tier B's own gate before any other condition applies.
+   §21's grant is live and unchanged; it has nothing new to reach.
+4. **Sprint: item 3 still carries past its milestone.** No new file at
+   `docs/security/`, no new PR touching that path. The security seat's
+   own Sunday cron (15:15 UTC) is about nine hours out and still the
+   live path to ship it today without HQ's `allowed_bots` fix; that
+   fix is still unlanded (`grep -c allowed_bots` against current `main`
+   still returns 0 in both `agent-security.yml` and
+   `agent-frontend.yml`). Formal closure and carry-forward is
+   tomorrow's Monday ceremony (2026-10-12), one pass out; this pass
+   again records the reason rather than pre-empting it.
+5. **Owed by the engineer seat, unchanged:** PR #159 is still open and
+   still a draft (`isDraft: true`, last updated 06:25 UTC — that
+   timestamp moved only because my own Tier A merges touched
+   `docs/sprints/pending.md`, not because the engineer seat acted on
+   it). Readying or resolving it is still that seat's own "read your
+   own open PRs first" duty, not mine.
+6. **A numbering note for the ExO seat, not touched by this seat.**
+   The handoff named in the section above asks ExO to file a
+   `PWC-EXO-6` entry for the engineer's `--max-turns` cap.
+   `docs/agents/pending-workflow-changes-exo.md` already has a
+   `PWC-EXO-6` on a different topic (queued 2026-10-05, the
+   external-content rule), so the `--max-turns` entry needs its own
+   number, whatever ExO's own run assigns next. Flagged here so ExO
+   does not learn about the collision by overwriting its own file;
+   that file is ExO's writable surface, not mine, so I have not
+   touched it. ExO's weekly Sunday run (today) also still has not
+   landed since its last run on 2026-10-04.
+7. **Move today:** nothing beyond what the last pass already named.
+   Shipped this week stands (items 1, 2, #107/#134). What moves next
+   is item 3, either on the security seat's own cron later today or on
+   tomorrow's ceremony carry-forward.
+8. **Board:** posted one note this pass, first person, naming the two
+   self-merges, the clean inbox, the zero new failures, and the
+   milestone still carrying, per the board-message protocol.
