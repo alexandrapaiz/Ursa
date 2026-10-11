@@ -4656,6 +4656,20 @@ survey.
   its own unit: an `agent-identity` input on `action.yml` threaded to
   `ursa ci`, and a case in `src/launch-parity.test.ts` that declares an
   identity and asserts both launches drop the same record.
+- Built so far: the second half of that first step, by the 2026-10-11
+  second run (PR #163). The `agent-identity` input exists on
+  `action.yml` and is threaded through `CiOptions.agentIdentities` to
+  the pair walk, and `src/launch-parity.test.ts` holds the case that
+  declares an identity and asserts both launches drop the same record,
+  plus the diagnostic behind it. Specified in
+  `docs/design/agent-coauthor-detection.md` §12 and
+  `docs/design/launch-parity.md` §8. Still unbuilt, and the reason the
+  status below is unchanged: the `editor` block on `OutcomeRecord`
+  itself, its four-value basis field, carrying the run's own
+  declarations onto the record, and the sixteenth bound in
+  `src/invariants.ts`. The launch-parity half was a defect in a change
+  already merged into this branch; the record-shape half is a new field
+  on the artifact a lab buys and wants the owner's verdict first.
 - Cost: $0
 - Status: proposed
 
@@ -4794,3 +4808,122 @@ genuinely open and the product surface does not show it, which is the
 same split Ursa is one decision away from: `docs/design/` now holds
 thirty-three documents and `ursa-minor/app/page.tsx` still names none
 of them.
+
+### 2026-10-11 (second run) — A declaration that matches everything reads as the honest answer
+- Trigger: probing `--agent-identity`, the flag the same day's earlier
+  run shipped, against a clone of this repository. The flag takes a
+  substring, so a short one matches every identity in the history:
+  `--agent-identity '@'` classified all 481 commits as agents' and
+  wrote zero records, and `--agent-identity 'a'` did the same. Measured
+  directly (`findCommitPairsWithDiagnostics`, `generatedByDeclaredIdentity`
+  481 of 481, `pairs` 0). The run exits 0 and prints "If every commit
+  here is an agent's, that is an answer rather than a failure", which on
+  this repository is the *correct* output (`docs/design/agent-coauthor-detection.md`
+  §3.3). So the failure mode and the honest answer are the same three
+  lines, and a typo in a workflow's `agent-identity:` block would
+  silently stop every record a repository produces while reporting
+  success. A single space is the quietest version: it matched 21
+  commits, because it matches any author name with two words in it.
+- What: make a declaration state its own reach, and refuse the
+  degenerate case. Three parts, smallest first. (1) Trim each
+  declaration and drop the ones that are empty after trimming, in
+  `src/pairfinder.ts` where `filter(Boolean)` already drops `''` but
+  keeps `'   '`; the Action's shell already skips blank lines
+  (`action.yml`, §12.3 of the design document) and the library should
+  not depend on its caller for that, which is the same parity argument
+  this run's own fix rests on. (2) Report the reach rather than only the
+  count: `PairFinderDiagnostics` gains `declaredIdentityMatches:
+  { declaration: string; commits: number }[]`, one row per declaration,
+  so a declaration that matched 481 of 481 commits is visible next to
+  one that matched 81. (3) Refuse the degenerate case loudly: when a
+  single declaration matches every commit in the history, exit non-zero
+  with the declaration quoted, by the same reasoning that gives the
+  author-name fallback its all-match suppression — a pattern that
+  describes the whole history has described the environment and not an
+  agent. Unlike that suppression this one must not proceed silently,
+  because the user typed it.
+- First step: part (1) and part (2), which are both in
+  `src/pairfinder.ts` and testable in `src/pairing-window.test.ts`
+  without touching either launch: a case declaring `'   '` and asserting
+  zero declared matches, and a case declaring two identities of
+  different reach and asserting both rows. Part (3) is a behaviour
+  change with an exit code and belongs in its own unit, with the
+  threshold question ("every commit" or "every commit and more than
+  one declaration") answered there rather than guessed here.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — A measured number names a commit, and the walk reads every ref
+- Trigger: reproducing this run's own inherited measurement. The design
+  document states its figures against "a clone of this repository at
+  fe0da2a (470 commits)", and 470 is what `git rev-list --count HEAD`
+  returns there. Resolving a clone checked out at that commit reported
+  `Scanned 481 commits`. Both numbers are right. `listCommits` passes
+  `--all` deliberately, documented in `src/pairfinder.ts` line 117,
+  because the user pointed at a whole repository rather than a branch;
+  so the walk saw the eleven commits that reached `main` after fe0da2a
+  and were present in the clone as a different ref. The consequence is
+  that a documented measurement is not reproducible from the commit it
+  names: it depends on which refs the clone happened to carry, which
+  depends on when it was cloned. Eleven design documents under
+  `docs/design/` lead with a measured number taken this way.
+- What: pin and report the ref set, not just the commit. Two halves.
+  First, `PairFinderDiagnostics` carries the refs the walk actually
+  read, from `git for-each-ref --format='%(refname) %(objectname)'`
+  filtered to those `git log --all` would reach, so a run states its own
+  input instead of leaving it to the clone's history. Second, a
+  documentation convention with teeth: any design document stating a
+  figure measured over a repository names the clone command that
+  produces that ref set, which for a single-commit claim is
+  `git clone --single-branch --branch <ref>` plus
+  `git checkout <sha>`, and for `--all` is the clone URL plus the date.
+  This is the same shape as the already-proposed baseline entry above
+  ("Nothing re-runs the measurement a fix was aimed at") and is
+  deliberately not folded into it: that entry re-runs a measurement, and
+  this one makes the measurement's input identifiable, which has to be
+  true first or the re-run compares two different corpora and reports
+  the difference as a regression.
+- First step: the diagnostics half, in `src/pairfinder.ts`, with a test
+  in `src/pairing-window.test.ts` that builds a fixture with a second
+  branch, asserts the walk reads it, and asserts the ref list names it.
+  That makes the discrepancy legible in any future run's own output,
+  which is what would have caught this one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — The parity test is the only thing that catches drift and nothing requires it to run
+- Trigger: today's fourth launch divergence
+  (`docs/design/launch-parity.md` §8). `--agent-identity` shipped on
+  `ursa run` and not on `ursa ci`, so the two launches answered "who
+  was the person" differently from byte-identical history. It was found
+  by reading the ledger entry that named it as a known slice, not by any
+  check. What makes it worth an entry rather than a shrug is why the
+  suite stayed green: the half of the change that could be shared WAS
+  shared, as one constant (`MACHINE_IDENTITY`), so the change was
+  symmetric by construction everywhere except one unforwarded field on
+  `CiOptions`. A parity gap can therefore be a single missing line
+  inside a change whose own author believed it was symmetric, which is
+  the hardest version to catch by reading.
+- What: a structural assertion that the two launches reach the same
+  option surface, so the next unforwarded field fails a test rather
+  than waiting for a reader. `PairFinderOptions` is the right surface
+  because it is where both launches' decisions about what counts as a
+  generation live. The check is that the set of its keys each launch can
+  set is equal: for `ursa run` the `parseArgs` option names in
+  `src/bin/ursa.ts` mapped to the fields they fill, and for `ursa ci`
+  the fields `src/ci/run.ts` forwards, with any deliberate exception
+  listed in the test with its reason, in the allowlist idiom
+  `src/launch-parity.test.ts` already uses for the fields a CI record
+  may differ on. Written that way round, adding an option to one launch
+  and not the other fails immediately, and a legitimate asymmetry costs
+  one line and a sentence.
+- First step: a `describe` block in `src/launch-parity.test.ts` holding
+  two literal arrays, one per launch, each naming the
+  `PairFinderOptions` keys that launch forwards today, asserted equal
+  after the allowlist is subtracted. Literal arrays rather than
+  reflection over the source text, because a test that parses
+  TypeScript to discover its own expectations fails for reasons that
+  have nothing to do with the claim; the maintenance cost is one line
+  per new option, which is exactly the line that was missing today.
+- Cost: $0
+- Status: proposed
