@@ -363,6 +363,22 @@ anything:
 The signatures a caller writes against, not descriptions of them.
 
 ```ts
+// src/ci/run.ts — the CI launch's boundary. The option below is the one
+// that was missing until 2026-10-11 (§12): every other field was here,
+// so the gap was not a missing concept, it was one unforwarded field.
+export interface CiOptions {
+  projectPath: string
+  eventPath: string
+  repo: string
+  token: string
+  minChars?: number
+  /** substrings the consumer declared to be agents', from action.yml's `agent-identity` */
+  agentIdentities?: string[]
+  post?: boolean
+}
+```
+
+```ts
 // src/pairfinder.ts — the classifier's whole public surface
 export interface PairFinderOptions {
   agentTrailerPattern?: RegExp
@@ -532,6 +548,24 @@ git -C ~/clones/ursa-self log --pretty=format:'%an%x09%ae' \
 # 6. the tests for this change alone, then the whole suite
 npx vitest run src/pairing-window.test.ts
 npm test
+
+# 7. the CI launch with the same declaration (§12). --no-post prints the
+#    run comment instead of writing it to a pull request, so this is
+#    safe to run against a repository nobody wants commented on
+node dist/ursa.cjs ci ~/clones/ursa-self \
+  --repo alexandrapaiz/Ursa \
+  --event ~/clones/ursa-self/event.json \
+  --min-chars 200 \
+  --agent-identity '@agents.epito.me' \
+  --no-post
+
+# 8. the parity assertion itself, which resolves ONE fixture repository
+#    through both launches and diffs the records field by field
+npx vitest run src/launch-parity.test.ts
+
+# 9. the proof that the parity case is load-bearing: revert only the CI
+#    call site, watch exactly one case fail, restore it
+npm run bundle:check   # expect "dist/ursa.cjs is current"
 ```
 
 ---
@@ -581,8 +615,10 @@ Three readings worth naming:
 
 ## 9. What this does not fix
 
-Both are ledger entries from this run (`docs/ideas.md`, 2026-10-11),
-not silent gaps.
+Three gaps, each a ledger entry from this run (`docs/ideas.md`,
+2026-10-11) rather than a silent omission. The second was closed the
+same day by the run that inherited this document; it is struck through
+instead of deleted so the slice and its repair stay visible together.
 
 1. **A file synced from another repository is still read as composed
    text.** `src/vendored.ts` detects an import by finding its source
@@ -590,15 +626,11 @@ not silent gaps.
    git's reach is invisible to it. The pair that carried the claim is
    gone, but a sync followed by a genuine human edit would still produce
    a record reporting an imported file as model output.
-2. **The CI launch cannot be told who the agents are.** `ursa ci` calls
-   `findCommitPairs(projectPath, { range })` (`src/ci/run.ts` line 148)
-   with no identity option, and `action.yml` exposes no input that
-   would carry one, so a project whose seats are declared locally has
-   them undeclared on every merge. The shared default means the trailer
-   half of this change does reach the CI launch; only the declaration
-   does not. That is a launch-parity gap of the kind
-   `docs/design/launch-parity.md` and `src/launch.ts` exist to catch,
-   and it is sliced out of this run rather than rushed.
+2. ~~**The CI launch cannot be told who the agents are.**~~ **Closed
+   2026-10-11 by the run that inherited this document; see §12.** It
+   was sliced out of the first run and fixed by the second rather than
+   left, because a parity gap introduced by this very change is this
+   change's own defect and not a future enhancement.
 3. **Nothing re-runs the measurement a fix was aimed at.**
    `docs/design/vendored-paths.md` §1's table has five rows, the fix
    removed row two, and row one — the largest, at 60,616 characters —
@@ -621,6 +653,8 @@ the alternatives considered.
 | tsx | 4.23.15 | executes the TypeScript entry points directly (`npx tsx src/bin/ursa.ts run ...`, `npm run measure:coauthor`) with no build step | a build step before every measurement pass adds a stale-artifact failure mode to a tool whose only job is to produce trustworthy numbers |
 | `jsdiff` (`diff`) | 8.0.4 | unchanged here; named because it computes the word-level diff behind `survived_mutated`, which is the label this change moves characters out of | listed for completeness: the 4,850-to-4,614 row in §8 is its output, so a reader checking that number needs to know what produced it |
 
+| `bash` | 5.2.21 (`ubuntu-24.04` runner default) | splits `action.yml`'s `agent-identity` input into one `--agent-identity` flag per line, inside the composite action's `resolve` step (§12.3) | `while IFS= read -r` over the environment variable, rather than `${{ }}` interpolation plus word splitting: interpolation pastes a consumer-controlled string into the script before bash parses it, and unquoted word splitting would break any identity containing a space. A Node pre-step reading the same variable was the alternative and was rejected because the Action's premise is that the YAML a consumer reads before running it is the whole story, and a second script to audit is worse than four lines of shell |
+
 No new dependency, no new service, no new credential. Steady-state cost
 stays $0.
 
@@ -628,8 +662,13 @@ stays $0.
 
 ## 11. Rollback
 
-Three commits on `engineer/2026-10-11-prose-path-dogfood`. Reverting any
-of them leaves the rest working.
+Three commits on `engineer/2026-10-11-prose-path-dogfood`, plus the §12
+parity commit on `engineer/2026-10-11-coauthor-detection-landing`, which
+contains the first branch and supersedes it. Reverting any of them
+leaves the rest working. The parity commit is the safest to revert
+alone: it restores the pre-2026-10-11 CI behaviour, which is a CI launch
+that cannot be told who the agents are, and touches nothing the local
+launch reads.
 
 ```bash
 # the whole change
@@ -651,3 +690,97 @@ npm run measure:coauthor -- ~/clones/ursa-self
 
 Nothing to migrate: `.ursa/` is rebuilt from git history on every run,
 and no record written before this change is read by anything after it.
+
+---
+
+## 12. The CI launch reads the same declaration (added 2026-10-11, second run)
+
+### 12.1 Why this is a defect and not an enhancement
+
+`ursa run` and `ursa ci` are sold as one resolver fired two ways, and
+that sentence is the entire premise of the Action surface: a lab
+auditing a record made in CI is auditing the local resolver's behaviour
+or it is auditing nothing. §9's second item recorded that
+`--agent-identity` reached only the local launch. That makes the two
+launches give different answers to "who was the person" from
+byte-identical history, on exactly the repositories the option exists
+for, which is the single failure `src/launch.ts` was written to make
+impossible. It is the fourth entry in that module's drift list, after
+the size floor, the self-check, and the erased episode.
+
+The asymmetry was narrow and worth stating precisely, because it
+explains why no existing test caught it. The default vocabulary is a
+shared constant (`MACHINE_IDENTITY`, §1.1), so the trailer half of this
+change reached both launches the moment it was written. Only the
+caller-supplied declaration did not, and only one line carried it.
+
+### 12.2 The three edges that were missing
+
+Node by node, in the direction the declaration travels:
+
+| Edge | Carries | State before 2026-10-11 |
+|---|---|---|
+| a consumer's workflow YAML → `action.yml` input `agent-identity` | a newline-separated string, one substring per line | no such input existed, so there was nothing for a consumer to set |
+| `action.yml` step `resolve` → `dist/ursa.cjs` argv | zero or more `--agent-identity <substring>` argument pairs | not emitted |
+| `src/bin/ursa.ts` `runCi({...})` → `src/ci/run.ts` → `findCommitPairs` | `CiOptions.agentIdentities`, then `PairFinderOptions.agentIdentities` | the field did not exist on `CiOptions`, and the call was `findCommitPairs(projectPath, { range })` |
+
+The local launch's edge, `src/bin/ursa.ts` → `findCommitPairs`, was
+already present and is unchanged.
+
+### 12.3 The input is read from the environment, not interpolated
+
+An Action input is a string chosen by whoever writes the consumer's
+workflow, and the list is newline-separated because that is the shape a
+YAML block scalar already has. Splitting it in the step's shell is the
+only part of this with a sharp edge, so the value is passed through the
+environment and never interpolated into the script text:
+
+```yaml
+env:
+  URSA_AGENT_IDENTITY: ${{ inputs.agent-identity }}
+run: |
+  while IFS= read -r identity; do
+    [ -n "${identity//[[:space:]]/}" ] || continue
+    args+=(--agent-identity "$identity")
+  done <<< "$URSA_AGENT_IDENTITY"
+```
+
+`${{ }}` interpolation pastes the value into the script before bash
+sees it, so an identity containing a backtick or `$(...)` would be
+executed on the runner. Read from the environment it is data. The
+blank-line skip is not cosmetic either: a block scalar written the
+natural way ends with a newline, which would otherwise become an empty
+declaration, and an empty substring matches every identity in the
+history and would silently classify the whole repository as agents'.
+That is the one failure mode of this feature that would look like a
+successful run reporting zero records, which is also the correct answer
+on this repository (§3.3), so it would have been indistinguishable from
+working.
+
+Verified for four inputs before it shipped: empty (no flags added), one
+line, two lines with a trailing newline (two flags), and a value
+carrying `"`, a backtick and `$(id)` (one flag, passed through
+uninterpreted).
+
+### 12.4 How it is held
+
+`src/launch-parity.test.ts` resolves one fixture repository through both
+launches and diffs the records field by field. The new block asserts the
+declaration *changes* the answer rather than merely that both launches
+agree, because a test that only checked agreement would also pass if
+both launches ignored the flag:
+
+| Case | Asserts |
+|---|---|
+| without the declaration | both launches write the record, same task id |
+| declaring the editor's email an agent | both write zero records, both exit 0, so zero is an answer and not an error |
+| the diagnostic behind it | `generatedByDeclaredIdentity` is 3 and `editorIdentities` is empty, so a future change that drops the record for some unrelated reason cannot keep the file green |
+
+The second case matches on the editor's *email*, which the built-in
+vocabulary never reads (§2.1), so it cannot pass by accident through the
+author-name fallback.
+
+**Evidence it is load-bearing.** Reverting only the `src/ci/run.ts` call
+site to `findCommitPairs(projectPath, { range })` fails exactly one
+case, with `expected 1 to be +0`: the CI launch wrote a record the local
+launch refused. That is the defect stated as a diff.
