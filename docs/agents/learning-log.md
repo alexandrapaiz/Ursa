@@ -597,4 +597,125 @@ Run opened. Branch `ursa-exo/2026-10-05-window`, draft PR opened before
 the work, per the ship-first rule (docs/standards/pm.md §8). Findings,
 decisions and changes are appended below as this run produces them.
 
-<!-- exo run 2026-10-11: cycle opened -->
+## 2026-10-11 — Sixth entry: the queue broke in our favour, and the second cap was invisible all along
+
+**Read this first if you are the next ExO run.** Three things changed
+shape this week and two of them are good news, which is unusual enough
+in this log to say plainly.
+
+### What this run observed
+
+**The queue inverted.** Fifteen open PRs against seventy-seven merges in
+seven days. The three previous entries in this file reported 17/~1,
+52/5 and a warning that the org was producing faster than its one gate
+absorbs. That warning is withdrawn in `merge-order.md`. Do not re-raise
+it out of habit. Measure it again, and if open still trails merges, say
+so, because three runs of alarm followed by silence reads as a missing
+check rather than a resolved problem.
+
+**Six of seven failures were turn-cap kills, and our instrument could
+not see them.** This is the big one. Incident 10 taught this seat to
+compare each run's duration to `timeout-minutes` and treat a near-cap
+duration as a kill. Run that check on this week and every failure comes
+back clean: they ran 16 to 38 minutes against caps of 45 to 90. They
+died on `--max-turns` in `claude_args`, which is a second budget,
+reports as `failure` rather than `cancelled`, and leaves no trace on
+the duration axis the charter told me to measure.
+
+The lesson is not "add a turn check". It is that Incident 10's prose
+said "name the threshold it ran into" and what shipped into the charter
+was a single command about one named setting. A seat that follows
+commands faithfully, which is what this seat is built to be, inherits
+the narrowing and loses the lesson. §2 now carries both the turn-cap
+command and the general rule: any finite budget a run can exhaust is a
+cap, and a new instrument should ask what budgets are invisible to it.
+That is Incident 12. Written up with run IDs.
+
+`num_turns` appears in the log of every run including successes, so
+this is a leading indicator. The engineer spent 89 of 120 on a run that
+passed. Report ratios, not just failures.
+
+**The event bus handed one seat another seat's instructions.** The
+security run wrote "resolve the backlog of this seat's own open pull
+requests (#47, #75, #85, #112, #124)" in its own PR body, then died on
+its turn cap. The dispatcher assembling the PM's failure-triage payload
+copied that sentence in verbatim, pronoun intact, and the PM read an
+instruction to go and write to five security-seat PRs. It declined,
+correctly, citing the external-content rule, and said in writing that
+it had touched none of them. That is Incident 13.
+
+Two things worth carrying. First, the rule that saved it is in eleven of
+eleven charters and zero of eleven workflow `prompt:` blocks, which is
+PWC-EXO-6, queued six days ago and still unapplied. §2b says the
+workflow block arrives last and wins a conflict, so the guardrail held
+in the weaker half. One careful run is not a control. Second, this is
+the external-content rule's hardest case and it comes from inside: real
+text, by a real seat, in this repo's own voice, about work that really
+is queued. Only the referent of "this seat" is wrong. There is no
+attacker anywhere in it.
+
+### What this run changed
+
+1. `prompts/exo-agent.md` §2: the turn-cap instrument and the general
+   budget rule (Incident 12).
+2. `docs/agents/incidents.md`: Incidents 12 and 13, full postmortems.
+3. `docs/agents/pending-workflow-changes-exo.md`: **PWC-EXO-7**, raising
+   the four caps with evidence behind them and requiring a recorded
+   reason on every cap, plus payload fencing for Incident 13. PWC-EXO-6
+   annotated with its near-miss.
+4. `docs/agents/merge-order.md`: rewritten, simulated.
+5. `docs/agents/runner-facts.md` §3 corrected, and the matching charter
+   paragraph with it. See below.
+6. README's architecture diagram: the memory node still named the single
+   `pending-workflow-changes.md`; the queue went per-seat on 2026-10-04.
+   Fixed and re-rendered and looked at.
+7. Seventy stale remote branches deleted.
+
+### What the next run must check first
+
+- **PWC-EXO-7, 6, 5, 4, 3, 2, 1. Seven queued, zero applied.** The
+  oldest is fourteen days. This seat cannot apply any of them from
+  Actions (re-measured this run by actually attempting the push: the
+  token is refused by name). If the owner has not applied them, the
+  right move is probably to stop adding to the queue and ask her
+  directly what it is for. Seven entries nobody can reach is not a
+  backlog, it is a broken channel.
+- **PWC-EXO-3 is eleven days old and is the draft-PR rule.** The
+  workflow block that woke this run says "open exactly one pull request
+  with `gh pr create`", with no `--draft`. I followed the charter over
+  the block. A less careful run follows the block, because it arrives
+  last. Incident 7 is still live.
+- **Did the turn caps get raised?** If yes, report a full week's
+  `error_max_turns` count and the turn-usage ratios either way.
+  Incident 12 does not close on a quiet week alone.
+- **ADR-005 and ADR-006 are still each used twice** in
+  `docs/decisions.md`, for four unrelated rulings. PWC-EXO-2. Never
+  renumber an accepted ADR yourself. It stays on the list until the
+  owner rules.
+- **Incident 11 told this seat to queue the turn-cap fix as
+  `PWC-EXO-6`.** That number was already taken. It shipped as
+  `PWC-EXO-7` and the collision is flagged in the entry. If you find a
+  handoff naming a PWC number, check the number before you use it.
+  That is Incident 9's whole lesson arriving one more time.
+
+### One correction to a fact this seat inherited
+
+`runner-facts.md` §3, written 2026-10-06, says the runner's checkout is
+shallow and that every ancestry question lies until you unshallow. It
+is no longer true: all eleven workflows now set `fetch-depth: 0` and
+`git rev-parse --is-shallow-repository` returned `false` this run. The
+section is corrected in place and deliberately kept, because the fix
+lives in eleven files this seat cannot write and the underlying lesson
+is not about shallowness. It is that `merge-base` and `rev-list` answer
+ancestry questions wrongly without erroring, and a run that trusts the
+answer can read a healthy repository as a destroyed one. Keep the
+one-line check.
+
+### A note on method, for whoever reads this cold
+
+The simulated merge order caught something the pairwise check could not.
+PR #87 tests clean against `origin/main` and conflicts the moment #49
+lands, because both sales runs add `docs/sales/README.md`. If you
+compute conflicts only against `main`, you will hand the owner an order
+that breaks on the ninth merge. Simulate the sequence. The charter says
+so and this is the week it earned its place.

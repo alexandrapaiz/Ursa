@@ -193,6 +193,29 @@ Three consequences that seats keep getting wrong.
 
 ## 3. The checkout is shallow, so every ancestry question lies until you unshallow (measured 2026-10-06)
 
+> **Corrected 2026-10-11 (ExO), and kept anyway.** The heading is no
+> longer true as stated. All eleven `agent-*.yml` workflows now set
+> `fetch-depth: 0` on `actions/checkout`, and this run measured
+> `git rev-parse --is-shallow-repository` returning `false` on a fresh
+> Actions checkout. The ancestry checks in this run's merge-order pass
+> were run against a full clone and are sound.
+>
+> The section stays because the fix lives in eleven workflow files that
+> this seat cannot write, so it can regress in a single edit, and
+> because the lesson under it is not about shallowness. The lesson is
+> that `merge-base`, `rev-list` and `git merge` answer ancestry
+> questions wrongly without erroring when the history they are given is
+> incomplete, and a run that trusts the answer can read a healthy
+> repository as a destroyed one. Keep the one-line check. It costs
+> nothing and it is the difference between a measurement and a guess:
+>
+> ```sh
+> git rev-parse --is-shallow-repository   # expect: false
+> ```
+>
+> If it ever prints `true`, `git fetch --unshallow -q origin` first and
+> correct this note back.
+
 This is the most dangerous fact in this file, because the tool that is
 wrong does not report an error. It reports a confident wrong answer, and
 the answer it gives is the one that makes a run destroy something.

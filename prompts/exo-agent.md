@@ -58,6 +58,47 @@ been the problem" over a run that GitHub had stopped at 45m19s against a
 45-minute cap. The duration and the cap were both in the data it already
 had. That is Ursa incident 10.
 
+**Then measure the other cap, because there are two and the time cap is
+the one that fails loudly.** Every workflow also sets `--max-turns` in
+its `claude_args`, and a run that exhausts it dies with conclusion
+`failure` at any wall-clock duration, so the duration-versus-timeout
+check above returns a clean bill of health over it. On 2026-10-11 six of
+the seven agent failures in the week were `error_max_turns` and not one
+was a time cap. Durations ran 16 to 38 minutes against caps of 45 to 90.
+A run that checked only the paragraph above would have reported that no
+run came within five minutes of its cap, which was true, and concluded
+the caps were not biting, which was false for six runs. That is Ursa
+incident 12, and it is Incident 10's defect repeated against the second
+cap: the instrument was built for the cap that had already burned the
+org, and it cannot see the one that had not yet.
+
+Both numbers are in the data. Run this, every run:
+
+```bash
+# the turn cap each seat is given
+grep -nE "max-turns" .github/workflows/agent-*.yml
+# what each run actually spent, and why it ended
+for id in $(gh run list --limit 40 --json databaseId,workflowName \
+    --jq '.[]|select(.workflowName|test("gent"))|.databaseId'); do
+  echo "$id $(gh run view $id --json workflowName --jq .workflowName)"
+  gh run view $id --log 2>/dev/null \
+    | grep -oE '"num_turns": *[0-9]+|Reached maximum number of turns \([0-9]+\)' | sort -u
+done
+```
+
+`num_turns` is reported in the log of every run, successful ones
+included, so this is a leading indicator and not only a postmortem. A
+seat spending 85% or more of its turn budget on runs that succeed is a
+seat about to start failing, and that is worth saying before it does.
+Report the ratio, not just the failures.
+
+**The general rule, which is the part that outlives both caps.** A
+budget that a run can exhaust is a cap, whatever it is called and
+wherever it is configured. Time and turns are the two this org has
+found. When you add an instrument for one, ask what else in the
+workflow is a finite budget, because the next one will be invisible to
+every check written for its predecessors.
+
 For each agent's output:
 `gh pr list --state all`, noting merged, closed without merge, and
 stale-open PRs, and reading the PR descriptions where charters require
@@ -318,12 +359,15 @@ previous week's plan:
    the fifty-two open PRs were ancestors of four others, and five merges
    would have closed thirty-two of them.
 
-**Unshallow before you run either of those.** The runner's checkout is
-shallow, and on a shallow clone `merge-base` answers ancestry questions
-wrongly without saying so. `git fetch --unshallow -q origin`, then
-confirm `git rev-parse --is-shallow-repository` prints `false`. The full
-measurement, including the catastrophe it looks like if you skip it, is
-docs/agents/runner-facts.md §3.
+**Confirm the clone is complete before you run either of those.** On a
+shallow clone `merge-base` answers ancestry questions wrongly without
+saying so, and the wrong answer looks like a force-push catastrophe.
+Check with `git rev-parse --is-shallow-repository`, and if it prints
+`true`, `git fetch --unshallow -q origin` first. As of 2026-10-11 all
+eleven workflows set `fetch-depth: 0` and it prints `false`, so this is
+one cheap line rather than a step, but it is eleven files' worth of
+setting that this seat cannot write and so can regress without notice.
+The full measurement is docs/agents/runner-facts.md §3.
 
 Then write the landing order and verify it by actually performing those
 merges in sequence in a scratch worktree, because an order that has not
