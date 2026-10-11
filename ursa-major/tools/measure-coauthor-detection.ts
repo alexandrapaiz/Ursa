@@ -15,8 +15,14 @@
 // check, the deletion attributor, the durability walk — is held
 // identical by being called the same way in both passes.
 //
+// A third pass runs when identities are declared on the command line,
+// which is how the second half of the same finding was measured: the
+// trailer fix stopped a machine's SYNC being read as a correction, and
+// declaring the seats stopped a machine's EDIT being read as one.
+//
 // Usage, from the package root:
-//   npx tsx tools/measure-coauthor-detection.ts <path-to-clone>
+//   npx tsx tools/measure-coauthor-detection.ts <path-to-clone> \
+//     [--agent-identity <substring>]...
 //
 // Writes nothing. Records are resolved in memory and never saved, so it
 // is safe to point at a clone you care about; it does not create a
@@ -36,15 +42,23 @@ const FOUR_VENDOR_WORDS = /claude|codex|cursor|gpt/i
 /** the same floor `ursa run` applies, so the two passes agree on which records count */
 const MIN_CHARS = 200
 
-const project = process.argv[2]
+const argv = process.argv.slice(2)
+const project = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--agent-identity')
+const declared = argv.flatMap((a, i) => (a === '--agent-identity' && argv[i + 1] ? [argv[i + 1]] : []))
 if (!project) {
-  console.error('usage: npx tsx tools/measure-coauthor-detection.ts <path-to-clone>')
+  console.error('usage: npx tsx tools/measure-coauthor-detection.ts <path-to-clone> [--agent-identity <substring>]...')
   process.exit(2)
 }
 
 interface Totals {
   pass: string
   trailerPattern: string
+  /** identities the caller declared to be agents' for this pass */
+  declaredIdentities: string[]
+  /** commits classified by that declaration rather than by a pattern */
+  generatedByDeclaredIdentity: number
+  /** who the pass decided was the person, which is the thing to look at */
+  editorIdentities: { name: string; email: string; pairs: number }[]
   /** commits the walk classified as generations by their trailer */
   generatedByTrailer: number
   /** commits it classified by author name, after the all-match suppression */
@@ -71,9 +85,10 @@ interface Totals {
   refused: { distance: number; age: number; interposedGeneration: number; notDescendant: number }
 }
 
-function pass(label: string, trailer: RegExp | undefined): Totals {
+function pass(label: string, trailer: RegExp | undefined, identities: string[] = []): Totals {
   const { pairs, diagnostics } = findCommitPairsWithDiagnostics(project, {
     agentTrailerPattern: trailer,
+    agentIdentities: identities,
   })
   const commits = listCommits(project)
   const episodes = buildEpisodes(pairs, project).map((ep) => ({
@@ -94,6 +109,9 @@ function pass(label: string, trailer: RegExp | undefined): Totals {
   return {
     pass: label,
     trailerPattern: String(trailer ?? '(shipped default)'),
+    declaredIdentities: identities,
+    generatedByDeclaredIdentity: diagnostics.generatedByDeclaredIdentity,
+    editorIdentities: diagnostics.editorIdentities,
     generatedByTrailer: diagnostics.generatedByTrailer,
     generatedByAuthorName: diagnostics.generatedByAuthorName,
     pairs: pairs.length,
@@ -115,6 +133,9 @@ const after = pass('machine-identity (shipped from 2026-10-11)', undefined)
 
 console.log(JSON.stringify(before, null, 2))
 console.log(JSON.stringify(after, null, 2))
+if (declared.length > 0) {
+  console.log(JSON.stringify(pass('machine-identity plus declared identities', undefined, declared), null, 2))
+}
 console.log(JSON.stringify({
   delta: 'after minus before',
   survivedVerbatimChars: after.survivedVerbatimChars - before.survivedVerbatimChars,

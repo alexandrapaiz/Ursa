@@ -419,3 +419,103 @@ describe('the trailer pattern is never narrower than the author fallback', () =>
     expect(diagnostics.generatedByAuthorName).toBe(0)
   })
 })
+
+describe('who the run decided was the person', () => {
+  // The second half of the 2026-10-11 dogfood finding, and the half no
+  // pattern can close. After the trailer pattern was widened to every
+  // machine identity the author fallback knew, a run over a clone of
+  // this repository still produced four records, and all four named an
+  // agent seat as the person: the seats commit as `ursa-pm`, `ursa-exo`
+  // and `ursa-engineer` at `@agents.epito.me`. No default a library can
+  // ship in good faith matches those names, and the walk reaches "this
+  // is the person" by absence, so an identity it has never heard of is
+  // promoted to a human being in silence.
+  //
+  // Two answers, both here. The run says who it credited, so the gap is
+  // one line of output instead of a 470-commit investigation. And the
+  // owner can declare the identity, because they are the only party who
+  // knows it. docs/design/agent-coauthor-detection.md §3.
+  const SEAT = AS('ursa-pm', 'ursa-pm@agents.epito.me')
+
+  function seatEditsAgentWork() {
+    const r = repo()
+    r.commit('pending.md', LONG('v0'), 'Baseline')
+    const genSha = r.commit('pending.md', LONG('v1'), 'Write the queue' + TRAILER)
+    const seatSha = r.commit('pending.md', LONG('v1') + '\nreconciled by the PM seat', 'Reconcile the queue', SEAT)
+    return { r, genSha, seatSha }
+  }
+
+  it('names the identity it credited the edit to, with its email', () => {
+    const { r } = seatEditsAgentWork()
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir)
+    expect(pairs).toHaveLength(1)
+    expect(diagnostics.editorIdentities).toEqual([
+      { name: 'ursa-pm', email: 'ursa-pm@agents.epito.me', pairs: 1 },
+    ])
+  })
+
+  it('counts pairs per identity, most first', () => {
+    const r = repo()
+    const OTHER = AS('ursa-exo', 'ursa-exo@agents.epito.me')
+    r.commit('a.md', LONG('a0'), 'Baseline a')
+    r.commit('a.md', LONG('a1'), 'Write a' + TRAILER)
+    r.commit('a.md', LONG('a1') + '\npm edit one', 'Edit a', SEAT)
+    r.commit('b.md', LONG('b0'), 'Baseline b')
+    r.commit('b.md', LONG('b1'), 'Write b' + TRAILER)
+    r.commit('b.md', LONG('b1') + '\npm edit two', 'Edit b', SEAT)
+    r.commit('c.md', LONG('c0'), 'Baseline c')
+    r.commit('c.md', LONG('c1'), 'Write c' + TRAILER)
+    r.commit('c.md', LONG('c1') + '\nexo edit', 'Edit c', OTHER)
+    const { diagnostics } = findCommitPairsWithDiagnostics(r.dir)
+    expect(diagnostics.editorIdentities).toEqual([
+      { name: 'ursa-pm', email: 'ursa-pm@agents.epito.me', pairs: 2 },
+      { name: 'ursa-exo', email: 'ursa-exo@agents.epito.me', pairs: 1 },
+    ])
+  })
+
+  it('declaring the identity turns its commits into generations, so the pair goes', () => {
+    const { r } = seatEditsAgentWork()
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir, {
+      agentIdentities: ['ursa-pm'],
+    })
+    expect(pairs).toHaveLength(0)
+    expect(diagnostics.generatedByDeclaredIdentity).toBe(1)
+    expect(diagnostics.editorIdentities).toEqual([])
+  })
+
+  it('matches a declared identity on the email as well as the name', () => {
+    // The whole reason the option is not just a wider author pattern: a
+    // fleet of seats shares one mail domain and nothing else.
+    const { r } = seatEditsAgentWork()
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir, {
+      agentIdentities: ['@agents.epito.me'],
+    })
+    expect(pairs).toHaveLength(0)
+    expect(diagnostics.generatedByDeclaredIdentity).toBe(1)
+  })
+
+  it('leaves the person alone when the declaration does not name them', () => {
+    const { r, seatSha } = seatEditsAgentWork()
+    const { pairs, diagnostics } = findCommitPairsWithDiagnostics(r.dir, {
+      agentIdentities: ['ursa-security'],
+    })
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].finalSha).toBe(seatSha)
+    expect(diagnostics.generatedByDeclaredIdentity).toBe(0)
+  })
+
+  it('does not widen the built-in vocabulary to emails, which would misread a person', () => {
+    // A person named Claude is a person. Reading them as a machine does
+    // not cost one commit's signal, it deletes the pair and the
+    // generated side with it, which is the costly direction named in
+    // src/pairfinder.ts's header note.
+    const PERSON = AS('C. Devereux', 'claude.devereux@example.com')
+    const r = repo()
+    r.commit('doc.md', LONG('v0'), 'Baseline')
+    r.commit('doc.md', LONG('v1'), 'Write it' + TRAILER)
+    const editSha = r.commit('doc.md', LONG('v1') + '\nher own edit', 'Rework it', PERSON)
+    const { pairs } = findCommitPairsWithDiagnostics(r.dir)
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].finalSha).toBe(editSha)
+  })
+})
