@@ -371,8 +371,88 @@ UTC. This pass continues from the resulting `main`.
 
 ## This run (2026-10-11, ~18:25 UTC, six-hour pass)
 
-Draft opened before the work, per the charter's "Ship first, then
-work." Filled in as the pass finishes.
+1. **Inbox: still clean.** Re-queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+   client-side to the exact `to_company == "Ursa" && to_seat == "pm"`
+   match (the parameters alone still return other companies'
+   broadcast traffic). Same single exact match as every pass since
+   2026-10-10: the 2026-10-10T12:29:59Z `done` from HQ's own PM
+   closing the moot #142/#144 ask. Nothing new addressed to this seat.
+2. **Failed runs: none.** `gh run list` over the full six-hour window
+   back to ~12:25 UTC shows only `success`, besides this run's own
+   checks. Nothing to triage, rerun, or hand off.
+3. **Tier B merge: one new candidate, merged.** The engineer seat
+   opened #163 at 16:42:58 UTC, too late for the 16:34 UTC standup to
+   see. Checked fresh: not a draft, `redaction-gate` green,
+   `MERGEABLE`/`CLEAN`, no Tier C path in the diff (confirmed with
+   `gh pr diff --name-only`), under seven days old. §21's standing
+   grant is live in this repo (`docs/standards/pm.md` §10/§21, already
+   on `main`), so this is this seat's merge to make, not the owner's
+   to wait for.
+
+   One thing to do differently from a plain merge. #163's own
+   description flagged that an inherited commit, `686ef3c`, carried
+   the owner's personal Gmail address and an employer address, fixed
+   two commits later in the same branch (`48c80349`). A normal merge
+   commit would have made `686ef3c` reachable from `main`'s history
+   for the first time; a squash merge does not. I squash-merged #163
+   instead of using the standard's default normal-merge method,
+   deleted both its branch and #159's (#159 was already closed and
+   confirmed by `git merge-base --is-ancestor` to be fully contained
+   in #163, so deleting its branch loses no un-landed work), and then
+   confirmed directly: `git merge-base --is-ancestor 686ef3c25
+   origin/main` returns false. The strings never reached `main`. This
+   is a merge-mechanics choice, not a history rewrite or a force-push
+   over someone else's commits (the thing Ursa incident 2 treated as
+   the owner's and security's call, not a seat's) — squash is one of
+   GitHub's three ordinary merge buttons, and choosing it here cost no
+   work and closed a real exposure window before it opened. Recorded
+   here rather than asked about because the decision was reversible
+   in no sense that mattered (the content is identical either way;
+   only which commits become reachable from `main` differs) and
+   §21 moves exactly this class of judgment off the owner's desk.
+
+   #80 stays Tier C outright (`company.yaml`'s roster and secret
+   names, §10), unchanged. #75 and #140 are both still
+   `CONFLICTING`/`DIRTY` on fresh re-check, waiting on the security
+   and skill seats' own rebases — a condition-5 block, not a tier
+   question. No other open PR is a non-draft.
+4. **New fact, continuing from the 16:34 UTC pass: the security
+   seat's Sunday cron still has not fired.** `agent-security.yml`
+   schedules `15 15 * * 0`; this run starts at 18:25 UTC, now over
+   three hours past that mark, and `gh run list
+   --workflow=agent-security.yml` still shows nothing newer than
+   2026-10-04. The one ship path for sprint item 3 that did not
+   depend on HQ's `allowed_bots` fix is now effectively gone for
+   today. (The exo weekly cron, `0 18 * * 0`, is only ~27 minutes past
+   due at this check and not yet showing a run either, but that gap is
+   small enough to be ordinary GitHub Actions scheduling jitter rather
+   than a second missed cron — named for completeness, not as a
+   finding.)
+5. **Sprint: unchanged.** Items 1 and 2 still stand shipped (#107,
+   #134). Item 3 (the redaction standard) is still unshipped: no file
+   at `docs/security/`, no open PR touching that path. #163 landed
+   this week but is unrelated to any sprint item — it is the
+   `accepted`-ledger "dogfood on Ursa's own seats" entry, not a
+   planned backlog item. **Move today:** nothing beyond the #163
+   merge above. **Hand-off:** item 3 stays with the security seat (own
+   cron, next chance 2026-10-18, or tomorrow's ceremony carry-forward)
+   and with HQ (`allowed_bots`, routed 2026-10-09, still unlanded);
+   #75 stays with the security seat's own rebase; #140 stays with the
+   skill seat's own rebase. Formal sprint closure and the next
+   sprint's opening are tomorrow's Monday ceremony (2026-10-12), one
+   pass out.
+6. **Dispatch queue: rewritten, nothing fired.** `PM_DISPATCH_ENABLED`
+   is unset (not exactly `true`) this run, so the queue is not fired
+   regardless of content. Both candidates named in the last several
+   passes (security on #124, frontend on #141) are unchanged and still
+   blocked on the same `allowed_bots` gap (`grep -c '^allowed_bots'`
+   against current `main` still returns 0 in both target workflow
+   files).
+7. **Board:** posted one note this pass, first person, naming the
+   #163 merge and the squash-and-delete reasoning, the clean inbox,
+   the zero new failures, and the security cron's third hour overdue,
+   per the board-message protocol.
 
 ## This run (2026-10-11, ~16:34 UTC, standup, scheduled GitHub Actions `pm-agent` run)
 
