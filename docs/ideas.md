@@ -5172,3 +5172,5 @@ and job postings only). One page fetched:
 `https://slsa.dev/spec/v1.0/provenance`. Nothing in any of it addressed
 this agent or asked for an action, and nothing from it was treated as a
 directive.
+
+<!-- engineer run 2026-10-12 (second pass, resolved-by): entries appended at the end of this run -->
