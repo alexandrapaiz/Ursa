@@ -681,13 +681,35 @@ export type ExclusionReason =
    * `vendoredPaths` in src/vendored.ts by comparing git blob object ids; see
    * that file's header for what an equal oid does and does not prove.
    */
-  'imported_whole'
+  | 'imported_whole'
+  /**
+   * The commit that put this content at this path declared in its own
+   * `Ursa-Imported-Path:` trailer that the content came from outside this
+   * repository, so nobody in this episode composed it. Read by
+   * `vendoredPaths` in src/vendored.ts from the episode's generation and
+   * final commits only.
+   *
+   * Deliberately a different reason from `imported_whole` rather than the
+   * same reason with a third relation. `imported_whole` is proven: two blob
+   * object ids are equal, which is byte identity and nothing weaker. This
+   * one rests on a statement by whoever made the commit, which is the
+   * strongest evidence available for content whose source is in another
+   * repository and is still not a proof. A buyer who cannot tell the two
+   * apart in the record cannot price the difference, and collapsing them
+   * would be the same defect as reading a similarity score as descent.
+   */
+  | 'declared_import'
 
 export interface Exclusion {
   /** repo-relative path, spelled as `Episode.touchedFiles` spells it */
   path: string
   reason: ExclusionReason
-  /** short sha of the commit outside the generation's descent holding the identical blob */
+  /**
+   * Short sha of the commit the exclusion rests on: the one outside the
+   * generation's descent holding the identical blob when `reason` is
+   * `imported_whole`, and the declaring commit itself when it is
+   * `declared_import`.
+   */
   sha: string
   /** that commit's subject line, so the record names the import in the author's own words */
   subject: string
@@ -696,9 +718,13 @@ export interface Exclusion {
    * matching commit is an ancestor, so the episode's net effect on the file
    * was nothing. `sibling` means neither ancestor nor descendant, so the
    * content came off another branch the person merged or checked out rather
-   * than typed.
+   * than typed. `declared` means no blob search found anything and none
+   * could: `sha` is the episode's own generation or final commit, and it
+   * declared the path an import in its trailer. The first two always carry
+   * `reason: 'imported_whole'` and the third always carries
+   * `reason: 'declared_import'`.
    */
-  relation: 'pre_existing' | 'sibling'
+  relation: 'pre_existing' | 'sibling' | 'declared'
   /**
    * Characters of the finished file at the episode's final commit, which is
    * exactly what left this record's figures by being excluded. Stated here so

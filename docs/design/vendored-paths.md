@@ -256,6 +256,7 @@ export interface VendoredPath {
   sha: string
   /** that commit's subject line */
   subject: string
+  /** a third member, 'declared', was added 2026-10-12; see §9.6 */
   relation: 'pre_existing' | 'sibling'
 }
 
@@ -503,7 +504,7 @@ measurement noise, so it is recorded here rather than done.
 | `git rev-parse <sha>:<path>` | n/a, a `git` subcommand | names a blob without reading it | `git cat-file -p` reads the content, `git ls-tree` prints a line that must be parsed for the oid. `rev-parse` returns the 40 characters wanted and nothing else |
 | `git log --all` | n/a, a `git` subcommand | enumerates candidate commits per path across every ref, including branches never merged | a single-branch walk cannot see a sibling branch, and sibling branches are precisely where imported content comes from. This is `commitsTouchingPath`'s existing rationale in `src/pairfinder.ts` |
 | TypeScript | 5.9.3 installed, `^5.7.2` in `ursa-major/package.json` | `tsc --noEmit` is the first half of `npm test`; `VendoredPath` and the `Episode` field are checked at every call site | already the project's language. The `relation` union is what makes a third relation a compile error rather than a runtime surprise |
-| Vitest | 5.0.2 (`npx vitest --version`) | runs `src/vendored.test.ts`'s 10 cases, each against a real throwaway git repository | already the project's runner (26 test files). Real repositories rather than mocked git, for `corroborate.test.ts`'s stated reason: the defect is never in the git call, it is in what the resolver believes about the answer |
+| Vitest | 5.0.2 (`npx vitest --version`) | runs `src/vendored.test.ts`'s cases (10 at this section's writing, 22 after §9), each against a real throwaway git repository | already the project's runner (26 test files). Real repositories rather than mocked git, for `corroborate.test.ts`'s stated reason: the defect is never in the git call, it is in what the resolver believes about the answer |
 | Node.js | 22.23.3 (`node --version` on the runner) | `node:child_process` `execFileSync` for the git calls, `node:fs` and `node:os` for fixture repositories | `execFileSync` rather than `exec`: no shell, so a path with a space or a quote in it cannot become an injection. This matches `src/pairfinder.ts`'s existing `git()` helper |
 | `tsx` | 4.23.15 installed, `^4.19.2` in `ursa-major/package.json` | runs `src/bin/ursa.ts` and the throwaway counting script directly from TypeScript, which is how every probe in this repo is taken | a build step before every probe would add a stale-artifact failure mode to a measurement whose whole point is to be re-runnable |
 
@@ -535,3 +536,429 @@ measurement noise, so it is recorded here rather than done.
   it; the check does not distinguish them and does not need to.
 - **the probe** — a clone of this repository with every remote branch
   fetched, used as real input to `ursa run`. The commands are in §6.
+
+---
+
+## 9. The import the search cannot see, and the declaration that answers it
+
+Added 2026-10-12. Sections 1 through 8 describe a check that finds an
+import by locating its content somewhere in this repository's own object
+store. This section is about the case where that is structurally
+impossible, which turned out to be the largest instance of the defect in
+this repository.
+
+### 9.1 The defect, as a number
+
+`docs/standards/lessons.md` is a copy of a file owned by
+`alexandrapaiz/alexandra-systems`. It arrived here by a sync commit that
+copied it from that repository at `775ce36`. On the 2026-10-11 dogfood
+run the resolver read all **63,362 characters** of it as model output and
+**60,616** of them as text the person kept, and that one file carried
+**84.7%** of the run's headline survival figure.
+
+The check in §2 could not refuse it and no amount of care in the blob
+comparison would have helped. §2's test is "is this content also at some
+commit that is neither the generation nor a descendant of it", and the
+answer for imported content is no, because the content did not exist in
+this repository at all until the sync commit introduced it. An import
+from outside git's reach is invisible to a check that works by looking
+inside it.
+
+This is a different failure from §1's. §1 is a file whose copy is *here*
+on a sibling branch, which the search finds. §9 is a file whose only copy
+*anywhere here* is the one the sync brought in, which the search cannot
+find by construction. Both produce the same false claim.
+
+### 9.2 Why a trailer, and why not the subject line
+
+Every sync commit in this repository already names its upstream in
+prose:
+
+```
+Lessons sync 2026-09-28: HQ standards/lessons.md @ 775ce36
+Re-vendor docs/standards/pm.md from HQ main @ 683c7dd
+Re-vendor docs/standards/lessons.md from HQ fb03199 (#169)
+```
+
+So a regular expression over subject lines would have worked on every
+instance of the defect that exists today. It is refused anyway, for two
+reasons that are not stylistic.
+
+First, it is the central-assessment overreach the fourth principle names
+(`docs/vision.md`): it would reclassify any commit whose message merely
+*mentions* a sync, including a commit discussing one, and the person who
+wrote that message never agreed to that reading. A `git revert` of a sync
+carries the sync's own subject line prefixed with "Revert", and reverting
+an import is not importing.
+
+Second, a declaration and a guess are different evidence and the record
+has to be able to tell a buyer which it holds. A trailer is a field whose
+only purpose is to be read by a machine. It is the same shape as
+`--agent-identity` (§ `docs/design/agent-coauthor-detection.md`): where
+the library cannot know, the party who does know says so, in a form that
+is unambiguous about having been said.
+
+### 9.3 Which commits are asked, and why exactly two
+
+The episode's **generation** and its **final**, in that order. These are
+the only two commits any claim in the record rests on, and each voids a
+different half of what `survived_verbatim` means — "a model wrote this
+and the person kept it":
+
+| commit that declares | what the declaration voids | the real shape it covers |
+|---|---|---|
+| the generation (`Episode.generatedSha`) | "a model wrote this". The sync was authored by an agent seat, so the pair walk reads it as a generation; the imported text is then credited to a model that only copied it | a sync commit followed by a genuine human edit of the same file. This is the `docs/standards/lessons.md` case in §9.1 |
+| the final (`Episode.finalSha`) | "the person kept this". The finished file is upstream's content, so it is not the person's composition either | an agent drafts a file and the person's finishing commit replaces it with the upstream version and says so |
+
+An **ancestor's** or a **sibling's** declaration is not read. Such a
+commit says what *it* imported, which is no evidence about what this
+episode composed on top of it; and in the sub-case where the imported
+content did survive into the finished file unchanged, §2's blob search
+already finds it by byte identity and reports it as `pre_existing` or
+`sibling`, which is the stronger evidence. Reading ancestors would
+therefore add no true verdict and would add the false one where the
+person rewrote an imported file into their own work.
+
+### 9.4 Evidence strength, and why this is a second reason rather than a third relation
+
+A declaration is **not** a proof. §2's `imported_whole` asserts that two
+blob object ids were compared and found equal, which is byte identity and
+nothing weaker. `declared_import` asserts that whoever made the commit
+said the content came from outside. That is the strongest evidence
+obtainable for content whose source is in another repository, and it is
+still a statement.
+
+So the record keeps them apart. A buyer who cannot distinguish a proof
+from a statement in the record cannot price the difference, and
+collapsing the two would be the same class of defect as reading a
+similarity score as descent (`docs/design/corroborated-descent.md`).
+Concretely, the invariant that a single reason must satisfy — "this was
+established by comparing blob object ids" — is false of a declaration,
+so a `declared` relation carrying `reason: 'imported_whole'` would be the
+record misdescribing its own evidence.
+
+The same rule reaches the terminal. `renderRunSummary` in
+`src/bin/ursa.ts` prints three branches rather than two, because its two
+existing sentences both say "byte-identical", and saying that about a
+comparison that never ran is the identical defect one layer out.
+
+### 9.5 System diagram, extending §3
+
+Two new nodes and three new edges. Everything else in §3 is unchanged.
+
+```
+          ┌─────────────────────────────────────────────┐
+          │ src/bin/ursa.ts  main()                     │
+          │   resolvablePaths(ep): string[]             │
+          └────────┬────────────────────────────────────┘
+   string[] paths  │  CommitInfo[]  Episode{generatedSha,finalSha}
+                   ▼
+          ┌────────────────────────────────────────┐
+          │ src/vendored.ts                        │
+          │   vendoredPaths(...)                   │
+          │     declaration(repoPath, sha)  [NEW]  │
+          └───┬────────────────┬───────────────┬───┘
+              │                │               │
+  Declaration │                │ blob oid      │ PathCommit[]
+  {sha,subject,│               │ (40 hex)      │
+   paths:Set}  │               │               │
+              ▼                ▼               ▼
+  ┌───────────────────────┐ ┌──────────────┐ ┌──────────────────────┐
+  │ git log -1            │ │ git rev-parse│ │ src/pairfinder.ts    │
+  │ --pretty=format:      │ │ <sha>:<path> │ │ commitsTouchingPath  │
+  │ %s%x00%(trailers:     │ │ (blobOid)    │ │ (git log --all -- p) │
+  │ key=Ursa-Imported-    │ └──────────────┘ └──────────────────────┘
+  │ Path,valueonly,       │        [NEW edge is the one on the left;
+  │ separator=%x09)       │         these two are §3's, unchanged]
+  │        [NEW node]     │
+  └───────────────────────┘
+                   │
+    VendoredPath{relation:'declared'}
+                   ▼
+          ┌────────────────────────────────────────┐
+          │ src/resolve-episode.ts                 │
+          │   relation==='declared'                │
+          │     ? reason:'declared_import'   [NEW] │
+          │     : reason:'imported_whole'          │
+          └────────┬───────────────────────────────┘
+      Exclusion[]  │
+                   ▼
+   ┌───────────────────────────────┐   ┌──────────────────────────────┐
+   │ .ursa/records/<id>.json       │   │ src/invariants.ts            │
+   │   exclusions[].reason         │──▶│ EXCLUSION_NOT_CLASSIFIED     │
+   │   = 'declared_import'         │   │ (reason-agnostic, unchanged) │
+   └───────────────────────────────┘   └──────────────────────────────┘
+```
+
+The edge labels are exact. `git log -1 --pretty=format:...` returns one
+string: the subject, a NUL byte, then the declared paths separated by
+tabs. NUL and tab are used because neither can occur in a git subject
+line or in a path git will check out, so the split needs no escaping.
+
+### 9.6 Interfaces, extending §4
+
+`src/vendored.ts`:
+
+```ts
+/**
+ * The commit trailer by which the party making a commit declares that the
+ * content it is putting at a path came from outside this repository.
+ */
+export const IMPORT_TRAILER = 'Ursa-Imported-Path'
+
+/** What one commit says about itself: its subject, and the paths it imported. */
+interface Declaration {
+  /** full sha, as passed in; truncated only when it reaches a VendoredPath */
+  sha: string
+  subject: string
+  /** paths named by IMPORT_TRAILER lines; empty on a commit that declares nothing */
+  paths: Set<string>
+}
+
+/** Read sha's subject and its import declarations in one git call. */
+function declaration(repoPath: string, sha: string): Declaration
+
+/** §4's interface, with one more member in the union. */
+export interface VendoredPath {
+  path: string
+  sha: string
+  subject: string
+  relation: 'pre_existing' | 'sibling' | 'declared'
+}
+```
+
+`src/types.ts`:
+
+```ts
+export type ExclusionReason =
+  | 'imported_whole'   // two blob object ids compared and equal: a proof
+  | 'declared_import'  // the committing party said so: a statement
+
+export interface Exclusion {
+  path: string
+  reason: ExclusionReason
+  /**
+   * The commit the exclusion rests on: the one outside the generation's
+   * descent holding the identical blob when reason is imported_whole,
+   * and the declaring commit itself when it is declared_import.
+   */
+  sha: string
+  subject: string
+  relation: 'pre_existing' | 'sibling' | 'declared'
+  chars: number
+}
+```
+
+`vendoredPaths`'s signature is unchanged. It takes no new argument: the
+two shas it needs are already members of the `ep` parameter it has, which
+is why this is a change inside one function rather than a change to a
+boundary.
+
+### 9.7 The one correct spelling, and the silent way to get it wrong
+
+Git parses trailers out of the **last paragraph of the message only**.
+So this is read:
+
+```
+Lessons sync 2026-09-28: HQ standards/lessons.md @ 775ce36
+
+Ursa-Imported-Path: docs/standards/lessons.md
+Ursa-Imported-Path: docs/standards/pm.md
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+and this is **not**, because the co-author block is the last paragraph
+and the declaration is a paragraph of its own above it:
+
+```
+Lessons sync 2026-09-28: HQ standards/lessons.md @ 775ce36
+
+Ursa-Imported-Path: docs/standards/lessons.md
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+The two differ by one blank line. The failure is silent: the declaration
+is not read, the exclusion does not fire, and the record sells the import
+as survival exactly as it did before this change.
+
+This is pinned as behaviour rather than fixed, by the test `does not read
+a declaration in a paragraph of its own, above another trailer block` in
+`src/vendored.test.ts`, which asserts both halves on histories differing
+only by that blank line. Fixing it would mean scanning the whole message
+for the key, which is reading prose, which is what §9.2 refuses. The cost
+is paid down here and by the `declaring()` helper in the test file, which
+exists so that the correct spelling is the easy one to write.
+
+The run that shipped this made exactly this mistake first, in its own
+fixtures, and five tests failed before the cause was found.
+
+### 9.8 On-disk layout, with a real payload
+
+The record field is `exclusions[]`, already specified in §5.2. What is
+new is the pair of values `reason: "declared_import"` and `relation:
+"declared"`. This entry is the literal content of
+`/tmp/declared-fixture/.ursa/records/declared-fixture-2026-10-12-5306fd3.json`,
+produced by the commands in §9.9 and copied out of the file:
+
+```json
+{
+  "exclusions": [
+    {
+      "path": "standard.md",
+      "reason": "declared_import",
+      "sha": "5306fd3",
+      "subject": "Lessons sync 2026-09-28: HQ standard.md @ 775ce36",
+      "relation": "declared",
+      "chars": 3336
+    }
+  ]
+}
+```
+
+The fixture is a throwaway repository under `/tmp`, built by the script
+in §9.9, so its shas are reproducible by anyone running those commands
+and no identifier here belongs to a private record or to anyone's
+machine. The redaction rider in `prompts/engineer-agent.md` is satisfied
+by construction rather than by substitution: there is nothing here to
+redact.
+
+### 9.9 Exact commands, and the numbers they produced
+
+Build the fixture. Every string below is literal; `standard.md` is the
+imported file, `module.ts` is a file the agent genuinely wrote, which
+must keep being resolved:
+
+```sh
+rm -rf /tmp/declared-fixture && mkdir -p /tmp/declared-fixture
+cd /tmp/declared-fixture && git init -q -b main
+export GIT_AUTHOR_NAME="Human Owner" GIT_AUTHOR_EMAIL="human@example.com"
+export GIT_COMMITTER_NAME="Human Owner" GIT_COMMITTER_EMAIL="human@example.com"
+
+# Baseline, then the sync commit authored by an agent seat, declaring
+# its import, then the person's genuine edit of both files.
+git add -A && git commit -q -m "Baseline"
+GIT_AUTHOR_NAME="claude[bot]" GIT_AUTHOR_EMAIL="noreply@anthropic.com" \
+GIT_COMMITTER_NAME="claude[bot]" GIT_COMMITTER_EMAIL="noreply@anthropic.com" \
+git commit -q -a -m "Lessons sync 2026-09-28: HQ standard.md @ 775ce36
+
+Ursa-Imported-Path: standard.md
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git commit -q -a -m "Annotate the standard, finish the module"
+```
+
+Confirm git itself reads the declaration, before asking this code to:
+
+```sh
+git -C /tmp/declared-fixture log -1 \
+  --pretty=format:'%(trailers:key=Ursa-Imported-Path,valueonly)' 5306fd3
+# standard.md
+```
+
+Run before and after. The "before" tree is a detached worktree at this
+branch's first commit, with `node_modules` symlinked so both runs use one
+install:
+
+```sh
+git worktree add --detach /tmp/ursa-before HEAD~1
+ln -sfn "$PWD/ursa-major/node_modules" /tmp/ursa-before/ursa-major/node_modules
+
+cd /tmp/ursa-before/ursa-major
+rm -rf /tmp/declared-fixture/.ursa && npx tsx src/bin/ursa.ts run /tmp/declared-fixture
+
+cd /home/runner/work/Ursa/Ursa/ursa-major
+rm -rf /tmp/declared-fixture/.ursa && npx tsx src/bin/ursa.ts run /tmp/declared-fixture
+```
+
+What those two runs printed, verbatim on the lines that moved:
+
+| figure | before | after |
+|---|---|---|
+| `stats.byClass.survived_verbatim.chars`, the headline "survived your editing verbatim" | 3,626 | 423 |
+| `stats.finalChars`, the finished size the record claims to have read | 3,788 | 452 |
+| `files[].path`, the paths the record classifies | `module.ts`, `standard.md` | `module.ts` |
+| `exclusions`, the paths it read and refused | `[]` (asked, found nothing) | one entry, §9.8 |
+
+The import was **88.3%** of the headline figure (3,203 of 3,626 characters
+removed), which is the same shape as the 84.7% measured on the real
+repository in §9.1.
+
+The arithmetic closes exactly, and this is the check worth running rather
+than the percentage. The before run read 3,788 characters. The after run
+classifies 452 and excludes 3,336. `452 + 3,336 = 3,788`: precisely the
+import left the figures and nothing else did.
+
+Check the record against the gate, which has fifteen bounds and no new
+one here — `EXCLUSION_NOT_CLASSIFIED` is written against `reason` as a
+value rather than against either of its cases, so it covers the new
+reason unchanged:
+
+```sh
+cd /home/runner/work/Ursa/Ursa/ursa-major
+npx tsx src/invariants.cli.ts /tmp/declared-fixture/.ursa/records
+# exclusions: 1 path came in whole from elsewhere and was not classified,
+#   taking 3,336 chars out of the 3,788 this run read
+# OK — every stated bound holds
+# 1 record checked, 0 violations.
+```
+
+The suite:
+
+```sh
+cd /home/runner/work/Ursa/Ursa/ursa-major && npm test
+# Test Files  31 passed | 1 skipped (32)
+#      Tests  560 passed | 4 skipped (564)
+```
+
+550 before, 560 after. The ten are `src/vendored.test.ts`'s new block,
+and every one of them asserts its premise as well as its verdict —
+including, in the first, that the content exists at that path in exactly
+one commit, so that the blob search provably has nothing to find and the
+declaration is carrying the whole result.
+
+### 9.10 What this does not do
+
+Stated plainly because the gap is easy to miss in a passing suite.
+
+**It changes nothing about this repository's existing history.** No
+commit in this repository carries `Ursa-Imported-Path` today, so
+re-running the probe on `main` produces the identical numbers it produced
+yesterday. The 60,616-character claim in §9.1 is not retroactively
+repaired; it is a claim in a record already written, and this change only
+stops the next one.
+
+**It requires the syncing party to adopt the trailer.** Sync commits here
+are made by HQ's seats and by the exo-centralizer seat, whose charters
+live in another repository; there is no sync script in this repository to
+amend (checked: `grep -rln 'Re-vendor' tools/ .github/ scripts/` returns
+nothing). So adoption is a convention that has to reach those seats, and
+until it does this mechanism is armed and unused. That routing is an
+owner and HQ decision rather than an engineering one, and it is filed as
+a ledger entry on 2026-10-12 rather than actioned here.
+
+**It does not detect an undeclared cross-repository import.** By design.
+The alternative was the subject-line regex §9.2 refuses, and the honest
+statement of the residual risk is that an import nobody declares is still
+read as composition. §2's blob search remains the only mechanism that
+needs no cooperation, and it only sees imports whose content is already
+here.
+
+### 9.11 Terms used in this section, defined in place
+
+- **commit trailer** — a `Key: value` line in the last paragraph of a git
+  commit message, parsed by `git interpret-trailers` and by
+  `--pretty=format:%(trailers:...)`. `Co-Authored-By` is the one this
+  project already reads, in `listCommits`.
+- **declaration**, as §9 uses it — a statement by the party making a
+  commit about content that commit introduces, in a machine-read field.
+  Contrasted throughout with a **proof**, which here means equal git blob
+  object ids and nothing else.
+- **sync commit** — a commit whose content was copied into this
+  repository from another repository, named in `CLAUDE.md` under "The
+  holding company" as the mechanism by which HQ standards arrive.
+- **the generation**, **the final** — `Episode.generatedSha` and
+  `Episode.finalSha`, the agent's commit and the person's commit of one
+  pair. Defined in §8; repeated because §9.3 turns on the distinction.
+- **armed and unused** — of a mechanism that is implemented, tested and
+  reachable, but which no producer currently triggers, so it changes no
+  output until one does. §9.10's first two paragraphs.

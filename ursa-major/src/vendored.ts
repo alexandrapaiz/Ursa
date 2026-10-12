@@ -48,8 +48,8 @@
 // answer, because text comparison invites normalization and
 // normalization is how "nearly the same" starts passing for "the same".
 //
-// THE TWO RELATIONS, which are src/corroborate.ts's and mean the same
-// thing here:
+// THE TWO RELATIONS THE SEARCH CAN FIND, which are src/corroborate.ts's
+// and mean the same thing here:
 //
 //   pre_existing — the matching commit is an ancestor of the generation.
 //     The finished file is the file as it stood before the agent wrote,
@@ -58,6 +58,49 @@
 //     another branch, which the person merged or checked out rather than
 //     typed. This is the `b59add9` case: a vendoring commit on a branch
 //     the generation never contained.
+//
+// THE THIRD RELATION, AND THE CASE THE SEARCH STRUCTURALLY CANNOT SEE.
+// Both relations above are found by locating the content somewhere in
+// this repository's object store. An import from a DIFFERENT repository
+// is invisible to that, because the content never existed here before
+// the commit that brought it in. Measured on this repository on
+// 2026-10-11: `docs/standards/lessons.md` arrived by a sync commit
+// copying it from `alexandrapaiz/alexandra-systems` at `775ce36`, the
+// resolver read all 63,362 characters of it as model output and 60,616
+// of them as text the person kept, and this module could not refuse it.
+// Scaling: that one file carried 84.7% of that run's headline survival
+// figure (docs/design/vendored-paths.md §1).
+//
+//   declared — a commit says in its own trailer that the content it put
+//     at this path came from outside. No blob search is run and none
+//     would succeed. The evidence is the declaration, which is weaker
+//     than byte identity and is therefore reported under its own
+//     exclusion reason (`declared_import`, not `imported_whole`), so a
+//     buyer reading the record can tell a proof from a statement.
+//
+// WHY A TRAILER AND NOT THE SUBJECT LINE. Every sync commit in this
+// repository already names its upstream in prose — "Lessons sync
+// 2026-09-28: HQ standards/lessons.md @ 775ce36", "Re-vendor
+// docs/standards/pm.md from HQ main @ 683c7dd" — so a regex over
+// subjects would have worked on today's history. It is refused anyway.
+// A regex over prose is the central-assessment overreach the fourth
+// principle names (docs/vision.md): it would silently reclassify any
+// commit whose message happens to mention a sync, and the person who
+// wrote that message never agreed to that reading. A trailer is a
+// declaration in a field whose only purpose is to be read by a machine,
+// which is the same shape as `--agent-identity`: where the library
+// cannot know, the party who does says so.
+//
+// WHICH COMMITS ARE ASKED, AND WHY ONLY TWO. The generation and the
+// final, in that order. These are the only two commits whose authorship
+// any claim in the record rests on, and each voids a different half of
+// `survived_verbatim`'s meaning ("a model wrote this and the person kept
+// it"). A declaration on the generation says the model did not write it.
+// A declaration on the final says the finished file is not the person's
+// composition either. An ancestor's or a sibling's declaration is not
+// read, because it says what that commit imported and nothing about what
+// this episode composed on top of it; where the content did survive
+// unchanged, the blob search above already finds it by identity.
 //
 // Descendants of the generation are excluded, and that exclusion is what
 // keeps the test from being vacuous. `ep.finalSha` is a descendant and
@@ -110,8 +153,15 @@ export interface VendoredPath {
   sha: string
   /** that commit's subject line, so the record names the import in the user's own words */
   subject: string
-  /** how that commit stands to the generation; see this file's header */
-  relation: 'pre_existing' | 'sibling'
+  /**
+   * How this path was found to be an import; see this file's header.
+   * `pre_existing` and `sibling` are proven by blob identity and say where
+   * the identical content sits relative to the generation. `declared` is
+   * `sha`'s own trailer saying it brought the content in from outside this
+   * repository, which is a statement rather than a proof and carries its
+   * own exclusion reason downstream.
+   */
+  relation: 'pre_existing' | 'sibling' | 'declared'
 }
 
 /**
@@ -136,6 +186,80 @@ function blobOid(repoPath: string, sha: string, path: string): string | null {
     }).trim() || null
   } catch {
     return null
+  }
+}
+
+/**
+ * The commit trailer by which the party making a commit declares that the
+ * content it is putting at a path came from outside this repository.
+ *
+ * Exported because it is the public half of this module: a sync commit has
+ * to spell the key exactly for the declaration to be read, and the design
+ * document and the tests must not be free to spell it differently.
+ *
+ * One trailer line per path, repeated for a commit importing several:
+ *
+ *   Lessons sync 2026-09-28: HQ standards/lessons.md @ 775ce36
+ *
+ *   Ursa-Imported-Path: docs/standards/lessons.md
+ *   Ursa-Imported-Path: docs/standards/pm.md
+ *
+ * Git parses trailers only out of the message's last paragraph, so a
+ * declaration written mid-message is not read. That is a constraint worth
+ * keeping rather than working around: it is what stops a commit that
+ * merely discusses an import from being taken as declaring one.
+ */
+export const IMPORT_TRAILER = 'Ursa-Imported-Path'
+
+/** What one commit says about itself: its subject, and the paths it imported. */
+interface Declaration {
+  /** full sha, as passed in; truncated only when it reaches a `VendoredPath` */
+  sha: string
+  subject: string
+  /** paths named by `IMPORT_TRAILER` lines, empty on a commit that declares nothing */
+  paths: Set<string>
+}
+
+/**
+ * Read `sha`'s subject and its import declarations in one git call.
+ *
+ * `%(trailers:key=...,valueonly,separator=%x09)` is git's own trailer
+ * parser, which is the whole reason this is a trailer: no parsing of commit
+ * prose happens in this process. Tab separates the values and NUL separates
+ * the subject from them, because neither character can occur in a git
+ * subject line or in a path git will check out.
+ *
+ * Spelled here rather than added to `listCommits` in src/pairfinder.ts for
+ * the reason `blobOid` above gives: that module is the most contended file
+ * in the repository, its `--pretty` format is a positional tab-separated
+ * row that every caller indexes into, and this needs two commits per
+ * episode rather than every commit in the walk. `CommitInfo.trailers`
+ * carries `Co-Authored-By` only, so there was no field to reuse.
+ *
+ * stderr is dropped and a failure returns a declaration of nothing, the
+ * same asymmetry the header states: a clone that cannot answer is a fact
+ * about the clone, and refusing to resolve a file over it would cost real
+ * correction signal.
+ */
+function declaration(repoPath: string, sha: string): Declaration {
+  let out: string
+  try {
+    out = execFileSync('git', [
+      '-C', repoPath, 'log', '-1',
+      `--pretty=format:%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
+      sha,
+    ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+  } catch {
+    return { sha, subject: '', paths: new Set() }
+  }
+  const nul = out.indexOf('\0')
+  if (nul < 0) return { sha, subject: out.trim(), paths: new Set() }
+  return {
+    sha,
+    subject: out.slice(0, nul),
+    paths: new Set(
+      out.slice(nul + 1).split('\t').map((x) => x.trim()).filter((x) => x.length > 0),
+    ),
   }
 }
 
@@ -172,9 +296,28 @@ export function vendoredPaths(
 ): VendoredPath[] {
   const { ancestors, descendants } = relatives(commits, ep.generatedSha)
   const found: VendoredPath[] = []
+  // Two git calls for the whole episode, skipped entirely when there is
+  // nothing to ask about. Generation before final: a declaration on the
+  // generation voids the authorship claim at its root, so it is the more
+  // informative of the two when both commits declare the same path.
+  const declared = paths.length === 0
+    ? []
+    : [declaration(projectPath, ep.generatedSha), declaration(projectPath, ep.finalSha)]
   for (const path of paths) {
     const finalOid = blobOid(projectPath, ep.finalSha, path)
     if (finalOid === null || finalOid === EMPTY_BLOB) continue
+    // Checked ahead of the search, and short-circuiting it. Not an
+    // optimization dressed as a rule: the declared case is by definition
+    // the one where the content is not in this object store, so the search
+    // it skips is the search that was going to fail. The cost is that a
+    // path which is both declared and findable by identity is reported
+    // under the weaker evidence, which is the honest direction to err and
+    // saves up to `MAX_CANDIDATE_BLOBS` + 1 subprocesses per such path.
+    const d = declared.find((x) => x.paths.has(path))
+    if (d !== undefined) {
+      found.push({ path, sha: d.sha.slice(0, SHORT), subject: d.subject, relation: 'declared' })
+      continue
+    }
     const touching = commitsTouchingPath(projectPath, path)
     // null is "this clone cannot answer", which is not evidence of an
     // import. Resolve the file.
