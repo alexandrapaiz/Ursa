@@ -2,6 +2,10 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## This run (2026-10-12, six-hour pass, in progress)
+
+Draft opened first per "ship first, then work." Filling in below.
+
 Reconciled 2026-10-11, ~16:34 UTC (standup, the scheduled GitHub
 Actions `pm-agent` run). Continues this seat's own open #162
 (`ursa-pm/2026-10-11-message-3`), which already carried the ~06:20 UTC
