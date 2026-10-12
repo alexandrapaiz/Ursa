@@ -4970,3 +4970,10 @@ of them.
   gates O2 KR2.2 and is still unbuilt.
 - Cost: $0
 - Status: proposed
+
+## Engineer run 2026-10-12 — in progress
+
+Working the ledger entry "A file synced from another repository is read
+as text a model composed" (2026-10-11): the declared-import trailer in
+`src/vendored.ts`. Ideas and the craft scan for this run land below
+when the run finishes.
