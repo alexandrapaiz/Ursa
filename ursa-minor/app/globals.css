@@ -220,6 +220,28 @@ html {
   }
 }
 
+/* ---------- centred labels in a tracked face ----------
+
+   Letter-spacing is added after every glyph including the last, so a centred
+   uppercase label carries one trailing space its ink does not fill, and the
+   ink lands left of the box's centre by half of it. Measured 2026-10-12 at 3x
+   on the rendered controls, ink to border on each side: GET POLARIS 29.33
+   left against 31.33 right, BACK TO URSA MINOR 30.00 against 32.33. The
+   word-mark measures 2.00 against 2.00, because 2026-10-08 trimmed its
+   trailing space for the hover hairline; this is the same defect in the only
+   other place it occurs, and the same remedy.
+
+   The correction moves the label, not the box: half the tracking off the
+   right padding and onto the left, so both controls keep their width and
+   their left edge stays on the page's margin. Benchmarked 2026-10-12 against
+   Linear, Vercel, Cursor and Perplexity: none of the four tracks a primary
+   control far enough for this to arise, which is why none of them corrects
+   it. The tracking is ours, so the correction has to be too. */
+.tracked-label {
+  padding-left: calc(1.75rem + 0.11em);
+  padding-right: calc(1.75rem - 0.11em);
+}
+
 /* ---------- the call to action ---------- */
 /* The only control on the page, and today it ships disabled, so it has no
    hover, press or focus behaviour at all. Benchmarked against Linear
@@ -354,6 +376,31 @@ html {
    tracking leaves after the final R, so the rule stops under the letter
    rather than 5px past it. On the home page the mark is not a link and this
    never applies. */
+
+/* The hit area, which is not the same thing as the box.
+
+   Measured 2026-10-12: the word-mark link on the 404 renders 134.5 x 24 at
+   every width from 320 to 1440. It is the page's "go home" control and the
+   first tab stop, and 24px is well under the 44px minimum touch target, so on
+   a phone it is the hardest thing on the site to hit while being one of only
+   two things to hit. The header has the room: 56px of padding above the mark
+   and 32px below, and at 320, where the tag wraps under the mark, 4px between
+   the two.
+
+   Taken as an overlay rather than as padding on purpose. Padding would grow
+   the link's own box, and the focus ring and the hover hairline are both
+   drawn from that box and were tuned against it on 2026-10-08. 16px up and
+   4px down takes 24 to exactly 44 without moving a pixel of either, and the
+   4px stops at the tag's top edge at 320 rather than covering inert text. */
+.mark-link {
+  position: relative;
+}
+
+.mark-link::after {
+  content: "";
+  position: absolute;
+  inset: -16px 0 -4px;
+}
 
 .mark-link .mark {
   margin-right: -0.34em;

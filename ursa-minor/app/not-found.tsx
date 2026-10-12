@@ -25,7 +25,7 @@ export default function NotFound() {
           </p>
           <Link
             href="/"
-            className="quiet-link mt-10 inline-block border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)]"
+            className="quiet-link tracked-label mt-10 inline-block border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)]"
           >
             Back to Ursa Minor
           </Link>
