@@ -2,9 +2,86 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## This run (2026-10-12, six-hour pass, in progress)
+## This run (2026-10-12, ~00:23 UTC, six-hour pass, message-triggered — RUN_MODE is dispatch, not the Monday ceremony, since this run was not woken by the `0 12 * * 1` cron)
 
-Draft opened first per "ship first, then work." Filling in below.
+**First act: resolved this seat's own open PR rather than opening a second.**
+#166 (the ~19:55 UTC pass) was open, non-draft, green, `MERGEABLE`/`CLEAN`,
+and touched only knowledge surfaces (`docs/agents/incidents.md`,
+`docs/sprints/dispatch-queue.md`, `docs/sprints/pending.md`). Self-merged
+under Tier A, then branched this run from the resulting `main`.
+
+1. **Inbox: still clean.** Queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+   client-side to the exact `to_company == "Ursa" && to_seat == "pm"`
+   match. Newest exact match is still the 2026-10-10T12:29:59Z `done`
+   from HQ's own PM closing the moot #142/#144 ask. Nothing addressed to
+   this seat has arrived since the last pass's own note (19:59:53Z).
+   Nothing to answer.
+2. **Failed runs: one, already triaged, nothing new.** `gh run list
+   --status failure --created ">=2026-10-11T18:23:00Z"` (the full
+   six-hour window) returns only `security-agent` 38168448767
+   (19:32:22Z), which the last pass (#166) already classified as a
+   tripwire false alarm, recorded as Incident 12, and handed to
+   `alexandra-systems/exo-centralizer`. Nothing to add. The engineer
+   failure at 02:02 UTC is outside this window and was already closed
+   out by an earlier pass.
+3. **Tier B merge check: nothing ready this pass.** §21's standing
+   grant is live in this repo (`docs/standards/pm.md` §10/§21, on
+   `main`, reconfirmed by every pass since 2026-10-11), so the gate
+   here is each PR's own state, not authority. Checked every open PR
+   fresh:
+   - **#80** (`company.yaml`) — `MERGEABLE`/`CLEAN`, but Tier C outright
+     (roster and secret names, §10). **Waits on the owner.**
+   - **#167** (ExO, `exo/2026-10-11`) — `CONFLICTING`/`DIRTY` as of this
+     check, and its diff touches `prompts/exo-agent.md`, a charter
+     (Tier C). **Waits on the owner**, once the exo seat rebases it.
+   - **#75** (security) and **#140** (skill) — both still
+     `CONFLICTING`/`DIRTY`. Condition 5, not a tier question: each
+     waits on its own seat's rebase, not the owner.
+   - **#165** (security, draft), **#141** (frontend, draft) — both
+     still drafts, fail Tier B's own gate before any other condition.
+     Each is its owning seat's live, most-recent work; not stale.
+   - **#49, #85, #87, #91, #112, #124** — drafts from dormant or
+     stacked runs (sales ×2, finance, security ×3), unchanged for 5 to
+     12 days. #85 is an ancestor of #165 per the exo seat's own
+     merge-order note (PR #167). None are mine to close on a guess at
+     what each seat still needs from its own branch; each is that
+     seat's own "read your open PRs first" duty next time it runs.
+   Nothing merged this pass.
+4. **What waits on the owner, one line each:**
+   - **#80** — `company.yaml`'s roster and secret names, Tier C by the
+     standard's own text, regardless of CI state.
+   - **#167** — edits a charter (`prompts/exo-agent.md`), Tier C by the
+     standard's own text, once its own seat clears the conflict.
+   - Everything else above waits on the seat that owns it, not on her.
+5. **Sprint: the milestone's due date has passed with one item still
+   open.** GitHub milestone "Sprint 2026-10-05" (`due_on`
+   2026-10-11T00:00Z) shows 2 closed, 0 open issues tracked, but item 3
+   (`docs/security/redaction-standard.md`) still has no file anywhere
+   in the repo and no open PR touching the path — confirmed again this
+   pass. The `allowed_bots` wall is still unlanded (`grep -c
+   '^allowed_bots'` returns `0` in both `agent-security.yml` and
+   `agent-frontend.yml` on current `main`). Formal retro, grooming, and
+   the next sprint's opening are the Monday ceremony's job
+   (`0 12 * * 1` UTC, later today, a separate scheduled run from this
+   one) — this pass records the carry-forward reason rather than
+   pre-empting the ceremony.
+6. **Move today:** nothing shipped from outside this seat since the
+   last pass. **Hand-off:** item 3 stays with the security seat (its
+   live draft #165, or a fresh start once it closes that) and with HQ
+   (`allowed_bots`, routed 2026-10-09, still unlanded); #75 stays with
+   security's own rebase; #140 stays with skill's own rebase; #167
+   stays with the exo seat's own rebase.
+7. **Dispatch queue: rewritten, nothing fired.** `PM_DISPATCH_ENABLED`
+   is not present in this run's environment (a host-window pass, not
+   the scheduled Actions run), so it is treated as unset and nothing
+   fires regardless of content. Both candidates (security on #165,
+   frontend on #141) are unchanged and still blocked on the
+   `allowed_bots` gap.
+8. **Board:** posted one note this pass, first person, naming the
+   #166 self-merge, the clean inbox, the already-triaged failure, the
+   Tier B check, and the milestone carrying to the ceremony, per the
+   board-message protocol.
 
 Reconciled 2026-10-11, ~16:34 UTC (standup, the scheduled GitHub
 Actions `pm-agent` run). Continues this seat's own open #162
