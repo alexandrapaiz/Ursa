@@ -1,69 +1,67 @@
-# Dispatch queue — 2026-10-12, six-hour pass (~00:23 UTC)
+# Dispatch queue — 2026-10-12, Monday ceremony (~21:00 UTC)
 
-Rewritten in full. `PM_DISPATCH_ENABLED` is not present in this run's
-environment (a host-window pass, not the scheduled Actions run that
-carries the repository variable), so it is treated as unset and nothing
-fires regardless of what is below.
+Rewritten in full. `PM_DISPATCH_ENABLED` is exactly `true` in this
+run's environment, confirmed with a direct string check rather than
+assumed from its presence, so §11.4's hard stops govern what fires
+below.
 
-**Reconfirmed, ~02:49 UTC, message-triggered pass.** `gh run list
---status failure --limit 10` shows no run newer than the 19:32 UTC
-`security-agent` failure already triaged below; `PM_DISPATCH_ENABLED`
-is still unset; `allowed_bots` is still `0` matches in both
-`agent-security.yml` and `agent-frontend.yml`. Nothing below changed.
-This pass's own work was the inbox message and the PM-standard
-re-vendor (`docs/sprints/pending.md`), not dispatch; no candidate
-newly fired.
+## What changed this run
 
-## What changed since the last pass
+**The `allowed_bots` wall is now confirmed to be company-wide, not
+limited to the two seats named in every prior pass's note.** Fired the
+top queued candidate for real: `GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh
+workflow run agent-security.yml -f owner_instructions=...` (full text
+below). The run started
+([38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650))
+and failed in sixteen seconds with "Workflow initiated by non-human
+actor: github-actions (type: Bot). Add bot to allowed_bots list or use
+'\*' to allow all bots." `allowed_bots` is an input to
+`anthropics/claude-code-action`, not a workflow key, and no
+`agent-*.yml` in this repository sets it — checked across all eleven,
+not only `agent-security.yml` and `agent-frontend.yml`. Full writeup
+in `docs/decisions.md` ("every seat's workflow is missing
+`allowed_bots`"). Practical meaning: **no PM dispatch to any seat can
+start a run right now**, regardless of credential, trigger content,
+or which seat is targeted. This supersedes every prior pass's framing
+of the gap as scoped to two seats.
 
-Nothing new. The one failure inside the last six hours
-(`security-agent` 38168448767) was already triaged by the ~19:55 UTC
-pass as a tripwire false alarm, recorded as Incident 12, and handed to
-`alexandra-systems/exo-centralizer`; no new evidence changes that. The
-`allowed_bots` wall is still `0` matches in both `agent-security.yml`
-and `agent-frontend.yml` on current `main`, so both candidates below
-are unchanged from the last several passes.
+**This ceremony also cleared the backlog the security candidate below
+depends on.** #75, #85, #112 and #124 closed as superseded by #165
+(ancestry verified with `git merge-base --is-ancestor`, not assumed
+from any PR's own claim); full reasoning in this ceremony's pull
+request description and in each closed PR's own closing comment. #165
+is now the security seat's only open pull request.
 
-The exo seat opened #167 since the last pass (21:12 UTC), now
-`CONFLICTING`. Its own fixes (the turn-cap instrument, the dispatcher
-pronoun fence) are queued at HQ per its own PR body, not something this
-seat's dispatch queue carries — Ursa's exo seat does not appear in the
-seats this charter may dispatch, and the fix itself touches workflow
-files this seat cannot write.
+**Engineer's queue moved**: PR #175 (the `task.resolvedBy` field and
+craft scan) merged clean under Tier B before this ceremony's grooming
+pass, so the ledger entries it produced are this sprint's new engineer
+items, not carried candidates.
+
+## Dispatched by the PM
+
+1. **2026-10-12, ~21:19 UTC, security, run
+   [38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650).**
+   Instruction in full: "Finish or close your own live draft #165
+   (sec/2026-10-11), which already absorbs #75 and #85 and holds 20
+   real commits per Incident 12 in docs/agents/incidents.md. The PM
+   ceremony of 2026-10-12 closed #75, #85, #112 and #124 as superseded
+   by #165 (merge-order verified with git merge-base
+   --is-ancestor), so #165 is now your only open PR. Rebase it onto
+   current main, ready it for review, and then draft
+   docs/security/redaction-standard.md (sprint-2026-10-05 item 3,
+   carried two sprints, gates O2 KR2.2) against the fixture record at
+   ursa-major/fixtures/mini/record/, per sprint-2026-10-12." Failed on
+   the `allowed_bots` gate above, confirmed by reading the run's own
+   log rather than its conclusion field alone (§0b's own rule about
+   zero-length failures, applied to a dispatch instead of a cron). Not
+   a seat defect; no rerun, since the same gate blocks a retry
+   identically. This is the day's and the week's first and only
+   security dispatch, so the ceiling (one per seat, three a day, ten a
+   week) is nowhere near touched.
 
 ## Proposed, not fired this run
 
-1. **Security** — build on its own live draft #165, finish or close
-   it, then draft the redaction standard:
-
-   ```
-   GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh workflow run agent-security.yml \
-     -f owner_instructions='Build on open PR #165
-   (sec/2026-10-11), do not start a new review. That run died at its
-   turn cap (Incident 12, docs/agents/incidents.md) mid-way through
-   both charter sweeps and its own five-PR backlog (#47, #75, #85,
-   #112, #124). Read your own seat charter and pick: ready #165 with a
-   real findings section, or close it with a pointer to which of the
-   five PRs it actually advanced. Land the five-PR backlog as a stack
-   or a sequence of closes, not a sixth parallel attempt. Then, in the
-   same PR or a fresh one if #165 closes, draft
-   docs/security/redaction-standard.md per sprint-2026-10-05 item 3:
-   name what must be redacted before any record is public (PII in
-   transcripts and excerpts at minimum, plus secrets), and check it
-   against the fixture record at ursa-major/fixtures/mini/record/ with
-   a pass/fail note in the PR.'
-   ```
-
-   **Trigger:** the sprint milestone's due date has passed; item 3
-   still has no file anywhere in the repo and no open PR touches the
-   path.
-   **Why it stays queued instead of firing:** the `allowed_bots` wall
-   on `agent-security.yml` blocks it regardless of credential, and
-   §11.4 stops a dispatch to a seat with an open PR unless told
-   explicitly to build on that branch — which this instruction does,
-   should the wall ever clear.
-
-2. **Frontend** — build on its own live draft #141, port the one
+1. **Frontend** — build on its own live draft #141, port the one
    unmerged fix its ancestor PR carried:
 
    ```
@@ -84,33 +82,36 @@ files this seat cannot write.
    **Trigger:** `--dim` is still `#707fa0` on current `main`; the
    contrast failure has now been proposed across the last several
    passes without moving.
-   **Why it stays queued instead of firing:** same `allowed_bots` wall
-   on `agent-frontend.yml`.
+   **Why it is not fired this run, unlike the security candidate
+   above:** the security dispatch already re-confirmed the
+   `allowed_bots` gate is company-wide. Firing this one too would only
+   reproduce the identical, now-confirmed failure on a second seat and
+   spend a second dispatch slot for no new evidence. Holding it queued
+   until the gate is fixed or a chair starts it from a window instead.
 
-No third entry. The one failure this window is already the subject of
-candidate 1; nothing else in company §11.3 or Ursa's own criteria fires
-beyond it.
+No third entry. Nothing in company §11.3 or Ursa's own criteria fires
+beyond the one dispatch already made and the one held above.
 
 ## What this seat is not chasing further
 
-The `allowed_bots` fix touches `.github/workflows`, HQ's surface, not
-this seat's, per pm.md §15. Routed to HQ's own project manager
-2026-10-09 with the commands written out; still unlanded as of this
-pass. The no-ship tripwire fix (Incident 12) and the dispatcher-pronoun
-fence (Incident 13, named in #167's own body) are the same kind of
-surface, handed to `alexandra-systems/exo-centralizer`.
+The `allowed_bots` fix and the missing `tools/gh-actions.sh` /
+`tools/check-merge-queue.sh` / `tools/check-actions-reach.sh` scripts
+both touch `.github/workflows` or shared cross-company tooling, HQ's
+surface, not this seat's, per pm.md §15. Both routed to
+`alexandra-systems/exo-centralizer`; the tools gap since 2026-10-09,
+the `allowed_bots` gap new this run. The no-ship tripwire fix
+(Incident 12) and the dispatcher-pronoun fence (Incident 13) are the
+same kind of surface, already handed to the same seat by earlier
+passes.
 
 ## Failed-run triage this run (§11.7)
 
-One failure inside the six-hour window: `security-agent` 38168448767.
-Already classified as a tripwire false alarm by the previous pass (the
-run's PR, #165, exists with 20 real commits); no rerun; Incident 12;
-handed to exo-centralizer. Nothing new to add this pass. The only other
-failure inside the last 24 hours, `engineer-agent` 38103816460 (02:02
-UTC), was triaged and closed out by an earlier pass.
-
-## Dispatched by the PM
-
-None this run. `PM_DISPATCH_ENABLED` is not set in this run's
-environment, and both candidates above are blocked for the reason
-stated regardless.
+One failure in the last 24 hours at the time of this check:
+`security-agent` run 38309881650 (21:19 UTC), the dispatch above.
+**Classification: configuration** (a bot-actor gate missing from the
+workflow file, not a seat defect and not transient). No rerun — the
+same gate blocks a retry identically. Handed to
+`alexandra-systems/exo-centralizer` (above). The earlier `security-agent`
+failure (38168448767, 19:32 UTC on 2026-10-11) was already classified
+as a tripwire false alarm by the ~19:55 UTC pass that day and is
+outside this run's 24-hour window; nothing new to add.

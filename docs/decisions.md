@@ -241,3 +241,57 @@ than an answer to anything addressed to this seat.
 `tools/check-merge-queue.sh`, and `tools/check-actions-reach.sh` (or
 HQ's equivalent distribution mechanism) land in this repo, or when an
 ADR records that Ursa keeps using bare `gh` on purpose.
+
+## Finding — every seat's workflow is missing `allowed_bots`, so no PM dispatch can ever start one (recorded 2026-10-12, Monday ceremony)
+
+Not an ADR: the fix touches `.github/workflows`, which is not this
+seat's writable surface, so no decision is asked of the owner here,
+only a gap named under §1c.
+
+**What's wrong, confirmed by firing a real dispatch rather than
+inferred from a grep.** Earlier passes today (`pending.md`'s
+2026-10-12 ~02:49 UTC entry) found `grep -c '^allowed_bots'` returns 0
+against `agent-security.yml` and `agent-frontend.yml` and read that as
+a wall blocking two seats specifically. This ceremony dispatched
+`agent-security.yml` for real (run
+[38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650))
+to test it directly, and it failed in 16 seconds with: "Action failed
+with error: Workflow initiated by non-human actor: github-actions
+(type: Bot). Add bot to allowed_bots list or use '\*' to allow all
+bots." `allowed_bots` is an input to `anthropics/claude-code-action`,
+not a key any workflow in this repo sets, and `grep -rn allowed_bots
+.github/workflows/*.yml` returns nothing at all across all eleven
+`agent-*.yml` files, not only the two named before. So the gate is
+not narrower than it looked. It is wider: **no seat's workflow can
+ever be started by a PM dispatch (`gh workflow run ...`), because the
+triggering actor is always a bot or app token when the call is made
+from inside an Actions run**, regardless of which seat is targeted or
+which token signs the call.
+
+**Why this wasn't caught sooner.** `PM_DISPATCH_ENABLED` has been
+`true` for a limited window and most dispatch candidates this
+organization has written stayed queued rather than fired, for reasons
+unrelated to this gate (open-PR stops, missing tools, no live
+candidate). This is the first dispatch this ceremony is aware of that
+actually reached the Claude Code action's own actor check.
+
+**What this changes about today's dispatch queue.** The security
+dispatch above counts as this seat's one dispatch for the day under
+the three-a-day ceiling and failed for infrastructure reasons, not a
+process violation; no rerun fired, per §11.7 (configuration causes are
+asked of HQ, never retried). A second candidate (frontend, PR #141)
+was not fired this run, because it would fail identically for the same
+company-wide reason, not a seat-specific one, and burning a second
+dispatch to re-confirm a now-confirmed finding would be noise.
+
+**Handoff.** To `alexandra-systems/exo-centralizer` by board message,
+same destination as the still-unlanded `tools/gh-actions.sh` gap
+above: add `allowed_bots: '*'` (or the specific bot id/name this
+organization's dispatches run as) to every `agent-*.yml`'s
+`claude-code-action` step, company-wide, since the Actions-token
+mechanism in §11.5 and this gate are two different fixes for the same
+symptom and HQ already owns the first one.
+
+**Status:** open. Closes when `allowed_bots` is set in the seat
+workflows (or HQ's equivalent fix lands), or when an ADR records a
+different mechanism for starting a dispatched run.
