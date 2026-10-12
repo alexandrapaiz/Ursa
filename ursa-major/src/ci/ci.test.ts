@@ -91,6 +91,42 @@ describe('the run comment carries the same fields in the same order', () => {
     expect(model).not.toContain('no interpretation ran')
   })
 
+  it('names the resolver that produced the records, and says nothing when not told', () => {
+    // The CI launch is where this line does the most work. A reader of
+    // this comment is reading figures produced by a build they did not
+    // install, and on any repository other than this one GitHub handed
+    // the runner `dist/ursa.cjs` as a tarball, so the bundle digest in
+    // this line is the only identity of that build anywhere in view.
+    const base = {
+      prNumber: 92, repo: 'alexandrapaiz/Ursa', range: 'abc1234..def5678',
+      windowNote: 'merge commit: window is the pull request\'s own commits',
+      declarationBasis: 'undeclared', recordsPath: '/tmp/x/.ursa/records', runUrl: null,
+    }
+    const fields = runCommentFields([], [], CI_ZERO)
+
+    const bundled = renderRunComment(fields, {
+      ...base, resolvedBy: { basis: 'bundle_digest', digest: '0123456789abcdef' },
+    })
+    expect(bundled).toContain('resolver bundle sha256:0123456789abcdef')
+    expect(bundled).toContain('`task.resolvedBy`')
+
+    const local = renderRunComment(fields, {
+      ...base, resolvedBy: { basis: 'git_commit', commit: 'abc1234', dirty: true },
+    })
+    expect(local).toContain('resolver abc1234 (working tree had uncommitted changes)')
+
+    // A run that resolved nothing has no record to read an identity off,
+    // and says that rather than naming one.
+    expect(renderRunComment(fields, { ...base, resolvedBy: null }))
+      .toContain('resolver not identified')
+
+    // An older caller that passes nothing prints no line at all. A
+    // sentence naming no resolver would read as a resolver that declined
+    // to identify itself, which is a different and worse claim than
+    // silence.
+    expect(renderRunComment(fields, base)).not.toContain('Resolver that produced')
+  })
+
   it('leads with the marker so the next run can find it, and asks for the reaction', () => {
     const body = renderRunComment(runCommentFields([], [], CI_ZERO), {
       prNumber: 92, repo: 'alexandrapaiz/Ursa', range: 'abc1234..def5678',

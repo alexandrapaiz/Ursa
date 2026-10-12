@@ -178,6 +178,24 @@ export function renderViewer(record: OutcomeRecord): string {
   var meta = document.getElementById('meta');
   meta.textContent = 'generated ' + R.task.generatedAt.slice(0, 10) + ' · ' + R.files.length + ' files · ' + R.generations.length + ' generations · ' + R.conversations.length + ' conversation' + (R.conversations.length === 1 ? '' : 's');
   meta.appendChild(el('span', 'chip', R.task.finished ? 'finished' : 'abandoned'));
+  // Which build of the resolver classified the spans below. The user is
+  // entitled to see it for the same reason they are entitled to see every
+  // other inference on this page, and the practical case is that two
+  // records in this same directory, with the same id, can have been
+  // written by resolvers that disagreed by a factor of eight about how
+  // much of the work survived (docs/ideas.md, 2026-10-12). Absent on a
+  // record written before the field existed, in which case nothing is
+  // shown rather than a chip claiming an unknown resolver.
+  if (R.task.resolvedBy) {
+    var rb = R.task.resolvedBy;
+    var resolverChip = el('span', 'chip', rb.basis === 'git_commit'
+      ? 'resolved by commit ' + rb.commit + (rb.dirty ? ' plus uncommitted changes' : '')
+      : 'resolved by bundle sha256:' + rb.digest);
+    resolverChip.title = rb.basis === 'git_commit'
+      ? 'The classifications on this page were computed by Ursa Major at commit ' + rb.commit + ' of its own source.' + (rb.dirty ? ' That working tree had uncommitted changes, so the commit alone does not identify the code that ran.' : '')
+      : 'The classifications on this page were computed by a single-file build of Ursa Major whose contents hash to this SHA-256. There was no source checkout to name a commit from, which is the normal case on a GitHub runner.';
+    meta.appendChild(resolverChip);
+  }
   // What kind of finished thing this record is about. Spelled out rather than
   // abbreviated, because 'hosted' alone is a bare term to anyone outside Ursa.
   var ARTIFACT_KINDS = {
