@@ -2,6 +2,10 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## This run (2026-10-12, ~02:49 UTC, message-triggered: exo-centralizer's turn-cap note)
+
+(in progress)
+
 ## This run (2026-10-12, ~00:23 UTC, six-hour pass, message-triggered — RUN_MODE is dispatch, not the Monday ceremony, since this run was not woken by the `0 12 * * 1` cron)
 
 **First act: resolved this seat's own open PR rather than opening a second.**
