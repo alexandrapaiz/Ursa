@@ -5204,6 +5204,22 @@ directive.
   `README.md`'s class table says "generated and kept unchanged" and the
   bound's own message says "Verbatim means byte-identical, so the two
   extents describe the same characters". Three statements, two meanings.
+
+  Measured today, by calling `resolve()` directly on one generation and
+  five final texts that differ from it in one way each:
+
+      identical                  -> survived_verbatim
+      case changed               -> survived_verbatim
+      em dash replaced by hyphen -> survived_verbatim
+      line rewrapped             -> survived_verbatim
+      smart quotes introduced    -> survived_mutated, then survived_verbatim
+
+  Four of the five differences are invisible to the label. The fifth is
+  caught only because the fold runs from curly quotes to straight ones,
+  so a final text that introduces curly quotes lands on characters the
+  generation does not have at that offset. That is an accident of which
+  direction the fold runs, not a rule.
+
   The consequence a lab pays for is not the two characters. It is that a
   span the person retyped in different case, or whose em dash they
   replaced, or whose lines they rewrapped, is sold as text the model got
@@ -5215,11 +5231,12 @@ directive.
   `survived_mutated` with a diff. The first is honest and loses a
   distinction a buyer wants; the second keeps `survived_verbatim`
   meaning what every document in this repository says it means.
-- First step: a test in `ursa-major/src/resolver.test.ts` over a
-  two-commit fixture whose human edit changes only whitespace and case
-  inside one sentence, asserting that the resulting span is not
-  `survived_verbatim`. It fails today. Then decide the two options above
-  against it, which is a design call the test makes concrete rather than
+- First step: the five-case probe above, committed as a test in
+  `ursa-major/src/resolver.test.ts`, asserting that each of the four
+  differences the label currently ignores does not produce
+  `survived_verbatim`. Four of its five assertions fail today, which is
+  the point: the test is the specification of the decision below. Then
+  decide the two options above against it, which is a design call the test makes concrete rather than
   one more paragraph. Do not start by widening the bound: the bound is
   the only thing in the repository that noticed.
 - Cost: $0
