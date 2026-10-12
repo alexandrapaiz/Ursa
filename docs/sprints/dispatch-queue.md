@@ -1,41 +1,31 @@
-# Dispatch queue — 2026-10-11, message pass (~19:55 UTC)
+# Dispatch queue — 2026-10-12, six-hour pass (~00:23 UTC)
 
-Rewritten in full. `PM_DISPATCH_ENABLED` is unset (not exactly `true`)
-this run, same as the ~18:25 UTC pass; both candidates below are
-blocked on the `allowed_bots` wall regardless (`grep -c '^allowed_bots'`
-against current `main`'s `agent-security.yml` and `agent-frontend.yml`
-still returns `0` for both).
+Rewritten in full. `PM_DISPATCH_ENABLED` is not present in this run's
+environment (a host-window pass, not the scheduled Actions run that
+carries the repository variable), so it is treated as unset and nothing
+fires regardless of what is below.
 
-## What changed this run
+## What changed since the last pass
 
-The security seat's own Sunday cron (`15 15 * * 0`, `agent-security.yml`)
-fired, four hours and seventeen minutes late, at 19:32:22Z — the path
-the last two passes named as gone for the day is not gone, it was
-delayed. It then failed: run
-[38168448767](https://github.com/alexandrapaiz/Ursa/actions/runs/38168448767)
-hit its `--max-turns 100` cap mid-way through an oversized task (both
-charter sweeps plus its own five-PR backlog, #47/#75/#85/#112/#124, in
-one pass) and the "No-ship tripwire" flagged it as a total loss. It
-is not one: draft PR #165 (`sec/2026-10-11`) holds 20 real commits.
-Triaged under pm.md §11.7 as a tripwire false alarm, no rerun, recorded
-as Incident 12 in `docs/agents/incidents.md`, handed to
-`alexandra-systems/exo-centralizer`. Full detail in `pending.md`.
+Nothing new. The one failure inside the last six hours
+(`security-agent` 38168448767) was already triaged by the ~19:55 UTC
+pass as a tripwire false alarm, recorded as Incident 12, and handed to
+`alexandra-systems/exo-centralizer`; no new evidence changes that. The
+`allowed_bots` wall is still `0` matches in both `agent-security.yml`
+and `agent-frontend.yml` on current `main`, so both candidates below
+are unchanged from the last several passes.
 
-This also moots candidate 1 below as it was written for the last two
-passes: #124 is no longer the security seat's newest or most relevant
-open draft. #165 is. The instruction is rewritten accordingly.
-
-The milestone clock: "Sprint 2026-10-05" was due 2026-10-11T00:00:00Z
-and is now ten hours past it. Item 3 (the redaction standard) is still
-unshipped — no file at `docs/security/`, and #165 does not count as
-progress on it while it sits as an unfinished draft with no live run
-behind it. Formal closure and carry-forward is tomorrow's Monday
-ceremony (2026-10-12).
+The exo seat opened #167 since the last pass (21:12 UTC), now
+`CONFLICTING`. Its own fixes (the turn-cap instrument, the dispatcher
+pronoun fence) are queued at HQ per its own PR body, not something this
+seat's dispatch queue carries — Ursa's exo seat does not appear in the
+seats this charter may dispatch, and the fix itself touches workflow
+files this seat cannot write.
 
 ## Proposed, not fired this run
 
-1. **Security** — build on its own live-but-abandoned draft #165,
-   finish or close it, then draft the redaction standard:
+1. **Security** — build on its own live draft #165, finish or close
+   it, then draft the redaction standard:
 
    ```
    GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh workflow run agent-security.yml \
@@ -55,10 +45,9 @@ ceremony (2026-10-12).
    a pass/fail note in the PR.'
    ```
 
-   **Trigger:** milestone "Sprint 2026-10-05" is past its due date;
-   item 3 still has no file anywhere in the repo and no open PR
-   touches the path; the seat's own cron fired and failed without
-   reaching it (Incident 12).
+   **Trigger:** the sprint milestone's due date has passed; item 3
+   still has no file anywhere in the repo and no open PR touches the
+   path.
    **Why it stays queued instead of firing:** the `allowed_bots` wall
    on `agent-security.yml` blocks it regardless of credential, and
    §11.4 stops a dispatch to a seat with an open PR unless told
@@ -79,7 +68,7 @@ ceremony (2026-10-12).
    main still has --dim: #707fa0 in ursa-minor/app/globals.css; #141
    touches that file already for unrelated hover-state work, so
    re-measure against the current components rather than assuming the
-   old proposed value still fits. Finish #141 own plan (benchmark
+   old proposed value still fits. Finish #141's own plan (benchmark
    writeup, after-shots for its two refinements) in the same PR.'
    ```
 
@@ -89,29 +78,30 @@ ceremony (2026-10-12).
    **Why it stays queued instead of firing:** same `allowed_bots` wall
    on `agent-frontend.yml`.
 
-No third entry. The failed run this pass is already the subject of
-candidate 1; nothing else in company §11.3 or Ursa's own criteria
-fires beyond it.
+No third entry. The one failure this window is already the subject of
+candidate 1; nothing else in company §11.3 or Ursa's own criteria fires
+beyond it.
 
 ## What this seat is not chasing further
 
-The actual fix for the `allowed_bots` wall touches `.github/workflows`,
-HQ's surface, not this seat's, per pm.md §15. Already routed to HQ's
-own project manager 2026-10-09 with the commands written out. Tracked
-at HQ now. The no-ship tripwire fix (Incident 12, this run) is the same
-kind of surface, handed to `alexandra-systems/exo-centralizer` the same
-way.
+The `allowed_bots` fix touches `.github/workflows`, HQ's surface, not
+this seat's, per pm.md §15. Routed to HQ's own project manager
+2026-10-09 with the commands written out; still unlanded as of this
+pass. The no-ship tripwire fix (Incident 12) and the dispatcher-pronoun
+fence (Incident 13, named in #167's own body) are the same kind of
+surface, handed to `alexandra-systems/exo-centralizer`.
 
 ## Failed-run triage this run (§11.7)
 
-One failed run: `security-agent` 38168448767. Classified tripwire false
-alarm (the run's PR, #165, exists); no rerun; recorded as Incident 12;
-handed to exo-centralizer. Full reasoning in `pending.md` and
-`docs/agents/incidents.md`. The only other failure inside the last 24
-hours, `engineer-agent` 38103816460 (02:02 UTC), was already triaged
-and closed out by an earlier pass; nothing new there.
+One failure inside the six-hour window: `security-agent` 38168448767.
+Already classified as a tripwire false alarm by the previous pass (the
+run's PR, #165, exists with 20 real commits); no rerun; Incident 12;
+handed to exo-centralizer. Nothing new to add this pass. The only other
+failure inside the last 24 hours, `engineer-agent` 38103816460 (02:02
+UTC), was triaged and closed out by an earlier pass.
 
 ## Dispatched by the PM
 
-None this run. `PM_DISPATCH_ENABLED` is unset, and both candidates
-above are blocked for the reason stated regardless.
+None this run. `PM_DISPATCH_ENABLED` is not set in this run's
+environment, and both candidates above are blocked for the reason
+stated regardless.
