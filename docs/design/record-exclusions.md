@@ -133,6 +133,9 @@ can also serve pasted conversations with no repository behind them.
 In `src/types.ts`:
 
 ```ts
+// A second reason, 'declared_import', and a third relation, 'declared',
+// were added 2026-10-12 for imports from another repository, which no
+// blob comparison can find. See docs/design/vendored-paths.md §9.
 export type ExclusionReason = 'imported_whole'
 
 export interface Exclusion {
@@ -605,7 +608,12 @@ why the deletion run is reported rather than the pass count alone.
   unreadable blob at either commit, a blob over `MAX_BLOB_CHARS`
   (300,000), and a path with no generation side. Each is a refusal with
   evidence behind it and each would be a reason code. Filed as a ledger
-  entry today.
+  entry today. (**Superseded in part, 2026-10-12.** A second reason code
+  exists: `declared_import`, for a path a commit declares an import in
+  its own trailer, which is evidence of a different kind rather than one
+  of the three listed here. The three above are still unaddressed. See
+  `docs/design/vendored-paths.md` §9.4 for why a second reason rather
+  than a second relation under the first reason.)
 - **The arithmetic is not yet an invariant across the whole run.**
   `consideredChars` closes per record. "The characters this run read
   equals the characters it classified plus the characters it refused,

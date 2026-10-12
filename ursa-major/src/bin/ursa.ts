@@ -38,7 +38,7 @@ import { blobAt, findCommitPairsWithDiagnostics, listCommits, type CommitInfo, t
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { gitDeletionAttributor } from '../deletion'
 import { gitDescentCorroborator } from '../corroborate'
-import { vendoredPaths } from '../vendored'
+import { IMPORT_TRAILER, vendoredPaths } from '../vendored'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
@@ -132,10 +132,18 @@ export function renderRunSummary(
     lines.push(
       `${vendored.length} file${vendored.length === 1 ? '' : 's'} came in whole from elsewhere and ${vendored.length === 1 ? 'was' : 'were'} not read as your work, starting with ${one.path}.`,
     )
+    // Three branches, not two. A `declared` import was never compared
+    // byte for byte against anything, because its source is in another
+    // repository, so the two sentences below would both be false claims
+    // about how the run knows. Saying "byte-identical" about a
+    // declaration is the same defect as the record flattening
+    // `declared_import` into `imported_whole`.
     lines.push(
-      one.relation === 'sibling'
-        ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
-        : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
+      one.relation === 'declared'
+        ? `Commit ${one.sha} ("${one.subject}") declares it an import in its own ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.`
+        : one.relation === 'sibling'
+          ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
+          : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
     )
     lines.push(
       `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`,
