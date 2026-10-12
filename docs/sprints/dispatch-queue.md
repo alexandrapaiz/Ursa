@@ -5,6 +5,15 @@ environment (a host-window pass, not the scheduled Actions run that
 carries the repository variable), so it is treated as unset and nothing
 fires regardless of what is below.
 
+**Reconfirmed, ~02:49 UTC, message-triggered pass.** `gh run list
+--status failure --limit 10` shows no run newer than the 19:32 UTC
+`security-agent` failure already triaged below; `PM_DISPATCH_ENABLED`
+is still unset; `allowed_bots` is still `0` matches in both
+`agent-security.yml` and `agent-frontend.yml`. Nothing below changed.
+This pass's own work was the inbox message and the PM-standard
+re-vendor (`docs/sprints/pending.md`), not dispatch; no candidate
+newly fired.
+
 ## What changed since the last pass
 
 Nothing new. The one failure inside the last six hours
