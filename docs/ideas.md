@@ -5173,4 +5173,203 @@ and job postings only). One page fetched:
 this agent or asked for an action, and nothing from it was treated as a
 directive.
 
-<!-- engineer run 2026-10-12 (second pass, resolved-by): entries appended at the end of this run -->
+
+### 2026-10-12 (second pass) — `survived_verbatim` is not verbatim, and a record sold today proves it
+- Trigger: today's probe run of the resolver over this repository's own
+  history, fired to check the new `task.resolvedBy` field end to end.
+  The run exited non-zero on a bound that has nothing to do with that
+  field: `CLAIM_NOT_WIDER` on record `ursa-2026-10-07-2f610e9`, file
+  `docs/sprints/pending.md`, span 78 at `[3895,3996)`, observed as "101
+  final chars credited to a 99-char generation extent, 2 too many". The
+  span is labelled `survived_verbatim` with `score: 1`. Read out of the
+  record, the two texts are not the same bytes:
+
+      final: 'Full entries in\n  `docs/ideas.md`.\n- The `docs/decisions.md` …'
+      gen:   'Full entries in `docs/ideas.md`.\n- The `docs/decisions.md` …'
+
+  The person reflowed the line. One space became a newline and two
+  spaces, which is the two characters the bound counted. This is not the
+  2026-10-05 entry "`survived_mutated` credits the person's own additions
+  to the model": that one was about the mutated class and ended by
+  narrowing this bound to `survived_verbatim` only. The bound as narrowed
+  is now firing, on the class it was narrowed to, on this organization's
+  own records.
+- What: the cause is that matching runs on normalized text.
+  `normalize()` in `ursa-major/src/normalize.ts` lowercases, folds smart
+  punctuation (`’`→`'`, `—`→`-`, `…`→`...`, non-breaking space→space)
+  and collapses every whitespace run to one space, and
+  `ursa-major/src/resolve.ts` assigns `survived_verbatim` with `score: 1`
+  on a match in that shadow text. So the field means "identical after
+  case folding, punctuation folding and whitespace collapsing", while
+  `README.md`'s class table says "generated and kept unchanged" and the
+  bound's own message says "Verbatim means byte-identical, so the two
+  extents describe the same characters". Three statements, two meanings.
+  The consequence a lab pays for is not the two characters. It is that a
+  span the person retyped in different case, or whose em dash they
+  replaced, or whose lines they rewrapped, is sold as text the model got
+  right and the person did not touch — and the edit, which is the
+  correction and the whole product, is discarded as noise. Either the
+  label is renamed to what it measures and a new class carries the
+  byte-identical case, or the raw extents are compared after the
+  normalized match and a difference demotes the span to
+  `survived_mutated` with a diff. The first is honest and loses a
+  distinction a buyer wants; the second keeps `survived_verbatim`
+  meaning what every document in this repository says it means.
+- First step: a test in `ursa-major/src/resolver.test.ts` over a
+  two-commit fixture whose human edit changes only whitespace and case
+  inside one sentence, asserting that the resulting span is not
+  `survived_verbatim`. It fails today. Then decide the two options above
+  against it, which is a design call the test makes concrete rather than
+  one more paragraph. Do not start by widening the bound: the bound is
+  the only thing in the repository that noticed.
+- Cost: $0
+- Status: urgent
+
+### 2026-10-12 (second pass) — The sixteenth bound: a record that names a resolver should have to name one that can be looked up
+- Trigger: writing `task.resolvedBy` today and deliberately not writing a
+  bound for it. `ursa-major/src/invariants.ts` still declares fifteen
+  codes, and nothing checks that `commit` looks like a git object id or
+  that `digest` looks like a hash prefix. The field is therefore free to
+  degrade into a placeholder that reads as provenance and is not, which
+  is the failure mode the field was added to end, re-entered one level
+  down.
+- What: `RESOLVER_IDENTIFIED` as the sixteenth bound. If a record carries
+  `task.resolvedBy`, then a `git_commit` basis carries a `commit`
+  matching `/^[0-9a-f]{7,40}$/` and a boolean `dirty`, and a
+  `bundle_digest` basis carries a `digest` matching `/^[0-9a-f]{16}$/`.
+  Absence stays legal and unchecked, because absence is a true claim
+  (`docs/design/resolver-identity.md` §3.2) and a bound requiring the
+  field would make every record written before today illegal. In
+  register with the second clause of `EXCLUSION_NOT_CLASSIFIED`, which
+  already checks that an exclusion names a commit at all rather than
+  checking arithmetic.
+- First step: the bound is six lines; the fixture is the work. Add
+  `fixtures/violations/resolver-identified.json` by extending
+  `tools/make-violation-fixtures.ts`, plus its `.md` note quoting the
+  gate's own `observed` and `where` strings verbatim, because
+  `ursa-major/src/invariants.violations.test.ts` asserts the codes those
+  fixtures fire equals `BOUND_CODES` exactly and reads the expectation
+  out of the note. Then update the five counts that test hardcodes
+  (`toHaveLength(15)`, `violations).toBe(17)`, `single).toHaveLength(13)`
+  and two sentences), the `BOUND_COUNT` prose in `README.md`, and the
+  comparability line in `docs/design/resolver-identity.md` §10.1 that
+  currently says this is not a bound.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-12 (second pass) — The record says which resolver, not whether two resolvers can be compared
+- Trigger: today's craft scan of Artificial Analysis's own methodology
+  page (see the scan note below), read against
+  `docs/design/resolver-identity.md` §10.3, which admits the gap in the
+  field shipped today. `task.resolvedBy` tells a reader that two records
+  came from different code. It does not tell them whether to compare the
+  two anyway, so every holder of two records has to diff two commits of
+  this repository to find out, and most will instead assume the figures
+  are comparable because nothing says otherwise.
+- What: a committed, machine-readable statement of what each resolver
+  change does to cross-record comparability, keyed by the same commit the
+  record names. Concretely, `ursa-major/comparability.json`: an array of
+  entries, each a `commit` (the short sha that appears in
+  `task.resolvedBy`), a `movesFields` array naming the record paths whose
+  values that commit changes for identical input
+  (`stats.byClass.survived_verbatim.chars`, `files[].spans[].class`,
+  `exclusions`), and a one-sentence `comparability` string in the
+  producer's own words. The form is stolen directly from Artificial
+  Analysis, which does not merely version each constituent evaluation but
+  states the break in plain language per transition: "Scores are not
+  directly comparable with v1.0" for one, and for a benign change "v1.1
+  changes only how Elo ratings are fitted" with "Whilst Elo scores shift,
+  rank ordering is largely preserved". A version string says two numbers
+  differ. That sentence says whether to compare them anyway, which is the
+  question the reader actually has. Distinct from the earlier 2026-10-12
+  entry on `docs/design/evidence-classes.md`: that one enumerates which
+  of a record's fields were verified versus merely carried within one
+  record, and this one is about two records resolved by different code.
+- First step: write the file with the three entries this repository can
+  already state honestly, which are the three changes that moved figures
+  in the last week — the `imported_whole` exclusion (2026-10-06), the
+  descent corroboration demotion (2026-10-08) and the `declared_import`
+  exclusion (2026-10-12) — each with its real short sha read from
+  `git log`, and a test asserting every `commit` in the file resolves to
+  a real commit in this repository via `git cat-file -e <sha>^{commit}`,
+  so an entry cannot name a sha that does not exist. Serving it beside
+  the record, or embedding the matching entry into the record at write
+  time, is the second day's question and is deliberately not decided
+  here.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-12 (engineer's craft scan, second pass)
+
+Rotation: `docs/market/landscape.md` category 2, the evaluation and arena
+products, which is the next category after the category 1 sweep the
+earlier pass of this seat did today. Product read: **Artificial
+Analysis**, whose Intelligence Index is the single number most often
+quoted as the state of the frontier.
+
+**Worth stealing: state the comparability break in a sentence, not just
+the version number.** Read today, 2026-10-12, at
+`artificialanalysis.ai/methodology/intelligence-benchmarking`. The index
+is labelled `v4.3.2` and it is a synthesis of eight evaluation datasets,
+each of which carries its own version. That part is ordinary. The craft
+is what sits beside each version transition, which is a plain statement
+of what it did to comparability, written for a reader deciding whether to
+put two numbers on the same chart:
+
+- for one constituent, "Scores are not directly comparable with v1.0"
+- for another, "v1.1 supersedes v1.0, and scores are not comparable
+  across the two versions"
+- and where the change was benign, both halves: "v1.1 changes only how
+  Elo ratings are fitted" and "Whilst Elo scores shift, rank ordering is
+  largely preserved"
+
+The last one is the one to copy. A producer who says "this change moved
+the numbers and preserved the ordering" has told a reader exactly how far
+their old analysis still holds. A version string alone tells them only
+that something moved, which in practice reads as nothing moved. That is
+the third ledger entry above, and it is the direct successor to the field
+this seat shipped today. The same page also publishes its agentic harness
+as open source and says "We disclose our methodology, including prompt
+templates, evaluation criteria, and limitations", which is the posture
+this project's own strategic note already names as both the enterprise
+sales channel and the user trust proof.
+
+**What Ursa does better: the identity travels with the artifact, and the
+evidence travels with it too.** Two gaps on the other side, both of them
+structural rather than oversights.
+
+First, the version is on the website and not on the number. A score
+quoted from Artificial Analysis in a chart or a press release does not
+carry `v4.3.2` with it, so a reader has to map the date they saw it to a
+version history they have to go and find. Ursa's figures cannot be
+separated from their identity that way, because `task.resolvedBy` is a
+field inside the same file as the figures.
+
+Second, and this is the sharper one, the comparability claims are
+auditable only as far as the producer's word. The same page says the
+headline numbers for one constituent "are produced on Harvey's private
+120-task dataset, which is not publicly released", and that Artificial
+Analysis "maintain internal copies of all evaluation datasets". So when
+that page says two versions are not comparable, a buyer cannot check it;
+when it says rank ordering was preserved, a buyer cannot check that
+either. An Ursa record ships the finished text, the generations, and
+every excerpt a signal quotes, and `SIGNAL_QUOTE_GROUNDED` re-reads each
+excerpt against the raw text it names. A buyer re-running the resolver
+named in `task.resolvedBy` against the record's own contents is checking
+the claim rather than accepting it.
+
+The honest qualifier, which cuts the other way: Artificial Analysis has
+its weaker version of this for eight evaluations across years of
+releases, and Ursa has the strong version for a field that is one day
+old, over two trials, with the comparability statement itself still
+unwritten.
+
+**External sources read this run.** One web search, for how Artificial
+Analysis versions its methodology and whether scores are comparable over
+time; its results included four third-party blog posts whose specific
+version dates and score deltas this seat did not use, because they could
+not be confirmed against the primary page. One page fetched:
+`https://artificialanalysis.ai/methodology/intelligence-benchmarking`,
+read to its first 100,000 characters, which is the source of every quoted
+sentence above. Nothing in any of it addressed this agent or asked for an
+action, and nothing from it was treated as a directive.
