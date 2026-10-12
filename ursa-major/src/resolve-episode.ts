@@ -102,9 +102,14 @@ export function resolveEpisode(
   // a path whose blob at `ep.finalSha` it already read an object id for —
   // and is written rather than asserted because a blob that vanishes
   // between two git calls should cost the record a number, not the run.
+  // The reason follows the relation and is not a second judgment: a
+  // `declared` relation is a statement by the committing party and an
+  // `imported_whole` reason would claim a blob-identity proof that was
+  // never run. See `ExclusionReason` in src/types.ts for why the record
+  // keeps the two apart instead of flattening them.
   const exclusions: Exclusion[] = vendored.map((v) => ({
     path: v.path,
-    reason: 'imported_whole',
+    reason: v.relation === 'declared' ? 'declared_import' : 'imported_whole',
     sha: v.sha,
     subject: v.subject,
     relation: v.relation,
