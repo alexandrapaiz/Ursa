@@ -140,7 +140,7 @@ export function renderRunSummary(
     // `declared_import` into `imported_whole`.
     lines.push(
       one.relation === 'declared'
-        ? `Commit ${one.sha} ("${one.subject}") declares it an import with a ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.`
+        ? `Commit ${one.sha} ("${one.subject}") declares it an import in its own ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.`
         : one.relation === 'sibling'
           ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
           : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
