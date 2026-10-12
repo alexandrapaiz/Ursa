@@ -80,6 +80,15 @@ const ALLOWED_TO_DIFFER = ['signals', 'durability', 'lifespan'] as const
 function comparable(record: OutcomeRecord): Record<string, unknown> {
   const out: Record<string, unknown> = {
     'task.id': record.task.id,
+    // Which resolver made the claims. In this test both launches run
+    // in-process from one working tree, so the two records must name the
+    // same resolver; a divergence here means one launch stamped a record
+    // the other did not, which is how the field would quietly become
+    // optional in practice. In production the two legitimately differ,
+    // because `ursa ci` runs the committed `dist/ursa.cjs` on a runner
+    // that cloned nothing, and that difference is the field's entire
+    // point rather than drift — see `ResolverIdentity` in src/types.ts.
+    'task.resolvedBy': record.task.resolvedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
     'stats.generated': record.stats.generated,
@@ -281,6 +290,22 @@ describe('one repository resolved through both launches produces the same record
       // field that drifted rather than stopping at the first.
       expect(a).toEqual(b)
     }
+  })
+
+  it('names a resolver on both sides, so the comparison above is not undefined vs undefined', async () => {
+    // `comparable()` includes `task.resolvedBy`, and a projection that
+    // compares a field neither record carries passes without testing
+    // anything. This is the same vacuity check the violation fixtures
+    // make for `signals`, `descent` and `exclusions` on their base
+    // record (src/invariants.violations.test.ts).
+    const repo = editedFixture()
+    const { ci, local } = await bothLaunches(repo, 10)
+    const [ciRec] = [...ci.values()]
+    const [localRec] = [...local.values()]
+    // Both launches run in-process here, out of this repository's own
+    // work tree, so both resolve on the git basis.
+    expect(ciRec.task.resolvedBy).toMatchObject({ basis: 'git_commit' })
+    expect(localRec.task.resolvedBy).toEqual(ciRec.task.resolvedBy)
   })
 
   it('agrees that the edit was an edit: survived_mutated on both sides, not just a matching total', async () => {
