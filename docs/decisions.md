@@ -194,3 +194,50 @@ organizes) applies. Infisical centralizes the growing secret set
 with rotation and audit in one place.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## Finding — the re-vendored PM standard names dispatch tools this repo does not have (recorded 2026-10-12, PM pass)
+
+Not an ADR: no decision is asked of the owner here, only a gap named
+under §1c's instruction to log a deviation between the vendored
+standard's assumption and Ursa's practice.
+
+**What's wrong.** This pass re-vendored `docs/standards/pm.md` to HQ's
+current text (PR #170, merged). The new §11.5 tells the standup to run
+`tools/gh-actions.sh workflow run agent-<seat>.yml ...` and
+`tools/gh-actions.sh run list --limit 30` in place of bare `gh`,
+because the Claude Code action overwrites `GH_TOKEN`/`GITHUB_TOKEN`
+with a scoped installation token and the ambient `gh` therefore cannot
+start another workflow run; the wrapper is supposed to pick the right
+credential so a seat never has to know this. The new §11.2 also names
+`tools/check-merge-queue.sh` for merge state and references
+`tools/check-actions-reach.sh` for diagnosing a 403. None of the three
+exist anywhere in this repo (`ls tools` returns only `ledger/` and
+`stack/`). Until they land, a seat following the new standard's exact
+commands would fail on a missing script, not on the credential problem
+the standard is describing.
+
+**Why this run didn't try to write them.** The scripts are described as
+shared tooling, not product-specific ones, and §16 names the exo
+centralizer as the owner of cross-company machinery; inventing a local
+copy here risks a second, divergent implementation of the same wrapper
+HQ is already building (its harvest handoff this same morning mentions
+a `company-checks` workflow it is adding at HQ). This is a gap to flag,
+not one day-sized item to improvise around.
+
+**What to do until they land.** Dispatch and the standup's Actions
+reads keep using bare `gh` as before; a `403: Resource not accessible
+by integration` on a workflow-dispatch call is the known symptom
+(§11.5's own description) and is not, on its own, evidence that the
+grant is missing.
+
+**Handoff.** Named here and in `docs/sprints/pending.md`'s top three so
+the next PM pass or the exo centralizer's own weekly run can pick it
+up; not raised as a separate board message this pass, since the
+inbox reply already sent (the merge confirmation) covers the action
+this run actually took and this finding is net-new evidence rather
+than an answer to anything addressed to this seat.
+
+**Status:** open. Closes when `tools/gh-actions.sh`,
+`tools/check-merge-queue.sh`, and `tools/check-actions-reach.sh` (or
+HQ's equivalent distribution mechanism) land in this repo, or when an
+ADR records that Ursa keeps using bare `gh` on purpose.

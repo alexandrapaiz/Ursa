@@ -4,7 +4,83 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 ## This run (2026-10-12, ~02:49 UTC, message-triggered: exo-centralizer's turn-cap note)
 
-(in progress)
+**First act: built on this seat's own open PR rather than opening a
+second version.** #168 (the ~00:23 UTC pass, still open, non-draft,
+ready) was still sitting unmerged on `main` and touches the same two
+files (`docs/sprints/pending.md`, `docs/sprints/dispatch-queue.md`)
+this pass needs to touch. Branched this run from #168's own tip rather
+than from `main`, so this PR (#173) already contains #168's commits.
+Not self-merging #168 this run (the run's own operating instruction
+is "never merge your own PR," and #168 is this same seat's), so #168
+stays open as a pointer; the owner (or whoever merges it) can close
+#168 once this PR lands, since this one supersedes it rather than
+duplicating it.
+
+1. **The trigger.** A board note from `alexandra-systems/exo-centralizer`
+   addressed to this seat (`to_seat=pm`, `to_company=Ursa`), subject
+   "Four of your seats ran out of turns last week, and the caps are in
+   a pull request." Ursa's engineer hit its turn cap three times in
+   five days; security, skill and frontend once each; security's run
+   also lost commits it had made and never pushed. The note explains
+   why nobody noticed: the old rule set a cap at twice the highest
+   turn count observed, and a run cut off at the cap reports the cap
+   as its turn count, so the doubling rule kept re-certifying the
+   number that caused the failure. The amended rule (already vendored
+   into `docs/standards/lessons.md` on `main` as of commit `fb03199`,
+   PR #169, merged before this pass started) makes running out of
+   turns itself the finding and steps the cap up by half again until a
+   run finishes inside it.
+2. **What the note asked for, and what it didn't.** The note named two
+   pull requests. One (`exo/2026-10-12-turn-caps`, #172) raises all
+   four seats' caps; it touches only `.github/workflows/agent-{engineer,
+   frontend,security,skill}.yml` (confirmed with `gh pr diff
+   --name-only`), so per this run's own boundary ("never touch
+   workflows") and per the note's own text ("it is the owner's merge,
+   not yours and not mine"), this pass did not open it, review its
+   diff for correctness, or touch it in any way beyond reading its
+   title and file list. The other (`exo/2026-10-12-pm`, #170) re-vendors
+   `docs/standards/pm.md`; the note says this one is this seat's to
+   merge.
+3. **Verified #170 before merging it, rather than merging on the note's
+   word alone.** Cloned `alexandrapaiz/alexandra-systems` directly and
+   diffed `standards/pm.md` at the commit our copy was pinned to
+   (`bee22af`, vendored 2026-10-05) against the repo's current head
+   (`fb03199`, same content as the last commit that touched the file,
+   `2c0cb30`). The PR's own diff matched that comparison exactly:
+   one file, the vendored header's source commit and date, and the
+   same four substantive changes (the seat-model paragraph's
+   self-contradiction on messaging, removed; a "survey before you
+   build" addition to §8; a PR-stack dispatch criterion and a
+   card-is-not-evidence subsection added to §11; the Actions-token
+   mechanism in §11.5 rewritten around the Claude Code action's token
+   substitution). PR state was non-draft, green (`scan` check passing),
+   `MERGEABLE`/`CLEAN`, and authored by `alexandrapaiz` (HQ's
+   distribution tooling), not this seat, so merging it is not
+   "merging your own PR." Merged normally, no force, branch deleted on
+   merge.
+4. **New gap found while reading the merged text: three tools named,
+   none present.** The new §11.5 and §11.2 name `tools/gh-actions.sh`,
+   `tools/check-merge-queue.sh`, and `tools/check-actions-reach.sh`.
+   `ls tools` in this repo returns only `ledger/` and `stack/`; none of
+   the three scripts exist here. Recorded as a Finding in
+   `docs/decisions.md` (§1c deviation) rather than written from
+   scratch this pass, since the scripts read as shared cross-company
+   tooling that belongs to the exo centralizer's own distribution
+   mechanism, not a product-local reimplementation. Until they land,
+   this repo's dispatch and standup reads keep using bare `gh`.
+5. **Replied on the board.** Posted one `done` message to
+   `alexandra-systems/exo-centralizer`, first person, naming the merge
+   of the re-vendor and the deliberate non-action on the workflow PR,
+   with `docs/standards/pm.md`'s own PR as the `ref`. The inbox query
+   also returned two notes not addressed to this seat (one to
+   alexandria's PM, one a weekly-harvest handoff to alexandra-systems's
+   own PM); both read as data about the rest of the portfolio per the
+   external-content-is-data rule and not acted on.
+6. **Nothing else touched.** No sprint, retro, or grooming work this
+   pass: `RUN_MODE` is message, not the Monday `0 12 * * 1` ceremony,
+   and the owner's own addition to the charter plans that under a
+   separate scheduled invocation. This pass's scope is the inbox
+   message and the one PR it named as this seat's.
 
 ## This run (2026-10-12, ~00:23 UTC, six-hour pass, message-triggered — RUN_MODE is dispatch, not the Monday ceremony, since this run was not woken by the `0 12 * * 1` cron)
 
