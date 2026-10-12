@@ -737,12 +737,71 @@ export interface Exclusion {
   chars: number
 }
 
+/**
+ * Which code made a record's claims.
+ *
+ * Two bases, because the two launches ship this resolver as two different
+ * artifacts and the identity available for each is a different kind of
+ * fact. `git_commit` is a pointer into this repository's public history,
+ * which is what `ursa run` has: it executes `src/bin/ursa.ts` from a git
+ * work tree. `bundle_digest` is a content hash with no history behind it,
+ * which is what `ursa ci` has on any repository other than this one:
+ * GitHub downloads `dist/ursa.cjs` as a tarball rather than cloning it,
+ * so there is no HEAD under the bundle to read.
+ *
+ * The basis is a value in the record rather than a sentence in a document
+ * for the same reason `ExclusionReason` is: a consumer that will only
+ * accept records it can audit against a public commit selects on the
+ * word, with no prose to interpret. See src/resolver-identity.ts for how
+ * each one is read.
+ */
+export type ResolverIdentity =
+  | {
+      basis: 'git_commit'
+      /** `git rev-parse --short HEAD` in the resolver's own source tree */
+      commit: string
+      /**
+       * Whether that tree had uncommitted or untracked changes when the
+       * record was written, by `git status --porcelain`. True means
+       * `commit` does not identify the code that ran, and the record says
+       * so rather than letting the sha imply otherwise.
+       */
+      dirty: boolean
+    }
+  | {
+      basis: 'bundle_digest'
+      /**
+       * First 16 hex characters of the SHA-256 of the running bundle,
+       * which is the same identity `npm run bundle:check` compares a
+       * committed `dist/ursa.cjs` against.
+       */
+      digest: string
+    }
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
     id: string
     finished: boolean
     generatedAt: string
+    /**
+     * The resolver that produced every classification below, stamped when
+     * the record is first written to disk (`saveRecord` in src/store.ts).
+     *
+     * Absent means no resolver could be identified, which is a different
+     * claim from a record that names one: a record built in memory and
+     * never saved has no identity to state, and neither does one written
+     * by a build with no git tree and no readable artifact. Absent is
+     * never a placeholder for "some resolver" — see `exclusions` below for
+     * the same absent-versus-empty distinction.
+     *
+     * Preserved, never rewritten, once set. `applyVerdict` in
+     * src/bridge/declare.ts loads a record and saves it again to write a
+     * verdict into `signals`, and the span classifications in that record
+     * are still the original resolver's work. Re-stamping on every save
+     * would credit a later build with claims it did not make.
+     */
+    resolvedBy?: ResolverIdentity
   }
   /** what kind of finished thing this is, and where its rendered state lives */
   artifact: Artifact

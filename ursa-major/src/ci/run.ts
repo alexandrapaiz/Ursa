@@ -232,6 +232,12 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     dropped,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
+    // Read off the records rather than re-asked of the process, so the
+    // comment cannot name a resolver different from the one the records
+    // name. `?? null` covers the run that resolved nothing: there is then
+    // no record to read an identity from, and `formatResolverIdentity`
+    // says so in the one sentence it has for that case.
+    resolvedBy: records[0]?.task.resolvedBy ?? null,
   })
 
   let commentUrl: string | null = null
