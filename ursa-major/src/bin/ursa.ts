@@ -44,6 +44,7 @@ import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
+import { formatResolverIdentity } from '../resolver-identity'
 import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
@@ -455,6 +456,15 @@ export async function main(argv: string[]): Promise<number> {
     }
   }
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
+  // Which build of the resolver made the claims above. Printed on the
+  // local launch too, not only in the CI comment, because the figures a
+  // user is reading here moved by a factor of eight between two commits
+  // of this resolver on 2026-10-12 (docs/ideas.md) and the terminal gave
+  // no sign that anything underneath them had changed. Suppressed when
+  // nothing was written, since there is then no claim to attribute.
+  if (records.length > 0) {
+    console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`)
+  }
 
   // The gate runs on every run, after the records are on disk, and its
   // failure is the exit code. Records are saved first on purpose: a record

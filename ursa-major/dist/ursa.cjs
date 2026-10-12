@@ -448,12 +448,42 @@ function blobOid(repoPath, sha, path) {
     return null;
   }
 }
+function declaration(repoPath, sha) {
+  let out;
+  try {
+    out = (0, import_node_child_process2.execFileSync)("git", [
+      "-C",
+      repoPath,
+      "log",
+      "-1",
+      `--pretty=format:%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
+      sha
+    ], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    return { sha, subject: "", paths: /* @__PURE__ */ new Set() };
+  }
+  const nul = out.indexOf("\0");
+  if (nul < 0) return { sha, subject: out.trim(), paths: /* @__PURE__ */ new Set() };
+  return {
+    sha,
+    subject: out.slice(0, nul),
+    paths: new Set(
+      out.slice(nul + 1).split("	").map((x) => x.trim()).filter((x) => x.length > 0)
+    )
+  };
+}
 function vendoredPaths(projectPath, ep, paths, commits) {
   const { ancestors, descendants } = relatives(commits, ep.generatedSha);
   const found = [];
+  const declared = paths.length === 0 ? [] : [declaration(projectPath, ep.generatedSha), declaration(projectPath, ep.finalSha)];
   for (const path of paths) {
     const finalOid = blobOid(projectPath, ep.finalSha, path);
     if (finalOid === null || finalOid === EMPTY_BLOB) continue;
+    const d = declared.find((x) => x.paths.has(path));
+    if (d !== void 0) {
+      found.push({ path, sha: d.sha.slice(0, SHORT2), subject: d.subject, relation: "declared" });
+      continue;
+    }
     const touching = commitsTouchingPath(projectPath, path);
     if (touching === null) continue;
     let compared = 0;
@@ -475,7 +505,7 @@ function vendoredPaths(projectPath, ep, paths, commits) {
   }
   return found;
 }
-var import_node_child_process2, MAX_CANDIDATE_BLOBS, SHORT2, EMPTY_BLOB;
+var import_node_child_process2, MAX_CANDIDATE_BLOBS, SHORT2, IMPORT_TRAILER, EMPTY_BLOB;
 var init_vendored = __esm({
   "src/vendored.ts"() {
     "use strict";
@@ -484,6 +514,7 @@ var init_vendored = __esm({
     init_corroborate();
     MAX_CANDIDATE_BLOBS = 40;
     SHORT2 = 7;
+    IMPORT_TRAILER = "Ursa-Imported-Path";
     EMPTY_BLOB = "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391";
   }
 });
@@ -980,16 +1011,16 @@ FINAL: ${finalQuote}`,
   }
   return out;
 }
-function deriveSignals(record, declaration = UNDECLARED) {
+function deriveSignals(record, declaration2 = UNDECLARED) {
   const base = {
     method: "auto-detected",
     annotatedAt: (/* @__PURE__ */ new Date()).toISOString(),
     episode: {
       steps: record.generations.length,
       generations: record.generations.length,
-      accepted: declaration.accepted,
+      accepted: declaration2.accepted,
       acceptanceStatedInChat: false,
-      acceptanceBasis: declaration.basis
+      acceptanceBasis: declaration2.basis
     },
     correctionLoops: [],
     feedbackTranslations: [],
@@ -1123,29 +1154,90 @@ var init_episodes = __esm({
   }
 });
 
+// src/resolver-identity.ts
+function runningScript() {
+  const argv1 = process.argv[1];
+  if (!argv1) return null;
+  try {
+    return (0, import_node_fs.statSync)(argv1).isFile() ? argv1 : null;
+  } catch {
+    return null;
+  }
+}
+function git3(dir, args) {
+  try {
+    return (0, import_node_child_process4.execFileSync)("git", ["-C", dir, ...args], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+function resolverIdentity(scriptPath = runningScript()) {
+  if (scriptPath === null) return null;
+  const dir = (0, import_node_path2.dirname)(scriptPath);
+  if (git3(dir, ["rev-parse", "--is-inside-work-tree"]) === "true") {
+    const commit = git3(dir, ["rev-parse", "--short", "HEAD"]);
+    if (commit) {
+      const status = git3(dir, ["status", "--porcelain"]);
+      return { basis: "git_commit", commit, dirty: status === null || status.length > 0 };
+    }
+  }
+  try {
+    const digest = (0, import_node_crypto.createHash)("sha256").update((0, import_node_fs.readFileSync)(scriptPath)).digest("hex");
+    return { basis: "bundle_digest", digest: digest.slice(0, 16) };
+  } catch {
+    return null;
+  }
+}
+function currentResolverIdentity() {
+  if (!memo) memo = { value: resolverIdentity() };
+  return memo.value;
+}
+function formatResolverIdentity(identity) {
+  if (!identity) return "resolver not identified (no git work tree and no readable bundle)";
+  if (identity.basis === "git_commit") {
+    return `resolver ${identity.commit}${identity.dirty ? " (working tree had uncommitted changes)" : ""}`;
+  }
+  return `resolver bundle sha256:${identity.digest}`;
+}
+var import_node_child_process4, import_node_crypto, import_node_fs, import_node_path2, memo;
+var init_resolver_identity = __esm({
+  "src/resolver-identity.ts"() {
+    "use strict";
+    import_node_child_process4 = require("node:child_process");
+    import_node_crypto = require("node:crypto");
+    import_node_fs = require("node:fs");
+    import_node_path2 = require("node:path");
+  }
+});
+
 // src/store.ts
 function ursaDir(projectRoot) {
-  return (0, import_node_path2.join)(projectRoot, ".ursa");
+  return (0, import_node_path3.join)(projectRoot, ".ursa");
 }
-function saveRecord(projectRoot, record) {
-  const dir = (0, import_node_path2.join)(ursaDir(projectRoot), "records");
-  (0, import_node_fs.mkdirSync)(dir, { recursive: true });
-  const path = (0, import_node_path2.join)(dir, `${record.task.id}.json`);
-  (0, import_node_fs.writeFileSync)(path, JSON.stringify(record, null, 2) + "\n");
+function saveRecord(projectRoot, record, identity = currentResolverIdentity()) {
+  const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
+  (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
+  const path = (0, import_node_path3.join)(dir, `${record.task.id}.json`);
+  if (identity && !record.task.resolvedBy) record.task.resolvedBy = identity;
+  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(record, null, 2) + "\n");
   return path;
 }
 function saveEpisodes(projectRoot, episodes) {
-  (0, import_node_fs.mkdirSync)(ursaDir(projectRoot), { recursive: true });
-  const path = (0, import_node_path2.join)(ursaDir(projectRoot), "episodes.json");
-  (0, import_node_fs.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
+  (0, import_node_fs2.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "episodes.json");
+  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
   return path;
 }
-var import_node_fs, import_node_path2;
+var import_node_fs2, import_node_path3;
 var init_store = __esm({
   "src/store.ts"() {
     "use strict";
-    import_node_fs = require("node:fs");
-    import_node_path2 = require("node:path");
+    import_node_fs2 = require("node:fs");
+    import_node_path3 = require("node:path");
+    init_resolver_identity();
   }
 });
 
@@ -1181,8 +1273,8 @@ function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date(
   };
 }
 function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  if (!(0, import_node_fs2.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
-  const tuning = JSON.parse((0, import_node_fs2.readFileSync)(tuningPath, "utf8"));
+  if (!(0, import_node_fs3.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
+  const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tuningPath, "utf8"));
   const target = tuning.axioms.find((a) => a.id === unitId);
   if (!target) {
     throw new Error(
@@ -1196,23 +1288,23 @@ function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toIS
       (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
     )
   };
-  (0, import_node_fs2.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
+  (0, import_node_fs3.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
   return updated;
 }
-var import_node_fs2;
+var import_node_fs3;
 var init_revoke = __esm({
   "src/tuning/revoke.ts"() {
     "use strict";
-    import_node_fs2 = require("node:fs");
+    import_node_fs3 = require("node:fs");
   }
 });
 
 // src/consent.ts
 function consentPath(projectRoot) {
-  return (0, import_node_path3.join)(ursaDir(projectRoot), "consent.json");
+  return (0, import_node_path4.join)(ursaDir(projectRoot), "consent.json");
 }
 function tuningPathFor(projectRoot) {
-  return (0, import_node_path3.join)(ursaDir(projectRoot), "tuning.json");
+  return (0, import_node_path4.join)(ursaDir(projectRoot), "tuning.json");
 }
 function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
   return {
@@ -1233,10 +1325,10 @@ function coerceScope(raw) {
 }
 function loadConsent(projectRoot) {
   const path = consentPath(projectRoot);
-  if (!(0, import_node_fs3.existsSync)(path)) return withheldByDefault();
+  if (!(0, import_node_fs4.existsSync)(path)) return withheldByDefault();
   let parsed;
   try {
-    parsed = JSON.parse((0, import_node_fs3.readFileSync)(path, "utf8"));
+    parsed = JSON.parse((0, import_node_fs4.readFileSync)(path, "utf8"));
   } catch {
     return withheldByDefault();
   }
@@ -1251,9 +1343,9 @@ function loadConsent(projectRoot) {
   };
 }
 function saveConsent(projectRoot, consent) {
-  (0, import_node_fs3.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  (0, import_node_fs4.mkdirSync)(ursaDir(projectRoot), { recursive: true });
   const path = consentPath(projectRoot);
-  (0, import_node_fs3.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
+  (0, import_node_fs4.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
   return path;
 }
 function isGranted(consent, scope) {
@@ -1281,17 +1373,17 @@ function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).
   return setState(projectRoot, scope, "withheld", by, now);
 }
 function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const recordFile = (0, import_node_path3.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
-  const hadFile = (0, import_node_fs3.existsSync)(recordFile);
-  if (hadFile) (0, import_node_fs3.rmSync)(recordFile);
+  const recordFile = (0, import_node_path4.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
+  const hadFile = (0, import_node_fs4.existsSync)(recordFile);
+  if (hadFile) (0, import_node_fs4.rmSync)(recordFile);
   let axiomsDeleted = [];
   let evidenceStripped = 0;
   let sourcesRemoved = 0;
   const tPath = tuningPathFor(projectRoot);
-  if ((0, import_node_fs3.existsSync)(tPath)) {
-    const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tPath, "utf8"));
+  if ((0, import_node_fs4.existsSync)(tPath)) {
+    const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
     const result = forgetRecordInTuning(tuning, recordId, now);
-    (0, import_node_fs3.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
+    (0, import_node_fs4.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
     axiomsDeleted = result.axiomsDeleted;
     evidenceStripped = result.evidenceStripped;
     sourcesRemoved = result.sourcesRemoved;
@@ -1309,12 +1401,12 @@ function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOS
   });
   return tombstone;
 }
-var import_node_fs3, import_node_path3, SCOPES;
+var import_node_fs4, import_node_path4, SCOPES;
 var init_consent = __esm({
   "src/consent.ts"() {
     "use strict";
-    import_node_fs3 = require("node:fs");
-    import_node_path3 = require("node:path");
+    import_node_fs4 = require("node:fs");
+    import_node_path4 = require("node:path");
     init_revoke();
     init_store();
     SCOPES = ["minor-aggregate"];
@@ -2715,7 +2807,7 @@ var init_deletion = __esm({
 // src/resolve-episode.ts
 function resolvablePaths(ep) {
   return ep.touchedFiles.filter(
-    (path) => TEXT_EXTS.has((0, import_node_path4.extname)(path)) && !SKIP_FILES.has(path.split("/").pop() ?? "")
+    (path) => TEXT_EXTS.has((0, import_node_path5.extname)(path)) && !SKIP_FILES.has(path.split("/").pop() ?? "")
   );
 }
 function artifactFor(projectPath, ep) {
@@ -2732,7 +2824,7 @@ function resolveEpisode(projectPath, ep, commits) {
   const imported = new Set(vendored.map((v) => v.path));
   const exclusions = vendored.map((v) => ({
     path: v.path,
-    reason: "imported_whole",
+    reason: v.relation === "declared" ? "declared_import" : "imported_whole",
     sha: v.sha,
     subject: v.subject,
     relation: v.relation,
@@ -2804,11 +2896,11 @@ function resolveEpisode(projectPath, ep, commits) {
     artifact: artifactFor(projectPath, ep).artifact
   });
 }
-var import_node_path4, TEXT_EXTS, SKIP_FILES, MAX_BLOB_CHARS2;
+var import_node_path5, TEXT_EXTS, SKIP_FILES, MAX_BLOB_CHARS2;
 var init_resolve_episode = __esm({
   "src/resolve-episode.ts"() {
     "use strict";
-    import_node_path4 = require("node:path");
+    import_node_path5 = require("node:path");
     init_pairfinder();
     init_resolve();
     init_deploy();
@@ -3112,9 +3204,9 @@ __export(consent_cli_exports, {
   runForgetCommand: () => runForgetCommand
 });
 function loadRecords(projectRoot) {
-  const dir = (0, import_node_path5.join)(ursaDir(projectRoot), "records");
-  if (!(0, import_node_fs4.existsSync)(dir)) return [];
-  return (0, import_node_fs4.readdirSync)(dir).filter((n2) => n2.endsWith(".json")).sort().map((n2) => JSON.parse((0, import_node_fs4.readFileSync)((0, import_node_path5.join)(dir, n2), "utf8")));
+  const dir = (0, import_node_path6.join)(ursaDir(projectRoot), "records");
+  if (!(0, import_node_fs5.existsSync)(dir)) return [];
+  return (0, import_node_fs5.readdirSync)(dir).filter((n2) => n2.endsWith(".json")).sort().map((n2) => JSON.parse((0, import_node_fs5.readFileSync)((0, import_node_path6.join)(dir, n2), "utf8")));
 }
 function flag(argv, name) {
   const i = argv.indexOf(`--${name}`);
@@ -3143,8 +3235,8 @@ function describe(consent, projectRoot, io) {
   const records = loadRecords(projectRoot);
   io.out(`  ${records.length} record${records.length === 1 ? "" : "s"} on disk, all of them local.`);
   const tPath = tuningPathFor(projectRoot);
-  if ((0, import_node_fs4.existsSync)(tPath)) {
-    const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
+  if ((0, import_node_fs5.existsSync)(tPath)) {
+    const tuning = JSON.parse((0, import_node_fs5.readFileSync)(tPath, "utf8"));
     const active = tuning.axioms.filter((a) => a.status !== "revoked");
     io.out(`  ${tuning.axioms.length} inferences, ${active.length} active and ${tuning.axioms.length - active.length} revoked.`);
     for (const a of active) {
@@ -3169,7 +3261,7 @@ async function runConsentCommand(argv, io = stdio) {
     io.err("Usage: ursa consent show|grant|revoke|disclose|revoke-axiom <project> [options]");
     return 2;
   }
-  const projectRoot = (0, import_node_path5.resolve)(project);
+  const projectRoot = (0, import_node_path6.resolve)(project);
   if (sub === "show") {
     describe(loadConsent(projectRoot), projectRoot, io);
     return 0;
@@ -3219,7 +3311,7 @@ async function runConsentCommand(argv, io = stdio) {
     const out = flag(rest, "out");
     const json = JSON.stringify(batch, null, 2) + "\n";
     if (out) {
-      (0, import_node_fs4.writeFileSync)(out, json);
+      (0, import_node_fs5.writeFileSync)(out, json);
       io.out(`${batch.rows.length} aggregate row${batch.rows.length === 1 ? "" : "s"} written to ${out}. The audit passed: no key, no string and no fragment of your text is in that file.`);
     } else {
       io.out(json);
@@ -3236,7 +3328,7 @@ async function runForgetCommand(argv, io = stdio) {
     io.err("Usage: ursa forget <project> --record <recordId>");
     return 2;
   }
-  const projectRoot = (0, import_node_path5.resolve)(project);
+  const projectRoot = (0, import_node_path6.resolve)(project);
   const t = forget(projectRoot, recordId);
   if (!t.removed.recordFile && t.removed.axiomsDeleted.length === 0 && t.removed.evidenceStripped === 0) {
     io.out(`No record ${recordId} was on disk and nothing was derived from it. It is tombstoned anyway, so re-running \`ursa run\` will not create it.`);
@@ -3254,12 +3346,12 @@ async function runForgetCommand(argv, io = stdio) {
   io.out("  Its id is tombstoned, so `ursa run` will not rebuild it from the git history it came from.");
   return 0;
 }
-var import_node_fs4, import_node_path5, stdio;
+var import_node_fs5, import_node_path6, stdio;
 var init_consent_cli = __esm({
   "src/consent.cli.ts"() {
     "use strict";
-    import_node_fs4 = require("node:fs");
-    import_node_path5 = require("node:path");
+    import_node_fs5 = require("node:fs");
+    import_node_path6 = require("node:path");
     init_store();
     init_consent();
     init_disclosure();
@@ -3358,11 +3450,11 @@ function distill(record, tuning, model, runner = claudeRunner) {
   const prompt = buildDistillPrompt(record, tuning);
   return parseDistillOutput(runner(prompt, model));
 }
-var import_node_child_process4, VALID_KINDS, claudeRunner;
+var import_node_child_process5, VALID_KINDS, claudeRunner;
 var init_distill = __esm({
   "src/tuning/distill.ts"() {
     "use strict";
-    import_node_child_process4 = require("node:child_process");
+    import_node_child_process5 = require("node:child_process");
     VALID_KINDS = /* @__PURE__ */ new Set([
       "correction-loop",
       "feedback-translation",
@@ -3372,7 +3464,7 @@ var init_distill = __esm({
       "episode"
     ]);
     claudeRunner = (prompt, model) => {
-      const out = (0, import_node_child_process4.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
+      const out = (0, import_node_child_process5.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
         input: prompt,
         encoding: "utf8",
         maxBuffer: 16 * 1024 * 1024,
@@ -3513,7 +3605,7 @@ function mergeWindow(payload, opts = {}) {
 }
 function parentCountOf(repoPath, sha) {
   try {
-    const out = (0, import_node_child_process5.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
+    const out = (0, import_node_child_process6.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
       encoding: "utf8"
     }).trim();
     return out.split(/\s+/).filter(Boolean).length - 1;
@@ -3522,15 +3614,15 @@ function parentCountOf(repoPath, sha) {
   }
 }
 function mergeWindowFromEvent(eventPath, repoPath) {
-  const payload = JSON.parse((0, import_node_fs5.readFileSync)(eventPath, "utf8"));
+  const payload = JSON.parse((0, import_node_fs6.readFileSync)(eventPath, "utf8"));
   return mergeWindow(payload, { parentCountOf: (sha) => parentCountOf(repoPath, sha) });
 }
-var import_node_fs5, import_node_child_process5, NotAMergedPullRequest;
+var import_node_fs6, import_node_child_process6, NotAMergedPullRequest;
 var init_window = __esm({
   "src/ci/window.ts"() {
     "use strict";
-    import_node_fs5 = require("node:fs");
-    import_node_child_process5 = require("node:child_process");
+    import_node_fs6 = require("node:fs");
+    import_node_child_process6 = require("node:child_process");
     NotAMergedPullRequest = class extends Error {
     };
   }
@@ -3539,7 +3631,7 @@ var init_window = __esm({
 // src/ci/distill-mode.ts
 function claudeOnPath() {
   try {
-    (0, import_node_child_process6.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
+    (0, import_node_child_process7.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
     return true;
   } catch {
     return false;
@@ -3566,11 +3658,11 @@ function selectDistillMode(env, opts = {}) {
   }
   return { kind: "model", model, reason: `${credential} is set and the claude CLI is on PATH` };
 }
-var import_node_child_process6, CREDENTIAL_VARS;
+var import_node_child_process7, CREDENTIAL_VARS;
 var init_distill_mode = __esm({
   "src/ci/distill-mode.ts"() {
     "use strict";
-    import_node_child_process6 = require("node:child_process");
+    import_node_child_process7 = require("node:child_process");
     CREDENTIAL_VARS = ["ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN"];
   }
 });
@@ -3755,6 +3847,9 @@ function renderRunComment(f, ctx) {
   lines.push(
     bad === 0 ? `- Self-check: every record above satisfies all ${BOUND_COUNT} of the bounds a record must satisfy, so the figures in the table are at least internally consistent.` : `- Self-check: **${bad} bound${bad === 1 ? "" : "s"} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
   );
+  if (ctx.resolvedBy !== void 0) {
+    lines.push(`- Resolver that produced these records: ${formatResolverIdentity(ctx.resolvedBy)}. Every record above carries it as \`task.resolvedBy\`, so a figure in this table can be traced to the code that computed it.`);
+  }
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`);
   lines.push("");
   lines.push("</details>");
@@ -3769,6 +3864,7 @@ var init_comment = __esm({
   "src/ci/comment.ts"() {
     "use strict";
     init_invariants();
+    init_resolver_identity();
     RUN_COMMENT_MARKER = "<!-- ursa-major:run-comment:v1 -->";
   }
 });
@@ -3817,7 +3913,7 @@ async function runCi(opts) {
   } else {
     log("ursa ci: no declared acceptance to read; silence stays undeclared");
   }
-  const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
+  const declaration2 = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
   const pairs = findCommitPairs(opts.projectPath, {
     range: window.range,
     agentIdentities: opts.agentIdentities
@@ -3842,7 +3938,7 @@ async function runCi(opts) {
       dropped.belowMinChars++;
       continue;
     }
-    const signals = deriveSignals(record, declaration);
+    const signals = deriveSignals(record, declaration2);
     signals.notes = [...signals.notes ?? [], `CI launch: ${window.note}`];
     record.signals = signals;
     recordPaths.push(saveRecord(opts.projectPath, record));
@@ -3862,11 +3958,17 @@ async function runCi(opts) {
     repo: opts.repo,
     range: window.range,
     windowNote: window.note,
-    declarationBasis: declaration.basis,
-    recordsPath: (0, import_node_path6.join)(ursaDir(opts.projectPath), "records"),
+    declarationBasis: declaration2.basis,
+    recordsPath: (0, import_node_path7.join)(ursaDir(opts.projectPath), "records"),
     dropped,
     runUrl: opts.runUrl ?? null,
-    invariantViolations: gate.violations.length
+    invariantViolations: gate.violations.length,
+    // Read off the records rather than re-asked of the process, so the
+    // comment cannot name a resolver different from the one the records
+    // name. `?? null` covers the run that resolved nothing: there is then
+    // no record to read an identity from, and `formatResolverIdentity`
+    // says so in the one sentence it has for that case.
+    resolvedBy: records[0]?.task.resolvedBy ?? null
   });
   let commentUrl = null;
   if (opts.post === false) {
@@ -3886,7 +3988,7 @@ async function runCi(opts) {
     comment,
     commentUrl,
     priorAcceptance,
-    declaration,
+    declaration: declaration2,
     mode,
     recordPaths,
     invariantViolations: gate.violations
@@ -3907,7 +4009,7 @@ function renderStepOutputs(fields, commentUrl) {
   ].join("\n");
 }
 function writeStepOutputs(path, fields, commentUrl) {
-  (0, import_node_fs6.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
+  (0, import_node_fs7.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
 }
 async function readReactions(api, prNumber, log) {
   try {
@@ -3926,7 +4028,7 @@ async function readReactions(api, prNumber, log) {
 }
 function appendAcceptance(projectPath, prior) {
   const dir = ursaDir(projectPath);
-  (0, import_node_fs6.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs7.mkdirSync)(dir, { recursive: true });
   const entry = {
     schemaVersion: "0.1.0",
     commentUrl: prior.comment.commentUrl,
@@ -3938,7 +4040,7 @@ function appendAcceptance(projectPath, prior) {
     mark: prior.mark,
     readAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  (0, import_node_fs6.appendFileSync)((0, import_node_path6.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
+  (0, import_node_fs7.appendFileSync)((0, import_node_path7.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
 }
 function distillAll(projectPath, records, mode, log) {
   const base = {
@@ -3952,8 +4054,8 @@ function distillAll(projectPath, records, mode, log) {
     return base;
   }
   if (records.length === 0) return base;
-  const tuningPath = (0, import_node_path6.join)(ursaDir(projectPath), "tuning.json");
-  let tuning = (0, import_node_fs6.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs6.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
+  const tuningPath = (0, import_node_path7.join)(ursaDir(projectPath), "tuning.json");
+  let tuning = (0, import_node_fs7.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs7.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
   for (const record of records) {
     if (tuning.sources.some((s) => s.recordId === record.task.id)) continue;
     try {
@@ -3966,15 +4068,15 @@ function distillAll(projectPath, records, mode, log) {
       log(`ursa ci: distill failed on ${record.task.id} (${err.message}); continuing`);
     }
   }
-  (0, import_node_fs6.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
+  (0, import_node_fs7.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
   return base;
 }
-var import_node_fs6, import_node_path6, NO_PRIOR;
+var import_node_fs7, import_node_path7, NO_PRIOR;
 var init_run = __esm({
   "src/ci/run.ts"() {
     "use strict";
-    import_node_fs6 = require("node:fs");
-    import_node_path6 = require("node:path");
+    import_node_fs7 = require("node:fs");
+    import_node_path7 = require("node:path");
     init_pairfinder();
     init_episodes();
     init_signals();
@@ -4012,7 +4114,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path7 = require("node:path");
+var import_node_path8 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -4206,6 +4308,7 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
 // src/bin/ursa.ts
 init_episodes();
 init_store();
+init_resolver_identity();
 init_launch();
 init_resolve_episode();
 init_resolve_episode();
@@ -4257,7 +4360,7 @@ function renderRunSummary(records, episodes, diagnostics) {
       `${vendored.length} file${vendored.length === 1 ? "" : "s"} came in whole from elsewhere and ${vendored.length === 1 ? "was" : "were"} not read as your work, starting with ${one.path}.`
     );
     lines.push(
-      one.relation === "sibling" ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.` : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`
+      one.relation === "declared" ? `Commit ${one.sha} ("${one.subject}") declares it an import in its own ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.` : one.relation === "sibling" ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.` : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`
     );
     lines.push(
       `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`
@@ -4415,7 +4518,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path7.resolve)(project),
+      projectPath: (0, import_node_path8.resolve)(project),
       eventPath,
       repo,
       token,
@@ -4439,7 +4542,7 @@ async function main(argv) {
     }
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path7.resolve)(project),
+      projectPath: (0, import_node_path8.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -4457,14 +4560,14 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path7.resolve)(project);
+  const projectPath = (0, import_node_path8.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
-  let declaration = UNDECLARED;
+  let declaration2 = UNDECLARED;
   if (values.declare === "satisfied") {
-    declaration = { accepted: true, basis: "owner-declared satisfied at launch (--declare satisfied)" };
+    declaration2 = { accepted: true, basis: "owner-declared satisfied at launch (--declare satisfied)" };
   } else if (values.declare === "unsatisfied") {
-    declaration = { accepted: false, basis: "owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed" };
+    declaration2 = { accepted: false, basis: "owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed" };
   }
   const bound = (flag2) => {
     const raw = values[flag2];
@@ -4496,7 +4599,7 @@ async function main(argv) {
     if (!record) continue;
     if (!clearsSizeFloor(record, minChars)) continue;
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt);
-    record.signals = deriveSignals(record, declaration);
+    record.signals = deriveSignals(record, declaration2);
     saveRecord(projectPath, record);
     records.push(record);
   }
@@ -4512,6 +4615,9 @@ ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`
   }
   console.log(`
 Records: ${projectPath}/.ursa/records/`);
+  if (records.length > 0) {
+    console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`);
+  }
   const gate = gateRecords(records);
   if (gate.violations.length > 0) {
     console.error(`
