@@ -37,6 +37,52 @@ run's own PR adds no third check-in, since three OKR readings in six
 days is the exact pattern PR #88 already flagged to the owner as a
 possible sign this seat should pause until the merge backlog clears.
 
+## Grooming (2026-10-12, Monday ceremony)
+
+**The one `accepted` entry, re-checked.** "Agentic-forward: Ursa as the
+agents' HQ" (2026-09-19) is further along than the last grooming pass
+recorded: sub-step (a) (`get_briefing`'s interface) and sub-step (c)
+(semantic `nearestCases` ranking) are both built and merged, per
+#175's own craft-scan cross-check this run. Only sub-step (d),
+dogfooding against one of Ursa's own seats, is unverified from the
+repo. Flagging again for the engineer seat to move the parts that
+shipped; the PM does not change a status it does not own (pm.md §4).
+"Finished work is not only chat" already moved to `built` since the
+last grooming pass — no action needed, noted only so the next pass
+does not re-flag it.
+
+**Awaiting your verdict, and the backlog itself is now the finding.**
+Thirty `proposed` entries are two weeks or older with no ruling
+(counted by date against today, 2026-10-12), up from three named in
+the 2026-10-05/10-06 grooming note three and a half weeks ago. Those
+same three are still the oldest and still unruled: repo split
+(2026-09-18, 24 days), tuning packs (2026-09-19, 23 days), the
+merge-commits/PR-reader finding (2026-09-20, 22 days). Listing all
+thirty by title here would bury the point rather than make it: the
+count tripling while the oldest three sit untouched says the two-week
+flag has stopped being a flag an owner can act on and started being a
+number that only grows, run over run.
+
+Two `proposed` entries already name the exact fix for this, and both
+are themselves now three weeks old with no verdict: **"The ledger
+wants to be a directory"** (2026-09-27) and **"The idea ledger should
+be a directory, not one file"** (2026-09-30). Both propose splitting
+`docs/ideas.md` into `docs/ideas/YYYY-MM-DD-slug.md` files with a
+generated index, which would also let a grooming pass flag a stale
+entry by moving its file to an `awaiting-verdict/` subdirectory
+instead of writing a paragraph that ages the moment the next entry is
+filed. This grooming pass does not pick between the two (near-
+duplicates, one from each of two different runs) or act on either,
+since adopting one is itself a decision this file's contract reserves
+for the owner. Recommending a verdict on these two specifically, ahead
+of the other twenty-eight, because every week without one makes the
+other twenty-eight harder to triage by hand.
+
+No entry marked stale or superseded this run beyond the one noted
+above. Ordering `accepted` entries by leverage is moot again this pass
+for the same reason as last time: there is exactly one `accepted`
+entry and it is already three-quarters built.
+
 ## Grooming (2026-10-05, ceremony run 2026-10-06)
 
 Two `accepted` entries below (not reproduced here, see their dated

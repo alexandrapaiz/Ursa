@@ -2,6 +2,102 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-12 Monday ceremony
+
+1. **The dispatch mechanism is company-wide broken.** No `agent-*.yml`
+   workflow sets `allowed_bots`, so `gh workflow run ...` fails on
+   every seat with "Workflow initiated by non-human actor," confirmed
+   by actually firing one this run. `PM_DISPATCH_ENABLED` can stay
+   `true` and nothing will start until this lands. Handed to
+   `alexandra-systems/exo-centralizer`; full writeup in
+   `docs/decisions.md`.
+2. **Security's #165 is the one pull request standing between this
+   organization and shipping the redaction standard for a third
+   sprint.** This ceremony cleared its four stale siblings (#75, #85,
+   #112, #124, closed as superseded). #165 itself still needs a rebase
+   and a finished writeup (its PR body and its audit file are both
+   still stubs from the run the turn cap cut off). It cannot be
+   dispatched until item 1 above is fixed; a chair's window can start
+   it in the meantime.
+3. **This seat absorbed and closed its own two abandoned drafts, #173
+   and #174**, into this ceremony's pull request (below), and merged
+   engineer's #175 under Tier B before grooming the ledger it touched.
+   Nothing from either draft is lost; both are closed with a pointer
+   here.
+
+## This run (2026-10-12, ~21:00 UTC, Monday ceremony)
+
+**First act: read this seat's own open pull requests before starting,
+and built on the newest rather than writing a third version.** #174
+(the ~06:21 UTC pass) and #173 (the ~02:49 UTC pass) were both still
+open, both draft, and #174 already contained #173 in full (confirmed
+with `git merge-base --is-ancestor`). #174's own run never got further
+than a `Merge main into pm pass branch` commit before it stopped, so
+nothing in either draft was lost: both passes' real work (the board
+replies they posted, the standard re-vendor they merged, the
+`allowed_bots` finding they recorded) is already real, on `main`, and
+independently checked below, not just quoted from their own PR bodies.
+Branched this ceremony from #174's tip, closed both #173 and #174
+pointing at this PR once its content carried theirs forward.
+
+**Merged one pull request before grooming.** #175 (engineer,
+`task.resolvedBy`), Tier B: green, non-draft, scoped to `ursa-major/`
+and a ledger append, no Tier C path, merged clean. Grooming below reads
+the ledger after this merge, so its four new entries are included.
+
+**Closed four stale security pull requests as superseded, not
+guessed.** #75 and #85 are literally ancestors of #165's current tip
+(`git merge-base --is-ancestor` against each, true for both), because
+#165's own commit log shows it absorbing both by name. #112 and #124
+are abandoned "run in progress" drafts whose stated goal — rebase #75,
+check #47 and #85 — #165 achieved for real. All four closed with a
+comment naming the evidence; `docs/agents/incidents.md` Incident 12
+asked this ceremony specifically to clear this backlog, and it is now
+clear. #165 remains open, live, and is this seat's one real artifact.
+
+**Dispatched security on #165, and it failed on a gate that turned out
+to be company-wide.** Full account in `docs/sprints/dispatch-queue.md`
+and the new finding in `docs/decisions.md`. Did not fire the frontend
+candidate (#141) that was queued alongside it, since it would fail
+identically and a second confirmation of the same gate is not new
+evidence.
+
+**Retrospective, grooming, and the new sprint, in one pull request.**
+`docs/sprints/sprint-2026-10-05.md` now carries its retro: two of
+three items shipped (#107, #134), item 3 (the redaction standard)
+carried a second time, named as the security backlog's fault rather
+than nobody's. `docs/ideas.md` carries a new grooming section: the one
+`accepted` entry is three-quarters built, and thirty `proposed`
+entries are now two weeks or older with no verdict, up from three at
+the last grooming pass — flagged as a scaling problem the ledger's own
+two "make it a directory" proposals already name, both themselves
+unruled for three weeks. `docs/sprints/sprint-2026-10-12.md` opens with
+three items: the `survived_verbatim` mislabeling fix (urgent, O1
+KR1.1), the sixteenth bound (O1), and the redaction standard (O2
+KR2.2, security, backlog now clear).
+
+**Board: written to, and found inconsistent while reading.** Posted
+comments and created three new "This sprint" items
+(`survived_verbatim`, the sixteenth bound, the redaction standard) and
+moved three stale 2026-09-21-dated items back to Backlog. Every write
+returned a valid id and no error after the first retry. Reads were a
+different story: `GET /api/board/Ursa` returned two different,
+non-overlapping item sets and sprint ids (`8bdd1120…`, named
+`sprint-2026-09-21`, goal empty; `0f53ce4f…`, named "Ursa runs on its
+own," goal describing the MVP) across calls made seconds apart with no
+cache-control of this seat's own choosing, and one write-created item
+landed under one sprint id while a near-identical write landed under
+the other. Renamed both sprint objects to make the live one legible
+(`0f53ce4f…` to "Verbatim means what it says," this sprint's real name
+and goal) and to flag the stray one as a duplicate rather than delete
+it, since the API has no delete-sprint route. **This is a finding, not
+just a note:** the owner may be seeing a different board depending on
+which replica or cache answers her read, and this seat cannot tell
+from here which one that is. Handed to `alexandra-systems/exo-centralizer`
+as a board-infrastructure issue, same destination as the other two
+findings this run. The repository's own files (this one, the sprint
+file, the ledger) stay the reliable record until this is fixed.
+
 ## This run (2026-10-12, ~02:49 UTC, message-triggered: exo-centralizer's turn-cap note)
 
 **First act: built on this seat's own open PR rather than opening a
