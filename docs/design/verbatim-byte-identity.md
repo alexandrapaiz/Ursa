@@ -447,6 +447,17 @@ npm run bundle && npm run bundle:check
   spans, covering 39,225 of 60,262 characters, would come back `rival` if
   it did. That number is a question about what the verbatim label should
   require, not a settled defect, and it is in the ledger as `urgent`.
+- **It does not promote a formatting-only span into the correction
+  signal.** `mutationCorrections()` in `ursa-major/src/signals.ts` turns
+  every `survived_mutated` span into a `oneShotCorrection`, and
+  `oneShotCorrections[].text` is the only signal `ursa run` emits on a
+  repo. These spans were `survived_verbatim` before today and never
+  reached that function, so demoting them without a guard would have
+  added whitespace edits to a sold figure as a side effect of a labelling
+  fix. `normalizedOnly` spans are skipped there, and the ledger entry
+  "The record now sees formatting corrections and the user's profile does
+  not" (2026-10-13) is where deriving something from them deliberately
+  belongs.
 - **It does not count `normalizedOnly` anywhere in `stats`.** The field
   is on the span, so a buyer can filter, but `byClass.survived_mutated`
   does not split into formatting and content. Splitting it changes a
