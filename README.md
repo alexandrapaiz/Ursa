@@ -49,10 +49,23 @@ span of the final text classified by what happened to it.
 
 | Class | Meaning |
 |---|---|
-| `survived_verbatim` | generated and kept unchanged |
-| `survived_mutated` | kept but edited. The edit is the correction. |
+| `survived_verbatim` | generated and kept unchanged, meaning byte-identical: the characters of the final span are the characters of the generation extent it names, with nothing folded away |
+| `survived_mutated` | kept but edited. The edit is the correction. A span also carrying `normalizedOnly` is the narrow case where the edit changed only case, only smart punctuation, or only whitespace, so the two texts are the same text after folding and differ in raw characters alone |
 | `generated_deleted` | produced and thrown away |
 | `no_generation_provenance` | in the finished work but traceable to no generation. The model was never in the running. |
+
+Until 2026-10-13 `survived_verbatim` meant something weaker than this
+table said. Matching runs on normalized text, which is lowercased, has
+smart punctuation folded and every whitespace run collapsed, and pass 1
+of the resolver made its claim on a hit in that shadow text rather than
+on the characters themselves. A case change, an em dash retyped as a
+hyphen and a reflowed line were therefore all sold as text the model got
+right and the person did not touch. Measured over ten records of this
+repository's own history, 26 of 770 verbatim claims, covering 1,466
+characters, were claims of that kind. The reasoning, the measurement and
+the fix are in `docs/design/verbatim-byte-identity.md`, and
+`npx tsx tools/measure-verbatim-fidelity.ts cases` reproduces the table
+of six cases it turns on.
 
 Every record also names **what kind of finished thing** it is about,
 because finished work is not only chat. A record's `artifact.kind` is

@@ -1512,6 +1512,16 @@ function rawTextFor(record, q) {
   }
   return file.text;
 }
+function firstDifference(final, generation, window = 10) {
+  let i = 0;
+  while (i < final.length && i < generation.length && final[i] === generation[i]) i++;
+  const from = Math.max(0, i - window);
+  return {
+    offset: i,
+    final: final.slice(from, i + window),
+    generation: generation.slice(from, i + window)
+  };
+}
 function checkRecord(record) {
   const out = [];
   const id = record.task.id;
@@ -1556,11 +1566,19 @@ function checkRecord(record) {
       if (s.class === "survived_verbatim") {
         const finalLen = s.end - s.start;
         const srcLen = s.source.end - s.source.start;
+        const claimed = gen2.text.slice(s.source.start, s.source.end);
         if (finalLen > srcLen) {
           push(
             "CLAIM_NOT_WIDER",
             at,
             `${finalLen} final chars credited to a ${srcLen}-char generation extent, ${finalLen - srcLen} too many`
+          );
+        } else if (claimed !== s.text) {
+          const d = firstDifference(s.text, claimed);
+          push(
+            "CLAIM_NOT_WIDER",
+            at,
+            `${finalLen} final chars and the ${srcLen}-char generation extent they claim are not the same characters, first differing at offset ${d.offset}: final ${JSON.stringify(d.final)}, generation ${JSON.stringify(d.generation)}`
           );
         }
       }
@@ -2502,6 +2520,31 @@ function resolve(input) {
     start,
     end
   });
+  const normalizedOnlyMutation = (base, p, gStart, gEnd, filePath, trivial) => {
+    const claimed = p.gen.text.slice(gStart, gEnd);
+    const source = srcPtr(p, gStart, gEnd);
+    const descent = input.corroborate?.(filePath, base.text);
+    if (descent?.basis === "rival") {
+      return {
+        ...base,
+        class: "no_generation_provenance",
+        uncertain: true,
+        candidate: { score: 1, text: claimed, source },
+        descent
+      };
+    }
+    addClaim(mutatedClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+    return {
+      ...base,
+      class: "survived_mutated",
+      score: 1,
+      normalizedOnly: true,
+      source,
+      diff: wordDiff2(claimed, base.text),
+      ...trivial ? { trivial } : {},
+      ...descent ? { descent } : {}
+    };
+  };
   const files = input.files.map((f) => {
     const mode = modeForPath(f.path);
     const spans = [];
@@ -2510,24 +2553,40 @@ function resolve(input) {
       const base = { start: s.start, end: s.end, text: s.text };
       let span = null;
       if (sNorm.length >= MIN_VERBATIM_LEN) {
-        for (const p of preps) {
-          const idx = p.norm.norm.indexOf(sNorm);
-          if (idx < 0) continue;
-          const gStart = p.norm.map[idx];
-          const gEnd = p.norm.map[idx + sNorm.length - 1] + 1;
-          span = { ...base, class: "survived_verbatim", score: 1, source: srcPtr(p, gStart, gEnd) };
-          addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
-          break;
+        let nearest = null;
+        outerLong: for (const p of preps) {
+          for (let idx = p.norm.norm.indexOf(sNorm); idx >= 0; idx = p.norm.norm.indexOf(sNorm, idx + 1)) {
+            const gStart = p.norm.map[idx];
+            const gEnd = p.norm.map[idx + sNorm.length - 1] + 1;
+            if (p.gen.text.slice(gStart, gEnd) !== s.text) {
+              nearest ??= { p, gStart, gEnd };
+              continue;
+            }
+            span = { ...base, class: "survived_verbatim", score: 1, source: srcPtr(p, gStart, gEnd) };
+            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+            break outerLong;
+          }
+        }
+        if (!span && nearest) {
+          span = normalizedOnlyMutation(base, nearest.p, nearest.gStart, nearest.gEnd, f.path);
         }
       } else if (sNorm.length > 0) {
+        let nearestShort = null;
         outer: for (const p of preps) {
           for (const g of p.sentences) {
-            if (g.norm === sNorm) {
-              span = { ...base, class: "survived_verbatim", score: 1, trivial: true, source: srcPtr(p, g.start, g.end) };
-              addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end });
-              break outer;
+            if (g.norm !== sNorm) continue;
+            if (g.text !== s.text) {
+              nearestShort ??= { p, g };
+              continue;
             }
+            span = { ...base, class: "survived_verbatim", score: 1, trivial: true, source: srcPtr(p, g.start, g.end) };
+            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end });
+            break outer;
           }
+        }
+        if (!span && nearestShort) {
+          const { p, g } = nearestShort;
+          span = normalizedOnlyMutation(base, p, g.start, g.end, f.path, true);
         }
       }
       if (!span && sNorm.length > 0) {
@@ -2567,11 +2626,7 @@ function resolve(input) {
               class: "survived_mutated",
               score: r33(best.score),
               source: srcPtr(best.p, best.sent.start, best.sent.end),
-              diff: diffWords(best.sent.text, s.text).map((d) => ({
-                value: d.value,
-                ...d.added ? { added: true } : {},
-                ...d.removed ? { removed: true } : {}
-              })),
+              diff: wordDiff2(best.sent.text, s.text),
               // `uncertain` is deliberately NOT set on an `unverified`
               // verdict. It is stats.uncertainSpans' own definition (a
               // below-threshold candidate awaiting adjudication) and that
@@ -2592,7 +2647,14 @@ function resolve(input) {
       }
       spans.push(span ?? { ...base, class: "no_generation_provenance" });
     }
-    return { path: f.path, mode, text: f.text, spans: mergeVerbatimRuns(spans, f.text) };
+    return {
+      path: f.path,
+      mode,
+      text: f.text,
+      // preps is built by mapping over input.generations in order, so its
+      // index is the generationIndex a source pointer carries.
+      spans: mergeVerbatimRuns(spans, f.text, preps.map((p) => p.gen.text))
+    };
   });
   const overlaps = (claims, s) => !!claims && claims.some((c) => c.start < s.end && c.end > s.start);
   const attribute = input.attributeDeletion ?? (() => ({ cause: "human_edit" }));
@@ -2636,11 +2698,11 @@ function resolve(input) {
     ...input.exclusions ? { exclusions: input.exclusions } : {}
   };
 }
-function mergeVerbatimRuns(spans, text) {
+function mergeVerbatimRuns(spans, text, genTexts) {
   const out = [];
   for (const s of spans) {
     const prev = out[out.length - 1];
-    if (prev && prev.class === "survived_verbatim" && s.class === "survived_verbatim" && prev.source && s.source && prev.source.generationIndex === s.source.generationIndex && s.source.start >= prev.source.end && s.source.start - prev.source.end <= 2 && /^\s*$/.test(text.slice(prev.end, s.start))) {
+    if (prev && prev.class === "survived_verbatim" && s.class === "survived_verbatim" && prev.source && s.source && prev.source.generationIndex === s.source.generationIndex && s.source.start >= prev.source.end && s.source.start - prev.source.end <= 2 && text.slice(prev.end, s.start) === (genTexts[s.source.generationIndex] ?? "").slice(prev.source.end, s.source.start)) {
       prev.end = s.end;
       prev.text = text.slice(prev.start, prev.end);
       prev.source.end = s.source.end;
@@ -2651,7 +2713,7 @@ function mergeVerbatimRuns(spans, text) {
   }
   return out;
 }
-var r33;
+var r33, wordDiff2;
 var init_resolve = __esm({
   "src/resolve.ts"() {
     "use strict";
@@ -2661,6 +2723,11 @@ var init_resolve = __esm({
     init_match();
     init_stats();
     r33 = (x) => Math.round(x * 1e3) / 1e3;
+    wordDiff2 = (from, to) => diffWords(from, to).map((d) => ({
+      value: d.value,
+      ...d.added ? { added: true } : {},
+      ...d.removed ? { removed: true } : {}
+    }));
   }
 });
 
