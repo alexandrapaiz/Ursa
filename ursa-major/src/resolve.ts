@@ -23,7 +23,7 @@
 // forced it. With no corroborator every above-threshold match is labelled
 // `survived_mutated` as before.
 
-import { diffWords } from 'diff'
+import { diffChars, diffWords } from 'diff'
 import { normalize, type Normalized } from './normalize'
 import { segment, modeForPath, type Span } from './segment'
 import {
@@ -103,13 +103,28 @@ interface Claim {
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
 
-/** word-level diff generation → final, in the record's own DiffPart shape */
-const wordDiff = (from: string, to: string) =>
-  diffWords(from, to).map((d) => ({
+/** diff generation → final, in the record's own DiffPart shape */
+const toDiffParts = (parts: Array<{ value: string; added?: boolean; removed?: boolean }>) =>
+  parts.map((d) => ({
     value: d.value,
     ...(d.added ? { added: true } : {}),
     ...(d.removed ? { removed: true } : {}),
   }))
+
+/** word-level, the right granularity for an edit that changed words */
+const wordDiff = (from: string, to: string) => toDiffParts(diffWords(from, to))
+
+/**
+ * Character-level, and only for a `normalizedOnly` mutation. `diffWords`
+ * tokenizes on whitespace and treats any run of it as equivalent, so on the
+ * commonest normalized-only difference — a doubled space, a reflowed line —
+ * it reports one unchanged part and no change at all. A span whose whole
+ * content is the mutation, carrying a diff that says nothing was mutated,
+ * would be worse than the label it replaced. At this granularity the
+ * difference is always visible, and it is cheap here because the two strings
+ * are the same string modulo folding.
+ */
+const charDiff = (from: string, to: string) => toDiffParts(diffChars(from, to))
 
 export function resolve(input: ResolveInput): OutcomeRecord {
   const gens = input.generations.map((g, i) => ({ ...g, generationIndex: i }))
@@ -206,7 +221,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       score: 1,
       normalizedOnly: true,
       source,
-      diff: wordDiff(claimed, base.text),
+      diff: charDiff(claimed, base.text),
       ...(trivial ? { trivial } : {}),
       ...(descent ? { descent } : {}),
     }

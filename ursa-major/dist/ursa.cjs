@@ -2065,6 +2065,20 @@ var init_base = __esm({
   }
 });
 
+// node_modules/diff/libesm/diff/character.js
+function diffChars(oldStr, newStr, options) {
+  return characterDiff.diff(oldStr, newStr, options);
+}
+var CharacterDiff, characterDiff;
+var init_character = __esm({
+  "node_modules/diff/libesm/diff/character.js"() {
+    init_base();
+    CharacterDiff = class extends Diff {
+    };
+    characterDiff = new CharacterDiff();
+  }
+});
+
 // node_modules/diff/libesm/util/string.js
 function longestCommonPrefix(str1, str2) {
   let i;
@@ -2350,6 +2364,7 @@ var init_word = __esm({
 // node_modules/diff/libesm/index.js
 var init_libesm = __esm({
   "node_modules/diff/libesm/index.js"() {
+    init_character();
     init_word();
   }
 });
@@ -2540,7 +2555,7 @@ function resolve(input) {
       score: 1,
       normalizedOnly: true,
       source,
-      diff: wordDiff2(claimed, base.text),
+      diff: charDiff(claimed, base.text),
       ...trivial ? { trivial } : {},
       ...descent ? { descent } : {}
     };
@@ -2713,7 +2728,7 @@ function mergeVerbatimRuns(spans, text, genTexts) {
   }
   return out;
 }
-var r33, wordDiff2;
+var r33, toDiffParts, wordDiff2, charDiff;
 var init_resolve = __esm({
   "src/resolve.ts"() {
     "use strict";
@@ -2723,11 +2738,13 @@ var init_resolve = __esm({
     init_match();
     init_stats();
     r33 = (x) => Math.round(x * 1e3) / 1e3;
-    wordDiff2 = (from, to) => diffWords(from, to).map((d) => ({
+    toDiffParts = (parts) => parts.map((d) => ({
       value: d.value,
       ...d.added ? { added: true } : {},
       ...d.removed ? { removed: true } : {}
     }));
+    wordDiff2 = (from, to) => toDiffParts(diffWords(from, to));
+    charDiff = (from, to) => toDiffParts(diffChars(from, to));
   }
 });
 
