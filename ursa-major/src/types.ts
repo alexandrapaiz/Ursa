@@ -243,11 +243,38 @@ export interface FinalSpan {
   end: number
   text: string
   class: SpanClass
-  /** similarity score that earned the label (1 for verbatim) */
+  /**
+   * Similarity score that earned the label: 1 for verbatim, and also 1 for a
+   * `normalizedOnly` mutation, whose two texts are identical on the
+   * normalized side by construction.
+   */
   score?: number
   source?: SourcePointer
   /** word-level diff generation → final; the mutation is the correction */
   diff?: DiffPart[]
+  /**
+   * Set on a `survived_mutated` span whose text is identical to the
+   * generation extent it names after case folding, punctuation folding and
+   * whitespace collapsing, and differs in raw characters only. The person
+   * reflowed a line, changed a capital, or retyped an em dash as a hyphen.
+   *
+   * Three readings of this span are defensible and the record refuses to
+   * choose between them, which is why the fact is a field and not a class.
+   * A buyer studying content corrections filters these out as formatting
+   * noise. A buyer studying house style — the thing Ursa Major sells users
+   * as "your tone, your format preferences" — wants exactly these and
+   * nothing else. A buyer counting how much of the model's output survived
+   * wants them inside `survived_verbatim`, which they are not, because that
+   * label means byte-identical as of 2026-10-13.
+   *
+   * Until that date these spans WERE labelled `survived_verbatim` with
+   * `score: 1`, because pass 1 made its claim on a hit in the normalized
+   * shadow text. Measured over ten records of this repository's own history,
+   * 26 of 770 verbatim claims, covering 1,466 characters, were claims of
+   * this kind: see docs/design/verbatim-byte-identity.md and
+   * `tools/measure-verbatim-fidelity.ts`, which reproduces the number.
+   */
+  normalizedOnly?: true
   /** below-threshold best match existed; surfaced for human adjudication */
   uncertain?: boolean
   candidate?: { score: number; text: string; source: SourcePointer }

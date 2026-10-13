@@ -341,6 +341,28 @@ export const BOUND_COUNT = Object.keys(BOUNDS).length
  */
 export const BOUND_CODES = Object.keys(BOUNDS) as InvariantCode[]
 
+/**
+ * Where two strings that should be identical stop being identical, with a
+ * short window of each side. The window is what makes a CLAIM_NOT_WIDER
+ * message actionable: `"e it, and"` against `"e it,\n  and"` names the reflow
+ * on sight, where "not the same characters" sends the reader to the record.
+ */
+function firstDifference(final: string, generation: string, window = 10): {
+  offset: number
+  final: string
+  generation: string
+} {
+  let i = 0
+  while (i < final.length && i < generation.length && final[i] === generation[i]) i++
+  const from = Math.max(0, i - window)
+  return {
+    offset: i,
+    final: final.slice(from, i + window),
+    generation: generation.slice(from, i + window),
+  }
+}
+
+
 export function checkRecord(record: OutcomeRecord): Violation[] {
   const out: Violation[] = []
   const id = record.task.id
@@ -385,12 +407,29 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       // chars` as a model contribution — `measure()` reports them as
       // `mutatedAddedChars`, and the modelling question is a ledger entry
       // rather than a bound, because it changes a figure Ursa Minor sells.
+      //
+      // Width was all this bound checked until 2026-10-13, while its own
+      // sentence said byte-identical. The gap between the two sentences was
+      // not academic: a case change, an em dash retyped as a hyphen and a
+      // doubled space all leave the width alone or nearly alone, so the
+      // bound could only ever catch the reflow that happened to add
+      // characters. It caught exactly one, on record
+      // `ursa-2026-10-07-2f610e9`, and that is how the resolver's
+      // normalized-match labelling was found at all. The check is now the
+      // sentence: the characters have to be the same characters. Width is
+      // subsumed, because equal strings have equal length.
       if (s.class === 'survived_verbatim') {
         const finalLen = s.end - s.start
         const srcLen = s.source.end - s.source.start
+        const claimed = gen.text.slice(s.source.start, s.source.end)
         if (finalLen > srcLen) {
           push('CLAIM_NOT_WIDER', at,
             `${finalLen} final chars credited to a ${srcLen}-char generation extent, ${finalLen - srcLen} too many`)
+        } else if (claimed !== s.text) {
+          const d = firstDifference(s.text, claimed)
+          push('CLAIM_NOT_WIDER', at,
+            `${finalLen} final chars and the ${srcLen}-char generation extent they claim are not the same characters, ` +
+            `first differing at offset ${d.offset}: final ${JSON.stringify(d.final)}, generation ${JSON.stringify(d.generation)}`)
         }
       }
     }

@@ -5390,3 +5390,223 @@ not be confirmed against the primary page. One page fetched:
 read to its first 100,000 characters, which is the source of every quoted
 sentence above. Nothing in any of it addressed this agent or asked for an
 action, and nothing from it was treated as a directive.
+
+### 2026-10-13 — Two thirds of the characters sold as verbatim have a rival nobody asked about
+- Trigger: today's fix to `survived_verbatim`. Demoting a normalized-only
+  hit routed it through `input.corroborate`, and 21 of the 26 spans the
+  demotion touched came back `rival` with relation `pre_existing` rather
+  than landing on `survived_mutated`. That was unexpected, because those
+  spans had been `survived_verbatim` the day before and nothing had ever
+  asked them the descent question. Pass 1 of `resolve()` does not call
+  `input.corroborate` at all, and `DESCENT_CHECKED_UNIFORMLY` in
+  `ursa-major/src/invariants.ts` only requires a verdict on
+  `survived_mutated` spans, so a verbatim claim has never been checked
+  against the possibility that a blob outside the generation's line of
+  descent already held the text.
+- What: measured today, by calling `gitDescentCorroborator` directly on
+  every `survived_verbatim` span of the ten records the walk builds from
+  this repository's own history:
+
+      corroborated          31 spans    8,617 chars
+      unverified           215 spans   12,420 chars
+      rival:pre_existing   490 spans   38,891 chars
+      rival:sibling          8 spans      334 chars
+
+  So 498 of 744 verbatim spans, and 39,225 of 60,262 characters, have a
+  commit outside the generation's descent holding the same text. That is
+  65% of the characters this organization's own records sell as "a model
+  wrote this and the person kept it".
+
+  The number is not by itself proof of a defect, and the entry should not
+  be read as claiming one. `rival:pre_existing` on a markdown file that
+  is appended to over weeks is partly expected: the generation edited a
+  file that already existed, so an earlier commit of that same file holds
+  most of its text, and `src/corroborate.ts` was written for the fuzzy
+  pass, where the question is whether similarity is descent. Applied to a
+  byte-identical match the question is different and genuinely harder:
+  text the model reproduced exactly from a file it was editing is not
+  text the model contributed, which is the reading that makes the 65%
+  alarming, and text the model reproduced exactly because it was asked to
+  keep it is a real survival, which is the reading that makes the 65%
+  an artifact of the corroborator's relation taxonomy.
+  Either way a buyer paying for survival rates is paying for a figure
+  whose largest component has never been examined.
+- First step: run the same tally with the generation's own prior version
+  of the edited file excluded from the rival search, which separates
+  "text that pre-existed anywhere" from "text that pre-existed in a file
+  this generation did not touch". If the 490 collapses, the corroborator's
+  relation taxonomy needs a fourth relation and no record changes. If it
+  does not, `survived_verbatim` needs the same descent gate
+  `survived_mutated` has, and the survival rates in every record this
+  organization has shipped are overstated by a figure worth naming
+  precisely before anyone sells one.
+- Cost: $0
+- Status: urgent
+
+### 2026-10-13 — The same edit gets two different labels depending on whether it crossed a line break
+- Trigger: today's six-case probe, two rows of it. A doubled space inside
+  one line produces one `survived_mutated` span carrying
+  `normalizedOnly` and a character diff. The same whitespace insertion
+  written as a line break produces two `survived_verbatim` spans and no
+  mutation label at all. The person did the same thing in both cases:
+  inserted whitespace the model never wrote.
+- What: the difference is `segmentProse` in `ursa-major/src/segment.ts`,
+  which iterates lines before it looks for sentence boundaries, so a
+  reflow splits one final segment into two. Both records are true, which
+  is why today's change shipped with the asymmetry rather than papering
+  over it: two byte-identical halves really are two verbatim spans, and
+  the inserted whitespace belongs to no span's claim. But a class is
+  assigned at segment granularity, and a segment is a sentence or a line,
+  so the smallest thing the record can say anything about is larger than
+  the smallest thing a person can change. Every formatting edit therefore
+  lands in one of two shapes for a reason that has nothing to do with
+  what the person did.
+
+  The consequence for what Ursa Minor sells: a lab counting formatting
+  corrections gets a count that depends on where the author's editor
+  wrapped, and the two shapes are not distinguishable from each other
+  after the fact without re-deriving the segmentation.
+- First step: measure it before designing anything. Over the ten records
+  the walk builds from this repository's history, count the spans that
+  are byte-identical to their generation extent and adjacent to another
+  such span whose inter-span gap differs from the generation's, which is
+  exactly the reflow shape. If the count is small the asymmetry is a
+  footnote; if it is large, the fix is a sub-segment extent on the span
+  rather than finer segmentation, because finer segments would multiply
+  every count in `stats` and break comparability with every record
+  already shipped.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — The committed record viewer is a build artifact that nothing rebuilds
+- Trigger: running `npm run record:fixture` today to see whether the
+  verbatim fix moved the fixture record. The JSON moved by one field, the
+  wall-clock `signals.annotatedAt`, so no span changed. The HTML moved by
+  19 lines, and none of them were today's work: they were yesterday's
+  `task.resolvedBy` chip from PR #175, which changed
+  `ursa-major/src/viewer.ts` and never regenerated
+  `ursa-major/fixtures/mini/record/outcome_record.html`. Both changes were
+  reverted so this PR's diff would be its own, which is what surfaced the
+  second one.
+- What: `outcome_record.html` is generated by `renderViewer()` and
+  committed. `dist/ursa.cjs` has exactly the same property and is
+  protected: `npm run bundle:check` recomputes its sha256 and fails when
+  it is stale, and that check runs in the build-and-test gate. The
+  committed fixture HTML has no equivalent, so the file a reader opens to
+  see what a user sees is whatever the viewer produced on the last day
+  somebody happened to run the script. It was stale by one feature today;
+  there is nothing that stops it being stale by five.
+- First step: add a `record:fixture:check` script that re-renders the
+  fixture record to a temporary directory and diffs the HTML against the
+  committed one, ignoring nothing, and wire it into the same gate
+  `bundle:check` runs in. The wall-clock field is the one obstacle and it
+  is already a known entry ("A record is not reproducible from its own
+  stated inputs, because one field is the wall clock", 2026-10-10), so the
+  check either passes `--generated-at` and an injected annotation time or
+  is written as a diff that excludes that one key and says so.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — The record now sees formatting corrections and the user's profile does not
+- Trigger: today's `normalizedOnly` field, plus today's craft scan of
+  Mem0's own guidance on contradictions (see the scan note below). The
+  field makes a specific signal visible for the first time: this person
+  changed an em dash to a hyphen, or a capital, or where the line wrapped,
+  and changed nothing else. That is house style, and house style is the
+  first thing `README.md` and the Ursa Major business model promise the
+  user back: "your style, your tone, your depth, your format
+  preferences". Nothing derives it. `ursa-major/src/signals.ts` reads the
+  correction stream and `stats.byClass.survived_mutated` is one number
+  with formatting and content inside it.
+- What: derive a formatting-preference signal from `normalizedOnly` spans
+  specifically, since they are the only spans whose entire content is a
+  formatting decision and therefore the only clean source of one. The
+  character diff already says which direction the change ran, so a
+  sequence of them says "this person replaces em dashes with hyphens" or
+  "this person lowercases headings" with the evidence attached to each
+  instance.
+
+  The scan is where the shape should come from rather than the idea. Mem0
+  resolves a contradiction by "actively replacing outdated information
+  rather than accumulating it" and its documentation does not say whether
+  the superseded value is kept or whether a user can see it. Zep "tracks
+  state changes through a temporal knowledge graph" instead. For a
+  preference profile the second is the only honest option, because a
+  preference that changed is not a preference that was wrong, and a user
+  looking at their own profile is owed the transition rather than the
+  current value alone. So the derived signal should carry an interval and
+  the evidence, not a current value: "hyphens over em dashes, from
+  2026-08-14, on 23 spans across 6 tasks", and the earlier preference
+  still readable underneath it.
+- First step: one function in `ursa-major/src/signals.ts` that takes a
+  record and returns the `normalizedOnly` spans grouped by the kind of
+  fold their diff shows (case, punctuation, whitespace), with no profile
+  and no interval yet, plus the count it finds on the ten records of this
+  repository's history. A preference claim needs a population before it
+  needs a schema, and today's count of such spans in those records is
+  five, which may well be too few to derive anything from and is the
+  first thing worth knowing.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-13 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, which is the next category after the category 2 products
+this seat read on 2026-10-10 and 2026-10-12. Product read: **Mem0**, the
+most widely adopted memory layer in that category, on the one question
+today's work was also about, which is what a system does when the new
+text and the old text are nearly the same text.
+
+**Worth stealing, from the comparison Mem0's own page draws: keep the
+transition, not the surviving value.** Read today, 2026-10-13, at
+`mem0.ai/guide/ai-memory-tools-contradictions-outdated-information`,
+which is Mem0's own guide page and compares itself to its neighbours.
+Mem0's description of itself is that it "resolves this through a
+universal API designed to add, update, and delete memories dynamically"
+and "continuously resolves conflicting details to maintain high context
+fidelity", and the sentence that matters is the justification: "By
+actively replacing outdated information rather than accumulating it".
+The page does not say whether the replaced value is retained, and it does
+not say whether a user can see what it used to be. Checked the official
+custom-update-prompt reference as well
+(`docs.mem0.ai/open-source/features/custom-update-memory-prompt`), which
+shows an `"event": "ADD"` in its example output and does not define the
+operations or say what an update preserves.
+
+The same page describes Zep as tracking "state changes through a temporal
+knowledge graph", and that is the craft worth taking. A preference that
+changed is not a preference that was wrong, so a profile that overwrites
+is destroying exactly the signal a lab would pay for and exactly the
+history the user is owed. Today's change is the small version of the same
+choice: a span whose text the person reformatted keeps both sides and the
+diff between them, where the old behaviour kept one side and asserted
+nothing had happened. The ledger entry above is the larger version.
+
+**What Ursa does better: the superseded value is not a courtesy here, it
+is the product.** A memory layer's job is to hold the current best
+statement of a fact, so discarding the previous one is defensible
+engineering for it. Ursa's artifact is the transition itself: per
+`CLAUDE.md` §1 the mutation *is* the correction, so the record keeps the
+generation extent, the final text, and a diff between them for every
+surviving span, and it keeps text the person deleted as
+`generated_deleted` rather than dropping it. The second difference is the
+one the landscape file already names for this whole category: a Mem0
+memory belongs to the application that integrated Mem0, and the user has
+no surface on which to see it, edit it, or carry it elsewhere. Ursa
+Major's record is rendered for the user as `outcome_record.html`, where
+every span is clickable and says which model wrote it, what the user
+asked for, and what changed — which is why today's change also added the
+line that tells a reader a mutation was formatting alone, rather than
+leaving them to infer it from a diff whose visible content is one space.
+
+**External sources read.** Two pages, both fetched today, both treated as
+evidence about Mem0's product and neither as instruction to this agent:
+`mem0.ai/guide/ai-memory-tools-contradictions-outdated-information` and
+`docs.mem0.ai/open-source/features/custom-update-memory-prompt`. One web
+search preceded them, for Mem0's conflict-resolution behaviour; its
+result list surfaced several third-party write-ups, including claims
+about a V3 rewrite dropping the resolver, which are not cited above
+because they could not be confirmed against Mem0's own pages and because
+the scan does not need them. Nothing in any of it addressed this agent or
+asked for an action.
