@@ -1,14 +1,14 @@
-# fixtures/violations — fifteen records the gate must refuse
+# fixtures/violations — sixteen records the gate must refuse
 
 Every other fixture in this repository is a record the resolver got
-right. This directory holds the opposite: sixteen committed
-`OutcomeRecord` files, one clean base and fifteen counterexamples, each
+right. This directory holds the opposite: seventeen committed
+`OutcomeRecord` files, one clean base and sixteen counterexamples, each
 one the base plus a single named edit that violates exactly the bound it
 is named after.
 
 ## Why a directory of broken records exists
 
-`src/invariants.ts` states fifteen bounds a record must satisfy, and
+`src/invariants.ts` states sixteen bounds a record must satisfy, and
 `ursa run` and `ursa ci` both exit non-zero when one of them fails. Until
 this directory existed, no record anywhere in the repository violated any
 of them, and that absence had two measurable costs.
@@ -39,7 +39,7 @@ because no fixture is allowed to be wrong" (`docs/ideas.md`, 2026-10-10).
 
 | File | What it is |
 |---|---|
-| `base.json` | A record that passes all fifteen bounds. Every counterexample is this file plus one edit, so a reviewer reads a two-line `diff` rather than a 7 KB JSON file. |
+| `base.json` | A record that passes all sixteen bounds. Every counterexample is this file plus one edit, so a reviewer reads a two-line `diff` rather than a 7 KB JSON file. |
 | `<slug>.json` | One counterexample. `<slug>` is the lower-case, hyphenated form of the invariant code it fires, for example `gen-survived-bounded.json` for `GEN_SURVIVED_BOUNDED`. |
 | `<slug>.md` | That fixture's note: the exact edit, what the record now claims, and the gate's own `observed` string with both sides of every number in it. |
 
@@ -50,7 +50,7 @@ asserts every `observed` string the gate produced still appears in the
 note verbatim. A fixture whose numbers move leaves a note that no longer
 matches and fails the suite rather than misleading the next reader.
 
-## The base record, and the three structures it carries on purpose
+## The base record, and the four structures it carries on purpose
 
 `base.json` is produced by `resolve()` over synthetic prose: one
 `survived_verbatim` span, one `survived_mutated` span where the person
@@ -58,7 +58,7 @@ edited "holds it whole" into "holds the whole of it", one
 `no_generation_provenance` span, and one generation segment the person
 threw away.
 
-Three of the fifteen bounds read nothing else, and all three are
+Four of the sixteen bounds read nothing else, and all four are
 *vacuously* true on a record that lacks their structure — which is why
 neither fixture already committed here (`fixtures/mini/record/` and
 `fixtures/real/`) could serve as the base:
@@ -68,14 +68,22 @@ neither fixture already committed here (`fixtures/mini/record/` and
 | `SIGNAL_QUOTE_GROUNDED` | `signals.oneShotCorrections[].quotes[]` | `deriveSignals()`, the real detector, run over the resolved record |
 | `DESCENT_CHECKED_UNIFORMLY` | `files[].spans[].descent` | attached by hand as `{ basis: 'corroborated', rivalsSearched: 3 }`, because a corroborator needs a git repository and this record has none |
 | `EXCLUSION_NOT_CLASSIFIED` | `exclusions[]` | passed through `resolve()`'s own input, so `stats.perFile` gets the row the resolver would have written |
+| `RESOLVER_IDENTIFIED` | `task.resolvedBy` | set by hand to `{ basis: 'git_commit', commit: '19455a3', dirty: false }`, because `src/store.ts` stamps that field inside `saveRecord` and this script writes its files directly |
 
-Only the descent verdicts are hand-attached. `{ basis: 'corroborated' }`
-is the shape `src/corroborate.ts` emits when nothing outside the
-generation's line of descent holds the span's text.
+The descent verdicts and the resolver identity are the hand-attached
+ones. `{ basis: 'corroborated' }` is the shape `src/corroborate.ts` emits
+when nothing outside the generation's line of descent holds the span's
+text. `19455a3` is a real commit of this repository, the one that added
+`task.resolvedBy`, rather than an invented short form like the `deadbee`
+below: the bound it is there for says a named resolver is one a reader
+can look up, so the record that passes it names one that resolves. It is
+a literal and not a read of `HEAD`, for the reason in "Why the records
+are byte-reproducible" below.
 
 ## Two bounds are backstops, not independent statements
 
-Thirteen of the fifteen fixtures fire exactly one violation. Two cannot,
+Thirteen of the sixteen fixtures fire exactly one violation, and three
+fire two or three. Two of the sixteen bounds cannot be broken alone,
 as a matter of arithmetic rather than of how hard anyone tried:
 
 - **`GEN_CLAIM_BOUNDED`** bounds the merged length of the source extents
@@ -93,7 +101,7 @@ as a matter of arithmetic rather than of how hard anyone tried:
 Both are real guards against their neighbours being wrong. Neither is a
 statement a record can break on its own, and
 `src/invariants.violations.test.ts` asserts that count — thirteen
-single-bound fixtures and two pairs — so a future edit to
+single-bound fixtures, two pairs and one triple — so a future edit to
 `src/invariants.ts` that makes either one independently reachable fails
 the suite and gets the note corrected.
 
@@ -111,7 +119,7 @@ cd ursa-major
 npm run fixtures:violations          # rewrite every file in this directory
 npm run fixtures:violations:check    # exit non-zero if any file drifted
 npx vitest run src/invariants.violations.test.ts
-npx tsx src/invariants.cli.ts fixtures/violations   # 17 violations, exit 1
+npx tsx src/invariants.cli.ts fixtures/violations   # 20 violations, exit 1
 ```
 
 To add a bound's counterexample, append a `Case` to `CASES` in
@@ -126,12 +134,16 @@ rather than becoming a vague fixture.
 ## Redaction
 
 Nothing here needed redacting and nothing is redacted. Every string in
-every file is synthetic: the prose is three sentences written for this
-fixture, the two paths are `notes.md` and `docs/standards/pm.md`, the
-commit shas are the invented short forms `96ed4e5` and `deadbee`, the
-model is `test-model`, and both timestamps are the fixed
-`2026-10-10T00:00:00.000Z`. No home directory, machine username, session
-UUID or real conversation appears. Checked with:
+every file is either synthetic or a public commit of this repository: the
+prose is three sentences written for this fixture, the two paths are
+`notes.md` and `docs/standards/pm.md`, the model is `test-model`, both
+timestamps are the fixed `2026-10-10T00:00:00.000Z`, and the shas are the
+invented short forms `96ed4e5` and `deadbee` plus the one real public sha
+`19455a3` in `task.resolvedBy`, named above. No home directory, machine
+username, session UUID or real conversation appears, and a commit of a
+public repository is none of those — it is the form the redaction rider
+in `prompts/engineer-agent.md` asks for, a value that is real and
+resolvable rather than a placeholder standing in for one. Checked with:
 
 ```bash
 grep -ohE '/(Users|home)/[^"]*|[a-f0-9]{32,}' fixtures/violations/* | sort -u
