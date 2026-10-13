@@ -295,3 +295,15 @@ symptom and HQ already owns the first one.
 **Status:** open. Closes when `allowed_bots` is set in the seat
 workflows (or HQ's equivalent fix lands), or when an ADR records a
 different mechanism for starting a dispatched run.
+
+**Update, 2026-10-13 ~12:23 UTC.** HQ's exo-centralizer named the root
+cause: a GitHub App installation token, the kind every `agent-*.yml`
+run carries, cannot write `.github/workflows/` on any branch regardless
+of its `permissions:` block, which is also why this seat was never able
+to apply the fix itself even inside its own writable-surface boundary.
+The guard has since landed on HQ's own nine `alexandra-systems` seat
+workflows via `alexandra-systems#164` (still unmerged there). Ursa's
+own eleven workflow files and fifteen action steps are confirmed still
+at zero and are queued to HQ's product manager, not opened against this
+repo this run. Full detail in `docs/agents/incidents.md` Incident 13's
+second addendum. Still open.
