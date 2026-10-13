@@ -155,23 +155,42 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       const base = { start: s.start, end: s.end, text: s.text }
       let span: FinalSpan | null = null
 
-      // Pass 1 — verbatim
+      // Pass 1 — verbatim.
+      //
+      // Containment runs on the shadow text, which is lowercased, has smart
+      // punctuation folded and every whitespace run collapsed to one space.
+      // A normalized hit therefore survives a case change, an em dash
+      // retyped as a hyphen and any reflow, and until 2026-10-13 every one
+      // of those was labelled `survived_verbatim` with `score: 1`. That is
+      // a weaker claim than the label makes: README's class table says
+      // "generated and kept unchanged", and CLAIM_NOT_WIDER's own sentence
+      // says "verbatim means byte-identical". So the normalized hit only
+      // locates a candidate extent now, and the claim is made solely when
+      // the raw characters agree. A hit whose raw characters differ falls
+      // through to pass 2, where the difference is scored and emitted as a
+      // diff — which is the thing Ursa Minor sells, rather than noise to
+      // fold away.
       if (sNorm.length >= MIN_VERBATIM_LEN) {
-        for (const p of preps) {
-          const idx = p.norm.norm.indexOf(sNorm)
-          if (idx < 0) continue
-          const gStart = p.norm.map[idx]
-          const gEnd = p.norm.map[idx + sNorm.length - 1] + 1
-          span = { ...base, class: 'survived_verbatim', score: 1, source: srcPtr(p, gStart, gEnd) }
-          addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
-          break
+        outerLong: for (const p of preps) {
+          // All occurrences, not just the first: a generation that repeats a
+          // sentence should not lose a byte-identical claim because an
+          // earlier copy of it differs in case.
+          for (let idx = p.norm.norm.indexOf(sNorm); idx >= 0; idx = p.norm.norm.indexOf(sNorm, idx + 1)) {
+            const gStart = p.norm.map[idx]
+            const gEnd = p.norm.map[idx + sNorm.length - 1] + 1
+            if (p.gen.text.slice(gStart, gEnd) !== s.text) continue
+            span = { ...base, class: 'survived_verbatim', score: 1, source: srcPtr(p, gStart, gEnd) }
+            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
+            break outerLong
+          }
         }
       } else if (sNorm.length > 0) {
         // short segment: exact equality with a whole generation segment only,
-        // and flagged trivial — weak evidence either way
+        // and flagged trivial — weak evidence either way. Raw equality for
+        // the same reason the long branch demands it.
         outer: for (const p of preps) {
           for (const g of p.sentences) {
-            if (g.norm === sNorm) {
+            if (g.norm === sNorm && g.text === s.text) {
               span = { ...base, class: 'survived_verbatim', score: 1, trivial: true, source: srcPtr(p, g.start, g.end) }
               addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end })
               break outer
@@ -252,7 +271,14 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       spans.push(span ?? { ...base, class: 'no_generation_provenance' })
     }
 
-    return { path: f.path, mode, text: f.text, spans: mergeVerbatimRuns(spans, f.text) }
+    return {
+      path: f.path,
+      mode,
+      text: f.text,
+      // preps is built by mapping over input.generations in order, so its
+      // index is the generationIndex a source pointer carries.
+      spans: mergeVerbatimRuns(spans, f.text, preps.map((p) => p.gen.text)),
+    }
   })
 
   const overlaps = (claims: Claim[] | undefined, s: Span) =>
@@ -313,8 +339,23 @@ export function resolve(input: ResolveInput): OutcomeRecord {
 /**
  * Merge consecutive verbatim spans that came from the same generation with
  * contiguous source ranges into maximal runs.
+ *
+ * The merged span covers the gap between the two spans as well as the spans
+ * themselves, so the merge makes a claim about characters neither span
+ * matched. Until 2026-10-13 it accepted any whitespace gap in the final text
+ * against a generation gap of up to two characters, and that is exactly what
+ * produced the CLAIM_NOT_WIDER violation on record
+ * `ursa-2026-10-07-2f610e9`, span 78 of `docs/sprints/pending.md`: the person
+ * had reflowed one line, so a one-character generation gap (a space) was
+ * credited with a three-character final gap (a newline and two spaces), and
+ * 101 final characters were sold as 99 generated ones. The gap now has to be
+ * the same characters on both sides. Two byte-identical runs separated by a
+ * gap the person rewrote stay two spans, and the characters they inserted
+ * belong to no span's claim, which is what happened to them.
+ *
+ * `genTexts` is indexed by `generationIndex`.
  */
-function mergeVerbatimRuns(spans: FinalSpan[], text: string): FinalSpan[] {
+function mergeVerbatimRuns(spans: FinalSpan[], text: string, genTexts: string[]): FinalSpan[] {
   const out: FinalSpan[] = []
   for (const s of spans) {
     const prev = out[out.length - 1]
@@ -327,7 +368,8 @@ function mergeVerbatimRuns(spans: FinalSpan[], text: string): FinalSpan[] {
       prev.source.generationIndex === s.source.generationIndex &&
       s.source.start >= prev.source.end &&
       s.source.start - prev.source.end <= 2 &&
-      /^\s*$/.test(text.slice(prev.end, s.start))
+      text.slice(prev.end, s.start) ===
+        (genTexts[s.source.generationIndex] ?? '').slice(prev.source.end, s.source.start)
     ) {
       prev.end = s.end
       prev.text = text.slice(prev.start, prev.end)

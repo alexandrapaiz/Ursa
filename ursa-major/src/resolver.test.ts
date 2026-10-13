@@ -154,3 +154,88 @@ describe('resolve (fixture end-to-end)', () => {
     }
   })
 })
+
+// The six-case probe from the ledger entry "`survived_verbatim` is not
+// verbatim, and a record sold today proves it" (docs/ideas.md, 2026-10-12),
+// committed as the specification it asked to be. Each case is the same
+// generation and a final text that differs from it in exactly one way.
+// Five of the six produced `survived_verbatim` with `score: 1` before
+// 2026-10-13; the measured before-and-after table is in
+// docs/design/verbatim-byte-identity.md, and the same six cases run on
+// demand from tools/measure-verbatim-fidelity.ts.
+describe('resolve (survived_verbatim means byte-identical)', () => {
+  const GEN =
+    'The resolver joins finished work backward to the generations that fed it, and the label is supplied by the artifact — never by a grader.'
+
+  const run = (finalText: string) =>
+    resolve({
+      taskId: 'verbatim-probe',
+      files: [{ path: 'final.md', text: finalText }],
+      conversations: [
+        { conversationId: 'c1', model: 'probe-model', startedAt: '2026-10-13T00:00:00.000Z', turns: 1 },
+      ],
+      generations: [
+        { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
+      ],
+      finished: true,
+      generatedAt: '2026-10-13T00:00:00.000Z',
+    })
+
+  /** every span the record labels verbatim, with the generation bytes it points at */
+  const verbatimClaims = (finalText: string) =>
+    run(finalText)
+      .files[0].spans.filter((s) => s.class === 'survived_verbatim')
+      .map((s) => ({ final: s.text, claimed: s.source ? GEN.slice(s.source.start, s.source.end) : null }))
+
+  it('labels an identical final text verbatim', () => {
+    const spans = run(GEN).files[0].spans
+    expect(spans).toHaveLength(1)
+    expect(spans[0].class).toBe('survived_verbatim')
+    expect(spans[0].text).toBe(GEN)
+  })
+
+  // The four differences the normalized match used to fold away. Each one
+  // keeps the span's normalized text identical to the generation's, so
+  // every one of these assertions failed before the fix.
+  const folded: Array<[string, string]> = [
+    ['a case change', GEN.replace('The resolver', 'The Resolver')],
+    ['an em dash retyped as a hyphen', GEN.replace('—', '-')],
+    ['a doubled space', GEN.replace('and the label', 'and  the label')],
+  ]
+  for (const [what, finalText] of folded) {
+    it(`does not label ${what} verbatim`, () => {
+      const spans = run(finalText).files[0].spans
+      expect(spans.map((s) => s.class)).toEqual(['survived_mutated'])
+      expect(spans[0].diff, 'the edit is reported as a diff, not folded away').toBeDefined()
+    })
+  }
+
+  it('does not credit a reflowed line with the whitespace the person inserted', () => {
+    // Prose segments line by line, so a reflow splits one final segment into
+    // two. Both halves really are byte-identical, and before the fix
+    // mergeVerbatimRuns joined them across a 3-char final gap ("\n  ")
+    // standing in for a 1-char generation gap (" "), claiming 2 characters
+    // the model never wrote. That merged span is the CLAIM_NOT_WIDER
+    // violation on record `ursa-2026-10-07-2f610e9`. The two halves stay
+    // verbatim; the inserted whitespace now belongs to no span's claim.
+    const finalText = GEN.replace('and the label', 'and\n  the label')
+    const spans = run(finalText).files[0].spans
+    expect(spans.map((s) => s.class)).toEqual(['survived_verbatim', 'survived_verbatim'])
+    expect(spans.some((s) => s.text.includes('\n'))).toBe(false)
+  })
+
+  it('every verbatim claim in every case is the same characters on both sides', () => {
+    const cases = [
+      GEN,
+      ...folded.map(([, f]) => f),
+      GEN.replace('and the label', 'and\n  the label'),
+      // smart quotes introduced: caught before the fix too, but only by the
+      // accident that the fold runs curly-to-straight rather than the other
+      // way, so it was never a rule
+      GEN.replace('the artifact', 'the ‘artifact’'),
+    ]
+    for (const finalText of cases) {
+      for (const c of verbatimClaims(finalText)) expect(c.claimed).toBe(c.final)
+    }
+  })
+})
