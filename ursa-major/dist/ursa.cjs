@@ -984,6 +984,7 @@ function mutationCorrections(record) {
   for (const file of record.files) {
     for (const span of file.spans) {
       if (span.class !== "survived_mutated" || !span.diff || !span.source) continue;
+      if (span.normalizedOnly) continue;
       const gen = record.generations[span.source.generationIndex];
       if (!gen) continue;
       const agent = gen.text.slice(span.source.start, span.source.end);

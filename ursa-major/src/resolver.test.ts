@@ -7,6 +7,7 @@ import { levSimilarity, similarity } from './match'
 import { parsePasteConversation, parseClaudeSession } from './parse'
 import { resolve } from './resolve'
 import { checkRecord } from './invariants'
+import { deriveSignals } from './signals'
 
 const FIXTURE = join(__dirname, '..', 'fixtures', 'mini')
 
@@ -225,6 +226,17 @@ describe('resolve (survived_verbatim means byte-identical)', () => {
     const spans = run(GEN.replace('and the label', 'and  the label')).files[0].spans
     const changed = spans[0].diff!.filter((d) => d.added || d.removed)
     expect(changed.map((d) => ({ value: d.value, added: d.added }))).toEqual([{ value: ' ', added: true }])
+  })
+
+  it('keeps a formatting-only mutation out of the one signal `ursa run` emits', () => {
+    // These spans were `survived_verbatim` before 2026-10-13 and so never
+    // reached `deriveSignals`. Demoting them without this would have added
+    // whitespace edits to `oneShotCorrections`, which is a figure Ursa Minor
+    // sells moving as a side effect of a labelling fix.
+    const record = run(GEN.replace('and the label', 'and  the label'))
+    expect(record.files[0].spans[0].normalizedOnly).toBe(true)
+    const signals = deriveSignals(record)
+    expect(signals.oneShotCorrections).toEqual([])
   })
 
   it('demotes rather than drops, because dropping moves the span to the class that must stay clean', () => {
