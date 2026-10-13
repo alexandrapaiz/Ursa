@@ -194,3 +194,116 @@ organizes) applies. Infisical centralizes the growing secret set
 with rotation and audit in one place.
 
 **Owner:** Alexandra. **Status:** accepted (directed in session).
+
+## Finding — the re-vendored PM standard names dispatch tools this repo does not have (recorded 2026-10-12, PM pass)
+
+Not an ADR: no decision is asked of the owner here, only a gap named
+under §1c's instruction to log a deviation between the vendored
+standard's assumption and Ursa's practice.
+
+**What's wrong.** This pass re-vendored `docs/standards/pm.md` to HQ's
+current text (PR #170, merged). The new §11.5 tells the standup to run
+`tools/gh-actions.sh workflow run agent-<seat>.yml ...` and
+`tools/gh-actions.sh run list --limit 30` in place of bare `gh`,
+because the Claude Code action overwrites `GH_TOKEN`/`GITHUB_TOKEN`
+with a scoped installation token and the ambient `gh` therefore cannot
+start another workflow run; the wrapper is supposed to pick the right
+credential so a seat never has to know this. The new §11.2 also names
+`tools/check-merge-queue.sh` for merge state and references
+`tools/check-actions-reach.sh` for diagnosing a 403. None of the three
+exist anywhere in this repo (`ls tools` returns only `ledger/` and
+`stack/`). Until they land, a seat following the new standard's exact
+commands would fail on a missing script, not on the credential problem
+the standard is describing.
+
+**Why this run didn't try to write them.** The scripts are described as
+shared tooling, not product-specific ones, and §16 names the exo
+centralizer as the owner of cross-company machinery; inventing a local
+copy here risks a second, divergent implementation of the same wrapper
+HQ is already building (its harvest handoff this same morning mentions
+a `company-checks` workflow it is adding at HQ). This is a gap to flag,
+not one day-sized item to improvise around.
+
+**What to do until they land.** Dispatch and the standup's Actions
+reads keep using bare `gh` as before; a `403: Resource not accessible
+by integration` on a workflow-dispatch call is the known symptom
+(§11.5's own description) and is not, on its own, evidence that the
+grant is missing.
+
+**Handoff.** Named here and in `docs/sprints/pending.md`'s top three so
+the next PM pass or the exo centralizer's own weekly run can pick it
+up; not raised as a separate board message this pass, since the
+inbox reply already sent (the merge confirmation) covers the action
+this run actually took and this finding is net-new evidence rather
+than an answer to anything addressed to this seat.
+
+**Status:** open. Closes when `tools/gh-actions.sh`,
+`tools/check-merge-queue.sh`, and `tools/check-actions-reach.sh` (or
+HQ's equivalent distribution mechanism) land in this repo, or when an
+ADR records that Ursa keeps using bare `gh` on purpose.
+
+## Finding — every seat's workflow is missing `allowed_bots`, so no PM dispatch can ever start one (recorded 2026-10-12, Monday ceremony)
+
+Not an ADR: the fix touches `.github/workflows`, which is not this
+seat's writable surface, so no decision is asked of the owner here,
+only a gap named under §1c.
+
+**What's wrong, confirmed by firing a real dispatch rather than
+inferred from a grep.** Earlier passes today (`pending.md`'s
+2026-10-12 ~02:49 UTC entry) found `grep -c '^allowed_bots'` returns 0
+against `agent-security.yml` and `agent-frontend.yml` and read that as
+a wall blocking two seats specifically. This ceremony dispatched
+`agent-security.yml` for real (run
+[38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650))
+to test it directly, and it failed in 16 seconds with: "Action failed
+with error: Workflow initiated by non-human actor: github-actions
+(type: Bot). Add bot to allowed_bots list or use '\*' to allow all
+bots." `allowed_bots` is an input to `anthropics/claude-code-action`,
+not a key any workflow in this repo sets, and `grep -rn allowed_bots
+.github/workflows/*.yml` returns nothing at all across all eleven
+`agent-*.yml` files, not only the two named before. So the gate is
+not narrower than it looked. It is wider: **no seat's workflow can
+ever be started by a PM dispatch (`gh workflow run ...`), because the
+triggering actor is always a bot or app token when the call is made
+from inside an Actions run**, regardless of which seat is targeted or
+which token signs the call.
+
+**Why this wasn't caught sooner.** `PM_DISPATCH_ENABLED` has been
+`true` for a limited window and most dispatch candidates this
+organization has written stayed queued rather than fired, for reasons
+unrelated to this gate (open-PR stops, missing tools, no live
+candidate). This is the first dispatch this ceremony is aware of that
+actually reached the Claude Code action's own actor check.
+
+**What this changes about today's dispatch queue.** The security
+dispatch above counts as this seat's one dispatch for the day under
+the three-a-day ceiling and failed for infrastructure reasons, not a
+process violation; no rerun fired, per §11.7 (configuration causes are
+asked of HQ, never retried). A second candidate (frontend, PR #141)
+was not fired this run, because it would fail identically for the same
+company-wide reason, not a seat-specific one, and burning a second
+dispatch to re-confirm a now-confirmed finding would be noise.
+
+**Handoff.** To `alexandra-systems/exo-centralizer` by board message,
+same destination as the still-unlanded `tools/gh-actions.sh` gap
+above: add `allowed_bots: '*'` (or the specific bot id/name this
+organization's dispatches run as) to every `agent-*.yml`'s
+`claude-code-action` step, company-wide, since the Actions-token
+mechanism in §11.5 and this gate are two different fixes for the same
+symptom and HQ already owns the first one.
+
+**Status:** open. Closes when `allowed_bots` is set in the seat
+workflows (or HQ's equivalent fix lands), or when an ADR records a
+different mechanism for starting a dispatched run.
+
+**Update, 2026-10-13 ~12:23 UTC.** HQ's exo-centralizer named the root
+cause: a GitHub App installation token, the kind every `agent-*.yml`
+run carries, cannot write `.github/workflows/` on any branch regardless
+of its `permissions:` block, which is also why this seat was never able
+to apply the fix itself even inside its own writable-surface boundary.
+The guard has since landed on HQ's own nine `alexandra-systems` seat
+workflows via `alexandra-systems#164` (still unmerged there). Ursa's
+own eleven workflow files and fifteen action steps are confirmed still
+at zero and are queued to HQ's product manager, not opened against this
+repo this run. Full detail in `docs/agents/incidents.md` Incident 13's
+second addendum. Still open.
