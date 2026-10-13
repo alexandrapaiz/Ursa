@@ -6,6 +6,7 @@ import { segmentProse, segmentLines, modeForPath } from './segment'
 import { levSimilarity, similarity } from './match'
 import { parsePasteConversation, parseClaudeSession } from './parse'
 import { resolve } from './resolve'
+import { checkRecord } from './invariants'
 
 const FIXTURE = join(__dirname, '..', 'fixtures', 'mini')
 
@@ -172,7 +173,7 @@ describe('resolve (survived_verbatim means byte-identical)', () => {
       taskId: 'verbatim-probe',
       files: [{ path: 'final.md', text: finalText }],
       conversations: [
-        { conversationId: 'c1', model: 'probe-model', startedAt: '2026-10-13T00:00:00.000Z', turns: 1 },
+        { id: 'c1', title: 'verbatim probe', adapter: 'paste', model: 'probe-model', turns: 2, userTurns: 1 },
       ],
       generations: [
         { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
@@ -203,12 +204,64 @@ describe('resolve (survived_verbatim means byte-identical)', () => {
     ['a doubled space', GEN.replace('and the label', 'and  the label')],
   ]
   for (const [what, finalText] of folded) {
-    it(`does not label ${what} verbatim`, () => {
+    it(`labels ${what} a normalized-only mutation, not verbatim`, () => {
       const spans = run(finalText).files[0].spans
       expect(spans.map((s) => s.class)).toEqual(['survived_mutated'])
       expect(spans[0].diff, 'the edit is reported as a diff, not folded away').toBeDefined()
+      // The demotion keeps the generation extent pass 1 located, so the
+      // record still says which model wrote the text that was edited.
+      expect(spans[0].source).toBeDefined()
+      expect(spans[0].normalizedOnly, 'a buyer can tell this mutation from a content edit').toBe(true)
+      expect(spans[0].score).toBe(1)
     })
   }
+
+  it('demotes rather than drops, because dropping moves the span to the class that must stay clean', () => {
+    // The first version of this fix let a non-byte-identical pass-1 hit fall
+    // through to pass 2, which scores against generation SEGMENTS. Over ten
+    // records of this repository's history that pushed 26 spans and 1,466
+    // characters into `no_generation_provenance` — "the model was never in
+    // the running" — about text the model had written. The assertion is that
+    // no case in this probe produces that class, since in every one of them
+    // the model wrote the text.
+    for (const [, finalText] of folded) {
+      const classes = run(finalText).files[0].spans.map((s) => s.class)
+      expect(classes).not.toContain('no_generation_provenance')
+    }
+  })
+
+  it('asks the corroborator on a demoted span, and honours a rival verdict', () => {
+    // DESCENT_CHECKED_UNIFORMLY requires that if any span carries a descent
+    // verdict, every survived_mutated span does. Pass 1 never asked before,
+    // so a demoted span would have been the one mutation label in the record
+    // with no verdict behind it.
+    const finalText = GEN.replace('The resolver', 'The Resolver')
+    const asked: string[] = []
+    const record = resolve({
+      taskId: 'verbatim-probe',
+      files: [{ path: 'final.md', text: finalText }],
+      conversations: [
+        { id: 'c1', title: 'verbatim probe', adapter: 'paste', model: 'probe-model', turns: 2, userTurns: 1 },
+      ],
+      generations: [
+        { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
+      ],
+      finished: true,
+      generatedAt: '2026-10-13T00:00:00.000Z',
+      corroborate: (path) => {
+        asked.push(path)
+        return { basis: 'rival', relation: 'pre_existing', sha: 'deadbee', subject: 'docs: the sentence, written before this generation' }
+      },
+    })
+    expect(asked).toEqual(['final.md'])
+    const span = record.files[0].spans[0]
+    expect(span.class).toBe('no_generation_provenance')
+    expect(span.uncertain).toBe(true)
+    expect(span.candidate, 'the evidence is kept for a human to adjudicate').toBeDefined()
+    expect(span.descent!.basis).toBe('rival')
+    // and the record still passes its own gate in that shape
+    expect(checkRecord(record)).toEqual([])
+  })
 
   it('does not credit a reflowed line with the whitespace the person inserted', () => {
     // Prose segments line by line, so a reflow splits one final segment into
