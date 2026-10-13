@@ -124,10 +124,19 @@ describe('the directory covers the gate rather than a corner of it', () => {
     // property of the bound set and a future edit to `src/invariants.ts`
     // could make either one independently reachable — at which point this
     // test fails and the note that says otherwise gets corrected.
-    expect(expectedCodes('gen-claim-bounded')).toEqual(['CLAIM_IN_GENERATION', 'GEN_CLAIM_BOUNDED'])
+    //
+    // CLAIM_NOT_WIDER is the other direction of the same fact and arrived on
+    // 2026-10-13. It is reachable alone, and `claim-not-wider.json` is where
+    // it is reached alone. What changed is that strengthening it from a
+    // width comparison to a byte comparison made it fire alongside two
+    // fixtures aimed at other bounds, because both of those edits leave a
+    // verbatim span crediting characters the generation does not hold. That
+    // is coverage rather than noise, so the companion lists name it.
+    expect(expectedCodes('gen-claim-bounded')).toEqual(['CLAIM_IN_GENERATION', 'CLAIM_NOT_WIDER', 'GEN_CLAIM_BOUNDED'])
+    expect(expectedCodes('final-spans-in-file')).toEqual(['FINAL_SPANS_IN_FILE', 'CLAIM_NOT_WIDER'])
     expect(expectedCodes('pct-denominators-ordered')).toEqual(['RATES_MATCH_FIELDS', 'PCT_DENOMINATORS_ORDERED'])
     const single = SLUGS.filter((s) => expectedCodes(s).length === 1)
-    expect(single).toHaveLength(13)
+    expect(single).toHaveLength(12)
   })
 })
 
@@ -140,9 +149,15 @@ describe('the gate reaches these records through the two surfaces that read reco
     // one at test time, which proves the plumbing and leaves nothing a
     // reviewer can read.
     const { violations, lines } = runGate(DIR)
-    // 15 fixtures, two of which fire two bounds each, plus the clean base.
-    expect(violations).toBe(17)
-    expect(lines.join('\n')).toContain('17 violations')
+    // 15 fixtures, plus the clean base. Two fire two bounds each and one
+    // fires three, which is 19 violations: `final-spans-in-file` and
+    // `gen-claim-bounded` each gained CLAIM_NOT_WIDER on 2026-10-13, when
+    // that bound started checking the byte-identity its own sentence had
+    // always stated instead of only the two extents' lengths. Each
+    // fixture's `.md` says which bounds it fires and why, and the
+    // per-fixture assertion above is what holds this total honest.
+    expect(violations).toBe(19)
+    expect(lines.join('\n')).toContain('19 violations')
     expect(lines.join('\n')).toContain('OK — every stated bound holds')
   })
 

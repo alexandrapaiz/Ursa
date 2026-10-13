@@ -175,12 +175,12 @@ const CASES: Case[] = [
   },
   {
     slug: 'gen-claim-bounded',
-    codes: ['CLAIM_IN_GENERATION', 'GEN_CLAIM_BOUNDED'],
+    codes: ['CLAIM_IN_GENERATION', 'CLAIM_NOT_WIDER', 'GEN_CLAIM_BOUNDED'],
     edit: 'the first sourced span\'s `source.end` pushed 400 characters past the end of the generation text',
     consequence:
       'final spans claim, between them, more distinct characters of one generation than that generation ever wrote. This is the shape of the figure that started the gate: a survival total larger than the generation total it is a share of.',
     why:
-      'GEN_CLAIM_BOUNDED cannot fire alone. Claimed characters are the merged length of source extents; CLAIM_IN_GENERATION holds every extent inside `[0, text.length)` and GEN_CHARS_CONSISTENT holds `charsWritten === text.length`, so while those two pass, the merged length is bounded by `charsWritten` as a matter of arithmetic. Violating it requires violating one of them first, and reaching past the end of the generation is the cheaper of the two. The bound is a backstop against the other two being wrong, not an independent statement, and that is worth knowing before anyone tries to test it in isolation.',
+      'CLAIM_NOT_WIDER joins the other two as of 2026-10-13, for the same reason and not by accident: a `survived_verbatim` span now has to be the same characters as the generation extent it names, and an extent reaching 400 characters past the end of the text slices to a different string than the span holds. Before that date the bound compared only the two lengths, and the stretched extent was longer rather than shorter, so it passed. GEN_CLAIM_BOUNDED cannot fire alone. Claimed characters are the merged length of source extents; CLAIM_IN_GENERATION holds every extent inside `[0, text.length)` and GEN_CHARS_CONSISTENT holds `charsWritten === text.length`, so while those two pass, the merged length is bounded by `charsWritten` as a matter of arithmetic. Violating it requires violating one of them first, and reaching past the end of the generation is the cheaper of the two. The bound is a backstop against the other two being wrong, not an independent statement, and that is worth knowing before anyone tries to test it in isolation.',
     break: (r) => {
       const s = r.files[0].spans.find((x) => x.source)!
       s.source!.end = r.generations[s.source!.generationIndex].text.length + 400
@@ -200,10 +200,12 @@ const CASES: Case[] = [
   },
   {
     slug: 'final-spans-in-file',
-    codes: ['FINAL_SPANS_IN_FILE'],
+    codes: ['FINAL_SPANS_IN_FILE', 'CLAIM_NOT_WIDER'],
     edit: 'one character appended to `files[0].spans[0].text`, leaving `start` and `end` alone',
     consequence:
       'the classified span carries text that is not the slice of the finished file its offsets name. The class label is attached to the offsets and the evidence a reader checks is the text, so the record labels one extent and displays another. The extents are untouched, so `coveredChars` and every percentage built on it still reconcile.',
+    why:
+      'Two bounds fire on one appended character, and the pair is the point. FINAL_SPANS_IN_FILE catches the span disagreeing with the file it came from; CLAIM_NOT_WIDER catches the same span disagreeing with the generation it credits, because as of 2026-10-13 a `survived_verbatim` claim has to be the same characters on both sides rather than merely no longer. Neither bound subsumes the other: a span can match its file and not its generation, which is the case the 2026-10-12 ledger entry found on a record this organization had already shipped.',
     break: (r) => { r.files[0].spans[0].text += 'x' },
   },
   {

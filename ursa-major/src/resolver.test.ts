@@ -6,6 +6,8 @@ import { segmentProse, segmentLines, modeForPath } from './segment'
 import { levSimilarity, similarity } from './match'
 import { parsePasteConversation, parseClaudeSession } from './parse'
 import { resolve } from './resolve'
+import { checkRecord } from './invariants'
+import { deriveSignals } from './signals'
 
 const FIXTURE = join(__dirname, '..', 'fixtures', 'mini')
 
@@ -151,6 +153,165 @@ describe('resolve (fixture end-to-end)', () => {
     for (const s of spans) expect(finalText.slice(s.start, s.end)).toBe(s.text)
     for (const g of record.generations) {
       for (const s of g.spans) expect(g.text.slice(s.start, s.end)).toBe(s.text)
+    }
+  })
+})
+
+// The six-case probe from the ledger entry "`survived_verbatim` is not
+// verbatim, and a record sold today proves it" (docs/ideas.md, 2026-10-12),
+// committed as the specification it asked to be. Each case is the same
+// generation and a final text that differs from it in exactly one way.
+// Five of the six produced `survived_verbatim` with `score: 1` before
+// 2026-10-13; the measured before-and-after table is in
+// docs/design/verbatim-byte-identity.md, and the same six cases run on
+// demand from tools/measure-verbatim-fidelity.ts.
+describe('resolve (survived_verbatim means byte-identical)', () => {
+  const GEN =
+    'The resolver joins finished work backward to the generations that fed it, and the label is supplied by the artifact — never by a grader.'
+
+  const run = (finalText: string) =>
+    resolve({
+      taskId: 'verbatim-probe',
+      files: [{ path: 'final.md', text: finalText }],
+      conversations: [
+        { id: 'c1', title: 'verbatim probe', adapter: 'paste', model: 'probe-model', turns: 2, userTurns: 1 },
+      ],
+      generations: [
+        { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
+      ],
+      finished: true,
+      generatedAt: '2026-10-13T00:00:00.000Z',
+    })
+
+  /** every span the record labels verbatim, with the generation bytes it points at */
+  const verbatimClaims = (finalText: string) =>
+    run(finalText)
+      .files[0].spans.filter((s) => s.class === 'survived_verbatim')
+      .map((s) => ({ final: s.text, claimed: s.source ? GEN.slice(s.source.start, s.source.end) : null }))
+
+  it('labels an identical final text verbatim', () => {
+    const spans = run(GEN).files[0].spans
+    expect(spans).toHaveLength(1)
+    expect(spans[0].class).toBe('survived_verbatim')
+    expect(spans[0].text).toBe(GEN)
+  })
+
+  // The four differences the normalized match used to fold away. Each one
+  // keeps the span's normalized text identical to the generation's, so
+  // every one of these assertions failed before the fix.
+  const folded: Array<[string, string]> = [
+    ['a case change', GEN.replace('The resolver', 'The Resolver')],
+    ['an em dash retyped as a hyphen', GEN.replace('—', '-')],
+    ['a doubled space', GEN.replace('and the label', 'and  the label')],
+  ]
+  for (const [what, finalText] of folded) {
+    it(`labels ${what} a normalized-only mutation, not verbatim`, () => {
+      const spans = run(finalText).files[0].spans
+      expect(spans.map((s) => s.class)).toEqual(['survived_mutated'])
+      expect(spans[0].diff, 'the edit is reported as a diff, not folded away').toBeDefined()
+      // The demotion keeps the generation extent pass 1 located, so the
+      // record still says which model wrote the text that was edited.
+      expect(spans[0].source).toBeDefined()
+      expect(spans[0].normalizedOnly, 'a buyer can tell this mutation from a content edit').toBe(true)
+      expect(spans[0].score).toBe(1)
+    })
+  }
+
+  it('shows the change at character granularity, because a word diff cannot see whitespace', () => {
+    // `diffWords` treats any run of whitespace as equivalent, so on the
+    // commonest normalized-only difference it reports one unchanged part and
+    // no change at all. A span whose entire content is the mutation,
+    // carrying a diff asserting nothing was mutated, is worse than the label
+    // it replaced.
+    const spans = run(GEN.replace('and the label', 'and  the label')).files[0].spans
+    const changed = spans[0].diff!.filter((d) => d.added || d.removed)
+    expect(changed.map((d) => ({ value: d.value, added: d.added }))).toEqual([{ value: ' ', added: true }])
+  })
+
+  it('keeps a formatting-only mutation out of the one signal `ursa run` emits', () => {
+    // These spans were `survived_verbatim` before 2026-10-13 and so never
+    // reached `deriveSignals`. Demoting them without this would have added
+    // whitespace edits to `oneShotCorrections`, which is a figure Ursa Minor
+    // sells moving as a side effect of a labelling fix.
+    const record = run(GEN.replace('and the label', 'and  the label'))
+    expect(record.files[0].spans[0].normalizedOnly).toBe(true)
+    const signals = deriveSignals(record)
+    expect(signals.oneShotCorrections).toEqual([])
+  })
+
+  it('demotes rather than drops, because dropping moves the span to the class that must stay clean', () => {
+    // The first version of this fix let a non-byte-identical pass-1 hit fall
+    // through to pass 2, which scores against generation SEGMENTS. Over ten
+    // records of this repository's history that pushed 26 spans and 1,466
+    // characters into `no_generation_provenance` — "the model was never in
+    // the running" — about text the model had written. The assertion is that
+    // no case in this probe produces that class, since in every one of them
+    // the model wrote the text.
+    for (const [, finalText] of folded) {
+      const classes = run(finalText).files[0].spans.map((s) => s.class)
+      expect(classes).not.toContain('no_generation_provenance')
+    }
+  })
+
+  it('asks the corroborator on a demoted span, and honours a rival verdict', () => {
+    // DESCENT_CHECKED_UNIFORMLY requires that if any span carries a descent
+    // verdict, every survived_mutated span does. Pass 1 never asked before,
+    // so a demoted span would have been the one mutation label in the record
+    // with no verdict behind it.
+    const finalText = GEN.replace('The resolver', 'The Resolver')
+    const asked: string[] = []
+    const record = resolve({
+      taskId: 'verbatim-probe',
+      files: [{ path: 'final.md', text: finalText }],
+      conversations: [
+        { id: 'c1', title: 'verbatim probe', adapter: 'paste', model: 'probe-model', turns: 2, userTurns: 1 },
+      ],
+      generations: [
+        { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
+      ],
+      finished: true,
+      generatedAt: '2026-10-13T00:00:00.000Z',
+      corroborate: (path) => {
+        asked.push(path)
+        return { basis: 'rival', relation: 'pre_existing', sha: 'deadbee', subject: 'docs: the sentence, written before this generation' }
+      },
+    })
+    expect(asked).toEqual(['final.md'])
+    const span = record.files[0].spans[0]
+    expect(span.class).toBe('no_generation_provenance')
+    expect(span.uncertain).toBe(true)
+    expect(span.candidate, 'the evidence is kept for a human to adjudicate').toBeDefined()
+    expect(span.descent!.basis).toBe('rival')
+    // and the record still passes its own gate in that shape
+    expect(checkRecord(record)).toEqual([])
+  })
+
+  it('does not credit a reflowed line with the whitespace the person inserted', () => {
+    // Prose segments line by line, so a reflow splits one final segment into
+    // two. Both halves really are byte-identical, and before the fix
+    // mergeVerbatimRuns joined them across a 3-char final gap ("\n  ")
+    // standing in for a 1-char generation gap (" "), claiming 2 characters
+    // the model never wrote. That merged span is the CLAIM_NOT_WIDER
+    // violation on record `ursa-2026-10-07-2f610e9`. The two halves stay
+    // verbatim; the inserted whitespace now belongs to no span's claim.
+    const finalText = GEN.replace('and the label', 'and\n  the label')
+    const spans = run(finalText).files[0].spans
+    expect(spans.map((s) => s.class)).toEqual(['survived_verbatim', 'survived_verbatim'])
+    expect(spans.some((s) => s.text.includes('\n'))).toBe(false)
+  })
+
+  it('every verbatim claim in every case is the same characters on both sides', () => {
+    const cases = [
+      GEN,
+      ...folded.map(([, f]) => f),
+      GEN.replace('and the label', 'and\n  the label'),
+      // smart quotes introduced: caught before the fix too, but only by the
+      // accident that the fold runs curly-to-straight rather than the other
+      // way, so it was never a rule
+      GEN.replace('the artifact', 'the ‘artifact’'),
+    ]
+    for (const finalText of cases) {
+      for (const c of verbatimClaims(finalText)) expect(c.claimed).toBe(c.final)
     }
   })
 })
