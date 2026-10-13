@@ -2,7 +2,7 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-10-13 ~12:23 UTC six-hour pass
+## Top three for the owner, 2026-10-13 ~18:00 UTC standup
 
 1. **Nothing is newly ready for your merge this pass.** #80
    (`company.yaml`) stays Tier C on its roster and secret names
@@ -10,19 +10,13 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
    edits the charter `prompts/exo-agent.md`) is Tier C once it is
    clean, but it is still `CONFLICTING`/`DIRTY` and waits on the ExO
    seat's own rebase before that question is even reached.
-2. **The dispatch wall now has a named cause no seat in this repo can
-   fix directly, and it is still up.** HQ's exo-centralizer reports
-   (board, 2026-10-12 21:46 UTC) that `allowed_bots` was never missing
-   because of carelessness: a GitHub App installation token, the kind
-   every `agent-*.yml` run (including this one) carries, cannot write
-   `.github/workflows/` on any branch no matter what the file's own
-   permissions say. The guard has landed on HQ's own nine seat
-   workflows, on an unmerged pull request (`alexandra-systems#164`).
-   Ursa's own eleven workflow files and fifteen action steps are
-   confirmed still at zero and are queued to HQ's own project manager,
-   not opened against this repo this run. Nothing for you to do here;
-   full detail in `docs/agents/incidents.md` Incident 13's second
-   addendum.
+2. **The dispatch wall is still up, confirmed fresh this pass
+   (`grep -rn allowed_bots .github/workflows/*.yml`, zero matches
+   across all eleven files).** HQ's fix (`alexandra-systems#164`) is
+   still unmerged there and still not applied here; still queued to
+   HQ's own project manager, not opened against this repo. Nothing for
+   you to do here; full detail in `docs/agents/incidents.md` Incident
+   13's second addendum.
 3. **Security's #165 is unchanged.** Still the one open pull request
    standing between this organization and shipping the redaction
    standard, still a draft, still `CONFLICTING`/`DIRTY`, waiting on the
@@ -943,3 +937,62 @@ this seat's own #173 and #174) is its likely output, last pushed
 touch `docs/sprints/dispatch-queue.md` or `docs/decisions.md`, both of
 which #176 already has open; the merge order question goes to the
 owner in this run's own pull request instead of being resolved here.
+
+## This run (2026-10-13, ~18:00 UTC, scheduled standup)
+
+**First act: merged this seat's own prior PR rather than building on
+it.** #180 (`ursa-pm/2026-10-13-message-2`) was open, ready (not
+draft), `CLEAN`, and touched only Tier A knowledge surfaces
+(`docs/agents/incidents.md`, `docs/decisions.md`, `docs/ideas.md`,
+`docs/sprints/*`). Self-merged under Tier A rather than carried
+forward into a new branch, then started this pass from the resulting
+`main`.
+
+1. **Inbox: nothing new.** `$BOARD_API_URL/api/messages?to_seat=pm`
+   filtered client-side to the exact `to_company == "Ursa"` match. The
+   newest exact matches are this seat's own two notes from the prior
+   pass (06:29 and 12:28 UTC today); nothing addressed to this seat has
+   arrived since.
+2. **Failed runs: one, already triaged.** `gh run list --status
+   failure --created ">=2026-10-12T00:00:00Z"` returns only
+   `security-agent` 38309881650 (2026-10-12 21:19:16Z), already
+   classified as configuration (Incident 13) and handed to
+   `alexandra-systems/exo-centralizer` by an earlier pass. No rerun;
+   the same gate blocks a retry identically.
+3. **Tier B merge check: nothing new.** Checked every open PR fresh
+   (#49, #80, #87, #91, #140, #165, #167). #80 is `MERGEABLE`/`CLEAN`
+   but Tier C outright (company.yaml). #140, #165, #167 are
+   `CONFLICTING`/`DIRTY`, waiting on skill's, security's, and ExO's own
+   rebases (#167 also Tier C once clean). #49, #87, #91 are unchanged
+   dormant-seat drafts, not this seat's to revive. Nothing to merge.
+4. **New fact: the engineer's own 11:26 UTC daily cron did not fire
+   today.** `gh run list --workflow=agent-engineer.yml --created
+   "2026-10-13T00:00:00Z..2026-10-13T23:59:59Z"` shows only the
+   03:42:31Z run (PR #179, already shipped); no run exists near 11:26Z
+   and the workflow is not disabled. Same shape as the security seat's
+   missed Sunday cron on 2026-10-11 (see that date's entry above): a
+   trigger GitHub's own scheduler appears to have dropped, not a failed
+   run and not a repo-side cause. Recorded in
+   `docs/sprints/dispatch-queue.md` as a pattern to watch, not filed as
+   its own incident yet, since two points eleven days apart is not yet
+   a third occurrence.
+5. **Dispatch queue: rewritten in full, nothing fires.**
+   `PM_DISPATCH_ENABLED` is `true` this run. Confirmed the
+   `allowed_bots` wall is still at zero matches across all eleven
+   `agent-*.yml` files. Three candidates considered (engineer on sprint
+   item 2, security on #165/item 3, frontend on #141) and none fired:
+   each would reproduce the already-confirmed Incident 13 rejection in
+   seconds, and engineer's own next cron (23:26 UTC) will attempt item
+   2 for free within six hours regardless.
+6. **Sprint: unchanged since the last pass.** Item 1 shipped (#179,
+   already on `main`). Item 2 is the engineer's to start, not yet
+   begun; item 3 stays blocked on the dispatch wall. Board columns
+   checked against the sprint file and found consistent (item 1 in
+   Done, items 2 and 3 in This sprint, neither yet moved to In
+   progress because neither seat has started).
+7. **Board:** commented the shipping PR link
+   (`source_url`, https://github.com/alexandrapaiz/Ursa/pull/179) on
+   the "Verbatim now means byte-identical" Done item, since it had
+   shipped without one. Posted one standup note naming the clean
+   inbox, the already-triaged failure, the merge check, the missed
+   cron, and the held dispatch queue.

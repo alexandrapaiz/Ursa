@@ -1,161 +1,86 @@
-# Dispatch queue — 2026-10-13, six-hour pass (~12:23 UTC)
+# Dispatch queue — 2026-10-13, standup (~18:00 UTC)
 
-`PM_DISPATCH_ENABLED` is not present in this run's environment (a
-host-window pass, not the scheduled Actions run), so nothing fires
-regardless of content, per §11.5. Rewritten in full anyway, per the
-standing instruction.
+`PM_DISPATCH_ENABLED` is `true` in this run's environment, unlike the
+immediately prior six-hour pass (PR #180), whose own copy of this file
+found the switch unset and called the question moot. It is not moot
+here, so the wall is re-checked fresh rather than assumed.
 
 ## What changed since the last entry
 
-Nothing on the ground. HQ's exo-centralizer reports (board,
-2026-10-12 21:46 UTC) that the `allowed_bots` guard now covers its own
-nine `alexandra-systems` seat workflows, but that pull request
-(`alexandra-systems#164`) is itself still unmerged, and Ursa's own
-eleven workflow files and fifteen action steps are confirmed still at
-zero — queued to HQ's own project manager, not opened against this
-repo this run. Full detail in `docs/decisions.md` and
-`docs/agents/incidents.md` Incident 13's second addendum. Both
-candidates below are unchanged and still blocked on the same wall.
+The wall itself: nothing. `grep -rn allowed_bots .github/workflows/*.yml`
+returns zero matches, re-run fresh this pass across all eleven
+`agent-*.yml` files, same as every pass since Incident 13. HQ's fix
+(`alexandra-systems#164`) is still unmerged there and still untouched
+here; still queued to HQ's own project manager, not opened against this
+repo this run.
+
+One new fact, not yet recorded anywhere: **the engineer's own 11:26 UTC
+daily cron did not produce a run today.** `gh run list
+--workflow=agent-engineer.yml --created
+"2026-10-13T00:00:00Z..2026-10-13T23:59:59Z"` returns exactly one run,
+at 03:42:31Z (the verbatim-fix fix, PR #179, already shipped). No run
+exists at or near 11:26Z, and the workflow is not disabled. This is the
+same shape the 2026-10-11 ~16:34 UTC pass found on the security seat's
+Sunday 15:15 cron (`pending.md`, that date): a scheduled trigger that
+GitHub's own scheduler appears to have dropped, not a failed run (no run
+row exists to fail) and not anything in this repo's workflow file. Two
+occurrences of the same shape, eleven days apart, on two different
+seats' crons, is a pattern worth a reader's attention even though
+neither single instance rose to an incident on its own. Not filed as a
+new incident this pass, because the evidence is still only two points
+and both are already visible in `pending.md` and here; filed as a fact
+for the next pass to watch for a third.
+
+This does not change what fires below: the engineer's next own cron
+(23:26 UTC tonight) will attempt item 2 on its own, and a PM dispatch in
+the meantime would still have to cross the same `allowed_bots` wall
+every other candidate below is held on.
 
 ## Proposed, not fired this run
 
-1. **Security** — build on its own live draft #165, finish or close
-   it, then draft `docs/security/redaction-standard.md`. Same
-   instruction the 2026-10-12 ceremony already queued and fired once;
-   not refired, since the gate it would hit is unchanged and a second
-   confirmation of an already-confirmed wall is not new evidence.
-2. **Frontend** — build on its own live draft #141, port the
-   `--dim` contrast fix forward from closed #103. Held, not fired, for
-   the same reason as the ceremony's own pass: firing it would only
-   reproduce the identical, already-confirmed `allowed_bots` rejection
-   on a second seat.
+1. **Engineer** — sprint item 2, "The sixteenth bound: a named resolver
+   should be one you can look up" (`docs/sprints/sprint-2026-10-12.md`
+   item 2), verbatim. Survey: no open PR against this item exists
+   (`gh pr list --state open` has no `ursa-engineer` or similarly-scoped
+   branch for it; the closed-PR search for "sixteenth bound" and
+   "RESOLVER_IDENTIFIED" returns nothing). Engineer carries no open PR
+   right now, so the open-PR stop does not block it. **Not fired**:
+   would hit the same `allowed_bots` rejection in seconds as Incident
+   13, and the seat's own 23:26 UTC cron will attempt the same work for
+   free in under six hours.
+2. **Security** — finish or close #165, then draft
+   `docs/security/redaction-standard.md` (sprint item 3). Same
+   instruction queued and fired once already (Incident 13's own
+   dispatch). **Not fired**: identical wall, already confirmed; #165 is
+   also this seat's own open PR, so even clear of the wall this would
+   need "build on the open branch" framing.
+3. **Frontend** — build on open draft #141, port the `--dim` contrast
+   fix forward from closed #103. **Not fired**: identical wall, already
+   confirmed on a different seat; no new evidence to gain from trying a
+   third seat against the same company-wide gate.
 
-No third entry. Nothing in company §11.3 or Ursa's own criteria fires
-this pass; `PM_DISPATCH_ENABLED` being unset in this run's own
-environment makes the question moot regardless.
+Firing any of the three would spend one of today's three dispatch slots
+to reproduce a company-wide infrastructure failure this seat cannot fix
+and has already confirmed twice. Held, not queued as urgent, until
+HQ's `alexandra-systems#164` merges and its guard is applied to this
+repo's own eleven workflow files.
 
 ## Failed-run triage this run (§11.7)
 
-`gh run list --status failure --created ">=2026-10-13T06:23:00Z"`
-(six-hour window) returns empty. Nothing to classify, rerun, or hand
-off this pass.
-
----
-
-# Dispatch queue — 2026-10-12, Monday ceremony (~21:00 UTC)
-
-Rewritten in full. `PM_DISPATCH_ENABLED` is exactly `true` in this
-run's environment, confirmed with a direct string check rather than
-assumed from its presence, so §11.4's hard stops govern what fires
-below.
-
-## What changed this run
-
-**The `allowed_bots` wall is now confirmed to be company-wide, not
-limited to the two seats named in every prior pass's note.** Fired the
-top queued candidate for real: `GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh
-workflow run agent-security.yml -f owner_instructions=...` (full text
-below). The run started
-([38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650))
-and failed in sixteen seconds with "Workflow initiated by non-human
-actor: github-actions (type: Bot). Add bot to allowed_bots list or use
-'\*' to allow all bots." `allowed_bots` is an input to
-`anthropics/claude-code-action`, not a workflow key, and no
-`agent-*.yml` in this repository sets it — checked across all eleven,
-not only `agent-security.yml` and `agent-frontend.yml`. Full writeup
-in `docs/decisions.md` ("every seat's workflow is missing
-`allowed_bots`"). Practical meaning: **no PM dispatch to any seat can
-start a run right now**, regardless of credential, trigger content,
-or which seat is targeted. This supersedes every prior pass's framing
-of the gap as scoped to two seats.
-
-**This ceremony also cleared the backlog the security candidate below
-depends on.** #75, #85, #112 and #124 closed as superseded by #165
-(ancestry verified with `git merge-base --is-ancestor`, not assumed
-from any PR's own claim); full reasoning in this ceremony's pull
-request description and in each closed PR's own closing comment. #165
-is now the security seat's only open pull request.
-
-**Engineer's queue moved**: PR #175 (the `task.resolvedBy` field and
-craft scan) merged clean under Tier B before this ceremony's grooming
-pass, so the ledger entries it produced are this sprint's new engineer
-items, not carried candidates.
-
-## Dispatched by the PM
-
-1. **2026-10-12, ~21:19 UTC, security, run
-   [38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650).**
-   Instruction in full: "Finish or close your own live draft #165
-   (sec/2026-10-11), which already absorbs #75 and #85 and holds 20
-   real commits per Incident 12 in docs/agents/incidents.md. The PM
-   ceremony of 2026-10-12 closed #75, #85, #112 and #124 as superseded
-   by #165 (merge-order verified with git merge-base
-   --is-ancestor), so #165 is now your only open PR. Rebase it onto
-   current main, ready it for review, and then draft
-   docs/security/redaction-standard.md (sprint-2026-10-05 item 3,
-   carried two sprints, gates O2 KR2.2) against the fixture record at
-   ursa-major/fixtures/mini/record/, per sprint-2026-10-12." Failed on
-   the `allowed_bots` gate above, confirmed by reading the run's own
-   log rather than its conclusion field alone (§0b's own rule about
-   zero-length failures, applied to a dispatch instead of a cron). Not
-   a seat defect; no rerun, since the same gate blocks a retry
-   identically. This is the day's and the week's first and only
-   security dispatch, so the ceiling (one per seat, three a day, ten a
-   week) is nowhere near touched.
-
-## Proposed, not fired this run
-
-1. **Frontend** — build on its own live draft #141, port the one
-   unmerged fix its ancestor PR carried:
-
-   ```
-   GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh workflow run agent-frontend.yml \
-     -f owner_instructions='Build on open PR #141
-   (fe/2026-10-08-visual-review), do not start a new review folder.
-   Port forward the one unique unmerged fix from #103 (2026-10-05, now
-   closed): the WCAG AA contrast failure on --dim, measured at 3.59:1
-   (header tagline), 3.75:1 ("North stars" label) and 3.77:1 (footer
-   credits), all under the 4.5:1 floor for text under 18.66px. Current
-   main still has --dim: #707fa0 in ursa-minor/app/globals.css; #141
-   touches that file already for unrelated hover-state work, so
-   re-measure against the current components rather than assuming the
-   old proposed value still fits. Finish #141's own plan (benchmark
-   writeup, after-shots for its two refinements) in the same PR.'
-   ```
-
-   **Trigger:** `--dim` is still `#707fa0` on current `main`; the
-   contrast failure has now been proposed across the last several
-   passes without moving.
-   **Why it is not fired this run, unlike the security candidate
-   above:** the security dispatch already re-confirmed the
-   `allowed_bots` gate is company-wide. Firing this one too would only
-   reproduce the identical, now-confirmed failure on a second seat and
-   spend a second dispatch slot for no new evidence. Holding it queued
-   until the gate is fixed or a chair starts it from a window instead.
-
-No third entry. Nothing in company §11.3 or Ursa's own criteria fires
-beyond the one dispatch already made and the one held above.
+`gh run list --status failure --created ">=2026-10-12T00:00:00Z"`
+returns one row: `security-agent` run
+[38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650),
+2026-10-12 21:19:16Z. Already classified as *configuration* (Incident
+13) by an earlier pass and handed to
+`alexandra-systems/exo-centralizer`; unchanged, no rerun (the same gate
+blocks a retry identically). No failures newer than this one exist in
+the window checked.
 
 ## What this seat is not chasing further
 
 The `allowed_bots` fix and the missing `tools/gh-actions.sh` /
 `tools/check-merge-queue.sh` / `tools/check-actions-reach.sh` scripts
-both touch `.github/workflows` or shared cross-company tooling, HQ's
-surface, not this seat's, per pm.md §15. Both routed to
-`alexandra-systems/exo-centralizer`; the tools gap since 2026-10-09,
-the `allowed_bots` gap new this run. The no-ship tripwire fix
-(Incident 12) and the dispatcher-pronoun fence (Incident 13) are the
-same kind of surface, already handed to the same seat by earlier
-passes.
-
-## Failed-run triage this run (§11.7)
-
-One failure in the last 24 hours at the time of this check:
-`security-agent` run 38309881650 (21:19 UTC), the dispatch above.
-**Classification: configuration** (a bot-actor gate missing from the
-workflow file, not a seat defect and not transient). No rerun — the
-same gate blocks a retry identically. Handed to
-`alexandra-systems/exo-centralizer` (above). The earlier `security-agent`
-failure (38168448767, 19:32 UTC on 2026-10-11) was already classified
-as a tripwire false alarm by the ~19:55 UTC pass that day and is
-outside this run's 24-hour window; nothing new to add.
+are HQ's surface (pm.md §15), already routed to
+`alexandra-systems/exo-centralizer` by earlier passes. The missed-cron
+pattern above is recorded for the next pass to watch, not handed off on
+its own: two data points is not yet a finding HQ can act on.
