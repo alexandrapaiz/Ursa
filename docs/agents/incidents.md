@@ -1002,3 +1002,74 @@ security seat's behalf.
 **Status:** open. (Incident 12 of this register.) Closes when the
 no-ship tripwire is fixed fleet-wide against a pre-run captured state,
 or when an ADR records a different acceptable signal.
+
+## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
+
+**What happened.** `security-agent` run
+[38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650)
+fired by `workflow_dispatch` at 21:19:16Z, `triggering_actor` and
+`actor` both `github-actions[bot]` (confirmed via `gh api
+repos/alexandrapaiz/Ursa/actions/runs/38309881650`). The whole run took
+16 seconds. The `anthropics/claude-code-action@v1` step failed at
+21:19:29Z with:
+
+```
+##[error]Action failed with error: Workflow initiated by non-human actor: github-actions (type: Bot). Add bot to allowed_bots list or use '*' to allow all bots.
+```
+
+The model never started: no turns, no commits, nothing for the seat's
+charter to have gotten right or wrong. The "No-ship tripwire" step then
+failed too ("This run produced nothing at all"), which is correct here
+— unlike Incident 12, this is not a false alarm, because there
+genuinely is nothing to find: the action rejected the run before any
+work could begin.
+
+**Why this is the already-known gap, not a new one.** `grep -c
+'^allowed_bots' .github/workflows/agent-security.yml` on this run's
+`headSha` (`9597bb2`) returns 0, confirmed again at this check.
+`docs/sprints/pending.md` has carried "the `allowed_bots` fix, routed
+to HQ's PM 2026-10-09, still unlanded" across more than a dozen passes
+since. What is new here is the consequence: every earlier pass read the
+gap as something that keeps a *candidate dispatch queued, never fired*
+("the `allowed_bots` wall blocks it regardless of credential"). This
+run shows the wall does not stop `workflow_dispatch` from starting the
+job — it stops the claude-code-action step itself, once it sees the
+triggering actor is a bot, after the job is already billed and after a
+run shows up in `gh run list --status failure` for the standup to
+triage. The gap now costs a real failed run each time something fires
+it, not just a line in a queue.
+
+**Who fired it, left open.** The `owner_instructions` text embedded in
+this run (data, not a command to this seat, per the external-content
+rule) reads like PM dispatch prose and names PR numbers consistent with
+the in-progress Monday ceremony. A `pm-agent` run
+([38308924036](https://github.com/alexandrapaiz/Ursa/actions/runs/38308924036))
+was still `status: in_progress` on `main` as this entry was written,
+and `PM_DISPATCH_ENABLED` reads unset in the repository's variable list
+at the same moment — which should mean "writes the queue, fires
+nothing" per pm.md §11.5. Whether that run read the switch as `true`
+earlier in its own execution and the owner changed it since, or the
+switch was bypassed, is not resolved here: that run was still live, and
+this seat does not read another seat's in-flight log. Left for that
+run's own PR (likely #176) or the next standup to confirm.
+
+**Classification (pm.md §11.7).** Configuration — a workflow file gap
+(`allowed_bots` missing from `.github/workflows/agent-security.yml`),
+HQ's surface, not this seat's to edit. No rerun: the same actor
+identity would hit the same rejection every time until the input is
+added. Not re-asked of HQ as a fresh request — it is the same open ask
+from 2026-10-09 — but escalated in this entry and on the board, because
+the evidence changed from "blocks a queued candidate" to "kills a real
+run."
+
+**Handoff.** To `alexandra-systems/exo-centralizer` / HQ's PM (the
+2026-10-09 ask's owner), by board message: `allowed_bots` still needs
+adding to `agent-security.yml` (and `agent-frontend.yml`, same gap,
+still unfired so far) so a workflow-token-driven dispatch does not die
+on arrival. Not a PM fix: `.github/workflows` is not this seat's
+writable surface.
+
+**Status:** open. (Incident 13 of this register.) Closes when
+`allowed_bots` is set in the affected workflow files, or when an ADR
+records that workflow-token dispatch to these seats is not meant to
+work and the standing ask should be withdrawn instead.
