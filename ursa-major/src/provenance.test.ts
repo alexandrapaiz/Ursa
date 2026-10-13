@@ -224,6 +224,39 @@ describe('the rendered viewer, opened and clicked (jsdom)', () => {
     expect(inspector.textContent).toContain('Draft two sentences about the resolver.')
   })
 
+  it('a formatting-only mutation says so, rather than showing a diff of whitespace', () => {
+    // The span class is `survived_mutated` and the diff's only visible
+    // content is a capital letter, so without this the reader sees a
+    // mutation and no account of what was mutated. Before 2026-10-13 the
+    // same span was labelled "survived verbatim" and the change was not
+    // shown at all. Executed in jsdom rather than greped out of the HTML,
+    // for the reason the resolver-chip test above gives.
+    const GEN = 'The resolver joins finished work backward to the generations that fed it, and the label is supplied by the artifact.'
+    const formatting = resolve({
+      taskId: 'formatting-only',
+      files: [{ path: 'final.md', text: GEN.replace('The resolver', 'The Resolver') }],
+      conversations: [
+        { id: 'c1', title: 'probe', adapter: 'paste', model: 'probe-model', turns: 2, userTurns: 1 },
+      ],
+      generations: [
+        { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
+      ],
+      finished: true,
+    })
+    expect(formatting.files[0].spans[0].normalizedOnly).toBe(true)
+
+    const dom = new JSDOM(renderViewer(formatting), { runScripts: 'dangerously' })
+    dom.window.Element.prototype.scrollIntoView = function () {}
+    const spans = Array.from(
+      dom.window.document.querySelectorAll('.panel')[0].querySelectorAll('pre.doc .sp'),
+    )
+    click(dom, spans[0])
+    const inspector = dom.window.document.getElementById('inspector')!
+    expect(inspector.textContent).toContain('Survived mutated · formatting only')
+    expect(inspector.textContent).toContain('What changed is formatting alone')
+    expect(inspector.textContent).toContain('Mutation (generation → final)')
+  })
+
   it('the generation link opens the Generations tab and highlights the exact source range', () => {
     const dom = open()
     const doc = dom.window.document
