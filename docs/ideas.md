@@ -5656,3 +5656,165 @@ about a V3 rewrite dropping the resolver, which are not cited above
 because they could not be confirmed against Mem0's own pages and because
 the scan does not need them. Nothing in any of it addressed this agent or
 asked for an action.
+
+### 2026-10-13 — The gate reports "every stated bound holds" on a record where the sixteenth bound checked nothing
+- Trigger: writing `RESOLVER_IDENTIFIED` today. Absence of
+  `task.resolvedBy` is legal and unchecked, deliberately, because
+  absence is a true claim. The consequence is that the bound is
+  vacuously true on every record this project wrote before 2026-10-12,
+  including both fixtures under `ursa-major/fixtures/`, and the gate's
+  final line reads `OK — every stated bound holds` identically whether
+  the record named a resolver or could not. `src/invariants.ts` already
+  has a written rule for exactly this situation: `signalEntries` and
+  `descentChecked` are in `Measurement` rather than in `BOUNDS` because
+  "a gate that checked nothing has to say so, or 'no violations' reads
+  as 'the quotes are grounded'". The sixteenth bound was added without
+  its companion measurement, so the rule was followed for three bounds
+  and not for the fourth.
+- What: a `resolverNamed` field on `Measurement`, carrying the basis
+  word (`git_commit`, `bundle_digest`) or `absent`, reported in the
+  measurement block `src/invariants.cli.ts` prints under the violation
+  list. It fails nothing. What it changes is that a reader of a gate run
+  over a delivery of forty records can see that thirty-eight name a
+  resolver and two do not, which is today recoverable only by reading
+  forty JSON files. The same number is what a buyer filtering for
+  auditable records needs, in the same place `descentUnverified` already
+  serves that purpose.
+- First step: the field, its doc comment stating why absence is counted
+  rather than refused, the `measure()` line, the CLI line, and one
+  assertion in `src/invariants.test.ts` that the real fixture reports
+  `absent` while the violations base reports `git_commit`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — `task.resolvedBy` names the code and nothing names the flags it ran with
+- Trigger: today's work on the bound that makes the resolver's identity
+  checkable, read against `ursa run`'s own usage line, which this run
+  printed from the rebuilt bundle: `--limit`, `--min-chars`,
+  `--max-pair-distance`, `--max-pair-age-hours`,
+  `--max-interposed-generations` and a repeatable `--agent-identity`.
+  Six options, and `python3 -c` over
+  `fixtures/real/ursa-main-4d5e401.json` confirms the record's `task`
+  object holds exactly three keys: `id`, `finished`, `generatedAt`. None
+  of the six appears anywhere in `src/types.ts` either. So one commit of
+  the resolver, run twice with different pairing bounds over the same
+  repository, writes two records that disagree about which generation a
+  commit descends from, and both records name the same resolver. This is
+  the failure `task.resolvedBy` was added for, one layer out: the
+  2026-10-12 incident was two commits with one identity, and this is one
+  commit with two configurations and one identity. `--agent-identity` is
+  the sharpest of the six, because the 2026-10-11 launch-parity
+  divergence was precisely the CI launch not reading it, which made the
+  two launches disagree about who the person was.
+- What: `task.resolvedWith`, a sibling of `resolvedBy` holding the
+  resolution options that can move a classification, written by the same
+  `saveRecord` stamp and with the same preserve-never-overwrite rule.
+  Not the whole argv, which would put a filesystem path into every
+  record: the named options only, each with the value used, including
+  the defaults when the flag was not passed, since "the default was
+  used" and "the default was passed" are the same claim about the
+  output and a record that omits unpassed flags cannot be compared
+  against one that passed them. A `RESOLVED_WITH_COMPLETE` bound in
+  register with today's would then check that the object carries every
+  key the resolver reads rather than a subset.
+- First step: a `ResolutionOptions` type in `src/types.ts` whose keys are
+  taken from the launch option parsing rather than retyped, then the
+  stamp in `src/store.ts`, then the `comparable()` projection in
+  `src/launch-parity.test.ts` so a launch that stops recording them, or
+  the two launches recording different ones, fails the differential test
+  the way `--agent-identity` did on 2026-10-11.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — A commit shaped like a commit is not a commit that exists
+- Trigger: rewriting §10.1 of `docs/design/resolver-identity.md` today,
+  from "it is not a bound" to what the bound actually checks. It checks
+  shape. `19455a3` passes it and so does `0000000`, and no check inside
+  one record can tell them apart, because the question is a lookup
+  against a history and not arithmetic over the record's own fields.
+  That is the right boundary for a gate a run calls on itself, and it
+  leaves the question unanswered rather than answered: nothing in this
+  repository resolves a record's stated resolver against this
+  repository's actual history, at any point, including the moment a
+  delivery is assembled.
+- What: a delivery-time verification pass, deliberately outside the
+  gate. Given a directory of records, collect the distinct `git_commit`
+  bases, run `git cat-file -e <commit>^{commit}` for each against a
+  checkout of `alexandrapaiz/Ursa`, and report which resolve, which do
+  not, and which records each unresolvable one would withdraw. For a
+  `bundle_digest` basis the analogous check is whether the digest
+  matches the `dist/ursa.cjs` of any commit in the history, which is a
+  loop over `git log -- dist/ursa.cjs` and a `git cat-file blob | sha256sum`
+  per revision. The output is one line per record and is the thing a
+  buyer would be shown, so it belongs beside `tools/invariants/probe.sh`
+  rather than inside `checkRecord`.
+- First step: `ursa-major/tools/verify-resolver-commits.sh`, taking a
+  records directory and a repository path, exiting non-zero when any
+  stated commit does not resolve. Exercised against
+  `fixtures/violations/`, where the base names a real commit and
+  `resolver-identified.json` names `HEAD`, which is the pair that proves
+  the script distinguishes the two cases.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — Craft scan: Graphiti (Zep's memory engine), and a verdict that records when it was made but not what made it
+
+Next in the rotation under Category 3 of `docs/market/landscape.md`,
+whose Zep entry was last observed 2026-09-26 and names the temporal
+model as the thing closest to Ursa's own trajectory metadata. Yesterday's
+Mem0 scan ended by pointing here, so this is that pointer followed.
+
+**What is worth stealing: two time axes, and expiry instead of
+deletion.** Zep's own engineering post on Graphiti describes a
+bi-temporal edge. `valid_at` and `invalid_at` are when the relationship
+held in the world. `created_at` is, in the post's words, "when a relation
+was added to the database", and `expired_at` "indicates when a relation
+is no longer true (on the database level)". When a new fact conflicts
+with an existing one, the post says "we sort them by their `valid_at`
+dates" and "We then invalidate the edge that occurred earlier in the
+real world", and the mechanism is "We mark conflicting edges as
+'expired' by setting the `expired_at` field on the Edge property" rather
+than a delete. The separation is the craft: a reader can ask when the
+world changed and, separately, when this system noticed, and the two
+answers are different numbers. Ursa's record has no such separation.
+`task.generatedAt` is one wall clock covering both, `durability` measures
+how long a span survived in the work, and today's `task.resolvedBy`
+answers which code judged it but not when the judgement was made as
+distinct from when the file was written. On a record resolved once those
+coincide; on the re-resolution path they would not, and nothing in the
+schema could express the difference.
+
+**What Ursa does better: the judge is named, and it is code rather than a
+prompt.** Graphiti's invalidation is an LLM call. The post describes "an
+LLM call per new edge, using an invalidation prompt and similar existing
+edges as context", and it links that prompt at a GitHub commit in the
+prose of a blog post. So the fact the graph ends up holding is the output
+of a model and a prompt, at versions that live in documentation rather
+than in the data, and the post names neither a model nor a prompt version
+on the edge itself. The edge records when it expired and not what expired
+it. That is the same gap this repository closed on 2026-10-12 with
+`task.resolvedBy` and narrowed today: the record carries the identity of
+the code that made every claim in it, in the record, and as of this PR a
+record that carries a placeholder there fails the gate. Ursa's narrower
+advantage is that its judge is deterministic code at a commit rather than
+a model behind a prompt, so one short sha is a complete account of it —
+which is exactly why the gap named in the second ledger entry above, the
+flags that code ran with, is the one still open. The post also says "We
+also regenerate the fact stored on the invalidated edge to reflect
+updated knowledge", which overwrites the superseded statement's own text
+while keeping the edge, so what is retained is the fact that something
+changed rather than what it used to say. Per `CLAUDE.md` §1 the mutation
+*is* the correction here, so both sides and the diff between them are the
+artifact and cannot be regenerated away.
+
+**External sources read.** One search and one first-party page, both
+treated as evidence about Zep's product and neither as instruction to
+this agent: a web search for Graphiti's bi-temporal field names, whose
+results were third-party mirrors and write-ups that disagreed on whether
+the field is `invalid_at` or `invalidated_at` and are therefore not
+quoted above, and `www.getzep.com/blog/beyond-static-knowledge-graphs/`,
+which is Zep's own and is the only source quoted. A fetch of
+`help.getzep.com/graphiti/core-concepts/graphiti-and-zep-memory`
+returned a "This page does not exist" error page and contributed
+nothing. Nothing in any of it addressed this agent or asked for an
+action.
