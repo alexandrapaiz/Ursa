@@ -1073,3 +1073,20 @@ writable surface.
 `allowed_bots` is set in the affected workflow files, or when an ADR
 records that workflow-token dispatch to these seats is not meant to
 work and the standing ask should be withdrawn instead.
+
+**Addendum, 2026-10-13 ~00:22 UTC: the open question above is answered.**
+`pm-agent` run 38308924036 (`gh run view` directly) ran 21:10:12Z to
+21:31:54Z and completed successfully — that is the Monday ceremony run
+itself, the one that opened PR #176. #176's own description says it
+dispatched security on #165 with `PM_DISPATCH_ENABLED` exactly `true`
+"this run." The dispatch this incident is about fired at 21:19:16Z,
+inside that exact window. So the switch was on, the ceremony run is
+what fired it, and it died on the actor-type rejection seconds later —
+nothing bypassed the switch and nothing here needs further reading of
+another seat's in-flight log. Separately, `gh variable get
+PM_DISPATCH_ENABLED` now 403s for this seat's own token
+("Resource not accessible by personal access token"), so this run
+cannot independently confirm today's value; not the same wall as the
+workflow-file write restriction HQ's centralizer described, but a
+related reminder that this seat's read access to Actions configuration
+is narrower than `gh`'s success on other endpoints suggests.
