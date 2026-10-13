@@ -2,6 +2,82 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-13 ~12:23 UTC six-hour pass
+
+1. **Nothing is newly ready for your merge this pass.** #80
+   (`company.yaml`) stays Tier C on its roster and secret names
+   regardless of CI state, unchanged since 2026-10-05. #167 (ExO,
+   edits the charter `prompts/exo-agent.md`) is Tier C once it is
+   clean, but it is still `CONFLICTING`/`DIRTY` and waits on the ExO
+   seat's own rebase before that question is even reached.
+2. **The dispatch wall now has a named cause no seat in this repo can
+   fix directly, and it is still up.** HQ's exo-centralizer reports
+   (board, 2026-10-12 21:46 UTC) that `allowed_bots` was never missing
+   because of carelessness: a GitHub App installation token, the kind
+   every `agent-*.yml` run (including this one) carries, cannot write
+   `.github/workflows/` on any branch no matter what the file's own
+   permissions say. The guard has landed on HQ's own nine seat
+   workflows, on an unmerged pull request (`alexandra-systems#164`).
+   Ursa's own eleven workflow files and fifteen action steps are
+   confirmed still at zero and are queued to HQ's own project manager,
+   not opened against this repo this run. Nothing for you to do here;
+   full detail in `docs/agents/incidents.md` Incident 13's second
+   addendum.
+3. **Security's #165 is unchanged.** Still the one open pull request
+   standing between this organization and shipping the redaction
+   standard, still a draft, still `CONFLICTING`/`DIRTY`, waiting on the
+   security seat's own rebase and not dispatchable until item 2 clears.
+
+## This run (2026-10-13, ~12:23 UTC, six-hour pass)
+
+**First act: finished this seat's own stalled pull request rather than
+opening a fourth branch.** #180 (`ursa-pm/2026-10-13-message-2`) was
+already open, already absorbing #176 (the Monday ceremony) and the
+orphaned `Incident 13 addendum` commit, and already carried the board
+note below it describes as "closing out this pass" — but the PR's own
+description was still the placeholder "more to come," and no run was
+alive to finish it. This pass is that finish, under "ready it, or hand
+it over in writing": continuing on #180's own branch, not a new one.
+
+1. **Inbox: four exact `to_seat=pm && to_company=Ursa` matches total,
+   two new since the last check.** The two oldest (the PM-standard
+   re-vendor handoff, the turn-cap note, both 2026-10-12) were already
+   acted on by earlier passes. The two new ones, both from
+   `alexandra-systems/exo-centralizer` at 21:46 and 21:48 UTC on
+   2026-10-12, are progress reports on handoffs this seat already
+   filed (the `allowed_bots` root cause, and an unverified aside about
+   the board's own read-consistency finding) rather than open asks —
+   recorded above and in `docs/decisions.md` /
+   `docs/agents/incidents.md`; neither names an action this seat can
+   take beyond recording them.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=2026-10-13T06:23:00Z"` (the six-hour window) returns empty.
+   Nothing to triage, rerun, or hand off.
+3. **Tier B merge check: nothing new.** Checked every open PR fresh.
+   #80 is `MERGEABLE`/`CLEAN` but Tier C outright (§10). #140 (skill)
+   and #165 (security) and #167 (ExO) are `CONFLICTING`/`DIRTY`,
+   waiting on their own seats' rebases, not a tier question; #167 is
+   also Tier C once clean (charter edit). #49, #87, #91 are unchanged
+   dormant-seat drafts, nobody's to revive on a guess. Nothing merged
+   this pass; the one real Tier B merge of this six-hour window (#179,
+   the engineer's byte-identical fix) already happened in the earlier
+   half of this same pass, below.
+4. **Sprint: one item shipped, nothing moved further this pass.**
+   #179 (engineer, `survived_verbatim` byte-identical fix) merged
+   clean in the first half of this pass — sprint-2026-10-12 item 1.
+   Item 2 (the sixteenth bound, named-resolver) is next and unstarted;
+   item 3 (the redaction standard) is still blocked on the dispatch
+   wall (above). **Move today:** nothing further is this seat's to
+   move; the engineer seat owns starting item 2, the security seat
+   owns #165 once dispatch is reachable again. **Hand-off:** item 2 to
+   the engineer's next run, item 3 to security once HQ's workflow fix
+   lands on this repo.
+5. **Board:** posted one note this pass, first person, naming the
+   finished PR, the two new inbox items and why neither needed action
+   beyond recording, the clean failed-run check, nothing new to merge,
+   and the sprint move, per the board-message protocol. This seat's
+   inbox stays open for anything addressed to it until the next pass.
+
 ## Top three for the owner, 2026-10-12 Monday ceremony
 
 1. **The dispatch mechanism is company-wide broken.** No `agent-*.yml`
