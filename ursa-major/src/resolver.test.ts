@@ -216,6 +216,17 @@ describe('resolve (survived_verbatim means byte-identical)', () => {
     })
   }
 
+  it('shows the change at character granularity, because a word diff cannot see whitespace', () => {
+    // `diffWords` treats any run of whitespace as equivalent, so on the
+    // commonest normalized-only difference it reports one unchanged part and
+    // no change at all. A span whose entire content is the mutation,
+    // carrying a diff asserting nothing was mutated, is worse than the label
+    // it replaced.
+    const spans = run(GEN.replace('and the label', 'and  the label')).files[0].spans
+    const changed = spans[0].diff!.filter((d) => d.added || d.removed)
+    expect(changed.map((d) => ({ value: d.value, added: d.added }))).toEqual([{ value: ' ', added: true }])
+  })
+
   it('demotes rather than drops, because dropping moves the span to the class that must stay clean', () => {
     // The first version of this fix let a non-byte-identical pass-1 hit fall
     // through to pass 2, which scores against generation SEGMENTS. Over ten
