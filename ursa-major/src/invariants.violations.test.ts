@@ -1,4 +1,4 @@
-// `fixtures/violations/` — fifteen committed records, each of which the gate
+// `fixtures/violations/` — sixteen committed records, each of which the gate
 // must refuse, read off disk exactly as a buyer or a CLI would read them.
 //
 // Why this file exists rather than more cases in `src/invariants.test.ts`.
@@ -53,27 +53,34 @@ function expectedCodes(slug: string): InvariantCode[] {
 }
 
 describe('the base record every counterexample is one edit away from', () => {
-  it('passes all fifteen bounds, so each fixture below fails because of its own edit', () => {
+  it('passes all sixteen bounds, so each fixture below fails because of its own edit', () => {
     expect(checkRecord(load('base.json'))).toEqual([])
   })
 
-  it('carries the three structures a resolved chat record does not, so no bound is vacuous here', () => {
+  it('carries the four structures a resolved chat record does not, so no bound is vacuous here', () => {
     const base = load('base.json')
     // Each of these is read by exactly one bound, and each is absent from
     // both fixtures already committed to this repository, which is why those
     // two cannot serve as the base: SIGNAL_QUOTE_GROUNDED,
-    // DESCENT_CHECKED_UNIFORMLY and EXCLUSION_NOT_CLASSIFIED are all
-    // vacuously true on a record that has none of them.
+    // DESCENT_CHECKED_UNIFORMLY, EXCLUSION_NOT_CLASSIFIED and
+    // RESOLVER_IDENTIFIED are all vacuously true on a record that has none
+    // of them.
     expect(base.signals!.oneShotCorrections.length).toBeGreaterThan(0)
     expect(base.signals!.oneShotCorrections[0].quotes.length).toBeGreaterThan(0)
     expect(base.files.flatMap((f) => f.spans).filter((s) => s.descent).length).toBeGreaterThan(0)
     expect(base.exclusions).toHaveLength(1)
+    // The fourth, added 2026-10-13 with the bound that reads it. Absence is
+    // legal under RESOLVER_IDENTIFIED, so a base record with no identity on
+    // it would make that bound vacuous here while the suite still reported
+    // sixteen bounds covered, which is the one shape this directory exists
+    // to rule out.
+    expect(base.task.resolvedBy).toEqual({ basis: 'git_commit', commit: '19455a3', dirty: false })
   })
 })
 
 describe('each committed record fires exactly the bounds its note names', () => {
-  it('found fifteen fixtures beside the base', () => {
-    expect(SLUGS).toHaveLength(15)
+  it('found sixteen fixtures beside the base', () => {
+    expect(SLUGS).toHaveLength(16)
   })
 
   for (const slug of SLUGS) {
@@ -83,7 +90,7 @@ describe('each committed record fires exactly the bounds its note names', () => 
 
       // Equality, not containment. A counterexample that fires three
       // unrelated bounds tells a reader nothing about the one it is named
-      // for, and two of the fifteen fixtures only exist in the shape they do
+      // for, and two of the sixteen fixtures only exist in the shape they do
       // because this assertion refused the first version of them.
       expect(found.map((v) => v.code)).toEqual(want)
 
@@ -101,11 +108,13 @@ describe('each committed record fires exactly the bounds its note names', () => 
 })
 
 describe('the directory covers the gate rather than a corner of it', () => {
-  it('fires every one of the declared bounds across the fifteen fixtures', () => {
+  it('fires every one of the declared bounds across the sixteen fixtures', () => {
     const fired = new Set(SLUGS.flatMap((s) => checkRecord(load(`${s}.json`)).map((v) => v.code)))
-    // The whole point of the directory. A sixteenth bound added to
+    // The whole point of the directory. A seventeenth bound added to
     // `src/invariants.ts` with no record that breaks it fails this line,
-    // which is the only mechanism in the repository that would notice.
+    // which is the only mechanism in the repository that would notice. It
+    // did notice: RESOLVER_IDENTIFIED arrived on 2026-10-13 and this line is
+    // what required `resolver-identified.json` to arrive with it.
     expect([...fired].sort()).toEqual([...BOUND_CODES].sort())
   })
 
@@ -118,7 +127,7 @@ describe('the directory covers the gate rather than a corner of it', () => {
   })
 
   it('records which bounds cannot be violated alone, as the fixtures found them', () => {
-    // Two of the fifteen are backstops: they are implied by their
+    // Two of the sixteen are backstops: they are implied by their
     // neighbours, so no record can break them in isolation. Asserted here,
     // and explained in each fixture's own note, because the fact is a
     // property of the bound set and a future edit to `src/invariants.ts`
@@ -136,7 +145,7 @@ describe('the directory covers the gate rather than a corner of it', () => {
     expect(expectedCodes('final-spans-in-file')).toEqual(['FINAL_SPANS_IN_FILE', 'CLAIM_NOT_WIDER'])
     expect(expectedCodes('pct-denominators-ordered')).toEqual(['RATES_MATCH_FIELDS', 'PCT_DENOMINATORS_ORDERED'])
     const single = SLUGS.filter((s) => expectedCodes(s).length === 1)
-    expect(single).toHaveLength(12)
+    expect(single).toHaveLength(13)
   })
 })
 
@@ -149,15 +158,15 @@ describe('the gate reaches these records through the two surfaces that read reco
     // one at test time, which proves the plumbing and leaves nothing a
     // reviewer can read.
     const { violations, lines } = runGate(DIR)
-    // 15 fixtures, plus the clean base. Two fire two bounds each and one
-    // fires three, which is 19 violations: `final-spans-in-file` and
+    // 16 fixtures, plus the clean base. Two fire two bounds each and one
+    // fires three, which is 20 violations: `final-spans-in-file` and
     // `gen-claim-bounded` each gained CLAIM_NOT_WIDER on 2026-10-13, when
     // that bound started checking the byte-identity its own sentence had
     // always stated instead of only the two extents' lengths. Each
     // fixture's `.md` says which bounds it fires and why, and the
     // per-fixture assertion above is what holds this total honest.
-    expect(violations).toBe(19)
-    expect(lines.join('\n')).toContain('19 violations')
+    expect(violations).toBe(20)
+    expect(lines.join('\n')).toContain('20 violations')
     expect(lines.join('\n')).toContain('OK — every stated bound holds')
   })
 

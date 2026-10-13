@@ -53,6 +53,7 @@ export type InvariantCode =
   | 'SIGNAL_QUOTE_GROUNDED'
   | 'DESCENT_CHECKED_UNIFORMLY'
   | 'EXCLUSION_NOT_CLASSIFIED'
+  | 'RESOLVER_IDENTIFIED'
 
 export interface Violation {
   code: InvariantCode
@@ -206,12 +207,26 @@ const BOUNDS: Record<InvariantCode, string> = {
     'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
   DESCENT_CHECKED_UNIFORMLY:
     'if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.',
+  RESOLVER_IDENTIFIED:
+    'if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim — it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
 
 /** a violation message quotes the offending string; 60 chars is enough to find it */
 const abbrev = (s: string) => (s.length > 60 ? s.slice(0, 60) + '…' : s)
+
+/**
+ * An arbitrary JSON value quoted into a violation message.
+ *
+ * `JSON.stringify` returns the VALUE `undefined` rather than a string for
+ * `undefined` and for a function, so `abbrev(JSON.stringify(x))` throws on
+ * exactly the input RESOLVER_IDENTIFIED exists to report: a record whose
+ * `dirty` flag or `basis` key is simply missing. Found by the unit case for
+ * that bound before it was ever committed, which is the whole reason the
+ * bound has unit cases beside its fixture.
+ */
+const quoted = (x: unknown) => abbrev(JSON.stringify(x) ?? String(x))
 
 function claimsByGeneration(
   files: FinalFile[],
@@ -622,6 +637,65 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
     if (x.chars <= 0 || x.sha.length === 0) {
       push('EXCLUSION_NOT_CLASSIFIED', at,
         `chars=${x.chars}, sha=${x.sha ? x.sha : '(empty)'}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`)
+    }
+  }
+
+  // The resolver the record names, checked the way an exclusion's commit is.
+  // Neither of those is arithmetic. Both ask the same question: is the thing
+  // this record points at a thing a reader could go and find?
+  //
+  // Why absence is legal. `resolverIdentity()` returns `null` when there is
+  // no git work tree and no readable bundle, and src/store.ts writes nothing
+  // rather than writing a word like `unknown`, because "nobody could tell
+  // which code ran" and "this code ran" are different claims and only the
+  // second one is provenance (src/resolver-identity.ts, and
+  // docs/design/resolver-identity.md §3.2). A bound requiring the field
+  // would also make every record this project wrote before 2026-10-12
+  // illegal, including both fixtures committed here.
+  //
+  // Why the field is read as `unknown` instead of as `ResolverIdentity`.
+  // This is the only bound in the module that asks whether a value has the
+  // SHAPE its type promises, and the records the gate runs on reach it
+  // through `JSON.parse` off disk, where that type is an assumption and not
+  // a guarantee — `runGate` in src/invariants.cli.ts reads a directory a
+  // buyer or an earlier version of this resolver wrote. Narrowing through
+  // the declared union first would make the malformed cases unreachable in
+  // TypeScript while leaving them reachable in the file, which is the exact
+  // trade the gate exists to refuse.
+  const resolvedBy = record.task.resolvedBy as unknown
+  if (resolvedBy !== undefined && resolvedBy !== null) {
+    const at = 'task.resolvedBy'
+    if (typeof resolvedBy !== 'object') {
+      push('RESOLVER_IDENTIFIED', at,
+        `the field is ${typeof resolvedBy} (${quoted(resolvedBy)}), not an object carrying a basis`)
+    } else {
+      const v = resolvedBy as Record<string, unknown>
+      if (v.basis === 'git_commit') {
+        // Lowercase only, 7 the shortest prefix `--short` emits and 40 the
+        // full SHA-1 object id. A longer string is not a git object id and a
+        // shorter one is not one a reader can resolve unambiguously.
+        if (typeof v.commit !== 'string' || !/^[0-9a-f]{7,40}$/.test(v.commit)) {
+          push('RESOLVER_IDENTIFIED', at,
+            `basis git_commit names commit ${quoted(v.commit)}, which is not 7 to 40 lowercase hex characters, so it is not a commit id anyone can look up`)
+        }
+        if (typeof v.dirty !== 'boolean') {
+          push('RESOLVER_IDENTIFIED', at,
+            `basis git_commit carries dirty ${quoted(v.dirty)}, which is not a boolean, so the record does not say whether the tree that ran was the tree at that commit`)
+        }
+      } else if (v.basis === 'bundle_digest') {
+        // Exactly 16, because `resolverIdentity()` writes
+        // `digest.slice(0, 16)` of a SHA-256 and `npm run bundle:check`
+        // compares the same prefix. A different length is a digest from
+        // somewhere else, and the comparison a buyer would run against the
+        // committed `dist/ursa.cjs` would silently never match.
+        if (typeof v.digest !== 'string' || !/^[0-9a-f]{16}$/.test(v.digest)) {
+          push('RESOLVER_IDENTIFIED', at,
+            `basis bundle_digest names digest ${quoted(v.digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against the bundle's own sha256 prefix`)
+        }
+      } else {
+        push('RESOLVER_IDENTIFIED', at,
+          `basis ${quoted(v.basis)}, which is neither git_commit nor bundle_digest, so nothing downstream knows what kind of identity this is`)
+      }
     }
   }
 
