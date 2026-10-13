@@ -44,6 +44,22 @@ function mutationCorrections(record: OutcomeRecord): OneShotCorrection[] {
   for (const file of record.files) {
     for (const span of file.spans) {
       if (span.class !== 'survived_mutated' || !span.diff || !span.source) continue
+      // A formatting-only mutation is not a one-shot correction. Such a span
+      // is identical to the generation extent after case, punctuation and
+      // whitespace folding, so the whole of its "correction" is a capital, a
+      // dash, or where the line wrapped, and `oneShotCorrections[].text` is
+      // the only signal `ursa run` emits on a repo. Before 2026-10-13 these
+      // spans were labelled `survived_verbatim` and never reached this
+      // function; demoting them to `survived_mutated` would have added them
+      // to that signal silently, which is a sold figure moving as a side
+      // effect of a labelling fix rather than as a decision. Skipped here
+      // rather than dropped from the record: the span keeps its
+      // `normalizedOnly` flag and its character-level diff, so deriving a
+      // house-style preference from exactly these spans stays possible, and
+      // that is a ledger entry (docs/ideas.md, 2026-10-13) with a population
+      // of five on this repository's history — too few to derive anything
+      // from yet, and far too few to be worth contaminating this signal for.
+      if (span.normalizedOnly) continue
       const gen = record.generations[span.source.generationIndex]
       if (!gen) continue
       // Both sides are read from where the record already stores them: the

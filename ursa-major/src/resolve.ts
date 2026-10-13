@@ -23,7 +23,7 @@
 // forced it. With no corroborator every above-threshold match is labelled
 // `survived_mutated` as before.
 
-import { diffWords } from 'diff'
+import { diffChars, diffWords } from 'diff'
 import { normalize, type Normalized } from './normalize'
 import { segment, modeForPath, type Span } from './segment'
 import {
@@ -103,6 +103,29 @@ interface Claim {
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
 
+/** diff generation → final, in the record's own DiffPart shape */
+const toDiffParts = (parts: Array<{ value: string; added?: boolean; removed?: boolean }>) =>
+  parts.map((d) => ({
+    value: d.value,
+    ...(d.added ? { added: true } : {}),
+    ...(d.removed ? { removed: true } : {}),
+  }))
+
+/** word-level, the right granularity for an edit that changed words */
+const wordDiff = (from: string, to: string) => toDiffParts(diffWords(from, to))
+
+/**
+ * Character-level, and only for a `normalizedOnly` mutation. `diffWords`
+ * tokenizes on whitespace and treats any run of it as equivalent, so on the
+ * commonest normalized-only difference — a doubled space, a reflowed line —
+ * it reports one unchanged part and no change at all. A span whose whole
+ * content is the mutation, carrying a diff that says nothing was mutated,
+ * would be worse than the label it replaced. At this granularity the
+ * difference is always visible, and it is cheap here because the two strings
+ * are the same string modulo folding.
+ */
+const charDiff = (from: string, to: string) => toDiffParts(diffChars(from, to))
+
 export function resolve(input: ResolveInput): OutcomeRecord {
   const gens = input.generations.map((g, i) => ({ ...g, generationIndex: i }))
 
@@ -146,6 +169,64 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     end,
   })
 
+  /**
+   * What to do with a pass-1 hit whose raw characters do not agree with the
+   * generation extent it found. The hit is real: the two texts are the same
+   * text after case folding, punctuation folding and whitespace collapsing.
+   * What it is not is `survived_verbatim`, so the span is demoted here
+   * rather than dropped.
+   *
+   * Dropping it was the first version of this fix, and measuring it is what
+   * rejected it. Falling through to pass 2 sends the span to be scored
+   * against generation SEGMENTS, and the commonest case in real history is a
+   * line the model wrapped and the person did not, whose final segment
+   * straddles two generation segments and therefore matches neither well
+   * enough. Over ten records of this repository's own history that put 26
+   * spans and 1,466 characters into `no_generation_provenance` — the class
+   * CLAUDE.md §1 calls the most valuable, meaning "the model was never in
+   * the running", asserted about text the model demonstrably wrote. A false
+   * verbatim claim traded for a false claim of no provenance at all is not a
+   * fix. `tools/measure-verbatim-fidelity.ts` is that measurement.
+   *
+   * `corroborate` is asked here for the same reason pass 2 asks it, and a
+   * `rival` verdict demotes the same way: identical-after-normalization is
+   * still not proof of descent when a blob outside this generation's line
+   * holds the same text. DESCENT_CHECKED_UNIFORMLY in src/invariants.ts
+   * requires that uniformity and would fire if this branch skipped the ask.
+   */
+  const normalizedOnlyMutation = (
+    base: { start: number; end: number; text: string },
+    p: GenPrep,
+    gStart: number,
+    gEnd: number,
+    filePath: string,
+    trivial?: true,
+  ): FinalSpan => {
+    const claimed = p.gen.text.slice(gStart, gEnd)
+    const source = srcPtr(p, gStart, gEnd)
+    const descent = input.corroborate?.(filePath, base.text)
+    if (descent?.basis === 'rival') {
+      return {
+        ...base,
+        class: 'no_generation_provenance',
+        uncertain: true,
+        candidate: { score: 1, text: claimed, source },
+        descent,
+      }
+    }
+    addClaim(mutatedClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
+    return {
+      ...base,
+      class: 'survived_mutated',
+      score: 1,
+      normalizedOnly: true,
+      source,
+      diff: charDiff(claimed, base.text),
+      ...(trivial ? { trivial } : {}),
+      ...(descent ? { descent } : {}),
+    }
+  }
+
   const files: FinalFile[] = input.files.map((f) => {
     const mode = modeForPath(f.path)
     const spans: FinalSpan[] = []
@@ -155,28 +236,65 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       const base = { start: s.start, end: s.end, text: s.text }
       let span: FinalSpan | null = null
 
-      // Pass 1 — verbatim
+      // Pass 1 — verbatim.
+      //
+      // Containment runs on the shadow text, which is lowercased, has smart
+      // punctuation folded and every whitespace run collapsed to one space.
+      // A normalized hit therefore survives a case change, an em dash
+      // retyped as a hyphen and any reflow, and until 2026-10-13 every one
+      // of those was labelled `survived_verbatim` with `score: 1`. That is
+      // a weaker claim than the label makes: README's class table says
+      // "generated and kept unchanged", and CLAIM_NOT_WIDER's own sentence
+      // says "verbatim means byte-identical". So the normalized hit only
+      // locates a candidate extent now, and the claim is made solely when
+      // the raw characters agree. A hit whose raw characters differ falls
+      // through to pass 2, where the difference is scored and emitted as a
+      // diff — which is the thing Ursa Minor sells, rather than noise to
+      // fold away.
       if (sNorm.length >= MIN_VERBATIM_LEN) {
-        for (const p of preps) {
-          const idx = p.norm.norm.indexOf(sNorm)
-          if (idx < 0) continue
-          const gStart = p.norm.map[idx]
-          const gEnd = p.norm.map[idx + sNorm.length - 1] + 1
-          span = { ...base, class: 'survived_verbatim', score: 1, source: srcPtr(p, gStart, gEnd) }
-          addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
-          break
+        // Every occurrence in every generation, not just the first hit: a
+        // generation that repeats a sentence should not lose a byte-identical
+        // claim because an earlier copy of it differs in case. The first hit
+        // that is not byte-identical is kept as `nearest` and used only if no
+        // exact one exists anywhere.
+        let nearest: { p: GenPrep; gStart: number; gEnd: number } | null = null
+        outerLong: for (const p of preps) {
+          for (let idx = p.norm.norm.indexOf(sNorm); idx >= 0; idx = p.norm.norm.indexOf(sNorm, idx + 1)) {
+            const gStart = p.norm.map[idx]
+            const gEnd = p.norm.map[idx + sNorm.length - 1] + 1
+            if (p.gen.text.slice(gStart, gEnd) !== s.text) {
+              nearest ??= { p, gStart, gEnd }
+              continue
+            }
+            span = { ...base, class: 'survived_verbatim', score: 1, source: srcPtr(p, gStart, gEnd) }
+            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
+            break outerLong
+          }
+        }
+        if (!span && nearest) {
+          span = normalizedOnlyMutation(base, nearest.p, nearest.gStart, nearest.gEnd, f.path)
         }
       } else if (sNorm.length > 0) {
         // short segment: exact equality with a whole generation segment only,
-        // and flagged trivial — weak evidence either way
+        // and flagged trivial — weak evidence either way. Raw equality for
+        // the same reason the long branch demands it, and the same demotion
+        // when only the normalized sides agree.
+        let nearestShort: { p: GenPrep; g: GenSentence } | null = null
         outer: for (const p of preps) {
           for (const g of p.sentences) {
-            if (g.norm === sNorm) {
-              span = { ...base, class: 'survived_verbatim', score: 1, trivial: true, source: srcPtr(p, g.start, g.end) }
-              addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end })
-              break outer
+            if (g.norm !== sNorm) continue
+            if (g.text !== s.text) {
+              nearestShort ??= { p, g }
+              continue
             }
+            span = { ...base, class: 'survived_verbatim', score: 1, trivial: true, source: srcPtr(p, g.start, g.end) }
+            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end })
+            break outer
           }
+        }
+        if (!span && nearestShort) {
+          const { p, g } = nearestShort
+          span = normalizedOnlyMutation(base, p, g.start, g.end, f.path, true)
         }
       }
 
@@ -225,11 +343,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
               class: 'survived_mutated',
               score: r3(best.score),
               source: srcPtr(best.p, best.sent.start, best.sent.end),
-              diff: diffWords(best.sent.text, s.text).map((d) => ({
-                value: d.value,
-                ...(d.added ? { added: true } : {}),
-                ...(d.removed ? { removed: true } : {}),
-              })),
+              diff: wordDiff(best.sent.text, s.text),
               // `uncertain` is deliberately NOT set on an `unverified`
               // verdict. It is stats.uncertainSpans' own definition (a
               // below-threshold candidate awaiting adjudication) and that
@@ -252,7 +366,14 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       spans.push(span ?? { ...base, class: 'no_generation_provenance' })
     }
 
-    return { path: f.path, mode, text: f.text, spans: mergeVerbatimRuns(spans, f.text) }
+    return {
+      path: f.path,
+      mode,
+      text: f.text,
+      // preps is built by mapping over input.generations in order, so its
+      // index is the generationIndex a source pointer carries.
+      spans: mergeVerbatimRuns(spans, f.text, preps.map((p) => p.gen.text)),
+    }
   })
 
   const overlaps = (claims: Claim[] | undefined, s: Span) =>
@@ -313,8 +434,23 @@ export function resolve(input: ResolveInput): OutcomeRecord {
 /**
  * Merge consecutive verbatim spans that came from the same generation with
  * contiguous source ranges into maximal runs.
+ *
+ * The merged span covers the gap between the two spans as well as the spans
+ * themselves, so the merge makes a claim about characters neither span
+ * matched. Until 2026-10-13 it accepted any whitespace gap in the final text
+ * against a generation gap of up to two characters, and that is exactly what
+ * produced the CLAIM_NOT_WIDER violation on record
+ * `ursa-2026-10-07-2f610e9`, span 78 of `docs/sprints/pending.md`: the person
+ * had reflowed one line, so a one-character generation gap (a space) was
+ * credited with a three-character final gap (a newline and two spaces), and
+ * 101 final characters were sold as 99 generated ones. The gap now has to be
+ * the same characters on both sides. Two byte-identical runs separated by a
+ * gap the person rewrote stay two spans, and the characters they inserted
+ * belong to no span's claim, which is what happened to them.
+ *
+ * `genTexts` is indexed by `generationIndex`.
  */
-function mergeVerbatimRuns(spans: FinalSpan[], text: string): FinalSpan[] {
+function mergeVerbatimRuns(spans: FinalSpan[], text: string, genTexts: string[]): FinalSpan[] {
   const out: FinalSpan[] = []
   for (const s of spans) {
     const prev = out[out.length - 1]
@@ -327,7 +463,8 @@ function mergeVerbatimRuns(spans: FinalSpan[], text: string): FinalSpan[] {
       prev.source.generationIndex === s.source.generationIndex &&
       s.source.start >= prev.source.end &&
       s.source.start - prev.source.end <= 2 &&
-      /^\s*$/.test(text.slice(prev.end, s.start))
+      text.slice(prev.end, s.start) ===
+        (genTexts[s.source.generationIndex] ?? '').slice(prev.source.end, s.source.start)
     ) {
       prev.end = s.end
       prev.text = text.slice(prev.start, prev.end)
