@@ -19,14 +19,20 @@ import Link from "next/link";
  */
 export function SiteHeader({ href }: { href?: string }) {
   const mark = (
-    <span className="font-[family-name:var(--font-inter-tight)] text-[0.95rem] font-extralight uppercase tracking-[0.34em] whitespace-nowrap text-[var(--star)]">
+    <span className="mark font-[family-name:var(--font-inter-tight)] text-[0.95rem] font-extralight uppercase tracking-[0.34em] whitespace-nowrap text-[var(--star)]">
       Ursa Minor
     </span>
   );
 
   return (
     <header className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-[clamp(2rem,8vw,6rem)] pt-14 pb-8">
-      {href ? <Link href={href}>{mark}</Link> : mark}
+      {href ? (
+        <Link href={href} className="mark-link">
+          {mark}
+        </Link>
+      ) : (
+        mark
+      )}
       <span className="font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em] text-[var(--dim)]">
         for frontier labs
       </span>
