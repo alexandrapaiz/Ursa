@@ -320,7 +320,9 @@ export function renderViewer(record: OutcomeRecord): string {
   function showSpan(span) {
     inspector.innerHTML = '';
     inspector.style.display = 'block';
-    var h = el('h3', '', LABELS[span.class] + (span.uncertain ? ' · uncertain' : '') + (span.trivial ? ' · trivial match' : ''));
+    var h = el('h3', '', LABELS[span.class] + (span.uncertain ? ' · uncertain' : '')
+      + (span.trivial ? ' · trivial match' : '')
+      + (span.normalizedOnly ? ' · formatting only' : ''));
     h.style.color = COLORS[span.class];
     inspector.appendChild(h);
     var src = span.source || (span.candidate && span.candidate.source);
@@ -371,6 +373,14 @@ export function renderViewer(record: OutcomeRecord): string {
       var dh = el('h3', '', 'Mutation (generation → final)');
       dh.style.marginTop = '10px';
       inspector.appendChild(dh);
+      // The narrow mutation, named for the reader rather than left to be
+      // inferred from a diff whose only visible content is whitespace.
+      // Before 2026-10-13 this span was labelled "survived verbatim" and the
+      // change was folded away entirely, so saying what the change was is
+      // part of the correction, not decoration.
+      if (span.normalizedOnly) {
+        inspector.appendChild(el('div', 'nolink', 'The two texts are the same text after case folding, smart punctuation folding and whitespace collapsing. What changed is formatting alone: a capital, a dash, or where the line wrapped.'));
+      }
       var d = el('pre', 'diff');
       span.diff.forEach(function (part) {
         var node;
