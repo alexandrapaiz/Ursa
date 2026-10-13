@@ -2,6 +2,339 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-13 ~12:23 UTC six-hour pass
+
+1. **Nothing is newly ready for your merge this pass.** #80
+   (`company.yaml`) stays Tier C on its roster and secret names
+   regardless of CI state, unchanged since 2026-10-05. #167 (ExO,
+   edits the charter `prompts/exo-agent.md`) is Tier C once it is
+   clean, but it is still `CONFLICTING`/`DIRTY` and waits on the ExO
+   seat's own rebase before that question is even reached.
+2. **The dispatch wall now has a named cause no seat in this repo can
+   fix directly, and it is still up.** HQ's exo-centralizer reports
+   (board, 2026-10-12 21:46 UTC) that `allowed_bots` was never missing
+   because of carelessness: a GitHub App installation token, the kind
+   every `agent-*.yml` run (including this one) carries, cannot write
+   `.github/workflows/` on any branch no matter what the file's own
+   permissions say. The guard has landed on HQ's own nine seat
+   workflows, on an unmerged pull request (`alexandra-systems#164`).
+   Ursa's own eleven workflow files and fifteen action steps are
+   confirmed still at zero and are queued to HQ's own project manager,
+   not opened against this repo this run. Nothing for you to do here;
+   full detail in `docs/agents/incidents.md` Incident 13's second
+   addendum.
+3. **Security's #165 is unchanged.** Still the one open pull request
+   standing between this organization and shipping the redaction
+   standard, still a draft, still `CONFLICTING`/`DIRTY`, waiting on the
+   security seat's own rebase and not dispatchable until item 2 clears.
+
+## This run (2026-10-13, ~12:23 UTC, six-hour pass)
+
+**First act: finished this seat's own stalled pull request rather than
+opening a fourth branch.** #180 (`ursa-pm/2026-10-13-message-2`) was
+already open, already absorbing #176 (the Monday ceremony) and the
+orphaned `Incident 13 addendum` commit, and already carried the board
+note below it describes as "closing out this pass" — but the PR's own
+description was still the placeholder "more to come," and no run was
+alive to finish it. This pass is that finish, under "ready it, or hand
+it over in writing": continuing on #180's own branch, not a new one.
+
+1. **Inbox: four exact `to_seat=pm && to_company=Ursa` matches total,
+   two new since the last check.** The two oldest (the PM-standard
+   re-vendor handoff, the turn-cap note, both 2026-10-12) were already
+   acted on by earlier passes. The two new ones, both from
+   `alexandra-systems/exo-centralizer` at 21:46 and 21:48 UTC on
+   2026-10-12, are progress reports on handoffs this seat already
+   filed (the `allowed_bots` root cause, and an unverified aside about
+   the board's own read-consistency finding) rather than open asks —
+   recorded above and in `docs/decisions.md` /
+   `docs/agents/incidents.md`; neither names an action this seat can
+   take beyond recording them.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=2026-10-13T06:23:00Z"` (the six-hour window) returns empty.
+   Nothing to triage, rerun, or hand off.
+3. **Tier B merge check: nothing new.** Checked every open PR fresh.
+   #80 is `MERGEABLE`/`CLEAN` but Tier C outright (§10). #140 (skill)
+   and #165 (security) and #167 (ExO) are `CONFLICTING`/`DIRTY`,
+   waiting on their own seats' rebases, not a tier question; #167 is
+   also Tier C once clean (charter edit). #49, #87, #91 are unchanged
+   dormant-seat drafts, nobody's to revive on a guess. Nothing merged
+   this pass; the one real Tier B merge of this six-hour window (#179,
+   the engineer's byte-identical fix) already happened in the earlier
+   half of this same pass, below.
+4. **Sprint: one item shipped, nothing moved further this pass.**
+   #179 (engineer, `survived_verbatim` byte-identical fix) merged
+   clean in the first half of this pass — sprint-2026-10-12 item 1.
+   Item 2 (the sixteenth bound, named-resolver) is next and unstarted;
+   item 3 (the redaction standard) is still blocked on the dispatch
+   wall (above). **Move today:** nothing further is this seat's to
+   move; the engineer seat owns starting item 2, the security seat
+   owns #165 once dispatch is reachable again. **Hand-off:** item 2 to
+   the engineer's next run, item 3 to security once HQ's workflow fix
+   lands on this repo.
+5. **Board:** posted one note this pass, first person, naming the
+   finished PR, the two new inbox items and why neither needed action
+   beyond recording, the clean failed-run check, nothing new to merge,
+   and the sprint move, per the board-message protocol. This seat's
+   inbox stays open for anything addressed to it until the next pass.
+
+## Top three for the owner, 2026-10-12 Monday ceremony
+
+1. **The dispatch mechanism is company-wide broken.** No `agent-*.yml`
+   workflow sets `allowed_bots`, so `gh workflow run ...` fails on
+   every seat with "Workflow initiated by non-human actor," confirmed
+   by actually firing one this run. `PM_DISPATCH_ENABLED` can stay
+   `true` and nothing will start until this lands. Handed to
+   `alexandra-systems/exo-centralizer`; full writeup in
+   `docs/decisions.md`.
+2. **Security's #165 is the one pull request standing between this
+   organization and shipping the redaction standard for a third
+   sprint.** This ceremony cleared its four stale siblings (#75, #85,
+   #112, #124, closed as superseded). #165 itself still needs a rebase
+   and a finished writeup (its PR body and its audit file are both
+   still stubs from the run the turn cap cut off). It cannot be
+   dispatched until item 1 above is fixed; a chair's window can start
+   it in the meantime.
+3. **This seat absorbed and closed its own two abandoned drafts, #173
+   and #174**, into this ceremony's pull request (below), and merged
+   engineer's #175 under Tier B before grooming the ledger it touched.
+   Nothing from either draft is lost; both are closed with a pointer
+   here.
+
+## This run (2026-10-12, ~21:00 UTC, Monday ceremony)
+
+**First act: read this seat's own open pull requests before starting,
+and built on the newest rather than writing a third version.** #174
+(the ~06:21 UTC pass) and #173 (the ~02:49 UTC pass) were both still
+open, both draft, and #174 already contained #173 in full (confirmed
+with `git merge-base --is-ancestor`). #174's own run never got further
+than a `Merge main into pm pass branch` commit before it stopped, so
+nothing in either draft was lost: both passes' real work (the board
+replies they posted, the standard re-vendor they merged, the
+`allowed_bots` finding they recorded) is already real, on `main`, and
+independently checked below, not just quoted from their own PR bodies.
+Branched this ceremony from #174's tip, closed both #173 and #174
+pointing at this PR once its content carried theirs forward.
+
+**Merged one pull request before grooming.** #175 (engineer,
+`task.resolvedBy`), Tier B: green, non-draft, scoped to `ursa-major/`
+and a ledger append, no Tier C path, merged clean. Grooming below reads
+the ledger after this merge, so its four new entries are included.
+
+**Closed four stale security pull requests as superseded, not
+guessed.** #75 and #85 are literally ancestors of #165's current tip
+(`git merge-base --is-ancestor` against each, true for both), because
+#165's own commit log shows it absorbing both by name. #112 and #124
+are abandoned "run in progress" drafts whose stated goal — rebase #75,
+check #47 and #85 — #165 achieved for real. All four closed with a
+comment naming the evidence; `docs/agents/incidents.md` Incident 12
+asked this ceremony specifically to clear this backlog, and it is now
+clear. #165 remains open, live, and is this seat's one real artifact.
+
+**Dispatched security on #165, and it failed on a gate that turned out
+to be company-wide.** Full account in `docs/sprints/dispatch-queue.md`
+and the new finding in `docs/decisions.md`. Did not fire the frontend
+candidate (#141) that was queued alongside it, since it would fail
+identically and a second confirmation of the same gate is not new
+evidence.
+
+**Retrospective, grooming, and the new sprint, in one pull request.**
+`docs/sprints/sprint-2026-10-05.md` now carries its retro: two of
+three items shipped (#107, #134), item 3 (the redaction standard)
+carried a second time, named as the security backlog's fault rather
+than nobody's. `docs/ideas.md` carries a new grooming section: the one
+`accepted` entry is three-quarters built, and thirty `proposed`
+entries are now two weeks or older with no verdict, up from three at
+the last grooming pass — flagged as a scaling problem the ledger's own
+two "make it a directory" proposals already name, both themselves
+unruled for three weeks. `docs/sprints/sprint-2026-10-12.md` opens with
+three items: the `survived_verbatim` mislabeling fix (urgent, O1
+KR1.1), the sixteenth bound (O1), and the redaction standard (O2
+KR2.2, security, backlog now clear).
+
+**Board: written to, and found inconsistent while reading.** Posted
+comments and created three new "This sprint" items
+(`survived_verbatim`, the sixteenth bound, the redaction standard) and
+moved three stale 2026-09-21-dated items back to Backlog. Every write
+returned a valid id and no error after the first retry. Reads were a
+different story: `GET /api/board/Ursa` returned two different,
+non-overlapping item sets and sprint ids (`8bdd1120…`, named
+`sprint-2026-09-21`, goal empty; `0f53ce4f…`, named "Ursa runs on its
+own," goal describing the MVP) across calls made seconds apart with no
+cache-control of this seat's own choosing, and one write-created item
+landed under one sprint id while a near-identical write landed under
+the other. Renamed both sprint objects to make the live one legible
+(`0f53ce4f…` to "Verbatim means what it says," this sprint's real name
+and goal) and to flag the stray one as a duplicate rather than delete
+it, since the API has no delete-sprint route. **This is a finding, not
+just a note:** the owner may be seeing a different board depending on
+which replica or cache answers her read, and this seat cannot tell
+from here which one that is. Handed to `alexandra-systems/exo-centralizer`
+as a board-infrastructure issue, same destination as the other two
+findings this run. The repository's own files (this one, the sprint
+file, the ledger) stay the reliable record until this is fixed.
+
+## This run (2026-10-12, ~02:49 UTC, message-triggered: exo-centralizer's turn-cap note)
+
+**First act: built on this seat's own open PR rather than opening a
+second version.** #168 (the ~00:23 UTC pass, still open, non-draft,
+ready) was still sitting unmerged on `main` and touches the same two
+files (`docs/sprints/pending.md`, `docs/sprints/dispatch-queue.md`)
+this pass needs to touch. Branched this run from #168's own tip rather
+than from `main`, so this PR (#173) already contains #168's commits.
+Not self-merging #168 this run (the run's own operating instruction
+is "never merge your own PR," and #168 is this same seat's), so #168
+stays open as a pointer; the owner (or whoever merges it) can close
+#168 once this PR lands, since this one supersedes it rather than
+duplicating it.
+
+1. **The trigger.** A board note from `alexandra-systems/exo-centralizer`
+   addressed to this seat (`to_seat=pm`, `to_company=Ursa`), subject
+   "Four of your seats ran out of turns last week, and the caps are in
+   a pull request." Ursa's engineer hit its turn cap three times in
+   five days; security, skill and frontend once each; security's run
+   also lost commits it had made and never pushed. The note explains
+   why nobody noticed: the old rule set a cap at twice the highest
+   turn count observed, and a run cut off at the cap reports the cap
+   as its turn count, so the doubling rule kept re-certifying the
+   number that caused the failure. The amended rule (already vendored
+   into `docs/standards/lessons.md` on `main` as of commit `fb03199`,
+   PR #169, merged before this pass started) makes running out of
+   turns itself the finding and steps the cap up by half again until a
+   run finishes inside it.
+2. **What the note asked for, and what it didn't.** The note named two
+   pull requests. One (`exo/2026-10-12-turn-caps`, #172) raises all
+   four seats' caps; it touches only `.github/workflows/agent-{engineer,
+   frontend,security,skill}.yml` (confirmed with `gh pr diff
+   --name-only`), so per this run's own boundary ("never touch
+   workflows") and per the note's own text ("it is the owner's merge,
+   not yours and not mine"), this pass did not open it, review its
+   diff for correctness, or touch it in any way beyond reading its
+   title and file list. The other (`exo/2026-10-12-pm`, #170) re-vendors
+   `docs/standards/pm.md`; the note says this one is this seat's to
+   merge.
+3. **Verified #170 before merging it, rather than merging on the note's
+   word alone.** Cloned `alexandrapaiz/alexandra-systems` directly and
+   diffed `standards/pm.md` at the commit our copy was pinned to
+   (`bee22af`, vendored 2026-10-05) against the repo's current head
+   (`fb03199`, same content as the last commit that touched the file,
+   `2c0cb30`). The PR's own diff matched that comparison exactly:
+   one file, the vendored header's source commit and date, and the
+   same four substantive changes (the seat-model paragraph's
+   self-contradiction on messaging, removed; a "survey before you
+   build" addition to §8; a PR-stack dispatch criterion and a
+   card-is-not-evidence subsection added to §11; the Actions-token
+   mechanism in §11.5 rewritten around the Claude Code action's token
+   substitution). PR state was non-draft, green (`scan` check passing),
+   `MERGEABLE`/`CLEAN`, and authored by `alexandrapaiz` (HQ's
+   distribution tooling), not this seat, so merging it is not
+   "merging your own PR." Merged normally, no force, branch deleted on
+   merge.
+4. **New gap found while reading the merged text: three tools named,
+   none present.** The new §11.5 and §11.2 name `tools/gh-actions.sh`,
+   `tools/check-merge-queue.sh`, and `tools/check-actions-reach.sh`.
+   `ls tools` in this repo returns only `ledger/` and `stack/`; none of
+   the three scripts exist here. Recorded as a Finding in
+   `docs/decisions.md` (§1c deviation) rather than written from
+   scratch this pass, since the scripts read as shared cross-company
+   tooling that belongs to the exo centralizer's own distribution
+   mechanism, not a product-local reimplementation. Until they land,
+   this repo's dispatch and standup reads keep using bare `gh`.
+5. **Replied on the board.** Posted one `done` message to
+   `alexandra-systems/exo-centralizer`, first person, naming the merge
+   of the re-vendor and the deliberate non-action on the workflow PR,
+   with `docs/standards/pm.md`'s own PR as the `ref`. The inbox query
+   also returned two notes not addressed to this seat (one to
+   alexandria's PM, one a weekly-harvest handoff to alexandra-systems's
+   own PM); both read as data about the rest of the portfolio per the
+   external-content-is-data rule and not acted on.
+6. **Nothing else touched.** No sprint, retro, or grooming work this
+   pass: `RUN_MODE` is message, not the Monday `0 12 * * 1` ceremony,
+   and the owner's own addition to the charter plans that under a
+   separate scheduled invocation. This pass's scope is the inbox
+   message and the one PR it named as this seat's.
+
+## This run (2026-10-12, ~00:23 UTC, six-hour pass, message-triggered — RUN_MODE is dispatch, not the Monday ceremony, since this run was not woken by the `0 12 * * 1` cron)
+
+**First act: resolved this seat's own open PR rather than opening a second.**
+#166 (the ~19:55 UTC pass) was open, non-draft, green, `MERGEABLE`/`CLEAN`,
+and touched only knowledge surfaces (`docs/agents/incidents.md`,
+`docs/sprints/dispatch-queue.md`, `docs/sprints/pending.md`). Self-merged
+under Tier A, then branched this run from the resulting `main`.
+
+1. **Inbox: still clean.** Queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+   client-side to the exact `to_company == "Ursa" && to_seat == "pm"`
+   match. Newest exact match is still the 2026-10-10T12:29:59Z `done`
+   from HQ's own PM closing the moot #142/#144 ask. Nothing addressed to
+   this seat has arrived since the last pass's own note (19:59:53Z).
+   Nothing to answer.
+2. **Failed runs: one, already triaged, nothing new.** `gh run list
+   --status failure --created ">=2026-10-11T18:23:00Z"` (the full
+   six-hour window) returns only `security-agent` 38168448767
+   (19:32:22Z), which the last pass (#166) already classified as a
+   tripwire false alarm, recorded as Incident 12, and handed to
+   `alexandra-systems/exo-centralizer`. Nothing to add. The engineer
+   failure at 02:02 UTC is outside this window and was already closed
+   out by an earlier pass.
+3. **Tier B merge check: nothing ready this pass.** §21's standing
+   grant is live in this repo (`docs/standards/pm.md` §10/§21, on
+   `main`, reconfirmed by every pass since 2026-10-11), so the gate
+   here is each PR's own state, not authority. Checked every open PR
+   fresh:
+   - **#80** (`company.yaml`) — `MERGEABLE`/`CLEAN`, but Tier C outright
+     (roster and secret names, §10). **Waits on the owner.**
+   - **#167** (ExO, `exo/2026-10-11`) — `CONFLICTING`/`DIRTY` as of this
+     check, and its diff touches `prompts/exo-agent.md`, a charter
+     (Tier C). **Waits on the owner**, once the exo seat rebases it.
+   - **#75** (security) and **#140** (skill) — both still
+     `CONFLICTING`/`DIRTY`. Condition 5, not a tier question: each
+     waits on its own seat's rebase, not the owner.
+   - **#165** (security, draft), **#141** (frontend, draft) — both
+     still drafts, fail Tier B's own gate before any other condition.
+     Each is its owning seat's live, most-recent work; not stale.
+   - **#49, #85, #87, #91, #112, #124** — drafts from dormant or
+     stacked runs (sales ×2, finance, security ×3), unchanged for 5 to
+     12 days. #85 is an ancestor of #165 per the exo seat's own
+     merge-order note (PR #167). None are mine to close on a guess at
+     what each seat still needs from its own branch; each is that
+     seat's own "read your open PRs first" duty next time it runs.
+   Nothing merged this pass.
+4. **What waits on the owner, one line each:**
+   - **#80** — `company.yaml`'s roster and secret names, Tier C by the
+     standard's own text, regardless of CI state.
+   - **#167** — edits a charter (`prompts/exo-agent.md`), Tier C by the
+     standard's own text, once its own seat clears the conflict.
+   - Everything else above waits on the seat that owns it, not on her.
+5. **Sprint: the milestone's due date has passed with one item still
+   open.** GitHub milestone "Sprint 2026-10-05" (`due_on`
+   2026-10-11T00:00Z) shows 2 closed, 0 open issues tracked, but item 3
+   (`docs/security/redaction-standard.md`) still has no file anywhere
+   in the repo and no open PR touching the path — confirmed again this
+   pass. The `allowed_bots` wall is still unlanded (`grep -c
+   '^allowed_bots'` returns `0` in both `agent-security.yml` and
+   `agent-frontend.yml` on current `main`). Formal retro, grooming, and
+   the next sprint's opening are the Monday ceremony's job
+   (`0 12 * * 1` UTC, later today, a separate scheduled run from this
+   one) — this pass records the carry-forward reason rather than
+   pre-empting the ceremony.
+6. **Move today:** nothing shipped from outside this seat since the
+   last pass. **Hand-off:** item 3 stays with the security seat (its
+   live draft #165, or a fresh start once it closes that) and with HQ
+   (`allowed_bots`, routed 2026-10-09, still unlanded); #75 stays with
+   security's own rebase; #140 stays with skill's own rebase; #167
+   stays with the exo seat's own rebase.
+7. **Dispatch queue: rewritten, nothing fired.** `PM_DISPATCH_ENABLED`
+   is not present in this run's environment (a host-window pass, not
+   the scheduled Actions run), so it is treated as unset and nothing
+   fires regardless of content. Both candidates (security on #165,
+   frontend on #141) are unchanged and still blocked on the
+   `allowed_bots` gap.
+8. **Board:** posted one note this pass, first person, naming the
+   #166 self-merge, the clean inbox, the already-triaged failure, the
+   Tier B check, and the milestone carrying to the ceremony, per the
+   board-message protocol.
+
 Reconciled 2026-10-11, ~16:34 UTC (standup, the scheduled GitHub
 Actions `pm-agent` run). Continues this seat's own open #162
 (`ursa-pm/2026-10-11-message-3`), which already carried the ~06:20 UTC

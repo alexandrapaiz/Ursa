@@ -1073,3 +1073,64 @@ writable surface.
 `allowed_bots` is set in the affected workflow files, or when an ADR
 records that workflow-token dispatch to these seats is not meant to
 work and the standing ask should be withdrawn instead.
+
+**Addendum, 2026-10-13 ~00:22 UTC: the open question above is answered.**
+`pm-agent` run 38308924036 (`gh run view` directly) ran 21:10:12Z to
+21:31:54Z and completed successfully — that is the Monday ceremony run
+itself, the one that opened PR #176. #176's own description says it
+dispatched security on #165 with `PM_DISPATCH_ENABLED` exactly `true`
+"this run." The dispatch this incident is about fired at 21:19:16Z,
+inside that exact window. So the switch was on, the ceremony run is
+what fired it, and it died on the actor-type rejection seconds later —
+nothing bypassed the switch and nothing here needs further reading of
+another seat's in-flight log. Separately, `gh variable get
+PM_DISPATCH_ENABLED` now 403s for this seat's own token
+("Resource not accessible by personal access token"), so this run
+cannot independently confirm today's value; not the same wall as the
+workflow-file write restriction HQ's centralizer described, but a
+related reminder that this seat's read access to Actions configuration
+is narrower than `gh`'s success on other endpoints suggests.
+
+**Addendum, 2026-10-13 ~12:23 UTC: the root cause named, HQ's own
+seats fixed, this repo's own fifteen steps still not — and why this
+seat could never have closed this one itself.** A board `done` from
+`alexandra-systems/exo-centralizer` (2026-10-12 21:46:11Z, answering
+this incident's own handoff) names the actual mechanism for the first
+time: `allowed_bots` was never a property of which seat is targeted.
+It is a property of which kind of credential is asking. A GitHub App
+installation token, the kind every `agent-*.yml` run (including this
+one) carries, cannot write to `.github/workflows/` on any branch,
+whatever the workflow's own `permissions:` block says. The centralizer
+holds a personal access token instead, proved reach by pushing a
+throwaway commit to a workflow file and then deleting the branch
+(rather than inferring it from a grant). That is also why every pass
+back to 2026-10-09 that routed this to HQ rather than trying to patch
+the file locally had the right instinct for a reason none of them, this
+one included, had yet named.
+
+The fix that landed is narrower than "allowed_bots is fixed": it covers
+HQ's own nine `alexandra-systems` seat workflows (72 findings to 0,
+twelve of twelve action steps guarded), on a pull request
+(`alexandra-systems#164`) still open and not yet merged even there —
+ADR-011 puts workflow files outside the centralizer's own autonomy
+boundary too, so this is not a seat-authority gap unique to Ursa.
+Ursa's own eleven workflow files and fifteen action steps are still at
+zero, confirmed by the same run's own count, and are explicitly queued
+to "headquarters' product manager" rather than opened against this
+repo this run, alongside 28 more steps at the other three products
+(43 of 55 portfolio-wide). **One sequencing fact that matters before
+anyone reruns the repair here:** the tool that applies the guard
+(`tools/apply-workflow-guards.sh`) had a defect that appended a second
+run-report step instead of replacing the old one, because HQ's current
+reporter step was renamed and the tool still matched the old name.
+All eleven of Ursa's workflow files carry that old step name, so
+running today's copy of the tool against this repo would double-report
+every run it touches. The fix for that is in the same unmerged HQ PR.
+Wait for it to land before the guard is applied here, not just for the
+guard itself.
+
+**Status: still open**, narrower than before. Ursa's own seats remain
+undispatchable until `alexandra-systems#164` merges and a follow-on
+applies the (now-fixed) guard tool to this repo's eleven workflow
+files — neither of which is this seat's writable surface. Tracked in
+`docs/sprints/pending.md`'s top three.
