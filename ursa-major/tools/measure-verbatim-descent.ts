@@ -57,11 +57,24 @@
 //     existed when the final work was committed. Merged or checked out, not
 //     typed, and not this generation's.
 //   future  A rival on a branch whose commit is NEWER than the episode's
-//     `finalSha`. The shipped corroborator counts these, and it should not:
-//     text cannot have been copied from work that did not exist yet. This
-//     row is a defect in `gitDescentCorroborator`, not a property of the
-//     records, and it is reported separately so the sibling figure can be
-//     read without it.
+//     `finalSha`. Text cannot have been copied from work that did not exist
+//     yet, so this row was a defect in `gitDescentCorroborator` rather than
+//     a property of the records, and it was reported separately so the
+//     sibling figure could be read without it.
+//
+// THE FUTURE ROW IS NOW THE ACCEPTANCE TEST (changed 2026-10-14). The bound
+// this row argued for shipped today: `gitDescentCorroborator` takes a
+// fourth argument `horizonSha`, and `resolveEpisode` passes `ep.finalSha`.
+// So the pass now runs the search twice over the same spans — once as
+// shipped, with the horizon, and once unbounded, which is the search as it
+// behaved before today — and prints both:
+//
+//   the `future` row, computed from the SHIPPED verdict, which is the
+//     fix's acceptance criterion and must read zero;
+//   HORIZON BOUND, computed by diffing the unbounded verdict against the
+//     shipped one, which is how many spans the bound actually changed and
+//     what each of them says instead. That is the defect's size, kept as a
+//     number rather than deleted along with the defect.
 //
 // `prior_revision` is the alarming reading and `restored` is the artifact of
 // the taxonomy. The tally below says which one the 490 actually is.
@@ -180,6 +193,10 @@ function run(project: string, limit: number, exampleCap: number): void {
   }
   /** why the search could not answer, counted so "unverified" is not one opaque row */
   const unverifiedReasons = new Map<string, number>()
+  /** spans whose verdict the horizon bound changed, and what they say now */
+  const boundDropped = empty()
+  const boundNowSays = new Map<string, number>()
+  const boundExamples: string[] = []
   const examples: Record<'prior_revision' | 'restored' | 'sibling' | 'future', string[]> = {
     prior_revision: [], restored: [], sibling: [], future: [],
   }
@@ -201,7 +218,11 @@ function run(project: string, limit: number, exampleCap: number): void {
   const parentHeld = empty()
 
   for (const { ep, record } of paired) {
-    const corroborate = gitDescentCorroborator(project, ep.generatedSha, commits)
+    const corroborate = gitDescentCorroborator(project, ep.generatedSha, commits, ep.finalSha)
+    // The same search with no horizon: `gitDescentCorroborator`'s own
+    // behaviour before 2026-10-14, kept so the bound's effect is a
+    // measured difference rather than an assertion that it worked.
+    const unbounded = gitDescentCorroborator(project, ep.generatedSha, commits)
     const parents = byShaIndex.get(ep.generatedSha)?.parents ?? []
     // The generous boundary. A rival could legitimately have been written
     // after the generation and before the person finished — they branched,
@@ -236,12 +257,39 @@ function run(project: string, limit: number, exampleCap: number): void {
           bucket = ev.basis
         } else if (ev.relation === 'sibling') {
           const rivalAt = rivalDate(project, ev.sha, dateCache)
-          bucket = rivalAt !== null && finalAt !== '' && rivalAt > finalAt ? 'future' : 'sibling'
+          // Date.parse and not a string compare, matching the bound in
+          // src/corroborate.ts: iso-strict dates carry each author's own
+          // UTC offset, so text order is not time order across offsets.
+          bucket = rivalAt !== null && finalAt !== ''
+            && Date.parse(rivalAt) > Date.parse(finalAt) ? 'future' : 'sibling'
         } else {
           bucket = heldAlready ? 'prior_revision' : 'restored'
         }
         refined[bucket].spans++
         refined[bucket].chars += chars
+
+        // What the search said before the bound existed. Only asked of
+        // spans, like everything else here, so a span the bound did not
+        // touch costs one cached lookup and no git call.
+        const before = unbounded(file.path, span.text)
+        if (before.basis === 'rival') {
+          const beforeAt = rivalDate(project, before.sha, dateCache)
+          const wasFuture = beforeAt !== null && finalAt !== '' && Date.parse(beforeAt) > Date.parse(finalAt)
+          if (wasFuture) {
+            boundDropped.spans++
+            boundDropped.chars += chars
+            const now = ev.basis === 'rival' ? `rival:${ev.relation} ${ev.sha}` : ev.basis
+            boundNowSays.set(now, (boundNowSays.get(now) ?? 0) + 1)
+            if (boundExamples.length < exampleCap) {
+              boundExamples.push(
+                `  ${record.task.id} ${file.path} [${span.start},${span.end}) ${chars}c  (final at ${finalAt})` +
+                `\n    dropped rival: ${before.sha} ${before.subject}  [${beforeAt}]` +
+                `\n    now says:      ${now}` +
+                `\n    text:          ${JSON.stringify(span.text.slice(0, 96))}`,
+              )
+            }
+          }
+        }
 
         if (bucket !== 'corroborated' && bucket !== 'unverified' && examples[bucket].length < exampleCap) {
           const when = ev.basis === 'rival' ? (rivalDate(project, ev.sha, dateCache) ?? '?') : '?'
@@ -277,6 +325,16 @@ function run(project: string, limit: number, exampleCap: number): void {
       console.log(`  ${r.padEnd(26)} ${String(n).padStart(6)} spans`)
     }
   }
+
+  console.log(`\nHORIZON BOUND — rivals authored after the episode's finalSha, which the shipped search now drops`)
+  console.log(row('dropped', boundDropped))
+  if (boundNowSays.size > 0) {
+    for (const [k, n] of [...boundNowSays].sort((a, b) => b[1] - a[1])) {
+      console.log(`    now says ${k.padEnd(30)} ${String(n).padStart(6)} spans`)
+    }
+  }
+  console.log(`  future row above, from the shipped verdict: ${refined.future.spans} spans (must be 0)`)
+  if (boundExamples.length > 0) console.log(`\nexamples — dropped by the horizon bound\n${boundExamples.join('\n')}`)
 
   const contributed = refined.corroborated.chars + refined.unverified.chars + refined.restored.chars
   console.log(`\nPARENT CONTAINMENT — asked of every verbatim span, independent of rival-search order`)
