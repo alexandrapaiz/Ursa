@@ -42,8 +42,11 @@ leans on them:
   resolvable path in an episode was an import (`src/vendored.ts`), so that
   the absence states itself instead of being an absent file on disk. See
   `docs/design/record-exclusions.md`.
-- **The fifteen bounds** — the self-consistency checks in
-  `src/invariants.ts` that a record must satisfy, ten of them arithmetic.
+- **The bounds** — the self-consistency checks in `src/invariants.ts`
+  that a record must satisfy. Sixteen of them as of 2026-10-13, counted
+  by `BOUND_COUNT` rather than by any sentence including this one,
+  because the count has moved six times in eight days and a number
+  written out in prose goes stale silently.
 - **Erasure** — the user's deletion of a record and everything derived
   from it, recorded as a tombstone by `ursa forget` in
   `<project>/.ursa/consent.json`. See `docs/design/consent-and-erasure.md`.
@@ -157,7 +160,7 @@ export interface GateResult {
   report: string
 }
 
-/** All fifteen bounds, run over everything a launch just wrote. */
+/** Every bound in `src/invariants.ts`, run over everything a launch just wrote. */
 export function gateRecords(records: OutcomeRecord[]): GateResult
 ```
 
@@ -167,7 +170,7 @@ return:
 ```ts
 // ursa-major/src/bin/ursa.ts
 export async function main(argv: string[]): Promise<number>
-// 0 when every record satisfies all fifteen bounds, 1 when one does not,
+// 0 when every record satisfies every bound, 1 when one does not,
 // 2 on a usage error. Unchanged by this work.
 
 // ursa-major/src/ci/run.ts
@@ -206,7 +209,7 @@ export interface RunCommentContext {
   recordsPath: string
   runUrl: string | null
   dropped?: { unresolvable: number; belowMinChars: number; minChars: number }
-  /** how many of the fifteen bounds the records violated; absent reads as 0 */
+  /** how many bound violations the records carry in total; absent reads as 0 */
   invariantViolations?: number
 }
 ```

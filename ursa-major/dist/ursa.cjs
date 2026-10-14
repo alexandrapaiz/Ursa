@@ -527,13 +527,13 @@ function excerpt(text) {
 function normalizeForExcerpt(text) {
   return text.replace(/\s+/g, " ").trim();
 }
-function isExcerptOf(quoted, source) {
-  if (quoted.length === 0) return false;
+function isExcerptOf(quoted2, source) {
+  if (quoted2.length === 0) return false;
   const normalized = normalizeForExcerpt(source);
-  if (quoted.length > MAX_EXCERPT && quoted.endsWith("\u2026")) {
-    return normalized.startsWith(quoted.slice(0, -1));
+  if (quoted2.length > MAX_EXCERPT && quoted2.endsWith("\u2026")) {
+    return normalized.startsWith(quoted2.slice(0, -1));
   }
-  return normalized.includes(quoted);
+  return normalized.includes(quoted2);
 }
 var MAX_EXCERPT;
 var init_text = __esm({
@@ -676,12 +676,12 @@ function detectTraceSignals(record) {
           unresolvedSingleCorrections++;
           continue;
         }
-        const quoted = excerpt(members[0].text);
+        const quoted2 = excerpt(members[0].text);
         oneShotCorrections.push({
           step: members[0].step,
-          text: quoted,
+          text: quoted2,
           domain: targetFiles(record, conv.id, members[0].step, closedStep, members).join(", ") || theme,
-          quotes: [{ of: "user_prompt", conversationId: conv.id, step: members[0].step, text: quoted }]
+          quotes: [{ of: "user_prompt", conversationId: conv.id, step: members[0].step, text: quoted2 }]
         });
         continue;
       }
@@ -760,10 +760,10 @@ function specFrom(members, promptSteps, conversationId) {
   const pool = wanted.length > 0 ? wanted : members;
   const chosen = pool[pool.length - 1];
   const others = promptSteps.filter((s) => s !== chosen.step);
-  const quoted = excerpt(chosen.text);
+  const quoted2 = excerpt(chosen.text);
   return {
-    discoveredSpec: `quoted from step ${chosen.step}, the loop's last statement of what was wanted (regression reports excluded): "${quoted}"` + (others.length > 0 ? ` \u2014 the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(", ")}` : ""),
-    quotes: [{ of: "user_prompt", conversationId, step: chosen.step, text: quoted }]
+    discoveredSpec: `quoted from step ${chosen.step}, the loop's last statement of what was wanted (regression reports excluded): "${quoted2}"` + (others.length > 0 ? ` \u2014 the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(", ")}` : ""),
+    quotes: [{ of: "user_prompt", conversationId, step: chosen.step, text: quoted2 }]
   };
 }
 function targetFiles(record, conversationId, fromStep, toStep, members) {
@@ -1795,6 +1795,49 @@ function checkRecord(record) {
       );
     }
   }
+  const resolvedBy = record.task.resolvedBy;
+  if (resolvedBy !== void 0 && resolvedBy !== null) {
+    const at = "task.resolvedBy";
+    if (typeof resolvedBy !== "object") {
+      push(
+        "RESOLVER_IDENTIFIED",
+        at,
+        `the field is ${typeof resolvedBy} (${quoted(resolvedBy)}), not an object carrying a basis`
+      );
+    } else {
+      const v = resolvedBy;
+      if (v.basis === "git_commit") {
+        if (typeof v.commit !== "string" || !/^[0-9a-f]{7,40}$/.test(v.commit)) {
+          push(
+            "RESOLVER_IDENTIFIED",
+            at,
+            `basis git_commit names commit ${quoted(v.commit)}, which is not 7 to 40 lowercase hex characters, so it is not a commit id anyone can look up`
+          );
+        }
+        if (typeof v.dirty !== "boolean") {
+          push(
+            "RESOLVER_IDENTIFIED",
+            at,
+            `basis git_commit carries dirty ${quoted(v.dirty)}, which is not a boolean, so the record does not say whether the tree that ran was the tree at that commit`
+          );
+        }
+      } else if (v.basis === "bundle_digest") {
+        if (typeof v.digest !== "string" || !/^[0-9a-f]{16}$/.test(v.digest)) {
+          push(
+            "RESOLVER_IDENTIFIED",
+            at,
+            `basis bundle_digest names digest ${quoted(v.digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against the bundle's own sha256 prefix`
+          );
+        }
+      } else {
+        push(
+          "RESOLVER_IDENTIFIED",
+          at,
+          `basis ${quoted(v.basis)}, which is neither git_commit nor bundle_digest, so nothing downstream knows what kind of identity this is`
+        );
+      }
+    }
+  }
   return out;
 }
 function formatViolations(violations) {
@@ -1802,7 +1845,7 @@ function formatViolations(violations) {
     bound:    ${v.invariant}
     observed: ${v.observed}`).join("\n");
 }
-var BOUNDS, r3, abbrev, BOUND_COUNT, BOUND_CODES;
+var BOUNDS, r3, abbrev, quoted, BOUND_COUNT, BOUND_CODES;
 var init_invariants = __esm({
   "src/invariants.ts"() {
     "use strict";
@@ -1823,10 +1866,12 @@ var init_invariants = __esm({
       PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
       SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
       EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
-      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it."
+      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.",
+      RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it."
     };
     r3 = (x) => Math.round(x * 1e3) / 1e3;
     abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
+    quoted = (x) => abbrev(JSON.stringify(x) ?? String(x));
     BOUND_COUNT = Object.keys(BOUNDS).length;
     BOUND_CODES = Object.keys(BOUNDS);
   }

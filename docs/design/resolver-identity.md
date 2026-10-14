@@ -44,8 +44,8 @@ keys a record had that day — `schemaVersion`, `task`, `artifact`,
 **Why this is structural and not an accident of one day.** The
 classification rules under those figures are young and they move:
 
-- `src/invariants.ts` went from ten bounds to fifteen between 2026-10-06
-  and 2026-10-12. `BOUND_COUNT` is derived from the `BOUNDS` object for
+- `src/invariants.ts` went from ten bounds to sixteen between 2026-10-06
+  and 2026-10-13. `BOUND_COUNT` is derived from the `BOUNDS` object for
   exactly this reason.
 - `src/corroborate.ts` changed when a similarity score above
   `THETA_HIGH` is allowed to be called an edit at all, which moves spans
@@ -291,10 +291,14 @@ confident, plausible-looking claim about the wrong repository.
 
 ### 4.3 What a record written before this change looks like
 
-Unchanged, and still valid. `task.resolvedBy` is optional, no bound
-requires it, and `src/invariants.ts` was not touched by this work. Every
-record in `ursa-major/fixtures/` and `ursa-major/fixtures/violations/`
-still passes all fifteen bounds with no identity on it.
+Unchanged, and still valid. `task.resolvedBy` is optional and no bound
+requires it, which is still true after `RESOLVER_IDENTIFIED` arrived on
+2026-10-13: that bound checks a present identity's shape and does not
+touch an absent one (§10.1). Both records under `ursa-major/fixtures/`
+carry no identity and pass all sixteen bounds, and
+`src/invariants.test.ts` asserts exactly that, so a later edit that made
+the field mandatory would fail the suite on the two records this project
+has actually shipped.
 
 ## 5. Exact commands, and the numbers they produced
 
@@ -485,9 +489,14 @@ in which case there is no artifact to identify and the caller gets
 - **Dirty.** `git status --porcelain` printed at least one line for the
   resolver's own source tree, counting untracked files. It means the
   commit named beside it is not a complete account of the code that ran.
-- **Bound.** One of the fifteen arithmetic and same-set constraints in
+- **Bound.** One of the sixteen constraints in
   `ursa-major/src/invariants.ts` that every record is checked against
-  before a run reports success. Untouched by this work.
+  before a run reports success. Fourteen are arithmetic or same-set
+  statements about the record's own numbers and paths. The other two ask
+  whether something the record names is real: `EXCLUSION_NOT_CLASSIFIED`
+  that an exclusion names a commit at all, and `RESOLVER_IDENTIFIED`
+  (added 2026-10-13, after this document's first version) that this
+  field's commit or digest has the shape of one.
 - **Work tree.** A git checkout with files you can edit, as opposed to a
   bare repository or an unpacked tarball. `git rev-parse
   --is-inside-work-tree` is the question that distinguishes them, and the
@@ -497,15 +506,22 @@ in which case there is no artifact to identify and the caller gets
 
 ## 10. What this does not do
 
-1. **It is not a bound.** `src/invariants.ts` still has fifteen codes and
-   no sixteenth. Nothing fails if a record carries no identity, and
-   nothing checks that `commit` looks like an object id. A
-   `RESOLVER_IDENTIFIED` bound would need a sixteenth counterexample
-   record in `ursa-major/fixtures/violations/` with a note quoting the
-   gate's own output verbatim, because
+1. **It was not a bound on the day it shipped. It is one now.**
+   `RESOLVER_IDENTIFIED` landed 2026-10-13 as the sixteenth code in
+   `src/invariants.ts`, with `fixtures/violations/resolver-identified.json`
+   as its counterexample, because
    `src/invariants.violations.test.ts` asserts the set of codes those
-   fixtures fire equals `BOUND_CODES` exactly. That is a day's work of
-   its own and it is in the ledger as such.
+   fixtures fire equals `BOUND_CODES` exactly. What the bound checks is
+   SHAPE: a `git_commit` basis carries 7 to 40 lowercase hexadecimal
+   characters and a boolean `dirty`, a `bundle_digest` basis carries
+   exactly 16 lowercase hexadecimal characters, and no third basis
+   exists. What it still does not check, and what no bound inside one
+   record can check, is whether the commit it names exists in this
+   repository's history — that is a lookup against a remote, not
+   arithmetic over the record's own fields, and it belongs to whoever
+   audits a delivery rather than to the gate a run calls on itself.
+   Nothing fails if a record carries no identity at all, which is
+   deliberate and asserted (§4.3).
 2. **It does not make a record reproducible.** Knowing which resolver
    wrote a record tells a reader which code to re-run; it does not make
    the re-run produce a byte-identical file. `task.generatedAt` is a wall

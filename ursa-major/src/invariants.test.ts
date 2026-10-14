@@ -916,3 +916,121 @@ describe('the row list enumerates every path the run read', () => {
     expect(dangling[0].detail).toContain('no final file and no exclusion')
   })
 })
+
+// ---------------------------------------------------------------------------
+// The sixteenth bound. The first one in this module that is about a SHAPE
+// rather than about two numbers, and the first whose legal state includes the
+// field being absent entirely.
+//
+// RESOLVER_IDENTIFIED guards `task.resolvedBy`, which says which code made
+// every claim in the record (src/resolver-identity.ts). The field was added
+// on 2026-10-12 after this repository resolved one fixture repository twice,
+// with two commits of the resolver, and wrote two records to one path whose
+// headline figure differed by a factor of eight. Nothing in either file named
+// the code that wrote it.
+//
+// This bound is the level below that. A field whose job is to be a pointer is
+// worthless the moment it can hold something that is not one, and the three
+// surfaces that display it — `renderRunSummary`, the viewer and the CI run
+// comment — all print whatever string the record carries. `fixtures/
+// violations/resolver-identified.json` is the committed counterexample and
+// covers the `commit: "HEAD"` case; the cases below are the other four,
+// which one fixture cannot hold at once.
+// ---------------------------------------------------------------------------
+
+describe('a named resolver is one a reader can look up', () => {
+  const identified = (resolvedBy: unknown): OutcomeRecord => {
+    const r = resolvedRecord()
+    ;(r.task as unknown as Record<string, unknown>).resolvedBy = resolvedBy
+    return r
+  }
+  const codesOf = (resolvedBy: unknown) =>
+    checkRecord(identified(resolvedBy)).map((v) => v.code)
+  const fired = (resolvedBy: unknown) =>
+    checkRecord(identified(resolvedBy)).find((v) => v.code === 'RESOLVER_IDENTIFIED')
+
+  it('accepts both bases in the shapes `resolverIdentity()` actually emits', () => {
+    // `git rev-parse --short HEAD` at its default length, the same value at
+    // full SHA-1 length, the dirty variant, and the 16-hex prefix
+    // `createHash('sha256').digest('hex').slice(0, 16)` produces.
+    expect(codesOf({ basis: 'git_commit', commit: '19455a3', dirty: false })).toEqual([])
+    expect(codesOf({ basis: 'git_commit', commit: 'a'.repeat(40), dirty: true })).toEqual([])
+    expect(codesOf({ basis: 'bundle_digest', digest: '0123456789abcdef' })).toEqual([])
+  })
+
+  it('accepts a record that names no resolver at all, which is most of them', () => {
+    // Absence is a true claim and the bound does not touch it. Both fixtures
+    // committed to this repository predate the field, so a bound that
+    // required it would fail the suite on the two records it is supposed to
+    // be checked against.
+    expect(checkRecord(resolvedRecord())).toEqual([])
+    expect(codesOf(undefined)).toEqual([])
+    expect(codesOf(null)).toEqual([])
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      expect(load(p).task.resolvedBy, p).toBeUndefined()
+      expect(checkRecord(load(p)), p).toEqual([])
+    }
+  })
+
+  it('fires on a commit that is not a commit id, which is the placeholder case', () => {
+    // Every one of these reads as provenance in a terminal and resolves to
+    // nothing, or to something different in every clone.
+    for (const commit of ['HEAD', 'main', 'unknown', '', 'A511A50', 'abc123', 'nothex7']) {
+      expect(codesOf({ basis: 'git_commit', commit, dirty: false }), commit)
+        .toEqual(['RESOLVER_IDENTIFIED'])
+    }
+    // Upper case is refused deliberately rather than normalized: git writes
+    // lowercase, so a record carrying anything else was not written by
+    // `resolverIdentity()` and the gate should say so instead of accepting a
+    // value whose origin is unexplained.
+    expect(fired({ basis: 'git_commit', commit: 'A511A50', dirty: false })!.observed)
+      .toContain('"A511A50"')
+  })
+
+  it('fires on a missing dirty flag, because the sha alone can be a claim about code that did not run', () => {
+    const v = fired({ basis: 'git_commit', commit: '19455a3' })!
+    expect(v.observed).toContain('dirty')
+    expect(v.observed).toContain('not a boolean')
+    // The string case specifically, which is what a hand-edited record or a
+    // lossy JSON round trip produces.
+    expect(codesOf({ basis: 'git_commit', commit: '19455a3', dirty: 'false' }))
+      .toEqual(['RESOLVER_IDENTIFIED'])
+  })
+
+  it('fires on a digest that cannot be compared against the bundle it names', () => {
+    // 16 exactly, because that is the prefix `npm run bundle:check` compares.
+    // A full 64-character SHA-256 is refused for the same reason a 20-hex
+    // string is: neither can be equality-checked against the prefix the
+    // build writes, so both would fail that comparison silently.
+    for (const digest of ['0123456789abcde', '0123456789abcdef0', 'f'.repeat(64), 'not-a-digest']) {
+      expect(codesOf({ basis: 'bundle_digest', digest }), digest)
+        .toEqual(['RESOLVER_IDENTIFIED'])
+    }
+  })
+
+  it('fires on a third basis and on a field that is not an object', () => {
+    // The union has two members and a consumer filtering on the word is the
+    // reason it is a union at all (src/resolver-identity.ts). A third value
+    // is not a new kind of identity, it is an identity nothing downstream
+    // can interpret.
+    expect(fired({ basis: 'npm_version', version: '0.1.0' })!.observed)
+      .toContain('neither git_commit nor bundle_digest')
+    expect(codesOf({})).toEqual(['RESOLVER_IDENTIFIED'])
+    // And the flattened form the field was deliberately not given: one
+    // string, which is what a consumer would have had to guess the meaning
+    // of, and which this bound now refuses outright.
+    expect(fired('a511a50')!.observed).toContain('not an object carrying a basis')
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-resolver-identified-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(identified({ basis: 'git_commit', commit: 'HEAD', dirty: false }), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('RESOLVER_IDENTIFIED')
+    expect(lines.join('\n')).toContain('"HEAD"')
+  })
+})
