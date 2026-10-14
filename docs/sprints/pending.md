@@ -2,6 +2,95 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-14 ~00:25 UTC six-hour pass
+
+1. **Nothing is newly ready for your merge beyond what this pass already
+   shipped itself.** #182 (engineer, sprint item 2) merged under Tier B
+   and this seat's own #183 merged under Tier A, both below. #80
+   (`company.yaml`) stays Tier C on its roster and secret names,
+   unchanged since 2026-10-05. #184 (research) is new since the last
+   pass and is also Tier C outright: it edits the research seat's own
+   charter, `prompts/research-agent.md`.
+2. **Three drafts from your own window sessions are now nine to
+   fourteen days old with no verdict: #49, #87, #91.** Reviving a
+   dormant seat and judging unreviewed proposal work both stay yours;
+   named again rather than closed on a guess.
+3. **The dispatch wall is still up on this repo specifically, even
+   though HQ's own half of the fix landed.** HQ's `alexandra-systems#164`
+   merged 2026-10-13T06:30 UTC and guards all nine of headquarters' own
+   workflows, but it never touched this repo: `grep -rn allowed_bots
+   .github/workflows/*.yml` is still zero matches across all eleven
+   files here, confirmed fresh after that merge. The remaining forty-
+   three steps portfolio-wide, Ursa's included, are queued to
+   headquarters' own project manager per exo-centralizer's own report.
+   Nothing for you to do here.
+
+## This run (2026-10-14, ~00:25 UTC, six-hour pass, message-triggered)
+
+**First act: resolved this seat's own open pull request before starting
+anything new.** #183 (the ~18:21 UTC pass yesterday) was still open,
+non-draft, green, and touched only `docs/sprints/dispatch-queue.md` and
+`docs/sprints/pending.md` — pure knowledge surfaces. Self-merged under
+Tier A, then merged the resulting `main` into this pass's own branch
+rather than starting from a stale base.
+
+1. **Inbox: clean.** Queried `$BOARD_API_URL/api/messages?to_seat=pm`
+   and filtered client-side to the exact `to_company == "Ursa" &&
+   to_seat == "pm"` match. The newest exact match is still this seat's
+   own note from the close of the last pass (18:27:21 UTC yesterday).
+   Nothing addressed to this seat has arrived since. No ask or handoff
+   waiting on an answer.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns an empty list, and the
+   run history for the last eight hours shows nothing but `success`.
+   Nothing to triage, rerun, or hand off.
+3. **Tier B merge: one found and merged, a near-miss from the last
+   pass.** #182 (engineer, "the sixteenth bound," sprint item 2) was
+   pushed at 18:25:40 UTC yesterday, about ninety seconds before the
+   prior pass's own closing check at 18:27:21 — a timing gap, not a
+   defect in that pass, but it meant #182 had never actually been
+   checked against Tier B until this one. Checked fresh: not a draft,
+   `redaction-gate` green, `MERGEABLE`/`CLEAN`, no Tier C path in the
+   diff (`gh pr diff --name-only`: `ursa-major/` source, fixtures and a
+   ledger append only, nothing under `prompts/` or `.github/`), under
+   seven days old, no hold label, no owner comment since its last push.
+   Merged normally, branch deleted.
+4. **Everything else, re-checked fresh rather than carried over:** #184
+   (research) is new since the last pass and is Tier C outright — its
+   diff includes `+19` lines to its own charter,
+   `prompts/research-agent.md`, additive but still a charter edit. #80
+   stays Tier C on `company.yaml`'s roster and secret names. #167 (ExO)
+   and #140 (skill) are both still `CONFLICTING`/`DIRTY`, waiting on
+   their own seats' rebases; #167 is also Tier C once clean (it edits
+   `prompts/exo-agent.md`). #165 (security) is still a draft, failing
+   Tier B's own gate before any other condition. #49, #87, #91 are
+   unchanged dormant-seat drafts from the owner's own window sessions,
+   nine to fourteen days old, not this seat's to revive on a guess.
+5. **Sprint: item 2 ships this pass.** `sprint-2026-10-12.md` items 1
+   and 2 are now both merged (#179 and, this pass, #182). Item 3 (the
+   redaction standard) is still blocked on two things at once: the
+   security seat's own rebase of #165, and the dispatch wall in "Top
+   three" item 3 above, which is specific to this repo's own eleven
+   workflow files and unaffected by HQ's merge of its half. **Move
+   today:** nothing further is this seat's to move; engineer has
+   cleared both of its sprint items early. **Hand-off:** item 3 stays
+   with the security seat (finish or close #165 on its own rebase) and
+   with HQ (the Ursa-specific half of the `allowed_bots` fix, still
+   unopened against this repo).
+6. **Dispatch queue: rewritten, nothing fires.** This run's environment
+   carries no `PM_DISPATCH_ENABLED` value (a message-triggered pass, not
+   the scheduled Actions run), so it is treated as unset and nothing
+   fires regardless of content, same as every prior host-window pass.
+   The wall itself is unchanged (point 3 above), so the queue's three
+   standing candidates (engineer, now moot since item 2 shipped above;
+   security on #165; frontend on #141) are rewritten with engineer
+   dropped and the other two held for the same reason as every pass
+   since Incident 13.
+7. **Board:** posted one note this pass, first person, naming the two
+   merges, the clean inbox, the zero failures, the sprint item 2 ship,
+   and the dispatch hold, per the board-message protocol. This seat's
+   inbox stays open for anything addressed to it until the next pass.
+
 ## Top three for the owner, 2026-10-13 ~18:21 UTC six-hour pass
 
 1. **Nothing is newly ready for your merge this pass either.** #80
