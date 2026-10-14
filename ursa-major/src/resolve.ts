@@ -154,6 +154,14 @@ export function resolve(input: ResolveInput): OutcomeRecord {
 
   const verbatimClaims = new Map<number, Claim[]>()
   const mutatedClaims = new Map<number, Claim[]>()
+  /**
+   * Generation extents that a pass-1 hit matched byte-for-byte and the
+   * descent gate then refused (added 2026-10-14). They are not claims in
+   * the sense the other two maps are — no final span asserts survival over
+   * them — and they are kept only so the generation segment behind them can
+   * be marked `not_generated` instead of `generated_deleted`.
+   */
+  const notGeneratedClaims = new Map<number, Claim[]>()
   const addClaim = (m: Map<number, Claim[]>, c: Claim) => {
     let arr = m.get(c.genIndex)
     if (!arr) m.set(c.genIndex, (arr = []))
@@ -168,6 +176,92 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     start,
     end,
   })
+
+  /**
+   * The descent gate on a byte-identical pass-1 hit (added 2026-10-14).
+   *
+   * WHAT IT IS FOR. On the `ursa run` path a "generation" is not what the
+   * model typed. `resolveEpisode` builds one from the whole blob of each
+   * touched file at the agent's commit, so a generation contains every line
+   * the file already held before the agent opened it. A final span can
+   * therefore be byte-identical to a generation extent and still be text no
+   * model wrote, and until today pass 1 labelled all of it
+   * `survived_verbatim` — "generated and kept unchanged", per README's class
+   * table — without ever asking.
+   *
+   * HOW BIG IT WAS. Over 12 records of this repository's own history, 719
+   * of 1,024 verbatim spans, 110,736 of 139,105 characters, hold text the
+   * file already contained at the generation's parent commit. That is 79.6%
+   * of what the records sold as survival.
+   * `tools/measure-verbatim-descent.ts` is that measurement and reproduces
+   * it; the ledger entry "Two thirds of the characters sold as verbatim
+   * have a rival nobody asked about" (docs/ideas.md, 2026-10-13) is where
+   * the question came from.
+   *
+   * WHICH VERDICT DEMOTES, AND WHY ONLY ONE. `prior_revision` only. It is
+   * the single relation that says the text existed BEFORE the generation
+   * did, which is the claim that makes "the model wrote this" false.
+   * `sibling` says the text also exists on some parallel branch, which on a
+   * file many branches edit is mostly the same common base content seen
+   * from the side, and `pre_existing` says an older ancestor held text the
+   * parent does not — a restore, which pass 1 cannot reach anyway, since
+   * restored text is absent from the generation. Demoting on either would
+   * destroy real survival signal on weak evidence, which is the asymmetry
+   * src/corroborate.ts already argues for in the other direction.
+   *
+   * WHERE IT LANDS. `no_generation_provenance`, which CLAUDE.md §1 defines
+   * as "present in the finished work but traceable to no generation at all,
+   * meaning the model was never in the running". For text the file already
+   * held, the model was never in the running, so this is the literal
+   * reading of the class and not a stretch of it. The generation extent is
+   * not thrown away: it stays as `candidate`, so a buyer can see what the
+   * resolver nearly claimed and why it did not.
+   *
+   * WHAT IT DOES NOT CLAIM. No verdict at all, or any non-`rival` verdict,
+   * leaves the label exactly as it was. The chat path (src/cli.ts) injects
+   * no corroborator, so every verbatim claim there is unchanged.
+   */
+  const verbatimClaim = (
+    base: { start: number; end: number; text: string },
+    p: GenPrep,
+    gStart: number,
+    gEnd: number,
+    filePath: string,
+    trivial?: true,
+  ): FinalSpan => {
+    const descent = input.corroborate?.(filePath, base.text)
+    if (descent?.basis === 'rival' && descent.relation === 'prior_revision') {
+      // Registered against the generation even though the span makes no
+      // survival claim, so the segment behind it can be given the
+      // `not_generated` fate rather than falling to `generated_deleted`.
+      // Without this the record would assert that the model produced text
+      // and the person discarded it, about text still present in the
+      // finished file. See `GenerationFate` in src/types.ts.
+      addClaim(notGeneratedClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
+      return {
+        ...base,
+        class: 'no_generation_provenance',
+        uncertain: true,
+        candidate: { score: 1, text: p.gen.text.slice(gStart, gEnd), source: srcPtr(p, gStart, gEnd) },
+        descent,
+      }
+    }
+    // The claim stands, so it is registered against the generation. This
+    // happens here and not at the call site because a demoted span must not
+    // register one: `GEN_CLAIM_BOUNDED` and the `survived_verbatim`
+    // generation fate are both computed from `verbatimClaims`, and a claim
+    // left behind by a span that no longer makes it would put the extent in
+    // a rate no span supports.
+    addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
+    return {
+      ...base,
+      class: 'survived_verbatim',
+      score: 1,
+      ...(trivial ? { trivial } : {}),
+      source: srcPtr(p, gStart, gEnd),
+      ...(descent ? { descent } : {}),
+    }
+  }
 
   /**
    * What to do with a pass-1 hit whose raw characters do not agree with the
@@ -266,8 +360,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
               nearest ??= { p, gStart, gEnd }
               continue
             }
-            span = { ...base, class: 'survived_verbatim', score: 1, source: srcPtr(p, gStart, gEnd) }
-            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd })
+            span = verbatimClaim(base, p, gStart, gEnd, f.path)
             break outerLong
           }
         }
@@ -287,8 +380,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
               nearestShort ??= { p, g }
               continue
             }
-            span = { ...base, class: 'survived_verbatim', score: 1, trivial: true, source: srcPtr(p, g.start, g.end) }
-            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end })
+            span = verbatimClaim(base, p, g.start, g.end, f.path, true)
             break outer
           }
         }
@@ -386,14 +478,26 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     const spans = p.sentences.map((gs) => {
       const v = overlaps(verbatimClaims.get(gi), gs)
       const m = !v && overlaps(mutatedClaims.get(gi), gs)
-      const fate: GenerationFate = v ? 'survived_verbatim' : m ? 'survived_mutated' : 'generated_deleted'
+      // Checked last, so a segment that any real claim covers keeps that
+      // claim: one segment of a whole-file blob can hold both a line the
+      // agent wrote and a line the file already had, and the survival is
+      // the stronger statement about it.
+      const n = !v && !m && overlaps(notGeneratedClaims.get(gi), gs)
+      const fate: GenerationFate = v
+        ? 'survived_verbatim'
+        : m ? 'survived_mutated'
+          : n ? 'not_generated' : 'generated_deleted'
       const base = { start: gs.start, end: gs.end, text: gs.text, fate }
       if (fate !== 'generated_deleted') return base
       return { ...base, deletion: attribute(p.gen.filePath ?? '', gs.text) }
     })
     const totalChars = spans.reduce((a, s) => a + (s.end - s.start), 0)
+    // Stated as the two survival fates rather than as "not deleted", which
+    // is what it said before `not_generated` existed. A segment the file
+    // already held is not a survival, and the old spelling would have
+    // counted it as one the moment a fourth fate appeared.
     const survivedChars = spans
-      .filter((s) => s.fate !== 'generated_deleted')
+      .filter((s) => s.fate === 'survived_verbatim' || s.fate === 'survived_mutated')
       .reduce((a, s) => a + (s.end - s.start), 0)
     // charsWritten is the generation's own length, separatorChars the part
     // of it no segment covers. totalChars stays segment-only, because a fate
@@ -470,6 +574,17 @@ function mergeVerbatimRuns(spans: FinalSpan[], text: string, genTexts: string[])
       prev.text = text.slice(prev.start, prev.end)
       prev.source.end = s.source.end
       if (!(prev.trivial && s.trivial)) delete prev.trivial
+      // The descent verdict of a merged run is the weaker of the two
+      // (added 2026-10-14, with the pass-1 gate). Each verdict was asked
+      // about one of the two spans, and nobody asked about the joined text.
+      // `corroborated` is a positive claim — searched, and nothing outside
+      // this generation's descent holds it — so inheriting it from the
+      // first half would extend that claim over characters no search
+      // covered. `unverified` says only that the question could not be
+      // answered, which stays true of any wider span containing it.
+      if (s.descent?.basis === 'unverified' && prev.descent?.basis !== 'unverified') {
+        prev.descent = s.descent
+      }
       continue
     }
     out.push({ ...s })

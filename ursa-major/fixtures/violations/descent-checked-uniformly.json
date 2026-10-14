@@ -171,6 +171,7 @@
       "separatorChars": 4,
       "verbatimClaimedChars": 70,
       "survivedChars": 145,
+      "notGeneratedChars": 0,
       "deletedChars": 61,
       "deletedPct": 0.296,
       "humanDeletedChars": 61,

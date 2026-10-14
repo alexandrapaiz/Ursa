@@ -106,7 +106,19 @@ export function computeStats(
     )
   const mergeDeleted = deletedCharsWhere((c) => c === 'merge')
   const unknownDeleted = deletedCharsWhere((c) => c === 'unknown')
-  const generatedDeleted = generatedTotal - generatedSurvived
+  // Segments the file already held at the generation's parent. They sit
+  // inside `totalChars` and are neither survival nor deletion, so they come
+  // out of the gross figure before the human share is computed by
+  // subtraction. Omitting them would file every character of the file the
+  // agent opened as text the person discarded. See `GenerationFate` in
+  // src/types.ts.
+  const generatedNotGenerated = generations.reduce(
+    (a, g) => a + g.spans
+      .filter((s) => s.fate === 'not_generated')
+      .reduce((b, s) => b + (s.end - s.start), 0),
+    0,
+  )
+  const generatedDeleted = generatedTotal - generatedSurvived - generatedNotGenerated
   const humanDeleted = generatedDeleted - mergeDeleted - unknownDeleted
 
   const perConversation = conversations.map((conv) => {
@@ -145,6 +157,7 @@ export function computeStats(
       separatorChars: generatedSeparators,
       verbatimClaimedChars: verbatimClaimed,
       survivedChars: generatedSurvived,
+      notGeneratedChars: generatedNotGenerated,
       deletedChars: generatedDeleted,
       deletedPct: generatedTotal ? r3(generatedDeleted / generatedTotal) : 0,
       humanDeletedChars: humanDeleted,
