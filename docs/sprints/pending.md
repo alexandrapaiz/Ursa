@@ -2,6 +2,67 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-13 ~18:21 UTC six-hour pass
+
+1. **Nothing is newly ready for your merge this pass either.** #80
+   (`company.yaml`) is clean and green but stays Tier C outright on its
+   roster and secret names, same as every pass since 2026-10-05; the
+   widened Tier B authority in the vendored standard does not reach a
+   file this standard itself carves out by name.
+2. **Three drafts from your own window sessions are now eight to
+   thirteen days old with no verdict: #49, #87, #91.** #49 is sales'
+   first Ursa run (2026-09-30), #87 is sales' 2026-10-05 window, #91 is
+   finance's 2026-10-05 window. All three are clean and green, but
+   reviving a dormant seat and judging unreviewed proposal work are
+   both yours by the standard's own terms, so this seat is naming them
+   again rather than closing them on a guess.
+3. **The dispatch wall is still up, confirmed fresh this pass** (`grep
+   -rn allowed_bots .github/workflows/*.yml`, zero matches across all
+   eleven files, same as every pass since Incident 13). HQ's fix is
+   still unmerged on its own repo and still not applied here. Nothing
+   for you to do; full detail in `docs/agents/incidents.md` Incident
+   13's second addendum.
+
+## This run (2026-10-13, ~18:21 UTC, six-hour pass)
+
+1. **Inbox: checked fresh, nothing new.** `to_seat=pm && to_company=Ursa`
+   and the broader `to_company=Ursa` feed both return nothing after the
+   last standup's own closing note (18:05:45 UTC). No ask or handoff is
+   waiting on an answer this pass.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=2026-10-13T12:21:00Z"` (the six-hour window) returns empty, and
+   the broader any-status read over the same window shows only
+   successful `pm-agent` and `redaction-gate` runs. Nothing to triage,
+   rerun, or hand off.
+3. **Tier B merge check: nothing new, checked fresh rather than
+   trusted.** Re-read `mergeable`/`mergeStateStatus` on every open pull
+   request rather than reusing the last pass's numbers. #167, #165, and
+   #140 are `CONFLICTING`/`DIRTY`, waiting on their own seats' rebases,
+   not a tier question. #80, #49, #87, #91 are `MERGEABLE`/`CLEAN`, but
+   #80 is Tier C by content (see the top three above) and #49/#87/#91
+   are drafts, which fails Tier B's own gate (condition 2) before any
+   other condition applies. The widened merge authority the vendored
+   standard carries since its 2026-10-05 revision is real and current
+   in this repo's own copy of `docs/standards/pm.md`, but it changes
+   which PRs this seat may merge without waiting on her, not which
+   files stay hers to decide; nothing open today crosses that line.
+4. **Sprint: nothing shipped this pass; nothing more moved.** The
+   byte-identical fix shipped in the earlier half of today's six-hour
+   window, before this pass started, and that is still the sprint's
+   only landed item today. Item 2 (the sixteenth bound) is next and
+   unstarted; the engineer's own evening cron (23:26 UTC tonight) will
+   attempt it on its own, and a PM dispatch in the meantime would only
+   cross the same dispatch wall named above. Item 3 (the redaction
+   standard) stays blocked on the security seat's own rebase of its one
+   open pull request. **Hand-off:** item 2 to the engineer's own next
+   cron, no PM action needed; item 3 to the security seat once its
+   branch is clean or the dispatch wall clears, whichever comes first.
+5. **Board:** posted one note this pass, first person, naming the clean
+   inbox, the clean failed-run window, the merge check and why nothing
+   crossed the line, the dispatch hold, and the sprint's non-move. This
+   seat's inbox stays open for anything addressed to it until the next
+   pass.
+
 ## Top three for the owner, 2026-10-13 ~18:00 UTC standup
 
 1. **Nothing is newly ready for your merge this pass.** #80
