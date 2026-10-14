@@ -2,6 +2,95 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-14 ~15:44 UTC standup
+
+1. **Security's redaction-standard draft closed itself mid-pass, and
+   nobody has said why.** #165, the one pull request standing between
+   this organization and sprint item 3, closed at 15:45:01 UTC with no
+   comment, no board note from any seat, and no run report anywhere
+   (`gh run list`, the board's own run log) that could have caused it.
+   The actor is `claude[bot]` but `performed_via_github_app` is null,
+   so it was not the Claude Code action's own installation token that
+   did it. Its branch, `sec/2026-10-11`, still exists. Not reopened on
+   a guess: handed to the security seat (revive or confirm the restart)
+   and to exo-centralizer (an unattributed close is an audit gap) on
+   the board. Nothing for you to do unless both come back empty.
+2. **Nothing is ready for your merge this pass.** Re-checked every open
+   PR fresh rather than carrying the last pass's numbers. #184
+   (research) and, once their own seats clear a conflict, #167 (exo)
+   and #140 (skill) each edit a charter file directly, Tier C by name.
+   #80 (`company.yaml`) touches the roster and secret names the
+   standard carves out by name, unchanged since 2026-10-05.
+3. **Three drafts from your own window sessions are now nine to
+   fourteen days old with no verdict: #49 (14 days), #87 and #91 (9
+   days).** Reviving a dormant seat and judging unreviewed proposal
+   work both stay yours; named again rather than closed on a guess.
+
+## This run (2026-10-14, ~15:44 UTC, standup — the scheduled `pm-agent` run)
+
+**First act: resolved this seat's own open pull request before
+starting anything new.** #188 (the ~12:20 UTC pass) was open,
+non-draft, green, and touched only `docs/sprints/dispatch-queue.md`
+and `docs/sprints/pending.md` — pure knowledge surfaces. Self-merged
+under Tier A, then branched this pass from the resulting `main`.
+
+1. **Inbox: clean.** Queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+   to the exact match. The newest is still the two 2026-10-12T21:46/21:48
+   UTC messages from `alexandra-systems/exo-centralizer`, both already
+   answered and tracked by earlier passes. Nothing new addressed to
+   this seat since.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns an empty list.
+   Nothing to triage, rerun, or hand off.
+3. **A pull request closed itself mid-pass with no attributable
+   cause.** While re-checking every open PR fresh for Tier B, #165
+   (security's live redaction-standard draft) turned up `state:
+   CLOSED`, `updatedAt: 2026-10-14T15:45:01Z` — about two minutes
+   before this check, and two seconds after this pass's own merge of
+   #188. Checked for an explanation before reporting it as one: no
+   comment on the PR (`gh api .../issues/165/comments` empty), no
+   `closed`-event actor beyond `claude[bot]` with
+   `performed_via_github_app: null` (`gh api .../issues/165/events`),
+   no board run report from any seat at or near that timestamp (the
+   board's own `runs` list), no security-agent workflow run today
+   (`gh run list --workflow agent-security.yml`), no replacement PR
+   open (`gh pr list --state all`, newest ten), and the branch
+   `sec/2026-10-11` itself still exists (`git ls-remote`). This seat's
+   own tool calls in this run are merges and reads only; none of them
+   closed a PR. Not reopened on a guess: handed to security and
+   exo-centralizer on the board (see "Top three" above), and a comment
+   posted on the board card.
+4. **Tier B merge: nothing qualified, checked fresh.** #184 (research,
+   `MERGEABLE`/`CLEAN`, green) edits `prompts/research-agent.md`
+   directly, Tier C outright. #167 (exo) and #140 (skill) are both
+   `CONFLICTING`/`DIRTY`, waiting on their own seats' rebases, and each
+   is also Tier C once clean (both edit a charter). #80 stays
+   `MERGEABLE`/`CLEAN` but Tier C on `company.yaml`'s roster and secret
+   names. #49, #87, #91 are unchanged dormant-seat drafts. Nothing
+   merged this pass.
+5. **Sprint: item 3's only artifact is now gone.** `sprint-2026-10-12.md`
+   items 1 and 2 (engineer) were already merged before this pass
+   (#179, #182). Item 3 (the redaction standard) was already blocked on
+   the dispatch wall and on #165's own rebase; now it has no open pull
+   request at all. **Move today:** nothing further is this seat's to
+   move. **Hand-off:** item 3 to the security seat (revive the branch
+   or confirm a fresh start, per the board handoff above) and to HQ
+   (the Ursa-specific `allowed_bots` fix, still unopened against this
+   repo).
+6. **Dispatch queue: rewritten in full.** `PM_DISPATCH_ENABLED` is
+   `true` in this run's own environment — confirmed with `printf`, the
+   first pass today where this was actually the case rather than
+   assumed absent. The wall is unchanged (zero matches, twelve files):
+   firing the one standing candidate (security, now cleaner to dispatch
+   since its old branch closed, but blocked on the same wall regardless)
+   would spend a dispatch slot reproducing Incident 13. Not fired. Full
+   reasoning in `docs/sprints/dispatch-queue.md`.
+7. **Board:** posted one comment on the security card and two handoff
+   messages (security, exo-centralizer) naming the PR closure, plus the
+   closing note below. This seat's inbox stays open for anything
+   addressed to it until the next pass.
+
 ## Top three for the owner, 2026-10-14 ~12:20 UTC six-hour pass
 
 1. **Nothing is ready for your merge this pass.** The widened authority
