@@ -156,7 +156,27 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
     expect(record.generations.map((g) => g.filePath)).toEqual(['module.ts'])
   })
 
-  it('is the whole of the difference: without the refusal the import is credited as survival', () => {
+  /**
+   * What the refusal is still the only defense against, restated
+   * 2026-10-14.
+   *
+   * This test used to assert that without the file-level refusal the
+   * import inflates the survival figure, and that the refusal was "the
+   * whole of the difference". Half of that stopped being true the day the
+   * span-level descent gate landed (src/resolve.ts, `verbatimClaim`): the
+   * sibling branch that authored `standard.md` is a rival for every span
+   * of it, and the generation's parent holds the shared clause text, so
+   * pass 1 now demotes all of it on its own. Both records report the same
+   * survival figure, and the equality is asserted below rather than
+   * smoothed over, because it is the measurement.
+   *
+   * The refusal's remaining and separate job is that the path is not in
+   * the record at all. A span-level gate leaves 3,200 characters of
+   * somebody else's document inside `files[]`, inside `coveredChars`, and
+   * inside every per-file row a buyer reads — honestly labelled, and still
+   * not this episode's work. That is what the assertions cover now.
+   */
+  it('keeps the import out of the record, which the span-level gate alone does not', () => {
     const { r, generatedSha } = vendoredOnASibling()
     const ep = episodeFor(r, generatedSha)
     // `ep.vendoredPaths` left unset is not how `main` calls it; this is
@@ -167,12 +187,22 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
 
     const survived = (rec: typeof before) =>
       rec.stats.byClass.survived_verbatim.chars + rec.stats.byClass.survived_mutated.chars
-    expect(survived(before)).toBeGreaterThan(survived(after))
-    // Every character of the import was in the inflated figure, and the
-    // agent's own module is all that is left in the honest one.
-    const fromTheImport = before.files.find((f) => f.path === 'standard.md')!
-    expect(fromTheImport.spans.some((s) => s.class === 'survived_verbatim')).toBe(true)
+
+    // The span-level gate already sells none of the import as survival, so
+    // the two figures agree. Neither is inflated, and the agent's own
+    // module is all either of them counts.
+    expect(survived(before)).toBe(survived(after))
     expect(survived(after)).toBeLessThan(HQ.length)
+
+    // The difference the refusal does make: the path, its characters, and
+    // its per-file row are gone rather than merely relabelled.
+    const fromTheImport = before.files.find((f) => f.path === 'standard.md')!
+    expect(fromTheImport.spans.length).toBeGreaterThan(0)
+    expect(fromTheImport.spans.some((x) => x.class === 'survived_verbatim')).toBe(false)
+    expect(fromTheImport.spans.some((x) => x.descent?.basis === 'rival')).toBe(true)
+    expect(after.files.find((f) => f.path === 'standard.md')).toBeUndefined()
+    expect(before.stats.coveredChars).toBeGreaterThan(after.stats.coveredChars)
+    expect(before.stats.perFile.map((row) => row.path)).toContain('standard.md')
   })
 
   it('keeps resolving the file the agent did write', () => {
@@ -481,9 +511,21 @@ describe('a file synced from another repository is not read as text a model comp
 
     // The defect, reproduced: the undeclared run finds no import at all
     // and sells the synced file as the person's kept work.
+    //
+    // The threshold here was `> UPSTREAM.length` until 2026-10-14, chosen
+    // to say "the entire import is inside the figure". The span-level
+    // descent gate now shaves the part of the synced document the
+    // generation's parent already held, so the figure no longer clears the
+    // file's own length and the comparison has to be stated against the
+    // honest record instead of against a constant. The defect is unchanged
+    // and is still most of the file: a declaration is the only evidence
+    // that a byte-identical sync from ANOTHER repository is an import,
+    // because no commit in this one is a rival for it.
     expect(before.exclusions).toEqual([])
     expect(before.files.map((f) => f.path)).toContain('standard.md')
-    expect(survived(before)).toBeGreaterThan(UPSTREAM.length)
+    const fromTheSync = before.files.find((f) => f.path === 'standard.md')!
+    expect(fromTheSync.spans.some((x) => x.class === 'survived_verbatim')).toBe(true)
+    expect(survived(before) - survived(after)).toBeGreaterThan(UPSTREAM.length / 2)
 
     // The fix: the standard leaves both sides of the record, the module
     // the agent genuinely wrote keeps every label it earned.

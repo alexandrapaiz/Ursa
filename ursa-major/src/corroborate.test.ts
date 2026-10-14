@@ -21,6 +21,7 @@ import { buildEpisodes } from './episodes'
 import { findCommitPairs, listCommits } from './pairfinder'
 import { resolveEpisode } from './bin/ursa'
 import { gitDescentCorroborator, MAX_RIVAL_BLOBS } from './corroborate'
+import { checkRecord } from './invariants'
 import { resolve } from './resolve'
 import { THETA_HIGH } from './match'
 import type { FinalSpan } from './types'
@@ -83,6 +84,8 @@ const PAD = Array.from({ length: 20 }, (_, i) => `const unrelatedConstant${i} = 
 
 const A_LINE = 'export const label = (item) => `- ${item.title}: ${item.claim} -- so what: ${item.why}`'
 const B_LINE = 'export const label = (item) => `* ${item.title}: ${item.claim} -- because: ${item.why}`'
+/** a third wording, so a fixture can put B_LINE in the grandparent and not the parent */
+const C_LINE = 'export const label = (item) => `+ ${item.title}: ${item.claim} -- reason: ${item.why}`'
 
 const file = (line: string) => `${PAD}\n${line}\n`
 
@@ -246,9 +249,142 @@ describe('the human restoring text the agent had replaced', () => {
       .find((f) => f.path === 'label.ts')!.spans, B_LINE)!
 
     expect(span.class).toBe('no_generation_provenance')
-    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'pre_existing' })
+    // `prior_revision` and not `pre_existing` since 2026-10-14. The commit
+    // that holds B_LINE here is `original`, which is the generation's own
+    // parent, so the more precise of the two ancestor relations applies.
+    // The relation changed; the finding did not. `pre_existing` now names
+    // only the older-ancestor restore, which the next test builds.
+    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
     expect(span.descent?.basis === 'rival' && original.startsWith(span.descent.sha)).toBe(true)
     expect(span.diff).toBeUndefined()
+  })
+
+  /**
+   * The restore that really does come from an older ancestor, which is
+   * what `pre_existing` means now that the parent case has its own
+   * relation.
+   *
+   * Three human commits before the agent: the line is written, then
+   * replaced by an unrelated third wording, so the grandparent holds
+   * B_LINE and the parent does not. The agent then writes A_LINE and the
+   * person restores B_LINE. The corroborator must walk past the parent,
+   * find the grandparent, and say `pre_existing`.
+   *
+   * Over this repository's own history exactly one span of 1,024 is in
+   * this shape (`tools/measure-verbatim-descent.ts`), which is why the
+   * two cases had to be separated: one label was carrying a population of
+   * 504 and a population of 1 under the same name.
+   */
+  it('calls an older ancestor pre_existing, not the parent revision', () => {
+    const r = repo()
+    const grandparent = r.commit('label.ts', file(B_LINE), 'The human writes the label')
+    const parent = r.commit('label.ts', file(C_LINE), 'The human tries a third wording')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    r.commit('label.ts', file(B_LINE) + 'export const restored = true\n', 'Go back to the first wording')
+
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    expect(ep, 'the fixture must produce a pair for the agent\'s generation').toBeDefined()
+    const span = spanFor(resolveEpisode(r.dir, ep!)!.files
+      .find((f) => f.path === 'label.ts')!.spans, B_LINE)!
+
+    expect(span.class).toBe('no_generation_provenance')
+    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'pre_existing' })
+    expect(span.descent?.basis === 'rival' && grandparent.startsWith(span.descent.sha)).toBe(true)
+    // The parent is the commit that does NOT hold the text, which is the
+    // whole point of the fixture: if the search had stopped at the parent
+    // it would have reported no rival at all.
+    expect(span.descent?.basis === 'rival' && parent.startsWith(span.descent.sha)).toBe(false)
+  })
+})
+
+/**
+ * The gate the 2026-10-13 ledger entry asked for: a byte-identical pass-1
+ * hit is not a survival if the file already held the text.
+ *
+ * All three fixtures below have the same shape, which is the shape of
+ * every real `ursa run` record and the reason the defect was invisible:
+ * the agent edits ONE line of an existing file, and `resolveEpisode`
+ * builds the generation from the whole blob at the agent's commit. That
+ * blob contains the twenty padding lines the file already had, so pass 1
+ * matched them byte-for-byte against "the generation" and called them
+ * survival. Nothing was wrong with the match. The generation was wrong.
+ */
+describe('a verbatim hit on text the file already held', () => {
+  /** the agent changes one line; everything else in the file is untouched */
+  function agentEditsOneLine() {
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep the agent\'s wording')
+    return { r, base, generatedSha }
+  }
+
+  function spansOf(r: Repo, generatedSha: string): FinalSpan[] {
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    expect(ep, 'the fixture must produce a pair for the agent\'s generation').toBeDefined()
+    return resolveEpisode(r.dir, ep!)!.files.find((f) => f.path === 'label.ts')!.spans
+  }
+
+  it('is demoted out of survived_verbatim and names the parent that held it', () => {
+    const { r, base, generatedSha } = agentEditsOneLine()
+    const spans = spansOf(r, generatedSha)
+    // A padding line: present in the finished file, byte-identical to the
+    // generation blob, and present in the parent blob too.
+    const padding = spans.find((x) => x.text.includes('unrelatedConstant3'))
+    expect(padding, 'the padding the agent never touched must be classified').toBeDefined()
+    expect(padding!.class).toBe('no_generation_provenance')
+    expect(padding!.descent).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
+    expect(padding!.descent?.basis === 'rival' && base.startsWith(padding!.descent.sha)).toBe(true)
+    // The generation extent it nearly claimed is kept rather than thrown
+    // away, so the record still shows what the resolver considered.
+    expect(padding!.candidate?.text).toContain('unrelatedConstant3')
+    expect(padding!.uncertain).toBe(true)
+  })
+
+  it('leaves the agent\'s own line as a survival, since no parent held it', () => {
+    const { r, generatedSha } = agentEditsOneLine()
+    const agentLine = spanFor(spansOf(r, generatedSha), A_LINE)
+    expect(agentLine, 'the line the agent actually wrote must be classified').toBeDefined()
+    expect(agentLine!.class).toBe('survived_verbatim')
+    // It carries a verdict rather than no verdict: the gate ran on this
+    // span too and came back with nothing against it.
+    expect(agentLine!.descent?.basis).not.toBe('rival')
+  })
+
+  it('does not register a generation claim for a span it demoted', () => {
+    const { r, generatedSha } = agentEditsOneLine()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)!
+    const record = resolveEpisode(r.dir, ep)!
+    // The bound that would have caught a claim left behind by a demoted
+    // span, plus every other bound, over the real record.
+    expect(checkRecord(record).map((v) => `${v.code} ${v.where}`)).toEqual([])
+    // And the survival rate no longer counts the padding.
+    const verbatim = record.files.flatMap((f) => f.spans)
+      .filter((x) => x.class === 'survived_verbatim')
+    expect(verbatim.every((x) => !x.text.includes('unrelatedConstant'))).toBe(true)
+  })
+
+  /**
+   * The ordering defect the measurement found. A parallel branch also
+   * holds the padding, and `commitsTouchingPath` lists commits newest
+   * first, so before the parent was checked separately this span came back
+   * `sibling` — a weaker relation that does not demote — purely because
+   * git listed the sibling branch first.
+   */
+  it('prefers the parent over a sibling branch git happens to list first', () => {
+    const { r, base, generatedSha } = agentEditsOneLine()
+    // A branch off the base that touches the same path, created after the
+    // episode so `git log --all` lists it ahead of the parent.
+    r.gitCommitting(['checkout', '-q', '-b', 'parallel', base])
+    r.commit('label.ts', file(B_LINE) + 'export const onTheOtherBranch = true\n', 'Parallel work')
+    r.gitCommitting(['checkout', '-q', 'main'])
+
+    const padding = spansOf(r, generatedSha).find((x) => x.text.includes('unrelatedConstant3'))!
+    expect(padding.descent).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
+    expect(padding.descent?.basis === 'rival' && base.startsWith(padding.descent.sha)).toBe(true)
   })
 })
 

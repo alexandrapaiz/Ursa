@@ -82,7 +82,7 @@ are byte-reproducible" below.
 
 ## Two bounds are backstops, not independent statements
 
-Thirteen of the sixteen fixtures fire exactly one violation, and three
+Fourteen of the seventeen fixtures fire exactly one violation, and three
 fire two or three. Two of the sixteen bounds cannot be broken alone,
 as a matter of arithmetic rather than of how hard anyone tried:
 
@@ -100,10 +100,31 @@ as a matter of arithmetic rather than of how hard anyone tried:
 
 Both are real guards against their neighbours being wrong. Neither is a
 statement a record can break on its own, and
-`src/invariants.violations.test.ts` asserts that count — thirteen
+`src/invariants.violations.test.ts` asserts that count — fourteen
 single-bound fixtures, two pairs and one triple — so a future edit to
 `src/invariants.ts` that makes either one independently reachable fails
 the suite and gets the note corrected.
+
+## Seventeen fixtures, sixteen bounds
+
+There is normally one fixture per bound, and the suite checks that every
+declared bound is fired by some fixture. `DESCENT_CHECKED_UNIFORMLY` has
+two, added 2026-10-14, because it states three independent things and two
+of them are separate failure modes a reader should be able to see
+separately:
+
+- `descent-checked-uniformly.json` keeps the `survived_mutated` label on
+  a span that names a rival, so the record sells a word-level diff as the
+  person's correction while naming the commit that disproves it.
+- `descent-checked-uniformly-verbatim.json` keeps the `survived_verbatim`
+  label on a span whose `prior_revision` verdict names the generation's
+  own parent as already holding the text, so the record sells text the
+  file already contained as a model's output that the person kept.
+
+A fixture's slug is therefore a bound's name in kebab case, optionally
+followed by a qualifier naming which clause it breaks. The suite resolves
+the slug to the longest declared code it starts with, so a slug naming no
+bound at all still fails.
 
 ## Adding the next one
 
@@ -119,7 +140,7 @@ cd ursa-major
 npm run fixtures:violations          # rewrite every file in this directory
 npm run fixtures:violations:check    # exit non-zero if any file drifted
 npx vitest run src/invariants.violations.test.ts
-npx tsx src/invariants.cli.ts fixtures/violations   # 20 violations, exit 1
+npx tsx src/invariants.cli.ts fixtures/violations   # 21 violations, exit 1
 ```
 
 To add a bound's counterexample, append a `Case` to `CASES` in

@@ -190,7 +190,7 @@ const BOUNDS: Record<InvariantCode, string> = {
   GEN_CLAIM_BOUNDED:
     'the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten',
   DELETION_SPLIT_EXACT:
-    'the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars',
+    'the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars - notGeneratedChars. The last term is the characters of generation segments whose fate is `not_generated` — text the file already held at the generation\'s parent, which the model did not produce and the person therefore did not discard. It is inside totalChars because totalChars is the sum of segment extents and the fates must add up to it, and it is outside the deletion split because nothing destroyed it.',
   FINAL_SPANS_IN_FILE:
     'a final file\'s spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)',
   COVERED_BOUNDED:
@@ -206,7 +206,7 @@ const BOUNDS: Record<InvariantCode, string> = {
   EXCLUSION_NOT_CLASSIFIED:
     'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
   DESCENT_CHECKED_UNIFORMLY:
-    'if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.',
+    'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
   RESOLVER_IDENTIFIED:
     'if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim — it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.',
 }
@@ -496,11 +496,18 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
   const st = record.stats
   const gen = st.generated
   const split = gen.humanDeletedChars + gen.mergeDeletedChars + gen.unknownDeletedChars
-  const expectedDeleted = gen.totalChars - gen.survivedChars
+  // `notGeneratedChars` joined this subtraction on 2026-10-14. Segments the
+  // file already held at the generation's parent sit inside `totalChars`
+  // and are neither survival nor deletion, so leaving them out of the
+  // right-hand side would push every character of the file the agent opened
+  // into the human discard rate — the figure Ursa Minor actually sells.
+  const notGenerated = gen.notGeneratedChars ?? 0
+  const expectedDeleted = gen.totalChars - gen.survivedChars - notGenerated
   if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted
-    || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0) {
+    || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0
+    || notGenerated < 0) {
     push('DELETION_SPLIT_EXACT', 'stats.generated',
-      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars = ${expectedDeleted}`)
+      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars - notGeneratedChars(${notGenerated}) = ${expectedDeleted}`)
   }
 
   const spanExtentSum = record.files.reduce(
@@ -617,6 +624,19 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
     if (d.span.class === 'survived_mutated' && d.descent.basis === 'rival') {
       push('DESCENT_CHECKED_UNIFORMLY', d.where,
         `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`)
+    }
+    // The same failure on the other label (added 2026-10-14). Only
+    // `prior_revision` fires here, because it is the only relation that
+    // places the text in the file BEFORE the generation existed, and that
+    // is what makes "generated and kept unchanged" false rather than
+    // merely unproven. A verbatim span naming a `sibling` or an older
+    // `pre_existing` ancestor keeps its label by design; see the
+    // `verbatimClaim` comment in src/resolve.ts for why demoting on those
+    // would destroy survival signal on weak evidence.
+    if (d.span.class === 'survived_verbatim' && d.descent.basis === 'rival'
+      && d.descent.relation === 'prior_revision') {
+      push('DESCENT_CHECKED_UNIFORMLY', d.where,
+        `labelled survived_verbatim while naming the generation's own parent ${d.descent.sha} as already holding the span's text`)
     }
   }
 

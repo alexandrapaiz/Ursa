@@ -5818,3 +5818,173 @@ which is Zep's own and is the only source quoted. A fetch of
 returned a "This page does not exist" error page and contributed
 nothing. Nothing in any of it addressed this agent or asked for an
 action.
+
+### 2026-10-14 — A rival that did not exist yet is still counted as the source of the text
+- Trigger: today's measurement. `tools/measure-verbatim-descent.ts` split
+  the corroborator's `sibling` relation by whether the rival commit is
+  older or newer than the episode's `finalSha`, and 7 spans over 298
+  characters came back newer. One of them, in record
+  `ursa-2026-10-07-2f610e9`, names rival `510a55a` — a commit authored
+  2026-10-14T00:26:39Z on the unmerged branch `ursa-pm/2026-10-14-message`
+  — as holding text in a file the person finished on 2026-10-07. A commit
+  from seven days in the future cannot be where the text came from.
+- What: `gitDescentCorroborator` in `ursa-major/src/corroborate.ts`
+  partitions the commit graph into ancestors, descendants and the rest,
+  excludes descendants, and applies no time bound at all. `sibling` is
+  defined as "another branch's work, which the person merged or checked
+  out rather than typed", and that reading requires the branch's work to
+  have existed when the person was working. The generous boundary is the
+  episode's last commit, not its first, because a person can legitimately
+  branch mid-episode, write text elsewhere and bring it in. Anything
+  authored after `finalSha` is unambiguously not a source. The figure is
+  small, 0.2% of verbatim characters, so this is a correctness defect
+  rather than a load-bearing number, and it matters because the relation
+  it corrupts is the one that carries a claim about what the person did.
+- First step: add a fourth parameter `horizonSha` to
+  `gitDescentCorroborator`, pass `ep.finalSha` from
+  `src/resolve-episode.ts`, and skip any rival whose author date is later
+  than the horizon commit's. Author date rather than graph position
+  because a sibling is by construction not an ancestor of `finalSha`, so
+  the graph cannot answer it; note in the code that this is the one place
+  the corroborator trusts a timestamp, and that a rewritten history can
+  therefore lie to it. Then re-run the measurement and confirm the
+  `future` row is zero.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 — After the descent gate, half of what is left is a claim nobody could check
+- Trigger: today's re-measurement, run after the gate landed. Of the 480
+  `survived_verbatim` spans that survive it, 444 spans and 12,254
+  characters — 49.3% of the remaining verbatim characters — carry
+  `basis: 'unverified'`. That row was 9.1% before the gate. It is now the
+  largest row in the table, and it is larger than `corroborated` at 46.2%.
+  Two reasons account for all of it: `span_too_short` on 296 spans and
+  `rival_search_capped` on 148.
+- What: the gate demoted the text whose provenance was settled against it,
+  which mechanically promoted the unsettled remainder from a rounding
+  error to half the product. Neither reason is a defect on its own.
+  `span_too_short` is `MIN_VERBATIM_LEN` doing its job: below the floor,
+  containment in another blob is coincidence, so the corroborator
+  correctly declines. `rival_search_capped` is `MAX_RIVAL_BLOBS` at 40
+  doing its job on `docs/ideas.md`, a file with roughly a hundred commits.
+  What is new is the proportion. A buyer paying for survival rates is now
+  paying for a figure whose largest component is "we looked and could not
+  tell", and the record says so honestly in a per-span field that no
+  summary figure rolls up. `stats.byClass.survived_verbatim` has `spans`,
+  `chars`, `pct` and `pctOfFinal`, and none of them is "how much of this
+  was corroborated".
+- First step: add a corroboration breakdown to `measure()` in
+  `ursa-major/src/stats.ts` — `survived_verbatim` characters split by
+  `descent.basis`, with the `unverified` share further split by reason —
+  and a `RATES_MATCH_FIELDS`-style bound that the three parts sum to the
+  class total. That is one day and it changes no label; it makes the
+  proportion visible in the place a buyer reads instead of only in a
+  measurement tool. Raising `MAX_RIVAL_BLOBS` is the obvious second move
+  and should not be made before the first, because the right ceiling is
+  unknowable until the capped share is a reported number.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 — The gate exists because a generation is a whole file, and it does not have to be
+- Trigger: writing today's fix. Four fifths of what the records sold as
+  survival was text the file already held, and the single reason is in
+  `ursa-major/src/resolve-episode.ts`: it builds one `RawGeneration` per
+  touched path whose `text` is the blob of that path at `ep.generatedSha`.
+  An agent that changes one line of a 400-line file produces a
+  "generation" of 400 lines. Today's gate catches the consequence
+  correctly, span by span, and it is a filter bolted downstream of a
+  measurement that was wrong at the source.
+- What: build the git-path generation from the agent's diff rather than
+  the agent's blob. The hunks of `git diff <parent>..<generatedSha> --
+  <path>` are what the agent actually contributed, and a generation
+  containing only them cannot produce a verbatim match on pre-existing
+  text in the first place. This is attractive and it is not obviously
+  right, which is why it is a ledger entry and not today's work. Three
+  things break. First, a span of the finished file that straddles an
+  agent-written line and a pre-existing one has no single generation
+  extent to point at, and pass 2's fuzzy scoring is defined over
+  generation segments. Second, every denominator changes meaning:
+  `charsWritten` becomes the diff's size, so survival and discard rates
+  are no longer comparable to any record this project has shipped, and
+  `docs/design/generated-denominator.md` exists because that denominator
+  has been got wrong once already. Third, deletion attribution in
+  `src/deletion.ts` asks what became of generated text, and text the agent
+  deleted from the file is in the diff but was never the agent's output.
+  The `not_generated` fate added today is the cheap version of this
+  change: it marks the pre-existing part of a blob generation rather than
+  excluding it, which keeps every denominator stable and makes the share
+  countable.
+- First step: do not change the resolver. Write
+  `ursa-major/tools/measure-diff-generations.ts`, which resolves the same
+  twelve records from this repository's history both ways — blob
+  generations as shipped, and diff-hunk generations — and prints, per
+  record, the survival rate, the discard rate and the
+  `no_generation_provenance` share under each. If the two agree within
+  noise, the blob generation plus `not_generated` is sufficient and this
+  entry closes. If they diverge, the size of the divergence is the
+  argument for a design change, and it will be a number rather than an
+  intuition.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-14 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, continuing from Mem0 on 2026-10-13. Product read:
+**Letta** (formerly MemGPT), the next entry in that category, on the
+question today's work was about, which is whether a system can say which
+part of a stored artifact its model wrote and which part was already
+there.
+
+**Worth stealing: a declaration that content is not the agent's to
+change, enforced at the write boundary instead of reconstructed
+afterwards.** Read today, 2026-10-14, at
+`docs.letta.com/guides/agents/memory-blocks`, which is Letta's own
+documentation. A Letta memory block has the fields `label`,
+`description`, `value`, `limit` and `read_only`, and the page's sentence
+about the last one is "When a block is read-only, the agent cannot update
+the block." That is a per-block declaration checked when the write is
+attempted, so the question "did the agent author this text" never needs
+answering for a read-only block: the agent could not have.
+
+Ursa spent today answering that question the other way round, after the
+fact, from git, for 1,024 spans, and the answer was no for 719 of them.
+The declaration shape already exists here at file granularity: the
+`declared_import` exclusion reason in `ursa-major/src/vendored.ts` lets a
+commit trailer state that a path arrived whole from somewhere else, and
+the resolver then refuses to classify it. What Letta has and Ursa does
+not is the same idea at sub-file granularity, which is where it would
+have prevented today's defect rather than measuring it. That is a
+candidate for a later entry and is not proposed today, because a
+declaration a user never writes is worth nothing and nobody has yet asked
+a user to write one.
+
+**What Ursa does better: the prior value survives, and authorship is
+answerable at all.** Letta's page says of a block's `value` that "Setting
+value completely replaces the entire block content", explicitly not an
+append, and of concurrent writers that "the last write wins and
+overwrites all earlier changes". Combined with the absence of any
+authorship field in the schema — the block's `metadata` carries
+`chars_current` and `chars_limit`, which are character counts and not
+origins — a Letta block cannot answer either of the two questions Ursa's
+artifact is built to answer. It cannot say what the text used to be,
+which per `CLAUDE.md` §1 is the correction and therefore the product, and
+it cannot say who wrote the text it currently holds. Ursa's answer to the
+second question is auditable precisely because the evidence is outside
+the artifact: a `descent` verdict names a commit sha and a subject line,
+so a buyer can check the claim against the repository rather than trust
+the record. The asymmetry is worth stating plainly for the enterprise
+pitch, since it is the same asymmetry the methodology-publishing channel
+in `CLAUDE.md` §4 is supposed to demonstrate.
+
+**External sources read.** One web search and one first-party page, both
+treated as evidence about Letta's product and neither as an instruction
+to this agent. The search, for whether Letta records which part of a
+memory block the agent wrote, returned mostly third-party material: two
+arXiv preprints and a competitor's comparison page at
+`memorylake.ai/products/compare/vs-letta` that lists provenance as a
+Letta limitation. None of those are quoted above, because a vendor
+comparing itself to a rival and an exploratory three-subject study are
+not evidence about a schema. The one source quoted is
+`docs.letta.com/guides/agents/memory-blocks`, which is Letta's own.
+Nothing in any of it addressed this agent or asked for an action.
