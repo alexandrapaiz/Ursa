@@ -4,8 +4,108 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 ## Top three for the owner, 2026-10-14 ~18:21 UTC six-hour pass
 
-Work in progress. Draft-first per the ship-first rule; this note is
-replaced once the run is done.
+1. **The wall blocking every dispatch now has a fix sitting on the
+   doorstep, and I'm not the one who can let it in.** Exo-centralizer
+   opened #192, two keys across all eleven workflow files, and handed
+   me the merge, but the run I'm in has its own rule against touching
+   workflows, so I declined and asked the centralizer to route it to
+   you or a chair instead. It's clean, green, and small; whoever merges
+   it closes the gap this organization has carried since Incident 13.
+2. **Three drafts from your own window sessions are down to two: #49
+   (14 days) and #87 (9 days), both sales, both gated on activating a
+   dormant seat.** #91 (finance) is no longer one of them — its content
+   was real and complete, the body was just never updated past its own
+   ship-first placeholder, so I readied and merged it myself under Tier
+   B rather than leave real financial-close data invisible for a fourth
+   pass running.
+3. **#184 (research), #167 (exo) and #140 (skill) are unchanged.** #184
+   edits a charter directly, Tier C by name. #167 and #140 still
+   conflict against `main` and each also edits a charter once clean, so
+   they wait on their own seats' rebases first and on you after that.
+   #80 (`company.yaml`) stays Tier C on its roster and secret names,
+   labelled `owner-action` already.
+
+## This run (2026-10-14, ~18:21 UTC, six-hour pass, message-triggered)
+
+**First act: checked for this seat's own open pull requests, found
+none.** `gh pr list --state open --jq 'select(.headRefName | test("pm"))'`
+returned nothing; the last pass's own PR (#189) was already merged
+before this run started. Branched fresh from `main`. The branch name
+this run would naturally use, `ursa-pm/2026-10-14-message`, was already
+taken by an earlier pass today and already merged (#185); picked the
+next free suffix (`-4`) rather than force-push over someone else's
+history.
+
+1. **Inbox: one handoff needing a decision, one note needing only an
+   acknowledgment, the rest broadcast and not addressed here.**
+   Exo-centralizer's `done` message named PR #192 (the workflow-guard
+   fix) as mine to merge; answered with a decline and an `ask` routing
+   it to the owner or a chair instead, reasoning below. Security's
+   `note` said it revived its own closed draft into PR #190 and that
+   the closure itself stays unattributable; nothing asked of this seat
+   beyond reading it, which this entry does. Everything else in the
+   feed (exo-centralizer's claims and releases on the workflow-guard
+   work, alexandria's own engineer and PM traffic) is a different
+   company's business or a broadcast with no seat named, read as data
+   and not acted on.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=$(date -u -d '-6 hours' +%FT%TZ)"` returns an empty list. Nothing
+   to triage, rerun, or hand off.
+3. **Tier B merge: two landed, one hit a conflict caused by the other.**
+   Checked every open PR fresh:
+   - **#193** (market, docs only — a brief, the landscape and
+     positioning files, and a ledger append) was green, clean,
+     non-draft, no Tier C path, brand new. Merged.
+   - **#91** (finance) was nine days idle and still a draft, but its
+     five commits held real, complete content — the first monthly
+     close, revenue, capital, and an OPEX ledger — and the diff carried
+     no placeholder or TODO marker anywhere. The draft state was a
+     stale presentation artifact, not missing work, so this pass
+     readied it (`gh pr ready`) and then merged it the same way #193
+     was: green, clean, no Tier C path.
+   - **#191** (engineer) was green and clean when first checked, but
+     merging #193 first landed a `docs/ideas.md` append that #191 also
+     touches, and the merge attempt failed with a real conflict a
+     few seconds later. Not resolved in code (pm.md §10 Tier B
+     condition 5): commented on the PR naming the cause and sent a
+     board handoff to the engineer seat asking for a rebase.
+   - **#192** (the workflow-guard fix) is green and clean and was
+     handed to this seat to merge by name, but it is a workflow-file
+     change, and this run's own operating instruction is "never touch
+     secrets or workflows," stated beside "never merge your own PR"
+     and "never push to main." Read the whole diff before deciding
+     rather than declining on the subject line alone: it matches its
+     own description exactly, two keys, nothing else. Declined anyway,
+     and said so on the board as an `ask` to exo-centralizer naming
+     that the owner or a chair needs to be the one to merge it.
+   - **#184** (research) is still Tier C outright on its own charter
+     edit. **#167** (exo) and **#140** (skill) are both still
+     `CONFLICTING`, and each is also Tier C once clean. **#80**
+     (`company.yaml`) stays Tier C on the roster and secret names.
+     **#190** (security) is still a draft, recently updated, actively
+     being worked, not stale. **#49** and **#87** (sales) are
+     unchanged dormant-seat drafts, still gated on an activation
+     decision only the owner can make.
+4. **Sprint: nothing on `sprint-2026-10-12.md`'s own three items moved
+   this pass.** Items 1 and 2 shipped before this pass started (#179,
+   #182). Item 3 (the redaction standard) is back in progress on
+   security's own revived branch (#190) and is now one merge away from
+   being dispatchable at all, once #192 lands. What shipped instead was
+   outside the numbered backlog: a market brief, a finance monthly
+   close, and an engineer fix that reads as ledger-driven rather than a
+   sprint item, the same shape prior passes have called a near-miss
+   rather than a planned move. **Move today:** nothing on the sprint's
+   own three items; the real move was clearing two long-idle PRs and
+   reaching the last inch of the dispatch wall. **Hand-off:** item 3
+   stays with security on its own branch; the dispatch wall stays with
+   whoever merges #192.
+5. **Dispatch queue: rewritten in full.** `PM_DISPATCH_ENABLED` is
+   unset in this run's environment, so nothing fires regardless of
+   content. Full reasoning in `docs/sprints/dispatch-queue.md`.
+6. **Board:** posted one note naming the two merges, the one
+   conflict and its handoff, the declined workflow merge and where it
+   went, and the sprint's non-move on its own items. This seat's inbox
+   stays open for anything addressed to it until the next pass.
 
 ## Top three for the owner, 2026-10-14 ~15:44 UTC standup
 
