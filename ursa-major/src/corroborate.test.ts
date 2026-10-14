@@ -388,6 +388,113 @@ describe('a verbatim hit on text the file already held', () => {
   })
 })
 
+/**
+ * The time bound, added 2026-10-14. A `sibling` verdict says the person
+ * "merged or checked out rather than typed" the text, which requires the
+ * other branch's commit to have existed while they were working. Nothing
+ * here looked at time until today, so a commit authored after the episode
+ * closed could be named as the source of its text — and one was, on a
+ * shipped record (docs/ideas.md, 2026-10-14).
+ *
+ * Every fixture below is the `agentEditsOneLine` shape plus one extra
+ * branch, because the span that matters is the one line the agent really
+ * did write: it is the only span in that fixture a spurious rival can take
+ * away, since the padding is already demoted by the parent.
+ */
+describe('a rival authored after the work finished', () => {
+  /**
+   * The agent writes A_LINE and the person keeps it. Afterwards — the
+   * repository is on a monotonic clock, so "afterwards" is literally a
+   * later author date — a branch off the baseline also comes to hold
+   * A_LINE. Nobody could have copied the finished text from it.
+   *
+   * The extra `onTheOtherBranch` line keeps the branch's blob from being
+   * byte-identical to the finished one, which would be a whole-file import
+   * (src/vendored.ts) and would drop the path before any span of it was
+   * classified.
+   */
+  function rivalWrittenAfterwards() {
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep the agent\'s wording')
+    r.gitCommitting(['checkout', '-q', '-b', 'later', base])
+    const futureSha = r.commit('label.ts', file(A_LINE) + 'export const onTheOtherBranch = true\n', 'Work that started after the episode closed')
+    r.gitCommitting(['checkout', '-q', 'main'])
+    return { r, base, generatedSha, finalSha, futureSha }
+  }
+
+  it('reproduces the defect when no horizon is given, so the fixture is not passing for the wrong reason', () => {
+    const { r, generatedSha, futureSha } = rivalWrittenAfterwards()
+    // Three arguments: `gitDescentCorroborator` as it behaved before the
+    // bound existed, which is still the chat path's behaviour. The later
+    // branch holds A_LINE, so the search finds it and reports a sibling.
+    const unbounded = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir))
+    const verdict = unbounded('label.ts', A_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    expect(verdict.basis === 'rival' && futureSha.startsWith(verdict.sha)).toBe(true)
+  })
+
+  it('drops that rival once the episode\'s final commit is the horizon', () => {
+    const { r, generatedSha, finalSha } = rivalWrittenAfterwards()
+    const bounded = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    // Not `unverified`. The search ran, read every candidate that could
+    // have been a source, and found none: that is a corroboration.
+    expect(bounded('label.ts', A_LINE)).toMatchObject({ basis: 'corroborated' })
+  })
+
+  it('keeps the agent\'s line a survival on the shipped resolver path', () => {
+    const { r, generatedSha } = rivalWrittenAfterwards()
+    // The integration assertion, through `resolveEpisode`, which is where
+    // the horizon is actually wired. Without the bound this span is
+    // `no_generation_provenance` with a fabricated sibling against it.
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    expect(ep, 'the fixture must produce a pair for the agent\'s generation').toBeDefined()
+    const record = resolveEpisode(r.dir, ep!)!
+    const agentLine = spanFor(record.files.find((f) => f.path === 'label.ts')!.spans, A_LINE)
+    expect(agentLine?.class).toBe('survived_verbatim')
+    expect(agentLine?.descent?.basis).toBe('corroborated')
+    // And the record still holds together, since a class change that left
+    // a stale generation claim behind would be a violation rather than a
+    // relabelling.
+    expect(checkRecord(record).map((v) => `${v.code} ${v.where}`)).toEqual([])
+  })
+
+  it('still searches a branch the episode merged in, however its author date reads', () => {
+    // The carve-out, and the reason the bound asks the graph before the
+    // clock. This branch's author date is a year after the episode closed,
+    // which happens for real whenever a commit is rebased or a machine's
+    // clock is wrong, and it is nonetheless an ancestor of the final
+    // commit: the person merged it, so it demonstrably existed. A
+    // date-only bound would drop it and report a corroboration over
+    // evidence it was holding.
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+
+    r.gitCommitting(['checkout', '-q', '-b', 'side', base])
+    writeFileSync(join(r.dir, 'label.ts'), file(A_LINE) + 'export const side = true\n')
+    sh(r.dir, ['add', '.'], HUMAN)
+    // Written through `sh` rather than `repo.commit` because the fixture
+    // needs an author date the repository's monotonic clock would never
+    // produce. This is the only commit in the suite that sets its own.
+    const AHEAD = '2027-06-01T00:00:00+00:00'
+    sh(r.dir, ['commit', '-q', '-m', 'Side work with a date from next year'],
+      { ...HUMAN, GIT_AUTHOR_DATE: AHEAD, GIT_COMMITTER_DATE: AHEAD })
+    const sideSha = r.at('HEAD')
+
+    r.gitCommitting(['checkout', '-q', 'main'])
+    r.gitCommitting(['merge', '-q', '--no-ff', '-X', 'theirs', '-m', 'Merge side', 'side'])
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const side = true\nexport const kept = true\n', 'Finish')
+
+    const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    const verdict = c('label.ts', A_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    expect(verdict.basis === 'rival' && sideSha.startsWith(verdict.sha)).toBe(true)
+  })
+})
+
 describe('what the corroborator says when it cannot tell', () => {
   it('declines on a span shorter than the verbatim floor, leaving the label alone', () => {
     const r = repo()
