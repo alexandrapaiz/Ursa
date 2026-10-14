@@ -369,16 +369,30 @@ function relatives(commits, generatedSha) {
   };
   return { ancestors: reach(parents), descendants: reach(children) };
 }
-function gitDescentCorroborator(projectPath, generatedSha, commits) {
+function authoredAfterHorizon(commits, generatedSha, horizonSha) {
+  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]));
+  const horizonMs = horizonSha === void 0 ? NaN : authorMs.get(horizonSha) ?? NaN;
+  if (Number.isNaN(horizonMs)) return () => false;
+  const { ancestors } = relatives(commits, generatedSha);
+  const horizonAncestors = relatives(commits, horizonSha).ancestors;
+  return (sha) => {
+    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false;
+    const ms = authorMs.get(sha);
+    if (ms === void 0 || Number.isNaN(ms)) return false;
+    return ms > horizonMs;
+  };
+}
+function gitDescentCorroborator(projectPath, generatedSha, commits, horizonSha) {
   const { ancestors, descendants } = relatives(commits, generatedSha);
   const parent = commits.find((c) => c.sha === generatedSha);
   const parents = parent?.parents ?? [];
   const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]));
+  const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha);
   const rivalCache = /* @__PURE__ */ new Map();
   const rivalsFor = (filePath) => {
     if (rivalCache.has(filePath)) return rivalCache.get(filePath);
     const touching = commitsTouchingPath(projectPath, filePath);
-    const rivals = touching === null ? null : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha));
+    const rivals = touching === null ? null : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha) && !afterHorizon(c.sha));
     rivalCache.set(filePath, rivals);
     return rivals;
   };
@@ -3065,7 +3079,11 @@ function resolveEpisode(projectPath, ep, commits) {
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
+    // `ep.finalSha` is the horizon: a commit authored after the person
+    // finished this work cannot be where its text came from, and before
+    // the bound existed one shipped record named a commit seven days in
+    // its own future as a rival (docs/ideas.md, 2026-10-14).
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph, ep.finalSha),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
