@@ -17,6 +17,16 @@ import { replayReader, type RecordedRepo } from './replay'
 import { coAuthoredBy } from './gh'
 import { resolveEpisode } from '../bin/ursa'
 
+// Author identity is set through the environment, not `git config`.
+// GIT_AUTHOR_NAME outranks a repository's user.name and every agent
+// harness exports it, so a fixture that relies on `git config` is
+// authored by whoever runs the suite. See the long note in m0.test.ts.
+const AS = (name: string, email: string) => ({
+  GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email,
+  GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
+})
+const HUMAN = AS('Human Owner', 'human@example.com')
+
 const AGENT_TRAILER = 'Claude Opus 5 <noreply@anthropic.com>'
 
 function commit(over: Partial<PullRequestCommit> & { sha: string; authoredAt: string }): PullRequestCommit {
@@ -185,8 +195,10 @@ describe('statedCorrectionsFor', () => {
 })
 
 describe('merge-resolution against a real git repository', () => {
-  function sh(cwd: string, args: string[]): string {
-    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+  function sh(cwd: string, args: string[], env: Record<string, string> = HUMAN): string {
+    return execFileSync('git', args, {
+      cwd, env: { ...process.env, ...env }, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+    })
   }
 
   /**
@@ -399,8 +411,10 @@ describe('replay against Ursa pull requests that really merged', () => {
  * read and every such deletion was the human's.
  */
 describe('a merge inside the pull request deletes a generation', () => {
-  function sh(cwd: string, args: string[]): string {
-    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+  function sh(cwd: string, args: string[], env: Record<string, string> = HUMAN): string {
+    return execFileSync('git', args, {
+      cwd, env: { ...process.env, ...env }, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+    })
   }
 
   const BASE_A = ['export function header() {', "  return 'The frontier, read for you.'", '}'].join('\n')

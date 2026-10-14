@@ -19,8 +19,19 @@ import { buildEpisodes } from './episodes'
 import { resolveEpisode } from './bin/ursa'
 import { gitDeletionAttributor } from './deletion'
 
-function sh(cwd: string, args: string[]): string {
-  return execFileSync('git', args, { cwd, encoding: 'utf8' })
+// Author identity is set through the environment, not `git config`.
+// GIT_AUTHOR_NAME outranks a repository's user.name and every agent
+// harness exports it, so a fixture that relies on `git config` is
+// authored by whoever runs the suite. See the long note in m0.test.ts.
+const AS = (name: string, email: string) => ({
+  GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email,
+  GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
+})
+const HUMAN = AS('Human Owner', 'human@example.com')
+const OTHER = AS('Other Fork', 'other@example.com')
+
+function sh(cwd: string, args: string[], env: Record<string, string> = HUMAN): string {
+  return execFileSync('git', args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8' })
 }
 
 const BASE_A = [
@@ -204,13 +215,13 @@ describe('a merge can delete a generation, and the record must not blame the hum
  */
 function foreignSha(): string {
   const dir = mkdtempSync(join(tmpdir(), 'ursa-foreign-'))
-  sh(dir, ['init', '-q', '-b', 'main'])
-  sh(dir, ['config', 'user.email', 'other@example.com'])
-  sh(dir, ['config', 'user.name', 'Other Fork'])
+  sh(dir, ['init', '-q', '-b', 'main'], OTHER)
+  sh(dir, ['config', 'user.email', 'other@example.com'], OTHER)
+  sh(dir, ['config', 'user.name', 'Other Fork'], OTHER)
   writeFileSync(join(dir, 'README.md'), 'a repository under test has never seen this commit\n')
-  sh(dir, ['add', '.'])
-  sh(dir, ['commit', '-q', '-m', 'Unrelated history'])
-  return sh(dir, ['rev-parse', 'HEAD']).trim()
+  sh(dir, ['add', '.'], OTHER)
+  sh(dir, ['commit', '-q', '-m', 'Unrelated history'], OTHER)
+  return sh(dir, ['rev-parse', 'HEAD'], OTHER).trim()
 }
 
 /**
