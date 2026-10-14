@@ -11,6 +11,30 @@ export type GenerationFate =
   | 'survived_verbatim'
   | 'survived_mutated'
   | 'generated_deleted'
+  /**
+   * The segment is inside the generation's text, but the file already held
+   * that text at the generation's parent commit, so it is not output the
+   * model produced and it has no survival or deletion fate at all.
+   * (Added 2026-10-14 with the pass-1 descent gate.)
+   *
+   * It exists because of what a generation IS on the `ursa run` path.
+   * `resolveEpisode` builds one from the whole blob of each touched file at
+   * the agent's commit, so most of a "generation" is usually the file the
+   * agent opened. Once the final span over that text is demoted to
+   * `no_generation_provenance`, the segment behind it is covered by no
+   * survival claim, and without this fate it fell to `generated_deleted` —
+   * asserting that the model produced text and the person threw it away,
+   * about text that is still sitting in the finished file. That is a false
+   * label in the one class CLAUDE.md §1 sells as correction signal, so the
+   * fate is named instead of inferred.
+   *
+   * It carries no `deletion` attribution, is excluded from `survivedChars`,
+   * and is subtracted from `deletedChars` before the human share is
+   * computed. It stays inside `totalChars`, because `totalChars` is defined
+   * as the sum of segment extents and a reader must be able to add the
+   * fates up to it.
+   */
+  | 'not_generated'
 
 /**
  * What destroyed a generation span, when its fate is `generated_deleted`.
@@ -116,12 +140,26 @@ export type DescentEvidence =
    * generation. The label fell back to `no_generation_provenance` and no
    * diff was emitted.
    *
-   *   pre_existing — the commit is an ancestor of the generation. In
-   *     practice this is a restore: an ancestor held the text, the
-   *     generation replaced it, and the person put it back. Found by a
-   *     failing test, because the obvious reading of this relation —
-   *     text that was in the file all along — never reaches Pass 2 at
-   *     all, since the verbatim pass claims untouched text first.
+   *   prior_revision — the commit is the generation's own parent, so
+   *     the file already held this text when the agent opened it. On the
+   *     `ursa run` path a generation is the whole blob of the touched
+   *     file at the agent's commit, which contains every line the file
+   *     already had, so a span can be byte-identical to a generation and
+   *     still be text no model contributed. This is the strongest of the
+   *     three relations and the only one that demotes a
+   *     `survived_verbatim` claim, because it is the only one that says
+   *     the text was there before the generation existed rather than
+   *     merely that it exists somewhere else too. Checked before the
+   *     general rival walk (src/corroborate.ts) so the answer does not
+   *     depend on `git log --all` ordering.
+   *   pre_existing — the commit is an older ancestor of the generation,
+   *     and the parent does NOT hold the text. In practice this is a
+   *     restore: an ancestor held the text, the generation replaced it,
+   *     and the person put it back. Before `prior_revision` existed this
+   *     relation carried both cases, and over this repository's own
+   *     history the split is 504 `prior_revision` to 1 restore
+   *     (`tools/measure-verbatim-descent.ts`), so the two readings were
+   *     never comparable in size and the label named the rarer one.
    *   sibling — the commit is on a branch the generation is not an
    *     ancestor of: another branch's work, which the person merged or
    *     checked out rather than typed.
@@ -133,7 +171,7 @@ export type DescentEvidence =
    * that the final text was composed by editing this generation. Text
    * that already existed verbatim elsewhere was not composed here.
    */
-  | { basis: 'rival'; sha: string; subject: string; relation: 'pre_existing' | 'sibling' }
+  | { basis: 'rival'; sha: string; subject: string; relation: 'prior_revision' | 'pre_existing' | 'sibling' }
   /**
    * The search did not settle the question, so the `survived_mutated`
    * label stands unchanged and says why it is unguarded.
@@ -443,6 +481,23 @@ export interface Stats {
      */
     verbatimClaimedChars: number
     survivedChars: number
+    /**
+     * Characters of generation segments whose fate is `not_generated`: the
+     * file already held the text at the generation's parent, so the model
+     * did not produce them. Neither survived nor deleted, and subtracted
+     * from `totalChars` before `deletedChars` is computed. Zero on the chat
+     * path, which injects no corroborator and therefore never demotes.
+     *
+     * OPTIONAL, and read as zero when absent. Every record this project
+     * wrote before 2026-10-14 omits the field, and for those records zero
+     * is the true value rather than a default: no descent gate ran on their
+     * verbatim claims, so no segment of them could carry the fate. Making
+     * it required instead would fail `DELETION_SPLIT_EXACT` on every
+     * historical record on disk, which is the same mistake
+     * `RESOLVER_IDENTIFIED` avoided by making an absent `task.resolvedBy`
+     * legal. Written on every new record; `src/stats.ts` always sets it.
+     */
+    notGeneratedChars?: number
     /**
      * every deleted char, whatever destroyed it:
      * humanDeletedChars + mergeDeletedChars + unknownDeletedChars

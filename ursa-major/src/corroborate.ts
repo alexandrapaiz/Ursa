@@ -29,17 +29,37 @@
 //
 // THE TEST. If the span's text is present verbatim in a commit that is NOT
 // a descendant of the generation, then the text has a source other than
-// editing this generation, and the mutation claim is dropped. Two
-// relations qualify, both rivals:
+// editing this generation, and the mutation claim is dropped. Three
+// relations qualify, all rivals:
 //
-//   pre_existing — the commit is an ancestor of the generation. The text
-//     was in the file before the agent wrote. This is not a corner case on
-//     the `ursa run` path, where a "generation" is the whole file blob at
-//     the agent's commit and therefore contains everything the file
-//     already held.
+//   prior_revision — the commit is the generation's own PARENT. The file
+//     already held the text when the agent opened it. This is not a corner
+//     case on the `ursa run` path, where a "generation" is the whole file
+//     blob at the agent's commit and therefore contains everything the
+//     file already held.
+//   pre_existing — an older ancestor holds the text and the parent does
+//     not: the generation replaced text an earlier commit had and the
+//     person put the earlier text back.
 //   sibling — neither ancestor nor descendant. Another branch's work,
 //     which the person merged or checked out rather than typed. The
 //     branch-B case above.
+//
+// WHY THE PARENT IS CHECKED FIRST, AND SEPARATELY (added 2026-10-14).
+// Until today this module had two relations, and `pre_existing` carried
+// both the parent case and the restore. It reported whichever rival
+// `git log --all` listed first, newest-first, so a span whose text sits
+// both in the parent revision and on a parallel branch came back
+// `sibling`. The relation a record carried was therefore partly an
+// artifact of log ordering, and the parent case — the only one that
+// settles whether the model contributed the text at all — was the one most
+// often hidden by it. `tools/measure-verbatim-descent.ts` measured the
+// gap over this repository's own history: the old search called 505 spans
+// `pre_existing`, while the parent blob actually held 719 of the 1,024
+// verbatim spans, 110,736 of 139,105 characters.
+//
+// So the parent blob is read before the walk. It is one `git show` per
+// (parent, path), cached, which is cheaper than the walk it short-circuits,
+// and its answer does not depend on the order of anything.
 //
 // Descendants of the generation are excluded, and the exclusion is what
 // makes the test usable rather than vacuous: `finalSha` is a descendant
@@ -148,6 +168,15 @@ export function gitDescentCorroborator(
   commits: CommitInfo[],
 ): DescentCorroborator {
   const { ancestors, descendants } = relatives(commits, generatedSha)
+  // The generation's own parents, read off the graph the pair walk already
+  // produced rather than asked of git again. Plural because a merge has
+  // several; a hit in any of them means the text was present on at least
+  // one side of the work this generation started from. Empty for a root
+  // commit, which correctly makes `prior_revision` unreachable: a root
+  // commit's blob is the first version of the file, so nothing preceded it.
+  const parent = commits.find((c) => c.sha === generatedSha)
+  const parents = parent?.parents ?? []
+  const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]))
 
   /** rival commits for a path, newest first; null when git could not say */
   const rivalCache = new Map<string, PathCommit[] | null>()
@@ -182,6 +211,22 @@ export function gitDescentCorroborator(
       return { basis: 'unverified', reason: 'span_too_short' }
     }
 
+    // The parent, before the walk. A hit here is the strongest statement
+    // this module can make and the only one that demotes a verbatim claim,
+    // so it is never allowed to lose a race to a sibling that git happened
+    // to list first.
+    for (const p of parents) {
+      const got = read(p, filePath)
+      if (got.kind !== 'present') continue
+      if (!normalize(got.text).norm.includes(needle)) continue
+      return {
+        basis: 'rival',
+        sha: p.slice(0, SHORT),
+        subject: parentSubject.get(p) ?? '',
+        relation: 'prior_revision',
+      }
+    }
+
     const rivals = rivalsFor(filePath)
     if (rivals === null) {
       return { basis: 'unverified', reason: 'path_history_unreadable' }
@@ -211,6 +256,9 @@ export function gitDescentCorroborator(
         basis: 'rival',
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
+        // A parent that held the text already returned above, so an
+        // ancestor reaching this line is an older one and the relation is
+        // the restore it was always documented to be.
         relation: ancestors.has(c.sha) ? 'pre_existing' : 'sibling',
       }
     }

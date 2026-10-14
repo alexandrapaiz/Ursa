@@ -79,8 +79,8 @@ describe('the base record every counterexample is one edit away from', () => {
 })
 
 describe('each committed record fires exactly the bounds its note names', () => {
-  it('found sixteen fixtures beside the base', () => {
-    expect(SLUGS).toHaveLength(16)
+  it('found seventeen fixtures beside the base', () => {
+    expect(SLUGS).toHaveLength(17)
   })
 
   for (const slug of SLUGS) {
@@ -90,7 +90,7 @@ describe('each committed record fires exactly the bounds its note names', () => 
 
       // Equality, not containment. A counterexample that fires three
       // unrelated bounds tells a reader nothing about the one it is named
-      // for, and two of the sixteen fixtures only exist in the shape they do
+      // for, and two of the seventeen fixtures only exist in the shape they do
       // because this assertion refused the first version of them.
       expect(found.map((v) => v.code)).toEqual(want)
 
@@ -108,7 +108,7 @@ describe('each committed record fires exactly the bounds its note names', () => 
 })
 
 describe('the directory covers the gate rather than a corner of it', () => {
-  it('fires every one of the declared bounds across the sixteen fixtures', () => {
+  it('fires every one of the declared bounds across the seventeen fixtures', () => {
     const fired = new Set(SLUGS.flatMap((s) => checkRecord(load(`${s}.json`)).map((v) => v.code)))
     // The whole point of the directory. A seventeenth bound added to
     // `src/invariants.ts` with no record that breaks it fails this line,
@@ -121,7 +121,19 @@ describe('the directory covers the gate rather than a corner of it', () => {
   it('names each fixture after a bound it actually fires', () => {
     for (const slug of SLUGS) {
       const codes = checkRecord(load(`${slug}.json`)).map((v) => v.code)
-      const fromSlug = slug.replace(/-/g, '_').toUpperCase()
+      // A slug is a bound's own name in kebab case, optionally followed by
+      // a qualifier naming WHICH CLAUSE of that bound it breaks. The
+      // qualifier arrived on 2026-10-14 with
+      // `descent-checked-uniformly-verbatim`: DESCENT_CHECKED_UNIFORMLY
+      // gained a third clause that day, and a bound with several
+      // independent failure modes needs a committed record for each one,
+      // which a strict one-fixture-per-code rule forbade. So the longest
+      // declared code that the slug starts with is the one it must fire,
+      // and a slug matching no code at all still fails this line.
+      const fromSlug = [...BOUND_CODES]
+        .filter((c) => `${slug.replace(/-/g, '_').toUpperCase()}_`.startsWith(`${c}_`))
+        .sort((a, b) => b.length - a.length)[0]
+      expect(fromSlug, `${slug}.json is named after no declared bound`).toBeDefined()
       expect(codes, `${slug}.json fires ${codes.join(', ')}`).toContain(fromSlug)
     }
   })
@@ -145,7 +157,7 @@ describe('the directory covers the gate rather than a corner of it', () => {
     expect(expectedCodes('final-spans-in-file')).toEqual(['FINAL_SPANS_IN_FILE', 'CLAIM_NOT_WIDER'])
     expect(expectedCodes('pct-denominators-ordered')).toEqual(['RATES_MATCH_FIELDS', 'PCT_DENOMINATORS_ORDERED'])
     const single = SLUGS.filter((s) => expectedCodes(s).length === 1)
-    expect(single).toHaveLength(13)
+    expect(single).toHaveLength(14)
   })
 })
 
@@ -158,15 +170,17 @@ describe('the gate reaches these records through the two surfaces that read reco
     // one at test time, which proves the plumbing and leaves nothing a
     // reviewer can read.
     const { violations, lines } = runGate(DIR)
-    // 16 fixtures, plus the clean base. Two fire two bounds each and one
-    // fires three, which is 20 violations: `final-spans-in-file` and
+    // 17 fixtures, plus the clean base. Two fire two bounds each and one
+    // fires three, which is 21 violations: `final-spans-in-file` and
     // `gen-claim-bounded` each gained CLAIM_NOT_WIDER on 2026-10-13, when
     // that bound started checking the byte-identity its own sentence had
-    // always stated instead of only the two extents' lengths. Each
-    // fixture's `.md` says which bounds it fires and why, and the
-    // per-fixture assertion above is what holds this total honest.
-    expect(violations).toBe(20)
-    expect(lines.join('\n')).toContain('20 violations')
+    // always stated instead of only the two extents' lengths, and
+    // `descent-checked-uniformly-verbatim` arrived on 2026-10-14 with that
+    // bound's third clause. Each fixture's `.md` says which bounds it fires
+    // and why, and the per-fixture assertion above is what holds this total
+    // honest.
+    expect(violations).toBe(21)
+    expect(lines.join('\n')).toContain('21 violations')
     expect(lines.join('\n')).toContain('OK — every stated bound holds')
   })
 
