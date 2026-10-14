@@ -3,7 +3,12 @@
   "task": {
     "id": "violation-fixture-base",
     "finished": true,
-    "generatedAt": "2026-10-10T00:00:00.000Z"
+    "generatedAt": "2026-10-10T00:00:00.000Z",
+    "resolvedBy": {
+      "basis": "git_commit",
+      "commit": "19455a3",
+      "dirty": false
+    }
   },
   "artifact": {
     "kind": "chat"

@@ -3,7 +3,7 @@
 //   npx tsx tools/make-violation-fixtures.ts          # write every fixture
 //   npx tsx tools/make-violation-fixtures.ts --check   # fail if any drifted
 //
-// Why a script and not fifteen hand-typed JSON files. The fixtures ARE the
+// Why a script and not sixteen hand-typed JSON files. The fixtures ARE the
 // artifact: `src/invariants.violations.test.ts` reads only the committed
 // `.json` and `.md` files and never imports this module, so a fixture that
 // stops firing is a test failure whether or not this script still runs. What
@@ -38,11 +38,12 @@ const clone = (r: OutcomeRecord): OutcomeRecord => JSON.parse(JSON.stringify(r))
 // The base record. Everything below is this record plus one named edit, so a
 // reviewer reads the edit rather than the file.
 //
-// Built through `resolve()` on synthetic prose, then given the two structures
-// a resolved chat-path record does not carry, because three of the fifteen
+// Built through `resolve()` on synthetic prose, then given the structures a
+// resolved chat-path record does not carry, because four of the sixteen
 // bounds read nothing else: `signals` (SIGNAL_QUOTE_GROUNDED), a descent
 // verdict per mutation label (DESCENT_CHECKED_UNIFORMLY), and one exclusion
-// (EXCLUSION_NOT_CLASSIFIED). The signals come from `deriveSignals`, the real
+// (EXCLUSION_NOT_CLASSIFIED). A fourth, RESOLVER_IDENTIFIED, reads
+// `task.resolvedBy`, which `resolve()` does not write either. The signals come from `deriveSignals`, the real
 // detector, and the exclusion goes through `resolve()`'s own input so
 // `stats.perFile` gets the row the resolver would have written. Only the
 // descent verdicts are attached by hand, because a corroborator needs a git
@@ -99,6 +100,23 @@ function baseRecord(): OutcomeRecord {
       if (s.class === 'survived_mutated') s.descent = { basis: 'corroborated', rivalsSearched: 3 }
     }
   }
+  // Pinned, not read off the tree this script runs in. `saveRecord` stamps
+  // `task.resolvedBy` from `currentResolverIdentity()` (src/store.ts), and
+  // this script does not go through `saveRecord`, so the field would be
+  // absent here — which is legal, and would leave RESOLVER_IDENTIFIED
+  // vacuously true on the base record in the same way SIGNAL_QUOTE_GROUNDED
+  // was vacuous on the two fixtures that predate this directory. A literal
+  // is also the only form that can be committed: reading HEAD would make
+  // every fixture's bytes a function of the commit containing them, so
+  // `--check` would report drift on every commit and the fixtures could
+  // never be diffed.
+  //
+  // The value is a real commit of this repository — `19455a3`, the commit
+  // that added `task.resolvedBy` — rather than a shaped-but-invented string
+  // like the `deadbee` in `descent-checked-uniformly.json`. The bound this
+  // fixture pair exists for is that a named resolver is one a reader can
+  // look up, so the record that passes it ought to name one that resolves.
+  record.task.resolvedBy = { basis: 'git_commit', commit: '19455a3', dirty: false }
   return record
 }
 
@@ -106,7 +124,7 @@ function baseRecord(): OutcomeRecord {
 // The cases. `codes` is the multiset of invariant codes the gate must emit on
 // this fixture and nothing besides, declared here and re-asserted by the
 // test. Where it holds more than one entry, `why` says why the bound cannot
-// be violated on its own — three of the fifteen are backstops that are
+// be violated on its own — two of the sixteen are backstops that are
 // mathematically implied by their neighbours, which is a fact this exercise
 // produced and no `toContain` assertion could have shown.
 // ---------------------------------------------------------------------------
@@ -284,6 +302,20 @@ const CASES: Case[] = [
     break: (r) => {
       r.exclusions![0] = { ...r.exclusions![0], path: 'notes.md' }
       r.stats.perFile = r.stats.perFile.filter((row) => row.path !== EXCLUDED.path)
+    },
+  },
+  {
+    slug: 'resolver-identified',
+    codes: ['RESOLVER_IDENTIFIED'],
+    edit: '`task.resolvedBy.commit` overwritten with the string `HEAD`, the basis and the `dirty` flag left alone',
+    consequence:
+      'the record names the resolver that made every claim below it, and the name is not one anybody can look up. `HEAD` resolves to a different commit in every clone and on every day, so a lab holding two records stamped this way cannot tell whether they were resolved by the same rules, which is the entire question `task.resolvedBy` was added to answer. The field still reads as provenance in the viewer, the CLI line and the CI comment, because all three print whatever string the record carries. This is the field\'s own failure mode re-entered one level down: a placeholder that passes for a pointer.',
+    break: (r) => {
+      // Cast for the same reason the bound reads the field as `unknown`: the
+      // malformed state is reachable in a JSON file on disk and unreachable
+      // through the declared `ResolverIdentity` union, so writing the
+      // counterexample requires stepping outside the type exactly once.
+      ;(r.task.resolvedBy as unknown as Record<string, unknown>).commit = 'HEAD'
     },
   },
 ]
