@@ -61,6 +61,44 @@
 // (parent, path), cached, which is cheaper than the walk it short-circuits,
 // and its answer does not depend on the order of anything.
 //
+// WHY A RIVAL CAN BE TOO NEW TO BE A RIVAL (added 2026-10-14).
+// `sibling` claims the person "merged or checked out rather than typed"
+// the text, and that claim requires the other branch's commit to have
+// existed while the person was working. Until today nothing here looked
+// at time at all, so a commit authored after the episode ended could be
+// named as the source of text the episode had already finished. It
+// happened on a shipped record: `ursa-2026-10-07-2f610e9` named rival
+// `510a55a`, authored 2026-10-14 on an unmerged branch, as holding text
+// in a file whose work closed on 2026-10-07 (docs/ideas.md, 2026-10-14).
+// Seven spans over 298 characters, so 0.2% of verbatim characters: a
+// correctness defect rather than a load-bearing figure, and it corrupts
+// the one relation that carries a claim about what the person did.
+//
+// The bound is `horizonSha`, the episode's `finalSha`. The boundary is
+// the episode's LAST commit and not its first, because a person can
+// legitimately branch mid-episode, write text elsewhere and bring it in;
+// only work authored after they finished is unambiguously not a source.
+//
+// Two things make this narrower than "compare the dates":
+//
+//   The graph is asked first and the clock only answers what the graph
+//   cannot. A commit that is an ancestor of the generation, or an
+//   ancestor of the horizon, demonstrably existed by then whatever its
+//   author date says, and rebases and clock skew make author dates lie
+//   in exactly that direction. So the time bound applies only to a
+//   candidate whose position neither reaches — which is precisely the
+//   `sibling` set, the only relation the defect could reach.
+//
+//   An unknown date never drops a rival. A candidate missing from
+//   `commits` (a caller that passed a narrowed range), an unparseable
+//   date, or an absent horizon all leave the candidate in the search,
+//   because dropping it would silently promote a span on no evidence.
+//
+// This is the one place the module trusts a timestamp instead of the
+// commit graph, and a rewritten history can therefore lie to it: a
+// sibling rebased to an older author date gets searched again. That is
+// the safe direction, since being searched is the old behaviour.
+//
 // Descendants of the generation are excluded, and the exclusion is what
 // makes the test usable rather than vacuous: `finalSha` is a descendant
 // and its blob holds every final span by definition, so a test that did
@@ -162,10 +200,20 @@ export function relatives(commits: CommitInfo[], generatedSha: string): {
  * rest; a blob is read once per (sha, path) however many spans ask about
  * it.
  */
+/**
+ * @param horizonSha the episode's `finalSha`: the last commit of the work
+ *   this generation belongs to. A candidate rival authored after it, and
+ *   reachable from neither the generation's history nor the horizon's,
+ *   did not exist while the person was working and is dropped from the
+ *   search. Omitted means no horizon is known — the chat path, and the
+ *   unit tests that ask about one span — and then every candidate is in
+ *   the running, which is this function's behaviour before 2026-10-14.
+ */
 export function gitDescentCorroborator(
   projectPath: string,
   generatedSha: string,
   commits: CommitInfo[],
+  horizonSha?: string,
 ): DescentCorroborator {
   const { ancestors, descendants } = relatives(commits, generatedSha)
   // The generation's own parents, read off the graph the pair walk already
@@ -178,6 +226,30 @@ export function gitDescentCorroborator(
   const parents = parent?.parents ?? []
   const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]))
 
+  // The horizon, in epoch milliseconds. `Date.parse` and not a string
+  // compare: `listCommits` reads author dates with `--date=iso-strict`,
+  // which carries each author's own UTC offset, so `2026-10-14T00:26:39Z`
+  // sorts before `2026-10-13T23:00:00-07:00` as text while being two
+  // hours after it in fact.
+  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]))
+  const horizonMs = horizonSha === undefined ? NaN : (authorMs.get(horizonSha) ?? NaN)
+  // Ancestors of the horizon, which are not in general ancestors of the
+  // generation: a branch merged into this episode between `generatedSha`
+  // and `finalSha` is a sibling of the generation and still demonstrably
+  // existed before the person finished. Computed from the same in-memory
+  // graph, so it costs one more walk of a map and no subprocess.
+  const horizonAncestors = Number.isNaN(horizonMs)
+    ? new Set<string>()
+    : relatives(commits, horizonSha as string).ancestors
+  /** authored after the person finished, so it cannot be where the text came from */
+  const afterHorizon = (sha: string): boolean => {
+    if (Number.isNaN(horizonMs)) return false
+    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false
+    const ms = authorMs.get(sha)
+    if (ms === undefined || Number.isNaN(ms)) return false
+    return ms > horizonMs
+  }
+
   /** rival commits for a path, newest first; null when git could not say */
   const rivalCache = new Map<string, PathCommit[] | null>()
   const rivalsFor = (filePath: string): PathCommit[] | null => {
@@ -185,7 +257,14 @@ export function gitDescentCorroborator(
     const touching = commitsTouchingPath(projectPath, filePath)
     const rivals = touching === null
       ? null
-      : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha))
+      : touching.filter((c) => c.sha !== generatedSha
+        && !descendants.has(c.sha)
+        // Dropped before any blob is read, like the descendant exclusion
+        // above and for the same reason: a commit that cannot be the
+        // source should not cost a `git show`, and it must not consume a
+        // slot against MAX_RIVAL_BLOBS, or a burst of later branch work
+        // on a busy path would push the real rivals past the cap.
+        && !afterHorizon(c.sha))
     rivalCache.set(filePath, rivals)
     return rivals
   }
