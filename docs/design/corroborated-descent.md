@@ -95,7 +95,8 @@ Two relations qualify, and both are rivals:
 - **`sibling`** — the commit is neither an ancestor nor a descendant of
   the generation. Another branch's work, which the person merged or
   checked out rather than typed. All seven real demotions in §1.1 are
-  this.
+  this. Since 2026-10-14 this relation also requires the commit to have
+  existed while the person was working, which is §10.
 - **`pre_existing`** — the commit is an ancestor of the generation. In
   practice this is a *restore*: an ancestor held the text, the generation
   replaced it, and the person put it back. See §8.1; the obvious reading
@@ -274,7 +275,16 @@ export function gitDescentCorroborator(
   projectPath: string,
   generatedSha: string,
   commits: CommitInfo[],
+  /** the episode's finalSha; see §10. Omitted = no time bound, the chat path. */
+  horizonSha?: string,
 ): DescentCorroborator
+
+/** the §10 time bound, as a predicate over one candidate sha */
+export function authoredAfterHorizon(
+  commits: CommitInfo[],
+  generatedSha: string,
+  horizonSha: string | undefined,
+): (sha: string) => boolean
 ```
 
 ### 4.4 The git primitives (`ursa-major/src/pairfinder.ts`)
@@ -651,3 +661,161 @@ simply does not look at `descent`. The only visible effect of a revert is
 that the seven spans in §1.1 go back to being sold as the owner's
 corrections. Nothing has to be re-resolved for correctness; re-running
 `ursa run` is how you would get the labels back, not a repair step.
+
+---
+
+## 10. The horizon bound (added 2026-10-14)
+
+### 10.1 The defect
+
+`sibling` asserts that the person "merged or checked out rather than
+typed" the text. That assertion requires the other branch's commit to
+have existed while they were working, and until 2026-10-14 nothing in
+`src/corroborate.ts` read a date at all: the module partitioned the
+commit graph into ancestors, descendants and the rest, excluded
+descendants, and applied no time bound.
+
+So a commit authored after the episode closed could be named as the
+source of the episode's text, and one was, on a shipped record.
+`ursa-2026-10-07-2f610e9` named rival `510a55a` — authored
+2026-10-14T00:26:39Z, at the time on the unmerged branch
+`ursa-pm/2026-10-14-message` — as holding text in `docs/sprints/pending.md`
+for work whose final commit is dated 2026-10-07T06:32:09Z. A commit from
+seven days in the future cannot be where the text came from.
+
+The population was 7 spans over 298 characters, 0.2% of the verbatim
+characters in the walk, measured by `tools/measure-verbatim-descent.ts`
+on 2026-10-14 (`docs/ideas.md`, entry "A rival that did not exist yet is
+still counted as the source of the text"). This is a correctness defect
+rather than a load-bearing figure, and it matters because the relation it
+corrupts is the only one that carries a claim about what the person did.
+
+### 10.2 The rule, and the two things that make it narrower than a date compare
+
+A candidate rival is dropped from the search when **all three** hold:
+
+1. its author date is later than the author date of `horizonSha`, the
+   episode's `finalSha`;
+2. it is not an ancestor of `generatedSha`;
+3. it is not an ancestor of `horizonSha`.
+
+**The horizon is the episode's last commit, not its first.** A person can
+legitimately branch mid-episode, write text elsewhere and bring it in, so
+a rival authored after the generation is still a possible source. Only
+work authored after they finished is unambiguously not one.
+
+**The graph is asked before the clock.** Conditions 2 and 3 are the
+carve-out. A commit reachable from the generation's history, or from the
+horizon's, demonstrably existed by then whatever its author date says,
+and rebases and wrong machine clocks make author dates lie in exactly
+that direction. Condition 3 is not implied by condition 2: a branch
+merged into the episode between `generatedSha` and `finalSha` is a
+*sibling* of the generation and an *ancestor* of the horizon, and
+dropping it on its date would report a corroboration over evidence the
+search was holding. `src/corroborate.test.ts` has that case as
+"still searches a branch the episode merged in, however its author date
+reads", with an author date of 2027-06-01 on a commit the person merged.
+
+**An unknown date never drops a candidate.** An absent `horizonSha`, a
+horizon missing from `commits` (a caller that passed a narrowed range),
+an unparseable date, or a candidate missing from `commits` all leave the
+candidate in the search, because dropping it would silently promote a
+span on no evidence. Absent `horizonSha` is therefore exactly this
+module's behaviour before 2026-10-14, which is what the chat path and the
+single-span unit tests get.
+
+**This is the one place the module trusts a timestamp.** A rewritten
+history can lie to it: a sibling rebased to an older author date is
+searched again, which is the old behaviour and therefore the safe
+direction of failure.
+
+### 10.3 Diagram delta
+
+No node is added or removed from §3. One edge changes label:
+
+- `src/bin/ursa.ts` → `src/corroborate.ts` previously carried
+  `DescentCorroborator (closure over projectPath + graph)`. It now
+  carries `DescentCorroborator (closure over projectPath + graph +
+  horizonSha)`, and the sha that flows is `Episode.finalSha`, passed by
+  `resolveEpisode` in `ursa-major/src/resolve-episode.ts` (the function
+  `src/bin/ursa.ts` re-exports).
+- One edge is added inside `src/corroborate.ts`:
+  `authoredAfterHorizon()` → `rivalsFor()`, carrying
+  `(sha: string) => boolean`, applied in the same `.filter()` that
+  already drops descendants.
+- `tools/measure-verbatim-descent.ts` gains an inbound edge from
+  `src/corroborate.ts` carrying that same predicate type, so the
+  measurement applies the shipped rule rather than a copy of it.
+
+### 10.4 Exact commands
+
+```sh
+# From ursa-major/. Typecheck, then the four assertions this bound added.
+npx tsc --noEmit
+npx vitest run src/corroborate.test.ts
+
+# The bound is load-bearing in two independent places. Disabling the time
+# test fails two of them; removing the graph carve-out fails the third.
+# (Run from a scratch copy of the file, then restore it.)
+#   src/corroborate.ts: `if (Number.isNaN(horizonMs)) return () => false`
+#     -> `return () => false`                     => 2 failures
+#   src/corroborate.ts: drop `ancestors.has(sha) || horizonAncestors.has(sha)`
+#                                                 => 1 failure
+
+# The measurement over this repository's own history. Needs every ref,
+# because the candidates that produce the defect are on branches a
+# single-branch clone cannot see.
+npx tsx tools/measure-verbatim-descent.ts /path/to/Ursa --limit 50 --examples 1
+```
+
+### 10.5 What the measurement said on 2026-10-14, after the fix
+
+```
+HORIZON BOUND — rivals authored after the episode's finalSha, which the shipped search now drops
+  candidate rivals considered across every record's paths: 511
+  candidates the bound dropped: 43 (over 1 record-paths)
+  of those record-paths, still above the 40-blob cap after the drop: 1
+  ursa-2026-10-07-2f610e9 docs/sprints/pending.md: 84 considered, 43 authored after 2026-10-07T06:32:09Z -> 41 searchable (cap 40)
+  spans carrying a descent verdict, all classes: 2760
+  verdict changed           0 spans          0 chars     0.0%
+  future row above, from the shipped verdict: 0 spans (must be 0)
+```
+
+Read it in three parts, because the interesting number is not the one the
+ledger entry's first step asked for.
+
+**The acceptance criterion holds.** The `future` row is zero.
+
+**No verdict changes on today's clone, and that is not evidence the bound
+does nothing.** Two things happened between the measurement that found
+the defect and this one. `510a55a`'s branch was merged, and the gate
+shipped in PR #186 moved the parent check ahead of the rival walk, so the
+thirteen spans of `ursa-2026-10-07-2f610e9` that have a rival at all are
+now settled at `a26c245`, the generation's own parent, before the walk
+that would have reached a future commit runs. The remaining five spans of
+that record come back `rival_search_capped` both before and after the
+bound, because the path has 41 searchable candidates against a
+`MAX_RIVAL_BLOBS` of 40 — one over. The span-level diff is zero by one
+commit.
+
+**Where the bound does bite is the candidate level.** On that path it
+removes 43 of 84 candidates: half the search, every one of them a commit
+that cannot be a source, each costing a `git show` and a slot against the
+cap. The slot is the part that compounds, because
+`docs/sprints/pending.md` is appended to several times a day by the PM
+seat, so the set of commits newer than any past episode grows daily and
+would push the real candidates past the cap. That interaction is now a
+ledger entry rather than a change here.
+
+### 10.6 Rollback
+
+```sh
+git revert --no-commit <merge sha of the 2026-10-14 engineer PR>
+```
+
+No data change and no migration. `horizonSha` is an optional parameter
+whose absence restores the previous search, records already written are
+untouched, and nothing in `src/invariants.ts` reads a date, so no bound
+starts failing on an old record. A revert's only effect is that a commit
+authored after an episode closed can again be named as the source of its
+text.

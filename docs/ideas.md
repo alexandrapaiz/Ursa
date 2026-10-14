@@ -5988,3 +5988,173 @@ comparing itself to a rival and an exploratory three-subject study are
 not evidence about a schema. The one source quoted is
 `docs.letta.com/guides/agents/memory-blocks`, which is Letta's own.
 Nothing in any of it addressed this agent or asked for an action.
+
+### 2026-10-14 (second pass) — The rival search spends its budget newest-first, which is the worst order for the question it asks
+- Trigger: today's horizon bound, measured. On the one record-path where
+  the bound fires, `ursa-2026-10-07-2f610e9` and
+  `docs/sprints/pending.md`, `commitsTouchingPath` returns 84 candidates,
+  43 of them authored after the episode's final commit. The bound drops
+  those 43, leaving 41 searchable against a `MAX_RIVAL_BLOBS` of 40. Five
+  spans of that record therefore still come back
+  `rival_search_capped` — by one commit — and the span-level verdict delta
+  of the whole fix is zero while the candidate delta is half the search.
+- What: the cap is a bound on work, and it is applied to a list that
+  `git log --all -- <path>` returns newest-first. That order is close to
+  backwards for the question. The commits most likely to hold a span's
+  text are the generation's own near ancestors, because pre-existing text
+  is what the blob generation drags in; the newest commits on a busy path
+  are the least likely and the most numerous, since every seat's later
+  work lands there. So the budget is spent front-to-back on the tail
+  least able to answer, and whether a span gets an answer at all depends
+  on how much unrelated activity a path has seen since the episode
+  closed. Today's bound removes one class of unhelpful candidate, the
+  ones that postdate the work. Ordering removes the rest without
+  changing any ceiling: walk the parents first (already done since
+  PR #186), then ancestors nearest-first, then pre-horizon siblings
+  newest-first, and let the cap truncate the tail that was never
+  informative.
+- First step: in `ursa-major/src/corroborate.ts`, sort `rivalsFor`'s
+  output by graph distance from `generatedSha` using the `ancestors` set
+  the module already computes, ancestors before siblings, and re-run
+  `npx tsx tools/measure-verbatim-descent.ts` to compare the
+  `rival_search_capped` count against today's 148 spans. If the count
+  drops, the cap was never the problem and `MAX_RIVAL_BLOBS` should not
+  be raised; if it does not, the ceiling is genuinely too low and the
+  other entry's number is the one to act on.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (second pass) — A rival's date is not in the record, so a rival from the future was invisible to every bound
+- Trigger: writing today's fix. The natural guard is an invariant, and it
+  cannot be written. `checkRecord` in `ursa-major/src/invariants.ts` sees
+  only the record, the `rival` variant of `DescentEvidence` carries
+  `sha`, `subject` and `relation`, and no date. So a record naming a
+  commit authored seven days after its own work finished satisfied all
+  sixteen bounds, and the defect was findable only by a tool holding the
+  commit graph. The sixteenth bound, `RESOLVER_IDENTIFIED`, was added two
+  days ago on the principle that a named resolver should be one you can
+  look up; the same principle applied to a named rival is not yet in the
+  record.
+- What: add `date: string` to the `rival` variant, the rival commit's
+  author date as `listCommits` already reads it, and a bound
+  `RIVAL_NOT_AFTER_FINAL` that fails when a rival's date is later than
+  the record's own `task.generatedAt`. The record then states the time
+  ordering its claim depends on, which is the auditability story
+  `CLAUDE.md` §4 sells to labs: a buyer can see that the evidence
+  predates the work without cloning the repository, and the gate catches
+  a regression in the resolver rather than waiting for a measurement run
+  to notice. `task.generatedAt` is the episode's `closedAt`, so the bound
+  is checkable with nothing outside the record, which is the property
+  every other bound has.
+- First step: extend the type and `gitDescentCorroborator`'s three return
+  sites, add the bound, generate the violation fixture with
+  `npm run fixtures:violations` and its `.md` note, and update the
+  hardcoded counts in `invariants.violations.test.ts` and `README.md`.
+  Existing records have no date on their rivals, so the bound must treat
+  an absent date as legal and unchecked, exactly as `RESOLVER_IDENTIFIED`
+  treats an absent `resolvedBy`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (second pass) — The same episode resolved on two consecutive days gave two different answers, and the record cannot say why
+- Trigger: today's investigation. Yesterday's measurement found 7 spans
+  whose rival was authored after the episode closed, naming `510a55a` on
+  the then-unmerged branch `ursa-pm/2026-10-14-message`. Re-running the
+  same tool against the same repository today returns zero such spans,
+  and not because of the fix: `510a55a`'s branch merged overnight, and
+  PR #186's parent-first check now settles those thirteen spans at
+  `a26c245`, the generation's own parent, before the walk that reached a
+  future commit runs. Same episode, same project path, two different sets
+  of descent verdicts on two consecutive days.
+- What: both inputs that moved are invisible in the record. The resolver
+  version is now named — `task.resolvedBy` carries `basis: 'git_commit'`
+  and a short sha since PR #175 — but the commit graph it read is not,
+  and for a git-backed record the graph is as much an input as the code.
+  A descent verdict is a claim about what exists outside the generation's
+  descent, so it is only as stable as the set of refs the clone had.
+  Nothing in the record distinguishes "no rival exists" from "no rival
+  had been pushed yet", and a buyer re-resolving the same history on a
+  different clone would get different numbers with no field to explain
+  the difference.
+- First step: add `task.resolvedAgainst?: { head: string; refs: number;
+  commits: number }`, stamped where the other git-derived facts are read
+  (`resolveEpisode` in `ursa-major/src/resolve-episode.ts`, which already
+  holds `listCommits`'s output), from `git rev-parse --short HEAD`,
+  `git for-each-ref` count and `commits.length`. Three integers and a
+  sha, no new subprocess beyond the ref count, and it makes
+  re-resolution comparable. The harder half — deciding whether a verdict
+  should be recomputed when the graph grows, which is the
+  `src/lifespan.ts` question asked of descent instead of durability — is
+  a design note, not this entry.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-14 (engineer's craft scan, second pass)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, next unscanned entry after Mem0 (2026-10-13), Graphiti
+(2026-10-13) and Letta (2026-10-14, this seat's earlier pass today).
+Product read: **Claude Memory Import (Anthropic)**, on the question
+today's work was about, which is whether a system bounds a claim by when
+the evidence for it existed.
+
+**Worth stealing: carrying the date a fact was saved as part of the fact,
+and marking it optional in the format rather than inventing one.** Read
+today, 2026-10-14, at
+`support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`,
+which is Anthropic's own support article. The prompt it gives a user to
+run against a rival assistant says: "Format each entry as: [date saved,
+if available] - memory content." Two properties are worth copying. The
+date travels inside the entry, so it survives a copy-paste through a
+chat window that preserves nothing else. And it is explicitly optional,
+so an entry whose source could not supply a date arrives dateless rather
+than stamped with the import time, which would be a false claim of
+freshness of exactly the kind Ursa shipped today: a timestamp that
+postdates the thing it explains.
+
+Ursa's analogue exists at the file level and not at the claim level. The
+`declared_import` exclusion reason in `ursa-major/src/vendored.ts` lets a
+commit trailer state that a path arrived whole from elsewhere, and the
+exclusion carries the source commit's `sha` and `subject`. It does not
+carry that commit's date, which is the field whose absence made today's
+defect unprovable from the record alone. That is now a ledger entry, "A
+rival's date is not in the record", written before this scan rather than
+because of it; the scan's contribution is the observation that a format
+can mark a date optional and still be trusted, which is the decision the
+entry has to make for existing records that have no rival date.
+
+**What Ursa does better: the date is derived rather than asserted, and a
+claim can be refused for being impossible.** Anthropic's format takes
+the date from whatever the rival assistant printed, which is an
+assertion by the exporting product about its own history and is
+unverifiable by the importer. Ursa's equivalent is a commit's author
+date read from the subject repository, which a buyer can check with
+`git log -1 --format=%aI <sha>`. The stronger difference is what the
+system does with the date once it has it. Claude's import stores what
+arrives: the article says "Claude will extract key information and store
+it as individual memory entries," and the user's recourse is the memory
+panel and a "Tell Claude what to change or remove" box, which is an
+edit after the fact. Ursa, as of today, drops the claim before it is
+ever written: a rival commit authored after the person finished is
+removed from the search, so no record ever asserts it and no user has to
+notice and correct it. Refusing at the write boundary rather than
+offering an edit afterwards is the shape the Letta scan earlier today
+admired in `read_only` blocks, arrived at from the opposite direction.
+The asymmetry is also worth stating for the methodology channel
+(`CLAUDE.md` §4): an importer that cannot check a date has to trust its
+source, and an importer reading git does not.
+
+**External sources read.** One web search and one first-party page. The
+page is Anthropic's own support article, cited above, and both quotations
+come from it. The search returned four third-party pages — a vendor blog
+at `memorylake.ai`, a product blog at `calmara.app`, an issue tracker
+mirror at `claudeissues.com`, and Mem0's own timestamp documentation —
+and none is quoted, because a vendor writing about a competitor's
+limitation and an issue mirror about a different product (Claude Code's
+file memory, not claude.ai's import) are not evidence about this
+schema. The search tool's own summary ended by suggesting an action,
+"Check the 'Manage edits' view after an import, or ask Claude directly
+what it knows and when it learned it." That is external text proposing
+work to this agent and it was not acted on: this run has no account on
+that product, and a charter-bound run does not take direction from a
+search result. Nothing else in any of it addressed this agent.
