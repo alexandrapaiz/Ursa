@@ -371,6 +371,9 @@ function relatives(commits, generatedSha) {
 }
 function gitDescentCorroborator(projectPath, generatedSha, commits) {
   const { ancestors, descendants } = relatives(commits, generatedSha);
+  const parent = commits.find((c) => c.sha === generatedSha);
+  const parents = parent?.parents ?? [];
+  const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]));
   const rivalCache = /* @__PURE__ */ new Map();
   const rivalsFor = (filePath) => {
     if (rivalCache.has(filePath)) return rivalCache.get(filePath);
@@ -394,6 +397,17 @@ function gitDescentCorroborator(projectPath, generatedSha, commits) {
     if (needle.length < MIN_VERBATIM_LEN) {
       return { basis: "unverified", reason: "span_too_short" };
     }
+    for (const p of parents) {
+      const got = read(p, filePath);
+      if (got.kind !== "present") continue;
+      if (!normalize(got.text).norm.includes(needle)) continue;
+      return {
+        basis: "rival",
+        sha: p.slice(0, SHORT),
+        subject: parentSubject.get(p) ?? "",
+        relation: "prior_revision"
+      };
+    }
     const rivals = rivalsFor(filePath);
     if (rivals === null) {
       return { basis: "unverified", reason: "path_history_unreadable" };
@@ -416,6 +430,9 @@ function gitDescentCorroborator(projectPath, generatedSha, commits) {
         basis: "rival",
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
+        // A parent that held the text already returned above, so an
+        // ancestor reaching this line is an older one and the relation is
+        // the restore it was always documented to be.
         relation: ancestors.has(c.sha) ? "pre_existing" : "sibling"
       };
     }
@@ -1644,12 +1661,13 @@ function checkRecord(record) {
   const st = record.stats;
   const gen = st.generated;
   const split = gen.humanDeletedChars + gen.mergeDeletedChars + gen.unknownDeletedChars;
-  const expectedDeleted = gen.totalChars - gen.survivedChars;
-  if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0) {
+  const notGenerated = gen.notGeneratedChars ?? 0;
+  const expectedDeleted = gen.totalChars - gen.survivedChars - notGenerated;
+  if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0 || notGenerated < 0) {
     push(
       "DELETION_SPLIT_EXACT",
       "stats.generated",
-      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars = ${expectedDeleted}`
+      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars - notGeneratedChars(${notGenerated}) = ${expectedDeleted}`
     );
   }
   const spanExtentSum = record.files.reduce(
@@ -1775,6 +1793,13 @@ function checkRecord(record) {
         `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`
       );
     }
+    if (d.span.class === "survived_verbatim" && d.descent.basis === "rival" && d.descent.relation === "prior_revision") {
+      push(
+        "DESCENT_CHECKED_UNIFORMLY",
+        d.where,
+        `labelled survived_verbatim while naming the generation's own parent ${d.descent.sha} as already holding the span's text`
+      );
+    }
   }
   const classified = new Set(record.files.map((f) => f.path));
   for (const [i, x] of (record.exclusions ?? []).entries()) {
@@ -1858,7 +1883,7 @@ var init_invariants = __esm({
       GEN_CHARS_CONSISTENT: "a generation's character counts agree: totalChars = sum of span extents, charsWritten = text.length, separatorChars = charsWritten - totalChars",
       GEN_SURVIVED_BOUNDED: "a generation's surviving characters are a subset of its segment characters, which are a subset of what it wrote: survivedChars <= totalChars <= charsWritten",
       GEN_CLAIM_BOUNDED: "the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten",
-      DELETION_SPLIT_EXACT: "the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars",
+      DELETION_SPLIT_EXACT: "the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars - notGeneratedChars. The last term is the characters of generation segments whose fate is `not_generated` \u2014 text the file already held at the generation's parent, which the model did not produce and the person therefore did not discard. It is inside totalChars because totalChars is the sum of segment extents and the fates must add up to it, and it is outside the deletion split because nothing destroyed it.",
       FINAL_SPANS_IN_FILE: "a final file's spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)",
       COVERED_BOUNDED: "classified characters are a subset of the finished work: coveredChars = sum of final span extents <= finalChars",
       RATES_MATCH_FIELDS: "every stored rate equals its own numerator over its own denominator, rounded to three places",
@@ -1866,7 +1891,7 @@ var init_invariants = __esm({
       PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
       SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
       EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
-      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.",
+      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
       RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it."
     };
     r3 = (x) => Math.round(x * 1e3) / 1e3;
@@ -2471,7 +2496,11 @@ function computeStats(files, generations, conversations, exclusions = []) {
   );
   const mergeDeleted = deletedCharsWhere((c) => c === "merge");
   const unknownDeleted = deletedCharsWhere((c) => c === "unknown");
-  const generatedDeleted = generatedTotal - generatedSurvived;
+  const generatedNotGenerated = generations.reduce(
+    (a, g) => a + g.spans.filter((s) => s.fate === "not_generated").reduce((b, s) => b + (s.end - s.start), 0),
+    0
+  );
+  const generatedDeleted = generatedTotal - generatedSurvived - generatedNotGenerated;
   const humanDeleted = generatedDeleted - mergeDeleted - unknownDeleted;
   const perConversation = conversations.map((conv) => {
     const convGens = generations.filter((g) => g.conversationId === conv.id);
@@ -2506,6 +2535,7 @@ function computeStats(files, generations, conversations, exclusions = []) {
       separatorChars: generatedSeparators,
       verbatimClaimedChars: verbatimClaimed,
       survivedChars: generatedSurvived,
+      notGeneratedChars: generatedNotGenerated,
       deletedChars: generatedDeleted,
       deletedPct: generatedTotal ? r32(generatedDeleted / generatedTotal) : 0,
       humanDeletedChars: humanDeleted,
@@ -2568,6 +2598,7 @@ function resolve(input) {
   }
   const verbatimClaims = /* @__PURE__ */ new Map();
   const mutatedClaims = /* @__PURE__ */ new Map();
+  const notGeneratedClaims = /* @__PURE__ */ new Map();
   const addClaim = (m, c) => {
     let arr = m.get(c.genIndex);
     if (!arr) m.set(c.genIndex, arr = []);
@@ -2581,6 +2612,28 @@ function resolve(input) {
     start,
     end
   });
+  const verbatimClaim = (base, p, gStart, gEnd, filePath, trivial) => {
+    const descent = input.corroborate?.(filePath, base.text);
+    if (descent?.basis === "rival" && descent.relation === "prior_revision") {
+      addClaim(notGeneratedClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+      return {
+        ...base,
+        class: "no_generation_provenance",
+        uncertain: true,
+        candidate: { score: 1, text: p.gen.text.slice(gStart, gEnd), source: srcPtr(p, gStart, gEnd) },
+        descent
+      };
+    }
+    addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+    return {
+      ...base,
+      class: "survived_verbatim",
+      score: 1,
+      ...trivial ? { trivial } : {},
+      source: srcPtr(p, gStart, gEnd),
+      ...descent ? { descent } : {}
+    };
+  };
   const normalizedOnlyMutation = (base, p, gStart, gEnd, filePath, trivial) => {
     const claimed = p.gen.text.slice(gStart, gEnd);
     const source = srcPtr(p, gStart, gEnd);
@@ -2623,8 +2676,7 @@ function resolve(input) {
               nearest ??= { p, gStart, gEnd };
               continue;
             }
-            span = { ...base, class: "survived_verbatim", score: 1, source: srcPtr(p, gStart, gEnd) };
-            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+            span = verbatimClaim(base, p, gStart, gEnd, f.path);
             break outerLong;
           }
         }
@@ -2640,8 +2692,7 @@ function resolve(input) {
               nearestShort ??= { p, g };
               continue;
             }
-            span = { ...base, class: "survived_verbatim", score: 1, trivial: true, source: srcPtr(p, g.start, g.end) };
-            addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end });
+            span = verbatimClaim(base, p, g.start, g.end, f.path, true);
             break outer;
           }
         }
@@ -2724,13 +2775,14 @@ function resolve(input) {
     const spans = p.sentences.map((gs) => {
       const v = overlaps(verbatimClaims.get(gi), gs);
       const m = !v && overlaps(mutatedClaims.get(gi), gs);
-      const fate = v ? "survived_verbatim" : m ? "survived_mutated" : "generated_deleted";
+      const n2 = !v && !m && overlaps(notGeneratedClaims.get(gi), gs);
+      const fate = v ? "survived_verbatim" : m ? "survived_mutated" : n2 ? "not_generated" : "generated_deleted";
       const base = { start: gs.start, end: gs.end, text: gs.text, fate };
       if (fate !== "generated_deleted") return base;
       return { ...base, deletion: attribute(p.gen.filePath ?? "", gs.text) };
     });
     const totalChars = spans.reduce((a, s) => a + (s.end - s.start), 0);
-    const survivedChars = spans.filter((s) => s.fate !== "generated_deleted").reduce((a, s) => a + (s.end - s.start), 0);
+    const survivedChars = spans.filter((s) => s.fate === "survived_verbatim" || s.fate === "survived_mutated").reduce((a, s) => a + (s.end - s.start), 0);
     return {
       ...p.gen,
       spans,
@@ -2768,6 +2820,9 @@ function mergeVerbatimRuns(spans, text, genTexts) {
       prev.text = text.slice(prev.start, prev.end);
       prev.source.end = s.source.end;
       if (!(prev.trivial && s.trivial)) delete prev.trivial;
+      if (s.descent?.basis === "unverified" && prev.descent?.basis !== "unverified") {
+        prev.descent = s.descent;
+      }
       continue;
     }
     out.push({ ...s });

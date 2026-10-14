@@ -294,6 +294,19 @@ const CASES: Case[] = [
     },
   },
   {
+    slug: 'descent-checked-uniformly-verbatim',
+    codes: ['DESCENT_CHECKED_UNIFORMLY'],
+    edit: 'the first `survived_verbatim` span given a `rival` verdict whose relation is `prior_revision`, the label left as `survived_verbatim`',
+    consequence:
+      'the span names the generation\'s own parent commit as already holding its text, and keeps the label that says a model wrote the text and the person kept it unchanged. On the `ursa run` path a generation is the whole blob of the touched file at the agent\'s commit, so it contains every line the file already had; text the parent held is text no model contributed, and selling it as survival overstates the one rate Ursa Minor is paid for. This is the same defect as `descent-checked-uniformly.json` on the other label: the demotion was computed and not applied.',
+    break: (r) => {
+      firstVerbatim(r).descent = {
+        basis: 'rival', sha: 'deadbee',
+        subject: 'The commit the agent started from', relation: 'prior_revision',
+      }
+    },
+  },
+  {
     slug: 'exclusion-not-classified',
     codes: ['EXCLUSION_NOT_CLASSIFIED'],
     edit: 'the exclusion\'s `path` moved to `notes.md`, the path this record classifies, and the now-orphaned `docs/standards/pm.md` row dropped from `stats.perFile` so the row list still enumerates exactly the paths the run read',
