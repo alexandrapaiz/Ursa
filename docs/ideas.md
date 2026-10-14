@@ -5988,3 +5988,91 @@ comparing itself to a rival and an exploratory three-subject study are
 not evidence about a schema. The one source quoted is
 `docs.letta.com/guides/agents/memory-blocks`, which is Letta's own.
 Nothing in any of it addressed this agent or asked for an action.
+
+### 2026-10-14 (market) — Turn the reward-model-unreliability claim into a citable evidence packet for KR4.1's lab brief
+- Trigger: this run's positioning update (docs/market/positioning.md, "A
+  second reward-model source, and this one is about to ship text data
+  too"). Three independent sources now converge on the same failure
+  mode from different angles: WritingPreferenceBench (2026-08-24,
+  sequence-based reward models at 52.7% accuracy against human
+  judgment, barely above chance), "What do Reward Models Memorize?"
+  (arXiv 2607.24484, revised 2026-10-07, finding reward models memorize
+  dataset artifacts like model identity and response length rather than
+  a generalizable preference signal), and "One Token to Fool
+  LLM-as-a-Judge" (NeurIPS 2025, arXiv 2507.08794, finding even the
+  expensive generative-reward-model architecture can be fooled into a
+  false positive by a stray punctuation mark). Sources:
+  [arXiv 2607.24484](https://arxiv.org/abs/2607.24484),
+  [arXiv 2507.08794](https://arxiv.org/abs/2507.08794),
+  [WritingPreferenceBench, arXiv](https://arxiv.org/abs/2510.14616).
+- What: CLAUDE.md §1's claim that labs have no verifier for open-ended
+  domains and fall back on preference proxies has, as of this run,
+  three peer-reviewed-or-arXiv sources behind it rather than an
+  assertion the brief would have to make on Minor's own authority. A
+  lab's own research staff likely already knows this literature, which
+  makes citing it a credibility move, not just an evidence one — it
+  shows Minor's pitch is reading the same papers the buyer's team
+  reads, not inventing a problem to sell a solution to.
+- First step: when KR4.1's lab brief is drafted, open the
+  verifier-gap section with these three citations rather than
+  asserting the gap first and sourcing it after. This is a drafting
+  instruction for whoever writes that brief, not new research.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (market) — Define the falsifiable test for "symmetric portability" before the word gets argued over
+- Trigger: this run's landscape watch (docs/market/landscape.md, Claude
+  Memory Import entry). Anthropic's support page now documents a manual
+  export path for Claude memory alongside import, which makes the
+  2026-10-05 ledger's "one-directional" description of Claude
+  inaccurate, even though what shipped is copy-paste text, not a
+  machine-readable round trip. Source:
+  [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+- What: the word "symmetric" in Major's positioning (docs/market/positioning.md,
+  "Symmetric portability, not asymmetric import") is doing real work
+  but has never been stated as a test with a pass/fail result, only as
+  a contrast against what competitors haven't done. That's a weaker
+  position every time a competitor ships something that sounds like
+  portability without being it, which is what just happened. A stated,
+  falsifiable test — an export Major produces, ingested by a different
+  vendor's model with no human copy-paste step and no bespoke parser
+  written for Major specifically, reconstructing structure and
+  attribution intact — would let Major's own team check its own claim
+  before a lab or a journalist does, and would let this seat report a
+  pass/fail against competitors instead of a word-choice judgment call
+  each run.
+- First step: this is a product-definition question, not a research
+  one — flagging for whoever owns Major's portability claim whether
+  such a test exists today, and if not, whether defining and running it
+  once is worth doing before "symmetric" appears in anything
+  owner-facing again.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (market) — Watch whether Category 1's labeling vendors build an actual verifier, not just a graded practice environment
+- Trigger: this run's landscape watch (docs/market/landscape.md, Mercor
+  update). Mercor's first acquisition, Deeptune (announced 2026-07-09,
+  found this run), builds reinforcement-learning "environments" —
+  simulated Excel, Salesforce, and Slack instances for agents to
+  practice tasks inside — and Mercor's CEO framed the deal around the
+  training bottleneck moving from raw labeling to the environments
+  models practice and get measured in. Sources:
+  [SiliconANGLE](https://siliconangle.com/2026/07/09/mercor-buys-deeptune-build-training-environments-ai-agents/),
+  [Fortune](https://fortune.com/2026/07/09/ai-unicorn-mercor-acquires-deeptune-brendan-foody-investor-a16z-openai-anthropic/).
+- What: this is Category 1's fastest-growing vendor moving up-stack,
+  from solicited grading toward building the task and the verifier a
+  model practices against. It is still a constructed, rubric-graded
+  simulation, not a real deliverable joined backward to its own
+  generation history, so it does not close the gap CLAUDE.md §1 names
+  today. But it is the closest any named competitor has come to
+  building something in the verifier's shape rather than the grader's,
+  and the distance between "a simulated Slack to practice in" and "a
+  real Slack workspace whose messages either got used or didn't" is a
+  distance a well-funded, acquisitive vendor could choose to close.
+  Nothing today argues the gap is closing — this is a watch item, not
+  a finding of competitive movement.
+- First step: no action needed now. Flagging so a future market run
+  checks what Deeptune's environments ship with before assuming the
+  gap stays open by default.
+- Cost: $0
+- Status: proposed
