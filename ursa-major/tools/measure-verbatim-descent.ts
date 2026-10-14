@@ -87,11 +87,11 @@
 // store read or written.
 
 import { execFileSync } from 'node:child_process'
-import { findCommitPairs, listCommits, blobLookup, type CommitInfo } from '../src/pairfinder'
+import { commitsTouchingPath, findCommitPairs, listCommits, blobLookup, type CommitInfo } from '../src/pairfinder'
 import { buildEpisodes, type Episode } from '../src/episodes'
 import { clearsSizeFloor } from '../src/launch'
 import { resolveEpisode } from '../src/resolve-episode'
-import { gitDescentCorroborator, relatives } from '../src/corroborate'
+import { authoredAfterHorizon, gitDescentCorroborator, relatives, MAX_RIVAL_BLOBS } from '../src/corroborate'
 import { normalize } from '../src/normalize'
 import { MIN_VERBATIM_LEN } from '../src/match'
 import type { OutcomeRecord } from '../src/types'
@@ -193,6 +193,10 @@ function run(project: string, limit: number, exampleCap: number): void {
   }
   /** why the search could not answer, counted so "unverified" is not one opaque row */
   const unverifiedReasons = new Map<string, number>()
+  /** candidates the horizon bound removes from the search, counted per (record, path) */
+  const candidates = { considered: 0, dropped: 0, stillOverCap: 0, pathsDropping: 0 }
+  /** one line per (record, path) the bound removed a candidate from, printed in the report */
+  const candidateLines: string[] = []
   /** spans whose verdict the horizon bound changed, and what they say now */
   const boundDropped = empty()
   const boundNowSays = new Map<string, number>()
@@ -203,6 +207,8 @@ function run(project: string, limit: number, exampleCap: number): void {
 
   let verbatimSpans = 0
   let verbatimChars = 0
+  /** every span carrying a descent verdict, of any class: the bound's whole surface */
+  let descentSpans = 0
   // The decisive question, asked of EVERY verbatim span and not only of the
   // ones the shipped corroborator happened to call `pre_existing`.
   //
@@ -218,23 +224,73 @@ function run(project: string, limit: number, exampleCap: number): void {
   const parentHeld = empty()
 
   for (const { ep, record } of paired) {
+    const finalAt = byShaIndex.get(ep.finalSha)?.date ?? ''
     const corroborate = gitDescentCorroborator(project, ep.generatedSha, commits, ep.finalSha)
     // The same search with no horizon: `gitDescentCorroborator`'s own
     // behaviour before 2026-10-14, kept so the bound's effect is a
     // measured difference rather than an assertion that it worked.
     const unbounded = gitDescentCorroborator(project, ep.generatedSha, commits)
+    // The candidate-level effect, which is where the bound bites first and
+    // which no span-level tally can see. A dropped candidate changes a
+    // verdict only when it was the one holding the text, and it frees a
+    // slot against MAX_RIVAL_BLOBS for every span of the path either way.
+    const afterHorizon = authoredAfterHorizon(commits, ep.generatedSha, ep.finalSha)
+    const { descendants } = relatives(commits, ep.generatedSha)
+    for (const file of record.files) {
+      const touching = commitsTouchingPath(project, file.path)
+      if (touching === null) continue
+      const rivals = touching.filter((c) => c.sha !== ep.generatedSha && !descendants.has(c.sha))
+      const dropped = rivals.filter((c) => afterHorizon(c.sha)).length
+      candidates.considered += rivals.length
+      candidates.dropped += dropped
+      if (dropped > 0) {
+        candidates.pathsDropping++
+        if (rivals.length - dropped > MAX_RIVAL_BLOBS) candidates.stillOverCap++
+        candidateLines.push(`  ${record.task.id} ${file.path}: ${rivals.length} considered, `
+          + `${dropped} authored after ${finalAt} -> ${rivals.length - dropped} searchable (cap ${MAX_RIVAL_BLOBS})`)
+      }
+    }
     const parents = byShaIndex.get(ep.generatedSha)?.parents ?? []
     // The generous boundary. A rival could legitimately have been written
     // after the generation and before the person finished — they branched,
     // wrote the text elsewhere, and brought it in — so the cutoff is the
     // episode's LAST commit, not its first. Anything newer than that is
     // unambiguously work that did not exist when the final text was saved.
-    const finalAt = byShaIndex.get(ep.finalSha)?.date ?? ''
     const blobCache = new Map<string, string | null>()
     for (const file of record.files) {
       for (const span of file.spans) {
-        if (span.class !== 'survived_verbatim') continue
         const chars = span.end - span.start
+
+        // The horizon bound, asked of every span the corroborator ran on
+        // and not only of the verbatim ones. `survived_mutated` is the
+        // relation's original client — pass 2 calls `input.corroborate`
+        // and a `sibling` verdict demotes the span to
+        // `no_generation_provenance` — so counting the bound's effect on
+        // verbatim spans alone would measure a fraction of its surface.
+        if (span.descent !== undefined) {
+          descentSpans++
+          const before = unbounded(file.path, span.text)
+          if (before.basis === 'rival') {
+            const beforeAt = rivalDate(project, before.sha, dateCache)
+            if (beforeAt !== null && finalAt !== '' && Date.parse(beforeAt) > Date.parse(finalAt)) {
+              const after = corroborate(file.path, span.text)
+              boundDropped.spans++
+              boundDropped.chars += chars
+              const now = after.basis === 'rival' ? `rival:${after.relation} ${after.sha}` : after.basis
+              boundNowSays.set(`${span.class} -> ${now}`, (boundNowSays.get(`${span.class} -> ${now}`) ?? 0) + 1)
+              if (boundExamples.length < exampleCap) {
+                boundExamples.push(
+                  `  ${record.task.id} ${file.path} [${span.start},${span.end}) ${chars}c ${span.class}  (final at ${finalAt})` +
+                  `\n    dropped rival: ${before.sha} ${before.subject}  [${beforeAt}]` +
+                  `\n    now says:      ${now}` +
+                  `\n    text:          ${JSON.stringify(span.text.slice(0, 96))}`,
+                )
+              }
+            }
+          }
+        }
+
+        if (span.class !== 'survived_verbatim') continue
         verbatimSpans++
         verbatimChars += chars
 
@@ -267,29 +323,6 @@ function run(project: string, limit: number, exampleCap: number): void {
         }
         refined[bucket].spans++
         refined[bucket].chars += chars
-
-        // What the search said before the bound existed. Only asked of
-        // spans, like everything else here, so a span the bound did not
-        // touch costs one cached lookup and no git call.
-        const before = unbounded(file.path, span.text)
-        if (before.basis === 'rival') {
-          const beforeAt = rivalDate(project, before.sha, dateCache)
-          const wasFuture = beforeAt !== null && finalAt !== '' && Date.parse(beforeAt) > Date.parse(finalAt)
-          if (wasFuture) {
-            boundDropped.spans++
-            boundDropped.chars += chars
-            const now = ev.basis === 'rival' ? `rival:${ev.relation} ${ev.sha}` : ev.basis
-            boundNowSays.set(now, (boundNowSays.get(now) ?? 0) + 1)
-            if (boundExamples.length < exampleCap) {
-              boundExamples.push(
-                `  ${record.task.id} ${file.path} [${span.start},${span.end}) ${chars}c  (final at ${finalAt})` +
-                `\n    dropped rival: ${before.sha} ${before.subject}  [${beforeAt}]` +
-                `\n    now says:      ${now}` +
-                `\n    text:          ${JSON.stringify(span.text.slice(0, 96))}`,
-              )
-            }
-          }
-        }
 
         if (bucket !== 'corroborated' && bucket !== 'unverified' && examples[bucket].length < exampleCap) {
           const when = ev.basis === 'rival' ? (rivalDate(project, ev.sha, dateCache) ?? '?') : '?'
@@ -327,7 +360,12 @@ function run(project: string, limit: number, exampleCap: number): void {
   }
 
   console.log(`\nHORIZON BOUND — rivals authored after the episode's finalSha, which the shipped search now drops`)
-  console.log(row('dropped', boundDropped))
+  console.log(`  candidate rivals considered across every record's paths: ${candidates.considered}`)
+  console.log(`  candidates the bound dropped: ${candidates.dropped} (over ${candidates.pathsDropping} record-paths)`)
+  console.log(`  of those record-paths, still above the ${MAX_RIVAL_BLOBS}-blob cap after the drop: ${candidates.stillOverCap}`)
+  for (const line of candidateLines) console.log(line)
+  console.log(`  spans carrying a descent verdict, all classes: ${descentSpans}`)
+  console.log(row('verdict changed', boundDropped))
   if (boundNowSays.size > 0) {
     for (const [k, n] of [...boundNowSays].sort((a, b) => b[1] - a[1])) {
       console.log(`    now says ${k.padEnd(30)} ${String(n).padStart(6)} spans`)

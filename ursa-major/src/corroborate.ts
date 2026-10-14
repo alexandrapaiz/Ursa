@@ -201,6 +201,48 @@ export function relatives(commits: CommitInfo[], generatedSha: string): {
  * it.
  */
 /**
+ * Is this commit authored after the work finished, with the commit graph
+ * unable to say otherwise?
+ *
+ * The time bound, as a predicate over one candidate sha. Exported rather
+ * than left inline because `tools/measure-verbatim-descent.ts` reports
+ * how many candidates the bound removes from real history, and a
+ * measurement that re-implements the rule measures the copy.
+ *
+ * `commits` is `listCommits(projectPath)`; `horizonSha` is the episode's
+ * `finalSha`. Returns a predicate that is always false when no horizon is
+ * given or the horizon is not in `commits`, which is the behaviour of this
+ * module before 2026-10-14.
+ */
+export function authoredAfterHorizon(
+  commits: CommitInfo[],
+  generatedSha: string,
+  horizonSha: string | undefined,
+): (sha: string) => boolean {
+  // `Date.parse` and not a string compare: `listCommits` reads author
+  // dates with `--date=iso-strict`, which carries each author's own UTC
+  // offset, so `2026-10-14T00:26:39Z` sorts before
+  // `2026-10-13T23:00:00-07:00` as text while being two hours after it in
+  // fact. This repository's own history has both shapes in it.
+  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]))
+  const horizonMs = horizonSha === undefined ? NaN : (authorMs.get(horizonSha) ?? NaN)
+  if (Number.isNaN(horizonMs)) return () => false
+  const { ancestors } = relatives(commits, generatedSha)
+  // Ancestors of the horizon, which are not in general ancestors of the
+  // generation: a branch merged into this episode between `generatedSha`
+  // and `finalSha` is a sibling of the generation and still demonstrably
+  // existed before the person finished. Computed from the same in-memory
+  // graph, so it costs one more walk of a map and no subprocess.
+  const horizonAncestors = relatives(commits, horizonSha as string).ancestors
+  return (sha) => {
+    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false
+    const ms = authorMs.get(sha)
+    if (ms === undefined || Number.isNaN(ms)) return false
+    return ms > horizonMs
+  }
+}
+
+/**
  * @param horizonSha the episode's `finalSha`: the last commit of the work
  *   this generation belongs to. A candidate rival authored after it, and
  *   reachable from neither the generation's history nor the horizon's,
@@ -226,29 +268,7 @@ export function gitDescentCorroborator(
   const parents = parent?.parents ?? []
   const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]))
 
-  // The horizon, in epoch milliseconds. `Date.parse` and not a string
-  // compare: `listCommits` reads author dates with `--date=iso-strict`,
-  // which carries each author's own UTC offset, so `2026-10-14T00:26:39Z`
-  // sorts before `2026-10-13T23:00:00-07:00` as text while being two
-  // hours after it in fact.
-  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]))
-  const horizonMs = horizonSha === undefined ? NaN : (authorMs.get(horizonSha) ?? NaN)
-  // Ancestors of the horizon, which are not in general ancestors of the
-  // generation: a branch merged into this episode between `generatedSha`
-  // and `finalSha` is a sibling of the generation and still demonstrably
-  // existed before the person finished. Computed from the same in-memory
-  // graph, so it costs one more walk of a map and no subprocess.
-  const horizonAncestors = Number.isNaN(horizonMs)
-    ? new Set<string>()
-    : relatives(commits, horizonSha as string).ancestors
-  /** authored after the person finished, so it cannot be where the text came from */
-  const afterHorizon = (sha: string): boolean => {
-    if (Number.isNaN(horizonMs)) return false
-    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false
-    const ms = authorMs.get(sha)
-    if (ms === undefined || Number.isNaN(ms)) return false
-    return ms > horizonMs
-  }
+  const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha)
 
   /** rival commits for a path, newest first; null when git could not say */
   const rivalCache = new Map<string, PathCommit[] | null>()
