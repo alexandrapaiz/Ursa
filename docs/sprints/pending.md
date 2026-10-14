@@ -2,6 +2,11 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-14 ~18:21 UTC six-hour pass
+
+Work in progress. Draft-first per the ship-first rule; this note is
+replaced once the run is done.
+
 ## Top three for the owner, 2026-10-14 ~15:44 UTC standup
 
 1. **Security's redaction-standard draft closed itself mid-pass, and
