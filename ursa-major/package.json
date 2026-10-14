@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Ursa Major provenance resolver — joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
+  "description": "Ursa Major provenance resolver \u2014 joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
   "scripts": {
     "test": "tsc --noEmit && vitest run",
     "typecheck": "tsc --noEmit",
@@ -34,5 +34,8 @@
   },
   "optionalDependencies": {
     "@huggingface/transformers": "^4.3.0"
+  },
+  "overrides": {
+    "source-map-js": "^1.2.2"
   }
 }
