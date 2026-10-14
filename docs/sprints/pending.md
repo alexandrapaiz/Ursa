@@ -2,6 +2,77 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-14 ~12:20 UTC six-hour pass
+
+1. **Nothing is ready for your merge this pass.** The widened authority
+   (`docs/standards/pm.md` §10/§21) is live in this repo's own vendored
+   copy, confirmed again this pass, so the gate is each PR's own state,
+   not authority. #184 (research) and, once their own seats clear a
+   conflict, #167 (exo) and #140 (skill) each edit a charter file
+   directly (Tier C by name). #80 (`company.yaml`) touches the roster
+   and secret names the standard carves out by name, and also carries
+   her own comment, unchanged since 2026-10-05.
+2. **Three drafts from her own window sessions are now nine to
+   fourteen days old with no verdict: #49 (14 days), #87 and #91 (9
+   days).** Reviving a dormant seat and judging unreviewed proposal
+   work both stay hers; named again rather than closed on a guess.
+3. **The dispatch wall is still up on this repo specifically.** `grep
+   -rn allowed_bots .github/workflows/*.yml` is still zero matches
+   across all eleven `agent-*.yml` files. The remaining forty-three
+   steps portfolio-wide, Ursa's fifteen included, are still queued to
+   headquarters' own project manager per exo-centralizer's 2026-10-12
+   report. Nothing for you to do here.
+
+## This run (2026-10-14, ~12:20 UTC, six-hour pass, message-triggered)
+
+**First act: resolved this seat's own open pull request before starting
+anything new.** #187 (the ~06:20 UTC pass) was open, non-draft, green,
+and touched only `docs/sprints/dispatch-queue.md` and
+`docs/sprints/pending.md` — pure knowledge surfaces. Self-merged under
+Tier A, then branched this pass from the resulting `main`.
+
+1. **Inbox: clean.** Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`
+   and filtered to the exact match. The newest exact match is still the
+   two 2026-10-12T21:46/21:48 UTC messages from `alexandra-systems/exo-
+   centralizer`, both already answered and tracked by earlier passes
+   (the `allowed_bots` root cause above, and the unverified board-read
+   aside). Nothing new addressed to this seat has arrived since.
+2. **Failed runs: none.** `gh run list --status failure --created
+   ">=2026-10-14T06:20:00Z"` and the broader 24-hour window both return
+   empty. Nothing to triage, rerun, or hand off.
+3. **Tier B merge: nothing qualified, checked fresh.** #184 (research,
+   `MERGEABLE`/`CLEAN`, green) edits `prompts/research-agent.md`
+   directly, Tier C outright. #167 (exo) and #140 (skill) are both
+   still `CONFLICTING`/`DIRTY`, waiting on their own seats' rebases,
+   and each is also Tier C once clean (both edit a charter). #80 stays
+   `MERGEABLE`/`CLEAN` but Tier C on `company.yaml`'s roster and secret
+   names, plus an owner comment already on it. #165 (security) is
+   still a draft, failing Tier B's own gate before any other condition.
+   #49, #87, #91 are unchanged dormant-seat drafts. Nothing merged.
+4. **Board hygiene: one stale card moved.** "The sixteenth bound" item
+   was still sitting in This sprint though the engineer shipped it six
+   hours ago (#182); moved to Done with the PR as `source_url` and a
+   comment naming why, since the board is a tracking surface this seat
+   owns and a reader checking it would otherwise see stale status.
+5. **Sprint: nothing new ships this pass.** `sprint-2026-10-12.md`
+   items 1 and 2 were already merged before this pass started (#179,
+   #182); this pass's only sprint-relevant move is the board hygiene
+   fix above. Item 3 (the redaction standard) stays blocked on the
+   security seat's own rebase of #165 and on the dispatch wall (HQ's
+   half not yet opened against this repo). **Move today:** nothing
+   further is this seat's to move. **Hand-off:** item 3 to the security
+   seat (finish or close #165 on its own rebase) and to HQ (the
+   Ursa-specific `allowed_bots` fix, still unopened against this repo).
+6. **Dispatch queue: rewritten in full.** `PM_DISPATCH_ENABLED` is
+   unset in this run's environment, treated as unset, nothing fires.
+   The wall is unchanged (zero matches, eleven files); the two standing
+   candidates (security on #165, frontend on #141) stay held, same
+   reason as every pass since Incident 13.
+7. **Board:** posted one note this pass, first person, naming the
+   self-merge, the clean inbox, the zero failures, the board hygiene
+   fix, and the sprint hold. This seat's inbox stays open for anything
+   addressed to it until the next pass.
+
 ## Top three for the owner, 2026-10-14 ~06:20 UTC six-hour pass
 
 1. **Nothing is newly ready for your merge beyond what this pass already
