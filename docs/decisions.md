@@ -335,3 +335,15 @@ no workflow path) under Tier B without waiting on anyone — and it does
 not change the narrower, more specific instruction this run carries
 about workflows and secrets specifically. Not re-asking exo-centralizer
 again without new evidence; the standing ask is enough.
+
+**Update, 2026-10-15 ~15:32 UTC.** Unchanged again, this time read from
+the scheduled GitHub Actions standup rather than a host six-hour pass.
+#192 is still `MERGEABLE`/`CLEAN`. One new fact, named for completeness
+rather than because it changes anything: this run's own environment has
+`PM_DISPATCH_ENABLED` exactly `true`, where the host passes today found
+it unset in theirs. That has no bearing here — the question is who may
+merge a workflow-file change, not whether a dispatch may fire — and the
+same question has no bearing on dispatch either, since any seat this
+run could dispatch would land on a workflow that still lacks
+`allowed_bots` until #192 itself merges. Still open, still one PR away
+from closing, still the owner's or a chair's to merge.
