@@ -26,8 +26,8 @@ evidence:
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
     source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:577-605
   - ref: E3
-    what: one machine-identity pattern marks a commit as generated through three tests, an owner-declared list, the co-author trailer and the author name, after the trailer pattern was widened on 2026-10-14
-    source: ursa-major/src/pairfinder.ts:262-263,293; ursa-major/src/pairfinder.ts:545-556
+    what: one machine-identity pattern marks a commit as generated through three tests, an owner-declared list, the co-author trailer and the author name, after the trailer pattern was widened on 2026-10-11
+    source: ursa-major/src/pairfinder.ts:218-263,293; ursa-major/src/pairfinder.ts:545-556; docs/design/agent-coauthor-detection.md
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff
     source: ursa-major/src/pairfinder.ts:610-613
@@ -234,15 +234,17 @@ fallback still is, whenever it matches every commit in the history,
 because `GIT_AUTHOR_NAME` is ambient and a harness that exports it labels
 the person's own commits too [E3].
 
-**This changed on 2026-10-14, and the previous version of this skill
+**This changed on 2026-10-11, and the previous version of this skill
 described the hazard that caused it.** Until then the trailer pattern was
 only `claude|codex|cursor|gpt` and the `[bot]` test reached author names
 alone, so a bot whose name held none of those four substrings passed
 through as human. This skill reported that as a live risk in this
 repository, naming a squash commit whose trailer GitHub had rewritten to
 `Co-authored-by: exo-centralizer[bot]`. The risk then materialized and
-was measured. That commit was authored by the owner's own account, so
-neither test reached it, and it became eligible as a person's edit. It
+was measured. On a clone of this repository at `fe0da2a`, 470 commits,
+exactly one carried `Co-Authored-By: exo-centralizer[bot]`. It was
+authored by the owner's own account, so the author fallback could not
+reach it either, and it became eligible as a person's edit. It
 paired with the preceding `claude[bot]` commit and produced a record
 claiming 60,616 of 63,362 generated characters survived verbatim, which
 is 94.9 percent. That single claim carried 84.7 percent of the run's

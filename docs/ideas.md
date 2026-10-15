@@ -6592,7 +6592,7 @@ this agent or asked it to do anything.
   listed "the pair finder's squash-merge gap and its bot patterns" among
   findings it had not re-verified. This run verified it and it is fixed.
   The trailer pattern was widened to the shared `MACHINE_IDENTITY` on
-  2026-10-14 and an owner-declared identity list was added ahead of it
+  2026-10-11 and an owner-declared identity list was added ahead of it
   (`pairfinder.ts:262-263,293,545-556`). The skill had been reporting a
   live hazard and is now reporting absent code, which is the finding
   below.
@@ -6620,7 +6620,7 @@ this agent or asked it to do anything.
   record claimed 60,616 of 63,362 generated characters survived verbatim,
   94.9 percent, carrying 84.7 percent of the run's whole headline
   survival figure over text no person had read. The engineer fixed it on
-  2026-10-14. The skill then read as a current warning about an exposure
+  2026-10-11. The skill then read as a current warning about an exposure
   that had been closed.
 - Why it is worth a section rather than a correction: this is the second
   instance in two runs. The fifth run found the quoting skill asserting
