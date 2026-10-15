@@ -99,6 +99,29 @@
 // sibling rebased to an older author date gets searched again. That is
 // the safe direction, since being searched is the old behaviour.
 //
+// AND THE DATE IS WRITTEN DOWN (added 2026-10-15). The bound above runs
+// here, in a module that holds the commit graph, and the record it
+// produces did not. So a rival from the episode's future satisfied all
+// sixteen bounds in src/invariants.ts, and the defect was findable only
+// by a tool that could re-read the repository: `rival` carried `sha`,
+// `subject` and `relation`, and no time at all (docs/ideas.md,
+// 2026-10-14). Every `rival` verdict now carries the rival commit's own
+// author date, so `RIVAL_NOT_AFTER_FINAL` can check the ordering against
+// the record's `task.generatedAt` with nothing but the record in hand.
+//
+// The two are deliberately not the same check. This module's bound is
+// the stronger one and it asks the graph first, because a candidate
+// reachable from the generation or from the horizon existed whatever its
+// clock said. The record's bound is the weaker one and sees only dates,
+// because that is all a buyer holds. A verdict this module wrote can
+// therefore name an ancestor whose author date is later than
+// `task.generatedAt` — a rebase, or a machine with a wrong clock — and
+// the gate will fire on a record this module considers correct. That is
+// the right direction for a gate whose job is to refuse claims it cannot
+// check, and the fixture note at
+// `fixtures/violations/rival-not-after-final.md` says so, so nobody
+// reads the gate's refusal as a second opinion about the graph.
+//
 // Descendants of the generation are excluded, and the exclusion is what
 // makes the test usable rather than vacuous: `finalSha` is a descendant
 // and its blob holds every final span by definition, so a test that did
@@ -267,6 +290,14 @@ export function gitDescentCorroborator(
   const parent = commits.find((c) => c.sha === generatedSha)
   const parents = parent?.parents ?? []
   const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]))
+  // The parent's author date, for the `prior_revision` verdict's own
+  // `date` field. It comes from `commits` and not from
+  // `commitsTouchingPath`, because the parent check runs before the path
+  // walk and is what makes that walk unnecessary. A caller holding a
+  // narrowed `CommitInfo[]` can therefore have the parent sha without its
+  // date, and the verdict then carries no date, which `DescentEvidence`
+  // declares legal: absent means this resolver could not state it.
+  const commitDate = new Map(commits.map((c) => [c.sha, c.date]))
 
   const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha)
 
@@ -323,6 +354,12 @@ export function gitDescentCorroborator(
         sha: p.slice(0, SHORT),
         subject: parentSubject.get(p) ?? '',
         relation: 'prior_revision',
+        // Spread rather than written as `date: commitDate.get(p)`, because
+        // the field is optional and an explicit `undefined` survives
+        // `JSON.stringify` as a missing key in the record but as a PRESENT
+        // key with value `undefined` to anything comparing objects in
+        // memory, which is the shape the unit tests assert on.
+        ...(commitDate.get(p) !== undefined ? { date: commitDate.get(p) as string } : {}),
       }
     }
 
@@ -359,6 +396,10 @@ export function gitDescentCorroborator(
         // ancestor reaching this line is an older one and the relation is
         // the restore it was always documented to be.
         relation: ancestors.has(c.sha) ? 'pre_existing' : 'sibling',
+        // Always present on this path: `commitsTouchingPath` reads `%aI`
+        // for every line it returns, so a candidate that reached this loop
+        // has a date whether or not it is in `commits`.
+        date: c.date,
       }
     }
 

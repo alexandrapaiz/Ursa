@@ -411,6 +411,17 @@ export function blobAt(repoPath: string, sha: string, path: string): string | nu
 export interface PathCommit {
   sha: string
   subject: string
+  /**
+   * Author date, strict ISO 8601 with the author's own UTC offset, exactly
+   * as `CommitInfo.date` carries it (`%aI`). Read here rather than looked
+   * up in `listCommits`'s output because a caller may hold a narrowed
+   * range while this function always asks `--all`, so a commit can be in
+   * this list and absent from that one. `src/corroborate.ts` writes it
+   * into the record's `rival` verdict, which is what lets
+   * `RIVAL_NOT_AFTER_FINAL` in src/invariants.ts check the time ordering
+   * a descent claim depends on without a repository in hand.
+   */
+  date: string
 }
 
 /**
@@ -429,14 +440,18 @@ export function commitsTouchingPath(repoPath: string, path: string): PathCommit[
   let out: string
   try {
     out = git(repoPath, [
-      'log', '--all', '--pretty=format:%H%x09%s', '--', path,
+      // `%aI` sits between the sha and the subject, not after it, because a
+      // commit subject may itself contain a tab and the parse below keeps
+      // the subject as the whole remainder of the line. A date field after
+      // the subject would be eaten by that remainder.
+      'log', '--all', '--pretty=format:%H%x09%aI%x09%s', '--', path,
     ], { quiet: true })
   } catch {
     return null
   }
   return out.split('\n').filter((l) => l.includes('\t')).map((l) => {
-    const [sha, ...rest] = l.split('\t')
-    return { sha, subject: rest.join('\t') }
+    const [sha, date, ...rest] = l.split('\t')
+    return { sha, subject: rest.join('\t'), date }
   })
 }
 
