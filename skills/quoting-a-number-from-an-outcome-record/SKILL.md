@@ -112,6 +112,9 @@ evidence:
   - ref: E31
     what: the Pretence principle, systems built on claims of sufficient information conform to the measure rather than the world
     source: docs/vision.md, section 0b, principle 4
+  - ref: E32
+    what: survived_verbatim means byte-identical as of 2026-10-13, and a formatting-only match is now survived_mutated with normalizedOnly set and score 1, which 26 of 770 verbatim claims over ten records of this repository were
+    source: ursa-major/src/types.ts:357-388, ursa-major/src/resolve.ts:266-290, ursa-major/src/resolver.test.ts:168
 supersedes: []
 ---
 
@@ -196,7 +199,13 @@ demotion drops the `trivial` flag rather than carrying it over [E9].
 So `trivial` still marks weak evidence inside `survived_verbatim`, and
 it no longer marks every short exact match. A
 span with no match at all receives exactly the same
-`no_generation_provenance` label as an uncertain one [E10]. Neither
+`no_generation_provenance` label as an uncertain one [E10]. There is now
+a third flag, and it moves in the other direction. `normalizedOnly`
+marks a `survived_mutated` span whose text is identical to its
+generation extent after case folding, punctuation folding and
+whitespace collapsing, and differs in raw characters only [E32]. It
+carries `score: 1` like a verbatim match, so a filter written on the
+score alone will not separate them [E32]. Neither
 flag has a character total in the schema, only a span count [E11], so
 the subtraction has to be done from `files[].spans` directly. Output:
 either an adjusted figure with its method stated, or the sentence
@@ -333,6 +342,29 @@ adjudication lands a `no_generation_provenance` share is an upper bound
 rather than a measurement. A seat quoting it without saying so has
 produced the exact failure the Pretence principle names, a system
 conforming to its measure rather than to the world [E31].
+
+**"Verbatim" changed meaning on 2026-10-13, so a survival figure is not
+comparable across that date.** `survived_verbatim` now means
+byte-identical. Before that date a match made in the normalized shadow
+text earned the same label with the same `score: 1`, so a reflowed line,
+a changed capital or an em dash retyped as a hyphen all counted as the
+model's text surviving untouched [E32]. The size of the correction is
+measured rather than estimated: over ten records of this repository's own
+history, 26 of 770 verbatim claims, covering 1,466 characters, were
+claims of that kind [E32].
+
+Ours: two consequences, and the second is the one that will embarrass
+somebody. Any `survived_verbatim` percentage computed before 2026-10-13
+is an upper bound against the current definition, so a trend line drawn
+through that date is measuring a schema change and reporting it as a
+change in model behaviour. And the spans did not disappear, they moved
+into `survived_mutated`, which is the category Ursa sells as "the
+mutation is the correction". A formatting-only reflow is not a
+correction in that sense. So when quoting a mutation rate as evidence of
+what users fix, filter `normalizedOnly` out and say that you did,
+because the record deliberately refuses to choose between the three
+defensible readings of those spans and leaves the choice to whoever
+quotes it [E32].
 
 **Quote a scalar, and quote the one the record computes.** The
 discipline the methods document imposes is that every lab-facing
