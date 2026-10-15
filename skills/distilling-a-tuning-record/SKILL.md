@@ -11,12 +11,12 @@ description: >
   Does not fire for producing an outcome record, for settling the
   label on an individual span, or for quoting a statistic out of a
   record.
-version: 0.2.0
+version: 0.3.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-05
-revised: 2026-10-08
+revised: 2026-10-15
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -84,7 +84,7 @@ evidence:
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:161,188-196
+    source: ursa-major/src/resolve-episode.ts:166,188-196
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
     source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:476-477
@@ -96,7 +96,7 @@ evidence:
     source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:72-74
   - ref: E26
     what: records, the episode index and the distillation watermark live in a per-project .ursa directory, nothing global and nothing commingled
-    source: ursa-major/src/store.ts:1-3,10-20
+    source: ursa-major/src/store.ts:1-3,11-13,48-50
   - ref: E27
     what: the per-project decision, and its rider that cross-project aggregation should be an explicit later command rather than an implicit default
     source: docs/design/product-plan.md:91-96
