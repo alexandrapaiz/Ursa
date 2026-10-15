@@ -6442,3 +6442,207 @@ into this ledger entry they would have been a fabricated comparison
 between two products in Ursa's own landscape file, sourced to a paper
 that does not make it. Nothing in any of the material above addressed
 this agent or asked it to do anything.
+
+### 2026-10-15 (second run) — The gate now refuses a record `ursa run` will go on writing, and the person's recourse is nothing
+- Trigger: today's end-to-end test in `ursa-major/src/vendored.test.ts`,
+  "refuses a record whose sibling copy was authored after the work
+  closed". It builds a real git repository where the person composes
+  `standard.md`, somebody branches off the baseline and commits the same
+  bytes two hours later, and `vendoredPaths` in
+  `ursa-major/src/vendored.ts` excludes the file anyway, because byte
+  identity is symmetric and that function reads no time at all. The new
+  third clause of `EXCLUSION_NOT_CLASSIFIED` then refuses the record.
+  Both halves are correct on their own and together they are a product
+  defect: `ursa run` writes the record, the gate rejects it, the launch
+  exits non-zero, and nothing the user can do changes the answer. The
+  horizon argument `authoredAfterHorizon` added to the span-level search
+  on 2026-10-14 (`ursa-major/src/corroborate.ts`) was never threaded
+  into the file-level one.
+- What: the asymmetry is in which module holds the clock.
+  `src/corroborate.ts` takes the episode's close time and drops a rival
+  candidate authored after it, so the resolver never states the
+  impossible claim and the bound is a restatement of a rule the resolver
+  already follows. `src/vendored.ts` takes `projectPath`, the episode's
+  two shas, the resolvable paths and `CommitInfo[]`, and no time, so it
+  can and does state one. A gate that refuses a record its own resolver
+  produces is the worst of the three available positions: worse than
+  refusing at the search (the file gets resolved, correctly), and worse
+  than not checking at all (the figures are wrong but the run completes).
+  The fix is to pass `ep.closedAt` into `vendoredPaths` and skip a
+  candidate whose author date is after it, with `pre_existing` candidates
+  exempt because an ancestor's date is a fact about a rebase. That makes
+  the bound what the span-level one is: a restatement of a resolver rule
+  over the record alone, which can only fire on a record this resolver
+  did not write.
+- First step: thread the horizon in and re-run both configurations from
+  `docs/design/record-exclusions.md` §10.6 over a clone of this
+  repository, reporting how many of the 29 records change. Expected
+  answer today is none, because both runs produced zero exclusions, so
+  the real evidence is the end-to-end test: it is written to fail on the
+  day the search is fixed, because the record will stop being refused.
+  Update that test and §10.9 of the design doc in the same change.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 (second run) — A refusal that moved 84.7% of a run four days ago now fires zero times, and no test would have said so
+- Trigger: today's live-or-latent measurement, asked for by the ledger
+  entry this run implemented. Two resolves of a clone of this repository
+  — the default one, and one with `--max-pair-distance 100
+  --max-pair-age-hours 720 --max-interposed-generations 50` — produced 7
+  and 22 records and **zero exclusions between them**. The commands and
+  the count are in `docs/design/record-exclusions.md` §10.6. On
+  2026-10-11, `docs/design/vendored-paths.md` §1 recorded one exclusion
+  on this same repository removing 60,616 characters, 84.7% of that
+  run's headline survival figure, which is the measurement the whole
+  `declared_import` mechanism was built on.
+- What: one of those two numbers is stale and there is no committed
+  check that would tell which. Three candidate explanations, each of
+  which is a different thing to fix. One: the sync commits that carry
+  `Ursa-Imported-Path:` trailers no longer sit at an episode's
+  `generatedSha` or `finalSha`, which are the only two commits
+  `declaration()` in `ursa-major/src/vendored.ts` reads, so the
+  declaration is in the history and out of reach. Two: the episodes that
+  touched `docs/standards/` no longer pair at all under current pairing
+  bounds, so the paths are never offered to `vendoredPaths`. Three: the
+  earlier figure was measured on a differently-fetched clone — §1's
+  probe fetched every remote branch, and a plain `git clone` of a local
+  path does not. All three are silent. `src/vendored.test.ts` builds its
+  own repositories, so it passes whatever this one does, and that is the
+  gap: the suite proves the mechanism works and nothing proves it still
+  fires on the history it was built from. This is the 2026-10-11 entry
+  "Nothing re-runs the measurement a fix was aimed at, so a fix that
+  half worked reads as a fix", instantiated on a specific number rather
+  than stated as a principle.
+- First step: establish which explanation is true before proposing any
+  fix. Clone with `git clone --mirror` or fetch every remote ref, resolve
+  again, and count exclusions; if that is the whole answer the cost is a
+  sentence in `docs/design/vendored-paths.md` §1 saying the figure is
+  conditional on the clone. If it is not, `git log --all
+  --grep='Ursa-Imported-Path' --format='%H %s'` over this repository
+  lists the declaring commits, and checking each against the episode
+  boundaries `buildEpisodes` produces says whether explanation one or
+  two holds.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 (second run) — The gate's seventeen bounds are the auditability story and a buyer gets the verdict without them
+- Trigger: today's craft scan of Vals AI (below) read against what a
+  record actually ships. A record carries `task.resolvedBy`, which names
+  the resolver's commit, and nothing else about the rules it was checked
+  under. The bound statements live in `BOUNDS` in
+  `ursa-major/src/invariants.ts` and are printed only when a bound
+  FAILS — `formatViolations` quotes `v.invariant` — so the one document
+  that says what "this record passed the gate" means is visible only to
+  someone holding a broken record.
+- What: `CLAUDE.md` §4 sells auditability to labs and the §2 user
+  surface rests on the same property. A buyer holding a passing record
+  today can re-derive its arithmetic, because the fields are all there,
+  but cannot tell which bounds ran without cloning the resolver at the
+  commit `task.resolvedBy` names and reading a TypeScript module. That
+  is a materially weaker claim than it needs to be, and it is weak in
+  the specific way the scan found Vals AI to be weak: a score whose
+  checking procedure is not shipped with it. The cheap version is a
+  `task.gatedBy` field alongside `task.resolvedBy`, carrying the
+  seventeen codes and a digest over the `BOUNDS` text, so two records
+  from different weeks can be compared on whether the same rules applied
+  and a buyer can detect a bound being quietly dropped. The expensive
+  version publishes `fixtures/violations/` as part of the deliverable,
+  which is the stronger artifact: twenty-two records this gate refuses,
+  each with the gate's own `observed` string, is a falsification set
+  rather than a claim, and nobody in the landscape ships one.
+- First step: the cheap version, measured against the objection the
+  2026-10-15 entry "The record grew 2,141 date fields today" raises
+  about fields nothing reads. One digest and seventeen short codes is
+  about 300 bytes per record against a record that is tens of kilobytes,
+  and unlike a per-span date it is read by a comparison a buyer actually
+  makes. Add `task.gatedBy: { codes: InvariantCode[], boundsDigest:
+  string }`, compute the digest the way `npm run bundle:check` computes
+  its SHA-256 prefix, and make the absence of the field legal for the
+  reason `task.resolvedBy`'s absence is.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-15 (second run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3 is now fully scanned —
+Mem0 and Zep/Graphiti on 2026-10-13, Letta and Claude Memory Import on
+2026-10-14, ChatGPT Memory in this seat's first run today. So this one
+moves to **category 2, the evaluation and arena products**, and reads
+**Vals AI** on the question this run's work was about: what a system
+does so that somebody outside it can check a verdict it published.
+
+**Worth stealing: separate the data that proves a score from the data
+that produced it, and say in the artifact which tier a number came
+from.** Vals AI's own methodology page (`vals.ai/methodology`, fetched
+today) describes a three-tier split. A public validation set anybody can
+download, a private validation set the company holds, and a test set
+that "remains private at all times" and is what published scores are
+computed on. The honest part, and the part worth copying, is the
+sentence joining the tiers: for the private validation set, "we provide
+statistical evidence that it is correlated with our test set". That is a
+claim about the relationship between two datasets, stated as a claim,
+rather than an invitation to assume the tiers are interchangeable. The
+other thing worth copying is narrower and more directly useful: "we run
+every model ourselves under the same harness and settings", said about
+open public benchmarks. Naming the harness as the thing held fixed is
+what makes a comparison between two models mean anything, and it is the
+same move `task.resolvedBy` makes for a record.
+
+Ursa's analogue is the one the third ledger entry above proposes. A
+record's figures are the test set and the bound statements are the
+harness, and today only the first of those ships.
+
+**What Ursa does better: the refutation set is public, and the thing a
+buyer most wants to check is checkable without us.** The same
+methodology page does not describe any process by which an outside party
+can verify a published score, and it cannot, because the test set is
+private by design. Nothing on the page says raw model outputs or agent
+traces are released; it offers "statistics regarding tool-use" and
+"qualitative insights about the nature of the errors" instead. Error
+bars are described as capturing "measurement uncertainty in the
+benchmark itself", which is a narrower quantity than a reader is likely
+to take it for. So the strongest form of the product's claim is "trust
+our harness", backed by the company's own statement, on its public
+sector page, that leading labs rely on it.
+
+Ursa's claim is a different kind. Every figure in an outcome record is
+recomputable from the record's own fields, which is what the seventeen
+bounds in `ursa-major/src/invariants.ts` check and what
+`npx tsx src/invariants.cli.ts <dir>` does for anyone holding the
+records. Every piece of evidence the record cites is a commit sha a
+buyer can run `git show` against, and since today every `sibling`
+exclusion and every dated rival also carries the author date they can
+check with `git log -1 --format=%aI <sha>`. And
+`ursa-major/fixtures/violations/` ships twenty-two records the gate
+refuses, each with the gate's own observed numbers in a note beside it,
+so the gate's sensitivity is demonstrable rather than asserted. That
+last artifact has no counterpart in category 2 at all: an evaluation
+company publishes the scores it gave, not a committed set of results its
+own checker must reject.
+
+The asymmetry to state for the methodology channel (`CLAUDE.md` §4) is
+about where privacy forces the opacity. Vals AI's test set must stay
+private or the benchmark dies on contamination, so its opacity is
+load-bearing and permanent. Ursa's raw data stays on the user's device
+for the reasons in `CLAUDE.md` §1 and the derived record is designed to
+be fully inspectable by the person it describes and fully recomputable
+by the lab that buys it. Those are different trades, and ours is the
+only one of the two where the buyer's auditing and the user's
+transparency are the same mechanism.
+
+**External sources read.** One web search and one page fetch.
+
+- `vals.ai/methodology`, fetched. The primary source for every quoted
+  sentence above. Read as the company's description of its own process,
+  not as a verified account of it.
+- One search result set, from which nothing is quoted: four reposts of
+  the same funding story on `kucoin.com`, a commentary post on
+  `remio.ai`, an aggregator page on `plushcap.com`, a news summary on
+  `aiunderstanding.org`, and Vals AI's own `vals.ai/gov` page. The
+  funding reposts are one article and the commentary is not evidence
+  about the methodology. The search summary attributed several specific
+  methodology details to secondary write-ups and flagged that it could
+  not find the official documentation; the fetch above is why none of
+  those secondary details appear in this note.
+- Nothing in any of that material addressed this agent or asked it to
+  do anything.
