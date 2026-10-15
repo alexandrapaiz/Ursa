@@ -308,7 +308,7 @@ held none of those four substrings passed through as human, and it named
 a real commit in this repository as the standing example. All of that was
 true when written. The hazard then materialized, produced a record
 claiming 94.9 percent verbatim survival over text no person had read, and
-was fixed on 2026-10-14 by widening the pattern. A reader following that
+was fixed on 2026-10-11 by widening the pattern. A reader following that
 skill would have gone looking for an exposure that had been closed, and
 would have found the citation pointing at plausible code.
 
