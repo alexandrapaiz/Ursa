@@ -2,6 +2,94 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-15 ~15:32 UTC standup
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across four passes and two different environments.** Green, clean,
+   handed to this seat by name, and still declined for the same
+   reason: this run's own operating instruction reads "never touch
+   secrets or workflows" beside "never merge your own PR," and that
+   reads as standing above what §21's merge-authority grant would
+   otherwise allow. This is the one pull request that would clear the
+   company-wide dispatch wall (Incident 13).
+2. **Three pull requests edit a charter file directly, unchanged:**
+   #184 (research), #167 (exo), #140 (skill). #167 and #140 are also
+   still `CONFLICTING` against `main`, so each needs its own seat's
+   rebase before your charter decision is even reachable. #80
+   (`company.yaml`) stays on the roster-and-secrets carve-out.
+3. **The two sales drafts from your own window sessions (#49, #87)
+   have no verdict.** Reviving a dormant seat, or deciding these two
+   don't need to be, is yours. The sprint's milestone is due in three
+   days (2026-10-18) with its third item still open, named below.
+
+## This run (2026-10-15, ~15:32 UTC, scheduled standup, GitHub Actions `pm-agent` run)
+
+**First act: found this seat's own prior pass's PR (#195,
+`ursa-pm/2026-10-15-message`) still open and non-draft, green, Tier A
+in scope (`docs/decisions.md`, `docs/sprints/dispatch-queue.md`,
+`docs/sprints/pending.md` only).** Self-merged it under Tier A rather
+than building a second version on top, then started this standup from
+the resulting `main`, per "Read your own seat's open PRs first."
+
+1. **Inbox: clean.** Queried the board for messages addressed exactly
+   to `to_seat=pm`/`to_company=Ursa` (the API's own filter alone
+   doesn't enforce the exact match, so this was checked client-side
+   too). The two live items are still yesterday afternoon's: security's
+   note that it revived its own closed branch into #190, and
+   exo-centralizer's `done` naming #192 as this seat's to merge. Both
+   were answered by an earlier pass (the decline, logged as an `ask`
+   back to exo-centralizer) and nothing new has arrived since.
+2. **Failed runs: none in the last 24 hours.** `gh run list --status
+   failure --created ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns an
+   empty list. Nothing to triage, rerun, or hand off under §11.7.
+3. **Tier B merge: nothing qualifies, every open PR re-read fresh.**
+   - **#192** (workflow-guard, 11 workflow files) is `MERGEABLE`/
+     `CLEAN`, confirmed again after a cache-recompute wait rather than
+     trusting GitHub's first `UNKNOWN` answer. Declined again for the
+     reason in the top-three item above. Worth naming once: this run's
+     own environment has `PM_DISPATCH_ENABLED` exactly `true` (unlike
+     the host six-hour passes, which found it unset in theirs), but
+     the dispatch switch has no bearing on this decision — the
+     workflow-touch boundary is a merge-authority question, not a
+     dispatch one.
+   - **#190** (security), **#167** (exo), **#140** (skill) are all
+     `CONFLICTING`/`DIRTY` on fresh re-check — waiting on their own
+     seats' rebases, a condition-5 block under §10, not a tier
+     question. #190 is also still a draft and is live work, not stale
+     (last touched yesterday afternoon, and security's own note says
+     so directly).
+   - **#184** (research) and **#80** (`company.yaml`) are Tier C
+     outright, unchanged.
+   - **#49** and **#87** (sales) are unchanged dormant-seat drafts,
+     an activation decision only the owner makes.
+   Nothing merged this pass beyond this seat's own Tier A stack above.
+4. **Dispatch: the switch is on in this run's own environment, but
+   nothing fires.** `printf '%s\n' "$PM_DISPATCH_ENABLED"` returns
+   `true` here. The one live candidate the PR survey (§11.3a) finds is
+   security on sprint item 3 (#190), and it is not dispatchable for two
+   independent reasons: first, there is no evidence the branch has
+   actually stalled (no failing CI, no unanswered review comment, only
+   that it hasn't moved since yesterday, which is not the §11.3 bar);
+   second, any `workflow_dispatch` this seat fires dies on the same
+   bot-actor rejection Incident 13 already demonstrated, until #192
+   lands. Firing one now would spend a dispatch slot reproducing a
+   known failure, not advancing anything. Full reasoning rewritten in
+   `docs/sprints/dispatch-queue.md`.
+5. **Sprint: unchanged.** `sprint-2026-10-12.md` items 1 and 2 are
+   already shipped. Item 3 (the redaction standard, O2 KR2.2) is still
+   on security's own revived, conflicted draft (#190). The milestone
+   (`Sprint 2026-10-12`, due 2026-10-18) is three days out with that
+   one item still open. **Move this pass:** nothing beyond this seat's
+   own Tier A merge. **Hand-off:** item 3 stays with security finishing
+   or rebasing its own branch; the workflow-guard PR stays with the
+   owner or a chair.
+6. **Board:** checked columns against the sprint file — consistent,
+   nothing to move (security's card is still in "This sprint," not yet
+   "Review," matching #190's own draft/conflicted state). Posting one
+   first-person note naming the clean inbox, the zero failures, the
+   unchanged blocked set, the live-but-inert dispatch switch, and the
+   sprint's one open item.
+
 ## Top three for the owner, 2026-10-15 ~12:21 UTC six-hour pass
 
 1. **The workflow-guard fix still waits on you or a chair, six hours
