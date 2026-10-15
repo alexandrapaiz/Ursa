@@ -27,7 +27,7 @@ evidence:
     source: ursa-major/src/stats.ts:8-12,66-67
   - ref: E3
     what: the schema says coveredChars excludes text no span covers, and reports it separately from finalChars
-    source: ursa-major/src/types.ts:388-393
+    source: ursa-major/src/types.ts:526-531
   - ref: E4
     what: in code mode a span is a trimmed non-empty line, so indentation and blank lines are never covered by any span
     source: ursa-major/src/segment.ts:21-33
@@ -39,19 +39,19 @@ evidence:
     source: ursa-major/src/stats.ts:88-91,109,147-149
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
-    source: ursa-major/src/viewer.ts:216-245
+    source: ursa-major/src/viewer.ts:234-263
   - ref: E8
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:242-249, ursa-major/src/match.ts:7-8
+    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short exact match is labelled survived_verbatim with score 1 and flagged trivial, so it sits inside that category's chars
     source: ursa-major/src/resolve.ts:169-181, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
-    source: ursa-major/src/resolve.ts:252
+    source: ursa-major/src/resolve.ts:458
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
-    source: ursa-major/src/types.ts:394-395, ursa-major/src/stats.ts:36-37,52-53
+    source: ursa-major/src/types.ts:532-533, ursa-major/src/stats.ts:36-37,52-53
   - ref: E12
     what: CLAUDE.md lists all four classifications under one heading and calls no_generation_provenance the most valuable
     source: CLAUDE.md, section 1, span classifications
@@ -60,22 +60,22 @@ evidence:
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
-    source: ursa-major/src/types.ts:478-479, ursa-major/src/stats.ts:124-126
+    source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:136-138
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
-    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:530
+    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:580
   - ref: E16
     what: CLAUDE.md lists turns to acceptance as trajectory metadata wrapped around the record
     source: CLAUDE.md, section 1, trajectory metadata
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
-    source: ursa-major/src/stats.ts:54-57,136-141
+    source: ursa-major/src/stats.ts:54-57,148-153
   - ref: E18
     what: path-filter drops generations at parse time, before any denominator is computed
     source: ursa-major/src/parse.ts:130, ursa-major/src/cli.ts:58,119
   - ref: E19
     what: the record carries a finished flag, set false by --abandoned, and the viewer shows it as a chip
-    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:298, ursa-major/src/viewer.ts:180
+    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:523, ursa-major/src/viewer.ts:180
   - ref: E20
     what: the CLI prints finalChars and coveredChars on one line, and gives every class both an of-final and an of-classified column
     source: ursa-major/src/cli.ts:167-173

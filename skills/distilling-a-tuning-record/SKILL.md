@@ -75,25 +75,25 @@ evidence:
     source: ursa-major/src/tuning/export.ts:9-15,27-50
   - ref: E19
     what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted
-    source: ursa-major/src/signals.ts:1-7,95-121
+    source: ursa-major/src/signals.ts:1-7,111-137
   - ref: E20
     what: a one-shot correction's domain field is the file path, and its text is an agent-against-final excerpt pair
-    source: ursa-major/src/signals.ts:74-77
+    source: ursa-major/src/signals.ts:90-93
   - ref: E21
     what: the undeclared default says in its own words that retention is not acceptance, and null means no declaration surface was offered
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:161,179-187
+    source: ursa-major/src/resolve-episode.ts:161,188-196
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
-    source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:338-339
+    source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:476-477
   - ref: E24
     what: an episode id is the project slug, the generated commit date, and the first seven characters of the generated commit sha
     source: ursa-major/src/episodes.ts:60-64
   - ref: E25
     what: the designed distillation watermark, a distilled flag on each episode and an isDistilled lookup against it
-    source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:35-37
+    source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:72-74
   - ref: E26
     what: records, the episode index and the distillation watermark live in a per-project .ursa directory, nothing global and nothing commingled
     source: ursa-major/src/store.ts:1-3,10-20
@@ -132,7 +132,7 @@ evidence:
     source: ursa-major/src/tuning/tuning.test.ts:18-26
   - ref: E38
     what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
-    source: ursa-major/src/signals.ts:49-63
+    source: ursa-major/src/signals.ts:65-79
 supersedes: []
 ---
 
