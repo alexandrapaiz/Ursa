@@ -180,7 +180,11 @@ export function resolveEpisode(
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
+    // `ep.finalSha` is the horizon: a commit authored after the person
+    // finished this work cannot be where its text came from, and before
+    // the bound existed one shipped record named a commit seven days in
+    // its own future as a rival (docs/ideas.md, 2026-10-14).
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph, ep.finalSha),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
