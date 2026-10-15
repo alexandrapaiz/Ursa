@@ -12,12 +12,12 @@ description: >
   the ancestry was not. Does not fire for producing a record in the
   first place, for labelling generations, or for reading a record's
   summary statistics.
-version: 0.2.0
+version: 0.3.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-24
-revised: 2026-10-08
+revised: 2026-10-15
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -30,8 +30,8 @@ evidence:
     what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
     source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:390-391
   - ref: E4
-    what: trivial is a different flag with a different cause, set on short exact matches
-    source: ursa-major/src/resolve.ts:170-181, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
+    what: trivial is a different flag with a different cause, set on short raw-exact matches only, and stripped when the descent check demotes the span
+    source: ursa-major/src/resolve.ts:371-384, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3
@@ -51,8 +51,8 @@ evidence:
     what: KR1.1 requires all 55 uncertain spans adjudicated, thresholds retuned to a false-positive rate of 10 percent or lower, and the adjudication file committed beside the record
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E11
-    what: a generation's fate is derived from claim overlap rather than adjudicated directly, and survivalRate follows from it
-    source: ursa-major/src/resolve.ts:258-290
+    what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14
+    source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
     source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
@@ -63,14 +63,14 @@ evidence:
     what: the methods document's own limits, n=1 demonstrates label types and not statistics
     source: docs/beyond-preference-pairs.md:154-170
   - ref: E15
-    what: the viewer marks uncertain spans with a dashed underline and prints the count needing adjudication
-    source: ursa-major/src/viewer.ts:89,310-311,305
+    what: the viewer marks uncertain spans with a dashed underline, prints the count needing adjudication, and labels spans uncertain, trivial match or formatting only
+    source: ursa-major/src/viewer.ts:89,310-311,323-325
   - ref: E16
     what: a second branch sets uncertain, where an above-threshold match whose descent is corroborated as rival is demoted to no_generation_provenance with the candidate and a descent field kept
     source: ursa-major/src/resolve.ts:415-431
   - ref: E17
     what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
-    source: ursa-major/src/resolve.ts:228-233
+    source: ursa-major/src/resolve.ts:438-443
 supersedes: []
 ---
 
@@ -93,6 +93,9 @@ adjudicated, so they move on their own once span verdicts change [E11].
 **1. Open the record and the viewer together.** The viewer draws every
 uncertain span with a dashed underline and prints how many need
 adjudication, so it is the fastest way to see where they cluster [E15].
+It labels each span with up to three qualifiers now, `uncertain`,
+`trivial match` and `formatting only`, so the queue can be read off the
+page before any JSON is opened [E15].
 The JSON is what you will actually read from, because it carries the
 candidate that the viewer only hints at. Output: the list of uncertain
 spans with file path and character offsets.
@@ -132,13 +135,19 @@ means you genuinely cannot tell, and it is a real verdict rather than
 an admission, because the count of unresolvables is itself a reading
 on the thresholds. Output: one verdict per span.
 
-**4. Keep `trivial` out of this.** It is a different flag with a
-different cause. A final segment that normalizes to fewer than 12
-characters cannot claim verbatim by containment, so the resolver only
-accepts an exact match against a whole generation segment and marks it
-trivial, which the code itself calls weak evidence either way [E4].
-Trivial spans are not in the uncertain band and do not belong in the
-adjudicated set. Folding them in inflates the denominator and hides
+**4. Keep `trivial` out of this, and check that it really is still
+flagged.** It is a different flag with a different cause. A final
+segment that normalizes to fewer than 12 characters cannot claim
+verbatim by containment, so the resolver only accepts an exact match
+against a whole generation segment and marks it trivial, which the code
+itself calls weak evidence either way [E4]. The match must now agree on
+raw characters and not only on their normalization. A short segment
+whose normalized form matches while its raw text does not is demoted the
+same way the long branch demotes one, and the demoted span carries no
+`trivial` flag [E4]. So trivial spans are still outside the uncertain
+band and still do not belong in the adjudicated set, but the reason is
+now that demotion strips the flag rather than that the two populations
+never meet. Folding them in inflates the denominator and hides
 whichever problem is real. Output: two separate counts.
 
 **5. Write the verdicts to a file beside the record.** KR1.1 requires
@@ -250,7 +259,16 @@ record is sold on.
 - Generation-side fates and `survivalRate` are derived from claim
   overlap rather than judged here [E11]. They move when span verdicts
   move, which means the survival numbers in a record should be read as
-  provisional until adjudication is done.
+  provisional until adjudication is done. There are four fates to move
+  between as of 2026-10-14, not three. `not_generated` marks a segment
+  the file already held at the generation's parent commit, it is
+  excluded from `survivedChars` and subtracted from `deletedChars`, and
+  it stays inside `totalChars` so the fates still add up to it [E11].
+  An adjudication that overturns a demotion therefore moves characters
+  out of `not_generated` rather than out of `generated_deleted`, and
+  `survivedChars` is now defined as the two survival fates rather than
+  as everything undeleted, so the old spelling of that sum would have
+  counted an import as a survival [E11].
 - The evidence base behind the judgment section is one trial and part
   of a second. The methods document says so about itself, that n=1
   demonstrates label types and not statistics [E14]. Treat every

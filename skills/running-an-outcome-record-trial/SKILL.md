@@ -11,12 +11,12 @@ description: >
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
   code, or for redacting a record so it can be published.
-version: 0.2.0
+version: 0.3.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-30
-revised: 2026-10-08
+revised: 2026-10-15
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -26,8 +26,8 @@ evidence:
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
     source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:577-605
   - ref: E3
-    what: what marks a commit as generated, including the author fallback that matches bots and github-actions
-    source: ursa-major/src/pairfinder.ts:144,167; ursa-major/src/pairfinder.ts:391-395
+    what: one machine-identity pattern marks a commit as generated through three tests, an owner-declared list, the co-author trailer and the author name, after the trailer pattern was widened on 2026-10-14
+    source: ursa-major/src/pairfinder.ts:262-263,293; ursa-major/src/pairfinder.ts:545-556
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff
     source: ursa-major/src/pairfinder.ts:610-613
@@ -39,10 +39,10 @@ evidence:
     source: ursa-major/src/resolve-episode.ts:188-196
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
-    source: ursa-major/src/resolve-episode.ts:124,183; ursa-major/src/episodes.ts:25
+    source: ursa-major/src/resolve-episode.ts:129,192; ursa-major/src/episodes.ts:25
   - ref: E8
-    what: min-chars defaults to 200 and limit truncates; ursa run drops below-threshold episodes without naming them, while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:378-379; ursa-major/src/bin/ursa.ts:377; ursa-major/src/ci/run.ts:149
+    what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
+    source: ursa-major/src/bin/ursa.ts:378-379; ursa-major/src/bin/ursa.ts:437; ursa-major/src/ci/run.ts:194; ursa-major/src/launch.ts:56
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
@@ -176,12 +176,14 @@ record [E20]. *Output: the record, plus a declaration with a basis.*
 
 **7. Reconcile the episode count against what the run reported.** The git
 path drops any episode whose generated side is under 200 characters, and
-truncates to `--limit` when given. `ursa run` does not name what it
-dropped; the CI path does, counting its below-threshold drops [E8]. So
-on a local run, if step 2 counted more pairs than the run produced
-records, that gap is the default threshold rather than a bug, and you
-have to reconstruct it yourself. *Output: the two counts, and the reason for
-any difference.*
+truncates to `--limit` when given. Both paths now ask that through one
+predicate, which exempts a record that carries exclusions, so an episode
+whose every path was an import still produces the record whose only job
+is to say so [E8]. `ursa run` does not name what it dropped. The CI path
+does, counting its below-threshold drops separately [E8]. So on a local
+run, if step 2 counted more pairs than the run produced records, that gap
+is the default threshold rather than a bug, and you have to reconstruct
+it yourself. *Output: the two counts, and the reason for any difference.*
 
 **8. Write down what the record measured, next to the record.** A record
 should state which stage of the funnel it came from [E14]. Also state
@@ -222,20 +224,38 @@ entire branch diff. Every condition for a legal pairing target is met, and
 the diff it supplies is precisely what the exclusion's own comment says
 must not be counted as the person's corrections [E4].
 
-Whether it is caught depends on the trailer that survives the squash, and
-the marker test is narrower than it looks. The trailer pattern matches
-`claude|codex|cursor|gpt`, and the author fallback, which is the only test
-that knows about `[bot]` names, is applied to the commit's author name and
-never to its trailer [E3]. A bot whose name contains none of those four
-substrings therefore passes through as human.
+Whether it is caught depends on the trailer that survives the squash.
+The marker test now applies one pattern to three places. A commit is an
+agent's if the owner has declared its identity, or if its co-author
+trailer matches `claude|codex|cursor|gpt|copilot|github-actions|\[bot\]`,
+or, failing both, if its author name matches that same pattern [E3]. The
+declared list is checked first and is never suppressed. The author
+fallback still is, whenever it matches every commit in the history,
+because `GIT_AUTHOR_NAME` is ambient and a harness that exports it labels
+the person's own commits too [E3].
 
-Ours: this is measurable in this repository, and it is not hypothetical.
-Across the 88 commits reachable in a working clone, 78 are agent-marked
-non-merge commits, 8 are merge commits the exclusion drops, and the
-remaining 2 are root or graft boundaries. One of those is a squash merge
-whose trailer GitHub rewrote to `Co-authored-by: exo-centralizer[bot]`,
-which matches neither pattern, so it reads as a human commit editing the
-agent's work.
+**This changed on 2026-10-14, and the previous version of this skill
+described the hazard that caused it.** Until then the trailer pattern was
+only `claude|codex|cursor|gpt` and the `[bot]` test reached author names
+alone, so a bot whose name held none of those four substrings passed
+through as human. This skill reported that as a live risk in this
+repository, naming a squash commit whose trailer GitHub had rewritten to
+`Co-authored-by: exo-centralizer[bot]`. The risk then materialized and
+was measured. That commit was authored by the owner's own account, so
+neither test reached it, and it became eligible as a person's edit. It
+paired with the preceding `claude[bot]` commit and produced a record
+claiming 60,616 of 63,362 generated characters survived verbatim, which
+is 94.9 percent. That single claim carried 84.7 percent of the run's
+whole headline survival figure, and no person had read a character of it.
+Both commits were automated syncs of the same upstream file [E3].
+
+Ours: read the direction of that fix before copying it. Widening the
+marker narrows what a run claims rather than widening it, because a
+commit classified as a generation stops being eligible as a pairing
+target [E3]. A refused pair is a claim not made, where the alternative
+here was a claim that was false. So when you are unsure whether some
+machine identity belongs in the pattern, the costly direction is leaving
+it out.
 
 ```bash
 git log --all --pretty=format:'%h%x09%an%x09%p%x09%(trailers:key=Co-Authored-By,valueonly)'
@@ -279,16 +299,21 @@ session transcript and a pasted conversation satisfies two of KR1.3's
 three constraints at once. Do not force it. A joined record assembled from
 sources that fed different work is worse than two clean records.
 
-**The default detector is looser than it reads, in both directions.** A
-commit counts as generated when its co-author trailer matches
-`claude|codex|cursor|gpt`, or, failing that, when its author name matches a
-wider list that includes `github-actions` and anything bracketed `[bot]`
-[E3]. So a release bot or a CI commit is classified as a model generation,
-and its next human touch becomes a correction of it. Going the other way,
-an agent commit whose trailer was dropped is read as human, which silently
-converts a generation into `no_generation_provenance`. The comment in the
-finder says the fallback deliberately errs toward matching because a false
-negative loses signal [E3].
+**The default detector is loose in one direction by choice, and the
+choice is defensible.** One pattern covering `copilot`,
+`github-actions` and anything bracketed `[bot]` is applied to the
+declared list, the trailer and the author name alike [E3]. So a release
+bot or a CI commit is classified as a model generation, and its next
+human touch becomes a correction of it. That is the intended cost. A
+commit classified as a generation stops being eligible as a pairing
+target, so the error it produces is a pair refused rather than a
+survival claimed, and the file's own note says that is the correct
+direction to err in [E3]. Going the other way still bites. An agent
+commit whose trailer was dropped and whose author name is a person's
+reads as human, which silently converts a generation into
+`no_generation_provenance`. The owner-declared identity list exists for
+exactly that case, and it is the only one of the three tests that is
+never suppressed [E3].
 
 Ours: before trusting a trial's model attribution, look at the distinct
 marker strings in the output, because attribution on this path is the

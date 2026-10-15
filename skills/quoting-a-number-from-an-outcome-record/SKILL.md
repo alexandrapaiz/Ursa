@@ -11,17 +11,17 @@ description: >
   that already exists against the field it cites. Does not fire for
   producing a record, for choosing a trial subject, or for deciding
   the label on any individual span.
-version: 0.2.0
+version: 0.3.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-01
-revised: 2026-10-08
+revised: 2026-10-15
 evidence_scheme: repo
 evidence:
   - ref: E1
-    what: there are three span classes over the final work, and generated_deleted is a generation fate rather than a span class
-    source: ursa-major/src/types.ts:5-14
+    what: there are three span classes over the final work and four generation fates, and generated_deleted and not_generated are both fates rather than span classes
+    source: ursa-major/src/types.ts:5-8,10-37
   - ref: E2
     what: byClass covers only the three span classes, and each class carries two percentages, pct over coveredChars and pctOfFinal over finalChars
     source: ursa-major/src/stats.ts:8-12,66-67
@@ -35,8 +35,8 @@ evidence:
     what: segmentation mode is chosen by file extension, prose for md, mdx, markdown, txt and tex, code for everything else
     source: ursa-major/src/segment.ts:13-15
   - ref: E6
-    what: deletedPct is deleted generated chars over total generated chars, a different population from the final work
-    source: ursa-major/src/stats.ts:88-91,109,147-149
+    what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again
+    source: ursa-major/src/stats.ts:88-91,115-122,159-165
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
     source: ursa-major/src/viewer.ts:234-263
@@ -44,8 +44,8 @@ evidence:
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
     source: ursa-major/src/resolve.ts:448-455, ursa-major/src/match.ts:7-8
   - ref: E9
-    what: a short exact match is labelled survived_verbatim with score 1 and flagged trivial, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:169-181, ursa-major/src/match.ts:9-10
+    what: a short raw-exact match is labelled survived_verbatim with score 1 and flagged trivial so it sits inside that category's chars, unless the descent check demotes it, which drops the trivial flag
+    source: ursa-major/src/resolve.ts:371-384,224-263, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
     source: ursa-major/src/resolve.ts:458
@@ -165,7 +165,14 @@ two, and they are not the same set of characters. Everything in
 `pctOfFinal` over `finalChars` [E2]. Both are final-work text, and
 which one a sentence means is the whole question.
 `deletedPct` is divided by total generated chars, which is model output
-text [E6]. Output: one sentence of the form "this is a share of X",
+text [E6]. Its numerator is narrower than "everything that did not
+survive". Since 2026-10-14 it is total generated chars less the
+survived chars and less the `not_generated` chars, so text the file
+already held is subtracted out of the numerator while remaining in the
+denominator [E6]. The record also reports `humanDeletedPct` beside it,
+which narrows the numerator again to the deletions no mechanical cause
+explains [E6]. Quote whichever of the two you mean by name, because
+"deleted" alone no longer picks out one of them. Output: one sentence of the form "this is a share of X",
 where X is either covered final characters or generated characters.
 
 **3. Decide whether the number is a share of the work or a share of the
@@ -181,7 +188,13 @@ gap.
 Two flags put low-confidence spans inside ordinary categories. A
 below-threshold best match is labelled `no_generation_provenance` and
 flagged `uncertain` [E8]. A short exact match is labelled
-`survived_verbatim` with a score of 1 and flagged `trivial` [E9]. A
+`survived_verbatim` with a score of 1 and flagged `trivial`, but only
+when the raw characters agree and the descent check does not refuse it.
+A short match whose text the file already held at the parent commit is
+demoted to `no_generation_provenance` with `uncertain` set, and the
+demotion drops the `trivial` flag rather than carrying it over [E9].
+So `trivial` still marks weak evidence inside `survived_verbatim`, and
+it no longer marks every short exact match. A
 span with no match at all receives exactly the same
 `no_generation_provenance` label as an uncertain one [E10]. Neither
 flag has a character total in the schema, only a span count [E11], so
@@ -237,7 +250,13 @@ is held until the corpus supports it.
 over the final work, and `generated_deleted` is not one of them. It is
 a generation fate [E1], which follows from what the classes describe: a
 deleted generation leaves no text in the finished work for a span to
-cover. The viewer nonetheless draws the three classes and the deleted
+cover. The two vocabularies have since drifted further apart rather
+than closer together. A fourth generation fate, `not_generated`, was
+added on 2026-10-14 for a segment that sits inside a generation's text
+but that the file already held at the generation's parent commit, so it
+is neither survival nor deletion [E1]. There are now three span classes
+and four generation fates, and no sentence should use a word from one
+vocabulary against a denominator from the other. The viewer nonetheless draws the three classes and the deleted
 figure as four tiles in one row, and then draws a distribution bar
 underneath that contains only the three [E7]. The tiles and the bar
 disagree about how many categories there are, and the tiles are the
