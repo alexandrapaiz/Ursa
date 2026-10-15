@@ -2,6 +2,87 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-15 ~18:25 UTC six-hour pass
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across five passes and three different environments.** Unchanged
+   from every prior pass today: green, clean, handed to this seat by
+   name, and still declined for the same reason, this run's own
+   operating instruction reads "never touch secrets or workflows"
+   beside "never merge your own PR," and that stands above what §21's
+   merge-authority grant would otherwise allow this seat to do. This is
+   the one pull request that would clear the company-wide dispatch
+   wall (Incident 13). Not re-asking again this pass; the standing ask
+   from four passes ago is still the live one.
+2. **Three pull requests edit a charter file directly: #199 (skill,
+   new this pass), #184 (research), #167 (exo).** #167 is also still
+   `CONFLICTING` against `main`; handed off to the exo seat on the
+   board this pass to rebase it, since a code conflict is not this
+   seat's to resolve. #80 (`company.yaml`) stays on the
+   roster-and-secrets carve-out, labeled `owner-action` already.
+3. **The two sales drafts from your own window sessions (#49, #87)
+   still have no verdict.** Reviving a dormant seat, or deciding these
+   two don't need to be, is yours. The sprint's milestone is due in
+   three days (2026-10-18) with its third item still open, named below.
+
+## This run (2026-10-15, ~18:25 UTC, six-hour pass, host-triggered)
+
+1. **Inbox: checked fresh, nothing new.** Queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+   client-side to the exact match (the API's own filter doesn't
+   enforce it). The two live items are still 2026-10-14's: security's
+   note that it revived its own closed branch into #190, and
+   exo-centralizer's `done` naming #192 as this seat's to merge. Both
+   were answered by an earlier pass today (the decline on #192, logged
+   as a standing `ask` back to exo-centralizer; #190's revival needed
+   no action from this seat). Nothing addressed to `pm` has arrived
+   since.
+2. **Failed runs: one in the last six hours, a tripwire false alarm.**
+   `pm-agent` run
+   [38760984649](https://github.com/alexandrapaiz/Ursa/actions/runs/38760984649)
+   (2026-10-15 15:30:49Z) failed its "No-ship tripwire" step. Read
+   against the evidence rather than the conclusion: that run pushed
+   `docs/decisions.md`'s 15:32 UTC update and opened/merged PR #197
+   (`pm/standup-2026-10-15`, merged 15:37:26Z) in the same pass, so the
+   run shipped real, committed work and the tripwire fired on stale
+   local state at teardown, after the merge had already landed. Per
+   pm.md §11.7, classified as a tripwire false alarm (the run's PR
+   exists): no rerun.
+3. **Tier B merge: two actions, both fresh since the 15:32 UTC pass.**
+   Merged **#198** (engineer, "the file-level refusal gets a clock") —
+   green, `CLEAN`, not a draft, not this seat's own, no Tier C path
+   (`gh pr diff --name-only` showed only `README.md`,
+   `docs/design/*`, `docs/ideas.md`, and `ursa-major/` source and
+   fixtures), under seven days old. Closed **#140** (skill, the
+   2026-10-08 library consolidation) with a comment naming the reason:
+   its own thread already carries the skill seat's verified
+   `git merge-base --is-ancestor` check showing #140's head is a
+   strict ancestor of #199, opened minutes earlier by today's skill
+   run. Nothing else moved: #199 and #184 edit `prompts/` directly
+   (Tier C, confirmed by `gh pr diff --name-only`, naming
+   `prompts/skill-extract.md` and `prompts/research-agent.md`
+   respectively) regardless of their clean, green state. #192 stays
+   declined for the workflow-file reason above. #190 (security) is
+   still a draft. #80 is Tier C outright (`company.yaml`). #49 and #87
+   are dormant-seat drafts with no verdict to give.
+4. **#167 handed to the exo seat.** Still `CONFLICTING` against `main`
+   and still edits `prompts/exo-agent.md` (Tier C once clean, per
+   `gh pr diff --name-only`). Posted a `handoff` on the board to
+   `exo`/Ursa asking it to rebase, since a code conflict is the owning
+   seat's to resolve and not this seat's to fix by hand.
+5. **Sprint: item 3 is the only one still open, unchanged.** Items 1
+   and 2 of `sprint-2026-10-12.md` shipped earlier this week (#179,
+   #182, confirmed in prior passes); item 3
+   (`docs/security/redaction-standard.md`) is still on security's own
+   draft #190, still conflicted, with the 2026-10-18 milestone three
+   days out. Engineer kept shipping beyond the sprint's named items
+   (#196, #198 today), which is real velocity but not progress on item
+   3; nobody but the security seat can move that one.
+6. **Board:** posted one `handoff` (exo, #167's rebase) and one `note`
+   this pass, first person, naming the tripwire false alarm, the two
+   Tier B actions, and the sprint's unmoved third item. This seat's
+   inbox stays open for anything addressed to it until the next pass.
+
 ## Top three for the owner, 2026-10-15 ~15:32 UTC standup
 
 1. **The workflow-guard fix (#192) still waits on you or a chair, now
