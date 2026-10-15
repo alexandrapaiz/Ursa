@@ -890,6 +890,37 @@ export interface Exclusion {
    * it moved is a field that drifts.
    */
   chars: number
+  /**
+   * Author date of `sha`, strict ISO 8601 with the author's own UTC offset
+   * (`%aI`), as `DescentEvidence`'s `rival` variant carries it one level
+   * down.
+   *
+   * Why the file level needs it for the same reason the span level did.
+   * A `sibling` exclusion is the only relation here whose claim rests on a
+   * clock: it says the finished file is byte-identical to a copy on a
+   * branch that is neither an ancestor nor a descendant of the generation,
+   * which is evidence that the content came from that branch — and if that
+   * branch's commit was authored after the work closed, the copy is a copy
+   * OF this work rather than a source for it. The refusal is then
+   * backwards, and it is an expensive refusal to get backwards: an
+   * exclusion removes a whole file from every figure in the record, and on
+   * this repository's own history one of them removed 60,616 characters,
+   * 84.7% of a run's headline survival figure.
+   *
+   * `pre_existing` and `declared` are exempt from the ordering for the
+   * reasons `RIVAL_NOT_AFTER_FINAL` exempts `prior_revision`,
+   * `pre_existing` and `merged_in`: a `pre_existing` match is an ancestor
+   * of the generation, so the commit graph vouches for it whatever a
+   * rebase did to its author date, and a `declared` import names a commit
+   * in ANOTHER repository's history whose clock is not comparable to this
+   * one's at all.
+   *
+   * ABSENT is legal and unchecked. Every record this project wrote before
+   * 2026-10-15 has exclusions with no date, and `vendoredPaths` omits the
+   * field rather than writing an empty string when a clone cannot answer.
+   * Read `EXCLUSION_NOT_CLASSIFIED` in src/invariants.ts for the bound.
+   */
+  date?: string
 }
 
 /**

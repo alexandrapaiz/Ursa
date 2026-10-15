@@ -205,7 +205,7 @@ const BOUNDS: Record<InvariantCode, string> = {
   SIGNAL_QUOTE_GROUNDED:
     'every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()\'s whitespace normalization, and the same excerpt appears in the signal\'s own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.',
   EXCLUSION_NOT_CLASSIFIED:
-    'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
+    'no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit\'s author date states one that can be ordered, with a `sibling` exclusion\'s date no later than the record\'s own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository\'s own history one exclusion removed 60,616 characters, 84.7% of that run\'s headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch\'s commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one\'s. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer.',
   DESCENT_CHECKED_UNIFORMLY:
     'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
   RESOLVER_IDENTIFIED:
@@ -714,6 +714,13 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
   // produce a record that names its own counter-evidence and sells the
   // claim anyway, which is the one defect a buyer could catch before we do.
   const classified = new Set(record.files.map((f) => f.path))
+  // Dated `sibling` exclusions, counted for the same reason `datedSiblings`
+  // is counted above: the record-level complaint about an unreadable
+  // `task.generatedAt` has standing only once something actually needs that
+  // field ordered. Counted separately from the span-level tally because a
+  // record can carry exclusions and no descent verdicts at all, and then
+  // the span-level loop never runs.
+  let datedSiblingExclusions = 0
   for (const [i, x] of (record.exclusions ?? []).entries()) {
     const at = `exclusions[${i}] (${x.path})`
     if (classified.has(x.path)) {
@@ -725,6 +732,37 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       push('EXCLUSION_NOT_CLASSIFIED', at,
         `chars=${x.chars}, sha=${x.sha ? x.sha : '(empty)'}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`)
     }
+    // The time clause, which is `RIVAL_NOT_AFTER_FINAL` one level up. Read
+    // as `unknown` for the reason that bound reads a rival's date that way:
+    // these records reach the gate through `JSON.parse` off a directory
+    // somebody else wrote, so the declared type is an assumption and a
+    // `date` of `1760000000` is reachable in a file.
+    const date = (x as { date?: unknown }).date
+    if (date === undefined) continue
+    const ms = typeof date === 'string' ? Date.parse(date) : Number.NaN
+    // Unreadable fails on every relation, exactly as it does for a rival:
+    // an exempt relation still has no business stating a time nothing can
+    // order, because the field reads as provenance on every surface that
+    // prints it and omitting it was always allowed.
+    if (Number.isNaN(ms)) {
+      push('EXCLUSION_NOT_CLASSIFIED', at,
+        `excluded as ${x.reason} from ${x.sha} (${x.relation}) carrying date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`)
+      continue
+    }
+    if (x.relation !== 'sibling') continue
+    datedSiblingExclusions++
+    if (Number.isNaN(finalMs)) continue
+    if (ms > finalMs) {
+      push('EXCLUSION_NOT_CLASSIFIED', at,
+        `sibling copy ${x.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the ${x.chars} chars of this file were dropped from every figure on the evidence of a commit from the record's own future`)
+    }
+  }
+  // One violation for the record rather than one per exclusion, for the
+  // reason the span-level twin above gives: the fault is in the single
+  // field every sibling is ordered against.
+  if (datedSiblingExclusions > 0 && Number.isNaN(finalMs)) {
+    push('EXCLUSION_NOT_CLASSIFIED', 'task.generatedAt',
+      `${datedSiblingExclusions} sibling exclusion${datedSiblingExclusions === 1 ? '' : 's'} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no excluded file's copy can be ordered against the work it was dropped from`)
   }
 
   // The resolver the record names, checked the way an exclusion's commit is.

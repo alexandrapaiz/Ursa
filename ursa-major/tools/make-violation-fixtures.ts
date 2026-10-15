@@ -59,6 +59,23 @@ const EXCLUDED: Exclusion = {
   subject: 'standards: sync pm.md from HQ',
   relation: 'sibling',
   chars: 199,
+  // DATED as of 2026-10-15, with EXCLUSION_NOT_CLASSIFIED's time clause, and
+  // for the same reason the base record's rival verdict is dated: the field
+  // is optional, so a base whose only exclusion carried no date would
+  // satisfy the clause by having nothing to check while the suite still
+  // reported the bound covered.
+  //
+  // The value is the same instant the base's rival verdict carries, and that
+  // is deliberate rather than lazy. `2026-10-09T17:00:00-06:00` is
+  // `2026-10-09T23:00:00Z`, one hour BEFORE this record's
+  // `task.generatedAt` of `2026-10-10T00:00:00.000Z`, while its text sorts
+  // AFTER it as a string. The fixture that breaks this clause moves it two
+  // hours later, to an instant after the horizon whose text still sorts
+  // before it. Running the same trap at both levels is the point: a gate
+  // that compared characters instead of instants would pass both files, and
+  // `tools/measure-verbatim-descent.ts` shipped exactly that mistake before
+  // 2026-10-14.
+  date: '2026-10-09T17:00:00-06:00',
 }
 
 const firstVerbatim = (r: OutcomeRecord) =>
@@ -396,11 +413,34 @@ const CASES: Case[] = [
   },
   {
     slug: 'rival-not-after-final-unreadable-horizon',
-    codes: ['RIVAL_NOT_AFTER_FINAL'],
+    codes: ['RIVAL_NOT_AFTER_FINAL', 'EXCLUSION_NOT_CLASSIFIED'],
     edit: '`task.generatedAt` replaced with the string `2026-13-45T99:00:00Z`, the rival\'s own date left alone',
     consequence:
       'the record carries a dated rival and no readable clock to order it against. The defect is in one field rather than in any span, so the gate fires once for the record and names `task.generatedAt` rather than once per verdict. It is the third of this bound\'s three independent failure modes and the only one that is not about the rival at all: the ordering is unavailable because the horizon is unreadable, which is indistinguishable, to anything downstream, from a record whose rivals were all checked.',
+    why:
+      'One broken field, two bounds, and that is the correct answer rather than noise. As of 2026-10-15 the base record carries both a dated `sibling` rival verdict and a dated `sibling` exclusion, and `task.generatedAt` is the single horizon both are ordered against. RIVAL_NOT_AFTER_FINAL reports that no span-level verdict can be ordered and EXCLUSION_NOT_CLASSIFIED reports that no file-level refusal can be, which are different losses: the first leaves a span\'s descent claim unchecked, the second leaves a whole file\'s removal from every figure unchecked. A fixture that fired only one of them would be a fixture asserting that the two levels share a check, and they do not.',
     break: (r) => { r.task.generatedAt = '2026-13-45T99:00:00Z' },
+  },
+  {
+    slug: 'exclusion-not-classified-after-final',
+    codes: ['EXCLUSION_NOT_CLASSIFIED'],
+    edit: 'the dated `sibling` exclusion\'s `date` moved two hours later, from `2026-10-09T17:00:00-06:00` to `2026-10-09T19:00:00-06:00`, which is one hour after `task.generatedAt`',
+    consequence:
+      'the record drops a whole file out of every figure it reports, on the evidence of a commit authored after the work closed. The exclusion\'s relation is `sibling`, which claims the finished file is byte-identical to a copy on a branch outside this generation\'s line of descent and infers that the content came FROM that branch. Dated after the work, the inference runs backwards: the branch holds a copy OF this work, and the record refuses to credit a file the person did write. This is `rival-not-after-final.json` one level up and it is the more expensive of the two, because an exclusion moves `stats.finalChars` and every percentage built on it rather than one span — on this repository\'s own history one exclusion removed 60,616 characters, 84.7% of that run\'s headline survival figure. The edit is two hours and not two days for the reason the span-level one is: `2026-10-09T19:00:00-06:00` is `2026-10-10T01:00:00Z`, after the horizon, while its text still sorts before `2026-10-10T00:00:00.000Z`. A gate comparing strings would pass this file.',
+    break: (r) => { r.exclusions![0].date = '2026-10-09T19:00:00-06:00' },
+  },
+  {
+    slug: 'exclusion-not-classified-unreadable-date',
+    codes: ['EXCLUSION_NOT_CLASSIFIED'],
+    edit: 'the dated `sibling` exclusion\'s `date` replaced with the string `last Tuesday`',
+    consequence:
+      'the exclusion states a date and states it in a form nothing can order. `Date.parse` returns `NaN`, so the comparison that decides whether this file was dropped on evidence from the future cannot be made, and a bound that skipped an unreadable date would report the refusal as checked. Unreadable fails on every relation here, including the two the clause exempts from ordering, because the field prints as provenance on every surface that shows it: `pre_existing` and `declared` are excused from being ORDERED, not from being readable.',
+    break: (r) => {
+      // Cast for the reason the bound reads the field as `unknown`: the
+      // malformed state is reachable in a JSON file and unreachable through
+      // the declared type.
+      ;(r.exclusions![0] as unknown as Record<string, unknown>).date = 'last Tuesday'
+    },
   },
 ]
 
