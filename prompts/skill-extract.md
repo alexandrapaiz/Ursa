@@ -367,3 +367,43 @@ reading anything. It shrinks the batch to the part that needs judgment,
 it keeps the two kinds of change in separate diffs where a reviewer can
 see which were decided by a person, and it means a run that dies partway
 has still landed the half that was not going to change anyway.
+
+## 5j. The lock proves the lines did not change, not that they support the claim
+
+(Added 2026-10-15, sixth run, after this seat shipped the failure and
+caught it in its own audit.)
+
+There is a blind spot in the guard §5g installs, and it is worth naming
+precisely because the guard is good enough to be trusted too far.
+
+`check-evidence.mjs` now proves four things: the path exists, the line
+numbers are in bounds, the body and the evidence table agree in both
+directions, and the cited lines still hash to what they hashed to when
+the claim was recorded. A citation can satisfy all four and still not
+support its sentence, because none of them is a relevance check. The
+failure arrives as a range that is too narrow rather than as an
+exaggerated claim. The hash is correctly recorded over the wrong lines,
+so the checker reports OK and a reader following the `ref` lands on real
+code that simply does not say what was attributed to it.
+
+This run shipped exactly that and found it by hand. The rewritten E3 in
+`running-an-outcome-record-trial` asserted a measured incident, 94.9
+percent verbatim survival over text no person had read, and the
+reasoning for why one of the three marker tests carries an all-match
+suppression. Both live in a doc comment at `pairfinder.ts:218-263`. E3
+was anchored at `262-263` and `545-556`, which hold the constants and
+the marker function and neither argument. Every automated check passed.
+
+So, the step that has no exit status: **after rewriting a claim, read
+your own citation back as a stranger would.** Open the range you wrote
+down, not the range you were looking at while you worked, and ask
+whether the sentence can be checked from what is inside it. A claim that
+needs a comment thirty lines above the code must cite the comment. When
+a prose argument and the code it describes are both load-bearing, the
+range covers both or the citation is decoration.
+
+Ours: the asymmetry here is the thing to remember. An overstated
+sentence is visible to any reviewer who reads the skill. A
+too-narrow anchor is invisible to every reviewer who does not open the
+file, and invisible to the checker by construction, so it survives
+exactly the review that a confident green run invites.
