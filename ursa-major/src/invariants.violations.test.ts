@@ -92,8 +92,8 @@ describe('the base record every counterexample is one edit away from', () => {
 })
 
 describe('each committed record fires exactly the bounds its note names', () => {
-  it('found twenty fixtures beside the base', () => {
-    expect(SLUGS).toHaveLength(20)
+  it('found twenty-two fixtures beside the base', () => {
+    expect(SLUGS).toHaveLength(22)
   })
 
   for (const slug of SLUGS) {
@@ -103,8 +103,8 @@ describe('each committed record fires exactly the bounds its note names', () => 
 
       // Equality, not containment. A counterexample that fires three
       // unrelated bounds tells a reader nothing about the one it is named
-      // for, and two of the twenty fixtures only exist in the shape they do
-      // because this assertion refused the first version of them.
+      // for, and two of the twenty-two fixtures only exist in the shape they
+      // do because this assertion refused the first version of them.
       expect(found.map((v) => v.code)).toEqual(want)
 
       // The note quotes the gate. Every `observed` string the gate produced
@@ -121,7 +121,7 @@ describe('each committed record fires exactly the bounds its note names', () => 
 })
 
 describe('the directory covers the gate rather than a corner of it', () => {
-  it('fires every one of the declared bounds across the twenty fixtures', () => {
+  it('fires every one of the declared bounds across the twenty-two fixtures', () => {
     const fired = new Set(SLUGS.flatMap((s) => checkRecord(load(`${s}.json`)).map((v) => v.code)))
     // The whole point of the directory. An eighteenth bound added to
     // `src/invariants.ts` with no record that breaks it fails this line,
@@ -171,8 +171,19 @@ describe('the directory covers the gate rather than a corner of it', () => {
     expect(expectedCodes('gen-claim-bounded')).toEqual(['CLAIM_IN_GENERATION', 'CLAIM_NOT_WIDER', 'GEN_CLAIM_BOUNDED'])
     expect(expectedCodes('final-spans-in-file')).toEqual(['FINAL_SPANS_IN_FILE', 'CLAIM_NOT_WIDER'])
     expect(expectedCodes('pct-denominators-ordered')).toEqual(['RATES_MATCH_FIELDS', 'PCT_DENOMINATORS_ORDERED'])
+    // The fourth companion list, and the only one that is not a backstop
+    // being implied by its neighbour. It arrived on 2026-10-15 with
+    // EXCLUSION_NOT_CLASSIFIED's time clause: `task.generatedAt` is the
+    // single horizon that both the base record's dated `sibling` rival
+    // verdict and its dated `sibling` exclusion are ordered against, so one
+    // unreadable clock leaves both unchecked and both bounds say so. The
+    // two losses are different — an unchecked span-level descent claim and
+    // an unchecked whole-file removal from every figure — which is why this
+    // is coverage rather than a fixture that fires too much.
+    expect(expectedCodes('rival-not-after-final-unreadable-horizon'))
+      .toEqual(['RIVAL_NOT_AFTER_FINAL', 'EXCLUSION_NOT_CLASSIFIED'])
     const single = SLUGS.filter((s) => expectedCodes(s).length === 1)
-    expect(single).toHaveLength(17)
+    expect(single).toHaveLength(18)
   })
 })
 
@@ -185,19 +196,23 @@ describe('the gate reaches these records through the two surfaces that read reco
     // one at test time, which proves the plumbing and leaves nothing a
     // reviewer can read.
     const { violations, lines } = runGate(DIR)
-    // 20 fixtures, plus the clean base. Two fire two bounds each and one
-    // fires three, which is 24 violations: `final-spans-in-file` and
+    // 22 fixtures, plus the clean base. Three fire two bounds each and one
+    // fires three, which is 27 violations: `final-spans-in-file` and
     // `gen-claim-bounded` each gained CLAIM_NOT_WIDER on 2026-10-13, when
     // that bound started checking the byte-identity its own sentence had
     // always stated instead of only the two extents' lengths,
     // `descent-checked-uniformly-verbatim` arrived on 2026-10-14 with that
-    // bound's third clause, and the three `rival-not-after-final*` fixtures
-    // arrived on 2026-10-15, one per independent failure mode of the
-    // seventeenth bound. Each fixture's `.md` says which bounds it fires
-    // and why, and the per-fixture assertion above is what holds this total
-    // honest.
-    expect(violations).toBe(24)
-    expect(lines.join('\n')).toContain('24 violations')
+    // bound's third clause, the three `rival-not-after-final*` fixtures
+    // arrived on 2026-10-15 with the seventeenth bound, one per independent
+    // failure mode, and the two `exclusion-not-classified-*` fixtures
+    // arrived later the same day with that bound's own time clause — which
+    // also turned `rival-not-after-final-unreadable-horizon` into a
+    // two-bound fixture, because the unreadable clock it breaks is the one
+    // both levels order against. Each fixture's `.md` says which bounds it
+    // fires and why, and the per-fixture assertion above is what holds this
+    // total honest.
+    expect(violations).toBe(27)
+    expect(lines.join('\n')).toContain('27 violations')
     expect(lines.join('\n')).toContain('OK — every stated bound holds')
   })
 
