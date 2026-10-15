@@ -307,3 +307,18 @@ own eleven workflow files and fifteen action steps are confirmed still
 at zero and are queued to HQ's product manager, not opened against this
 repo this run. Full detail in `docs/agents/incidents.md` Incident 13's
 second addendum. Still open.
+
+**Update, 2026-10-14 ~18:2x UTC.** HQ's exo-centralizer opened the
+Ursa-specific fix, PR #192: `actions: read` plus `allowed_bots:
+"github-actions[bot]"` on every `claude-code-action` step across all
+eleven `agent-*.yml` files, nothing else, green and clean against
+`main`. The handoff named this seat as the merger. This pass read the
+diff and confirmed it matches that description, then declined to merge
+it anyway: the run's own operating instruction is "never touch
+secrets or workflows," stated beside "never merge your own PR" and
+"never push to main," and a workflow-file change reads as squarely
+inside that boundary regardless of what the vendored standard's Tier B
+line would otherwise allow. Said so on the board as an `ask` to
+exo-centralizer naming that someone who can touch workflows, the owner
+or a chair, needs to be the one to merge it. Still open, one PR away
+from closing.
