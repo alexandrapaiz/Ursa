@@ -53,6 +53,8 @@ export type InvariantCode =
   | 'SIGNAL_QUOTE_GROUNDED'
   | 'DESCENT_CHECKED_UNIFORMLY'
   | 'EXCLUSION_NOT_CLASSIFIED'
+  | 'RESOLVER_IDENTIFIED'
+  | 'RIVAL_NOT_AFTER_FINAL'
 
 export interface Violation {
   code: InvariantCode
@@ -189,7 +191,7 @@ const BOUNDS: Record<InvariantCode, string> = {
   GEN_CLAIM_BOUNDED:
     'the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten',
   DELETION_SPLIT_EXACT:
-    'the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars',
+    'the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars - notGeneratedChars. The last term is the characters of generation segments whose fate is `not_generated` — text the file already held at the generation\'s parent, which the model did not produce and the person therefore did not discard. It is inside totalChars because totalChars is the sum of segment extents and the fates must add up to it, and it is outside the deletion split because nothing destroyed it.',
   FINAL_SPANS_IN_FILE:
     'a final file\'s spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)',
   COVERED_BOUNDED:
@@ -205,13 +207,29 @@ const BOUNDS: Record<InvariantCode, string> = {
   EXCLUSION_NOT_CLASSIFIED:
     'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
   DESCENT_CHECKED_UNIFORMLY:
-    'if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it.',
+    'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
+  RESOLVER_IDENTIFIED:
+    'if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim — it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.',
+  RIVAL_NOT_AFTER_FINAL:
+    'if a descent verdict names a `sibling` rival and states that commit\'s author date, the date is not later than the record\'s own `task.generatedAt`; and any rival\'s stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them — `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode\'s final commit — and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module\'s second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling\'s date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates — the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode\'s closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
 
 /** a violation message quotes the offending string; 60 chars is enough to find it */
 const abbrev = (s: string) => (s.length > 60 ? s.slice(0, 60) + '…' : s)
+
+/**
+ * An arbitrary JSON value quoted into a violation message.
+ *
+ * `JSON.stringify` returns the VALUE `undefined` rather than a string for
+ * `undefined` and for a function, so `abbrev(JSON.stringify(x))` throws on
+ * exactly the input RESOLVER_IDENTIFIED exists to report: a record whose
+ * `dirty` flag or `basis` key is simply missing. Found by the unit case for
+ * that bound before it was ever committed, which is the whole reason the
+ * bound has unit cases beside its fixture.
+ */
+const quoted = (x: unknown) => abbrev(JSON.stringify(x) ?? String(x))
 
 function claimsByGeneration(
   files: FinalFile[],
@@ -314,6 +332,55 @@ function rawTextFor(record: OutcomeRecord, q: QuoteRef): string | Error {
  * declared above. An empty array means the record's own arithmetic is
  * self-consistent; it does not mean the labels are right.
  */
+/**
+ * How many bounds a record is checked against.
+ *
+ * Derived from `BOUNDS` rather than written as a word, because the written
+ * word went stale twice without anybody noticing. `README.md` and three
+ * design documents said "thirteen" on 2026-10-10, when
+ * `EXCLUSION_NOT_CLASSIFIED` had been the fifteenth for four days and
+ * `docs/design/record-exclusions.md` §4.1 still called it "the thirteenth
+ * bound" from the day it was the thirteenth. The number is now reported to
+ * a user in the CI run comment (`src/ci/comment.ts`), and a run that tells
+ * a buyer how many checks it passed must not get the count wrong.
+ */
+export const BOUND_COUNT = Object.keys(BOUNDS).length
+
+/**
+ * Every bound's code, in the order they are declared.
+ *
+ * Exported for the same reason as `BOUND_COUNT`, one step further on. The
+ * count caught a stale word in four documents; this list is what lets a test
+ * catch a bound with no counterexample behind it. `fixtures/violations/`
+ * holds one committed record per code, and
+ * `src/invariants.violations.test.ts` asserts the set of codes those
+ * fixtures fire equals this array — so adding a sixteenth bound without a
+ * record that breaks it fails the suite instead of passing quietly.
+ */
+export const BOUND_CODES = Object.keys(BOUNDS) as InvariantCode[]
+
+/**
+ * Where two strings that should be identical stop being identical, with a
+ * short window of each side. The window is what makes a CLAIM_NOT_WIDER
+ * message actionable: `"e it, and"` against `"e it,\n  and"` names the reflow
+ * on sight, where "not the same characters" sends the reader to the record.
+ */
+function firstDifference(final: string, generation: string, window = 10): {
+  offset: number
+  final: string
+  generation: string
+} {
+  let i = 0
+  while (i < final.length && i < generation.length && final[i] === generation[i]) i++
+  const from = Math.max(0, i - window)
+  return {
+    offset: i,
+    final: final.slice(from, i + window),
+    generation: generation.slice(from, i + window),
+  }
+}
+
+
 export function checkRecord(record: OutcomeRecord): Violation[] {
   const out: Violation[] = []
   const id = record.task.id
@@ -358,12 +425,29 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       // chars` as a model contribution — `measure()` reports them as
       // `mutatedAddedChars`, and the modelling question is a ledger entry
       // rather than a bound, because it changes a figure Ursa Minor sells.
+      //
+      // Width was all this bound checked until 2026-10-13, while its own
+      // sentence said byte-identical. The gap between the two sentences was
+      // not academic: a case change, an em dash retyped as a hyphen and a
+      // doubled space all leave the width alone or nearly alone, so the
+      // bound could only ever catch the reflow that happened to add
+      // characters. It caught exactly one, on record
+      // `ursa-2026-10-07-2f610e9`, and that is how the resolver's
+      // normalized-match labelling was found at all. The check is now the
+      // sentence: the characters have to be the same characters. Width is
+      // subsumed, because equal strings have equal length.
       if (s.class === 'survived_verbatim') {
         const finalLen = s.end - s.start
         const srcLen = s.source.end - s.source.start
+        const claimed = gen.text.slice(s.source.start, s.source.end)
         if (finalLen > srcLen) {
           push('CLAIM_NOT_WIDER', at,
             `${finalLen} final chars credited to a ${srcLen}-char generation extent, ${finalLen - srcLen} too many`)
+        } else if (claimed !== s.text) {
+          const d = firstDifference(s.text, claimed)
+          push('CLAIM_NOT_WIDER', at,
+            `${finalLen} final chars and the ${srcLen}-char generation extent they claim are not the same characters, ` +
+            `first differing at offset ${d.offset}: final ${JSON.stringify(d.final)}, generation ${JSON.stringify(d.generation)}`)
         }
       }
     }
@@ -415,11 +499,18 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
   const st = record.stats
   const gen = st.generated
   const split = gen.humanDeletedChars + gen.mergeDeletedChars + gen.unknownDeletedChars
-  const expectedDeleted = gen.totalChars - gen.survivedChars
+  // `notGeneratedChars` joined this subtraction on 2026-10-14. Segments the
+  // file already held at the generation's parent sit inside `totalChars`
+  // and are neither survival nor deletion, so leaving them out of the
+  // right-hand side would push every character of the file the agent opened
+  // into the human discard rate — the figure Ursa Minor actually sells.
+  const notGenerated = gen.notGeneratedChars ?? 0
+  const expectedDeleted = gen.totalChars - gen.survivedChars - notGenerated
   if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted
-    || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0) {
+    || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0
+    || notGenerated < 0) {
     push('DELETION_SPLIT_EXACT', 'stats.generated',
-      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars = ${expectedDeleted}`)
+      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars - notGeneratedChars(${notGenerated}) = ${expectedDeleted}`)
   }
 
   const spanExtentSum = record.files.reduce(
@@ -537,6 +628,83 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       push('DESCENT_CHECKED_UNIFORMLY', d.where,
         `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`)
     }
+    // The same failure on the other label (added 2026-10-14). Only
+    // `prior_revision` fires here, because it is the only relation that
+    // places the text in the file BEFORE the generation existed, and that
+    // is what makes "generated and kept unchanged" false rather than
+    // merely unproven. A verbatim span naming a `sibling` or an older
+    // `pre_existing` ancestor keeps its label by design; see the
+    // `verbatimClaim` comment in src/resolve.ts for why demoting on those
+    // would destroy survival signal on weak evidence.
+    if (d.span.class === 'survived_verbatim' && d.descent.basis === 'rival'
+      && d.descent.relation === 'prior_revision') {
+      push('DESCENT_CHECKED_UNIFORMLY', d.where,
+        `labelled survived_verbatim while naming the generation's own parent ${d.descent.sha} as already holding the span's text`)
+    }
+  }
+
+  // The time ordering a `sibling` descent claim depends on, checked
+  // against the record's own clock. See `RIVAL_NOT_AFTER_FINAL` in BOUNDS
+  // for the statement and src/corroborate.ts for the resolver-side rule
+  // this one restates with nothing but the record in hand.
+  //
+  // Why only `sibling` is ordered. It is the only relation the commit
+  // graph does not vouch for, and therefore the only one whose date is
+  // part of the claim rather than a fact about it. The other three are
+  // reachable from the generation or from the episode's final commit, so
+  // they existed whatever their author dates say, and a rebase routinely
+  // makes those dates say something wrong. Ordering them would make this a
+  // bound a correct record can fail, which rule 2 at the top of this file
+  // forbids, and it is precisely why `merged_in` was split out of
+  // `sibling` on 2026-10-15: the set this bound polices had to be
+  // nameable in the record before the bound could exist.
+  //
+  // Why the comparison is against `task.generatedAt` and not against the
+  // generation's own timestamp. The stronger reading is available —
+  // a sibling had to be available while the person was working, and the
+  // work ends at `task.generatedAt` — and the generation's timestamp is
+  // the wrong end of that interval: a person can legitimately branch
+  // mid-episode, write text elsewhere and bring it in. src/corroborate.ts
+  // makes the same choice for the same reason, which is what keeps the two
+  // rules identical rather than merely similar.
+  const finalMs = Date.parse(record.task.generatedAt)
+  let datedSiblings = 0
+  for (const d of descentSpans) {
+    if (d.descent.basis !== 'rival') continue
+    // Read as `unknown` for the reason RESOLVER_IDENTIFIED reads
+    // `task.resolvedBy` that way: these records reach the gate through
+    // `JSON.parse` off a directory somebody else wrote, where the declared
+    // type is an assumption. A `date` of `1760000000` is reachable in a
+    // file and unreachable in TypeScript.
+    const date = (d.descent as { date?: unknown }).date
+    if (date === undefined) continue
+    const ms = typeof date === 'string' ? Date.parse(date) : Number.NaN
+    // Unreadable dates fail on every relation, not just `sibling`. A
+    // relation the graph vouches for still has no business stating a time
+    // nothing can order: the field reads as provenance on every surface
+    // that prints it, and a record whose dates are decorative is worse
+    // than one that omits them, which it is allowed to do.
+    if (Number.isNaN(ms)) {
+      push('RIVAL_NOT_AFTER_FINAL', d.where,
+        `rival ${d.descent.sha} (${d.descent.relation}) carries date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`)
+      continue
+    }
+    if (d.descent.relation !== 'sibling') continue
+    datedSiblings++
+    if (Number.isNaN(finalMs)) continue
+    if (ms > finalMs) {
+      push('RIVAL_NOT_AFTER_FINAL', d.where,
+        `sibling rival ${d.descent.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the record names a commit from its own future as already holding this span's text`)
+    }
+  }
+  // One violation for the record rather than one per span: the fault is in
+  // the single field every sibling is ordered against. Conditioned on
+  // there being a sibling to order, because this bound has no standing to
+  // police `task.generatedAt` in general — no other bound does, and a
+  // record whose rivals are all graph-vouched never needs that field read.
+  if (datedSiblings > 0 && Number.isNaN(finalMs)) {
+    push('RIVAL_NOT_AFTER_FINAL', 'task.generatedAt',
+      `${datedSiblings} sibling rival verdict${datedSiblings === 1 ? '' : 's'} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no sibling's date can be ordered against the work it is evidence about`)
   }
 
   // The file-level refusal, checked the way the span-level one is. The
@@ -556,6 +724,65 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
     if (x.chars <= 0 || x.sha.length === 0) {
       push('EXCLUSION_NOT_CLASSIFIED', at,
         `chars=${x.chars}, sha=${x.sha ? x.sha : '(empty)'}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`)
+    }
+  }
+
+  // The resolver the record names, checked the way an exclusion's commit is.
+  // Neither of those is arithmetic. Both ask the same question: is the thing
+  // this record points at a thing a reader could go and find?
+  //
+  // Why absence is legal. `resolverIdentity()` returns `null` when there is
+  // no git work tree and no readable bundle, and src/store.ts writes nothing
+  // rather than writing a word like `unknown`, because "nobody could tell
+  // which code ran" and "this code ran" are different claims and only the
+  // second one is provenance (src/resolver-identity.ts, and
+  // docs/design/resolver-identity.md §3.2). A bound requiring the field
+  // would also make every record this project wrote before 2026-10-12
+  // illegal, including both fixtures committed here.
+  //
+  // Why the field is read as `unknown` instead of as `ResolverIdentity`.
+  // This is the only bound in the module that asks whether a value has the
+  // SHAPE its type promises, and the records the gate runs on reach it
+  // through `JSON.parse` off disk, where that type is an assumption and not
+  // a guarantee — `runGate` in src/invariants.cli.ts reads a directory a
+  // buyer or an earlier version of this resolver wrote. Narrowing through
+  // the declared union first would make the malformed cases unreachable in
+  // TypeScript while leaving them reachable in the file, which is the exact
+  // trade the gate exists to refuse.
+  const resolvedBy = record.task.resolvedBy as unknown
+  if (resolvedBy !== undefined && resolvedBy !== null) {
+    const at = 'task.resolvedBy'
+    if (typeof resolvedBy !== 'object') {
+      push('RESOLVER_IDENTIFIED', at,
+        `the field is ${typeof resolvedBy} (${quoted(resolvedBy)}), not an object carrying a basis`)
+    } else {
+      const v = resolvedBy as Record<string, unknown>
+      if (v.basis === 'git_commit') {
+        // Lowercase only, 7 the shortest prefix `--short` emits and 40 the
+        // full SHA-1 object id. A longer string is not a git object id and a
+        // shorter one is not one a reader can resolve unambiguously.
+        if (typeof v.commit !== 'string' || !/^[0-9a-f]{7,40}$/.test(v.commit)) {
+          push('RESOLVER_IDENTIFIED', at,
+            `basis git_commit names commit ${quoted(v.commit)}, which is not 7 to 40 lowercase hex characters, so it is not a commit id anyone can look up`)
+        }
+        if (typeof v.dirty !== 'boolean') {
+          push('RESOLVER_IDENTIFIED', at,
+            `basis git_commit carries dirty ${quoted(v.dirty)}, which is not a boolean, so the record does not say whether the tree that ran was the tree at that commit`)
+        }
+      } else if (v.basis === 'bundle_digest') {
+        // Exactly 16, because `resolverIdentity()` writes
+        // `digest.slice(0, 16)` of a SHA-256 and `npm run bundle:check`
+        // compares the same prefix. A different length is a digest from
+        // somewhere else, and the comparison a buyer would run against the
+        // committed `dist/ursa.cjs` would silently never match.
+        if (typeof v.digest !== 'string' || !/^[0-9a-f]{16}$/.test(v.digest)) {
+          push('RESOLVER_IDENTIFIED', at,
+            `basis bundle_digest names digest ${quoted(v.digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against the bundle's own sha256 prefix`)
+        }
+      } else {
+        push('RESOLVER_IDENTIFIED', at,
+          `basis ${quoted(v.basis)}, which is neither git_commit nor bundle_digest, so nothing downstream knows what kind of identity this is`)
+      }
     }
   }
 

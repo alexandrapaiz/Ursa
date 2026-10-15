@@ -21,6 +21,7 @@ import { buildEpisodes } from './episodes'
 import { findCommitPairs, listCommits } from './pairfinder'
 import { resolveEpisode } from './bin/ursa'
 import { gitDescentCorroborator, MAX_RIVAL_BLOBS } from './corroborate'
+import { checkRecord } from './invariants'
 import { resolve } from './resolve'
 import { THETA_HIGH } from './match'
 import type { FinalSpan } from './types'
@@ -46,6 +47,17 @@ interface Repo {
   commit(path: string, body: string, msg: string, env?: Record<string, string>): string
   gitCommitting(args: string[], env?: Record<string, string>): void
   at(ref: string): string
+}
+
+/**
+ * A commit's author date as git itself prints it, in the same strict ISO
+ * form `listCommits` and `commitsTouchingPath` read (`%aI`). Used to assert
+ * that a rival verdict's `date` is the repository's answer rather than a
+ * string this suite computed, which is the only way the assertion can fail
+ * when the field stops being read from git.
+ */
+function gitDate(dir: string, sha: string): string {
+  return execFileSync('git', ['-C', dir, 'log', '-1', '--format=%aI', sha], { encoding: 'utf8' }).trim()
 }
 
 /** A repository on a controlled clock, so the pair walk's age bound is testable. */
@@ -83,6 +95,8 @@ const PAD = Array.from({ length: 20 }, (_, i) => `const unrelatedConstant${i} = 
 
 const A_LINE = 'export const label = (item) => `- ${item.title}: ${item.claim} -- so what: ${item.why}`'
 const B_LINE = 'export const label = (item) => `* ${item.title}: ${item.claim} -- because: ${item.why}`'
+/** a third wording, so a fixture can put B_LINE in the grandparent and not the parent */
+const C_LINE = 'export const label = (item) => `+ ${item.title}: ${item.claim} -- reason: ${item.why}`'
 
 const file = (line: string) => `${PAD}\n${line}\n`
 
@@ -146,7 +160,7 @@ describe('a rival commit holding the text drops the mutation claim', () => {
     expect(span?.descent).toBeUndefined()
   })
 
-  it('does not label the span survived_mutated when a sibling commit holds it verbatim', () => {
+  it('does not label the span survived_mutated when a commit outside the descent holds it verbatim', () => {
     const { r, generatedSha } = twoBranchesOneSurvivor()
     const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
       .find((e) => e.generatedSha === generatedSha)
@@ -164,7 +178,18 @@ describe('a rival commit holding the text drops the mutation claim', () => {
     const span = spanFor(resolveEpisode(r.dir, ep)!.files
       .find((f) => f.path === 'label.ts')!.spans, B_LINE)!
 
-    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    // `merged_in` and not `sibling` since 2026-10-15. The human merged
+    // branch-b into branch-a, so the rival commit is an ancestor of the
+    // episode's final commit and the commit graph itself places it inside
+    // the work. That is the stronger of the two statements the old
+    // `sibling` relation flattened together, and it is the right one for
+    // this fixture: "a branch this work merged" rather than "a branch
+    // somewhere that may or may not have existed yet".
+    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    // And it carries the rival commit's own author date, which is what
+    // lets RIVAL_NOT_AFTER_FINAL read the record without a repository.
+    expect(span.descent?.basis === 'rival' && span.descent.date)
+      .toBe(gitDate(r.dir, rivalSha))
     // The evidence is kept, not thrown away: a human adjudicating this
     // record needs the score and the text that scored.
     expect(span.uncertain).toBe(true)
@@ -246,9 +271,362 @@ describe('the human restoring text the agent had replaced', () => {
       .find((f) => f.path === 'label.ts')!.spans, B_LINE)!
 
     expect(span.class).toBe('no_generation_provenance')
-    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'pre_existing' })
+    // `prior_revision` and not `pre_existing` since 2026-10-14. The commit
+    // that holds B_LINE here is `original`, which is the generation's own
+    // parent, so the more precise of the two ancestor relations applies.
+    // The relation changed; the finding did not. `pre_existing` now names
+    // only the older-ancestor restore, which the next test builds.
+    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
     expect(span.descent?.basis === 'rival' && original.startsWith(span.descent.sha)).toBe(true)
     expect(span.diff).toBeUndefined()
+  })
+
+  /**
+   * The restore that really does come from an older ancestor, which is
+   * what `pre_existing` means now that the parent case has its own
+   * relation.
+   *
+   * Three human commits before the agent: the line is written, then
+   * replaced by an unrelated third wording, so the grandparent holds
+   * B_LINE and the parent does not. The agent then writes A_LINE and the
+   * person restores B_LINE. The corroborator must walk past the parent,
+   * find the grandparent, and say `pre_existing`.
+   *
+   * Over this repository's own history exactly one span of 1,024 is in
+   * this shape (`tools/measure-verbatim-descent.ts`), which is why the
+   * two cases had to be separated: one label was carrying a population of
+   * 504 and a population of 1 under the same name.
+   */
+  it('calls an older ancestor pre_existing, not the parent revision', () => {
+    const r = repo()
+    const grandparent = r.commit('label.ts', file(B_LINE), 'The human writes the label')
+    const parent = r.commit('label.ts', file(C_LINE), 'The human tries a third wording')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    r.commit('label.ts', file(B_LINE) + 'export const restored = true\n', 'Go back to the first wording')
+
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    expect(ep, 'the fixture must produce a pair for the agent\'s generation').toBeDefined()
+    const span = spanFor(resolveEpisode(r.dir, ep!)!.files
+      .find((f) => f.path === 'label.ts')!.spans, B_LINE)!
+
+    expect(span.class).toBe('no_generation_provenance')
+    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'pre_existing' })
+    expect(span.descent?.basis === 'rival' && grandparent.startsWith(span.descent.sha)).toBe(true)
+    // The parent is the commit that does NOT hold the text, which is the
+    // whole point of the fixture: if the search had stopped at the parent
+    // it would have reported no rival at all.
+    expect(span.descent?.basis === 'rival' && parent.startsWith(span.descent.sha)).toBe(false)
+  })
+})
+
+/**
+ * The gate the 2026-10-13 ledger entry asked for: a byte-identical pass-1
+ * hit is not a survival if the file already held the text.
+ *
+ * All three fixtures below have the same shape, which is the shape of
+ * every real `ursa run` record and the reason the defect was invisible:
+ * the agent edits ONE line of an existing file, and `resolveEpisode`
+ * builds the generation from the whole blob at the agent's commit. That
+ * blob contains the twenty padding lines the file already had, so pass 1
+ * matched them byte-for-byte against "the generation" and called them
+ * survival. Nothing was wrong with the match. The generation was wrong.
+ */
+describe('a verbatim hit on text the file already held', () => {
+  /** the agent changes one line; everything else in the file is untouched */
+  function agentEditsOneLine() {
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep the agent\'s wording')
+    return { r, base, generatedSha }
+  }
+
+  function spansOf(r: Repo, generatedSha: string): FinalSpan[] {
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    expect(ep, 'the fixture must produce a pair for the agent\'s generation').toBeDefined()
+    return resolveEpisode(r.dir, ep!)!.files.find((f) => f.path === 'label.ts')!.spans
+  }
+
+  it('is demoted out of survived_verbatim and names the parent that held it', () => {
+    const { r, base, generatedSha } = agentEditsOneLine()
+    const spans = spansOf(r, generatedSha)
+    // A padding line: present in the finished file, byte-identical to the
+    // generation blob, and present in the parent blob too.
+    const padding = spans.find((x) => x.text.includes('unrelatedConstant3'))
+    expect(padding, 'the padding the agent never touched must be classified').toBeDefined()
+    expect(padding!.class).toBe('no_generation_provenance')
+    expect(padding!.descent).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
+    expect(padding!.descent?.basis === 'rival' && base.startsWith(padding!.descent.sha)).toBe(true)
+    // The generation extent it nearly claimed is kept rather than thrown
+    // away, so the record still shows what the resolver considered.
+    expect(padding!.candidate?.text).toContain('unrelatedConstant3')
+    expect(padding!.uncertain).toBe(true)
+  })
+
+  it('leaves the agent\'s own line as a survival, since no parent held it', () => {
+    const { r, generatedSha } = agentEditsOneLine()
+    const agentLine = spanFor(spansOf(r, generatedSha), A_LINE)
+    expect(agentLine, 'the line the agent actually wrote must be classified').toBeDefined()
+    expect(agentLine!.class).toBe('survived_verbatim')
+    // It carries a verdict rather than no verdict: the gate ran on this
+    // span too and came back with nothing against it.
+    expect(agentLine!.descent?.basis).not.toBe('rival')
+  })
+
+  it('does not register a generation claim for a span it demoted', () => {
+    const { r, generatedSha } = agentEditsOneLine()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)!
+    const record = resolveEpisode(r.dir, ep)!
+    // The bound that would have caught a claim left behind by a demoted
+    // span, plus every other bound, over the real record.
+    expect(checkRecord(record).map((v) => `${v.code} ${v.where}`)).toEqual([])
+    // And the survival rate no longer counts the padding.
+    const verbatim = record.files.flatMap((f) => f.spans)
+      .filter((x) => x.class === 'survived_verbatim')
+    expect(verbatim.every((x) => !x.text.includes('unrelatedConstant'))).toBe(true)
+  })
+
+  /**
+   * The ordering defect the measurement found. A parallel branch also
+   * holds the padding, and `commitsTouchingPath` lists commits newest
+   * first, so before the parent was checked separately this span came back
+   * `sibling` — a weaker relation that does not demote — purely because
+   * git listed the sibling branch first.
+   */
+  it('prefers the parent over a sibling branch git happens to list first', () => {
+    const { r, base, generatedSha } = agentEditsOneLine()
+    // A branch off the base that touches the same path, created after the
+    // episode so `git log --all` lists it ahead of the parent.
+    r.gitCommitting(['checkout', '-q', '-b', 'parallel', base])
+    r.commit('label.ts', file(B_LINE) + 'export const onTheOtherBranch = true\n', 'Parallel work')
+    r.gitCommitting(['checkout', '-q', 'main'])
+
+    const padding = spansOf(r, generatedSha).find((x) => x.text.includes('unrelatedConstant3'))!
+    expect(padding.descent).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
+    expect(padding.descent?.basis === 'rival' && base.startsWith(padding.descent.sha)).toBe(true)
+  })
+})
+
+/**
+ * The time bound, added 2026-10-14. A `sibling` verdict says the person
+ * "merged or checked out rather than typed" the text, which requires the
+ * other branch's commit to have existed while they were working. Nothing
+ * here looked at time until today, so a commit authored after the episode
+ * closed could be named as the source of its text — and one was, on a
+ * shipped record (docs/ideas.md, 2026-10-14).
+ *
+ * Every fixture below is the `agentEditsOneLine` shape plus one extra
+ * branch, because the span that matters is the one line the agent really
+ * did write: it is the only span in that fixture a spurious rival can take
+ * away, since the padding is already demoted by the parent.
+ */
+describe('a rival authored after the work finished', () => {
+  /**
+   * The agent writes A_LINE and the person keeps it. Afterwards — the
+   * repository is on a monotonic clock, so "afterwards" is literally a
+   * later author date — a branch off the baseline also comes to hold
+   * A_LINE. Nobody could have copied the finished text from it.
+   *
+   * The extra `onTheOtherBranch` line keeps the branch's blob from being
+   * byte-identical to the finished one, which would be a whole-file import
+   * (src/vendored.ts) and would drop the path before any span of it was
+   * classified.
+   */
+  function rivalWrittenAfterwards() {
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep the agent\'s wording')
+    r.gitCommitting(['checkout', '-q', '-b', 'later', base])
+    const futureSha = r.commit('label.ts', file(A_LINE) + 'export const onTheOtherBranch = true\n', 'Work that started after the episode closed')
+    r.gitCommitting(['checkout', '-q', 'main'])
+    return { r, base, generatedSha, finalSha, futureSha }
+  }
+
+  it('reproduces the defect when no horizon is given, so the fixture is not passing for the wrong reason', () => {
+    const { r, generatedSha, futureSha } = rivalWrittenAfterwards()
+    // Three arguments: `gitDescentCorroborator` as it behaved before the
+    // bound existed, which is still the chat path's behaviour. The later
+    // branch holds A_LINE, so the search finds it and reports a sibling.
+    const unbounded = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir))
+    const verdict = unbounded('label.ts', A_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    expect(verdict.basis === 'rival' && futureSha.startsWith(verdict.sha)).toBe(true)
+  })
+
+  it('drops that rival once the episode\'s final commit is the horizon', () => {
+    const { r, generatedSha, finalSha } = rivalWrittenAfterwards()
+    const bounded = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    // Not `unverified`. The search ran, read every candidate that could
+    // have been a source, and found none: that is a corroboration.
+    expect(bounded('label.ts', A_LINE)).toMatchObject({ basis: 'corroborated' })
+  })
+
+  it('keeps the agent\'s line a survival on the shipped resolver path', () => {
+    const { r, generatedSha } = rivalWrittenAfterwards()
+    // The integration assertion, through `resolveEpisode`, which is where
+    // the horizon is actually wired. Without the bound this span is
+    // `no_generation_provenance` with a fabricated sibling against it.
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    expect(ep, 'the fixture must produce a pair for the agent\'s generation').toBeDefined()
+    const record = resolveEpisode(r.dir, ep!)!
+    const agentLine = spanFor(record.files.find((f) => f.path === 'label.ts')!.spans, A_LINE)
+    expect(agentLine?.class).toBe('survived_verbatim')
+    expect(agentLine?.descent?.basis).toBe('corroborated')
+    // And the record still holds together, since a class change that left
+    // a stale generation claim behind would be a violation rather than a
+    // relabelling.
+    expect(checkRecord(record).map((v) => `${v.code} ${v.where}`)).toEqual([])
+  })
+
+  it('still searches a branch the episode merged in, however its author date reads', () => {
+    // The carve-out, and the reason the bound asks the graph before the
+    // clock. This branch's author date is a year after the episode closed,
+    // which happens for real whenever a commit is rebased or a machine's
+    // clock is wrong, and it is nonetheless an ancestor of the final
+    // commit: the person merged it, so it demonstrably existed. A
+    // date-only bound would drop it and report a corroboration over
+    // evidence it was holding.
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+
+    r.gitCommitting(['checkout', '-q', '-b', 'side', base])
+    writeFileSync(join(r.dir, 'label.ts'), file(A_LINE) + 'export const side = true\n')
+    sh(r.dir, ['add', '.'], HUMAN)
+    // Written through `sh` rather than `repo.commit` because the fixture
+    // needs an author date the repository's monotonic clock would never
+    // produce. This is the only commit in the suite that sets its own.
+    const AHEAD = '2027-06-01T00:00:00+00:00'
+    sh(r.dir, ['commit', '-q', '-m', 'Side work with a date from next year'],
+      { ...HUMAN, GIT_AUTHOR_DATE: AHEAD, GIT_COMMITTER_DATE: AHEAD })
+    const sideSha = r.at('HEAD')
+
+    r.gitCommitting(['checkout', '-q', 'main'])
+    r.gitCommitting(['merge', '-q', '--no-ff', '-X', 'theirs', '-m', 'Merge side', 'side'])
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const side = true\nexport const kept = true\n', 'Finish')
+
+    const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    const verdict = c('label.ts', A_LINE)
+    // `merged_in`, which is the relation that exists for exactly this
+    // case: the date says "after the work" and the graph says "inside the
+    // work", and the graph wins. Naming it is what lets the record-side
+    // bound police `sibling` dates without firing on this record — see
+    // the assertion below, and src/invariants.ts rule 2.
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    expect(verdict.basis === 'rival' && sideSha.startsWith(verdict.sha)).toBe(true)
+    // Read back through git rather than compared against AHEAD: `%aI`
+    // prints a zero offset as `Z`, so the string the fixture set and the
+    // string git returns are the same instant and not the same characters.
+    expect(verdict.basis === 'rival' && verdict.date).toBe(gitDate(r.dir, sideSha))
+    expect(Date.parse(gitDate(r.dir, sideSha))).toBe(Date.parse(AHEAD))
+
+    // This fixture stops at the corroborator on purpose: the pair walk
+    // builds no episode from it (the intervening merge and the next-year
+    // author date are exactly what it refuses), so there is no record to
+    // gate. The gate's side of the same case is asserted in "the date a
+    // rival verdict carries" below, on a record that does resolve.
+  })
+})
+
+describe('the date a rival verdict carries', () => {
+  /**
+   * A branch that is NOT merged and whose commits predate the episode's
+   * last one, which is the only shape that produces `relation: 'sibling'`
+   * now that merged branches are `merged_in`. It is also the only shape
+   * RIVAL_NOT_AFTER_FINAL polices, so the record below is the one the
+   * bound is actually about.
+   *
+   * The repository's clock is monotonic in commit order, so the side
+   * branch's commit is authored before the final commit simply by being
+   * made first.
+   */
+  function unmergedSiblingBeforeTheEnd() {
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    r.gitCommitting(['checkout', '-q', '-b', 'side', base])
+    const sideSha = r.commit('label.ts', file(A_LINE) + 'export const onTheSide = true\n', 'Side work, never merged')
+    r.gitCommitting(['checkout', '-q', 'main'])
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep the agent\'s wording')
+    return { r, generatedSha, sideSha, finalSha }
+  }
+
+  it('is the rival commit\'s own author date, read from the repository', () => {
+    const { r, generatedSha, sideSha, finalSha } = unmergedSiblingBeforeTheEnd()
+    const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    const verdict = c('label.ts', A_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    expect(verdict.basis === 'rival' && verdict.date).toBe(gitDate(r.dir, sideSha))
+  })
+
+  it('names the generation\'s parent date on a prior_revision verdict', () => {
+    // The other return site, and the one whose date comes from the
+    // in-memory commit graph rather than from `commitsTouchingPath`.
+    const r = repo()
+    const parentSha = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep it')
+    const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    const verdict = c('label.ts', B_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
+    expect(verdict.basis === 'rival' && verdict.date).toBe(gitDate(r.dir, parentSha))
+  })
+
+  it('leaves a merged_in verdict dated after the work alone, which is rule 2 holding', () => {
+    // The companion to "still searches a branch the episode merged in"
+    // above, on the gate side. A `merged_in` rival dated a year after the
+    // work is a correct record: the commit graph placed that commit inside
+    // the episode, and its author date is a fact about a rebase or a
+    // machine clock rather than about the claim. If RIVAL_NOT_AFTER_FINAL
+    // ever fires here it has become a bound a correct record can fail,
+    // which src/invariants.ts's second rule forbids — and that was the
+    // reason `merged_in` had to be split out of `sibling` before the bound
+    // could be written at all.
+    const { r, generatedSha } = unmergedSiblingBeforeTheEnd()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    const record = resolveEpisode(r.dir, ep!)!
+    const victim = record.files.flatMap((f) => f.spans)
+      .find((sp) => sp.descent?.basis === 'rival' && sp.descent.relation === 'sibling')!
+    const d = victim.descent as { relation: string; date: string }
+    d.relation = 'merged_in'
+    d.date = '2027-06-01T00:00:00Z'
+    expect(checkRecord(record)).toEqual([])
+    // And the same record with the same date under the policed relation
+    // does fire, so the exemption above is the relation and not the date.
+    d.relation = 'sibling'
+    expect(checkRecord(record).map((v) => v.code)).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+  })
+
+  it('passes the gate on the shipped path, and fails it if the date is moved past the work', () => {
+    const { r, generatedSha } = unmergedSiblingBeforeTheEnd()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    const record = resolveEpisode(r.dir, ep!)!
+    const dated = record.files.flatMap((f) => f.spans)
+      .map((sp) => sp.descent)
+      .filter((d): d is Extract<typeof d, { basis: 'rival' }> => d?.basis === 'rival')
+    expect(dated.length, 'the fixture must produce at least one rival verdict').toBeGreaterThan(0)
+    expect(dated.some((d) => d.relation === 'sibling')).toBe(true)
+    for (const d of dated) expect(Date.parse(d.date!)).not.toBeNaN()
+    expect(checkRecord(record)).toEqual([])
+
+    // The defect of 2026-10-14, injected into a real record rather than a
+    // fixture: one sibling's date moved one second past the end of the
+    // work. Nothing else changes, and the gate alone catches it.
+    const broken = JSON.parse(JSON.stringify(record)) as typeof record
+    const victim = broken.files.flatMap((f) => f.spans)
+      .find((sp) => sp.descent?.basis === 'rival' && sp.descent.relation === 'sibling')!
+    ;(victim.descent as { date: string }).date =
+      new Date(Date.parse(broken.task.generatedAt) + 1000).toISOString()
+    const fired = checkRecord(broken)
+    expect(fired.map((v) => v.code)).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    expect(fired[0].observed).toContain('after task.generatedAt')
   })
 })
 
@@ -348,6 +726,71 @@ describe('the viewer accounts for a demotion rather than going quiet', () => {
     // records it. Asserting the subject the descent verdict actually
     // carries is the only version of this test that can fail.
     expect(html).toContain('Rich label, other wording')
-    expect(html).toContain('a branch this generation is not an ancestor of')
+
+    // The prose branches are NOT asserted against this HTML, and the
+    // reason is a false positive found on 2026-10-15. `renderViewer`
+    // emits the whole inspector as client-side source, so every arm of
+    // its relation ternary is a literal in the page whatever the record
+    // says. The old assertion here named the sibling wording and went on
+    // passing after this fixture's verdict became `merged_in`, which is
+    // the one thing it existed to notice.
+    //
+    // What varies with the record is the embedded JSON, so that is what
+    // is asserted here, and the prose is asserted in the test below by
+    // running the page and clicking the span.
+    const record = resolveEpisode(r.dir, ep)!
+    const payload = JSON.stringify(record)
+    expect(html).toContain(payload.replace(/</g, '\\u003c').slice(0, 200))
+    // The B_LINE span specifically, and not the first rival verdict in the
+    // file: the padding this fixture pads with is held by the baseline
+    // commit, so `label.ts`'s first rival is a `prior_revision` on PAD.
+    const rival = spanFor(record.files.find((f) => f.path === 'label.ts')!.spans, B_LINE)!.descent!
+    expect(rival).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    expect(rival.basis === 'rival' && rival.date).toBeDefined()
+    // And the record's own copy of that date is in the page, so the
+    // inspector has it to print.
+    expect(html).toContain(rival.basis === 'rival' ? rival.date! : '')
+  })
+
+  it('tells the user which branch it was and when that branch was written', async () => {
+    // In jsdom, because the inspector is built by the page's own script
+    // from the embedded record: a substring assertion on the HTML passes
+    // against every arm of the relation ternary at once, which is how the
+    // assertion above this one went on passing after the verdict for this
+    // fixture became `merged_in`. src/provenance.test.ts makes the same
+    // choice for the resolver chip and records what the substring version
+    // cost there.
+    const { JSDOM } = await import('jsdom')
+    const { renderViewer } = await import('./viewer')
+    const { r, generatedSha } = twoBranchesOneSurvivor()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)!
+    const record = resolveEpisode(r.dir, ep)!
+
+    const dom = new JSDOM(renderViewer(record), { runScripts: 'dangerously' })
+    dom.window.Element.prototype.scrollIntoView = function () {}
+    const spans = Array.from(
+      dom.window.document.querySelectorAll('.panel')[0].querySelectorAll('pre.doc .sp'),
+    )
+    const fileSpans = record.files.find((f) => f.path === 'label.ts')!.spans
+    const target = spanFor(fileSpans, B_LINE)!
+    const idx = fileSpans.indexOf(target)
+    expect(target.descent).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    spans[idx].dispatchEvent(
+      new dom.window.MouseEvent('click', { bubbles: true, cancelable: true }),
+    )
+    const text = dom.window.document.getElementById('inspector')!.textContent ?? ''
+
+    expect(text).toContain('Not counted as your edit')
+    // The relation, in the words the person reads. `merged_in` is the one
+    // relation whose honest sentence is that they had the text in front of
+    // them, which is a stronger statement than the fall-through wording
+    // this span used to get.
+    expect(text).toContain('a branch this work merged, so you had it in front of you')
+    expect(text).not.toContain('a branch this generation is not an ancestor of')
+    // And the date, so "when did that commit exist" is answerable from the
+    // surface the user is looking at rather than only from the record.
+    const rival = target.descent!
+    expect(text).toContain('authored ' + (rival.basis === 'rival' ? rival.date : ''))
   })
 })

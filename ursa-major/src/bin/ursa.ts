@@ -38,13 +38,14 @@ import { blobAt, findCommitPairsWithDiagnostics, listCommits, type CommitInfo, t
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { gitDeletionAttributor } from '../deletion'
 import { gitDescentCorroborator } from '../corroborate'
-import { vendoredPaths } from '../vendored'
+import { IMPORT_TRAILER, vendoredPaths } from '../vendored'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
-import { checkRecord, formatViolations } from '../invariants'
+import { formatResolverIdentity } from '../resolver-identity'
+import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -132,10 +133,18 @@ export function renderRunSummary(
     lines.push(
       `${vendored.length} file${vendored.length === 1 ? '' : 's'} came in whole from elsewhere and ${vendored.length === 1 ? 'was' : 'were'} not read as your work, starting with ${one.path}.`,
     )
+    // Three branches, not two. A `declared` import was never compared
+    // byte for byte against anything, because its source is in another
+    // repository, so the two sentences below would both be false claims
+    // about how the run knows. Saying "byte-identical" about a
+    // declaration is the same defect as the record flattening
+    // `declared_import` into `imported_whole`.
     lines.push(
-      one.relation === 'sibling'
-        ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
-        : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
+      one.relation === 'declared'
+        ? `Commit ${one.sha} ("${one.subject}") declares it an import in its own ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.`
+        : one.relation === 'sibling'
+          ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
+          : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
     )
     lines.push(
       `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`,
@@ -159,11 +168,30 @@ export function renderRunSummary(
       )
     }
     if (episodes.length === 0) {
-      const looked = diagnostics.generatedByTrailer + diagnostics.generatedByAuthorName
+      // The three classifiers are named separately and they have to sum
+      // to the total, or the line is arithmetic that cannot be true. The
+      // declared count was missing from this sum when --agent-identity
+      // shipped, which on this repository printed "327 looked generated"
+      // for a run that had classified 454.
+      const d = diagnostics
+      const looked = d.generatedByTrailer + d.generatedByAuthorName + d.generatedByDeclaredIdentity
+      const how = [`${d.generatedByTrailer} by trailer`, `${d.generatedByAuthorName} by author name`]
+      if (d.generatedByDeclaredIdentity > 0) {
+        how.push(`${d.generatedByDeclaredIdentity} by an identity you declared`)
+      }
       lines.push('')
       lines.push(
-        `Scanned ${diagnostics.commitsScanned} commit${diagnostics.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${diagnostics.generatedByTrailer} by trailer, ${diagnostics.generatedByAuthorName} by author name), and none of those was followed by an edit of the same file without an agent marker.`,
+        `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${how.join(', ')}), and none of those was followed by an edit of the same file without an agent marker.`,
       )
+      // The case this repository is in, and it is not an empty result.
+      // Every commit on the default branch is an agent's, so there is no
+      // human edit for a pair to close on, and the person's corrections
+      // are somewhere else entirely: in the pull requests they reviewed.
+      if (looked > 0) {
+        lines.push(
+          'If every commit here is an agent\'s, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads.',
+        )
+      }
     }
 
     // What the walk REFUSED to claim, said out loud whether or not the run
@@ -210,6 +238,28 @@ export function renderRunSummary(
         `${diagnostics.mergeGenerationsRefused} merge commit${diagnostics.mergeGenerationsRefused === 1 ? '' : 's'} carried an agent marker and were not counted as generations. A merge restates work other commits did; it wrote nothing of its own.`,
       )
     }
+
+    // Who the run decided was the person, named rather than assumed.
+    //
+    // Every span class in every record above rests on this one bit, and
+    // the run reaches it by absence: a commit is yours when it matches no
+    // agent pattern. So an identity the pattern happens not to know is
+    // promoted to a human being silently. On this repository's own
+    // history on 2026-10-11 that was all four surviving records: the
+    // agent seats commit as `ursa-pm`, `ursa-exo` and `ursa-engineer`,
+    // which no shippable default pattern matches. The person reading
+    // this knows those names in one glance; the library cannot know them
+    // at all. Printing them is the cheapest honest thing available.
+    if (diagnostics.editorIdentities.length > 0) {
+      const who = diagnostics.editorIdentities
+        .map((e) => `${e.name}${e.email ? ` <${e.email}>` : ''} (${e.pairs} pair${e.pairs === 1 ? '' : 's'})`)
+        .join(', ')
+      lines.push('')
+      lines.push(`The edits above were credited to ${who}.`)
+      lines.push(
+        'That is whoever authored each commit this run read as yours, and it is read from the commit rather than verified. If any of those is an agent rather than you, pass --agent-identity <name-or-email-substring> and run again: its commits become generations, and the records that rested on them are not written.',
+      )
+    }
   }
 
   const tested = records.reduce((n, r) => n + (r.durability?.testedSpans ?? 0), 0)
@@ -249,6 +299,12 @@ export async function main(argv: string[]): Promise<number> {
       'max-pair-distance': { type: 'string' },
       'max-pair-age-hours': { type: 'string' },
       'max-interposed-generations': { type: 'string' },
+      // Repeatable. Each value is a substring matched case-insensitively
+      // against a commit's author name AND its author email, so an agent
+      // seat whose name no shippable pattern could match
+      // (`ursa-pm`, `ursa-exo`) can be declared by the only party who
+      // knows it: the person whose repository it is.
+      'agent-identity': { type: 'string', multiple: true },
       declare: { type: 'string' },
       'sync-url': { type: 'string' },
       session: { type: 'string' },
@@ -264,10 +320,11 @@ export async function main(argv: string[]): Promise<number> {
   if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
+    console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
-    console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--no-post]')
+    console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]')
     return 2
   }
   if (cmd === 'ci') {
@@ -289,6 +346,11 @@ export async function main(argv: string[]): Promise<number> {
       apiBaseUrl: process.env.GITHUB_API_URL,
       runUrl: values['run-url'] ?? null,
       minChars: values['min-chars'] ? Number(values['min-chars']) : undefined,
+      // The same flag the local launch above reads. Both launches must
+      // answer "who was the person" from the same declaration or the
+      // one-resolver-two-launches claim is false for any repository
+      // whose agents git cannot recognise by name (src/launch.ts).
+      agentIdentities: values['agent-identity'],
       post: values['no-post'] !== true,
     })
     return result.exitCode
@@ -340,6 +402,7 @@ export async function main(argv: string[]): Promise<number> {
     maxPairDistance: bound('max-pair-distance'),
     maxPairAgeHours: bound('max-pair-age-hours'),
     maxInterposedGenerations: bound('max-interposed-generations'),
+    agentIdentities: values['agent-identity'],
   })
   // One graph read for the whole run. Every episode's corroborator needs
   // the same parent/child edges to tell a rival commit from a descendant
@@ -356,17 +419,14 @@ export async function main(argv: string[]): Promise<number> {
   }))
   // Erasure has to survive re-derivation. Every episode here was rebuilt
   // from git history, so without this filter `ursa forget` would delete a
-  // record the next run recreates, which is not deletion.
-  // Imported here rather than at the top of the file, following this
-  // module's existing pattern for `startBridge`. It also keeps the import
-  // block untouched, which is where this change would otherwise collide
-  // with every other open PR that edits `../types`.
-  const { isForgotten, loadConsent } = await import('../consent')
-  const consent = loadConsent(projectPath)
+  // record the next run recreates, which is not deletion. The lookup moved
+  // to `src/launch.ts` on 2026-10-10 because the CI launch skipped it
+  // entirely and so resurrected what this one refuses to.
+  const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id))
   let suppressed = 0
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
-    if (isForgotten(consent, ep.id)) { suppressed++; continue }
+    if (erased.has(ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep, commits)
     // `--min-chars` filters out an episode too small to carry signal, and
     // it is measured on the generation side, which a refusal-only record
@@ -374,7 +434,7 @@ export async function main(argv: string[]): Promise<number> {
     // explain an import would be dropped by a threshold aimed at something
     // else, and the absence would be back.
     if (!record) continue
-    if (record.stats.generated.totalChars < minChars && (record.exclusions?.length ?? 0) === 0) continue
+    if (!clearsSizeFloor(record, minChars)) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the
     // real work did to each span. Git-only, so it lives here and not in
@@ -396,6 +456,15 @@ export async function main(argv: string[]): Promise<number> {
     }
   }
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
+  // Which build of the resolver made the claims above. Printed on the
+  // local launch too, not only in the CI comment, because the figures a
+  // user is reading here moved by a factor of eight between two commits
+  // of this resolver on 2026-10-12 (docs/ideas.md) and the terminal gave
+  // no sign that anything underneath them had changed. Suppressed when
+  // nothing was written, since there is then no claim to attribute.
+  if (records.length > 0) {
+    console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`)
+  }
 
   // The gate runs on every run, after the records are on disk, and its
   // failure is the exit code. Records are saved first on purpose: a record
@@ -405,10 +474,9 @@ export async function main(argv: string[]): Promise<number> {
   // it exists for (src/invariants.ts) survived six records, four open pull
   // requests and 344 passing tests, and an opt-in check would have been
   // off for all of them.
-  const violations = records.flatMap((r) => checkRecord(r))
-  if (violations.length > 0) {
-    console.error(`\n${violations.length} record invariant${violations.length === 1 ? '' : 's'} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.`)
-    console.error(formatViolations(violations))
+  const gate = gateRecords(records)
+  if (gate.violations.length > 0) {
+    console.error(`\n${gate.report}`)
     return 1
   }
   return 0
