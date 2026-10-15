@@ -246,6 +246,12 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
     const record = resolveEpisode(r.dir, ep)!
     expect(record.files).toEqual([])
     expect(record.generations).toEqual([])
+    // Read out of git rather than written as a literal, so this asserts
+    // "the author date of THAT commit" and not "some ISO string". It is the
+    // field EXCLUSION_NOT_CLASSIFIED orders against `task.generatedAt`:
+    // a sibling copy authored after the work closed is a copy OF the work,
+    // and the refusal would be backwards.
+    const vendorDate = sh(r.dir, ['log', '-1', '--pretty=format:%aI', vendorSha]).trim()
     expect(record.exclusions).toEqual([{
       path: 'standard.md',
       reason: 'imported_whole',
@@ -253,7 +259,10 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
       subject: 'Re-vendor standard.md from HQ main',
       relation: 'sibling',
       chars: HQ.length,
+      date: vendorDate,
     }])
+    expect(Date.parse(vendorDate))
+      .toBeLessThanOrEqual(Date.parse(record.task.generatedAt))
     // It claims nothing, and claiming nothing is not the same as being
     // unarithmetic: the gate holds on it like any other record.
     expect(checkRecord(record)).toEqual([])
@@ -718,5 +727,81 @@ describe('a file synced from another repository is not read as text a model comp
     expect(found).toEqual([])
     const record = resolveEpisode(r.dir, { ...ep, vendoredPaths: found })!
     expect(checkRecord(record)).toEqual([])
+  })
+
+  /**
+   * The refusal running backwards, on a real repository, 2026-10-15.
+   *
+   * `vendoredPaths` applies no time bound. It asks only whether some
+   * commit outside the generation's descent holds the finished blob, and
+   * byte identity is symmetric: it cannot tell a copy the person took FROM
+   * that branch apart from a copy somebody later took OF the person's
+   * work. The horizon argument added to the span-level search on
+   * 2026-10-14 (`authoredAfterHorizon` in src/corroborate.ts) never
+   * reached this module.
+   *
+   * So the record below is the one the resolver really writes, and it is
+   * wrong in the expensive direction: the person composed `standard.md`,
+   * somebody branched off the baseline and committed the same bytes two
+   * hours later, and the whole file leaves every figure in the record.
+   * This is not a span losing its label. `stats.finalChars` drops by the
+   * size of the file, and every percentage built on it moves with it.
+   *
+   * The assertion is deliberately that the GATE catches what the resolver
+   * does not. Fixing `vendoredPaths` to bound its own search is a
+   * separate change with its own cost — it would need the episode's close
+   * time threaded into a module that currently takes none — and this test
+   * is what will fail, loudly and by design, on the day someone makes it,
+   * because the record will stop being refused.
+   */
+  it('refuses a record whose sibling copy was authored after the work closed', () => {
+    const r = repo()
+    r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const baseline = r.at('HEAD')
+    const generatedSha = r.commit(
+      { 'standard.md': doc('rewrites'), 'module.ts': AGENT_MODULE },
+      'Rewrite the standard and derive the module' + TRAILER,
+      BOT,
+    )
+    // The person's own composition, and the episode's closing commit.
+    r.commit({
+      'standard.md': HQ,
+      'module.ts': AGENT_MODULE + 'export const checked = true\n',
+    }, 'Write the standard out properly, keep the derived module')
+
+    // AFTER the work closed: somebody branches off the baseline and lands
+    // the same bytes. Nothing about this commit was available to copy from
+    // while the person was writing, which is the whole point.
+    r.git(['checkout', '-q', '-b', 'later-branch', baseline])
+    const lateSha = r.commit({ 'standard.md': HQ }, 'Mirror the standard onto the release branch')
+    r.git(['checkout', '-q', 'main'])
+
+    const ep = episodeFor(r, generatedSha)
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+
+    // The resolver excludes it, and says so with a date that gives the
+    // reader what the resolver did not use.
+    expect(found.map((v) => v.path)).toEqual(['standard.md'])
+    expect(found[0].relation).toBe('sibling')
+    expect(lateSha.startsWith(found[0].sha)).toBe(true)
+
+    const record = resolveEpisode(r.dir, { ...ep, vendoredPaths: found })!
+    expect(record.files.map((f) => f.path)).toEqual(['module.ts'])
+    const excluded = record.exclusions![0]
+    expect(Date.parse(excluded.date!))
+      .toBeGreaterThan(Date.parse(record.task.generatedAt))
+
+    // What this cost the record, stated as the number rather than implied:
+    // the file the person wrote is the larger part of the finished work,
+    // and it is now in no class and no percentage.
+    expect(excluded.chars).toBe(HQ.length)
+    expect(excluded.chars).toBeGreaterThan(record.stats.finalChars)
+
+    // And the bound that notices. Before today this record satisfied every
+    // bound in src/invariants.ts, because the exclusion carried no time.
+    const violations = checkRecord(record)
+    expect(violations.map((v) => v.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(violations[0].observed).toContain('after task.generatedAt')
+    expect(violations[0].observed).toContain(`${excluded.chars} chars`)
   })
 })

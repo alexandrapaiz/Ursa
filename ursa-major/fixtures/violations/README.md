@@ -1,10 +1,10 @@
-# fixtures/violations — twenty records the gate must refuse
+# fixtures/violations — twenty-two records the gate must refuse
 
 Every other fixture in this repository is a record the resolver got
-right. This directory holds the opposite: twenty-one committed
-`OutcomeRecord` files, one clean base and twenty counterexamples, each
-one the base plus a single named edit that violates exactly the bound it
-is named after.
+right. This directory holds the opposite: twenty-three committed
+`OutcomeRecord` files, one clean base and twenty-two counterexamples,
+each one the base plus a single named edit that violates exactly the
+bound it is named after.
 
 ## Why a directory of broken records exists
 
@@ -58,7 +58,7 @@ edited "holds it whole" into "holds the whole of it", one
 `no_generation_provenance` span, and one generation segment the person
 threw away.
 
-Five of the seventeen bounds read nothing else, and all five are
+Six of the seventeen bounds read nothing else, and all six are
 *vacuously* true on a record that lacks their structure — which is why
 neither fixture already committed here (`fixtures/mini/record/` and
 `fixtures/real/`) could serve as the base:
@@ -67,9 +67,10 @@ neither fixture already committed here (`fixtures/mini/record/` and
 |---|---|---|
 | `SIGNAL_QUOTE_GROUNDED` | `signals.oneShotCorrections[].quotes[]` | `deriveSignals()`, the real detector, run over the resolved record |
 | `DESCENT_CHECKED_UNIFORMLY` | `files[].spans[].descent` | attached by hand as `{ basis: 'corroborated', rivalsSearched: 3 }`, because a corroborator needs a git repository and this record has none |
-| `EXCLUSION_NOT_CLASSIFIED` | `exclusions[]` | passed through `resolve()`'s own input, so `stats.perFile` gets the row the resolver would have written |
+| `EXCLUSION_NOT_CLASSIFIED`, first two clauses | `exclusions[]` | passed through `resolve()`'s own input, so `stats.perFile` gets the row the resolver would have written |
 | `RESOLVER_IDENTIFIED` | `task.resolvedBy` | set by hand to `{ basis: 'git_commit', commit: '19455a3', dirty: false }`, because `src/store.ts` stamps that field inside `saveRecord` and this script writes its files directly |
 | `RIVAL_NOT_AFTER_FINAL` | `files[].spans[].descent.date` on a `rival` verdict | attached by hand, as a `sibling` rival dated `2026-10-09T17:00:00-06:00`, one hour before the record's `task.generatedAt`. The relation is `sibling` because that is the only one the bound orders by date, and the offset is `-06:00` rather than `Z` so the legal case and the broken case differ in instant without differing in string order |
+| `EXCLUSION_NOT_CLASSIFIED`, time clause (added 2026-10-15) | `exclusions[].date` | the same instant, on the base's one `sibling` exclusion. Without a date the clause is satisfied by having nothing to order, which is the same vacuity the row above closed one level down. Running the same `-06:00` instant at both levels is deliberate: a gate comparing strings would pass the broken form of either |
 
 The descent verdicts and the resolver identity are the hand-attached
 ones. `{ basis: 'corroborated' }` is the shape `src/corroborate.ts` emits
@@ -83,9 +84,9 @@ are byte-reproducible" below.
 
 ## Two bounds are backstops, not independent statements
 
-Seventeen of the twenty fixtures fire exactly one violation, and three
-fire two or three. Two of the seventeen bounds cannot be broken alone,
-as a matter of arithmetic rather than of how hard anyone tried:
+Eighteen of the twenty-two fixtures fire exactly one violation, and
+four fire two or three. Two of the seventeen bounds cannot be broken
+alone, as a matter of arithmetic rather than of how hard anyone tried:
 
 - **`GEN_CLAIM_BOUNDED`** bounds the merged length of the source extents
   claiming a generation by what that generation wrote. While
@@ -101,17 +102,27 @@ as a matter of arithmetic rather than of how hard anyone tried:
 
 Both are real guards against their neighbours being wrong. Neither is a
 statement a record can break on its own, and
-`src/invariants.violations.test.ts` asserts that count — seventeen
-single-bound fixtures, two pairs and one triple — so a future edit to
+`src/invariants.violations.test.ts` asserts that count — eighteen
+single-bound fixtures, three pairs and one triple — so a future edit to
 `src/invariants.ts` that makes either one independently reachable fails
 the suite and gets the note corrected.
 
-## Twenty fixtures, seventeen bounds
+The third pair is not a backstop and is listed separately in that test.
+`rival-not-after-final-unreadable-horizon.json` breaks `task.generatedAt`,
+which is the single horizon that both the base's dated `sibling` rival
+verdict and its dated `sibling` exclusion are ordered against, so the
+gate reports that neither level can be checked. The two losses are
+different — an unchecked span-level descent claim, and an unchecked
+removal of a whole file from every figure in the record — and a fixture
+firing only one of them would assert that the two levels share a check
+when they do not.
+
+## Twenty-two fixtures, seventeen bounds
 
 There is normally one fixture per bound, and the suite checks that every
-declared bound is fired by some fixture. Two bounds have more than one,
-because a bound stating several independent things needs a record for
-each failure mode a reader should be able to see separately.
+declared bound is fired by some fixture. Three bounds have more than
+one, because a bound stating several independent things needs a record
+for each failure mode a reader should be able to see separately.
 
 `DESCENT_CHECKED_UNIFORMLY` has two, added 2026-10-14:
 
@@ -143,10 +154,35 @@ they are the bound's three independent failure modes:
   than in any span, so the gate fires once for the record and names
   `task.generatedAt`.
 
+`EXCLUSION_NOT_CLASSIFIED` has three. The first,
+`exclusion-not-classified.json`, breaks the same-set clause by excluding
+a path the record also classifies. The other two arrived 2026-10-15 with
+the bound's time clause, which is `RIVAL_NOT_AFTER_FINAL` one level up
+and the more expensive of the two to get wrong: a span-level mistake
+moves one span, while an exclusion removes a whole file from every figure
+in the record, and on this repository's own history one exclusion removed
+60,616 characters, 84.7% of that run's headline survival figure.
+
+- `exclusion-not-classified-after-final.json` moves the `sibling`
+  exclusion's date two hours later, one hour past `task.generatedAt`, so
+  the record drops a file on the evidence of a commit authored after the
+  work closed. A `sibling` exclusion claims the finished file is
+  byte-identical to a copy on a branch outside this generation's descent
+  and infers the content came FROM that branch; dated after the work, the
+  copy is a copy OF the work and the refusal runs backwards. The two
+  hours are chosen the same way the span-level fixture's are, so a gate
+  comparing strings would pass this file too.
+- `exclusion-not-classified-unreadable-date.json` replaces the date with
+  `last Tuesday`. As at the span level, unreadable fires on every
+  relation, including the two the ordering clause exempts: `pre_existing`
+  and `declared` are excused from being ordered, not from being readable.
+
 A fixture's slug is therefore a bound's name in kebab case, optionally
 followed by a qualifier naming which clause it breaks. The suite resolves
 the slug to the longest declared code it starts with, so a slug naming no
-bound at all still fails.
+bound at all still fails. That rule is why these two are spelled
+`exclusion-not-classified-*` rather than `exclusion-not-after-final-*`:
+the clause is new, the bound it belongs to is not.
 
 ## Adding the next one
 
@@ -162,7 +198,7 @@ cd ursa-major
 npm run fixtures:violations          # rewrite every file in this directory
 npm run fixtures:violations:check    # exit non-zero if any file drifted
 npx vitest run src/invariants.violations.test.ts
-npx tsx src/invariants.cli.ts fixtures/violations   # 24 violations, exit 1
+npx tsx src/invariants.cli.ts fixtures/violations   # 27 violations, exit 1
 ```
 
 To add a bound's counterexample, append a `Case` to `CASES` in
@@ -187,7 +223,9 @@ invented short forms `96ed4e5` and `deadbee` plus the one real public sha
 chosen for this fixture and name no real commit; the `-06:00` offset is
 a property the bound has to handle and not a location. No home directory, machine
 username, session UUID or real conversation appears, and a commit of a
-public repository is none of those — it is the form the redaction rider
+public repository is none of those. The exclusion dates added later the
+same day are the same synthetic instants, for the reason the base-record
+table above gives. It is the form the redaction rider
 in `prompts/engineer-agent.md` asks for, a value that is real and
 resolvable rather than a placeholder standing in for one. Checked with:
 

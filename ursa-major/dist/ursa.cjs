@@ -507,19 +507,20 @@ function declaration(repoPath, sha) {
       repoPath,
       "log",
       "-1",
-      `--pretty=format:%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
+      `--pretty=format:%aI%x00%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
       sha
     ], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
   } catch {
-    return { sha, subject: "", paths: /* @__PURE__ */ new Set() };
+    return { sha, subject: "", date: "", paths: /* @__PURE__ */ new Set() };
   }
-  const nul = out.indexOf("\0");
-  if (nul < 0) return { sha, subject: out.trim(), paths: /* @__PURE__ */ new Set() };
+  const [date, subject, trailers] = out.split("\0");
+  if (subject === void 0) return { sha, subject: (date ?? "").trim(), date: "", paths: /* @__PURE__ */ new Set() };
   return {
     sha,
-    subject: out.slice(0, nul),
+    subject,
+    date,
     paths: new Set(
-      out.slice(nul + 1).split("	").map((x) => x.trim()).filter((x) => x.length > 0)
+      (trailers ?? "").split("	").map((x) => x.trim()).filter((x) => x.length > 0)
     )
   };
 }
@@ -532,7 +533,15 @@ function vendoredPaths(projectPath, ep, paths, commits) {
     if (finalOid === null || finalOid === EMPTY_BLOB) continue;
     const d = declared.find((x) => x.paths.has(path));
     if (d !== void 0) {
-      found.push({ path, sha: d.sha.slice(0, SHORT2), subject: d.subject, relation: "declared" });
+      found.push({
+        path,
+        sha: d.sha.slice(0, SHORT2),
+        subject: d.subject,
+        relation: "declared",
+        // Omitted rather than empty when the clone could not answer; see
+        // `VendoredPath.date`.
+        ...d.date ? { date: d.date } : {}
+      });
       continue;
     }
     const touching = commitsTouchingPath(projectPath, path);
@@ -549,6 +558,9 @@ function vendoredPaths(projectPath, ep, paths, commits) {
         path,
         sha: c.sha.slice(0, SHORT2),
         subject: c.subject,
+        // `commitsTouchingPath` reads `%aI` in the same `git log` that
+        // enumerated these candidates, so the date costs no extra call.
+        date: c.date,
         relation: ancestors.has(c.sha) ? "pre_existing" : "sibling"
       });
       break;
@@ -1869,6 +1881,7 @@ function checkRecord(record) {
     );
   }
   const classified = new Set(record.files.map((f) => f.path));
+  let datedSiblingExclusions = 0;
   for (const [i, x] of (record.exclusions ?? []).entries()) {
     const at = `exclusions[${i}] (${x.path})`;
     if (classified.has(x.path)) {
@@ -1886,6 +1899,34 @@ function checkRecord(record) {
         `chars=${x.chars}, sha=${x.sha ? x.sha : "(empty)"}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`
       );
     }
+    const date = x.date;
+    if (date === void 0) continue;
+    const ms = typeof date === "string" ? Date.parse(date) : Number.NaN;
+    if (Number.isNaN(ms)) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `excluded as ${x.reason} from ${x.sha} (${x.relation}) carrying date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`
+      );
+      continue;
+    }
+    if (x.relation !== "sibling") continue;
+    datedSiblingExclusions++;
+    if (Number.isNaN(finalMs)) continue;
+    if (ms > finalMs) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `sibling copy ${x.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the ${x.chars} chars of this file were dropped from every figure on the evidence of a commit from the record's own future`
+      );
+    }
+  }
+  if (datedSiblingExclusions > 0 && Number.isNaN(finalMs)) {
+    push(
+      "EXCLUSION_NOT_CLASSIFIED",
+      "task.generatedAt",
+      `${datedSiblingExclusions} sibling exclusion${datedSiblingExclusions === 1 ? "" : "s"} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no excluded file's copy can be ordered against the work it was dropped from`
+    );
   }
   const resolvedBy = record.task.resolvedBy;
   if (resolvedBy !== void 0 && resolvedBy !== null) {
@@ -1957,7 +1998,7 @@ var init_invariants = __esm({
       PCT_DENOMINATORS_ORDERED: "a class's share of the finished work is never larger than its share of the classified part: byClass[c].pctOfFinal <= byClass[c].pct. The two fields differ only in denominator \u2014 coveredChars for pct, finalChars for pctOfFinal \u2014 and COVERED_BOUNDED already holds coveredChars <= finalChars, so the bound is the same-set statement that the wider denominator produced the smaller number. It fires when the two are computed from each other's denominator, which is the one way a reader could be handed the flattering figure under the honest field's name.",
       PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
       SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
-      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
+      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit's author date states one that can be ordered, with a `sibling` exclusion's date no later than the record's own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository's own history one exclusion removed 60,616 characters, 84.7% of that run's headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch's commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one's. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer.",
       DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
       RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.",
       RIVAL_NOT_AFTER_FINAL: "if a descent verdict names a `sibling` rival and states that commit's author date, the date is not later than the record's own `task.generatedAt`; and any rival's stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them \u2014 `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode's final commit \u2014 and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module's second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling's date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates \u2014 the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode's closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written."
@@ -3081,7 +3122,11 @@ function resolveEpisode(projectPath, ep, commits) {
     sha: v.sha,
     subject: v.subject,
     relation: v.relation,
-    chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0
+    chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0,
+    // Spread so an absent date stays absent in the written JSON rather
+    // than becoming `"date": undefined`'s omission by accident; see
+    // `Exclusion.date` in src/types.ts for why absence is a true claim.
+    ...v.date ? { date: v.date } : {}
   }));
   let turn = 0;
   for (const path of candidates) {
