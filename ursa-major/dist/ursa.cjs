@@ -74,9 +74,13 @@ function commitsTouchingPath(repoPath, path) {
   let out;
   try {
     out = git(repoPath, [
+      // `%aI` sits between the sha and the subject, not after it, because a
+      // commit subject may itself contain a tab and the parse below keeps
+      // the subject as the whole remainder of the line. A date field after
+      // the subject would be eaten by that remainder.
       "log",
       "--all",
-      "--pretty=format:%H%x09%s",
+      "--pretty=format:%H%x09%aI%x09%s",
       "--",
       path
     ], { quiet: true });
@@ -84,8 +88,8 @@ function commitsTouchingPath(repoPath, path) {
     return null;
   }
   return out.split("\n").filter((l) => l.includes("	")).map((l) => {
-    const [sha, ...rest] = l.split("	");
-    return { sha, subject: rest.join("	") };
+    const [sha, date, ...rest] = l.split("	");
+    return { sha, subject: rest.join("	"), date };
   });
 }
 function isAncestor(repoPath, ancestor, descendant) {
@@ -369,16 +373,32 @@ function relatives(commits, generatedSha) {
   };
   return { ancestors: reach(parents), descendants: reach(children) };
 }
-function gitDescentCorroborator(projectPath, generatedSha, commits) {
+function authoredAfterHorizon(commits, generatedSha, horizonSha) {
+  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]));
+  const horizonMs = horizonSha === void 0 ? NaN : authorMs.get(horizonSha) ?? NaN;
+  if (Number.isNaN(horizonMs)) return () => false;
+  const { ancestors } = relatives(commits, generatedSha);
+  const horizonAncestors = relatives(commits, horizonSha).ancestors;
+  return (sha) => {
+    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false;
+    const ms = authorMs.get(sha);
+    if (ms === void 0 || Number.isNaN(ms)) return false;
+    return ms > horizonMs;
+  };
+}
+function gitDescentCorroborator(projectPath, generatedSha, commits, horizonSha) {
   const { ancestors, descendants } = relatives(commits, generatedSha);
   const parent = commits.find((c) => c.sha === generatedSha);
   const parents = parent?.parents ?? [];
   const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]));
+  const commitDate = new Map(commits.map((c) => [c.sha, c.date]));
+  const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha);
+  const mergedIntoEpisode = horizonSha !== void 0 && commits.some((c) => c.sha === horizonSha) ? relatives(commits, horizonSha).ancestors : /* @__PURE__ */ new Set();
   const rivalCache = /* @__PURE__ */ new Map();
   const rivalsFor = (filePath) => {
     if (rivalCache.has(filePath)) return rivalCache.get(filePath);
     const touching = commitsTouchingPath(projectPath, filePath);
-    const rivals = touching === null ? null : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha));
+    const rivals = touching === null ? null : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha) && !afterHorizon(c.sha));
     rivalCache.set(filePath, rivals);
     return rivals;
   };
@@ -405,7 +425,13 @@ function gitDescentCorroborator(projectPath, generatedSha, commits) {
         basis: "rival",
         sha: p.slice(0, SHORT),
         subject: parentSubject.get(p) ?? "",
-        relation: "prior_revision"
+        relation: "prior_revision",
+        // Spread rather than written as `date: commitDate.get(p)`, because
+        // the field is optional and an explicit `undefined` survives
+        // `JSON.stringify` as a missing key in the record but as a PRESENT
+        // key with value `undefined` to anything comparing objects in
+        // memory, which is the shape the unit tests assert on.
+        ...commitDate.get(p) !== void 0 ? { date: commitDate.get(p) } : {}
       };
     }
     const rivals = rivalsFor(filePath);
@@ -430,10 +456,18 @@ function gitDescentCorroborator(projectPath, generatedSha, commits) {
         basis: "rival",
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
-        // A parent that held the text already returned above, so an
-        // ancestor reaching this line is an older one and the relation is
-        // the restore it was always documented to be.
-        relation: ancestors.has(c.sha) ? "pre_existing" : "sibling"
+        // Three-way, and the order matters. A parent that held the text
+        // already returned above, so an ancestor reaching this line is an
+        // older one and the relation is the restore it was always
+        // documented to be. Otherwise the horizon's ancestors are asked
+        // before the fall-through, because every ancestor of the
+        // generation is also an ancestor of the horizon and would
+        // otherwise swallow the restore case.
+        relation: ancestors.has(c.sha) ? "pre_existing" : mergedIntoEpisode.has(c.sha) ? "merged_in" : "sibling",
+        // Always present on this path: `commitsTouchingPath` reads `%aI`
+        // for every line it returns, so a candidate that reached this loop
+        // has a date whether or not it is in `commits`.
+        date: c.date
       };
     }
     if (hole !== null) {
@@ -1801,6 +1835,39 @@ function checkRecord(record) {
       );
     }
   }
+  const finalMs = Date.parse(record.task.generatedAt);
+  let datedSiblings = 0;
+  for (const d of descentSpans) {
+    if (d.descent.basis !== "rival") continue;
+    const date = d.descent.date;
+    if (date === void 0) continue;
+    const ms = typeof date === "string" ? Date.parse(date) : Number.NaN;
+    if (Number.isNaN(ms)) {
+      push(
+        "RIVAL_NOT_AFTER_FINAL",
+        d.where,
+        `rival ${d.descent.sha} (${d.descent.relation}) carries date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`
+      );
+      continue;
+    }
+    if (d.descent.relation !== "sibling") continue;
+    datedSiblings++;
+    if (Number.isNaN(finalMs)) continue;
+    if (ms > finalMs) {
+      push(
+        "RIVAL_NOT_AFTER_FINAL",
+        d.where,
+        `sibling rival ${d.descent.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the record names a commit from its own future as already holding this span's text`
+      );
+    }
+  }
+  if (datedSiblings > 0 && Number.isNaN(finalMs)) {
+    push(
+      "RIVAL_NOT_AFTER_FINAL",
+      "task.generatedAt",
+      `${datedSiblings} sibling rival verdict${datedSiblings === 1 ? "" : "s"} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no sibling's date can be ordered against the work it is evidence about`
+    );
+  }
   const classified = new Set(record.files.map((f) => f.path));
   for (const [i, x] of (record.exclusions ?? []).entries()) {
     const at = `exclusions[${i}] (${x.path})`;
@@ -1891,8 +1958,9 @@ var init_invariants = __esm({
       PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
       SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
       EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
-      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
-      RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it."
+      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
+      RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.",
+      RIVAL_NOT_AFTER_FINAL: "if a descent verdict names a `sibling` rival and states that commit's author date, the date is not later than the record's own `task.generatedAt`; and any rival's stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them \u2014 `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode's final commit \u2014 and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module's second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling's date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates \u2014 the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode's closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written."
     };
     r3 = (x) => Math.round(x * 1e3) / 1e3;
     abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
@@ -3065,7 +3133,11 @@ function resolveEpisode(projectPath, ep, commits) {
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
+    // `ep.finalSha` is the horizon: a commit authored after the person
+    // finished this work cannot be where its text came from, and before
+    // the bound existed one shipped record named a commit seven days in
+    // its own future as a rival (docs/ideas.md, 2026-10-14).
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph, ep.finalSha),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,

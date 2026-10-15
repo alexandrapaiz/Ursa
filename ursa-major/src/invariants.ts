@@ -54,6 +54,7 @@ export type InvariantCode =
   | 'DESCENT_CHECKED_UNIFORMLY'
   | 'EXCLUSION_NOT_CLASSIFIED'
   | 'RESOLVER_IDENTIFIED'
+  | 'RIVAL_NOT_AFTER_FINAL'
 
 export interface Violation {
   code: InvariantCode
@@ -206,9 +207,11 @@ const BOUNDS: Record<InvariantCode, string> = {
   EXCLUSION_NOT_CLASSIFIED:
     'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
   DESCENT_CHECKED_UNIFORMLY:
-    'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
+    'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
   RESOLVER_IDENTIFIED:
     'if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim — it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.',
+  RIVAL_NOT_AFTER_FINAL:
+    'if a descent verdict names a `sibling` rival and states that commit\'s author date, the date is not later than the record\'s own `task.generatedAt`; and any rival\'s stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them — `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode\'s final commit — and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module\'s second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling\'s date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates — the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode\'s closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
@@ -638,6 +641,70 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       push('DESCENT_CHECKED_UNIFORMLY', d.where,
         `labelled survived_verbatim while naming the generation's own parent ${d.descent.sha} as already holding the span's text`)
     }
+  }
+
+  // The time ordering a `sibling` descent claim depends on, checked
+  // against the record's own clock. See `RIVAL_NOT_AFTER_FINAL` in BOUNDS
+  // for the statement and src/corroborate.ts for the resolver-side rule
+  // this one restates with nothing but the record in hand.
+  //
+  // Why only `sibling` is ordered. It is the only relation the commit
+  // graph does not vouch for, and therefore the only one whose date is
+  // part of the claim rather than a fact about it. The other three are
+  // reachable from the generation or from the episode's final commit, so
+  // they existed whatever their author dates say, and a rebase routinely
+  // makes those dates say something wrong. Ordering them would make this a
+  // bound a correct record can fail, which rule 2 at the top of this file
+  // forbids, and it is precisely why `merged_in` was split out of
+  // `sibling` on 2026-10-15: the set this bound polices had to be
+  // nameable in the record before the bound could exist.
+  //
+  // Why the comparison is against `task.generatedAt` and not against the
+  // generation's own timestamp. The stronger reading is available —
+  // a sibling had to be available while the person was working, and the
+  // work ends at `task.generatedAt` — and the generation's timestamp is
+  // the wrong end of that interval: a person can legitimately branch
+  // mid-episode, write text elsewhere and bring it in. src/corroborate.ts
+  // makes the same choice for the same reason, which is what keeps the two
+  // rules identical rather than merely similar.
+  const finalMs = Date.parse(record.task.generatedAt)
+  let datedSiblings = 0
+  for (const d of descentSpans) {
+    if (d.descent.basis !== 'rival') continue
+    // Read as `unknown` for the reason RESOLVER_IDENTIFIED reads
+    // `task.resolvedBy` that way: these records reach the gate through
+    // `JSON.parse` off a directory somebody else wrote, where the declared
+    // type is an assumption. A `date` of `1760000000` is reachable in a
+    // file and unreachable in TypeScript.
+    const date = (d.descent as { date?: unknown }).date
+    if (date === undefined) continue
+    const ms = typeof date === 'string' ? Date.parse(date) : Number.NaN
+    // Unreadable dates fail on every relation, not just `sibling`. A
+    // relation the graph vouches for still has no business stating a time
+    // nothing can order: the field reads as provenance on every surface
+    // that prints it, and a record whose dates are decorative is worse
+    // than one that omits them, which it is allowed to do.
+    if (Number.isNaN(ms)) {
+      push('RIVAL_NOT_AFTER_FINAL', d.where,
+        `rival ${d.descent.sha} (${d.descent.relation}) carries date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`)
+      continue
+    }
+    if (d.descent.relation !== 'sibling') continue
+    datedSiblings++
+    if (Number.isNaN(finalMs)) continue
+    if (ms > finalMs) {
+      push('RIVAL_NOT_AFTER_FINAL', d.where,
+        `sibling rival ${d.descent.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the record names a commit from its own future as already holding this span's text`)
+    }
+  }
+  // One violation for the record rather than one per span: the fault is in
+  // the single field every sibling is ordered against. Conditioned on
+  // there being a sibling to order, because this bound has no standing to
+  // police `task.generatedAt` in general — no other bound does, and a
+  // record whose rivals are all graph-vouched never needs that field read.
+  if (datedSiblings > 0 && Number.isNaN(finalMs)) {
+    push('RIVAL_NOT_AFTER_FINAL', 'task.generatedAt',
+      `${datedSiblings} sibling rival verdict${datedSiblings === 1 ? '' : 's'} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no sibling's date can be ordered against the work it is evidence about`)
   }
 
   // The file-level refusal, checked the way the span-level one is. The

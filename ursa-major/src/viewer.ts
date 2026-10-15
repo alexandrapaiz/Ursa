@@ -334,12 +334,34 @@ export function renderViewer(record: OutcomeRecord): string {
     // see what was inferred about them (CLAUDE.md §2), and "a commit you
     // did not write already contained this text" is the inference.
     if (span.descent && span.descent.basis === 'rival') {
-      var rel = span.descent.relation === 'pre_existing'
-        ? 'an earlier commit this generation replaced'
-        : 'a branch this generation is not an ancestor of';
+      // One branch per relation, and four of them because there are four.
+      // Until 2026-10-15 this was a two-way choice and prior_revision fell
+      // through to the sibling wording, so the surface the user reads
+      // described the generation's own parent commit as "a branch this
+      // generation is not an ancestor of" — the one relation where the
+      // true statement is the strongest one available, that the file
+      // already held this text when the agent opened it. No backticks in
+      // this comment: everything from the doctype above to the closing
+      // backtick of this template literal is one string, so one would end
+      // the document.
+      var rel = span.descent.relation === 'prior_revision'
+        ? 'the commit this generation started from, so the file already held this text when the agent opened it'
+        : span.descent.relation === 'pre_existing'
+          ? 'an earlier commit this generation replaced'
+          : span.descent.relation === 'merged_in'
+            ? 'a branch this work merged, so you had it in front of you'
+            : 'a branch this generation is not an ancestor of';
       inspector.appendChild(el('div', 'nolink',
         'Not counted as your edit: this exact text is already in commit ' + span.descent.sha
-        + ' ("' + span.descent.subject + '"), ' + rel
+        + ' ("' + span.descent.subject + '")'
+        // The date, when the record states one. The user can always see
+        // what was inferred about them (CLAUDE.md §2), and "when did that
+        // commit exist" is the question this inference turns on: a rival
+        // dated after the work would have been impossible evidence, which
+        // is what RIVAL_NOT_AFTER_FINAL now refuses before a record
+        // reaches this viewer at all.
+        + (span.descent.date ? ', authored ' + span.descent.date : '')
+        + ', ' + rel
         + '. You did not reach it by editing the generation above.'));
     }
     if (span.descent && span.descent.basis === 'unverified') {
