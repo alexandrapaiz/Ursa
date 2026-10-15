@@ -3,7 +3,7 @@
 //   npx tsx tools/make-violation-fixtures.ts          # write every fixture
 //   npx tsx tools/make-violation-fixtures.ts --check   # fail if any drifted
 //
-// Why a script and not sixteen hand-typed JSON files. The fixtures ARE the
+// Why a script and not twenty hand-typed JSON files. The fixtures ARE the
 // artifact: `src/invariants.violations.test.ts` reads only the committed
 // `.json` and `.md` files and never imports this module, so a fixture that
 // stops firing is a test failure whether or not this script still runs. What
@@ -39,7 +39,7 @@ const clone = (r: OutcomeRecord): OutcomeRecord => JSON.parse(JSON.stringify(r))
 // reviewer reads the edit rather than the file.
 //
 // Built through `resolve()` on synthetic prose, then given the structures a
-// resolved chat-path record does not carry, because four of the sixteen
+// resolved chat-path record does not carry, because five of the seventeen
 // bounds read nothing else: `signals` (SIGNAL_QUOTE_GROUNDED), a descent
 // verdict per mutation label (DESCENT_CHECKED_UNIFORMLY), and one exclusion
 // (EXCLUSION_NOT_CLASSIFIED). A fourth, RESOLVER_IDENTIFIED, reads
@@ -170,7 +170,7 @@ function baseRecord(): OutcomeRecord {
 // The cases. `codes` is the multiset of invariant codes the gate must emit on
 // this fixture and nothing besides, declared here and re-asserted by the
 // test. Where it holds more than one entry, `why` says why the bound cannot
-// be violated on its own — two of the sixteen are backstops that are
+// be violated on its own — two of the seventeen are backstops that are
 // mathematically implied by their neighbours, which is a fact this exercise
 // produced and no `toContain` assertion could have shown.
 // ---------------------------------------------------------------------------
