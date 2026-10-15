@@ -40,9 +40,13 @@
 //   pre_existing — an older ancestor holds the text and the parent does
 //     not: the generation replaced text an earlier commit had and the
 //     person put the earlier text back.
-//   sibling — neither ancestor nor descendant. Another branch's work,
-//     which the person merged or checked out rather than typed. The
-//     branch-B case above.
+//   merged_in — not an ancestor of the generation, but an ancestor of the
+//     episode's own final commit. Another branch's work that this episode
+//     merged, so the graph itself proves the person had it in front of
+//     them. Added 2026-10-15; see THE FOURTH RELATION below.
+//   sibling — reachable from neither the generation nor the episode's
+//     final commit. Another branch's work, which the person MAY have
+//     merged or checked out rather than typed. The branch-B case above.
 //
 // WHY THE PARENT IS CHECKED FIRST, AND SEPARATELY (added 2026-10-14).
 // Until today this module had two relations, and `pre_existing` carried
@@ -99,6 +103,26 @@
 // sibling rebased to an older author date gets searched again. That is
 // the safe direction, since being searched is the old behaviour.
 //
+// THE FOURTH RELATION, AND WHY THE DATE NEEDED IT (added 2026-10-15).
+// Until today `sibling` held two populations that make the same sentence
+// true with completely different standing. One is a branch the episode
+// merged, which the graph places inside the work: condition 3 of the
+// bound above is precisely this set, and it is why that condition is not
+// implied by condition 2. The other is a branch the graph cannot place
+// anywhere, where the only thing standing between "the person took this
+// text from here" and "this commit did not exist yet" is an author date.
+//
+// Keeping them under one name made the record uncheckable. A gate reading
+// only the record would have to either police every sibling's date, and
+// so fire on the merged branch whose date was rebased forward — a record
+// this module considers correct — or police none of them, and so miss the
+// defect the bound above exists for. src/invariants.ts's second rule
+// forbids the first: anything that can be legitimately false is a
+// measurement, not an invariant. So the relation says which population a
+// rival is in, `merged_in` is reported and never time-checked, and
+// `RIVAL_NOT_AFTER_FINAL` polices `sibling` alone. The record-side bound
+// is then the same rule as this module's, not a weaker one.
+//
 // AND THE DATE IS WRITTEN DOWN (added 2026-10-15). The bound above runs
 // here, in a module that holds the commit graph, and the record it
 // produces did not. So a rival from the episode's future satisfied all
@@ -109,18 +133,11 @@
 // author date, so `RIVAL_NOT_AFTER_FINAL` can check the ordering against
 // the record's `task.generatedAt` with nothing but the record in hand.
 //
-// The two are deliberately not the same check. This module's bound is
-// the stronger one and it asks the graph first, because a candidate
-// reachable from the generation or from the horizon existed whatever its
-// clock said. The record's bound is the weaker one and sees only dates,
-// because that is all a buyer holds. A verdict this module wrote can
-// therefore name an ancestor whose author date is later than
-// `task.generatedAt` — a rebase, or a machine with a wrong clock — and
-// the gate will fire on a record this module considers correct. That is
-// the right direction for a gate whose job is to refuse claims it cannot
-// check, and the fixture note at
-// `fixtures/violations/rival-not-after-final.md` says so, so nobody
-// reads the gate's refusal as a second opinion about the graph.
+// The gate's version sees only dates, because a date is all a buyer
+// holds. It is nonetheless the same rule rather than a weaker one, and
+// the fourth relation above is what makes that true: the three relations
+// the graph vouches for are exempt there by name, and the one that is
+// left is the one this module itself bounds by date.
 //
 // Descendants of the generation are excluded, and the exclusion is what
 // makes the test usable rather than vacuous: `finalSha` is a descendant
@@ -300,6 +317,21 @@ export function gitDescentCorroborator(
   const commitDate = new Map(commits.map((c) => [c.sha, c.date]))
 
   const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha)
+  /**
+   * Commits the episode itself merged: ancestors of the horizon that are
+   * not ancestors of the generation. Empty when no horizon was given,
+   * which is the chat path and the three-argument callers, and then no
+   * verdict can be `merged_in` — correctly, since with no horizon there is
+   * no episode to have merged anything.
+   *
+   * One more walk of the in-memory parent map, no subprocess. It is the
+   * same set `authoredAfterHorizon` computes for its third condition, and
+   * recomputed here rather than threaded out of that function so its
+   * signature stays the one `tools/measure-verbatim-descent.ts` calls.
+   */
+  const mergedIntoEpisode = horizonSha !== undefined && commits.some((c) => c.sha === horizonSha)
+    ? relatives(commits, horizonSha).ancestors
+    : new Set<string>()
 
   /** rival commits for a path, newest first; null when git could not say */
   const rivalCache = new Map<string, PathCommit[] | null>()
@@ -392,10 +424,16 @@ export function gitDescentCorroborator(
         basis: 'rival',
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
-        // A parent that held the text already returned above, so an
-        // ancestor reaching this line is an older one and the relation is
-        // the restore it was always documented to be.
-        relation: ancestors.has(c.sha) ? 'pre_existing' : 'sibling',
+        // Three-way, and the order matters. A parent that held the text
+        // already returned above, so an ancestor reaching this line is an
+        // older one and the relation is the restore it was always
+        // documented to be. Otherwise the horizon's ancestors are asked
+        // before the fall-through, because every ancestor of the
+        // generation is also an ancestor of the horizon and would
+        // otherwise swallow the restore case.
+        relation: ancestors.has(c.sha)
+          ? 'pre_existing'
+          : mergedIntoEpisode.has(c.sha) ? 'merged_in' : 'sibling',
         // Always present on this path: `commitsTouchingPath` reads `%aI`
         // for every line it returns, so a candidate that reached this loop
         // has a date whether or not it is in `commits`.

@@ -105,6 +105,7 @@ type Bucket =
   | 'unverified'
   | 'prior_revision'
   | 'restored'
+  | 'merged_in'
   | 'sibling'
   | 'future'
 
@@ -177,10 +178,19 @@ function run(project: string, limit: number, exampleCap: number): void {
   // The four rows the ledger entry printed, reproduced from the shipped
   // corroborator with nothing changed, so the refinement below is read
   // against a number that is checkable rather than quoted.
+  // Keyed by `basis` or by `rival:<relation>`, and every relation the
+  // corroborator can return has a row. `rival:merged_in` arrived on
+  // 2026-10-15 and `rival:prior_revision` is reachable in principle though
+  // not on this pass (a parent-held span is demoted out of
+  // `survived_verbatim` by the same corroborator before it reaches here),
+  // so both are declared rather than left to appear as `undefined` and
+  // throw on the first `.spans++`.
   const shipped: Record<string, Tally> = {
     corroborated: empty(),
     unverified: empty(),
+    'rival:prior_revision': empty(),
     'rival:pre_existing': empty(),
+    'rival:merged_in': empty(),
     'rival:sibling': empty(),
   }
   const refined: Record<Bucket, Tally> = {
@@ -188,6 +198,7 @@ function run(project: string, limit: number, exampleCap: number): void {
     unverified: empty(),
     prior_revision: empty(),
     restored: empty(),
+    merged_in: empty(),
     sibling: empty(),
     future: empty(),
   }
@@ -201,8 +212,8 @@ function run(project: string, limit: number, exampleCap: number): void {
   const boundDropped = empty()
   const boundNowSays = new Map<string, number>()
   const boundExamples: string[] = []
-  const examples: Record<'prior_revision' | 'restored' | 'sibling' | 'future', string[]> = {
-    prior_revision: [], restored: [], sibling: [], future: [],
+  const examples: Record<'prior_revision' | 'restored' | 'merged_in' | 'sibling' | 'future', string[]> = {
+    prior_revision: [], restored: [], merged_in: [], sibling: [], future: [],
   }
 
   let verbatimSpans = 0
@@ -302,8 +313,9 @@ function run(project: string, limit: number, exampleCap: number): void {
 
         const ev = corroborate(file.path, span.text)
         const shippedKey = ev.basis === 'rival' ? `rival:${ev.relation}` : ev.basis
-        shipped[shippedKey].spans++
-        shipped[shippedKey].chars += chars
+        const shippedRow = (shipped[shippedKey] ??= empty())
+        shippedRow.spans++
+        shippedRow.chars += chars
         if (ev.basis === 'unverified') {
           unverifiedReasons.set(ev.reason, (unverifiedReasons.get(ev.reason) ?? 0) + 1)
         }
@@ -311,6 +323,12 @@ function run(project: string, limit: number, exampleCap: number): void {
         let bucket: Bucket
         if (ev.basis !== 'rival') {
           bucket = ev.basis
+        } else if (ev.relation === 'merged_in') {
+          // A branch the episode merged. The graph places it inside the
+          // work, so no date is consulted and the `future` bucket below
+          // cannot be reached from here — which is the whole point of the
+          // relation existing (src/corroborate.ts, THE FOURTH RELATION).
+          bucket = 'merged_in'
         } else if (ev.relation === 'sibling') {
           const rivalAt = rivalDate(project, ev.sha, dateCache)
           // Date.parse and not a string compare, matching the bound in
@@ -386,7 +404,7 @@ function run(project: string, limit: number, exampleCap: number): void {
   console.log(`  chars left that the generation can be said to have contributed: ${(verbatimChars - parentHeld.chars).toLocaleString()} (${pct(verbatimChars - parentHeld.chars, verbatimChars)})`)
   void contributed
 
-  for (const k of ['prior_revision', 'restored', 'sibling', 'future'] as const) {
+  for (const k of ['prior_revision', 'restored', 'merged_in', 'sibling', 'future'] as const) {
     if (examples[k].length === 0) continue
     console.log(`\nexamples — ${k}\n${examples[k].join('\n')}`)
   }

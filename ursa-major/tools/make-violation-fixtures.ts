@@ -61,6 +61,11 @@ const EXCLUDED: Exclusion = {
   chars: 199,
 }
 
+const firstVerbatim = (r: OutcomeRecord) =>
+  r.files[0].spans.find((s) => s.class === 'survived_verbatim' && s.source)!
+const firstMutated = (r: OutcomeRecord) =>
+  r.files[0].spans.find((s) => s.class === 'survived_mutated')!
+
 function baseRecord(): OutcomeRecord {
   const generated = [
     'The information a decision needs is dispersed across many individuals.',
@@ -99,6 +104,47 @@ function baseRecord(): OutcomeRecord {
     for (const s of f.spans) {
       if (s.class === 'survived_mutated') s.descent = { basis: 'corroborated', rivalsSearched: 3 }
     }
+  }
+  // One DATED rival verdict, added 2026-10-15 with RIVAL_NOT_AFTER_FINAL.
+  // Without it that bound is vacuous on the base in exactly the way the
+  // four structures above exist to rule out: `rival.date` is optional, so a
+  // base record whose only verdicts are `corroborated` satisfies the bound
+  // by having nothing to check while the suite still reports seventeen
+  // bounds covered.
+  //
+  // It goes on a `survived_verbatim` span and the relation is `sibling`,
+  // because that is the one combination a real resolver writes and the gate
+  // leaves alone: `src/resolve.ts` attaches the verdict to the span it kept
+  // (the `...(descent ? { descent } : {})` in `verbatimSpan`) and demotes
+  // only on `prior_revision`, so a verbatim span naming a sibling keeps its
+  // label by design and DESCENT_CHECKED_UNIFORMLY's third clause does not
+  // fire on it.
+  //
+  // The sha stays the invented `deadbee` that the two descent fixtures
+  // already use, and this is the opposite choice from `task.resolvedBy`
+  // below, deliberately. There, the bound's claim is that a named commit is
+  // one a reader can look up, so the fixture names a commit that resolves.
+  // Here the verdict's claim is that this commit holds `notes.md`'s text,
+  // and `notes.md` is synthetic prose in no repository, so naming a real
+  // commit would make a false claim checkable instead of making the fixture
+  // more real. What has to be realistic is the DATE, which is what the
+  // bound reads.
+  //
+  // The offset is `-06:00` and not `Z`, and the hour is chosen so that the
+  // date is one hour BEFORE `task.generatedAt` while its text sorts after
+  // it. `2026-10-09T17:00:00-06:00` is `2026-10-09T23:00:00Z`; the fixture
+  // that breaks this bound moves it two hours later, to
+  // `2026-10-10T01:00:00Z`, which a string compare still reads as the
+  // earlier of the two because both strings begin `2026-10-09`. So the pair
+  // proves the gate orders instants rather than characters, which is the
+  // mistake `tools/measure-verbatim-descent.ts` actually shipped before
+  // 2026-10-14.
+  firstVerbatim(record).descent = {
+    basis: 'rival',
+    sha: 'deadbee',
+    subject: 'A branch alive while the person was working',
+    relation: 'sibling',
+    date: '2026-10-09T17:00:00-06:00',
   }
   // Pinned, not read off the tree this script runs in. `saveRecord` stamps
   // `task.resolvedBy` from `currentResolverIdentity()` (src/store.ts), and
@@ -140,11 +186,6 @@ interface Case {
   why?: string
   break: (r: OutcomeRecord) => void
 }
-
-const firstVerbatim = (r: OutcomeRecord) =>
-  r.files[0].spans.find((s) => s.class === 'survived_verbatim' && s.source)!
-const firstMutated = (r: OutcomeRecord) =>
-  r.files[0].spans.find((s) => s.class === 'survived_mutated')!
 
 const CASES: Case[] = [
   {
@@ -330,6 +371,36 @@ const CASES: Case[] = [
       // counterexample requires stepping outside the type exactly once.
       ;(r.task.resolvedBy as unknown as Record<string, unknown>).commit = 'HEAD'
     },
+  },
+  {
+    slug: 'rival-not-after-final',
+    codes: ['RIVAL_NOT_AFTER_FINAL'],
+    edit: 'the dated `sibling` rival\'s `date` moved two hours later, from `2026-10-09T17:00:00-06:00` to `2026-10-09T19:00:00-06:00`, which is one hour after `task.generatedAt`',
+    consequence:
+      'the record names a commit from its own future as already holding a span\'s text. The verdict\'s relation is `sibling`, which claims the person merged or checked the text out of another branch rather than typing it, and that claim requires the other branch\'s commit to have existed while they were working. This is the shipped defect of 2026-10-14 in miniature: record `ursa-2026-10-07-2f610e9` named a rival authored seven days after its own work closed, and all sixteen bounds passed because the record carried no date to check. The edit is also two hours and not two days on purpose — `2026-10-09T19:00:00-06:00` is `2026-10-10T01:00:00Z`, after the horizon, while its text still sorts before `2026-10-10T00:00:00.000Z` because both strings begin `2026-10-09`. A gate comparing strings instead of instants would pass this file.',
+    break: (r) => {
+      const d = firstVerbatim(r).descent as { date: string }
+      d.date = '2026-10-09T19:00:00-06:00'
+    },
+  },
+  {
+    slug: 'rival-not-after-final-unreadable-date',
+    codes: ['RIVAL_NOT_AFTER_FINAL'],
+    edit: 'the dated `sibling` rival\'s `date` replaced with the string `last Tuesday`',
+    consequence:
+      'the verdict states a date and states it in a form nothing can order. `Date.parse` returns `NaN`, so the comparison the bound exists to make silently cannot be made, and a bound that skipped an unreadable date would report the record as checked. This is the same failure mode as `resolver-identified.json` one field over: a placeholder in the shape of a pointer, which reads as provenance in the viewer because every surface prints whatever string the record carries.',
+    break: (r) => {
+      const d = firstVerbatim(r).descent as { date: string }
+      d.date = 'last Tuesday'
+    },
+  },
+  {
+    slug: 'rival-not-after-final-unreadable-horizon',
+    codes: ['RIVAL_NOT_AFTER_FINAL'],
+    edit: '`task.generatedAt` replaced with the string `2026-13-45T99:00:00Z`, the rival\'s own date left alone',
+    consequence:
+      'the record carries a dated rival and no readable clock to order it against. The defect is in one field rather than in any span, so the gate fires once for the record and names `task.generatedAt` rather than once per verdict. It is the third of this bound\'s three independent failure modes and the only one that is not about the rival at all: the ordering is unavailable because the horizon is unreadable, which is indistinguishable, to anything downstream, from a record whose rivals were all checked.',
+    break: (r) => { r.task.generatedAt = '2026-13-45T99:00:00Z' },
   },
 ]
 

@@ -160,9 +160,27 @@ export type DescentEvidence =
    *     history the split is 504 `prior_revision` to 1 restore
    *     (`tools/measure-verbatim-descent.ts`), so the two readings were
    *     never comparable in size and the label named the rarer one.
-   *   sibling — the commit is on a branch the generation is not an
-   *     ancestor of: another branch's work, which the person merged or
-   *     checked out rather than typed.
+   *   merged_in — the commit is not an ancestor of the generation, and IS
+   *     an ancestor of the episode's own final commit. Another branch's
+   *     work that this episode merged, so the person demonstrably had it
+   *     in front of them: the graph proves it existed while they were
+   *     working, with no appeal to any clock. Split out of `sibling` on
+   *     2026-10-15, because the two make the same claim with very
+   *     different standing — see `date` below, and
+   *     `RIVAL_NOT_AFTER_FINAL` in src/invariants.ts, which can police
+   *     `sibling` precisely because `merged_in` is no longer hiding
+   *     inside it. Only reachable when the corroborator was given a
+   *     horizon (`gitDescentCorroborator`'s fourth argument), which the
+   *     `ursa run` and `ursa ci` paths always pass and the chat path has
+   *     nothing to pass.
+   *   sibling — the commit is reachable from neither the generation nor
+   *     the episode's final commit: another branch's work, which the
+   *     person may have merged or checked out rather than typed. "May"
+   *     is the whole difference from `merged_in`. Nothing in the graph
+   *     places this commit inside the work, so the claim rests entirely
+   *     on its author date being early enough to have been available,
+   *     which is why this is the one relation whose date is load-bearing
+   *     and the one `RIVAL_NOT_AFTER_FINAL` checks.
    *
    * Neither verdict says nothing happened. The person did reject the
    * generation's wording, and that rejection survives as the span's
@@ -175,7 +193,7 @@ export type DescentEvidence =
       basis: 'rival'
       sha: string
       subject: string
-      relation: 'prior_revision' | 'pre_existing' | 'sibling'
+      relation: 'prior_revision' | 'pre_existing' | 'merged_in' | 'sibling'
       /**
        * The rival commit's own author date, strict ISO 8601 with the
        * author's UTC offset (`PathCommit.date`, git's `%aI`).
@@ -199,6 +217,19 @@ export type DescentEvidence =
        * the property every other bound has and the auditability story
        * CLAUDE.md §4 sells to labs: a buyer can see that the evidence
        * predates the work without cloning the repository.
+       *
+       * The date is load-bearing for exactly one relation, `sibling`.
+       * The other three are placed inside the work by the commit graph —
+       * `prior_revision` and `pre_existing` are ancestors of the
+       * generation, `merged_in` is an ancestor of the episode's final
+       * commit — so their dates are reported and never checked, and a
+       * rebase or a wrong machine clock that puts a late author date on
+       * one of them says nothing about the claim. That split is why
+       * `merged_in` exists: while it was folded into `sibling`, no bound
+       * could police a sibling's date without also firing on records
+       * whose evidence the graph had already proven, which
+       * src/invariants.ts's second rule forbids ("anything that can be
+       * legitimately false is a measurement, not an invariant").
        *
        * OPTIONAL, and absence is legal and unchecked. Every record
        * written before 2026-10-15 carries rivals with no date, and a

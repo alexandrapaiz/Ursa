@@ -49,6 +49,17 @@ interface Repo {
   at(ref: string): string
 }
 
+/**
+ * A commit's author date as git itself prints it, in the same strict ISO
+ * form `listCommits` and `commitsTouchingPath` read (`%aI`). Used to assert
+ * that a rival verdict's `date` is the repository's answer rather than a
+ * string this suite computed, which is the only way the assertion can fail
+ * when the field stops being read from git.
+ */
+function gitDate(dir: string, sha: string): string {
+  return execFileSync('git', ['-C', dir, 'log', '-1', '--format=%aI', sha], { encoding: 'utf8' }).trim()
+}
+
 /** A repository on a controlled clock, so the pair walk's age bound is testable. */
 function repo(stepHours = 1): Repo {
   const dir = mkdtempSync(join(tmpdir(), 'ursa-corrob-'))
@@ -149,7 +160,7 @@ describe('a rival commit holding the text drops the mutation claim', () => {
     expect(span?.descent).toBeUndefined()
   })
 
-  it('does not label the span survived_mutated when a sibling commit holds it verbatim', () => {
+  it('does not label the span survived_mutated when a commit outside the descent holds it verbatim', () => {
     const { r, generatedSha } = twoBranchesOneSurvivor()
     const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
       .find((e) => e.generatedSha === generatedSha)
@@ -167,7 +178,18 @@ describe('a rival commit holding the text drops the mutation claim', () => {
     const span = spanFor(resolveEpisode(r.dir, ep)!.files
       .find((f) => f.path === 'label.ts')!.spans, B_LINE)!
 
-    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    // `merged_in` and not `sibling` since 2026-10-15. The human merged
+    // branch-b into branch-a, so the rival commit is an ancestor of the
+    // episode's final commit and the commit graph itself places it inside
+    // the work. That is the stronger of the two statements the old
+    // `sibling` relation flattened together, and it is the right one for
+    // this fixture: "a branch this work merged" rather than "a branch
+    // somewhere that may or may not have existed yet".
+    expect(span.descent).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    // And it carries the rival commit's own author date, which is what
+    // lets RIVAL_NOT_AFTER_FINAL read the record without a repository.
+    expect(span.descent?.basis === 'rival' && span.descent.date)
+      .toBe(gitDate(r.dir, rivalSha))
     // The evidence is kept, not thrown away: a human adjudicating this
     // record needs the score and the text that scored.
     expect(span.uncertain).toBe(true)
@@ -490,8 +512,121 @@ describe('a rival authored after the work finished', () => {
 
     const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
     const verdict = c('label.ts', A_LINE)
-    expect(verdict).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    // `merged_in`, which is the relation that exists for exactly this
+    // case: the date says "after the work" and the graph says "inside the
+    // work", and the graph wins. Naming it is what lets the record-side
+    // bound police `sibling` dates without firing on this record — see
+    // the assertion below, and src/invariants.ts rule 2.
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'merged_in' })
     expect(verdict.basis === 'rival' && sideSha.startsWith(verdict.sha)).toBe(true)
+    // Read back through git rather than compared against AHEAD: `%aI`
+    // prints a zero offset as `Z`, so the string the fixture set and the
+    // string git returns are the same instant and not the same characters.
+    expect(verdict.basis === 'rival' && verdict.date).toBe(gitDate(r.dir, sideSha))
+    expect(Date.parse(gitDate(r.dir, sideSha))).toBe(Date.parse(AHEAD))
+
+    // This fixture stops at the corroborator on purpose: the pair walk
+    // builds no episode from it (the intervening merge and the next-year
+    // author date are exactly what it refuses), so there is no record to
+    // gate. The gate's side of the same case is asserted in "the date a
+    // rival verdict carries" below, on a record that does resolve.
+  })
+})
+
+describe('the date a rival verdict carries', () => {
+  /**
+   * A branch that is NOT merged and whose commits predate the episode's
+   * last one, which is the only shape that produces `relation: 'sibling'`
+   * now that merged branches are `merged_in`. It is also the only shape
+   * RIVAL_NOT_AFTER_FINAL polices, so the record below is the one the
+   * bound is actually about.
+   *
+   * The repository's clock is monotonic in commit order, so the side
+   * branch's commit is authored before the final commit simply by being
+   * made first.
+   */
+  function unmergedSiblingBeforeTheEnd() {
+    const r = repo()
+    const base = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    r.gitCommitting(['checkout', '-q', '-b', 'side', base])
+    const sideSha = r.commit('label.ts', file(A_LINE) + 'export const onTheSide = true\n', 'Side work, never merged')
+    r.gitCommitting(['checkout', '-q', 'main'])
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep the agent\'s wording')
+    return { r, generatedSha, sideSha, finalSha }
+  }
+
+  it('is the rival commit\'s own author date, read from the repository', () => {
+    const { r, generatedSha, sideSha, finalSha } = unmergedSiblingBeforeTheEnd()
+    const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    const verdict = c('label.ts', A_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'sibling' })
+    expect(verdict.basis === 'rival' && verdict.date).toBe(gitDate(r.dir, sideSha))
+  })
+
+  it('names the generation\'s parent date on a prior_revision verdict', () => {
+    // The other return site, and the one whose date comes from the
+    // in-memory commit graph rather than from `commitsTouchingPath`.
+    const r = repo()
+    const parentSha = r.commit('label.ts', file(B_LINE), 'The human writes the file')
+    const generatedSha = r.commit('label.ts', file(A_LINE), 'Reword the label' + TRAILER, BOT)
+    const finalSha = r.commit('label.ts', file(A_LINE) + 'export const kept = true\n', 'Keep it')
+    const c = gitDescentCorroborator(r.dir, generatedSha, listCommits(r.dir), finalSha)
+    const verdict = c('label.ts', B_LINE)
+    expect(verdict).toMatchObject({ basis: 'rival', relation: 'prior_revision' })
+    expect(verdict.basis === 'rival' && verdict.date).toBe(gitDate(r.dir, parentSha))
+  })
+
+  it('leaves a merged_in verdict dated after the work alone, which is rule 2 holding', () => {
+    // The companion to "still searches a branch the episode merged in"
+    // above, on the gate side. A `merged_in` rival dated a year after the
+    // work is a correct record: the commit graph placed that commit inside
+    // the episode, and its author date is a fact about a rebase or a
+    // machine clock rather than about the claim. If RIVAL_NOT_AFTER_FINAL
+    // ever fires here it has become a bound a correct record can fail,
+    // which src/invariants.ts's second rule forbids — and that was the
+    // reason `merged_in` had to be split out of `sibling` before the bound
+    // could be written at all.
+    const { r, generatedSha } = unmergedSiblingBeforeTheEnd()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    const record = resolveEpisode(r.dir, ep!)!
+    const victim = record.files.flatMap((f) => f.spans)
+      .find((sp) => sp.descent?.basis === 'rival' && sp.descent.relation === 'sibling')!
+    const d = victim.descent as { relation: string; date: string }
+    d.relation = 'merged_in'
+    d.date = '2027-06-01T00:00:00Z'
+    expect(checkRecord(record)).toEqual([])
+    // And the same record with the same date under the policed relation
+    // does fire, so the exemption above is the relation and not the date.
+    d.relation = 'sibling'
+    expect(checkRecord(record).map((v) => v.code)).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+  })
+
+  it('passes the gate on the shipped path, and fails it if the date is moved past the work', () => {
+    const { r, generatedSha } = unmergedSiblingBeforeTheEnd()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)
+    const record = resolveEpisode(r.dir, ep!)!
+    const dated = record.files.flatMap((f) => f.spans)
+      .map((sp) => sp.descent)
+      .filter((d): d is Extract<typeof d, { basis: 'rival' }> => d?.basis === 'rival')
+    expect(dated.length, 'the fixture must produce at least one rival verdict').toBeGreaterThan(0)
+    expect(dated.some((d) => d.relation === 'sibling')).toBe(true)
+    for (const d of dated) expect(Date.parse(d.date!)).not.toBeNaN()
+    expect(checkRecord(record)).toEqual([])
+
+    // The defect of 2026-10-14, injected into a real record rather than a
+    // fixture: one sibling's date moved one second past the end of the
+    // work. Nothing else changes, and the gate alone catches it.
+    const broken = JSON.parse(JSON.stringify(record)) as typeof record
+    const victim = broken.files.flatMap((f) => f.spans)
+      .find((sp) => sp.descent?.basis === 'rival' && sp.descent.relation === 'sibling')!
+    ;(victim.descent as { date: string }).date =
+      new Date(Date.parse(broken.task.generatedAt) + 1000).toISOString()
+    const fired = checkRecord(broken)
+    expect(fired.map((v) => v.code)).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    expect(fired[0].observed).toContain('after task.generatedAt')
   })
 })
 
