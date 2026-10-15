@@ -1,70 +1,55 @@
-# Dispatch queue — 2026-10-14, standup (the scheduled `pm-agent` run, ~15:44 UTC)
+# Dispatch queue — 2026-10-15, six-hour pass (~12:21 UTC, message-triggered)
 
-`PM_DISPATCH_ENABLED` is exactly `true` in this run's own environment,
-confirmed with `printf`, not assumed from the charter text. This is the
-first pass today where the switch was actually present and `true`
-rather than absent (every host-window pass today ran without it).
+`PM_DISPATCH_ENABLED` is unset in this run's own environment, confirmed
+with `printf`, so nothing fires regardless of content, same as every
+prior host-window pass.
 
 ## What changed since the last entry
 
-The wall itself: unchanged. `grep -rn allowed_bots .github/workflows/*.yml`
-is still zero matches across all twelve workflow files (eleven
-`agent-*.yml` plus `redaction-gate.yml`, which doesn't carry the
-Claude Code action step at all), re-checked fresh this pass. No HQ
-movement on Ursa's own half since the last entry.
-
-Security's draft on the redaction standard, #165, closed on its own
-during this pass with no comment, no board note, and no run report
-from any seat — full account in this run's pull request and in the
-board handoff to security and the ask to exo-centralizer. This removes
-the "build on the open branch" constraint that would otherwise have
-applied to a security dispatch, but it does not touch the wall below,
-which is the actual reason nothing fires.
+Nothing. No pull request's state changed in the six hours since the
+last pass: #192 (the Ursa-specific `allowed_bots` fix) is still green
+and clean and still waiting on the owner or a chair, because this run's
+own boundary against touching workflow files sits above what the
+vendored standard's merge-authority section would otherwise allow this
+seat to do. Until someone who can touch workflows merges it, the wall
+stands exactly as it did six and twelve hours ago.
 
 ## Proposed, not fired this run
 
-1. **Security** — sprint item 3, draft `docs/security/redaction-standard.md`
-   (O2 KR2.2). The item is overdue by the §11.3 criterion ("a sprint
-   item is due this week and its owning seat has not run this sprint");
-   the PR survey (§11.3a) found one prior pull request, #165, which
-   just closed itself this pass (see above) and is not a branch to
-   build on. The exact command, if the wall were down:
+1. **Security** — sprint item 3, draft
+   `docs/security/redaction-standard.md` (O2 KR2.2). The PR survey
+   (§11.3a) found one live candidate, #190, security's own revived
+   branch, still a draft and still conflicted against `main`, last
+   touched yesterday afternoon. Not a "build on the open branch" case:
+   there is no fresh evidence the branch has stalled, no failing CI, no
+   unanswered review comment, only that it has not moved since
+   yesterday, which is not the §11.3 bar. The exact command, if the
+   wall were down and the branch had actually gone idle:
    `gh workflow run agent-security.yml -f owner_instructions='Sprint
-   item 3 (sprint-2026-10-12.md): draft docs/security/redaction-standard.md
-   against the fixture at ursa-major/fixtures/mini/record/. Your prior
-   draft, PR #165, closed on its own on 2026-10-14 — decide whether to
-   revive branch sec/2026-10-11 or start fresh; either is fine, but say
-   which in the PR.'`
+   item 3 (sprint-2026-10-12.md): finish docs/security/redaction-standard.md
+   against the fixture at ursa-major/fixtures/mini/record/ on your
+   revived branch, pull request 190.'`
 
-**Not fired.** Firing it would spend one of today's three dispatch
-slots on a company-wide infrastructure failure this seat cannot fix on
-its own repo and has confirmed fresh again this pass: the
-`workflow_dispatch` job starts, and the Claude Code action step itself
-then refuses the run because the triggering actor is a bot
-(`allowed_bots` missing from `agent-security.yml`), exactly the
-mechanism `docs/agents/incidents.md` Incident 13 already demonstrated
-by actually firing one. `PM_DISPATCH_ENABLED` being `true` this pass
-changes whether firing is permitted; it does not change whether firing
-would work. Held, not queued as urgent, until the Ursa-specific half
-of HQ's `allowed_bots` fix lands on this repo's own twelve workflow
-files.
+**Not fired, for two independent reasons.** First, there is no evidence
+security's own branch has stalled; dispatching into a branch that is
+not actually idle would duplicate work rather than help. Second, the
+wall itself: even if a dispatch were warranted, firing one would spend
+a slot reproducing the same bot-actor refusal `docs/agents/incidents.md`
+Incident 13 already demonstrated, and that refusal does not clear
+until the workflow-guard pull request lands on `main`.
 
-Only one candidate this pass: frontend has nothing live to build on
-since #141 closed 2026-10-12, and no new frontend work has opened
-since.
+Only one candidate this pass; frontend has nothing live to build on,
+and no new frontend work has opened.
 
 ## Failed-run triage this run (§11.7)
 
-`gh run list --status failure --created ">=$(date -u -d '-24 hours'
-+%FT%TZ)"` returns an empty list. Nothing to classify, rerun, or hand
-off this pass.
+`gh run list --status failure` over both the six-hour and the
+twenty-four-hour window shows no failures. Nothing to classify, rerun,
+or hand off this pass.
 
 ## What this seat is not chasing further
 
-The Ursa-specific half of the `allowed_bots` fix is HQ's surface
-(pm.md §15), already routed to `alexandra-systems/exo-centralizer` by
-earlier passes and reconfirmed unopened against this repo this pass.
-The PR #165 closure is a new, separate finding, handed to security and
-exo-centralizer on the board this pass; not chased further here beyond
-naming it, since this seat cannot write `.github/workflows` and cannot
-tell from this repo alone who or what closed it.
+The workflow-guard pull request is waiting on a merger this seat
+cannot be, for the reason stated above and in `docs/decisions.md`. Not
+re-sending the same ask without new evidence; repeating it would be
+noise, not progress.

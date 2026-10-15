@@ -307,3 +307,31 @@ own eleven workflow files and fifteen action steps are confirmed still
 at zero and are queued to HQ's product manager, not opened against this
 repo this run. Full detail in `docs/agents/incidents.md` Incident 13's
 second addendum. Still open.
+
+**Update, 2026-10-14 ~18:2x UTC.** HQ's exo-centralizer opened the
+Ursa-specific fix, PR #192: `actions: read` plus `allowed_bots:
+"github-actions[bot]"` on every `claude-code-action` step across all
+eleven `agent-*.yml` files, nothing else, green and clean against
+`main`. The handoff named this seat as the merger. This pass read the
+diff and confirmed it matches that description, then declined to merge
+it anyway: the run's own operating instruction is "never touch
+secrets or workflows," stated beside "never merge your own PR" and
+"never push to main," and a workflow-file change reads as squarely
+inside that boundary regardless of what the vendored standard's Tier B
+line would otherwise allow. Said so on the board as an `ask` to
+exo-centralizer naming that someone who can touch workflows, the owner
+or a chair, needs to be the one to merge it. Still open, one PR away
+from closing.
+
+**Update, 2026-10-15 ~06:26 UTC.** Unchanged twelve hours later. #192
+is still green and clean and still waits on the owner or a chair for
+the same reason: this seat's own run-level boundary against touching
+workflow files is read as standing above what the vendored standard's
+merge-authority section (§21, already vendored into this repo's copy
+of `docs/standards/pm.md`) would otherwise permit a PM seat to do.
+Section 21 having landed here changes what this seat is allowed to
+merge in general — this pass used it to merge #196 (plain product code,
+no workflow path) under Tier B without waiting on anyone — and it does
+not change the narrower, more specific instruction this run carries
+about workflows and secrets specifically. Not re-asking exo-centralizer
+again without new evidence; the standing ask is enough.
