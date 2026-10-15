@@ -6442,3 +6442,260 @@ into this ledger entry they would have been a fabricated comparison
 between two products in Ursa's own landscape file, sourced to a paper
 that does not make it. Nothing in any of the material above addressed
 this agent or asked it to do anything.
+
+### 2026-10-08 — Finding: half the skill library's receipts pointed at the wrong lines, and the checker could not see it
+
+- Trigger: skill seat's fifth run, consolidating four runs of library work
+  onto `main` and re-verifying the citations against the current tree
+- What: 58 of 117 line-anchored citations across the four skills resolved
+  to unrelated code. `skills/check-evidence.mjs` reported `OK: 133 sources
+  resolved` throughout, because it proved three things that are all true
+  of a wrong anchor: the path exists, the line number is in bounds, and
+  the body and the evidence table agree. `resolve.ts:160-167` had been the
+  branch that sets `uncertain`; by 2026-10-08 it was the verbatim-match
+  pass. A reader following that citation finds plausible code and believes
+  the claim, which is worse than a dead link, because a dead link
+  announces itself.
+- How it happened, precisely, because the mechanism matters more than the
+  count: commit `eec5717` on 2026-10-05 re-landed the library onto a newer
+  `main` and said in its own message that the files "ride along verbatim".
+  They did. So did the anchors, written against the 2026-09-24 tree. No
+  step in the run was wrong on its own terms and the checker passed, which
+  is why this went five days without anyone noticing.
+- Why it is the most expensive defect this library can have: the
+  differentiator is "skills with receipts", and a receipt that silently
+  stops matching is the one failure that converts the product's claim into
+  its opposite. The provenance reviewer in the ADR-13 panel exists to
+  catch a claim laundered beyond its evidence; this is the same sin
+  arriving by drift rather than by overstatement.
+- Fixed in this run: 43 anchors relocated mechanically against the
+  as-written content recovered from each skill's base tree, 25 re-pointed
+  by hand, five claims rewritten because the evidence had changed rather
+  than moved, and `skills/evidence.lock.json` added so the checker fails
+  on a changed fingerprint. `prompts/skill-extract.md` §5g states the
+  rule. Verified three ways: a tampered lock fails, a one-word source edit
+  fails and names both skills citing that range, and re-indentation passes.
+- What is still owed, and is not this seat's to do: the lock is enforced
+  only by a seat remembering to run the checker. No seat can install a CI
+  gate (see the 2026-09-27 blocker entry), so this guard is one
+  `npm`-less `node` invocation away from being decorative. The ask is one
+  workflow step running `node skills/check-evidence.mjs` on pull requests
+  touching `skills/` or `ursa-major/src/`.
+- Cost: $0
+- Status: fixed in this run, with a CI gate owed
+
+### 2026-10-08 — Finding: the skill library had zero bytes on `main` while four of its own pull requests carried it
+
+- Trigger: same run, reading the seat's own open PRs first per the org rule
+- What: the seat had four open pull requests (#14 closed, #50, #64, #83,
+  #123). #14 was the root of a stack and was closed unmerged on 2026-10-06
+  as "stale and conflicting, superseded by #50, #64". But #50 was based on
+  #14's branch and #64 on #50's, so closing the root left two mergeable
+  pull requests pointing at a base that can never merge, and the
+  superseding they were credited with was the reason they could not land.
+  Meanwhile `skills/` did not exist on `main` at all.
+- The part worth generalizing: "superseded by a later PR" is a safe
+  closure only when the later PR targets a branch that reaches `main`. For
+  a stack it is exactly backwards, and the closure reads as cleanup while
+  orphaning the work. A tier-based staleness sweep cannot see this, because
+  the base branch is not in the fields it reads.
+- Resolved in this run: PR #83's seat surface is a strict content superset
+  of #64, #50 and #14 — the three shared skills and the checker are
+  byte-identical, and #83 adds `distilling-a-tuning-record` plus sections
+  5e and 5f of the extract prompt. This run's branch is cut from `main` and
+  carries that superset, so one merge lands four runs of work.
+- Cost: $0
+- Status: resolved in this run
+
+### 2026-10-08 — Repeat, third time: the skill seat's Data access section cannot be satisfied
+
+- Trigger: `NEON_RO_URL` unset again, third consecutive run
+- What: the seat's inherited Data access section assumes a Neon database of
+  silver-layer claims produced by a research pipeline. Ursa has no research
+  pipeline, no claims and no such database, so the secret being unset is
+  not the blocker and setting it would not help. Runs on 2026-09-24,
+  2026-09-30 and 2026-10-08 each spent their opening on the same detour.
+  The 2026-09-24 and 2026-09-30 entries saying so never reached `main`,
+  which is its own instance of the finding above.
+- The charter's own activation banner already says alexandria-specific
+  references do not apply here and lists a corpus among them, so the
+  amendment is bookkeeping rather than a decision. The working answer is
+  already in the library: `evidence_scheme: repo`, which cites paths and
+  line ranges in this repository and is now fingerprinted.
+- The ask, unchanged and outside this seat's write surface: replace the
+  Data access section of `prompts/skill-agent.md` with the repo evidence
+  scheme, and drop the instruction to query silver for a claim cluster.
+- Cost: $0
+- Status: proposed, third time
+
+### 2026-10-08 — Re-filed: fourteen findings from three runs that never reached `main`
+
+- Trigger: all sixteen ledger entries written by the skill seat's first
+  three runs were checked against `main` and none of them were present
+- What: the entries lived only in #14, #50 and #64, so the engineer seat
+  could not act on findings it never saw. Two are re-filed above. The
+  remaining fourteen are listed here with what this run could verify
+  against the current tree, because re-asserting a fixed defect is its own
+  kind of false receipt.
+- **Still true, verified this run.** `uncertainSpans` and `trivialSpans`
+  are span counts with no char totals, so no adjusted share can be
+  computed (`stats.ts:134-135`, `types.ts:394-395`). The two capture paths
+  accept different file extensions, and only the git path reads `.py`,
+  `.yml`, `.toml` and `.sql` (`cli.ts:21-24` against
+  `resolve-episode.ts:33-36`). `byModel` shares still do not sum to one:
+  `byModelChars` accumulates only spans carrying a `source`, over a
+  `coveredChars` denominator that includes spans carrying none
+  (`stats.ts:55,136-140`). The remainder is unlabelled, though the field
+  is now honestly named `pctOfCovered`.
+- **Fixed since, and withdrawn.** The evidence checker's multi-range bug
+  is fixed in the shipped checker. The viewer's denominator defect is
+  substantially addressed: `byClass` now carries `pctOfFinal` beside
+  `pct`, and the CLI prints `finalChars` and `coveredChars` together with
+  both columns, which is why two claims in
+  `quoting-a-number-from-an-outcome-record` had to be rewritten this run
+  rather than re-anchored.
+- **Partly fixed, narrowed.** `turnsToAcceptance` is still the latest
+  assistant turn that contributed surviving text rather than a count of
+  turns, but the schema comment now says so (`types.ts:478-479`). The
+  name and CLAUDE.md's "turns to acceptance" trajectory field still
+  promise a count. The remaining defect is the name, not the arithmetic.
+- **Not re-verified this run, carried forward as filed.** The pair
+  finder's squash-merge gap and its bot patterns; `ursa run` reporting the
+  depth of the clone rather than the history of the project; one human
+  commit being the correction for several episodes; the uncovered fraction
+  being systematically larger for code than for prose; two skill
+  descriptions both claiming the deletion-rate comparison prompt. These
+  are stated as the earlier runs stated them and should be read with their
+  original dates, not as fresh observations.
+- Cost: $0
+- Status: re-filed for the engineer seat
+
+### 2026-10-15 — The evidence lock earned its keep on first contact, and a carried-forward finding turns out to have been fixed
+
+- Trigger: skill seat's sixth run, carrying the library in PR #140 over
+  410 files of `main` movement it was behind
+- What: merging `main` into the library branch tripped the
+  `skills/evidence.lock.json` guard on 44 of 144 fingerprinted ranges.
+  The checker that preceded the lock would have reported OK on all of
+  them, because in-bounds was all it proved. This is the first
+  independent test of the guard #140 added and it caught the exact
+  failure it was built for, one week after being written, on a merge
+  rather than on an edit.
+- The split, which makes the job plannable: 27 were pure relocation,
+  with the cited lines present byte-for-byte at a new position. 14 were
+  content changes. 3 were ambiguous, with the cited text appearing twice
+  in the new file. Of the 17 that were not pure relocation, **7 carried
+  claims that no longer held.** So roughly 60 percent of a drift batch
+  is machine work and the reading cost sits in the remainder. Recorded
+  as §5i of `prompts/skill-extract.md`.
+- **The carried-forward item that is now closed.** The previous run
+  listed "the pair finder's squash-merge gap and its bot patterns" among
+  findings it had not re-verified. This run verified it and it is fixed.
+  The trailer pattern was widened to the shared `MACHINE_IDENTITY` on
+  2026-10-11 and an owner-declared identity list was added ahead of it
+  (`pairfinder.ts:262-263,293,545-556`). The skill had been reporting a
+  live hazard and is now reporting absent code, which is the finding
+  below.
+- Cost: $0
+- Status: the guard needs the CI gate #140 already asked for. One
+  workflow step running `node skills/check-evidence.mjs` on pull
+  requests touching `skills/` or `ursa-major/src/`. No seat can install
+  it (ledger, 2026-09-27). Re-filed with one week of evidence behind it
+  rather than an argument: this run is what the gate would have caught
+  automatically, and it was caught only because the run happened to look.
+
+### 2026-10-15 — Finding: a skill that reports a defect becomes a confident warning about code that no longer exists
+
+- Trigger: re-reading the 17 drifted citations whose content had changed
+- What: `running-an-outcome-record-trial` said the marker test was
+  narrower than it looked, that the trailer pattern matched only
+  `claude|codex|cursor|gpt`, and that a bot whose name held none of those
+  four substrings passed through as human. It named a real commit in this
+  repository, the squash whose trailer GitHub rewrote to
+  `Co-authored-by: exo-centralizer[bot]`, and called the risk live rather
+  than hypothetical. Every word was true when written. The hazard then
+  materialized: that commit was authored by the owner's own account, so
+  neither test reached it, it became eligible as a person's edit, it
+  paired with the preceding `claude[bot]` commit, and the resulting
+  record claimed 60,616 of 63,362 generated characters survived verbatim,
+  94.9 percent, carrying 84.7 percent of the run's whole headline
+  survival figure over text no person had read. The engineer fixed it on
+  2026-10-11. The skill then read as a current warning about an exposure
+  that had been closed.
+- Why it is worth a section rather than a correction: this is the second
+  instance in two runs. The fifth run found the quoting skill asserting
+  that the CLI "never prints `finalChars`", which this seat had reported
+  and the engineer had fixed. The shape is structural rather than
+  careless. This seat's findings are routed to the engineer by design, so
+  a seat that reports well should expect its own reports to come back as
+  code, and prose describing a live defect is indistinguishable in tone
+  from prose describing a standing property.
+- Recorded as §5h of `prompts/skill-extract.md`: when a drift failure
+  lands on a claim the skill framed as a defect, ask whether it was
+  fixed rather than only whether it moved, keep the measured incident and
+  retire the warning into the past tense, and state the direction of the
+  fix, because a reader hitting a related decision needs to know which
+  way the code errs and why.
+- Cost: $0
+- Status: fixed in this run's skills. The general rule is in the extract
+  prompt. Nothing is owed to another seat.
+
+### 2026-10-15 — A library surface has to render citation freshness, not just the citation
+
+- Trigger: charter step 4, checking that what the skills cite can render,
+  against a library that now has a lock file
+- What: §6 of `prompts/skill-extract.md` sets the constraint that a
+  reader must be able to click a `ref` and land on the cited source.
+  That constraint is now insufficient. Since `skills/evidence.lock.json`
+  exists, every citation has a second piece of state beside its target,
+  which is whether the cited lines still hash to what they hashed to when
+  the claim was written. A surface that renders only the link reproduces
+  the exact failure the lock was built to stop: the reader clicks,
+  lands on plausible code, and believes a claim that may have drifted.
+- So the ask, when the skills route is built: render the lock state
+  beside each `ref`, and make a drifted citation visibly drifted rather
+  than silently normal. A skill with any drifted anchor should not
+  present as current, because "revises when its evidence changes" is the
+  product claim and a page that hides the staleness is selling the claim
+  while breaking it.
+- Still true and still blocking: Ursa has no skills library surface.
+  `ursa-minor/` has `app`, `components`, `lib` and `public` and no skills
+  route, so nothing in `skills/` renders anywhere. Carried from earlier
+  runs, not new.
+- Cost: $0
+- Status: for the engineer or frontend seat, as a constraint on a surface
+  that does not exist yet rather than a defect in one that does. Not this
+  seat's to build, per Boundaries.
+
+### 2026-10-15 — The evidence lock's blind spot: a correct hash over the wrong lines
+
+- Trigger: auditing this run's own rewritten claims against their
+  citations, after the checker had already reported OK
+- What: the guard proves the path exists, the lines are in bounds, body
+  and table agree, and the cited lines have not changed since the claim
+  was written. None of those is a relevance check. A citation can pass
+  all four and fail to support its sentence, and the failure arrives as
+  a range that is too narrow rather than as an exaggerated claim. This
+  run shipped one: the rewritten E3 in `running-an-outcome-record-trial`
+  asserted a measured incident and an argument about test precedence
+  that live in a doc comment at `pairfinder.ts:218-263`, while anchored
+  at `262-263` and `545-556`, which contain neither. Caught by hand in
+  the same run and widened.
+- Why it matters more than it looks: the drift guard is good, which is
+  the problem. A green `evidence check` now reads as "the receipts are
+  sound", and it means something narrower. The product claim is that a
+  reader can check any sentence against its evidence, and a correctly
+  fingerprinted anchor over the wrong lines breaks that claim while
+  satisfying every gate we have.
+- Recorded as §5j of `prompts/skill-extract.md`, as a reading step with
+  no exit status: after rewriting a claim, open the range you wrote down
+  rather than the range you were looking at, and ask whether the
+  sentence can be checked from what is inside it.
+- Not done, and not claimed: the existing 152 ranges were not audited
+  for this failure. Only the citations this run rewrote were. A sweep
+  asking "does each range contain what its `what` field says" is a
+  separate job and cannot be automated by the same trick, since
+  relevance is the part that needs a reader.
+- Cost: $0
+- Status: open as a known limitation of the guard. Next run of this seat
+  should take a slice of the sweep rather than attempt all of it.
