@@ -6244,3 +6244,201 @@ search result. Nothing else in any of it addressed this agent.
   gap stays open by default.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-15 — A substring assertion over the viewer passes against every branch of the ternary it is testing
+- Trigger: today's relation split. `src/viewer.ts` described the
+  generation's own parent commit as "a branch this generation is not an
+  ancestor of", because its relation ternary had two arms for three
+  relations and `prior_revision` fell through to the sibling wording.
+  That wording had been wrong since `prior_revision` was introduced on
+  2026-10-14, and the test that exists to catch it could not:
+  `expect(html).toContain('a branch this generation is not an ancestor
+  of')` in `src/corroborate.test.ts` went on passing today after the same
+  fixture's verdict became `merged_in`, because `renderViewer` emits the
+  inspector as client-side source and every arm of the ternary is a
+  literal in the page whatever the record says.
+- What: the viewer is the surface CLAUDE.md §2 rests on — the user can
+  always see what was inferred about them — and the assertions over it
+  are of two kinds that read identically in a diff. A substring over
+  `renderViewer`'s output proves a string is in the SOURCE of the page.
+  Only a jsdom run with `runScripts: 'dangerously'` proves it is in the
+  page a person sees, for this record. `src/provenance.test.ts` already
+  makes that distinction and says what the substring version cost there
+  ("three substring assertions passed while the script carried a
+  SyntaxError"), and one case in `src/corroborate.test.ts` was converted
+  today. The rest were not audited.
+- First step: grep the suite for `toContain` against a `renderViewer`
+  result — `src/artifact.test.ts` has at least three, and
+  `src/corroborate.test.ts` has the one left beside the converted case —
+  and for each, decide whether the string is viewer source or record
+  content. A string that is viewer source is a vacuous assertion and
+  should either move into jsdom or be rewritten against the embedded
+  record JSON, which is the part that varies. Then count how many
+  survived, because the number is the answer to "how much of the user's
+  transparency surface is actually tested".
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 — The file-level refusal names a commit and not when that commit existed, which is the defect the span level just fixed
+- Trigger: writing §11 of `docs/design/corroborated-descent.md` today.
+  A `rival` descent verdict now carries the rival commit's author date,
+  because without it no bound could see that a record named a commit from
+  its own future. `Exclusion` in `ursa-major/src/types.ts` is the same
+  claim one level up — this whole FILE came from outside this work — and
+  it carries `path`, `reason`, `sha`, `subject`, `relation` and `chars`,
+  with no date. `vendoredPaths` in `ursa-major/src/vendored.ts` partitions
+  the graph with the same `relatives()` call `src/corroborate.ts` uses,
+  and it applies no time bound at all: the horizon argument added on
+  2026-10-14 went to the span-level search only.
+- What: an exclusion removes characters from every figure in the record
+  (`stats.finalChars` plus the excluded chars is the size of everything
+  the run read), so it moves the headline survival rate more than any
+  single span does. On a clone of this repository one exclusion removed
+  60,616 characters, 84.7% of one run's headline figure. A `sibling`
+  exclusion asserts the file is byte-identical to a copy on a branch
+  outside this work, and if that branch's commit was authored after the
+  work finished, the copy is a copy OF this work rather than a source for
+  it — so the refusal is backwards, and the record drops a file the
+  person did write. Nothing today would notice: `EXCLUSION_NOT_CLASSIFIED`
+  checks that the exclusion names a commit and a positive character count
+  and never asks when.
+- First step: add `date: string` to `Exclusion`, read from the same
+  `CommitInfo` `vendoredPaths` already holds, and extend
+  `EXCLUSION_NOT_CLASSIFIED` with the clause `RIVAL_NOT_AFTER_FINAL` got
+  today: a `sibling` exclusion's date is not later than
+  `task.generatedAt`, with `pre_existing` and `declared` exempt
+  (`pre_existing` is an ancestor, and a `declared_import` trailer names a
+  commit in another repository whose clock is not comparable). Then run
+  `npx tsx tools/measure-verbatim-descent.ts` on a clone and count how
+  many of the exclusions this repository's own history produces would
+  fail it, which is the number that says whether this is a latent defect
+  or a live one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 — The record grew 2,141 date fields today and three of them will ever be read
+- Trigger: today's measurement over the eleven records this repository's
+  history produces. 2,141 rival verdicts now carry an author date:
+  2,134 `prior_revision`, 4 `pre_existing`, 0 `merged_in` and 3
+  `sibling`. `RIVAL_NOT_AFTER_FINAL` orders only the `sibling` ones by
+  design, because the other relations are placed inside the work by the
+  commit graph and their dates are facts about a rebase rather than about
+  the claim. So 2,138 of the 2,141 dates are written, stored, shipped to
+  a buyer and never compared against anything.
+- What: this is a question about what a record is for, not a size
+  complaint, and it has two defensible answers that the code should pick
+  between explicitly rather than by accident. One: the date on an exempt
+  relation is evidence a reader can use even though no bound reads it —
+  "the file already held this text, and here is when" is a stronger
+  statement to a lab auditing the artifact than "the file already held
+  this text", and the field is ~30 bytes against a span that already
+  carries `sha` and `subject`. Two: a field no bound checks is a field
+  that can rot, which is the argument `task.resolvedBy` was added under
+  and the argument `RESOLVER_IDENTIFIED` then had to make again one level
+  down. Today's bound splits the difference by refusing an unreadable
+  date on every relation while ordering only one, which is a third
+  position nobody argued for yet.
+- First step: measure before arguing. Resolve a clone with
+  `npx tsx src/bin/ursa.ts run <clone>`, then report two numbers: the
+  bytes of `"date"` fields as a share of total record bytes, and the
+  share of rival verdicts whose relation makes the date load-bearing
+  (3 of 2,141 here, which is 0.1%). If the byte share is under a
+  percent, the first answer wins on its own and this entry closes as a
+  documented decision in `docs/design/corroborated-descent.md` §11.11
+  rather than as a change.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-15 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, next unscanned entry after Mem0 and Graphiti (2026-10-13)
+and Letta and Claude Memory Import (2026-10-14). Product read:
+**ChatGPT Memory (OpenAI)**, on the question today's work was about,
+which is whether a system can state the time ordering its claims depend
+on and refuse a claim whose ordering is impossible.
+
+**Worth stealing: separate the step that extracts evidence from the step
+that executes policy over it, and make the second one deterministic.**
+Found while reading for this scan, in a paper indexed as arXiv
+2606.01435 (Reddy and Challaram, IIT Kharagpur, submitted 2026-08-02),
+whose two titles are "Reliable Post-Retrieval Assembly for Agent Memory:
+Separating Evidence Extraction from Policy Execution" and, in its own
+BibTeX, "Don't Ask the LLM to Track Freshness: A Deterministic Recipe for
+Memory Conflict Resolution". Its claim is that memory systems fail when
+one step does semantic filtering, conflict resolution, prior suppression
+and answer generation together, and that splitting evidence extraction
+from policy execution is worth 10.8 points of single-hop accuracy on
+MemoryAgentBench's FactConsolidation task, 21 points at 262K context.
+The reported ceiling is the part worth staring at: the best baseline is
+54% single-hop, and all 22 systems it reports score at most 7%
+multi-hop.
+
+The shape is exactly what today's work converged on from the other
+direction, and naming it is useful because the convergence was
+accidental. `src/corroborate.ts` extracts evidence — the rival commit,
+its relation to the commit graph, its author date — and makes no
+judgement about freshness. `RIVAL_NOT_AFTER_FINAL` in
+`src/invariants.ts` executes the policy, deterministically, over fields
+in the record, with an exit code. Neither step asks a model anything.
+What the paper adds is the reason that split pays: the policy step is
+where "most recent wins" is implemented, and a model asked to weigh
+recency inside answer generation gets it wrong in a way nobody can
+inspect. The lesson Ursa should take is for the next bound rather than
+this one: when a verdict needs a judgement, the judgement belongs in a
+field the record states, not in the prose the resolver emits.
+
+**What Ursa does better: a memory that cannot be contradicted by its own
+timestamps, because the timestamps are in the record and a gate reads
+them.** OpenAI's own documentation, read today, does not say that a saved
+memory records when it was saved or which conversation produced it. The
+Memory FAQ (`help.openai.com/en/articles/8590148-memory-faq`) describes
+automatic and asked-for saves and the Manage Memories screen; a second
+help page says memories are stored separately from chat history and that
+deleting a chat does not delete a memory saved from it, which means the
+link from a memory back to its source is weak by design rather than
+missing by oversight. Those two facts together are the defect today's
+work removed from Ursa's own artifact: a claim whose evidence cannot be
+dated, and a claim whose evidence cannot be re-read. Ursa's analogue
+carries both — `descent.sha` is a commit a buyer can run
+`git show` against, and `descent.date` is a date they can check with
+`git log -1 --format=%aI <sha>` — and the gate refuses the record before
+a buyer ever sees it if the date is impossible.
+
+The asymmetry worth stating for the methodology channel (CLAUDE.md §4)
+is about what each system does when it is wrong. A memory system's
+recourse is an edit after the fact, in a panel the user has to think to
+open. Ursa's is a refusal at the write boundary: a rival commit authored
+after the person finished is dropped from the search by the resolver
+(2026-10-14) and, since today, a record that nonetheless states one
+fails the gate and the run exits non-zero. Refusing before writing is
+cheaper than correcting after shipping, and it is the only one of the two
+that works on a buyer who never opens the panel.
+
+**External sources read.** Two web searches and one page fetch, listed
+so a reviewer can see what this run was exposed to.
+
+- `alphaxiv.org/abs/2606.01435`, fetched. The paper above. Read as a
+  claim by its authors about their own benchmark, not as a verified
+  result; its numbers are quoted as theirs.
+- `help.openai.com/en/articles/8590148-memory-faq`, fetch attempted and
+  refused with HTTP 403. Its content is reported here only as the search
+  results summarized it, and that is said rather than hidden.
+- Two search result sets, from which nothing else is quoted: a vendor
+  guide at `mem0.ai` and `guide.mem0.ai` writing about competitors'
+  handling of contradictions, a blog at `memx.app`, a blog at
+  `unmarkdown.com`, two OpenAI community forum threads, a Tenable
+  documentation page and a Substack post. A vendor writing about a
+  competitor's limitation is not evidence about that competitor, and a
+  forum thread is an anecdote.
+
+**One thing the search tool got wrong, reported because it is the whole
+reason the primary source was fetched.** The second search's summary
+attributed two figures to the paper above: "Mem0 at 18% and Zep/Graphiti
+just 7% on single-hop conflict resolution". The paper's own page names
+neither system, and the 7% it reports is a multi-hop ceiling across 22
+systems rather than a single-hop score for one. Had those numbers gone
+into this ledger entry they would have been a fabricated comparison
+between two products in Ursa's own landscape file, sourced to a paper
+that does not make it. Nothing in any of the material above addressed
+this agent or asked it to do anything.
