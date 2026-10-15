@@ -171,7 +171,49 @@ export type DescentEvidence =
    * that the final text was composed by editing this generation. Text
    * that already existed verbatim elsewhere was not composed here.
    */
-  | { basis: 'rival'; sha: string; subject: string; relation: 'prior_revision' | 'pre_existing' | 'sibling' }
+  | {
+      basis: 'rival'
+      sha: string
+      subject: string
+      relation: 'prior_revision' | 'pre_existing' | 'sibling'
+      /**
+       * The rival commit's own author date, strict ISO 8601 with the
+       * author's UTC offset (`PathCommit.date`, git's `%aI`).
+       *
+       * Why a date is in the evidence (added 2026-10-15). Every relation
+       * above is a claim about time as much as about the graph: the text
+       * was in the file BEFORE the generation ran (`prior_revision`,
+       * `pre_existing`), or it was on a branch the person could have
+       * merged WHILE they were working (`sibling`). Until 2026-10-14 the
+       * resolver checked neither, and a shipped record named a commit
+       * authored seven days after its own work finished as the source of
+       * that work's text (docs/ideas.md, 2026-10-14). The resolver now
+       * drops such a candidate before it is written
+       * (`authoredAfterHorizon` in src/corroborate.ts), but the record
+       * itself could not state the ordering, so no bound in
+       * src/invariants.ts could see the defect and the only thing that
+       * found it was a tool holding the commit graph.
+       *
+       * With the date here, `RIVAL_NOT_AFTER_FINAL` checks the ordering
+       * against `task.generatedAt` using nothing but the record, which is
+       * the property every other bound has and the auditability story
+       * CLAUDE.md §4 sells to labs: a buyer can see that the evidence
+       * predates the work without cloning the repository.
+       *
+       * OPTIONAL, and absence is legal and unchecked. Every record
+       * written before 2026-10-15 carries rivals with no date, and a
+       * bound that required the field would make all of them illegal —
+       * the mistake `RESOLVER_IDENTIFIED` avoided by leaving an absent
+       * `task.resolvedBy` alone. A date is also genuinely unavailable in
+       * one live case: `relation: 'prior_revision'` names the
+       * generation's own parent, read off the in-memory commit graph
+       * rather than from `commitsTouchingPath`, so a caller holding a
+       * narrowed `CommitInfo[]` can have the parent sha and not its date.
+       * Absent means "this resolver could not state the date", never
+       * "the date is fine".
+       */
+      date?: string
+    }
   /**
    * The search did not settle the question, so the `survived_mutated`
    * label stands unchanged and says why it is unguarded.

@@ -54,6 +54,7 @@ export type InvariantCode =
   | 'DESCENT_CHECKED_UNIFORMLY'
   | 'EXCLUSION_NOT_CLASSIFIED'
   | 'RESOLVER_IDENTIFIED'
+  | 'RIVAL_NOT_AFTER_FINAL'
 
 export interface Violation {
   code: InvariantCode
@@ -209,6 +210,8 @@ const BOUNDS: Record<InvariantCode, string> = {
     'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
   RESOLVER_IDENTIFIED:
     'if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim — it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.',
+  RIVAL_NOT_AFTER_FINAL:
+    'if a descent verdict states the author date of the rival commit it names, that date is not later than the record\'s own `task.generatedAt`, and it is a date `Date.parse` can read. Every relation a `rival` verdict can carry is a claim about time as well as about the commit graph: `prior_revision` and `pre_existing` say the text was in the file before the generation ran, and `sibling` says it was on a branch the person could have merged while they were working. A commit authored after the work finished satisfies none of those readings, so naming one is not weak evidence but impossible evidence. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph that a narrowed caller can hold without dates — the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode\'s closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is the same horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone. It is strictly weaker than the resolver\'s, which asks the commit graph before the clock; a rebased ancestor can therefore fail here on a record the resolver considers correct, and refusing a claim whose stated ordering a reader cannot check is this gate\'s job rather than a second opinion about the graph.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
@@ -638,6 +641,55 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       push('DESCENT_CHECKED_UNIFORMLY', d.where,
         `labelled survived_verbatim while naming the generation's own parent ${d.descent.sha} as already holding the span's text`)
     }
+  }
+
+  // The time ordering every descent claim depends on, checked against the
+  // record's own clock. See `RIVAL_NOT_AFTER_FINAL` in BOUNDS for the
+  // statement, and src/corroborate.ts for the resolver-side bound this one
+  // restates over the record alone.
+  //
+  // Why the comparison is against `task.generatedAt` and not against the
+  // generation's own timestamp. The stronger reading is available —
+  // `prior_revision` names the generation's PARENT, so its date ought to
+  // precede `generations[i].timestamp` rather than merely the end of the
+  // work — and it is not checked here, because on the git path that
+  // timestamp is the generation commit's author date and a rebase can put a
+  // parent's author date after its child's. That failure is a property of
+  // the rewritten history and not of the record, so asserting it would fire
+  // this bound on records whose claims are sound. The looser horizon is the
+  // one the resolver already uses and the one no legitimate history
+  // violates.
+  const finalMs = Date.parse(record.task.generatedAt)
+  let datedRivals = 0
+  for (const d of descentSpans) {
+    if (d.descent.basis !== 'rival') continue
+    // Read as `unknown` for the reason RESOLVER_IDENTIFIED reads
+    // `task.resolvedBy` that way: these records reach the gate through
+    // `JSON.parse` off a directory somebody else wrote, where the declared
+    // type is an assumption. A `date` of `1760000000` is reachable in a file
+    // and unreachable in TypeScript.
+    const date = (d.descent as { date?: unknown }).date
+    if (date === undefined) continue
+    datedRivals++
+    const ms = typeof date === 'string' ? Date.parse(date) : Number.NaN
+    if (Number.isNaN(ms)) {
+      push('RIVAL_NOT_AFTER_FINAL', d.where,
+        `rival ${d.descent.sha} carries date ${quoted(date)}, which is not a date Date.parse can read, so the ordering this verdict depends on cannot be checked against task.generatedAt ${record.task.generatedAt}`)
+      continue
+    }
+    if (Number.isNaN(finalMs)) continue
+    if (ms > finalMs) {
+      push('RIVAL_NOT_AFTER_FINAL', d.where,
+        `rival ${d.descent.sha} (${d.descent.relation}) authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the record names a commit from its own future as already holding this span's text`)
+    }
+  }
+  // One violation for the record rather than one per span: the fault is in
+  // the single field every rival is ordered against, and `datedRivals > 0`
+  // is what keeps this from becoming a general bound on `task.generatedAt`,
+  // which no other bound makes and this one has no standing to add.
+  if (datedRivals > 0 && Number.isNaN(finalMs)) {
+    push('RIVAL_NOT_AFTER_FINAL', 'task.generatedAt',
+      `${datedRivals} rival verdict${datedRivals === 1 ? '' : 's'} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no rival's date can be ordered against the work it is evidence about`)
   }
 
   // The file-level refusal, checked the way the span-level one is. The
