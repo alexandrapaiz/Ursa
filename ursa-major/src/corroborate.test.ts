@@ -726,6 +726,71 @@ describe('the viewer accounts for a demotion rather than going quiet', () => {
     // records it. Asserting the subject the descent verdict actually
     // carries is the only version of this test that can fail.
     expect(html).toContain('Rich label, other wording')
-    expect(html).toContain('a branch this generation is not an ancestor of')
+
+    // The prose branches are NOT asserted against this HTML, and the
+    // reason is a false positive found on 2026-10-15. `renderViewer`
+    // emits the whole inspector as client-side source, so every arm of
+    // its relation ternary is a literal in the page whatever the record
+    // says. The old assertion here named the sibling wording and went on
+    // passing after this fixture's verdict became `merged_in`, which is
+    // the one thing it existed to notice.
+    //
+    // What varies with the record is the embedded JSON, so that is what
+    // is asserted here, and the prose is asserted in the test below by
+    // running the page and clicking the span.
+    const record = resolveEpisode(r.dir, ep)!
+    const payload = JSON.stringify(record)
+    expect(html).toContain(payload.replace(/</g, '\\u003c').slice(0, 200))
+    // The B_LINE span specifically, and not the first rival verdict in the
+    // file: the padding this fixture pads with is held by the baseline
+    // commit, so `label.ts`'s first rival is a `prior_revision` on PAD.
+    const rival = spanFor(record.files.find((f) => f.path === 'label.ts')!.spans, B_LINE)!.descent!
+    expect(rival).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    expect(rival.basis === 'rival' && rival.date).toBeDefined()
+    // And the record's own copy of that date is in the page, so the
+    // inspector has it to print.
+    expect(html).toContain(rival.basis === 'rival' ? rival.date! : '')
+  })
+
+  it('tells the user which branch it was and when that branch was written', async () => {
+    // In jsdom, because the inspector is built by the page's own script
+    // from the embedded record: a substring assertion on the HTML passes
+    // against every arm of the relation ternary at once, which is how the
+    // assertion above this one went on passing after the verdict for this
+    // fixture became `merged_in`. src/provenance.test.ts makes the same
+    // choice for the resolver chip and records what the substring version
+    // cost there.
+    const { JSDOM } = await import('jsdom')
+    const { renderViewer } = await import('./viewer')
+    const { r, generatedSha } = twoBranchesOneSurvivor()
+    const ep = buildEpisodes(findCommitPairs(r.dir), r.dir)
+      .find((e) => e.generatedSha === generatedSha)!
+    const record = resolveEpisode(r.dir, ep)!
+
+    const dom = new JSDOM(renderViewer(record), { runScripts: 'dangerously' })
+    dom.window.Element.prototype.scrollIntoView = function () {}
+    const spans = Array.from(
+      dom.window.document.querySelectorAll('.panel')[0].querySelectorAll('pre.doc .sp'),
+    )
+    const fileSpans = record.files.find((f) => f.path === 'label.ts')!.spans
+    const target = spanFor(fileSpans, B_LINE)!
+    const idx = fileSpans.indexOf(target)
+    expect(target.descent).toMatchObject({ basis: 'rival', relation: 'merged_in' })
+    spans[idx].dispatchEvent(
+      new dom.window.MouseEvent('click', { bubbles: true, cancelable: true }),
+    )
+    const text = dom.window.document.getElementById('inspector')!.textContent ?? ''
+
+    expect(text).toContain('Not counted as your edit')
+    // The relation, in the words the person reads. `merged_in` is the one
+    // relation whose honest sentence is that they had the text in front of
+    // them, which is a stronger statement than the fall-through wording
+    // this span used to get.
+    expect(text).toContain('a branch this work merged, so you had it in front of you')
+    expect(text).not.toContain('a branch this generation is not an ancestor of')
+    // And the date, so "when did that commit exist" is answerable from the
+    // surface the user is looking at rather than only from the record.
+    const rival = target.descent!
+    expect(text).toContain('authored ' + (rival.basis === 'rival' ? rival.date : ''))
   })
 })
