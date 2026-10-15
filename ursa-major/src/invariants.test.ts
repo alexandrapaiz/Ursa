@@ -1034,3 +1034,159 @@ describe('a named resolver is one a reader can look up', () => {
     expect(lines.join('\n')).toContain('"HEAD"')
   })
 })
+
+// ---------------------------------------------------------------------------
+// The seventeenth bound. The second one about a SHAPE rather than two
+// numbers, and the first about TIME.
+//
+// RIVAL_NOT_AFTER_FINAL guards the `date` a `rival` descent verdict carries
+// (src/corroborate.ts). It exists because of a defect that was in a shipped
+// record and that no bound could see: record `ursa-2026-10-07-2f610e9` named
+// commit `510a55a`, authored 2026-10-14 on a then-unmerged branch, as holding
+// text in work whose final commit is dated 2026-10-07. A commit from seven
+// days in the future cannot be where the text came from, and the only reason
+// nothing caught it is that the `rival` variant carried `sha`, `subject` and
+// `relation` and no time at all, so the finding needed a tool holding the
+// commit graph (docs/ideas.md, 2026-10-14).
+//
+// The bound polices one relation, `sibling`, and the cases below are mostly
+// about why the other three are exempt. `fixtures/violations/` holds three
+// committed counterexamples, one per independent failure mode; these are the
+// cases a fixture cannot hold, which are the LEGAL ones.
+// ---------------------------------------------------------------------------
+
+describe('a rival from the future is not where the text came from', () => {
+  const FINAL = '2026-10-05T00:00:00.000Z'
+
+  /**
+   * `resolvedRecord()` with one rival verdict on it, placed where a real
+   * demotion puts one.
+   *
+   * The verdict goes on the `no_generation_provenance` span, which is the
+   * class `resolve()` gives a span it demoted on rival evidence, so every
+   * relation can be tried here without DESCENT_CHECKED_UNIFORMLY firing
+   * instead: that bound refuses a `rival` verdict under `survived_mutated`
+   * (the demotion computed and not applied) and a `prior_revision` one
+   * under `survived_verbatim` (the same failure on the survival label).
+   * Isolating this bound means not reusing those spans.
+   *
+   * The `survived_mutated` span is given a `corroborated` verdict for the
+   * same reason the violation fixtures' base record does: once ANY span
+   * carries a descent verdict, DESCENT_CHECKED_UNIFORMLY requires that
+   * every mutation label carry one, and a record missing that would fire
+   * two codes for one edit.
+   */
+  const withRival = (rival: unknown): OutcomeRecord => {
+    const r = resolvedRecord()
+    expect(r.task.generatedAt).toBe(FINAL)
+    for (const sp of r.files[0].spans) {
+      if (sp.class === 'survived_mutated') sp.descent = { basis: 'corroborated', rivalsSearched: 3 }
+    }
+    const span = r.files[0].spans.find((sp) => sp.class === 'no_generation_provenance')!
+    ;(span as unknown as Record<string, unknown>).descent = rival
+    return r
+  }
+  const codesOf = (rival: unknown) => checkRecord(withRival(rival)).map((v) => v.code)
+  const fired = (rival: unknown) =>
+    checkRecord(withRival(rival)).find((v) => v.code === 'RIVAL_NOT_AFTER_FINAL')
+  const sibling = (date: string | undefined) => ({
+    basis: 'rival', sha: 'deadbee', subject: 'Parallel work', relation: 'sibling',
+    ...(date === undefined ? {} : { date }),
+  })
+
+  it('accepts a sibling authored before the work ended, including the same instant', () => {
+    expect(codesOf(sibling('2026-10-04T23:59:59.000Z'))).toEqual([])
+    // Equality is legal. The bound is "not later", and a rival authored in
+    // the same second as the final commit was still available to copy from.
+    expect(codesOf(sibling(FINAL))).toEqual([])
+  })
+
+  it('accepts a sibling whose date is earlier than the work in a different offset', () => {
+    // `2026-10-04T19:00:00-06:00` is `2026-10-05T01:00:00Z`, which is AFTER
+    // the horizon while its text sorts before it, and
+    // `2026-10-04T21:00:00-06:00` is `2026-10-05T03:00:00Z`. Both are
+    // refused, and a string compare would accept both, which is the mistake
+    // `tools/measure-verbatim-descent.ts` shipped before 2026-10-14.
+    expect(codesOf(sibling('2026-10-04T17:00:00-06:00'))).toEqual([])
+    expect(codesOf(sibling('2026-10-04T19:00:00-06:00'))).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    expect(codesOf(sibling('2026-10-04T21:00:00-06:00'))).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+  })
+
+  it('accepts a rival with no date, which is every record written before 2026-10-15', () => {
+    expect(codesOf(sibling(undefined))).toEqual([])
+    // Including a sibling with no date on a record whose own clock is
+    // unreadable: nothing is being ordered, so there is nothing to refuse.
+    const r = withRival(sibling(undefined))
+    r.task.generatedAt = 'whenever'
+    expect(checkRecord(r).map((v) => v.code)).toEqual([])
+    // And the two records committed to this repository, which predate the
+    // field, exactly as RESOLVER_IDENTIFIED's own case asserts.
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      expect(checkRecord(load(p)), p).toEqual([])
+    }
+  })
+
+  it('exempts the three relations the commit graph vouches for, however they are dated', () => {
+    // This is rule 2 at the top of src/invariants.ts, applied. A
+    // `prior_revision` or `pre_existing` rival is an ancestor of the
+    // generation and a `merged_in` rival is an ancestor of the episode's
+    // final commit, so each demonstrably existed while the person worked
+    // whatever its author date says — and a rebase or a wrong machine clock
+    // routinely makes those dates say 2027. Policing them would make this a
+    // bound a CORRECT record can fail, and splitting `merged_in` out of
+    // `sibling` on 2026-10-15 is what made the policed set nameable.
+    for (const relation of ['prior_revision', 'pre_existing', 'merged_in']) {
+      expect(codesOf({ ...sibling('2027-06-01T00:00:00Z'), relation }), relation).toEqual([])
+    }
+    // The same date under the policed relation fires, so the exemption
+    // above is the relation and not something about the date.
+    expect(codesOf(sibling('2027-06-01T00:00:00Z'))).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+  })
+
+  it('fires on a date nothing can order, on every relation', () => {
+    // Unreadable dates are not exempt, because a relation the graph vouches
+    // for still has no business stating a time nothing can read: the field
+    // prints as provenance on every surface that shows it.
+    for (const relation of ['prior_revision', 'pre_existing', 'merged_in', 'sibling']) {
+      expect(codesOf({ ...sibling('last Tuesday'), relation }), relation)
+        .toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    }
+    expect(fired(sibling('last Tuesday'))!.observed).toContain('Date.parse can read')
+    // The types a JSON file can hold and TypeScript cannot, which is why
+    // the bound reads the field as `unknown`.
+    expect(codesOf({ ...sibling(undefined), date: 1760000000 })).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    expect(codesOf({ ...sibling(undefined), date: null })).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    expect(fired({ ...sibling(undefined), date: 1760000000 })!.observed).toContain('1760000000')
+  })
+
+  it('fires once, naming the clock, when the record\'s own horizon is unreadable', () => {
+    const r = withRival(sibling('2026-10-04T00:00:00Z'))
+    r.task.generatedAt = '2026-13-45T99:00:00Z'
+    const found = checkRecord(r)
+    expect(found.map((v) => v.code)).toEqual(['RIVAL_NOT_AFTER_FINAL'])
+    // `push` prefixes the record id, so this is the whole `where`.
+    expect(found[0].where).toBe('invariants-unit task.generatedAt')
+    expect(found[0].observed).toContain('1 sibling rival verdict')
+    expect(found[0].observed).toContain('2026-13-45T99:00:00Z')
+  })
+
+  it('names both sides of the comparison, which is this module\'s rule for a message', () => {
+    const v = fired(sibling('2026-10-09T00:00:00Z'))!
+    expect(v.observed).toContain('2026-10-09T00:00:00Z')
+    expect(v.observed).toContain(FINAL)
+    expect(v.observed).toContain('deadbee')
+    expect(v.where).toContain('file notes.md span')
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-rival-not-after-final-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(withRival(sibling('2026-10-09T00:00:00Z')), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('RIVAL_NOT_AFTER_FINAL')
+    expect(lines.join('\n')).toContain('2026-10-09T00:00:00Z')
+  })
+})

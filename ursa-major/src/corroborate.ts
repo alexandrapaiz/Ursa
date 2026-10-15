@@ -40,9 +40,13 @@
 //   pre_existing — an older ancestor holds the text and the parent does
 //     not: the generation replaced text an earlier commit had and the
 //     person put the earlier text back.
-//   sibling — neither ancestor nor descendant. Another branch's work,
-//     which the person merged or checked out rather than typed. The
-//     branch-B case above.
+//   merged_in — not an ancestor of the generation, but an ancestor of the
+//     episode's own final commit. Another branch's work that this episode
+//     merged, so the graph itself proves the person had it in front of
+//     them. Added 2026-10-15; see THE FOURTH RELATION below.
+//   sibling — reachable from neither the generation nor the episode's
+//     final commit. Another branch's work, which the person MAY have
+//     merged or checked out rather than typed. The branch-B case above.
 //
 // WHY THE PARENT IS CHECKED FIRST, AND SEPARATELY (added 2026-10-14).
 // Until today this module had two relations, and `pre_existing` carried
@@ -60,6 +64,80 @@
 // So the parent blob is read before the walk. It is one `git show` per
 // (parent, path), cached, which is cheaper than the walk it short-circuits,
 // and its answer does not depend on the order of anything.
+//
+// WHY A RIVAL CAN BE TOO NEW TO BE A RIVAL (added 2026-10-14).
+// `sibling` claims the person "merged or checked out rather than typed"
+// the text, and that claim requires the other branch's commit to have
+// existed while the person was working. Until today nothing here looked
+// at time at all, so a commit authored after the episode ended could be
+// named as the source of text the episode had already finished. It
+// happened on a shipped record: `ursa-2026-10-07-2f610e9` named rival
+// `510a55a`, authored 2026-10-14 on an unmerged branch, as holding text
+// in a file whose work closed on 2026-10-07 (docs/ideas.md, 2026-10-14).
+// Seven spans over 298 characters, so 0.2% of verbatim characters: a
+// correctness defect rather than a load-bearing figure, and it corrupts
+// the one relation that carries a claim about what the person did.
+//
+// The bound is `horizonSha`, the episode's `finalSha`. The boundary is
+// the episode's LAST commit and not its first, because a person can
+// legitimately branch mid-episode, write text elsewhere and bring it in;
+// only work authored after they finished is unambiguously not a source.
+//
+// Two things make this narrower than "compare the dates":
+//
+//   The graph is asked first and the clock only answers what the graph
+//   cannot. A commit that is an ancestor of the generation, or an
+//   ancestor of the horizon, demonstrably existed by then whatever its
+//   author date says, and rebases and clock skew make author dates lie
+//   in exactly that direction. So the time bound applies only to a
+//   candidate whose position neither reaches — which is precisely the
+//   `sibling` set, the only relation the defect could reach.
+//
+//   An unknown date never drops a rival. A candidate missing from
+//   `commits` (a caller that passed a narrowed range), an unparseable
+//   date, or an absent horizon all leave the candidate in the search,
+//   because dropping it would silently promote a span on no evidence.
+//
+// This is the one place the module trusts a timestamp instead of the
+// commit graph, and a rewritten history can therefore lie to it: a
+// sibling rebased to an older author date gets searched again. That is
+// the safe direction, since being searched is the old behaviour.
+//
+// THE FOURTH RELATION, AND WHY THE DATE NEEDED IT (added 2026-10-15).
+// Until today `sibling` held two populations that make the same sentence
+// true with completely different standing. One is a branch the episode
+// merged, which the graph places inside the work: condition 3 of the
+// bound above is precisely this set, and it is why that condition is not
+// implied by condition 2. The other is a branch the graph cannot place
+// anywhere, where the only thing standing between "the person took this
+// text from here" and "this commit did not exist yet" is an author date.
+//
+// Keeping them under one name made the record uncheckable. A gate reading
+// only the record would have to either police every sibling's date, and
+// so fire on the merged branch whose date was rebased forward — a record
+// this module considers correct — or police none of them, and so miss the
+// defect the bound above exists for. src/invariants.ts's second rule
+// forbids the first: anything that can be legitimately false is a
+// measurement, not an invariant. So the relation says which population a
+// rival is in, `merged_in` is reported and never time-checked, and
+// `RIVAL_NOT_AFTER_FINAL` polices `sibling` alone. The record-side bound
+// is then the same rule as this module's, not a weaker one.
+//
+// AND THE DATE IS WRITTEN DOWN (added 2026-10-15). The bound above runs
+// here, in a module that holds the commit graph, and the record it
+// produces did not. So a rival from the episode's future satisfied all
+// sixteen bounds in src/invariants.ts, and the defect was findable only
+// by a tool that could re-read the repository: `rival` carried `sha`,
+// `subject` and `relation`, and no time at all (docs/ideas.md,
+// 2026-10-14). Every `rival` verdict now carries the rival commit's own
+// author date, so `RIVAL_NOT_AFTER_FINAL` can check the ordering against
+// the record's `task.generatedAt` with nothing but the record in hand.
+//
+// The gate's version sees only dates, because a date is all a buyer
+// holds. It is nonetheless the same rule rather than a weaker one, and
+// the fourth relation above is what makes that true: the three relations
+// the graph vouches for are exempt there by name, and the one that is
+// left is the one this module itself bounds by date.
 //
 // Descendants of the generation are excluded, and the exclusion is what
 // makes the test usable rather than vacuous: `finalSha` is a descendant
@@ -162,10 +240,62 @@ export function relatives(commits: CommitInfo[], generatedSha: string): {
  * rest; a blob is read once per (sha, path) however many spans ask about
  * it.
  */
+/**
+ * Is this commit authored after the work finished, with the commit graph
+ * unable to say otherwise?
+ *
+ * The time bound, as a predicate over one candidate sha. Exported rather
+ * than left inline because `tools/measure-verbatim-descent.ts` reports
+ * how many candidates the bound removes from real history, and a
+ * measurement that re-implements the rule measures the copy.
+ *
+ * `commits` is `listCommits(projectPath)`; `horizonSha` is the episode's
+ * `finalSha`. Returns a predicate that is always false when no horizon is
+ * given or the horizon is not in `commits`, which is the behaviour of this
+ * module before 2026-10-14.
+ */
+export function authoredAfterHorizon(
+  commits: CommitInfo[],
+  generatedSha: string,
+  horizonSha: string | undefined,
+): (sha: string) => boolean {
+  // `Date.parse` and not a string compare: `listCommits` reads author
+  // dates with `--date=iso-strict`, which carries each author's own UTC
+  // offset, so `2026-10-14T00:26:39Z` sorts before
+  // `2026-10-13T23:00:00-07:00` as text while being two hours after it in
+  // fact. This repository's own history has both shapes in it.
+  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]))
+  const horizonMs = horizonSha === undefined ? NaN : (authorMs.get(horizonSha) ?? NaN)
+  if (Number.isNaN(horizonMs)) return () => false
+  const { ancestors } = relatives(commits, generatedSha)
+  // Ancestors of the horizon, which are not in general ancestors of the
+  // generation: a branch merged into this episode between `generatedSha`
+  // and `finalSha` is a sibling of the generation and still demonstrably
+  // existed before the person finished. Computed from the same in-memory
+  // graph, so it costs one more walk of a map and no subprocess.
+  const horizonAncestors = relatives(commits, horizonSha as string).ancestors
+  return (sha) => {
+    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false
+    const ms = authorMs.get(sha)
+    if (ms === undefined || Number.isNaN(ms)) return false
+    return ms > horizonMs
+  }
+}
+
+/**
+ * @param horizonSha the episode's `finalSha`: the last commit of the work
+ *   this generation belongs to. A candidate rival authored after it, and
+ *   reachable from neither the generation's history nor the horizon's,
+ *   did not exist while the person was working and is dropped from the
+ *   search. Omitted means no horizon is known — the chat path, and the
+ *   unit tests that ask about one span — and then every candidate is in
+ *   the running, which is this function's behaviour before 2026-10-14.
+ */
 export function gitDescentCorroborator(
   projectPath: string,
   generatedSha: string,
   commits: CommitInfo[],
+  horizonSha?: string,
 ): DescentCorroborator {
   const { ancestors, descendants } = relatives(commits, generatedSha)
   // The generation's own parents, read off the graph the pair walk already
@@ -177,6 +307,31 @@ export function gitDescentCorroborator(
   const parent = commits.find((c) => c.sha === generatedSha)
   const parents = parent?.parents ?? []
   const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]))
+  // The parent's author date, for the `prior_revision` verdict's own
+  // `date` field. It comes from `commits` and not from
+  // `commitsTouchingPath`, because the parent check runs before the path
+  // walk and is what makes that walk unnecessary. A caller holding a
+  // narrowed `CommitInfo[]` can therefore have the parent sha without its
+  // date, and the verdict then carries no date, which `DescentEvidence`
+  // declares legal: absent means this resolver could not state it.
+  const commitDate = new Map(commits.map((c) => [c.sha, c.date]))
+
+  const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha)
+  /**
+   * Commits the episode itself merged: ancestors of the horizon that are
+   * not ancestors of the generation. Empty when no horizon was given,
+   * which is the chat path and the three-argument callers, and then no
+   * verdict can be `merged_in` — correctly, since with no horizon there is
+   * no episode to have merged anything.
+   *
+   * One more walk of the in-memory parent map, no subprocess. It is the
+   * same set `authoredAfterHorizon` computes for its third condition, and
+   * recomputed here rather than threaded out of that function so its
+   * signature stays the one `tools/measure-verbatim-descent.ts` calls.
+   */
+  const mergedIntoEpisode = horizonSha !== undefined && commits.some((c) => c.sha === horizonSha)
+    ? relatives(commits, horizonSha).ancestors
+    : new Set<string>()
 
   /** rival commits for a path, newest first; null when git could not say */
   const rivalCache = new Map<string, PathCommit[] | null>()
@@ -185,7 +340,14 @@ export function gitDescentCorroborator(
     const touching = commitsTouchingPath(projectPath, filePath)
     const rivals = touching === null
       ? null
-      : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha))
+      : touching.filter((c) => c.sha !== generatedSha
+        && !descendants.has(c.sha)
+        // Dropped before any blob is read, like the descendant exclusion
+        // above and for the same reason: a commit that cannot be the
+        // source should not cost a `git show`, and it must not consume a
+        // slot against MAX_RIVAL_BLOBS, or a burst of later branch work
+        // on a busy path would push the real rivals past the cap.
+        && !afterHorizon(c.sha))
     rivalCache.set(filePath, rivals)
     return rivals
   }
@@ -224,6 +386,12 @@ export function gitDescentCorroborator(
         sha: p.slice(0, SHORT),
         subject: parentSubject.get(p) ?? '',
         relation: 'prior_revision',
+        // Spread rather than written as `date: commitDate.get(p)`, because
+        // the field is optional and an explicit `undefined` survives
+        // `JSON.stringify` as a missing key in the record but as a PRESENT
+        // key with value `undefined` to anything comparing objects in
+        // memory, which is the shape the unit tests assert on.
+        ...(commitDate.get(p) !== undefined ? { date: commitDate.get(p) as string } : {}),
       }
     }
 
@@ -256,10 +424,20 @@ export function gitDescentCorroborator(
         basis: 'rival',
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
-        // A parent that held the text already returned above, so an
-        // ancestor reaching this line is an older one and the relation is
-        // the restore it was always documented to be.
-        relation: ancestors.has(c.sha) ? 'pre_existing' : 'sibling',
+        // Three-way, and the order matters. A parent that held the text
+        // already returned above, so an ancestor reaching this line is an
+        // older one and the relation is the restore it was always
+        // documented to be. Otherwise the horizon's ancestors are asked
+        // before the fall-through, because every ancestor of the
+        // generation is also an ancestor of the horizon and would
+        // otherwise swallow the restore case.
+        relation: ancestors.has(c.sha)
+          ? 'pre_existing'
+          : mergedIntoEpisode.has(c.sha) ? 'merged_in' : 'sibling',
+        // Always present on this path: `commitsTouchingPath` reads `%aI`
+        // for every line it returns, so a candidate that reached this loop
+        // has a date whether or not it is in `commits`.
+        date: c.date,
       }
     }
 
