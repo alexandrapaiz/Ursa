@@ -1,7 +1,9 @@
 # Trigger test — quoting-a-number-from-an-outcome-record
 
-Five prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Two are near misses that should not.
+Six prompts, written against the `description` field in `SKILL.md`.
+Four should activate the skill. Two are near misses that should not.
+The fourth was added on 2026-10-15 under the §5 budget-is-a-floor rule,
+after the skill gained the `survived_verbatim` redefinition.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test.
 
@@ -48,6 +50,23 @@ can be compared or added". The answer is a qualified no, because the
 uncovered fraction is systematically larger in code mode than in prose
 mode, so a few points of difference between those two records can be
 segmentation rather than signal.
+
+**3b. "Our September deck says 41 percent of the model's text survived
+verbatim. I'm refreshing it off last night's record and the figure
+dropped to 33. Did the model get worse?"** (added 2026-10-15, sixth
+run)
+
+The budget in §5 is a floor, and this case was added because the skill
+learned something new rather than because the description changed. It
+reaches the same clause prompt 3 does, "checking whether two records'
+numbers can be compared or added", and the answer is now a hard no for
+any pair that straddles 2026-10-13. On that date `survived_verbatim`
+was redefined to mean byte-identical, and the formatting-only matches
+that used to earn the label moved into `survived_mutated`. A drop of
+that size across that date is a schema change being reported as model
+behaviour. This is the prompt that proves the clause was worth having,
+because nothing in it mentions schemas, versions or definitions, and
+the user's own hypothesis is the wrong one.
 
 ## Should not fire
 
