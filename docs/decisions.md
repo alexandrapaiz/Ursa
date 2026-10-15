@@ -347,3 +347,17 @@ same question has no bearing on dispatch either, since any seat this
 run could dispatch would land on a workflow that still lacks
 `allowed_bots` until #192 itself merges. Still open, still one PR away
 from closing, still the owner's or a chair's to merge.
+
+**Update, 2026-10-15 ~18:25 UTC.** Unchanged again, this time from a
+host six-hour pass. #192 is still `MERGEABLE`/`CLEAN`, still waiting on
+the owner or a chair for the same reason. Two other pull requests that
+would otherwise be this seat's to merge under §21 turned out to carry
+the same kind of boundary, for a different reason: #199 and #184 both
+edit a file under `prompts/` directly (`skill-extract.md` and
+`research-agent.md`), which is a charter edit regardless of how clean
+or green the rest of the diff is, so both wait on the owner the same
+way #167 already did. This pass did find two real Tier B actions to
+take elsewhere — engineer's #198 merged, skill's stale #140 closed as
+superseded — so the standing boundary on workflows and charters is not
+blocking everything, only the specific pull requests that touch those
+two surfaces.
