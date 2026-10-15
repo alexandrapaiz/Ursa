@@ -115,6 +115,17 @@ platform giant (Google Cloud), which does not resolve the structural
 concern named above so much as restate it with a new name attached.
 Last observed 2026-10-05: [Axios: Scale AI hires Francis deSouza](https://www.axios.com/2026/07/30/scale-ai-google-cloud-coo-francis-desouza), [Wikipedia: Francis deSouza](https://en.wikipedia.org/wiki/Francis_deSouza).
 
+Update 2026-10-14: re-ran the direct EDGAR company search flagged as a
+follow-up in the 2026-09-30 entry. It still returns no company named
+"Scale AI" and no S-1 on file. Independent IPO-tracking sites continue
+to disagree with each other — one still shows a March 12, 2026 S-1 and
+labels the company "Public," another says explicitly that no S-1 has
+been filed and no IPO date announced, and both acknowledge their own
+data may be outdated. Nothing found this run upgrades the circulating
+S-1 claim from unconfirmed to confirmed, or downgrades it to false; it
+remains unconfirmed, two EDGAR checks three weeks apart in agreement.
+Last observed 2026-10-14: [SEC EDGAR company search](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=scale+ai&type=S-1), [TechStackIPO: Scale AI](https://www.techstackipo.com/company/scale-ai).
+
 ### Mercor
 
 What it is: an expert-contractor marketplace that pivoted into RLHF,
@@ -179,6 +190,26 @@ to draw a dedicated investigative piece, which is a cost the
 real-work-derived outcome record does not carry by construction (no
 one is assigned graded tasks under deadline pressure to produce it).
 Last observed 2026-10-07: [aiweekly.co: Forbes — Surge AI, Mercor, AfterQuery and Turing sold ~$500M/year to Chinese labs](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to), [Gazetteer SF: New troubles at Mercor](https://sf.gazetteer.co/new-troubles-at-mercor-infighting-face-time-slavery-and-inhumane-working-conditions).
+
+Update 2026-10-14: Mercor made its first acquisition, announced
+2026-07-09 and found this run rather than caught at the time — buying
+Deeptune, an a16z-backed startup that builds reinforcement-learning
+"environments" (simulated Excel, Salesforce, Slack, and similar tools)
+for agents to practice tasks inside. Mercor's CEO, Brendan Foody, had
+personally angel-invested in Deeptune's $43M Series A about three
+months before buying the company outright, and framed the deal around
+where he sees the training bottleneck moving: from raw labeling to the
+environments models practice and get measured in. Read against this
+map's own thesis, this is Category 1's largest-by-growth vendor moving
+up-stack, from "pay a human to grade or generate on request" toward
+"build the task and the verifier the model practices against" — closer
+to CLAUDE.md §1's "verifier" territory than anything else this category
+has done, though a constructed practice environment with a built-in
+verifier is still a designed task, not a real deliverable joined
+backward to its own generation history. Worth tracking whether Mercor
+extends Deeptune's environments into anything that resembles an
+outcome record rather than a graded simulation. Last observed
+2026-10-14: [SiliconANGLE: Mercor buys Deeptune](https://siliconangle.com/2026/07/09/mercor-buys-deeptune-build-training-environments-ai-agents/), [Fortune: AI unicorn Mercor acquires Deeptune](https://fortune.com/2026/07/09/ai-unicorn-mercor-acquires-deeptune-brendan-foody-investor-a16z-openai-anthropic/).
 
 ### Prolific
 
@@ -457,6 +488,27 @@ action: the platform most capable of building true portability has
 instead built a feature that makes portability look solved while only
 solving acquisition. Last observed 2026-10-05: [PrimeTimer: Anthropic opens gate for importing memories from ChatGPT, Gemini to Claude](https://www.primetimer.com/features/anthropic-opens-gate-for-importing-memories-from-chatgpt-gemini-and-more-to-claude-in-a-new-gamechanger-update), [dev.to: I Tested 7 AI Memory Products for Portability — All 7 Lock You In](https://dev.to/stantyan/i-tested-7-ai-memory-products-for-portability-all-7-lock-you-in-31pm).
 
+Update 2026-10-14, a correction to last run's "one-directional" read:
+Anthropic's own support page (last updated per the page itself
+2026-09-02, found this run) now documents export alongside import,
+titled "Importing and exporting your memory from Claude." The export
+mechanism is the same shape as the import: a user asks Claude in chat
+to write out its memories verbatim, or views them under Settings, then
+copies that text out by hand. There is no named file format, no API,
+and the page does not say or imply that ChatGPT or Gemini could read a
+Claude export back in automatically — the stated path for taking memory
+elsewhere is still "copy the text, paste it into the other service." So
+the correction is narrower than it first looks: Claude is no longer
+import-only, but what it ships is a second manual copy-paste direction,
+not a machine-readable round trip a rival platform ingests on its own.
+This still falls short of "symmetric" in the strict sense tested in
+positioning.md (structure, attribution, and timestamps preserved
+automatically across a read-back), and last run's dev.to seven-product
+test predates this page, so it has not been re-run against Claude's
+current export. Worth a direct product test before leaning further on
+either "one-directional" or "symmetric" as the precise word. Last
+observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -501,4 +553,15 @@ at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Perman
   Index benchmarks converging on "economically valuable work" framing)
   and Mercor (the same Forbes finding's smaller Mercor echo, plus a
   labor-conditions investigation). No new entries added this run; the
+  monthly full-map pass is not due until around 2026-10-26.
+- 2026-10-14 — fifth run: dated update notes added to Scale AI
+  (re-checked EDGAR directly, the circulating S-1 claim remains
+  unconfirmed, same result as 2026-09-30), Mercor (its first
+  acquisition, Deeptune, a reinforcement-learning-environment builder —
+  this vendor moving up-stack toward the verifier layer rather than
+  staying in solicited labeling), and Claude Memory Import (a
+  correction: Anthropic's support page now documents export alongside
+  import, so "one-directional" from the 2026-10-05 entry is no longer
+  precise, though the export is still manual copy-paste text, not a
+  machine-readable round trip). No new entries added this run; the
   monthly full-map pass is not due until around 2026-10-26.
