@@ -756,6 +756,147 @@ describe('a path the record excludes and the figures it left', () => {
 })
 
 // ---------------------------------------------------------------------------
+// The same bound's third clause, added 2026-10-15: the time ordering a
+// `sibling` exclusion depends on. This is RIVAL_NOT_AFTER_FINAL one level up,
+// and the level matters. A span-level mistake moves one span; an exclusion
+// removes a whole file from every figure in the record, and on this
+// repository's own history one of them removed 60,616 characters, 84.7% of
+// that run's headline survival figure (docs/design/vendored-paths.md §1).
+//
+// What the clause refuses. A `sibling` exclusion says the finished file is
+// byte-identical to a copy on a branch that is neither an ancestor nor a
+// descendant of the generation, and infers from the identity that the content
+// came from that branch. If the branch's commit was authored after the work
+// closed, the inference runs backwards: the copy is a copy OF this work, and
+// the record drops a file the person did write. `vendoredPaths` in
+// src/vendored.ts applies no time bound of its own, so until this clause
+// existed nothing anywhere would notice.
+// ---------------------------------------------------------------------------
+
+describe('an excluded file\'s copy is not a copy of the work that excluded it', () => {
+  const FINAL = '2026-10-05T00:00:00.000Z'
+
+  /**
+   * A record with one exclusion on a path that is NOT among its classified
+   * files, so the first clause of this bound stays quiet and only the time
+   * clause can speak. `date` is spread in as `unknown` for the reason the
+   * rival cases below do it: these records reach the gate through
+   * `JSON.parse`, and the values a JSON file can hold are wider than the
+   * declared type.
+   */
+  const withExcluded = (patch: Record<string, unknown>): OutcomeRecord => {
+    const r = resolvedRecord([{
+      path: 'docs/standards/pm.md',
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'Re-vendor docs/standards/pm.md from HQ main @ 683c7dd',
+      relation: 'sibling',
+      chars: 21_656,
+      ...patch,
+    } as unknown as Exclusion])
+    expect(r.task.generatedAt).toBe(FINAL)
+    return r
+  }
+  const codesOf = (patch: Record<string, unknown>) =>
+    checkRecord(withExcluded(patch)).map((v) => v.code)
+  const fired = (patch: Record<string, unknown>) =>
+    checkRecord(withExcluded(patch)).find((v) => v.code === 'EXCLUSION_NOT_CLASSIFIED')
+
+  it('accepts a sibling copy authored before the work ended, including the same instant', () => {
+    expect(codesOf({ date: '2026-10-04T23:59:59.000Z' })).toEqual([])
+    // Equality is legal, for the reason it is legal one level down: a copy
+    // authored in the same second as the final commit was still there to
+    // take the file from.
+    expect(codesOf({ date: FINAL })).toEqual([])
+  })
+
+  it('fires on a sibling copy authored after the work closed, naming what it cost', () => {
+    expect(codesOf({ date: '2026-10-12T00:00:00Z' })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    const v = fired({ date: '2026-10-12T00:00:00Z' })!
+    // Both sides of the comparison and the size of the refusal, which is
+    // this module's rule for a message: the number the reader needs to see
+    // is how much of the record moved on this evidence.
+    expect(v.observed).toContain('2026-10-12T00:00:00Z')
+    expect(v.observed).toContain(FINAL)
+    expect(v.observed).toContain('96ed4e5')
+    expect(v.observed).toContain('21656 chars')
+    expect(v.where).toContain('docs/standards/pm.md')
+  })
+
+  it('compares instants and not strings, so a UTC offset cannot smuggle a date through', () => {
+    // `2026-10-04T19:00:00-06:00` is `2026-10-05T01:00:00Z`, an hour after
+    // the horizon, while its text sorts before `2026-10-05`. The twin case
+    // for rivals records that a string compare shipped this mistake once.
+    expect(codesOf({ date: '2026-10-04T17:00:00-06:00' })).toEqual([])
+    expect(codesOf({ date: '2026-10-04T19:00:00-06:00' })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+  })
+
+  it('accepts an exclusion with no date, which is every record written before 2026-10-15', () => {
+    expect(codesOf({})).toEqual([])
+    // Including on a record whose own clock is unreadable: nothing is being
+    // ordered, so there is nothing to refuse.
+    const r = withExcluded({})
+    r.task.generatedAt = 'whenever'
+    expect(checkRecord(r).map((v) => v.code)).toEqual([])
+    // And the two records committed to this repository, which predate the
+    // field, exactly as the rival clause's own case asserts.
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      expect(checkRecord(load(p)), p).toEqual([])
+    }
+  })
+
+  it('exempts the two relations whose clocks are not this repository\'s to order', () => {
+    // Rule 2 at the top of src/invariants.ts, applied. `pre_existing` is an
+    // ancestor of the generation, so the commit graph vouches for it whatever
+    // a rebase did to its author date. `declared` names a commit in ANOTHER
+    // repository, whose clock has no defined relation to this one's at all,
+    // and whose date is therefore not evidence about when the content was
+    // available here.
+    for (const relation of ['pre_existing', 'declared']) {
+      expect(codesOf({ relation, date: '2027-06-01T00:00:00Z' }), relation).toEqual([])
+    }
+    // The same date under the policed relation fires, so the exemption is
+    // the relation and not something about the date.
+    expect(codesOf({ date: '2027-06-01T00:00:00Z' })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+  })
+
+  it('fires on a date nothing can order, on every relation including the exempt ones', () => {
+    for (const relation of ['pre_existing', 'declared', 'sibling']) {
+      expect(codesOf({ relation, date: 'last Tuesday' }), relation)
+        .toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    }
+    expect(fired({ date: 'last Tuesday' })!.observed).toContain('Date.parse can read')
+    // The types a JSON file can hold and TypeScript cannot, which is why the
+    // bound reads the field as `unknown`.
+    expect(codesOf({ date: 1760000000 })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(codesOf({ date: null })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(fired({ date: 1760000000 })!.observed).toContain('1760000000')
+  })
+
+  it('fires once, naming the clock, when the record\'s own horizon is unreadable', () => {
+    const r = withExcluded({ date: '2026-10-04T00:00:00Z' })
+    r.task.generatedAt = '2026-13-45T99:00:00Z'
+    const found = checkRecord(r)
+    expect(found.map((v) => v.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(found[0].where).toBe('invariants-unit task.generatedAt')
+    expect(found[0].observed).toContain('1 sibling exclusion')
+    expect(found[0].observed).toContain('2026-13-45T99:00:00Z')
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-exclusion-not-after-final-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(withExcluded({ date: '2026-10-12T00:00:00Z' }), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('EXCLUSION_NOT_CLASSIFIED')
+    expect(lines.join('\n')).toContain('2026-10-12T00:00:00Z')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // The fourteenth and fifteenth bounds. Both are about a record that states a
 // true number and does not state which question it answers.
 //
