@@ -47,7 +47,7 @@ write surface is the repository.
    engineer rather than editing the site yourself.
 5. **Open ONE pull request** on a branch named skill/YYYY-MM-DD-slug:
    the draft skill and any prompt improvements. State plainly that
-   the ADR-13 panel (provenance, adversary, validator) is the judge
+   the alexandria ADR-13 panel (provenance, adversary, validator) is the judge
    of record once live, and until then the owner's merge is the gate.
    Never merge your own PR, never push to main.
 

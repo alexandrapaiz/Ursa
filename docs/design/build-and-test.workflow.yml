@@ -1,0 +1,132 @@
+# This file belongs at .github/workflows/build-and-test.yml and is parked here
+# because no agent seat can put it there. The restriction is on the GitHub App
+# installation's grant, not on the job, so no `permissions:` block changes it.
+# Verified on 2026-09-29 by attempting the push rather than trusting the claim:
+#
+#   ! [remote rejected] engineer/2026-09-29-next-rce-breakfix
+#     (refusing to allow a GitHub App to create or update workflow
+#      `.github/workflows/dep-floor.yml` without `workflows` permission)
+#
+# The owner installs it with two commands and nothing else:
+#
+#   cp docs/design/build-and-test.workflow.yml .github/workflows/build-and-test.yml
+#   git add .github/workflows/build-and-test.yml && git commit -m 'Wire the build and test gate into CI'
+#
+# This is the second of the two files that ledger entry "Nothing on a pull
+# request checks whether the code builds or the tests pass" (docs/ideas.md,
+# 2026-09-29, status urgent) asks for. The first is the sibling file
+# docs/design/dep-floor.workflow.yml, which guards dependency advisories. The
+# two are separate files on purpose: the floor can break with no commit,
+# because advisory data is fetched live from the npm registry, so it carries a
+# cron this file has no use for. Installing both is two `cp` commands.
+#
+# Every command below was executed on a clean checkout of
+# engineer/2026-10-08-build-and-test-gate at commit a6580c3 before this file
+# was written, on the same ubuntu-latest image and Node 22 this workflow pins.
+# The recorded results are in docs/design/build-and-test-gate.md §6. Nothing
+# here is aspirational.
+
+name: build-and-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Deliberately not path-filtered. A status check that GitHub can be told to
+# require has to actually run on every pull request, because a check skipped
+# by a path filter reports no status at all and a branch rule waiting on it
+# blocks forever. Actions minutes are free on a public repository, so the
+# saving a filter would buy is zero and the cost is a gate that cannot be
+# made required. See docs/design/build-and-test-gate.md §4.
+permissions:
+  contents: read
+
+# A second push to the same pull request makes the first run's answer stale,
+# so the stale run is cancelled rather than finished. `main` is excluded from
+# cancellation (github.ref is the group key) so that merges to the default
+# branch always produce a recorded result.
+concurrency:
+  group: build-and-test-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # The resolver: the product. 472 tests, and the committed bundle that
+  # ursa-major/action.yml executes on a runner.
+  ursa-major:
+    name: ursa-major — typecheck, tests, bundle freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ursa-major/package-lock.json
+      # `npm ci` rather than `npm install`: it fails when package.json and
+      # package-lock.json disagree, which makes lockfile drift a build error
+      # for free instead of a separate check.
+      - run: npm ci
+        working-directory: ursa-major
+      # `npm test` is `tsc --noEmit && vitest run` (ursa-major/package.json),
+      # so this one command is both the typecheck and the test run.
+      - run: npm test
+        working-directory: ursa-major
+      # dist/ursa.cjs is committed because a GitHub Action cannot install
+      # dependencies before its own entry point runs. A commit that changes
+      # src/ and forgets `npm run bundle` ships an Action that silently runs
+      # the previous version of the resolver. This step compares the bundle's
+      # sha256 against a fresh build and fails on a mismatch.
+      - run: npm run bundle:check
+        working-directory: ursa-major
+
+  # The public site: what a lab or a user actually sees.
+  ursa-minor:
+    name: ursa-minor — production build, lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ursa-minor/package-lock.json
+      - run: npm ci
+        working-directory: ursa-minor
+      # `next build` type-checks the app as part of building it, so there is
+      # no separate tsc step here the way there is for ursa-major.
+      - run: npm run build
+        working-directory: ursa-minor
+        env:
+          # Suppress the anonymous-telemetry notice so a failure is the only
+          # thing in the log that needs reading.
+          NEXT_TELEMETRY_DISABLED: "1"
+      # eslint exits 0 on warnings and non-zero on errors. The site carries
+      # one known warning today (an unused binding in
+      # components/ui/pixel-sky.tsx), so this step passes while that stays a
+      # warning and fails the moment anything becomes an error. It is not
+      # run with --max-warnings=0, because turning today's one warning into
+      # a merge blocker is a decision for the owner and not a side effect of
+      # installing a gate.
+      - run: npm run lint
+        working-directory: ursa-minor
+
+  # The sync overlay: the optional hosted half of Ursa Major, and the only
+  # component here that serves a request at runtime.
+  overlay:
+    name: ursa-major/overlay — production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ursa-major/overlay/package-lock.json
+      - run: npm ci
+        working-directory: ursa-major/overlay
+      - run: npm run build
+        working-directory: ursa-major/overlay
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"

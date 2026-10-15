@@ -122,6 +122,76 @@ describe('provenance audit catches each kind of break', () => {
   })
 })
 
+describe('the viewer names the resolver that classified the spans', () => {
+  // Constraint 2 of this project is that a user can always see what has
+  // been inferred about them, and which build of Ursa Major did the
+  // inferring is part of that. The case that forced it: on 2026-10-12 two
+  // records with the same `task.id`, written to the same path by two
+  // commits of this resolver, disagreed about how many characters
+  // survived verbatim by a factor of eight (docs/ideas.md). The viewer
+  // gave no sign that anything underneath the figures had moved.
+  //
+  // Executed in jsdom rather than asserted as a substring, because the
+  // chip is built by the inline script from the embedded record, and a
+  // substring check on `renderViewer`'s output would pass against a
+  // script that never appends it. `src/artifact.test.ts` records what
+  // that costs: three substring assertions there passed while the script
+  // carried a SyntaxError.
+  const chips = (record: OutcomeRecord): string[] => {
+    const dom = new JSDOM(renderViewer(record), { runScripts: 'dangerously' })
+    return Array.from(dom.window.document.querySelectorAll('#meta .chip')).map(
+      (c) => c.textContent ?? '',
+    )
+  }
+  const stamped = (resolvedBy: unknown): OutcomeRecord => {
+    const r = clone(fixtureRecord())
+    ;(r.task as unknown as Record<string, unknown>).resolvedBy = resolvedBy
+    return r
+  }
+
+  it('shows no chip at all on a record that names no resolver', () => {
+    // Every record written before this field existed is one of these, and
+    // a chip reading "unknown" would be a resolver named Unknown to any
+    // reader. Asserted as the first case so the three below cannot pass
+    // by the chip always being present.
+    const record = fixtureRecord()
+    expect(record.task.resolvedBy).toBeUndefined()
+    expect(chips(record).join(' ')).not.toContain('resolved by')
+  })
+
+  it('names the commit, and says when that commit is not the whole story', () => {
+    expect(chips(stamped({ basis: 'git_commit', commit: 'abc1234', dirty: false })))
+      .toContain('resolved by commit abc1234')
+    // A dirty tree's sha identifies code that did not run, so the chip
+    // refuses to let the sha stand alone.
+    expect(chips(stamped({ basis: 'git_commit', commit: 'abc1234', dirty: true })))
+      .toContain('resolved by commit abc1234 plus uncommitted changes')
+  })
+
+  it('names the bundle digest where there was no commit to name', () => {
+    // The CI launch on any repository other than this one: GitHub hands
+    // the runner `dist/ursa.cjs` as a tarball, so there is no HEAD under
+    // it and the bytes are the identity. Measured end to end on
+    // 2026-10-12 by running the committed bundle from a directory outside
+    // any git work tree.
+    expect(chips(stamped({ basis: 'bundle_digest', digest: '1dd251d21d457c96' })))
+      .toContain('resolved by bundle sha256:1dd251d21d457c96')
+  })
+
+  it('explains both bases in the hover text rather than leaving a hash bare', () => {
+    // No bare terms: "sha256:1dd251d2…" alone says nothing about what was
+    // hashed or why there is no commit beside it.
+    const dom = new JSDOM(
+      renderViewer(stamped({ basis: 'bundle_digest', digest: '1dd251d21d457c96' })),
+      { runScripts: 'dangerously' },
+    )
+    const titles = Array.from(dom.window.document.querySelectorAll('#meta .chip')).map(
+      (c) => (c as HTMLElement).title,
+    )
+    expect(titles.join(' ')).toContain('There was no source checkout to name a commit from')
+  })
+})
+
 describe('the rendered viewer, opened and clicked (jsdom)', () => {
   const record = fixtureRecord()
 
@@ -152,6 +222,39 @@ describe('the rendered viewer, opened and clicked (jsdom)', () => {
     expect(inspector.textContent).toContain('turn 1')
     expect(inspector.textContent).toContain('What the user asked for')
     expect(inspector.textContent).toContain('Draft two sentences about the resolver.')
+  })
+
+  it('a formatting-only mutation says so, rather than showing a diff of whitespace', () => {
+    // The span class is `survived_mutated` and the diff's only visible
+    // content is a capital letter, so without this the reader sees a
+    // mutation and no account of what was mutated. Before 2026-10-13 the
+    // same span was labelled "survived verbatim" and the change was not
+    // shown at all. Executed in jsdom rather than greped out of the HTML,
+    // for the reason the resolver-chip test above gives.
+    const GEN = 'The resolver joins finished work backward to the generations that fed it, and the label is supplied by the artifact.'
+    const formatting = resolve({
+      taskId: 'formatting-only',
+      files: [{ path: 'final.md', text: GEN.replace('The resolver', 'The Resolver') }],
+      conversations: [
+        { id: 'c1', title: 'probe', adapter: 'paste', model: 'probe-model', turns: 2, userTurns: 1 },
+      ],
+      generations: [
+        { conversationId: 'c1', model: 'probe-model', turnIndex: 0, kind: 'assistant_text', text: GEN },
+      ],
+      finished: true,
+    })
+    expect(formatting.files[0].spans[0].normalizedOnly).toBe(true)
+
+    const dom = new JSDOM(renderViewer(formatting), { runScripts: 'dangerously' })
+    dom.window.Element.prototype.scrollIntoView = function () {}
+    const spans = Array.from(
+      dom.window.document.querySelectorAll('.panel')[0].querySelectorAll('pre.doc .sp'),
+    )
+    click(dom, spans[0])
+    const inspector = dom.window.document.getElementById('inspector')!
+    expect(inspector.textContent).toContain('Survived mutated · formatting only')
+    expect(inspector.textContent).toContain('What changed is formatting alone')
+    expect(inspector.textContent).toContain('Mutation (generation → final)')
   })
 
   it('the generation link opens the Generations tab and highlights the exact source range', () => {

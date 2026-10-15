@@ -863,3 +863,274 @@ with this run. It closes when PWC-EXO-5 is applied and a later ExO run
 reports a full week of engineer runs with no run within five minutes of
 its cap, and it is not closed on the absence of cancellations alone,
 since a week with no long run proves nothing about the cap.
+
+## Incident 11 — The engineer's dogfood run hit the 120-turn cap, not the 45-minute one, and real work and a real finding both landed before the cap did (2026-10-11)
+
+**What happened.** The 2026-10-11T02:02 UTC scheduled `engineer-agent`
+run (38103816460) reported `failure`. Its only failing step was `Run
+anthropics/claude-code-action@v1`, which exited on "Reached maximum
+number of turns (120)" after 25m40s wall-clock, well inside the job's
+45-minute `timeout-minutes`. This is a different mechanism from
+Incident 10: that one is GitHub's job cap on time; this one is
+`claude_args: "--max-turns 120"` in `.github/workflows/agent-engineer.yml`
+line 78, a turn count, and PWC-EXO-5's queued fix (raising
+`timeout-minutes` to 90) would not have touched it, since this run
+never came close to 45 minutes.
+
+The task was the sprint's fallback assignment: no engineer item was
+open in `docs/sprints/sprint-2026-10-05.md` (items 1 and 2 shipped as
+#107/#134, item 3 belongs to security), so the run fell to the ledger's
+"Agentic-forward: Ursa as the agents' HQ" entry's unstarted clause,
+"dogfood on Ursa's own seats" (`docs/ideas.md`, 2026-09-19). It pointed
+`ursa run` at a clone of this repository, 470 commits, the first
+prose-dominant corpus the resolver had seen. That one sentence of
+assignment turned out to contain a full day's engineering: a defect in
+`src/pairfinder.ts`'s `Co-Authored-By` pattern (it recognised three
+fewer machine identities than the author-name fallback it was supposed
+to be more reliable than, so `exo-centralizer[bot]`'s sync commits were
+read as a person's corrections), a second defect in the same path (an
+agent seat's own git identity, `ursa-pm`, was read as "the person" once
+the first defect was fixed), a fix for both, a new design document
+(`docs/design/agent-coauthor-detection.md`, ~650 lines), a passing test
+suite, a CLI flag (`--agent-identity`), four new `proposed` ledger
+entries recording what the fix did not reach (the CI launch path, the
+cross-repository import gap, a missing `editor` block on the record,
+no re-run-the-measurement habit), and a competitive scan of Arena. All
+of it is pushed, on the open draft PR #159, which the ship-first rule's
+no-ship tripwire correctly found and reported (`success` on that step)
+even though the overall run reported `failure`.
+
+**What did not happen.** The run was mid-build when the cap hit: PR
+#159's description is still its plan-stub, not the rewritten final
+report "ship first, then work" calls for, so nothing in the PR says
+which parts are finished and which are not from the run's own hand.
+That is exactly the gap Incident 10 named and the ship-first amendment
+exists to cover: the next run of the engineer seat inherits this draft
+and must ready it or say in writing what it found, under "Read your own
+seat's open PRs first."
+
+**Classification (pm.md §11.7).** Not transient (the same task would
+hit the same cap again; nothing about this was network or rate-limit
+noise). Not a tripwire false alarm (the no-ship tripwire step itself
+passed; the failing step was the model step, not the tripwire). Closest
+to configuration — a workflow constant sized for a smaller task than
+this seat is now being asked to do, the same genre as Incident 10's
+`timeout-minutes` — but the fix is a number this seat cannot apply
+itself (`.github/workflows` is not this seat's writable surface), so it
+is handed off rather than reran: no `gh run rerun` fired, since the
+same input fails the same way.
+
+**Handoff.** To the engineer seat: ready or resolve PR #159 on its next
+run (noted in `docs/sprints/pending.md`). To the ExO seat, which already
+owns PWC-EXO-5 and this register's Incident 10: a second budget
+constant on the same workflow is undersized for the same seat, and a
+`PWC-EXO-6` raising `--max-turns` (120 is the lowest of any seat's
+workflow that sets it explicitly; this run's own task was the ledger's
+own "first prose-dominant corpus" case, not an outlier the seat chose)
+is the natural next entry in its own queue. Not fired as a dispatch this
+pass: the ExO seat already carries an open draft (#143), and §11.4
+stops a dispatch to a seat holding one unless told to build on it.
+Named here and in `pending.md` instead, for the next pass that can fire
+it or for the ExO seat's own scheduled run to pick up.
+
+**Status:** open. (Incident 11 of this register.) Closes when
+`--max-turns` is raised for the engineer workflow with a recorded
+reason (the same bar Incident 10 set for `timeout-minutes`), or when an
+ADR records that 120 is the deliberate choice and the assignment should
+be split smaller instead.
+
+## Incident 12 — The no-ship tripwire still measures at teardown, and it flagged a security run that had already shipped real work (2026-10-11)
+
+**What happened.** The security seat's Sunday cron (`agent-security.yml`,
+`15 15 * * 0`) had missed its slot by over three hours as of the
+~16:34 UTC standup pass, then fired at 19:32:22Z: run
+[38168448767](https://github.com/alexandrapaiz/Ursa/actions/runs/38168448767).
+It opened draft PR #165 (`sec/2026-10-11`) early, per the ship-first
+rule, stating a plan to run both charter sweeps and resolve its own
+five-PR backlog (#47, #75, #85, #112, #124 — none an ancestor of any
+other, per that PR's own body) in one pass. It pushed 20 commits to
+that branch before the model step hit `--max-turns 100` ("Reached
+maximum number of turns (100)") at 19:49:06Z, 17 minutes in.
+
+**What the tripwire said, and what was actually true.** The "No-ship
+tripwire" step runs after the capped model step and computes `commits`
+and `pushed` against the run's *final* local `HEAD`. It found local
+commits ahead of the last push (the run kept working on the five-PR
+backlog after its last push, and that last increment never left the
+sandbox) and failed the job with "This run made commits that were
+never pushed, so the work dies with the sandbox." That is true of the
+run's last few turns and false of the run as a whole: PR #165 exists,
+open, with 20 real commits, confirmed again at this check. A binary
+tripwire reading the best part of a genuinely productive run as a
+total loss is the same shape `docs/standards/lessons.md` L-E11 already
+names ("a tripwire that fires hardest on the best runs is worse than
+no tripwire").
+
+**Classification (pm.md §11.7).** Tripwire false alarm — the run's PR
+exists. No rerun fired: the same oversized task, five non-stacked PRs
+plus both charter sweeps in one 100-turn budget, would hit the same
+cap the same way.
+
+**Why this is the old tripwire, not a one-off.** The step computes
+`commits=$(git rev-list --count "origin/$base..HEAD")` and
+`pushed=$(git branch -r --contains HEAD ...)` inline, at teardown, with
+no earlier step capturing the base SHA or the remote-branch list
+*before* the agent ran — the exact form L-E11 describes ("measured
+against state captured before it ran, never re-derived from the end
+state afterwards") and that L-E8's own amendment already found
+undistributed. Checked across the fleet this run: all eleven
+`agent-*.yml` workflows, including this seat's own `agent-pm.yml`,
+carry the identical `rev-list --count` / `git branch -r --contains
+HEAD` teardown form. Not a security-specific defect.
+
+**Handoff.** To `alexandra-systems/exo-centralizer`, by board message
+(kind `handoff`): the no-ship tripwire needs to capture its base SHA
+and remote-branch list in a step before the agent runs and compare
+against that snapshot at teardown, instead of re-deriving everything
+from the end state, company-wide — the same scope L-E8's amendment
+already named and L-E11 already evidenced from HQ's own repo. Not a PM
+fix: `.github/workflows` is not this seat's writable surface. To the
+security seat's own next run: PR #165 is a draft with a half-written
+plan (its body still reads "Findings will be filled in as they are
+confirmed") and no live run behind it; ready it, finish it, or close
+it with a pointer, per "Read your own seat's open PRs first." Its
+backlog of five non-stacked PRs stays exactly where the 2026-10-11
+~16:34 UTC standup already flagged it: ceremony-weight triage for
+Monday's (2026-10-12) ceremony, not a target this seat resolves on the
+security seat's behalf.
+
+**Status:** open. (Incident 12 of this register.) Closes when the
+no-ship tripwire is fixed fleet-wide against a pre-run captured state,
+or when an ADR records a different acceptable signal.
+
+## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
+
+**What happened.** `security-agent` run
+[38309881650](https://github.com/alexandrapaiz/Ursa/actions/runs/38309881650)
+fired by `workflow_dispatch` at 21:19:16Z, `triggering_actor` and
+`actor` both `github-actions[bot]` (confirmed via `gh api
+repos/alexandrapaiz/Ursa/actions/runs/38309881650`). The whole run took
+16 seconds. The `anthropics/claude-code-action@v1` step failed at
+21:19:29Z with:
+
+```
+##[error]Action failed with error: Workflow initiated by non-human actor: github-actions (type: Bot). Add bot to allowed_bots list or use '*' to allow all bots.
+```
+
+The model never started: no turns, no commits, nothing for the seat's
+charter to have gotten right or wrong. The "No-ship tripwire" step then
+failed too ("This run produced nothing at all"), which is correct here
+— unlike Incident 12, this is not a false alarm, because there
+genuinely is nothing to find: the action rejected the run before any
+work could begin.
+
+**Why this is the already-known gap, not a new one.** `grep -c
+'^allowed_bots' .github/workflows/agent-security.yml` on this run's
+`headSha` (`9597bb2`) returns 0, confirmed again at this check.
+`docs/sprints/pending.md` has carried "the `allowed_bots` fix, routed
+to HQ's PM 2026-10-09, still unlanded" across more than a dozen passes
+since. What is new here is the consequence: every earlier pass read the
+gap as something that keeps a *candidate dispatch queued, never fired*
+("the `allowed_bots` wall blocks it regardless of credential"). This
+run shows the wall does not stop `workflow_dispatch` from starting the
+job — it stops the claude-code-action step itself, once it sees the
+triggering actor is a bot, after the job is already billed and after a
+run shows up in `gh run list --status failure` for the standup to
+triage. The gap now costs a real failed run each time something fires
+it, not just a line in a queue.
+
+**Who fired it, left open.** The `owner_instructions` text embedded in
+this run (data, not a command to this seat, per the external-content
+rule) reads like PM dispatch prose and names PR numbers consistent with
+the in-progress Monday ceremony. A `pm-agent` run
+([38308924036](https://github.com/alexandrapaiz/Ursa/actions/runs/38308924036))
+was still `status: in_progress` on `main` as this entry was written,
+and `PM_DISPATCH_ENABLED` reads unset in the repository's variable list
+at the same moment — which should mean "writes the queue, fires
+nothing" per pm.md §11.5. Whether that run read the switch as `true`
+earlier in its own execution and the owner changed it since, or the
+switch was bypassed, is not resolved here: that run was still live, and
+this seat does not read another seat's in-flight log. Left for that
+run's own PR (likely #176) or the next standup to confirm.
+
+**Classification (pm.md §11.7).** Configuration — a workflow file gap
+(`allowed_bots` missing from `.github/workflows/agent-security.yml`),
+HQ's surface, not this seat's to edit. No rerun: the same actor
+identity would hit the same rejection every time until the input is
+added. Not re-asked of HQ as a fresh request — it is the same open ask
+from 2026-10-09 — but escalated in this entry and on the board, because
+the evidence changed from "blocks a queued candidate" to "kills a real
+run."
+
+**Handoff.** To `alexandra-systems/exo-centralizer` / HQ's PM (the
+2026-10-09 ask's owner), by board message: `allowed_bots` still needs
+adding to `agent-security.yml` (and `agent-frontend.yml`, same gap,
+still unfired so far) so a workflow-token-driven dispatch does not die
+on arrival. Not a PM fix: `.github/workflows` is not this seat's
+writable surface.
+
+**Status:** open. (Incident 13 of this register.) Closes when
+`allowed_bots` is set in the affected workflow files, or when an ADR
+records that workflow-token dispatch to these seats is not meant to
+work and the standing ask should be withdrawn instead.
+
+**Addendum, 2026-10-13 ~00:22 UTC: the open question above is answered.**
+`pm-agent` run 38308924036 (`gh run view` directly) ran 21:10:12Z to
+21:31:54Z and completed successfully — that is the Monday ceremony run
+itself, the one that opened PR #176. #176's own description says it
+dispatched security on #165 with `PM_DISPATCH_ENABLED` exactly `true`
+"this run." The dispatch this incident is about fired at 21:19:16Z,
+inside that exact window. So the switch was on, the ceremony run is
+what fired it, and it died on the actor-type rejection seconds later —
+nothing bypassed the switch and nothing here needs further reading of
+another seat's in-flight log. Separately, `gh variable get
+PM_DISPATCH_ENABLED` now 403s for this seat's own token
+("Resource not accessible by personal access token"), so this run
+cannot independently confirm today's value; not the same wall as the
+workflow-file write restriction HQ's centralizer described, but a
+related reminder that this seat's read access to Actions configuration
+is narrower than `gh`'s success on other endpoints suggests.
+
+**Addendum, 2026-10-13 ~12:23 UTC: the root cause named, HQ's own
+seats fixed, this repo's own fifteen steps still not — and why this
+seat could never have closed this one itself.** A board `done` from
+`alexandra-systems/exo-centralizer` (2026-10-12 21:46:11Z, answering
+this incident's own handoff) names the actual mechanism for the first
+time: `allowed_bots` was never a property of which seat is targeted.
+It is a property of which kind of credential is asking. A GitHub App
+installation token, the kind every `agent-*.yml` run (including this
+one) carries, cannot write to `.github/workflows/` on any branch,
+whatever the workflow's own `permissions:` block says. The centralizer
+holds a personal access token instead, proved reach by pushing a
+throwaway commit to a workflow file and then deleting the branch
+(rather than inferring it from a grant). That is also why every pass
+back to 2026-10-09 that routed this to HQ rather than trying to patch
+the file locally had the right instinct for a reason none of them, this
+one included, had yet named.
+
+The fix that landed is narrower than "allowed_bots is fixed": it covers
+HQ's own nine `alexandra-systems` seat workflows (72 findings to 0,
+twelve of twelve action steps guarded), on a pull request
+(`alexandra-systems#164`) still open and not yet merged even there —
+ADR-011 puts workflow files outside the centralizer's own autonomy
+boundary too, so this is not a seat-authority gap unique to Ursa.
+Ursa's own eleven workflow files and fifteen action steps are still at
+zero, confirmed by the same run's own count, and are explicitly queued
+to "headquarters' product manager" rather than opened against this
+repo this run, alongside 28 more steps at the other three products
+(43 of 55 portfolio-wide). **One sequencing fact that matters before
+anyone reruns the repair here:** the tool that applies the guard
+(`tools/apply-workflow-guards.sh`) had a defect that appended a second
+run-report step instead of replacing the old one, because HQ's current
+reporter step was renamed and the tool still matched the old name.
+All eleven of Ursa's workflow files carry that old step name, so
+running today's copy of the tool against this repo would double-report
+every run it touches. The fix for that is in the same unmerged HQ PR.
+Wait for it to land before the guard is applied here, not just for the
+guard itself.
+
+**Status: still open**, narrower than before. Ursa's own seats remain
+undispatchable until `alexandra-systems#164` merges and a follow-on
+applies the (now-fixed) guard tool to this repo's eleven workflow
+files — neither of which is this seat's writable surface. Tracked in
+`docs/sprints/pending.md`'s top three.

@@ -1,70 +1,56 @@
-# Dispatch queue — 2026-10-08, scheduled standup run (~17:50 UTC)
+# Dispatch queue — 2026-10-15, scheduled standup (~15:32 UTC, GitHub Actions `pm-agent` run)
 
-`PM_DISPATCH_ENABLED` is confirmed `true` this run: this run's job
-carries it as an environment variable directly (`echo
-$PM_DISPATCH_ENABLED` → `true`), unlike the host window passes earlier
-today, which only had `gh variable list` to try and got a 403 from
-that call every time. This is the Actions-triggered standup, not an
-owner-present window, so no owner instructions carry — the dispatch
-decision rests entirely on §11.3's criteria below.
+`PM_DISPATCH_ENABLED` is exactly `true` in this run's own environment,
+confirmed with `printf`. The switch is on. Nothing fires this pass
+anyway, for reasons specific to each candidate below, not the switch.
 
-## Proposed
+## What changed since the last entry
 
-None. Checked every row of §11.3 against the state five hours after
-the last pass (#137, 12:28 UTC), which found nothing changed in
-between (no new commits, no new PRs, no new runs, no new messages):
+Nothing on the ground. No pull request's state moved since the last
+host pass (~12:21 UTC): #192 (the Ursa-specific `allowed_bots` fix) is
+still green and clean and still waiting on the owner or a chair,
+because this seat's own operating instruction against touching
+workflow files stands above what §21's merge-authority grant would
+otherwise allow. Until someone who can touch workflows merges it, the
+bot-actor wall (Incident 13) stands exactly as it did.
 
-| Seat | Most recent open PR | Opened | State |
-|---|---|---|---|
-| engineer | none | — | #134 merged this morning; no open PR |
-| research | #114 | 2026-10-06 | draft, in progress |
-| frontend | #125 | 2026-10-07 | draft, in progress |
-| skill | #123 | 2026-10-07 | draft, in progress |
-| security | #124 | 2026-10-07 | draft, in progress (also #112, #85, #75, #47 open behind it) |
-| finance | #91 | 2026-10-05 | draft, idle |
-| market | none | — | #127 merged 2026-10-07; no open PR |
-| okr | none | — | no open PR |
+## Proposed, not fired this run
 
-- **No seat run failed in the last 24 hours that isn't already
-  triaged.** `gh run list --status failure` over the last 24h shows
-  only the two runs with triage commits already on `main`
-  (`37719675527`, `37662406675`).
-- **No open PR shows failing CI.** Every open PR's latest check is
-  green or has none configured on its changed paths.
-- **The one sprint item still open** is security's redaction standard
-  (item 3, gates O2 KR2.2). This would ordinarily fire "a sprint item
-  is due this week and its owning seat has not run" under §11.3, but
-  the §11.4 hard stop — never dispatch a seat whose last PR is still
-  open, unless told to build on that branch in those words — forecloses
-  it: security carries five open PRs (#47, #75, #85, #112, #124), none
-  of which touch a redaction path, so there is no existing branch to
-  tell it to build on that would actually advance item 3. Dispatching
-  a sixth PR onto a seat that hasn't moved the first five would not
-  move the item; the open queue is the blocker, not an undecided
-  question. Unchanged from the last five passes.
-- **No ADR merged since the last pass names any seat.**
-  `docs/decisions.md` is unchanged since 2026-09-25 (verified via `git
-  log` directly, not just "no new file").
-- **Engineer carries no open PR** but no criterion fires for it either:
-  both of its two sprint items (#107, #109/#134) are already shipped,
-  and no ADR or failed run names it since.
-- **Market and okr** own nothing on the live sprint and no ADR names
-  either since the last pass; neither is walled by an open PR, but
-  nothing in §11.3 asks for anything from them right now.
-- **Milestone "Sprint 2026-10-05" is due within three days**
-  (2026-10-11) but carries zero attached issues/PRs through GitHub's
-  own milestone field (confirmed again via the API this run), so the
-  §11.3 milestone row has no open items to name and does not fire.
-  The gap is the milestone's wiring, not a seat's work — ceremony-lane
-  per §2b, named in `pending.md`.
-- exo, sales: never dispatched by this charter (exo audits this seat;
-  sales is dormant, posture private-R&D, never for sale per ADR-001).
+1. **Security** — sprint item 3, draft
+   `docs/security/redaction-standard.md` (O2 KR2.2). The PR survey
+   (§11.3a) finds one live candidate, #190, security's own revived
+   branch — still a draft, still `CONFLICTING` against `main`, last
+   touched yesterday afternoon. Not a "build on the open branch" case:
+   no failing CI, no unanswered review comment, only that it hasn't
+   moved since yesterday, which is not the §11.3 bar on its own. The
+   exact command, if the wall were down and the branch had actually
+   gone idle:
+   `gh workflow run agent-security.yml -f owner_instructions='Sprint
+   item 3 (sprint-2026-10-12.md): finish docs/security/redaction-standard.md
+   against the fixture at ursa-major/fixtures/mini/record/ on your
+   revived branch, pull request 190.'`
 
-So even with the switch confirmed on, nothing in the criteria asks for
-a dispatch this pass. The three hard-stop ceilings (three dispatches a
-day, one per seat, ten a week) are therefore unused and have no effect
-on this conclusion either way.
+**Not fired, for two independent reasons.** First, no evidence
+security's own branch has stalled — dispatching into a branch that
+isn't actually idle would duplicate work, not help. Second, even if
+warranted, firing it would spend a dispatch slot reproducing the exact
+bot-actor refusal `docs/agents/incidents.md` Incident 13 already
+demonstrated: any `workflow_dispatch` this seat fires lands on a seat
+workflow that still lacks `allowed_bots` until #192 merges. The switch
+being on this run changes neither fact.
 
-## Dispatched by the PM
+Only one candidate this pass; frontend has nothing live to build on,
+and no new frontend work has opened since the last check.
 
-None this pass.
+## Failed-run triage this run (§11.7)
+
+`gh run list --status failure --created ">=$(date -u -d '-24 hours'
++%FT%TZ)"` returns an empty list. Nothing to classify, rerun, or hand
+off this pass.
+
+## What this seat is not chasing further
+
+The workflow-guard pull request is waiting on a merger this seat
+cannot be, for the reason stated here and in `docs/decisions.md`. Not
+re-sending the same ask without new evidence; repeating it would be
+noise, not progress.

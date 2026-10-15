@@ -178,6 +178,24 @@ export function renderViewer(record: OutcomeRecord): string {
   var meta = document.getElementById('meta');
   meta.textContent = 'generated ' + R.task.generatedAt.slice(0, 10) + ' · ' + R.files.length + ' files · ' + R.generations.length + ' generations · ' + R.conversations.length + ' conversation' + (R.conversations.length === 1 ? '' : 's');
   meta.appendChild(el('span', 'chip', R.task.finished ? 'finished' : 'abandoned'));
+  // Which build of the resolver classified the spans below. The user is
+  // entitled to see it for the same reason they are entitled to see every
+  // other inference on this page, and the practical case is that two
+  // records in this same directory, with the same id, can have been
+  // written by resolvers that disagreed by a factor of eight about how
+  // much of the work survived (docs/ideas.md, 2026-10-12). Absent on a
+  // record written before the field existed, in which case nothing is
+  // shown rather than a chip claiming an unknown resolver.
+  if (R.task.resolvedBy) {
+    var rb = R.task.resolvedBy;
+    var resolverChip = el('span', 'chip', rb.basis === 'git_commit'
+      ? 'resolved by commit ' + rb.commit + (rb.dirty ? ' plus uncommitted changes' : '')
+      : 'resolved by bundle sha256:' + rb.digest);
+    resolverChip.title = rb.basis === 'git_commit'
+      ? 'The classifications on this page were computed by Ursa Major at commit ' + rb.commit + ' of its own source.' + (rb.dirty ? ' That working tree had uncommitted changes, so the commit alone does not identify the code that ran.' : '')
+      : 'The classifications on this page were computed by a single-file build of Ursa Major whose contents hash to this SHA-256. There was no source checkout to name a commit from, which is the normal case on a GitHub runner.';
+    meta.appendChild(resolverChip);
+  }
   // What kind of finished thing this record is about. Spelled out rather than
   // abbreviated, because 'hosted' alone is a bare term to anyone outside Ursa.
   var ARTIFACT_KINDS = {
@@ -302,7 +320,9 @@ export function renderViewer(record: OutcomeRecord): string {
   function showSpan(span) {
     inspector.innerHTML = '';
     inspector.style.display = 'block';
-    var h = el('h3', '', LABELS[span.class] + (span.uncertain ? ' · uncertain' : '') + (span.trivial ? ' · trivial match' : ''));
+    var h = el('h3', '', LABELS[span.class] + (span.uncertain ? ' · uncertain' : '')
+      + (span.trivial ? ' · trivial match' : '')
+      + (span.normalizedOnly ? ' · formatting only' : ''));
     h.style.color = COLORS[span.class];
     inspector.appendChild(h);
     var src = span.source || (span.candidate && span.candidate.source);
@@ -314,12 +334,34 @@ export function renderViewer(record: OutcomeRecord): string {
     // see what was inferred about them (CLAUDE.md §2), and "a commit you
     // did not write already contained this text" is the inference.
     if (span.descent && span.descent.basis === 'rival') {
-      var rel = span.descent.relation === 'pre_existing'
-        ? 'an earlier commit this generation replaced'
-        : 'a branch this generation is not an ancestor of';
+      // One branch per relation, and four of them because there are four.
+      // Until 2026-10-15 this was a two-way choice and prior_revision fell
+      // through to the sibling wording, so the surface the user reads
+      // described the generation's own parent commit as "a branch this
+      // generation is not an ancestor of" — the one relation where the
+      // true statement is the strongest one available, that the file
+      // already held this text when the agent opened it. No backticks in
+      // this comment: everything from the doctype above to the closing
+      // backtick of this template literal is one string, so one would end
+      // the document.
+      var rel = span.descent.relation === 'prior_revision'
+        ? 'the commit this generation started from, so the file already held this text when the agent opened it'
+        : span.descent.relation === 'pre_existing'
+          ? 'an earlier commit this generation replaced'
+          : span.descent.relation === 'merged_in'
+            ? 'a branch this work merged, so you had it in front of you'
+            : 'a branch this generation is not an ancestor of';
       inspector.appendChild(el('div', 'nolink',
         'Not counted as your edit: this exact text is already in commit ' + span.descent.sha
-        + ' ("' + span.descent.subject + '"), ' + rel
+        + ' ("' + span.descent.subject + '")'
+        // The date, when the record states one. The user can always see
+        // what was inferred about them (CLAUDE.md §2), and "when did that
+        // commit exist" is the question this inference turns on: a rival
+        // dated after the work would have been impossible evidence, which
+        // is what RIVAL_NOT_AFTER_FINAL now refuses before a record
+        // reaches this viewer at all.
+        + (span.descent.date ? ', authored ' + span.descent.date : '')
+        + ', ' + rel
         + '. You did not reach it by editing the generation above.'));
     }
     if (span.descent && span.descent.basis === 'unverified') {
@@ -353,6 +395,14 @@ export function renderViewer(record: OutcomeRecord): string {
       var dh = el('h3', '', 'Mutation (generation → final)');
       dh.style.marginTop = '10px';
       inspector.appendChild(dh);
+      // The narrow mutation, named for the reader rather than left to be
+      // inferred from a diff whose only visible content is whitespace.
+      // Before 2026-10-13 this span was labelled "survived verbatim" and the
+      // change was folded away entirely, so saying what the change was is
+      // part of the correction, not decoration.
+      if (span.normalizedOnly) {
+        inspector.appendChild(el('div', 'nolink', 'The two texts are the same text after case folding, smart punctuation folding and whitespace collapsing. What changed is formatting alone: a capital, a dash, or where the line wrapped.'));
+      }
       var d = el('pre', 'diff');
       span.diff.forEach(function (part) {
         var node;

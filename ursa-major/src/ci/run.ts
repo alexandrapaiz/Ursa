@@ -32,7 +32,9 @@ import { buildEpisodes, type Episode } from '../episodes'
 import { deriveSignals, type Declaration } from '../signals'
 import { saveEpisodes, saveRecord, ursaDir } from '../store'
 import type { OutcomeRecord } from '../types'
+import type { Violation } from '../invariants'
 import { resolveEpisode } from '../resolve-episode'
+import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
 import { distill } from '../tuning/distill'
 import { emptyTuning, mergeDistill } from '../tuning/merge'
 import type { TuningRecord } from '../tuning/types'
@@ -60,6 +62,24 @@ export interface CiOptions {
   runUrl?: string | null
   /** smallest generated-character count worth a record; matches `ursa run` */
   minChars?: number
+  /**
+   * Identities the consumer declares to be agents', the CI launch's half
+   * of `--agent-identity` (`PairFinderOptions.agentIdentities`).
+   *
+   * Here because the local launch had it and this one did not, which is
+   * the fourth entry in the drift list `src/launch.ts` opens with. A
+   * repository whose seats are declared locally had them undeclared on
+   * every merge, so the two launches answered "who was the person"
+   * differently from identical history: the exact failure that module
+   * exists to make impossible. The default pattern is a shared constant
+   * (`MACHINE_IDENTITY` in `src/pairfinder.ts`) and so already reached
+   * both launches; only the declaration did not.
+   *
+   * Carried from `action.yml`'s `agent-identity` input, one substring
+   * per line, so a consumer repository running agent seats of its own
+   * declares them once in the workflow rather than per invocation.
+   */
+  agentIdentities?: string[]
   env?: Record<string, string | undefined>
   /** false writes nothing to GitHub and prints the comment instead */
   post?: boolean
@@ -84,6 +104,13 @@ export interface CiResult {
   declaration: Declaration
   mode: DistillMode
   recordPaths: string[]
+  /**
+   * Every bound the records this run wrote violated, empty when they are
+   * self-consistent. Non-empty is what makes `exitCode` 1: the records and
+   * the comment still ship, because an impossible record is still the
+   * evidence, and the run stops reporting success.
+   */
+  invariantViolations: Violation[]
 }
 
 const NO_PRIOR: Declaration = {
@@ -108,6 +135,7 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
       return {
         exitCode: 0, window: null, fields: null, comment: null, commentUrl: null,
         priorAcceptance: null, declaration: NO_PRIOR, mode, recordPaths: [],
+        invariantViolations: [],
       }
     }
     throw err
@@ -135,7 +163,10 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR
 
   // 3. Resolve.
-  const pairs = findCommitPairs(opts.projectPath, { range: window.range })
+  const pairs = findCommitPairs(opts.projectPath, {
+    range: window.range,
+    agentIdentities: opts.agentIdentities,
+  })
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
   const recordPaths: string[] = []
@@ -143,10 +174,24 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   // asserting the one reason it is most likely NOT to be (src/ci/comment.ts,
   // emptyWindowSentence).
   const dropped = { unresolvable: 0, belowMinChars: 0, minChars }
+  // Erasure survives re-derivation on this launch too. A runner that has
+  // the project's `.ursa/` (committed, cached, or simply the same machine
+  // on a self-hosted runner) holds the tombstones `ursa forget` wrote, and
+  // a launch that rebuilds the episode from git history without reading
+  // them undoes the user's deletion. `src/launch.ts`, shared with
+  // `ursa run`, which has refused this since the consent work landed.
+  const erased = erasedEpisodeIds(opts.projectPath, episodes.map((e) => e.id))
+  let suppressed = 0
   for (const episode of episodes) {
+    if (erased.has(episode.id)) { suppressed++; continue }
     const record = resolveEpisode(opts.projectPath, episode)
     if (!record) { dropped.unresolvable++; continue }
-    if (record.stats.generated.totalChars < minChars) { dropped.belowMinChars++; continue }
+    // The same floor `ursa run` applies, and for the same reason it exempts
+    // a refusal-only record from it (src/launch.ts, clearsSizeFloor). Asked
+    // here as `record.stats.generated.totalChars < minChars` alone until
+    // 2026-10-10, which dropped the one record whose whole job is to say
+    // out loud that an episode's every path was an import.
+    if (!clearsSizeFloor(record, minChars)) { dropped.belowMinChars++; continue }
     const signals = deriveSignals(record, declaration)
     signals.notes = [...(signals.notes ?? []), `CI launch: ${window.note}`]
     record.signals = signals
@@ -155,6 +200,22 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   }
   saveEpisodes(opts.projectPath, episodes)
   log(`ursa ci: ${episodes.length} work units found, ${records.length} resolved`)
+  if (suppressed > 0) {
+    log(`ursa ci: ${suppressed} work unit${suppressed === 1 ? '' : 's'} you erased stayed erased; nothing was rebuilt`)
+  }
+
+  // 3b. The record's self-check, over what was just written. `ursa run` has
+  // run this on every run since the generated-denominator work and exits
+  // non-zero on a violation; this launch ran no check at all until
+  // 2026-10-10, so a record whose arithmetic cannot be true was posted to a
+  // pull request as five confident fields with nothing marking it. The
+  // comment is still posted and the records are still on disk, for the same
+  // reason `ursa run` still writes them: an impossible record is the
+  // evidence of the defect. What changes is the exit code, which fails the
+  // Action's step, and one line in the comment's detail block so the person
+  // reading the five fields is told not to trust them.
+  const gate = gateRecords(records)
+  if (gate.violations.length > 0) log(`ursa ci: ${gate.report}`)
 
   // 4. Distill, or say why not. Either way the run continues.
   const tuningDelta = distillAll(opts.projectPath, records, mode, log)
@@ -170,6 +231,13 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     recordsPath: join(ursaDir(opts.projectPath), 'records'),
     dropped,
     runUrl: opts.runUrl ?? null,
+    invariantViolations: gate.violations.length,
+    // Read off the records rather than re-asked of the process, so the
+    // comment cannot name a resolver different from the one the records
+    // name. `?? null` covers the run that resolved nothing: there is then
+    // no record to read an identity from, and `formatResolverIdentity`
+    // says so in the one sentence it has for that case.
+    resolvedBy: records[0]?.task.resolvedBy ?? null,
   })
 
   let commentUrl: string | null = null
@@ -188,8 +256,10 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   if (outputsPath) writeStepOutputs(outputsPath, fields, commentUrl)
 
   return {
-    exitCode: 0, window, fields, comment, commentUrl,
+    exitCode: gate.violations.length > 0 ? 1 : 0,
+    window, fields, comment, commentUrl,
     priorAcceptance, declaration, mode, recordPaths,
+    invariantViolations: gate.violations,
   }
 }
 

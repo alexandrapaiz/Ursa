@@ -37,6 +37,52 @@ run's own PR adds no third check-in, since three OKR readings in six
 days is the exact pattern PR #88 already flagged to the owner as a
 possible sign this seat should pause until the merge backlog clears.
 
+## Grooming (2026-10-12, Monday ceremony)
+
+**The one `accepted` entry, re-checked.** "Agentic-forward: Ursa as the
+agents' HQ" (2026-09-19) is further along than the last grooming pass
+recorded: sub-step (a) (`get_briefing`'s interface) and sub-step (c)
+(semantic `nearestCases` ranking) are both built and merged, per
+#175's own craft-scan cross-check this run. Only sub-step (d),
+dogfooding against one of Ursa's own seats, is unverified from the
+repo. Flagging again for the engineer seat to move the parts that
+shipped; the PM does not change a status it does not own (pm.md §4).
+"Finished work is not only chat" already moved to `built` since the
+last grooming pass — no action needed, noted only so the next pass
+does not re-flag it.
+
+**Awaiting your verdict, and the backlog itself is now the finding.**
+Thirty `proposed` entries are two weeks or older with no ruling
+(counted by date against today, 2026-10-12), up from three named in
+the 2026-10-05/10-06 grooming note three and a half weeks ago. Those
+same three are still the oldest and still unruled: repo split
+(2026-09-18, 24 days), tuning packs (2026-09-19, 23 days), the
+merge-commits/PR-reader finding (2026-09-20, 22 days). Listing all
+thirty by title here would bury the point rather than make it: the
+count tripling while the oldest three sit untouched says the two-week
+flag has stopped being a flag an owner can act on and started being a
+number that only grows, run over run.
+
+Two `proposed` entries already name the exact fix for this, and both
+are themselves now three weeks old with no verdict: **"The ledger
+wants to be a directory"** (2026-09-27) and **"The idea ledger should
+be a directory, not one file"** (2026-09-30). Both propose splitting
+`docs/ideas.md` into `docs/ideas/YYYY-MM-DD-slug.md` files with a
+generated index, which would also let a grooming pass flag a stale
+entry by moving its file to an `awaiting-verdict/` subdirectory
+instead of writing a paragraph that ages the moment the next entry is
+filed. This grooming pass does not pick between the two (near-
+duplicates, one from each of two different runs) or act on either,
+since adopting one is itself a decision this file's contract reserves
+for the owner. Recommending a verdict on these two specifically, ahead
+of the other twenty-eight, because every week without one makes the
+other twenty-eight harder to triage by hand.
+
+No entry marked stale or superseded this run beyond the one noted
+above. Ordering `accepted` entries by leverage is moot again this pass
+for the same reason as last time: there is exactly one `accepted`
+entry and it is already three-quarters built.
+
 ## Grooming (2026-10-05, ceremony run 2026-10-06)
 
 Two `accepted` entries below (not reproduced here, see their dated
@@ -183,7 +229,11 @@ docs/sprints/pending.md under "Owed by a seat, not yet started."
   path) to the record schema, and have `ursa run` fill `repo` and, when
   a deploy is detectable, `hosted`.
 - Cost: $0
-- Status: accepted (owner-directed 2026-09-20)
+- Status: built (accepted owner-directed 2026-09-20; shipped in `artifact.kind`
+  and `artifact.renderRef` on the record, `src/deploy.ts` filling `hosted`
+  from a commit's own CNAME/homepage/alias, and `docs/design/artifact-kind.md`.
+  Status corrected 2026-10-09 by the engineer seat, which found the entry
+  still reading `accepted` while looking for unbuilt accepted work.)
 
 ### 2026-09-20 — Finding: merge commits are not edits; the PR reader is load-bearing
 - Trigger: the M1 redo on alexandria. With merge commits excluded as
@@ -1515,7 +1565,12 @@ https://github.com/mem0ai/mem0
   repo fixture yields zero pairs rather than five inflated ones, and
   make `ursa run` print why it found nothing when a repo is unpairable.
 - Cost: $0
-- Status: urgent
+- Status: built (shipped as the `--max-pair-distance`, `--max-pair-age-hours`
+  and `--max-interposed-generations` bounds in `src/pairfinder.ts`, the
+  abandoned-claim reporting in `src/bin/ursa.ts`, `src/pairing-window.test.ts`
+  and `docs/design/pairing-window.md`. Status corrected 2026-10-09 by the
+  engineer seat; it had stayed `urgent` after the work landed, which
+  overstates the open queue every seat reads.)
 
 ### 2026-09-30 — A decayed span is evidence against tacit acceptance
 - Trigger: building `lifespan.ts` today. `signals.ts` sets
@@ -3359,7 +3414,6 @@ that commit stands in to the generation. A reader who doubts
 coverage report has ever been falsifiable in that way, and for a
 dataset sold to a lab that difference is the whole product.
 
-
 ### 2026-09-26 (market) — Neutrality as a named, sellable asset in the Minor pitch
 - Trigger: this run's landscape watch (docs/market/landscape.md,
   Category 1). Meta's $14.3B stake for 49% of Scale AI (June 2025)
@@ -3808,6 +3862,2586 @@ dataset sold to a lab that difference is the whole product.
   against vendor claims, not against a product this seat ran.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-08 — The record reports a percentage to three decimals and no uncertainty at all
+- Trigger: today's craft scan of Vals AI's methodology page (note below).
+  It reports a standard error beside every benchmark score and then
+  writes down what the error bar does not cover. Read back against
+  `ursa-major/fixtures/mini/record/outcome_record.json`, the outcome
+  record reports `stats.byClass.survived_verbatim.pct: 0.412` and
+  `survived_mutated.pct: 0.24` with no uncertainty of any kind. The
+  only uncertainty field in the whole block is `uncertainSpans`, a
+  count. Every one of those percentages is a function of the match
+  thresholds in `ursa-major/src/match.ts` (0.35 to 0.6 today), which is
+  the exact thing KR1.1 exists to retune, and no field in the record
+  says the number would move if the threshold did.
+- What: two additions to `stats`, both derived and neither a new input.
+  First, `stats.byClass.<class>.pctRange: [low, high]`, computed by
+  re-running the classifier at the threshold bounds rather than at the
+  single configured value, so a reader sees the span of answers the
+  current tuning admits instead of one point from inside it. Second,
+  `stats.notCovered: string[]`, a written list of the variance the range
+  does not capture, which is the part of Vals's practice that costs
+  nothing and is worth the most: today that list is at least the
+  excerpt-truncation case the eleventh bound checks, the sibling-blob
+  corroboration that `corroborate.ts` resolves, and the fact that a
+  record is one run over one history and carries no run-to-run variance
+  because there is none to have. A lab buying this signal is buying a
+  number, and a number sold without its own error bar is the kind of
+  claim the vision doc's fourth principle is about.
+- First step: a test that classifies the `fixtures/mini` final text at
+  the low and high ends of the `match.ts` thresholds and asserts the two
+  runs disagree on at least one span, which is what makes the range a
+  real measurement rather than a decoration. Then emit it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — A parked gate reports nothing, and nothing reads as green
+- Trigger: today's break-fix, and the two true statements that sat beside
+  each other all morning. `node scripts/dep-floor.mjs` exits 1 on
+  `3d3436f` with five high-severity advisories in two production trees.
+  The PM's reconciliation at ~17:50 UTC the same day records "No open PR
+  shows failing CI. Every open PR's latest check is green or has none
+  configured on its changed paths." Both are accurate. The gate that
+  detects the breach is parked at `docs/design/dep-floor.workflow.yml`
+  because no seat's token can write `.github/workflows/`, so it has
+  never run, and a check that never runs is reported in the same words
+  as a check that passed.
+- What: the repository has gates in two states and one vocabulary for
+  them. Give it two. A script at `scripts/gates.mjs` that enumerates
+  every gate the repository has, runs the ones that are runnable
+  locally, and prints for each one whether it is **installed** (a file
+  in `.github/workflows/`), **parked** (a file in `docs/design/*.workflow.yml`
+  with no installed counterpart) or **missing**, with one exit code over
+  the lot. Then "unchecked" stops being a synonym for "green" in every
+  surface that reports queue health, because there is a command that
+  returns the difference. It also means a seat that wakes with no memory
+  runs one command instead of discovering `scripts/dep-floor.mjs` by
+  reading an eleven-day-old ledger entry, which is how this run found it.
+- First step: the script, with the parked-versus-installed table, and the
+  dep-floor and build-and-test gates as its first two rows. The
+  redaction gate is the third row and is already installed, which makes
+  it the test that the table can tell the two states apart.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-08 — A committed generated file that depends on which command last wrote it
+- Trigger: building `ursa-major/overlay` during today's dependency
+  break-fix rewrote the committed file
+  `ursa-major/overlay/next-env.d.ts`, changing its two import paths from
+  `./.next/dev/types/...` to `./.next/types/...`. Next generates that
+  file, and which variant it writes depends on whether `next dev` or
+  `next build` ran last. Nothing in the repository notices. Whoever runs
+  the dev server next and commits flips it back, and the diff looks like
+  an intentional edit to a file whose own header says "This file should
+  not be edited."
+- What: a committed file that a build rewrites is a build that is not
+  reproducible, and the cheap fix is to make the build say so. Add a
+  `git diff --exit-code` step after each production build in the
+  build-and-test gate, so a build that modifies a tracked file fails
+  with the diff in the log instead of leaving it for the next person's
+  `git status`. This is one line per job and it generalises past this
+  one file: it catches any future generated-and-committed artifact
+  drifting, including `ursa-major/dist/ursa.cjs` if `bundle:check` is
+  ever loosened.
+- First step: add the step to `docs/design/build-and-test.workflow.yml`
+  and verify it by running `next dev` once, committing the file it
+  rewrites, and confirming the step fails. The verification matters more
+  than the step here, because a `git diff --exit-code` that has never
+  seen a dirty tree is untested.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-08, second dispatch (engineer's craft scan)
+
+**Product: Vals AI** (`vals.ai`), rotating onto Category 2 of
+`docs/market/landscape.md` (evaluation and arena products), which no
+engineer craft scan had reached. This run's first dispatch took Mem0 in
+Category 3, so the two scans of 2026-10-08 do not overlap. Read today:
+the benchmark index and the methodology page.
+
+**Worth stealing: the error bar, and the sentence that says what the
+error bar does not cover.** Vals reports a standard error beside every
+score — "We report standard errors alongside benchmark scores to reflect
+statistical uncertainty" — computed as the standard error of the mean
+over instance-level scores for single-run benchmarks, and over per-run
+scores for the three benchmarks it runs repeatedly ("currently three"
+independent runs). The genuinely clever part is the next sentence, which
+costs nothing to write and is the most honest thing on either page:
+the bars "do not reflect variability across prompts, seeds, deployment
+settings, or the stochastic nature of LLM generation." That is a vendor
+naming the uncertainty its own number does not capture, in the same
+paragraph as the number. Ursa's outcome record reports
+`survived_verbatim.pct: 0.412` to three decimals with no interval and no
+such sentence, which became this run's first ledger entry.
+
+**Where Ursa is ahead, and it is structural rather than a feature gap.**
+Vals's defence against benchmark contamination is secrecy: the test set
+"remains private at all times", only a validation set is public, and
+nothing on either page offers per-task traces or individual model
+outputs. So its credibility rests on the reader trusting a grader they
+cannot inspect — and the methodology page does not even name the grader
+consistently, saying accuracy "includes strict accuracy checks, as well
+as rubric-based LLM-as-a-judge accuracy metrics" without stating which
+benchmark uses which, or which model judges. Ursa's credibility rests on
+the opposite property. The label is supplied by the artifact rather than
+by a grader, so there is nothing to keep secret, and KR2.2 is the
+commitment to let a reader audit any span back to the generation and the
+user's words. Vals cannot offer that without destroying the private test
+set its contamination defence depends on. Ursa can offer it precisely
+because nobody judged the output.
+
+**The honest discount.** Vals is a funded company with a public
+leaderboard that enterprises read today, and this seat read two marketing
+and methodology pages rather than running the product, which it cannot:
+the test set is private, which is the whole point. The comparison above
+is against published claims, and on the one axis where Vals is plainly
+ahead — a number that exists, is updated, and names its own uncertainty —
+Ursa has no public record on `main` at all today, because the only trial
+record was pulled to the private repository pending the redaction
+standard that `docs/sprints/pending.md` still lists as unstarted.
+
+### 2026-10-09 — A briefing names how many rules it returned, never what it costs to read
+- Trigger: today's craft scan of Letta (see the scan note below) plus
+  today's own build. Letta's memory blocks carry a `limit`, "the size
+  limit (in characters) of the block", and its context window shows
+  `chars_current` against `chars_limit` as metadata the model itself can
+  read. Ursa's `get_briefing` has two ceilings, `maxRules` and
+  `maxCases`, and `Briefing.coverage` reports counts: "returned 1 rule
+  and 1 case". Both are denominated in rules, and a caller's real
+  constraint is characters. A rule with five evidence entries and a
+  verbatim quote is several times the size of one without, so an agent
+  choosing `maxRules: 8` is guessing at a number it cannot convert into
+  the thing it actually has to budget. Over MCP this stopped being
+  theoretical today: the tool is called inside a turn, by a model whose
+  context is already partly spent.
+- What: add a size field to `BriefingCoverage` — the character length of
+  `renderBriefing`'s own output, which is the string that actually enters
+  a context window, not the JSON. One number, computed after rendering,
+  reported in the markdown's `## Coverage` line and in the JSON. It
+  turns the ceilings into something a caller can calibrate: ask once,
+  read the cost, pick the ceiling. It also makes a regression visible,
+  because a briefing that silently doubles in size is today invisible to
+  every test.
+- First step: compute `renderedChars` in `renderBriefing`, thread it
+  back onto `coverage`, and assert in `hq.test.ts` that the number equals
+  the rendered string's own length for the fixture store. The honest
+  wrinkle to settle in that first step: `coverage` is part of the
+  `Briefing` that `renderBriefing` consumes, so the number cannot be
+  inside the thing it measures without a second pass. Render, measure,
+  then attach — and the test should pin that order, since computing it
+  the obvious way gives a figure that is wrong by its own length.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 — The tuning resource is unreachable from a client that only attaches tools
+- Trigger: today's craft scan of Letta's MCP documentation, read while
+  building Ursa's own MCP surface. Letta is an MCP client, not a server:
+  it registers a server by URL, lists the tools it offers, and attaches
+  those tools to agents. Its overview page says "MCP tools execute on
+  external MCP servers" and names no other MCP primitive anywhere.
+  Resources are not mentioned. Today's build put the tuning block at the
+  resource `ursa://tuning/current` and only `get_briefing` at a tool, on
+  the reasoning that tuning is a document and a document is a resource.
+  That reasoning is right about the protocol and possibly wrong about the
+  deployed clients, and a portability product whose whole promise is
+  "every model you use" cannot afford a delivery surface that one class
+  of client cannot see.
+- What: register the same tuning read as a tool as well as a resource,
+  `get_tuning`, returning exactly what `renderTuningBlock` returns, so
+  the surface works whether a client consumes resources, tools, or only
+  tools. Duplication is the right answer rather than a smell here: there
+  is one implementation and two advertisements of it, which is the shape
+  the protocol's own split forces on anyone who wants both audiences.
+  Worth doing before the first real client is wired, because the
+  alternative is discovering it as a user reporting that their rules
+  never arrived.
+- First step: measure before building. Run `claude mcp add` against
+  today's server and confirm whether Claude Code offers
+  `ursa://tuning/current` to the model on its own or only on request;
+  then read one more client's docs (Cursor is the cheapest second
+  sample). If either consumes resources only on explicit user action,
+  add `get_tuning` with a test asserting the tool and the resource return
+  byte-identical text. If both surface resources automatically, record
+  that and close this entry instead of building it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 — One stdio server grew the production audit tree from 70 packages to 161
+- Trigger: today's build, measured rather than estimated.
+  `@modelcontextprotocol/sdk` 1.32.1 declares 17 production dependencies
+  and resolves to 91 new production packages in `ursa-major`, taking the
+  tree from 70 to 161. The stdio transport, which is the only transport
+  this surface ships, loads none of the largest ones: a `require.cache`
+  probe after importing `server/mcp.js` and `server/stdio.js` shows
+  `zod` and `ajv` loaded and `express`, `hono`, `cors`, `jose`,
+  `express-rate-limit` and `body-parser` all absent. So Ursa's production
+  dependency tree now carries a web framework, a CORS handler, a rate
+  limiter and a JOSE implementation as dead code, and will keep carrying
+  them until M2.5 wires the remote transport those exist for.
+- What: this is not an argument against the SDK, which is the plan's own
+  choice (product-plan.md §9) and earns it by supplying the in-memory
+  transport that makes the MCP surface testable against a real client.
+  It is an argument that `scripts/dep-floor.mjs` now gates a surface
+  more than twice its previous size, where the added half is code no
+  shipped path executes. That changes what a dep-floor failure will mean:
+  a future high advisory in `express` would block every pull request in
+  this repository over a package Ursa does not run. Two candidate
+  answers, and the point of the entry is that the owner picks before the
+  first such advisory rather than during it. Either move the SDK to
+  `optionalDependencies` the way `@huggingface/transformers` already is,
+  so the MCP surface degrades to absent rather than gating the resolver,
+  or keep it required and add a dep-floor exception path scoped to
+  packages the loaded-module probe shows are unreachable.
+- First step: commit the probe as a test. It is six lines, it already
+  runs, and it is the only artifact here that would notice if a future
+  SDK version started loading `express` on the stdio path — which is the
+  fact both candidate answers depend on and neither would survive
+  without. Do that before choosing between them.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-09 (engineer's craft scan)
+
+**Product: Letta** (formerly MemGPT), rotating onto Category 3 of
+`docs/market/landscape.md` (personalization and memory layers). The
+previous engineer scans took CodeRabbit (2026-09-28), Claude Code
+(2026-10-01), and Mem0 plus Vals AI (2026-10-08), so Letta is the
+Category 3 entry no craft scan had reached. Read today: Letta's MCP
+overview page and its memory-blocks guide, both under `docs.letta.com`.
+Chosen because today's build was Ursa's own MCP surface, so the scan
+could inform the work rather than sit beside it, and it did: two of
+today's three ledger entries came out of it.
+
+**Worth stealing: the memory block tells the model its own size.** A
+Letta memory block has four fields — `label`, `description`, `value`,
+`limit` — where `limit` is "the size limit (in characters) of the
+block", and the agent's rendered context carries `chars_current` against
+`chars_limit` as metadata the model reads directly. Two things are good
+here and they are separable. The smaller one is the budget. The larger
+one is that the budget is denominated in the unit the constraint is
+actually in. Ursa's briefing has ceilings too, but they count rules and
+cases, and nothing anywhere reports the one number an agent has to
+manage, which is how many characters the briefing will occupy. That
+became today's first ledger entry.
+
+**Also worth noting: `read_only` is a declared field on the unit, not a
+property of the endpoint.** Letta makes mutability a fact about each
+block, so a block the agent must not edit says so in its own data.
+Ursa's briefing is read-only everywhere, and says so in three places
+that are all outside the data: a prose disclaimer, an MCP
+`readOnlyHint` annotation, and the absence of a write tool. That is
+sufficient today because there is nothing to write. It stops being
+sufficient the moment a user-editable surface and an agent-readable
+surface share one payload.
+
+**Where Ursa is ahead, and it is the authorship, not a feature.** In
+Letta the agent authors its own memory: it edits blocks through built-in
+memory tools, and the docs warn that an external write through the API
+"replaces the whole block" and that with concurrent writers "the last
+write wins and overwrites all earlier changes." So the record of what
+the system believes about you is written by the agent, overwritable in
+full, and carries no trail back to the moment that produced it. Every
+Ursa axiom is the inverse on all three counts. It is derived from
+finished work rather than asserted, it carries `evidence` pointers that
+join back to a record id, a signal kind and step ordinals, and
+`src/tuning/merge.ts` merges deterministically with revocation
+tombstones instead of letting a writer clobber the file. The principle
+underneath is vision's third: much of what people know shows up only in
+action. A block an agent writes about you is a stated preference with
+extra steps.
+
+**The honest discount, in two parts.** First, Letta and Ursa are not
+solving the same problem, and the comparison above flatters Ursa by
+scoring Letta on a promise it never made. Letta's memory is scoped to a
+deployed agent on purpose, for developers building that agent; it is
+not trying to be a portable user-owned profile, so "no consent surface
+for the end user" is a true observation about an absent goal rather than
+a weakness. Second, this seat read two documentation pages and did not
+run Letta, which is a real limit on every claim above: the docs page on
+memory blocks defines `limit` without stating what happens when a write
+exceeds it, and the scan did not establish that by experiment either.
+On the one axis where Letta is plainly ahead — a memory layer that
+real developers deploy today, against Ursa's surface that was written
+this morning and has been wired into zero clients — the gap is not
+close.
+
+### 2026-10-09 (second dispatch) — A tension is wired once and never dated, so a disagreement the evidence settled reads as open forever
+- Trigger: today's craft scan of Graphiti, Zep's open-source memory
+  engine (see the scan note below), read against
+  `ursa-major/src/tuning/merge.ts` and `src/tuning/export.ts`. Graphiti
+  resolves a contradiction by "temporal edge invalidation": the
+  superseded fact is not deleted and not summarized away, the edge
+  carrying it gets an end time, so the graph answers both "what is true"
+  and "what used to be true" from the same structure. Ursa wires the
+  equivalent edge and never ends it. `mergeDistillation` pushes each id
+  into the other's `contradicts` array symmetrically (merge.ts lines
+  75-89), and the only thing that ever removes one is `revoke.ts`
+  filtering ids the owner deleted. So a tension is permanent by
+  construction. It then prints forever: `export.ts` renders
+  `[tension with ax-00X]` beside the statement and lists the axiom again
+  under `## Tensions` with the words "Stated and revealed preferences
+  that conflict. Ask, do not guess", and `briefing.ts` prints the same
+  bracket into every briefing that serves either side.
+- What: give the contradiction edge the dates it already has the
+  evidence for. Each axiom's `evidence` entries carry the record they
+  came from, and `TuningRecord.sources` carries each distillation's
+  `distilledAt`, so for any pair of contradicting axioms Ursa can
+  already say when each side was last fed. A tension where one side has
+  gained three evidence entries over the last five records while the
+  other has gained none is not an open question, it is a settled one
+  that nothing closed, and printing it as open costs the owner a
+  decision she already made with her hands. Concretely: a
+  `lastFedAt` per side, and the renderer distinguishing a live tension
+  (both sides fed recently) from a stale one (one side cold), so
+  "ask, do not guess" is reserved for the case where asking is actually
+  the right move. The honest constraint, and the reason this is not just
+  "resolve tensions automatically": absence of recent evidence is not
+  refutation. A rule can be cold because the owner has not worked in
+  that domain for a month. So the output is a date and a direction,
+  never a verdict, which is the same discipline `BRIEFING_DISCLAIMER`
+  already states for every other unit.
+- First step: add `lastFedAt` to the tension rendering only, computed
+  rather than stored. `axiomFiles` in `briefing.ts` already resolves an
+  axiom's evidence back to its records, so the newest `distilledAt`
+  among an axiom's evidence sources is a derivation from data on disk
+  with no schema change and no migration. Render it in `export.ts`'s
+  `## Tensions` block as a line per side, and a test with two
+  contradicting axioms whose evidence sits in records distilled a month
+  apart asserting that the block says which side is cold. Storing the
+  field, and changing what a briefing does with a stale tension, are
+  separate days that this one makes cheap.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 (second dispatch) — The bounded read reports its size and the unbounded one does not
+- Trigger: today's own build. `get_briefing` has two ceilings (`maxRules`,
+  `maxCases`) and, as of this PR, reports what it costs in characters.
+  `renderTuningBlock` (`ursa-major/src/tuning/export.ts`) has neither. It
+  takes no ceiling of any kind, renders every axiom whose status is not
+  `revoked`, and reports nothing about its own size. That is the wrong way
+  round twice over. First, the briefing is the call a model makes
+  deliberately, when it is about to touch named files; the tuning block is
+  the read the server's own `instructions` string tells every client to
+  take unprompted at the start of every conversation ("Read the resource
+  ursa://tuning/current at the start of a conversation"). So the
+  unconditional read is the unbounded one. Second, it grows without limit
+  in the one direction the product is designed to grow: on the fixture
+  store it is 463 characters for 3 active axioms, about 154 characters per
+  axiom, and the whole premise of Ursa Major is that the axiom count rises
+  for as long as the person keeps working.
+- What: the same treatment, in the same shape, so there is one way to ask
+  what a read costs. A `renderedChars` on the tuning block's own metadata
+  and a measured variant beside `renderTuningBlock`, reusing the fixed
+  point `measureBriefing` already establishes rather than inventing a
+  second convention. Then, and only once the number exists, the question
+  of a ceiling becomes answerable instead of speculative: today nobody can
+  say at how many axioms this read stops being free, because nothing
+  measures it.
+- First step: measure before bounding, the same order this PR used for
+  the dependency probe. Add `measureTuningBlock` with the identical fixed
+  point and one test asserting the printed figure equals the rendered
+  string's own length, then run it against the fixture store and against
+  a synthetic store at 50 and 500 axioms and write the three numbers into
+  `docs/design/tuning-pipeline.md`. A ceiling designed before those
+  numbers exist would be a guess, and the ceiling is the part that can
+  silently drop a rule the owner is relying on.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-09 (second dispatch) — Reporting the cost makes the caller pay two round trips for it
+- Trigger: today's own build, and the shape of the ledger entry behind
+  it. `coverage.renderedChars` turns `maxRules` into something a caller
+  can calibrate, and the protocol it implies is stated in that entry's
+  own words: "ask once, read the cost, pick the ceiling." Read back after
+  building it, that is two tool calls for one briefing, and the second
+  one spends the context the first one just reported. For an agent inside
+  a turn, which is the caller this surface exists for, the first call is
+  pure overhead.
+- What: a `maxChars` argument on `GET_BRIEFING_INPUT`, so the ceiling can
+  be stated in the unit the caller actually has. The interesting part is
+  not the argument, it is that honouring it correctly is not truncation.
+  Every unit in a briefing carries its own receipt — an axiom id, the
+  owner's verbatim words, the `Surfaced because` line that makes it
+  auditable — so cutting the string at a character boundary produces a
+  briefing whose last rule has lost the provenance that makes it
+  evidence rather than an order, which is the one property
+  `BRIEFING_DISCLAIMER` is load-bearing about. So `maxChars` has to drop
+  whole rules and whole cases, lowest-ranked first, and then say in
+  `coverage` how many it dropped for size. A briefing that quietly
+  returned four of eight applicable rules because the fifth did not fit
+  would be the same silent-denominator defect this repository has now
+  fixed three times in the resolver.
+- First step: `coverage.droppedForSize`, and the drop loop, against a
+  request whose unbounded render is known to exceed its own `maxChars`.
+  The fixture store's widest briefing is 2633 characters, so
+  `maxChars: 1500` is a case that has to drop something; the test
+  asserts the result renders at or under 1500, that every rule still
+  present carries its `Surfaced because` line in full, and that
+  `coverage.axiomsReturned` plus `coverage.droppedForSize` accounts for
+  everything that cleared the relevance floor. Ordering is already
+  settled: `scoredRules` is sorted before `maxRules` slices it, so
+  dropping from the tail is dropping the lowest-ranked.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-09, second dispatch (engineer's craft scan)
+
+**Graphiti**, the open-source temporal knowledge-graph engine underneath
+Zep, read today at `help.getzep.com/graphiti/getting-started/overview`.
+Next in the rotation through `docs/market/landscape.md` category 3
+(personalization and memory layers): Mem0 was scanned 2026-10-08, Letta
+this morning, Zep's entry was last observed by the market seat on
+2026-09-26 and had never had a craft scan.
+
+**Worth stealing: a contradiction is an edge with an end date, not a
+deletion and not a summary.** The page's phrase for it is "temporal edge
+invalidation", and it is named explicitly in contrast to the obvious
+alternative, which the page calls LLM-driven summarization. When a new
+fact conflicts with an old one, the old edge is not removed and not
+rewritten into a merged sentence; it is given a lifecycle end, and the
+graph keeps answering point-in-time queries about both. Two properties
+fall out of that and both are ones Ursa wants. The history is not lossy,
+because nothing was summarized. And the resolution is auditable, because
+the end date is a fact in the same structure as the claim rather than a
+judgment made by a model nobody can inspect. That became today's first
+ledger entry, against the finding that Ursa's own contradiction edge
+(`contradicts` in `src/tuning/types.ts`) is wired symmetrically by
+`merge.ts` and then never ended by anything except the owner deleting one
+side.
+
+**What Ursa does better: the memory is the user's, and the graph is the
+developer's.** Graphiti stores the graph in a database the developer's
+product owns, and Zep's managed version stores it in Zep's. There is no
+operation in either that hands the end user their own subgraph, and the
+market seat's landscape entry records the same gap from the commercial
+side ("no path for a user to take their Zep graph to a different AI
+vendor"). Ursa Major's equivalent is a JSON file in the user's own
+repository that `cat` reads and `rm` deletes, served to a model by a
+local process over stdio. The asymmetry is structural rather than a
+feature gap: a hosted graph cannot offer on-device processing, which is
+load-bearing constraint 3 in CLAUDE.md.
+
+**Honest limit on the comparison, since the two products are not aimed
+at the same buyer.** Graphiti is solving entity resolution across
+unstructured conversation, which Ursa does not attempt at all: Ursa's
+units arrive pre-resolved because they are distilled from one person's
+own finished work with the git history attached. On the problem Graphiti
+is actually hard at, Ursa has no answer and needs none. The fair axis is
+how a conflict between two beliefs is represented over time, and on that
+axis Graphiti is ahead of Ursa today.
+
+**What the scan did not find, which is the answer to the question I went
+looking for.** I read the overview expecting a mechanism for bounding or
+reporting the size of retrieved context, because that is what this run
+was building. The page names none: no result limit, no token budget, no
+cost field. Its retrieval section describes merging vector, BM25 and
+graph-traversal results into "a single ranked answer" with "no
+LLM-in-the-loop reranking", which is a latency claim rather than a size
+claim. So `coverage.renderedChars` is not a thing Ursa is behind on; it
+appears to be a thing this category has not done. Recorded as an
+observation, not as a competitive claim, because one page is not a
+survey.
+
+### 2026-10-10 — A merge-time record is silent about the time dimension, and silence reads as "nothing decayed"
+- Trigger: writing the allowlist in `ursa-major/src/launch-parity.test.ts`
+  today. Two of its three entries are `durability` and the per-span
+  `lifespan`, both produced by `src/lifespan.ts`, which walks the commits
+  that came after an episode closed. `ursa run` runs it; `ursa ci` cannot,
+  because at merge time nothing has come after the merge yet. The
+  divergence is legitimate. What is not legitimate is its shape: the CI
+  record simply omits both keys, and an absent `decayRate` is
+  indistinguishable from a `decayRate` of zero to anything reading the
+  JSON. This project already made exactly this distinction once, for
+  exactly this reason: `no_generation_provenance` exists so that "traceable
+  to no generation" is a stated class rather than a missing field, and
+  `exclusions` exists so that a refused file is a claim rather than an
+  absence (`docs/design/record-exclusions.md`). The time dimension is the
+  one remaining place where the record still answers by saying nothing.
+- What: make the omission state itself. A record resolved by a launch that
+  did not measure durability carries
+  `durability: { measured: false, reason: "resolved at merge time; no
+  commit followed the episode's closing commit" }` instead of carrying no
+  `durability` key, and every surviving span carries
+  `lifespan: { fate: "unmeasured" }` rather than nothing. `unmeasured` is a
+  distinct value from the existing `untested`: `untested` means the walk
+  ran and found no later commit for that file, which is a measurement;
+  `unmeasured` means the walk did not run. A buyer reading a CI record can
+  then tell which question was asked. The second half, whether `ursa ci`
+  should walk the commits a later merge adds and amend the record, is a
+  product decision about what a merge-time record may assert and is
+  deliberately not bundled in here.
+- First step: add `measured: false` plus `reason` to the record-level
+  `durability` type in `ursa-major/src/types.ts`, set it in `src/ci/run.ts`
+  where `src/bin/ursa.ts` calls `annotateDurability`, add the `unmeasured`
+  fate, and add one bound to `src/invariants.ts`: a record with at least
+  one surviving span and no measured durability must carry the reason. The
+  parity test's allowlist then shrinks by nothing, but its entries stop
+  describing an absence and start describing two different stated answers.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 — Two of the three things that produce an outcome record are now compared, and the third is not
+- Trigger: §7.2 of `docs/design/launch-parity.md`, written today. Today's
+  test holds `ursa run` and `ursa ci` to the same record, which is what the
+  2026-10-08 entry asked for. Writing the limitation down surfaced that the
+  repository has a third producer of `OutcomeRecord` that nothing compares
+  against either of them: `ursa-major/src/cli.ts`, the older session-log
+  path that takes `--final` and `--sessions`, calls `resolve()` itself
+  rather than going through `src/resolve-episode.ts`, defaults
+  `artifact.kind` to `chat`, and emits the self-contained HTML viewer. It
+  is the path the n=1 trial was produced on and the path `docs/okrs/2026-q4.md`
+  KR1.3 names when it requires "at least two use the prose path" and "at
+  least one joins generations from more than one source." So the launch the
+  quarter's corpus KR depends on most is the one launch with no parity
+  check behind it.
+- What: the same differential comparison, one producer wider. `src/cli.ts`
+  cannot be compared to the git launches on the same input, because it
+  takes conversations and a final directory rather than a commit range, so
+  the comparison is not launch-against-launch. It is
+  launch-against-`resolve()`: build one `ResolveInput` from
+  `ursa-major/fixtures/mini/`, call `resolve()` directly, run `src/cli.ts`
+  over the same fixture, and assert the record the CLI wrote matches the
+  record `resolve()` returned on the same projection today's test already
+  defines, with a named allowlist for the fields the CLI adds on its own
+  (`artifact.kind`, `renderRef`, the viewer path, and `generatedAt` when
+  `--generated-at` is not passed). That turns "one resolver" from a claim
+  about two of three producers into a claim about all three.
+- First step: export `comparable()` and `topLevelDiff()` out of
+  `src/launch-parity.test.ts` into a small test helper module, then add one
+  test that runs `npm run record:fixture`'s own arguments through
+  `src/cli.ts` programmatically and compares against a direct `resolve()`
+  call on the same `fixtures/mini/` input. The fixture and the npm script
+  both already exist, so this is a comparison to write rather than a
+  fixture to build.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 — The record self-check can only be tested by replacing it, because no fixture is allowed to be wrong
+- Trigger: today's second negative check. Removing the `gateRecords` call
+  from `ursa-major/src/ci/run.ts` left all eight tests in
+  `src/launch-parity.test.ts` green, because a test that asserts a healthy
+  repository passes the gate passes identically whether the gate runs or
+  does not exist. Closing that hole needed a record whose arithmetic is
+  impossible, and no git fixture reliably produces one: the resolver is
+  correct, which is the entire reason the fifteen bounds exist. So
+  `src/ci/gate-wiring.test.ts` replaces `checkRecord` with `vi.mock` and
+  asserts the verdict reaches the exit code, the result object and the run
+  comment. That works, and it tests the wiring rather than the bounds, and
+  it is the only test in the repository that has to mock a module of this
+  project's own to say anything at all.
+- What: commit the impossible record as a fixture instead of mocking the
+  thing that would have caught it. One file,
+  `ursa-major/fixtures/violations/gen-claim-bounded.json`: a real
+  `OutcomeRecord`, hand-edited so exactly one bound fails, with a sibling
+  `.md` naming which bound and both sides of the number. Then
+  `src/invariants.test.ts` can assert `checkRecord` catches it, and the two
+  launch gates can be tested by resolving normally and then injecting the
+  fixture — no mock, and the fixture doubles as the worked example
+  `docs/design/generated-denominator.md` currently describes in prose. The
+  wider point, which is why this is worth an entry rather than a cleanup:
+  fifteen bounds exist and the repository holds zero records that violate
+  any of them, so fourteen of the fifteen have never been seen to fire
+  against a real artifact. A violations fixture directory is the cheapest
+  way to change that, one bound at a time. The count itself is a second
+  instance of the same problem: `README.md` and three design documents said
+  "thirteen" today, four days after `EXCLUSION_NOT_CLASSIFIED` became the
+  fifteenth, which is why `BOUND_COUNT` is now derived from `BOUNDS` and
+  the run comment reads the derived value.
+- First step: write the first one. Copy
+  `ursa-major/fixtures/mini/record/outcome_record.json`, raise one
+  generation's claimed characters above its `charsWritten`, commit it with
+  the note, and add one test asserting `checkRecord` returns exactly the
+  `GEN_CLAIM_BOUNDED` violation and nothing else. Fourteen more follow
+  one at a time, each as its own small unit of work.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-10 (engineer craft scan): **Letta's memory, read at
+  docs.letta.com/guides/agents/sleep-time-agents and the search result
+  summary for docs.letta.com/letta-agent/memory (the memory page itself
+  404s today), 2026-10-10.** Category 3 in `docs/market/landscape.md`,
+  picked because the rotation has scanned Mem0 twice and Zep's Graphiti
+  once and had not reached Letta.
+  **Worth stealing: the memory store is a git-backed directory, not a
+  document.** Letta calls it MemFS. The page says memory lives in "a
+  git-backed filesystem the agent can inspect and edit," that a user
+  reviews saved changes "in the desktop app's memory viewer or by
+  inspecting `$MEMORY_DIR` directly," and that before a large
+  reorganization the workflow "backs up the repository before splitting
+  files, merging duplicates, or restructuring the hierarchy." So every
+  change to what the system believes is a commit, and the history of the
+  belief is queryable with `git log` rather than reconstructed. Ursa
+  Major's equivalent, `<project>/.ursa/tuning.json`, is a single JSON
+  document with revocation tombstones: it records that a rule was revoked
+  and never records when the rule was first believed, which is exactly the
+  open ledger entry "The tuning store says what Ursa believes and never
+  when it started believing it" (2026-10-08). The scan's contribution is
+  not a new idea, it is that a competitor has shipped the mechanism that
+  entry proposes, and shipped it in the one form Ursa could adopt almost
+  free, since `.ursa/` already sits inside the user's own git repository.
+  **What Ursa does better: where the belief comes from, and who signs off
+  on it.** Letta's dream subagents "review recent conversations,
+  consolidate useful lessons, and update memory," and the same page states
+  plainly that "the agent does not ask for approval when it reviews
+  updates." That is a model reading a conversation, deciding what the
+  lesson is, and writing it into the user's memory unprompted, which is
+  the failure mode `docs/vision.md` names twice: principle 3, because a
+  lesson a model infers from what was said is a stated preference rather
+  than a revealed one, and principle 4, because the model is the central
+  assessor of its own evidence. Ursa's units come from what the person did
+  to the work, the edit is the correction, each unit carries a pointer back
+  to the span and the commit it came from, and the owner's declaration is
+  the only thing that counts as acceptance. Letta's `/remember` command is
+  the same stated-preference shape in the opposite direction: the user
+  tells the agent a lesson and the agent files it.
+  **Honest limit.** One documentation page, read once, and the memory
+  reference page it points at returns 404 today, so the mechanics of
+  per-block size limits and sharing could not be confirmed first-hand and
+  are not relied on above. Letta is also solving a different problem than
+  Ursa (keeping one long-running agent coherent across sessions, not making
+  one person's corrections portable across vendors), so the fair axis is
+  narrow: how a change in what the system believes is recorded over time.
+  On that axis Letta is ahead of Ursa today, and the gap is one already in
+  this ledger.
+
+### 2026-10-10 (second dispatch) — A record is not reproducible from its own stated inputs, because one field is the wall clock
+- Trigger: `npm run fixtures:violations:check` reported 16 of 31 files
+  drifted immediately after `npm run fixtures:violations` had written
+  them. The 16 were every `.json`; the 15 `.md` notes matched. The whole
+  difference was one field: `deriveSignals` in
+  `ursa-major/src/signals.ts` sets `signals.annotatedAt` to
+  `new Date().toISOString()`, so resolving identical input twice, one
+  second apart, produces two records that are not byte-identical. The
+  fixture script now pins that field to the episode's own `generatedAt`,
+  which fixes the fixtures and not the resolver.
+- What: byte-equality is the cheapest audit a buyer can run and today it
+  is unavailable. A lab handed an outcome record plus the inputs it names
+  cannot re-resolve and compare, because the comparison fails on a
+  timestamp regardless of whether anything else matches, and the lab has
+  no way to tell that from a record that was edited after the fact. This
+  is the auditability story `CLAUDE.md` §2 sells to both sides, reduced to
+  one field. The fix is that every timestamp in a record is derived from
+  the episode rather than read from the clock at write time: `annotatedAt`
+  takes the episode's `generatedAt` by default, and anything that
+  genuinely needs wall-clock time (a `renderRef`, a run's own log) lives
+  outside the record. The second half, a `--reproduce` mode on
+  `src/invariants.cli.ts` that re-resolves a record from its own
+  `conversations` and `files` and diffs the result, is the thing that turns
+  the property into a check a buyer can run, and it is deliberately not
+  bundled here.
+- First step: give `deriveSignals(record)` its `annotatedAt` from
+  `record.task.generatedAt` instead of `new Date()`, then add one test
+  that calls `resolve()` twice on the same `ResolveInput` and asserts
+  `JSON.stringify` of the two records is identical. Then remove the pin in
+  `ursa-major/tools/make-violation-fixtures.ts` and confirm
+  `fixtures:violations:check` still passes, which is the negative check:
+  if the pin was the only thing holding determinism, dropping it fails.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 (second dispatch) — Twelve bounds are checked against real history with an assertion that cannot see how much else broke
+- Trigger: today's work asserted equality on the whole violation code
+  list for fifteen committed records, and that turned up two bounds that
+  cannot be violated in isolation at all — `GEN_CLAIM_BOUNDED` and
+  `PCT_DENOMINATORS_ORDERED` are implied by their neighbours. Neither fact
+  was visible from the `BREAKAGES` table in
+  `ursa-major/src/invariants.test.ts`, which asserts
+  `expect(found.map((v) => v.code)).toContain(c.code)`. That table is not
+  redundant with the new fixtures: its mutations are applied to
+  `fixtures/real/ursa-main-4d5e401.json`, a record made from this
+  repository's own git history, which is coverage the synthetic base in
+  `fixtures/violations/` does not have. So the repository now has
+  exclusivity on synthetic records and containment on the real one.
+- What: give each of the nineteen `BREAKAGES` entries a declared `codes`
+  list the way `Case` in `tools/make-violation-fixtures.ts` has one, and
+  assert equality instead of containment. The interesting part is not the
+  conversion, it is what fails: a mutation of a real record that fires
+  four bounds is telling us something about the real record that a
+  single-field edit to a 200-character synthetic base cannot. Each failure
+  is either a sharper mutation to write or a dependency between bounds to
+  document, and the second kind belongs beside the two already found.
+- First step: add `codes: InvariantCode[]` to the `BREAKAGES` entry type,
+  fill it in with the single code each entry already names, change
+  `toContain` to `toEqual`, and run the file. Report the list of entries
+  that fail and what each one additionally fires; fixing them is the next
+  unit of work, not this one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-10 (second dispatch) — The gate grew from ten bounds to fifteen in six days and nothing public says what each one was taught to refuse
+- Trigger: today's craft scan of Vals AI (see the scan note below), plus
+  a documentation defect found while writing this change up. §5 of
+  `docs/design/generated-denominator.md` is titled "The ten bounds" and
+  describes ten; the repository has fifteen. Its claim that each row "has
+  at least one test that breaks a record in exactly that way" is also now
+  provably false for two rows. Both are corrected in place by today's PR,
+  which is the third time in a week a hand-written count of the bounds has
+  gone stale in a document after `BOUND_COUNT` was derived specifically to
+  stop that.
+- What: stop writing the bound list by hand anywhere. One generated
+  document, `docs/design/bounds.md`, built from `BOUNDS` in
+  `ursa-major/src/invariants.ts` joined to the notes in
+  `ursa-major/fixtures/violations/*.md`, with a row per bound carrying the
+  code, the bound's own text, the universe both sides are measured over,
+  the committed record that violates it, and the date the bound was added.
+  Checked in CI the way `npm run bundle:check` already checks a generated
+  file, so a bound added without a counterexample or without a line here
+  fails the suite. The last column is the part that is worth more than
+  tidiness: it is the published record of which near-miss the gate was
+  taught to catch and when, which is what a buyer auditing the methodology
+  actually wants and what no document here provides today.
+- First step: write the generator as a `--check`-able script next to
+  `tools/make-violation-fixtures.ts`, emitting the code, the bound text
+  and the fixture filename for all fifteen. The "date added" column needs
+  `git log -S'<CODE>' -- ursa-major/src/invariants.ts` per code, which is
+  one line of shell and can come in the same pass or the one after.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-10 (engineer craft scan, second dispatch): **Vals AI, read
+  first-hand at vals.ai (2026-10-10), the one product in Category 2 of
+  `docs/market/landscape.md` the craft rotation had not reached. The page
+  is 218,178 characters and the read covered the first 100,000 of them,
+  which is stated because the limit matters to two of the claims below.**
+  **Worth stealing: the verifier publishes what it was taught to refuse.**
+  Vals' ProofBench entry states that its grader was changed to reject
+  proofs using `sorry`, `admit`, or added axioms — three specific ways an
+  answer had been passing while cheating, named in public, after the fact.
+  A second habit alongside it: one post is described as having "the
+  inputs, raw outputs and analysis code behind the post's numbers ... in a
+  ledger linked from the post," and another links "Lean sources, the paper
+  and the verification logs." So a reader who doubts a number is handed
+  the material to recompute it, and a reader who doubts the grader is
+  handed the history of the grader's own repairs. Ursa's gate went from
+  ten bounds to fifteen between 2026-10-04 and 2026-10-10, each one added
+  because a record had passed while being wrong in a new way, and nothing
+  public records that sequence. The ledger entry above is this scan's
+  contribution.
+  **What Ursa does better: who supplies the label.** Every grading
+  mechanism named on the page is an external judge applied to an output.
+  Legal Research Bench answers are graded "against rubrics authored and
+  peer-reviewed by practicing lawyers"; the Excel Modeling Benchmark is
+  graded "against expert-authored gold models"; SAFE-Teen conversations
+  are rated "on clinician-defined safety checks"; Code Migration is scored
+  on "hidden tests." Each is a careful, expensive answer to "how good does
+  this answer look to a qualified reader," which is exactly the proxy
+  `CLAUDE.md` §1 says labs already have and `docs/vision.md` principle 4
+  names as the failure: a central assessor standing in for the work. Ursa
+  Minor's label is supplied by the artifact. Nobody judged the output; the
+  work either used it or it did not. The second difference is the dataset:
+  Tax Agent Bench is "a private 193-question test set," Legal Research
+  Bench "a private benchmark," CyberBench and the Excel Modeling Benchmark
+  private, Code Migration "proprietary" with "hidden tests," so a buyer
+  can audit the methodology and never the questions. Ursa's unit of sale
+  is the record itself, which is the buyer's audit surface, and the
+  methodology is published on principle (`CLAUDE.md` §5).
+  **Honest limit.** One page, one read, and 118,178 of its characters were
+  not read, so "nothing says per-question results are released" is a
+  statement about the half that was read and not about the product. A
+  search result that appeared to describe Legal Research Bench's internals
+  came from an arXiv appendix the search tool itself flagged as uncertain
+  in provenance, and nothing above relies on it. Vals is also solving a
+  different problem than Ursa — scoring frontier models on curated
+  professional tasks, not making one person's corrections portable — so
+  the fair axis is narrow: how a product that sells a verdict lets a buyer
+  check the verdict. On the first half of that axis, publishing the
+  grader's own repair history, Vals is ahead of Ursa today.
+
+### 2026-10-11 — The record names which model generated a span and never names who kept it
+- Trigger: today's dogfood run. `ursa run` over a clone of this
+  repository produced four records whose "the person kept this" verdict
+  rested on commits authored `ursa-pm <ursa-pm@agents.epito.me>`, an
+  agent seat. The run summary now says so out loud
+  (`PairFinderDiagnostics.editorIdentities`,
+  `docs/design/agent-coauthor-detection.md` §3.1), but the record on
+  disk does not. `OutcomeRecord` carries `agentMarker` for the
+  generation side, copied into the generation's `model` field, and
+  carries nothing at all for the edit side. So a lab auditing a
+  purchased record can check which model wrote a span and cannot check
+  whether the party who kept it was a human being. That is the one
+  question the span classes depend on: `survived_verbatim` means "a
+  model wrote this and the person kept it", and "the person" is an
+  inference the record does not expose.
+- What: an `editor` block on the record, filled from the pair the
+  episode came from. Three fields, all already in memory at write time:
+  the author name and email of `finalSha`, and the basis on which that
+  commit was classified as the person's, which is one of four values —
+  `no-agent-marker` (it matched nothing, the inference-by-absence case
+  and the weakest), `declared-person` (the owner named this identity as
+  their own), `github-login` (the pull-request path, which has a login
+  and no email), or `review-closure` (the PR path's merge-as-accepted
+  closure, where the "editor" is whoever merged). Carry the run's own
+  `--agent-identity` declarations in the same block, because a record
+  resolved with the fleet declared and one resolved without it are
+  different claims from identical inputs, and nothing on disk currently
+  distinguishes them. Then add a sixteenth bound to
+  `src/invariants.ts`: a record whose editor basis is
+  `no-agent-marker` may not report a `survived_*` class without the
+  editor identity being present, so the weakest basis can never be
+  silent.
+  The same entry carries a launch-parity gap found while shipping this,
+  and it is the reason the first step below stops where it does. The
+  local launch takes `--agent-identity` and the CI launch cannot: `ursa
+  ci` calls `findCommitPairs(projectPath, { range })` in
+  `src/ci/run.ts` line 148 with no identity option, and `action.yml`
+  has no input that would carry one. So a repository whose seats are
+  declared locally has them undeclared on every merge, and the two
+  launches answer "who was the person" differently from the same
+  history, which is exactly the class of drift
+  `docs/design/launch-parity.md` and `src/launch.ts` exist to prevent.
+  The default pattern is shared, so the trailer half of today's fix
+  does reach the CI launch; only the declaration does not.
+- First step: add the `editor` block to `OutcomeRecord` in
+  `src/types.ts`, fill it in `src/resolve-episode.ts` from the
+  `Episode` (which needs `finalAuthor`/`finalAuthorEmail` copied across
+  from `CommitPair` in `src/episodes.ts`, two fields), and assert it in
+  `src/resolver.test.ts` plus one `fixtures/violations/` counterexample
+  for the new bound, per `docs/design/violation-fixtures.md`. Then, as
+  its own unit: an `agent-identity` input on `action.yml` threaded to
+  `ursa ci`, and a case in `src/launch-parity.test.ts` that declares an
+  identity and asserts both launches drop the same record.
+- Built so far: the second half of that first step, by the 2026-10-11
+  second run (PR #163). The `agent-identity` input exists on
+  `action.yml` and is threaded through `CiOptions.agentIdentities` to
+  the pair walk, and `src/launch-parity.test.ts` holds the case that
+  declares an identity and asserts both launches drop the same record,
+  plus the diagnostic behind it. Specified in
+  `docs/design/agent-coauthor-detection.md` §12 and
+  `docs/design/launch-parity.md` §8. Still unbuilt, and the reason the
+  status below is unchanged: the `editor` block on `OutcomeRecord`
+  itself, its four-value basis field, carrying the run's own
+  declarations onto the record, and the sixteenth bound in
+  `src/invariants.ts`. The launch-parity half was a defect in a change
+  already merged into this branch; the record-shape half is a new field
+  on the artifact a lab buys and wants the owner's verdict first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 — A file synced from another repository is read as text a model composed
+- Trigger: today's dogfood run, and specifically the largest row of a
+  table written five days ago. `docs/standards/lessons.md` arrived in
+  this repository by a sync commit copying it from
+  `alexandrapaiz/alexandra-systems` at `775ce36`. The resolver read all
+  63,362 characters of it as model output and 60,616 of them as text
+  the person kept. `src/vendored.ts` exists to refuse exactly this and
+  could not: it detects an import by finding its source blob somewhere
+  in this repository's own object store, and this content never existed
+  here before the sync introduced it. An import from outside git's
+  reach is invisible to a check that works by looking inside it. Today's
+  trailer fix removes this particular claim by a different route (the
+  next sync is now read as a generation, so no pair forms), which means
+  the gap itself is untouched and will produce the same false claim the
+  first time a sync is followed by a genuine human edit.
+- What: read the import declaration the sync commit already writes.
+  Every sync commit in this repository names its upstream in its own
+  subject line — "Lessons sync 2026-09-28: HQ standards/lessons.md @
+  775ce36", "Re-vendor docs/standards/pm.md from HQ main @ 683c7dd" —
+  because the seat that made it knew it was importing. That is a
+  declaration, not a guess, and it is the same shape as the
+  `--agent-identity` answer shipped today: where the library cannot
+  know, let the party who does say so. Support a `Ursa-Imported-Path:
+  <path>` commit trailer, which `src/vendored.ts` reads as
+  authoritative for that commit's own paths and writes into the
+  record's `exclusions` with `relation: 'declared-import'` and the
+  commit that declared it. Do NOT parse subject lines: a regex over
+  prose would be the central-assessment overreach the fourth principle
+  names, and it would silently reclassify any commit whose message
+  happens to mention a sync.
+- First step: add the trailer to the `relation` union in
+  `src/vendored.ts` and read it in `vendoredPaths()`, which already
+  receives the `CommitInfo[]` it needs; test it in
+  `src/vendored.test.ts` with a fixture commit carrying the trailer and
+  no matching blob anywhere in the fixture repository, which is the
+  case the existing tests cannot construct.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 — Nothing re-runs the measurement a fix was aimed at, so a fix that half worked reads as a fix
+- Trigger: today's run, read against `docs/design/vendored-paths.md`
+  §1. That document's table has five rows and was written 2026-10-06 to
+  justify the import check. The fix shipped that day removed row two
+  (`docs/market/landscape.md`, 21,656 characters). Row one,
+  `docs/standards/lessons.md` at 60,616 characters, was the largest in
+  the table and stood untouched for five more days, until this run
+  resolved the same repository again and found it carrying 84.7% of the
+  headline survival figure. Nothing was wrong with the fix or the
+  document. What is missing is that the measurement which motivated the
+  fix was never repeated after it, so "the table that justified the
+  change" and "the state of the world after the change" were never
+  compared. Eleven design documents under `docs/design/` lead with a
+  measured number in exactly this shape.
+- What: a committed measurement baseline and one command that
+  re-derives it. `ursa-major/fixtures/baseline/ursa-self.json` holds
+  the `Totals` object `tools/measure-coauthor-detection.ts` already
+  emits, for a named commit of this repository, plus the per-file
+  character breakdown that `docs/design/vendored-paths.md` §1's table
+  is. A script re-clones that commit, re-resolves it, and diffs the two,
+  printing every figure that moved and by how much. Run on demand, not
+  in CI: cloning 470 commits and resolving them is minutes of work and
+  the build-and-test gate is already specified but not installed
+  (`docs/design/build-and-test.workflow.yml`). The point is not
+  automation, it is that the number in a design document stops being a
+  claim nobody can re-check and becomes a file with a command next to
+  it.
+- First step: `npm run baseline:write` and `npm run baseline:check` in
+  `ursa-major/package.json`, over the three-pass `Totals` this run's
+  tool already produces, pinned at `fe0da2a`.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-11 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 2, Arena (the product
+renamed from LMArena in January 2026). Picked over the category's two
+other entries because the craft question it answers is the one this
+run spent the day on: how a system tells a reader how much of its
+headline number to believe. Read today, 2026-10-11: Arena's
+`how-it-works` page, Arena's `arena-rank` announcement, and LMSYS's
+2024-08-28 style-control post.
+
+**Worth stealing: the confounder goes into the model, and the engine
+that fits it is a package anyone can install.** Arena's leaderboard
+score is not a raw win rate. Style is treated as an independent
+variable in the Bradley-Terry regression, so each model's rating is
+estimated net of it, and the first version of that control carried four
+features: answer token length, markdown headers, markdown bold
+elements, and markdown lists. The fitter is published as `arena-rank`
+on PyPI, Apache 2.0, at `lmarena/arena-rank`, with
+`compute_ratings_and_cis(dataset, significance_level=0.05)` returning
+95% confidence intervals computed in closed form rather than by
+bootstrap, a reweighting step so a model with fewer battles is not
+flattered by its own small sample, and a quickstart that loads the
+public `lmarena-ai/arena-human-preference-140k` dataset. A buyer can
+recompute the published number instead of trusting it.
+
+Ursa's outcome record has confounders of precisely that kind, and today
+measured the biggest one: who authored the edit. It moved the headline
+survival figure on this repository from 71,566 characters to 10,950 to
+zero, a factor of 6.5 and then to nothing, from one bit per commit. The
+record reports a single point estimate per class (`pct`,
+`pctOfFinal`), with no confounder named, no interval, and no weighting
+statement anywhere — `renderRunSummary` sums characters across records
+of 590 and 60,616 characters as though they carried equal evidential
+weight. Two transfers, both concrete. First, the identity confounder
+belongs in the record where a buyer can filter on it, which is the
+first ledger entry above. Second, Arena's reweighting is the answer to
+a problem Ursa has and has not named: a record built from a 590-
+character episode is not the same evidence as one built from 60,616,
+and the run summary currently adds them.
+
+**What Ursa does better: the correction, and what is being corrected.**
+Style control is a statistical repair applied after the fact to a
+signal Arena cannot change, because its label is a vote cast at the
+moment of asking. A voter who prefers the longer, better-formatted
+answer has stated a preference about how an answer looks, which is the
+failure mode `docs/vision.md` principle 3 names, and no regression
+recovers what the voter would have done with the text a week later.
+Ursa's label is not a vote at all: the work either used the text or it
+did not, so there is no "looks better" to subtract out. And where
+Arena's repair reweights a data point it keeps, today's repair deleted
+one. A 94.9% survival figure resting on a file nobody read is not a
+confounded measurement to be corrected, it is a claim that is false,
+and the honest move is to stop making it rather than to discount it.
+Arena cannot make that move, because its vote is all it has.
+
+**One thing worth watching rather than stealing.** Arena's own
+`how-it-works` page carries no confidence interval, no vote count per
+model, no tie handling and no statement of what a score cannot tell
+you. All of that lives in the package and the blog. The methodology is
+genuinely open and the product surface does not show it, which is the
+same split Ursa is one decision away from: `docs/design/` now holds
+thirty-three documents and `ursa-minor/app/page.tsx` still names none
+of them.
+
+### 2026-10-11 (second run) — A declaration that matches everything reads as the honest answer
+- Trigger: probing `--agent-identity`, the flag the same day's earlier
+  run shipped, against a clone of this repository. The flag takes a
+  substring, so a short one matches every identity in the history:
+  `--agent-identity '@'` classified all 481 commits as agents' and
+  wrote zero records, and `--agent-identity 'a'` did the same. Measured
+  directly (`findCommitPairsWithDiagnostics`, `generatedByDeclaredIdentity`
+  481 of 481, `pairs` 0). The run exits 0 and prints "If every commit
+  here is an agent's, that is an answer rather than a failure", which on
+  this repository is the *correct* output (`docs/design/agent-coauthor-detection.md`
+  §3.3). So the failure mode and the honest answer are the same three
+  lines, and a typo in a workflow's `agent-identity:` block would
+  silently stop every record a repository produces while reporting
+  success. A single space is the quietest version: it matched 21
+  commits, because it matches any author name with two words in it.
+- What: make a declaration state its own reach, and refuse the
+  degenerate case. Three parts, smallest first. (1) Trim each
+  declaration and drop the ones that are empty after trimming, in
+  `src/pairfinder.ts` where `filter(Boolean)` already drops `''` but
+  keeps `'   '`; the Action's shell already skips blank lines
+  (`action.yml`, §12.3 of the design document) and the library should
+  not depend on its caller for that, which is the same parity argument
+  this run's own fix rests on. (2) Report the reach rather than only the
+  count: `PairFinderDiagnostics` gains `declaredIdentityMatches:
+  { declaration: string; commits: number }[]`, one row per declaration,
+  so a declaration that matched 481 of 481 commits is visible next to
+  one that matched 81. (3) Refuse the degenerate case loudly: when a
+  single declaration matches every commit in the history, exit non-zero
+  with the declaration quoted, by the same reasoning that gives the
+  author-name fallback its all-match suppression — a pattern that
+  describes the whole history has described the environment and not an
+  agent. Unlike that suppression this one must not proceed silently,
+  because the user typed it.
+- First step: part (1) and part (2), which are both in
+  `src/pairfinder.ts` and testable in `src/pairing-window.test.ts`
+  without touching either launch: a case declaring `'   '` and asserting
+  zero declared matches, and a case declaring two identities of
+  different reach and asserting both rows. Part (3) is a behaviour
+  change with an exit code and belongs in its own unit, with the
+  threshold question ("every commit" or "every commit and more than
+  one declaration") answered there rather than guessed here.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — A measured number names a commit, and the walk reads every ref
+- Trigger: reproducing this run's own inherited measurement. The design
+  document states its figures against "a clone of this repository at
+  fe0da2a (470 commits)", and 470 is what `git rev-list --count HEAD`
+  returns there. Resolving a clone checked out at that commit reported
+  `Scanned 481 commits`. Both numbers are right. `listCommits` passes
+  `--all` deliberately, documented in `src/pairfinder.ts` line 117,
+  because the user pointed at a whole repository rather than a branch;
+  so the walk saw the eleven commits that reached `main` after fe0da2a
+  and were present in the clone as a different ref. The consequence is
+  that a documented measurement is not reproducible from the commit it
+  names: it depends on which refs the clone happened to carry, which
+  depends on when it was cloned. Eleven design documents under
+  `docs/design/` lead with a measured number taken this way.
+- What: pin and report the ref set, not just the commit. Two halves.
+  First, `PairFinderDiagnostics` carries the refs the walk actually
+  read, from `git for-each-ref --format='%(refname) %(objectname)'`
+  filtered to those `git log --all` would reach, so a run states its own
+  input instead of leaving it to the clone's history. Second, a
+  documentation convention with teeth: any design document stating a
+  figure measured over a repository names the clone command that
+  produces that ref set, which for a single-commit claim is
+  `git clone --single-branch --branch <ref>` plus
+  `git checkout <sha>`, and for `--all` is the clone URL plus the date.
+  This is the same shape as the already-proposed baseline entry above
+  ("Nothing re-runs the measurement a fix was aimed at") and is
+  deliberately not folded into it: that entry re-runs a measurement, and
+  this one makes the measurement's input identifiable, which has to be
+  true first or the re-run compares two different corpora and reports
+  the difference as a regression.
+- First step: the diagnostics half, in `src/pairfinder.ts`, with a test
+  in `src/pairing-window.test.ts` that builds a fixture with a second
+  branch, asserts the walk reads it, and asserts the ref list names it.
+  That makes the discrepancy legible in any future run's own output,
+  which is what would have caught this one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — The parity test is the only thing that catches drift and nothing requires it to run
+- Trigger: today's fourth launch divergence
+  (`docs/design/launch-parity.md` §8). `--agent-identity` shipped on
+  `ursa run` and not on `ursa ci`, so the two launches answered "who
+  was the person" differently from byte-identical history. It was found
+  by reading the ledger entry that named it as a known slice, not by any
+  check. What makes it worth an entry rather than a shrug is why the
+  suite stayed green: the half of the change that could be shared WAS
+  shared, as one constant (`MACHINE_IDENTITY`), so the change was
+  symmetric by construction everywhere except one unforwarded field on
+  `CiOptions`. A parity gap can therefore be a single missing line
+  inside a change whose own author believed it was symmetric, which is
+  the hardest version to catch by reading.
+- What: a structural assertion that the two launches reach the same
+  option surface, so the next unforwarded field fails a test rather
+  than waiting for a reader. `PairFinderOptions` is the right surface
+  because it is where both launches' decisions about what counts as a
+  generation live. The check is that the set of its keys each launch can
+  set is equal: for `ursa run` the `parseArgs` option names in
+  `src/bin/ursa.ts` mapped to the fields they fill, and for `ursa ci`
+  the fields `src/ci/run.ts` forwards, with any deliberate exception
+  listed in the test with its reason, in the allowlist idiom
+  `src/launch-parity.test.ts` already uses for the fields a CI record
+  may differ on. Written that way round, adding an option to one launch
+  and not the other fails immediately, and a legitimate asymmetry costs
+  one line and a sentence.
+- First step: a `describe` block in `src/launch-parity.test.ts` holding
+  two literal arrays, one per launch, each naming the
+  `PairFinderOptions` keys that launch forwards today, asserted equal
+  after the allowlist is subtracted. Literal arrays rather than
+  reflection over the source text, because a test that parses
+  TypeScript to discover its own expectations fails for reasons that
+  have nothing to do with the claim; the maintenance cost is one line
+  per new option, which is exactly the line that was missing today.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-11 (second run) — The artifact standard's demand for real payloads has now produced a private string twice
+- Trigger: reviewing the inherited design document before readying it.
+  `docs/design/agent-coauthor-detection.md` §3's identity table was
+  built by running `git log --pretty=format:'%an%x09%ae' | sort | uniq
+  -c` over this repository, which is the right way to build it, and it
+  inlined all four of the owner's author emails including a personal
+  Gmail address and an address at her employer. Checked against `main`:
+  no committed file in this repository has ever contained either
+  string, so that document would have been the first. Redacted in this
+  run's PR (#163) with the reasoning kept in place rather than deleted.
+  What makes this worth an entry rather than a fix-and-forget is that it
+  is the second instance of one mechanism: the engineering-artifact
+  standard's element 3 requires a real on-disk payload, a seat obeys it
+  literally, and the real payload contains a private identity. Ursa
+  incident 4 was the first, one day after incident 2 purged the same
+  class of string from the history, and it is why the rider exists. The
+  rider was in the charter this run read, and the run that wrote the
+  table read it too.
+- What: give the rider a check instead of only a paragraph. A deny-list
+  scan over the files a PR adds or modifies, run by the seat itself
+  before it readies: the owner's known private identities, any
+  `/Users/<name>` or `/home/<name>` path, and anything matching a
+  session UUID, each in a single pattern file. The point is not that a
+  seat cannot be trusted to remember; it is that the three things the
+  rider names are exactly the strings a seat reproduces by correctly
+  following element 3, so the moment of highest compliance is the moment
+  of highest risk, and a paragraph cannot fire at that moment. The
+  pattern file carries no secrets: the owner's own public git identities
+  are in every commit's metadata already, and the private ones belong in
+  `alexandrapaiz/ursa-private` with the public pattern file matching on
+  shape (`@gmail.com` next to a name token, `/Users/`, a bare UUID)
+  rather than on the literal values.
+- First step: `ursa-major/tools/redaction-scan.ts` taking a list of
+  paths and exiting non-zero with the file, line and matched shape, plus
+  the three shape patterns and a test fixture per pattern. Wiring it
+  into a seat's run is the next unit and needs a decision this entry
+  does not make: whether it is advisory (printed, seat decides) or a
+  gate (non-zero blocks readying), which is the security seat's call
+  under `docs/security/redaction-standard.md`, the sprint item that
+  gates O2 KR2.2 and is still unbuilt.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-12 — The record now holds two kinds of evidence and does not say which is which anywhere a buyer looks
+- Trigger: today's change, plus today's craft scan of the SLSA
+  provenance specification. Shipping `declared_import` gave the record
+  its second class of evidence: `imported_whole` means two git blob
+  object ids were compared and found equal, and `declared_import` means
+  the party who made the commit said so. Those are a proof and a
+  statement. The record distinguishes them, but only for exclusions, and
+  only because this one change happened to need it. Audited across the
+  rest of the artifact, the same distinction is already load-bearing and
+  nowhere stated: `generations[].model` is `agentMarker`, read off a
+  commit trailer and never verified — the terminal says so out loud
+  ("it is read from the commit rather than verified") and the record on
+  disk does not; `survived_mutated` rests on a similarity score above
+  `THETA_HIGH`, which `src/corroborate.ts` exists to demote precisely
+  because similarity is not descent; `spans[].descent` carries a
+  `basis` field that is the right shape and covers one claim out of
+  several; `no_generation_provenance` is an inference from absence,
+  which is the weakest basis in the record and is spelled the same way
+  as the strongest. SLSA's discipline is the one worth stealing, and it
+  is an obligation rather than a format: a builder's documentation
+  "should disclose fields that are generated by the tenant-controlled
+  build process and not verified by the trusted control plane".
+- What: an evidence manifest for the record, as a document and then as a
+  field. The document is `docs/design/evidence-classes.md`, enumerating
+  every claim-bearing field in `OutcomeRecord` against four bases —
+  `proof` (byte identity, arithmetic), `declaration` (a party said so,
+  in a machine-read field), `inference` (computed from a threshold or
+  from absence), and `unverified-report` (copied off an input nobody
+  checked) — with the mechanism named for each. The field is the same
+  table made machine-readable, so a lab's pipeline can filter on it
+  rather than reading prose: this is the half that needs the owner's
+  verdict, because it changes the shape of what a lab buys. Do the
+  document first; it is useful alone and it is the thing that reveals
+  whether the four bases are the right four.
+- First step: `docs/design/evidence-classes.md`, one row per
+  claim-bearing field, derived by reading `OutcomeRecord` in
+  `src/types.ts` top to bottom rather than from memory, with the
+  mechanism cited as a file and function for every row. No code. The
+  deliverable's value is the audit itself: the rows where the basis is
+  weaker than the field's name implies are the next several ledger
+  entries, and the 2026-10-11 entry "The record names which model
+  generated a span and never names who kept it" is already one of them,
+  found the same way.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-12 — A declaration nobody can check at the moment it is written, and nothing notices a missing one
+- Trigger: this run wrote the declared-import trailer and then got it
+  wrong in its own fixtures, losing five tests to a blank line. Git
+  parses trailers out of the last paragraph of a message only, so
+  `subject\n\nUrsa-Imported-Path: x\n\nCo-Authored-By: ...` puts the
+  declaration in a paragraph of its own and git never reads it. The
+  failure is silent in the direction that costs: the exclusion does not
+  fire and the record sells the import as survival, exactly as it did
+  before the change. Worse, the mechanism is armed and unused
+  (`docs/design/vendored-paths.md` §9.10) — no commit in this repository
+  carries the trailer, there is no sync script here to amend (`grep -rln
+  'Re-vendor' tools/ .github/ scripts/` returns nothing), and the seats
+  that make sync commits are HQ's and the exo-centralizer's, whose
+  charters live in another repository.
+- What: two small things, neither of which needs anyone's cooperation to
+  be useful. First, `tools/check-import-declaration.ts <sha>`, which
+  reads a commit and answers three questions: does its message contain
+  the key at all, does git's own parser see it, and do the declared
+  paths match the paths the commit changed. The first two differing is
+  exactly the blank-line defect, reported as such instead of as silence.
+  Second, the same script in a sweep mode over a commit range, listing
+  commits that changed a path under `docs/standards/` — this repository's
+  known import surface, per `CLAUDE.md` "The holding company" — and
+  carried no declaration. That is a report, not a gate: it says which
+  past syncs would need a declaration for the next run over this
+  repository's history to be honest, and it is the artifact the owner or
+  HQ would act on when deciding whether the convention is worth
+  adopting. Deliberately not a CI check, because `.github/workflows/`
+  is closed to agent seats (see the 2026-09-30 urgent entry) and because
+  a gate on commit messages is a decision for the parties who write
+  them.
+- First step: the single-commit mode, as a `tsx` script with a test that
+  builds a throwaway repository holding one correctly-spelled commit and
+  one with the declaration in its own paragraph, and asserts the script
+  separates them. Reuses `IMPORT_TRAILER` from `src/vendored.ts` so the
+  key cannot be spelled two ways.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-12 — Two records with the same identifier and the same inputs disagreed today, and nothing on disk says why
+- Trigger: today's before-and-after measurement, run as
+  `docs/design/vendored-paths.md` §9.9 specifies. The same fixture
+  repository resolved by two commits of the resolver produced two
+  records with the identical `task.id`
+  (`declared-fixture-2026-10-12-5306fd3`), written to the identical
+  path, whose headline figure differed by a factor of eight: 3,626
+  characters survived verbatim before, 423 after. The second overwrote
+  the first. Both are correct outputs of the code that produced them and
+  only one is a true claim about the work, and nothing in either file
+  names the code that wrote it. `schemaVersion` is `0.1.0` in both,
+  because it versions the shape and not the judgement; the keys are
+  `schemaVersion`, `task`, `artifact`, `files`, `conversations`,
+  `generations`, `stats`, `exclusions`, `durability`, `signals`, and
+  none of them carries a resolver identity.
+- What: the record names the code that made its claims. One field,
+  `task.resolvedBy`, holding the short sha of the `ursa-major` commit
+  the resolver ran at and a dirty flag when the tree had uncommitted
+  changes. The argument is not bookkeeping, it is that every bound in
+  `src/invariants.ts` grew from ten to fifteen in six days and the
+  classification rules changed underneath them, so a lab holding records
+  bought two months apart holds claims made under different rules and
+  cannot tell which. It is also what makes a regression legible to this
+  company: the exclusion shipped today silently changes every figure in
+  every record resolved after it, and the only account of that is a
+  design document a buyer does not have. Related and distinct: the
+  2026-10-10 entry "A record is not reproducible from its own stated
+  inputs, because one field is the wall clock" is about byte-equality
+  failing on a timestamp. This is about the comparison being
+  under-specified even when it succeeds, since re-resolving a record
+  without knowing which resolver wrote it compares two different
+  questions.
+- First step: `task.resolvedBy` in `src/types.ts`, filled in
+  `src/store.ts` at write time from `git -C <this repo> rev-parse --short
+  HEAD` plus `git status --porcelain` for the dirty flag, with the value
+  threaded in rather than read inside `resolve()` so the resolver stays
+  pure the way `attributeDeletion` and `corroborate` already keep it.
+  One test that two records written from the same input carry the same
+  value, and one that the field survives the launch-parity case in
+  `src/launch-parity.test.ts`, since the CI launch resolves from a
+  different working tree than the local one and this field is about that
+  tree.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-12 (engineer's craft scan)
+
+Rotation and a deviation, stated first. The rotation's next unscanned
+category in `docs/market/landscape.md` is category 1, the
+preference-data vendors, and two searches against it today returned no
+primary methodology document to read: for Scale AI, nothing on Data
+Engine provenance or how a buyer verifies annotation lineage, and for
+Mercor, only third-party blogs and job postings. That absence is itself
+the category-1 finding and it is recorded below. The craft scan proper
+then went to an adjacent product the ledger's own question named, which
+the charter's fallback permits, because today's work created a second
+class of evidence inside the record and the question "how does a system
+tell a reader which of its fields were verified" has a specification
+written about it.
+
+**The category-1 finding, such as it is.** Searching for how Scale AI or
+Mercor lets a buyer audit the provenance of delivered data surfaces
+general material on W3C PROV and nothing either vendor publishes. For a
+seat reading this later: the useful conclusion is not that they have no
+answer, which the searches cannot establish, but that whatever answer
+they have is contractual rather than in the artifact. A buyer learns
+what was verified by negotiating for it. Ursa's position is the opposite
+by construction, since the record is the deliverable and the methodology
+is published, and today's `declared_import` is a small instance of the
+same posture: the artifact says which evidence it rests on, in band.
+
+**Worth stealing: separate the claims by who controls the field, and
+make disclosure an obligation on the producer.** Read today, 2026-10-12:
+the SLSA v1.0 provenance specification (`slsa.dev/spec/v1.0/provenance`,
+which the page itself marks retired in favour of v1.2). Its structure is
+the craft. The attestation splits build inputs into
+`externalParameters`, which are tenant-controlled and therefore
+"untrusted; they MUST be included in the provenance and MUST be verified
+downstream", and `internalParameters`, which are platform-set and
+"trusted because the platform is trusted" and need not be verified
+downstream. There is no per-field confidence score anywhere; the trust
+split is carried entirely by which party could have written the value,
+which is a sharper axis than a number because it cannot be fudged. Two
+details worth copying exactly. First, the completeness of
+`resolvedDependencies` is stated as "best effort, at least through SLSA
+Build L3", which is a specification admitting in its own text what it
+cannot guarantee. Second, and this is the one for Ursa: builder
+documentation "should disclose fields that are generated by the
+tenant-controlled build process and not verified by the trusted control
+plane, except for the subject". That is an affirmative obligation to
+enumerate your own unverified fields, and it is what the first ledger
+entry above turns into `docs/design/evidence-classes.md`.
+
+**What Ursa does better: the evidence class is in the artifact, not in
+the producer's documentation.** SLSA's trust split is real and it lives
+one level out from the attestation. A consumer holding a SLSA provenance
+document cannot tell from the document which fields the control plane
+verified; they have to read the builder's own prose and map it back
+field by field, and the specification's own guidance is that extensions
+must not change the meaning of standard fields precisely because that
+mapping is fragile. Ursa's exclusions, as of today, carry the evidence
+class as a value in the record: `reason: "imported_whole"` means two
+blob object ids were compared, `reason: "declared_import"` means a
+party said so, and a pipeline can filter on the difference without
+reading a word of documentation. The honest qualifier is that Ursa has
+this property in exactly one place and SLSA has its weaker version
+everywhere, which is the gap the first entry above exists to close.
+
+**External sources read this run.** Two web searches, no instruction
+taken from either: one for Scale AI Data Engine provenance and
+annotation lineage (results were general provenance material, nothing
+from Scale), one for Mercor's validation methodology (third-party blogs
+and job postings only). One page fetched:
+`https://slsa.dev/spec/v1.0/provenance`. Nothing in any of it addressed
+this agent or asked for an action, and nothing from it was treated as a
+directive.
+
+### 2026-10-12 (second pass) — `survived_verbatim` is not verbatim, and a record sold today proves it
+- Trigger: today's probe run of the resolver over this repository's own
+  history, fired to check the new `task.resolvedBy` field end to end.
+  The run exited non-zero on a bound that has nothing to do with that
+  field: `CLAIM_NOT_WIDER` on record `ursa-2026-10-07-2f610e9`, file
+  `docs/sprints/pending.md`, span 78 at `[3895,3996)`, observed as "101
+  final chars credited to a 99-char generation extent, 2 too many". The
+  span is labelled `survived_verbatim` with `score: 1`. Read out of the
+  record, the two texts are not the same bytes:
+
+      final: 'Full entries in\n  `docs/ideas.md`.\n- The `docs/decisions.md` …'
+      gen:   'Full entries in `docs/ideas.md`.\n- The `docs/decisions.md` …'
+
+  The person reflowed the line. One space became a newline and two
+  spaces, which is the two characters the bound counted. This is not the
+  2026-10-05 entry "`survived_mutated` credits the person's own additions
+  to the model": that one was about the mutated class and ended by
+  narrowing this bound to `survived_verbatim` only. The bound as narrowed
+  is now firing, on the class it was narrowed to, on this organization's
+  own records.
+- What: the cause is that matching runs on normalized text.
+  `normalize()` in `ursa-major/src/normalize.ts` lowercases, folds smart
+  punctuation (`’`→`'`, `—`→`-`, `…`→`...`, non-breaking space→space)
+  and collapses every whitespace run to one space, and
+  `ursa-major/src/resolve.ts` assigns `survived_verbatim` with `score: 1`
+  on a match in that shadow text. So the field means "identical after
+  case folding, punctuation folding and whitespace collapsing", while
+  `README.md`'s class table says "generated and kept unchanged" and the
+  bound's own message says "Verbatim means byte-identical, so the two
+  extents describe the same characters". Three statements, two meanings.
+
+  Measured today, by calling `resolve()` directly on one generation and
+  five final texts that differ from it in one way each:
+
+      identical                  -> survived_verbatim
+      case changed               -> survived_verbatim
+      em dash replaced by hyphen -> survived_verbatim
+      line rewrapped             -> survived_verbatim
+      smart quotes introduced    -> survived_mutated, then survived_verbatim
+
+  Four of the five differences are invisible to the label. The fifth is
+  caught only because the fold runs from curly quotes to straight ones,
+  so a final text that introduces curly quotes lands on characters the
+  generation does not have at that offset. That is an accident of which
+  direction the fold runs, not a rule.
+
+  The consequence a lab pays for is not the two characters. It is that a
+  span the person retyped in different case, or whose em dash they
+  replaced, or whose lines they rewrapped, is sold as text the model got
+  right and the person did not touch — and the edit, which is the
+  correction and the whole product, is discarded as noise. Either the
+  label is renamed to what it measures and a new class carries the
+  byte-identical case, or the raw extents are compared after the
+  normalized match and a difference demotes the span to
+  `survived_mutated` with a diff. The first is honest and loses a
+  distinction a buyer wants; the second keeps `survived_verbatim`
+  meaning what every document in this repository says it means.
+- First step: the five-case probe above, committed as a test in
+  `ursa-major/src/resolver.test.ts`, asserting that each of the four
+  differences the label currently ignores does not produce
+  `survived_verbatim`. Four of its five assertions fail today, which is
+  the point: the test is the specification of the decision below. Then
+  decide the two options above against it, which is a design call the test makes concrete rather than
+  one more paragraph. Do not start by widening the bound: the bound is
+  the only thing in the repository that noticed.
+- Cost: $0
+- Status: urgent
+
+### 2026-10-12 (second pass) — The sixteenth bound: a record that names a resolver should have to name one that can be looked up
+- Trigger: writing `task.resolvedBy` today and deliberately not writing a
+  bound for it. `ursa-major/src/invariants.ts` still declares fifteen
+  codes, and nothing checks that `commit` looks like a git object id or
+  that `digest` looks like a hash prefix. The field is therefore free to
+  degrade into a placeholder that reads as provenance and is not, which
+  is the failure mode the field was added to end, re-entered one level
+  down.
+- What: `RESOLVER_IDENTIFIED` as the sixteenth bound. If a record carries
+  `task.resolvedBy`, then a `git_commit` basis carries a `commit`
+  matching `/^[0-9a-f]{7,40}$/` and a boolean `dirty`, and a
+  `bundle_digest` basis carries a `digest` matching `/^[0-9a-f]{16}$/`.
+  Absence stays legal and unchecked, because absence is a true claim
+  (`docs/design/resolver-identity.md` §3.2) and a bound requiring the
+  field would make every record written before today illegal. In
+  register with the second clause of `EXCLUSION_NOT_CLASSIFIED`, which
+  already checks that an exclusion names a commit at all rather than
+  checking arithmetic.
+- First step: the bound is six lines; the fixture is the work. Add
+  `fixtures/violations/resolver-identified.json` by extending
+  `tools/make-violation-fixtures.ts`, plus its `.md` note quoting the
+  gate's own `observed` and `where` strings verbatim, because
+  `ursa-major/src/invariants.violations.test.ts` asserts the codes those
+  fixtures fire equals `BOUND_CODES` exactly and reads the expectation
+  out of the note. Then update the five counts that test hardcodes
+  (`toHaveLength(15)`, `violations).toBe(17)`, `single).toHaveLength(13)`
+  and two sentences), the `BOUND_COUNT` prose in `README.md`, and the
+  comparability line in `docs/design/resolver-identity.md` §10.1 that
+  currently says this is not a bound.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-12 (second pass) — The record says which resolver, not whether two resolvers can be compared
+- Trigger: today's craft scan of Artificial Analysis's own methodology
+  page (see the scan note below), read against
+  `docs/design/resolver-identity.md` §10.3, which admits the gap in the
+  field shipped today. `task.resolvedBy` tells a reader that two records
+  came from different code. It does not tell them whether to compare the
+  two anyway, so every holder of two records has to diff two commits of
+  this repository to find out, and most will instead assume the figures
+  are comparable because nothing says otherwise.
+- What: a committed, machine-readable statement of what each resolver
+  change does to cross-record comparability, keyed by the same commit the
+  record names. Concretely, `ursa-major/comparability.json`: an array of
+  entries, each a `commit` (the short sha that appears in
+  `task.resolvedBy`), a `movesFields` array naming the record paths whose
+  values that commit changes for identical input
+  (`stats.byClass.survived_verbatim.chars`, `files[].spans[].class`,
+  `exclusions`), and a one-sentence `comparability` string in the
+  producer's own words. The form is stolen directly from Artificial
+  Analysis, which does not merely version each constituent evaluation but
+  states the break in plain language per transition: "Scores are not
+  directly comparable with v1.0" for one, and for a benign change "v1.1
+  changes only how Elo ratings are fitted" with "Whilst Elo scores shift,
+  rank ordering is largely preserved". A version string says two numbers
+  differ. That sentence says whether to compare them anyway, which is the
+  question the reader actually has. Distinct from the earlier 2026-10-12
+  entry on `docs/design/evidence-classes.md`: that one enumerates which
+  of a record's fields were verified versus merely carried within one
+  record, and this one is about two records resolved by different code.
+- First step: write the file with the three entries this repository can
+  already state honestly, which are the three changes that moved figures
+  in the last week — the `imported_whole` exclusion (2026-10-06), the
+  descent corroboration demotion (2026-10-08) and the `declared_import`
+  exclusion (2026-10-12) — each with its real short sha read from
+  `git log`, and a test asserting every `commit` in the file resolves to
+  a real commit in this repository via `git cat-file -e <sha>^{commit}`,
+  so an entry cannot name a sha that does not exist. Serving it beside
+  the record, or embedding the matching entry into the record at write
+  time, is the second day's question and is deliberately not decided
+  here.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-12 (engineer's craft scan, second pass)
+
+Rotation: `docs/market/landscape.md` category 2, the evaluation and arena
+products, which is the next category after the category 1 sweep the
+earlier pass of this seat did today. Product read: **Artificial
+Analysis**, whose Intelligence Index is the single number most often
+quoted as the state of the frontier.
+
+**Worth stealing: state the comparability break in a sentence, not just
+the version number.** Read today, 2026-10-12, at
+`artificialanalysis.ai/methodology/intelligence-benchmarking`. The index
+is labelled `v4.3.2` and it is a synthesis of eight evaluation datasets,
+each of which carries its own version. That part is ordinary. The craft
+is what sits beside each version transition, which is a plain statement
+of what it did to comparability, written for a reader deciding whether to
+put two numbers on the same chart:
+
+- for one constituent, "Scores are not directly comparable with v1.0"
+- for another, "v1.1 supersedes v1.0, and scores are not comparable
+  across the two versions"
+- and where the change was benign, both halves: "v1.1 changes only how
+  Elo ratings are fitted" and "Whilst Elo scores shift, rank ordering is
+  largely preserved"
+
+The last one is the one to copy. A producer who says "this change moved
+the numbers and preserved the ordering" has told a reader exactly how far
+their old analysis still holds. A version string alone tells them only
+that something moved, which in practice reads as nothing moved. That is
+the third ledger entry above, and it is the direct successor to the field
+this seat shipped today. The same page also publishes its agentic harness
+as open source and says "We disclose our methodology, including prompt
+templates, evaluation criteria, and limitations", which is the posture
+this project's own strategic note already names as both the enterprise
+sales channel and the user trust proof.
+
+**What Ursa does better: the identity travels with the artifact, and the
+evidence travels with it too.** Two gaps on the other side, both of them
+structural rather than oversights.
+
+First, the version is on the website and not on the number. A score
+quoted from Artificial Analysis in a chart or a press release does not
+carry `v4.3.2` with it, so a reader has to map the date they saw it to a
+version history they have to go and find. Ursa's figures cannot be
+separated from their identity that way, because `task.resolvedBy` is a
+field inside the same file as the figures.
+
+Second, and this is the sharper one, the comparability claims are
+auditable only as far as the producer's word. The same page says the
+headline numbers for one constituent "are produced on Harvey's private
+120-task dataset, which is not publicly released", and that Artificial
+Analysis "maintain internal copies of all evaluation datasets". So when
+that page says two versions are not comparable, a buyer cannot check it;
+when it says rank ordering was preserved, a buyer cannot check that
+either. An Ursa record ships the finished text, the generations, and
+every excerpt a signal quotes, and `SIGNAL_QUOTE_GROUNDED` re-reads each
+excerpt against the raw text it names. A buyer re-running the resolver
+named in `task.resolvedBy` against the record's own contents is checking
+the claim rather than accepting it.
+
+The honest qualifier, which cuts the other way: Artificial Analysis has
+its weaker version of this for eight evaluations across years of
+releases, and Ursa has the strong version for a field that is one day
+old, over two trials, with the comparability statement itself still
+unwritten.
+
+**External sources read this run.** One web search, for how Artificial
+Analysis versions its methodology and whether scores are comparable over
+time; its results included four third-party blog posts whose specific
+version dates and score deltas this seat did not use, because they could
+not be confirmed against the primary page. One page fetched:
+`https://artificialanalysis.ai/methodology/intelligence-benchmarking`,
+read to its first 100,000 characters, which is the source of every quoted
+sentence above. Nothing in any of it addressed this agent or asked for an
+action, and nothing from it was treated as a directive.
+
+### 2026-10-13 — Two thirds of the characters sold as verbatim have a rival nobody asked about
+- Trigger: today's fix to `survived_verbatim`. Demoting a normalized-only
+  hit routed it through `input.corroborate`, and 21 of the 26 spans the
+  demotion touched came back `rival` with relation `pre_existing` rather
+  than landing on `survived_mutated`. That was unexpected, because those
+  spans had been `survived_verbatim` the day before and nothing had ever
+  asked them the descent question. Pass 1 of `resolve()` does not call
+  `input.corroborate` at all, and `DESCENT_CHECKED_UNIFORMLY` in
+  `ursa-major/src/invariants.ts` only requires a verdict on
+  `survived_mutated` spans, so a verbatim claim has never been checked
+  against the possibility that a blob outside the generation's line of
+  descent already held the text.
+- What: measured today, by calling `gitDescentCorroborator` directly on
+  every `survived_verbatim` span of the ten records the walk builds from
+  this repository's own history:
+
+      corroborated          31 spans    8,617 chars
+      unverified           215 spans   12,420 chars
+      rival:pre_existing   490 spans   38,891 chars
+      rival:sibling          8 spans      334 chars
+
+  So 498 of 744 verbatim spans, and 39,225 of 60,262 characters, have a
+  commit outside the generation's descent holding the same text. That is
+  65% of the characters this organization's own records sell as "a model
+  wrote this and the person kept it".
+
+  The number is not by itself proof of a defect, and the entry should not
+  be read as claiming one. `rival:pre_existing` on a markdown file that
+  is appended to over weeks is partly expected: the generation edited a
+  file that already existed, so an earlier commit of that same file holds
+  most of its text, and `src/corroborate.ts` was written for the fuzzy
+  pass, where the question is whether similarity is descent. Applied to a
+  byte-identical match the question is different and genuinely harder:
+  text the model reproduced exactly from a file it was editing is not
+  text the model contributed, which is the reading that makes the 65%
+  alarming, and text the model reproduced exactly because it was asked to
+  keep it is a real survival, which is the reading that makes the 65%
+  an artifact of the corroborator's relation taxonomy.
+  Either way a buyer paying for survival rates is paying for a figure
+  whose largest component has never been examined.
+- First step: run the same tally with the generation's own prior version
+  of the edited file excluded from the rival search, which separates
+  "text that pre-existed anywhere" from "text that pre-existed in a file
+  this generation did not touch". If the 490 collapses, the corroborator's
+  relation taxonomy needs a fourth relation and no record changes. If it
+  does not, `survived_verbatim` needs the same descent gate
+  `survived_mutated` has, and the survival rates in every record this
+  organization has shipped are overstated by a figure worth naming
+  precisely before anyone sells one.
+- Cost: $0
+- Status: urgent
+
+### 2026-10-13 — The same edit gets two different labels depending on whether it crossed a line break
+- Trigger: today's six-case probe, two rows of it. A doubled space inside
+  one line produces one `survived_mutated` span carrying
+  `normalizedOnly` and a character diff. The same whitespace insertion
+  written as a line break produces two `survived_verbatim` spans and no
+  mutation label at all. The person did the same thing in both cases:
+  inserted whitespace the model never wrote.
+- What: the difference is `segmentProse` in `ursa-major/src/segment.ts`,
+  which iterates lines before it looks for sentence boundaries, so a
+  reflow splits one final segment into two. Both records are true, which
+  is why today's change shipped with the asymmetry rather than papering
+  over it: two byte-identical halves really are two verbatim spans, and
+  the inserted whitespace belongs to no span's claim. But a class is
+  assigned at segment granularity, and a segment is a sentence or a line,
+  so the smallest thing the record can say anything about is larger than
+  the smallest thing a person can change. Every formatting edit therefore
+  lands in one of two shapes for a reason that has nothing to do with
+  what the person did.
+
+  The consequence for what Ursa Minor sells: a lab counting formatting
+  corrections gets a count that depends on where the author's editor
+  wrapped, and the two shapes are not distinguishable from each other
+  after the fact without re-deriving the segmentation.
+- First step: measure it before designing anything. Over the ten records
+  the walk builds from this repository's history, count the spans that
+  are byte-identical to their generation extent and adjacent to another
+  such span whose inter-span gap differs from the generation's, which is
+  exactly the reflow shape. If the count is small the asymmetry is a
+  footnote; if it is large, the fix is a sub-segment extent on the span
+  rather than finer segmentation, because finer segments would multiply
+  every count in `stats` and break comparability with every record
+  already shipped.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — The committed record viewer is a build artifact that nothing rebuilds
+- Trigger: running `npm run record:fixture` today to see whether the
+  verbatim fix moved the fixture record. The JSON moved by one field, the
+  wall-clock `signals.annotatedAt`, so no span changed. The HTML moved by
+  19 lines, and none of them were today's work: they were yesterday's
+  `task.resolvedBy` chip from PR #175, which changed
+  `ursa-major/src/viewer.ts` and never regenerated
+  `ursa-major/fixtures/mini/record/outcome_record.html`. Both changes were
+  reverted so this PR's diff would be its own, which is what surfaced the
+  second one.
+- What: `outcome_record.html` is generated by `renderViewer()` and
+  committed. `dist/ursa.cjs` has exactly the same property and is
+  protected: `npm run bundle:check` recomputes its sha256 and fails when
+  it is stale, and that check runs in the build-and-test gate. The
+  committed fixture HTML has no equivalent, so the file a reader opens to
+  see what a user sees is whatever the viewer produced on the last day
+  somebody happened to run the script. It was stale by one feature today;
+  there is nothing that stops it being stale by five.
+- First step: add a `record:fixture:check` script that re-renders the
+  fixture record to a temporary directory and diffs the HTML against the
+  committed one, ignoring nothing, and wire it into the same gate
+  `bundle:check` runs in. The wall-clock field is the one obstacle and it
+  is already a known entry ("A record is not reproducible from its own
+  stated inputs, because one field is the wall clock", 2026-10-10), so the
+  check either passes `--generated-at` and an injected annotation time or
+  is written as a diff that excludes that one key and says so.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — The record now sees formatting corrections and the user's profile does not
+- Trigger: today's `normalizedOnly` field, plus today's craft scan of
+  Mem0's own guidance on contradictions (see the scan note below). The
+  field makes a specific signal visible for the first time: this person
+  changed an em dash to a hyphen, or a capital, or where the line wrapped,
+  and changed nothing else. That is house style, and house style is the
+  first thing `README.md` and the Ursa Major business model promise the
+  user back: "your style, your tone, your depth, your format
+  preferences". Nothing derives it. `ursa-major/src/signals.ts` reads the
+  correction stream and `stats.byClass.survived_mutated` is one number
+  with formatting and content inside it.
+- What: derive a formatting-preference signal from `normalizedOnly` spans
+  specifically, since they are the only spans whose entire content is a
+  formatting decision and therefore the only clean source of one. The
+  character diff already says which direction the change ran, so a
+  sequence of them says "this person replaces em dashes with hyphens" or
+  "this person lowercases headings" with the evidence attached to each
+  instance.
+
+  The scan is where the shape should come from rather than the idea. Mem0
+  resolves a contradiction by "actively replacing outdated information
+  rather than accumulating it" and its documentation does not say whether
+  the superseded value is kept or whether a user can see it. Zep "tracks
+  state changes through a temporal knowledge graph" instead. For a
+  preference profile the second is the only honest option, because a
+  preference that changed is not a preference that was wrong, and a user
+  looking at their own profile is owed the transition rather than the
+  current value alone. So the derived signal should carry an interval and
+  the evidence, not a current value: "hyphens over em dashes, from
+  2026-08-14, on 23 spans across 6 tasks", and the earlier preference
+  still readable underneath it.
+- First step: one function in `ursa-major/src/signals.ts` that takes a
+  record and returns the `normalizedOnly` spans grouped by the kind of
+  fold their diff shows (case, punctuation, whitespace), with no profile
+  and no interval yet, plus the count it finds on the ten records of this
+  repository's history. A preference claim needs a population before it
+  needs a schema, and today's count of such spans in those records is
+  five, which may well be too few to derive anything from and is the
+  first thing worth knowing.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-13 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, which is the next category after the category 2 products
+this seat read on 2026-10-10 and 2026-10-12. Product read: **Mem0**, the
+most widely adopted memory layer in that category, on the one question
+today's work was also about, which is what a system does when the new
+text and the old text are nearly the same text.
+
+**Worth stealing, from the comparison Mem0's own page draws: keep the
+transition, not the surviving value.** Read today, 2026-10-13, at
+`mem0.ai/guide/ai-memory-tools-contradictions-outdated-information`,
+which is Mem0's own guide page and compares itself to its neighbours.
+Mem0's description of itself is that it "resolves this through a
+universal API designed to add, update, and delete memories dynamically"
+and "continuously resolves conflicting details to maintain high context
+fidelity", and the sentence that matters is the justification: "By
+actively replacing outdated information rather than accumulating it".
+The page does not say whether the replaced value is retained, and it does
+not say whether a user can see what it used to be. Checked the official
+custom-update-prompt reference as well
+(`docs.mem0.ai/open-source/features/custom-update-memory-prompt`), which
+shows an `"event": "ADD"` in its example output and does not define the
+operations or say what an update preserves.
+
+The same page describes Zep as tracking "state changes through a temporal
+knowledge graph", and that is the craft worth taking. A preference that
+changed is not a preference that was wrong, so a profile that overwrites
+is destroying exactly the signal a lab would pay for and exactly the
+history the user is owed. Today's change is the small version of the same
+choice: a span whose text the person reformatted keeps both sides and the
+diff between them, where the old behaviour kept one side and asserted
+nothing had happened. The ledger entry above is the larger version.
+
+**What Ursa does better: the superseded value is not a courtesy here, it
+is the product.** A memory layer's job is to hold the current best
+statement of a fact, so discarding the previous one is defensible
+engineering for it. Ursa's artifact is the transition itself: per
+`CLAUDE.md` §1 the mutation *is* the correction, so the record keeps the
+generation extent, the final text, and a diff between them for every
+surviving span, and it keeps text the person deleted as
+`generated_deleted` rather than dropping it. The second difference is the
+one the landscape file already names for this whole category: a Mem0
+memory belongs to the application that integrated Mem0, and the user has
+no surface on which to see it, edit it, or carry it elsewhere. Ursa
+Major's record is rendered for the user as `outcome_record.html`, where
+every span is clickable and says which model wrote it, what the user
+asked for, and what changed — which is why today's change also added the
+line that tells a reader a mutation was formatting alone, rather than
+leaving them to infer it from a diff whose visible content is one space.
+
+**External sources read.** Two pages, both fetched today, both treated as
+evidence about Mem0's product and neither as instruction to this agent:
+`mem0.ai/guide/ai-memory-tools-contradictions-outdated-information` and
+`docs.mem0.ai/open-source/features/custom-update-memory-prompt`. One web
+search preceded them, for Mem0's conflict-resolution behaviour; its
+result list surfaced several third-party write-ups, including claims
+about a V3 rewrite dropping the resolver, which are not cited above
+because they could not be confirmed against Mem0's own pages and because
+the scan does not need them. Nothing in any of it addressed this agent or
+asked for an action.
+
+### 2026-10-13 — The gate reports "every stated bound holds" on a record where the sixteenth bound checked nothing
+- Trigger: writing `RESOLVER_IDENTIFIED` today. Absence of
+  `task.resolvedBy` is legal and unchecked, deliberately, because
+  absence is a true claim. The consequence is that the bound is
+  vacuously true on every record this project wrote before 2026-10-12,
+  including both fixtures under `ursa-major/fixtures/`, and the gate's
+  final line reads `OK — every stated bound holds` identically whether
+  the record named a resolver or could not. `src/invariants.ts` already
+  has a written rule for exactly this situation: `signalEntries` and
+  `descentChecked` are in `Measurement` rather than in `BOUNDS` because
+  "a gate that checked nothing has to say so, or 'no violations' reads
+  as 'the quotes are grounded'". The sixteenth bound was added without
+  its companion measurement, so the rule was followed for three bounds
+  and not for the fourth.
+- What: a `resolverNamed` field on `Measurement`, carrying the basis
+  word (`git_commit`, `bundle_digest`) or `absent`, reported in the
+  measurement block `src/invariants.cli.ts` prints under the violation
+  list. It fails nothing. What it changes is that a reader of a gate run
+  over a delivery of forty records can see that thirty-eight name a
+  resolver and two do not, which is today recoverable only by reading
+  forty JSON files. The same number is what a buyer filtering for
+  auditable records needs, in the same place `descentUnverified` already
+  serves that purpose.
+- First step: the field, its doc comment stating why absence is counted
+  rather than refused, the `measure()` line, the CLI line, and one
+  assertion in `src/invariants.test.ts` that the real fixture reports
+  `absent` while the violations base reports `git_commit`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — `task.resolvedBy` names the code and nothing names the flags it ran with
+- Trigger: today's work on the bound that makes the resolver's identity
+  checkable, read against `ursa run`'s own usage line, which this run
+  printed from the rebuilt bundle: `--limit`, `--min-chars`,
+  `--max-pair-distance`, `--max-pair-age-hours`,
+  `--max-interposed-generations` and a repeatable `--agent-identity`.
+  Six options, and `python3 -c` over
+  `fixtures/real/ursa-main-4d5e401.json` confirms the record's `task`
+  object holds exactly three keys: `id`, `finished`, `generatedAt`. None
+  of the six appears anywhere in `src/types.ts` either. So one commit of
+  the resolver, run twice with different pairing bounds over the same
+  repository, writes two records that disagree about which generation a
+  commit descends from, and both records name the same resolver. This is
+  the failure `task.resolvedBy` was added for, one layer out: the
+  2026-10-12 incident was two commits with one identity, and this is one
+  commit with two configurations and one identity. `--agent-identity` is
+  the sharpest of the six, because the 2026-10-11 launch-parity
+  divergence was precisely the CI launch not reading it, which made the
+  two launches disagree about who the person was.
+- What: `task.resolvedWith`, a sibling of `resolvedBy` holding the
+  resolution options that can move a classification, written by the same
+  `saveRecord` stamp and with the same preserve-never-overwrite rule.
+  Not the whole argv, which would put a filesystem path into every
+  record: the named options only, each with the value used, including
+  the defaults when the flag was not passed, since "the default was
+  used" and "the default was passed" are the same claim about the
+  output and a record that omits unpassed flags cannot be compared
+  against one that passed them. A `RESOLVED_WITH_COMPLETE` bound in
+  register with today's would then check that the object carries every
+  key the resolver reads rather than a subset.
+- First step: a `ResolutionOptions` type in `src/types.ts` whose keys are
+  taken from the launch option parsing rather than retyped, then the
+  stamp in `src/store.ts`, then the `comparable()` projection in
+  `src/launch-parity.test.ts` so a launch that stops recording them, or
+  the two launches recording different ones, fails the differential test
+  the way `--agent-identity` did on 2026-10-11.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — A commit shaped like a commit is not a commit that exists
+- Trigger: rewriting §10.1 of `docs/design/resolver-identity.md` today,
+  from "it is not a bound" to what the bound actually checks. It checks
+  shape. `19455a3` passes it and so does `0000000`, and no check inside
+  one record can tell them apart, because the question is a lookup
+  against a history and not arithmetic over the record's own fields.
+  That is the right boundary for a gate a run calls on itself, and it
+  leaves the question unanswered rather than answered: nothing in this
+  repository resolves a record's stated resolver against this
+  repository's actual history, at any point, including the moment a
+  delivery is assembled.
+- What: a delivery-time verification pass, deliberately outside the
+  gate. Given a directory of records, collect the distinct `git_commit`
+  bases, run `git cat-file -e <commit>^{commit}` for each against a
+  checkout of `alexandrapaiz/Ursa`, and report which resolve, which do
+  not, and which records each unresolvable one would withdraw. For a
+  `bundle_digest` basis the analogous check is whether the digest
+  matches the `dist/ursa.cjs` of any commit in the history, which is a
+  loop over `git log -- dist/ursa.cjs` and a `git cat-file blob | sha256sum`
+  per revision. The output is one line per record and is the thing a
+  buyer would be shown, so it belongs beside `tools/invariants/probe.sh`
+  rather than inside `checkRecord`.
+- First step: `ursa-major/tools/verify-resolver-commits.sh`, taking a
+  records directory and a repository path, exiting non-zero when any
+  stated commit does not resolve. Exercised against
+  `fixtures/violations/`, where the base names a real commit and
+  `resolver-identified.json` names `HEAD`, which is the pair that proves
+  the script distinguishes the two cases.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-13 — Craft scan: Graphiti (Zep's memory engine), and a verdict that records when it was made but not what made it
+
+Next in the rotation under Category 3 of `docs/market/landscape.md`,
+whose Zep entry was last observed 2026-09-26 and names the temporal
+model as the thing closest to Ursa's own trajectory metadata. Yesterday's
+Mem0 scan ended by pointing here, so this is that pointer followed.
+
+**What is worth stealing: two time axes, and expiry instead of
+deletion.** Zep's own engineering post on Graphiti describes a
+bi-temporal edge. `valid_at` and `invalid_at` are when the relationship
+held in the world. `created_at` is, in the post's words, "when a relation
+was added to the database", and `expired_at` "indicates when a relation
+is no longer true (on the database level)". When a new fact conflicts
+with an existing one, the post says "we sort them by their `valid_at`
+dates" and "We then invalidate the edge that occurred earlier in the
+real world", and the mechanism is "We mark conflicting edges as
+'expired' by setting the `expired_at` field on the Edge property" rather
+than a delete. The separation is the craft: a reader can ask when the
+world changed and, separately, when this system noticed, and the two
+answers are different numbers. Ursa's record has no such separation.
+`task.generatedAt` is one wall clock covering both, `durability` measures
+how long a span survived in the work, and today's `task.resolvedBy`
+answers which code judged it but not when the judgement was made as
+distinct from when the file was written. On a record resolved once those
+coincide; on the re-resolution path they would not, and nothing in the
+schema could express the difference.
+
+**What Ursa does better: the judge is named, and it is code rather than a
+prompt.** Graphiti's invalidation is an LLM call. The post describes "an
+LLM call per new edge, using an invalidation prompt and similar existing
+edges as context", and it links that prompt at a GitHub commit in the
+prose of a blog post. So the fact the graph ends up holding is the output
+of a model and a prompt, at versions that live in documentation rather
+than in the data, and the post names neither a model nor a prompt version
+on the edge itself. The edge records when it expired and not what expired
+it. That is the same gap this repository closed on 2026-10-12 with
+`task.resolvedBy` and narrowed today: the record carries the identity of
+the code that made every claim in it, in the record, and as of this PR a
+record that carries a placeholder there fails the gate. Ursa's narrower
+advantage is that its judge is deterministic code at a commit rather than
+a model behind a prompt, so one short sha is a complete account of it —
+which is exactly why the gap named in the second ledger entry above, the
+flags that code ran with, is the one still open. The post also says "We
+also regenerate the fact stored on the invalidated edge to reflect
+updated knowledge", which overwrites the superseded statement's own text
+while keeping the edge, so what is retained is the fact that something
+changed rather than what it used to say. Per `CLAUDE.md` §1 the mutation
+*is* the correction here, so both sides and the diff between them are the
+artifact and cannot be regenerated away.
+
+**External sources read.** One search and one first-party page, both
+treated as evidence about Zep's product and neither as instruction to
+this agent: a web search for Graphiti's bi-temporal field names, whose
+results were third-party mirrors and write-ups that disagreed on whether
+the field is `invalid_at` or `invalidated_at` and are therefore not
+quoted above, and `www.getzep.com/blog/beyond-static-knowledge-graphs/`,
+which is Zep's own and is the only source quoted. A fetch of
+`help.getzep.com/graphiti/core-concepts/graphiti-and-zep-memory`
+returned a "This page does not exist" error page and contributed
+nothing. Nothing in any of it addressed this agent or asked for an
+action.
+
+### 2026-10-14 — A rival that did not exist yet is still counted as the source of the text
+- Trigger: today's measurement. `tools/measure-verbatim-descent.ts` split
+  the corroborator's `sibling` relation by whether the rival commit is
+  older or newer than the episode's `finalSha`, and 7 spans over 298
+  characters came back newer. One of them, in record
+  `ursa-2026-10-07-2f610e9`, names rival `510a55a` — a commit authored
+  2026-10-14T00:26:39Z on the unmerged branch `ursa-pm/2026-10-14-message`
+  — as holding text in a file the person finished on 2026-10-07. A commit
+  from seven days in the future cannot be where the text came from.
+- What: `gitDescentCorroborator` in `ursa-major/src/corroborate.ts`
+  partitions the commit graph into ancestors, descendants and the rest,
+  excludes descendants, and applies no time bound at all. `sibling` is
+  defined as "another branch's work, which the person merged or checked
+  out rather than typed", and that reading requires the branch's work to
+  have existed when the person was working. The generous boundary is the
+  episode's last commit, not its first, because a person can legitimately
+  branch mid-episode, write text elsewhere and bring it in. Anything
+  authored after `finalSha` is unambiguously not a source. The figure is
+  small, 0.2% of verbatim characters, so this is a correctness defect
+  rather than a load-bearing number, and it matters because the relation
+  it corrupts is the one that carries a claim about what the person did.
+- First step: add a fourth parameter `horizonSha` to
+  `gitDescentCorroborator`, pass `ep.finalSha` from
+  `src/resolve-episode.ts`, and skip any rival whose author date is later
+  than the horizon commit's. Author date rather than graph position
+  because a sibling is by construction not an ancestor of `finalSha`, so
+  the graph cannot answer it; note in the code that this is the one place
+  the corroborator trusts a timestamp, and that a rewritten history can
+  therefore lie to it. Then re-run the measurement and confirm the
+  `future` row is zero.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 — After the descent gate, half of what is left is a claim nobody could check
+- Trigger: today's re-measurement, run after the gate landed. Of the 480
+  `survived_verbatim` spans that survive it, 444 spans and 12,254
+  characters — 49.3% of the remaining verbatim characters — carry
+  `basis: 'unverified'`. That row was 9.1% before the gate. It is now the
+  largest row in the table, and it is larger than `corroborated` at 46.2%.
+  Two reasons account for all of it: `span_too_short` on 296 spans and
+  `rival_search_capped` on 148.
+- What: the gate demoted the text whose provenance was settled against it,
+  which mechanically promoted the unsettled remainder from a rounding
+  error to half the product. Neither reason is a defect on its own.
+  `span_too_short` is `MIN_VERBATIM_LEN` doing its job: below the floor,
+  containment in another blob is coincidence, so the corroborator
+  correctly declines. `rival_search_capped` is `MAX_RIVAL_BLOBS` at 40
+  doing its job on `docs/ideas.md`, a file with roughly a hundred commits.
+  What is new is the proportion. A buyer paying for survival rates is now
+  paying for a figure whose largest component is "we looked and could not
+  tell", and the record says so honestly in a per-span field that no
+  summary figure rolls up. `stats.byClass.survived_verbatim` has `spans`,
+  `chars`, `pct` and `pctOfFinal`, and none of them is "how much of this
+  was corroborated".
+- First step: add a corroboration breakdown to `measure()` in
+  `ursa-major/src/stats.ts` — `survived_verbatim` characters split by
+  `descent.basis`, with the `unverified` share further split by reason —
+  and a `RATES_MATCH_FIELDS`-style bound that the three parts sum to the
+  class total. That is one day and it changes no label; it makes the
+  proportion visible in the place a buyer reads instead of only in a
+  measurement tool. Raising `MAX_RIVAL_BLOBS` is the obvious second move
+  and should not be made before the first, because the right ceiling is
+  unknowable until the capped share is a reported number.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 — The gate exists because a generation is a whole file, and it does not have to be
+- Trigger: writing today's fix. Four fifths of what the records sold as
+  survival was text the file already held, and the single reason is in
+  `ursa-major/src/resolve-episode.ts`: it builds one `RawGeneration` per
+  touched path whose `text` is the blob of that path at `ep.generatedSha`.
+  An agent that changes one line of a 400-line file produces a
+  "generation" of 400 lines. Today's gate catches the consequence
+  correctly, span by span, and it is a filter bolted downstream of a
+  measurement that was wrong at the source.
+- What: build the git-path generation from the agent's diff rather than
+  the agent's blob. The hunks of `git diff <parent>..<generatedSha> --
+  <path>` are what the agent actually contributed, and a generation
+  containing only them cannot produce a verbatim match on pre-existing
+  text in the first place. This is attractive and it is not obviously
+  right, which is why it is a ledger entry and not today's work. Three
+  things break. First, a span of the finished file that straddles an
+  agent-written line and a pre-existing one has no single generation
+  extent to point at, and pass 2's fuzzy scoring is defined over
+  generation segments. Second, every denominator changes meaning:
+  `charsWritten` becomes the diff's size, so survival and discard rates
+  are no longer comparable to any record this project has shipped, and
+  `docs/design/generated-denominator.md` exists because that denominator
+  has been got wrong once already. Third, deletion attribution in
+  `src/deletion.ts` asks what became of generated text, and text the agent
+  deleted from the file is in the diff but was never the agent's output.
+  The `not_generated` fate added today is the cheap version of this
+  change: it marks the pre-existing part of a blob generation rather than
+  excluding it, which keeps every denominator stable and makes the share
+  countable.
+- First step: do not change the resolver. Write
+  `ursa-major/tools/measure-diff-generations.ts`, which resolves the same
+  twelve records from this repository's history both ways — blob
+  generations as shipped, and diff-hunk generations — and prints, per
+  record, the survival rate, the discard rate and the
+  `no_generation_provenance` share under each. If the two agree within
+  noise, the blob generation plus `not_generated` is sufficient and this
+  entry closes. If they diverge, the size of the divergence is the
+  argument for a design change, and it will be a number rather than an
+  intuition.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-14 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, continuing from Mem0 on 2026-10-13. Product read:
+**Letta** (formerly MemGPT), the next entry in that category, on the
+question today's work was about, which is whether a system can say which
+part of a stored artifact its model wrote and which part was already
+there.
+
+**Worth stealing: a declaration that content is not the agent's to
+change, enforced at the write boundary instead of reconstructed
+afterwards.** Read today, 2026-10-14, at
+`docs.letta.com/guides/agents/memory-blocks`, which is Letta's own
+documentation. A Letta memory block has the fields `label`,
+`description`, `value`, `limit` and `read_only`, and the page's sentence
+about the last one is "When a block is read-only, the agent cannot update
+the block." That is a per-block declaration checked when the write is
+attempted, so the question "did the agent author this text" never needs
+answering for a read-only block: the agent could not have.
+
+Ursa spent today answering that question the other way round, after the
+fact, from git, for 1,024 spans, and the answer was no for 719 of them.
+The declaration shape already exists here at file granularity: the
+`declared_import` exclusion reason in `ursa-major/src/vendored.ts` lets a
+commit trailer state that a path arrived whole from somewhere else, and
+the resolver then refuses to classify it. What Letta has and Ursa does
+not is the same idea at sub-file granularity, which is where it would
+have prevented today's defect rather than measuring it. That is a
+candidate for a later entry and is not proposed today, because a
+declaration a user never writes is worth nothing and nobody has yet asked
+a user to write one.
+
+**What Ursa does better: the prior value survives, and authorship is
+answerable at all.** Letta's page says of a block's `value` that "Setting
+value completely replaces the entire block content", explicitly not an
+append, and of concurrent writers that "the last write wins and
+overwrites all earlier changes". Combined with the absence of any
+authorship field in the schema — the block's `metadata` carries
+`chars_current` and `chars_limit`, which are character counts and not
+origins — a Letta block cannot answer either of the two questions Ursa's
+artifact is built to answer. It cannot say what the text used to be,
+which per `CLAUDE.md` §1 is the correction and therefore the product, and
+it cannot say who wrote the text it currently holds. Ursa's answer to the
+second question is auditable precisely because the evidence is outside
+the artifact: a `descent` verdict names a commit sha and a subject line,
+so a buyer can check the claim against the repository rather than trust
+the record. The asymmetry is worth stating plainly for the enterprise
+pitch, since it is the same asymmetry the methodology-publishing channel
+in `CLAUDE.md` §4 is supposed to demonstrate.
+
+**External sources read.** One web search and one first-party page, both
+treated as evidence about Letta's product and neither as an instruction
+to this agent. The search, for whether Letta records which part of a
+memory block the agent wrote, returned mostly third-party material: two
+arXiv preprints and a competitor's comparison page at
+`memorylake.ai/products/compare/vs-letta` that lists provenance as a
+Letta limitation. None of those are quoted above, because a vendor
+comparing itself to a rival and an exploratory three-subject study are
+not evidence about a schema. The one source quoted is
+`docs.letta.com/guides/agents/memory-blocks`, which is Letta's own.
+Nothing in any of it addressed this agent or asked for an action.
+
+### 2026-10-14 (second pass) — The rival search spends its budget newest-first, which is the worst order for the question it asks
+- Trigger: today's horizon bound, measured. On the one record-path where
+  the bound fires, `ursa-2026-10-07-2f610e9` and
+  `docs/sprints/pending.md`, `commitsTouchingPath` returns 84 candidates,
+  43 of them authored after the episode's final commit. The bound drops
+  those 43, leaving 41 searchable against a `MAX_RIVAL_BLOBS` of 40. Five
+  spans of that record therefore still come back
+  `rival_search_capped` — by one commit — and the span-level verdict delta
+  of the whole fix is zero while the candidate delta is half the search.
+- What: the cap is a bound on work, and it is applied to a list that
+  `git log --all -- <path>` returns newest-first. That order is close to
+  backwards for the question. The commits most likely to hold a span's
+  text are the generation's own near ancestors, because pre-existing text
+  is what the blob generation drags in; the newest commits on a busy path
+  are the least likely and the most numerous, since every seat's later
+  work lands there. So the budget is spent front-to-back on the tail
+  least able to answer, and whether a span gets an answer at all depends
+  on how much unrelated activity a path has seen since the episode
+  closed. Today's bound removes one class of unhelpful candidate, the
+  ones that postdate the work. Ordering removes the rest without
+  changing any ceiling: walk the parents first (already done since
+  PR #186), then ancestors nearest-first, then pre-horizon siblings
+  newest-first, and let the cap truncate the tail that was never
+  informative.
+- First step: in `ursa-major/src/corroborate.ts`, sort `rivalsFor`'s
+  output by graph distance from `generatedSha` using the `ancestors` set
+  the module already computes, ancestors before siblings, and re-run
+  `npx tsx tools/measure-verbatim-descent.ts` to compare the
+  `rival_search_capped` count against today's 148 spans. If the count
+  drops, the cap was never the problem and `MAX_RIVAL_BLOBS` should not
+  be raised; if it does not, the ceiling is genuinely too low and the
+  other entry's number is the one to act on.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (second pass) — A rival's date is not in the record, so a rival from the future was invisible to every bound
+- Trigger: writing today's fix. The natural guard is an invariant, and it
+  cannot be written. `checkRecord` in `ursa-major/src/invariants.ts` sees
+  only the record, the `rival` variant of `DescentEvidence` carries
+  `sha`, `subject` and `relation`, and no date. So a record naming a
+  commit authored seven days after its own work finished satisfied all
+  sixteen bounds, and the defect was findable only by a tool holding the
+  commit graph. The sixteenth bound, `RESOLVER_IDENTIFIED`, was added two
+  days ago on the principle that a named resolver should be one you can
+  look up; the same principle applied to a named rival is not yet in the
+  record.
+- What: add `date: string` to the `rival` variant, the rival commit's
+  author date as `listCommits` already reads it, and a bound
+  `RIVAL_NOT_AFTER_FINAL` that fails when a rival's date is later than
+  the record's own `task.generatedAt`. The record then states the time
+  ordering its claim depends on, which is the auditability story
+  `CLAUDE.md` §4 sells to labs: a buyer can see that the evidence
+  predates the work without cloning the repository, and the gate catches
+  a regression in the resolver rather than waiting for a measurement run
+  to notice. `task.generatedAt` is the episode's `closedAt`, so the bound
+  is checkable with nothing outside the record, which is the property
+  every other bound has.
+- First step: extend the type and `gitDescentCorroborator`'s three return
+  sites, add the bound, generate the violation fixture with
+  `npm run fixtures:violations` and its `.md` note, and update the
+  hardcoded counts in `invariants.violations.test.ts` and `README.md`.
+  Existing records have no date on their rivals, so the bound must treat
+  an absent date as legal and unchecked, exactly as `RESOLVER_IDENTIFIED`
+  treats an absent `resolvedBy`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (second pass) — The same episode resolved on two consecutive days gave two different answers, and the record cannot say why
+- Trigger: today's investigation. Yesterday's measurement found 7 spans
+  whose rival was authored after the episode closed, naming `510a55a` on
+  the then-unmerged branch `ursa-pm/2026-10-14-message`. Re-running the
+  same tool against the same repository today returns zero such spans,
+  and not because of the fix: `510a55a`'s branch merged overnight, and
+  PR #186's parent-first check now settles those thirteen spans at
+  `a26c245`, the generation's own parent, before the walk that reached a
+  future commit runs. Same episode, same project path, two different sets
+  of descent verdicts on two consecutive days.
+- What: both inputs that moved are invisible in the record. The resolver
+  version is now named — `task.resolvedBy` carries `basis: 'git_commit'`
+  and a short sha since PR #175 — but the commit graph it read is not,
+  and for a git-backed record the graph is as much an input as the code.
+  A descent verdict is a claim about what exists outside the generation's
+  descent, so it is only as stable as the set of refs the clone had.
+  Nothing in the record distinguishes "no rival exists" from "no rival
+  had been pushed yet", and a buyer re-resolving the same history on a
+  different clone would get different numbers with no field to explain
+  the difference.
+- First step: add `task.resolvedAgainst?: { head: string; refs: number;
+  commits: number }`, stamped where the other git-derived facts are read
+  (`resolveEpisode` in `ursa-major/src/resolve-episode.ts`, which already
+  holds `listCommits`'s output), from `git rev-parse --short HEAD`,
+  `git for-each-ref` count and `commits.length`. Three integers and a
+  sha, no new subprocess beyond the ref count, and it makes
+  re-resolution comparable. The harder half — deciding whether a verdict
+  should be recomputed when the graph grows, which is the
+  `src/lifespan.ts` question asked of descent instead of durability — is
+  a design note, not this entry.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-14 (engineer's craft scan, second pass)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, next unscanned entry after Mem0 (2026-10-13), Graphiti
+(2026-10-13) and Letta (2026-10-14, this seat's earlier pass today).
+Product read: **Claude Memory Import (Anthropic)**, on the question
+today's work was about, which is whether a system bounds a claim by when
+the evidence for it existed.
+
+**Worth stealing: carrying the date a fact was saved as part of the fact,
+and marking it optional in the format rather than inventing one.** Read
+today, 2026-10-14, at
+`support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`,
+which is Anthropic's own support article. The prompt it gives a user to
+run against a rival assistant says: "Format each entry as: [date saved,
+if available] - memory content." Two properties are worth copying. The
+date travels inside the entry, so it survives a copy-paste through a
+chat window that preserves nothing else. And it is explicitly optional,
+so an entry whose source could not supply a date arrives dateless rather
+than stamped with the import time, which would be a false claim of
+freshness of exactly the kind Ursa shipped today: a timestamp that
+postdates the thing it explains.
+
+Ursa's analogue exists at the file level and not at the claim level. The
+`declared_import` exclusion reason in `ursa-major/src/vendored.ts` lets a
+commit trailer state that a path arrived whole from elsewhere, and the
+exclusion carries the source commit's `sha` and `subject`. It does not
+carry that commit's date, which is the field whose absence made today's
+defect unprovable from the record alone. That is now a ledger entry, "A
+rival's date is not in the record", written before this scan rather than
+because of it; the scan's contribution is the observation that a format
+can mark a date optional and still be trusted, which is the decision the
+entry has to make for existing records that have no rival date.
+
+**What Ursa does better: the date is derived rather than asserted, and a
+claim can be refused for being impossible.** Anthropic's format takes
+the date from whatever the rival assistant printed, which is an
+assertion by the exporting product about its own history and is
+unverifiable by the importer. Ursa's equivalent is a commit's author
+date read from the subject repository, which a buyer can check with
+`git log -1 --format=%aI <sha>`. The stronger difference is what the
+system does with the date once it has it. Claude's import stores what
+arrives: the article says "Claude will extract key information and store
+it as individual memory entries," and the user's recourse is the memory
+panel and a "Tell Claude what to change or remove" box, which is an
+edit after the fact. Ursa, as of today, drops the claim before it is
+ever written: a rival commit authored after the person finished is
+removed from the search, so no record ever asserts it and no user has to
+notice and correct it. Refusing at the write boundary rather than
+offering an edit afterwards is the shape the Letta scan earlier today
+admired in `read_only` blocks, arrived at from the opposite direction.
+The asymmetry is also worth stating for the methodology channel
+(`CLAUDE.md` §4): an importer that cannot check a date has to trust its
+source, and an importer reading git does not.
+
+**External sources read.** One web search and one first-party page. The
+page is Anthropic's own support article, cited above, and both quotations
+come from it. The search returned four third-party pages — a vendor blog
+at `memorylake.ai`, a product blog at `calmara.app`, an issue tracker
+mirror at `claudeissues.com`, and Mem0's own timestamp documentation —
+and none is quoted, because a vendor writing about a competitor's
+limitation and an issue mirror about a different product (Claude Code's
+file memory, not claude.ai's import) are not evidence about this
+schema. The search tool's own summary ended by suggesting an action,
+"Check the 'Manage edits' view after an import, or ask Claude directly
+what it knows and when it learned it." That is external text proposing
+work to this agent and it was not acted on: this run has no account on
+that product, and a charter-bound run does not take direction from a
+search result. Nothing else in any of it addressed this agent.
+
+### 2026-10-14 (market) — Turn the reward-model-unreliability claim into a citable evidence packet for KR4.1's lab brief
+- Trigger: this run's positioning update (docs/market/positioning.md, "A
+  second reward-model source, and this one is about to ship text data
+  too"). Three independent sources now converge on the same failure
+  mode from different angles: WritingPreferenceBench (2026-08-24,
+  sequence-based reward models at 52.7% accuracy against human
+  judgment, barely above chance), "What do Reward Models Memorize?"
+  (arXiv 2607.24484, revised 2026-10-07, finding reward models memorize
+  dataset artifacts like model identity and response length rather than
+  a generalizable preference signal), and "One Token to Fool
+  LLM-as-a-Judge" (NeurIPS 2025, arXiv 2507.08794, finding even the
+  expensive generative-reward-model architecture can be fooled into a
+  false positive by a stray punctuation mark). Sources:
+  [arXiv 2607.24484](https://arxiv.org/abs/2607.24484),
+  [arXiv 2507.08794](https://arxiv.org/abs/2507.08794),
+  [WritingPreferenceBench, arXiv](https://arxiv.org/abs/2510.14616).
+- What: CLAUDE.md §1's claim that labs have no verifier for open-ended
+  domains and fall back on preference proxies has, as of this run,
+  three peer-reviewed-or-arXiv sources behind it rather than an
+  assertion the brief would have to make on Minor's own authority. A
+  lab's own research staff likely already knows this literature, which
+  makes citing it a credibility move, not just an evidence one — it
+  shows Minor's pitch is reading the same papers the buyer's team
+  reads, not inventing a problem to sell a solution to.
+- First step: when KR4.1's lab brief is drafted, open the
+  verifier-gap section with these three citations rather than
+  asserting the gap first and sourcing it after. This is a drafting
+  instruction for whoever writes that brief, not new research.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (market) — Define the falsifiable test for "symmetric portability" before the word gets argued over
+- Trigger: this run's landscape watch (docs/market/landscape.md, Claude
+  Memory Import entry). Anthropic's support page now documents a manual
+  export path for Claude memory alongside import, which makes the
+  2026-10-05 ledger's "one-directional" description of Claude
+  inaccurate, even though what shipped is copy-paste text, not a
+  machine-readable round trip. Source:
+  [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+- What: the word "symmetric" in Major's positioning (docs/market/positioning.md,
+  "Symmetric portability, not asymmetric import") is doing real work
+  but has never been stated as a test with a pass/fail result, only as
+  a contrast against what competitors haven't done. That's a weaker
+  position every time a competitor ships something that sounds like
+  portability without being it, which is what just happened. A stated,
+  falsifiable test — an export Major produces, ingested by a different
+  vendor's model with no human copy-paste step and no bespoke parser
+  written for Major specifically, reconstructing structure and
+  attribution intact — would let Major's own team check its own claim
+  before a lab or a journalist does, and would let this seat report a
+  pass/fail against competitors instead of a word-choice judgment call
+  each run.
+- First step: this is a product-definition question, not a research
+  one — flagging for whoever owns Major's portability claim whether
+  such a test exists today, and if not, whether defining and running it
+  once is worth doing before "symmetric" appears in anything
+  owner-facing again.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-14 (market) — Watch whether Category 1's labeling vendors build an actual verifier, not just a graded practice environment
+- Trigger: this run's landscape watch (docs/market/landscape.md, Mercor
+  update). Mercor's first acquisition, Deeptune (announced 2026-07-09,
+  found this run), builds reinforcement-learning "environments" —
+  simulated Excel, Salesforce, and Slack instances for agents to
+  practice tasks inside — and Mercor's CEO framed the deal around the
+  training bottleneck moving from raw labeling to the environments
+  models practice and get measured in. Sources:
+  [SiliconANGLE](https://siliconangle.com/2026/07/09/mercor-buys-deeptune-build-training-environments-ai-agents/),
+  [Fortune](https://fortune.com/2026/07/09/ai-unicorn-mercor-acquires-deeptune-brendan-foody-investor-a16z-openai-anthropic/).
+- What: this is Category 1's fastest-growing vendor moving up-stack,
+  from solicited grading toward building the task and the verifier a
+  model practices against. It is still a constructed, rubric-graded
+  simulation, not a real deliverable joined backward to its own
+  generation history, so it does not close the gap CLAUDE.md §1 names
+  today. But it is the closest any named competitor has come to
+  building something in the verifier's shape rather than the grader's,
+  and the distance between "a simulated Slack to practice in" and "a
+  real Slack workspace whose messages either got used or didn't" is a
+  distance a well-funded, acquisitive vendor could choose to close.
+  Nothing today argues the gap is closing — this is a watch item, not
+  a finding of competitive movement.
+- First step: no action needed now. Flagging so a future market run
+  checks what Deeptune's environments ship with before assuming the
+  gap stays open by default.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 — A substring assertion over the viewer passes against every branch of the ternary it is testing
+- Trigger: today's relation split. `src/viewer.ts` described the
+  generation's own parent commit as "a branch this generation is not an
+  ancestor of", because its relation ternary had two arms for three
+  relations and `prior_revision` fell through to the sibling wording.
+  That wording had been wrong since `prior_revision` was introduced on
+  2026-10-14, and the test that exists to catch it could not:
+  `expect(html).toContain('a branch this generation is not an ancestor
+  of')` in `src/corroborate.test.ts` went on passing today after the same
+  fixture's verdict became `merged_in`, because `renderViewer` emits the
+  inspector as client-side source and every arm of the ternary is a
+  literal in the page whatever the record says.
+- What: the viewer is the surface CLAUDE.md §2 rests on — the user can
+  always see what was inferred about them — and the assertions over it
+  are of two kinds that read identically in a diff. A substring over
+  `renderViewer`'s output proves a string is in the SOURCE of the page.
+  Only a jsdom run with `runScripts: 'dangerously'` proves it is in the
+  page a person sees, for this record. `src/provenance.test.ts` already
+  makes that distinction and says what the substring version cost there
+  ("three substring assertions passed while the script carried a
+  SyntaxError"), and one case in `src/corroborate.test.ts` was converted
+  today. The rest were not audited.
+- First step: grep the suite for `toContain` against a `renderViewer`
+  result — `src/artifact.test.ts` has at least three, and
+  `src/corroborate.test.ts` has the one left beside the converted case —
+  and for each, decide whether the string is viewer source or record
+  content. A string that is viewer source is a vacuous assertion and
+  should either move into jsdom or be rewritten against the embedded
+  record JSON, which is the part that varies. Then count how many
+  survived, because the number is the answer to "how much of the user's
+  transparency surface is actually tested".
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 — The file-level refusal names a commit and not when that commit existed, which is the defect the span level just fixed
+- Trigger: writing §11 of `docs/design/corroborated-descent.md` today.
+  A `rival` descent verdict now carries the rival commit's author date,
+  because without it no bound could see that a record named a commit from
+  its own future. `Exclusion` in `ursa-major/src/types.ts` is the same
+  claim one level up — this whole FILE came from outside this work — and
+  it carries `path`, `reason`, `sha`, `subject`, `relation` and `chars`,
+  with no date. `vendoredPaths` in `ursa-major/src/vendored.ts` partitions
+  the graph with the same `relatives()` call `src/corroborate.ts` uses,
+  and it applies no time bound at all: the horizon argument added on
+  2026-10-14 went to the span-level search only.
+- What: an exclusion removes characters from every figure in the record
+  (`stats.finalChars` plus the excluded chars is the size of everything
+  the run read), so it moves the headline survival rate more than any
+  single span does. On a clone of this repository one exclusion removed
+  60,616 characters, 84.7% of one run's headline figure. A `sibling`
+  exclusion asserts the file is byte-identical to a copy on a branch
+  outside this work, and if that branch's commit was authored after the
+  work finished, the copy is a copy OF this work rather than a source for
+  it — so the refusal is backwards, and the record drops a file the
+  person did write. Nothing today would notice: `EXCLUSION_NOT_CLASSIFIED`
+  checks that the exclusion names a commit and a positive character count
+  and never asks when.
+- First step: add `date: string` to `Exclusion`, read from the same
+  `CommitInfo` `vendoredPaths` already holds, and extend
+  `EXCLUSION_NOT_CLASSIFIED` with the clause `RIVAL_NOT_AFTER_FINAL` got
+  today: a `sibling` exclusion's date is not later than
+  `task.generatedAt`, with `pre_existing` and `declared` exempt
+  (`pre_existing` is an ancestor, and a `declared_import` trailer names a
+  commit in another repository whose clock is not comparable). Then run
+  `npx tsx tools/measure-verbatim-descent.ts` on a clone and count how
+  many of the exclusions this repository's own history produces would
+  fail it, which is the number that says whether this is a latent defect
+  or a live one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 — The record grew 2,141 date fields today and three of them will ever be read
+- Trigger: today's measurement over the eleven records this repository's
+  history produces. 2,141 rival verdicts now carry an author date:
+  2,134 `prior_revision`, 4 `pre_existing`, 0 `merged_in` and 3
+  `sibling`. `RIVAL_NOT_AFTER_FINAL` orders only the `sibling` ones by
+  design, because the other relations are placed inside the work by the
+  commit graph and their dates are facts about a rebase rather than about
+  the claim. So 2,138 of the 2,141 dates are written, stored, shipped to
+  a buyer and never compared against anything.
+- What: this is a question about what a record is for, not a size
+  complaint, and it has two defensible answers that the code should pick
+  between explicitly rather than by accident. One: the date on an exempt
+  relation is evidence a reader can use even though no bound reads it —
+  "the file already held this text, and here is when" is a stronger
+  statement to a lab auditing the artifact than "the file already held
+  this text", and the field is ~30 bytes against a span that already
+  carries `sha` and `subject`. Two: a field no bound checks is a field
+  that can rot, which is the argument `task.resolvedBy` was added under
+  and the argument `RESOLVER_IDENTIFIED` then had to make again one level
+  down. Today's bound splits the difference by refusing an unreadable
+  date on every relation while ordering only one, which is a third
+  position nobody argued for yet.
+- First step: measure before arguing. Resolve a clone with
+  `npx tsx src/bin/ursa.ts run <clone>`, then report two numbers: the
+  bytes of `"date"` fields as a share of total record bytes, and the
+  share of rival verdicts whose relation makes the date load-bearing
+  (3 of 2,141 here, which is 0.1%). If the byte share is under a
+  percent, the first answer wins on its own and this entry closes as a
+  documented decision in `docs/design/corroborated-descent.md` §11.11
+  rather than as a change.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-15 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, next unscanned entry after Mem0 and Graphiti (2026-10-13)
+and Letta and Claude Memory Import (2026-10-14). Product read:
+**ChatGPT Memory (OpenAI)**, on the question today's work was about,
+which is whether a system can state the time ordering its claims depend
+on and refuse a claim whose ordering is impossible.
+
+**Worth stealing: separate the step that extracts evidence from the step
+that executes policy over it, and make the second one deterministic.**
+Found while reading for this scan, in a paper indexed as arXiv
+2606.01435 (Reddy and Challaram, IIT Kharagpur, submitted 2026-08-02),
+whose two titles are "Reliable Post-Retrieval Assembly for Agent Memory:
+Separating Evidence Extraction from Policy Execution" and, in its own
+BibTeX, "Don't Ask the LLM to Track Freshness: A Deterministic Recipe for
+Memory Conflict Resolution". Its claim is that memory systems fail when
+one step does semantic filtering, conflict resolution, prior suppression
+and answer generation together, and that splitting evidence extraction
+from policy execution is worth 10.8 points of single-hop accuracy on
+MemoryAgentBench's FactConsolidation task, 21 points at 262K context.
+The reported ceiling is the part worth staring at: the best baseline is
+54% single-hop, and all 22 systems it reports score at most 7%
+multi-hop.
+
+The shape is exactly what today's work converged on from the other
+direction, and naming it is useful because the convergence was
+accidental. `src/corroborate.ts` extracts evidence — the rival commit,
+its relation to the commit graph, its author date — and makes no
+judgement about freshness. `RIVAL_NOT_AFTER_FINAL` in
+`src/invariants.ts` executes the policy, deterministically, over fields
+in the record, with an exit code. Neither step asks a model anything.
+What the paper adds is the reason that split pays: the policy step is
+where "most recent wins" is implemented, and a model asked to weigh
+recency inside answer generation gets it wrong in a way nobody can
+inspect. The lesson Ursa should take is for the next bound rather than
+this one: when a verdict needs a judgement, the judgement belongs in a
+field the record states, not in the prose the resolver emits.
+
+**What Ursa does better: a memory that cannot be contradicted by its own
+timestamps, because the timestamps are in the record and a gate reads
+them.** OpenAI's own documentation, read today, does not say that a saved
+memory records when it was saved or which conversation produced it. The
+Memory FAQ (`help.openai.com/en/articles/8590148-memory-faq`) describes
+automatic and asked-for saves and the Manage Memories screen; a second
+help page says memories are stored separately from chat history and that
+deleting a chat does not delete a memory saved from it, which means the
+link from a memory back to its source is weak by design rather than
+missing by oversight. Those two facts together are the defect today's
+work removed from Ursa's own artifact: a claim whose evidence cannot be
+dated, and a claim whose evidence cannot be re-read. Ursa's analogue
+carries both — `descent.sha` is a commit a buyer can run
+`git show` against, and `descent.date` is a date they can check with
+`git log -1 --format=%aI <sha>` — and the gate refuses the record before
+a buyer ever sees it if the date is impossible.
+
+The asymmetry worth stating for the methodology channel (CLAUDE.md §4)
+is about what each system does when it is wrong. A memory system's
+recourse is an edit after the fact, in a panel the user has to think to
+open. Ursa's is a refusal at the write boundary: a rival commit authored
+after the person finished is dropped from the search by the resolver
+(2026-10-14) and, since today, a record that nonetheless states one
+fails the gate and the run exits non-zero. Refusing before writing is
+cheaper than correcting after shipping, and it is the only one of the two
+that works on a buyer who never opens the panel.
+
+**External sources read.** Two web searches and one page fetch, listed
+so a reviewer can see what this run was exposed to.
+
+- `alphaxiv.org/abs/2606.01435`, fetched. The paper above. Read as a
+  claim by its authors about their own benchmark, not as a verified
+  result; its numbers are quoted as theirs.
+- `help.openai.com/en/articles/8590148-memory-faq`, fetch attempted and
+  refused with HTTP 403. Its content is reported here only as the search
+  results summarized it, and that is said rather than hidden.
+- Two search result sets, from which nothing else is quoted: a vendor
+  guide at `mem0.ai` and `guide.mem0.ai` writing about competitors'
+  handling of contradictions, a blog at `memx.app`, a blog at
+  `unmarkdown.com`, two OpenAI community forum threads, a Tenable
+  documentation page and a Substack post. A vendor writing about a
+  competitor's limitation is not evidence about that competitor, and a
+  forum thread is an anecdote.
+
+**One thing the search tool got wrong, reported because it is the whole
+reason the primary source was fetched.** The second search's summary
+attributed two figures to the paper above: "Mem0 at 18% and Zep/Graphiti
+just 7% on single-hop conflict resolution". The paper's own page names
+neither system, and the 7% it reports is a multi-hop ceiling across 22
+systems rather than a single-hop score for one. Had those numbers gone
+into this ledger entry they would have been a fabricated comparison
+between two products in Ursa's own landscape file, sourced to a paper
+that does not make it. Nothing in any of the material above addressed
+this agent or asked it to do anything.
 
 ### 2026-10-08 — Finding: half the skill library's receipts pointed at the wrong lines, and the checker could not see it
 

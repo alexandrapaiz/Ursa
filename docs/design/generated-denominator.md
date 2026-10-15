@@ -416,9 +416,34 @@ generated: {
 ## 5. The ten bounds
 
 Each row is checked by `checkRecord` and has at least one test that breaks
-a record in exactly that way and asserts the code fires. "Universe" names
+a record and asserts the code fires. "Universe" names
 the set of characters both sides of the bound are measured over, because
 getting that wrong is the defect this whole artifact is about.
+
+> **Two corrections, 2026-10-10.** First, this table describes the ten
+> bounds this artifact shipped. Five more have been added since
+> (`PCT_DENOMINATORS_ORDERED`, `PERFILE_ENUMERATES_PATHS`,
+> `SIGNAL_QUOTE_GROUNDED`, `DESCENT_CHECKED_UNIFORMLY`,
+> `EXCLUSION_NOT_CLASSIFIED`); `BOUND_COUNT` in
+> `ursa-major/src/invariants.ts` is the live number and is derived from the
+> declarations rather than written.
+>
+> Second, the sentence above said "breaks a record in **exactly** that way",
+> and that is now known to be impossible for two rows.
+> `GEN_CLAIM_BOUNDED` cannot be violated without first violating
+> `CLAIM_IN_GENERATION` or `GEN_CHARS_CONSISTENT`, because the merged
+> length of extents inside a generation's text is bounded by that text's
+> length as arithmetic. The word is struck above. The two cases, each with
+> a committed record that demonstrates it, are in
+> `docs/design/violation-fixtures.md` §1.1 and in
+> `ursa-major/fixtures/violations/`.
+>
+> **Worked examples.** §3.2 below shows the defect inside two spans of a
+> real record. The reusable counterexamples are now committed, one per
+> bound, at `ursa-major/fixtures/violations/`, each with a note naming the
+> edit and quoting the gate's own numbers. `npx tsx
+> src/invariants.cli.ts fixtures/violations` runs the gate over all
+> sixteen and exits 1.
 
 | Code | Universe | The bound | Why it is a bound and not a preference |
 |---|---|---|---|
