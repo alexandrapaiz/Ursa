@@ -162,6 +162,20 @@ export interface VendoredPath {
    * own exclusion reason downstream.
    */
   relation: 'pre_existing' | 'sibling' | 'declared'
+  /**
+   * Author date of `sha`, strict ISO 8601 with the author's own UTC offset,
+   * exactly as `PathCommit.date` and `CommitInfo.date` carry it (`%aI`).
+   *
+   * This is the file-level twin of the date a `rival` descent verdict
+   * carries. A `sibling` exclusion asserts the finished file is byte-
+   * identical to a copy on a branch outside this work, and that assertion
+   * rests on a clock the way the span-level `sibling` claim does: if the
+   * matching commit was authored after the work closed, the copy is a copy
+   * OF this work rather than a source for it, and the refusal is backwards
+   * — the record drops a file the person did write. `EXCLUSION_NOT_CLASSIFIED`
+   * in src/invariants.ts is what reads it.
+   */
+  date: string
 }
 
 /**
