@@ -2,28 +2,97 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-10-14 ~18:21 UTC six-hour pass
+## Top three for the owner, 2026-10-15 ~06:26 UTC six-hour pass
 
-1. **The wall blocking every dispatch now has a fix sitting on the
-   doorstep, and I'm not the one who can let it in.** Exo-centralizer
-   opened #192, two keys across all eleven workflow files, and handed
-   me the merge, but the run I'm in has its own rule against touching
-   workflows, so I declined and asked the centralizer to route it to
-   you or a chair instead. It's clean, green, and small; whoever merges
-   it closes the gap this organization has carried since Incident 13.
-2. **Three drafts from your own window sessions are down to two: #49
-   (14 days) and #87 (9 days), both sales, both gated on activating a
-   dormant seat.** #91 (finance) is no longer one of them — its content
-   was real and complete, the body was just never updated past its own
-   ship-first placeholder, so I readied and merged it myself under Tier
-   B rather than leave real financial-close data invisible for a fourth
-   pass running.
-3. **#184 (research), #167 (exo) and #140 (skill) are unchanged.** #184
-   edits a charter directly, Tier C by name. #167 and #140 still
-   conflict against `main` and each also edits a charter once clean, so
-   they wait on their own seats' rebases first and on you after that.
-   #80 (`company.yaml`) stays Tier C on its roster and secret names,
-   labelled `owner-action` already.
+1. **The workflow-guard fix still waits on you or a chair, unchanged
+   since last pass.** #192 is still green, clean, and small, and I
+   still won't merge it myself: this run's own instruction draws the
+   line at workflow files specifically, wider than what the vendored
+   standard's merge-authority section would otherwise allow me, and I'm
+   treating my own run's line as the harder constraint. Nothing about
+   it has moved in twelve hours.
+2. **Three pull requests edit a charter file directly and none of them
+   have moved: #184 (research), #167 (exo), #140 (skill).** #167 and
+   #140 are also still conflicted against main, so each needs its own
+   seat's rebase before your charter decision is even the next step.
+   #80 (`company.yaml`) stays on the roster-and-secrets carve-out,
+   unchanged since the 7th.
+3. **The two sales drafts from your own window sessions are now ten and
+   fifteen days old with no verdict.** Reviving a dormant seat, or
+   deciding these two don't need to be, is yours; I'm not closing real
+   proposed work on a guess. The sprint's own milestone is due in three
+   days with its third item still open, named below.
+
+## This run (2026-10-15, ~06:26 UTC, six-hour pass, message-triggered)
+
+**First act: found this seat's own prior pass's draft already open and
+unfinished (#195, branch `ursa-pm/2026-10-15-message`), and built on it
+rather than starting a second version.** It had already absorbed the
+previous pass's PR (#194) by merging that branch in directly; this run
+continued from there instead of re-deriving the same content. Closed
+#194 once its content was confirmed carried forward, since it had
+nothing left to review that #195 didn't already hold.
+
+1. **Inbox: nothing new addressed to this seat since the last pass
+   closed at 18:30 UTC yesterday.** Checked the board's messages for
+   `to_seat=pm`/`to_company=Ursa` again, filtered to anything newer than
+   that timestamp: empty. The two items the last pass answered (the
+   workflow-guard handoff and security's note about its revived branch)
+   needed no further reply; neither asked this seat for anything beyond
+   what was already given.
+2. **Failed runs: none in the last six hours, and none in the broader
+   list either.** `gh run list --status failure --created
+   ">=$(date -u -d '-6 hours' +%FT%TZ)"` is empty; the last thirty runs
+   company-wide are all `success`. Nothing to triage, rerun, or hand
+   off.
+3. **Tier B merge: one landed clean, the rest are the same blocked set
+   as last pass, re-checked fresh rather than carried over.**
+   - **#196** (engineer) was green, clean, non-draft, touched no Tier C
+     path, and said plainly in its own description that it subsumed
+     #191 with the ancestry verified rather than assumed. Merged. GitHub
+     resolved #191 as merged automatically once #196 landed, so there
+     was nothing left to close by hand.
+   - **#192** (workflow guard) is unchanged: green, clean, handed to
+     this seat by name, declined again for the same reason as last
+     pass — a workflow-file change sits inside this run's own line
+     against touching workflows, stated beside never merging my own PR
+     and never pushing to main, regardless of what the vendored
+     standard's merge-authority section would otherwise permit. Not
+     re-asking exo-centralizer again this pass; the ask already stands
+     and repeating it without new evidence would be noise.
+   - **#184** (research) is still Tier C outright, its own charter
+     file. **#167** (exo) and **#140** (skill) are both still
+     `CONFLICTING` and each is also Tier C once clean; #140 is now
+     exactly seven days idle, but Tier C is the reason it isn't mine to
+     merge or close, not its age. **#80** (`company.yaml`) stays Tier C
+     on the roster and secret names, labelled `owner-action` already.
+   - **#190** (security) is still a draft and still `CONFLICTING`,
+     unchanged since 16:04 UTC yesterday. Not stale in the sense that
+     matters: the seat's own board note from yesterday said the branch
+     carries live, unfinished work, not an abandoned draft.
+   - **#49** and **#87** (sales) are unchanged dormant-seat drafts, now
+     15 and 10 days old, still gated on an activation decision only the
+     owner can make.
+4. **Sprint: one thing shipped outside the numbered backlog; the
+   backlog's own third item still hasn't moved.** Items 1 and 2 were
+   already done before this pass started. #196 is a correctness fix the
+   engineer found through its own measurement, not a planned sprint
+   item, continuing the same ledger-driven pattern prior passes have
+   called a near-miss. Item 3 (the redaction standard) is still on
+   security's own revived, conflicted draft; nothing in this pass moved
+   it, because dispatching a second attempt at it would duplicate live
+   work rather than help. The milestone carrying this sprint
+   (`Sprint 2026-10-12`) is due in three days with that one item still
+   open. **Move today:** the correctness fix landed. **Moves next:**
+   item 3, on security's own branch, the one open item standing between
+   this sprint and its goal.
+5. **Dispatch queue: rewritten in full.** `PM_DISPATCH_ENABLED` is
+   unset in this run's own environment, confirmed with `printf`, so
+   nothing fires regardless of content. Full reasoning in
+   `docs/sprints/dispatch-queue.md`.
+6. **Board:** posted one note naming the merge, the unchanged blocked
+   set, and the sprint's one open item. This seat's inbox stays open
+   for anything addressed to it until the next pass.
 
 ## This run (2026-10-14, ~18:21 UTC, six-hour pass, message-triggered)
 

@@ -322,3 +322,16 @@ line would otherwise allow. Said so on the board as an `ask` to
 exo-centralizer naming that someone who can touch workflows, the owner
 or a chair, needs to be the one to merge it. Still open, one PR away
 from closing.
+
+**Update, 2026-10-15 ~06:26 UTC.** Unchanged twelve hours later. #192
+is still green and clean and still waits on the owner or a chair for
+the same reason: this seat's own run-level boundary against touching
+workflow files is read as standing above what the vendored standard's
+merge-authority section (§21, already vendored into this repo's copy
+of `docs/standards/pm.md`) would otherwise permit a PM seat to do.
+Section 21 having landed here changes what this seat is allowed to
+merge in general — this pass used it to merge #196 (plain product code,
+no workflow path) under Tier B without waiting on anyone — and it does
+not change the narrower, more specific instruction this run carries
+about workflows and secrets specifically. Not re-asking exo-centralizer
+again without new evidence; the standing ask is enough.
