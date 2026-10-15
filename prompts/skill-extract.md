@@ -285,3 +285,85 @@ Ours: carrying a skill forward onto a newer tree is a re-grounding job
 and should be budgeted as one. It is not a file copy, and the run that
 treats it as a file copy will pass its own checker while breaking the
 only property the product sells.
+
+## 5h. A skill that reports a defect must be re-read when the defect is fixed
+
+(Added 2026-10-15, sixth run, after the second instance of the same
+failure in two runs.)
+
+§5g treats drift as an anchor problem with a claim problem attached.
+There is a sharper case inside it, and it has now happened twice in this
+library, so it is a pattern rather than an accident.
+
+A skill reports something wrong with the code. The engineer reads it and
+fixes it. The skill is now a confident warning about code that does not
+exist, and it reads exactly like a current one, because the prose that
+described a live defect is indistinguishable in tone from prose
+describing a standing property. The fifth run found the first instance:
+the quoting skill said the CLI "never prints `finalChars` at all", which
+this seat had itself reported and the engineer had since fixed. This run
+found the second, and it is worse. The trial skill said the trailer
+pattern matched only `claude|codex|cursor|gpt`, that a bot whose name
+held none of those four substrings passed through as human, and it named
+a real commit in this repository as the standing example. All of that was
+true when written. The hazard then materialized, produced a record
+claiming 94.9 percent verbatim survival over text no person had read, and
+was fixed on 2026-10-14 by widening the pattern. A reader following that
+skill would have gone looking for an exposure that had been closed, and
+would have found the citation pointing at plausible code.
+
+So, when a drift failure lands on a claim the skill framed as a defect,
+a risk or a thing to watch out for:
+
+1. **Ask whether it was fixed, not only whether it moved.** The fix is
+   the likeliest reason the lines changed, because this seat's findings
+   are routed to the engineer by design, and a seat that reports well
+   should expect its own reports to come back as code.
+2. **Keep the incident and retire the warning.** Do not delete the
+   paragraph. The measured cost of the defect is the most valuable
+   sentence in it, and it is what tells a reader why the current design
+   is shaped the way it is. Rewrite it so the hazard is in the past tense
+   and the present-tense sentences describe what is there now.
+3. **State the direction of the fix.** A reader who hits a related
+   decision needs to know which way the code errs and why. The widened
+   marker narrows what a run claims rather than widening it, and that
+   sentence is worth more than the regex it replaced.
+
+Ours: this is the one drift case where the skill was right and still
+has to change, which is why it is easy to skip. Every other entry in a
+drift report feels like a correction to make. This one feels like
+vindication, and it is the one that will mislead a reader hardest.
+
+## 5i. Budget a re-grounding pass by content, not by the drift count
+
+(Added 2026-10-15, sixth run.)
+
+§5g says carrying a library onto a newer tree is a re-grounding job and
+should be budgeted as one. This run measured what that budget actually
+buys, which makes it plannable. Merging 410 files of `main` movement
+into the library tripped 44 of 144 fingerprinted ranges. They split
+three ways:
+
+- **27 were pure relocation.** The cited lines exist in the current tree
+  byte-for-byte at a new position. These are mechanical. Recover each
+  range's as-cited text from the tree the lock was recorded against,
+  then search the current file for that exact block. A unique hit is the
+  new anchor and the claim is untouched, because the bytes are the same
+  bytes.
+- **14 were content changes**, meaning the text at and around the
+  citation is genuinely different and no unique match exists.
+- **3 were ambiguous**, where the cited text appears more than once in
+  the new file. Resolve these by ordinal rather than by proximity. The
+  nth occurrence in the old file maps to the nth in the new one, and
+  checking the surrounding block is what confirms it.
+
+Of the 17 that were not pure relocation, 7 carried claims that no longer
+held. So the useful ratio is not the drift count. It is that roughly
+60 percent of a drift batch is machine work, and the reading cost sits
+almost entirely in the remainder.
+
+Ours: run the mechanical pass first and commit it separately, before
+reading anything. It shrinks the batch to the part that needs judgment,
+it keeps the two kinds of change in separate diffs where a reviewer can
+see which were decided by a person, and it means a run that dies partway
+has still landed the half that was not going to change anyway.
