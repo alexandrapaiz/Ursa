@@ -28,10 +28,10 @@ evidence:
     source: ursa-major/src/match.ts:6,8,49-52
   - ref: E3
     what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
-    source: ursa-major/src/resolve.ts:242-249, ursa-major/src/types.ts:252-253
+    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:390-391
   - ref: E4
     what: trivial is a different flag with a different cause, set on short exact matches
-    source: ursa-major/src/resolve.ts:170-181, ursa-major/src/match.ts:10, ursa-major/src/types.ts:255
+    source: ursa-major/src/resolve.ts:170-181, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3
@@ -64,10 +64,10 @@ evidence:
     source: docs/beyond-preference-pairs.md:154-170
   - ref: E15
     what: the viewer marks uncertain spans with a dashed underline and prints the count needing adjudication
-    source: ursa-major/src/viewer.ts:89,292-293,305
+    source: ursa-major/src/viewer.ts:89,310-311,305
   - ref: E16
     what: a second branch sets uncertain, where an above-threshold match whose descent is corroborated as rival is demoted to no_generation_provenance with the candidate and a descent field kept
-    source: ursa-major/src/resolve.ts:205-221
+    source: ursa-major/src/resolve.ts:415-431
   - ref: E17
     what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
     source: ursa-major/src/resolve.ts:228-233

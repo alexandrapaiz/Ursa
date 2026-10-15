@@ -24,25 +24,25 @@ evidence:
     source: ursa-major/src/cli.ts:1-7; ursa-major/src/bin/ursa.ts:1-7
   - ref: E2
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
-    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:415-443
+    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:577-605
   - ref: E3
     what: what marks a commit as generated, including the author fallback that matches bots and github-actions
     source: ursa-major/src/pairfinder.ts:144,167; ursa-major/src/pairfinder.ts:391-395
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff
-    source: ursa-major/src/pairfinder.ts:448-451
+    source: ursa-major/src/pairfinder.ts:610-613
   - ref: E5
     what: the commit walk covers every branch by default, and walks one revision range instead when a caller passes one
-    source: ursa-major/src/pairfinder.ts:193-199
+    source: ursa-major/src/pairfinder.ts:319-325
   - ref: E6
     what: the git path records zero user turns, so it carries no user words and no turns-to-acceptance
-    source: ursa-major/src/resolve-episode.ts:179-187
+    source: ursa-major/src/resolve-episode.ts:188-196
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
     source: ursa-major/src/resolve-episode.ts:124,183; ursa-major/src/episodes.ts:25
   - ref: E8
     what: min-chars defaults to 200 and limit truncates; ursa run drops below-threshold episodes without naming them, while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:316-317; ursa-major/src/bin/ursa.ts:377; ursa-major/src/ci/run.ts:149
+    source: ursa-major/src/bin/ursa.ts:378-379; ursa-major/src/bin/ursa.ts:377; ursa-major/src/ci/run.ts:149
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
@@ -57,7 +57,7 @@ evidence:
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
   - ref: E13
     what: acceptance is a declaration, and the undeclared default states that retention is not acceptance
-    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:319-324
+    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:381-386
   - ref: E14
     what: the two paths measure different stages of the funnel, 82 percent deletion against 7 percent, and a record should state which stage it measured
     source: docs/beyond-preference-pairs.md:229-237
