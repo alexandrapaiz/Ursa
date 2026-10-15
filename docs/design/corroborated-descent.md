@@ -998,6 +998,13 @@ real file in `ursa-major/`.
   the rival's date and has one prose branch per relation, where it had
   two branches for three relations and described the generation's own
   parent commit as "a branch this generation is not an ancestor of".
+  That wording had been wrong since the parent relation was introduced,
+  and the test that should have caught it could not: `renderViewer`
+  emits the inspector as client-side source, so every arm of the
+  ternary is a literal in the page and a substring assertion passes
+  against all of them at once. The viewer case in
+  `src/corroborate.test.ts` is now run in jsdom and clicks the span,
+  which is the form that can fail.
 
 ### 11.7 On-disk layout, with a real payload
 
@@ -1067,7 +1074,7 @@ session identifier appears anywhere in the payload.
 ```sh
 # From ursa-major/.
 npx tsc --noEmit
-npx vitest run                       # 624 passing, 4 skipped as of 2026-10-15
+npx vitest run                       # 625 passing, 4 skipped as of 2026-10-15
 
 # The three new fixtures, and the gate reading all twenty off disk.
 npm run fixtures:violations:check    # "41 files match what this script would write."
@@ -1131,7 +1138,7 @@ turns on.
 |---|---|---|---|
 | `git` | 2.55.0 (the runner’s) | `log --all --pretty=format:%H%x09%aI%x09%s` supplies every rival's author date in the same call that already enumerated the candidates | The date was already on the line git prints; the alternative is `git log -1 --format=%aI <sha>` per candidate, which `tools/measure-verbatim-descent.ts` does and which costs one subprocess per rival |
 | TypeScript | 5.9.3 | the compiler that made the relation split cheap: adding `merged_in` to the union surfaced every site that branches on a relation, including the viewer's two-branch ternary over three relations | A runtime switch with a `default` would have left that viewer bug invisible, as it had been since the relation was introduced |
-| Vitest | 5.0.2 | 624 tests, including the seven unit cases for this bound and the four for the relation | Already the suite; no new dependency |
+| Vitest | 5.0.2 | 625 tests, including the seven unit cases for this bound and the five for the relation | Already the suite; no new dependency |
 | `Date.parse` (Node 22 built-in) | n/a, standard library | orders two ISO 8601 instants that carry different UTC offsets | A string compare is wrong and was shipped: `2026-10-09T19:00:00-06:00` sorts before `2026-10-10T00:00:00Z` as text and is one hour after it in fact, which is exactly what `rival-not-after-final.json` is built from |
 | `node tools/ledger/union-merge.mjs` | repo-local | merged `docs/ideas.md` across this branch and `main` by entry identity | A line-based three-way merge conflicts on two appends; the driver is per-clone and GitHub's server-side merge does not have it |
 
