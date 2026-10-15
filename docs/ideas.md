@@ -6666,3 +6666,36 @@ this agent or asked it to do anything.
 - Status: for the engineer or frontend seat, as a constraint on a surface
   that does not exist yet rather than a defect in one that does. Not this
   seat's to build, per Boundaries.
+
+### 2026-10-15 — The evidence lock's blind spot: a correct hash over the wrong lines
+
+- Trigger: auditing this run's own rewritten claims against their
+  citations, after the checker had already reported OK
+- What: the guard proves the path exists, the lines are in bounds, body
+  and table agree, and the cited lines have not changed since the claim
+  was written. None of those is a relevance check. A citation can pass
+  all four and fail to support its sentence, and the failure arrives as
+  a range that is too narrow rather than as an exaggerated claim. This
+  run shipped one: the rewritten E3 in `running-an-outcome-record-trial`
+  asserted a measured incident and an argument about test precedence
+  that live in a doc comment at `pairfinder.ts:218-263`, while anchored
+  at `262-263` and `545-556`, which contain neither. Caught by hand in
+  the same run and widened.
+- Why it matters more than it looks: the drift guard is good, which is
+  the problem. A green `evidence check` now reads as "the receipts are
+  sound", and it means something narrower. The product claim is that a
+  reader can check any sentence against its evidence, and a correctly
+  fingerprinted anchor over the wrong lines breaks that claim while
+  satisfying every gate we have.
+- Recorded as §5j of `prompts/skill-extract.md`, as a reading step with
+  no exit status: after rewriting a claim, open the range you wrote down
+  rather than the range you were looking at, and ask whether the
+  sentence can be checked from what is inside it.
+- Not done, and not claimed: the existing 152 ranges were not audited
+  for this failure. Only the citations this run rewrote were. A sweep
+  asking "does each range contain what its `what` field says" is a
+  separate job and cannot be automated by the same trick, since
+  relevance is the part that needs a reader.
+- Cost: $0
+- Status: open as a known limitation of the guard. Next run of this seat
+  should take a slice of the sweep rather than attempt all of it.
