@@ -89,6 +89,15 @@ function comparable(record: OutcomeRecord): Record<string, unknown> {
     // that cloned nothing, and that difference is the field's entire
     // point rather than drift — see `ResolverIdentity` in src/types.ts.
     'task.resolvedBy': record.task.resolvedBy,
+    // Which rules those claims were checked against. Unlike `resolvedBy`
+    // above, this one must agree between the two launches in PRODUCTION as
+    // well as here: the resolver's identity legitimately differs because
+    // `ursa ci` runs a committed bundle on a runner that cloned nothing,
+    // but the bound set is the same object literal compiled into both
+    // artifacts, so a divergence is `dist/ursa.cjs` being stale against
+    // `src/invariants.ts` — exactly what `npm run bundle:check` exists to
+    // catch, restated over a record.
+    'task.gatedBy': record.task.gatedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
     'stats.generated': record.stats.generated,
