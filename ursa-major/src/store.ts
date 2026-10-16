@@ -4,8 +4,9 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { currentGateIdentity } from './invariants'
 import { currentResolverIdentity } from './resolver-identity'
-import type { OutcomeRecord, ResolverIdentity } from './types'
+import type { GateIdentity, OutcomeRecord, ResolverIdentity } from './types'
 import type { Episode } from './episodes'
 
 export function ursaDir(projectRoot: string): string {
@@ -36,14 +37,27 @@ export function ursaDir(projectRoot: string): string {
  * the file on disk, which is the kind of near-identical pair this field
  * exists to make impossible.
  *
+ * WHY THE BOUND SET IS STAMPED HERE TOO, as a second parameter rather
+ * than folded into the first. The two facts are independent and one of
+ * them can be unavailable while the other is certain. `resolverIdentity()`
+ * returns null when there is no git work tree under the running script and
+ * no readable artifact to hash, and the bound set is in this process
+ * either way, because `currentGateIdentity()` reads an object literal in
+ * `src/invariants.ts` and cannot fail. Suppressing a knowable fact because
+ * an unrelated one is unknowable would make `task.gatedBy` absent on
+ * records whose rules were never in doubt.
+ *
  * @param identity the resolver to stamp, defaulting to this process's
- *   own. Passing `null` writes the record with no stamp, which is what a
- *   test asserting on exact record contents wants.
+ *   own. Passing `null` writes the record with no resolver stamp, which is
+ *   what a test asserting on exact record contents wants.
+ * @param gate the bound set to stamp, defaulting to this build's own.
+ *   `null` suppresses it, for the same tests.
  */
 export function saveRecord(
   projectRoot: string,
   record: OutcomeRecord,
   identity: ResolverIdentity | null = currentResolverIdentity(),
+  gate: GateIdentity | null = currentGateIdentity(),
 ): string {
   const dir = join(ursaDir(projectRoot), 'records')
   mkdirSync(dir, { recursive: true })
@@ -52,6 +66,11 @@ export function saveRecord(
   // re-save that writes signals into an existing record must not credit
   // today's build with yesterday's classifications.
   if (identity && !record.task.resolvedBy) record.task.resolvedBy = identity
+  // Same preserve-never-overwrite rule, and it matters more here than for
+  // the resolver, because the bound set changes without the resolver's
+  // commit changing in the record: a re-save months later would otherwise
+  // claim today's eighteen bounds for classifications made under ten.
+  if (gate && !record.task.gatedBy) record.task.gatedBy = gate
   writeFileSync(path, JSON.stringify(record, null, 2) + '\n')
   return path
 }
