@@ -18,7 +18,9 @@ import { describe, expect, it } from 'vitest'
 import { auditProvenance } from './audit'
 import { renderRunSummary } from './bin/ursa'
 import { mergedLength } from './intervals'
-import { checkRecord, measure, type InvariantCode } from './invariants'
+import {
+  BOUND_CODES, checkRecord, currentGateIdentity, measure, type InvariantCode,
+} from './invariants'
 import { runGate } from './invariants.cli'
 import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
@@ -1329,5 +1331,173 @@ describe('a rival from the future is not where the text came from', () => {
     expect(violations).toBe(1)
     expect(lines.join('\n')).toContain('RIVAL_NOT_AFTER_FINAL')
     expect(lines.join('\n')).toContain('2026-10-09T00:00:00Z')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The eighteenth bound. The third one about a SHAPE rather than two numbers,
+// and the first whose strongest clause compares the record against THIS
+// BUILD rather than against the record's own other fields.
+//
+// GATE_IDENTIFIED guards `task.gatedBy`, which says which rules the record's
+// claims were checked against (`GateIdentity` in src/types.ts). The field
+// was added on 2026-10-16 because `task.resolvedBy` answers "which code"
+// and nothing answered "which rules": the bound set went from ten to
+// eighteen in eleven days, so two records bought two months apart were
+// checked differently, and learning how meant cloning the resolver at the
+// commit the record names and reading this module.
+//
+// `fixtures/violations/gate-identified.json` is the committed counterexample
+// and covers the one case that matters most — this build's own digest over a
+// code list one bound short. The cases below are the shape cases, which one
+// fixture cannot hold at once, plus the two directions of the digest
+// comparison that a committed file cannot demonstrate because one of them
+// depends on what this build's digest IS.
+// ---------------------------------------------------------------------------
+
+describe('a named bound set is one that can be compared', () => {
+  const MINE = currentGateIdentity()
+
+  const gated = (gatedBy: unknown): OutcomeRecord => {
+    const r = resolvedRecord()
+    ;(r.task as unknown as Record<string, unknown>).gatedBy = gatedBy
+    return r
+  }
+  const codesOf = (gatedBy: unknown) => checkRecord(gated(gatedBy)).map((v) => v.code)
+  const fired = (gatedBy: unknown) =>
+    checkRecord(gated(gatedBy)).find((v) => v.code === 'GATE_IDENTIFIED')
+
+  it('accepts what this build stamps, which is the value `saveRecord` writes', () => {
+    expect(codesOf(MINE)).toEqual([])
+    // And the digest is the shape the bound requires, asserted here rather
+    // than trusted: `currentGateIdentity()` and the bound are in one module
+    // and could agree with each other while both being wrong about the
+    // 16-hex convention `ResolverIdentity`'s `bundle_digest` uses.
+    expect(MINE.boundsDigest).toMatch(/^[0-9a-f]{16}$/)
+    expect(MINE.codes).toEqual([...BOUND_CODES])
+  })
+
+  it('accepts a record that names no bound set at all, which is every record before today', () => {
+    // Absence is a true claim and the bound does not touch it, the same rule
+    // RESOLVER_IDENTIFIED follows. Both committed fixtures predate the
+    // field, so a bound that required it would fail on the two records it is
+    // supposed to be checked against.
+    expect(codesOf(undefined)).toEqual([])
+    expect(codesOf(null)).toEqual([])
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      expect(load(p).task.gatedBy, p).toBeUndefined()
+      expect(checkRecord(load(p)), p).toEqual([])
+    }
+  })
+
+  it('accepts a bound set from another build, including codes this one has never heard of', () => {
+    // The deliberate non-check, and the reason the field is typed
+    // `string[]`. A record written by a later resolver names a nineteenth
+    // bound, and refusing it would turn this gate into a gate against its
+    // own future. A record written by an earlier one names fifteen, which is
+    // every record this project wrote between 2026-10-06 and 2026-10-12.
+    expect(codesOf({ codes: [...BOUND_CODES, 'A_NINETEENTH_BOUND'], boundsDigest: 'a'.repeat(16) }))
+      .toEqual([])
+    expect(codesOf({ codes: BOUND_CODES.slice(0, 15), boundsDigest: 'b'.repeat(16) })).toEqual([])
+  })
+
+  it('fires when a record claims THIS build\'s rules and lists fewer of them', () => {
+    // The clause the field exists for, and the one `gate-identified.json`
+    // commits. A digest is a claim about which rules applied, so a record
+    // asserting this build\'s rule set while listing fewer rules than this
+    // build has is a record a bound was dropped from.
+    const dropped = MINE.codes.filter((c) => c !== 'RIVAL_NOT_AFTER_FINAL')
+    const v = fired({ codes: dropped, boundsDigest: MINE.boundsDigest })!
+    expect(v.observed).toContain(MINE.boundsDigest)
+    expect(v.observed).toContain('missing RIVAL_NOT_AFTER_FINAL')
+    expect(v.observed).toContain(`lists ${dropped.length}`)
+    expect(codesOf({ codes: dropped, boundsDigest: MINE.boundsDigest })).toEqual(['GATE_IDENTIFIED'])
+  })
+
+  it('fires in the other direction too, on a code this build does not have under its own digest', () => {
+    // Not symmetric with the case above by accident. A SHORT list under this
+    // digest means a bound was dropped; a LONG one means the digest was
+    // copied onto a record checked by something else, and both make the same
+    // same-digest comparison wrong.
+    const v = fired({ codes: [...MINE.codes, 'INVENTED_BOUND'], boundsDigest: MINE.boundsDigest })!
+    expect(v.observed).toContain('INVENTED_BOUND not in this bound set')
+  })
+
+  it('fires on an empty code list, which is not the same claim as absence', () => {
+    // Absence says nothing stamped this record. An empty array says a
+    // resolver stamped it and checked it against no bounds, which no build
+    // of this module can be: `BOUNDS` has never held fewer than ten entries.
+    const v = fired({ codes: [], boundsDigest: MINE.boundsDigest })!
+    expect(v.observed).toContain('empty array')
+    expect(v.observed).toContain('absence of the field')
+  })
+
+  it('fires on a code list that is not a list of codes', () => {
+    for (const codes of [[''], ['lowercase_code'], ['1_LEADING_DIGIT'], ['HAS SPACE'], [17]]) {
+      expect(codesOf({ codes, boundsDigest: MINE.boundsDigest }), JSON.stringify(codes))
+        .toEqual(['GATE_IDENTIFIED'])
+    }
+    // The flattened form the field was deliberately not given, and the one a
+    // lossy round trip produces.
+    expect(fired({ codes: BOUND_CODES.join(','), boundsDigest: MINE.boundsDigest })!.observed)
+      .toContain('not an array')
+  })
+
+  it('fires on a duplicated code, because the list is read as a set', () => {
+    // A list with one code twice has the same LENGTH as the honest list with
+    // one code missing, so a length-only comparison cannot tell them apart.
+    const v = fired({
+      codes: [...MINE.codes.slice(0, -1), 'CLAIM_NOT_WIDER'],
+      boundsDigest: MINE.boundsDigest,
+    })!
+    expect(v.observed).toContain('"CLAIM_NOT_WIDER" more than once')
+  })
+
+  it('fires on a digest that cannot be compared against another record\'s', () => {
+    // 16 exactly, matching `currentGateIdentity()` and the `bundle_digest`
+    // prefix RESOLVER_IDENTIFIED checks. Anything else is a digest from
+    // somewhere else and the one comparison this field supports would
+    // silently never match.
+    for (const boundsDigest of ['0123456789abcde', '0123456789abcdef0', 'f'.repeat(64), 'ABCDEF0123456789', '']) {
+      expect(codesOf({ codes: [...BOUND_CODES], boundsDigest }), JSON.stringify(boundsDigest))
+        .toEqual(['GATE_IDENTIFIED'])
+    }
+    // Reported once, for the shape, and not twice for the shape and the
+    // comparison the shape made impossible.
+    expect(codesOf({ codes: [], boundsDigest: 'nope' })).toEqual(['GATE_IDENTIFIED', 'GATE_IDENTIFIED'])
+  })
+
+  it('fires on a field that is not an object', () => {
+    expect(fired(MINE.boundsDigest)!.observed).toContain('not an object carrying codes and a digest')
+    expect(codesOf(17)).toEqual(['GATE_IDENTIFIED'])
+    // An object missing both halves fires twice, once per half, because the
+    // two are independent facts and a reader fixing one should still see the
+    // other.
+    expect(codesOf({})).toEqual(['GATE_IDENTIFIED', 'GATE_IDENTIFIED'])
+  })
+
+  it('does not read the field as a verdict: a record can carry it and still fail', () => {
+    // The reading the name invites and the record does not make. Both
+    // launches write records BEFORE the gate runs (`gateRecords` in
+    // src/launch.ts), so `gatedBy` says which rules applied and never that
+    // they held. Asserted on a record that carries this build\'s own stamp
+    // and breaks a different bound.
+    const r = gated(MINE)
+    r.stats.byClass.survived_verbatim.chars += 1
+    const codes = checkRecord(r).map((v) => v.code)
+    expect(codes).not.toContain('GATE_IDENTIFIED')
+    expect(codes.length).toBeGreaterThan(0)
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-gate-identified-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(gated({ codes: [...BOUND_CODES], boundsDigest: 'HEAD' }), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('GATE_IDENTIFIED')
+    expect(lines.join('\n')).toContain('"HEAD"')
   })
 })
