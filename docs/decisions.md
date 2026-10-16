@@ -348,6 +348,55 @@ run could dispatch would land on a workflow that still lacks
 `allowed_bots` until #192 itself merges. Still open, still one PR away
 from closing, still the owner's or a chair's to merge.
 
+**Update, 2026-10-16 ~15:2x UTC: #192 merged, and the wall it named is
+down — but dispatch is still not possible, for the other reason this
+file already names.** The owner merged #192 herself at 14:16:58 UTC
+today, on her first afternoon back (`gh pr view 192 --json mergedBy`
+confirms `alexandrapaiz`, not this seat). `docs/agents/incidents.md`
+Incident 13 is closed in this same pull request on that evidence: every
+`agent-*.yml` in this repo now carries `allowed_bots:
+"github-actions[bot]"`, confirmed by `git show` on the merge commit.
+
+That is not the same thing as dispatch working, and this pass checked
+rather than assumed. The sprint's open item (security, #190) met every
+§11.3/§11.4 criterion this pass walked fresh — due this week, the
+owning seat hasn't run via Actions since before the sprint started, its
+one open PR is a draft and the instruction names it by number and says
+to build on it — so this pass fired the real command rather than
+queuing a fourth proposal:
+
+```
+gh workflow run agent-security.yml -f owner_instructions='...'
+```
+
+It failed immediately: `HTTP 403: Resource not accessible by
+integration` on the `.../actions/workflows/.../dispatches` endpoint
+itself, before any workflow run was created. That is not the
+actor-type rejection Incident 13 described (this call never reached a
+workflow run at all, so there was nothing for `allowed_bots` to admit
+or refuse). It is the symptom this file's **first** open finding above
+("the re-vendored PM standard names dispatch tools this repo does not
+have") already named: the Claude Code action overwrites this run's
+`GH_TOKEN`/`GITHUB_TOKEN` with its own installation token before this
+seat ever gets a shell, and that token's scopes (confirmed directly:
+`GH_TOKEN="$GH_TOKEN" gh api user` also 403s "Resource not accessible
+by integration") don't include starting another workflow run. §11.5's
+named escape hatch, an env var carrying the original job token
+(`DEFAULT_WORKFLOW_TOKEN` there, `OVERRIDE_GITHUB_TOKEN` in this run's
+own environment), is present as a name but empty as a value here, and
+`tools/gh-actions.sh` still does not exist in this repo (`ls tools`:
+only `ledger/` and `stack/`), so there is no wrapper to route around it
+either.
+
+So: two independent walls, one now gone. Incident 13 (allowed_bots) is
+closed. The token-scope wall (this file's first finding, still open) is
+the sole remaining blocker, confirmed by a live attempt rather than
+inferred from a diff, and it is unchanged by anything that happened
+today. Handed to `alexandra-systems/exo-centralizer` again on the board
+this pass, naming this exact 403 as the first dispatch to actually
+clear Incident 13 and hit the second wall cleanly, with nothing else
+in the way to confuse the two.
+
 **Update, 2026-10-15 ~18:25 UTC.** Unchanged again, this time from a
 host six-hour pass. #192 is still `MERGEABLE`/`CLEAN`, still waiting on
 the owner or a chair for the same reason. Two other pull requests that
