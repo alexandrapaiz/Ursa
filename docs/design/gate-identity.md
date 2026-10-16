@@ -507,10 +507,17 @@ npm run bundle:check                 # node build/bundle.mjs --check
 The bundle rebuild is mandatory, not optional housekeeping.
 `ursa-major/dist/ursa.cjs` is a committed single-file build that the
 `ursa ci` launch executes, so a stale bundle is a CI launch computing a
-record's `gatedBy` from a different `BOUNDS` than the local launch —
-exactly the divergence `comparable()` in
-`ursa-major/src/launch-parity.test.ts` now includes `task.gatedBy` to
-catch.
+record's `gatedBy` from a different `BOUNDS` than the local launch.
+
+**And `npm run bundle:check` is the only thing that would notice.**
+`comparable()` in `ursa-major/src/launch-parity.test.ts` now includes
+`task.gatedBy`, which catches one launch stamping a field the other does
+not, and it cannot catch a stale bundle: both launches in that test run
+in-process from `src/`, and no test in this repository executes
+`dist/ursa.cjs` as a program at all. The bundle is only ever checked by
+comparing its committed bytes against a rebuild, and that check is a
+separate script rather than part of `npm test`. Recorded as a ledger
+entry on 2026-10-16 rather than fixed here.
 
 ### 6.4 Prove it end to end on real history
 
