@@ -2,6 +2,34 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-16 ~14:26 UTC six-hour pass
+
+The owner posted to the whole company this pass that she was out
+eleven days for surgery, is back at work today, and that her own
+merges resume this afternoon. None of the three below have moved yet
+as of this pass, so none are re-asked, only updated to say she is
+active again.
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across seven passes.** Unchanged: green, clean, handed to this seat
+   by name, still declined for the reason named every pass since
+   2026-10-14 — this run's own operating instruction reads "never
+   touch secrets or workflows," and that stands above what §21's
+   merge-authority grant would otherwise allow.
+2. **Three pull requests still edit a charter file directly: #199
+   (skill), #184 (research), #167 (exo).** #199 and #167 are also
+   still `CONFLICTING`; #184 now shows `MERGEABLE`/`CLEAN` but stays
+   Tier C regardless, since a charter edit doesn't stop being one when
+   the diff stops conflicting. The exo seat's own rebase PR for #167
+   (#201) is open but hasn't landed. #80 (`company.yaml`) stays on the
+   roster-and-secrets carve-out, already labeled `owner-action`.
+3. **The sprint's milestone is under two days out (2026-10-18) with
+   item 3 still open on security's own branch (#190, draft,
+   `CONFLICTING`).** No change on that branch this pass. This seat
+   still cannot wake it by dispatch while item 1's wall stands, so the
+   only two ways this moves are security picking it back up on its own
+   cron, or #192 clearing the wall.
+
 ## Top three for the owner, 2026-10-16 ~12:21 UTC six-hour pass
 
 1. **The workflow-guard fix (#192) still waits on you or a chair, now
@@ -27,6 +55,37 @@ Closed this pass under Tier B's own age rule, not waiting on you
 anymore: #49 and #87, the two sales-seat drafts that sat with no
 verdict across several passes. Both branches stay intact and
 reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-16, ~14:26 UTC, six-hour pass, message-triggered)
+
+1. **Found this seat's own prior pass today already finished and
+   open, not a draft, on the exact branch name this run was also told
+   to use.** #203 covers this pass's ask in full: inbox, failed runs,
+   Tier B, sprint. Rather than restart from `main` and redo it, this
+   run branched a new commit on top of #203's tip (branch name
+   appended with a suffix, per this run's own naming instruction) and
+   added only what #203 did not yet know.
+2. **Inbox: one new message, the owner's return.** Posted through
+   `chair:hq-console` at 14:16 UTC: she was out eleven days for
+   surgery, apologizes for the silence, is back at work today, and her
+   own merges resume this afternoon. Also carries a standing
+   instruction on model routing (see `docs/decisions.md`'s 14:26 UTC
+   entry): checked against this repo's actual workflow files, and
+   Ursa's existing Kimi-to-Claude-subscription fallback already does
+   what she asked, so nothing follows from it on this seat's side.
+   Nothing else in the inbox is new since #203's read two hours ago.
+3. **Failed runs: still zero in the last six hours**, re-checked
+   fresh rather than assumed from #203.
+4. **Tier B: still nothing to merge**, re-walked fresh. Same four
+   exclusions as #203 found: #199/#184/#167 touch `prompts/` (#184 now
+   clean rather than conflicting, same tier either way); #192 touches
+   `.github/workflows/`; #190 and #201 are drafts; #80 is the
+   roster/secrets carve-out.
+5. **Sprint: unchanged.** Items 1 and 2 shipped days ago; item 3 is
+   still open on security's branch, still the one thing between this
+   sprint and its goal.
+6. **Board:** posted one `note` this pass, first person, naming the
+   owner's return and that nothing else moved.
 
 ## This run (2026-10-16, ~12:21 UTC, six-hour pass, message-triggered)
 
