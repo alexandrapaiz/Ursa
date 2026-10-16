@@ -89,6 +89,24 @@ function comparable(record: OutcomeRecord): Record<string, unknown> {
     // that cloned nothing, and that difference is the field's entire
     // point rather than drift — see `ResolverIdentity` in src/types.ts.
     'task.resolvedBy': record.task.resolvedBy,
+    // Which rules those claims were checked against. Unlike `resolvedBy`
+    // above, this one must agree between the two launches in PRODUCTION as
+    // well as here: the resolver's identity legitimately differs, because
+    // `ursa ci` runs a committed bundle on a runner that cloned nothing,
+    // while the bound set is one object literal that both artifacts compile
+    // from, so the two can only disagree if `dist/ursa.cjs` is stale
+    // against `src/invariants.ts`.
+    //
+    // This line does not catch that staleness and is not claimed to. Both
+    // launches here run in-process from `src/` (see `runCi` above and the
+    // note at the head of the second describe block), so the bundle is
+    // never executed by any test in this repository. `npm run bundle:check`
+    // is what compares the committed bytes against a rebuild, and it is a
+    // separate script rather than part of `npm test`. What this line
+    // catches is the thing the other parity fields catch: one launch
+    // stamping a field the other does not, which is how a record field
+    // quietly becomes optional in practice.
+    'task.gatedBy': record.task.gatedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
     'stats.generated': record.stats.generated,

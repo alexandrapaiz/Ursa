@@ -4,6 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Phone landscape, where the height is the scarce dimension.
+   Measured 2026-10-15: the header spends 88px of padding around a 24px line,
+   which is 23% of a 375px-tall screen, and it pushed the page's only control
+   off the bottom at the two smallest landscape sizes. Bottom of the control
+   against the viewport, as shipped: 667x375 ended at 416, 41px below the fold,
+   with the top hairline of its border sliced by the edge; 720x360 ended at
+   378, 18px below. Landscape has no scroll cue, by design, so nothing said
+   there was more. 430px is the ceiling because it is the tallest phone
+   landscape in the review set (932x430); above it the generous header is right
+   and nothing was ever close to the fold. */
+@custom-variant short-landscape (@media (orientation: landscape) and (max-height: 430px));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

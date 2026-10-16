@@ -464,6 +464,16 @@ export async function main(argv: string[]): Promise<number> {
   // nothing was written, since there is then no claim to attribute.
   if (records.length > 0) {
     console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`)
+    // And which rules those claims were checked against, read off the
+    // record rather than from `currentGateIdentity()` directly. The
+    // difference matters on exactly one path: `saveRecord` preserves an
+    // existing `task.gatedBy` and never rewrites it, so a re-saved record
+    // carries the bound set its classifications were made under and this
+    // line has to say that one rather than today's.
+    const gate = records[0].task.gatedBy
+    if (gate) {
+      console.log(`Checked against: ${gate.codes.length} bounds, set \`${gate.boundsDigest}\``)
+    }
   }
 
   // The gate runs on every run, after the records are on disk, and its
