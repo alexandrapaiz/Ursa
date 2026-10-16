@@ -99,13 +99,20 @@ function comparable(record: OutcomeRecord): Record<string, unknown> {
     //
     // This line does not catch that staleness and is not claimed to. Both
     // launches here run in-process from `src/` (see `runCi` above and the
-    // note at the head of the second describe block), so the bundle is
-    // never executed by any test in this repository. `npm run bundle:check`
-    // is what compares the committed bytes against a rebuild, and it is a
-    // separate script rather than part of `npm test`. What this line
-    // catches is the thing the other parity fields catch: one launch
-    // stamping a field the other does not, which is how a record field
-    // quietly becomes optional in practice.
+    // note at the head of the second describe block), so this file never
+    // loads the bundle. What this line catches is the thing the other
+    // parity fields catch: one launch stamping a field the other does
+    // not, which is how a record field quietly becomes optional in
+    // practice.
+    //
+    // The staleness itself is caught, as of 2026-10-16, by
+    // `src/bundle-exec.test.ts`, which spawns the committed bundle as a
+    // child process out of a directory with no git work tree in it,
+    // reads the record it writes off disk, and compares that record's
+    // `task.gatedBy` against `currentGateIdentity()` computed in-process
+    // from `src/invariants.ts`. That file also folds `npm run
+    // bundle:check` into `npm test` by spawning it, which it was not
+    // part of when this paragraph was first written.
     'task.gatedBy': record.task.gatedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
