@@ -80,7 +80,18 @@ eighteen-author position paper on Major's exact claim, both five months
 old, both found in one search.
 
 The evidence bar does not bend for the owner-named areas. They are
-named because they matter, not exempted.
+named because they matter, not exempted. **And reporting one of them
+quiet for the window is a negative claim whose instrument must be the
+category listing, not a keyword search**, because a search tests the
+vocabulary you happened to choose rather than the field. Five
+consecutive briefs called the owner-named multi-agent and agentic-design
+area empty on keyword evidence, and one fetch of arXiv's cs.MA listing
+for October 2026 returned 252 entries, among them the paper closest to
+Ursa's own instrument design (docs/research/briefs/2026-10-16.md,
+correction 3 and the meta-review). **Where you read a listing, say how
+much of it you read**, since fifty of 252 is a sample and a brief that
+does not name it as one invites the same error from the other
+direction.
 
 Open what you cite. A search-result snippet is not a read source. When
 a secondary source and a primary source disagree on a date or a claim,
