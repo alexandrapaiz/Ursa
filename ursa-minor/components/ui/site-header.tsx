@@ -8,6 +8,12 @@ import Link from "next/link";
  * `href` makes the word-mark a link, which the 404 wants and the home page
  * does not.
  *
+ * In phone landscape the chrome answers to the height, the way the hero type
+ * was taught to on 2026-10-12. pt-14/pb-8 becomes pt-6/pb-4, which takes the
+ * header from 112px to 64px and is what puts the control back above the fold
+ * at 667x375 and 720x360. See the `short-landscape` variant in globals.css for
+ * the measurements.
+ *
  * The row wraps rather than fights. At 320 the word-mark measures 130px and
  * the tag 135px against 256px of usable width, so the old nowrap row broke
  * both of them internally ("URSA / MINOR" beside "for frontier / labs") with
@@ -25,7 +31,7 @@ export function SiteHeader({ href }: { href?: string }) {
   );
 
   return (
-    <header className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-[clamp(2rem,8vw,6rem)] pt-14 pb-8">
+    <header className="relative z-10 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-[clamp(2rem,8vw,6rem)] pt-14 pb-8 short-landscape:pt-6 short-landscape:pb-4">
       {href ? (
         <Link href={href} className="mark-link">
           {mark}
