@@ -4236,6 +4236,7 @@ function renderRunComment(f, ctx) {
   if (ctx.resolvedBy !== void 0) {
     lines.push(`- Resolver that produced these records: ${formatResolverIdentity(ctx.resolvedBy)}. Every record above carries it as \`task.resolvedBy\`, so a figure in this table can be traced to the code that computed it.`);
   }
+  lines.push(`- Bound set those records were checked against: \`${currentGateIdentity().boundsDigest}\`, over ${BOUND_COUNT} bounds. Every record above carries it as \`task.gatedBy\`, so two runs can be compared on whether the same rules applied. It names the rules, not a verdict: the self-check line above is what says they held.`);
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`);
   lines.push("");
   lines.push("</details>");
@@ -5003,6 +5004,10 @@ ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`
 Records: ${projectPath}/.ursa/records/`);
   if (records.length > 0) {
     console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`);
+    const gate2 = records[0].task.gatedBy;
+    if (gate2) {
+      console.log(`Checked against: ${gate2.codes.length} bounds, set \`${gate2.boundsDigest}\``);
+    }
   }
   const gate = gateRecords(records);
   if (gate.violations.length > 0) {
