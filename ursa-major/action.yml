@@ -8,6 +8,27 @@
 # Reference it as:
 #   uses: alexandrapaiz/Ursa/ursa-major@main
 #
+# WHICH BUILD YOU GET, SAID PLAINLY, because `@main` reads like a neutral
+# install line and it is not one yet. This project publishes no tags and
+# no releases, so `@main` is the only reference it offers, and `main`
+# rebuilt dist/ursa.cjs sixteen times in the eleven days to 2026-10-16.
+# The resolver that reads your merge this week is therefore not
+# guaranteed to be the one that read it last week. Two things follow.
+#
+# You can pin today, without waiting for a tag. A commit sha works and is
+# supported: `uses: alexandrapaiz/Ursa/ursa-major@<sha>`. That freezes
+# both the Action's steps and the bundle they run, which is the whole
+# artifact.
+#
+# And whichever you choose, every record says which build wrote it. Each
+# record carries `task.resolvedBy`, the identity of the code that made
+# its claims, and `task.gatedBy`, the set of rules those claims were
+# checked against. On this path `task.resolvedBy` is a SHA-256 prefix of
+# the bundle's own bytes, because GitHub downloads an action as a tarball
+# and there is no git history under it to name. So a figure in the run
+# comment can always be traced to a build, which is a weaker guarantee
+# than a version number and a stronger one than nothing.
+#
 # Composite rather than a docker container, per the product plan §9: the
 # runner's own checkout happens first, with the runner's own git and
 # token, and the step that reads the repository is plain auditable YAML
