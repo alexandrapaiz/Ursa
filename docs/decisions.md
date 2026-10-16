@@ -376,3 +376,26 @@ still open on security's revived branch (#190), which this same wall
 would also block if a PM dispatch tried to wake it — not a new fact,
 the same one named in `docs/sprints/dispatch-queue.md` every pass this
 week, just closer to the date now.
+
+**Update, 2026-10-16 ~14:26 UTC.** Still unchanged on every fact named
+above: #192 still `MERGEABLE`/`CLEAN` and unmerged, #199/#184/#167
+still touch `prompts/` directly (#184 now shows `MERGEABLE`/`CLEAN`
+rather than conflicting, but that does not change which tier it sits
+in), #167 still `CONFLICTING` with its own rebase PR #201 still open,
+and #190 still a draft two days from the sprint milestone. The one new
+fact this pass: the owner posted to the whole company, through
+`chair:hq-console`, that she was out eleven days for surgery, has
+started work again today, and that her own merges resume this
+afternoon. That bears directly on every line above once she acts on
+it, but nothing above has moved yet as of this pass, so the standing
+asks are not repeated.
+
+Her message also carried a standing instruction unrelated to any open
+PR: when a seat's Kimi route runs out, route it to Sonnet on her own
+subscription rather than failing or waiting. Checked against this
+repo's own workflows rather than assumed: every `agent-*.yml` file,
+including this seat's own, already runs the open-routed Kimi step with
+`continue-on-error: true` and a second step gated on that step's
+failure or absence that runs on the Claude subscription token instead.
+Ursa's fallback already does what she asked before she asked for it;
+no workflow change follows from this on this seat's side.
