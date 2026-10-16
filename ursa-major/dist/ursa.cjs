@@ -1218,265 +1218,6 @@ var init_episodes = __esm({
   }
 });
 
-// src/resolver-identity.ts
-function runningScript() {
-  const argv1 = process.argv[1];
-  if (!argv1) return null;
-  try {
-    return (0, import_node_fs.statSync)(argv1).isFile() ? argv1 : null;
-  } catch {
-    return null;
-  }
-}
-function git3(dir, args) {
-  try {
-    return (0, import_node_child_process4.execFileSync)("git", ["-C", dir, ...args], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"]
-    }).trim();
-  } catch {
-    return null;
-  }
-}
-function resolverIdentity(scriptPath = runningScript()) {
-  if (scriptPath === null) return null;
-  const dir = (0, import_node_path2.dirname)(scriptPath);
-  if (git3(dir, ["rev-parse", "--is-inside-work-tree"]) === "true") {
-    const commit = git3(dir, ["rev-parse", "--short", "HEAD"]);
-    if (commit) {
-      const status = git3(dir, ["status", "--porcelain"]);
-      return { basis: "git_commit", commit, dirty: status === null || status.length > 0 };
-    }
-  }
-  try {
-    const digest = (0, import_node_crypto.createHash)("sha256").update((0, import_node_fs.readFileSync)(scriptPath)).digest("hex");
-    return { basis: "bundle_digest", digest: digest.slice(0, 16) };
-  } catch {
-    return null;
-  }
-}
-function currentResolverIdentity() {
-  if (!memo) memo = { value: resolverIdentity() };
-  return memo.value;
-}
-function formatResolverIdentity(identity) {
-  if (!identity) return "resolver not identified (no git work tree and no readable bundle)";
-  if (identity.basis === "git_commit") {
-    return `resolver ${identity.commit}${identity.dirty ? " (working tree had uncommitted changes)" : ""}`;
-  }
-  return `resolver bundle sha256:${identity.digest}`;
-}
-var import_node_child_process4, import_node_crypto, import_node_fs, import_node_path2, memo;
-var init_resolver_identity = __esm({
-  "src/resolver-identity.ts"() {
-    "use strict";
-    import_node_child_process4 = require("node:child_process");
-    import_node_crypto = require("node:crypto");
-    import_node_fs = require("node:fs");
-    import_node_path2 = require("node:path");
-  }
-});
-
-// src/store.ts
-function ursaDir(projectRoot) {
-  return (0, import_node_path3.join)(projectRoot, ".ursa");
-}
-function saveRecord(projectRoot, record, identity = currentResolverIdentity()) {
-  const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
-  (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
-  const path = (0, import_node_path3.join)(dir, `${record.task.id}.json`);
-  if (identity && !record.task.resolvedBy) record.task.resolvedBy = identity;
-  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(record, null, 2) + "\n");
-  return path;
-}
-function saveEpisodes(projectRoot, episodes) {
-  (0, import_node_fs2.mkdirSync)(ursaDir(projectRoot), { recursive: true });
-  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "episodes.json");
-  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
-  return path;
-}
-var import_node_fs2, import_node_path3;
-var init_store = __esm({
-  "src/store.ts"() {
-    "use strict";
-    import_node_fs2 = require("node:fs");
-    import_node_path3 = require("node:path");
-    init_resolver_identity();
-  }
-});
-
-// src/tuning/revoke.ts
-function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const axiomsDeleted = [];
-  let evidenceStripped = 0;
-  const axioms = [];
-  for (const axiom of tuning.axioms) {
-    const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
-    const dropped = axiom.evidence.length - kept.length;
-    if (dropped === 0) {
-      axioms.push(axiom);
-      continue;
-    }
-    evidenceStripped += dropped;
-    if (kept.length === 0) {
-      axiomsDeleted.push(axiom.id);
-      continue;
-    }
-    axioms.push({ ...axiom, evidence: kept, evidenceCount: kept.length, lastSeen: now });
-  }
-  const deleted = new Set(axiomsDeleted);
-  const cleaned = axioms.map(
-    (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
-  );
-  const sources = tuning.sources.filter((s) => s.recordId !== recordId);
-  return {
-    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
-    axiomsDeleted,
-    evidenceStripped,
-    sourcesRemoved: tuning.sources.length - sources.length
-  };
-}
-function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  if (!(0, import_node_fs3.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
-  const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tuningPath, "utf8"));
-  const target = tuning.axioms.find((a) => a.id === unitId);
-  if (!target) {
-    throw new Error(
-      `No axiom ${unitId} in ${tuningPath} (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
-    );
-  }
-  const updated = {
-    ...tuning,
-    updatedAt: now,
-    axioms: tuning.axioms.map(
-      (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
-    )
-  };
-  (0, import_node_fs3.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
-  return updated;
-}
-var import_node_fs3;
-var init_revoke = __esm({
-  "src/tuning/revoke.ts"() {
-    "use strict";
-    import_node_fs3 = require("node:fs");
-  }
-});
-
-// src/consent.ts
-function consentPath(projectRoot) {
-  return (0, import_node_path4.join)(ursaDir(projectRoot), "consent.json");
-}
-function tuningPathFor(projectRoot) {
-  return (0, import_node_path4.join)(ursaDir(projectRoot), "tuning.json");
-}
-function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return {
-    schemaVersion: "0.1.0",
-    updatedAt: now,
-    scopes: { "minor-aggregate": { state: "withheld", changedAt: null, history: [] } },
-    forgotten: []
-  };
-}
-function coerceScope(raw) {
-  const o = raw ?? {};
-  const state = o.state === "granted" ? "granted" : "withheld";
-  return {
-    state,
-    changedAt: typeof o.changedAt === "string" ? o.changedAt : null,
-    history: Array.isArray(o.history) ? o.history : []
-  };
-}
-function loadConsent(projectRoot) {
-  const path = consentPath(projectRoot);
-  if (!(0, import_node_fs4.existsSync)(path)) return withheldByDefault();
-  let parsed;
-  try {
-    parsed = JSON.parse((0, import_node_fs4.readFileSync)(path, "utf8"));
-  } catch {
-    return withheldByDefault();
-  }
-  if (parsed === null || typeof parsed !== "object") return withheldByDefault();
-  const o = parsed;
-  const scopes = o.scopes ?? {};
-  return {
-    schemaVersion: "0.1.0",
-    updatedAt: typeof o.updatedAt === "string" ? o.updatedAt : (/* @__PURE__ */ new Date()).toISOString(),
-    scopes: { "minor-aggregate": coerceScope(scopes["minor-aggregate"]) },
-    forgotten: Array.isArray(o.forgotten) ? o.forgotten : []
-  };
-}
-function saveConsent(projectRoot, consent) {
-  (0, import_node_fs4.mkdirSync)(ursaDir(projectRoot), { recursive: true });
-  const path = consentPath(projectRoot);
-  (0, import_node_fs4.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
-  return path;
-}
-function isGranted(consent, scope) {
-  return consent.scopes[scope]?.state === "granted";
-}
-function isForgotten(consent, recordId) {
-  return consent.forgotten.some((t) => t.recordId === recordId);
-}
-function setState(projectRoot, scope, to, by, now) {
-  const consent = loadConsent(projectRoot);
-  const current = consent.scopes[scope];
-  const next = {
-    state: to,
-    changedAt: now,
-    history: [...current.history, { at: now, from: current.state, to, by }]
-  };
-  const updated = { ...consent, updatedAt: now, scopes: { ...consent.scopes, [scope]: next } };
-  saveConsent(projectRoot, updated);
-  return updated;
-}
-function grantScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return setState(projectRoot, scope, "granted", by, now);
-}
-function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return setState(projectRoot, scope, "withheld", by, now);
-}
-function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const recordFile = (0, import_node_path4.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
-  const hadFile = (0, import_node_fs4.existsSync)(recordFile);
-  if (hadFile) (0, import_node_fs4.rmSync)(recordFile);
-  let axiomsDeleted = [];
-  let evidenceStripped = 0;
-  let sourcesRemoved = 0;
-  const tPath = tuningPathFor(projectRoot);
-  if ((0, import_node_fs4.existsSync)(tPath)) {
-    const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
-    const result = forgetRecordInTuning(tuning, recordId, now);
-    (0, import_node_fs4.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
-    axiomsDeleted = result.axiomsDeleted;
-    evidenceStripped = result.evidenceStripped;
-    sourcesRemoved = result.sourcesRemoved;
-  }
-  const tombstone = {
-    recordId,
-    forgottenAt: now,
-    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
-  };
-  const consent = loadConsent(projectRoot);
-  saveConsent(projectRoot, {
-    ...consent,
-    updatedAt: now,
-    forgotten: [...consent.forgotten.filter((t) => t.recordId !== recordId), tombstone]
-  });
-  return tombstone;
-}
-var import_node_fs4, import_node_path4, SCOPES;
-var init_consent = __esm({
-  "src/consent.ts"() {
-    "use strict";
-    import_node_fs4 = require("node:fs");
-    import_node_path4 = require("node:path");
-    init_revoke();
-    init_store();
-    SCOPES = ["minor-aggregate"];
-  }
-});
-
 // src/intervals.ts
 function mergedLength(intervals) {
   const sorted = [...intervals].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -1575,6 +1316,15 @@ function rawTextFor(record, q) {
     return new Error(`no file ${q.filePath} in this record (has ${record.files.map((f) => f.path).join(", ") || "none"})`);
   }
   return file.text;
+}
+function currentGateIdentity() {
+  const canonical = [...BOUND_CODES].sort().map((code) => `${code}
+${BOUNDS[code]}
+`).join("");
+  return {
+    codes: [...BOUND_CODES],
+    boundsDigest: (0, import_node_crypto.createHash)("sha256").update(canonical, "utf8").digest("hex").slice(0, 16)
+  };
 }
 function firstDifference(final, generation, window = 10) {
   let i = 0;
@@ -1971,6 +1721,77 @@ function checkRecord(record) {
       }
     }
   }
+  const gatedBy = record.task.gatedBy;
+  if (gatedBy !== void 0 && gatedBy !== null) {
+    const at = "task.gatedBy";
+    if (typeof gatedBy !== "object") {
+      push(
+        "GATE_IDENTIFIED",
+        at,
+        `the field is ${typeof gatedBy} (${quoted(gatedBy)}), not an object carrying codes and a digest`
+      );
+    } else {
+      const v = gatedBy;
+      const codes = v.codes;
+      let codesWellFormed = false;
+      if (!Array.isArray(codes)) {
+        push(
+          "GATE_IDENTIFIED",
+          at,
+          `codes is ${quoted(codes)}, not an array, so the record does not list the bounds it was checked against`
+        );
+      } else if (codes.length === 0) {
+        push(
+          "GATE_IDENTIFIED",
+          at,
+          'codes is an empty array, so the record names a resolver that checked it against no bounds; absence of the field is how "nothing stamped this" is written'
+        );
+      } else {
+        const bad = codes.filter((c) => typeof c !== "string" || !/^[A-Z][A-Z0-9_]*$/.test(c));
+        const dupes = [...new Set(codes.filter((c, i) => codes.indexOf(c) !== i))];
+        if (bad.length > 0) {
+          push(
+            "GATE_IDENTIFIED",
+            at,
+            `codes holds ${bad.length} of ${codes.length} entr${bad.length === 1 ? "y" : "ies"} that is not a bound code in this module's shape, the first being ${quoted(bad[0])}`
+          );
+        } else if (dupes.length > 0) {
+          push(
+            "GATE_IDENTIFIED",
+            at,
+            `codes names ${quoted(dupes[0])} more than once, so its length is not the number of distinct bounds it claims`
+          );
+        } else {
+          codesWellFormed = true;
+        }
+      }
+      const digest = v.boundsDigest;
+      const digestWellFormed = typeof digest === "string" && /^[0-9a-f]{16}$/.test(digest);
+      if (!digestWellFormed) {
+        push(
+          "GATE_IDENTIFIED",
+          at,
+          `boundsDigest is ${quoted(digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against another record's`
+        );
+      }
+      if (codesWellFormed && digestWellFormed) {
+        const mine = currentGateIdentity();
+        if (digest === mine.boundsDigest) {
+          const listed = codes;
+          const claimed = new Set(listed);
+          const missing2 = mine.codes.filter((c) => !claimed.has(c));
+          const extra2 = listed.filter((c) => !mine.codes.includes(c));
+          if (missing2.length > 0 || extra2.length > 0) {
+            push(
+              "GATE_IDENTIFIED",
+              at,
+              `boundsDigest ${digest} is this resolver's own, so the record claims this resolver's ${mine.codes.length} bounds, and it lists ${listed.length}` + (missing2.length > 0 ? `, missing ${missing2.join(", ")}` : "") + (extra2.length > 0 ? `, with ${extra2.join(", ")} not in this bound set` : "")
+            );
+          }
+        }
+      }
+    }
+  }
   return out;
 }
 function formatViolations(violations) {
@@ -1978,10 +1799,11 @@ function formatViolations(violations) {
     bound:    ${v.invariant}
     observed: ${v.observed}`).join("\n");
 }
-var BOUNDS, r3, abbrev, quoted, BOUND_COUNT, BOUND_CODES;
+var import_node_crypto, BOUNDS, r3, abbrev, quoted, BOUND_COUNT, BOUND_CODES;
 var init_invariants = __esm({
   "src/invariants.ts"() {
     "use strict";
+    import_node_crypto = require("node:crypto");
     init_intervals();
     init_text();
     BOUNDS = {
@@ -2001,13 +1823,275 @@ var init_invariants = __esm({
       EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit's author date states one that can be ordered, with a `sibling` exclusion's date no later than the record's own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository's own history one exclusion removed 60,616 characters, 84.7% of that run's headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch's commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one's. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer.",
       DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
       RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.",
-      RIVAL_NOT_AFTER_FINAL: "if a descent verdict names a `sibling` rival and states that commit's author date, the date is not later than the record's own `task.generatedAt`; and any rival's stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them \u2014 `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode's final commit \u2014 and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module's second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling's date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates \u2014 the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode's closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written."
+      RIVAL_NOT_AFTER_FINAL: "if a descent verdict names a `sibling` rival and states that commit's author date, the date is not later than the record's own `task.generatedAt`; and any rival's stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them \u2014 `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode's final commit \u2014 and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module's second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling's date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates \u2014 the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode's closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written.",
+      GATE_IDENTIFIED: "if a record names the bound set its claims were checked against, the name is one that can be compared. `task.gatedBy.codes` is a non-empty array of distinct bound codes in the shape this module declares them (uppercase letters, digits and underscores, starting with a letter), `task.gatedBy.boundsDigest` is exactly 16 lowercase hexadecimal characters, and a record whose digest equals the CHECKING resolver's own digest carries exactly the checking resolver's codes. That last clause is the only one with teeth beyond shape, and it is the one the field was added for: a digest is a claim about which rules applied, so a record asserting this build's rule set while listing fewer rules than this build has is a record a bound was dropped from, and dropping one quietly is the failure `task.resolvedBy` alone could not catch. Membership is deliberately NOT checked, in the other direction: a record whose digest differs names the bounds of the resolver that wrote it, which on a record from a later build includes codes this one has never heard of, and refusing that record would make every bound added after it a gate against its own future. An ABSENT `task.gatedBy` is legal and unchecked, for the reason `RESOLVER_IDENTIFIED` gives \u2014 absence says nothing stamped this record, which every record written before 2026-10-16 says truthfully. Present is NOT a claim that the record passed: both launches write records before the gate runs (`gateRecords` in src/launch.ts), so each of the twenty-three records in fixtures/violations/ names this bound set and is refused by it."
     };
     r3 = (x) => Math.round(x * 1e3) / 1e3;
     abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
     quoted = (x) => abbrev(JSON.stringify(x) ?? String(x));
     BOUND_COUNT = Object.keys(BOUNDS).length;
     BOUND_CODES = Object.keys(BOUNDS);
+  }
+});
+
+// src/resolver-identity.ts
+function runningScript() {
+  const argv1 = process.argv[1];
+  if (!argv1) return null;
+  try {
+    return (0, import_node_fs.statSync)(argv1).isFile() ? argv1 : null;
+  } catch {
+    return null;
+  }
+}
+function git3(dir, args) {
+  try {
+    return (0, import_node_child_process4.execFileSync)("git", ["-C", dir, ...args], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+function resolverIdentity(scriptPath = runningScript()) {
+  if (scriptPath === null) return null;
+  const dir = (0, import_node_path2.dirname)(scriptPath);
+  if (git3(dir, ["rev-parse", "--is-inside-work-tree"]) === "true") {
+    const commit = git3(dir, ["rev-parse", "--short", "HEAD"]);
+    if (commit) {
+      const status = git3(dir, ["status", "--porcelain"]);
+      return { basis: "git_commit", commit, dirty: status === null || status.length > 0 };
+    }
+  }
+  try {
+    const digest = (0, import_node_crypto2.createHash)("sha256").update((0, import_node_fs.readFileSync)(scriptPath)).digest("hex");
+    return { basis: "bundle_digest", digest: digest.slice(0, 16) };
+  } catch {
+    return null;
+  }
+}
+function currentResolverIdentity() {
+  if (!memo) memo = { value: resolverIdentity() };
+  return memo.value;
+}
+function formatResolverIdentity(identity) {
+  if (!identity) return "resolver not identified (no git work tree and no readable bundle)";
+  if (identity.basis === "git_commit") {
+    return `resolver ${identity.commit}${identity.dirty ? " (working tree had uncommitted changes)" : ""}`;
+  }
+  return `resolver bundle sha256:${identity.digest}`;
+}
+var import_node_child_process4, import_node_crypto2, import_node_fs, import_node_path2, memo;
+var init_resolver_identity = __esm({
+  "src/resolver-identity.ts"() {
+    "use strict";
+    import_node_child_process4 = require("node:child_process");
+    import_node_crypto2 = require("node:crypto");
+    import_node_fs = require("node:fs");
+    import_node_path2 = require("node:path");
+  }
+});
+
+// src/store.ts
+function ursaDir(projectRoot) {
+  return (0, import_node_path3.join)(projectRoot, ".ursa");
+}
+function saveRecord(projectRoot, record, identity = currentResolverIdentity(), gate = currentGateIdentity()) {
+  const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
+  (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
+  const path = (0, import_node_path3.join)(dir, `${record.task.id}.json`);
+  if (identity && !record.task.resolvedBy) record.task.resolvedBy = identity;
+  if (gate && !record.task.gatedBy) record.task.gatedBy = gate;
+  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(record, null, 2) + "\n");
+  return path;
+}
+function saveEpisodes(projectRoot, episodes) {
+  (0, import_node_fs2.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "episodes.json");
+  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
+  return path;
+}
+var import_node_fs2, import_node_path3;
+var init_store = __esm({
+  "src/store.ts"() {
+    "use strict";
+    import_node_fs2 = require("node:fs");
+    import_node_path3 = require("node:path");
+    init_invariants();
+    init_resolver_identity();
+  }
+});
+
+// src/tuning/revoke.ts
+function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  const axiomsDeleted = [];
+  let evidenceStripped = 0;
+  const axioms = [];
+  for (const axiom of tuning.axioms) {
+    const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
+    const dropped = axiom.evidence.length - kept.length;
+    if (dropped === 0) {
+      axioms.push(axiom);
+      continue;
+    }
+    evidenceStripped += dropped;
+    if (kept.length === 0) {
+      axiomsDeleted.push(axiom.id);
+      continue;
+    }
+    axioms.push({ ...axiom, evidence: kept, evidenceCount: kept.length, lastSeen: now });
+  }
+  const deleted = new Set(axiomsDeleted);
+  const cleaned = axioms.map(
+    (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
+  );
+  const sources = tuning.sources.filter((s) => s.recordId !== recordId);
+  return {
+    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
+    axiomsDeleted,
+    evidenceStripped,
+    sourcesRemoved: tuning.sources.length - sources.length
+  };
+}
+function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  if (!(0, import_node_fs3.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
+  const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tuningPath, "utf8"));
+  const target = tuning.axioms.find((a) => a.id === unitId);
+  if (!target) {
+    throw new Error(
+      `No axiom ${unitId} in ${tuningPath} (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
+    );
+  }
+  const updated = {
+    ...tuning,
+    updatedAt: now,
+    axioms: tuning.axioms.map(
+      (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
+    )
+  };
+  (0, import_node_fs3.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
+  return updated;
+}
+var import_node_fs3;
+var init_revoke = __esm({
+  "src/tuning/revoke.ts"() {
+    "use strict";
+    import_node_fs3 = require("node:fs");
+  }
+});
+
+// src/consent.ts
+function consentPath(projectRoot) {
+  return (0, import_node_path4.join)(ursaDir(projectRoot), "consent.json");
+}
+function tuningPathFor(projectRoot) {
+  return (0, import_node_path4.join)(ursaDir(projectRoot), "tuning.json");
+}
+function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt: now,
+    scopes: { "minor-aggregate": { state: "withheld", changedAt: null, history: [] } },
+    forgotten: []
+  };
+}
+function coerceScope(raw) {
+  const o = raw ?? {};
+  const state = o.state === "granted" ? "granted" : "withheld";
+  return {
+    state,
+    changedAt: typeof o.changedAt === "string" ? o.changedAt : null,
+    history: Array.isArray(o.history) ? o.history : []
+  };
+}
+function loadConsent(projectRoot) {
+  const path = consentPath(projectRoot);
+  if (!(0, import_node_fs4.existsSync)(path)) return withheldByDefault();
+  let parsed;
+  try {
+    parsed = JSON.parse((0, import_node_fs4.readFileSync)(path, "utf8"));
+  } catch {
+    return withheldByDefault();
+  }
+  if (parsed === null || typeof parsed !== "object") return withheldByDefault();
+  const o = parsed;
+  const scopes = o.scopes ?? {};
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt: typeof o.updatedAt === "string" ? o.updatedAt : (/* @__PURE__ */ new Date()).toISOString(),
+    scopes: { "minor-aggregate": coerceScope(scopes["minor-aggregate"]) },
+    forgotten: Array.isArray(o.forgotten) ? o.forgotten : []
+  };
+}
+function saveConsent(projectRoot, consent) {
+  (0, import_node_fs4.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  const path = consentPath(projectRoot);
+  (0, import_node_fs4.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
+  return path;
+}
+function isGranted(consent, scope) {
+  return consent.scopes[scope]?.state === "granted";
+}
+function isForgotten(consent, recordId) {
+  return consent.forgotten.some((t) => t.recordId === recordId);
+}
+function setState(projectRoot, scope, to, by, now) {
+  const consent = loadConsent(projectRoot);
+  const current = consent.scopes[scope];
+  const next = {
+    state: to,
+    changedAt: now,
+    history: [...current.history, { at: now, from: current.state, to, by }]
+  };
+  const updated = { ...consent, updatedAt: now, scopes: { ...consent.scopes, [scope]: next } };
+  saveConsent(projectRoot, updated);
+  return updated;
+}
+function grantScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return setState(projectRoot, scope, "granted", by, now);
+}
+function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return setState(projectRoot, scope, "withheld", by, now);
+}
+function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  const recordFile = (0, import_node_path4.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
+  const hadFile = (0, import_node_fs4.existsSync)(recordFile);
+  if (hadFile) (0, import_node_fs4.rmSync)(recordFile);
+  let axiomsDeleted = [];
+  let evidenceStripped = 0;
+  let sourcesRemoved = 0;
+  const tPath = tuningPathFor(projectRoot);
+  if ((0, import_node_fs4.existsSync)(tPath)) {
+    const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
+    const result = forgetRecordInTuning(tuning, recordId, now);
+    (0, import_node_fs4.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
+    axiomsDeleted = result.axiomsDeleted;
+    evidenceStripped = result.evidenceStripped;
+    sourcesRemoved = result.sourcesRemoved;
+  }
+  const tombstone = {
+    recordId,
+    forgottenAt: now,
+    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
+  };
+  const consent = loadConsent(projectRoot);
+  saveConsent(projectRoot, {
+    ...consent,
+    updatedAt: now,
+    forgotten: [...consent.forgotten.filter((t) => t.recordId !== recordId), tombstone]
+  });
+  return tombstone;
+}
+var import_node_fs4, import_node_path4, SCOPES;
+var init_consent = __esm({
+  "src/consent.ts"() {
+    "use strict";
+    import_node_fs4 = require("node:fs");
+    import_node_path4 = require("node:path");
+    init_revoke();
+    init_store();
+    SCOPES = ["minor-aggregate"];
   }
 });
 
@@ -4152,6 +4236,7 @@ function renderRunComment(f, ctx) {
   if (ctx.resolvedBy !== void 0) {
     lines.push(`- Resolver that produced these records: ${formatResolverIdentity(ctx.resolvedBy)}. Every record above carries it as \`task.resolvedBy\`, so a figure in this table can be traced to the code that computed it.`);
   }
+  lines.push(`- Bound set those records were checked against: \`${currentGateIdentity().boundsDigest}\`, over ${BOUND_COUNT} bounds. Every record above carries it as \`task.gatedBy\`, so two runs can be compared on whether the same rules applied. It names the rules, not a verdict: the self-check line above is what says they held.`);
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`);
   lines.push("");
   lines.push("</details>");
@@ -4919,6 +5004,10 @@ ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`
 Records: ${projectPath}/.ursa/records/`);
   if (records.length > 0) {
     console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`);
+    const gate2 = records[0].task.gatedBy;
+    if (gate2) {
+      console.log(`Checked against: ${gate2.codes.length} bounds, set \`${gate2.boundsDigest}\``);
+    }
   }
   const gate = gateRecords(records);
   if (gate.violations.length > 0) {

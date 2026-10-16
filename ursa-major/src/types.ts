@@ -964,6 +964,75 @@ export type ResolverIdentity =
       digest: string
     }
 
+/**
+ * Which rules a record's claims were checked against.
+ *
+ * WHAT THIS IS NOT, FIRST, BECAUSE THE NAME INVITES THE WRONG READING.
+ * It is not a verdict and it is not a pass. Both launches write every
+ * record BEFORE running the gate over it, deliberately — see
+ * `gateRecords` in src/launch.ts, whose comment says why: a record whose
+ * arithmetic is impossible is still the evidence of the defect, so
+ * nothing is withheld from the user. A record therefore carries this
+ * field whether it passed or failed, and the twenty-three records in
+ * `ursa-major/fixtures/violations/` are the demonstration: every one of
+ * them names the bound set below and every one of them is refused by it.
+ * `gatedBy` answers "which rules applied", never "and they held".
+ *
+ * WHY IT IS IN THE RECORD. `task.resolvedBy` names the code that made
+ * the claims, which is the complete answer for anyone who can clone that
+ * commit, and a weak one for anyone who cannot: the bound set went from
+ * ten to eighteen in eleven days, so two records bought two months apart
+ * were checked under different rules, and before this field the only way
+ * to learn which rules was to clone the resolver at `task.resolvedBy` and
+ * read a TypeScript module. `CLAUDE.md` §4 sells auditability to labs and
+ * the §2 user surface rests on the same property; a buyer holding a
+ * passing record could re-derive all of its arithmetic and could not tell
+ * which checks had run on it.
+ *
+ * WHY BOTH A CODE LIST AND A DIGEST, when either alone looks sufficient.
+ * They answer two different questions and neither answers the other's.
+ * The digest answers "same rules?" between two records in one comparison
+ * and says nothing about which rule moved. The codes answer "which rule
+ * moved?" and cannot see a bound whose STATEMENT was rewritten while its
+ * name stayed, which is a change that silently alters what a record was
+ * checked for. Together they also make one specific tamper visible, which
+ * is the one the ledger entry behind this field asked for: a record whose
+ * digest matches the checking resolver's but whose code list is short has
+ * had a bound dropped from it, and `GATE_IDENTIFIED` in src/invariants.ts
+ * fails such a record rather than reporting consistency.
+ */
+export interface GateIdentity {
+  /**
+   * `InvariantCode` for every bound the resolver that wrote this record
+   * carried, in that resolver's own declaration order — `BOUND_CODES` in
+   * src/invariants.ts.
+   *
+   * Typed as `string[]` and not `InvariantCode[]`, which is the one place
+   * this file deliberately widens a type. A record written by a later
+   * resolver names bounds this build has never heard of, and that record
+   * is not malformed, it is newer: the eighteen codes below are this
+   * build's bound set, not the vocabulary of every record that will ever
+   * exist. Narrowing the field would make the correct handling of a
+   * nineteenth bound a type error at the only place that reads a record
+   * from disk.
+   */
+  codes: string[]
+  /**
+   * First 16 hex characters of the SHA-256 over every bound's code and
+   * statement text, which is the same prefix length `ResolverIdentity`'s
+   * `bundle_digest` uses and the same hash `npm run bundle:check` uses.
+   *
+   * Not verifiable from the record alone, and it is not meant to be: the
+   * bound statements are prose that would multiply a record's size, and
+   * the question this field exists for is comparative. Two records with
+   * the same digest were checked under the same rules; two with different
+   * digests were not, and the code lists say where to look. Computed by
+   * `currentGateIdentity()` in src/invariants.ts, over a canonical
+   * serialization documented there.
+   */
+  boundsDigest: string
+}
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
@@ -988,6 +1057,22 @@ export interface OutcomeRecord {
      * would credit a later build with claims it did not make.
      */
     resolvedBy?: ResolverIdentity
+    /**
+     * The bound set the resolver above carried, stamped beside
+     * `resolvedBy` by `saveRecord` in src/store.ts.
+     *
+     * Absent and present mean exactly what they mean for `resolvedBy`:
+     * absent says nothing stamped this record, which every record written
+     * before 2026-10-16 says truthfully, and is never a placeholder for
+     * "some bound set". Preserved and never rewritten once set, for the
+     * same reason — `applyVerdict` in src/bridge/declare.ts re-saves a
+     * record months later to write a user's verdict into `signals`, and
+     * the classifications in it were checked under the rules of the build
+     * that made them, not of the build that added a field.
+     *
+     * Present does NOT mean the record passed. See `GateIdentity`.
+     */
+    gatedBy?: GateIdentity
   }
   /** what kind of finished thing this is, and where its rendered state lives */
   artifact: Artifact
