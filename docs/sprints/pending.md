@@ -2,6 +2,79 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-16 ~12:21 UTC six-hour pass
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across six passes and three environments.** Unchanged again: green,
+   clean, handed to this seat by name, declined again for the same
+   reason as every pass since 2026-10-14 — this run's own operating
+   instruction reads "never touch secrets or workflows," and that
+   stands above what §21's merge-authority grant would otherwise allow.
+   Not re-asking this pass; nothing about the facts has moved.
+2. **Three pull requests still edit a charter file directly: #199
+   (skill), #184 (research), #167 (exo).** #167 is also still
+   `CONFLICTING`; the exo seat's own rebase PR for it (#201) is open
+   but hasn't landed. #80 (`company.yaml`) stays on the
+   roster-and-secrets carve-out, already labeled `owner-action`.
+3. **The sprint's milestone is two days out (2026-10-18) with item 3
+   still open on security's own branch (#190, draft, `CONFLICTING`).**
+   No change to report on that branch this pass. This seat cannot wake
+   it by dispatch while Incident 13's wall (item 1 above) stands, so
+   the only two ways this moves are security picking it back up on its
+   own cron, or #192 clearing the wall.
+
+Closed this pass under Tier B's own age rule, not waiting on you
+anymore: #49 and #87, the two sales-seat drafts that sat with no
+verdict across several passes. Both branches stay intact and
+reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-16, ~12:21 UTC, six-hour pass, message-triggered)
+
+1. **Inherited an unfinished draft from this seat's own earlier pass
+   today.** This exact branch name (`ursa-pm/2026-10-16-message`) was
+   already open as #203, a pointer PR carrying #202's work forward with
+   no new commits of its own ("full findings coming as commits land").
+   Per the org rule on reading a seat's own open PRs first, this run
+   checked it out and finished it rather than opening a second PR.
+   #202 itself was already closed (subsumed) by whatever got done
+   before that earlier run stopped.
+2. **Inbox: checked fresh, nothing new addressed to this seat.**
+   Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`,
+   filtered client-side to the exact match since the API's own filter
+   doesn't enforce it, and compared timestamps against the last pass's
+   read (06:26 UTC). Nothing landed for Ursa's pm in between; the only
+   new message in the feed was another company's own pass note, which
+   is data about that company, not an ask of this one.
+3. **Failed runs: zero in the last six hours.** `gh run list --limit
+   30` is clean back past the last pass, every run `success`. The one
+   24-hour-window item (`pm-agent` 38760984649, 15:30:49Z two days ago)
+   was already triaged as a tripwire false alarm by an earlier pass;
+   named again here for completeness, not re-triaged.
+4. **Tier B: nothing new to merge.** Walked the full open queue fresh.
+   #199, #184, #167 touch `prompts/` (charter); #192 touches
+   `.github/workflows/` (this run's own boundary); #190 and #201 are
+   drafts; #80 is `company.yaml` (roster/secrets carve-out); #167 and
+   #199 are also `CONFLICTING`. That accounts for every open PR except
+   this seat's own. Merged nothing, which matches every pass since the
+   18:25 one found the same four names unchanged.
+5. **Closed #49 and #87.** Both were sales-seat drafts from owner
+   dispatch windows (16 and 11 days idle), sitting in the "waiting on
+   owner" line across more passes than the standard means for a
+   pending item to go undecided. Tier B's own age rule (pm.md §10,
+   bullet 6) treats "older than seven days and not moving" as a close,
+   not a merge, so this pass closed both with a note that the branches
+   stay intact and either PR can reopen. This is queue hygiene, not a
+   judgment that the sales channel should stay dormant; that call is
+   still the owner's whenever she wants to make it.
+6. **Sprint:** both of this week's engineer items (1 and 2) shipped
+   days ago (#179, #182), and the engineer kept shipping past them into
+   its own follow-on work (#186, #196, #198, #204), all merged. Item 3
+   (security, redaction standard) is unchanged: still open on #190,
+   still two days from the 2026-10-18 milestone. Nothing in this pass
+   moves it, for the reason in "Top three" above.
+7. **Board:** posted one `note` this pass in first person, the way
+   §15 asks, pointing at this PR as the reference.
+
 ## Top three for the owner, 2026-10-15 ~18:25 UTC six-hour pass
 
 1. **The workflow-guard fix (#192) still waits on you or a chair, now

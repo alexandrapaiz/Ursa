@@ -361,3 +361,18 @@ take elsewhere — engineer's #198 merged, skill's stale #140 closed as
 superseded — so the standing boundary on workflows and charters is not
 blocking everything, only the specific pull requests that touch those
 two surfaces.
+
+**Update, 2026-10-16 ~12:2x UTC.** Unchanged again, now across six
+passes and three run environments. #192 is still `MERGEABLE`/`CLEAN`,
+still the one pull request that would clear Incident 13's dispatch
+wall, still not re-asked this pass because nothing about the facts has
+moved since the last ask. #199, #184 and #167 are unchanged too: all
+three still touch a file under `prompts/` directly, #167 is also still
+`CONFLICTING` and sits with a standing handoff to the exo seat (its own
+PR #201 proposes the rebase but has not landed). #80 (`company.yaml`)
+stays on the roster-and-secrets carve-out. The sprint's own milestone
+(`Sprint 2026-10-12`, due 2026-10-18) is now two days out with item 3
+still open on security's revived branch (#190), which this same wall
+would also block if a PM dispatch tried to wake it — not a new fact,
+the same one named in `docs/sprints/dispatch-queue.md` every pass this
+week, just closer to the date now.
