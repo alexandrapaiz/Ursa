@@ -2,6 +2,36 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-16 ~15:1x UTC scheduled standup
+
+1. **The workflow-guard fix is no longer item 1 — you cleared it
+   yourself at 14:16:58 UTC today, and Incident 13 is closed on that
+   evidence.** Not re-asked. What replaces it: dispatch still does not
+   work, for a different and already-tracked reason. This pass fired a
+   real dispatch at security (sprint item 3, PR #190) to test the fix,
+   and it failed on a 403 at the dispatch-creation step itself, not on
+   the actor-type rejection Incident 13 was about. That is
+   `docs/decisions.md`'s other open finding (no `tools/gh-actions.sh` in
+   this repo, and this run's own ambient token can't start a workflow
+   run) — HQ's machinery, not yours or mine, handed to the centralizer
+   again with the fresh evidence.
+2. **Three pull requests still edit a charter file directly: #199
+   (skill), #184 (research), #167 (exo).** Unchanged. #199 and #167 are
+   `CONFLICTING`; #184 is `MERGEABLE` but stays Tier C regardless,
+   since a charter edit doesn't stop being one when the diff stops
+   conflicting. #80 (`company.yaml`) stays on the roster-and-secrets
+   carve-out, already labeled `owner-action`. None of these are yours
+   to decide today without reading them; naming them so they don't age
+   out silently.
+3. **The sprint's milestone is two days out (2026-10-18) with item 3
+   still open on security's own branch (#190, draft, `CONFLICTING`,
+   idle since 2026-10-14 ~16:05 UTC).** The dispatch this pass fired at
+   it failed for the infrastructure reason in item 1, not for anything
+   wrong with the instruction or the item. Until the token-scope wall
+   clears, the only way this moves is security picking its own branch
+   back up on its own cron (next: Sunday 15:15 UTC) or a chair's host
+   window.
+
 ## Top three for the owner, 2026-10-16 ~14:26 UTC six-hour pass
 
 The owner posted to the whole company this pass that she was out
@@ -55,6 +85,49 @@ Closed this pass under Tier B's own age rule, not waiting on you
 anymore: #49 and #87, the two sales-seat drafts that sat with no
 verdict across several passes. Both branches stay intact and
 reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-16, ~15:1x UTC, scheduled standup, GitHub Actions `pm-agent` run)
+
+1. **Read own seat's open PRs first.** Found #203 and #206 (host
+   six-hour passes, both still open and non-draft, the PM's own
+   writing) already carrying today's state forward, #206 containing
+   #203. Branched this run's commits on top of #206's tip instead of
+   starting from `main`, per the org rule. Neither is this run's to
+   self-merge: both touch `docs/decisions.md`, which Tier A's own list
+   does not name as a knowledge surface, and a PM's own PR waits for
+   another merger regardless (Tier B rule 1). Unchanged by this run;
+   still waiting on the owner or HQ's PM.
+2. **Inbox: read before anything else.** Nothing new addressed to
+   `pm`/`Ursa` since the 14:31 UTC pass that isn't already reflected
+   above. The board's own feed carries messages for other companies
+   (epitome, alexandra-systems) that the `to_seat`/`to_company` filter
+   does not exclude; read and set aside as not this seat's.
+3. **Incident 13 closed.** Confirmed `#192`'s merge commit sets
+   `allowed_bots` on all eleven workflow files, then tested it with a
+   real dispatch rather than taking the diff's word for it. See
+   `docs/decisions.md` and `docs/agents/incidents.md` for the entries
+   and `docs/sprints/dispatch-queue.md` for the command and the result.
+4. **Dispatch: fired once, failed on the token-scope wall, not
+   Incident 13.** One of this seat's three-a-day dispatches spent;
+   two remain under the ceiling but nothing else in the queue met the
+   bar this pass.
+5. **Failed runs: one in the last 24 hours, already triaged twice by
+   earlier passes as a tripwire false alarm.** Not re-triaged a third
+   time. No rerun.
+6. **Tier B: walked every open PR fresh, merged none.** #184/#199/#167
+   touch `prompts/` (charter, Tier C); #190/#201 are drafts; #80 is the
+   roster-and-secrets carve-out; #203/#206 are this seat's own, per
+   item 1. Nothing new, nothing missed.
+7. **Board:** commented the dispatch attempt and its result on the
+   sprint-item-3 card (`3b1ee943…`, "Finish the live security draft,
+   then draft the redaction standard"), and posted one `note` naming
+   this pass's own findings, and one `handoff` to
+   `alexandra-systems/exo-centralizer` naming the token-scope 403 as
+   the fix now needed.
+8. **Sprint: unchanged.** Items 1 and 2 shipped days ago. Item 3 is
+   still open on security's own branch; this pass's dispatch did not
+   move it, for the infrastructure reason named above, not a flaw in
+   the instruction.
 
 ## This run (2026-10-16, ~14:26 UTC, six-hour pass, message-triggered)
 
