@@ -24,7 +24,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { checkRecord, type InvariantCode } from '../src/invariants'
+import { checkRecord, currentGateIdentity, type InvariantCode } from '../src/invariants'
 import { deriveSignals } from '../src/signals'
 import { resolve } from '../src/resolve'
 import type { Exclusion, OutcomeRecord } from '../src/types'
@@ -180,6 +180,27 @@ function baseRecord(): OutcomeRecord {
   // fixture pair exists for is that a named resolver is one a reader can
   // look up, so the record that passes it ought to name one that resolves.
   record.task.resolvedBy = { basis: 'git_commit', commit: '19455a3', dirty: false }
+  // READ LIVE, which is the opposite choice from the line above, and the
+  // reason is that the two fields fail in opposite directions when pinned.
+  //
+  // A pinned `resolvedBy` has to be pinned: reading HEAD would make every
+  // fixture's bytes a function of the commit containing them, so `--check`
+  // would report drift on every commit. A pinned `gatedBy` would be a
+  // digest no build of this module ever computed, which has one specific
+  // cost: GATE_IDENTIFIED's only clause with teeth fires on a record whose
+  // digest EQUALS the checking resolver's, so a pinned digest would leave
+  // that clause unreachable on the one record in this directory that is
+  // supposed to exercise every bound non-vacuously.
+  //
+  // The price is that this directory now drifts when a bound's STATEMENT is
+  // reworded, not only when a bound is added — the digest covers the text.
+  // That is loud rather than silent:
+  // `src/invariants.violations.test.ts` asserts `base.json`'s `gatedBy`
+  // equals `currentGateIdentity()`, so a wording change fails `npm test`
+  // with the command to run, and the fix is `npm run fixtures:violations`.
+  // The alternative, a digest that goes stale quietly, is the failure mode
+  // the whole field exists to make impossible.
+  record.task.gatedBy = currentGateIdentity()
   return record
 }
 
@@ -440,6 +461,17 @@ const CASES: Case[] = [
       // malformed state is reachable in a JSON file and unreachable through
       // the declared type.
       ;(r.exclusions![0] as unknown as Record<string, unknown>).date = 'last Tuesday'
+    },
+  },
+  {
+    slug: 'gate-identified',
+    codes: ['GATE_IDENTIFIED'],
+    edit: '`task.gatedBy.codes` with `RIVAL_NOT_AFTER_FINAL` spliced out of it, `boundsDigest` left alone',
+    consequence:
+      'the record claims it was checked against this resolver\'s exact rule set, by carrying this resolver\'s own `boundsDigest`, and lists one fewer rule than that set contains. One of the two readings is false and the record does not say which: either a bound was dropped from the list after the digest was computed, which makes the digest a claim about rules that did not all run, or the list is honest and the digest belongs to a different build, which makes every same-digest comparison a buyer runs against this record wrong. The bound removed is deliberately the one whose absence is hardest to notice from the outside — `RIVAL_NOT_AFTER_FINAL` is the check that a span\'s cited evidence is not dated after the work it is evidence about, and a record missing it looks exactly like a record that passed it. This is `resolver-identified.json` one field over: there a pointer passed for provenance, here a rule set passes for the rule set that ran.',
+    break: (r) => {
+      const g = r.task.gatedBy!
+      g.codes = g.codes.filter((c) => c !== 'RIVAL_NOT_AFTER_FINAL')
     },
   },
 ]

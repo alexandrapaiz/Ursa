@@ -224,6 +224,24 @@ export function PixelSky() {
 
     let scrollS = 0;
     let lastEpoch = 0;
+    let lastT = 0;
+
+    // Both smoothed responses used to advance by a fixed fraction PER FRAME,
+    // which ties the feel to the display rather than to time. Measured
+    // 2026-10-15 by driving requestAnimationFrame on a synthetic cadence: the
+    // parallax took the same 37 frames to reach 90% of its target at both
+    // rates, so it settled in 617ms at 60Hz and 308ms at 120Hz. Every 120Hz
+    // screen, which is every recent iPhone Pro and MacBook Pro, got a lean and
+    // a scroll darkening twice as fast as the ones that were tuned.
+    //
+    // The correction keeps 60Hz as the reference and converts each per-frame
+    // fraction into the equivalent per-second one, so a frame that is twice as
+    // short advances half as far: 1 - (1 - f)^(dt / 16.67). At 60Hz this
+    // returns the shipped constants exactly, to the last digit, so nothing
+    // that was tuned moves. dt is clamped at 100ms so a tab returning from the
+    // background resumes rather than jumping.
+    const FRAME = 1000 / 60;
+    const ease = (f: number, dt: number) => 1 - Math.pow(1 - f, dt / FRAME);
 
     const loop = (t: number) => {
       const epoch = Math.floor(t / 6000);
@@ -231,12 +249,16 @@ export function PixelSky() {
         lastEpoch = epoch;
         fillRand(false);
       }
-      mouseS.x += (mouseT.x - mouseS.x) * 0.06;
-      mouseS.y += (mouseT.y - mouseS.y) * 0.06;
+      const dt = lastT ? Math.min(t - lastT, 100) : FRAME;
+      lastT = t;
+
+      const km = ease(0.06, dt);
+      mouseS.x += (mouseT.x - mouseS.x) * km;
+      mouseS.y += (mouseT.y - mouseS.y) * km;
       canvas.style.transform = `scale(1.05) translate(${(mouseS.x * 14).toFixed(2)}px, ${(mouseS.y * 10).toFixed(2)}px)`;
 
       const scrollTarget = Math.min(scrollY / innerHeight, 1);
-      scrollS += (scrollTarget - scrollS) * 0.08;
+      scrollS += (scrollTarget - scrollS) * ease(0.08, dt);
       if (gl) gl.uniform1f(loc.u_scroll, scrollS);
 
       draw(t / 1000);
