@@ -306,6 +306,111 @@ describe('the bundle resolves a repository the way a customer runner does', () =
   })
 })
 
+/**
+ * The eight step outputs `action.yml` promises a consumer's workflow.
+ *
+ * Read out of `action.yml` rather than written down here, for the reason
+ * `BOUND_COUNT` is derived rather than typed: a list maintained in two
+ * places is a list that disagrees with itself, and this project has
+ * already paid for that once, when the word "thirteen" sat in `README.md`
+ * and three design documents for four days after the fifteenth bound
+ * landed.
+ *
+ * A regex and not a YAML parser, deliberately. This repository has no
+ * YAML dependency and adding one to read eight key names would be the
+ * larger change. What is matched is narrow enough to state exactly: the
+ * two-space-indented keys inside the top-level `outputs:` block, which
+ * ends at the next top-level key (`runs:`). A malformed `action.yml`
+ * would therefore produce a short list and a failing assertion below,
+ * which is the right direction to fail in.
+ */
+function declaredActionOutputs(): string[] {
+  const yaml = readFileSync('action.yml', 'utf8')
+  const block = yaml.split('\noutputs:\n')[1]?.split('\nruns:')[0]
+  if (!block) throw new Error('action.yml has no top-level outputs: block')
+  return [...block.matchAll(/^ {2}([a-z][a-z0-9-]*):$/gm)].map((m) => m[1])
+}
+
+/**
+ * `$GITHUB_OUTPUT` — the file the composite Action reads every one of its
+ * `outputs:` values out of.
+ *
+ * This is the other half of what `action.yml` does with the bundle, and
+ * until now the only evidence for it was reading the YAML. The step runs
+ * `node "$GITHUB_ACTION_PATH/dist/ursa.cjs" ci ...` once and then
+ * declares eight `outputs:` as `${{ steps.resolve.outputs.<name> }}`,
+ * which GitHub resolves by reading the `name=value` lines the process
+ * appended to the file named by `$GITHUB_OUTPUT`. So a name declared in
+ * the YAML and never written by the bundle is an output that resolves to
+ * the empty string on every consumer's runner, silently, and no test in
+ * this repository compared the two lists.
+ */
+describe('the bundle writes every step output action.yml declares', () => {
+  let written: Map<string, string>
+
+  beforeAll(() => {
+    const project = editedFixture()
+    const head = git(project, ['rev-parse', 'HEAD'])
+    const eventPath = join(project, 'event.json')
+    writeFileSync(eventPath, JSON.stringify({
+      repository: { full_name: 'o/r' },
+      pull_request: {
+        number: 1, merged: true, merge_commit_sha: null,
+        base: { sha: git(project, ['rev-parse', `${head}~2`]) }, head: { sha: head },
+      },
+    }))
+    // A real file, because the bundle APPENDS to it the way the runner
+    // expects rather than printing the lines, and a test that captured
+    // stdout would be testing something else.
+    const outputFile = join(project, 'github-output.txt')
+    writeFileSync(outputFile, '')
+
+    const run = runBundle(
+      BUNDLE,
+      ['ci', project, '--repo', 'o/r', '--event', eventPath, '--min-chars', '10', '--no-post'],
+      { GITHUB_OUTPUT: outputFile },
+    )
+    expect(run.status, run.stderr).toBe(0)
+
+    written = new Map(
+      readFileSync(outputFile, 'utf8')
+        .split('\n')
+        .filter((l) => l.includes('='))
+        .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]),
+    )
+  })
+
+  it('writes exactly the declared names, in the declared order', () => {
+    expect([...written.keys()]).toEqual(declaredActionOutputs())
+  })
+
+  it('gives the five figures the run comment reports, not placeholders', () => {
+    // The same numbers as the comment, which is the point of the step
+    // writing them itself rather than a second pass parsing the log.
+    expect(written.get('units-found')).toBe('1')
+    expect(written.get('units-resolved')).toBe('1')
+    expect(Number(written.get('chars-survived-verbatim'))).toBeGreaterThan(0)
+    expect(Number(written.get('chars-survived-edited'))).toBeGreaterThan(0)
+    expect(written.get('most-corrected-artifact')).toBe('digest.js')
+  })
+
+  it('distinguishes a zero tuning delta from no model having run', () => {
+    // `ci-no-model` is the honest zero this project insists on: no
+    // credential was in the environment, so nothing interpreted the
+    // corrections. A `distilled` mode here with a 0/0 delta would be the
+    // different and much worse claim that a model looked and found
+    // nothing. `cleanEnv()` removes ANTHROPIC_API_KEY and
+    // CLAUDE_CODE_OAUTH_TOKEN so this assertion means the same thing on
+    // a developer machine that has one.
+    expect(written.get('tuning-mode')).toBe('ci-no-model')
+    expect(written.get('tuning-delta')).toBe('0/0')
+  })
+
+  it('leaves comment-url empty under --no-post rather than inventing one', () => {
+    expect(written.get('comment-url')).toBe('')
+  })
+})
+
 // ---------------------------------------------------------------------------
 // The fixture repository.
 //
