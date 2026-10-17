@@ -16,7 +16,9 @@
     "mcp": "tsx src/mcp/cli.ts",
     "hq:demo": "tsx src/hq/seed.ts",
     "bundle": "node build/bundle.mjs",
-    "bundle:check": "node build/bundle.mjs --check"
+    "bundle:check": "node build/bundle.mjs --check",
+    "provenance:bundles": "tsx tools/make-bundle-digest-index.ts",
+    "provenance:bundles:check": "tsx tools/make-bundle-digest-index.ts --check"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",

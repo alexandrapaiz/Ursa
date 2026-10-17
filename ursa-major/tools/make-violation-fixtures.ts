@@ -3,7 +3,7 @@
 //   npx tsx tools/make-violation-fixtures.ts          # write every fixture
 //   npx tsx tools/make-violation-fixtures.ts --check   # fail if any drifted
 //
-// Why a script and not fifteen hand-typed JSON files. The fixtures ARE the
+// Why a script and not twenty hand-typed JSON files. The fixtures ARE the
 // artifact: `src/invariants.violations.test.ts` reads only the committed
 // `.json` and `.md` files and never imports this module, so a fixture that
 // stops firing is a test failure whether or not this script still runs. What
@@ -24,7 +24,7 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { checkRecord, type InvariantCode } from '../src/invariants'
+import { checkRecord, currentGateIdentity, type InvariantCode } from '../src/invariants'
 import { deriveSignals } from '../src/signals'
 import { resolve } from '../src/resolve'
 import type { Exclusion, OutcomeRecord } from '../src/types'
@@ -38,11 +38,12 @@ const clone = (r: OutcomeRecord): OutcomeRecord => JSON.parse(JSON.stringify(r))
 // The base record. Everything below is this record plus one named edit, so a
 // reviewer reads the edit rather than the file.
 //
-// Built through `resolve()` on synthetic prose, then given the two structures
-// a resolved chat-path record does not carry, because three of the fifteen
+// Built through `resolve()` on synthetic prose, then given the structures a
+// resolved chat-path record does not carry, because five of the seventeen
 // bounds read nothing else: `signals` (SIGNAL_QUOTE_GROUNDED), a descent
 // verdict per mutation label (DESCENT_CHECKED_UNIFORMLY), and one exclusion
-// (EXCLUSION_NOT_CLASSIFIED). The signals come from `deriveSignals`, the real
+// (EXCLUSION_NOT_CLASSIFIED). A fourth, RESOLVER_IDENTIFIED, reads
+// `task.resolvedBy`, which `resolve()` does not write either. The signals come from `deriveSignals`, the real
 // detector, and the exclusion goes through `resolve()`'s own input so
 // `stats.perFile` gets the row the resolver would have written. Only the
 // descent verdicts are attached by hand, because a corroborator needs a git
@@ -58,7 +59,29 @@ const EXCLUDED: Exclusion = {
   subject: 'standards: sync pm.md from HQ',
   relation: 'sibling',
   chars: 199,
+  // DATED as of 2026-10-15, with EXCLUSION_NOT_CLASSIFIED's time clause, and
+  // for the same reason the base record's rival verdict is dated: the field
+  // is optional, so a base whose only exclusion carried no date would
+  // satisfy the clause by having nothing to check while the suite still
+  // reported the bound covered.
+  //
+  // The value is the same instant the base's rival verdict carries, and that
+  // is deliberate rather than lazy. `2026-10-09T17:00:00-06:00` is
+  // `2026-10-09T23:00:00Z`, one hour BEFORE this record's
+  // `task.generatedAt` of `2026-10-10T00:00:00.000Z`, while its text sorts
+  // AFTER it as a string. The fixture that breaks this clause moves it two
+  // hours later, to an instant after the horizon whose text still sorts
+  // before it. Running the same trap at both levels is the point: a gate
+  // that compared characters instead of instants would pass both files, and
+  // `tools/measure-verbatim-descent.ts` shipped exactly that mistake before
+  // 2026-10-14.
+  date: '2026-10-09T17:00:00-06:00',
 }
+
+const firstVerbatim = (r: OutcomeRecord) =>
+  r.files[0].spans.find((s) => s.class === 'survived_verbatim' && s.source)!
+const firstMutated = (r: OutcomeRecord) =>
+  r.files[0].spans.find((s) => s.class === 'survived_mutated')!
 
 function baseRecord(): OutcomeRecord {
   const generated = [
@@ -99,6 +122,85 @@ function baseRecord(): OutcomeRecord {
       if (s.class === 'survived_mutated') s.descent = { basis: 'corroborated', rivalsSearched: 3 }
     }
   }
+  // One DATED rival verdict, added 2026-10-15 with RIVAL_NOT_AFTER_FINAL.
+  // Without it that bound is vacuous on the base in exactly the way the
+  // four structures above exist to rule out: `rival.date` is optional, so a
+  // base record whose only verdicts are `corroborated` satisfies the bound
+  // by having nothing to check while the suite still reports seventeen
+  // bounds covered.
+  //
+  // It goes on a `survived_verbatim` span and the relation is `sibling`,
+  // because that is the one combination a real resolver writes and the gate
+  // leaves alone: `src/resolve.ts` attaches the verdict to the span it kept
+  // (the `...(descent ? { descent } : {})` in `verbatimSpan`) and demotes
+  // only on `prior_revision`, so a verbatim span naming a sibling keeps its
+  // label by design and DESCENT_CHECKED_UNIFORMLY's third clause does not
+  // fire on it.
+  //
+  // The sha stays the invented `deadbee` that the two descent fixtures
+  // already use, and this is the opposite choice from `task.resolvedBy`
+  // below, deliberately. There, the bound's claim is that a named commit is
+  // one a reader can look up, so the fixture names a commit that resolves.
+  // Here the verdict's claim is that this commit holds `notes.md`'s text,
+  // and `notes.md` is synthetic prose in no repository, so naming a real
+  // commit would make a false claim checkable instead of making the fixture
+  // more real. What has to be realistic is the DATE, which is what the
+  // bound reads.
+  //
+  // The offset is `-06:00` and not `Z`, and the hour is chosen so that the
+  // date is one hour BEFORE `task.generatedAt` while its text sorts after
+  // it. `2026-10-09T17:00:00-06:00` is `2026-10-09T23:00:00Z`; the fixture
+  // that breaks this bound moves it two hours later, to
+  // `2026-10-10T01:00:00Z`, which a string compare still reads as the
+  // earlier of the two because both strings begin `2026-10-09`. So the pair
+  // proves the gate orders instants rather than characters, which is the
+  // mistake `tools/measure-verbatim-descent.ts` actually shipped before
+  // 2026-10-14.
+  firstVerbatim(record).descent = {
+    basis: 'rival',
+    sha: 'deadbee',
+    subject: 'A branch alive while the person was working',
+    relation: 'sibling',
+    date: '2026-10-09T17:00:00-06:00',
+  }
+  // Pinned, not read off the tree this script runs in. `saveRecord` stamps
+  // `task.resolvedBy` from `currentResolverIdentity()` (src/store.ts), and
+  // this script does not go through `saveRecord`, so the field would be
+  // absent here — which is legal, and would leave RESOLVER_IDENTIFIED
+  // vacuously true on the base record in the same way SIGNAL_QUOTE_GROUNDED
+  // was vacuous on the two fixtures that predate this directory. A literal
+  // is also the only form that can be committed: reading HEAD would make
+  // every fixture's bytes a function of the commit containing them, so
+  // `--check` would report drift on every commit and the fixtures could
+  // never be diffed.
+  //
+  // The value is a real commit of this repository — `19455a3`, the commit
+  // that added `task.resolvedBy` — rather than a shaped-but-invented string
+  // like the `deadbee` in `descent-checked-uniformly.json`. The bound this
+  // fixture pair exists for is that a named resolver is one a reader can
+  // look up, so the record that passes it ought to name one that resolves.
+  record.task.resolvedBy = { basis: 'git_commit', commit: '19455a3', dirty: false }
+  // READ LIVE, which is the opposite choice from the line above, and the
+  // reason is that the two fields fail in opposite directions when pinned.
+  //
+  // A pinned `resolvedBy` has to be pinned: reading HEAD would make every
+  // fixture's bytes a function of the commit containing them, so `--check`
+  // would report drift on every commit. A pinned `gatedBy` would be a
+  // digest no build of this module ever computed, which has one specific
+  // cost: GATE_IDENTIFIED's only clause with teeth fires on a record whose
+  // digest EQUALS the checking resolver's, so a pinned digest would leave
+  // that clause unreachable on the one record in this directory that is
+  // supposed to exercise every bound non-vacuously.
+  //
+  // The price is that this directory now drifts when a bound's STATEMENT is
+  // reworded, not only when a bound is added — the digest covers the text.
+  // That is loud rather than silent:
+  // `src/invariants.violations.test.ts` asserts `base.json`'s `gatedBy`
+  // equals `currentGateIdentity()`, so a wording change fails `npm test`
+  // with the command to run, and the fix is `npm run fixtures:violations`.
+  // The alternative, a digest that goes stale quietly, is the failure mode
+  // the whole field exists to make impossible.
+  record.task.gatedBy = currentGateIdentity()
   return record
 }
 
@@ -106,7 +208,7 @@ function baseRecord(): OutcomeRecord {
 // The cases. `codes` is the multiset of invariant codes the gate must emit on
 // this fixture and nothing besides, declared here and re-asserted by the
 // test. Where it holds more than one entry, `why` says why the bound cannot
-// be violated on its own — three of the fifteen are backstops that are
+// be violated on its own — two of the seventeen are backstops that are
 // mathematically implied by their neighbours, which is a fact this exercise
 // produced and no `toContain` assertion could have shown.
 // ---------------------------------------------------------------------------
@@ -122,11 +224,6 @@ interface Case {
   why?: string
   break: (r: OutcomeRecord) => void
 }
-
-const firstVerbatim = (r: OutcomeRecord) =>
-  r.files[0].spans.find((s) => s.class === 'survived_verbatim' && s.source)!
-const firstMutated = (r: OutcomeRecord) =>
-  r.files[0].spans.find((s) => s.class === 'survived_mutated')!
 
 const CASES: Case[] = [
   {
@@ -175,12 +272,12 @@ const CASES: Case[] = [
   },
   {
     slug: 'gen-claim-bounded',
-    codes: ['CLAIM_IN_GENERATION', 'GEN_CLAIM_BOUNDED'],
+    codes: ['CLAIM_IN_GENERATION', 'CLAIM_NOT_WIDER', 'GEN_CLAIM_BOUNDED'],
     edit: 'the first sourced span\'s `source.end` pushed 400 characters past the end of the generation text',
     consequence:
       'final spans claim, between them, more distinct characters of one generation than that generation ever wrote. This is the shape of the figure that started the gate: a survival total larger than the generation total it is a share of.',
     why:
-      'GEN_CLAIM_BOUNDED cannot fire alone. Claimed characters are the merged length of source extents; CLAIM_IN_GENERATION holds every extent inside `[0, text.length)` and GEN_CHARS_CONSISTENT holds `charsWritten === text.length`, so while those two pass, the merged length is bounded by `charsWritten` as a matter of arithmetic. Violating it requires violating one of them first, and reaching past the end of the generation is the cheaper of the two. The bound is a backstop against the other two being wrong, not an independent statement, and that is worth knowing before anyone tries to test it in isolation.',
+      'CLAIM_NOT_WIDER joins the other two as of 2026-10-13, for the same reason and not by accident: a `survived_verbatim` span now has to be the same characters as the generation extent it names, and an extent reaching 400 characters past the end of the text slices to a different string than the span holds. Before that date the bound compared only the two lengths, and the stretched extent was longer rather than shorter, so it passed. GEN_CLAIM_BOUNDED cannot fire alone. Claimed characters are the merged length of source extents; CLAIM_IN_GENERATION holds every extent inside `[0, text.length)` and GEN_CHARS_CONSISTENT holds `charsWritten === text.length`, so while those two pass, the merged length is bounded by `charsWritten` as a matter of arithmetic. Violating it requires violating one of them first, and reaching past the end of the generation is the cheaper of the two. The bound is a backstop against the other two being wrong, not an independent statement, and that is worth knowing before anyone tries to test it in isolation.',
     break: (r) => {
       const s = r.files[0].spans.find((x) => x.source)!
       s.source!.end = r.generations[s.source!.generationIndex].text.length + 400
@@ -200,10 +297,12 @@ const CASES: Case[] = [
   },
   {
     slug: 'final-spans-in-file',
-    codes: ['FINAL_SPANS_IN_FILE'],
+    codes: ['FINAL_SPANS_IN_FILE', 'CLAIM_NOT_WIDER'],
     edit: 'one character appended to `files[0].spans[0].text`, leaving `start` and `end` alone',
     consequence:
       'the classified span carries text that is not the slice of the finished file its offsets name. The class label is attached to the offsets and the evidence a reader checks is the text, so the record labels one extent and displays another. The extents are untouched, so `coveredChars` and every percentage built on it still reconcile.',
+    why:
+      'Two bounds fire on one appended character, and the pair is the point. FINAL_SPANS_IN_FILE catches the span disagreeing with the file it came from; CLAIM_NOT_WIDER catches the same span disagreeing with the generation it credits, because as of 2026-10-13 a `survived_verbatim` claim has to be the same characters on both sides rather than merely no longer. Neither bound subsumes the other: a span can match its file and not its generation, which is the case the 2026-10-12 ledger entry found on a record this organization had already shipped.',
     break: (r) => { r.files[0].spans[0].text += 'x' },
   },
   {
@@ -274,6 +373,19 @@ const CASES: Case[] = [
     },
   },
   {
+    slug: 'descent-checked-uniformly-verbatim',
+    codes: ['DESCENT_CHECKED_UNIFORMLY'],
+    edit: 'the first `survived_verbatim` span given a `rival` verdict whose relation is `prior_revision`, the label left as `survived_verbatim`',
+    consequence:
+      'the span names the generation\'s own parent commit as already holding its text, and keeps the label that says a model wrote the text and the person kept it unchanged. On the `ursa run` path a generation is the whole blob of the touched file at the agent\'s commit, so it contains every line the file already had; text the parent held is text no model contributed, and selling it as survival overstates the one rate Ursa Minor is paid for. This is the same defect as `descent-checked-uniformly.json` on the other label: the demotion was computed and not applied.',
+    break: (r) => {
+      firstVerbatim(r).descent = {
+        basis: 'rival', sha: 'deadbee',
+        subject: 'The commit the agent started from', relation: 'prior_revision',
+      }
+    },
+  },
+  {
     slug: 'exclusion-not-classified',
     codes: ['EXCLUSION_NOT_CLASSIFIED'],
     edit: 'the exclusion\'s `path` moved to `notes.md`, the path this record classifies, and the now-orphaned `docs/standards/pm.md` row dropped from `stats.perFile` so the row list still enumerates exactly the paths the run read',
@@ -282,6 +394,84 @@ const CASES: Case[] = [
     break: (r) => {
       r.exclusions![0] = { ...r.exclusions![0], path: 'notes.md' }
       r.stats.perFile = r.stats.perFile.filter((row) => row.path !== EXCLUDED.path)
+    },
+  },
+  {
+    slug: 'resolver-identified',
+    codes: ['RESOLVER_IDENTIFIED'],
+    edit: '`task.resolvedBy.commit` overwritten with the string `HEAD`, the basis and the `dirty` flag left alone',
+    consequence:
+      'the record names the resolver that made every claim below it, and the name is not one anybody can look up. `HEAD` resolves to a different commit in every clone and on every day, so a lab holding two records stamped this way cannot tell whether they were resolved by the same rules, which is the entire question `task.resolvedBy` was added to answer. The field still reads as provenance in the viewer, the CLI line and the CI comment, because all three print whatever string the record carries. This is the field\'s own failure mode re-entered one level down: a placeholder that passes for a pointer.',
+    break: (r) => {
+      // Cast for the same reason the bound reads the field as `unknown`: the
+      // malformed state is reachable in a JSON file on disk and unreachable
+      // through the declared `ResolverIdentity` union, so writing the
+      // counterexample requires stepping outside the type exactly once.
+      ;(r.task.resolvedBy as unknown as Record<string, unknown>).commit = 'HEAD'
+    },
+  },
+  {
+    slug: 'rival-not-after-final',
+    codes: ['RIVAL_NOT_AFTER_FINAL'],
+    edit: 'the dated `sibling` rival\'s `date` moved two hours later, from `2026-10-09T17:00:00-06:00` to `2026-10-09T19:00:00-06:00`, which is one hour after `task.generatedAt`',
+    consequence:
+      'the record names a commit from its own future as already holding a span\'s text. The verdict\'s relation is `sibling`, which claims the person merged or checked the text out of another branch rather than typing it, and that claim requires the other branch\'s commit to have existed while they were working. This is the shipped defect of 2026-10-14 in miniature: record `ursa-2026-10-07-2f610e9` named a rival authored seven days after its own work closed, and all sixteen bounds passed because the record carried no date to check. The edit is also two hours and not two days on purpose — `2026-10-09T19:00:00-06:00` is `2026-10-10T01:00:00Z`, after the horizon, while its text still sorts before `2026-10-10T00:00:00.000Z` because both strings begin `2026-10-09`. A gate comparing strings instead of instants would pass this file.',
+    break: (r) => {
+      const d = firstVerbatim(r).descent as { date: string }
+      d.date = '2026-10-09T19:00:00-06:00'
+    },
+  },
+  {
+    slug: 'rival-not-after-final-unreadable-date',
+    codes: ['RIVAL_NOT_AFTER_FINAL'],
+    edit: 'the dated `sibling` rival\'s `date` replaced with the string `last Tuesday`',
+    consequence:
+      'the verdict states a date and states it in a form nothing can order. `Date.parse` returns `NaN`, so the comparison the bound exists to make silently cannot be made, and a bound that skipped an unreadable date would report the record as checked. This is the same failure mode as `resolver-identified.json` one field over: a placeholder in the shape of a pointer, which reads as provenance in the viewer because every surface prints whatever string the record carries.',
+    break: (r) => {
+      const d = firstVerbatim(r).descent as { date: string }
+      d.date = 'last Tuesday'
+    },
+  },
+  {
+    slug: 'rival-not-after-final-unreadable-horizon',
+    codes: ['RIVAL_NOT_AFTER_FINAL', 'EXCLUSION_NOT_CLASSIFIED'],
+    edit: '`task.generatedAt` replaced with the string `2026-13-45T99:00:00Z`, the rival\'s own date left alone',
+    consequence:
+      'the record carries a dated rival and no readable clock to order it against. The defect is in one field rather than in any span, so the gate fires once for the record and names `task.generatedAt` rather than once per verdict. It is the third of this bound\'s three independent failure modes and the only one that is not about the rival at all: the ordering is unavailable because the horizon is unreadable, which is indistinguishable, to anything downstream, from a record whose rivals were all checked.',
+    why:
+      'One broken field, two bounds, and that is the correct answer rather than noise. As of 2026-10-15 the base record carries both a dated `sibling` rival verdict and a dated `sibling` exclusion, and `task.generatedAt` is the single horizon both are ordered against. RIVAL_NOT_AFTER_FINAL reports that no span-level verdict can be ordered and EXCLUSION_NOT_CLASSIFIED reports that no file-level refusal can be, which are different losses: the first leaves a span\'s descent claim unchecked, the second leaves a whole file\'s removal from every figure unchecked. A fixture that fired only one of them would be a fixture asserting that the two levels share a check, and they do not.',
+    break: (r) => { r.task.generatedAt = '2026-13-45T99:00:00Z' },
+  },
+  {
+    slug: 'exclusion-not-classified-after-final',
+    codes: ['EXCLUSION_NOT_CLASSIFIED'],
+    edit: 'the dated `sibling` exclusion\'s `date` moved two hours later, from `2026-10-09T17:00:00-06:00` to `2026-10-09T19:00:00-06:00`, which is one hour after `task.generatedAt`',
+    consequence:
+      'the record drops a whole file out of every figure it reports, on the evidence of a commit authored after the work closed. The exclusion\'s relation is `sibling`, which claims the finished file is byte-identical to a copy on a branch outside this generation\'s line of descent and infers that the content came FROM that branch. Dated after the work, the inference runs backwards: the branch holds a copy OF this work, and the record refuses to credit a file the person did write. This is `rival-not-after-final.json` one level up and it is the more expensive of the two, because an exclusion moves `stats.finalChars` and every percentage built on it rather than one span — on this repository\'s own history one exclusion removed 60,616 characters, 84.7% of that run\'s headline survival figure. The edit is two hours and not two days for the reason the span-level one is: `2026-10-09T19:00:00-06:00` is `2026-10-10T01:00:00Z`, after the horizon, while its text still sorts before `2026-10-10T00:00:00.000Z`. A gate comparing strings would pass this file.',
+    break: (r) => { r.exclusions![0].date = '2026-10-09T19:00:00-06:00' },
+  },
+  {
+    slug: 'exclusion-not-classified-unreadable-date',
+    codes: ['EXCLUSION_NOT_CLASSIFIED'],
+    edit: 'the dated `sibling` exclusion\'s `date` replaced with the string `last Tuesday`',
+    consequence:
+      'the exclusion states a date and states it in a form nothing can order. `Date.parse` returns `NaN`, so the comparison that decides whether this file was dropped on evidence from the future cannot be made, and a bound that skipped an unreadable date would report the refusal as checked. Unreadable fails on every relation here, including the two the clause exempts from ordering, because the field prints as provenance on every surface that shows it: `pre_existing` and `declared` are excused from being ORDERED, not from being readable.',
+    break: (r) => {
+      // Cast for the reason the bound reads the field as `unknown`: the
+      // malformed state is reachable in a JSON file and unreachable through
+      // the declared type.
+      ;(r.exclusions![0] as unknown as Record<string, unknown>).date = 'last Tuesday'
+    },
+  },
+  {
+    slug: 'gate-identified',
+    codes: ['GATE_IDENTIFIED'],
+    edit: '`task.gatedBy.codes` with `RIVAL_NOT_AFTER_FINAL` spliced out of it, `boundsDigest` left alone',
+    consequence:
+      'the record claims it was checked against this resolver\'s exact rule set, by carrying this resolver\'s own `boundsDigest`, and lists one fewer rule than that set contains. One of the two readings is false and the record does not say which: either a bound was dropped from the list after the digest was computed, which makes the digest a claim about rules that did not all run, or the list is honest and the digest belongs to a different build, which makes every same-digest comparison a buyer runs against this record wrong. The bound removed is deliberately the one whose absence is hardest to notice from the outside — `RIVAL_NOT_AFTER_FINAL` is the check that a span\'s cited evidence is not dated after the work it is evidence about, and a record missing it looks exactly like a record that passed it. This is `resolver-identified.json` one field over: there a pointer passed for provenance, here a rule set passes for the rule set that ran.',
+    break: (r) => {
+      const g = r.task.gatedBy!
+      g.codes = g.codes.filter((c) => c !== 'RIVAL_NOT_AFTER_FINAL')
     },
   },
 ]

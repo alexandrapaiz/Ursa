@@ -74,9 +74,13 @@ function commitsTouchingPath(repoPath, path) {
   let out;
   try {
     out = git(repoPath, [
+      // `%aI` sits between the sha and the subject, not after it, because a
+      // commit subject may itself contain a tab and the parse below keeps
+      // the subject as the whole remainder of the line. A date field after
+      // the subject would be eaten by that remainder.
       "log",
       "--all",
-      "--pretty=format:%H%x09%s",
+      "--pretty=format:%H%x09%aI%x09%s",
       "--",
       path
     ], { quiet: true });
@@ -84,8 +88,8 @@ function commitsTouchingPath(repoPath, path) {
     return null;
   }
   return out.split("\n").filter((l) => l.includes("	")).map((l) => {
-    const [sha, ...rest] = l.split("	");
-    return { sha, subject: rest.join("	") };
+    const [sha, date, ...rest] = l.split("	");
+    return { sha, subject: rest.join("	"), date };
   });
 }
 function isAncestor(repoPath, ancestor, descendant) {
@@ -369,13 +373,32 @@ function relatives(commits, generatedSha) {
   };
   return { ancestors: reach(parents), descendants: reach(children) };
 }
-function gitDescentCorroborator(projectPath, generatedSha, commits) {
+function authoredAfterHorizon(commits, generatedSha, horizonSha) {
+  const authorMs = new Map(commits.map((c) => [c.sha, Date.parse(c.date)]));
+  const horizonMs = horizonSha === void 0 ? NaN : authorMs.get(horizonSha) ?? NaN;
+  if (Number.isNaN(horizonMs)) return () => false;
+  const { ancestors } = relatives(commits, generatedSha);
+  const horizonAncestors = relatives(commits, horizonSha).ancestors;
+  return (sha) => {
+    if (ancestors.has(sha) || horizonAncestors.has(sha)) return false;
+    const ms = authorMs.get(sha);
+    if (ms === void 0 || Number.isNaN(ms)) return false;
+    return ms > horizonMs;
+  };
+}
+function gitDescentCorroborator(projectPath, generatedSha, commits, horizonSha) {
   const { ancestors, descendants } = relatives(commits, generatedSha);
+  const parent = commits.find((c) => c.sha === generatedSha);
+  const parents = parent?.parents ?? [];
+  const parentSubject = new Map(commits.map((c) => [c.sha, c.subject]));
+  const commitDate = new Map(commits.map((c) => [c.sha, c.date]));
+  const afterHorizon = authoredAfterHorizon(commits, generatedSha, horizonSha);
+  const mergedIntoEpisode = horizonSha !== void 0 && commits.some((c) => c.sha === horizonSha) ? relatives(commits, horizonSha).ancestors : /* @__PURE__ */ new Set();
   const rivalCache = /* @__PURE__ */ new Map();
   const rivalsFor = (filePath) => {
     if (rivalCache.has(filePath)) return rivalCache.get(filePath);
     const touching = commitsTouchingPath(projectPath, filePath);
-    const rivals = touching === null ? null : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha));
+    const rivals = touching === null ? null : touching.filter((c) => c.sha !== generatedSha && !descendants.has(c.sha) && !afterHorizon(c.sha));
     rivalCache.set(filePath, rivals);
     return rivals;
   };
@@ -393,6 +416,23 @@ function gitDescentCorroborator(projectPath, generatedSha, commits) {
     const needle = normalize(spanText).norm;
     if (needle.length < MIN_VERBATIM_LEN) {
       return { basis: "unverified", reason: "span_too_short" };
+    }
+    for (const p of parents) {
+      const got = read(p, filePath);
+      if (got.kind !== "present") continue;
+      if (!normalize(got.text).norm.includes(needle)) continue;
+      return {
+        basis: "rival",
+        sha: p.slice(0, SHORT),
+        subject: parentSubject.get(p) ?? "",
+        relation: "prior_revision",
+        // Spread rather than written as `date: commitDate.get(p)`, because
+        // the field is optional and an explicit `undefined` survives
+        // `JSON.stringify` as a missing key in the record but as a PRESENT
+        // key with value `undefined` to anything comparing objects in
+        // memory, which is the shape the unit tests assert on.
+        ...commitDate.get(p) !== void 0 ? { date: commitDate.get(p) } : {}
+      };
     }
     const rivals = rivalsFor(filePath);
     if (rivals === null) {
@@ -416,7 +456,18 @@ function gitDescentCorroborator(projectPath, generatedSha, commits) {
         basis: "rival",
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
-        relation: ancestors.has(c.sha) ? "pre_existing" : "sibling"
+        // Three-way, and the order matters. A parent that held the text
+        // already returned above, so an ancestor reaching this line is an
+        // older one and the relation is the restore it was always
+        // documented to be. Otherwise the horizon's ancestors are asked
+        // before the fall-through, because every ancestor of the
+        // generation is also an ancestor of the horizon and would
+        // otherwise swallow the restore case.
+        relation: ancestors.has(c.sha) ? "pre_existing" : mergedIntoEpisode.has(c.sha) ? "merged_in" : "sibling",
+        // Always present on this path: `commitsTouchingPath` reads `%aI`
+        // for every line it returns, so a candidate that reached this loop
+        // has a date whether or not it is in `commits`.
+        date: c.date
       };
     }
     if (hole !== null) {
@@ -448,12 +499,51 @@ function blobOid(repoPath, sha, path) {
     return null;
   }
 }
+function declaration(repoPath, sha) {
+  let out;
+  try {
+    out = (0, import_node_child_process2.execFileSync)("git", [
+      "-C",
+      repoPath,
+      "log",
+      "-1",
+      `--pretty=format:%aI%x00%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
+      sha
+    ], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    return { sha, subject: "", date: "", paths: /* @__PURE__ */ new Set() };
+  }
+  const [date, subject, trailers] = out.split("\0");
+  if (subject === void 0) return { sha, subject: (date ?? "").trim(), date: "", paths: /* @__PURE__ */ new Set() };
+  return {
+    sha,
+    subject,
+    date,
+    paths: new Set(
+      (trailers ?? "").split("	").map((x) => x.trim()).filter((x) => x.length > 0)
+    )
+  };
+}
 function vendoredPaths(projectPath, ep, paths, commits) {
   const { ancestors, descendants } = relatives(commits, ep.generatedSha);
   const found = [];
+  const declared = paths.length === 0 ? [] : [declaration(projectPath, ep.generatedSha), declaration(projectPath, ep.finalSha)];
   for (const path of paths) {
     const finalOid = blobOid(projectPath, ep.finalSha, path);
     if (finalOid === null || finalOid === EMPTY_BLOB) continue;
+    const d = declared.find((x) => x.paths.has(path));
+    if (d !== void 0) {
+      found.push({
+        path,
+        sha: d.sha.slice(0, SHORT2),
+        subject: d.subject,
+        relation: "declared",
+        // Omitted rather than empty when the clone could not answer; see
+        // `VendoredPath.date`.
+        ...d.date ? { date: d.date } : {}
+      });
+      continue;
+    }
     const touching = commitsTouchingPath(projectPath, path);
     if (touching === null) continue;
     let compared = 0;
@@ -468,6 +558,9 @@ function vendoredPaths(projectPath, ep, paths, commits) {
         path,
         sha: c.sha.slice(0, SHORT2),
         subject: c.subject,
+        // `commitsTouchingPath` reads `%aI` in the same `git log` that
+        // enumerated these candidates, so the date costs no extra call.
+        date: c.date,
         relation: ancestors.has(c.sha) ? "pre_existing" : "sibling"
       });
       break;
@@ -475,7 +568,7 @@ function vendoredPaths(projectPath, ep, paths, commits) {
   }
   return found;
 }
-var import_node_child_process2, MAX_CANDIDATE_BLOBS, SHORT2, EMPTY_BLOB;
+var import_node_child_process2, MAX_CANDIDATE_BLOBS, SHORT2, IMPORT_TRAILER, EMPTY_BLOB;
 var init_vendored = __esm({
   "src/vendored.ts"() {
     "use strict";
@@ -484,6 +577,7 @@ var init_vendored = __esm({
     init_corroborate();
     MAX_CANDIDATE_BLOBS = 40;
     SHORT2 = 7;
+    IMPORT_TRAILER = "Ursa-Imported-Path";
     EMPTY_BLOB = "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391";
   }
 });
@@ -496,13 +590,13 @@ function excerpt(text) {
 function normalizeForExcerpt(text) {
   return text.replace(/\s+/g, " ").trim();
 }
-function isExcerptOf(quoted, source) {
-  if (quoted.length === 0) return false;
+function isExcerptOf(quoted2, source) {
+  if (quoted2.length === 0) return false;
   const normalized = normalizeForExcerpt(source);
-  if (quoted.length > MAX_EXCERPT && quoted.endsWith("\u2026")) {
-    return normalized.startsWith(quoted.slice(0, -1));
+  if (quoted2.length > MAX_EXCERPT && quoted2.endsWith("\u2026")) {
+    return normalized.startsWith(quoted2.slice(0, -1));
   }
-  return normalized.includes(quoted);
+  return normalized.includes(quoted2);
 }
 var MAX_EXCERPT;
 var init_text = __esm({
@@ -645,12 +739,12 @@ function detectTraceSignals(record) {
           unresolvedSingleCorrections++;
           continue;
         }
-        const quoted = excerpt(members[0].text);
+        const quoted2 = excerpt(members[0].text);
         oneShotCorrections.push({
           step: members[0].step,
-          text: quoted,
+          text: quoted2,
           domain: targetFiles(record, conv.id, members[0].step, closedStep, members).join(", ") || theme,
-          quotes: [{ of: "user_prompt", conversationId: conv.id, step: members[0].step, text: quoted }]
+          quotes: [{ of: "user_prompt", conversationId: conv.id, step: members[0].step, text: quoted2 }]
         });
         continue;
       }
@@ -729,10 +823,10 @@ function specFrom(members, promptSteps, conversationId) {
   const pool = wanted.length > 0 ? wanted : members;
   const chosen = pool[pool.length - 1];
   const others = promptSteps.filter((s) => s !== chosen.step);
-  const quoted = excerpt(chosen.text);
+  const quoted2 = excerpt(chosen.text);
   return {
-    discoveredSpec: `quoted from step ${chosen.step}, the loop's last statement of what was wanted (regression reports excluded): "${quoted}"` + (others.length > 0 ? ` \u2014 the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(", ")}` : ""),
-    quotes: [{ of: "user_prompt", conversationId, step: chosen.step, text: quoted }]
+    discoveredSpec: `quoted from step ${chosen.step}, the loop's last statement of what was wanted (regression reports excluded): "${quoted2}"` + (others.length > 0 ? ` \u2014 the loop's other statements stand unmerged at conversations[].prompts[].step ${others.join(", ")}` : ""),
+    quotes: [{ of: "user_prompt", conversationId, step: chosen.step, text: quoted2 }]
   };
 }
 function targetFiles(record, conversationId, fromStep, toStep, members) {
@@ -953,6 +1047,7 @@ function mutationCorrections(record) {
   for (const file of record.files) {
     for (const span of file.spans) {
       if (span.class !== "survived_mutated" || !span.diff || !span.source) continue;
+      if (span.normalizedOnly) continue;
       const gen = record.generations[span.source.generationIndex];
       if (!gen) continue;
       const agent = gen.text.slice(span.source.start, span.source.end);
@@ -980,16 +1075,16 @@ FINAL: ${finalQuote}`,
   }
   return out;
 }
-function deriveSignals(record, declaration = UNDECLARED) {
+function deriveSignals(record, declaration2 = UNDECLARED) {
   const base = {
     method: "auto-detected",
     annotatedAt: (/* @__PURE__ */ new Date()).toISOString(),
     episode: {
       steps: record.generations.length,
       generations: record.generations.length,
-      accepted: declaration.accepted,
+      accepted: declaration2.accepted,
       acceptanceStatedInChat: false,
-      acceptanceBasis: declaration.basis
+      acceptanceBasis: declaration2.basis
     },
     correctionLoops: [],
     feedbackTranslations: [],
@@ -1123,204 +1218,6 @@ var init_episodes = __esm({
   }
 });
 
-// src/store.ts
-function ursaDir(projectRoot) {
-  return (0, import_node_path2.join)(projectRoot, ".ursa");
-}
-function saveRecord(projectRoot, record) {
-  const dir = (0, import_node_path2.join)(ursaDir(projectRoot), "records");
-  (0, import_node_fs.mkdirSync)(dir, { recursive: true });
-  const path = (0, import_node_path2.join)(dir, `${record.task.id}.json`);
-  (0, import_node_fs.writeFileSync)(path, JSON.stringify(record, null, 2) + "\n");
-  return path;
-}
-function saveEpisodes(projectRoot, episodes) {
-  (0, import_node_fs.mkdirSync)(ursaDir(projectRoot), { recursive: true });
-  const path = (0, import_node_path2.join)(ursaDir(projectRoot), "episodes.json");
-  (0, import_node_fs.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
-  return path;
-}
-var import_node_fs, import_node_path2;
-var init_store = __esm({
-  "src/store.ts"() {
-    "use strict";
-    import_node_fs = require("node:fs");
-    import_node_path2 = require("node:path");
-  }
-});
-
-// src/tuning/revoke.ts
-function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const axiomsDeleted = [];
-  let evidenceStripped = 0;
-  const axioms = [];
-  for (const axiom of tuning.axioms) {
-    const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
-    const dropped = axiom.evidence.length - kept.length;
-    if (dropped === 0) {
-      axioms.push(axiom);
-      continue;
-    }
-    evidenceStripped += dropped;
-    if (kept.length === 0) {
-      axiomsDeleted.push(axiom.id);
-      continue;
-    }
-    axioms.push({ ...axiom, evidence: kept, evidenceCount: kept.length, lastSeen: now });
-  }
-  const deleted = new Set(axiomsDeleted);
-  const cleaned = axioms.map(
-    (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
-  );
-  const sources = tuning.sources.filter((s) => s.recordId !== recordId);
-  return {
-    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
-    axiomsDeleted,
-    evidenceStripped,
-    sourcesRemoved: tuning.sources.length - sources.length
-  };
-}
-function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  if (!(0, import_node_fs2.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
-  const tuning = JSON.parse((0, import_node_fs2.readFileSync)(tuningPath, "utf8"));
-  const target = tuning.axioms.find((a) => a.id === unitId);
-  if (!target) {
-    throw new Error(
-      `No axiom ${unitId} in ${tuningPath} (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
-    );
-  }
-  const updated = {
-    ...tuning,
-    updatedAt: now,
-    axioms: tuning.axioms.map(
-      (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
-    )
-  };
-  (0, import_node_fs2.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
-  return updated;
-}
-var import_node_fs2;
-var init_revoke = __esm({
-  "src/tuning/revoke.ts"() {
-    "use strict";
-    import_node_fs2 = require("node:fs");
-  }
-});
-
-// src/consent.ts
-function consentPath(projectRoot) {
-  return (0, import_node_path3.join)(ursaDir(projectRoot), "consent.json");
-}
-function tuningPathFor(projectRoot) {
-  return (0, import_node_path3.join)(ursaDir(projectRoot), "tuning.json");
-}
-function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return {
-    schemaVersion: "0.1.0",
-    updatedAt: now,
-    scopes: { "minor-aggregate": { state: "withheld", changedAt: null, history: [] } },
-    forgotten: []
-  };
-}
-function coerceScope(raw) {
-  const o = raw ?? {};
-  const state = o.state === "granted" ? "granted" : "withheld";
-  return {
-    state,
-    changedAt: typeof o.changedAt === "string" ? o.changedAt : null,
-    history: Array.isArray(o.history) ? o.history : []
-  };
-}
-function loadConsent(projectRoot) {
-  const path = consentPath(projectRoot);
-  if (!(0, import_node_fs3.existsSync)(path)) return withheldByDefault();
-  let parsed;
-  try {
-    parsed = JSON.parse((0, import_node_fs3.readFileSync)(path, "utf8"));
-  } catch {
-    return withheldByDefault();
-  }
-  if (parsed === null || typeof parsed !== "object") return withheldByDefault();
-  const o = parsed;
-  const scopes = o.scopes ?? {};
-  return {
-    schemaVersion: "0.1.0",
-    updatedAt: typeof o.updatedAt === "string" ? o.updatedAt : (/* @__PURE__ */ new Date()).toISOString(),
-    scopes: { "minor-aggregate": coerceScope(scopes["minor-aggregate"]) },
-    forgotten: Array.isArray(o.forgotten) ? o.forgotten : []
-  };
-}
-function saveConsent(projectRoot, consent) {
-  (0, import_node_fs3.mkdirSync)(ursaDir(projectRoot), { recursive: true });
-  const path = consentPath(projectRoot);
-  (0, import_node_fs3.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
-  return path;
-}
-function isGranted(consent, scope) {
-  return consent.scopes[scope]?.state === "granted";
-}
-function isForgotten(consent, recordId) {
-  return consent.forgotten.some((t) => t.recordId === recordId);
-}
-function setState(projectRoot, scope, to, by, now) {
-  const consent = loadConsent(projectRoot);
-  const current = consent.scopes[scope];
-  const next = {
-    state: to,
-    changedAt: now,
-    history: [...current.history, { at: now, from: current.state, to, by }]
-  };
-  const updated = { ...consent, updatedAt: now, scopes: { ...consent.scopes, [scope]: next } };
-  saveConsent(projectRoot, updated);
-  return updated;
-}
-function grantScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return setState(projectRoot, scope, "granted", by, now);
-}
-function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  return setState(projectRoot, scope, "withheld", by, now);
-}
-function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
-  const recordFile = (0, import_node_path3.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
-  const hadFile = (0, import_node_fs3.existsSync)(recordFile);
-  if (hadFile) (0, import_node_fs3.rmSync)(recordFile);
-  let axiomsDeleted = [];
-  let evidenceStripped = 0;
-  let sourcesRemoved = 0;
-  const tPath = tuningPathFor(projectRoot);
-  if ((0, import_node_fs3.existsSync)(tPath)) {
-    const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tPath, "utf8"));
-    const result = forgetRecordInTuning(tuning, recordId, now);
-    (0, import_node_fs3.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
-    axiomsDeleted = result.axiomsDeleted;
-    evidenceStripped = result.evidenceStripped;
-    sourcesRemoved = result.sourcesRemoved;
-  }
-  const tombstone = {
-    recordId,
-    forgottenAt: now,
-    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
-  };
-  const consent = loadConsent(projectRoot);
-  saveConsent(projectRoot, {
-    ...consent,
-    updatedAt: now,
-    forgotten: [...consent.forgotten.filter((t) => t.recordId !== recordId), tombstone]
-  });
-  return tombstone;
-}
-var import_node_fs3, import_node_path3, SCOPES;
-var init_consent = __esm({
-  "src/consent.ts"() {
-    "use strict";
-    import_node_fs3 = require("node:fs");
-    import_node_path3 = require("node:path");
-    init_revoke();
-    init_store();
-    SCOPES = ["minor-aggregate"];
-  }
-});
-
 // src/intervals.ts
 function mergedLength(intervals) {
   const sorted = [...intervals].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
@@ -1420,6 +1317,25 @@ function rawTextFor(record, q) {
   }
   return file.text;
 }
+function currentGateIdentity() {
+  const canonical = [...BOUND_CODES].sort().map((code) => `${code}
+${BOUNDS[code]}
+`).join("");
+  return {
+    codes: [...BOUND_CODES],
+    boundsDigest: (0, import_node_crypto.createHash)("sha256").update(canonical, "utf8").digest("hex").slice(0, 16)
+  };
+}
+function firstDifference(final, generation, window = 10) {
+  let i = 0;
+  while (i < final.length && i < generation.length && final[i] === generation[i]) i++;
+  const from = Math.max(0, i - window);
+  return {
+    offset: i,
+    final: final.slice(from, i + window),
+    generation: generation.slice(from, i + window)
+  };
+}
 function checkRecord(record) {
   const out = [];
   const id = record.task.id;
@@ -1464,11 +1380,19 @@ function checkRecord(record) {
       if (s.class === "survived_verbatim") {
         const finalLen = s.end - s.start;
         const srcLen = s.source.end - s.source.start;
+        const claimed = gen2.text.slice(s.source.start, s.source.end);
         if (finalLen > srcLen) {
           push(
             "CLAIM_NOT_WIDER",
             at,
             `${finalLen} final chars credited to a ${srcLen}-char generation extent, ${finalLen - srcLen} too many`
+          );
+        } else if (claimed !== s.text) {
+          const d = firstDifference(s.text, claimed);
+          push(
+            "CLAIM_NOT_WIDER",
+            at,
+            `${finalLen} final chars and the ${srcLen}-char generation extent they claim are not the same characters, first differing at offset ${d.offset}: final ${JSON.stringify(d.final)}, generation ${JSON.stringify(d.generation)}`
           );
         }
       }
@@ -1533,12 +1457,13 @@ function checkRecord(record) {
   const st = record.stats;
   const gen = st.generated;
   const split = gen.humanDeletedChars + gen.mergeDeletedChars + gen.unknownDeletedChars;
-  const expectedDeleted = gen.totalChars - gen.survivedChars;
-  if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0) {
+  const notGenerated = gen.notGeneratedChars ?? 0;
+  const expectedDeleted = gen.totalChars - gen.survivedChars - notGenerated;
+  if (split !== gen.deletedChars || gen.deletedChars !== expectedDeleted || gen.humanDeletedChars < 0 || gen.mergeDeletedChars < 0 || gen.unknownDeletedChars < 0 || notGenerated < 0) {
     push(
       "DELETION_SPLIT_EXACT",
       "stats.generated",
-      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars = ${expectedDeleted}`
+      `human ${gen.humanDeletedChars} + merge ${gen.mergeDeletedChars} + unknown ${gen.unknownDeletedChars} = ${split}, deletedChars ${gen.deletedChars}, totalChars - survivedChars - notGeneratedChars(${notGenerated}) = ${expectedDeleted}`
     );
   }
   const spanExtentSum = record.files.reduce(
@@ -1664,8 +1589,49 @@ function checkRecord(record) {
         `labelled survived_mutated while naming ${d.descent.relation} rival ${d.descent.sha} as holding the span's text verbatim`
       );
     }
+    if (d.span.class === "survived_verbatim" && d.descent.basis === "rival" && d.descent.relation === "prior_revision") {
+      push(
+        "DESCENT_CHECKED_UNIFORMLY",
+        d.where,
+        `labelled survived_verbatim while naming the generation's own parent ${d.descent.sha} as already holding the span's text`
+      );
+    }
+  }
+  const finalMs = Date.parse(record.task.generatedAt);
+  let datedSiblings = 0;
+  for (const d of descentSpans) {
+    if (d.descent.basis !== "rival") continue;
+    const date = d.descent.date;
+    if (date === void 0) continue;
+    const ms = typeof date === "string" ? Date.parse(date) : Number.NaN;
+    if (Number.isNaN(ms)) {
+      push(
+        "RIVAL_NOT_AFTER_FINAL",
+        d.where,
+        `rival ${d.descent.sha} (${d.descent.relation}) carries date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`
+      );
+      continue;
+    }
+    if (d.descent.relation !== "sibling") continue;
+    datedSiblings++;
+    if (Number.isNaN(finalMs)) continue;
+    if (ms > finalMs) {
+      push(
+        "RIVAL_NOT_AFTER_FINAL",
+        d.where,
+        `sibling rival ${d.descent.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the record names a commit from its own future as already holding this span's text`
+      );
+    }
+  }
+  if (datedSiblings > 0 && Number.isNaN(finalMs)) {
+    push(
+      "RIVAL_NOT_AFTER_FINAL",
+      "task.generatedAt",
+      `${datedSiblings} sibling rival verdict${datedSiblings === 1 ? "" : "s"} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no sibling's date can be ordered against the work it is evidence about`
+    );
   }
   const classified = new Set(record.files.map((f) => f.path));
+  let datedSiblingExclusions = 0;
   for (const [i, x] of (record.exclusions ?? []).entries()) {
     const at = `exclusions[${i}] (${x.path})`;
     if (classified.has(x.path)) {
@@ -1683,6 +1649,148 @@ function checkRecord(record) {
         `chars=${x.chars}, sha=${x.sha ? x.sha : "(empty)"}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`
       );
     }
+    const date = x.date;
+    if (date === void 0) continue;
+    const ms = typeof date === "string" ? Date.parse(date) : Number.NaN;
+    if (Number.isNaN(ms)) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `excluded as ${x.reason} from ${x.sha} (${x.relation}) carrying date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`
+      );
+      continue;
+    }
+    if (x.relation !== "sibling") continue;
+    datedSiblingExclusions++;
+    if (Number.isNaN(finalMs)) continue;
+    if (ms > finalMs) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `sibling copy ${x.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the ${x.chars} chars of this file were dropped from every figure on the evidence of a commit from the record's own future`
+      );
+    }
+  }
+  if (datedSiblingExclusions > 0 && Number.isNaN(finalMs)) {
+    push(
+      "EXCLUSION_NOT_CLASSIFIED",
+      "task.generatedAt",
+      `${datedSiblingExclusions} sibling exclusion${datedSiblingExclusions === 1 ? "" : "s"} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no excluded file's copy can be ordered against the work it was dropped from`
+    );
+  }
+  const resolvedBy = record.task.resolvedBy;
+  if (resolvedBy !== void 0 && resolvedBy !== null) {
+    const at = "task.resolvedBy";
+    if (typeof resolvedBy !== "object") {
+      push(
+        "RESOLVER_IDENTIFIED",
+        at,
+        `the field is ${typeof resolvedBy} (${quoted(resolvedBy)}), not an object carrying a basis`
+      );
+    } else {
+      const v = resolvedBy;
+      if (v.basis === "git_commit") {
+        if (typeof v.commit !== "string" || !/^[0-9a-f]{7,40}$/.test(v.commit)) {
+          push(
+            "RESOLVER_IDENTIFIED",
+            at,
+            `basis git_commit names commit ${quoted(v.commit)}, which is not 7 to 40 lowercase hex characters, so it is not a commit id anyone can look up`
+          );
+        }
+        if (typeof v.dirty !== "boolean") {
+          push(
+            "RESOLVER_IDENTIFIED",
+            at,
+            `basis git_commit carries dirty ${quoted(v.dirty)}, which is not a boolean, so the record does not say whether the tree that ran was the tree at that commit`
+          );
+        }
+      } else if (v.basis === "bundle_digest") {
+        if (typeof v.digest !== "string" || !/^[0-9a-f]{16}$/.test(v.digest)) {
+          push(
+            "RESOLVER_IDENTIFIED",
+            at,
+            `basis bundle_digest names digest ${quoted(v.digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against the bundle's own sha256 prefix`
+          );
+        }
+      } else {
+        push(
+          "RESOLVER_IDENTIFIED",
+          at,
+          `basis ${quoted(v.basis)}, which is neither git_commit nor bundle_digest, so nothing downstream knows what kind of identity this is`
+        );
+      }
+    }
+  }
+  const gatedBy = record.task.gatedBy;
+  if (gatedBy !== void 0 && gatedBy !== null) {
+    const at = "task.gatedBy";
+    if (typeof gatedBy !== "object") {
+      push(
+        "GATE_IDENTIFIED",
+        at,
+        `the field is ${typeof gatedBy} (${quoted(gatedBy)}), not an object carrying codes and a digest`
+      );
+    } else {
+      const v = gatedBy;
+      const codes = v.codes;
+      let codesWellFormed = false;
+      if (!Array.isArray(codes)) {
+        push(
+          "GATE_IDENTIFIED",
+          at,
+          `codes is ${quoted(codes)}, not an array, so the record does not list the bounds it was checked against`
+        );
+      } else if (codes.length === 0) {
+        push(
+          "GATE_IDENTIFIED",
+          at,
+          'codes is an empty array, so the record names a resolver that checked it against no bounds; absence of the field is how "nothing stamped this" is written'
+        );
+      } else {
+        const bad = codes.filter((c) => typeof c !== "string" || !/^[A-Z][A-Z0-9_]*$/.test(c));
+        const dupes = [...new Set(codes.filter((c, i) => codes.indexOf(c) !== i))];
+        if (bad.length > 0) {
+          push(
+            "GATE_IDENTIFIED",
+            at,
+            `codes holds ${bad.length} of ${codes.length} entr${bad.length === 1 ? "y" : "ies"} that is not a bound code in this module's shape, the first being ${quoted(bad[0])}`
+          );
+        } else if (dupes.length > 0) {
+          push(
+            "GATE_IDENTIFIED",
+            at,
+            `codes names ${quoted(dupes[0])} more than once, so its length is not the number of distinct bounds it claims`
+          );
+        } else {
+          codesWellFormed = true;
+        }
+      }
+      const digest = v.boundsDigest;
+      const digestWellFormed = typeof digest === "string" && /^[0-9a-f]{16}$/.test(digest);
+      if (!digestWellFormed) {
+        push(
+          "GATE_IDENTIFIED",
+          at,
+          `boundsDigest is ${quoted(digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against another record's`
+        );
+      }
+      if (codesWellFormed && digestWellFormed) {
+        const mine = currentGateIdentity();
+        if (digest === mine.boundsDigest) {
+          const listed = codes;
+          const claimed = new Set(listed);
+          const missing2 = mine.codes.filter((c) => !claimed.has(c));
+          const extra2 = listed.filter((c) => !mine.codes.includes(c));
+          if (missing2.length > 0 || extra2.length > 0) {
+            push(
+              "GATE_IDENTIFIED",
+              at,
+              `boundsDigest ${digest} is this resolver's own, so the record claims this resolver's ${mine.codes.length} bounds, and it lists ${listed.length}` + (missing2.length > 0 ? `, missing ${missing2.join(", ")}` : "") + (extra2.length > 0 ? `, with ${extra2.join(", ")} not in this bound set` : "")
+            );
+          }
+        }
+      }
+    }
   }
   return out;
 }
@@ -1691,10 +1799,11 @@ function formatViolations(violations) {
     bound:    ${v.invariant}
     observed: ${v.observed}`).join("\n");
 }
-var BOUNDS, r3, abbrev, BOUND_COUNT, BOUND_CODES;
+var import_node_crypto, BOUNDS, r3, abbrev, quoted, BOUND_COUNT, BOUND_CODES;
 var init_invariants = __esm({
   "src/invariants.ts"() {
     "use strict";
+    import_node_crypto = require("node:crypto");
     init_intervals();
     init_text();
     BOUNDS = {
@@ -1704,20 +1813,285 @@ var init_invariants = __esm({
       GEN_CHARS_CONSISTENT: "a generation's character counts agree: totalChars = sum of span extents, charsWritten = text.length, separatorChars = charsWritten - totalChars",
       GEN_SURVIVED_BOUNDED: "a generation's surviving characters are a subset of its segment characters, which are a subset of what it wrote: survivedChars <= totalChars <= charsWritten",
       GEN_CLAIM_BOUNDED: "the characters of one generation claimed by final spans, counted once each, do not exceed what that generation wrote: claimed <= charsWritten",
-      DELETION_SPLIT_EXACT: "the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars",
+      DELETION_SPLIT_EXACT: "the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars - notGeneratedChars. The last term is the characters of generation segments whose fate is `not_generated` \u2014 text the file already held at the generation's parent, which the model did not produce and the person therefore did not discard. It is inside totalChars because totalChars is the sum of segment extents and the fates must add up to it, and it is outside the deletion split because nothing destroyed it.",
       FINAL_SPANS_IN_FILE: "a final file's spans are ordered, non-overlapping, inside its text, and each span.text is exactly text.slice(start, end)",
       COVERED_BOUNDED: "classified characters are a subset of the finished work: coveredChars = sum of final span extents <= finalChars",
       RATES_MATCH_FIELDS: "every stored rate equals its own numerator over its own denominator, rounded to three places",
       PCT_DENOMINATORS_ORDERED: "a class's share of the finished work is never larger than its share of the classified part: byClass[c].pctOfFinal <= byClass[c].pct. The two fields differ only in denominator \u2014 coveredChars for pct, finalChars for pctOfFinal \u2014 and COVERED_BOUNDED already holds coveredChars <= finalChars, so the bound is the same-set statement that the wider denominator produced the smaller number. It fires when the two are computed from each other's denominator, which is the one way a reader could be handed the flattering figure under the honest field's name.",
       PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
       SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
-      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.",
-      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one, and no span still labelled survived_mutated carries a `rival` verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it."
+      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit's author date states one that can be ordered, with a `sibling` exclusion's date no later than the record's own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository's own history one exclusion removed 60,616 characters, 84.7% of that run's headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch's commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one's. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer.",
+      DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
+      RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.",
+      RIVAL_NOT_AFTER_FINAL: "if a descent verdict names a `sibling` rival and states that commit's author date, the date is not later than the record's own `task.generatedAt`; and any rival's stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them \u2014 `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode's final commit \u2014 and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module's second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling's date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates \u2014 the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode's closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written.",
+      GATE_IDENTIFIED: "if a record names the bound set its claims were checked against, the name is one that can be compared. `task.gatedBy.codes` is a non-empty array of distinct bound codes in the shape this module declares them (uppercase letters, digits and underscores, starting with a letter), `task.gatedBy.boundsDigest` is exactly 16 lowercase hexadecimal characters, and a record whose digest equals the CHECKING resolver's own digest carries exactly the checking resolver's codes. That last clause is the only one with teeth beyond shape, and it is the one the field was added for: a digest is a claim about which rules applied, so a record asserting this build's rule set while listing fewer rules than this build has is a record a bound was dropped from, and dropping one quietly is the failure `task.resolvedBy` alone could not catch. Membership is deliberately NOT checked, in the other direction: a record whose digest differs names the bounds of the resolver that wrote it, which on a record from a later build includes codes this one has never heard of, and refusing that record would make every bound added after it a gate against its own future. An ABSENT `task.gatedBy` is legal and unchecked, for the reason `RESOLVER_IDENTIFIED` gives \u2014 absence says nothing stamped this record, which every record written before 2026-10-16 says truthfully. Present is NOT a claim that the record passed: both launches write records before the gate runs (`gateRecords` in src/launch.ts), so each of the twenty-three records in fixtures/violations/ names this bound set and is refused by it."
     };
     r3 = (x) => Math.round(x * 1e3) / 1e3;
     abbrev = (s) => s.length > 60 ? s.slice(0, 60) + "\u2026" : s;
+    quoted = (x) => abbrev(JSON.stringify(x) ?? String(x));
     BOUND_COUNT = Object.keys(BOUNDS).length;
     BOUND_CODES = Object.keys(BOUNDS);
+  }
+});
+
+// src/resolver-identity.ts
+function runningScript() {
+  const argv1 = process.argv[1];
+  if (!argv1) return null;
+  try {
+    return (0, import_node_fs.statSync)(argv1).isFile() ? argv1 : null;
+  } catch {
+    return null;
+  }
+}
+function git3(dir, args) {
+  try {
+    return (0, import_node_child_process4.execFileSync)("git", ["-C", dir, ...args], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+function resolverIdentity(scriptPath = runningScript()) {
+  if (scriptPath === null) return null;
+  const dir = (0, import_node_path2.dirname)(scriptPath);
+  if (git3(dir, ["rev-parse", "--is-inside-work-tree"]) === "true") {
+    const commit = git3(dir, ["rev-parse", "--short", "HEAD"]);
+    if (commit) {
+      const status = git3(dir, ["status", "--porcelain"]);
+      return { basis: "git_commit", commit, dirty: status === null || status.length > 0 };
+    }
+  }
+  try {
+    const digest = (0, import_node_crypto2.createHash)("sha256").update((0, import_node_fs.readFileSync)(scriptPath)).digest("hex");
+    return { basis: "bundle_digest", digest: digest.slice(0, 16) };
+  } catch {
+    return null;
+  }
+}
+function currentResolverIdentity() {
+  if (!memo) memo = { value: resolverIdentity() };
+  return memo.value;
+}
+function formatResolverIdentity(identity) {
+  if (!identity) return "resolver not identified (no git work tree and no readable bundle)";
+  if (identity.basis === "git_commit") {
+    return `resolver ${identity.commit}${identity.dirty ? " (working tree had uncommitted changes)" : ""}`;
+  }
+  return `resolver bundle sha256:${identity.digest}`;
+}
+var import_node_child_process4, import_node_crypto2, import_node_fs, import_node_path2, memo;
+var init_resolver_identity = __esm({
+  "src/resolver-identity.ts"() {
+    "use strict";
+    import_node_child_process4 = require("node:child_process");
+    import_node_crypto2 = require("node:crypto");
+    import_node_fs = require("node:fs");
+    import_node_path2 = require("node:path");
+  }
+});
+
+// src/store.ts
+function ursaDir(projectRoot) {
+  return (0, import_node_path3.join)(projectRoot, ".ursa");
+}
+function saveRecord(projectRoot, record, identity = currentResolverIdentity(), gate = currentGateIdentity()) {
+  const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
+  (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
+  const path = (0, import_node_path3.join)(dir, `${record.task.id}.json`);
+  if (identity && !record.task.resolvedBy) record.task.resolvedBy = identity;
+  if (gate && !record.task.gatedBy) record.task.gatedBy = gate;
+  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(record, null, 2) + "\n");
+  return path;
+}
+function saveEpisodes(projectRoot, episodes) {
+  (0, import_node_fs2.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "episodes.json");
+  (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
+  return path;
+}
+var import_node_fs2, import_node_path3;
+var init_store = __esm({
+  "src/store.ts"() {
+    "use strict";
+    import_node_fs2 = require("node:fs");
+    import_node_path3 = require("node:path");
+    init_invariants();
+    init_resolver_identity();
+  }
+});
+
+// src/tuning/revoke.ts
+function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  const axiomsDeleted = [];
+  let evidenceStripped = 0;
+  const axioms = [];
+  for (const axiom of tuning.axioms) {
+    const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
+    const dropped = axiom.evidence.length - kept.length;
+    if (dropped === 0) {
+      axioms.push(axiom);
+      continue;
+    }
+    evidenceStripped += dropped;
+    if (kept.length === 0) {
+      axiomsDeleted.push(axiom.id);
+      continue;
+    }
+    axioms.push({ ...axiom, evidence: kept, evidenceCount: kept.length, lastSeen: now });
+  }
+  const deleted = new Set(axiomsDeleted);
+  const cleaned = axioms.map(
+    (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
+  );
+  const sources = tuning.sources.filter((s) => s.recordId !== recordId);
+  return {
+    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
+    axiomsDeleted,
+    evidenceStripped,
+    sourcesRemoved: tuning.sources.length - sources.length
+  };
+}
+function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  if (!(0, import_node_fs3.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
+  const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tuningPath, "utf8"));
+  const target = tuning.axioms.find((a) => a.id === unitId);
+  if (!target) {
+    throw new Error(
+      `No axiom ${unitId} in ${tuningPath} (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
+    );
+  }
+  const updated = {
+    ...tuning,
+    updatedAt: now,
+    axioms: tuning.axioms.map(
+      (a) => a.id === unitId ? { ...a, status: "revoked", lastSeen: now } : a
+    )
+  };
+  (0, import_node_fs3.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
+  return updated;
+}
+var import_node_fs3;
+var init_revoke = __esm({
+  "src/tuning/revoke.ts"() {
+    "use strict";
+    import_node_fs3 = require("node:fs");
+  }
+});
+
+// src/consent.ts
+function consentPath(projectRoot) {
+  return (0, import_node_path4.join)(ursaDir(projectRoot), "consent.json");
+}
+function tuningPathFor(projectRoot) {
+  return (0, import_node_path4.join)(ursaDir(projectRoot), "tuning.json");
+}
+function withheldByDefault(now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt: now,
+    scopes: { "minor-aggregate": { state: "withheld", changedAt: null, history: [] } },
+    forgotten: []
+  };
+}
+function coerceScope(raw) {
+  const o = raw ?? {};
+  const state = o.state === "granted" ? "granted" : "withheld";
+  return {
+    state,
+    changedAt: typeof o.changedAt === "string" ? o.changedAt : null,
+    history: Array.isArray(o.history) ? o.history : []
+  };
+}
+function loadConsent(projectRoot) {
+  const path = consentPath(projectRoot);
+  if (!(0, import_node_fs4.existsSync)(path)) return withheldByDefault();
+  let parsed;
+  try {
+    parsed = JSON.parse((0, import_node_fs4.readFileSync)(path, "utf8"));
+  } catch {
+    return withheldByDefault();
+  }
+  if (parsed === null || typeof parsed !== "object") return withheldByDefault();
+  const o = parsed;
+  const scopes = o.scopes ?? {};
+  return {
+    schemaVersion: "0.1.0",
+    updatedAt: typeof o.updatedAt === "string" ? o.updatedAt : (/* @__PURE__ */ new Date()).toISOString(),
+    scopes: { "minor-aggregate": coerceScope(scopes["minor-aggregate"]) },
+    forgotten: Array.isArray(o.forgotten) ? o.forgotten : []
+  };
+}
+function saveConsent(projectRoot, consent) {
+  (0, import_node_fs4.mkdirSync)(ursaDir(projectRoot), { recursive: true });
+  const path = consentPath(projectRoot);
+  (0, import_node_fs4.writeFileSync)(path, JSON.stringify(consent, null, 2) + "\n");
+  return path;
+}
+function isGranted(consent, scope) {
+  return consent.scopes[scope]?.state === "granted";
+}
+function isForgotten(consent, recordId) {
+  return consent.forgotten.some((t) => t.recordId === recordId);
+}
+function setState(projectRoot, scope, to, by, now) {
+  const consent = loadConsent(projectRoot);
+  const current = consent.scopes[scope];
+  const next = {
+    state: to,
+    changedAt: now,
+    history: [...current.history, { at: now, from: current.state, to, by }]
+  };
+  const updated = { ...consent, updatedAt: now, scopes: { ...consent.scopes, [scope]: next } };
+  saveConsent(projectRoot, updated);
+  return updated;
+}
+function grantScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return setState(projectRoot, scope, "granted", by, now);
+}
+function revokeScope(projectRoot, scope, by, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  return setState(projectRoot, scope, "withheld", by, now);
+}
+function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  const recordFile = (0, import_node_path4.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
+  const hadFile = (0, import_node_fs4.existsSync)(recordFile);
+  if (hadFile) (0, import_node_fs4.rmSync)(recordFile);
+  let axiomsDeleted = [];
+  let evidenceStripped = 0;
+  let sourcesRemoved = 0;
+  const tPath = tuningPathFor(projectRoot);
+  if ((0, import_node_fs4.existsSync)(tPath)) {
+    const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
+    const result = forgetRecordInTuning(tuning, recordId, now);
+    (0, import_node_fs4.writeFileSync)(tPath, JSON.stringify(result.tuning, null, 2) + "\n");
+    axiomsDeleted = result.axiomsDeleted;
+    evidenceStripped = result.evidenceStripped;
+    sourcesRemoved = result.sourcesRemoved;
+  }
+  const tombstone = {
+    recordId,
+    forgottenAt: now,
+    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
+  };
+  const consent = loadConsent(projectRoot);
+  saveConsent(projectRoot, {
+    ...consent,
+    updatedAt: now,
+    forgotten: [...consent.forgotten.filter((t) => t.recordId !== recordId), tombstone]
+  });
+  return tombstone;
+}
+var import_node_fs4, import_node_path4, SCOPES;
+var init_consent = __esm({
+  "src/consent.ts"() {
+    "use strict";
+    import_node_fs4 = require("node:fs");
+    import_node_path4 = require("node:path");
+    init_revoke();
+    init_store();
+    SCOPES = ["minor-aggregate"];
   }
 });
 
@@ -1952,6 +2326,20 @@ var init_base = __esm({
         return components;
       }
     };
+  }
+});
+
+// node_modules/diff/libesm/diff/character.js
+function diffChars(oldStr, newStr, options) {
+  return characterDiff.diff(oldStr, newStr, options);
+}
+var CharacterDiff, characterDiff;
+var init_character = __esm({
+  "node_modules/diff/libesm/diff/character.js"() {
+    init_base();
+    CharacterDiff = class extends Diff {
+    };
+    characterDiff = new CharacterDiff();
   }
 });
 
@@ -2240,6 +2628,7 @@ var init_word = __esm({
 // node_modules/diff/libesm/index.js
 var init_libesm = __esm({
   "node_modules/diff/libesm/index.js"() {
+    init_character();
     init_word();
   }
 });
@@ -2300,7 +2689,11 @@ function computeStats(files, generations, conversations, exclusions = []) {
   );
   const mergeDeleted = deletedCharsWhere((c) => c === "merge");
   const unknownDeleted = deletedCharsWhere((c) => c === "unknown");
-  const generatedDeleted = generatedTotal - generatedSurvived;
+  const generatedNotGenerated = generations.reduce(
+    (a, g) => a + g.spans.filter((s) => s.fate === "not_generated").reduce((b, s) => b + (s.end - s.start), 0),
+    0
+  );
+  const generatedDeleted = generatedTotal - generatedSurvived - generatedNotGenerated;
   const humanDeleted = generatedDeleted - mergeDeleted - unknownDeleted;
   const perConversation = conversations.map((conv) => {
     const convGens = generations.filter((g) => g.conversationId === conv.id);
@@ -2335,6 +2728,7 @@ function computeStats(files, generations, conversations, exclusions = []) {
       separatorChars: generatedSeparators,
       verbatimClaimedChars: verbatimClaimed,
       survivedChars: generatedSurvived,
+      notGeneratedChars: generatedNotGenerated,
       deletedChars: generatedDeleted,
       deletedPct: generatedTotal ? r32(generatedDeleted / generatedTotal) : 0,
       humanDeletedChars: humanDeleted,
@@ -2397,6 +2791,7 @@ function resolve(input) {
   }
   const verbatimClaims = /* @__PURE__ */ new Map();
   const mutatedClaims = /* @__PURE__ */ new Map();
+  const notGeneratedClaims = /* @__PURE__ */ new Map();
   const addClaim = (m, c) => {
     let arr = m.get(c.genIndex);
     if (!arr) m.set(c.genIndex, arr = []);
@@ -2410,6 +2805,53 @@ function resolve(input) {
     start,
     end
   });
+  const verbatimClaim = (base, p, gStart, gEnd, filePath, trivial) => {
+    const descent = input.corroborate?.(filePath, base.text);
+    if (descent?.basis === "rival" && descent.relation === "prior_revision") {
+      addClaim(notGeneratedClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+      return {
+        ...base,
+        class: "no_generation_provenance",
+        uncertain: true,
+        candidate: { score: 1, text: p.gen.text.slice(gStart, gEnd), source: srcPtr(p, gStart, gEnd) },
+        descent
+      };
+    }
+    addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+    return {
+      ...base,
+      class: "survived_verbatim",
+      score: 1,
+      ...trivial ? { trivial } : {},
+      source: srcPtr(p, gStart, gEnd),
+      ...descent ? { descent } : {}
+    };
+  };
+  const normalizedOnlyMutation = (base, p, gStart, gEnd, filePath, trivial) => {
+    const claimed = p.gen.text.slice(gStart, gEnd);
+    const source = srcPtr(p, gStart, gEnd);
+    const descent = input.corroborate?.(filePath, base.text);
+    if (descent?.basis === "rival") {
+      return {
+        ...base,
+        class: "no_generation_provenance",
+        uncertain: true,
+        candidate: { score: 1, text: claimed, source },
+        descent
+      };
+    }
+    addClaim(mutatedClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
+    return {
+      ...base,
+      class: "survived_mutated",
+      score: 1,
+      normalizedOnly: true,
+      source,
+      diff: charDiff(claimed, base.text),
+      ...trivial ? { trivial } : {},
+      ...descent ? { descent } : {}
+    };
+  };
   const files = input.files.map((f) => {
     const mode = modeForPath(f.path);
     const spans = [];
@@ -2418,24 +2860,38 @@ function resolve(input) {
       const base = { start: s.start, end: s.end, text: s.text };
       let span = null;
       if (sNorm.length >= MIN_VERBATIM_LEN) {
-        for (const p of preps) {
-          const idx = p.norm.norm.indexOf(sNorm);
-          if (idx < 0) continue;
-          const gStart = p.norm.map[idx];
-          const gEnd = p.norm.map[idx + sNorm.length - 1] + 1;
-          span = { ...base, class: "survived_verbatim", score: 1, source: srcPtr(p, gStart, gEnd) };
-          addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: gStart, end: gEnd });
-          break;
+        let nearest = null;
+        outerLong: for (const p of preps) {
+          for (let idx = p.norm.norm.indexOf(sNorm); idx >= 0; idx = p.norm.norm.indexOf(sNorm, idx + 1)) {
+            const gStart = p.norm.map[idx];
+            const gEnd = p.norm.map[idx + sNorm.length - 1] + 1;
+            if (p.gen.text.slice(gStart, gEnd) !== s.text) {
+              nearest ??= { p, gStart, gEnd };
+              continue;
+            }
+            span = verbatimClaim(base, p, gStart, gEnd, f.path);
+            break outerLong;
+          }
+        }
+        if (!span && nearest) {
+          span = normalizedOnlyMutation(base, nearest.p, nearest.gStart, nearest.gEnd, f.path);
         }
       } else if (sNorm.length > 0) {
+        let nearestShort = null;
         outer: for (const p of preps) {
           for (const g of p.sentences) {
-            if (g.norm === sNorm) {
-              span = { ...base, class: "survived_verbatim", score: 1, trivial: true, source: srcPtr(p, g.start, g.end) };
-              addClaim(verbatimClaims, { genIndex: p.gen.generationIndex, start: g.start, end: g.end });
-              break outer;
+            if (g.norm !== sNorm) continue;
+            if (g.text !== s.text) {
+              nearestShort ??= { p, g };
+              continue;
             }
+            span = verbatimClaim(base, p, g.start, g.end, f.path, true);
+            break outer;
           }
+        }
+        if (!span && nearestShort) {
+          const { p, g } = nearestShort;
+          span = normalizedOnlyMutation(base, p, g.start, g.end, f.path, true);
         }
       }
       if (!span && sNorm.length > 0) {
@@ -2475,11 +2931,7 @@ function resolve(input) {
               class: "survived_mutated",
               score: r33(best.score),
               source: srcPtr(best.p, best.sent.start, best.sent.end),
-              diff: diffWords(best.sent.text, s.text).map((d) => ({
-                value: d.value,
-                ...d.added ? { added: true } : {},
-                ...d.removed ? { removed: true } : {}
-              })),
+              diff: wordDiff2(best.sent.text, s.text),
               // `uncertain` is deliberately NOT set on an `unverified`
               // verdict. It is stats.uncertainSpans' own definition (a
               // below-threshold candidate awaiting adjudication) and that
@@ -2500,7 +2952,14 @@ function resolve(input) {
       }
       spans.push(span ?? { ...base, class: "no_generation_provenance" });
     }
-    return { path: f.path, mode, text: f.text, spans: mergeVerbatimRuns(spans, f.text) };
+    return {
+      path: f.path,
+      mode,
+      text: f.text,
+      // preps is built by mapping over input.generations in order, so its
+      // index is the generationIndex a source pointer carries.
+      spans: mergeVerbatimRuns(spans, f.text, preps.map((p) => p.gen.text))
+    };
   });
   const overlaps = (claims, s) => !!claims && claims.some((c) => c.start < s.end && c.end > s.start);
   const attribute = input.attributeDeletion ?? (() => ({ cause: "human_edit" }));
@@ -2509,13 +2968,14 @@ function resolve(input) {
     const spans = p.sentences.map((gs) => {
       const v = overlaps(verbatimClaims.get(gi), gs);
       const m = !v && overlaps(mutatedClaims.get(gi), gs);
-      const fate = v ? "survived_verbatim" : m ? "survived_mutated" : "generated_deleted";
+      const n2 = !v && !m && overlaps(notGeneratedClaims.get(gi), gs);
+      const fate = v ? "survived_verbatim" : m ? "survived_mutated" : n2 ? "not_generated" : "generated_deleted";
       const base = { start: gs.start, end: gs.end, text: gs.text, fate };
       if (fate !== "generated_deleted") return base;
       return { ...base, deletion: attribute(p.gen.filePath ?? "", gs.text) };
     });
     const totalChars = spans.reduce((a, s) => a + (s.end - s.start), 0);
-    const survivedChars = spans.filter((s) => s.fate !== "generated_deleted").reduce((a, s) => a + (s.end - s.start), 0);
+    const survivedChars = spans.filter((s) => s.fate === "survived_verbatim" || s.fate === "survived_mutated").reduce((a, s) => a + (s.end - s.start), 0);
     return {
       ...p.gen,
       spans,
@@ -2544,22 +3004,25 @@ function resolve(input) {
     ...input.exclusions ? { exclusions: input.exclusions } : {}
   };
 }
-function mergeVerbatimRuns(spans, text) {
+function mergeVerbatimRuns(spans, text, genTexts) {
   const out = [];
   for (const s of spans) {
     const prev = out[out.length - 1];
-    if (prev && prev.class === "survived_verbatim" && s.class === "survived_verbatim" && prev.source && s.source && prev.source.generationIndex === s.source.generationIndex && s.source.start >= prev.source.end && s.source.start - prev.source.end <= 2 && /^\s*$/.test(text.slice(prev.end, s.start))) {
+    if (prev && prev.class === "survived_verbatim" && s.class === "survived_verbatim" && prev.source && s.source && prev.source.generationIndex === s.source.generationIndex && s.source.start >= prev.source.end && s.source.start - prev.source.end <= 2 && text.slice(prev.end, s.start) === (genTexts[s.source.generationIndex] ?? "").slice(prev.source.end, s.source.start)) {
       prev.end = s.end;
       prev.text = text.slice(prev.start, prev.end);
       prev.source.end = s.source.end;
       if (!(prev.trivial && s.trivial)) delete prev.trivial;
+      if (s.descent?.basis === "unverified" && prev.descent?.basis !== "unverified") {
+        prev.descent = s.descent;
+      }
       continue;
     }
     out.push({ ...s });
   }
   return out;
 }
-var r33;
+var r33, toDiffParts, wordDiff2, charDiff;
 var init_resolve = __esm({
   "src/resolve.ts"() {
     "use strict";
@@ -2569,6 +3032,13 @@ var init_resolve = __esm({
     init_match();
     init_stats();
     r33 = (x) => Math.round(x * 1e3) / 1e3;
+    toDiffParts = (parts) => parts.map((d) => ({
+      value: d.value,
+      ...d.added ? { added: true } : {},
+      ...d.removed ? { removed: true } : {}
+    }));
+    wordDiff2 = (from, to) => toDiffParts(diffWords(from, to));
+    charDiff = (from, to) => toDiffParts(diffChars(from, to));
   }
 });
 
@@ -2715,7 +3185,7 @@ var init_deletion = __esm({
 // src/resolve-episode.ts
 function resolvablePaths(ep) {
   return ep.touchedFiles.filter(
-    (path) => TEXT_EXTS.has((0, import_node_path4.extname)(path)) && !SKIP_FILES.has(path.split("/").pop() ?? "")
+    (path) => TEXT_EXTS.has((0, import_node_path5.extname)(path)) && !SKIP_FILES.has(path.split("/").pop() ?? "")
   );
 }
 function artifactFor(projectPath, ep) {
@@ -2732,11 +3202,15 @@ function resolveEpisode(projectPath, ep, commits) {
   const imported = new Set(vendored.map((v) => v.path));
   const exclusions = vendored.map((v) => ({
     path: v.path,
-    reason: "imported_whole",
+    reason: v.relation === "declared" ? "declared_import" : "imported_whole",
     sha: v.sha,
     subject: v.subject,
     relation: v.relation,
-    chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0
+    chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0,
+    // Spread so an absent date stays absent in the written JSON rather
+    // than becoming `"date": undefined`'s omission by accident; see
+    // `Exclusion.date` in src/types.ts for why absence is a true claim.
+    ...v.date ? { date: v.date } : {}
   }));
   let turn = 0;
   for (const path of candidates) {
@@ -2788,7 +3262,11 @@ function resolveEpisode(projectPath, ep, commits) {
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
+    // `ep.finalSha` is the horizon: a commit authored after the person
+    // finished this work cannot be where its text came from, and before
+    // the bound existed one shipped record named a commit seven days in
+    // its own future as a rival (docs/ideas.md, 2026-10-14).
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph, ep.finalSha),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,
@@ -2804,11 +3282,11 @@ function resolveEpisode(projectPath, ep, commits) {
     artifact: artifactFor(projectPath, ep).artifact
   });
 }
-var import_node_path4, TEXT_EXTS, SKIP_FILES, MAX_BLOB_CHARS2;
+var import_node_path5, TEXT_EXTS, SKIP_FILES, MAX_BLOB_CHARS2;
 var init_resolve_episode = __esm({
   "src/resolve-episode.ts"() {
     "use strict";
-    import_node_path4 = require("node:path");
+    import_node_path5 = require("node:path");
     init_pairfinder();
     init_resolve();
     init_deploy();
@@ -3112,9 +3590,9 @@ __export(consent_cli_exports, {
   runForgetCommand: () => runForgetCommand
 });
 function loadRecords(projectRoot) {
-  const dir = (0, import_node_path5.join)(ursaDir(projectRoot), "records");
-  if (!(0, import_node_fs4.existsSync)(dir)) return [];
-  return (0, import_node_fs4.readdirSync)(dir).filter((n2) => n2.endsWith(".json")).sort().map((n2) => JSON.parse((0, import_node_fs4.readFileSync)((0, import_node_path5.join)(dir, n2), "utf8")));
+  const dir = (0, import_node_path6.join)(ursaDir(projectRoot), "records");
+  if (!(0, import_node_fs5.existsSync)(dir)) return [];
+  return (0, import_node_fs5.readdirSync)(dir).filter((n2) => n2.endsWith(".json")).sort().map((n2) => JSON.parse((0, import_node_fs5.readFileSync)((0, import_node_path6.join)(dir, n2), "utf8")));
 }
 function flag(argv, name) {
   const i = argv.indexOf(`--${name}`);
@@ -3143,8 +3621,8 @@ function describe(consent, projectRoot, io) {
   const records = loadRecords(projectRoot);
   io.out(`  ${records.length} record${records.length === 1 ? "" : "s"} on disk, all of them local.`);
   const tPath = tuningPathFor(projectRoot);
-  if ((0, import_node_fs4.existsSync)(tPath)) {
-    const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
+  if ((0, import_node_fs5.existsSync)(tPath)) {
+    const tuning = JSON.parse((0, import_node_fs5.readFileSync)(tPath, "utf8"));
     const active = tuning.axioms.filter((a) => a.status !== "revoked");
     io.out(`  ${tuning.axioms.length} inferences, ${active.length} active and ${tuning.axioms.length - active.length} revoked.`);
     for (const a of active) {
@@ -3169,7 +3647,7 @@ async function runConsentCommand(argv, io = stdio) {
     io.err("Usage: ursa consent show|grant|revoke|disclose|revoke-axiom <project> [options]");
     return 2;
   }
-  const projectRoot = (0, import_node_path5.resolve)(project);
+  const projectRoot = (0, import_node_path6.resolve)(project);
   if (sub === "show") {
     describe(loadConsent(projectRoot), projectRoot, io);
     return 0;
@@ -3219,7 +3697,7 @@ async function runConsentCommand(argv, io = stdio) {
     const out = flag(rest, "out");
     const json = JSON.stringify(batch, null, 2) + "\n";
     if (out) {
-      (0, import_node_fs4.writeFileSync)(out, json);
+      (0, import_node_fs5.writeFileSync)(out, json);
       io.out(`${batch.rows.length} aggregate row${batch.rows.length === 1 ? "" : "s"} written to ${out}. The audit passed: no key, no string and no fragment of your text is in that file.`);
     } else {
       io.out(json);
@@ -3236,7 +3714,7 @@ async function runForgetCommand(argv, io = stdio) {
     io.err("Usage: ursa forget <project> --record <recordId>");
     return 2;
   }
-  const projectRoot = (0, import_node_path5.resolve)(project);
+  const projectRoot = (0, import_node_path6.resolve)(project);
   const t = forget(projectRoot, recordId);
   if (!t.removed.recordFile && t.removed.axiomsDeleted.length === 0 && t.removed.evidenceStripped === 0) {
     io.out(`No record ${recordId} was on disk and nothing was derived from it. It is tombstoned anyway, so re-running \`ursa run\` will not create it.`);
@@ -3254,12 +3732,12 @@ async function runForgetCommand(argv, io = stdio) {
   io.out("  Its id is tombstoned, so `ursa run` will not rebuild it from the git history it came from.");
   return 0;
 }
-var import_node_fs4, import_node_path5, stdio;
+var import_node_fs5, import_node_path6, stdio;
 var init_consent_cli = __esm({
   "src/consent.cli.ts"() {
     "use strict";
-    import_node_fs4 = require("node:fs");
-    import_node_path5 = require("node:path");
+    import_node_fs5 = require("node:fs");
+    import_node_path6 = require("node:path");
     init_store();
     init_consent();
     init_disclosure();
@@ -3358,11 +3836,11 @@ function distill(record, tuning, model, runner = claudeRunner) {
   const prompt = buildDistillPrompt(record, tuning);
   return parseDistillOutput(runner(prompt, model));
 }
-var import_node_child_process4, VALID_KINDS, claudeRunner;
+var import_node_child_process5, VALID_KINDS, claudeRunner;
 var init_distill = __esm({
   "src/tuning/distill.ts"() {
     "use strict";
-    import_node_child_process4 = require("node:child_process");
+    import_node_child_process5 = require("node:child_process");
     VALID_KINDS = /* @__PURE__ */ new Set([
       "correction-loop",
       "feedback-translation",
@@ -3372,7 +3850,7 @@ var init_distill = __esm({
       "episode"
     ]);
     claudeRunner = (prompt, model) => {
-      const out = (0, import_node_child_process4.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
+      const out = (0, import_node_child_process5.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
         input: prompt,
         encoding: "utf8",
         maxBuffer: 16 * 1024 * 1024,
@@ -3513,7 +3991,7 @@ function mergeWindow(payload, opts = {}) {
 }
 function parentCountOf(repoPath, sha) {
   try {
-    const out = (0, import_node_child_process5.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
+    const out = (0, import_node_child_process6.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
       encoding: "utf8"
     }).trim();
     return out.split(/\s+/).filter(Boolean).length - 1;
@@ -3522,15 +4000,15 @@ function parentCountOf(repoPath, sha) {
   }
 }
 function mergeWindowFromEvent(eventPath, repoPath) {
-  const payload = JSON.parse((0, import_node_fs5.readFileSync)(eventPath, "utf8"));
+  const payload = JSON.parse((0, import_node_fs6.readFileSync)(eventPath, "utf8"));
   return mergeWindow(payload, { parentCountOf: (sha) => parentCountOf(repoPath, sha) });
 }
-var import_node_fs5, import_node_child_process5, NotAMergedPullRequest;
+var import_node_fs6, import_node_child_process6, NotAMergedPullRequest;
 var init_window = __esm({
   "src/ci/window.ts"() {
     "use strict";
-    import_node_fs5 = require("node:fs");
-    import_node_child_process5 = require("node:child_process");
+    import_node_fs6 = require("node:fs");
+    import_node_child_process6 = require("node:child_process");
     NotAMergedPullRequest = class extends Error {
     };
   }
@@ -3539,7 +4017,7 @@ var init_window = __esm({
 // src/ci/distill-mode.ts
 function claudeOnPath() {
   try {
-    (0, import_node_child_process6.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
+    (0, import_node_child_process7.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
     return true;
   } catch {
     return false;
@@ -3566,11 +4044,11 @@ function selectDistillMode(env, opts = {}) {
   }
   return { kind: "model", model, reason: `${credential} is set and the claude CLI is on PATH` };
 }
-var import_node_child_process6, CREDENTIAL_VARS;
+var import_node_child_process7, CREDENTIAL_VARS;
 var init_distill_mode = __esm({
   "src/ci/distill-mode.ts"() {
     "use strict";
-    import_node_child_process6 = require("node:child_process");
+    import_node_child_process7 = require("node:child_process");
     CREDENTIAL_VARS = ["ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN"];
   }
 });
@@ -3755,6 +4233,10 @@ function renderRunComment(f, ctx) {
   lines.push(
     bad === 0 ? `- Self-check: every record above satisfies all ${BOUND_COUNT} of the bounds a record must satisfy, so the figures in the table are at least internally consistent.` : `- Self-check: **${bad} bound${bad === 1 ? "" : "s"} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
   );
+  if (ctx.resolvedBy !== void 0) {
+    lines.push(`- Resolver that produced these records: ${formatResolverIdentity(ctx.resolvedBy)}. Every record above carries it as \`task.resolvedBy\`, so a figure in this table can be traced to the code that computed it.`);
+  }
+  lines.push(`- Bound set those records were checked against: \`${currentGateIdentity().boundsDigest}\`, over ${BOUND_COUNT} bounds. Every record above carries it as \`task.gatedBy\`, so two runs can be compared on whether the same rules applied. It names the rules, not a verdict: the self-check line above is what says they held.`);
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`);
   lines.push("");
   lines.push("</details>");
@@ -3769,6 +4251,7 @@ var init_comment = __esm({
   "src/ci/comment.ts"() {
     "use strict";
     init_invariants();
+    init_resolver_identity();
     RUN_COMMENT_MARKER = "<!-- ursa-major:run-comment:v1 -->";
   }
 });
@@ -3817,7 +4300,7 @@ async function runCi(opts) {
   } else {
     log("ursa ci: no declared acceptance to read; silence stays undeclared");
   }
-  const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
+  const declaration2 = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
   const pairs = findCommitPairs(opts.projectPath, {
     range: window.range,
     agentIdentities: opts.agentIdentities
@@ -3842,7 +4325,7 @@ async function runCi(opts) {
       dropped.belowMinChars++;
       continue;
     }
-    const signals = deriveSignals(record, declaration);
+    const signals = deriveSignals(record, declaration2);
     signals.notes = [...signals.notes ?? [], `CI launch: ${window.note}`];
     record.signals = signals;
     recordPaths.push(saveRecord(opts.projectPath, record));
@@ -3862,11 +4345,17 @@ async function runCi(opts) {
     repo: opts.repo,
     range: window.range,
     windowNote: window.note,
-    declarationBasis: declaration.basis,
-    recordsPath: (0, import_node_path6.join)(ursaDir(opts.projectPath), "records"),
+    declarationBasis: declaration2.basis,
+    recordsPath: (0, import_node_path7.join)(ursaDir(opts.projectPath), "records"),
     dropped,
     runUrl: opts.runUrl ?? null,
-    invariantViolations: gate.violations.length
+    invariantViolations: gate.violations.length,
+    // Read off the records rather than re-asked of the process, so the
+    // comment cannot name a resolver different from the one the records
+    // name. `?? null` covers the run that resolved nothing: there is then
+    // no record to read an identity from, and `formatResolverIdentity`
+    // says so in the one sentence it has for that case.
+    resolvedBy: records[0]?.task.resolvedBy ?? null
   });
   let commentUrl = null;
   if (opts.post === false) {
@@ -3886,7 +4375,7 @@ async function runCi(opts) {
     comment,
     commentUrl,
     priorAcceptance,
-    declaration,
+    declaration: declaration2,
     mode,
     recordPaths,
     invariantViolations: gate.violations
@@ -3907,7 +4396,7 @@ function renderStepOutputs(fields, commentUrl) {
   ].join("\n");
 }
 function writeStepOutputs(path, fields, commentUrl) {
-  (0, import_node_fs6.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
+  (0, import_node_fs7.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
 }
 async function readReactions(api, prNumber, log) {
   try {
@@ -3926,7 +4415,7 @@ async function readReactions(api, prNumber, log) {
 }
 function appendAcceptance(projectPath, prior) {
   const dir = ursaDir(projectPath);
-  (0, import_node_fs6.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs7.mkdirSync)(dir, { recursive: true });
   const entry = {
     schemaVersion: "0.1.0",
     commentUrl: prior.comment.commentUrl,
@@ -3938,7 +4427,7 @@ function appendAcceptance(projectPath, prior) {
     mark: prior.mark,
     readAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  (0, import_node_fs6.appendFileSync)((0, import_node_path6.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
+  (0, import_node_fs7.appendFileSync)((0, import_node_path7.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
 }
 function distillAll(projectPath, records, mode, log) {
   const base = {
@@ -3952,8 +4441,8 @@ function distillAll(projectPath, records, mode, log) {
     return base;
   }
   if (records.length === 0) return base;
-  const tuningPath = (0, import_node_path6.join)(ursaDir(projectPath), "tuning.json");
-  let tuning = (0, import_node_fs6.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs6.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
+  const tuningPath = (0, import_node_path7.join)(ursaDir(projectPath), "tuning.json");
+  let tuning = (0, import_node_fs7.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs7.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
   for (const record of records) {
     if (tuning.sources.some((s) => s.recordId === record.task.id)) continue;
     try {
@@ -3966,15 +4455,15 @@ function distillAll(projectPath, records, mode, log) {
       log(`ursa ci: distill failed on ${record.task.id} (${err.message}); continuing`);
     }
   }
-  (0, import_node_fs6.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
+  (0, import_node_fs7.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
   return base;
 }
-var import_node_fs6, import_node_path6, NO_PRIOR;
+var import_node_fs7, import_node_path7, NO_PRIOR;
 var init_run = __esm({
   "src/ci/run.ts"() {
     "use strict";
-    import_node_fs6 = require("node:fs");
-    import_node_path6 = require("node:path");
+    import_node_fs7 = require("node:fs");
+    import_node_path7 = require("node:path");
     init_pairfinder();
     init_episodes();
     init_signals();
@@ -4012,7 +4501,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path7 = require("node:path");
+var import_node_path8 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -4206,6 +4695,7 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
 // src/bin/ursa.ts
 init_episodes();
 init_store();
+init_resolver_identity();
 init_launch();
 init_resolve_episode();
 init_resolve_episode();
@@ -4257,7 +4747,7 @@ function renderRunSummary(records, episodes, diagnostics) {
       `${vendored.length} file${vendored.length === 1 ? "" : "s"} came in whole from elsewhere and ${vendored.length === 1 ? "was" : "were"} not read as your work, starting with ${one.path}.`
     );
     lines.push(
-      one.relation === "sibling" ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.` : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`
+      one.relation === "declared" ? `Commit ${one.sha} ("${one.subject}") declares it an import in its own ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.` : one.relation === "sibling" ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.` : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`
     );
     lines.push(
       `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`
@@ -4415,7 +4905,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path7.resolve)(project),
+      projectPath: (0, import_node_path8.resolve)(project),
       eventPath,
       repo,
       token,
@@ -4439,7 +4929,7 @@ async function main(argv) {
     }
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path7.resolve)(project),
+      projectPath: (0, import_node_path8.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -4457,14 +4947,14 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path7.resolve)(project);
+  const projectPath = (0, import_node_path8.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
-  let declaration = UNDECLARED;
+  let declaration2 = UNDECLARED;
   if (values.declare === "satisfied") {
-    declaration = { accepted: true, basis: "owner-declared satisfied at launch (--declare satisfied)" };
+    declaration2 = { accepted: true, basis: "owner-declared satisfied at launch (--declare satisfied)" };
   } else if (values.declare === "unsatisfied") {
-    declaration = { accepted: false, basis: "owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed" };
+    declaration2 = { accepted: false, basis: "owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed" };
   }
   const bound = (flag2) => {
     const raw = values[flag2];
@@ -4496,7 +4986,7 @@ async function main(argv) {
     if (!record) continue;
     if (!clearsSizeFloor(record, minChars)) continue;
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt);
-    record.signals = deriveSignals(record, declaration);
+    record.signals = deriveSignals(record, declaration2);
     saveRecord(projectPath, record);
     records.push(record);
   }
@@ -4512,6 +5002,13 @@ ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`
   }
   console.log(`
 Records: ${projectPath}/.ursa/records/`);
+  if (records.length > 0) {
+    console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`);
+    const gate2 = records[0].task.gatedBy;
+    if (gate2) {
+      console.log(`Checked against: ${gate2.codes.length} bounds, set \`${gate2.boundsDigest}\``);
+    }
+  }
   const gate = gateRecords(records);
   if (gate.violations.length > 0) {
     console.error(`

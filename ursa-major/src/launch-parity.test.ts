@@ -80,6 +80,40 @@ const ALLOWED_TO_DIFFER = ['signals', 'durability', 'lifespan'] as const
 function comparable(record: OutcomeRecord): Record<string, unknown> {
   const out: Record<string, unknown> = {
     'task.id': record.task.id,
+    // Which resolver made the claims. In this test both launches run
+    // in-process from one working tree, so the two records must name the
+    // same resolver; a divergence here means one launch stamped a record
+    // the other did not, which is how the field would quietly become
+    // optional in practice. In production the two legitimately differ,
+    // because `ursa ci` runs the committed `dist/ursa.cjs` on a runner
+    // that cloned nothing, and that difference is the field's entire
+    // point rather than drift — see `ResolverIdentity` in src/types.ts.
+    'task.resolvedBy': record.task.resolvedBy,
+    // Which rules those claims were checked against. Unlike `resolvedBy`
+    // above, this one must agree between the two launches in PRODUCTION as
+    // well as here: the resolver's identity legitimately differs, because
+    // `ursa ci` runs a committed bundle on a runner that cloned nothing,
+    // while the bound set is one object literal that both artifacts compile
+    // from, so the two can only disagree if `dist/ursa.cjs` is stale
+    // against `src/invariants.ts`.
+    //
+    // This line does not catch that staleness and is not claimed to. Both
+    // launches here run in-process from `src/` (see `runCi` above and the
+    // note at the head of the second describe block), so this file never
+    // loads the bundle. What this line catches is the thing the other
+    // parity fields catch: one launch stamping a field the other does
+    // not, which is how a record field quietly becomes optional in
+    // practice.
+    //
+    // The staleness itself is caught, as of 2026-10-16, by
+    // `src/bundle-exec.test.ts`, which spawns the committed bundle as a
+    // child process out of a directory with no git work tree in it,
+    // reads the record it writes off disk, and compares that record's
+    // `task.gatedBy` against `currentGateIdentity()` computed in-process
+    // from `src/invariants.ts`. That file also folds `npm run
+    // bundle:check` into `npm test` by spawning it, which it was not
+    // part of when this paragraph was first written.
+    'task.gatedBy': record.task.gatedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
     'stats.generated': record.stats.generated,
@@ -281,6 +315,22 @@ describe('one repository resolved through both launches produces the same record
       // field that drifted rather than stopping at the first.
       expect(a).toEqual(b)
     }
+  })
+
+  it('names a resolver on both sides, so the comparison above is not undefined vs undefined', async () => {
+    // `comparable()` includes `task.resolvedBy`, and a projection that
+    // compares a field neither record carries passes without testing
+    // anything. This is the same vacuity check the violation fixtures
+    // make for `signals`, `descent` and `exclusions` on their base
+    // record (src/invariants.violations.test.ts).
+    const repo = editedFixture()
+    const { ci, local } = await bothLaunches(repo, 10)
+    const [ciRec] = [...ci.values()]
+    const [localRec] = [...local.values()]
+    // Both launches run in-process here, out of this repository's own
+    // work tree, so both resolve on the git basis.
+    expect(ciRec.task.resolvedBy).toMatchObject({ basis: 'git_commit' })
+    expect(localRec.task.resolvedBy).toEqual(ciRec.task.resolvedBy)
   })
 
   it('agrees that the edit was an edit: survived_mutated on both sides, not just a matching total', async () => {

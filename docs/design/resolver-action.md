@@ -689,6 +689,29 @@ happened.
    and read line by line, which is not the same as a green run. First
    real run requires a workflow file in `.github/workflows/`, which this
    seat cannot write (see `docs/agents/pending-workflow-changes.md`).
+
+   **Narrowed on 2026-10-16, and only narrowed.** That by-hand bundle run
+   is now a test. `ursa-major/src/bundle-exec.test.ts` spawns the
+   committed `dist/ursa.cjs` with `node`, out of a temporary directory
+   holding nothing but `dist/ursa.cjs` and with no git work tree above
+   it, which is the shape `$GITHUB_ACTION_PATH` has on a customer's
+   runner because GitHub downloads an action as a tarball. It asserts the
+   bundle resolves the three-commit fixture, writes one record, stamps
+   that record `{ basis: 'bundle_digest', digest: <sha256 prefix> }`
+   rather than a git commit, and carries a `task.gatedBy` deep-equal to
+   `currentGateIdentity()` computed in the test process from
+   `ursa-major/src/invariants.ts`.
+
+   What is still NOT done, so this item stays open rather than closing:
+   the test supplies the merge window as a hand-written `event.json` and
+   a `--repo` flag, so `action.yml` itself — the `inputs` block, the
+   shallow-clone deepening step, the `while IFS= read -r identity` loop
+   that turns the `agent-identity` block scalar into repeated flags, and
+   the `$GITHUB_OUTPUT` writes the eight `outputs` read — is still only
+   read and never executed. A green run of that YAML needs a workflow
+   file this seat cannot write. The gap this closed is "the bundle is a
+   program that runs today and applies today's rules"; the gap that
+   remains is "the composite Action's steps wire it up correctly".
 2. **The comment's stated numbers have never been compared against a
    second merge.** The surface's value is comparability across merges,
    and one run cannot demonstrate it.

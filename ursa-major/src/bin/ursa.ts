@@ -38,12 +38,13 @@ import { blobAt, findCommitPairsWithDiagnostics, listCommits, type CommitInfo, t
 import { detectDeploy, type DeployDetection } from '../deploy'
 import { gitDeletionAttributor } from '../deletion'
 import { gitDescentCorroborator } from '../corroborate'
-import { vendoredPaths } from '../vendored'
+import { IMPORT_TRAILER, vendoredPaths } from '../vendored'
 import { deriveSignals, UNDECLARED, type Declaration } from '../signals'
 import { annotateDurability } from '../lifespan'
 import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
+import { formatResolverIdentity } from '../resolver-identity'
 import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
@@ -132,10 +133,18 @@ export function renderRunSummary(
     lines.push(
       `${vendored.length} file${vendored.length === 1 ? '' : 's'} came in whole from elsewhere and ${vendored.length === 1 ? 'was' : 'were'} not read as your work, starting with ${one.path}.`,
     )
+    // Three branches, not two. A `declared` import was never compared
+    // byte for byte against anything, because its source is in another
+    // repository, so the two sentences below would both be false claims
+    // about how the run knows. Saying "byte-identical" about a
+    // declaration is the same defect as the record flattening
+    // `declared_import` into `imported_whole`.
     lines.push(
-      one.relation === 'sibling'
-        ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
-        : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
+      one.relation === 'declared'
+        ? `Commit ${one.sha} ("${one.subject}") declares it an import in its own ${IMPORT_TRAILER} trailer, so it was brought in from another repository rather than written here.`
+        : one.relation === 'sibling'
+          ? `It is byte-identical to its copy in commit ${one.sha} ("${one.subject}"), which is on a branch this work never contained, so it was brought in rather than written here.`
+          : `It is byte-identical to the version already in commit ${one.sha} ("${one.subject}"), so this work left the file exactly as it found it.`,
     )
     lines.push(
       `A file that arrives complete from another commit carries no correction of yours, so its spans were left unclassified rather than classified wrongly.`,
@@ -447,6 +456,25 @@ export async function main(argv: string[]): Promise<number> {
     }
   }
   console.log(`\nRecords: ${projectPath}/.ursa/records/`)
+  // Which build of the resolver made the claims above. Printed on the
+  // local launch too, not only in the CI comment, because the figures a
+  // user is reading here moved by a factor of eight between two commits
+  // of this resolver on 2026-10-12 (docs/ideas.md) and the terminal gave
+  // no sign that anything underneath them had changed. Suppressed when
+  // nothing was written, since there is then no claim to attribute.
+  if (records.length > 0) {
+    console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`)
+    // And which rules those claims were checked against, read off the
+    // record rather than from `currentGateIdentity()` directly. The
+    // difference matters on exactly one path: `saveRecord` preserves an
+    // existing `task.gatedBy` and never rewrites it, so a re-saved record
+    // carries the bound set its classifications were made under and this
+    // line has to say that one rather than today's.
+    const gate = records[0].task.gatedBy
+    if (gate) {
+      console.log(`Checked against: ${gate.codes.length} bounds, set \`${gate.boundsDigest}\``)
+    }
+  }
 
   // The gate runs on every run, after the records are on disk, and its
   // failure is the exit code. Records are saved first on purpose: a record

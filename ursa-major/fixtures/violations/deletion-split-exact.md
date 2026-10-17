@@ -15,8 +15,8 @@ The three-way split of deleted characters no longer adds up to the characters de
 ### `DELETION_SPLIT_EXACT`
 
 - Where: `violation-fixture-base stats.generated`
-- Observed: human 66 + merge 0 + unknown 0 = 66, deletedChars 61, totalChars - survivedChars = 61
-- Bound: the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars
+- Observed: human 66 + merge 0 + unknown 0 = 66, deletedChars 61, totalChars - survivedChars - notGeneratedChars(0) = 61
+- Bound: the deletion split is exact and non-negative: humanDeletedChars + mergeDeletedChars + unknownDeletedChars = deletedChars = totalChars - survivedChars - notGeneratedChars. The last term is the characters of generation segments whose fate is `not_generated` — text the file already held at the generation's parent, which the model did not produce and the person therefore did not discard. It is inside totalChars because totalChars is the sum of segment extents and the fates must add up to it, and it is outside the deletion split because nothing destroyed it.
 
 ## Provenance
 

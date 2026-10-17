@@ -11,7 +11,10 @@ export default function NotFound() {
       <div className="relative flex min-h-svh flex-col justify-between">
         <SiteHeader href="/" />
 
-        <div className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20">
+        {/* a <main>, not a <div>: this page had no main landmark at all, so
+            its headline and its only control sat outside every landmark on the
+            page. Same element box, same classes, same flex child. */}
+        <main className="relative z-10 max-w-4xl px-[clamp(2rem,8vw,6rem)] pb-20">
           <div className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> 404
           </div>
@@ -20,16 +23,16 @@ export default function NotFound() {
               wrapping returns 185/143: the balancer makes its one multi-line
               case both wider and more lopsided. The hero keeps text-balance,
               where it earns it. */}
-          <p className="mt-9 text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
+          <h1 className="mt-9 text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
             No star at these coordinates.
-          </p>
+          </h1>
           <Link
             href="/"
-            className="quiet-link mt-10 inline-block border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)]"
+            className="quiet-link tracked-label mt-10 inline-block border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)]"
           >
             Back to Ursa Minor
           </Link>
-        </div>
+        </main>
 
         <SiteFooter className="relative z-10" />
       </div>

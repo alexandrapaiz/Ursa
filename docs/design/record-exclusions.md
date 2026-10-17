@@ -133,6 +133,9 @@ can also serve pasted conversations with no repository behind them.
 In `src/types.ts`:
 
 ```ts
+// A second reason, 'declared_import', and a third relation, 'declared',
+// were added 2026-10-12 for imports from another repository, which no
+// blob comparison can find. See docs/design/vendored-paths.md §9.
 export type ExclusionReason = 'imported_whole'
 
 export interface Exclusion {
@@ -605,7 +608,12 @@ why the deletion run is reported rather than the pass count alone.
   unreadable blob at either commit, a blob over `MAX_BLOB_CHARS`
   (300,000), and a path with no generation side. Each is a refusal with
   evidence behind it and each would be a reason code. Filed as a ledger
-  entry today.
+  entry today. (**Superseded in part, 2026-10-12.** A second reason code
+  exists: `declared_import`, for a path a commit declares an import in
+  its own trailer, which is evidence of a different kind rather than one
+  of the three listed here. The three above are still unaddressed. See
+  `docs/design/vendored-paths.md` §9.4 for why a second reason rather
+  than a second relation under the first reason.)
 - **The arithmetic is not yet an invariant across the whole run.**
   `consideredChars` closes per record. "The characters this run read
   equals the characters it classified plus the characters it refused,
@@ -615,3 +623,326 @@ why the deletion run is reported rather than the pass count alone.
   is 112,346 and `excludedChars` is 30,287, which is 27.0% of what the
   run read and appears in nothing the user sees. Filed as a ledger
   entry today.
+
+---
+
+## 10. The exclusion gets a clock (2026-10-15)
+
+Added after the span-level fix of the same morning. §2's `vendoredPaths`
+node and §3's `VendoredPath` interface are amended here rather than
+rewritten in place, so the diff a reviewer reads is this section.
+
+### 10.1 The defect, and why nothing could see it
+
+`vendoredPaths` in `ursa-major/src/vendored.ts` asks one question per
+path: is there a commit, outside the generation's line of descent, whose
+blob object id at this path equals the finished blob's object id. Byte
+identity is **symmetric**. It cannot distinguish the person copying a
+file FROM another branch, which is the case the exclusion exists for,
+from somebody later copying the person's own finished file TO another
+branch, which is the opposite case and produces the same equal pair of
+object ids.
+
+Order in time is the only thing that separates them, and `vendoredPaths`
+reads no time at all. The horizon argument added to the span-level rival
+search on 2026-10-14 (`authoredAfterHorizon` in
+`ursa-major/src/corroborate.ts`) went to that search only, and
+`Exclusion` in `ursa-major/src/types.ts` carried `path`, `reason`, `sha`,
+`subject`, `relation` and `chars` with no date, so the record did not
+carry the fact either. `EXCLUSION_NOT_CLASSIFIED` asked whether the
+exclusion named a commit and a positive character count, and never asked
+when.
+
+**Why this matters more than the span-level version of the same defect,
+as a number rather than as an adjective.** A wrong span moves one span.
+An exclusion removes a whole path from `files[]`, from `stats.perFile`,
+from `stats.finalChars` and therefore from every percentage in the
+record. Measured on this repository on 2026-10-11 and recorded in
+`docs/design/vendored-paths.md` §1: one excluded file accounted for
+60,616 characters, 84.7% of that run's headline survival figure. A
+refusal that runs backwards drops a file the person did write, and
+credits the record's shrinkage to an import that never happened.
+
+### 10.2 System diagram, amended node by node
+
+Three edges change. Everything else in §2 stands.
+
+```
+  git object database                     (the clone under <projectPath>/.git)
+        │
+        │  PathCommit[] — { sha: string, date: string, subject: string },
+        │                 one row per commit touching this path, newest first,
+        │                 read by `git log --all --pretty=format:%H%x09%aI%x09%s -- <path>`
+        ▼
+  commitsTouchingPath()  in src/pairfinder.ts
+        │
+        │  PathCommit[]        ← EDGE 1 CHANGED: `date` added 2026-10-15 (morning),
+        │                        for the span-level search; this section is the
+        │                        second consumer of the same field
+        ▼
+  vendoredPaths()  in src/vendored.ts
+        │                      ──── git log -1 --pretty=format:%aI%x00%s%x00%(trailers:key=Ursa-Imported-Path,valueonly,separator=%x09) <sha> ───▶ git object database
+        │                      ◀─── Declaration — { sha, subject, date, paths: Set<string> } ────
+        │                             EDGE 2 CHANGED: the format string gained
+        │                             `%aI%x00` at the front, so a `declared`
+        │                             exclusion can carry a date too
+        │
+        │  VendoredPath[] — { path, sha, subject, relation, date?: string }
+        │                   EDGE 3 CHANGED: `date` added
+        ▼
+  resolveEpisode()  in src/resolve-episode.ts
+        │
+        │  Exclusion[] — { path, reason, sha, subject, relation, chars, date?: string }
+        ▼
+  resolve()  in src/resolve.ts  ──▶  OutcomeRecord.exclusions
+        │
+        │  OutcomeRecord (JSON, .ursa/records/<id>.json)
+        ▼
+  checkRecord()  in src/invariants.ts
+        │
+        │  Violation[] — code 'EXCLUSION_NOT_CLASSIFIED', third clause
+        ▼
+  non-zero exit from `ursa run`, `ursa ci` and src/invariants.cli.ts
+```
+
+**Why the `%aI` goes in front of `%s` in both git format strings.** In
+`commitsTouchingPath` the fields are tab-separated and the parser keeps
+the subject as the whole remainder of the line, so a subject containing a
+tab would eat a trailing date field. In `declaration` the fields are
+NUL-separated, and NUL is used precisely because the trailer list is
+already tab-separated and a subject may contain a tab; three NUL-separated
+fields is the only parse that survives both.
+
+### 10.3 Interfaces, as the signatures a caller writes against
+
+```ts
+// ursa-major/src/vendored.ts
+export interface VendoredPath {
+  path: string
+  sha: string
+  subject: string
+  relation: 'pre_existing' | 'sibling' | 'declared'
+  /**
+   * Author date of `sha` (`%aI`). Optional for one reason: `declaration()`
+   * returns an empty date when the clone cannot answer, and an empty
+   * string in the record is a date nothing can order. Absent says "no
+   * time was established", which is a true claim; `''` would say "here is
+   * the time" and be unreadable.
+   */
+  date?: string
+}
+
+// ursa-major/src/types.ts
+export interface Exclusion {
+  path: string
+  reason: ExclusionReason        // 'imported_whole' | 'declared_import'
+  sha: string
+  subject: string
+  relation: 'pre_existing' | 'sibling' | 'declared'
+  chars: number
+  date?: string
+}
+```
+
+No function signature changed. `vendoredPaths(projectPath, ep, paths,
+commits): VendoredPath[]` and `checkRecord(record: OutcomeRecord):
+Violation[]` are what they were; the two fields above are the whole of
+the type surface this section adds.
+
+### 10.4 The bound, stated
+
+In `BOUNDS.EXCLUSION_NOT_CLASSIFIED` in `ursa-major/src/invariants.ts`,
+as the third clause:
+
+> an exclusion that states its commit's author date states one that can
+> be ordered, with a `sibling` exclusion's date no later than the
+> record's own `task.generatedAt`.
+
+Three decisions inside that sentence, each with the reason it was taken.
+
+| decision | what it means | why |
+|---|---|---|
+| only `sibling` is **ordered** | a `sibling` exclusion's date is compared against `task.generatedAt` and refused when later | `sibling` is the only relation whose claim rests on a clock. It asserts the content came off a branch the commit graph does not place inside the work, so "that branch's commit existed while the person worked" is part of the claim rather than a fact about it |
+| `pre_existing` and `declared` are **exempt from the ordering** | their dates are reported and never compared | a `pre_existing` match is an ancestor of the generation, so the graph vouches for it whatever a rebase did to its author date. A `declared` import names a commit in **another repository**, whose clock has no defined relation to this one's, so its date is not evidence about availability here. Ordering either would make this a bound a correct record can fail, which rule 2 at the top of `src/invariants.ts` forbids |
+| an **unreadable** date fails on every relation, exempt or not | `Date.parse` returning `NaN` is a violation even under `pre_existing` and `declared` | the field prints as provenance on every surface that shows it, and omitting it was always allowed. Being excused from being ordered is not being excused from being readable. This is the same shape as `RESOLVER_IDENTIFIED` one field over: a placeholder that passes for a pointer |
+| an **absent** date is legal and unchecked | no violation, no measurement | every record this project wrote before 2026-10-15 has exclusions with no date, and `vendoredPaths` omits the field rather than writing `''` when a clone cannot answer. Absence is a true claim: it says no time was established |
+
+### 10.5 On-disk layout, with a real payload
+
+Path: `ursa-major/fixtures/violations/exclusion-not-classified-after-final.json`.
+Format: one `OutcomeRecord` as JSON, written by
+`ursa-major/tools/make-violation-fixtures.ts`. The whole of the
+`exclusions` array, verbatim, with the `task` block it is ordered
+against:
+
+```json
+  "task": {
+    "id": "violation-fixture-base",
+    "finished": true,
+    "generatedAt": "2026-10-10T00:00:00.000Z",
+    "resolvedBy": { "basis": "git_commit", "commit": "19455a3", "dirty": false }
+  },
+  "exclusions": [
+    {
+      "path": "docs/standards/pm.md",
+      "reason": "imported_whole",
+      "sha": "96ed4e5",
+      "subject": "standards: sync pm.md from HQ",
+      "relation": "sibling",
+      "chars": 199,
+      "date": "2026-10-09T19:00:00-06:00"
+    }
+  ]
+```
+
+Nothing here is redacted and nothing needed to be. The path is a real
+path in this repository, `96ed4e5` is an invented short form that names
+no commit, `19455a3` is a public commit of this repository (the one that
+added `task.resolvedBy`), and the two timestamps are synthetic. The
+redaction rider in `prompts/engineer-agent.md` asks for values that are
+real and runnable rather than placeholders, and it forbids a home
+directory, a machine username and a private session identifier. The
+directory's own check, which returns nothing:
+
+```bash
+cd ursa-major
+grep -ohE '/(Users|home)/[^"]*|[a-f0-9]{32,}' fixtures/violations/* | sort -u
+```
+
+**Why the date is `-06:00` and the hour is 19.** `2026-10-09T19:00:00-06:00`
+is `2026-10-10T01:00:00Z`, one hour **after** the record's
+`generatedAt` of `2026-10-10T00:00:00.000Z`, while as text it sorts
+**before** it, because both strings begin `2026-10-09`. A gate comparing
+date strings instead of instants passes this file. The base record's
+legal form of the same field is `2026-10-09T17:00:00-06:00`, which is
+`2026-10-09T23:00:00Z`, an hour before the horizon. The pair is the
+proof that the comparison is on instants.
+
+### 10.6 Exact commands, and the numbers they produced
+
+```bash
+cd ursa-major
+npm ci
+npm run typecheck                                   # tsc --noEmit, clean
+npx vitest run                                      # 636 passed | 4 skipped (640)
+npm run fixtures:violations                         # regenerate the directory
+npm run fixtures:violations:check                   # 45 files match what this script would write.
+npx tsx src/invariants.cli.ts fixtures/violations   # 23 records checked, 27 violations. exit 1
+npm run bundle && npm run bundle:check              # dist/ursa.cjs current, 196,261 bytes
+```
+
+The live-or-latent measurement the ledger entry asked for, run on a
+clone of this repository rather than on fixtures:
+
+```bash
+git clone -q /path/to/Ursa /tmp/ursa-clone
+cd ursa-major
+npx tsx src/bin/ursa.ts run /tmp/ursa-clone
+# -> 7 work units found, 7 resolved into records.
+
+# and again with the pairing bounds widened, to reach more episodes:
+git clone -q /path/to/Ursa /tmp/ursa-clone3
+npx tsx src/bin/ursa.ts run /tmp/ursa-clone3 \
+  --max-pair-distance 100 --max-pair-age-hours 720 --max-interposed-generations 50
+# -> 22 records written to /tmp/ursa-clone3/.ursa/records/
+#    (counted with: ls /tmp/ursa-clone3/.ursa/records/*.json | wc -l)
+```
+
+Then, over the records each run wrote:
+
+```bash
+python3 -I - <<'PY'
+import json, glob
+rows = []
+for d in sorted(glob.glob('/tmp/ursa-clone3/.ursa/records/*.json')):
+    r = json.load(open(d))
+    rows += [(r['task']['generatedAt'], x) for x in (r.get('exclusions') or [])]
+print(len(rows), 'exclusions')
+PY
+# -> 0 exclusions
+```
+
+**The answer: latent here, not live.** Both runs produced zero
+exclusions across 29 records between them, so no record this repository
+currently produces would fail the new clause. That is the honest
+reading and it is also a weak one, because zero exclusions means the
+clause was not exercised by real data at all. So the reachability is
+proved separately, on a purpose-built git repository, by
+`src/vendored.test.ts`, "refuses a record whose sibling copy was
+authored after the work closed": the person composes `standard.md`,
+somebody branches off the baseline and commits the same bytes two hours
+later, `vendoredPaths` excludes the file anyway because byte identity is
+symmetric, and the gate now refuses the record with one
+`EXCLUSION_NOT_CLASSIFIED`. Before today that record satisfied all
+seventeen bounds.
+
+### 10.7 Tooling
+
+Same stack as §7, re-measured in the run that produced this section.
+
+| tool | version | its job here | why it, over what was considered |
+|---|---|---|---|
+| `git` | 2.55.0 | `log --all --pretty=format:%H%x09%aI%x09%s -- <path>` for the candidate dates, `log -1 --pretty=format:%aI%x00%s%x00%(trailers:...)` for a declaring commit's date, subject and trailers in one call | the author date is git's own field and `%aI` is strict ISO 8601 with the author's offset. Parsing `git log`'s default human format, or storing a Unix epoch integer, would both discard the offset, which is exactly the information §10.5's string-versus-instant trap turns on |
+| Node.js | v22.23.3 | runtime for `ursa run`, `src/invariants.cli.ts`, the fixture script and the suite | already the project's runtime. `execFileSync` with an argument array keeps a path containing a space from becoming a shell word |
+| TypeScript | 5.9.3 (`^5.7.2` in `ursa-major/package.json`) | `tsc --noEmit` is the first half of `npm test`; it is what made the three `VendoredPath` construction sites a compile error the moment `date` was added | the optional-property encoding of "absent is a true claim" is checked statically. A runtime schema validator would catch it later and only on exercised paths |
+| `tsx` | 4.23.15 (`^4.19.2` in `ursa-major/package.json`) | runs `tools/make-violation-fixtures.ts`, `src/bin/ursa.ts` and `src/invariants.cli.ts` straight from TypeScript | a build step before every probe would add a stale-artifact failure mode to a measurement whose point is to be re-runnable |
+| `vitest` | 5.0.2 | the 640-case suite, including the eight new unit cases for this clause and the end-to-end case in `src/vendored.test.ts` | already the project's runner; `npx vitest run src/vendored.test.ts` scopes to one file |
+| `npm` | 10.9.9 | `npm ci`, `npm test`, `npm run bundle` | the lockfile is committed, so one `npm ci` reproduces every version above |
+| `esbuild` | 0.28.x (`^0.28.0` in `ursa-major/package.json`), invoked by `build/bundle.mjs` | rebuilds `dist/ursa.cjs`, the single-file launch artifact, which `npm run bundle:check` compares by SHA-256 | the bundle is a committed artifact and `bundle:check` fails the suite when it drifts, so a source change that does not reach it is caught here rather than at a user's install |
+| `python3` | 3.12 (the runner's system interpreter), invoked with `-I` | the throwaway count over the clone's records in §10.6 | isolated mode (`-I`) is the environment rule for reading untrusted directories: it ignores the script's directory and the environment, so a planted `json.py` in a clone cannot be imported. A TypeScript probe would need the project's own module resolution pointed at a scratch directory, which is the thing being avoided |
+
+### 10.8 Terms used in this section
+
+- **author date** — the `%aI` field of a git commit: when the change was
+  written, as distinct from the committer date, which a rebase rewrites.
+  Strict ISO 8601 with the author's own UTC offset, for example
+  `2026-10-09T19:00:00-06:00`.
+- **horizon** — `task.generatedAt` in the record, which on the `ursa
+  run` path is `ep.closedAt` in `src/resolve-episode.ts`, the author date
+  of the episode's closing commit. The instant the work ended, and the
+  only clock a record carries that an exclusion can be ordered against.
+- **ordered**, of a date — compared against the horizon with
+  `Date.parse` on both sides, so two instants are compared rather than
+  two strings.
+- **readable**, of a date — `Date.parse` returns a number rather than
+  `NaN`. A date can be readable and still not ordered, which is the case
+  for the two exempt relations.
+- **exempt relation** — `pre_existing` or `declared`: reported with its
+  date and never ordered against the horizon, for the reasons in §10.4.
+- **symmetric**, of byte identity — equal blob object ids establish that
+  two commits hold the same content and say nothing about which came
+  first. The property that makes a time check necessary rather than
+  belt-and-braces.
+- **latent**, of a defect — reachable by the code as written and not
+  produced by any input measured so far. The opposite of **live**, which
+  is a defect present in a record this project has already written. The
+  span-level version of this defect was live (record
+  `ursa-2026-10-07-2f610e9`); this one is latent, by the measurement in
+  §10.6.
+
+### 10.9 What this does not do
+
+- **`vendoredPaths` still applies no time bound of its own.** The
+  resolver goes on excluding a file whose only matching commit is from
+  the episode's future, and the gate is what refuses the resulting
+  record. Fixing the search would mean threading the episode's close
+  time into a module that currently takes none, and it changes which
+  records exist rather than which are refused, so it is a separate
+  change with a separate cost. The end-to-end test in
+  `src/vendored.test.ts` is written to fail on the day somebody makes
+  it, because the record will stop being refused, and that failure is
+  the signal to update this section.
+- **A `declared` import's date is stored and never compared.** It names
+  a commit in another repository, so there is no clock to compare it
+  against from inside this record. Whether an upstream repository's
+  commit date is worth carrying at all is the same open question the
+  2026-10-15 ledger entry "The record grew 2,141 date fields today and
+  three of them will ever be read" asks one level down; this section
+  takes the same third position that entry names, which is to refuse an
+  unreadable date everywhere and order only where the claim rests on the
+  clock.
+- **The `pre_existing` exemption is wider than it has to be.** An
+  ancestor of the generation is vouched for by the graph, which is the
+  argument for exempting it, and the author date on such a commit is
+  still information a reader might want ordered. No bound reads it
+  today.

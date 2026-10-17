@@ -22,7 +22,7 @@ import { describe, expect, it } from 'vitest'
 import { buildEpisodes, type Episode } from './episodes'
 import { findCommitPairs, listCommits } from './pairfinder'
 import { renderRunSummary, resolveEpisode, resolvablePaths } from './bin/ursa'
-import { vendoredPaths } from './vendored'
+import { IMPORT_TRAILER, vendoredPaths } from './vendored'
 import { checkRecord, measure } from './invariants'
 import { resolve } from './resolve'
 
@@ -156,7 +156,27 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
     expect(record.generations.map((g) => g.filePath)).toEqual(['module.ts'])
   })
 
-  it('is the whole of the difference: without the refusal the import is credited as survival', () => {
+  /**
+   * What the refusal is still the only defense against, restated
+   * 2026-10-14.
+   *
+   * This test used to assert that without the file-level refusal the
+   * import inflates the survival figure, and that the refusal was "the
+   * whole of the difference". Half of that stopped being true the day the
+   * span-level descent gate landed (src/resolve.ts, `verbatimClaim`): the
+   * sibling branch that authored `standard.md` is a rival for every span
+   * of it, and the generation's parent holds the shared clause text, so
+   * pass 1 now demotes all of it on its own. Both records report the same
+   * survival figure, and the equality is asserted below rather than
+   * smoothed over, because it is the measurement.
+   *
+   * The refusal's remaining and separate job is that the path is not in
+   * the record at all. A span-level gate leaves 3,200 characters of
+   * somebody else's document inside `files[]`, inside `coveredChars`, and
+   * inside every per-file row a buyer reads — honestly labelled, and still
+   * not this episode's work. That is what the assertions cover now.
+   */
+  it('keeps the import out of the record, which the span-level gate alone does not', () => {
     const { r, generatedSha } = vendoredOnASibling()
     const ep = episodeFor(r, generatedSha)
     // `ep.vendoredPaths` left unset is not how `main` calls it; this is
@@ -167,12 +187,22 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
 
     const survived = (rec: typeof before) =>
       rec.stats.byClass.survived_verbatim.chars + rec.stats.byClass.survived_mutated.chars
-    expect(survived(before)).toBeGreaterThan(survived(after))
-    // Every character of the import was in the inflated figure, and the
-    // agent's own module is all that is left in the honest one.
-    const fromTheImport = before.files.find((f) => f.path === 'standard.md')!
-    expect(fromTheImport.spans.some((s) => s.class === 'survived_verbatim')).toBe(true)
+
+    // The span-level gate already sells none of the import as survival, so
+    // the two figures agree. Neither is inflated, and the agent's own
+    // module is all either of them counts.
+    expect(survived(before)).toBe(survived(after))
     expect(survived(after)).toBeLessThan(HQ.length)
+
+    // The difference the refusal does make: the path, its characters, and
+    // its per-file row are gone rather than merely relabelled.
+    const fromTheImport = before.files.find((f) => f.path === 'standard.md')!
+    expect(fromTheImport.spans.length).toBeGreaterThan(0)
+    expect(fromTheImport.spans.some((x) => x.class === 'survived_verbatim')).toBe(false)
+    expect(fromTheImport.spans.some((x) => x.descent?.basis === 'rival')).toBe(true)
+    expect(after.files.find((f) => f.path === 'standard.md')).toBeUndefined()
+    expect(before.stats.coveredChars).toBeGreaterThan(after.stats.coveredChars)
+    expect(before.stats.perFile.map((row) => row.path)).toContain('standard.md')
   })
 
   it('keeps resolving the file the agent did write', () => {
@@ -216,6 +246,12 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
     const record = resolveEpisode(r.dir, ep)!
     expect(record.files).toEqual([])
     expect(record.generations).toEqual([])
+    // Read out of git rather than written as a literal, so this asserts
+    // "the author date of THAT commit" and not "some ISO string". It is the
+    // field EXCLUSION_NOT_CLASSIFIED orders against `task.generatedAt`:
+    // a sibling copy authored after the work closed is a copy OF the work,
+    // and the refusal would be backwards.
+    const vendorDate = sh(r.dir, ['log', '-1', '--pretty=format:%aI', vendorSha]).trim()
     expect(record.exclusions).toEqual([{
       path: 'standard.md',
       reason: 'imported_whole',
@@ -223,7 +259,10 @@ describe('a file that came in whole from elsewhere is not read as the person\'s 
       subject: 'Re-vendor standard.md from HQ main',
       relation: 'sibling',
       chars: HQ.length,
+      date: vendorDate,
     }])
+    expect(Date.parse(vendorDate))
+      .toBeLessThanOrEqual(Date.parse(record.task.generatedAt))
     // It claims nothing, and claiming nothing is not the same as being
     // unarithmetic: the gate holds on it like any other record.
     expect(checkRecord(record)).toEqual([])
@@ -380,5 +419,389 @@ describe('the limitation, pinned so it is visible rather than implied', () => {
     // record, so the discard it represents is not counted anywhere.
     expect(record.generations.map((g) => g.filePath)).toEqual(['b.ts'])
     expect(record.stats.generated.humanDeletedChars).toBeLessThan(HQ.length)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The import that arrived from another repository, which the blob search
+// structurally cannot find, and the declaration that answers it.
+//
+// Why these cases could not be written before: every test above builds its
+// import by putting the identical content at the identical path somewhere
+// else in the SAME fixture repository, because that is the only thing
+// `vendoredPaths` could read. The defect is the case where no such commit
+// exists anywhere — `docs/standards/lessons.md` came from
+// `alexandrapaiz/alexandra-systems`, and 60,616 characters of it were sold
+// as text the person kept. A fixture for that is a repository where the
+// content exists in exactly one place, which is why each test below asserts
+// the absence as well as the verdict.
+// ---------------------------------------------------------------------------
+
+/** the content the sync brings in, which exists in no other commit */
+const UPSTREAM = doc('imports')
+
+/**
+ * A declaration and the co-author trailer in ONE trailer block.
+ *
+ * Written as a helper because getting it wrong is silent, and this run got
+ * it wrong first: `'...' + '\n\nUrsa-Imported-Path: x' + TRAILER` puts a
+ * blank line between the two, which makes the declaration its own
+ * paragraph and the co-author block the last one. Git parses trailers out
+ * of the last paragraph only, so the declaration is then not read, the
+ * exclusion does not fire, and the record silently sells the import as
+ * survival — the exact defect this whole block exists to prevent. Pinned
+ * as behaviour by 'does not read a declaration in a paragraph of its own'
+ * below.
+ */
+const declaring = (...paths: string[]) =>
+  '\n\n' + paths.map((x) => `${IMPORT_TRAILER}: ${x}`).join('\n')
+  + TRAILER.replace('\n\n', '\n')
+
+/**
+ * The real shape, from this repository's own history. An agent seat syncs a
+ * standard in from the holding company, declaring it with the trailer, and
+ * touches a module it genuinely wrote in the same commit. The person then
+ * edits both. The sync is read as a generation, so without the declaration
+ * every surviving character of the standard is credited to a model.
+ */
+function syncedFromAnotherRepo(declare: boolean) {
+  const r = repo()
+  r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+  const generatedSha = r.commit(
+    { 'standard.md': UPSTREAM, 'module.ts': AGENT_MODULE },
+    'Lessons sync 2026-09-28: HQ standard.md @ 775ce36'
+      + (declare ? declaring('standard.md') : TRAILER),
+    BOT,
+  )
+  // The person's genuine edit, which is what makes a pair and what makes
+  // the finished blob differ from every blob in the repository.
+  r.commit({
+    'standard.md': UPSTREAM + 'A local note the owner added under the import.\n',
+    'module.ts': AGENT_MODULE + 'export const checked = true\n',
+  }, 'Annotate the standard, finish the module')
+  return { r, generatedSha }
+}
+
+describe('a file synced from another repository is not read as text a model composed', () => {
+  it('refuses the path on the commit\'s own declaration, with no matching blob anywhere', () => {
+    const { r, generatedSha } = syncedFromAnotherRepo(true)
+    const ep = episodeFor(r, generatedSha)
+
+    // The premise, asserted rather than assumed: this content exists at
+    // this path in exactly one commit, so the blob search has nothing to
+    // find and the declaration is carrying the whole verdict.
+    const holders = sh(r.dir, ['log', '--all', '--pretty=format:%H', '--', 'standard.md'])
+      .trim().split('\n').filter((x) => x.length > 0)
+      .filter((sha) => sh(r.dir, ['rev-parse', `${sha}:standard.md`]).trim()
+        === sh(r.dir, ['rev-parse', `${generatedSha}:standard.md`]).trim())
+    expect(holders).toEqual([generatedSha])
+
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+    expect(found.map((v) => v.path)).toEqual(['standard.md'])
+    expect(found[0].relation).toBe('declared')
+    expect(generatedSha.startsWith(found[0].sha)).toBe(true)
+    expect(found[0].subject).toBe('Lessons sync 2026-09-28: HQ standard.md @ 775ce36')
+  })
+
+  it('is the whole of the difference: without the declaration the import is credited as survival', () => {
+    // The same fixture twice, differing only in the trailer. This is the
+    // measurement the ledger entry is about, in miniature: the identical
+    // history produces an inflated survival figure when nobody declared
+    // the import and an honest one when somebody did.
+    const undeclared = syncedFromAnotherRepo(false)
+    const declared = syncedFromAnotherRepo(true)
+    const recordFor = (f: { r: Repo; generatedSha: string }) =>
+      resolveEpisode(f.r.dir, annotated(f.r, episodeFor(f.r, f.generatedSha)))!
+
+    const before = recordFor(undeclared)
+    const after = recordFor(declared)
+    const survived = (rec: typeof before) =>
+      rec.stats.byClass.survived_verbatim.chars + rec.stats.byClass.survived_mutated.chars
+
+    // The defect, reproduced: the undeclared run finds no import at all
+    // and sells the synced file as the person's kept work.
+    //
+    // The threshold here was `> UPSTREAM.length` until 2026-10-14, chosen
+    // to say "the entire import is inside the figure". The span-level
+    // descent gate now shaves the part of the synced document the
+    // generation's parent already held, so the figure no longer clears the
+    // file's own length and the comparison has to be stated against the
+    // honest record instead of against a constant. The defect is unchanged
+    // and is still most of the file: a declaration is the only evidence
+    // that a byte-identical sync from ANOTHER repository is an import,
+    // because no commit in this one is a rival for it.
+    expect(before.exclusions).toEqual([])
+    expect(before.files.map((f) => f.path)).toContain('standard.md')
+    const fromTheSync = before.files.find((f) => f.path === 'standard.md')!
+    expect(fromTheSync.spans.some((x) => x.class === 'survived_verbatim')).toBe(true)
+    expect(survived(before) - survived(after)).toBeGreaterThan(UPSTREAM.length / 2)
+
+    // The fix: the standard leaves both sides of the record, the module
+    // the agent genuinely wrote keeps every label it earned.
+    expect(after.files.map((f) => f.path)).toEqual(['module.ts'])
+    expect(after.generations.map((g) => g.filePath)).toEqual(['module.ts'])
+    expect(survived(after)).toBeLessThan(UPSTREAM.length)
+  })
+
+  it('writes the exclusion under its own reason, not as a proof it never ran', () => {
+    const { r, generatedSha } = syncedFromAnotherRepo(true)
+    const record = resolveEpisode(r.dir, annotated(r, episodeFor(r, generatedSha)))!
+
+    expect(record.exclusions).toHaveLength(1)
+    expect(record.exclusions![0]).toMatchObject({
+      path: 'standard.md',
+      // `imported_whole` here would be the record claiming two blob oids
+      // were compared and found equal. None were.
+      reason: 'declared_import',
+      sha: generatedSha.slice(0, 7),
+      subject: 'Lessons sync 2026-09-28: HQ standard.md @ 775ce36',
+      relation: 'declared',
+    })
+    // `chars` is the finished file, including the person's own added
+    // note, because that is what left the figures by being excluded.
+    expect(record.exclusions![0].chars).toBe(
+      UPSTREAM.length + 'A local note the owner added under the import.\n'.length,
+    )
+    // The gate holds, and the reconciliation the field exists for still
+    // closes with the new reason in place.
+    expect(checkRecord(record)).toEqual([])
+    const m = measure(record)
+    expect(m.consideredChars).toBe(record.stats.finalChars + record.exclusions![0].chars)
+  })
+
+  it('tells the user how the run knows, without claiming a comparison it did not make', () => {
+    const { r, generatedSha } = syncedFromAnotherRepo(true)
+    const ep = annotated(r, episodeFor(r, generatedSha))
+    const summary = renderRunSummary([resolveEpisode(r.dir, ep)!], [ep])
+
+    expect(summary).toContain('1 file came in whole from elsewhere')
+    expect(summary).toContain(IMPORT_TRAILER)
+    expect(summary).toContain(generatedSha.slice(0, 7))
+    // The sentence the other two relations print would be false here.
+    expect(summary).not.toContain('byte-identical')
+  })
+
+  it('reads a declaration on the final commit too, where the sync lands last', () => {
+    // The mirror shape: the agent writes the file, and the person's
+    // finishing commit replaces it with upstream content and says so.
+    // The finished file is then nobody's composition in this episode, and
+    // again no other commit holds that blob.
+    const r = repo()
+    r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const generatedSha = r.commit(
+      { 'standard.md': doc('rewrites'), 'module.ts': AGENT_MODULE },
+      'Draft the standard and the module' + TRAILER, BOT,
+    )
+    const finalSha = r.commit({
+      'standard.md': UPSTREAM,
+      'module.ts': AGENT_MODULE + 'export const checked = true\n',
+    }, 'Re-vendor standard.md from HQ main @ 683c7dd\n\nUrsa-Imported-Path: standard.md')
+
+    const ep = episodeFor(r, generatedSha)
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+    expect(found.map((v) => v.path)).toEqual(['standard.md'])
+    expect(found[0].relation).toBe('declared')
+    expect(finalSha.startsWith(found[0].sha)).toBe(true)
+  })
+
+  it('scopes the declaration to the paths it names, and to nothing else', () => {
+    // The guard that keeps this from being a per-episode kill switch. The
+    // commit declares one path; the module beside it in the same commit is
+    // still the agent's work and still gets classified.
+    const { r, generatedSha } = syncedFromAnotherRepo(true)
+    const record = resolveEpisode(r.dir, annotated(r, episodeFor(r, generatedSha)))!
+    const module = record.files.find((f) => f.path === 'module.ts')!
+    expect(module.spans.some((s) => s.class === 'survived_verbatim')).toBe(true)
+    expect(record.exclusions!.map((x) => x.path)).toEqual(['standard.md'])
+  })
+
+  it('does not read a declaration out of commit prose, only out of a trailer', () => {
+    // The refusal the design turns on. Every real sync commit in this
+    // repository names its upstream in the subject line, so a regex over
+    // prose would have worked and is still refused: it would reclassify
+    // any commit whose message merely mentions a sync, which is a
+    // judgement nobody authorised. Here the subject says "Re-vendor" and
+    // the body says it in words, and neither is read.
+    const r = repo()
+    r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const generatedSha = r.commit(
+      { 'standard.md': UPSTREAM, 'module.ts': AGENT_MODULE },
+      'Re-vendor standard.md from HQ main @ 683c7dd\n\n'
+        + 'This is an import. Ursa-Imported-Path is mentioned here in prose,\n'
+        + 'in a paragraph that is not a trailer block.\n\n'
+        + 'Discussion of why the sync happened follows, so the paragraph\n'
+        + 'above is not the last one either.' + TRAILER,
+      BOT,
+    )
+    r.commit({
+      'standard.md': UPSTREAM + 'A local note the owner added under the import.\n',
+      'module.ts': AGENT_MODULE + 'export const checked = true\n',
+    }, 'Annotate the standard, finish the module')
+
+    const ep = episodeFor(r, generatedSha)
+    expect(vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))).toEqual([])
+  })
+
+  it('does not read a declaration in a paragraph of its own, above another trailer block', () => {
+    // The mistake that is actually going to be made, made here on
+    // purpose. This run made it first: the declaration sits in its own
+    // paragraph and `Co-Authored-By` follows after a blank line, so the
+    // co-author block is the message's last paragraph and git's trailer
+    // parser never sees the declaration.
+    //
+    // Pinned as behaviour rather than fixed, and the reason is the whole
+    // design: the alternative is to scan the message for the key, which
+    // is reading prose, which is what `IMPORT_TRAILER` exists to avoid.
+    // What this costs is a silent miss, so the cost is paid down in
+    // documentation instead — docs/design/vendored-paths.md §9 shows the
+    // one correct spelling, and `declaring()` above is the helper that
+    // makes the correct one the easy one.
+    const r = repo()
+    r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const generatedSha = r.commit(
+      { 'standard.md': UPSTREAM, 'module.ts': AGENT_MODULE },
+      'Lessons sync 2026-09-28: HQ standard.md @ 775ce36'
+        + '\n\n' + IMPORT_TRAILER + ': standard.md'
+        + TRAILER,
+      BOT,
+    )
+    r.commit({
+      'standard.md': UPSTREAM + 'A local note the owner added under the import.\n',
+      'module.ts': AGENT_MODULE + 'export const checked = true\n',
+    }, 'Annotate the standard, finish the module')
+
+    const ep = episodeFor(r, generatedSha)
+    expect(vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))).toEqual([])
+
+    // And the correct spelling, on the identical history, does fire. The
+    // two differ by one blank line and nothing else.
+    const ok = syncedFromAnotherRepo(true)
+    const okEp = episodeFor(ok.r, ok.generatedSha)
+    expect(vendoredPaths(ok.r.dir, okEp, resolvablePaths(okEp), listCommits(ok.r.dir))
+      .map((v) => v.path)).toEqual(['standard.md'])
+  })
+
+  it('reads several declarations from one commit', () => {
+    // A sync commit commonly brings in more than one file: the real one
+    // this is modelled on carried `docs/standards/lessons.md` and
+    // `docs/standards/pm.md` together.
+    const r = repo()
+    r.commit({ 'a.md': doc('drafts'), 'b.md': doc('older'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const generatedSha = r.commit(
+      { 'a.md': UPSTREAM, 'b.md': doc('upstream-two'), 'module.ts': AGENT_MODULE },
+      'Standards sync @ 775ce36' + declaring('a.md', 'b.md'),
+      BOT,
+    )
+    r.commit({
+      'a.md': UPSTREAM + 'Local note.\n',
+      'b.md': doc('upstream-two') + 'Local note.\n',
+      'module.ts': AGENT_MODULE + 'export const checked = true\n',
+    }, 'Annotate both, finish the module')
+
+    const ep = episodeFor(r, generatedSha)
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+    expect(found.map((v) => v.path).sort()).toEqual(['a.md', 'b.md'])
+    expect(found.every((v) => v.relation === 'declared')).toBe(true)
+    const record = resolveEpisode(r.dir, { ...ep, vendoredPaths: found })!
+    expect(record.files.map((f) => f.path)).toEqual(['module.ts'])
+    expect(checkRecord(record)).toEqual([])
+  })
+
+  it('does not call a declared path an import when the finished file is gone', () => {
+    // A path the person deleted has no finished blob, so there is nothing
+    // to classify and nothing to exclude. Reporting it would put an entry
+    // with `chars: 0` in the record, which the gate refuses as a number
+    // that cannot be added back to `stats.finalChars`.
+    const r = repo()
+    r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const generatedSha = r.commit(
+      { 'standard.md': UPSTREAM, 'module.ts': AGENT_MODULE },
+      'Lessons sync @ 775ce36' + declaring('standard.md'),
+      BOT,
+    )
+    r.git(['rm', '-q', 'standard.md'])
+    r.commit({ 'module.ts': AGENT_MODULE + 'export const checked = true\n' }, 'Drop the standard')
+
+    const ep = episodeFor(r, generatedSha)
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+    expect(found).toEqual([])
+    const record = resolveEpisode(r.dir, { ...ep, vendoredPaths: found })!
+    expect(checkRecord(record)).toEqual([])
+  })
+
+  /**
+   * The refusal running backwards, on a real repository, 2026-10-15.
+   *
+   * `vendoredPaths` applies no time bound. It asks only whether some
+   * commit outside the generation's descent holds the finished blob, and
+   * byte identity is symmetric: it cannot tell a copy the person took FROM
+   * that branch apart from a copy somebody later took OF the person's
+   * work. The horizon argument added to the span-level search on
+   * 2026-10-14 (`authoredAfterHorizon` in src/corroborate.ts) never
+   * reached this module.
+   *
+   * So the record below is the one the resolver really writes, and it is
+   * wrong in the expensive direction: the person composed `standard.md`,
+   * somebody branched off the baseline and committed the same bytes two
+   * hours later, and the whole file leaves every figure in the record.
+   * This is not a span losing its label. `stats.finalChars` drops by the
+   * size of the file, and every percentage built on it moves with it.
+   *
+   * The assertion is deliberately that the GATE catches what the resolver
+   * does not. Fixing `vendoredPaths` to bound its own search is a
+   * separate change with its own cost — it would need the episode's close
+   * time threaded into a module that currently takes none — and this test
+   * is what will fail, loudly and by design, on the day someone makes it,
+   * because the record will stop being refused.
+   */
+  it('refuses a record whose sibling copy was authored after the work closed', () => {
+    const r = repo()
+    r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
+    const baseline = r.at('HEAD')
+    const generatedSha = r.commit(
+      { 'standard.md': doc('rewrites'), 'module.ts': AGENT_MODULE },
+      'Rewrite the standard and derive the module' + TRAILER,
+      BOT,
+    )
+    // The person's own composition, and the episode's closing commit.
+    r.commit({
+      'standard.md': HQ,
+      'module.ts': AGENT_MODULE + 'export const checked = true\n',
+    }, 'Write the standard out properly, keep the derived module')
+
+    // AFTER the work closed: somebody branches off the baseline and lands
+    // the same bytes. Nothing about this commit was available to copy from
+    // while the person was writing, which is the whole point.
+    r.git(['checkout', '-q', '-b', 'later-branch', baseline])
+    const lateSha = r.commit({ 'standard.md': HQ }, 'Mirror the standard onto the release branch')
+    r.git(['checkout', '-q', 'main'])
+
+    const ep = episodeFor(r, generatedSha)
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+
+    // The resolver excludes it, and says so with a date that gives the
+    // reader what the resolver did not use.
+    expect(found.map((v) => v.path)).toEqual(['standard.md'])
+    expect(found[0].relation).toBe('sibling')
+    expect(lateSha.startsWith(found[0].sha)).toBe(true)
+
+    const record = resolveEpisode(r.dir, { ...ep, vendoredPaths: found })!
+    expect(record.files.map((f) => f.path)).toEqual(['module.ts'])
+    const excluded = record.exclusions![0]
+    expect(Date.parse(excluded.date!))
+      .toBeGreaterThan(Date.parse(record.task.generatedAt))
+
+    // What this cost the record, stated as the number rather than implied:
+    // the file the person wrote is the larger part of the finished work,
+    // and it is now in no class and no percentage.
+    expect(excluded.chars).toBe(HQ.length)
+    expect(excluded.chars).toBeGreaterThan(record.stats.finalChars)
+
+    // And the bound that notices. Before today this record satisfied every
+    // bound in src/invariants.ts, because the exclusion carried no time.
+    const violations = checkRecord(record)
+    expect(violations.map((v) => v.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(violations[0].observed).toContain('after task.generatedAt')
+    expect(violations[0].observed).toContain(`${excluded.chars} chars`)
   })
 })
