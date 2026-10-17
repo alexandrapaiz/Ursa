@@ -18,7 +18,7 @@
 // reading five confident fields is told not to trust them.
 //
 // What the mock is still for, narrowed 2026-10-10. `fixtures/violations/`
-// now holds fifteen committed records that each break one bound, so the
+// now holds twenty committed records that each break one bound, so the
 // gate's own verdict and the two surfaces that read records off disk or out
 // of an array — `runGate` in `src/invariants.cli.ts` and `gateRecords` in
 // `src/launch.ts` — are all exercised against real broken records with no

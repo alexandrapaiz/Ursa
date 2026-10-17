@@ -3,7 +3,35 @@
   "task": {
     "id": "violation-fixture-base",
     "finished": true,
-    "generatedAt": "2026-10-10T00:00:00.000Z"
+    "generatedAt": "2026-10-10T00:00:00.000Z",
+    "resolvedBy": {
+      "basis": "git_commit",
+      "commit": "19455a3",
+      "dirty": false
+    },
+    "gatedBy": {
+      "codes": [
+        "CLAIM_NOT_WIDER",
+        "CLAIM_IN_GENERATION",
+        "GEN_SPANS_PARTITION_ORDER",
+        "GEN_CHARS_CONSISTENT",
+        "GEN_SURVIVED_BOUNDED",
+        "GEN_CLAIM_BOUNDED",
+        "DELETION_SPLIT_EXACT",
+        "FINAL_SPANS_IN_FILE",
+        "COVERED_BOUNDED",
+        "RATES_MATCH_FIELDS",
+        "PCT_DENOMINATORS_ORDERED",
+        "PERFILE_ENUMERATES_PATHS",
+        "SIGNAL_QUOTE_GROUNDED",
+        "EXCLUSION_NOT_CLASSIFIED",
+        "DESCENT_CHECKED_UNIFORMLY",
+        "RESOLVER_IDENTIFIED",
+        "RIVAL_NOT_AFTER_FINAL",
+        "GATE_IDENTIFIED"
+      ],
+      "boundsDigest": "10a82f2bc5f1ae6f"
+    }
   },
   "artifact": {
     "kind": "chat"
@@ -27,6 +55,13 @@
             "generationIndex": 0,
             "start": 0,
             "end": 70
+          },
+          "descent": {
+            "basis": "rival",
+            "sha": "deadbee",
+            "subject": "A branch alive while the person was working",
+            "relation": "sibling",
+            "date": "2026-10-09T17:00:00-06:00"
           }
         },
         {
@@ -164,6 +199,7 @@
       "separatorChars": 4,
       "verbatimClaimedChars": 70,
       "survivedChars": 145,
+      "notGeneratedChars": 0,
       "deletedChars": 61,
       "deletedPct": 0.296,
       "humanDeletedChars": 61,
@@ -211,7 +247,8 @@
       "sha": "96ed4e5",
       "subject": "standards: sync pm.md from HQ",
       "relation": "sibling",
-      "chars": 199
+      "chars": 199,
+      "date": "2026-10-09T17:00:00-06:00"
     }
   ],
   "signals": {

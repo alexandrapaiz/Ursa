@@ -102,13 +102,22 @@ export function resolveEpisode(
   // a path whose blob at `ep.finalSha` it already read an object id for —
   // and is written rather than asserted because a blob that vanishes
   // between two git calls should cost the record a number, not the run.
+  // The reason follows the relation and is not a second judgment: a
+  // `declared` relation is a statement by the committing party and an
+  // `imported_whole` reason would claim a blob-identity proof that was
+  // never run. See `ExclusionReason` in src/types.ts for why the record
+  // keeps the two apart instead of flattening them.
   const exclusions: Exclusion[] = vendored.map((v) => ({
     path: v.path,
-    reason: 'imported_whole',
+    reason: v.relation === 'declared' ? 'declared_import' : 'imported_whole',
     sha: v.sha,
     subject: v.subject,
     relation: v.relation,
     chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0,
+    // Spread so an absent date stays absent in the written JSON rather
+    // than becoming `"date": undefined`'s omission by accident; see
+    // `Exclusion.date` in src/types.ts for why absence is a true claim.
+    ...(v.date ? { date: v.date } : {}),
   }))
   let turn = 0
   for (const path of candidates) {
@@ -175,7 +184,11 @@ export function resolveEpisode(
     // in the file before the agent wrote (a generation here is the whole
     // blob) or came off a sibling branch. Without this the record ships a
     // word-level diff nobody performed.
-    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph),
+    // `ep.finalSha` is the horizon: a commit authored after the person
+    // finished this work cannot be where its text came from, and before
+    // the bound existed one shipped record named a commit seven days in
+    // its own future as a rival (docs/ideas.md, 2026-10-14).
+    corroborate: gitDescentCorroborator(projectPath, ep.generatedSha, graph, ep.finalSha),
     conversations: [{
       id: `git-${ep.generatedSha.slice(0, 7)}`,
       title: ep.subject,

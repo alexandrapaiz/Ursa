@@ -49,10 +49,45 @@ span of the final text classified by what happened to it.
 
 | Class | Meaning |
 |---|---|
-| `survived_verbatim` | generated and kept unchanged |
-| `survived_mutated` | kept but edited. The edit is the correction. |
+| `survived_verbatim` | generated and kept unchanged, meaning byte-identical: the characters of the final span are the characters of the generation extent it names, with nothing folded away |
+| `survived_mutated` | kept but edited. The edit is the correction. A span also carrying `normalizedOnly` is the narrow case where the edit changed only case, only smart punctuation, or only whitespace, so the two texts are the same text after folding and differ in raw characters alone |
 | `generated_deleted` | produced and thrown away |
 | `no_generation_provenance` | in the finished work but traceable to no generation. The model was never in the running. |
+
+A generation's own spans carry a parallel label, its **fate**, saying
+what became of that stretch of the model's output.
+
+| Fate | Meaning |
+|---|---|
+| `survived_verbatim` | a final span claims these characters unchanged |
+| `survived_mutated` | a final span claims them as the text it was edited from |
+| `generated_deleted` | no final span claims them, and the person had them in front of them. This is the discard, and the only fate that carries correction signal |
+| `not_generated` | the file already held this text at the commit the generation started from, so the model did not write it and nobody discarded it. It is in the generation only because a generation on the `ursa run` path is the whole blob of the touched file at the agent's commit |
+
+`not_generated` arrived on 2026-10-14 and is the reason the survival
+rates moved that day. Pass 1 of the resolver now asks, before it calls a
+byte-identical match a survival, whether the generation's parent commit
+already held the same text. Measured over twelve records of this
+repository's own history, it already held 719 of 1,024 verbatim spans,
+110,736 of 139,105 characters, which is 79.6% of everything the records
+sold as "generated and kept unchanged". After the gate, nothing left in
+`survived_verbatim` is text the parent held. The reasoning, the
+measurement and the fix are in `docs/design/verbatim-descent.md`, and
+`npx tsx tools/measure-verbatim-descent.ts <path-to-clone>` reproduces
+the tally on any repository.
+
+Until 2026-10-13 `survived_verbatim` meant something weaker than this
+table said. Matching runs on normalized text, which is lowercased, has
+smart punctuation folded and every whitespace run collapsed, and pass 1
+of the resolver made its claim on a hit in that shadow text rather than
+on the characters themselves. A case change, an em dash retyped as a
+hyphen and a reflowed line were therefore all sold as text the model got
+right and the person did not touch. Measured over ten records of this
+repository's own history, 26 of 770 verbatim claims, covering 1,466
+characters, were claims of that kind. The reasoning, the measurement and
+the fix are in `docs/design/verbatim-byte-identity.md`, and
+`npx tsx tools/measure-verbatim-fidelity.ts cases` reproduces the table
+of six cases it turns on.
 
 Every record also names **what kind of finished thing** it is about,
 because finished work is not only chat. A record's `artifact.kind` is
@@ -81,6 +116,52 @@ verdict that later work overturned, scored against the person's own
 prose in the same files so a volatile repo is not read as a bad model.
 How it is measured is in
 [`docs/design/span-lifespan.md`](docs/design/span-lifespan.md).
+
+Every record also names **which build of the resolver made its claims**,
+in `task.resolvedBy`. The reason is that the rules underneath the classes
+above are young and they move: the bound count went from ten to eighteen
+in eleven days, and the change that started refusing imported files silently
+moved every figure in every record written after it. Two records with the
+same identifier, resolved by two commits of the resolver, disagreed about
+how much of one piece of work survived by a factor of eight, and nothing
+in either file said which was which. So the record carries either the
+commit of the resolver's own source, with a flag when that tree had
+uncommitted changes, or the SHA-256 of the single-file build that ran when
+there was no source checkout to name a commit from. The field is absent
+when neither could be established, which is a different claim from naming
+a resolver. What it may not be is a placeholder: as of 2026-10-13 the
+`RESOLVER_IDENTIFIED` bound refuses a record whose commit is not 7 to 40
+hexadecimal characters or whose digest is not the 16-character prefix the
+build compares against, so a name in this field is one a reader can
+resolve. Resolving the digest half needs a table, because a hash of the
+bundle's bytes carries no history with it, and every record written on a
+runner carries that half. The table is
+[`docs/provenance/bundle-digests.md`](docs/provenance/bundle-digests.md):
+one row per version of the bundle that has existed, giving the commit
+that introduced it and when. It is generated from this repository's own
+history and `npm test` fails when it drifts. How each identity is read is
+in [`docs/design/resolver-identity.md`](docs/design/resolver-identity.md),
+and how the table is built is in
+[`docs/design/bundle-digest-index.md`](docs/design/bundle-digest-index.md).
+
+And since 2026-10-16 every record also names **which rules its claims
+were checked against**, in `task.gatedBy`: the code of every bound the
+resolver carried, and a 16-character SHA-256 prefix over those bounds'
+statements. Naming the code was not enough on its own. The bound set
+moves faster than the resolver's own identity suggests, so two records
+bought two months apart were checked under different rules, and the only
+way to learn which rules was to clone the resolver at the commit
+`task.resolvedBy` names and read a TypeScript module. Two records can now
+be compared on that question directly: the same digest means the same
+rules, a different digest means they differ, and the code lists say
+where. It names the rules and never a verdict, because both launches
+write their records before the gate runs, so a record carries this field
+whether it passed or failed. The `GATE_IDENTIFIED` bound refuses the one
+record that could lie about it, which is a record carrying the checking
+resolver's own digest over a shorter list of bounds than that resolver
+has. How the digest is computed, and why membership is deliberately not
+checked the other way, is in
+[`docs/design/gate-identity.md`](docs/design/gate-identity.md).
 
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
@@ -241,17 +322,18 @@ holds the two launches to the same record is
 |---|---|
 | `src/pairfinder.ts` | walks git history, identifies agent commits by their `Co-Authored-By` trailer or author pattern, pairs each with the next human edit, and says in the run summary who it decided the human was, by name and email, because that decision is reached by absence (a commit is yours when it matches no agent pattern) and so promotes any identity the pattern has never heard of to a person in silence. On this repository that was every record it wrote: the agent seats commit as `ursa-pm` and `ursa-exo`, which no shippable default matches, so `--agent-identity <name-or-email-substring>` lets the only party who knows the fleet declare it, on both launches: the flag locally, and the `agent-identity` input on the Action for every merge (`docs/design/agent-coauthor-detection.md`). It also reads a file's contents at any commit in three states: present, absent from that tree, or unreadable from this clone. Refuses the pair rather than guessing when the edit is too far away in commits or in hours, when another generation rewrote the same file first, when the edit sits on a branch the generation never reached, or when the "generation" is a merge commit, and reports every refusal it made (`docs/design/pairing-window.md`) |
 | `src/episodes.ts` | one episode per commit pair; boundaries are explicit, never inferred from idle time |
-| `src/resolve.ts` | joins final text to generations and classifies every span |
+| `src/resolve.ts` | joins final text to generations and classifies every span. A `survived_verbatim` claim is byte-identical to the generation extent it names, and a hit that is identical only after case, punctuation and whitespace folding is demoted to `survived_mutated` with the `normalizedOnly` flag and a character-level diff, because a label that folded those away sold the person's edit as the model's output (`docs/design/verbatim-byte-identity.md`). Byte-identity alone is still not survival: a byte-identical hit whose text the generation's own parent commit already held is demoted to `no_generation_provenance`, and the generation segment behind it gets the `not_generated` fate rather than being filed as a discard (`docs/design/verbatim-descent.md`) |
 | `src/signals.ts` | derives correction signals from a record; carries the owner's declaration. Two stages: a git commit pair yields one-shot corrections from its edited spans, a chat trace yields loops and regressions through `src/loops.ts` |
 | `src/loops.ts` | auto-detects correction loops, regressions and one-shot corrections from the user's own messages in a chat trace, with no hand annotation (`docs/design/trace-stage-loops.md`) |
 | `src/lifespan.ts` | walks the commits after an episode closed and records how long each span actually lasted |
 | `src/deletion.ts` | decides what destroyed a span that is gone from the final text: the person, who read it and did not keep it, a merge commit, which overwrote it mechanically and carries no correction signal, or nothing nameable, when the clone cannot read the boundary that would settle it (`docs/design/unknown-deletion-cause.md`) |
-| `src/corroborate.ts` | asks git whether a span's text already existed outside the generation's line of descent, so a high similarity score is not mistaken for proof that the person edited this generation. A span found verbatim in a commit that is not a descendant of the generation loses the `survived_mutated` label and the word-level diff that goes with it, because text that already existed elsewhere was not composed here (`docs/design/corroborated-descent.md`) |
-| `src/vendored.ts` | refuses a whole file before any span of it is read: when the finished file is byte-for-byte a copy of content that exists outside the generation's line of descent, it arrived from elsewhere (a vendored standard, a rebase, a cherry-pick, a copied template) and no character of it was composed in this work, so it is left out of the record rather than reported as text the person kept. On a clone of this repository it removed 21,656 characters of one rebased document from the survival figure, and the record says so: the refusal is written into the record as an `exclusions` entry naming the path, the commit the content came from and the 30,287 characters that left the figures, so a buyer can audit what the run declined to claim (`docs/design/vendored-paths.md`, `docs/design/record-exclusions.md`) |
+| `src/corroborate.ts` | asks git whether a span's text already existed outside the generation's line of descent, so a high similarity score is not mistaken for proof that the person edited this generation. A span found verbatim in a commit that is not a descendant of the generation loses the `survived_mutated` label and the word-level diff that goes with it, because text that already existed elsewhere was not composed here. A candidate commit authored after the episode's own final commit is dropped before its blob is read, since text cannot have been copied from work that did not exist yet, and the commit graph is asked before the clock so a rebased or badly dated commit the person demonstrably merged is still searched. That carve-out now has a name in the record: a rival the episode itself merged is reported as `merged_in` rather than as a plain `sibling`, which is the stronger statement — the graph places the commit inside the work instead of merely elsewhere — and it is what lets the gate order sibling dates without refusing records whose evidence a rebase mis-dated. Every rival verdict also carries the rival commit's own author date, so the time ordering a descent claim rests on can be read off the record with no clone in hand (`docs/design/corroborated-descent.md` §10, §11) |
+| `src/vendored.ts` | refuses a whole file before any span of it is read: when the finished file is byte-for-byte a copy of content that exists outside the generation's line of descent, it arrived from elsewhere (a vendored standard, a rebase, a cherry-pick, a copied template) and no character of it was composed in this work, so it is left out of the record rather than reported as text the person kept. On a clone of this repository it removed 21,656 characters of one rebased document from the survival figure, and the record says so: the refusal is written into the record as an `exclusions` entry naming the path, the commit the content came from and the 30,287 characters that left the figures, so a buyer can audit what the run declined to claim. A file copied in from ANOTHER repository is invisible to that comparison, because the content never existed here before the commit that brought it in, and on this repository that was the largest instance of the same defect: 60,616 characters of a standard synced from the holding company, read as text the person kept, carrying 84.7% of one run's headline survival figure. So a commit may also declare its own imports in a `Ursa-Imported-Path:` trailer, which is read as authoritative for that commit's paths and recorded under its own reason code, `declared_import`, because a declaration by the party who knows is the strongest evidence available for content sourced outside this repository and is still not the byte-identity proof the other reason asserts. Commit prose is deliberately never parsed (`docs/design/vendored-paths.md` §9, `docs/design/record-exclusions.md`) |
 | `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
-| `src/store.ts` | writes records and the episode index to `<project>/.ursa/` |
-| `src/invariants.ts` | checks a record against itself: fifteen bounds a record must satisfy, twelve of them arithmetic or structural and reported with both sides of the number they broke, one that re-reads every excerpt a signal quotes against the raw text it names, one that checks the record did not keep a mutation label it had already found the evidence against, and one that checks it did not classify a file it had already declared an import. The count is `BOUND_COUNT`, derived from the bounds themselves, because this line said thirteen for four days after the fifteenth was added. both launches exit non-zero when one is violated, after writing the records, because an impossible record is still the evidence, and the CI launch's run comment says in its detail block how far to trust the five fields above it. Every bound has a committed record that breaks it, at `fixtures/violations/`, one per code with a note quoting the gate's own numbers: a bound with no counterexample behind it fails the suite, and two of the fifteen turned out to be unbreakable on their own (`docs/design/generated-denominator.md`, `docs/design/signal-grounding.md`, `docs/design/corroborated-descent.md`, `docs/design/record-exclusions.md`, `docs/design/violation-fixtures.md`) |
-| `src/launch.ts` | the one definition of the three decisions each launch makes around the resolve step, shared by `src/bin/ursa.ts` and `src/ci/run.ts` so the two cannot answer them differently: whether a resolved record clears the `--min-chars` floor (a refusal-only record has no generation side to measure, so it is exempt), which episodes the user erased (both launches rebuild episodes from git history, so a launch that skips the consent record undoes `ursa forget`), and whether every record just written satisfies all fifteen bounds. All three had drifted apart between the two launches, found by resolving one fixture repository both ways and diffing the records. That differential test has now found four divergences; the fourth, on 2026-10-11, was the CI launch not reading `--agent-identity`, so the two launches disagreed about who the person was on any repository running agent seats of its own (`docs/design/launch-parity.md` §8) |
+| `src/store.ts` | writes records and the episode index to `<project>/.ursa/`, and stamps each record with the resolver that made its claims as it does. Here rather than in `src/resolve.ts` because writing is where a record stops being a value inside a process and becomes an artifact somebody can buy, and because it is the one place all four callers that save records pass through. Stamped once and never rewritten: the bridge loads a finished record months later to write the user's own acceptance verdict into it, and that save must not credit a later build with the original resolver's classifications (`docs/design/resolver-identity.md` §3.3) |
+| `src/resolver-identity.ts` | answers which build of the resolver is running, so the record can say so. Two answers, because the two launches ship the resolver as two different artifacts: `ursa run` executes the source from a git work tree, so the identity is that tree's commit plus a flag for whether the tree matched it, and `ursa ci` executes the committed single-file bundle on a runner GitHub handed an unpacked tarball, where there is no commit to read and the identity is the SHA-256 of the bytes that ran, which is the same number the build's own staleness check prints. Which kind of evidence it is stays in the record as a value, so a buyer who will only accept records auditable against a public commit filters on the word instead of reading prose. Reads the path of the running script from `process.argv[1]` rather than `import.meta.url` or `__dirname`, because this is the one module that is compiled both ways and neither of those exists in both (`docs/design/resolver-identity.md`) |
+| `src/invariants.ts` | checks a record against itself: eighteen bounds a record must satisfy, twelve of them arithmetic or structural and reported with both sides of the number they broke, one that re-reads every excerpt a signal quotes against the raw text it names, one that checks the record kept neither a mutation label nor a survival label it had already found the evidence against, one that checks it did not classify a file it had already declared an import and that the commit an import rests on is not itself dated after the work, one that checks the resolver the record names is one a reader can look up rather than a placeholder in the shape of a pointer, one that checks the evidence a span's descent verdict names is not dated after the work it is evidence about, because a commit from the episode's own future cannot be where the text came from, and one that checks the bound set a record says it was checked against is one that can be compared, so a record claiming this resolver's rules while listing fewer of them is refused rather than read as consistent. The count is `BOUND_COUNT`, derived from the bounds themselves, because this line said thirteen for four days after the fifteenth was added. both launches exit non-zero when one is violated, after writing the records, because an impossible record is still the evidence, and the CI launch's run comment says in its detail block how far to trust the five fields above it. Every bound has a committed record that breaks it, at `fixtures/violations/`, twenty-three records over eighteen codes, each with a note quoting the gate's own numbers: a bound with no counterexample behind it fails the suite, two of the eighteen turned out to be unbreakable on their own, `DESCENT_CHECKED_UNIFORMLY` has two records because two of its three clauses are separate failure modes, `RIVAL_NOT_AFTER_FINAL` has three, one per failure mode, the sharpest of which is dated so that a gate comparing date strings instead of instants would pass it, and `EXCLUSION_NOT_CLASSIFIED` has three because the same time check at the file level removes a whole file from every figure rather than one span (`docs/design/generated-denominator.md`, `docs/design/signal-grounding.md`, `docs/design/corroborated-descent.md`, `docs/design/record-exclusions.md`, `docs/design/violation-fixtures.md`, `docs/design/gate-identity.md`) |
+| `src/launch.ts` | the one definition of the three decisions each launch makes around the resolve step, shared by `src/bin/ursa.ts` and `src/ci/run.ts` so the two cannot answer them differently: whether a resolved record clears the `--min-chars` floor (a refusal-only record has no generation side to measure, so it is exempt), which episodes the user erased (both launches rebuild episodes from git history, so a launch that skips the consent record undoes `ursa forget`), and whether every record just written satisfies all eighteen bounds. All three had drifted apart between the two launches, found by resolving one fixture repository both ways and diffing the records. That differential test has now found four divergences; the fourth, on 2026-10-11, was the CI launch not reading `--agent-identity`, so the two launches disagreed about who the person was on any repository running agent seats of its own (`docs/design/launch-parity.md` §8) |
 | `src/intervals.ts` | the one definition of how many distinct characters a set of extents covers, shared by `src/stats.ts` and `src/invariants.ts` so a generated sentence reused in two places is counted once where it should be and twice where it should be |
 | `src/text.ts` | the one definition of a quoted, truncated excerpt, shared by `src/signals.ts` and `src/loops.ts`, plus the predicate `src/invariants.ts` uses to decide whether a quote really appears in the text it claims to come from |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
@@ -325,3 +407,11 @@ merged. The owner's merge is the only authority. See
    Ursa-operated compute.
 4. The software is not the moat. The consenting constellation of users
    is.
+
+## Part of Alexandra Systems Company
+
+Ursa is a subcompany of [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems), the holding company that runs every product in the portfolio as a company of agent seats.
+
+- HQ's standards are vendored at `docs/standards/` and bind every seat here; the PM seat merges every tier in this repository under section 21 of the PM standard, and HQ's PM holds the portfolio while the owner is away.
+- The company board is at https://alexandra-systems-company.com; a message addressed to a seat there wakes it through the event bus, and every run reports to the board.
+- `company.yaml` in this repository is what HQ reads to see this company: its seats, cadences and surfaces.

@@ -11,6 +11,30 @@ export type GenerationFate =
   | 'survived_verbatim'
   | 'survived_mutated'
   | 'generated_deleted'
+  /**
+   * The segment is inside the generation's text, but the file already held
+   * that text at the generation's parent commit, so it is not output the
+   * model produced and it has no survival or deletion fate at all.
+   * (Added 2026-10-14 with the pass-1 descent gate.)
+   *
+   * It exists because of what a generation IS on the `ursa run` path.
+   * `resolveEpisode` builds one from the whole blob of each touched file at
+   * the agent's commit, so most of a "generation" is usually the file the
+   * agent opened. Once the final span over that text is demoted to
+   * `no_generation_provenance`, the segment behind it is covered by no
+   * survival claim, and without this fate it fell to `generated_deleted` —
+   * asserting that the model produced text and the person threw it away,
+   * about text that is still sitting in the finished file. That is a false
+   * label in the one class CLAUDE.md §1 sells as correction signal, so the
+   * fate is named instead of inferred.
+   *
+   * It carries no `deletion` attribution, is excluded from `survivedChars`,
+   * and is subtracted from `deletedChars` before the human share is
+   * computed. It stays inside `totalChars`, because `totalChars` is defined
+   * as the sum of segment extents and a reader must be able to add the
+   * fates up to it.
+   */
+  | 'not_generated'
 
 /**
  * What destroyed a generation span, when its fate is `generated_deleted`.
@@ -116,15 +140,47 @@ export type DescentEvidence =
    * generation. The label fell back to `no_generation_provenance` and no
    * diff was emitted.
    *
-   *   pre_existing — the commit is an ancestor of the generation. In
-   *     practice this is a restore: an ancestor held the text, the
-   *     generation replaced it, and the person put it back. Found by a
-   *     failing test, because the obvious reading of this relation —
-   *     text that was in the file all along — never reaches Pass 2 at
-   *     all, since the verbatim pass claims untouched text first.
-   *   sibling — the commit is on a branch the generation is not an
-   *     ancestor of: another branch's work, which the person merged or
-   *     checked out rather than typed.
+   *   prior_revision — the commit is the generation's own parent, so
+   *     the file already held this text when the agent opened it. On the
+   *     `ursa run` path a generation is the whole blob of the touched
+   *     file at the agent's commit, which contains every line the file
+   *     already had, so a span can be byte-identical to a generation and
+   *     still be text no model contributed. This is the strongest of the
+   *     three relations and the only one that demotes a
+   *     `survived_verbatim` claim, because it is the only one that says
+   *     the text was there before the generation existed rather than
+   *     merely that it exists somewhere else too. Checked before the
+   *     general rival walk (src/corroborate.ts) so the answer does not
+   *     depend on `git log --all` ordering.
+   *   pre_existing — the commit is an older ancestor of the generation,
+   *     and the parent does NOT hold the text. In practice this is a
+   *     restore: an ancestor held the text, the generation replaced it,
+   *     and the person put it back. Before `prior_revision` existed this
+   *     relation carried both cases, and over this repository's own
+   *     history the split is 504 `prior_revision` to 1 restore
+   *     (`tools/measure-verbatim-descent.ts`), so the two readings were
+   *     never comparable in size and the label named the rarer one.
+   *   merged_in — the commit is not an ancestor of the generation, and IS
+   *     an ancestor of the episode's own final commit. Another branch's
+   *     work that this episode merged, so the person demonstrably had it
+   *     in front of them: the graph proves it existed while they were
+   *     working, with no appeal to any clock. Split out of `sibling` on
+   *     2026-10-15, because the two make the same claim with very
+   *     different standing — see `date` below, and
+   *     `RIVAL_NOT_AFTER_FINAL` in src/invariants.ts, which can police
+   *     `sibling` precisely because `merged_in` is no longer hiding
+   *     inside it. Only reachable when the corroborator was given a
+   *     horizon (`gitDescentCorroborator`'s fourth argument), which the
+   *     `ursa run` and `ursa ci` paths always pass and the chat path has
+   *     nothing to pass.
+   *   sibling — the commit is reachable from neither the generation nor
+   *     the episode's final commit: another branch's work, which the
+   *     person may have merged or checked out rather than typed. "May"
+   *     is the whole difference from `merged_in`. Nothing in the graph
+   *     places this commit inside the work, so the claim rests entirely
+   *     on its author date being early enough to have been available,
+   *     which is why this is the one relation whose date is load-bearing
+   *     and the one `RIVAL_NOT_AFTER_FINAL` checks.
    *
    * Neither verdict says nothing happened. The person did reject the
    * generation's wording, and that rejection survives as the span's
@@ -133,7 +189,62 @@ export type DescentEvidence =
    * that the final text was composed by editing this generation. Text
    * that already existed verbatim elsewhere was not composed here.
    */
-  | { basis: 'rival'; sha: string; subject: string; relation: 'pre_existing' | 'sibling' }
+  | {
+      basis: 'rival'
+      sha: string
+      subject: string
+      relation: 'prior_revision' | 'pre_existing' | 'merged_in' | 'sibling'
+      /**
+       * The rival commit's own author date, strict ISO 8601 with the
+       * author's UTC offset (`PathCommit.date`, git's `%aI`).
+       *
+       * Why a date is in the evidence (added 2026-10-15). Every relation
+       * above is a claim about time as much as about the graph: the text
+       * was in the file BEFORE the generation ran (`prior_revision`,
+       * `pre_existing`), or it was on a branch the person could have
+       * merged WHILE they were working (`sibling`). Until 2026-10-14 the
+       * resolver checked neither, and a shipped record named a commit
+       * authored seven days after its own work finished as the source of
+       * that work's text (docs/ideas.md, 2026-10-14). The resolver now
+       * drops such a candidate before it is written
+       * (`authoredAfterHorizon` in src/corroborate.ts), but the record
+       * itself could not state the ordering, so no bound in
+       * src/invariants.ts could see the defect and the only thing that
+       * found it was a tool holding the commit graph.
+       *
+       * With the date here, `RIVAL_NOT_AFTER_FINAL` checks the ordering
+       * against `task.generatedAt` using nothing but the record, which is
+       * the property every other bound has and the auditability story
+       * CLAUDE.md §4 sells to labs: a buyer can see that the evidence
+       * predates the work without cloning the repository.
+       *
+       * The date is load-bearing for exactly one relation, `sibling`.
+       * The other three are placed inside the work by the commit graph —
+       * `prior_revision` and `pre_existing` are ancestors of the
+       * generation, `merged_in` is an ancestor of the episode's final
+       * commit — so their dates are reported and never checked, and a
+       * rebase or a wrong machine clock that puts a late author date on
+       * one of them says nothing about the claim. That split is why
+       * `merged_in` exists: while it was folded into `sibling`, no bound
+       * could police a sibling's date without also firing on records
+       * whose evidence the graph had already proven, which
+       * src/invariants.ts's second rule forbids ("anything that can be
+       * legitimately false is a measurement, not an invariant").
+       *
+       * OPTIONAL, and absence is legal and unchecked. Every record
+       * written before 2026-10-15 carries rivals with no date, and a
+       * bound that required the field would make all of them illegal —
+       * the mistake `RESOLVER_IDENTIFIED` avoided by leaving an absent
+       * `task.resolvedBy` alone. A date is also genuinely unavailable in
+       * one live case: `relation: 'prior_revision'` names the
+       * generation's own parent, read off the in-memory commit graph
+       * rather than from `commitsTouchingPath`, so a caller holding a
+       * narrowed `CommitInfo[]` can have the parent sha and not its date.
+       * Absent means "this resolver could not state the date", never
+       * "the date is fine".
+       */
+      date?: string
+    }
   /**
    * The search did not settle the question, so the `survived_mutated`
    * label stands unchanged and says why it is unguarded.
@@ -243,11 +354,38 @@ export interface FinalSpan {
   end: number
   text: string
   class: SpanClass
-  /** similarity score that earned the label (1 for verbatim) */
+  /**
+   * Similarity score that earned the label: 1 for verbatim, and also 1 for a
+   * `normalizedOnly` mutation, whose two texts are identical on the
+   * normalized side by construction.
+   */
   score?: number
   source?: SourcePointer
   /** word-level diff generation → final; the mutation is the correction */
   diff?: DiffPart[]
+  /**
+   * Set on a `survived_mutated` span whose text is identical to the
+   * generation extent it names after case folding, punctuation folding and
+   * whitespace collapsing, and differs in raw characters only. The person
+   * reflowed a line, changed a capital, or retyped an em dash as a hyphen.
+   *
+   * Three readings of this span are defensible and the record refuses to
+   * choose between them, which is why the fact is a field and not a class.
+   * A buyer studying content corrections filters these out as formatting
+   * noise. A buyer studying house style — the thing Ursa Major sells users
+   * as "your tone, your format preferences" — wants exactly these and
+   * nothing else. A buyer counting how much of the model's output survived
+   * wants them inside `survived_verbatim`, which they are not, because that
+   * label means byte-identical as of 2026-10-13.
+   *
+   * Until that date these spans WERE labelled `survived_verbatim` with
+   * `score: 1`, because pass 1 made its claim on a hit in the normalized
+   * shadow text. Measured over ten records of this repository's own history,
+   * 26 of 770 verbatim claims, covering 1,466 characters, were claims of
+   * this kind: see docs/design/verbatim-byte-identity.md and
+   * `tools/measure-verbatim-fidelity.ts`, which reproduces the number.
+   */
+  normalizedOnly?: true
   /** below-threshold best match existed; surfaced for human adjudication */
   uncertain?: boolean
   candidate?: { score: number; text: string; source: SourcePointer }
@@ -416,6 +554,23 @@ export interface Stats {
      */
     verbatimClaimedChars: number
     survivedChars: number
+    /**
+     * Characters of generation segments whose fate is `not_generated`: the
+     * file already held the text at the generation's parent, so the model
+     * did not produce them. Neither survived nor deleted, and subtracted
+     * from `totalChars` before `deletedChars` is computed. Zero on the chat
+     * path, which injects no corroborator and therefore never demotes.
+     *
+     * OPTIONAL, and read as zero when absent. Every record this project
+     * wrote before 2026-10-14 omits the field, and for those records zero
+     * is the true value rather than a default: no descent gate ran on their
+     * verbatim claims, so no segment of them could carry the fate. Making
+     * it required instead would fail `DELETION_SPLIT_EXACT` on every
+     * historical record on disk, which is the same mistake
+     * `RESOLVER_IDENTIFIED` avoided by making an absent `task.resolvedBy`
+     * legal. Written on every new record; `src/stats.ts` always sets it.
+     */
+    notGeneratedChars?: number
     /**
      * every deleted char, whatever destroyed it:
      * humanDeletedChars + mergeDeletedChars + unknownDeletedChars
@@ -681,13 +836,35 @@ export type ExclusionReason =
    * `vendoredPaths` in src/vendored.ts by comparing git blob object ids; see
    * that file's header for what an equal oid does and does not prove.
    */
-  'imported_whole'
+  | 'imported_whole'
+  /**
+   * The commit that put this content at this path declared in its own
+   * `Ursa-Imported-Path:` trailer that the content came from outside this
+   * repository, so nobody in this episode composed it. Read by
+   * `vendoredPaths` in src/vendored.ts from the episode's generation and
+   * final commits only.
+   *
+   * Deliberately a different reason from `imported_whole` rather than the
+   * same reason with a third relation. `imported_whole` is proven: two blob
+   * object ids are equal, which is byte identity and nothing weaker. This
+   * one rests on a statement by whoever made the commit, which is the
+   * strongest evidence available for content whose source is in another
+   * repository and is still not a proof. A buyer who cannot tell the two
+   * apart in the record cannot price the difference, and collapsing them
+   * would be the same defect as reading a similarity score as descent.
+   */
+  | 'declared_import'
 
 export interface Exclusion {
   /** repo-relative path, spelled as `Episode.touchedFiles` spells it */
   path: string
   reason: ExclusionReason
-  /** short sha of the commit outside the generation's descent holding the identical blob */
+  /**
+   * Short sha of the commit the exclusion rests on: the one outside the
+   * generation's descent holding the identical blob when `reason` is
+   * `imported_whole`, and the declaring commit itself when it is
+   * `declared_import`.
+   */
   sha: string
   /** that commit's subject line, so the record names the import in the author's own words */
   subject: string
@@ -696,9 +873,13 @@ export interface Exclusion {
    * matching commit is an ancestor, so the episode's net effect on the file
    * was nothing. `sibling` means neither ancestor nor descendant, so the
    * content came off another branch the person merged or checked out rather
-   * than typed.
+   * than typed. `declared` means no blob search found anything and none
+   * could: `sha` is the episode's own generation or final commit, and it
+   * declared the path an import in its trailer. The first two always carry
+   * `reason: 'imported_whole'` and the third always carries
+   * `reason: 'declared_import'`.
    */
-  relation: 'pre_existing' | 'sibling'
+  relation: 'pre_existing' | 'sibling' | 'declared'
   /**
    * Characters of the finished file at the episode's final commit, which is
    * exactly what left this record's figures by being excluded. Stated here so
@@ -709,6 +890,147 @@ export interface Exclusion {
    * it moved is a field that drifts.
    */
   chars: number
+  /**
+   * Author date of `sha`, strict ISO 8601 with the author's own UTC offset
+   * (`%aI`), as `DescentEvidence`'s `rival` variant carries it one level
+   * down.
+   *
+   * Why the file level needs it for the same reason the span level did.
+   * A `sibling` exclusion is the only relation here whose claim rests on a
+   * clock: it says the finished file is byte-identical to a copy on a
+   * branch that is neither an ancestor nor a descendant of the generation,
+   * which is evidence that the content came from that branch — and if that
+   * branch's commit was authored after the work closed, the copy is a copy
+   * OF this work rather than a source for it. The refusal is then
+   * backwards, and it is an expensive refusal to get backwards: an
+   * exclusion removes a whole file from every figure in the record, and on
+   * this repository's own history one of them removed 60,616 characters,
+   * 84.7% of a run's headline survival figure.
+   *
+   * `pre_existing` and `declared` are exempt from the ordering for the
+   * reasons `RIVAL_NOT_AFTER_FINAL` exempts `prior_revision`,
+   * `pre_existing` and `merged_in`: a `pre_existing` match is an ancestor
+   * of the generation, so the commit graph vouches for it whatever a
+   * rebase did to its author date, and a `declared` import names a commit
+   * in ANOTHER repository's history whose clock is not comparable to this
+   * one's at all.
+   *
+   * ABSENT is legal and unchecked. Every record this project wrote before
+   * 2026-10-15 has exclusions with no date, and `vendoredPaths` omits the
+   * field rather than writing an empty string when a clone cannot answer.
+   * Read `EXCLUSION_NOT_CLASSIFIED` in src/invariants.ts for the bound.
+   */
+  date?: string
+}
+
+/**
+ * Which code made a record's claims.
+ *
+ * Two bases, because the two launches ship this resolver as two different
+ * artifacts and the identity available for each is a different kind of
+ * fact. `git_commit` is a pointer into this repository's public history,
+ * which is what `ursa run` has: it executes `src/bin/ursa.ts` from a git
+ * work tree. `bundle_digest` is a content hash with no history behind it,
+ * which is what `ursa ci` has on any repository other than this one:
+ * GitHub downloads `dist/ursa.cjs` as a tarball rather than cloning it,
+ * so there is no HEAD under the bundle to read.
+ *
+ * The basis is a value in the record rather than a sentence in a document
+ * for the same reason `ExclusionReason` is: a consumer that will only
+ * accept records it can audit against a public commit selects on the
+ * word, with no prose to interpret. See src/resolver-identity.ts for how
+ * each one is read.
+ */
+export type ResolverIdentity =
+  | {
+      basis: 'git_commit'
+      /** `git rev-parse --short HEAD` in the resolver's own source tree */
+      commit: string
+      /**
+       * Whether that tree had uncommitted or untracked changes when the
+       * record was written, by `git status --porcelain`. True means
+       * `commit` does not identify the code that ran, and the record says
+       * so rather than letting the sha imply otherwise.
+       */
+      dirty: boolean
+    }
+  | {
+      basis: 'bundle_digest'
+      /**
+       * First 16 hex characters of the SHA-256 of the running bundle,
+       * which is the same identity `npm run bundle:check` compares a
+       * committed `dist/ursa.cjs` against.
+       */
+      digest: string
+    }
+
+/**
+ * Which rules a record's claims were checked against.
+ *
+ * WHAT THIS IS NOT, FIRST, BECAUSE THE NAME INVITES THE WRONG READING.
+ * It is not a verdict and it is not a pass. Both launches write every
+ * record BEFORE running the gate over it, deliberately — see
+ * `gateRecords` in src/launch.ts, whose comment says why: a record whose
+ * arithmetic is impossible is still the evidence of the defect, so
+ * nothing is withheld from the user. A record therefore carries this
+ * field whether it passed or failed, and the twenty-three records in
+ * `ursa-major/fixtures/violations/` are the demonstration: every one of
+ * them names the bound set below and every one of them is refused by it.
+ * `gatedBy` answers "which rules applied", never "and they held".
+ *
+ * WHY IT IS IN THE RECORD. `task.resolvedBy` names the code that made
+ * the claims, which is the complete answer for anyone who can clone that
+ * commit, and a weak one for anyone who cannot: the bound set went from
+ * ten to eighteen in eleven days, so two records bought two months apart
+ * were checked under different rules, and before this field the only way
+ * to learn which rules was to clone the resolver at `task.resolvedBy` and
+ * read a TypeScript module. `CLAUDE.md` §4 sells auditability to labs and
+ * the §2 user surface rests on the same property; a buyer holding a
+ * passing record could re-derive all of its arithmetic and could not tell
+ * which checks had run on it.
+ *
+ * WHY BOTH A CODE LIST AND A DIGEST, when either alone looks sufficient.
+ * They answer two different questions and neither answers the other's.
+ * The digest answers "same rules?" between two records in one comparison
+ * and says nothing about which rule moved. The codes answer "which rule
+ * moved?" and cannot see a bound whose STATEMENT was rewritten while its
+ * name stayed, which is a change that silently alters what a record was
+ * checked for. Together they also make one specific tamper visible, which
+ * is the one the ledger entry behind this field asked for: a record whose
+ * digest matches the checking resolver's but whose code list is short has
+ * had a bound dropped from it, and `GATE_IDENTIFIED` in src/invariants.ts
+ * fails such a record rather than reporting consistency.
+ */
+export interface GateIdentity {
+  /**
+   * `InvariantCode` for every bound the resolver that wrote this record
+   * carried, in that resolver's own declaration order — `BOUND_CODES` in
+   * src/invariants.ts.
+   *
+   * Typed as `string[]` and not `InvariantCode[]`, which is the one place
+   * this file deliberately widens a type. A record written by a later
+   * resolver names bounds this build has never heard of, and that record
+   * is not malformed, it is newer: the eighteen codes below are this
+   * build's bound set, not the vocabulary of every record that will ever
+   * exist. Narrowing the field would make the correct handling of a
+   * nineteenth bound a type error at the only place that reads a record
+   * from disk.
+   */
+  codes: string[]
+  /**
+   * First 16 hex characters of the SHA-256 over every bound's code and
+   * statement text, which is the same prefix length `ResolverIdentity`'s
+   * `bundle_digest` uses and the same hash `npm run bundle:check` uses.
+   *
+   * Not verifiable from the record alone, and it is not meant to be: the
+   * bound statements are prose that would multiply a record's size, and
+   * the question this field exists for is comparative. Two records with
+   * the same digest were checked under the same rules; two with different
+   * digests were not, and the code lists say where to look. Computed by
+   * `currentGateIdentity()` in src/invariants.ts, over a canonical
+   * serialization documented there.
+   */
+  boundsDigest: string
 }
 
 export interface OutcomeRecord {
@@ -717,6 +1039,40 @@ export interface OutcomeRecord {
     id: string
     finished: boolean
     generatedAt: string
+    /**
+     * The resolver that produced every classification below, stamped when
+     * the record is first written to disk (`saveRecord` in src/store.ts).
+     *
+     * Absent means no resolver could be identified, which is a different
+     * claim from a record that names one: a record built in memory and
+     * never saved has no identity to state, and neither does one written
+     * by a build with no git tree and no readable artifact. Absent is
+     * never a placeholder for "some resolver" — see `exclusions` below for
+     * the same absent-versus-empty distinction.
+     *
+     * Preserved, never rewritten, once set. `applyVerdict` in
+     * src/bridge/declare.ts loads a record and saves it again to write a
+     * verdict into `signals`, and the span classifications in that record
+     * are still the original resolver's work. Re-stamping on every save
+     * would credit a later build with claims it did not make.
+     */
+    resolvedBy?: ResolverIdentity
+    /**
+     * The bound set the resolver above carried, stamped beside
+     * `resolvedBy` by `saveRecord` in src/store.ts.
+     *
+     * Absent and present mean exactly what they mean for `resolvedBy`:
+     * absent says nothing stamped this record, which every record written
+     * before 2026-10-16 says truthfully, and is never a placeholder for
+     * "some bound set". Preserved and never rewritten once set, for the
+     * same reason — `applyVerdict` in src/bridge/declare.ts re-saves a
+     * record months later to write a user's verdict into `signals`, and
+     * the classifications in it were checked under the rules of the build
+     * that made them, not of the build that added a field.
+     *
+     * Present does NOT mean the record passed. See `GateIdentity`.
+     */
+    gatedBy?: GateIdentity
   }
   /** what kind of finished thing this is, and where its rendered state lives */
   artifact: Artifact

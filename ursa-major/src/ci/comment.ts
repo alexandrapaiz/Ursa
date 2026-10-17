@@ -21,8 +21,9 @@
 // (src/ci/reactions.ts). It is versioned, because a later field order
 // would be a different contract and must not be mistaken for this one.
 
-import { BOUND_COUNT } from '../invariants'
-import type { OutcomeRecord } from '../types'
+import { BOUND_COUNT, currentGateIdentity } from '../invariants'
+import { formatResolverIdentity } from '../resolver-identity'
+import type { OutcomeRecord, ResolverIdentity } from '../types'
 import type { Episode } from '../episodes'
 
 export const RUN_COMMENT_MARKER = '<!-- ursa-major:run-comment:v1 -->'
@@ -92,6 +93,25 @@ export interface RunCommentContext {
    * question a violated bound answers.
    */
   invariantViolations?: number
+  /**
+   * The resolver that wrote this run's records, as `task.resolvedBy`
+   * states it in each of them (src/resolver-identity.ts).
+   *
+   * In the detail block for the same reason `invariantViolations` is: the
+   * five-field table's shape is fixed so two runs stay comparable, and
+   * this is a question a reader asks when deciding how far to trust the
+   * figures rather than one of the figures. It matters most here, on the
+   * CI launch, because a reader of this comment is reading numbers
+   * produced by a build they did not install and cannot see — and on any
+   * repository other than this one, GitHub handed the runner the action
+   * as a tarball, so the identity is the bundle's digest and this line is
+   * the only place it is ever shown.
+   *
+   * Omitted by a caller that does not pass it, which prints no line at
+   * all. A sentence naming no resolver would be worse than silence: it
+   * would read as a resolver that declined to identify itself.
+   */
+  resolvedBy?: ResolverIdentity | null
 }
 
 /**
@@ -221,6 +241,17 @@ export function renderRunComment(f: RunCommentFields, ctx: RunCommentContext): s
       ? `- Self-check: every record above satisfies all ${BOUND_COUNT} of the bounds a record must satisfy, so the figures in the table are at least internally consistent.`
       : `- Self-check: **${bad} bound${bad === 1 ? '' : 's'} violated**, so the figures in the table cannot all be true at once. The records were still written, because an impossible record is still the evidence of the defect, and this run's step exited non-zero rather than reporting success. The violations, with both sides of every number, are in the workflow log.`
   )
+  if (ctx.resolvedBy !== undefined) {
+    lines.push(`- Resolver that produced these records: ${formatResolverIdentity(ctx.resolvedBy)}. Every record above carries it as \`task.resolvedBy\`, so a figure in this table can be traced to the code that computed it.`)
+  }
+  // The bound set, beside the resolver and not folded into the self-check
+  // line above it. That line says how many bounds held; this one says WHICH,
+  // and the two are different facts: a count is the same word whether or not
+  // a bound was dropped from the set being counted. The digest is here
+  // rather than only in the record because this comment is the surface a
+  // reader sees without opening a record at all, and comparing two runs'
+  // digests is the one check the field supports.
+  lines.push(`- Bound set those records were checked against: \`${currentGateIdentity().boundsDigest}\`, over ${BOUND_COUNT} bounds. Every record above carries it as \`task.gatedBy\`, so two runs can be compared on whether the same rules applied. It names the rules, not a verdict: the self-check line above is what says they held.`)
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`)
   lines.push('')
   lines.push('</details>')

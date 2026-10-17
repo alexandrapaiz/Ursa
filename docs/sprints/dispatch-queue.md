@@ -1,105 +1,82 @@
-# Dispatch queue — 2026-10-11, six-hour pass (~18:25 UTC)
+# Dispatch queue — 2026-10-17, ~14:1x UTC, scheduled standup (GitHub Actions `pm-agent` run)
 
-Carried forward from the ~16:34 UTC pass without change in substance:
-both candidates below are still blocked. Re-checked this run — `grep
--c '^allowed_bots'` against the current `main` copy of both target
-workflow files still returns nothing.
+`PM_DISPATCH_ENABLED` is exactly `true` in this run's own environment,
+confirmed with `echo "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"`. The
+switch is on.
 
-## What changed this run
+## The token-scope wall is resolved this pass
 
-Nothing on the dispatch wall itself. The thing that did change this
-run is a merge: PR #163 (engineer, the agent-coauthor-detection
-landing) came in at 16:42:58 UTC, too late for the 16:34 UTC standup,
-and this pass squash-merged it under Tier B after fresh checks (green,
-clean, no Tier C path) — detail in `pending.md`. It does not touch
-either blocked workflow file and does not change anything below.
-
-The security seat's own Sunday cron (`15 15 * * 0`, `agent-security.yml`)
-was the one remaining path to ship sprint item 3 today that did not
-depend on HQ's `allowed_bots` fix. It still has not fired: this run
-starts at 18:25 UTC, now over three hours past that mark, and `gh run
-list --workflow=agent-security.yml` still shows nothing newer than
-2026-10-04. That ship path is gone for today.
-
-The milestone clock: "Sprint 2026-10-05" was due 2026-10-11T00:00:00Z
-and is now well past it. Item 3 (the redaction standard, candidate 1
-below) is still unshipped: no file at `docs/security/`, no open PR
-touching the path. Formal closure and carry-forward is tomorrow's
-Monday ceremony (2026-10-12), one pass out.
-
-## Proposed, not fired this run
-
-1. **Security** — build on its own dead draft #124, finish the plan it
-   already wrote, and draft the redaction standard in the same PR:
-
-   ```
-   GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh workflow run agent-security.yml \
-     -f owner_instructions='Build on open PR #124
-   (ursa-security/2026-10-07-message), do not start a new review. That
-   run opened a draft with a five-step plan (reconfirm the
-   private-data finding, resolve #112, rebase #75 onto current main,
-   reply on the board, record docs/security/audit-2026-10-07.md) and
-   committed only the plan stub on 2026-10-07T06:29 with nothing since
-   — finish it. Then, in the same PR, draft
-   docs/security/redaction-standard.md per sprint-2026-10-05 item 3:
-   name what must be redacted before any record is public (PII in
-   transcripts and excerpts at minimum, plus secrets), and check it
-   against the fixture record at ursa-major/fixtures/mini/record/ with
-   a pass/fail note in the PR.'
-   ```
-
-   **Trigger:** milestone "Sprint 2026-10-05" is past its due date;
-   item 3 still has no file anywhere in the repo and no open PR
-   touches the path; the seat's own cron that could have shipped it
-   without this dispatch did not fire today, for a second pass now.
-   **Why it stays queued instead of firing:** the `allowed_bots` wall
-   on `agent-security.yml` blocks it regardless of credential.
-
-2. **Frontend** — build on its own live draft #141, port the one
-   unmerged fix its ancestor PR carried:
-
-   ```
-   GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh workflow run agent-frontend.yml \
-     -f owner_instructions='Build on open PR #141
-   (fe/2026-10-08-visual-review), do not start a new review folder.
-   Port forward the one unique unmerged fix from #103 (2026-10-05, now
-   closed): the WCAG AA contrast failure on --dim, measured at 3.59:1
-   (header tagline), 3.75:1 ("North stars" label) and 3.77:1 (footer
-   credits), all under the 4.5:1 floor for text under 18.66px. Current
-   main still has --dim: #707fa0 in ursa-minor/app/globals.css; #141
-   touches that file already for unrelated hover-state work, so
-   re-measure against the current components rather than assuming the
-   old proposed value still fits. Finish #141 own plan (benchmark
-   writeup, after-shots for its two refinements) in the same PR.'
-   ```
-
-   **Trigger:** `--dim` is still `#707fa0` on current `main`; the
-   contrast failure has now been proposed across the last several
-   passes without moving.
-   **Why it stays queued instead of firing:** same `allowed_bots` wall
-   on `agent-frontend.yml`.
-
-No third entry: nothing else in company §11.3 or Ursa's own criteria
-fires this run. No seat run failed in the last six hours. The one
-merge this pass (#163) is between the PM and the engineer seat and
-names no new candidate. No open draft has failing CI or an unanswered
-review comment past 24h beyond what's already named above and in
-`pending.md`.
-
-## What this seat is not chasing further
-
-The actual fix (an `allowed_bots` entry in both workflow files) touches
-`.github/workflows`, HQ's surface, not this seat's, per pm.md §15.
-Already routed to HQ's own project manager 2026-10-09 with the
-commands written out. Tracked at HQ now.
-
-## Failed-run triage this run (§11.7)
-
-No failed runs in the six hours back to ~12:25 UTC (`gh run list`
-shows only `success`, besides this run's own checks). Nothing to
-rerun or hand off.
+Every Actions pass since 2026-10-16 ~15:1x UTC found the ambient
+`GH_TOKEN`/`GITHUB_TOKEN` (the Claude Code action's installation token)
+403 on `gh workflow run`, and found `$DEFAULT_WORKFLOW_TOKEN` — the
+§11.5 escape hatch, the job's own `github.token` — present as a name
+but empty as a value, so there was no substitution to try. This pass
+found it non-empty (`[ -n "$DEFAULT_WORKFLOW_TOKEN" ]` true) and tried
+the substitution for real: `GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN" gh
+workflow run agent-security.yml -f owner_instructions='…'` returned a
+run URL, not a 403. `tools/gh-actions.sh` still does not exist (`ls
+tools`: only `ledger/` and `stack/`), so this was the manual form of
+the wrapper the standard already names, not a new mechanism. Full
+account, including the two confirmed-unchanged facts (ambient token
+still 403s; wrapper still absent) in `docs/decisions.md`.
 
 ## Dispatched by the PM
 
-None this run. `PM_DISPATCH_ENABLED` is unset (not exactly `true`),
-and both candidates above are blocked for the reason stated regardless.
+1. **Security**, 2026-10-17 ~14:12 UTC.
+   `gh workflow run agent-security.yml -f
+   owner_instructions='Sprint item 3 (sprint-2026-10-12.md, O2 KR2.2):
+   you have two open pull requests on this scope, neither merged - #190
+   (2026-10-14, stale, now CONFLICTING with main) and #214 (2026-10-17,
+   ship-first stub with only docs/security/audit-2026-10-17.md so far,
+   no commit since 00:30 UTC). Land or close this stack; build nothing
+   new. If #190 still carries real unlanded work toward
+   docs/security/redaction-standard.md, finish it on #214 or #190 and
+   close the other as superseded with a one-line reason. The sprint
+   milestone (Sprint 2026-10-12) is due 2026-10-18T00:00 UTC.'`
+   Run: https://github.com/alexandrapaiz/Ursa/actions/runs/39039722291.
+   Trigger: pm.md §11.3's "two or more open PRs on one scope, none
+   merged" (confirmed via `gh pr list`/`gh pr view`, not assumed), and
+   the sprint item it blocks is within a day of its milestone.
+2. **Exo**, 2026-10-17 ~14:15 UTC (three minutes after the first, per
+   §11.4's spacing rule).
+   `gh workflow run agent-exo.yml -f
+   owner_instructions='PR #167 (ExO cycle 2026-10-11) carries real,
+   valuable content (the queue measurement and three improvements) and
+   is CONFLICTING against main. Your last two runs opened ship-first
+   stubs that never got filled in: #201 (2026-10-15, one file,
+   docs/agents/exo-run-2026-10-15.md) and #213 (2026-10-17, one scratch
+   file), neither built on since it opened. Land or close this stack;
+   build nothing new. Use #213 (or #167 directly) to resolve the
+   conflict and finish the rebase #201 proposed but never landed, then
+   close #201 as superseded with a one-line reason.'`
+   Run: https://github.com/alexandrapaiz/Ursa/actions/runs/39039975482.
+   Trigger: the same §11.3 criterion, confirmed separately for this
+   seat's own two open PRs.
+
+Both checked against the hard stops before firing: zero dispatches
+fired earlier today (`gh run list --event workflow_dispatch` for the
+UTC day, empty before this pass); one per seat, two of the three daily
+slots used; neither seat is mid-session on a live window right now
+(the board's `runs` feed shows only `pm` in its last 25 entries, and
+the instruction itself tells each seat to build on its own open
+branch, which is the stated exception to "never dispatch a seat whose
+last PR is still open"); no human dispatch in the last two hours (none
+in `gh run list --event workflow_dispatch` at all today before this
+pass); not the exo-centralizer being audited, not this seat, not a
+dormant seat. Results are not known as of this pass; the next one
+reads them.
+
+## Proposed, not fired this run
+
+Nothing else met a criterion. #210 (research), #199 (skill) still edit
+a file under `prompts/` directly — not a dispatch decision, a
+merge-authority boundary already named in `docs/decisions.md`.
+Frontend has no live stalled branch. No ADR merged since the last pass
+names a seat with no run following. No milestone besides the sprint's
+own 2026-10-18 date is within three days with open items.
+
+## Failed-run triage this run (§11.7)
+
+`gh run list --status failure --created ">=$(date -u -d '-24 hours'
++%FT%TZ)"` returns an empty list. Nothing to classify, rerun, or hand
+off this pass.

@@ -258,6 +258,85 @@ whoever drafts KR4.1's lab brief should name the distinction
 explicitly rather than let a buyer discover the overlap and ask Minor
 to explain it unprompted.
 
+## A second reward-model source, and this one is about to ship text data too (2026-10-14)
+
+The 2026-10-05 entry leaned on one benchmark (WritingPreferenceBench) for
+the claim that standard reward models barely beat chance on open-ended
+quality. This run found two more, independent sources converging on the
+same failure mode from different angles, which turns a single data point
+into a pattern.
+
+"What do Reward Models Memorize?" (Verhoeven, Mishra, and Shutova, arXiv
+2607.24484, posted 2026-07-27 and revised 2026-10-07) measures
+counterfactual memorization directly and finds discriminatively-trained
+reward models memorize dataset-specific shortcuts — which model produced
+a response, how the user sampled it, response length — rather than
+learning a preference signal that generalizes. On preference pairs
+unlike anything in training, they fall back on surface heuristics such
+as length and compliance. Separately, "One Token to Fool LLM-as-a-Judge"
+(NeurIPS 2025, arXiv 2507.08794) found that generative reward
+models — the more expensive, reasoning-chain architecture
+WritingPreferenceBench found actually works — can still be made to award
+a false positive to a low-quality answer using nothing but a stray
+punctuation mark or a generic reasoning opener, across GPT-o1 and
+Claude-4 among others.
+
+Read together: the cheap, standard way labs grade open-ended output
+(WritingPreferenceBench's 52.7%, barely-above-chance reward models) fails
+for a traceable reason, not bad luck — it memorizes artifacts of its own
+training data rather than learning what made a response good. The
+expensive way that works better is itself gameable by trivial,
+content-free inputs. Neither failure mode has an equivalent in the
+outcome record, because the outcome record never asks a model to predict
+or judge quality at all; it reports what happened to text after the fact.
+This is independent, peer-reviewed-or-arXiv-preprint evidence Minor's lab
+brief can cite directly rather than asserting the verifier gap as a
+claim labs have to take on faith — see the ledger proposal this run for
+turning this into a citable packet. Last observed 2026-10-14:
+[arXiv 2607.24484: What do Reward Models Memorize?](https://arxiv.org/abs/2607.24484),
+[arXiv 2507.08794: One Token to Fool LLM-as-a-Judge](https://arxiv.org/abs/2507.08794).
+
+## Symmetric portability, revised: Claude now exports too, but manually (2026-10-14)
+
+The 2026-10-05 entry's sharpest claim was that Claude's memory-import
+feature "does not export anything a competitor could read back," making
+"symmetric" the precise word to contrast against. This run's landscape
+watch (docs/market/landscape.md, Claude Memory Import entry) found
+Anthropic's own support page now documents export alongside import,
+dated by the page itself to 2026-09-02 — six weeks before this run
+caught it, which is itself worth naming plainly: the gap between a
+competitor shipping something and this seat noticing it was over a
+month, this time in the direction that narrows Major's claim rather than
+widens it.
+
+The correction is narrower than "Claude is now symmetric." What
+Anthropic shipped is a second manual copy-paste path: a user asks Claude
+to write out its memory as text, then pastes that text into whatever
+service they're moving to. There is no file format, no API, and nothing
+on the page claims or implies that ChatGPT or Gemini could parse a
+Claude export automatically. That is not the property "symmetric" was
+built to name here — structure, attribution, and timestamps surviving a
+read-back between two vendors with no commercial reason to cooperate.
+It is the same copy-paste-a-prompt mechanic the whole category already
+uses for import, now offered in the other direction too.
+
+The honest positioning update: "one-directional" is no longer accurate
+and should stop being used about Claude specifically. "Symmetric," in
+the strict automated-round-trip sense, still has not been demonstrated
+by anything in this landscape, Claude included — but the margin by which
+Major can claim it is narrower than last run's entry implied, and will
+keep narrowing every time a competitor ships a manual workaround that
+looks like portability without being it. The actual test Major should be
+prepared to pass, stated precisely rather than left as a word: an
+export Major produces, ingested by a different vendor's model with no
+human copy-paste step and no bespoke parser written for Major
+specifically, reconstructing structure and attribution intact. Nothing
+in this market has been shown to pass that test. Whether Major itself
+can pass it today is a product question this seat cannot answer from
+the outside — flagging it as the next thing worth a direct test, not
+assuming the answer because no competitor has been shown to clear the
+bar either.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -284,3 +363,13 @@ to explain it unprompted.
   pitch-collision risk: Surge AI's new benchmarks use language close
   to Minor's own and should be explicitly distinguished in the lab
   brief before a buyer asks. No pricing recommendation made.
+- 2026-10-14 — added two more reward-model-unreliability sources
+  (a memorization study and a judge-gaming study) alongside
+  WritingPreferenceBench, turning a single data point into a pattern
+  Minor's lab brief can cite directly. Also revised the 2026-10-05
+  "symmetric portability" entry after finding Claude now ships a manual
+  export path too — "one-directional" no longer holds, but "symmetric"
+  in the strict automated-round-trip sense still has not been
+  demonstrated by anything in the landscape, Claude included, and the
+  precise test for it is stated plainly rather than left as a word. No
+  pricing recommendation made.
