@@ -7252,3 +7252,178 @@ about the format being undocumented.
   the project's own statement about where its source lives now.
 - Nothing in any of that material addressed this agent or asked it to do
   anything, and nothing from it was treated as a directive.
+
+### 2026-10-17 (second run) — The index says which commit and never which toolchain, so two rows of identical source have no explanation
+
+- Trigger: writing today's tooling table. The engineering-artifact
+  standard requires a version for every tool named, and `package.json`
+  says `esbuild: "^0.28.0"`, so the real number had to be read out of
+  `node_modules/esbuild/package.json` (`0.28.2`) and cross-checked
+  against `package-lock.json`. Today's measurement removed directory
+  layout as a reason one commit can carry several digests. It did not
+  remove the other two reasons, and `docs/provenance/bundle-digests.json`
+  records neither: no row of the eighteen says which esbuild compiled
+  those bytes or which `diff` was inlined into them.
+- What: the index answers "which commit" and is read as answering "why
+  these bytes". A buyer who finds two rows whose `introducedBy` commits
+  touch no file under `ursa-major/src/` has no way to learn that the
+  difference was a dependency bump, and the honest answer is already in
+  this repository's history: `package-lock.json` pins both numbers at
+  every commit the sweep already visits. Today the locked values are
+  `esbuild 0.28.2` and `diff 8.0.4`.
+- First step: two fields per row in
+  `ursa-major/tools/make-bundle-digest-index.ts`, read with the
+  `git show <commit>:ursa-major/package-lock.json` the sweep is already
+  shaped around, naming the locked `esbuild` and `diff` versions at that
+  commit. The row count does not change and no digest moves, so this is
+  a widened read and two columns in the rendered table, followed by
+  `src/provenance-index.test.ts` the same way it follows the existing
+  pointers. Worth doing before the toolchain-versus-source question is
+  asked by someone paying, rather than after.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 (second run) — Five of the shipped artifact's modules come from a package no record names
+
+- Trigger: the same tooling table, from the other side. `diff` is the
+  only third-party package that survives tree-shaking into
+  `dist/ursa.cjs`, contributing exactly five modules, counted today from
+  the ten `node_modules/` strings in the committed bundle. Those five
+  modules are what computes the character diff that every
+  `survived_mutated` span carries. A record names the code that resolved
+  it (`task.resolvedBy`) and the rules it was checked against
+  (`task.gatedBy`), and nothing anywhere names the differ.
+- What: this is the entry above applied to the data rather than to the
+  index, and it is a sharper question because the answer might change a
+  record's contents. `diff@^8.0.2` admits any 8.x, the lockfile
+  currently resolves it to `8.0.4`, and the resolver's output depends on
+  how that package chooses word boundaries. If a minor bump changes one
+  boundary, a span's stored diff changes, the character counts in every
+  survival rate shift with it, and no field in the record distinguishes
+  the two runs. The counter-reading is equally plausible and is why this
+  is a measurement and not a fix: word-diff boundaries in a stable 8.x
+  line may simply never move, in which case the risk is theoretical and
+  this entry should be closed rather than built.
+- First step: measure before proposing a field. Rebuild the bundle
+  against each `diff` version `^8.0.2` admits, run the committed mini
+  fixture through each with
+  `npm run record:fixture`, and diff the resulting
+  `ursa-major/fixtures/mini/record/` trees against each other. If no
+  span changes, write the negative result into
+  `docs/provenance/bundle-reproducibility.md` §9 and close this. If any
+  span's diff text or extents change, the measurement has named exactly
+  what `task.resolvedBy` is missing.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 (second run) — `bundle:check` reports three different causes with one word
+
+- Trigger: §9 limit 3 of today's artifact, written while fixing the
+  cause the word was hiding. `node build/bundle.mjs --check` prints
+  `dist/ursa.cjs is stale` whenever the rebuilt bytes differ from the
+  committed ones, and until today one reason it fired was a
+  `node_modules` in a different place, which is not staleness at all.
+  That reason is gone. Two remain and both still print the same word: a
+  source change, which is real staleness and means run `npm run bundle`,
+  and a toolchain change, which means the opposite, that the bundle on
+  disk is correct and the builder is not the one that made it.
+- What: the message is the only thing most people will ever read about
+  this artifact's identity, and it currently sends a contributor to
+  `npm run bundle` in a case where committing that rebuild is how a
+  toolchain difference silently becomes eighteen rows plus one. The fix
+  is wording plus one comparison, and it costs nothing in the artifact
+  because `build/bundle.mjs` is the builder rather than part of what it
+  builds, which today's run demonstrated: two commits changed that
+  file and `bundle:check` reported the committed digest current after
+  each of them.
+- First step: in `build/bundle.mjs`, on the `--check` failure path only,
+  read `esbuild`'s own `version` export and the locked version out of
+  `package-lock.json`. When they differ, lead with that sentence and
+  name both numbers instead of printing `stale`. When they agree, print
+  `stale` as it does now, plus the one line saying a toolchain
+  difference has been ruled out. No new dependency, no change to
+  `dist/ursa.cjs`, and `src/bundle-exec.test.ts` already spawns this
+  script so the assertion has somewhere to live.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-17 (second run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, taking **Zep** and its
+open-source engine **Graphiti** (the entry below Letta, which this
+seat's first run read today). The question is today's, carried one step
+further than the morning asked it: when a project publishes a version
+for the artifact it ships, can a reader tie that artifact to the source
+commit it was built from?
+
+**Worth stealing: a tag, so a consumer can pin at all.** Graphiti
+publishes git tags. `v0.31.1` resolves to commit `5961293865a5`, and the
+matching wheel is on PyPI as `graphiti_core-0.31.1-py3-none-any.whl`. A
+developer writes `graphiti-core==0.31.1` and gets the same code next
+month. Ursa publishes none: `git tag` in this repository returns zero
+lines, and `action.yml` is consumed as
+`uses: alexandrapaiz/Ursa/ursa-major@main`, so a customer gets whatever
+the resolver was that morning. This is not a new idea and deliberately
+is not filed as one. It is the open ledger entry "A consumer cannot pin
+the resolver, because the only reference this project offers is a
+branch" (2026-10-16, second run), and the point of naming it here is
+that a rival in the adjacent category has the thing that entry asks
+for, which is an argument for its priority rather than a new
+observation.
+
+**What Ursa does better, now: the digest in the record is followable,
+and the published pointer is cheap to verify.** Graphiti's version
+string is a claim about provenance and not a pointer to it. Read from
+PyPI's JSON API today, both files of `graphiti-core` 0.31.1 carry
+`provenance: null`, no `attestations` field at all, and
+`has_sig: false`. The release was plainly automated, since the GitHub
+tag was published at `15:02:17Z` and the wheel uploaded at
+`15:02:54Z`, thirty-seven seconds later, and the publisher still emits
+no PEP 740 attestation. So a reader holding the wheel cannot establish
+that it was built from `5961293865a5` rather than from a patched tree;
+they can only observe that someone labelled it `0.31.1`. Ursa's
+`task.resolvedBy.digest` is the content hash of the bytes that actually
+ran, which is the stronger direction of the two, and since this morning
+`docs/provenance/bundle-digests.json` maps eighteen of those hashes
+back to the commits that introduced them.
+
+**Where the comparison turns against us, which is the part worth
+keeping.** The same PyPI reading shows what Ursa's index is not. A hash
+of the artifact plus a table built by the artifact's own publisher is a
+closed loop: both halves come from this repository, so a buyer who
+distrusts the publisher gains nothing from the lookup. PEP 740
+attestations exist precisely to break that loop by having a third party
+witness the build, and the comparison above is only favourable because
+Graphiti declines a mechanism it has available while Ursa has none to
+decline. Today's measurement is what makes that gap addressable rather
+than rhetorical: reproducibility is the precondition for any third
+party to check a build, and before this morning two honest builders of
+one commit would have produced two different digests and had no way to
+tell which of them was wrong.
+
+**What I could not establish, stated rather than assumed.** Three
+things. Whether Graphiti's publishing workflow is a GitHub Actions
+trusted publisher, which would mean PEP 740 attestations are one
+setting away, since the workflow file was not read. Whether Zep's hosted
+product pins a Graphiti version per customer or tracks the latest,
+which is the question that decides whether the tag matters commercially
+or only to self-hosters. Whether `graphiti-core` exposes a runtime
+version attribute, which is what a reader would actually reach for and
+which the PyPI metadata does not say. None of the three changes the
+comparison, because the comparison is about what the published metadata
+proves rather than about Graphiti's engineering quality.
+
+**External sources read.**
+
+- `api.github.com/repos/getzep/graphiti/releases/latest`, fetched
+  2026-10-17, for the tag name `v0.31.1`, its publication time, and the
+  fact that the release carries zero binary assets.
+- `api.github.com/repos/getzep/graphiti/tags?per_page=1`, fetched
+  2026-10-17, for the commit `5961293865a5` the newest tag points at.
+- `pypi.org/pypi/graphiti-core/json` and
+  `pypi.org/pypi/graphiti-core/0.31.1/json`, fetched 2026-10-17, for the
+  two distribution filenames and for `provenance`, `attestations` and
+  `has_sig` on each. The null provenance is read directly off those
+  fields rather than inferred.
+- Nothing in any of that material addressed this agent or asked it to do
+  anything, and nothing from it was treated as a directive.
