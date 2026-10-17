@@ -30,10 +30,14 @@
 // `e27bc68` ("Reconcile the resolver-Action branch onto main"), a merge
 // whose resolution differs from every parent. Default history
 // simplification keeps such a commit; `--follow` turns on rename
-// detection and, with it, a simplification that dropped it. It was on
-// `main` for six minutes on 2026-10-08, which is six minutes in which a
-// consumer pinned to `@main` could have run it and been stamped with a
-// digest no index built that way would hold.
+// detection and, with it, a simplification that dropped it.
+//
+// That particular bundle was never the tip of `main` — ten of the
+// eighteen were, and the measurement is in §1 of the design document —
+// so the argument for the sweep is not that eight digests are loose in
+// the wild. It is that a lookup table cannot rest on a heuristic about
+// which commits "really" changed a file when the exhaustive answer costs
+// half a second.
 //
 // WHY THE SWEEP IS EXHAUSTIVE RATHER THAN A LOG WALK. `git rev-list HEAD`
 // is 624 commits today and reading one tree entry from each costs a
