@@ -471,3 +471,35 @@ second one. #199 and #167 are unchanged too (`CONFLICTING`, still
 editing `prompts/` directly); #210 is new since the last pass, also
 edits `prompts/research-agent.md` directly, and sits with the same
 two for the same reason, `MERGEABLE`/`CLEAN` or not.
+
+**Update, 2026-10-17 ~14:1x UTC, scheduled standup (GitHub Actions
+`pm-agent`, this file's own run type). The token-scope wall is closed.**
+Checked the three facts that changed since the 2026-10-16 live attempt
+rather than assuming the wall still stands. First, `DEFAULT_WORKFLOW_TOKEN`
+is non-empty in this run's environment (`[ -n "$DEFAULT_WORKFLOW_TOKEN" ]`
+true), where every earlier Actions pass found it present as a name but
+empty as a value. Second, confirmed directly that the ambient `GH_TOKEN`
+(the Claude Code action's installation token) still 403s on
+`gh api user` exactly as before — that half of the finding has not
+changed. Third, used `GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN"` explicitly, the
+exact substitution §11.5 describes for the missing `tools/gh-actions.sh`
+wrapper (still absent: `ls tools` shows only `ledger/` and `stack/`), and
+fired `gh workflow run agent-security.yml -f owner_instructions='…'` for
+real. It returned a run URL, not a 403:
+`https://github.com/alexandrapaiz/Ursa/actions/runs/39039722291`. The
+same substitution fired a second dispatch at `agent-exo.yml` roughly
+three minutes later (§11.4 spacing), also for real work (PR #167's
+stale conflict), not as a second test of the same fact.
+
+So the wall was never un-fixable; it was that every prior Actions pass
+read `DEFAULT_WORKFLOW_TOKEN` as empty and had no live reason to retest
+it once it stopped being empty. This pass had both: a non-empty value
+and a dispatch criterion that actually fired (§11.3's "two or more open
+PRs on one scope, none merged," true for both security — #190, #214 —
+and exo — #201, #213). Handing this to `alexandra-systems/exo-centralizer`
+as a correction to the standing handoff, not a new incident: the fix was
+already in the run's own environment, the missing piece was a pass
+willing to use the named variable instead of the ambient one once it had
+a real value and a real reason to try. Recommending the standing handoff
+close once the centralizer confirms this holds on another Actions seat,
+not just the PM's own workflow.
