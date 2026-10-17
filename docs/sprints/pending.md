@@ -2,6 +2,476 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~12:2x UTC host six-hour pass
+
+1. **The sprint's milestone is about twelve hours out (2026-10-18T00:00
+   UTC) and item 3 still has not shipped.** The two runs this seat
+   handed the work to six hours ago, security's #214 and exo's #213,
+   are both unchanged since they were opened at ~00:30 UTC: still one
+   placeholder file each, no new commits in twelve hours. Checked
+   whether either seat has a live window right now rather than
+   guessing from the PR alone — neither does, so nothing will move on
+   either branch until that seat's own next run picks it back up.
+   Not asking you to act today; naming it so the date does not pass
+   quietly if neither run resumes in time.
+2. **Three open pull requests still edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** Unchanged again. #199 and
+   #167 are also `CONFLICTING`. None of these are mine to merge
+   regardless of how clean or conflicted they are.
+3. **Nothing new qualified for Tier B this pass.** Every open pull
+   request this seat does not itself own was already true on the last
+   check: a draft, a charter edit, a conflict, or some combination of
+   the three. The queue has not grown and nothing in it is a fresh
+   decision for you; it is the same shape the last two passes already
+   named.
+
+## Top three for the owner, 2026-10-17 ~06:2x UTC host six-hour pass
+
+1. **The sprint's milestone is due tonight (2026-10-18T00:00 UTC, about
+   eighteen hours from this pass) with item 3 still open.** The good
+   news since the last pass: security picked up the direct handoff and
+   opened a fresh run (PR #214) that explicitly absorbs the stalled
+   #190 and means to resolve its conflict. As of this check it is still
+   an early draft (one audit file, findings not yet filled in), so
+   nothing has shipped yet. Not asking you to act today; naming it so
+   the date does not pass quietly if the run does not finish in time.
+2. **Three open pull requests still edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** Unchanged since the last
+   pass. #199 and #167 are also `CONFLICTING`, but exo's own new run
+   (PR #213) says it means to actually rebase #167 this time, not just
+   open another stub. None of these are mine to merge regardless of
+   how clean or conflicted they are.
+3. **Both direct handoffs this seat sent last pass were picked up
+   within six hours.** Security opened #214 and exo opened #213,
+   each naming this seat's handoff as its trigger. Neither has
+   produced mergeable work yet. Naming this because it is the first
+   time in this sprint that a broadcast-only mention turned into a
+   named ask and the ask turned into a run; worth watching whether it
+   holds as a pattern.
+
+## Top three for the owner, 2026-10-17 ~00:2x UTC host six-hour pass
+
+1. **The sprint's milestone is due today (2026-10-18) with item 3 still
+   open on security's own branch (#190, draft, `CONFLICTING`, idle
+   since 2026-10-14 ~16:05 UTC).** Items 1 and 2 shipped days ago (#179,
+   #182). This pass sent security a direct board handoff naming the PR
+   and the date, the first time this has been addressed to that seat
+   by name rather than mentioned in a broadcast note. Dispatching it
+   again was not attempted: the token-scope wall that failed the
+   2026-10-16 dispatch is unchanged, and this host surface cannot even
+   confirm the dispatch switch is on (new fact, `docs/decisions.md`).
+   If security does not pick its branch back up before the date, the
+   sprint item either carries again or you decide it differently; not
+   asking you to act today, naming it so it does not age out silently.
+2. **Three open pull requests edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** #199 and #167 are also
+   `CONFLICTING`; #210 is new since the last pass and is
+   `MERGEABLE`/`CLEAN`, which does not change which tier it sits in,
+   since a charter edit stays Tier C regardless of how clean the diff
+   is. None of these are mine to merge. #210's content, if you want the
+   short version: three rules for how the research seat writes a
+   negative claim ("absence needs an instrument too"), prompted by its
+   own correction log.
+3. **Two stalled drafts got their first direct handoff this pass
+   instead of another broadcast mention.** #199 (skill, conflicting
+   since before 2026-10-15) and #190 (security, above) had each been
+   named in this seat's notes several times but never addressed to the
+   owning seat by name on the board until this pass. Also flagged to
+   the exo seat: its own PR #201, opened 2026-10-15 to rebase #167, is
+   a one-commit ship-first stub whose body was never filled in and
+   whose branch never touched #167 at all; #167 is still `CONFLICTING`
+   two days later. Not asking you to act; naming it so the gap between
+   a PR's title and what it actually did does not go unnoticed a third
+   time (the same shape another company's PM flagged in itself this
+   week).
+
+## Top three for the owner, 2026-10-16 ~15:1x UTC scheduled standup
+
+1. **The workflow-guard fix is no longer item 1 — you cleared it
+   yourself at 14:16:58 UTC today, and Incident 13 is closed on that
+   evidence.** Not re-asked. What replaces it: dispatch still does not
+   work, for a different and already-tracked reason. This pass fired a
+   real dispatch at security (sprint item 3, PR #190) to test the fix,
+   and it failed on a 403 at the dispatch-creation step itself, not on
+   the actor-type rejection Incident 13 was about. That is
+   `docs/decisions.md`'s other open finding (no `tools/gh-actions.sh` in
+   this repo, and this run's own ambient token can't start a workflow
+   run) — HQ's machinery, not yours or mine, handed to the centralizer
+   again with the fresh evidence.
+2. **Three pull requests still edit a charter file directly: #199
+   (skill), #184 (research), #167 (exo).** Unchanged. #199 and #167 are
+   `CONFLICTING`; #184 is `MERGEABLE` but stays Tier C regardless,
+   since a charter edit doesn't stop being one when the diff stops
+   conflicting. #80 (`company.yaml`) stays on the roster-and-secrets
+   carve-out, already labeled `owner-action`. None of these are yours
+   to decide today without reading them; naming them so they don't age
+   out silently.
+3. **The sprint's milestone is two days out (2026-10-18) with item 3
+   still open on security's own branch (#190, draft, `CONFLICTING`,
+   idle since 2026-10-14 ~16:05 UTC).** The dispatch this pass fired at
+   it failed for the infrastructure reason in item 1, not for anything
+   wrong with the instruction or the item. Until the token-scope wall
+   clears, the only way this moves is security picking its own branch
+   back up on its own cron (next: Sunday 15:15 UTC) or a chair's host
+   window.
+
+## Top three for the owner, 2026-10-16 ~14:26 UTC six-hour pass
+
+The owner posted to the whole company this pass that she was out
+eleven days for surgery, is back at work today, and that her own
+merges resume this afternoon. None of the three below have moved yet
+as of this pass, so none are re-asked, only updated to say she is
+active again.
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across seven passes.** Unchanged: green, clean, handed to this seat
+   by name, still declined for the reason named every pass since
+   2026-10-14 — this run's own operating instruction reads "never
+   touch secrets or workflows," and that stands above what §21's
+   merge-authority grant would otherwise allow.
+2. **Three pull requests still edit a charter file directly: #199
+   (skill), #184 (research), #167 (exo).** #199 and #167 are also
+   still `CONFLICTING`; #184 now shows `MERGEABLE`/`CLEAN` but stays
+   Tier C regardless, since a charter edit doesn't stop being one when
+   the diff stops conflicting. The exo seat's own rebase PR for #167
+   (#201) is open but hasn't landed. #80 (`company.yaml`) stays on the
+   roster-and-secrets carve-out, already labeled `owner-action`.
+3. **The sprint's milestone is under two days out (2026-10-18) with
+   item 3 still open on security's own branch (#190, draft,
+   `CONFLICTING`).** No change on that branch this pass. This seat
+   still cannot wake it by dispatch while item 1's wall stands, so the
+   only two ways this moves are security picking it back up on its own
+   cron, or #192 clearing the wall.
+
+## Top three for the owner, 2026-10-16 ~12:21 UTC six-hour pass
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across six passes and three environments.** Unchanged again: green,
+   clean, handed to this seat by name, declined again for the same
+   reason as every pass since 2026-10-14 — this run's own operating
+   instruction reads "never touch secrets or workflows," and that
+   stands above what §21's merge-authority grant would otherwise allow.
+   Not re-asking this pass; nothing about the facts has moved.
+2. **Three pull requests still edit a charter file directly: #199
+   (skill), #184 (research), #167 (exo).** #167 is also still
+   `CONFLICTING`; the exo seat's own rebase PR for it (#201) is open
+   but hasn't landed. #80 (`company.yaml`) stays on the
+   roster-and-secrets carve-out, already labeled `owner-action`.
+3. **The sprint's milestone is two days out (2026-10-18) with item 3
+   still open on security's own branch (#190, draft, `CONFLICTING`).**
+   No change to report on that branch this pass. This seat cannot wake
+   it by dispatch while Incident 13's wall (item 1 above) stands, so
+   the only two ways this moves are security picking it back up on its
+   own cron, or #192 clearing the wall.
+
+Closed this pass under Tier B's own age rule, not waiting on you
+anymore: #49 and #87, the two sales-seat drafts that sat with no
+verdict across several passes. Both branches stay intact and
+reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-17, ~06:2x UTC, host six-hour pass)
+
+1. **Read own seat's open PRs first.** Found #212
+   (`ursa-pm/2026-10-17-message`), this seat's own, open and ready (not
+   draft), carrying the ~00:2x pass's work. A PM's own Tier B PR waits
+   for another merger, so this seat cannot merge #212 itself; branched
+   this run from #212's tip instead of `main` and will close #212
+   pointing at this PR once its content is carried forward, rather than
+   leaving two open PRs for the same seat.
+2. **Inbox: checked `to_seat=pm&to_company=Ursa` again, filtered to the
+   exact match client-side.** The newest exact match is still this
+   seat's own note from the 00:2x pass. Nothing new addressed to this
+   seat has arrived since.
+3. **Failed runs: none.** `gh run list` over both the six-hour and
+   24-hour windows since this seat's last check returns nothing but
+   `success`.
+4. **Tier B merge: one landed, checked fresh rather than carried
+   over.** #215 (engineer, the bundle digest index) was green, not a
+   draft, no label, no comment, `MERGEABLE`/`CLEAN`, and its diff
+   (`gh pr diff --name-only`) touches only `ursa-major/` source and
+   tests, `docs/design/`, `docs/provenance/`, `docs/ideas.md`, and
+   `README.md` — nothing under `prompts/` or `.github/`. Merged.
+   Everything else re-checked fresh: #210 (research) and #167/#199
+   (exo, skill) are unchanged — the first a clean charter edit, the
+   other two still `CONFLICTING` charter edits. #201 and #190, the two
+   stalled drafts this seat handed off last pass, are now each
+   subsumed by a fresh same-day run from their own seat (#213 from
+   exo, #214 from security); both of those are themselves still early
+   drafts (one scratch file, one audit file with no findings filled in
+   yet) and fail Tier B's own draft gate, so neither is mine to merge
+   yet either.
+5. **Dispatch: nothing fired, unchanged reason.** `PM_DISPATCH_ENABLED`
+   reads empty in this run's own environment (confirmed with `printf`).
+   The token-scope wall that failed the 2026-10-16 dispatch is
+   unchanged; firing again would either reproduce that 403 or fire
+   blind on an unconfirmed switch. Full reasoning in
+   `docs/sprints/dispatch-queue.md`.
+6. **Sprint: items 1 and 2 shipped days ago (#179, #182). Item 3 has
+   not shipped, but for the first time it is being actively worked
+   rather than sitting idle** — security's #214 is a direct response to
+   this seat's own handoff last pass. Milestone (`sprint-2026-10-12.md`,
+   due 2026-10-18T00:00 UTC) is about eighteen hours out. **Move this
+   pass:** the engineer merge above, outside the numbered backlog.
+   **Hand-off:** item 3 stays with security's own #214 run; if it has
+   not landed by the milestone, the next pass should say so plainly
+   rather than let the date pass without comment.
+7. **Board:** posting one note this pass, first person, naming the
+   merge, the clean inbox, the zero failures, the two handoffs that
+   turned into real runs, and the sprint's one open item against its
+   milestone, no PR numbers or codes in the note's prose.
+
+## This run (2026-10-17, ~00:2x UTC, host six-hour pass)
+
+1. **Read own seat's open PRs first.** Found #211
+   (`ursa-pm/2026-10-16-message-3`), this seat's own, open and draft,
+   stacking #208 (closed without merging) which itself stacked #206
+   and #203 (both already resolved by earlier passes). Branched this
+   run from #211's tip rather than main, merged latest `main` (#209)
+   cleanly, and closed #211 pointing at this PR once its content was
+   carried forward. Unshallowed the clone first (`git fetch
+   --unshallow`): the default checkout here was shallow and reported
+   "unrelated histories" on the first merge attempt, the same shape of
+   mistake Incident 9 warned about, caught before it produced a wrong
+   conclusion rather than after.
+2. **Inbox: checked the right address, found nothing addressed to
+   `pm`/`Ursa`.** `to_seat=pm&to_company=Ursa` returns 36 messages, all
+   either broadcast notes (`to_seat`/`to_company` null, visible across
+   every company) or addressed to other companies' own seats; none
+   addressed to this seat specifically. No ask, no handoff, waiting on
+   an answer from this seat this pass.
+3. **Failed runs: none.** `gh run list --status failure` over both the
+   six-hour and 24-hour windows returns empty.
+4. **Tier B merge check: walked every open PR fresh, merged none.**
+   #210 (research) is `MERGEABLE`/`CLEAN` but edits
+   `prompts/research-agent.md` directly — Tier C regardless. #201
+   (exo, draft) is `MERGEABLE`/`CLEAN` but a draft, not ready, and not
+   this seat's to ready. #199 (skill), #190 (security), #167 (exo) are
+   all `CONFLICTING`/`DIRTY` — not this seat's to resolve in code; see
+   item 5. Nothing met every Tier B criterion at once.
+5. **Three direct handoffs sent, where only broadcast mentions existed
+   before.** To security: PR #190 and the sprint milestone, due
+   tomorrow. To skill: PR #199's conflict, unaddressed since it opened.
+   To exo: its own PR #201 is a stub that never did the rebase its
+   title promises, and #167 is still conflicting two days later. All
+   three are the owning seat's to act on, not this seat's to fix in
+   code.
+6. **Dispatch: nothing fired.** The 2026-10-16 dispatch at security
+   already tested the token-scope wall and failed on it; nothing about
+   that wall changed. This host surface also cannot read
+   `PM_DISPATCH_ENABLED` (403, new fact, folded into the standing
+   handoff in `docs/decisions.md`), so even a fresh attempt would fire
+   with the switch's state unconfirmed. Not firing blind.
+7. **Sprint: items 1 and 2 shipped days ago (#179, #182); item 3 is
+   the one thing between this sprint and its goal, and it is on
+   security to move, not on a dispatch this seat cannot fire with
+   confidence right now.** Milestone is tomorrow. Handed off above;
+   next move is security's own cron, a chair's window, or the owner.
+8. **Board:** posted the three handoffs above and one pass note, first
+   person, naming the inbox check, the triage, the merge check, and
+   the sprint state, no PR numbers or codes in the note's prose.
+
+## This run (2026-10-16, ~15:1x UTC, scheduled standup, GitHub Actions `pm-agent` run)
+
+1. **Read own seat's open PRs first.** Found #203 and #206 (host
+   six-hour passes, both still open and non-draft, the PM's own
+   writing) already carrying today's state forward, #206 containing
+   #203. Branched this run's commits on top of #206's tip instead of
+   starting from `main`, per the org rule. Neither is this run's to
+   self-merge: both touch `docs/decisions.md`, which Tier A's own list
+   does not name as a knowledge surface, and a PM's own PR waits for
+   another merger regardless (Tier B rule 1). Unchanged by this run;
+   still waiting on the owner or HQ's PM.
+2. **Inbox: read before anything else.** Nothing new addressed to
+   `pm`/`Ursa` since the 14:31 UTC pass that isn't already reflected
+   above. The board's own feed carries messages for other companies
+   (epitome, alexandra-systems) that the `to_seat`/`to_company` filter
+   does not exclude; read and set aside as not this seat's.
+3. **Incident 13 closed.** Confirmed `#192`'s merge commit sets
+   `allowed_bots` on all eleven workflow files, then tested it with a
+   real dispatch rather than taking the diff's word for it. See
+   `docs/decisions.md` and `docs/agents/incidents.md` for the entries
+   and `docs/sprints/dispatch-queue.md` for the command and the result.
+4. **Dispatch: fired once, failed on the token-scope wall, not
+   Incident 13.** One of this seat's three-a-day dispatches spent;
+   two remain under the ceiling but nothing else in the queue met the
+   bar this pass.
+5. **Failed runs: one in the last 24 hours, already triaged twice by
+   earlier passes as a tripwire false alarm.** Not re-triaged a third
+   time. No rerun.
+6. **Tier B: walked every open PR fresh, merged none.** #184/#199/#167
+   touch `prompts/` (charter, Tier C); #190/#201 are drafts; #80 is the
+   roster-and-secrets carve-out; #203/#206 are this seat's own, per
+   item 1. Nothing new, nothing missed.
+7. **Board:** commented the dispatch attempt and its result on the
+   sprint-item-3 card (`3b1ee943…`, "Finish the live security draft,
+   then draft the redaction standard"), and posted one `note` naming
+   this pass's own findings, and one `handoff` to
+   `alexandra-systems/exo-centralizer` naming the token-scope 403 as
+   the fix now needed.
+8. **Sprint: unchanged.** Items 1 and 2 shipped days ago. Item 3 is
+   still open on security's own branch; this pass's dispatch did not
+   move it, for the infrastructure reason named above, not a flaw in
+   the instruction.
+
+## This run (2026-10-16, ~14:26 UTC, six-hour pass, message-triggered)
+
+1. **Found this seat's own prior pass today already finished and
+   open, not a draft, on the exact branch name this run was also told
+   to use.** #203 covers this pass's ask in full: inbox, failed runs,
+   Tier B, sprint. Rather than restart from `main` and redo it, this
+   run branched a new commit on top of #203's tip (branch name
+   appended with a suffix, per this run's own naming instruction) and
+   added only what #203 did not yet know.
+2. **Inbox: one new message, the owner's return.** Posted through
+   `chair:hq-console` at 14:16 UTC: she was out eleven days for
+   surgery, apologizes for the silence, is back at work today, and her
+   own merges resume this afternoon. Also carries a standing
+   instruction on model routing (see `docs/decisions.md`'s 14:26 UTC
+   entry): checked against this repo's actual workflow files, and
+   Ursa's existing Kimi-to-Claude-subscription fallback already does
+   what she asked, so nothing follows from it on this seat's side.
+   Nothing else in the inbox is new since #203's read two hours ago.
+3. **Failed runs: still zero in the last six hours**, re-checked
+   fresh rather than assumed from #203.
+4. **Tier B: still nothing to merge**, re-walked fresh. Same four
+   exclusions as #203 found: #199/#184/#167 touch `prompts/` (#184 now
+   clean rather than conflicting, same tier either way); #192 touches
+   `.github/workflows/`; #190 and #201 are drafts; #80 is the
+   roster/secrets carve-out.
+5. **Sprint: unchanged.** Items 1 and 2 shipped days ago; item 3 is
+   still open on security's branch, still the one thing between this
+   sprint and its goal.
+6. **Board:** posted one `note` this pass, first person, naming the
+   owner's return and that nothing else moved.
+
+## This run (2026-10-16, ~12:21 UTC, six-hour pass, message-triggered)
+
+1. **Inherited an unfinished draft from this seat's own earlier pass
+   today.** This exact branch name (`ursa-pm/2026-10-16-message`) was
+   already open as #203, a pointer PR carrying #202's work forward with
+   no new commits of its own ("full findings coming as commits land").
+   Per the org rule on reading a seat's own open PRs first, this run
+   checked it out and finished it rather than opening a second PR.
+   #202 itself was already closed (subsumed) by whatever got done
+   before that earlier run stopped.
+2. **Inbox: checked fresh, nothing new addressed to this seat.**
+   Queried `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`,
+   filtered client-side to the exact match since the API's own filter
+   doesn't enforce it, and compared timestamps against the last pass's
+   read (06:26 UTC). Nothing landed for Ursa's pm in between; the only
+   new message in the feed was another company's own pass note, which
+   is data about that company, not an ask of this one.
+3. **Failed runs: zero in the last six hours.** `gh run list --limit
+   30` is clean back past the last pass, every run `success`. The one
+   24-hour-window item (`pm-agent` 38760984649, 15:30:49Z two days ago)
+   was already triaged as a tripwire false alarm by an earlier pass;
+   named again here for completeness, not re-triaged.
+4. **Tier B: nothing new to merge.** Walked the full open queue fresh.
+   #199, #184, #167 touch `prompts/` (charter); #192 touches
+   `.github/workflows/` (this run's own boundary); #190 and #201 are
+   drafts; #80 is `company.yaml` (roster/secrets carve-out); #167 and
+   #199 are also `CONFLICTING`. That accounts for every open PR except
+   this seat's own. Merged nothing, which matches every pass since the
+   18:25 one found the same four names unchanged.
+5. **Closed #49 and #87.** Both were sales-seat drafts from owner
+   dispatch windows (16 and 11 days idle), sitting in the "waiting on
+   owner" line across more passes than the standard means for a
+   pending item to go undecided. Tier B's own age rule (pm.md §10,
+   bullet 6) treats "older than seven days and not moving" as a close,
+   not a merge, so this pass closed both with a note that the branches
+   stay intact and either PR can reopen. This is queue hygiene, not a
+   judgment that the sales channel should stay dormant; that call is
+   still the owner's whenever she wants to make it.
+6. **Sprint:** both of this week's engineer items (1 and 2) shipped
+   days ago (#179, #182), and the engineer kept shipping past them into
+   its own follow-on work (#186, #196, #198, #204), all merged. Item 3
+   (security, redaction standard) is unchanged: still open on #190,
+   still two days from the 2026-10-18 milestone. Nothing in this pass
+   moves it, for the reason in "Top three" above.
+7. **Board:** posted one `note` this pass in first person, the way
+   §15 asks, pointing at this PR as the reference.
+
+## Top three for the owner, 2026-10-15 ~18:25 UTC six-hour pass
+
+1. **The workflow-guard fix (#192) still waits on you or a chair, now
+   across five passes and three different environments.** Unchanged
+   from every prior pass today: green, clean, handed to this seat by
+   name, and still declined for the same reason, this run's own
+   operating instruction reads "never touch secrets or workflows"
+   beside "never merge your own PR," and that stands above what §21's
+   merge-authority grant would otherwise allow this seat to do. This is
+   the one pull request that would clear the company-wide dispatch
+   wall (Incident 13). Not re-asking again this pass; the standing ask
+   from four passes ago is still the live one.
+2. **Three pull requests edit a charter file directly: #199 (skill,
+   new this pass), #184 (research), #167 (exo).** #167 is also still
+   `CONFLICTING` against `main`; handed off to the exo seat on the
+   board this pass to rebase it, since a code conflict is not this
+   seat's to resolve. #80 (`company.yaml`) stays on the
+   roster-and-secrets carve-out, labeled `owner-action` already.
+3. **The two sales drafts from your own window sessions (#49, #87)
+   still have no verdict.** Reviving a dormant seat, or deciding these
+   two don't need to be, is yours. The sprint's milestone is due in
+   three days (2026-10-18) with its third item still open, named below.
+
+## This run (2026-10-15, ~18:25 UTC, six-hour pass, host-triggered)
+
+1. **Inbox: checked fresh, nothing new.** Queried
+   `$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+   client-side to the exact match (the API's own filter doesn't
+   enforce it). The two live items are still 2026-10-14's: security's
+   note that it revived its own closed branch into #190, and
+   exo-centralizer's `done` naming #192 as this seat's to merge. Both
+   were answered by an earlier pass today (the decline on #192, logged
+   as a standing `ask` back to exo-centralizer; #190's revival needed
+   no action from this seat). Nothing addressed to `pm` has arrived
+   since.
+2. **Failed runs: one in the last six hours, a tripwire false alarm.**
+   `pm-agent` run
+   [38760984649](https://github.com/alexandrapaiz/Ursa/actions/runs/38760984649)
+   (2026-10-15 15:30:49Z) failed its "No-ship tripwire" step. Read
+   against the evidence rather than the conclusion: that run pushed
+   `docs/decisions.md`'s 15:32 UTC update and opened/merged PR #197
+   (`pm/standup-2026-10-15`, merged 15:37:26Z) in the same pass, so the
+   run shipped real, committed work and the tripwire fired on stale
+   local state at teardown, after the merge had already landed. Per
+   pm.md §11.7, classified as a tripwire false alarm (the run's PR
+   exists): no rerun.
+3. **Tier B merge: two actions, both fresh since the 15:32 UTC pass.**
+   Merged **#198** (engineer, "the file-level refusal gets a clock") —
+   green, `CLEAN`, not a draft, not this seat's own, no Tier C path
+   (`gh pr diff --name-only` showed only `README.md`,
+   `docs/design/*`, `docs/ideas.md`, and `ursa-major/` source and
+   fixtures), under seven days old. Closed **#140** (skill, the
+   2026-10-08 library consolidation) with a comment naming the reason:
+   its own thread already carries the skill seat's verified
+   `git merge-base --is-ancestor` check showing #140's head is a
+   strict ancestor of #199, opened minutes earlier by today's skill
+   run. Nothing else moved: #199 and #184 edit `prompts/` directly
+   (Tier C, confirmed by `gh pr diff --name-only`, naming
+   `prompts/skill-extract.md` and `prompts/research-agent.md`
+   respectively) regardless of their clean, green state. #192 stays
+   declined for the workflow-file reason above. #190 (security) is
+   still a draft. #80 is Tier C outright (`company.yaml`). #49 and #87
+   are dormant-seat drafts with no verdict to give.
+4. **#167 handed to the exo seat.** Still `CONFLICTING` against `main`
+   and still edits `prompts/exo-agent.md` (Tier C once clean, per
+   `gh pr diff --name-only`). Posted a `handoff` on the board to
+   `exo`/Ursa asking it to rebase, since a code conflict is the owning
+   seat's to resolve and not this seat's to fix by hand.
+5. **Sprint: item 3 is the only one still open, unchanged.** Items 1
+   and 2 of `sprint-2026-10-12.md` shipped earlier this week (#179,
+   #182, confirmed in prior passes); item 3
+   (`docs/security/redaction-standard.md`) is still on security's own
+   draft #190, still conflicted, with the 2026-10-18 milestone three
+   days out. Engineer kept shipping beyond the sprint's named items
+   (#196, #198 today), which is real velocity but not progress on item
+   3; nobody but the security seat can move that one.
+6. **Board:** posted one `handoff` (exo, #167's rebase) and one `note`
+   this pass, first person, naming the tripwire false alarm, the two
+   Tier B actions, and the sprint's unmoved third item. This seat's
+   inbox stays open for anything addressed to it until the next pass.
+
 ## Top three for the owner, 2026-10-15 ~15:32 UTC standup
 
 1. **The workflow-guard fix (#192) still waits on you or a chair, now
