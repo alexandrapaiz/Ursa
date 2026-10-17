@@ -2,6 +2,42 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~00:2x UTC host six-hour pass
+
+1. **The sprint's milestone is due today (2026-10-18) with item 3 still
+   open on security's own branch (#190, draft, `CONFLICTING`, idle
+   since 2026-10-14 ~16:05 UTC).** Items 1 and 2 shipped days ago (#179,
+   #182). This pass sent security a direct board handoff naming the PR
+   and the date, the first time this has been addressed to that seat
+   by name rather than mentioned in a broadcast note. Dispatching it
+   again was not attempted: the token-scope wall that failed the
+   2026-10-16 dispatch is unchanged, and this host surface cannot even
+   confirm the dispatch switch is on (new fact, `docs/decisions.md`).
+   If security does not pick its branch back up before the date, the
+   sprint item either carries again or you decide it differently; not
+   asking you to act today, naming it so it does not age out silently.
+2. **Three open pull requests edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** #199 and #167 are also
+   `CONFLICTING`; #210 is new since the last pass and is
+   `MERGEABLE`/`CLEAN`, which does not change which tier it sits in,
+   since a charter edit stays Tier C regardless of how clean the diff
+   is. None of these are mine to merge. #210's content, if you want the
+   short version: three rules for how the research seat writes a
+   negative claim ("absence needs an instrument too"), prompted by its
+   own correction log.
+3. **Two stalled drafts got their first direct handoff this pass
+   instead of another broadcast mention.** #199 (skill, conflicting
+   since before 2026-10-15) and #190 (security, above) had each been
+   named in this seat's notes several times but never addressed to the
+   owning seat by name on the board until this pass. Also flagged to
+   the exo seat: its own PR #201, opened 2026-10-15 to rebase #167, is
+   a one-commit ship-first stub whose body was never filled in and
+   whose branch never touched #167 at all; #167 is still `CONFLICTING`
+   two days later. Not asking you to act; naming it so the gap between
+   a PR's title and what it actually did does not go unnoticed a third
+   time (the same shape another company's PM flagged in itself this
+   week).
+
 ## Top three for the owner, 2026-10-16 ~15:1x UTC scheduled standup
 
 1. **The workflow-guard fix is no longer item 1 — you cleared it
@@ -85,6 +121,56 @@ Closed this pass under Tier B's own age rule, not waiting on you
 anymore: #49 and #87, the two sales-seat drafts that sat with no
 verdict across several passes. Both branches stay intact and
 reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-17, ~00:2x UTC, host six-hour pass)
+
+1. **Read own seat's open PRs first.** Found #211
+   (`ursa-pm/2026-10-16-message-3`), this seat's own, open and draft,
+   stacking #208 (closed without merging) which itself stacked #206
+   and #203 (both already resolved by earlier passes). Branched this
+   run from #211's tip rather than main, merged latest `main` (#209)
+   cleanly, and closed #211 pointing at this PR once its content was
+   carried forward. Unshallowed the clone first (`git fetch
+   --unshallow`): the default checkout here was shallow and reported
+   "unrelated histories" on the first merge attempt, the same shape of
+   mistake Incident 9 warned about, caught before it produced a wrong
+   conclusion rather than after.
+2. **Inbox: checked the right address, found nothing addressed to
+   `pm`/`Ursa`.** `to_seat=pm&to_company=Ursa` returns 36 messages, all
+   either broadcast notes (`to_seat`/`to_company` null, visible across
+   every company) or addressed to other companies' own seats; none
+   addressed to this seat specifically. No ask, no handoff, waiting on
+   an answer from this seat this pass.
+3. **Failed runs: none.** `gh run list --status failure` over both the
+   six-hour and 24-hour windows returns empty.
+4. **Tier B merge check: walked every open PR fresh, merged none.**
+   #210 (research) is `MERGEABLE`/`CLEAN` but edits
+   `prompts/research-agent.md` directly — Tier C regardless. #201
+   (exo, draft) is `MERGEABLE`/`CLEAN` but a draft, not ready, and not
+   this seat's to ready. #199 (skill), #190 (security), #167 (exo) are
+   all `CONFLICTING`/`DIRTY` — not this seat's to resolve in code; see
+   item 5. Nothing met every Tier B criterion at once.
+5. **Three direct handoffs sent, where only broadcast mentions existed
+   before.** To security: PR #190 and the sprint milestone, due
+   tomorrow. To skill: PR #199's conflict, unaddressed since it opened.
+   To exo: its own PR #201 is a stub that never did the rebase its
+   title promises, and #167 is still conflicting two days later. All
+   three are the owning seat's to act on, not this seat's to fix in
+   code.
+6. **Dispatch: nothing fired.** The 2026-10-16 dispatch at security
+   already tested the token-scope wall and failed on it; nothing about
+   that wall changed. This host surface also cannot read
+   `PM_DISPATCH_ENABLED` (403, new fact, folded into the standing
+   handoff in `docs/decisions.md`), so even a fresh attempt would fire
+   with the switch's state unconfirmed. Not firing blind.
+7. **Sprint: items 1 and 2 shipped days ago (#179, #182); item 3 is
+   the one thing between this sprint and its goal, and it is on
+   security to move, not on a dispatch this seat cannot fire with
+   confidence right now.** Milestone is tomorrow. Handed off above;
+   next move is security's own cron, a chair's window, or the owner.
+8. **Board:** posted the three handoffs above and one pass note, first
+   person, naming the inbox check, the triage, the merge check, and
+   the sprint state, no PR numbers or codes in the note's prose.
 
 ## This run (2026-10-16, ~15:1x UTC, scheduled standup, GitHub Actions `pm-agent` run)
 
