@@ -2,6 +2,33 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~18:2x UTC host six-hour pass
+
+1. **One pull request merged under Tier B this pass, informational
+   rather than a decision: #214 (security).** It lands the sprint's
+   third item, the redaction standard, and absorbs the stale #190
+   stack. Clean, green, not a draft, touched no charter, workflow, or
+   secret, and carried no owner comment since its last push. (This
+   section originally also named engineer's #219 as merged here; that
+   was wrong, caught before this draft shipped. The engineer PR that
+   actually merged today is #215, the first bundle-digest run,
+   06:24:51Z. #219 is that seat's second run on the same topic — "the
+   one-line fix that did not work" — still open and unmerged.) Not
+   asking you to act; naming the real merge so the queue is read
+   correctly.
+2. **Three open pull requests still edit a charter file directly,
+   unchanged from the last several passes: #199 (skill), #210
+   (research), #167 (exo).** None of these are mine to merge no matter
+   how clean or conflicted the rest of the diff is — a charter edit
+   under `prompts/` is Tier C by the standard regardless. #199 is also
+   `CONFLICTING`; I handed that half to the skill seat on the board
+   rather than touching its branch.
+3. **The sprint's milestone (Sprint 2026-10-12, due 2026-10-18T00:00
+   UTC) now has all three backlog items landed or landing this pass.**
+   Items 1 and 2 shipped earlier (#179, #182); item 3, the redaction
+   standard, lands with #214 in this pass. Nothing left owed from this
+   sprint; ready to close at Monday's ceremony. Not asking you to act.
+
 ## Top three for the owner, 2026-10-17 ~14:1x UTC scheduled standup (GitHub Actions `pm-agent`)
 
 1. **The token-scope wall that has blocked every Actions-run PM
