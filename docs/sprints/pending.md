@@ -4,14 +4,17 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 ## Top three for the owner, 2026-10-17 ~18:2x UTC host six-hour pass
 
-1. **Two pull requests merged under Tier B this pass, both informational
-   rather than a decision: #214 (security) and #219 (engineer).** #214
-   lands the sprint's third item, the redaction standard, and absorbs
-   the stale #190 stack; #219 fixes a real bundle-digest
-   non-reproducibility bug the engineer found in its own second run
-   today. Both were clean, green, not drafts, touched no charter,
-   workflow, or secret, and carried no owner comment since their last
-   push. Not asking you to act; naming the merges so the queue is read
+1. **One pull request merged under Tier B this pass, informational
+   rather than a decision: #214 (security).** It lands the sprint's
+   third item, the redaction standard, and absorbs the stale #190
+   stack. Clean, green, not a draft, touched no charter, workflow, or
+   secret, and carried no owner comment since its last push. (This
+   section originally also named engineer's #219 as merged here; that
+   was wrong, caught before this draft shipped. The engineer PR that
+   actually merged today is #215, the first bundle-digest run,
+   06:24:51Z. #219 is that seat's second run on the same topic — "the
+   one-line fix that did not work" — still open and unmerged.) Not
+   asking you to act; naming the real merge so the queue is read
    correctly.
 2. **Three open pull requests still edit a charter file directly,
    unchanged from the last several passes: #199 (skill), #210
