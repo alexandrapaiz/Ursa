@@ -2,8 +2,11 @@
 
 **A methods position: what outcome records support that comparison data cannot.**
 *Ursa — draft v0.1, 2026-08-05. Grounded throughout in the first provenance-resolved
-outcome record (`ursa-major/trial/task-001/`), n=1 by design: every claim cites a
-label that record actually contains.*
+outcome record (alexandrapaiz/ursa-private, `trial/task-001/`), n=1 by design: every
+claim cites a label that record actually contains. The record lives in the private
+repo, not here: it carries verbatim user prompts and absolute local paths, so it was
+moved after the All-Hands 002 finding and this history was purged of it. See
+`ursa-major/trial/README.md`.*
 
 ---
 
