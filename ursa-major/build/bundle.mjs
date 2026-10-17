@@ -20,6 +20,19 @@
 // error that says exactly that, instead of shipping code that would
 // resolve a wrong path at runtime.
 //
+// Why the bytes are canonicalized before they are hashed: esbuild
+// annotates every module it inlines with the path it read that module
+// from, written relative to the build's working directory, and it does
+// so in two places — a `// <path>` comment above the module and a
+// property key in the `__esm` / `__commonJS` registry object. Where
+// `node_modules` resolves from is therefore part of the artifact's
+// bytes, and the bytes are the resolver's identity:
+// `resolverIdentity()` hashes this file and `task.resolvedBy.digest`
+// is the first 16 characters of that hash. Measured on 2026-10-17, one
+// commit built from four layouts produced three different digests. See
+// `docs/provenance/bundle-reproducibility.md` for the numbers and for
+// the candidate fix that measurement refuted.
+//
 //   node build/bundle.mjs            # write dist/ursa.cjs
 //   node build/bundle.mjs --check    # rebuild into memory and compare
 
@@ -29,6 +42,46 @@ import { createHash } from 'node:crypto'
 
 const OUT = 'dist/ursa.cjs'
 const check = process.argv.includes('--check')
+
+// Rewrite each inlined dependency's annotated path to the
+// `node_modules/...` suffix it ends with, so that a bundle built from a
+// package whose `node_modules` is hoisted to a parent directory or
+// symlinked out of the tree is byte-identical to one built from a
+// package that owns its own `node_modules`.
+//
+// The rewrites are derived from the build's own metafile rather than
+// from a regular expression over the output, so the only strings
+// touched are paths esbuild reports having read. In the canonical
+// layout every input is already relative to the package, every
+// candidate is skipped, and this function returns its argument
+// unchanged — which is why installing it churns no committed digest.
+//
+// Two inputs that canonicalize to one string would collide as registry
+// keys and one module's initializer would silently overwrite the
+// other's, so that case throws instead of shipping.
+function canonicalizeInlinedPaths (text, metafile) {
+  const rewrites = new Map()
+  for (const input of Object.keys(metafile.inputs)) {
+    const at = input.indexOf('node_modules/')
+    if (at <= 0) continue                      // -1: not a dependency. 0: already canonical.
+    if (input[at - 1] !== '/') continue        // e.g. a directory named `mynode_modules`
+    const canonical = input.slice(at)
+    const prior = rewrites.get(canonical)
+    if (prior !== undefined && prior !== input) {
+      throw new Error(
+        `two inlined modules canonicalize to the same path, which would collide as ` +
+        `registry keys in ${OUT}:\n  ${prior}\n  ${input}\n  both -> ${canonical}`
+      )
+    }
+    rewrites.set(canonical, input)
+  }
+  // Longest source path first, so one path that is a prefix of another
+  // cannot leave the longer one half-rewritten.
+  const ordered = [...rewrites].sort((a, b) => b[1].length - a[1].length)
+  let out = text
+  for (const [canonical, input] of ordered) out = out.split(input).join(canonical)
+  return out
+}
 
 const result = await build({
   entryPoints: ['src/bin/bundle-entry.ts'],
@@ -60,10 +113,13 @@ const result = await build({
   legalComments: 'inline',
   banner: { js: '#!/usr/bin/env node' },
   write: false,
+  // Asked for so the canonicalization below can name the paths esbuild
+  // actually read instead of guessing at them from the output.
+  metafile: true,
   logLevel: 'warning',
 })
 
-const text = result.outputFiles[0].text
+const text = canonicalizeInlinedPaths(result.outputFiles[0].text, result.metafile)
 const digest = createHash('sha256').update(text).digest('hex')
 
 if (check) {
