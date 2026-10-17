@@ -504,6 +504,18 @@ in which case there is no artifact to identify and the caller gets
 - **Stamp.** Writing `task.resolvedBy` onto a record at the moment it is
   saved, done once and never rewritten (§3.3).
 
+## 9a. Following the bundle digest, added 2026-10-17
+
+This document's §4.2 shows a record whose resolver identity is
+`{"basis": "bundle_digest", "digest": "1dd251d21d457c96"}` and says
+truthfully that it is a content hash with no history behind it. That is
+now a pointer as well: `docs/provenance/bundle-digests.json` indexes
+every version of `ursa-major/dist/ursa.cjs` in this repository's history
+by the same sixteen characters, and `1dd251d21d457c96` resolves to
+commit `6a993c6` of 2026-10-12. The index, the walk it required and the
+one rule it imposes on contributors are in
+[`docs/design/bundle-digest-index.md`](bundle-digest-index.md).
+
 ## 10. What this does not do
 
 1. **It was not a bound on the day it shipped. It is one now.**
