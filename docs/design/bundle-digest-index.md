@@ -515,9 +515,23 @@ So the digest identifies the artifact that ran, exactly as claimed, but
 two builds of identical source can carry different digests if their
 `node_modules` resolves from different places. Nothing in this index is
 wrong because of it, and the index gains a row rather than losing one.
-It is recorded as a ledger entry of its own, with a one-line first step
+It was recorded as a ledger entry of its own, with a one-line first step
 (`absWorkingDir` on the esbuild call) and a measurement to prove it
 worked.
+
+**Resolved the same day, and the one-line first step was wrong.**
+`absWorkingDir` changed nothing, because `build/bundle.mjs` already runs
+with the package directory as its working directory in every layout, so
+the option was being set to the value it already had. The measurement
+also found a third digest this paragraph did not know about: a
+`node_modules` hoisted to the parent directory, which is what npm
+workspaces produce, gives `743ca60a55a5444c`. What fixed it is
+`build/canonicalize.mjs`, which rewrites the annotated paths to the
+`node_modules/…` suffix esbuild's own metafile names. The numbers, the
+refutation, and the limits of the claim are in
+[`docs/provenance/bundle-reproducibility.md`](../provenance/bundle-reproducibility.md).
+No digest in the table above changed value, because the fix is a no-op
+in the layout this repository builds in.
 
 **It does not say whether a version was ever released, and that is a
 decision rather than an omission.** The natural extra column is "was this
