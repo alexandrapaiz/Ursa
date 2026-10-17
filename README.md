@@ -133,8 +133,16 @@ a resolver. What it may not be is a placeholder: as of 2026-10-13 the
 `RESOLVER_IDENTIFIED` bound refuses a record whose commit is not 7 to 40
 hexadecimal characters or whose digest is not the 16-character prefix the
 build compares against, so a name in this field is one a reader can
-resolve. How each one is read is in
-[`docs/design/resolver-identity.md`](docs/design/resolver-identity.md).
+resolve. Resolving the digest half needs a table, because a hash of the
+bundle's bytes carries no history with it, and every record written on a
+runner carries that half. The table is
+[`docs/provenance/bundle-digests.md`](docs/provenance/bundle-digests.md):
+one row per version of the bundle that has existed, giving the commit
+that introduced it and when. It is generated from this repository's own
+history and `npm test` fails when it drifts. How each identity is read is
+in [`docs/design/resolver-identity.md`](docs/design/resolver-identity.md),
+and how the table is built is in
+[`docs/design/bundle-digest-index.md`](docs/design/bundle-digest-index.md).
 
 And since 2026-10-16 every record also names **which rules its claims
 were checked against**, in `task.gatedBy`: the code of every bound the

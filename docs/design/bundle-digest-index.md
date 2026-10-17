@@ -515,8 +515,9 @@ So the digest identifies the artifact that ran, exactly as claimed, but
 two builds of identical source can carry different digests if their
 `node_modules` resolves from different places. Nothing in this index is
 wrong because of it, and the index gains a row rather than losing one.
-It is recorded as a ledger entry of its own, the fourth one filed by this
-run.
+It is recorded as a ledger entry of its own, with a one-line first step
+(`absWorkingDir` on the esbuild call) and a measurement to prove it
+worked.
 
 **It does not say whether a version was ever released, and that is a
 decision rather than an omission.** The natural extra column is "was this
