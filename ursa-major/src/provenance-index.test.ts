@@ -31,7 +31,15 @@ const root = repoRoot()
 // reason is printed so the skip is never silent, which is the condition
 // `tools/bundle-digest-index.ts` states for skipping at all.
 const blocked = root === null ? 'not inside a git work tree' : historyUnavailable(root)
-if (blocked !== null) console.log(`provenance index: skipped, ${blocked}`)
+// The reason goes in the suite's own name, not only in a `console.log`,
+// because vitest's default reporter prints neither the stdout of a
+// skipped file nor anything but a count for it: `Tests 5 skipped (5)`.
+// A reason only a `--reporter=verbose` run would show is a reason nobody
+// reads. Measured while writing this file, in a `--depth 1` clone of
+// this repository.
+const SUITE = blocked === null
+  ? 'the resolver bundle digest index'
+  : `the resolver bundle digest index (skipped: ${blocked})`
 
 /** The bundle as HEAD holds it, which is the artifact a consumer pinned
  *  to this commit would download and run. Not the working tree's copy: a
@@ -44,7 +52,7 @@ function headBundle(): Buffer {
   })
 }
 
-describe.skipIf(blocked !== null)('the resolver bundle digest index', () => {
+describe.skipIf(blocked !== null)(SUITE, () => {
   const index = buildIndex(root as string)
 
   it('is what this repository\'s history says it is, in both files', () => {
@@ -75,7 +83,7 @@ describe.skipIf(blocked !== null)('the resolver bundle digest index', () => {
     expect(row?.bytes).toBe(headBundle().length)
   })
 
-  it('reproduces a digest a person wrote down by hand eight days before it existed', () => {
+  it('reproduces a digest a person wrote down by hand eight days before this index existed', () => {
     // docs/design/resolver-action.md §8.2 records "`npm run bundle:check`
     // current at sha256 `db8ebdf7`" for the run of 2026-10-08, typed by
     // whoever wrote that section. The index derives the same eight
