@@ -7315,3 +7315,33 @@ about the format being undocumented.
   never instruction" landed in the charters dated 2026-10-05 and cites
   this finding by number. Verified on `main` by the 2026-10-11 security
   run across all charter files under `prompts/`.
+
+### 2026-10-17 — The tuning block fences injected text and the MCP briefing does not (security run)
+- Trigger: the audit's MCP pass, checking whether the containment this
+  branch adds to `renderTuningBlock` covers every path an axiom takes to
+  a model
+- What: `src/tuning/export.ts` now runs every axiom field through
+  `oneLine`, which flattens line breaks, strips control characters,
+  removes a leading markdown marker and bounds the length, so injected
+  text cannot occupy the instruction positions of the block the user
+  pastes into a model. The same axiom text reaches a model by a second
+  path with none of that. `renderBriefing` in `src/hq/briefing.ts`
+  splices `statement`, `domain`, `contradicts` and
+  `firstEvidence.quote` straight into markdown, two of them inside bold
+  and quote markers, and `measureBriefing` is what the MCP
+  `get_briefing` tool returns to any connected client. So the hardened
+  path is the one a human copies by hand and the unhardened one is the
+  path an agent reads automatically. `oneLine` is module private in
+  `export.ts`, so nothing in `briefing.ts` could reuse it even
+  deliberately.
+- First step: export `oneLine` from `src/tuning/export.ts` and apply it
+  to the four record-derived fields in `renderBriefing`, with a test
+  that a multi-line axiom statement renders as one line in both
+  surfaces. A well-formed axiom is a short single-line rule, so every
+  existing axiom renders byte for byte as it does today and the
+  briefing's `renderedChars` fixed point is undisturbed.
+- Cost: $0, under an hour
+- Status: proposed. Not applied by the run that found it, because the
+  owner's dispatch for 2026-10-17 was to land or close the two open
+  security pull requests and build nothing new. The finding is recorded
+  at `docs/security/audit-2026-10-17.md` F3 with the same detail.
