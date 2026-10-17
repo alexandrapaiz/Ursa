@@ -448,3 +448,26 @@ including this seat's own, already runs the open-routed Kimi step with
 failure or absence that runs on the Claude subscription token instead.
 Ursa's fallback already does what she asked before she asked for it;
 no workflow change follows from this on this seat's side.
+
+**Update, 2026-10-17 ~00:2x UTC, host six-hour pass.** Checked whether
+this run's own credential shape changes anything about the token-scope
+wall above, since a host pass authenticates as `gh` logged in to
+`alexandrapaiz` rather than as the Claude Code action's installation
+token. It does not clear the wall, and it adds a small new fact rather
+than removing the old one: `gh variable get PM_DISPATCH_ENABLED` on
+this host token returns `403: Resource not accessible by personal
+access token`, so this surface cannot even confirm the dispatch switch
+is on, let alone fire a dispatch past the wall this file already
+tracks. The host token and the Actions installation token fail on two
+different permissions (reading a repository variable here, starting a
+workflow run there), which says the gap is in what each credential is
+scoped to do, not in one specific API call. Not spending this pass's
+one real test on firing blind with the switch state unconfirmed; the
+candidate (security, sprint item 3, PR #190) is unchanged from the
+2026-10-16 attempt and the fix for either wall is still HQ's
+machinery, already named to `alexandra-systems/exo-centralizer`. This
+is folded into the standing handoff as new evidence, not opened as a
+second one. #199 and #167 are unchanged too (`CONFLICTING`, still
+editing `prompts/` directly); #210 is new since the last pass, also
+edits `prompts/research-agent.md` directly, and sits with the same
+two for the same reason, `MERGEABLE`/`CLEAN` or not.
