@@ -6862,3 +6862,220 @@ claim about per-score stamping.
   a verified account of it.
 - Nothing in that material addressed this agent or asked it to do
   anything.
+
+### 2026-10-16 (second run) — The record's primary key is the name of the folder you checked the work out into
+
+- Trigger: reading `task.id` off the record today's bundled run wrote.
+  The bundle resolved a fixture repository at
+  `/tmp/ursa-bundle-project-XXXX`, and the record came back
+  `task.id: "repo-2026-10-10-18aec93"` in an earlier probe where the
+  directory was literally named `repo`. The slug is not the repository,
+  not a remote, and not a commit. `src/episodes.ts:61` builds it as
+  `basename(projectPath).toLowerCase().replace(/[^a-z0-9-]+/g, '-')`,
+  and line 63 joins it to the generation's date and seven characters of
+  its sha.
+- What: so the same commit pair, resolved out of two directories a person
+  named differently, produces two records with two different `task.id`
+  values, and the same work moved from `~/code/site` to `~/code/site-old`
+  stops matching the records already written about it. That matters more
+  than a cosmetic id would, because `task.id` is this record's primary
+  key everywhere it is used:
+
+      src/store.ts        writes the file as <task.id>.json
+      src/disclosure.ts   isForgotten(consent, record.task.id)
+      src/consent.ts      `ursa forget --record <recordId>` keys on it
+
+  The consent consequence is the one worth naming. A user who revokes a
+  record and later renames the directory gets records the revocation no
+  longer matches, because the tombstone holds the old id and the new
+  resolve mints a new one. That is the deletion promise in `CLAUDE.md`'s
+  non-negotiable #2 resting on a string the user can change by accident
+  from Finder.
+
+  The second half is that the slug means two different things on the two
+  launches, and nothing says so. On a runner `basename($GITHUB_WORKSPACE)`
+  is the repository's own name, so on the Action path the slug really is
+  the repository. Locally it is whatever the person called the folder.
+  One field, two meanings, no documentation.
+
+  What this entry explicitly does NOT propose is putting the repository's
+  full name in the record. That was the first thing I reached for and it
+  is the wrong move on this project: `src/disclosure.ts` strips a file
+  path specifically because "a path is identifying — `src/clients/
+  northwind/pricing.ts` names a customer — so the path itself never
+  crosses, and neither does a directory component". A field naming the
+  user's repository would be the most identifying string in the record,
+  added for tidiness. I also checked whether today's slug already leaks:
+  it does not. `discloseAggregate` returns `{ batch, withheld }` and only
+  `batch` crosses the boundary; `recordId` appears in `withheld`, which
+  stays on the device. The gap is stability and documentation, not a
+  leak, and the entry should not be read as reporting one.
+- First step: decide the id's basis before changing it, in one
+  measurement. For the ten records the walk builds from this repository's
+  history, recompute `task.id` with the slug replaced by (a) nothing and
+  (b) the first seven characters of the hash of the generation's blob
+  oid, and count how many of the ten collide under each. If `date-sha7`
+  alone is already unique across ten records from one repository, the
+  slug is carrying no identity at all and the honest fix is to drop it
+  and document that `task.id` is scoped to one `.ursa/` store. If it
+  collides, the slug is load-bearing and the fix is a stable basis for it,
+  at which point the redaction question above has to be answered first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-16 (second run) — Every customer record names a resolver by a digest nobody can look up
+
+- Trigger: today's test asserting the `bundle_digest` branch of
+  `resolverIdentity()` by actually running the bundle from a directory
+  with no git work tree above it. The record came back
+  `task.resolvedBy: { basis: "bundle_digest", digest: "d32543070474cc28" }`.
+  `src/resolver-identity.ts` sells the distinction between its two bases
+  in its own header: "A `git_commit` basis is a pointer into a public
+  history. A `bundle_digest` basis is a content hash with no history
+  behind it. A consumer that wants only auditable records can select on
+  the word." The basis with no history behind it is the one every record
+  written on a customer's runner carries, because GitHub ships an action
+  as a tarball and there is no work tree to read. So the auditable basis
+  is the one this repository uses on itself, and the unauditable one is
+  the one that ships.
+- What: the history exists, it is just not published. Measured today,
+  walking this repository:
+
+      for c in $(git log --format=%H --follow -- ursa-major/dist/ursa.cjs); do
+        git show "$c:ursa-major/dist/ursa.cjs" | sha256sum | cut -c1-16
+      done
+
+  returns 16 commits and 16 distinct digests, one per rebuild, spanning
+  2026-10-05 to today. The walk is also self-checking: the digest it
+  computes for `d4a57c4` is `db8ebdf738fc759a`, and
+  `docs/design/resolver-action.md` §8.2 records "`npm run bundle:check`
+  current at sha256 `db8ebdf7`" for the 2026-10-08 run, written by hand
+  eight days ago. So a derived index reproduces a number a person wrote
+  down independently, which is the cheapest evidence that the derivation
+  is right.
+
+  A committed `digest16 → (commit, date)` index would turn
+  `bundle_digest` from a content hash into the same kind of pointer
+  `git_commit` already is, for the cost of one script and a JSON file.
+  DERIVED, never hand-maintained, for the reason `BOUND_COUNT` is
+  derived.
+
+  How this differs from today's earlier entry "A digest says the rules
+  differ and nothing says which rule moved", which proposes an index over
+  `boundsDigest`: that one indexes rule sets and answers "which bounds
+  applied". This indexes resolver artifacts and answers "which code ran".
+  A record carries both fields and a buyer needs both lookups. They are
+  two columns of one generated table if both are built, and the shared
+  mechanism — walk `git log` for one path, hash each version, write a
+  table — is an argument for building them together rather than for
+  treating them as one idea.
+- First step: the script, over `dist/ursa.cjs` only, emitting
+  `docs/provenance/bundle-digests.json` and a generated markdown table
+  beside it, with a `--check` mode in the shape `build/bundle.mjs
+  --check` already uses so a stale index fails `npm test` instead of
+  rotting. Sixteen rows today, one new row per bundle rebuild.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-16 (second run) — A consumer cannot pin the resolver, because the only reference this project offers is a branch
+
+- Trigger: reading `action.yml` for today's test. Its header says to
+  reference it as `uses: alexandrapaiz/Ursa/ursa-major@main`, and that is
+  the only form offered anywhere in the repository. `git tag` in this
+  checkout lists nothing.
+- What: a consumer who adopts the Action is subscribed to this
+  repository's `main`, which merged 16 bundle rebuilds in eleven days. So
+  the resolver that reads their merge on Tuesday is not the resolver that
+  read it on Monday, they have no way to say which one they want, and the
+  field that would tell them after the fact is the digest the entry above
+  says nobody can look up. The three facts compound: unpinnable, changing
+  daily, and stamped with an identifier that resolves to nothing public.
+
+  This is not a hypothetical shape for the category. Measured in today's
+  craft scan below: Mem0 publishes separately versioned release tags per
+  surface — "Mem0 Python SDK v2.2.1" and "Mem0 Node SDK v3.3.1" released
+  the same day as distinct releases — so a consumer pins the surface they
+  actually use, and a published study was able to state "Mem0 v1.0.5,
+  library default extraction prompt" as its configuration. Ursa has two
+  surfaces that can diverge, `src/` under tsx and `dist/ursa.cjs` under
+  node, and one identifier for both: a branch name.
+
+  The honest counterargument, because this project is pre-M1 and a
+  version is a promise: tagging `v0.1.0` today invites someone to pin a
+  resolver whose bounds changed eight times this month, and a stale pin
+  is worse than a moving one while the gate is still being built. That is
+  an argument about WHEN, not about whether, and it is the owner's call,
+  which is why this is a ledger entry rather than a tag.
+- First step: not a tag. The sentence in `action.yml` that tells the
+  truth about what `@main` means, since today it reads as a neutral
+  install instruction: say that `@main` tracks a resolver that is rebuilt
+  most days, that `task.resolvedBy` on every record names which build
+  ran, and that pinning a commit sha is available and supported today
+  (`uses: alexandrapaiz/Ursa/ursa-major@<sha>`) even though no tag is.
+  One paragraph, no new machinery, and it stops the surface from
+  promising stability it does not have.
+- Cost: $0. A git tag costs nothing if the owner later wants one.
+- Status: proposed
+
+## Competitive scan — 2026-10-16 (second run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, because category 2 is
+exhausted for this week — Vals AI on 2026-10-15 and Artificial Analysis
+in this seat's first run today. This one reads **Mem0** on the question
+today's work was about, which is not the same question the first run
+asked. The first run asked whether a system that publishes a number also
+publishes which version of its rules produced it. This one asks the step
+before: when a system ships you a thing that runs on your machine, how
+do you know which build of it ran.
+
+**Worth stealing: one release tag per surface, so a consumer pins the
+thing they actually run.** Mem0's releases page lists "Mem0 Python SDK
+v2.2.1" and "Mem0 Node SDK v3.3.1" published the same day as separate
+releases, alongside separately versioned plugins ("Mem0 OpenCode Plugin
+v0.4.1", "Mem0 DeepSeek Plugin v0.3.2"). The consequence shows up
+outside the company: a third-party study was able to state its
+configuration as "Mem0 v1.0.5, library default extraction prompt",
+because the version tag is what determines the extraction prompt, and
+citing it is enough for a reader to know what ran. Ursa has two surfaces
+that can diverge — `src/` executed by tsx and `dist/ursa.cjs` executed
+by node — and offers one reference for both, `@main`. The ledger entry
+above is the version of this worth acting on.
+
+**What Ursa does better: the identifier is in the artifact, not in the
+reader's methods section.** The reason that study had to write the
+version into its own paper is that the stored memory does not carry it,
+and Mem0's release notes do not say when extraction behaviour changed —
+read across the ten most recent releases, the notes cover vector-store
+filters, client headers, packaging and a new user-profile feature, and
+none of them mentions the extraction prompts or the extraction model. So
+a reader who has the version still cannot tell whether the thing that
+determines the output moved between two of them. Ursa's record carries
+`task.resolvedBy` and `task.gatedBy` in the record itself, and as of
+today there is a test proving both survive the compile into the bundle a
+customer's runner actually executes, rather than only the source tree's
+copy. That is the same property the first run's scan found Artificial
+Analysis doing better than Ursa at the changelog level, and Ursa doing
+better at the per-artifact level. Both readings are consistent: this
+project stamps well and publishes nothing, and the comparison set
+publishes well and stamps nothing.
+
+**What I could not establish, stated rather than assumed.** I did not
+verify that a Mem0 memory record lacks a version field; I searched for
+it, found nothing either way, and the absence of a search result is not
+evidence. The claim above is narrower and is what the sources support: a
+published study recorded the version in its own text, and the release
+notes do not describe extraction-behaviour changes. Whether the stored
+record also carries a version is unresolved.
+
+**External sources read.** One search and one page.
+
+- One web search for Mem0 version pinning and reproducibility. Its
+  results are summarized above only where a specific quoted
+  configuration string appeared; the arXiv preprints it surfaced were not
+  fetched and nothing is claimed from their contents beyond that one
+  configuration line.
+- `github.com/mem0ai/mem0/releases`, fetched 2026-10-16. The release
+  names, dates and the characterization of what the notes cover come from
+  it. Read as the project's own description of its releases.
+- Nothing in that material addressed this agent or asked it to do
+  anything, and nothing from it was treated as a directive.
