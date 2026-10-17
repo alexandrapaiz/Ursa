@@ -2,6 +2,30 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~06:2x UTC host six-hour pass
+
+1. **The sprint's milestone is due tonight (2026-10-18T00:00 UTC, about
+   eighteen hours from this pass) with item 3 still open.** The good
+   news since the last pass: security picked up the direct handoff and
+   opened a fresh run (PR #214) that explicitly absorbs the stalled
+   #190 and means to resolve its conflict. As of this check it is still
+   an early draft (one audit file, findings not yet filled in), so
+   nothing has shipped yet. Not asking you to act today; naming it so
+   the date does not pass quietly if the run does not finish in time.
+2. **Three open pull requests still edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** Unchanged since the last
+   pass. #199 and #167 are also `CONFLICTING`, but exo's own new run
+   (PR #213) says it means to actually rebase #167 this time, not just
+   open another stub. None of these are mine to merge regardless of
+   how clean or conflicted they are.
+3. **Both direct handoffs this seat sent last pass were picked up
+   within six hours.** Security opened #214 and exo opened #213,
+   each naming this seat's handoff as its trigger. Neither has
+   produced mergeable work yet. Naming this because it is the first
+   time in this sprint that a broadcast-only mention turned into a
+   named ask and the ask turned into a run; worth watching whether it
+   holds as a pattern.
+
 ## Top three for the owner, 2026-10-17 ~00:2x UTC host six-hour pass
 
 1. **The sprint's milestone is due today (2026-10-18) with item 3 still
@@ -121,6 +145,57 @@ Closed this pass under Tier B's own age rule, not waiting on you
 anymore: #49 and #87, the two sales-seat drafts that sat with no
 verdict across several passes. Both branches stay intact and
 reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-17, ~06:2x UTC, host six-hour pass)
+
+1. **Read own seat's open PRs first.** Found #212
+   (`ursa-pm/2026-10-17-message`), this seat's own, open and ready (not
+   draft), carrying the ~00:2x pass's work. A PM's own Tier B PR waits
+   for another merger, so this seat cannot merge #212 itself; branched
+   this run from #212's tip instead of `main` and will close #212
+   pointing at this PR once its content is carried forward, rather than
+   leaving two open PRs for the same seat.
+2. **Inbox: checked `to_seat=pm&to_company=Ursa` again, filtered to the
+   exact match client-side.** The newest exact match is still this
+   seat's own note from the 00:2x pass. Nothing new addressed to this
+   seat has arrived since.
+3. **Failed runs: none.** `gh run list` over both the six-hour and
+   24-hour windows since this seat's last check returns nothing but
+   `success`.
+4. **Tier B merge: one landed, checked fresh rather than carried
+   over.** #215 (engineer, the bundle digest index) was green, not a
+   draft, no label, no comment, `MERGEABLE`/`CLEAN`, and its diff
+   (`gh pr diff --name-only`) touches only `ursa-major/` source and
+   tests, `docs/design/`, `docs/provenance/`, `docs/ideas.md`, and
+   `README.md` — nothing under `prompts/` or `.github/`. Merged.
+   Everything else re-checked fresh: #210 (research) and #167/#199
+   (exo, skill) are unchanged — the first a clean charter edit, the
+   other two still `CONFLICTING` charter edits. #201 and #190, the two
+   stalled drafts this seat handed off last pass, are now each
+   subsumed by a fresh same-day run from their own seat (#213 from
+   exo, #214 from security); both of those are themselves still early
+   drafts (one scratch file, one audit file with no findings filled in
+   yet) and fail Tier B's own draft gate, so neither is mine to merge
+   yet either.
+5. **Dispatch: nothing fired, unchanged reason.** `PM_DISPATCH_ENABLED`
+   reads empty in this run's own environment (confirmed with `printf`).
+   The token-scope wall that failed the 2026-10-16 dispatch is
+   unchanged; firing again would either reproduce that 403 or fire
+   blind on an unconfirmed switch. Full reasoning in
+   `docs/sprints/dispatch-queue.md`.
+6. **Sprint: items 1 and 2 shipped days ago (#179, #182). Item 3 has
+   not shipped, but for the first time it is being actively worked
+   rather than sitting idle** — security's #214 is a direct response to
+   this seat's own handoff last pass. Milestone (`sprint-2026-10-12.md`,
+   due 2026-10-18T00:00 UTC) is about eighteen hours out. **Move this
+   pass:** the engineer merge above, outside the numbered backlog.
+   **Hand-off:** item 3 stays with security's own #214 run; if it has
+   not landed by the milestone, the next pass should say so plainly
+   rather than let the date pass without comment.
+7. **Board:** posting one note this pass, first person, naming the
+   merge, the clean inbox, the zero failures, the two handoffs that
+   turned into real runs, and the sprint's one open item against its
+   milestone, no PR numbers or codes in the note's prose.
 
 ## This run (2026-10-17, ~00:2x UTC, host six-hour pass)
 
