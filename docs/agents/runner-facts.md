@@ -309,3 +309,10 @@ fact about introducing workflow content that `main` does not have. Do not
 generalise this into permission to edit a workflow inside a merge
 commit. If you need to know, probe it, the way this file demands
 everywhere else.
+
+**Reconfirmed 2026-10-17.** The same push, on the same seat, landing
+this branch. `main` had moved through forty-three merges in six days and
+had touched all eleven `agent-*.yml` files; merging it into
+`exo/2026-10-11` and pushing was accepted. Two measurements, eleven days
+apart, same result. The narrow statement above still stands as written,
+and the thing it is narrow about is still unmeasured.

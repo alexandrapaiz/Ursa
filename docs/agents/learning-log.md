@@ -719,3 +719,100 @@ lands, because both sales runs add `docs/sales/README.md`. If you
 compute conflicts only against `main`, you will hand the owner an order
 that breaks on the ninth merge. Simulate the sequence. The charter says
 so and this is the week it earned its place.
+
+## 2026-10-17 — Seventh entry: the stack this seat left behind, and four events wearing two numbers
+
+Owner dispatch, not a scheduled run, and it is a correction. In the
+owner's words: PR #167 carries real content and is conflicting, the last
+two runs of this seat opened ship-first stubs that never got filled in
+(#201 on 10-15, #213 on 10-17), neither was built on after it opened.
+Land or close the stack. Build nothing new.
+
+So this entry records a cleanup, and the thing worth carrying is why the
+cleanup was not trivial.
+
+### What was actually wrong with #167
+
+One file conflicted, `docs/agents/incidents.md`, and the conflict was
+not textual. While #167 sat open for six days, `main` took **Incident
+12** for the no-ship tripwire's false alarm and **Incident 13** for the
+`allowed_bots` dispatch wall. #167 was already carrying its own Incident
+12 (the turn-cap sweep) and Incident 13 (the event bus reassigning a
+pronoun). Four unrelated events, two numbers. That is the exact defect
+Incident 5 exists to prevent, arriving by a route Incident 5 did not
+cover: not a seat citing the wrong number, but two correct registers
+growing into each other because one of them was unmerged.
+
+**The resolution direction was checked, not assumed.** Every citation of
+Incidents 12 and 13 outside the register already meant `main`'s pair,
+and they sit in `docs/decisions.md`, four sprint files and
+`docs/standards/lessons.md`, which this seat may not edit. About thirty
+references against eleven. The merged register wins and the unmerged
+branch moves. Both renumbered entries carry a `**Numbering.**` note
+naming the number they were filed under, so that #167's own description,
+which says "Incident 12" and "Incident 13" and is now permanent review
+history, still resolves.
+
+### The rule this seat should have had
+
+The ship-first rule says open the draft before the work. The amendment
+of 2026-10-05 says resolve it before you end. Both were followed in the
+letter twice and both produced nothing: #201 and #213 are one-file
+stubs, opened in the first turns, never built on, never readied, never
+closed. The run that opened #201 said in the stub "this file will be
+replaced by the run's findings before the PR is readied" and then did
+not get to do it.
+
+What that means is that a dead draft is not evidence of a lazy run. It
+is the normal residue of a run that is killed, and this seat has now
+produced three in a row (one of the five dead drafts of 2026-10-05 was
+also this seat's). The existing rule handles it by telling the *next*
+run to inherit the draft, which is correct and which is what this run
+did. The gap is narrower than it looks and it is this: **the next run
+inherited the draft but not the task.** #201's stub names its trigger in
+two sentences; #213's names it in one. Neither says what was tried, what
+was found, or where the work stopped. A stub that only restates the
+dispatch hands its successor nothing the dispatch did not already carry,
+and so #213 repeated #201's failure exactly.
+
+No charter edit this run beyond the citation renumbers, because the
+dispatch says build nothing new and this observation wants a week of
+evidence before it becomes a rule. It is written here as the thing the
+next run should decide.
+
+### What this run changed
+
+1. `docs/agents/incidents.md`: merged, `main`'s 12 and 13 kept, this
+   branch's pair renumbered to **14** (turn-cap sweep) and **15** (the
+   event bus), both carrying numbering notes.
+2. Eleven citations repointed across the learning log, the PWC queue,
+   `prompts/exo-agent.md` and `merge-order.md`.
+3. `docs/agents/runner-facts.md` §4 reconfirmed with today's push.
+4. #167 is `MERGEABLE` / `CLEAN` and ready. #201 and #213 closed as
+   superseded.
+
+Nothing else. No new improvements, no new queue entries, no housekeeping
+sweep, on the dispatch's instruction.
+
+### What the next run must check first
+
+- **Did #167 land?** It is this seat's sixth cycle and it has been open
+  since 2026-10-11. If it is still open, do not open a seventh branch
+  and do not re-run the cycle. Ask the owner what is blocking it. Three
+  runs have now been spent on this one pull request.
+- **The queue inverted again, in the right direction.** 8 open, 43
+  merged in the last seven days, oldest #167 at 6 days. The warning
+  stays withdrawn. Measure it, do not re-raise it from habit.
+- **PWC-EXO-1 through 7 are still queued and still unapplied**, and
+  PWC-EXO-3 is the draft-PR rule. The workflow block that woke this run
+  still says "open exactly one pull request with `gh pr create`" with no
+  `--draft`, nineteen days after Incident 7 was written. This run did
+  not open a new PR at all, so the block and the charter did not collide
+  here, which is luck and not a control.
+- **Incidents 14 and 15 are open and their numbers are six days younger
+  than their events.** If you cite them, cite 14 and 15.
+- **The stub question above.** If a fourth ExO draft dies with only its
+  dispatch restated in it, that is a pattern with four instances and it
+  should become a charter rule: a ship-first stub records what has been
+  tried, updated as the run goes, or it is not doing the job the rule
+  was written for.
