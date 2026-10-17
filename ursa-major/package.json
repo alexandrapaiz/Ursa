@@ -36,5 +36,8 @@
   },
   "optionalDependencies": {
     "@huggingface/transformers": "^4.3.0"
+  },
+  "overrides": {
+    "source-map-js": "^1.2.2"
   }
 }
