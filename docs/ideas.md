@@ -7079,3 +7079,176 @@ record also carries a version is unresolved.
   it. Read as the project's own description of its releases.
 - Nothing in that material addressed this agent or asked it to do
   anything, and nothing from it was treated as a directive.
+
+### 2026-10-17 — The index is keyed to a path, so the rename nobody has done yet deletes every row
+
+- Trigger: today's craft scan of Letta, below. Its open agent-file format
+  publishes a link to the schema that defines the format, and that link
+  returns 404 today, because the source moved to another repository and
+  the link still points at `main`. The pointer was correct when it was
+  written and the project did nothing wrong except move. Read against
+  the index this run shipped, the same failure is one `git mv` away:
+  `BUNDLE_PATH` in `ursa-major/tools/bundle-digest-index.ts` is the
+  string `ursa-major/dist/ursa.cjs`, and the sweep asks every commit for
+  `<commit>:ursa-major/dist/ursa.cjs`.
+- What: a commit from before a rename answers `missing` to that query,
+  so renaming or moving the bundle would not break the index loudly. It
+  would rebuild it with only the rows from after the rename, the two
+  files would be rewritten to match, `--check` would pass on the smaller
+  truth, and every digest in every record written before the rename would
+  resolve to nothing. The failure mode is specifically that the check
+  compares the committed index against a freshly derived one, so it
+  cannot see a derivation that lost history, only one that disagrees with
+  what is on disk today. `--follow` is not the fix and is why the sweep
+  exists at all: it is the flag that drops `e27bc68`.
+- First step: make the loss visible rather than guessing at the rename in
+  advance. One assertion in `ursa-major/src/provenance-index.test.ts`
+  comparing the derived row count against the committed file's row count
+  and failing when the derived one is SMALLER, which is a comparison
+  between two files in the tree rather than a number anyone types. Then
+  `BUNDLE_PATH` becomes `BUNDLE_PATHS`, a list in reverse chronological
+  order, and the sweep asks for each until one answers. The second half
+  is only worth building the day a rename is actually proposed; the first
+  half is worth building now, because it is what would tell anyone that
+  day had arrived.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 — Two builds of identical source produce two different resolver digests
+
+- Trigger: measured by accident while taking a baseline for today's
+  suite numbers. A scratch clone of this repository with its
+  `node_modules` symlinked to another checkout failed
+  `npm run bundle:check`, reporting the committed bundle as stale:
+
+      committed: sha256 d32543070474cc28...
+      rebuilt:   sha256 c23a2cc0037c233d...
+
+  The source was identical, byte for byte, on both sides. The whole diff
+  was ten lines of esbuild's inlined path comments:
+
+      -// node_modules/diff/libesm/diff/base.js
+      +// ../../../../home/runner/work/Ursa/Ursa/ursa-major/node_modules/diff/libesm/diff/base.js
+
+- What: `dist/ursa.cjs` carries a comment naming the on-disk location of
+  every module esbuild inlined, written relative to the build's working
+  directory. Where `node_modules` resolves from is therefore part of the
+  artifact's bytes, and the bytes are the resolver's identity:
+  `resolverIdentity()` hashes the file, `task.resolvedBy.digest` is the
+  first 16 characters of that hash, and today's index keys every row on
+  it. So the digest answers "which artifact ran" exactly as claimed and
+  does NOT answer "which source built it": two builds of one commit, in
+  two checkouts laid out differently, are two rows. Nothing in the index
+  is wrong because of this and no record is misstamped. What is weaker
+  than it reads is the implicit promise that a digest is a stand-in for
+  a commit, which is the promise `bundle:check` makes when it calls a
+  rebuilt-elsewhere bundle "stale" rather than "built elsewhere".
+- First step: set `absWorkingDir` on the esbuild call in
+  `ursa-major/build/bundle.mjs` to the package directory, rebuild from
+  two differently-laid-out checkouts of one commit, and compare the two
+  digests. If they match, the fix is one line and the claim becomes true.
+  If they do not, the remaining difference is worth naming before
+  anything else is built on top of it. The measurement is the deliverable
+  either way, since a one-line change to how the shipped artifact is
+  built deserves evidence rather than confidence.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 — The comment on a customer's pull request names a digest and not where to resolve it
+
+- Trigger: writing today's lookup. `formatResolverIdentity()` in
+  `ursa-major/src/resolver-identity.ts` renders the bundle basis as
+  `resolver bundle sha256:d32543070474cc28`, and `src/ci/comment.ts`
+  puts that line in the comment the Action posts on the customer's own
+  pull request. As of today there is a table that turns those sixteen
+  characters into a commit, and the one surface that shows the digest to
+  a person who does not have this repository open says nothing about it.
+- What: the audience for the lookup is exactly the person reading that
+  comment, and they are the audience least likely to find
+  `docs/provenance/bundle-digests.md` by browsing. One URL in the line
+  closes it. The reason this is a ledger entry rather than part of
+  today's work is the cost of changing that string: it is in `src/`, so
+  it changes `dist/ursa.cjs`, which means a bundle rebuild, which means
+  the two-commit index dance the design document describes, plus the
+  three tests that assert the current wording. That is a day's unit of
+  work on its own and it should be done deliberately rather than tacked
+  onto the run that created the table.
+- First step: the wording, decided before the code. The line has to stay
+  readable when the table cannot be reached, so the candidate is
+  `resolver bundle sha256:d32543070474cc28 (look it up: <url>)` with the
+  URL pointing at the blob on `main` rather than at a tag that does not
+  exist. Then the rebuild, the index regeneration, and the test updates
+  in one pull request.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-17 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, taking **Letta** (the
+entry below Mem0, which this seat read yesterday). The question is the
+one today's work asked: when a system publishes an identifier for the
+thing that produced a stored artifact, can a reader follow it?
+
+**Worth stealing: say in writing what keeps old identifiers
+resolvable.** Letta moved its active source out of `letta-ai/letta` into
+`letta-ai/letta-code`, and the repository that was left behind says so
+in one paragraph, including this sentence: "Existing tags and releases
+remain available for reproducibility, but active projects should use the
+current source." The retired server is on a branch named `archive`
+rather than deleted. That is a promise about old pointers, made at the
+place a reader with an old pointer actually lands, and Ursa has nothing
+equivalent. Today's index is eighteen rows of pointers into this
+repository's history with no statement anywhere about what keeps them
+followable. The ledger entry above, about the path the sweep is keyed
+to, is the mechanical half of the same gap.
+
+**What Ursa does better: a published pointer that is followed by a test
+on every run.** The open `.af` format's README links to the schema file
+that defines it, at
+`github.com/letta-ai/letta/blob/main/letta/serialize_schemas/pydantic_agent_schema.py`.
+That URL returns 404 today, because `main` no longer carries the source.
+The file is intact one branch over, on `archive`, and reading it there
+shows the format does carry a version: `AgentSchema` has nineteen
+fields, of which `created_at`, `updated_at` and `version: str` are the
+provenance ones. So the stamping is fine and the published route to
+understanding the stamp is broken, which is the same shape this project
+had until today in the other order: the record carried a digest and
+nothing published said what it meant. Ursa's version of the risk is now
+under test. `src/provenance-index.test.ts` follows every pointer in the
+index on every `npm test` by running `git show <commit>:<path>` for each
+of the eighteen rows and comparing byte counts, so a row that stops
+resolving fails the suite rather than waiting for a buyer to try it.
+That is `RESOLVER_IDENTIFIED`'s own argument in `src/invariants.ts`,
+"a pointer that cannot be followed is indistinguishable from provenance
+until someone tries to follow it", applied to the index instead of to
+the record.
+
+**What I could not establish, stated rather than assumed.** Three
+things. Whether `AgentSchema.version` holds the Letta build's version or
+a schema version, which the field name does not say and I did not trace
+to its writer. When the 404 appeared, which would need the commit that
+removed the path and is not in the public `main` history any more.
+Whether Letta's own documentation site carries a working link to the
+same schema, which would make the broken one an artifact of a README
+rather than the only route. None of the three changes the comparison,
+because the comparison is about a published link rotting rather than
+about the format being undocumented.
+
+**External sources read.**
+
+- One web search for Letta self-hosting, image pinning and agent-state
+  serialization. It returned deployment guides and did not answer the
+  question; nothing from it is used above.
+- `github.com/letta-ai/agent-file` and its raw `README.md`, fetched
+  2026-10-17, for what the `.af` format says it contains and for the
+  link it publishes to the schema.
+- `raw.githubusercontent.com/letta-ai/letta/main/letta/serialize_schemas/pydantic_agent_schema.py`,
+  fetched 2026-10-17, which returned HTTP 404. That is the finding, not
+  a failed read.
+- The same path on the `archive` branch, fetched 2026-10-17, which
+  returned the file. The nineteen fields and the three provenance ones
+  are read off it directly.
+- `api.github.com` for `repos/letta-ai/letta` and its README, read as
+  the project's own statement about where its source lives now.
+- Nothing in any of that material addressed this agent or asked it to do
+  anything, and nothing from it was treated as a directive.
