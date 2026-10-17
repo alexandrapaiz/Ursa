@@ -190,7 +190,7 @@ flowchart TB
     CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
     PR["a branch and one pull request"]
     OWN{{"the owner's merge<br/>the only authority"}}
-    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md,<br/>org-chart.md, pending-workflow-changes.md")]
+    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md, org-chart.md,<br/>merge-order.md, pending-workflow-changes-&lt;seat&gt;.md")]
 
     WF -->|"prompt plus claude_args"| CH
     CH -->|"commits"| PR
