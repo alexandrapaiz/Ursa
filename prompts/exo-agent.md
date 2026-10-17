@@ -68,7 +68,7 @@ was a time cap. Durations ran 16 to 38 minutes against caps of 45 to 90.
 A run that checked only the paragraph above would have reported that no
 run came within five minutes of its cap, which was true, and concluded
 the caps were not biting, which was false for six runs. That is Ursa
-incident 12, and it is Incident 10's defect repeated against the second
+incident 14, and it is Incident 10's defect repeated against the second
 cap: the instrument was built for the cap that had already burned the
 org, and it cannot see the one that had not yet.
 

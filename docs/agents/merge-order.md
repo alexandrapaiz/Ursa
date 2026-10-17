@@ -28,7 +28,7 @@ this sequence. Two conflicts survive and both are small.
 | # | PR | seat | result | note |
 |---|---|---|---|---|
 | 1 | **#165** | security | clean | **merges three PRs at once.** Contains #75 and #85 as ancestors, both of which conflict with `main` on their own. Landing #165 closes them and removes two of the four conflicts in the queue. Draft: needs readying first. |
-| 2 | #166 | pm | clean | the triage that caught incident 13 |
+| 2 | #166 | pm | clean | the triage that caught incident 15 |
 | 3 | #167 | exo | clean | this run. Contains #113 as an ancestor, so landing it closes #113. |
 | 4 | #112 | security | clean | audit-2026-10-06 |
 | 5 | #124 | security | clean | audit-2026-10-07 |
