@@ -1,41 +1,41 @@
-# Dispatch queue — 2026-10-17, ~06:2x UTC host six-hour pass
+# Dispatch queue — 2026-10-17, ~12:2x UTC host six-hour pass
 
 `PM_DISPATCH_ENABLED` reads empty in this run's own environment
-(`printf '%s\n' "$PM_DISPATCH_ENABLED"`, no error this time, just
-unset). Not assuming it is `true` from the last confirmed read
-(2026-10-16 ~15:1x UTC, an Actions run with a different credential
-shape); not firing anything this pass on an unconfirmed switch.
+(`printf '%s\n' "$PM_DISPATCH_ENABLED"`, unset again). Not assuming it
+is `true` from the last confirmed read (2026-10-16 ~15:1x UTC, an
+Actions run with a different credential shape); not firing anything
+this pass on an unconfirmed switch.
 
 ## What changed since the last entry
 
-Nothing on the ground changed the token-scope wall that failed the
-2026-10-16 dispatch. No new failure to classify. The one real change:
-both seats this pass would otherwise have considered dispatching
-already started their own runs on their own trigger (exo's #213,
-security's #214), each citing this seat's own board handoff from the
-last pass as the reason. Dispatching either now would duplicate live
-work, not start it.
+Nothing on the ground. The token-scope wall is unchanged. No new
+failure to classify. The one new fact: both seats this pass would
+otherwise consider dispatching have gone quiet rather than stalled on
+an error — `security's #214` and `exo's #213` carry no commit since
+they opened at ~00:30 UTC, and a check of the live sessions on this
+host found neither seat holding a window right now. That is twelve
+hours idle, not a failure this seat can see a cause for, and not yet
+the kind of gap the dispatch criteria ask for (no failing CI, no
+unanswered review comment, and the owning seat has in fact run this
+sprint already).
 
 ## Dispatched by the PM
 
-None this pass. Both live candidates are already being worked by
-their own seat's fresh run; firing a dispatch at either would
-duplicate in-progress work, which the hard stops already forbid in
-spirit even before reaching the switch question.
+None this pass. Neither live candidate meets a dispatch criterion yet
+(see above), and the token-scope wall would refuse the call before it
+reached either workflow regardless.
 
 ## Proposed, not fired this run
 
-1. **Security, sprint item 3.** No longer a dispatch candidate this
-   pass: PR #214 is already a fresh, same-day run from the security
-   seat itself, explicitly absorbing the stalled #190 and resolving its
-   conflict. Watching rather than dispatching. If #214 stalls before
-   the milestone (`sprint-2026-10-12.md`, due 2026-10-18T00:00 UTC,
-   about eighteen hours from this pass), the next pass should reconsider
-   dispatching, and only then with the switch's state confirmed first.
-2. **Exo, PR #167's conflict.** Also no longer a dispatch candidate:
-   PR #213 is a fresh same-day run from the exo seat, opened to resolve
-   #201 and actually rebase #167, citing this seat's handoff as its
-   trigger. Watching, not dispatching.
+1. **Security, sprint item 3.** Watching, not dispatching. #214 has
+   gone quiet rather than failed, and §11.3's criteria for dispatching
+   a stalled seat need a failing check or an unanswered review
+   comment, neither of which applies to a draft nobody has reviewed
+   yet. If #214 is still untouched at the next pass, with the
+   milestone (`sprint-2026-10-12.md`, due 2026-10-18T00:00 UTC) closer
+   still, that changes the read.
+2. **Exo, PR #167's conflict.** Same reasoning. #213 has gone quiet,
+   not failed; watching rather than dispatching.
 3. **Nothing else met the bar.** Frontend has no live stalled branch;
    no ADR merged since the last pass names a seat with no run
    following; no milestone besides the sprint's own 2026-10-18 date is

@@ -2,6 +2,29 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~12:2x UTC host six-hour pass
+
+1. **The sprint's milestone is about twelve hours out (2026-10-18T00:00
+   UTC) and item 3 still has not shipped.** The two runs this seat
+   handed the work to six hours ago, security's #214 and exo's #213,
+   are both unchanged since they were opened at ~00:30 UTC: still one
+   placeholder file each, no new commits in twelve hours. Checked
+   whether either seat has a live window right now rather than
+   guessing from the PR alone — neither does, so nothing will move on
+   either branch until that seat's own next run picks it back up.
+   Not asking you to act today; naming it so the date does not pass
+   quietly if neither run resumes in time.
+2. **Three open pull requests still edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** Unchanged again. #199 and
+   #167 are also `CONFLICTING`. None of these are mine to merge
+   regardless of how clean or conflicted they are.
+3. **Nothing new qualified for Tier B this pass.** Every open pull
+   request this seat does not itself own was already true on the last
+   check: a draft, a charter edit, a conflict, or some combination of
+   the three. The queue has not grown and nothing in it is a fresh
+   decision for you; it is the same shape the last two passes already
+   named.
+
 ## Top three for the owner, 2026-10-17 ~06:2x UTC host six-hour pass
 
 1. **The sprint's milestone is due tonight (2026-10-18T00:00 UTC, about
