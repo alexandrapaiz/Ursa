@@ -314,7 +314,7 @@ already being lost, and names the trade rather than hiding it.
 > rule is in eleven of eleven charters and zero of eleven workflow
 > `prompt:` blocks, six days after this entry was queued. The guardrail
 > that worked is in the half of the charter §2b says loses a conflict.
-> Full postmortem: Ursa incident 13.
+> Full postmortem: Ursa incident 15.
 
 **Evidence.** The §2b both-halves sweep, run 2026-10-05. The
 external-content rule shipped to 11 of 11 charters in this pull request
@@ -363,12 +363,12 @@ and the handoff text in Incident 11 still names the wrong number.
 **The evidence.** Six of the seven agent failures in the week to
 2026-10-11 ended on `error_max_turns`, across four seats, at 16 to 38
 minutes against `timeout-minutes` caps of 45 to 90. Full list and
-run IDs in Incident 12.
+run IDs in Incident 14.
 
 | seat | current `--max-turns` | failures this week | note |
 |---|---|---|---|
 | engineer | 120 | 3 | lowest explicit cap of any seat; runs twice daily and does build work |
-| security | 100 | 1 | lost unpushed commits when it died (Incident 12) |
+| security | 100 | 1 | lost unpushed commits when it died (Incident 14) |
 | skill | 100 | 1 | |
 | frontend | 250 | 1 | highest cap in the roster and still hit it |
 | pm | 140 | 0 | |
@@ -400,12 +400,12 @@ rediscovering it:
 
 ```yaml
           # --max-turns 200: raised from 120 on 2026-10-11 after three
-          # turn-cap kills in five days (incident 12). This seat runs
+          # turn-cap kills in five days (incident 14). This seat runs
           # twice daily and does build work, so it carries the roster's
           # heaviest turn count. Revisit if runs stop reaching 150.
 ```
 
-**The exact edit, part 3: payload hygiene (incident 13).** Where a
+**The exact edit, part 3: payload hygiene (incident 15).** Where a
 dispatch payload includes text quoted from another run, it must be
 fenced and labelled rather than concatenated into the instruction body,
 because "this seat" in a quoted PR body resolves to the recipient. The

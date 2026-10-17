@@ -629,7 +629,7 @@ commands faithfully, which is what this seat is built to be, inherits
 the narrowing and loses the lesson. §2 now carries both the turn-cap
 command and the general rule: any finite budget a run can exhaust is a
 cap, and a new instrument should ask what budgets are invisible to it.
-That is Incident 12. Written up with run IDs.
+That is Incident 14. Written up with run IDs.
 
 `num_turns` appears in the log of every run including successes, so
 this is a leading indicator. The engineer spent 89 of 120 on a run that
@@ -642,7 +642,7 @@ its turn cap. The dispatcher assembling the PM's failure-triage payload
 copied that sentence in verbatim, pronoun intact, and the PM read an
 instruction to go and write to five security-seat PRs. It declined,
 correctly, citing the external-content rule, and said in writing that
-it had touched none of them. That is Incident 13.
+it had touched none of them. That is Incident 15.
 
 Two things worth carrying. First, the rule that saved it is in eleven of
 eleven charters and zero of eleven workflow `prompt:` blocks, which is
@@ -657,11 +657,11 @@ attacker anywhere in it.
 ### What this run changed
 
 1. `prompts/exo-agent.md` §2: the turn-cap instrument and the general
-   budget rule (Incident 12).
+   budget rule (Incident 14).
 2. `docs/agents/incidents.md`: Incidents 12 and 13, full postmortems.
 3. `docs/agents/pending-workflow-changes-exo.md`: **PWC-EXO-7**, raising
    the four caps with evidence behind them and requiring a recorded
-   reason on every cap, plus payload fencing for Incident 13. PWC-EXO-6
+   reason on every cap, plus payload fencing for Incident 15. PWC-EXO-6
    annotated with its near-miss.
 4. `docs/agents/merge-order.md`: rewritten, simulated.
 5. `docs/agents/runner-facts.md` §3 corrected, and the matching charter
@@ -687,7 +687,7 @@ attacker anywhere in it.
   last. Incident 7 is still live.
 - **Did the turn caps get raised?** If yes, report a full week's
   `error_max_turns` count and the turn-usage ratios either way.
-  Incident 12 does not close on a quiet week alone.
+  Incident 14 does not close on a quiet week alone.
 - **ADR-005 and ADR-006 are still each used twice** in
   `docs/decisions.md`, for four unrelated rulings. PWC-EXO-2. Never
   renumber an accepted ADR yourself. It stays on the list until the
