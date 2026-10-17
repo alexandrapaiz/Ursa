@@ -49,6 +49,7 @@ still 403s; wrapper still absent) in `docs/decisions.md`.
    build nothing new. Use #213 (or #167 directly) to resolve the
    conflict and finish the rebase #201 proposed but never landed, then
    close #201 as superseded with a one-line reason.'`
+   Run: https://github.com/alexandrapaiz/Ursa/actions/runs/39039975482.
    Trigger: the same §11.3 criterion, confirmed separately for this
    seat's own two open PRs.
 
