@@ -2,6 +2,31 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~14:1x UTC scheduled standup (GitHub Actions `pm-agent`)
+
+1. **The token-scope wall that has blocked every Actions-run PM
+   dispatch since 2026-10-12 is resolved, this pass.** Not by a code
+   fix landing — by using `$DEFAULT_WORKFLOW_TOKEN` explicitly instead
+   of the ambient `GH_TOKEN`, exactly as pm.md §11.5 describes for the
+   still-missing `tools/gh-actions.sh` wrapper. Every earlier Actions
+   pass found that variable present as a name but empty as a value;
+   this pass found it non-empty, tried the substitution for real, and
+   it worked: `gh workflow run agent-security.yml` returned a run URL
+   instead of a 403. Full account in `docs/decisions.md`'s running
+   finding. Not asking you to act; naming it so the next pass and HQ's
+   centralizer stop treating it as an open blocker.
+2. **Two real dispatches fired this pass, both load-bearing, not
+   tests.** Security (#190, #214: land-or-close the stack, finish
+   sprint item 3's redaction standard or close the superseded one) and
+   exo (#201, #213: land-or-close, resolve PR #167's stale conflict).
+   Both satisfy pm.md §11.3's "two or more open PRs on one scope, none
+   merged" criterion, confirmed before firing, not assumed. Results
+   land in the next pass.
+3. **Three open pull requests still edit a charter file directly: #199
+   (skill), #167 (exo, now the target of today's dispatch), #210
+   (research).** Unchanged. None of these are mine to merge regardless
+   of how clean or conflicted they are.
+
 ## Top three for the owner, 2026-10-17 ~12:2x UTC host six-hour pass
 
 1. **The sprint's milestone is about twelve hours out (2026-10-18T00:00
@@ -168,6 +193,55 @@ Closed this pass under Tier B's own age rule, not waiting on you
 anymore: #49 and #87, the two sales-seat drafts that sat with no
 verdict across several passes. Both branches stay intact and
 reopenable; see "This run" below for the reasoning.
+
+## This run (2026-10-17, ~14:1x UTC, scheduled standup, GitHub Actions `pm-agent` run)
+
+1. **Read own seat's open PRs first.** Found #217
+   (`ursa-pm/2026-10-17-message-3`), this seat's own, open, ready (not
+   draft), `MERGEABLE`/`CLEAN`, touching only `docs/agents/incidents.md`,
+   `docs/decisions.md`, `docs/sprints/dispatch-queue.md` and
+   `docs/sprints/pending.md` — every changed file a Tier A knowledge
+   surface, matching this seat's own 2026-10-13 precedent for when to
+   self-merge rather than build on top. Self-merged #217 and started
+   this pass from the resulting `main`.
+2. **Inbox: checked `to_seat=pm&to_company=Ursa`, filtered to the
+   exact match client-side.** Newest exact match is this seat's own
+   note from the 12:2x pass. Nothing new addressed to this seat since.
+3. **Failed runs: none.** `gh run list --status failure --created
+   ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns an empty list.
+   Nothing to classify, rerun, or hand off.
+4. **Tier B merge check: nothing new.** #210 (research) still edits
+   `prompts/research-agent.md` directly, Tier C. #199 (skill) and #167
+   (exo) still `CONFLICTING` and still edit a file under `prompts/` or
+   are themselves the target of today's dispatch. #214 (security) and
+   #213 (exo) are still early drafts, not readied. #190 and #201 are
+   stale stubs from each seat's own earlier run. Nothing to merge.
+5. **The token-scope wall is resolved, confirmed by firing for real,
+   not by rereading the old finding.** `DEFAULT_WORKFLOW_TOKEN` reads
+   non-empty in this run's own environment, unlike every prior Actions
+   pass. Used it explicitly as `GH_TOKEN` (the §11.5 substitution for
+   the still-missing `tools/gh-actions.sh`) and fired
+   `gh workflow run agent-security.yml` — a real run URL came back,
+   not a 403. Full account in `docs/decisions.md`.
+6. **Dispatch: `PM_DISPATCH_ENABLED` is exactly `true` in this run's
+   environment, confirmed with the same `echo` test every pass uses.**
+   Two candidates met a real §11.3 criterion ("two or more open PRs on
+   one scope, none merged") and neither seat is mid-session on a live
+   window (checked the board's `runs` feed; only `pm` appears in the
+   last 25 entries): security (#190, #214, sprint item 3) and exo
+   (#201, #213, PR #167's conflict). Fired both, spaced three minutes
+   apart per §11.4: `agent-security.yml` run
+   [39039722291](https://github.com/alexandrapaiz/Ursa/actions/runs/39039722291),
+   `agent-exo.yml` fired roughly three minutes later. Neither result is
+   known yet as of this pass; the next pass reads the outcome. Zero
+   dispatches fired earlier today, so this pass used 2 of the 3 daily
+   slots and both allowed seats, well inside the ten-a-week ceiling.
+7. **Sprint: unchanged in substance, now actively pushed rather than
+   only watched.** `sprint-2026-10-12.md`, item 3 still open, milestone
+   due 2026-10-18T00:00 UTC, about ten hours out from this pass.
+8. **Board:** posting one note this pass naming the resolved wall and
+   the two dispatches (full text in the board message, not duplicated
+   here). Inbox stays open for anything addressed to this seat.
 
 ## This run (2026-10-17, ~06:2x UTC, host six-hour pass)
 
