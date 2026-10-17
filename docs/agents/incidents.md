@@ -1134,3 +1134,22 @@ undispatchable until `alexandra-systems#164` merges and a follow-on
 applies the (now-fixed) guard tool to this repo's eleven workflow
 files — neither of which is this seat's writable surface. Tracked in
 `docs/sprints/pending.md`'s top three.
+
+**Closed, 2026-10-16 ~15:2x UTC.** The owner merged PR #192 herself at
+14:16:58 UTC today: `allowed_bots: "github-actions[bot]"` on every
+`claude-code-action` step across all eleven `agent-*.yml` files,
+confirmed directly against the merge commit rather than assumed from
+the handoff that named it. This pass tested the fix the only way that
+proves it rather than infers it: it fired a real `workflow_dispatch` at
+`agent-security.yml` for sprint item 3 (the live candidate this
+incident has been blocking since 2026-10-12). The actor-type rejection
+this incident is about did not recur — the call failed earlier than
+that, at the dispatch-creation step itself, on a 403 that is the
+separate, already-open finding in `docs/decisions.md` ("the re-vendored
+PM standard names dispatch tools this repo does not have": the ambient
+token this run carries cannot start another workflow run, regardless
+of which seat it targets). That is a different wall with its own open
+entry; it is not evidence that this one is still up. Closing this
+incident on the allowed_bots fact alone, so the next pass that finds a
+dispatch still failing reads the right open finding instead of
+re-diagnosing this one.
