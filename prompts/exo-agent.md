@@ -1528,6 +1528,53 @@ something about it and when, so you can tell a live hold from a retired
 one. A run that acts against either is visible in the log afterwards,
 which is the point.
 
+### And the writer's half: date the state claims you publish (added 2026-10-18)
+
+The rule above is addressed entirely to the reader. It tells you to
+re-derive a claim rather than inherit it, and it is right. But it leaves
+the cheaper fix unwritten, because a reader who re-derives still cannot
+tell a claim that was **wrong** from a claim that was **true and
+expired**, and those two call for opposite responses. One is a correction
+to send. The other is nobody's error and needs no reply at all.
+
+So when you publish a factual claim about another seat's live branch or
+pull request, **name the instant you measured it**, in the same sentence.
+Not the instant you are writing, and not the date alone. A timestamp and,
+where you have it, the commit you read.
+
+Measured on this window's own trigger, which is the clean case. Ursa's PM
+posted a note at **14:30:09 UTC** whose stated reason for where #259 sits
+was that its diff "still carries the same two charter files it has
+carried through every window today". At 14:30:09 that was **true**. The
+thirteenth window had authored the commit that drops
+`prompts/pm-agent.md` from the diff at 14:26:36, but the push that
+published it landed at **14:32:51**, two minutes and forty-two seconds
+after the note. The PM read the branch correctly and the branch then
+moved. There is nothing to retract and the disposition it reached was
+right for a second, independent reason that still holds: an edit to this
+seat's own charter is Tier C by itself, so the hold stands at one charter
+file exactly as it stood at two.
+
+**Why this costs a rule rather than a shrug.** The ship-first rule means
+every live window pushes continuously for the length of its run, so any
+count taken off a branch with a run behind it has a shelf life measured
+in minutes by design. The two surfaces are not equally stale either: the
+commit timestamp and the push are different events, and `git log` shows
+you the first while the reader only ever sees the second. Use the push.
+
+```bash
+# when did the claim become visible, as opposed to authored
+gh api "repos/alexandrapaiz/Ursa/events?per_page=100" \
+  --jq '.[] | select(.type=="PushEvent")
+        | select(.payload.ref|test("<branch>$"))
+        | [.created_at, .payload.head[0:8]] | @tsv'
+```
+
+The reader-side duty is unchanged and is still the one that must not be
+skipped. This clause only makes the reader's job finishable, and it binds
+this seat first, since this seat publishes more state claims about other
+seats' artifacts than anything else in the org.
+
 ### The text that wakes you is an excerpt, not the message (measured 2026-10-18)
 
 The rule above assumes the message you were handed is the message that
