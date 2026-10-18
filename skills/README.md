@@ -114,6 +114,8 @@ node --test skills/relevance-sweep.test.mjs
 node skills/relevance-sweep.mjs                 the unread refs, least-defended first
 node skills/relevance-sweep.mjs <skill>[/<ref>] one ref's dossier
 node skills/relevance-sweep.mjs --audited       what has been read, and when
+node skills/relevance-sweep.mjs --record <scope>  bind a verdict to what was read
+node skills/relevance-sweep.mjs --stale           exit 1 if any verdict is unbound or stale
 ```
 
 Everything above checks that a citation still points where it pointed. None
@@ -133,10 +135,42 @@ sweep resumable: 111 refs is several runs' work.
   eleven sound. 43 of 111 read. The false one was contradicted by another
   skill's ref over the same helper, with both fingerprints green, which is
   what the overlap field exists to surface.
+- Third slice, 2026-10-18, 20 refs: no claim false, eight ranges too narrow.
+  One of the eight was found by the ref sharing its sentence rather than by
+  the ordering, which is where the shared-sentence field comes from.
+- Fourth slice, 2026-10-18, 34 refs, closing the rangeable half at 97 of 111:
+  two claims false, five ranges widened. The share needing a reader fell from
+  a third in slice 1 to a fifth here, which is what reading top-down is for.
+- Fifth slice, 2026-10-18, the 14 refs that cited a document and a section
+  name rather than lines: two claims false, all fourteen ranged, and two more
+  unranged sources found by reading the frontmatter rather than the tool,
+  which counted refs where it should have counted sources.
 
-Next: the 14 refs the sweep lists apart, which cite a document and a section
-name rather than lines and therefore have no fingerprint at all. Then the
-remaining 54 ranged refs. `prompts/skill-extract.md` §5j, §5l and §5m.
+**Closed 2026-10-18: 111 of 111 refs read, six false claims, 26 ranges
+widened, 79 sound as cited.** Every ref in the library carries a line range
+and a fingerprint. `prompts/skill-extract.md` §5j, §5l, §5m and §5n.
+
+## A verdict is only as good as the lines it was read against
+
+A closed sweep is a claim about a day. `relevance.lock.json` is what keeps it
+true afterwards: three digests per ref, over the cited lines, the `what`
+field, and the passages citing it, beside the verdict and date from the audit
+row. When one of the three moves, the ref is read in the audit and stale
+here, and `--stale` exits 1 naming which input moved, because a reflowed
+passage is a minute of re-reading and a re-pointed range is the whole reading
+again.
+
+The digest covers line content and paths, never line numbers, so a
+relocation onto identical lines keeps its verdict and a re-point to different
+text does not. That matters because most drift is the quiet kind: 27 of 44
+ranges on 2026-10-15 and 39 of 43 on 2026-10-18.
+
+This is not what the evidence lock already does. Three failures leave
+`check-evidence` green on every range and this red: a `what` field rewritten
+under a verdict, a citing passage rewritten under one, and a changed range
+re-blessed by `check-evidence --update`, which is the exact act that erases
+the signal a re-read is owed. `--record` names its scope for the same reason
+`--update` does. `prompts/skill-extract.md` §5o.
 
 The three tools read a `source:` line through one shared pattern,
 `skills/source-line.mjs`. It is an allowlist of extensions, because a generic

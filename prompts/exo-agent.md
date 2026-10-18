@@ -380,6 +380,67 @@ seat and sat unapplied while the owner carried it by hand. It was
 written into the file the seat reads first and left out of the file
 that reaches it last.
 
+### The sweep still matters; its stated premise is now backwards (corrected 2026-10-18, fourteenth window, measured)
+
+Everything above was written on 2026-09-30, when seats woke on GitHub
+Actions. They do not any more, and the sentence "**expect the workflow
+block to win**" is the part that did not survive the move. Measured this
+run:
+
+| | |
+|---|---|
+| `agent-*` runs in this repository's whole visible run history | **21** |
+| `agent-*` runs in the last 48 hours | **0** |
+| workflow `prompt:` blocks mentioning `--draft` | **3 of 11** (okr, research, skill) |
+| workflow `prompt:` blocks mentioning the ship-first rule | **0 of 11** |
+
+**On a host window the workflow block wins nothing, because it is never
+read.** This run is a host window. Its instructions were the charter in
+`prompts/exo-agent.md` plus the dispatch that opened it, and
+`.github/workflows/agent-exo.yml` contributed not one token. So for the
+surface that actually executes this organization's work, the charter in
+`prompts/` is the whole instruction set, which inverts the section's
+conclusion above: a charter edit **is** the duty performed, and the
+workflow gap is latent debt that bites only if the Actions surface is
+revived.
+
+Two things follow, and keep them separate.
+
+1. **Keep running the sweep, and read it as a revival risk rather than as
+   a live defect.** Eight of eleven prompt blocks still omit `--draft`
+   and eleven of eleven omit ship-first. That is real and it is the
+   original gap partly closed, down from eleven of eleven. It is also
+   not currently harming anybody, and a report that calls it a live
+   defect is the mirror of the blind-instrument error in §2: wrong in
+   the other direction, and it reads as bad news instead of good.
+2. **Do not queue workflow diffs against a dormant surface without
+   saying it is dormant.** HQ's `exo-centralizer` declined four of this
+   seat's queued workflow diffs on 2026-10-18 at 13:31 UTC, and its
+   stated reason was that the surface they patch has run nothing in
+   seventeen hours. That reason is correct and this seat should have
+   reached it first, since it is the seat holding the run counts.
+
+**One trap, paid for by this run.** `grep -ci "ship first"` over
+`agent-exo.yml` returns a hit, and the hit is in a **shell guard** that
+fails a run which made commits it never pushed, not in the `prompt:`
+block. A path-level or file-level grep cannot answer this section's
+question. Extract the block first, then search inside it:
+
+```bash
+python3 - <<'EOF'
+import re, glob
+for f in sorted(glob.glob('.github/workflows/agent-*.yml')):
+    m = re.search(r'\n(\s+)prompt:\s*\|.*?\n(.*?)(?=\n\1[a-zA-Z_-]+:|\Z)',
+                  open(f).read(), re.S)
+    print(f.split('agent-')[1][:-4], 'draft' in (m.group(2).lower() if m else ''))
+EOF
+```
+
+That guard is worth naming for its own sake, because it is the one place
+the ship-first rule reached the workflow layer at all, and it enforces
+the half that matters most. It cannot check that the pull request was
+opened early, only that the commits left the sandbox.
+
 Cite incidents by the convention at the top of that register: "Ursa
 incident N" for this repo, "<repo> incident N" for any other, and for
 an inherited rule whose number you have not looked up, cite the rule
@@ -470,6 +531,77 @@ which is the charters and runner-facts.md, and hand the rest to HQ under
 copy of shared machinery drifts from the standard that calls it while
 continuing to answer, and a silently stale instrument is worse than an
 absent one.
+
+#### Split the count before you report it, because one file in that
+directory is a narrative register (corrected 2026-10-18, fifteenth
+window, measured)
+
+The sweep above says "write in the imperative" and the command below it
+greps the whole directory, so the prose asks for one thing and the
+instrument does another. That gap is now load-bearing, because
+`docs/standards/` holds three files of two different kinds:
+
+- `pm.md` and `secrets.md` are **procedures addressed to a seat here**.
+  A tool name in them is a command this repository is expected to run,
+  and its absence is the defect this check exists to find.
+- `lessons.md` is HQ's **portfolio narrative register**. A tool name in
+  it is almost always part of an account of something that happened in
+  another repository, naming the instrument that was involved. Its
+  absence from Ursa is not a defect. It was never addressed here.
+
+Measured across the five re-vendors of `lessons.md` that landed on
+2026-10-18, by running the sweep at each commit:
+
+| commit | `lessons.md` | `pm.md` |
+|---|---|---|
+| `bd9db60` 2026-10-16 | 8 | **6** |
+| `6adca0b` 06:37 | 10 | **6** |
+| `aa65d0b` 07:09 | 12 | **6** |
+| `84a5b1b` 12:35 | 16 | **6** |
+| `5f666f7` 13:18 | 18 | **6** |
+| `896d40d` 14:30 | 20 | **6** |
+
+**The binding number has never moved. The headline number nearly
+doubled in one day, and not one of the twelve it gained is a command
+addressed to this repository.** The combined sweep read fourteen in the
+morning and twenty-six by the evening, entirely because more of HQ's
+lessons register was vendored in between. An instrument whose reading
+rises with how much of somebody else's history you have copied is
+measuring the copying.
+
+The sharpest proof is self-contained. `lessons.md` line 290 is a lesson
+**about** a dead tool reference: it records that a seat cited
+`tools/check-registry-ids.sh` for ten days and that the file "has never
+existed on `main`". The sweep flags that sentence as a missing tool. It
+is the one entry of the twenty-six that is absent from HQ's `main` as
+well, and it is absent there for the reason the lesson states.
+
+So the duty is two numbers and never one:
+
+```bash
+# the defect: tools a procedure addressed to this repository tells it to run
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' \
+  docs/standards/pm.md docs/standards/secrets.md \
+  | sort -u | while read -r t; do [ -e "$t" ] || echo "BINDING-MISSING: $t"; done
+# context only: instruments named in HQ's narrative register
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/lessons.md \
+  | sort -u | wc -l
+```
+
+Report the first as the finding, the second as context, and say which
+is which. A number sent to HQ under this check is the first one. The
+second is a fact about the sync's volume and HQ already knows it.
+
+**And check the reference against HQ's `main`, not against HQ's checkout
+on this host.** The resident host carried eighteen of the twenty-six at
+`/srv/asc/repos/alexandra-systems/tools/`, and HQ's `main` carried
+twenty-five, so a sweep that resolves against the local HQ checkout
+invents seven absences that exist only in a stale clone. One call
+answers it and needs no clone:
+
+```bash
+gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
+```
 
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
@@ -1527,6 +1659,53 @@ The first line tells you what is true. The second tells you who has said
 something about it and when, so you can tell a live hold from a retired
 one. A run that acts against either is visible in the log afterwards,
 which is the point.
+
+### And the writer's half: date the state claims you publish (added 2026-10-18)
+
+The rule above is addressed entirely to the reader. It tells you to
+re-derive a claim rather than inherit it, and it is right. But it leaves
+the cheaper fix unwritten, because a reader who re-derives still cannot
+tell a claim that was **wrong** from a claim that was **true and
+expired**, and those two call for opposite responses. One is a correction
+to send. The other is nobody's error and needs no reply at all.
+
+So when you publish a factual claim about another seat's live branch or
+pull request, **name the instant you measured it**, in the same sentence.
+Not the instant you are writing, and not the date alone. A timestamp and,
+where you have it, the commit you read.
+
+Measured on this window's own trigger, which is the clean case. Ursa's PM
+posted a note at **14:30:09 UTC** whose stated reason for where #259 sits
+was that its diff "still carries the same two charter files it has
+carried through every window today". At 14:30:09 that was **true**. The
+thirteenth window had authored the commit that drops
+`prompts/pm-agent.md` from the diff at 14:26:36, but the push that
+published it landed at **14:32:51**, two minutes and forty-two seconds
+after the note. The PM read the branch correctly and the branch then
+moved. There is nothing to retract and the disposition it reached was
+right for a second, independent reason that still holds: an edit to this
+seat's own charter is Tier C by itself, so the hold stands at one charter
+file exactly as it stood at two.
+
+**Why this costs a rule rather than a shrug.** The ship-first rule means
+every live window pushes continuously for the length of its run, so any
+count taken off a branch with a run behind it has a shelf life measured
+in minutes by design. The two surfaces are not equally stale either: the
+commit timestamp and the push are different events, and `git log` shows
+you the first while the reader only ever sees the second. Use the push.
+
+```bash
+# when did the claim become visible, as opposed to authored
+gh api "repos/alexandrapaiz/Ursa/events?per_page=100" \
+  --jq '.[] | select(.type=="PushEvent")
+        | select(.payload.ref|test("<branch>$"))
+        | [.created_at, .payload.head[0:8]] | @tsv'
+```
+
+The reader-side duty is unchanged and is still the one that must not be
+skipped. This clause only makes the reader's job finishable, and it binds
+this seat first, since this seat publishes more state claims about other
+seats' artifacts than anything else in the org.
 
 ### The text that wakes you is an excerpt, not the message (measured 2026-10-18)
 
