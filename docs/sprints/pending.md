@@ -2,6 +2,53 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-first pass, 2026-10-18 ~13:3x UTC, message: PR #250 (skill, the relevance sweep) to review against the merge rule, exo's "you owe me nothing" note read
+
+**Merged, not held.** The dispatch asked for one of two outcomes and
+this one needed the first: `gh pr diff 250 --name-only` lists
+seventeen files, sixteen of them under `skills/` or `docs/ideas.md`
+and one under `prompts/` — `prompts/skill-extract.md`. That file is
+the format specification this seat established as non-Tier-C two
+passes ago for #247 (and before that for #199): it names itself "a
+proposal to the owner, not a settled standard," and `skill-agent.md`'s
+own Boundaries line lists it as this seat's normal write surface
+alongside `skills/`, not among the charters. The seat's actual charter,
+`prompts/skill-agent.md`, is untouched in this diff. Treating the same
+file the same way twice in one day rather than re-deriving a verdict
+each time it recurs. Not a draft, no `hold` label, no comment since
+the 13:33:54Z push. Checks green (`scan`: `SUCCESS`). Merge-cleanliness
+verified directly rather than trusted from the cached field: unshallowed
+the clone, fetched `refs/pull/250/head`, `git merge-tree --write-tree
+--name-only origin/main refs/prs/250` returned a tree with no
+conflicting paths. Checked every other open PR's diff fresh for a
+collision on `docs/ideas.md` or any touched `skills/` path — none.
+The skill seat held exactly this one open PR, not a stack. Merged
+normally, `22ebc0f6`.
+
+**Nothing else moved.** `gh pr list --state open` after the merge:
+`#210` (research, Tier C, unchanged), `#225` (this seat's own, now
+thirty-one passes), `#236`/`#240` (frontend's own drafts, unchanged),
+`#241` (engineer's own draft, unchanged), `#248` (exo, Tier C, the
+standing owner-ask, silence deadline still 2026-10-20T12:30 UTC,
+unchanged), `#251` (exo's ninth window, declared to subsume #248,
+Tier C by the same two charter files, unchanged). None independently
+changed tier since the thirtieth pass's check, so none is touched
+this pass.
+
+**Exo's note read, no action owed.** exo's 13:35:59Z board message
+("You owe me nothing...") answers this seat's own prior note and
+reports that note arrived at exo truncated at 1,500 characters — a bus
+defect it has already handed to HQ, not something this seat caused or
+can fix. It also confirms exo's ninth window (#251) was deliberately
+opened as a new PR rather than grown on #246/#248's branch, so the
+owner's one pending decision still covers both. No reply needed: the
+message answers itself and asks this seat for nothing.
+
+**Failed runs: none.** `gh run list --status failure --created
+">=$(date -u -d '-6 hours' +%FT%TZ)"` is empty.
+
+**Board:** posted one `done` naming the merge and the PR it closed out.
+
 ## Thirtieth pass, 2026-10-18 ~13:2x UTC, message: PR #248 (exo) and PR #249 (distribution) to review against the merge rule, exo's probe and pointer notes, exo's run-finished report
 
 **This event was already closed by the twenty-ninth pass before this run read it.** Checked fresh rather than trusted: `gh pr view 248` is unchanged since the twenty-ninth pass's own check (`OPEN`, not a draft, Tier C by the same two charter files, same 2026-10-20T12:30 UTC silence deadline), and #249 (distribution's `lessons.md` re-vendor) is `MERGED` — self-merged under ADR-011's one-file lane, not a Tier B action this seat took or needed to take. The board inbox for `to_company == "Ursa"` has nothing addressed to this seat after the twenty-ninth pass's own closing message at 13:22:48Z: exo's probe messages and its two "pointer" notes are all timestamped before that close and are read here as the same evidence the twenty-ninth pass already read and acted on (closing #246, holding #248, naming the churn in its own words). `gh run list --status failure` since the last check: empty. The one new fact since the twenty-ninth pass's own check is PR #251 (exo's ninth window, declared to subsume #248), which is a draft with a placeholder body — run in progress, nothing yet to check against the merge rule, same disposition this stack has given every in-progress draft today.
