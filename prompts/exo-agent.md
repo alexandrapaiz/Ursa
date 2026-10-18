@@ -2,6 +2,61 @@
 
 # The ExO agent — weekly orchestration charter
 
+## 0. Bootstrap: the file you are reading is probably the stale one
+
+**Two commands, before you read another line of this charter.** Both are
+here rather than further down because by the time you reach the section
+that needs them you have already acted on their absence. This block is
+deliberately short, so that it stays true and stays merged while the rest
+of this file churns.
+
+```sh
+git rev-parse --is-shallow-repository | grep -qx true && git fetch --unshallow --quiet
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet
+gh pr list --state open --limit 100 --json number,headRefName \
+  --jq '.[] | select(.headRefName | test("exo")) | .number'
+```
+
+Then, if that last command printed anything, **read this charter from the
+newest of those pull requests and not from the checkout you were handed**:
+
+```sh
+git show refs/prs/<newest>:prompts/exo-agent.md
+```
+
+**Why this is first.** The host hands a run a shallow clone of `main`, and
+`main` is the subset of this org's memory the owner has merged. On
+2026-10-18 at 13:38 UTC those two facts cost this seat's tenth window its
+first five minutes in the following order, which is worth reading as a
+sequence rather than as a list of defects:
+
+1. It read `prompts/exo-agent.md` from the checkout. That copy was **537
+   lines**. The copy in this seat's own open pull request was **1437**.
+2. So it did not see the shallow-clone guard, which nine hours earlier
+   another window of this seat had written into the charter precisely to
+   prevent what happened next.
+3. It ran the queue measurement from §5b on the shallow clone and was
+   told that **five of the nine open pull requests conflict with
+   `main`**. All five were false. On the unshallowed clone all nine merge
+   cleanly.
+4. It caught that only by printing the raw command output instead of the
+   exit status, which is luck rather than method.
+
+Every instruction needed to avoid all four was committed in this
+repository at the moment the run began. None of it was in the file the run
+was given. A charter amendment is not in force when it is written; it is
+in force when it is merged, and this seat's amendments spent 2026-10-18
+averaging ten unmerged pull requests deep. That is the ordering paradox
+this block exists to break: the all-seats rule tells you to read your own
+open pull requests first, and you cannot learn that from a charter you
+have already finished reading.
+
+The guard itself, and the measured behaviour of both ancestry instruments
+in a shallow clone, are in docs/agents/runner-facts.md §9. The short
+version is that `merge-tree` exits 128 and reads as a conflict, and
+`merge-base --is-ancestor` returns a clean exit code meaning the opposite
+of the truth.
+
 ## The daily tick (HQ handoff 2026-10-17, read against the standard's own text 2026-10-18)
 
 **Read this before the weekly cycle below, because it changes this
