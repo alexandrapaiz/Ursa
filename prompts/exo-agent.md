@@ -655,21 +655,49 @@ Generalizing a one-line proof to a whole file is what hid the second
 line. That is
 `INC-2026-10-18-l-x5-enforcement-counted-as-narrative`.
 
-So three buckets, and the third one is the grep that was missing:
+So three buckets, and the third one is the sweep that was missing. A
+line-level or bullet-level grep is useless for it, because an `L-*`
+entry's requirement and its narrative live under the same bullet, so
+anything bullet-scoped returns the whole file's twenty names again and
+tells you nothing. Scope it to the **sentence**, and require an
+enforcement word in the same sentence as the path:
 
 ```bash
-# bucket 3, binding: a tool a vendored L-* rule names as its own enforcement
-awk '/^- \*\*L-[A-Z0-9-]+ /{r=1} r' docs/standards/lessons.md \
-  | grep -oE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' | sort -u \
-  | while read -r t; do [ -e "$t" ] || echo "RULE-MISSING: $t"; done
+python3 - <<'EOF'
+import re, os
+parts = re.split(r'\n(?=- \*\*L-[A-Z0-9-]+ )', open('docs/standards/lessons.md').read())
+KEY  = re.compile(r'enforc|PreToolUse|hook|registers (?:this|it)|the requirement'
+                  r'|refuses|must be run|mandates', re.I)
+TOOL = re.compile(r'tools/[A-Za-z0-9._-]+\.(?:sh|mjs|js|py)')
+hits = {}
+for p in parts:
+    m = re.match(r'- \*\*(L-[A-Z0-9-]+)', p)
+    if not m: continue
+    for sent in re.split(r'(?<=[.!?])\s+', p):
+        if TOOL.search(sent) and KEY.search(sent):
+            for t in set(TOOL.findall(sent)): hits.setdefault(t, set()).add(m.group(1))
+for t, rules in sorted(hits.items()):
+    print(('RULE-MISSING: ' if not os.path.exists(t) else 'present: ') + t, sorted(rules))
+EOF
 ```
 
-That grep over-matches, because an `L-*` entry's own narrative sits
-under the same bullet as its requirement. Read every line it prints and
-keep the ones where the rule says the file **enforces** it, rather than
-the ones where the rule recounts an instrument that was involved in
-something. Three or four names is a list a run can read. Report the ones
-that survive with the binding count, not with the context count.
+Measured on 2026-10-18 it printed **two** names, which is the right
+order of magnitude for a list a run reads by hand:
+
+- `tools/check-secret-print.py` from **L-X5**, which is the finding.
+  The rule names the file as the hook that refuses the command, so the
+  reference is binding here.
+- `tools/prune-merged-branches.sh` from **L-A37**, which is a false
+  positive and worth keeping as the example of one. That sentence
+  recounts HQ deleting 345 stranded refs with the tool on one day. The
+  rule it belongs to, "every merge deletes its head branch", is binding
+  here and is satisfied by `gh pr merge --delete-branch` and the §5b
+  predicate below. Nothing in Ursa needs that script.
+
+So read both lines rather than counting them. The test is whether the
+rule says the file **enforces** the rule, not whether the rule mentions
+the file. Report the survivors with the binding count and never with
+the context count.
 
 #### And sweep the other direction, because this check cannot see a tool nobody here has named (added 2026-10-18, sixteenth window)
 
