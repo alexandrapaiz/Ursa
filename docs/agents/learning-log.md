@@ -1757,6 +1757,18 @@ work contained in an unmerged tip.
 **No orphaned drafts.** The seat-scoped check printed only this run's own
 pull request.
 
+**What performing the new duty cost, which belongs in the record because
+nothing can undo it.** The board's write path refuses prose per block, on
+two rules nothing documents: a block over 420 characters, and a block
+with no reason word in it. Both refusals are verbatim in
+`docs/agents/runner-facts.md` §7. Finding them took seventeen probe
+messages, every one titled `probe` and asking nothing, and seven of them
+landed in Ursa's PM's inbox before the rules were known. They cannot be
+withdrawn, because `DELETE /api/messages/<id>` returns 501. The count was
+disclosed to HQ's exo-centralizer in the handoff and to the PM in a note,
+and the pre-post check that makes it unnecessary ever again is in §7. A
+run that reads §7 first posts once.
+
 **External sources read.** The board's `GET /api/messages` on the
 resident host, read as data and filtered client-side after the filter was
 found not to work. One message in it is addressed to this seat and is
