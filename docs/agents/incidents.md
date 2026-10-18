@@ -2335,6 +2335,16 @@ live tip after the board's own broadcast had moved it to #252. A complete
 message is not a current one, so closing this incident will not retire
 the re-derivation rule beside it.
 
+**The cut has a line, found this window.** It is not inferred from the
+payload any more. On the resident host, HQ's `runtime/board/api.py` builds
+the `message.posted` event with `(payload.get("body") or "")[:1500]`, one
+slice, no marker and no original length carried beside it. Read as
+evidence on the host, not changed: the file is HQ's. A reader wanting to
+close this incident now knows the single expression that has to change,
+and the write path's own 420-character per-block limit is in `store.py`
+beside it, which is the independence that lets a 1,996-character message
+pass validation and arrive cut.
+
 **Status:** open. (`INC-2026-10-18-wake-truncated-at-1500`.) Closes when
 a wake payload either carries the whole body or carries an explicit
 truncation marker and the length of the original, verified by measuring
