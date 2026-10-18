@@ -20,11 +20,13 @@ import { JSDOM } from 'jsdom'
 import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
 import { saveRecord } from './store'
+import type { DisclosureManifest } from './publish'
 import {
   DisclosureNotAcknowledged,
   PUBLISHED_INDEX_VERSION,
   formatManifest,
   manifestFor,
+  noveltyOfDisclosure,
   publish,
   recordHref,
   renderIndexPage,
@@ -106,7 +108,27 @@ describe('the disclosure gate', () => {
     expect(text).toContain('your own')
     expect(text).toContain('messages to the model')
     expect(text).toContain('final.md')
-    expect(text).toContain('never been public before')
+  })
+
+  it('tells a session-path record that its text was never public, and a git-path record that it was', () => {
+    const session = manifestFor([fixtureRecord()])
+    expect(session.adapters).toEqual(['paste'])
+    expect(noveltyOfDisclosure(session).join(' ')).toContain('never in the repository')
+
+    // The claim that was wrong until the first end-to-end run: a git-path
+    // generation is a blob at a commit, so a public repository published
+    // it already. Asserted here against a hand-built manifest so the test
+    // does not need a git fixture to hold the sentence honest.
+    const text = noveltyOfDisclosure({ ...session, adapters: ['git'] }).join(' ')
+    expect(text).toContain('already published that text')
+    expect(text).not.toContain('never in the repository')
+  })
+
+  it('states both claims when the project holds records from both paths', () => {
+    const both = { ...manifestFor([fixtureRecord()]), adapters: ['git', 'paste'] as DisclosureManifest['adapters'] }
+    const text = noveltyOfDisclosure(both).join(' ')
+    expect(text).toContain('already published that text')
+    expect(text).toContain('never in the repository')
   })
 
   it('counts a path once when two records share it', () => {
@@ -236,6 +258,9 @@ describe('the index page', () => {
     const disclosure = doc.querySelector('.disclosure')?.textContent ?? ''
     expect(disclosure).toContain('raw text, not a summary')
     expect(disclosure).toContain('own messages to the model')
+    // The page carries the same path-aware claim the command line prints,
+    // rather than a stronger one that fits in a banner.
+    expect(disclosure).toContain('never in the repository')
   })
 
   it('states that the three percentages do not sum to 100%, since they do not', () => {
@@ -251,5 +276,42 @@ describe('the index page', () => {
     })
     expect(hostile).not.toContain('<script>')
     expect(hostile).toContain('&lt;script&gt;')
+  })
+})
+
+describe('the record id becoming a public URL', () => {
+  it('warns when the id carries a directory name that is not this repository', () => {
+    const project = projectWith([fixtureRecord('northwind-pricing-2026-10-18-8dcb0c7')])
+    const result = publish({
+      projectPath: project, outDir: outDirIn(project), acknowledged: true,
+      repository: 'someone/their-repo',
+    })
+    expect(result.warnings).toHaveLength(1)
+    expect(result.warnings[0]).toContain('northwind-pricing')
+    expect(result.warnings[0]).toContain('name of the directory')
+  })
+
+  it('stays quiet on a runner, where the directory is the repository', () => {
+    const project = projectWith([fixtureRecord('their-repo-2026-10-18-8dcb0c7')])
+    const result = publish({
+      projectPath: project, outDir: outDirIn(project), acknowledged: true,
+      repository: 'someone/their-repo',
+    })
+    expect(result.warnings).toEqual([])
+  })
+
+  it('stays quiet when no repository was stated, since there is nothing to compare against', () => {
+    const project = projectWith([fixtureRecord('anything-2026-10-18-8dcb0c7')])
+    const result = publish({ projectPath: project, outDir: outDirIn(project), acknowledged: true })
+    expect(result.warnings).toEqual([])
+  })
+
+  it('does not warn about an id that is not in the resolver shape at all', () => {
+    const project = projectWith([fixtureRecord('fixture-mini')])
+    const result = publish({
+      projectPath: project, outDir: outDirIn(project), acknowledged: true,
+      repository: 'someone/their-repo',
+    })
+    expect(result.warnings).toEqual([])
   })
 })

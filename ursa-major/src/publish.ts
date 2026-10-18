@@ -143,6 +143,25 @@ export interface PublishedIndex {
 export interface DisclosureManifest {
   records: number
   recordIds: string[]
+  /**
+   * Which capture paths produced these records, sorted and deduplicated.
+   * Load-bearing for what the disclosure can honestly claim, and the
+   * reason this field exists at all.
+   *
+   * On the `git` path a generation is the blob of a touched file at the
+   * agent's own commit, so every character of `generations[].text` is
+   * already in the repository's history and a public repository has
+   * already published it; there are no prompts, because a commit carries
+   * no conversation. On `claude-code` and `paste` the generations and the
+   * prompts come from a session log that was never in the repository, and
+   * publishing them is the first time that text is readable by anyone.
+   *
+   * Measured rather than assumed: resolving this repository's own history
+   * on 2026-10-18 produced two records with 143,218 characters of
+   * generation and zero prompts, against which the sentence "this text
+   * has never been public before" would have been false.
+   */
+  adapters: ('claude-code' | 'paste' | 'git')[]
   finalFiles: number
   filePaths: string[]
   finalChars: number
@@ -155,6 +174,7 @@ export interface DisclosureManifest {
 
 export function manifestFor(records: OutcomeRecord[]): DisclosureManifest {
   const paths = new Set<string>()
+  const adapters = new Set<'claude-code' | 'paste' | 'git'>()
   let finalChars = 0, generations = 0, generationChars = 0
   let conversations = 0, prompts = 0, promptChars = 0
   for (const r of records) {
@@ -168,6 +188,7 @@ export function manifestFor(records: OutcomeRecord[]): DisclosureManifest {
     }
     for (const c of r.conversations) {
       conversations += 1
+      adapters.add(c.adapter)
       for (const p of c.prompts ?? []) {
         prompts += 1
         promptChars += p.text.length
@@ -177,6 +198,7 @@ export function manifestFor(records: OutcomeRecord[]): DisclosureManifest {
   return {
     records: records.length,
     recordIds: records.map((r) => r.task.id),
+    adapters: [...adapters].sort(),
     finalFiles: [...paths].length,
     filePaths: [...paths].sort(),
     finalChars,
@@ -208,10 +230,53 @@ export function formatManifest(m: DisclosureManifest): string {
     for (const p of m.filePaths) lines.push(`  ${p}`)
     lines.push('')
   }
-  lines.push('The second and third lines are text that has never been public before,')
-  lines.push('even when the repository is. Nothing here is aggregated, redacted or')
-  lines.push('withheld: a published record is the record.')
+  for (const line of noveltyOfDisclosure(m)) lines.push(line)
+  lines.push('')
+  lines.push('Nothing here is aggregated, redacted or withheld: a published record is')
+  lines.push('the record.')
   return lines.join('\n')
+}
+
+/**
+ * How much of the above is text nobody could already read. It depends
+ * entirely on where the record came from, and it is the one claim in a
+ * disclosure that must not overstate.
+ *
+ * This function exists because the sentence it replaces was wrong. Until
+ * 2026-10-18 `formatManifest` ended with "text that has never been public
+ * before, even when the repository is", and the first end-to-end run of
+ * `ursa publish` on this repository printed it over two git-path records
+ * whose 143,218 characters of generation are blobs of files at commits
+ * already pushed to a public remote. The claim was false for the only
+ * path the Action actually uses.
+ *
+ * Returned as lines rather than one sentence because the mixed case is
+ * real: a project can hold records from both paths, and collapsing them
+ * would have to pick either the weaker or the stronger claim, and both
+ * are wrong about half the set.
+ */
+export function noveltyOfDisclosure(m: DisclosureManifest): string[] {
+  const hasGit = m.adapters.includes('git')
+  const hasChat = m.adapters.some((a) => a === 'claude-code' || a === 'paste')
+  const out: string[] = []
+  if (hasGit) {
+    out.push("The generations in the git-path records are blobs of files at the agent's")
+    out.push('own commits, so a public repository has already published that text. What')
+    out.push('is new on the page is the classification over it: which characters a model')
+    out.push('wrote, which ones you changed, and which ones it never touched.')
+  }
+  if (hasChat) {
+    if (hasGit) out.push('')
+    out.push('The generations and the messages in the session-path records come from a')
+    out.push('transcript that was never in the repository. Publishing them is the first')
+    out.push('time that text is readable by anyone, and it includes every message you')
+    out.push('typed to the model, in full.')
+  }
+  if (out.length === 0) {
+    out.push('These records name no conversation, so what becomes readable is the')
+    out.push('finished text and the classification over it.')
+  }
+  return out
 }
 
 export interface PublishOptions {
@@ -235,6 +300,13 @@ export interface PublishResult {
   /** absolute paths written, in the order they were written */
   written: string[]
   index: PublishedIndex
+  /**
+   * Record ids whose slug is not this repository's name, which means the
+   * id carries the name of whatever directory the work was resolved in.
+   * See `foreignSlugWarnings` for why that matters more here than it does
+   * on disk.
+   */
+  warnings: string[]
   /**
    * Record ids found in `.ursa/records/` and skipped, with the reason.
    * Reported rather than thrown: one unreadable file must not stop a
@@ -310,7 +382,59 @@ export function publish(opts: PublishOptions): PublishResult {
   // comes from a directory name), and a page silently missing from a
   // published set is the failure this file is least able to notice.
   write(join(opts.outDir, '.nojekyll'), '')
-  return { written, index, skipped }
+  return { written, index, skipped, warnings: foreignSlugWarnings(records, opts.repository ?? null) }
+}
+
+/**
+ * The record id is the name of the directory the work was resolved in.
+ * `episodeId` in src/episodes.ts builds it as
+ * `basename(projectPath)`-`date`-`sha7`, so resolving
+ * `~/work/northwind-pricing` produces the id
+ * `northwind-pricing-2026-10-18-8dcb0c7`.
+ *
+ * On disk that is a known wart, recorded in docs/ideas.md on 2026-10-16
+ * as a primary key that moves when you rename a folder. Publishing
+ * changes what it costs rather than what it is: the id becomes a path
+ * segment in a URL anyone can read and a search engine can index, and
+ * `index.json` lists every one of them in `disclosed.recordIds`. A
+ * directory name is the one piece of the publisher's filesystem this
+ * module cannot avoid carrying, because it is the record's identity and
+ * not a field beside it.
+ *
+ * This function cannot fix that — the id is the primary key and changing
+ * it is a decision about every record already written, not a publish-time
+ * transform. What it can do is refuse to let the leak happen silently.
+ * On a GitHub runner the workspace is `/home/runner/work/<repo>/<repo>`,
+ * so the slug is the repository's own name and there is nothing to warn
+ * about; that is the quiet case and it is the common one. The loud case
+ * is a record resolved somewhere else and published here, which is
+ * exactly when the directory name is information the publisher did not
+ * mean to hand over.
+ *
+ * Warned rather than refused, because the publisher may well have meant
+ * it: a repository published under one name whose records were resolved
+ * from a differently-named local clone is a legitimate and ordinary
+ * thing. A refusal would be this module overruling the person whose data
+ * it is, which is the posture the whole product exists not to take.
+ */
+export function foreignSlugWarnings(records: OutcomeRecord[], repository: string | null): string[] {
+  if (!repository) return []
+  const repoSlug = repository.split('/').pop()!.toLowerCase().replace(/[^a-z0-9-]+/g, '-')
+  if (!repoSlug) return []
+  const out: string[] = []
+  for (const r of records) {
+    // The id is `<slug>-<YYYY-MM-DD>-<sha7>`; everything before the date
+    // is the slug, and a slug may itself contain dashes.
+    const slug = r.task.id.replace(/-\d{4}-\d{2}-\d{2}-[0-9a-f]{7}$/, '')
+    if (slug === r.task.id || slug === repoSlug) continue
+    out.push(
+      `record "${r.task.id}" will be published at ${recordHref(r.task.id, 'html')}, and the ` +
+      `"${slug}" in that address is the name of the directory this work was resolved in, not ` +
+      `"${repoSlug}". If that directory name is not something you want in a public URL, rename ` +
+      `the checkout and resolve again before publishing.`,
+    )
+  }
+  return out
 }
 
 function summarize(record: OutcomeRecord): PublishedRecordSummary {
@@ -485,6 +609,7 @@ record's page carries both denominators.</p>`}
   output across ${n(d.generations)} generation${d.generations === 1 ? '' : 's'}, and ${n(d.promptChars)} characters of the
   publisher's own messages to the model across ${n(d.prompts)} message${d.prompts === 1 ? '' : 's'}. Whoever built this
   site was shown those counts and the file paths, and agreed to them.</p>
+  <p>${escapeHtml(noveltyOfDisclosure(d).join(' ').replace(/\s+/g, ' '))}</p>
 </div>
 
 <footer>

@@ -80,6 +80,7 @@ export function runPublish(opts: PublishCommandOptions): number {
       acknowledged: true,
       repository: opts.repository,
     })
+    for (const w of result.warnings) console.error(`warning: ${w}`)
     console.log('')
     console.log(`wrote ${result.written.length} files to ${opts.outDir}`)
     console.log(`  ${result.index.records.length} record pages, one index page, one index.json`)
