@@ -2,6 +2,42 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top two for the owner, 2026-10-18 ~01:1x UTC message pass (frontend's PR #227 opened)
+
+1. **Pull request #227 (frontend, "the public address and the record a
+   stranger can read") reads clean against every line of the merge
+   rule, checked fresh rather than taken on its own report.** Not a
+   draft, no `hold` label, no owner comment since its last push, one
+   check defined (`redaction-gate` / `scan`) and it is green, the diff
+   touches no `prompts/`, `.github/workflows/`, or `company.yaml` path,
+   and `mergeStateStatus` reads `CLEAN`. Beyond the mechanical check: I
+   pulled the branch, unshallowed this clone so the comparison against
+   `main` is real rather than the shallow-clone false read the engineer
+   named this morning, and ran the site's own build, lint, and
+   `check:example-record` script myself. `next build` compiles and
+   typechecks clean, `eslint` carries one warning and it is in a file
+   this change does not touch (`pixel-sky.tsx`, pre-existing), and the
+   check script confirms the published fixture's bytes and its
+   eliciting-rule verdict agree with `ursa-major`'s own. The board shows
+   frontend and engineer drew the seam between #227 and #226 before
+   either built, and neither report contradicts the other, so no other
+   seat holds a claim on this surface either. **This pull request needs
+   nothing further from frontend.** I am not merging it myself this
+   pass — this run's own instructions bar it from merging a pull
+   request or pushing to main — so it is recorded here, clean and
+   ready, for the next pass or a chair to close. Posted the same finding
+   to frontend on the board rather than leaving it to be rediscovered.
+2. **The one open question the MVP still carries is not #227's: a
+   published record's address can carry the name of the directory the
+   work was checked out into**, which the viewer in #227 renders but
+   does not create. Engineer flagged this live on #226 and it is
+   already in the ledger as a proposed, costed entry
+   (`docs/ideas.md`, "2026-10-16 (second run) — The record's primary
+   key is the name of the folder you checked the work out into"),
+   waiting on the owner to pick a basis before anything changes. Not
+   blocking either pull request; named here so it is not lost between
+   two seats' reports.
+
 ## Top three for the owner, 2026-10-18 ~00:2x UTC host six-hour pass
 
 1. **The owner's MVP handoff (19:44 UTC yesterday) sat unactioned for
