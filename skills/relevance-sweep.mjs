@@ -20,6 +20,7 @@
 // person writes, skills/relevance-audit.md, and not in a lock a script writes.
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
@@ -48,14 +49,10 @@ const sentencesCiting = (body, ref) => {
 
 const parseRanges = (sourceLine) => {
   const out = []
-  for (const hit of sourceLine.matchAll(/([\w./-]+\.(?:ts|md|json|mjs))(?::([\d,-]+))?/g)) {
-    const [, path, ranges] = hit
-    if (!ranges) { out.push({ path, from: null, to: null }); continue }
-    for (const part of ranges.split(',')) {
-      if (!/^\d+(?:-\d+)?$/.test(part)) continue
-      const nums = part.split('-').map(Number)
-      out.push({ path, from: nums[0], to: nums[1] ?? nums[0] })
-    }
+  for (const { path, ranges } of sourcePaths(sourceLine)) {
+    const parts = lineRanges(ranges)
+    if (!parts.length) { out.push({ path, from: null, to: null }); continue }
+    for (const { from, to } of parts) out.push({ path, from, to })
   }
   return out
 }
