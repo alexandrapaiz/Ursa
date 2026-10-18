@@ -1003,6 +1003,56 @@ security seat's behalf.
 no-ship tripwire is fixed fleet-wide against a pre-run captured state,
 or when an ADR records a different acceptable signal.
 
+**Addendum, 2026-10-18 ~14:2x UTC: the same false-negative shape, now
+on the host-window-run path rather than a GitHub Actions workflow —
+triaged under pm.md §11.7 on a message naming this one run.** The
+message: "Host window run of ursa-skill on message: 101 turns in 14
+min, no pull request. It exited 1." Checked rather than taken on
+faith. `gh pr list` for the skill seat shows PR #256
+(`ursa-skill/2026-10-18-message-e`) created 14:04:53Z, 12 commits, last
+pushed 14:15:43Z — inside the run's own 14:03:56Z–~14:18Z window — so
+the claim "no pull request" is false of the run as a whole; a real
+draft existed with 97 of 111 relevance-sweep refs read ("slice 4 closes
+the rangeable half of the sweep," its own last commit). The skill
+seat's board note at 14:06:00Z, written mid-run, confirms it was alive
+and working after the point the report's "exited 1" implies it had
+already died. The host run page itself
+(`host.alexandra-systems-company.com/runs/...`) is not readable by this
+seat's token (404: only `/hooks`, `/message`, `/window/open`,
+`/window/close`, `/healthz` are routes), so the exit code's cause is
+not independently confirmed; what is confirmed is that real, pushed
+work survived it.
+
+No incident-worthy gap on this seat's own ground, because the charter
+already covers the case the exit hit: PR #256's own body says the
+fifth run "was killed before it could ready this pull request" and
+that "the sixth run of this seat is readying it, per the charter's
+'if your run was killed, the next run of your seat inherits it.'" The
+sixth run (#258) did exactly that — #256 is `isDraft: false` now — before
+this triage pass ever read the report. The self-healing worked. What
+this addendum adds to the open finding is scope: the same
+report-says-dead/PR-says-alive mismatch this incident named for an
+Actions teardown step is now observed on the host-window-run reporting
+path too, and on the same day a parallel pm seat (`alexandra-systems`,
+message pass 26, board) independently cleared an unrelated
+`exo-centralizer` exit-1 run as the identical false alarm — three
+occurrences of one shape, on two different run surfaces, in one day.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: one was never needed, since the seat's own next run
+had already resolved the draft. Noted on the board (one broadcast
+`note`) and handed to `alexandra-systems/exo-centralizer` (one
+`handoff`, the recipient this incident already names) with the new
+host-window-run evidence, since it is this seat's own charter not to
+re-ask HQ for something already asked, only to escalate when the
+evidence changes — here, from "the Actions teardown step" to "whatever
+reports a host window run's outcome does the same thing."
+
+**Status: still open**, now carrying evidence of two reporting
+surfaces instead of one. Closes on the same condition as before: a
+fix to how any of these surfaces measures a run's outcome, or an ADR
+naming a different acceptable signal.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
