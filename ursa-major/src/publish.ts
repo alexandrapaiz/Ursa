@@ -653,19 +653,32 @@ function resolverValue(by: ResolverIdentity): string {
 export function renderIndexPage(index: PublishedIndex): string {
   const n = (x: number) => x.toLocaleString('en-US')
   const pct = (part: number, whole: number) => (whole > 0 ? ((part / whole) * 100).toFixed(1) + '%' : '—')
+  // Each cell carries its own column name in a `<span class="label">`,
+  // hidden on a wide viewport where the table header already supplies
+  // it and shown on a narrow one where the row has become a block and
+  // the header is gone. The label is real text in the document rather
+  // than a `::before { content: attr(data-label) }`, because CSS
+  // generated content is not dependably exposed to a screen reader and
+  // a column name that exists only in a stylesheet is a column name a
+  // reader can lose. See the narrow-viewport rules in the stylesheet
+  // below for why the row stops being a row at all.
   const rows = index.records.map((r) => {
     const verbatim = r.charsByClass.survived_verbatim ?? 0
     const mutated = r.charsByClass.survived_mutated ?? 0
     const none = r.charsByClass.no_generation_provenance ?? 0
-    return `<tr>
-  <td class="id"><a href="${escapeAttr(r.html)}">${escapeHtml(r.id)}</a></td>
-  <td class="num">${n(r.finalChars)}</td>
-  <td class="num verbatim">${pct(verbatim, r.finalChars)}</td>
-  <td class="num mutated">${pct(mutated, r.finalChars)}</td>
-  <td class="num human">${pct(none, r.finalChars)}</td>
-  <td class="when">${escapeHtml(r.generatedAt.slice(0, 10))}</td>
-  <td class="raw"><a href="${escapeAttr(r.json)}">JSON</a></td>
-</tr>`
+    const cell = (cls: string, label: string, body: string) =>
+      `  <td class="${cls}"><span class="label">${escapeHtml(label)}</span>${body}</td>`
+    return [
+      '<tr class="record">',
+      cell('id', 'Record', `<a href="${escapeAttr(r.html)}">${escapeHtml(r.id)}</a>`),
+      cell('num', 'Final characters', n(r.finalChars)),
+      cell('num verbatim', 'Kept unchanged', pct(verbatim, r.finalChars)),
+      cell('num mutated', 'Kept, edited', pct(mutated, r.finalChars)),
+      cell('num human', 'No model behind it', pct(none, r.finalChars)),
+      cell('when', 'Resolved', escapeHtml(r.generatedAt.slice(0, 10))),
+      cell('raw', 'Raw record', `<a href="${escapeAttr(r.json)}">JSON</a>`),
+      '</tr>',
+    ].join('\n')
   }).join('\n')
 
   const empty = `<p class="empty">This site has no records in it. Either no merge has produced
@@ -725,6 +738,45 @@ export function renderIndexPage(index: PublishedIndex): string {
   .empty { color: var(--text-secondary); max-width: 68ch; margin: 24px 0; }
   code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; color: var(--text-secondary); }
   footer { margin-top: 34px; border-top: 1px solid var(--border); padding-top: 14px; }
+  /* Supplied by the table header on a wide viewport; see the rules below. */
+  .label { display: none; }
+  /* A record id is <directory-name>-<date>-<sha7> and can be 40
+     characters with no space in it, so without this one declaration the
+     id column has a minimum width equal to its longest word and pushes
+     the table past the viewport whatever else the layout does. */
+  td.id, td.id a { overflow-wrap: anywhere; }
+
+  /* THE NARROW VIEWPORT, and why the table stops being a table.
+     Measured by the frontend seat on 2026-10-18: at a 390px viewport
+     this page's document was 521px wide, so the three provenance
+     columns, the date and the JSON link were all off screen with no way
+     to reach them, and each row stood eight lines tall because every
+     record id was breaking one word per line. A seven-column table of
+     numbers has a minimum width that no amount of padding or font size
+     gets under 390px, so the fix is not to shrink it: each row becomes
+     one block carrying its own labels, which is the shape the frontend
+     seat's own set view uses and which has no minimum width at all.
+     760px is the breakpoint because that is where this table's seven
+     columns stop fitting without the numbers colliding, not a round
+     number chosen for a device. Verify with
+     npx tsx tools/measure-index-page.ts (a backtick cannot appear here:
+     this stylesheet lives inside a template literal). */
+  @media (max-width: 760px) {
+    table, tbody, tr, td { display: block; width: auto; }
+    thead { display: none; }
+    table { margin: 18px 0 8px; }
+    tr.record {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 13px; margin: 0 0 12px;
+    }
+    td, th { border-bottom: none; padding: 3px 0; }
+    td.num, td.when, td.raw {
+      display: flex; justify-content: space-between; gap: 14px; text-align: right;
+    }
+    td.id { padding-bottom: 7px; font-size: 15px; }
+    .label { display: block; color: var(--text-muted); font-size: 12px; text-align: left; }
+    td.num .label, td.when .label, td.raw .label { display: inline; }
+  }
 </style>
 </head>
 <body>
@@ -744,7 +796,7 @@ ${index.records.length === 0 ? empty : `<table>
 <thead><tr>
   <th>Record</th><th class="num">Final characters</th>
   <th class="num">Kept unchanged</th><th class="num">Kept, edited</th><th class="num">No model behind it</th>
-  <th>Resolved</th><th>Raw</th>
+  <th>Resolved</th><th>Raw record</th>
 </tr></thead>
 <tbody>
 ${rows}
@@ -778,7 +830,12 @@ record's page carries both denominators.</p>`}
   Built by Ursa Major's resolver from this repository's own git history, on
   the repository owner's own runner. Index contract version ${escapeHtml(index.indexVersion)};
   record schema ${escapeHtml(index.recordSchemaVersions.join(', ') || 'none')}. The machine-readable form
-  of this page is <a href="${INDEX_JSON}">${INDEX_JSON}</a>.
+  of this page is <a href="${INDEX_JSON}">${INDEX_JSON}</a>, which states each record's
+  byte count and the SHA-256 of its own file, so a reader who fetches one record can
+  check that it is the record this index was built against. That check catches a
+  truncated download, a stale copy served by a cache, and a record replaced without
+  this page being rebuilt. It does not show that whoever published this site is
+  honest, because this page and the records under it were written by the same run.
 </footer>
 </body>
 </html>

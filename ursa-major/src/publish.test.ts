@@ -371,6 +371,66 @@ describe('the index page', () => {
     expect(legend).toContain('do not sum')
   })
 
+  // THE LIMIT OF THESE TWO TESTS, stated because it decides what they are
+  // worth. jsdom parses this page and lays out none of it: `scrollWidth`
+  // is 0 for every element here, so the actual defect the frontend seat
+  // measured on 2026-10-18 — a 521px document inside a 390px viewport —
+  // cannot be reproduced in this file at all. What is testable here is
+  // the structure the narrow layout needs in order to work, and that is
+  // what these assert. The width itself is measured in a real browser
+  // engine by tools/measure-index-page.ts.
+  it('gives every cell its own column name as real text, so a block layout stays labelled', () => {
+    const doc = new JSDOM(html).window.document
+    const headings = [...doc.querySelectorAll('thead th')].map((th) => th.textContent?.trim())
+    const row = doc.querySelector('tbody tr')!
+    const labels = [...row.querySelectorAll('td')].map((td) => td.querySelector('.label')?.textContent?.trim())
+
+    // One label per cell, no cell left to be read by position alone.
+    expect(labels.filter(Boolean)).toHaveLength(row.querySelectorAll('td').length)
+    // And the labels are the header's own words, so the wide page and
+    // the narrow page name the same column the same way.
+    for (const label of labels) {
+      expect(headings.some((h) => h === label), `"${label}" should be a column heading too`).toBe(true)
+    }
+    // The label is text in the document rather than CSS generated
+    // content, because `content: attr(...)` is not dependably read aloud
+    // and a column name that exists only in a stylesheet can be lost.
+    expect(html).not.toContain('attr(data-label)')
+  })
+
+  it('stops being a seven-column table on a narrow viewport, since seven columns do not fit one', () => {
+    // Asserted against the stylesheet because this page has no other
+    // place to carry it: the page is self-contained by design, so the
+    // rule either is in this string or does not exist. Without it the
+    // table keeps a minimum width equal to its seven columns and a phone
+    // reader loses the three provenance columns off the right edge.
+    const style = html.slice(html.indexOf('<style>'), html.indexOf('</style>'))
+    expect(style).toMatch(/@media \(max-width: \d{3}px\)/)
+    const narrow = style.slice(style.indexOf('@media'))
+    expect(narrow).toMatch(/table[^{]*\{[^}]*display: block/)
+    expect(narrow).toMatch(/thead \{ display: none/)
+    // The labels are hidden on a wide viewport and shown here; both
+    // halves matter, since showing them always would duplicate the
+    // header on every row.
+    expect(style).toMatch(/\.label \{ display: none/)
+    expect(narrow).toMatch(/\.label \{ display: block/)
+    // A record id has no spaces in it and is the one string on this page
+    // that can set the layout's minimum width on its own.
+    expect(style).toMatch(/td\.id, td\.id a \{ overflow-wrap: anywhere/)
+  })
+
+  it('says in the footer what the published digests prove and what they do not', () => {
+    const doc = new JSDOM(html).window.document
+    const footer = doc.querySelector('footer')!.textContent!.replace(/\s+/g, ' ')
+    expect(footer).toContain('SHA-256')
+    expect(footer).toContain('truncated download')
+    // The limit is on the page, not only in the code comments: the index
+    // and the records are written by the same run, so the digest says
+    // nothing about the publisher's honesty and the page must not imply
+    // that it does.
+    expect(footer).toContain('does not show that whoever published this site is honest')
+  })
+
   it('escapes a repository name rather than splicing it into the title', () => {
     const hostile = renderIndexPage({
       ...result.index,
