@@ -55,7 +55,7 @@ evidence:
     source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37, ursa-major/src/stats.ts:115-121
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
-    source: ursa-major/trial/README.md:64-72 ("Where the records live"); docs/agents/incidents.md:150-158 (Incident 2)
+    source: ursa-major/trial/README.md:64-72 ("Where the records live"); docs/agents/incidents.md:179-187 (Incident 2)
   - ref: E13
     what: session capture and git capture sit at different points of the funnel, 82 percent deletion against 7 percent
     source: docs/beyond-preference-pairs.md:232-239
