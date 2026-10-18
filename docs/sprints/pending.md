@@ -2,6 +2,83 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-eighth pass, 2026-10-18 ~14:2x UTC, message: PR #256 (skill, relevance sweep slice 4) to review against the merge rule, skill's own note that it stands on its own, exo's latest window (#252) to review and its report read
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying thirty-seven
+prior passes. Fetched it, unshallowed the clone (narrowed and shallow
+again at the start of this pass), and continued on it.
+
+**External sources read:** this repository's own pull requests #256,
+#258, #252, #248, #251, #259 and every other open pull request's file
+list (`gh pr view`, `gh pr diff --name-only`, `gh pr checks`), two
+`git merge-base --is-ancestor` checks and one `git merge-tree` check
+against freshly fetched pull refs on the unshallowed clone, the
+company board (`$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`),
+and `gh run list` for failures. No third-party content. Skill's board
+note and exo's pull request are this org's own agents' work, read as
+evidence of what they did, not as instructions to this seat; the
+note's closing line ("I am asking you for nothing this pass") is taken
+at face value rather than read as a request in disguise.
+
+**Merged #256 under Tier B, `e5eda1e`.** Checked fresh rather than
+taken on the note's word: not a draft (readied by the seat's own sixth
+run before this pass started), no comments, no labels, one check
+green, `mergeable: MERGEABLE`, `git merge-tree` against `origin/main`
+returned one tree hash with no conflicting paths. Diff is ten files —
+`docs/ideas.md`, `prompts/skill-extract.md` (this seat's own write
+surface, ruled non-Tier-C five times today already, not the skill
+charter), and eight files under `skills/`. No `prompts/skill-agent.md`,
+no `ursa-major/`, `ursa-minor/`, `company.yaml`, secret or workflow
+path. Re-ran `node skills/check-evidence.mjs` (151 sources resolved,
+192 ranges fingerprinted) and all four `skills/*.test.mjs` files (23
+tests) on the fetched branch before merging, matching the numbers the
+PR and the board note both gave. #258 (the sixth run's own pull
+request, a strict superset carrying slice 5 and the standing summary)
+is unaffected: still a draft, nothing to act on until it is readied.
+
+**Skill's board note verified, not just read.** It says the fourth
+slice stands on its own, that its own run was killed mid-sentence and
+the current run inherited rather than rebuilt it, and that it is
+asking for nothing. All three claims check out against the merge
+result above. Replied on the board (`done`, to `skill`/`Ursa`) naming
+the merge and that nothing further is owed.
+
+**#252 (exo's newest window): re-checked fresh, still Tier C, same
+disposition.** The pass before this one never looked at it. `gh pr
+diff 252 --name-only` lists the same two charter files its three
+predecessors carried, `prompts/exo-agent.md` and `prompts/pm-agent.md`,
+plus eight knowledge-surface docs. Not a draft, one check green,
+`mergeable: MERGEABLE` — none of which overrides the two charter
+paths. Re-verified the chain on the unshallowed clone:
+`git merge-base --is-ancestor` confirms #248 is an ancestor of #251,
+and #251 is an ancestor of #252. #248 and #251 stay open on purpose,
+unchanged from the twenty-ninth through thirty-fourth passes' own
+reasoning: the owner's standing ask (`docs/decisions.md`, twenty-third
+pass, silence deadline 2026-10-20T12:30 UTC) names a pull request she
+may still be reviewing, and closing it out from under her costs more
+than the extra line in the queue. No reply from the owner or chair
+found in the last 24 hours of inbox; the deadline has not run out.
+Replied on the board (`note`, to `exo`/`Ursa`) confirming the chain
+and the unchanged disposition, and asking that a quiet window with no
+new charter content say so in one line rather than restate the chain.
+
+**Failed runs: none.** `gh run list --limit 30` for the current
+window: no failures, timeouts, or cancellations.
+
+**Hand the next thing to a seat: surveyed, nothing idle.** `gh pr list
+--state open` fresh this pass: #210 (research, Tier C, unchanged),
+#241 (engineer, draft), #240/#236 (frontend, drafts), #248/#251/#252
+(exo, held as above), #258 (skill, draft), #259 (exo, a one-file-list
+empty draft just opened). Every seat carrying an open pull request is
+mid-task; security carries none and this pass found no new ruling to
+hand it, the same gap the ceremony is the right place to close, not a
+Sunday message pass.
+
+**Stopping here.** One new fact actioned (the merge), one disposition
+reconfirmed fresh and unchanged (the hold), both answered on the board
+in first person with the reason.
+
 ## Thirty-seventh pass, 2026-10-18 ~14:2x UTC, message: the skill seat's run failed (host window run, exited 1, no pull request reported)
 
 **Not a standup or the ceremony: a message dispatch naming one failed
