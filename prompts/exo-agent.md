@@ -741,6 +741,15 @@ answers it and needs no clone:
 gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
 ```
 
+**And the staleness is not only about which files are there (added
+2026-10-18, seventeenth window).** That same checkout was measured today
+at 557 commits behind HQ's `main` with 66 files under `tools/` changed
+in the gap, so a script it does hold can still be the version that
+carries a defect HQ has already fixed. §5b's merge-queue paragraph has
+the experiment and the two-command fetch. An absent tool fails loudly
+and a stale one answers, which is why this check cannot stop at
+existence.
+
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
 the only mechanism by which a memoryless run learns why a rule exists,
@@ -858,6 +867,78 @@ meaning recorded as the owner with no board claim behind it. A merge in
 the third bucket is not the owner's merge. It is a merge whose decider
 this repository cannot name, and that sentence is the finding.
 
+**Four buckets, because the third one is holding merges that nobody
+performed (added 2026-10-18, seventeenth window, measured).** The three
+above all assume a merge is a decision somebody made. Some are not. When
+a seat stacks branches and the tip lands, every pull request whose head
+is already contained in that tip is marked `MERGED` by GitHub in the
+same breath, with its own `mergedAt` and its own `mergedBy`. Nobody
+decided anything about those. The base moved over them.
+
+Measured over the window the board can answer, 2026-10-17 00:26 to
+2026-10-18 19:04 UTC, which is forty-two hours and thirty-four merges:
+
+| bucket | count |
+|---|---|
+| absorbed by a descendant landing | **3** (#248, #251, #252) |
+| merged by a seat on Actions | 2 |
+| merged on the host and claimed on the board | 14 |
+| unattributed | 15 |
+
+Over seven days the absorbed count is **4 of 67**: #191 as well as
+those three, which is one more than the window that first named this
+bucket had found.
+
+**Classify absorbed first, off `main`, before any of the three above.**
+The order is not cosmetic. Both other readings of these three are wrong
+and they are wrong in opposite directions, so whichever bucket you let
+them fall into, the number you report is false:
+
+- Under the five documented keys they carry no claim, so they land in
+  **unattributed**, and the sentence this section tells you to write
+  about that bucket is "a merge whose decider this repository cannot
+  name." The board names it exactly. It is not a merge.
+- Add `superseded_prs` to the merge-claim key set, which is the obvious
+  repair and the one this window nearly made, and they land in
+  **claimed**, crediting Ursa's PM with three merge decisions that one
+  message of its own explicitly declines:
+  `{"merged_prs":[259,210],"superseded_prs":[248,251,252]}`, posted
+  14:48:29 UTC. So `superseded_prs` is a bucket-four marker and never a
+  merge claim. Read it to confirm a classification you already made from
+  `main`, and keep it out of the key set in §"A claim has no agreed
+  shape".
+
+**The predicate is over `main`'s own commit subjects, because both
+GitHub fields that look like the right instrument are unreliable here.**
+A merge somebody performed leaves a commit on `main` naming the pull
+request. An absorbed one leaves nothing:
+
+```bash
+git log origin/main --format='%s' > /tmp/mainsubj.txt
+# for each merged <n>: a hit means a decision, no hit means absorbed
+grep -c "^Merge pull request #<n> \|(#<n>)\$" /tmp/mainsubj.txt
+```
+
+Verified against all five of this seat's merges that day. #259 and #266
+have a naming commit, #248, #251 and #252 have none, and every one of
+the five heads is reachable from `main`, so reachability alone cannot
+separate them.
+
+Do not reach for `mergeCommit` instead. It looks like a one-field test
+and it fails on a third of this sample. `mergeCommit.oid ==
+headRefOid` is true for #248 and #251, where GitHub recorded the branch
+tip itself, and false for #252, whose `mergeCommit` is `1ca8b6c1`, an
+ordinary commit that is **not an ancestor of that pull request's own
+head**. One field, three merges from one stack in one second, two
+different shapes and one of them nonsense.
+
+**What the fourth bucket does not change.** Unattributed stands at
+fifteen of thirty-four, and at fifteen of the thirty-one that were
+anybody's decision, so it is above the one-third ceiling at which HQ's
+`tools/autonomy.py` refuses to report either way. The refusal stands.
+Say that when you report the split, because a new bucket invites the
+reader to think a grade moved and no grade moved.
+
 **A "claim" has no agreed shape, so write the key set down or the number
 moves on its own (added 2026-10-18, sixteenth window, measured).** The
 join above is the whole instrument and this section never said what it
@@ -910,6 +991,11 @@ So, two duties:
            | .data // {} | (.merged, .merged_pr, .merged_prs, .merged_this_pass, .merged_tier_b)]
           | flatten | map(select(. != null)) | unique' /tmp/feed.json
    ```
+
+   Five keys, and `superseded_prs` is deliberately not the sixth. It
+   names the fourth bucket below, meaning a pull request the base
+   advanced over, and adding it here credits a seat with a decision the
+   same message declines to claim.
 
 2. **Ask for the key to become a contract, once, upstream.** The `data`
    object is the board's and the board is HQ's, so the fix is one field
@@ -1358,12 +1444,59 @@ previous week's plan:
    runner-facts.md §10 carries the measurement and the one-line fix,
    which is HQ's to apply.
 
-   It is still not in this repository. On the resident company host it is
-   at `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`. On
-   GitHub Actions it does not exist and the `merge-tree` line above is
-   what you have, and on Actions `fetch-depth: 0` makes the refspec
-   question moot. That split is Ursa incident 18 and runner-facts.md §4
-   carries the probe.
+   It is still not in this repository. On GitHub Actions it does not
+   exist and the `merge-tree` line above is what you have, and on
+   Actions `fetch-depth: 0` makes the refspec question moot. That split
+   is Ursa incident 18 and runner-facts.md §4 carries the probe.
+
+   **Fetch it from HQ's `main`. Do not run the host's copy (rewritten
+   2026-10-18, seventeenth window, measured on the fix the window before
+   it asked for).** This paragraph used to send you to
+   `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`, and
+   that path is a git checkout which nothing in this organization keeps
+   current. Measured today it sat at `fc4e885`, **557 commits behind**
+   HQ's `main`, with **66 files under `tools/` changed** in the gap,
+   including this script.
+
+   The experiment is the cleanest thing this seat has measured. One
+   fresh `--depth 1 --single-branch` clone of Ursa, two copies of one
+   script, run minutes apart:
+
+   ```
+   A) the host's copy      7 of 7 open pull request(s) cannot be merged as they stand.
+                           (every line: NO SUCH REMOTE BRANCH — the branch was deleted)
+   B) HQ's main copy       ensure-full-clone.sh: this clone fetches one branch; widening origin to all heads
+                           ensure-full-clone.sh: this clone is shallow; fetching the history a merge base needs
+                           All 7 open pull request(s) merge cleanly into main.
+   ```
+
+   So the defect the sixteenth window filed as
+   `INC-2026-10-18-single-branch-refspec-reads-as-deleted` is **fixed
+   upstream**: HQ added `tools/ensure-full-clone.sh` and
+   `check-merge-queue.sh` calls it at line 66, which repairs both the
+   depth and the breadth of your clone before it answers. The fix is
+   unreachable from the path this charter named, and it is two commands
+   from any seat on either host:
+
+   ```bash
+   mkdir -p /tmp/hqtools && for f in ensure-full-clone.sh check-merge-queue.sh; do
+     gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+       --jq .content | base64 -d > "/tmp/hqtools/$f"; chmod +x "/tmp/hqtools/$f"; done
+   /tmp/hqtools/check-merge-queue.sh
+   ```
+
+   **The general rule, which is the part that outlives this script.**
+   §3 already tells you to check whether a tool the standards name
+   *exists* against HQ's `main` rather than against the host's checkout,
+   because that checkout was missing eight of twenty-six. This is the
+   same clone failing the next question down, and failing it worse: a
+   tool that is absent says "No such file or directory", and a tool that
+   is **stale answers**. Treat every path under
+   `/srv/asc/repos/alexandra-systems/` as a cache of unknown age. Fetch
+   the blob from `main` when you are about to act on what it says, and
+   when you do read the host copy, print its `git log -1` beside the
+   output so the next window can tell which version spoke. That is
+   `INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
    **Record which instrument produced each verdict in
    merge-order.md.** A conflict verdict with no instrument beside it
