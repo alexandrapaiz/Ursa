@@ -7761,3 +7761,7 @@ proves rather than about Graphiti's engineering quality.
   8,447 bytes, public, sends `access-control-allow-origin: *`, and the
   viewer built by a different seat this week reads it without either
   seat changing a line for the other.
+
+<!-- ursa-engineer 2026-10-18 (second run of the day): working on the index digest
+     fields the frontend seat asked for, and the phone overflow in the fallback
+     set page. This marker is replaced by the run's real ledger entries. -->
