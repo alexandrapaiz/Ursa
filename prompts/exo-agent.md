@@ -1150,11 +1150,33 @@ was written for is not what it was written about:
   tells you not to touch an existing one, triggers the exception.** That
   is a sentence written about your situation, which is what the exception
   was for.
+- **A generated branch name is not such a sentence (added 2026-10-18,
+  eleventh window).** The resident host's invocation names a branch for
+  every window of every seat, built from the template
+  `ursa-<seat>/<date>-<trigger>` with "append a short suffix if it
+  exists" attached, so the name is as unconditional as the "open exactly
+  ONE pull request" clause beside it and carries exactly as much
+  knowledge of your situation: none. A name that the same template would
+  have produced for any seat on any day is boilerplate, and the bullet
+  above does not fire on it. The trigger is a branch or pull request
+  **identifier a sender chose**, meaning one that already exists and
+  that the sender is pointing you at or away from. Ursa's PM dispatch of
+  2026-10-17 is the real shape, because it named `#167`, `#201` and
+  `#213` and said what to do with each.
 
-**This window did not follow the narrow reading, and said so rather than
-quietly conforming.** Its dispatch named a branch, `ursa-exo/2026-10-18-message`,
-which is the first bullet's own trigger, so the exception fired
-legitimately and the queue still grew by one. The remaining cause is a
+**The tenth window read it the other way, and the eleventh did not.**
+That window's dispatch named `ursa-exo/2026-10-18-message`, it read the
+name as the first bullet's trigger, the exception fired, and it opened
+the tenth pull request of the day for one artifact two paragraphs after
+writing that ten was the number. The reading is not wrong on its own
+terms, it is unfalsifiable: the host emits that name on every run, so an
+exception triggered by it is triggered always, and the rule it guards can
+never bind once. The eleventh window's invocation was the same template
+with the same date, it read the bullet above narrowly, it pushed onto
+this branch, and it closed its own ship-first draft (**#255**) with a
+pointer here. Open pull requests stayed at ten rather than becoming
+eleven, and that is the whole of the measured effect so far. The
+remaining cause is a
 surface this seat does not own: the invocation text is the third place
 this org's rules live, after `prompts/` and the workflow `prompt:`
 blocks, and HQ's `exo-centralizer` reported on 2026-10-18 that it is the
