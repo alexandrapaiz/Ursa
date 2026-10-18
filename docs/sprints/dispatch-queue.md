@@ -1,42 +1,34 @@
-# Dispatch queue — 2026-10-18, ~09:3x UTC, message pass (twentieth)
+# Dispatch queue — 2026-10-18, ~09:4x UTC, message pass (twenty-first)
 
-## Tier B merge this pass (§10, amended by §21): one, done
+## This pass's event: already closed by the pass before it
 
-`#232` (engineer, "this repository publishes its own outcome records
-to its own Pages site") is the dispatch this pass answers. Checked
-fresh against every Tier B condition — not this seat's own PR, not a
-draft, no `hold` label, checks green, no Tier C path in the diff,
-`MERGEABLE`/`CLEAN`, opened today, the one PR comment (HQ's advisory
-seat, 09:06:26Z) predates the branch's last four commits — and all
-held. Merged (`4bf9f0f`). Full account in `docs/sprints/pending.md`'s
-twentieth-pass entry, including the two steps the merge does not by
-itself complete (HQ copying the workflow file into
-`.github/workflows/`; the owner's one Pages-enable API call).
+The dispatch names engineer's run-finished notice for
+`ursa-engineer/2026-10-18T09-09-05-734Z-message`. That run is the one
+that opened PR #232, and the twentieth pass already reviewed it
+against Tier B and merged it (`4bf9f0f`, 09:34:58Z) before this pass
+started. Full account in `docs/sprints/pending.md`'s twenty-first-pass
+entry. Nothing fires through `gh workflow run` this pass.
 
-## Nothing else to propose through `gh workflow run` this pass
+## Tier B candidates checked fresh this pass: none ready
 
-`gh pr list --state open` now shows nine: `#240`, `#236`, `#235`,
-`#234`, `#231`, `#225` (this seat's own), `#210`, `#199`, `#167`. Every
-one already has a live seat on it — `#235`→`#234`→`#231` is exo's own
-stack, `#240` and `#236` are frontend's own drafts, `#210` is
-research's, `#199` is skill's. None is stuck behind a question or a
-defect this seat can name, so none meets §11.3's bar, and
-`PM_DISPATCH_ENABLED` is unreadable with this token (`403`, the same
-gap every prior pass in this file has hit) in any case.
+`gh pr list --state open` now shows ten: `#241` (engineer, new this
+pass, draft, title still "WIP"), `#240` and `#236` (frontend's own
+drafts), `#235`→`#234`→`#231` (exo's own stack, Tier C — touches
+`prompts/exo-agent.md` and/or `prompts/pm-agent.md`), `#225` (this
+seat's own), `#210` (research, Tier C — `prompts/research-agent.md`),
+`#199` (skill, Tier C and `CONFLICTING`), `#167` (exo, subsumed by
+`#234`/`#235`). Every one already has a live seat on it or is Tier C
+regardless of merge state. `PM_DISPATCH_ENABLED` is still unreadable
+with this token (`403`), and moot regardless since nothing here meets
+§11.3's bar.
 
-## Other Tier B candidates checked this pass: none ready
+## Closed this pass: nothing, because the owner already closed it
 
-Same shape as the thirteenth and nineteenth passes: `#167`, `#231`,
-`#234`, `#235` are one subsumption stack touching `prompts/exo-agent.md`
-and/or `prompts/pm-agent.md` — Tier C, charters are owner-only
-(pm.md §9) regardless of how clean or ready any of them read. `#210`
-touches `prompts/research-agent.md`, also Tier C. `#199` touches
-`prompts/skill-extract.md` and reads `CONFLICTING` besides. `#240` and
-`#236` are frontend's own clean drafts, not yet readied by their own
-seat. Nothing else here is both ready and Tier B.
+`#237` (engineer's fourth run) was `CLOSED` by `alexandrapaiz` at
+09:28:53Z, before the twentieth pass even started. Confirmed, not
+re-closed.
 
 ## Failed-run triage this pass (§11.7)
 
-`gh run list --status failure --created ">=2026-10-18T09:12:00Z"`
-returns nothing. No run has failed since the nineteenth pass's check.
-No rerun, no new incident.
+`gh run list --limit 15`: all green. No run has failed since the
+twentieth pass's check. No rerun, no new incident.
