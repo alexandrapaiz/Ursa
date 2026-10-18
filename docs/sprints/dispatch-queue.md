@@ -1,63 +1,59 @@
-# Dispatch queue — 2026-10-18, ~01:2x UTC, message pass (`window:message`)
+# Dispatch queue — 2026-10-18, ~02:0x UTC, message pass (`window:message`)
 
-## Tier B merge this pass (§10, amended by §21)
+## Tier B merges this pass (§10, amended by §21)
 
-**#227 (frontend, the public address and the record viewer).** Not a
-draft, no label, no owner comment since its last push, one defined
-check (`scan`) green, `mergeStateStatus: CLEAN`, diff confined to
-`docs/design/reviews/`, `ursa-minor/app`, `ursa-minor/components`,
-`ursa-minor/lib`, `ursa-minor/public`, `ursa-minor/scripts`,
+**#229 (frontend, the record address and the viewer that refuses to
+overclaim).** Not a draft, no label, no comment or review since its
+last push, one defined check (`scan`) green, `mergeStateStatus:
+CLEAN`. Diff confined to `docs/design/reviews/`, `ursa-minor/app`,
+`ursa-minor/components`, `ursa-minor/lib`, `ursa-minor/scripts`,
 `ursa-minor/package.json` — no `prompts/`, `.github/workflows/`, or
-`company.yaml` path. Merged. This corrects the previous pass in this
-same PR, which declined to merge it on a reading of this seat's own
-boundary that does not match its own practice: this window has already
-merged #219, and earlier passes merged #215, #214, #198, #196, all
-product-code Tier B merges under `ursa-major/`, none of them this
-seat's own PR, none a workflow or secret path. #227 is the same shape
-under `ursa-minor/`.
+`company.yaml` path. Merged.
 
-## Failed-run triage this run (§11.7)
+**#230 (engineer, the index's digest and byte count, and the 390px
+fallback-page fix).** Opened since the last pass closed; found by the
+same open-queue check that found #229. Not a draft, no label, no
+comment since its last push, check green, `mergeStateStatus: CLEAN`,
+diff confined to `README.md`, `docs/design/public-record-address.md`,
+`docs/ideas.md`, `docs/provenance/`, and `ursa-major/` source and
+tests. Merged.
 
-One failure this pass, and it is not a GitHub Actions run — every
-seat's clock left GitHub on 2026-10-17 (#224), so `gh run list`
-carries only `redaction-gate` scan checks on open branches, all
-`success`, and no `agent-*.yml` runs at all. The failure is a host
-window run: `ursa-engineer` on the `message` trigger, started
-2026-10-18T00:27:28Z, 121 turns, 34 minutes, exit 1, reported with no
-pull request.
+## Not merged: #231 (exo), Tier C by content
 
-That report is wrong, checked against the branch rather than trusted.
-Pull request #226 exists, was opened about one minute into that same
-window (`createdAt: 00:28:27Z`) and last touched about two minutes
-before the window's own reported end (`updatedAt: 01:03:27Z`), carries
-nine commits matching the engineer's own `done` report word for word —
-the publish script, its tests, the Pages action, the README line, the
-design doc — one check defined and green, `mergeStateStatus: CLEAN`.
-
-Classified as a **tripwire false alarm** (the run's PR exists): no
-rerun. The run shipped the real work and exited 1 on something after
-its last push, most likely the step that would have called the PR
-ready, and whatever the host's own completion check looks for never
-saw the PR already sitting there. Told engineer on the board (handoff,
-ref #226): the next run of that seat opens #226 before it starts
-anything new, since the work in it reads finished and only that seat
-can say whether it actually is. Not re-triaging if the same host-run
-shape repeats without new evidence; this entry is the record of why.
+`gh pr diff --name-only 231` includes `prompts/exo-agent.md`. Charters
+are owner-only (pm.md §9) regardless of what this seat's own Tier B/C
+authority otherwise covers. Named for the owner in `pending.md`,
+alongside the fact that it subsumes #167, so she can close both with
+one decision.
 
 ## This pass acted through the board, not `gh workflow run`
 
 Per §17, a message-triggered pass answers what woke it and hands work
-onward as board handoffs rather than firing scheduled dispatches. One
-went out this pass, folded into the failed-run entry above: the
-handoff to engineer naming #226 as the next pull request to open,
-not a new one.
+onward as board messages rather than firing scheduled dispatches. Two
+went out this pass: a `note` to engineer and a `note` to exo, each
+answering a message addressed to this seat, and a `handoff` to
+engineer naming the one open item neither of the two live drafts
+below claims — measuring how much of a record is not reproducible
+across two resolves of the same clone (`ursa-major/
+tools/measure-resolve-determinism.ts`, the first step engineer's own
+#230 already wrote into the ledger).
 
-## Nothing else proposed this run
+## Nothing proposed through `gh workflow run` this pass
 
-`PM_DISPATCH_ENABLED` was not checked; the event-bus door, not
-`gh workflow run`, is what this pass used. No sprint item is due
-within three days beyond Sprint 2026-10-12's own close, already
-shipped. No ADR merged since the last pass names a seat with no run
-following, beyond what is handed off above. Frontend's own #228
-(the record page's size, in progress) needs nothing from this seat
-yet; it is live work on the seat's own cron, not a stall.
+`gh variable get PM_DISPATCH_ENABLED` returned `403: Resource not
+accessible by personal access token` this pass, the same token-scope
+gap pm.md §11.5 describes for Actions calls generally, not a secret
+withheld on purpose. Moot regardless: every open thread this pass
+found already has a live seat on it. #232 (engineer) is building the
+Pages dogfood this seat handed off two passes ago. #233 (frontend) is
+reading the integrity UI against the divergent-digest case and
+measuring the width this seat could not. Nothing here needed a cold
+`workflow_dispatch` start instead of the message it already had.
+
+## Failed-run triage this run (§11.7)
+
+`gh run list --status failure --created ">=-24h"` returns seven
+`redaction-gate` runs, all on this branch or frontend's prior ones,
+all already classified by the second, fifth, seventh, and eighth
+passes in this same pull request. Nothing new in this pass's own
+window; no rerun, no new incident.

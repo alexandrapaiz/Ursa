@@ -2,6 +2,90 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Ninth pass, 2026-10-18 ~02:0x UTC: #229 and #230 merged, exo and engineer answered on the board, #231 named Tier C
+
+Four events woke this seat: frontend's PR #229 ("the record address a
+stranger can paste, and the viewer that refuses to overclaim about
+it"), with the instruction to check it against the merge rule or hand
+it back to its seat; exo's `done` closing the stale draft it flagged
+two days running and carrying that work into #231; engineer's `note`
+confirming the eighth pass's tripwire-false-alarm verdict; and the
+same frontend run-finished notice a second time, naming "merge what is
+yours, close what is superseded, hand the next thing to a seat."
+
+**#229 merged.** Checked fresh, not assumed: not a draft, no label, no
+comment or review since its last push, one defined check (`scan`)
+green, `mergeStateStatus: CLEAN`. `gh pr diff --name-only 229` showed
+only `docs/design/reviews/`, `ursa-minor/app`, `ursa-minor/components`,
+`ursa-minor/lib`, `ursa-minor/scripts`, `ursa-minor/package.json` — no
+`prompts/`, `.github/workflows/`, or `company.yaml` path. Merged with
+`gh pr merge 229 --merge`.
+
+**#230 (engineer) merged in the same sweep.** Opened since the eighth
+pass closed and not named in either event, but the same open-PR check
+that found #229 clean found this one clean too: not a draft, no
+label, no comment since its last push, check green,
+`mergeStateStatus: CLEAN`, diff confined to `README.md`,
+`docs/design/public-record-address.md`, `docs/ideas.md`,
+`docs/provenance/`, and `ursa-major/` source and tests — no
+`prompts/`, workflow, or secret path. Merged with `gh pr merge 230
+--merge`.
+
+**Close what is superseded: nothing to close.** The open queue after
+both merges holds two brand-new live drafts, #232 (engineer, Pages
+dogfooding, the handoff the sixth pass above sent) and #233 (frontend,
+the integrity UI against the divergent-digest case engineer's #230
+warned about, plus the 390px width measurement), neither a duplicate
+of finished work. #231 (exo) and #167 (exo, 2026-10-11) are discussed
+below, not closed by this seat.
+
+**#231 is Tier C, not Tier B, regardless of how clean it reads.**
+`gh pr diff --name-only 231` includes `prompts/exo-agent.md` alongside
+the incident register and learning log. Charters are owner-only by
+pm.md §9 no matter what §10/§21 otherwise grant this seat, so #231
+waits on her merge. Its own text says it subsumes #167 (the same
+charter file, from 2026-10-11): naming that here so she can close #167
+as part of the same decision rather than reading two charter diffs
+for one change. Replied to exo on the board naming both findings.
+
+**Engineer's confirming note answered, nothing to redo.** Replied in
+first person agreeing with the verdict and keeping the one durable
+fact from it: two different things report a run, and the one that
+said no pull request existed lives in the runtime's own repository,
+not in this one, so it is not this seat's or engineer's to fix.
+
+**Hand the next thing to a seat.** The one open item neither #232 nor
+#233 claims: engineer's own #230 found that resolving the same clone
+twice produces two different digests (`generatedAt` sits inside the
+hashed bytes) and logged a proposed ledger entry with a one-run first
+step, `ursa-major/tools/measure-resolve-determinism.ts`. Handed to
+engineer on the board for whichever run is free after the Pages
+dogfood, noting #233's plan to read the integrity UI against the same
+divergence so the two are a shared dependency, not a collision.
+
+**Failed-run triage: nothing new.** `gh run list --status failure
+--created ">=-24h"` returns seven runs, all on this branch or
+frontend's prior ones, all already classified and closed by the
+second, fifth, seventh, and eighth passes above. No failure in this
+pass's own window.
+
+**Dispatch queue: could not read the switch this pass.** `gh variable
+get PM_DISPATCH_ENABLED` returned `403: Resource not accessible by
+personal access token` — the same token shape gap pm.md §11.5
+describes for Actions calls, not a secret withheld on purpose. Moot
+either way: every open item this pass found already has a seat
+building it (#232, #233) or a handoff just sent on the board, so
+nothing was a candidate to fire through `tools/gh-actions.sh workflow
+run` regardless of the switch's value.
+
+**Merging `main` back into this branch surfaced four conflicts**
+(`docs/ideas.md`, `docs/provenance/bundle-digests.json`,
+`docs/provenance/bundle-digests.md`, `ursa-minor/package.json`), the
+same shape the sixth pass above resolved: this branch's own history
+carries no commits on any of the four paths (`git log main..HEAD --
+<path>` empty for all four), so there was no competing edit to choose
+between, and `main`'s side was taken in full.
+
 ## Eighth pass, 2026-10-18 ~02:0x UTC: closing the loop on the exact run id that woke this pass
 
 A new message woke this seat naming `redaction-gate` run `39088088726`
