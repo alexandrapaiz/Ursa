@@ -445,6 +445,85 @@ Three rules that give the file teeth, also HQ's:
   spelling has appeared and the centralizer has not made the field a
   contract in `docs/standards/pm.md` §15.
 
+### The claim read covers both of the board's partitions, because a read with no addressee returns broadcasts only
+
+- **Proposal.** The eighteenth window, 2026-10-18, from the merge claim
+  for its own trigger. §3e of `prompts/exo-agent.md` grades autonomy by
+  joining merged pull requests against the PM's board claims, and its
+  board read is `?limit=400` with no addressee. That call returned
+  **230 messages with `to_seat` null in 230 of 230**. The PM's `done` of
+  19:04:06, carrying `data.merged_tier_b: [266]`, is absent from it and
+  present from `?to_seat=exo&everyone=0`, so the instrument filed that
+  merge as unattributed while the message naming its decider sat in the
+  inbox of the run doing the filing.
+- **Merged.** Not yet. Shipped in this window's pull request: §3e's read
+  is two calls over three surfaces, broadcast plus a directed read per
+  addressee over the roster plus `owner`, `chair` and
+  `exo-centralizer`, with the union taken across the five documented
+  keys; and `docs/agents/runner-facts.md` §7 now states the partition
+  rule for every instrument that reads that endpoint rather than for
+  this one call.
+- **Effect.** Measured in the same pass, over the forty-three hours the
+  board can answer and its thirty-four merges. Claimed **13 → 15**,
+  unattributed **16 → 14**, unresolved share of the thirty-one merges
+  that were anybody's decision **52% → 45%**. Two claims, #256 and
+  #266, exist only on the directed surface. **Both readings are above
+  the one-third ceiling at which `tools/autonomy.py` refuses to report,
+  so the refusal stands and no grade moved** — the third correction in
+  two days to move this number and not the conclusion drawn from it.
+- **Rule.** The store has two partitions and a read covers one of them
+  unless you name an addressee, and `from_seat` is not honoured, so the
+  loop is over recipients somebody else chose. More generally: when you
+  repair a read, enumerate the partitions of the surface and say which
+  the call covers, because an instrument that reads one of two surfaces
+  grades as blind rather than as partial.
+- **Next measure.** On the brief of **2026-10-25**, re-run the split
+  with both reads and report claimed, absorbed and unattributed beside
+  the same numbers taken with the broadcast-only call. The experiment
+  succeeds if the two-surface number is the one every window reports and
+  the gap between them is stated; it fails if any window again reports
+  an autonomy figure without naming which surfaces its read covered.
+
+### HQ's tool list is read against this charter's own procedures, not only against the incident register
+
+- **Proposal.** The eighteenth window, 2026-10-18. §3's "sweep the other
+  direction" check pairs HQ's `tools/` against Ursa's **incident
+  register**, so every pairing it has produced answered a failure
+  somebody had already written up. Read the same list against the
+  checks this charter spells out in bash and three more fall out, none
+  of which had ever been named in this seat's own registers:
+  `check-queue-ids.sh` against §3's identifier scan, `merge-order.sh`
+  against §5b's hand-built order, `check-draft-prs.sh` against the
+  dead-draft count.
+- **Merged.** Not yet. Shipped in this window's pull request: the
+  pairing-against-procedures subsection in §3, with the three tools
+  named and the rule that a section spelling out a multi-step
+  measurement in bash is a pairing candidate by construction. The
+  portability half went to `alexandra-systems/exo-centralizer` at
+  19:28:24 rather than being patched here.
+- **Effect.** One number, from running the first of the three.
+  `check-queue-ids.sh --audit-base` named `ADR-005` and `ADR-006` as
+  each used twice on `origin/main`, in one command. That collision has
+  been on this register since **2026-09-27**, and every window in the
+  **twenty-one days** since was told to "scan every numbered register
+  for a number used twice" by hand. The scan was never skipped and never
+  wrong. It was re-derived from nothing, each time, by a run with no
+  memory of the last one.
+- **Rule.** A hand-rolled procedure in a charter is not evidence that no
+  tool exists; it is evidence the charter predates the tool. And running
+  a borrowed tool from HQ's `main` cures staleness while importing HQ's
+  paths, so read the paths it hardcodes before quoting its output: an
+  absent tool fails loudly, a stale tool answers, and a current tool
+  carrying another repository's assumptions answers about files that are
+  not there.
+- **Next measure.** On the brief of **2026-10-25**, count the checks in
+  `prompts/exo-agent.md` still written as hand procedures that have a
+  named HQ instrument. Baseline **3** this week, all three now cited.
+  The experiment succeeds if that count reaches zero without any tool
+  being vendored into `tools/`; it fails if a window vendors a copy,
+  because a local copy drifts from the standard that calls it while
+  continuing to answer.
+
 ### Carried forward: eight, all of them merged this week with their Effect lines already written
 
 - **Proposal.** Rule 3 of this file carries forward any improvement that
