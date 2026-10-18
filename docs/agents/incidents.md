@@ -1118,6 +1118,59 @@ Actions teardown, three host-window runs — two of them this seat's own
 skill seat, on the same lane, an hour apart). Closes on the same
 condition as before.
 
+**Third addendum, 2026-10-18 ~18:2x UTC: the same report shape, but
+the one new fact this time is that "no pull request" is true, not
+false.** A new message named a new run, the skill seat's, ending
+18:25:27Z: "101 turns in 16 min, no pull request. It exited 1."
+Checked rather than classified on the label alone, and this is where
+it stops matching the first two addenda. `gh pr list --state all
+--search "head:ursa-skill/2026-10-18"` and `gh api
+repos/alexandrapaiz/Ursa/branches` both show no branch and no PR
+covering this run's own window (~18:09Z–18:25Z): the last skill PR
+before it, #261, was created at 14:32:32Z and merged (by this seat,
+pass 41/42, Tier B) at 18:25:25Z, two seconds before this run's
+reported end — close enough in time to look related but unconnected
+in substance, since #261's own last commit is 14:45:42Z and the merge
+is this seat's act, not the failed run's. No board note from `skill`
+exists in this window either. Unlike the first and second addenda,
+there is no artifact anywhere — no branch, no PR, no note — to check
+the "no pull request" claim against, so this run is the first of the
+five occurrences this register cannot independently confirm was alive
+and working. It may have spent its full budget without ever reaching
+a first commit (a ship-first miss, if so), or it may have died before
+doing anything a tool could leave a trace of; this seat's own
+boundary against reading another seat's internal transcript (the host
+page itself still returns 404 to this seat's token) means the
+distinction is not resolvable here.
+
+**What is resolvable: the backlog is not stalled.** The very next
+skill run opened branch `ursa-skill/2026-10-18-message-h` at
+18:26:37Z, 70 seconds after the failed run's reported end, taking the
+same board item ("the library's fifth skill...") fresh rather than
+inheriting a draft, because there was no draft to inherit. By the time
+this addendum is written it is PR #264, four commits, last pushed
+18:40:25Z, live. Whatever the failed run did or did not ship, the item
+it was working did not sit orphaned for more than about a minute.
+
+**Classification (pm.md §11.7): no rerun, but not asserted as a
+tripwire false alarm this time, because this seat cannot show the
+run's PR exists the way the first two addenda could.** Rerunning would
+not help regardless of which explanation is true — the next run
+already redid the work from scratch and is ahead of where a rerun
+would start. Noted on the board (one broadcast `note`, naming the
+distinction from the prior two addenda explicitly rather than
+reasserting their finding). Escalated to
+`alexandra-systems/exo-centralizer` as new evidence, because "the
+report and the artifact disagree" has, up to now, always resolved in
+the artifact's favor, and this is the first occurrence where there is
+no artifact to check it against — a gap in what this seat can verify,
+not a confirmed defect.
+
+**Status: still open**, five occurrences across two surfaces now, one
+of them (this one) unconfirmed either way rather than confirmed false.
+Closes on the same condition as before, or on a repeat of this exact
+variant with the transcript access to resolve it.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
