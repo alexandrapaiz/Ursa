@@ -2,6 +2,108 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-fourth pass, 2026-10-18 ~12:3x UTC, message: a PR to review against the merge rule and exo's run-finished report, both naming the same event the twenty-third pass already opened
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
+   (#225) is this seat's own, open since the twenty-second pass,
+   carrying all twenty-three prior passes. Checked it out, merged
+   `origin/main` fresh (already up to date), and continued on it
+   rather than opening a second branch or a second pull request.
+
+2. **The event is the twenty-third pass's own, read a second time, plus
+   one new fact that pass could not have seen.** Both halves of this
+   pass's dispatch — "review PR #242 against the merge rule" and "read
+   exo's report, merge what is yours, close what is superseded, hand
+   the next thing to a seat" — describe the same handoff
+   (`exo`/`Ursa`'s `783d0346…`) the twenty-third pass already answered:
+   agreed with exo's reading of §10 vs. §21 on the facts, declined to
+   self-adopt it, and sent the owner an `ask` under §22's silence
+   route. Checked fresh rather than taken on that pass's own account:
+   the `ask` (12:29:59Z, "Two questions from exo, both routed to you
+   with my own recommendation, neither urgent") is confirmed on the
+   board, still unanswered, clock running from that timestamp. Not
+   re-asking a second time this pass for the same question.
+   The new fact: `#242` was a draft when the twenty-third pass checked
+   it and is not now (`gh pr view 242`: not a draft, `CLEAN`), and exo
+   has since opened a fifth window, `#243`, draft, "run in progress,"
+   whose own body claims to subsume `#231`, `#234` and `#242` (and
+   `#167` through them). Verified rather than taken on that claim: on
+   a freshly unshallowed clone (see item 4), `git merge-base
+   --is-ancestor` confirms `#242`'s tip is already an ancestor of
+   `#243`'s current tip, even mid-run. `#242` itself stays exactly
+   where the twenty-third pass left it, open and Tier C pending the
+   owner's word; closing it while exo's own live run is still writing
+   to the branch above it is exo's call, not this seat's to make for
+   it.
+
+3. **Close what is superseded: three closed, verified rather than taken
+   on exo's own account.** `#242`'s body claims to subsume `#167`,
+   `#231` and `#234` (`#235` already closed by an earlier pass). On the
+   unshallowed clone, `git merge-base --is-ancestor` confirms all three
+   branch tips are strict ancestors of `#242`'s tip, so every commit in
+   them survives regardless of what happens to `#242` next. Closed all
+   three (`gh pr close`) with a comment on each naming the ancestry
+   check and pointing at `#242`, then posted one `note` to `exo`/`Ursa`
+   on the board saying the same. `#242` itself was not closed: it is
+   not superseded by anything merged, only by a draft still being
+   written, and the owner's pending `ask` is specifically about it.
+
+4. **The shallow, narrowed clone that exo's own finding 3 named is real
+   here too, and it produced a false "unrelated histories" error before
+   it was fixed.** `git rev-parse --is-shallow-repository` read `true`
+   and `remote.origin.fetch` was narrowed to `main` only, exactly the
+   shape `docs/agents/runner-facts.md` §3 describes (added in `#242`'s
+   own diff). Widened the refspec and ran `git fetch --unshallow`
+   before trusting any ancestry or conflict check this pass makes;
+   every check above and below was run after that fix, not before.
+
+5. **Hand the next thing to a seat: skill's own stale conflict, never
+   actually handed to it before now.** `#199` has not moved (no new
+   commit on its branch) since 2026-10-15, three days, despite HQ's own
+   MBA advisory comment on it calling it the highest-leverage unmerged
+   pull request in the whole portfolio. Checked the conflict for real
+   on the unshallowed clone rather than trust GitHub's cached
+   `UNKNOWN` field: `git merge-tree` confirms exactly one conflict,
+   `docs/ideas.md`, nothing else. Checked the board for any prior
+   message addressed to `skill`/`Ursa` naming this PR: none in the
+   visible history, only comments and advisory notes on the PR itself,
+   none of them a handoff asking the seat to act. Sent one now
+   (`handoff`, `pm`/`Ursa` → `skill`/`Ursa`, 12:38:09Z), naming the
+   conflict and the fact that this seat cannot merge the result even
+   clean, since the diff also edits `prompts/skill-extract.md`
+   directly, which stays the owner's regardless of how clean the rest
+   of the branch reads.
+
+6. **Failed runs: none new.** `gh run list --status failure --created
+   ">=$(date -u -d '-6 hours' +%FT%TZ)"` is empty, same as the
+   twenty-third pass's own check six minutes before.
+
+7. **Tier B merge: nothing new to merge.** Beyond the three closures
+   above, every other open PR is unchanged from the twenty-third
+   pass's read: `#241` (engineer), `#240`/`#236` (frontend) are live
+   drafts; `#210` (research) and `#199` (skill) are Tier C by their
+   `prompts/` diffs; `#225` is this seat's own; `#243` (exo) is a draft,
+   "run in progress."
+
+8. **Dispatch: nothing fired through `gh workflow run`.** This pass's
+   own action was a board handoff (item 5), the choreography door
+   §17 describes, not a cold dispatch start; `PM_DISPATCH_ENABLED`
+   still returns `403: Resource not accessible by personal access
+   token` on this host token, the same gap every host pass today has
+   hit, and moot regardless since the only new candidate (skill, item
+   5) was answered through the board instead.
+
+9. **Sprint: unchanged, fully shipped.** Same as the twenty-third
+   pass: all three of `sprint-2026-10-12.md`'s items are merged, ahead
+   of the 2026-10-18T00:00 UTC milestone. Nothing moves on the backlog
+   today; tomorrow's Monday ceremony opens the next sprint.
+
+10. **Board.** One `handoff` to `skill`/`Ursa` (item 5), one `note` to
+    `exo`/`Ursa` naming the three closures and that the fourth stays
+    with the owner, both sent this pass. No new message to the owner:
+    the standing `ask` from the twenty-third pass already covers this
+    event in full and nothing this pass found changes its terms.
+
 ## Twenty-third pass, 2026-10-18 ~12:3x UTC, message: exo's tier-C-charter-freeze handoff, routed to the owner rather than decided alone
 
 1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)

@@ -644,3 +644,50 @@ a branch stays unless its closed PR's own closing comment already names
 why nothing in it is needed, in which case I delete it on sight the way
 this seat already does for merged branches — and the same 48-hour clock
 applies.
+
+## Finding — three of exo's own pull requests closed as superseded, confirmed on an unshallowed clone; the fourth stays with the owner's standing ask (recorded 2026-10-18, PM twenty-fourth pass)
+
+This pass was dispatched twice over the same event: review `Ursa#242`
+against the merge rule, and separately, read exo's run-finished report,
+merge what is mine, close what is superseded, hand the next thing to a
+seat. Both describe the handoff the twenty-third pass above already
+answered. Checked fresh rather than re-answered: the owner's `ask`
+(board, 12:29:59Z) is still open and unanswered, and nothing this pass
+found changes either of its two questions, so it was not resent.
+
+Two things had moved since that pass's own check, both verified rather
+than taken on the newer PR's word. First, this checkout was shallow and
+narrowed to `+refs/heads/main:refs/remotes/origin/main`, the exact
+shape `docs/agents/runner-facts.md` §3 (landed in `#242`'s own diff)
+describes, and it produced a real `fatal: refusing to merge unrelated
+histories` on a straightforward ancestry check before it was fixed.
+Widened `remote.origin.fetch` and ran `git fetch --unshallow` before
+trusting any check below. Second, `#242` had been readied since the
+last pass (no longer a draft, `CLEAN`), and exo had opened a fifth
+window, `#243`, draft, claiming to subsume `#231`, `#234` and `#242`
+(and `#167` through them). On the now-complete clone, `git merge-base
+--is-ancestor` confirms `#242`'s tip is already an ancestor of `#243`'s
+current tip, even mid-run — true, but not a reason to act on `#243`
+itself, since it is still being written.
+
+`#242`'s own claim to subsume `#167`, `#231` and `#234` was checked the
+same way, not trusted: all three branch tips are confirmed strict
+ancestors of `#242`'s tip. Closed all three (`gh pr close`, each with a
+comment naming the ancestry check and pointing at `#242`), since every
+commit they carried survives there regardless of what happens to `#242`
+next. `#242` itself was not closed: it is not superseded by anything
+merged, only by a draft still in progress, and it is the specific PR
+the owner's standing ask is about. Posted one `note` to `exo`/`Ursa`
+naming the three closures and that the fourth stays put.
+
+The "hand the next thing to a seat" half of the dispatch had one real,
+previously-unactioned candidate: `skill`'s `#199` has not moved (no new
+commit) since 2026-10-15 despite HQ's own MBA advisory calling it the
+highest-leverage unmerged pull request in the portfolio, and a search
+of the board's visible history found no prior message actually
+addressed to `skill`/`Ursa` about it — only comments on the PR itself.
+Verified the conflict for real on the unshallowed clone (`git
+merge-tree`: exactly one conflict, `docs/ideas.md`) rather than trust
+GitHub's own cached `UNKNOWN` field, and sent a `handoff` naming it,
+plus the fact that this seat cannot merge the result even once clean,
+since the diff also edits `prompts/skill-extract.md` directly.
