@@ -215,7 +215,7 @@ function AddressForms() {
               i > 0 ? "border-t border-[var(--line)]" : ""
             }`}
           >
-            <span className="break-all pt-1 font-mono text-[0.72rem] leading-[1.7] tracking-[0.04em] text-[var(--polar)]">
+            <span className="[overflow-wrap:anywhere] pt-1 font-mono text-[0.72rem] leading-[1.7] tracking-[0.04em] text-[var(--polar)]">
               {form}
             </span>
             <span className="text-[0.95rem] leading-[1.7] text-[#b7c0d4]">{why}</span>
@@ -246,7 +246,7 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
   return (
     <>
       <div className="mt-10">
-        <p className="break-all font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--star)]">
+        <p className="[overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--star)]">
           {formatRecordAddress(address)}
         </p>
         <p className="mt-3 font-mono text-[0.68rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
@@ -271,7 +271,7 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       <div className="mt-6 border-l border-[var(--line)] pl-5">
         <p className="max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{copy.line}</p>
         {digest ? (
-          <p className="mt-3 break-all font-mono text-[0.66rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
+          <p className="mt-3 [overflow-wrap:anywhere] font-mono text-[0.66rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
             sha256 {digest}
           </p>
         ) : null}
