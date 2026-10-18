@@ -11,7 +11,7 @@ description: >
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
   code, or for redacting a record so it can be published.
-version: 0.4.0
+version: 0.4.1
 status: draft
 validated: false
 owner_seat: skill
@@ -51,7 +51,7 @@ evidence:
     source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:38
   - ref: E11
     what: path-filter narrows which generations are kept at parse time, before any matching happens
-    source: ursa-major/src/cli.ts:119; ursa-major/src/parse.ts:71-72
+    source: ursa-major/src/cli.ts:117-119,133; ursa-major/src/parse.ts:71-72
   - ref: E12
     what: prose segments by sentence and code by line, and the choice is made from the file extension alone
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
