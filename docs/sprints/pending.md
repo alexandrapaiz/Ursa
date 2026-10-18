@@ -2,6 +2,89 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twelfth pass, 2026-10-18 ~02:3x UTC: #233 merged under Tier B, the host's "no pull request" mechanism closed out, eight stale charter prefixes logged for the owner
+
+Six events woke this seat: frontend's PR #233, with the instruction to
+check it against the merge rule or hand what it needs to its seat;
+frontend's run-finished notice naming the same PR; exo-centralizer's
+note answering the question this seat sent HQ about the host's
+recurring false "no pull request" report; exo-centralizer's handoff
+naming eight of this company's own charters as carrying a stale branch
+prefix; exo's PR #234, re-checked; and exo's run-finished notice for
+the same PR, named twice as in prior passes.
+
+**#233 (frontend) is merged.** Checked fresh, not taken on the note's
+own account: not a draft, no label, no comment or review since its
+last push, one defined check (`scan`) green, `mergeStateStatus: CLEAN`.
+`gh pr diff --name-only 233` shows the diff confined to `docs/design/
+reviews/` and `ursa-minor/` (`app`, `components`, `lib`, `package.json`,
+`public/fixtures`, `scripts`) — no `prompts/`, `.github/workflows/`, or
+`company.yaml` path. The branch was cut from #229, already merged by
+the ninth pass, so the net diff against `main` is additive only, not a
+duplicate of that merge. Merged with `gh pr merge 233 --merge`. The two
+defects frontend's note named — the set view's unconditional
+"checked against the index" claim going false on a site with no digest,
+and a record address wrapping mid-word at 390px — are both fixed and
+photographed inside this same PR, so nothing further is owed from
+frontend on either one.
+
+**The host's "no pull request" question is answered, and this seat's
+own hypothesis about it is wrong.** Exo-centralizer read the actual
+completion path (`cli/src/lib/runner.js`, the staged copy at
+`/srv/asc/repos/alexandra-systems/tools/host/epitod-hotfix-2026-10-17/
+runner.js`): it never asks the code host or reads a branch name at all.
+It searches the agent's own printed output for the last text shaped
+like a pull request address, over a rolling buffer that keeps only the
+last 64 KiB. Exo replayed that logic in `node` and confirmed a real
+address survives 63 KiB of trailing output and is lost at 64 KiB. This
+seat's standing habit of opening the draft in its first minute and then
+running for a long pass is exactly the shape that loses the address:
+the first thing printed is the thing the 64 KiB window drops first.
+This seat's prior guess — that a charter's stale branch prefix caused
+that false report — does not hold for this mechanism, because it reads
+no branch at all; retracted, not carried forward. Exo found a second,
+real defect while checking: `tools/no-ship-tripwire.sh`, a different
+check that does read a declared prefix as a fallback to credit a self
+merge, was stripping the first character of an unquoted prefix
+declaration. That one is fixed on exo's own pull request with new
+tests; it is not this seat's to fix, and nothing further is owed to
+HQ on either half.
+
+**Eight of this company's own charters carry the stale prefix the
+tripwire fallback needs, and this seat logged the fix rather than
+making it.** Grepped all eight files named in the handoff and confirmed
+every line exactly as named (full table in `docs/decisions.md`,
+"eight of Ursa's charters..."). Not self-edited: `docs/standards/pm.md`
+§9 and this charter both reserve `prompts/` to the owner's merge. This
+is the owner's to take, either directly or as a routed pull request;
+nothing in #234 touches these three lines (its own `prompts/
+pm-agent.md` edit is the separate, already-landed merge-state clause),
+so the two do not collide and can be taken together.
+
+**#234 (exo) reconfirmed Tier C, unchanged.** `gh pr diff --name-only
+234` still includes `prompts/exo-agent.md` and `prompts/pm-agent.md`
+alongside `docs/agents/` files and `README.md`. Not a draft any more
+(`isDraft: false`), checks green, `mergeStateStatus: CLEAN`, but a
+charter path in the diff holds it to Tier C regardless. Still subsumes
+#231 and #167 (`git merge-base --is-ancestor` reconfirmed on this
+pass's own fetch). Waiting on the owner, unchanged from the eleventh
+pass's read.
+
+**Nothing else moved.** Three new drafts appeared on the open queue
+mid-pass (#232 engineer, #235 exo, #236 frontend), all still drafts
+with live runs behind them; noted for visibility, not chased, since a
+moving draft is its own seat's to finish. `gh run list --limit 30`
+shows no run that completed outside success in the last day. No
+dispatch candidate: every open thread already has a seat on it, and
+this is a message-triggered pass (§17), which answers what woke it
+rather than firing a scheduled dispatch.
+
+**Board.** Replied to exo-centralizer twice, first person, in the
+threads it asked for: once closing the host-report question with the
+retraction above, once confirming the eight-charter finding and where
+it is logged. Replied to frontend confirming #233's merge. Posted a
+pass-closing `done`.
+
 ## Eleventh pass, 2026-10-18 ~02:2x UTC: the resolver's "reason" answered, #231 reconfirmed Tier C, nothing new to merge
 
 Three events woke this seat: PR #231 (exo) with the instruction to check
