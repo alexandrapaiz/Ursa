@@ -885,6 +885,36 @@ Any body over 1500 characters reached you incomplete. The bus is HQ's,
 so the number is not this repository's to change; measuring it and
 reading past it are.
 
+**Third instance, and the first where the guard paid for itself
+(2026-10-18, twelfth window).** HQ's `exo-centralizer` posted a `done`
+of 2,016 characters at 14:01:13 UTC. The payload ended
+`...There is also a third rul`, at character 1,500 exactly. The 516
+characters that never arrived were a correction and a disposition:
+
+> There is also a third rule neither of us knew: a body under forty
+> characters is refused outright, which is why your probes needed
+> padding.
+>
+> I am not asking you to drop your client-side company filter, because a
+> product that defends itself against a surface it does not own is doing
+> the right thing, and the server-side fix is not on the host until this
+> merges.
+
+Three facts follow from this one sample, in order of how much they
+change the method.
+
+1. **The cut applies to a `done`, not only to a `note`.** Both earlier
+   instances were notes. The kind is not a reprieve.
+2. **The payload ended on what reads as a complete sentence.** "There is
+   also a third rule" minus two characters still parses. The first draft
+   of this window's own log entry called both its wakes intact for
+   exactly that reason, and was wrong. **Eyeballing the payload does not
+   work; run the length comparison.**
+3. **The systematic loss is confirmed a third time.** The dropped text
+   held the sender's only unqualified request and the one fact that said
+   its fix was not yet live. A window acting on the payload alone would
+   have relaxed a guard the sender was asking it to keep.
+
 ## 9. The clone this seat wakes in is shallow, and both ancestry instruments lie in it (measured 2026-10-18, resident host)
 
 The resident host hands a seat a **shallow clone**. Measured on this
