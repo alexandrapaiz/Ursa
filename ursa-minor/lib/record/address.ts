@@ -55,6 +55,18 @@
  *    which is the difference between telling someone "that record is not
  *    published yet" and "your browser could not read that address". See
  *    `fetchFailure`.
+ *
+ *    Re-measured here on 2026-10-18 with `curl -H 'Origin: …'`, because
+ *    both hosts send these headers only when an origin is stated, and
+ *    the re-measurement found one case the first one did not cover. The
+ *    header follows the **host**, not the path: `octocat.github.io`
+ *    sends it on a 404 for a file and on a 404 for a repository that has
+ *    no site at all, while an account with no Pages site anywhere
+ *    (`alexandrapaiz.github.io`, measured the same minute) answers 404
+ *    with no header at all. So on the `pages` scheme a thrown fetch most
+ *    often means that account has never deployed a Pages site, rather
+ *    than a network that is down, and the sentence says the likelier
+ *    thing first.
  * 2. `raw.githubusercontent.com` serves every file as `text/plain`. The
  *    self-contained HTML page that `ursa publish` writes beside each
  *    record therefore arrives at a browser as source code when it comes
@@ -337,7 +349,6 @@ export function permanenceNote(a: RecordAddress): string | null {
  */
 export function fetchFailure(a: RecordAddress, status: number | 'threw'): string {
   const url = recordAddressUrl(a)
-  const known = a.scheme !== 'url'
 
   if (status === 404) {
     if (a.scheme === 'git') {
@@ -357,9 +368,23 @@ export function fetchFailure(a: RecordAddress, status: number | 'threw'): string
     return `${url} answered 404. Whatever is meant to be there is not there now.`
   }
   if (status === 'threw') {
-    return known
-      ? `Your browser could not reach ${url} at all. That host sends a cross-origin header on a 404 as well as on a hit, so this is usually a host or a network that is not answering rather than a record that is missing.`
-      : `Your browser could not read ${url}. A host that sends no permissive cross-origin header will refuse to load here, and nothing on our side will fetch it for you; that is the point of the design rather than a limitation of it.`
+    if (a.scheme === 'git') {
+      return (
+        `Your browser could not reach ${url} at all. That host answers a missing file with a ` +
+        'readable 404, so this is a network or a host that is not answering rather than a record ' +
+        'that is not there.'
+      )
+    }
+    if (a.scheme === 'pages') {
+      return (
+        `Your browser could not read ${url}. An account that has published any GitHub Pages site ` +
+        `answers a missing record with a readable 404, so the likeliest thing here is that ` +
+        `${a.owner} has no Pages site at all and GitHub's own 404 page is refusing to be read ` +
+        'cross-origin. Either nothing has been deployed for that account yet, or the account name ' +
+        'is not the one that published the record.'
+      )
+    }
+    return `Your browser could not read ${url}. A host that sends no permissive cross-origin header will refuse to load here, and nothing on our side will fetch it for you; that is the point of the design rather than a limitation of it.`
   }
   if (status === 403) {
     return `${url} answered 403. A private repository is readable by you when you are signed in and not by a page fetching on your behalf, so an address to one is not an address a stranger can read.`

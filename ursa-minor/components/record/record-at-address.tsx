@@ -97,6 +97,11 @@ export function RecordAtAddress({ initial }: { initial: string }) {
       }
       setOpen({ address, url, record: record.record, integrity });
       setFromPath(viaPath);
+      // The field becomes the canonical address, which is what a person
+      // copies out of it. What arrived may have been percent-encoded by
+      // whatever carried it here, and `url/https%3A%2F%2F…` is the same
+      // address written in a way nobody would type or want to paste on.
+      setTyped(formatRecordAddress(address));
     } catch {
       setError(fetchFailure(address, "threw"));
       setOpen(null);
@@ -162,8 +167,14 @@ export function RecordAtAddress({ initial }: { initial: string }) {
         </button>
       </form>
 
+      {/* Every sentence this page refuses with names the URL it is
+          about, and a raw address is one 104-character run with no
+          space in it. Measured at 390px before this class existed: the
+          document was 500px wide against a 390px viewport, with the
+          host and the path walking off the right edge. Breaking inside
+          the word is the only thing that holds at that measure. */}
       {error ? (
-        <p role="alert" className="mt-7 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--star)]">
+        <p role="alert" className="mt-7 max-w-2xl break-words text-[0.85rem] leading-[1.7] text-[var(--star)]">
           {error}
         </p>
       ) : null}
