@@ -2,6 +2,71 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-eighth pass, 2026-10-18 ~13:0x-13:1x UTC, message: exo's note that the hold it was about to restore was already retired, and that the breach was its own previous window's
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
+   (#225) is still this seat's own open pull request, now carrying
+   twenty-seven prior passes. Checked out from `FETCH_HEAD`, confirmed
+   the twenty-seventh pass's commit (`9f4692c`) as the tip, and
+   continued on it.
+
+2. **The board, read directly rather than from the trigger text's
+   paraphrase.** The run's own trigger named three events: exo's
+   12:54:39Z note (already answered by the twenty-seventh pass,
+   closing #242 and naming #245), exo's run-finished notice for #245,
+   and a third note, `ba9a7445` (13:04:08Z), that arrived after the
+   twenty-seventh pass had already closed. Only the third was
+   unanswered. Checked the full inbox (`to_seat=pm&to_company=Ursa`,
+   filtered client-side to the exact company match) rather than trust
+   either account: nothing else addressed to this seat was open.
+
+3. **`ba9a7445` answered: no restoration was owed, and the pointer
+   moved one more step.** exo's note said its own previous window had
+   been about to restore a hold this seat had already released seven
+   minutes earlier, checked that against the live state before
+   acting, and found nothing to restore. It also named its own
+   seventh window, #246, as containing #245. Verified rather than
+   taken on word: `gh pr view 242/243/245` all read `CLOSED`; `gh pr
+   view 246` reads `OPEN`, not a draft, `CLEAN`/`MERGEABLE`, one check
+   green. `git merge-base --is-ancestor` on an unshallowed clone
+   confirms the full chain, 242 < 243 < 245 < 246, in the direction
+   that cannot invert. Closed #245 with a comment naming #246 as the
+   new live tip (containment in an unmerged tip lasts only as long as
+   the tip), then posted the retraction on the board itself, in reply
+   to `ba9a7445`, rather than only in the pull request comment —
+   exo's own ask, and the right one: a correction that lives only on
+   a pull request is invisible to the next memoryless seat that reads
+   the inbox first.
+
+4. **#246 held, same disposition as #242/#243/#245 before it, not a
+   new decision.** `gh pr diff 246 --name-only` lists ten files
+   including `prompts/exo-agent.md` and `prompts/pm-agent.md`. Its own
+   body makes the bold declaration exo proposed on the 23rd pass ("this
+   pull request moves no authority between agents and loosens no owner
+   gate") and the declaration reads true on inspection, same as this
+   seat found for #243. Not adopting the bold-declaration rule on the
+   strength of one more clean example: this seat has read every
+   `prompts/` pull request as the owner's for at least thirteen passes
+   today, and the standing ask to her (6e2e7e38, 12:29:59Z) already
+   carries the question with a silence deadline of 2026-10-20T12:30
+   UTC. Left open, Tier C, pending her word or that deadline.
+
+5. **Two live drafts noted, neither actionable.** #247 (skill,
+   "the anchor relocation pass becomes a committed tool") and #248
+   (exo's eighth window, opened mid-pass, triggered by a similar
+   message) are both run-in-progress drafts. Nothing to check against
+   the merge rule yet; not chased.
+
+6. **Failed runs: none.** `gh run list --status failure --created
+   ">=-2 hours"` is empty. No other open pull request changed state
+   between the twenty-seventh pass's close (13:03:38Z) and this
+   pass's own checks.
+
+7. **Board.** Posted one `note` in reply to exo (`ba9a7445`), first
+   person, confirming the retired hold, the corrected pointer, and the
+   adopted practice of posting a board retraction alongside a pull
+   request comment. Posted one closing `done` naming the pass.
+
 ## Twenty-seventh pass, 2026-10-18 ~12:5x-13:0x UTC, message: exo's sixth window (#245), skill's done on #199, and exo's handoff on the tier-C contradiction
 
 1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
