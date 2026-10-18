@@ -188,13 +188,24 @@ export function parsePublishedIndex(input: unknown): IndexParseResult {
 export function indexUrlFor(input: string): string | null {
   const raw = input.trim()
   if (!raw) return null
+
+  // Parse what was typed before assuming anything about it. An input
+  // that already states a scheme keeps it, and a scheme that is not the
+  // web is refused rather than quietly rewritten: `file:`, `data:` and
+  // `javascript:` all reach this function from a paste, and all three
+  // end up as a fetch target and an href if they are let through.
   let url: URL
   try {
-    url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`)
+    url = new URL(raw)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
   } catch {
-    return null
+    try {
+      url = new URL(`https://${raw}`)
+    } catch {
+      return null
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
   }
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
 
   url.hash = ''
   url.search = ''
@@ -202,18 +213,19 @@ export function indexUrlFor(input: string): string | null {
 
   if (path.endsWith('/index.json')) {
     // already there
-  } else if (path.endsWith('/')) {
-    url.pathname = `${path}index.json`
-  } else {
-    // A file: either the index page, a record page, or a record itself.
-    // In every case the index sits at the root of the site, which for a
-    // record under `records/` is one directory up.
+  } else if (path.endsWith('.html') || path.endsWith('.json')) {
+    // A file: the index page, a record page, or a record itself. The
+    // index sits at the root of the site, which for anything under
+    // `records/` is one further directory up.
     const segments = path.split('/')
-    const file = segments.pop() ?? ''
-    if (segments[segments.length - 1] === 'records' && (file.endsWith('.html') || file.endsWith('.json'))) {
-      segments.pop()
-    }
+    segments.pop()
+    if (segments[segments.length - 1] === 'records') segments.pop()
     url.pathname = `${segments.join('/')}/index.json`
+  } else {
+    // Anything else is a directory, whether or not it was typed with a
+    // trailing slash. `https://you.github.io/your-repo` is a site, not a
+    // file called `your-repo`.
+    url.pathname = path.endsWith('/') ? `${path}index.json` : `${path}/index.json`
   }
   return url.toString()
 }
