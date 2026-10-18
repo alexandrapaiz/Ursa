@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { parseRecord } from "@/lib/record/parse";
+import { recordAddressHref } from "@/lib/record/address";
 import {
   indexUrlFor,
   parsePublishedIndex,
@@ -175,7 +177,12 @@ export function PublishedSite() {
       <p className="mt-7 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
         <span className="font-mono text-[0.85rem] text-[var(--star)]">ursa publish</span> turns your
         records into a static site on hosting you own. Paste its address and this page reads the
-        index at its root, which is how you see the whole set before fetching any of it.
+        index at its root, which is how you see the whole set before fetching any of it. If what you
+        were sent is one record rather than a whole site,{" "}
+        <Link href="/record/at" className="rec-action text-[var(--polar)]">
+          read it at its own address
+        </Link>
+        .
       </p>
 
       <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5">
@@ -254,12 +261,17 @@ function SiteSet({
         {index.records.map((s, i) => {
           const shares = sharesOf(s);
           return (
-            <li key={s.id} className={i > 0 ? "border-t border-[var(--line)]" : ""}>
+            <li key={s.id} className={`py-7 ${i > 0 ? "border-t border-[var(--line)]" : ""}`}>
+              {/* The padding is the item's rather than the button's, so
+                  that the address line below can sit inside the same
+                  block without stacking two paddings between rows. An
+                  anchor may not live inside a button, which is the other
+                  reason it is a sibling and not part of the control. */}
               <button
                 type="button"
                 onClick={() => onOpen(s)}
                 disabled={opening !== null}
-                className="group block w-full py-7 text-left disabled:cursor-wait"
+                className="group block w-full text-left disabled:cursor-wait"
               >
                 {/* The id gets the full measure and breaks anywhere. It is
                     a slug long enough to overflow a phone on its own. */}
@@ -299,6 +311,21 @@ function SiteSet({
                 </span>
 
               </button>
+
+              {/* New in index contract 0.2: the record states its own
+                  address, so the set stops being a place you can only
+                  look and becomes a place you can share out of. This is
+                  the link to that record alone, with the address itself
+                  beside it, because the string is the thing a person
+                  pastes into a message. */}
+              {s.address ? (
+                <p className="mt-5 font-mono text-[0.68rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
+                  <Link href={recordAddressHref(s.address)} className="rec-action text-[var(--polar)]">
+                    a link to this record alone
+                  </Link>
+                  <span className="break-all"> · {s.address}</span>
+                </p>
+              ) : null}
             </li>
           );
         })}
@@ -369,6 +396,17 @@ function OpenRecord({
               <a href={url} className="rec-action text-[var(--polar)]" target="_blank" rel="noreferrer">
                 the bytes themselves
               </a>
+            </>
+          ) : null}
+          {open.summary.address ? (
+            <>
+              {" · "}
+              <Link
+                href={recordAddressHref(open.summary.address)}
+                className="rec-action text-[var(--polar)]"
+              >
+                a link to this record alone
+              </Link>
             </>
           ) : null}
         </p>

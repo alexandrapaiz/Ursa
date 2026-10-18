@@ -287,6 +287,19 @@
           "subject": "The address in the README, the grammar in the design doc, and a rebuilt bundle"
         }
       ]
+    },
+    {
+      "digest": "277611ace7436084",
+      "sha256": "277611ace7436084f435861a174df92833d6b0523d916bbf7a0aa88e0349ee90",
+      "blob": "594697310fe177a11353599e2ecf78e935940398",
+      "bytes": 272223,
+      "introducedBy": [
+        {
+          "commit": "ef8eeaf39a0e3f147b157c6f89cac40440fcf179",
+          "date": "2026-10-18T01:55:09.000Z",
+          "subject": "Rebuild the bundle for the index digest fields and the phone layout"
+        }
+      ]
     }
   ]
 }
