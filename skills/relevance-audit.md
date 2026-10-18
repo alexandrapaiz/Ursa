@@ -183,3 +183,63 @@ force here, and so is the overlap one.
 | `adjudicating-uncertain-spans/E14` | supports | 2026-10-18 | Seventeen lines where two would do. The claim is the first bullet of "Honest limits" and the rest of the range is the other four limits, which cost nothing and give the reader the list. |
 | `running-an-outcome-record-trial/E15` | supports | 2026-10-18 | Three lines, and the clause the skill leans on, "the record gets the fine-tuning trace that n=2's commit pairs lacked", is the third of them. |
 | `running-an-outcome-record-trial/E17` | supports | 2026-10-18 | Four lines carrying both halves, label types rather than statistics and every quantitative claim an existence proof. Overlap agrees: `quoting/E21` cites the identical range for the identical reading and `adjudicating/E14` is a superset of it. |
+
+**Where the sweep stands after four slices.** 97 of 111 refs read, 14 left,
+and all fourteen were the ones citing a document and a section name rather
+than lines. Across the four slices: four false claims, 26 ranges widened, 67
+sound as cited. The share needing a reader was a third in slice 1 and a fifth
+in slice 4, which is what reading the queue top-down is supposed to do, and it
+is also the reason the last slice is not free: the refs left at the end are
+the ones no mechanical signal ever scored.
+
+## Slice 5, read 2026-10-18
+
+The fourteen refs that cited a document and a section name instead of lines,
+which is every ref the first four slices could not take. The question for
+these is not whether the cited lines support the sentence, because there were
+no cited lines. It is whether the named section still exists, still says what
+the `what` field says it says, and can be given a range at all.
+
+All fourteen sections existed and all fourteen could be ranged, so the
+citation style was the only thing making them undefended, and each one is now
+a line range with the section name kept beside it in prose. Two claims were
+false. The sweep's own queue also turned out to undercount this category,
+which is the finding at the bottom of this section.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `distilling-a-tuning-record/E33` | wrong | 2026-10-18 | The `what` said "the two trials so far were owner-declared unsatisfied". `CLAUDE.md:16-22` says "Two trials done: n=1 over the Ursa Minor site build, n=2 over the full alexandria repo (owner-declared unsatisfied)", and the parenthetical attaches to n=2 alone. Nothing anywhere else in the repository declares the first trial: `grep -rn unsatisfied --include=*.md docs/ ursa-major/ CLAUDE.md` returns one declaration and it is this one, verified 2026-10-18. The passage citing the ref uses only the acceptance rule, which is sound and is in the same range, so the body needed no change and the `what` did. A `what` field is a receipt a later run reads instead of the source, which is why a false one counts as a false claim here. Ranged to `CLAUDE.md:16-22` (section 0). |
+| `quoting-a-number-from-an-outcome-record/E25` | wrong | 2026-10-18 | The `what` said KR1.3 means "the corpus deliberately mixes prose and code". `docs/okrs/2026-q4.md:28-32` requires five or more records with at least two on the prose path and says nothing about the other three, so a corpus of five prose records satisfies it and the mix is not entailed. The passage then built on the inference, "which means prose and code records will be read side by side", without marking it as ours. `what` narrowed to what the key result says, and the sentence now states the expectation as this seat's rather than the OKR file's. Second from the top of the slice ordering at a 33 percent miss rate, which is the ordering earning its keep on a ref it could not score until this slice gave it lines. |
+| `adjudicating-uncertain-spans/E6` | supports | 2026-10-18 | `CLAUDE.md:70` is the `no_generation_provenance` bullet and carries both halves of the claim, "traceable to no generation at all, meaning the model was never in the running" and "**The most valuable category.**" Ranged to `65-70`, the heading and all four bullets, so a stranger can see it is a span classification and not read the bullet in isolation. Overlap agrees: `quoting/E12` cites the identical range for the reading that all four sit under one heading. |
+| `quoting-a-number-from-an-outcome-record/E12` | supports | 2026-10-18 | "Lists all four classifications under one heading and calls `no_generation_provenance` the most valuable" is exactly what `CLAUDE.md:65-70` is: the heading at 65 and the four bullets at 67 to 70. Both passages hold. |
+| `quoting-a-number-from-an-outcome-record/E16` | supports | 2026-10-18 | `CLAUDE.md:72` is the heading "Trajectory metadata wrapped around the record:" and `74` is "turns to acceptance", which is the whole claim. Ranged to `72-74`. |
+| `adjudicating-uncertain-spans/E10` | supports | 2026-10-18 | `docs/okrs/2026-q4.md:13-18` carries all three conjuncts: all 55 uncertain spans adjudicated, the thresholds retuned so the false-positive rate is 10 percent or lower, and the adjudication file committed beside the record. Both passages read off it. Overlap agrees: `quoting/E13` cites the identical range for the two conjuncts it uses. |
+| `quoting-a-number-from-an-outcome-record/E13` | supports | 2026-10-18 | Same six lines, and the three passages hold on them: 55 spans in task-001, the retune to a false-positive target, and that the numbers would need rechecking after the retune. Split sound on the sentence shared with `E8, E30`: this ref carries the retune and the target, and the other two carry the sorting the thresholds do. |
+| `quoting-a-number-from-an-outcome-record/E24` | supports | 2026-10-18 | `docs/okrs/2026-q4.md:37-40` holds both conjuncts, every quantitative claim re-grounded in the n≥5 corpus rather than task-001 alone, and published at a public URL by November 30. The passage uses the first. |
+| `quoting-a-number-from-an-outcome-record/E26` | supports | 2026-10-18 | `docs/okrs/2026-q4.md:76-78` names the four span classes and "what a buyer can audit" in the key result's own words. Both passages hold. |
+| `distilling-a-tuning-record/E34` | supports | 2026-10-18 | `docs/vision.md:31-32` is principle 3 in full, and the clause the skill leans on, "It shows up only in action, applied to a particular case", is the second line verbatim. |
+| `distilling-a-tuning-record/E35` | supports | 2026-10-18 | `docs/vision.md:33-35` is principle 4 in full, "Systems built on them conform to the measure, not the world". Overlap agrees: `quoting/E31` cites the identical range for the identical reading, which is two skills citing one principle and not disagreeing about it. |
+| `quoting-a-number-from-an-outcome-record/E31` | supports | 2026-10-18 | The same three lines, used for the sharper purpose: a seat quoting a number without its qualifier is the failure the principle names. Sound as cited. |
+| `distilling-a-tuning-record/E36` | supports | 2026-10-18 | `docs/vision.md:53-56` is "Product missions, set with the parent's" and both of them, so the Ursa Major mission is readable as a mission rather than as a stray sentence. Ranged to four lines rather than one for that reason. |
+| `adjudicating-uncertain-spans/E12` | supports | 2026-10-18 | Two sources, both now ranged. `ursa-major/trial/README.md:64-72` says the records were moved to a private repository and why, "verbatim user prompts, raw conversation captures, and absolute local paths". `docs/agents/incidents.md:150-158` is Incident 2 and says the same in the register's voice, including the roughly one day of exposure. Either source alone would carry the claim, which is the right shape for a claim this skill uses to tell a reader the record is not in this repository. |
+
+**Two unranged sources the queue never showed, found by reading the frontmatter
+instead of the tool.** The sweep lists unrangeable *refs*, so a ref with one
+ranged source and one unranged one counts as ranged and never appears.
+`distilling-a-tuning-record/E30` cited `docs/okrs/2026-q4.md, O1 KR1.2`
+alongside a ranged source, and `running-an-outcome-record-trial/E3` cited
+`docs/design/agent-coauthor-detection.md` with no range and no section name at
+all, which made it the least defended citation in the library. Slice 4 had
+already read E30's unranged half by hand and found the line. Both are ranged
+now, `20-26` for the key result that retires manual annotation and `71-80,175-180`
+for the sync-commit table and the paragraph that says erring toward a refused
+pair is the correct direction. The tool now counts sources rather than refs, so
+this cannot hide again.
+
+**Where the sweep stands, closed.** 111 of 111 refs read, across five slices
+on 2026-10-18. Six false claims, 26 ranges widened, 79 sound as cited. Every
+ref in the library now carries a line range and a fingerprint, where before
+this slice fourteen carried neither. The thing to keep is not the number: it
+is that a third of the first slice needed a reader, and the last fourteen
+needed one twice, so the next library this seat builds gets the reading at
+authoring time rather than a sweep afterwards.
