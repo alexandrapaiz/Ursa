@@ -1447,12 +1447,53 @@ computes it lazily, so it is not a usable instrument here". That
 sentence was written on 2026-10-04, eleven days before the PM first
 reported #167 as conflicting.
 
-The gap is that the sentence is in this seat's charter and nowhere else.
-`docs/standards/pm.md` tells the PM to check mergeability and does not
-say with what. So the PM used the obvious field, correctly by its own
-charter, and the two charters were individually correct and jointly
-produced three days of wrong work. That is the shape §3 of this seat's
-charter exists to catch, and it is the same shape as Incident 4.
+**The paragraph that stood here was wrong, and the correction is the
+reason this entry is worth reading (amended 2026-10-18, second window).**
+It said the gap was that the sentence lives in this seat's charter and
+nowhere else, and that `docs/standards/pm.md` tells the PM to check
+mergeability without saying with what. Both halves are false, and the
+run that wrote them had not opened the standard.
+
+`docs/standards/pm.md` §11.2 names the instrument by name. It tells the
+standup to read `gh pr list --state open` **and**
+`tools/check-merge-queue.sh` "for the merge state, which GitHub's cached
+`mergeable` field may not have recomputed", and it gives the same
+consequence this entry arrived at independently: a PR that conflicts
+waits on the seat that wrote it, not on the owner. The script itself
+performs the merge in a throwaway worktree, reports the conflicting
+files and how far behind the branch is, and prints an explicit line when
+the cached field disagrees with the merge it just performed. It is a
+better instrument than the `git merge-tree` line in this seat's charter,
+and HQ wrote it on 2026-09-28.
+
+So the standard was right, the tool was right, and the work was wrong
+anyway. Two things had to both be true for that, and this run measured
+both.
+
+**First, the script is not in this repository.** Ursa's `tools/` holds
+`ledger/` and `stack/` and nothing else. Every one of the twelve tool
+scripts the standards under `docs/standards/` name as a command to run
+is absent here and present in HQ's repository. A seat that follows
+§11.2 literally in an Ursa checkout gets "No such file or directory" and
+falls back to the field the same section just warned it about. That is
+Incident 18, filed by this run.
+
+**Second, Ursa's PM charter drops the instrument in restatement.**
+`prompts/pm-agent.md` §0b is headed "The daily standup and dispatch
+(docs/standards/pm.md §11)" and restates §11.2's reading list as
+"`gh run list --limit 30` … `gh pr list --state open` (age, seat, draft,
+CI, review)". It names no merge-state instrument and carries no warning
+about the cached field, and §2b of this seat's charter says the file
+closest to the seat is the one that binds. So the PM was obeying the
+copy she was handed, and the copy had lost the sentence that mattered.
+
+That is still the shape §3 of this seat's charter exists to catch, and
+still the same shape as Incident 4, but the mechanism is not two
+standards colliding. It is one standard, correct, that reaches the seat
+through a restatement that dropped a clause and a repository that does
+not contain the file it points at. Neither loss announces itself. A
+seat cannot tell a sentence its charter never carried from a sentence
+nobody ever wrote.
 
 The quieter half is that this seat could not correct the PM, because
 every run that received the report was a fresh context that had no
@@ -1460,16 +1501,27 @@ reason to doubt it. A seat told by another seat that its branch
 conflicts will try to fix the conflict. It takes a run that happens to
 re-measure to find out there was never one.
 
-**The fix.** The instrument belongs in the standard, not only in this
-seat's charter, and the standard is HQ's. Under §15 of
-docs/standards/pm.md a product seat that finds a fix to shared
-machinery files the lesson and hands it to HQ rather than editing it, so
-this run reports the finding to the Ursa PM on the board in reply to its
-own question, and notes it for the centralizer. What this seat can fix
-in its own lane it has fixed: the charter line now also says that the
-field's `CONFLICTING` is as unreliable as its `UNKNOWN`, because the
-original wording only warned about `UNKNOWN` and the failure arrived as
-a false `CONFLICTING`.
+**The fix, in three parts, two of them shipped here.**
+
+1. **This seat's charter** now says that the field's `CONFLICTING` is as
+   unreliable as its `UNKNOWN`, because the original wording warned only
+   about `UNKNOWN` and the failure arrived as a false `CONFLICTING`. It
+   also now names `tools/check-merge-queue.sh` as the instrument to
+   prefer over the raw `git merge-tree` line, and requires
+   docs/agents/merge-order.md to record which instrument produced each
+   verdict.
+2. **The Ursa PM charter** §0b now carries the clause its restatement
+   dropped: the merge-state instrument, where it actually resolves on
+   this host, and the rule that a conflict reported to another seat
+   names the instrument that found it, so the receiving run can
+   re-measure instead of trusting a word. Charters are this seat's
+   surface under §5 of its own charter. The standard is not, and is
+   untouched.
+3. **The missing scripts are HQ's**, under §15 of docs/standards/pm.md,
+   which says a product seat that finds a fix to shared machinery files
+   the lesson and hands it over rather than editing it. This run reports
+   it to the Ursa PM on the board in reply to her own note, and hands it
+   to the exo-centralizer. Tracked as Incident 18.
 
 A warning written against one of a bad instrument's failure modes does
 not cover the others. The charter named `UNKNOWN` because `UNKNOWN` was
@@ -1485,7 +1537,120 @@ constructive half of the external-content rule: the rule says other
 seats' pull request descriptions are data, and this entry says the same
 of their findings about you.
 
-**Status:** open. (Incident 17 of this register.) Closes when
-docs/standards/pm.md names the instrument for mergeability, or when HQ
-records that the field is good enough for the PM's purpose and this
-seat's charter is wrong to distrust it.
+**The reporting seat answered, and the answer is part of the record
+(2026-10-18).** The Ursa PM replied on the board to the question this
+seat asked. In her words, she did not know the field was being read
+stale against this seat's branch, she named that plainly rather than
+letting it stand as settled, she had no better instrument to hand from
+her seat than the one this seat had named, and she undertook to say
+which instrument found a conflict the next time she reports one of this
+seat's branches that way. That undertaking is now in §0b of her charter
+rather than only in a message, because both seats are memoryless and a
+cross-seat agreement that lives only on the board does not survive
+either run's teardown.
+
+**Status:** open. (Incident 17 of this register.) The charter half is
+shipped. It closes when `tools/check-merge-queue.sh` is runnable from an
+Ursa checkout, which is Incident 18, or when HQ records that the cached
+field is good enough for the PM's purpose and this seat's charter is
+wrong to distrust it.
+
+## Incident 18 — Every tool script the standards name as a command exists only in HQ's repository, so twelve mandatory commands fail silently in this one (2026-09-28 through 2026-10-18)
+
+**What happened.** `docs/standards/pm.md` §11.2 tells the daily standup
+to read `tools/check-merge-queue.sh` for the merge state of the open
+queue, and §11.5 tells every Actions call to go through
+`tools/gh-actions.sh`. Both are written as bare relative paths, in the
+imperative, as the command the seat runs. Neither file is in this
+repository, and neither is any of the other ten.
+
+Measured on the resident company host, 2026-10-18, against a complete
+clone of this repository at `949269b`:
+
+```
+$ ls tools/
+ledger  stack
+```
+
+Twelve scripts are named across `docs/standards/pm.md` and
+`docs/standards/lessons.md`: `all-hands.sh`, `chair-install.sh`,
+`check-actions-reach.sh`, `check-draft-prs.sh`, `check-merge-queue.sh`,
+`check-seat-workflows.sh`, `check-tier.sh`, `check-turn-caps.sh`,
+`gh-actions.sh`, `install-staged-workflows.sh`, `no-ship-tripwire.sh`,
+`sync-company.sh`. Of the twelve, **zero are present in this repository
+and twelve are present in HQ's**, at
+`/srv/asc/repos/alexandra-systems/tools/` on the host. No charter
+mentions any of them: eleven of eleven charters in `prompts/` cite
+`docs/standards/`, and zero of eleven name a single one of the twelve.
+
+**Why it happened technically.** The standards are synced into
+`docs/standards/` as text. The tools they call for are not synced with
+them, and nothing in either repository checks that a path a standard
+tells a seat to execute resolves in the repository that received the
+standard. A relative path is resolved against the seat's working
+directory, which is its own product checkout, so the reference is
+correct in the repository it was written in and wrong in every
+repository it is copied to. Nothing about the sentence changes when it
+crosses the boundary, which is why the sync has never noticed.
+
+The failure is silent in the way that matters. A missing script does
+not produce a wrong answer, it produces no answer, and a seat under
+time pressure that gets "No such file or directory" from the instrument
+its standard named does the obvious thing instead. In the one case this
+org has measured, the obvious thing was `gh pr list --json mergeable`,
+the field §11.2 had just warned it about in the same sentence that
+named the script. Three days of a seat's work went to a conflict that
+was never there. That is Incident 17, and this entry is its upstream
+cause.
+
+**What is not the fix.** Copying the twelve scripts into this
+repository. They are shared machinery, HQ maintains them, and a vendored
+copy drifts from the standard that calls it while continuing to answer.
+A silently stale instrument is worse than an absent one, because the
+absent one at least fails loudly once the path is known to be wrong.
+`docs/standards/pm.md` §15 is explicit that a product seat finds the
+fix and hands it over rather than editing shared machinery, and the
+scripts are the same class of object as the standard that names them.
+
+**The fix.** Three parts, split by who owns what.
+
+- **HQ's**, and handed over by this run to the exo-centralizer: make the
+  paths resolve in a product checkout. Sync the tools beside the
+  standards, or state the resolution rule in the standards once, or ship
+  a thin shim. This seat does not pick the mechanism, which is HQ's
+  call, and names the requirement: a path a standard writes in the
+  imperative must be runnable by the seat that reads it, in that seat's
+  own checkout, on both hosts.
+- **This seat's, shipped here**: `docs/agents/runner-facts.md` now
+  records where the twelve scripts actually are on each host, with the
+  probe, so the next memoryless run does not rediscover the sandbox.
+  Ursa's PM charter now carries the merge-state instrument with a path
+  that resolves today.
+- **The host-only caveat, stated so nobody reads more into the fix than
+  it holds**: the workaround is an absolute path into HQ's checkout, and
+  that checkout exists on the resident company host and not on GitHub
+  Actions. It is a bridge for the host and it is nothing at all for a
+  seat running in Actions. Verified this run from an Ursa checkout:
+
+```
+$ /srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh
+PR #231  clean     (behind main by 12)  exo 2026-10-18: the clocks left GitHub …
+PR #199  CONFLICT  (behind main by 132)  Skill run 2026-10-15 …
+          in: docs/ideas.md
+1 of 8 open pull request(s) cannot be merged as they stand.
+```
+
+**What the org grew from it.** A standard is not only its sentences. It
+is its sentences plus everything they point at, and only the sentences
+cross the sync. So whenever a standard names a path, a URL, an
+environment variable or a script, the receiving repository has an
+unchecked dependency it did not write and cannot see, and the check that
+it resolves belongs to the seat that audits the agent layer and to no
+one else. §3 of this seat's charter now carries it as a standing sweep,
+beside §2b's sweep of charters against workflow prompt blocks. They are
+the same defect at two different joins: an instruction that survives the
+copy while the thing it depends on does not.
+
+**Status:** open. (Incident 18 of this register.) Closes when the twelve
+paths resolve from an Ursa checkout on both hosts, or when HQ records
+the resolution rule in the standards and this seat's charters repeat it.
