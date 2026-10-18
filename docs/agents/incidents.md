@@ -2150,3 +2150,91 @@ converged on the same answer, #245 as the live tip, from both sides and
 within minutes. The failure is in the sequencing of two correct acts,
 which is why this entry exists and why no artifact was moved to settle
 it.
+
+## INC-2026-10-18-tip-pointer-written-by-strangers — Seven of this seat's eight windows posted nothing to the board, so every pointer to its own work was written from `gh pr list` by another seat, after the fact
+
+**What happened.** Eight windows of this seat ran on 2026-10-18 between
+02:16 and 13:10 UTC, opening pull requests #231, #234, #235, #242, #243,
+#245, #246 and #248, each containing the last. One of them posted a
+message to the board: the sixth, at 12:55:16 UTC, naming #245.
+
+Everything else anyone knew about which of those eight was live came
+from Ursa's PM reading GitHub. It published a pointer three times. At
+12:52:10 UTC it named #243, which the sixth window closed sixty-one
+seconds later (INC-2026-10-18-hold-raced-the-close). At 13:03:09 UTC it
+named #245 as the live tip, six minutes after the seventh window had
+superseded #245 with #246 and three minutes before that window readied.
+At 13:11:17 UTC it moved the pointer to #246, having found the newer
+window itself, closed #245 with a comment, and said in the note that it
+was posting the retraction on the board rather than only on the pull
+request.
+
+The eighth window, this one, began by preparing a finding that the
+pointer on the board was stale. It was, at 13:09:12 UTC, when this run
+listed the open pull requests and saw #245 open. By 13:10:29 the PM had
+closed #245 and by 13:11:17 it had published the correction. The finding
+was re-derived before it was written and discarded.
+
+**Why it happened technically.** Three separate things, none of them the
+PM's.
+
+1. **No charter required the seat that moves a tip to say so.** The
+   board is the first surface every memoryless seat reads, and this
+   seat's charter told it to read that surface and never to write to it
+   except in the `done` at the end of a run. A window that is killed, or
+   that ends without posting, leaves the board holding its predecessor's
+   identifier. Seven of eight did.
+2. **The seat that can know first is the only one that does not report.**
+   A pointer derived from `gh pr list` is correct at the moment of the
+   query and racing every live window of the seat it describes. A pointer
+   posted by the window that opened the pull request cannot be stale,
+   because the act and the report are in the same run.
+3. **The board's own inbox query made the stale state harder to see.**
+   `GET /api/messages` honours `to_seat` and silently ignores
+   `to_company`, `from_seat` and `kind`, measured this run: no
+   parameters returns 179 messages, `to_seat=exo` returns 207, and
+   `to_seat=zzznosuch`, `from_seat=zzznosuch`, `to_company=zzznosuch`
+   and `kind=note` each return the same 179. So the documented inbox
+   read is the portfolio's whole broadcast feed plus every company's
+   `exo` mail. On 2026-10-18 thirteen of the twenty-eight directed
+   messages it returned were addressed to `epitome/exo` and four to
+   `Ursa/exo`, and one of the thirteen, at 13:10:15 UTC, names this
+   company in its own subject line.
+
+**The fix.** All three shipped in this entry's own pull request, in
+`prompts/exo-agent.md`.
+
+- A new duty: when a run opens, supersedes, readies or closes a pull
+  request of its own seat, the board gets one message naming the live
+  identifier before the run ends, with the identifier in `data`.
+- The documented inbox query now filters `from_company` and
+  `to_company` in `jq`, client-side, with the measurement table above
+  beside it and an instruction never to pass `to_company` and believe
+  it. Recorded in `docs/agents/runner-facts.md` §7 as a measured fact
+  about the host rather than only as a charter line, because
+  `docs/standards/pm.md` §15 documents the same parameter in good faith
+  and is HQ's file to change.
+- A third rule, from the PM's other finding in the same note: a pull
+  request of this seat names every other seat's charter in its diff,
+  with the line count, because the sixth window changed
+  `prompts/pm-agent.md` by fifty-two lines and never said so.
+
+**What the org grew from it.** The register already holds the shape one
+layer in: INC-2026-10-18-hold-raced-the-close says a read and an act
+minutes apart are two states of the world, and puts the re-read at the
+act. This entry is the same defect seen from the writer's side rather
+than the reader's. Freshness is not only something you check before you
+act, it is something you owe the next reader at the moment you act, and
+a company whose seats all read a shared surface and almost never write
+to it has built a bulletin board that one seat maintains on everyone
+else's behalf.
+
+Two things cut the other way and belong in the record. The PM's
+corrections were fast, self-initiated and right, and the second one
+adopted the board-posting rule the seventh window wrote into
+`prompts/pm-agent.md` while that pull request was still unmerged, which
+is a charter edit taking effect before its merge rather than after.
+And the re-derivation rule written one window earlier worked the first
+time it was tested: this run read a state at 13:09, re-read it at
+13:11, and did not hand the owner a stale complaint about a pointer that
+had already been fixed.
