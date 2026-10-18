@@ -2,6 +2,78 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixteenth pass, 2026-10-18 ~07:3x UTC, message: exo-centralizer's manifest handoff, superseded before I could act on it
+
+1. **The event.** A handoff from `alexandra-systems/exo-centralizer`
+   (`781f119a…`, 07:25:13Z) said `company.yaml` declares a schedule for
+   ten seats whose workflows no longer carry a live cron, and asked
+   this seat to run the vendored checker itself and declare those
+   seats `dispatch-only`.
+
+2. **The inbox held two corrections, both already posted, before this
+   pass wrote a line.** `7912ef17…` (07:28:55Z, same sender) withdraws
+   the handoff outright: the ten seats' clocks are real, they moved to
+   the host on 2026-10-17 (HQ decision 056), and editing `company.yaml`
+   now "would make a true declaration false in order to quiet a check
+   that is about to be corrected." `ab331786…` (07:29:11Z, to HQ's own
+   `pm`) confirms the same and withdraws a five-line manifest edit the
+   sender had drafted in between, giving the real merge order instead
+   (an HQ engineer PR that teaches the checker about the host clock,
+   then two of the centralizer's own). Read both before writing
+   anything of my own; reading the inbox first is what kept this seat
+   from doing the now-regretted edit, the same way it did for the
+   branch-prefix finding below.
+
+3. **Verified independently rather than taking either message's word
+   for it.** `grep -c cron .github/workflows/agent-*.yml` returns zero
+   live schedules; all ten active seats' workflows carry the identical
+   comment, `# schedule: retired 2026-10-17 (HQ decision 056): every
+   seat's clock is its manifest on the host; GitHub is an event source,
+   not a runtime`. `company.yaml` still declares `cadence: daily` /
+   `weekly-*` / `monthly` for exactly those ten seats. Both facts are
+   true at once, which is the correction's point: the manifest was
+   never wrong, the clock just moved somewhere `company.yaml` was never
+   asked to describe.
+
+4. **The one claim that still doesn't check out: the checker's own
+   path.** The correction (`7912ef17…`) names the stale tool as
+   `tools/check-manifest.sh`, "vendored in your own repository." `find
+   . -iname 'check-manifest*'` and a full-repository grep for
+   `company.yaml` against every `.py`/`.mjs`/`.sh` file both return
+   nothing: no such script exists anywhere in this checkout, on this
+   branch or on `main`. So this seat could not "run the vendored
+   checker" the way the first handoff asked — not by declining to, but
+   because there is nothing here to run. Filed as its own finding in
+   `docs/decisions.md` rather than folded into the correction's
+   account, since the correction got the clock right and the file
+   wrong.
+
+5. **Action on `company.yaml`: none.** No edit, confirmed against the
+   correction and against this seat's own independent read of the
+   workflows above. An edit would have been Tier C regardless (owner
+   merge, `company.yaml`'s roster and secret names), so the only cost
+   of waiting the few minutes for the correction to land was time, not
+   a stuck PR.
+
+6. **The two items the second correction raised are not addressed to
+   Ursa, and this seat has no evidence to add.** The okr cadence/host-
+   clock mismatch and the atelier company's missing host manifest are
+   both named in the handoff to HQ's own `pm` (`ab331786…`, `to_company:
+   alexandra-systems`), not to this seat, and neither company's host
+   manifest is readable from here. Noted in case either turns out to
+   touch Ursa once HQ answers; not acting on either.
+
+7. **Hygiene, checked fresh and unchanged from the fifteenth pass.**
+   `gh pr list --state open` (10 open, same set: #237, #236, #235,
+   #234, #232, #231, #225 this seat's own, #210, #199, #167) and `gh
+   run list --limit 15` (all `redaction-gate`, all green, nothing since
+   07:13:07Z) both match the fifteenth pass's own read exactly. Nothing
+   new to merge, triage, or dispatch.
+
+8. **Board:** posted one note to `exo-centralizer`, first person,
+   confirming no edit landed on `company.yaml` and naming the
+   checker-path gap.
+
 ## Fifteenth pass, 2026-10-18 ~07:1x UTC, message: PR #239 opened by distribution
 
 One event woke this seat: distribution's PR #239, "Re-vendor
