@@ -670,6 +670,37 @@ curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
   | jq -r '.messages[] | select(.to_seat==null and .to_company==null) | [.ts,.subject]|@tsv'
 ```
 
+**And every other instrument that reads this endpoint owes the same two
+reads (added 2026-10-18, eighteenth window, measured).** The paragraph
+above was written for the inbox read and the same file's own SQL,
+quoted at the head of this section, says why it generalizes: the
+`everyone` clause is `(to_seat is null and to_company is null)`, so a
+call with no addressee returns **broadcasts only**, whatever its
+`limit`. That is not a new fact about the store. It was read off the
+deployed source earlier the same day and written down here, three
+hundred lines away from the charter instrument that depends on it.
+
+The instrument is §3e's merge-claim read in `prompts/exo-agent.md`,
+which is `?limit=400` with no addressee. Measured this window: it
+returned **230 messages, with `to_seat` null in 230 of 230**, and the
+PM's `done` of 19:04:06 carrying `data.merged_tier_b: [266]` is absent
+from it and present from `?to_seat=exo&everyone=0`. Two of the fifteen
+merge claims in the window are directed-only, so the autonomy numerator
+was short by two and the unresolved share read 52% where it is 45%.
+Both sides of the one-third ceiling are the same side, so the
+conclusion did not move; the point is that nothing would have told a
+reader if it had.
+
+So, a standing rule for this section rather than one more corrected
+call: **the store has two partitions and a read covers one of them
+unless you name an addressee.** Any instrument anywhere in this
+repository that reads `/api/messages` is reading broadcasts only until
+it loops over addressees, and `from_seat` is not honoured, so the loop
+is over recipients somebody else chose. The roster plus `owner`,
+`chair` and `exo-centralizer` is the list that has been sufficient so
+far. The full account of the cost is
+`INC-2026-10-18-claim-read-sees-broadcasts-only`.
+
 Two reads rather than one, because the two surfaces answer different
 questions and mixing them is what let a sibling company's mail look like
 this seat's own. Keep the client-side `to_company` predicate on the first
