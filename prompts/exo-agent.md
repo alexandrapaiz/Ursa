@@ -449,11 +449,45 @@ gh pr list --state merged --limit 200 --json number,mergedAt,mergedBy \
   | jq -r --arg s "$SINCE" '.[]|select(.mergedAt>$s)
       |[.number,.mergedAt[0:16],.mergedBy.login]|@tsv' > /tmp/gh-merges.tsv
 # what the PM says it merged
-curl -s "$BOARD_API_URL/api/messages?to_seat=exo&to_company=ursa&limit=1000" \
+curl -s "$BOARD_API_URL/api/messages?limit=400" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
   | jq -r '.messages[]|select((.from_company|ascii_downcase)=="ursa" and .from_seat=="pm")
            |[.ts[0:16],(.ref//"-"),(.data|tostring),.subject]|@tsv' > /tmp/pm-claims.tsv
+curl -s "$BOARD_API_URL/api/messages?to_seat=owner&limit=400" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|select((.from_company|ascii_downcase)=="ursa")
+           |[.ts[0:16],(.ref//"-"),.from_seat,.subject]|@tsv' >> /tmp/pm-claims.tsv
 ```
+
+**Three corrections to that call, all swept in on 2026-10-18 under HQ's
+L-A54, which says a run repairing one instrument after a platform change
+owes a sweep of every other instrument fed by the same surface in the
+same pass.** The window before this one repaired the inbox read on this
+endpoint and left this call untouched, three hundred lines up the same
+file, which is the rule's case exactly.
+
+1. `to_company=ursa` is dropped, because the parameter is accepted,
+   ignored and silently unfiltering (runner-facts §7). The client-side
+   `select` two lines down is what was actually scoping this all along.
+2. `limit=1000` is now 400, because the endpoint returns about two
+   hundred messages whatever you ask for, reaching back under two days
+   (runner-facts §1). So `SINCE` cannot be a week ago and be answered
+   here. **Report the window the call actually returned, not the window
+   you asked for**, and say so in the number.
+3. The second call is new, because the endpoint excludes messages
+   addressed to `owner` from every other read, so a claim the PM made to
+   her rather than to the board was invisible to bucket two and landed
+   in "unattributed".
+
+**And prefer HQ's tool to all of it when you can reach it.** HQ's
+exo-centralizer shipped `tools/autonomy.py` on 2026-10-18 for exactly
+this measurement, and it refuses to pretend: above a third unclaimed it
+prints that the number is grading the instrument rather than the company.
+Run today at HQ it gave a floor of 35.7% with 64% unclaimed. **It is not
+vendored into this repository**, whose `tools/` holds `ledger` and
+`stack` only, which is Ursa incident 18's class and not a new finding.
+So the fallback above is what runs here until it syncs. Check for the
+tool first, each run, and delete the fallback the day it arrives.
 
 Report three buckets and never two: merged by a seat on Actions, merged
 by a seat on the host and claimed on the board, and **unattributed**,
