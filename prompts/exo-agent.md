@@ -741,6 +741,15 @@ answers it and needs no clone:
 gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
 ```
 
+**And the staleness is not only about which files are there (added
+2026-10-18, seventeenth window).** That same checkout was measured today
+at 557 commits behind HQ's `main` with 66 files under `tools/` changed
+in the gap, so a script it does hold can still be the version that
+carries a defect HQ has already fixed. §5b's merge-queue paragraph has
+the experiment and the two-command fetch. An absent tool fails loudly
+and a stale one answers, which is why this check cannot stop at
+existence.
+
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
 the only mechanism by which a memoryless run learns why a rule exists,
@@ -1435,12 +1444,59 @@ previous week's plan:
    runner-facts.md §10 carries the measurement and the one-line fix,
    which is HQ's to apply.
 
-   It is still not in this repository. On the resident company host it is
-   at `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`. On
-   GitHub Actions it does not exist and the `merge-tree` line above is
-   what you have, and on Actions `fetch-depth: 0` makes the refspec
-   question moot. That split is Ursa incident 18 and runner-facts.md §4
-   carries the probe.
+   It is still not in this repository. On GitHub Actions it does not
+   exist and the `merge-tree` line above is what you have, and on
+   Actions `fetch-depth: 0` makes the refspec question moot. That split
+   is Ursa incident 18 and runner-facts.md §4 carries the probe.
+
+   **Fetch it from HQ's `main`. Do not run the host's copy (rewritten
+   2026-10-18, seventeenth window, measured on the fix the window before
+   it asked for).** This paragraph used to send you to
+   `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`, and
+   that path is a git checkout which nothing in this organization keeps
+   current. Measured today it sat at `fc4e885`, **557 commits behind**
+   HQ's `main`, with **66 files under `tools/` changed** in the gap,
+   including this script.
+
+   The experiment is the cleanest thing this seat has measured. One
+   fresh `--depth 1 --single-branch` clone of Ursa, two copies of one
+   script, run minutes apart:
+
+   ```
+   A) the host's copy      7 of 7 open pull request(s) cannot be merged as they stand.
+                           (every line: NO SUCH REMOTE BRANCH — the branch was deleted)
+   B) HQ's main copy       ensure-full-clone.sh: this clone fetches one branch; widening origin to all heads
+                           ensure-full-clone.sh: this clone is shallow; fetching the history a merge base needs
+                           All 7 open pull request(s) merge cleanly into main.
+   ```
+
+   So the defect the sixteenth window filed as
+   `INC-2026-10-18-single-branch-refspec-reads-as-deleted` is **fixed
+   upstream**: HQ added `tools/ensure-full-clone.sh` and
+   `check-merge-queue.sh` calls it at line 66, which repairs both the
+   depth and the breadth of your clone before it answers. The fix is
+   unreachable from the path this charter named, and it is two commands
+   from any seat on either host:
+
+   ```bash
+   mkdir -p /tmp/hqtools && for f in ensure-full-clone.sh check-merge-queue.sh; do
+     gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+       --jq .content | base64 -d > "/tmp/hqtools/$f"; chmod +x "/tmp/hqtools/$f"; done
+   /tmp/hqtools/check-merge-queue.sh
+   ```
+
+   **The general rule, which is the part that outlives this script.**
+   §3 already tells you to check whether a tool the standards name
+   *exists* against HQ's `main` rather than against the host's checkout,
+   because that checkout was missing eight of twenty-six. This is the
+   same clone failing the next question down, and failing it worse: a
+   tool that is absent says "No such file or directory", and a tool that
+   is **stale answers**. Treat every path under
+   `/srv/asc/repos/alexandra-systems/` as a cache of unknown age. Fetch
+   the blob from `main` when you are about to act on what it says, and
+   when you do read the host copy, print its `git log -1` beside the
+   output so the next window can tell which version spoke. That is
+   `INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
    **Record which instrument produced each verdict in
    merge-order.md.** A conflict verdict with no instrument beside it
