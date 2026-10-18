@@ -47,7 +47,7 @@ import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
 import { clearsSizeFloor } from './launch'
-import { findCommitPairsWithDiagnostics } from './pairfinder'
+import { findCommitPairsWithDiagnostics, resolvePairingBounds } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
 import type { OutcomeRecord } from './types'
@@ -114,6 +114,15 @@ function comparable(record: OutcomeRecord): Record<string, unknown> {
     // bundle:check` into `npm test` by spawning it, which it was not
     // part of when this paragraph was first written.
     'task.gatedBy': record.task.gatedBy,
+    // Which pairing bounds the walk that found this record ran under.
+    // Compared here for the same reason as the two stamps above, and it
+    // is the one of the three that is a caller's argument rather than a
+    // property of the running build: both launches take the bounds from
+    // the same options and stamp them through one shared function
+    // (`stampPairingBounds` in src/launch.ts), so a difference on this
+    // line means one launch wrote an audit trail the other did not from
+    // identical inputs.
+    'task.pairedBy': record.task.pairedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
     'stats.generated': record.stats.generated,
@@ -194,10 +203,31 @@ function recordsOnDisk(repo: string): Map<string, OutcomeRecord> {
  * `.ursa/` is removed between the two so neither run reads the other's
  * output.
  */
+/**
+ * The three pairing bounds, named the way both launches name them, so a
+ * test can move one and assert both launches moved with it. Undefined
+ * leaves the resolver's own default, which is what every assertion in
+ * this file written before drift 5 relies on.
+ */
+interface ParityBounds {
+  maxPairDistance?: number
+  maxPairAgeHours?: number
+  maxInterposedGenerations?: number
+}
+
 async function bothLaunches(
   repo: string,
   minChars: number,
   agentIdentities: string[] = [],
+  bounds: ParityBounds = {},
+  /**
+   * What the merge window's base is. `HEAD~2` suits the three-commit
+   * fixtures; a fixture with commits interposed between the generation
+   * and the edit needs the window to span them, and passes the root
+   * commit instead. The local launch has no window and is unaffected,
+   * which is exactly why the two must be given the same history to read.
+   */
+  baseRef = 'HEAD~2',
 ): Promise<{
   ci: Map<string, OutcomeRecord>
   local: Map<string, OutcomeRecord>
@@ -206,7 +236,7 @@ async function bothLaunches(
   ciComment: string
 }> {
   const head = git(repo, ['rev-parse', 'HEAD'])
-  const base = git(repo, ['rev-parse', `${head}~2`])
+  const base = git(repo, ['rev-parse', baseRef])
   const eventPath = join(repo, 'event.json')
   writeFileSync(eventPath, JSON.stringify({
     repository: { full_name: 'o/r' },
@@ -220,6 +250,7 @@ async function bothLaunches(
     projectPath: repo, eventPath, repo: 'o/r', token: '',
     api: silentApi(), env: {}, post: false, minChars, log: () => {},
     agentIdentities,
+    ...bounds,
   })
   const ci = recordsOnDisk(repo)
   rmSync(join(repo, '.ursa'), { recursive: true, force: true })
@@ -233,6 +264,12 @@ async function bothLaunches(
     localExitCode = await main([
       'run', repo, '--min-chars', String(minChars),
       ...agentIdentities.flatMap((i) => ['--agent-identity', i]),
+      ...(bounds.maxPairDistance === undefined
+        ? [] : ['--max-pair-distance', String(bounds.maxPairDistance)]),
+      ...(bounds.maxPairAgeHours === undefined
+        ? [] : ['--max-pair-age-hours', String(bounds.maxPairAgeHours)]),
+      ...(bounds.maxInterposedGenerations === undefined
+        ? [] : ['--max-interposed-generations', String(bounds.maxInterposedGenerations)]),
     ])
   } finally {
     console.log = realLog
@@ -294,6 +331,73 @@ describe('both launches read the same declaration of who is an agent', () => {
     })
     expect(diagnostics.generatedByDeclaredIdentity).toBe(3)
     expect(diagnostics.editorIdentities).toEqual([])
+  })
+})
+
+describe('both launches read the same pairing bounds', () => {
+  // The fifth drift, found on 2026-10-18 while publishing this
+  // repository's own records to its own GitHub Pages site. All three
+  // bounds reached `ursa run` and none of them reached `ursa ci`:
+  // `src/ci/run.ts` called `findCommitPairs(projectPath, { range,
+  // agentIdentities })` and `action.yml` had no input that could carry a
+  // bound. So a consumer who raised the distance to resolve a long
+  // history got the wider walk on a laptop and the default 25 on every
+  // merge, from byte-identical history.
+  //
+  // The same pair-of-assertions shape as the agent-identity block above,
+  // and for the same reason: a test that only checked the two launches
+  // agree would also pass if both ignored the bound.
+  const ROOT = 'HEAD~6'
+
+  it('at the default distance neither launch pairs an edit seven commits later', async () => {
+    const repo = distantFixture()
+    const { ci, local } = await bothLaunches(repo, 10, [], { maxPairDistance: 2 }, ROOT)
+    expect(ci.size).toBe(0)
+    expect(local.size).toBe(0)
+  })
+
+  it('raising the distance produces the record on BOTH launches, not just the local one', async () => {
+    const repo = distantFixture()
+    const { ci, local, ciExitCode, localExitCode } = await bothLaunches(
+      repo, 10, [], { maxPairDistance: 20 }, ROOT,
+    )
+    expect(ci.size).toBe(1)
+    expect(local.size).toBe(1)
+    expect([...ci.keys()]).toEqual([...local.keys()])
+    expect(ciExitCode).toBe(0)
+    expect(localExitCode).toBe(0)
+  })
+
+  it('stamps the bounds it used into the record, on both launches, defaults filled in', async () => {
+    // The number a reader of a published record sees. Before this
+    // stamp a record stated two commits' shas and no statement of how
+    // far apart the resolver had been willing to let them be, so two
+    // records resolved from one history under different bounds were
+    // indistinguishable. The two unset bounds are asserted as the
+    // resolver's own defaults rather than as `undefined`, because a
+    // record states what the walk used and never what a caller omitted.
+    const repo = distantFixture()
+    const { ci, local } = await bothLaunches(repo, 10, [], { maxPairDistance: 20 }, ROOT)
+    const defaults = resolvePairingBounds()
+    const expected = {
+      maxPairDistance: 20,
+      maxPairAgeHours: defaults.maxPairAgeHours,
+      maxInterposedGenerations: defaults.maxInterposedGenerations,
+    }
+    expect([...local.values()][0].task.pairedBy).toEqual(expected)
+    expect([...ci.values()][0].task.pairedBy).toEqual(expected)
+  })
+
+  it('says which bound dropped the pair, by the same diagnostic both launches read', () => {
+    // The projection above proves the record is absent; this proves WHY,
+    // so a future change that drops it for another reason cannot keep
+    // this file green. It is also the number the Action's job summary
+    // prints, which is how a consumer whose site came out empty learns
+    // which input to set.
+    const repo = distantFixture()
+    const { diagnostics } = findCommitPairsWithDiagnostics(repo, { maxPairDistance: 2 })
+    expect(diagnostics.abandoned.distance).toBe(1)
+    expect(diagnostics.bounds.maxPairDistance).toBe(2)
   })
 })
 
@@ -526,6 +630,46 @@ function editedFixture(): string {
   writeFileSync(join(dir, 'digest.js'), GENERATED + '\n')
   git(dir, ['add', '.'])
   git(dir, ['commit', '-q', '-m', 'Generate digest module\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+
+  const edited = GENERATED
+    .replace('DIGEST — the latest research, summarized for you.', 'The frontier, read for you.')
+    .replace('why it matters', 'so what')
+  writeFileSync(join(dir, 'digest.js'), edited + '\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Tighten digest prose'])
+  return dir
+}
+
+/**
+ * The same three commits as `editedFixture`, with four unrelated commits
+ * pushed in between the agent's commit and the person's edit of it, so
+ * the pair is seven commits apart instead of one.
+ *
+ * This is the shape of a real repository with more than one writer, and
+ * the shape this repository itself has: on 2026-10-18 its 724-commit
+ * history resolved to zero records at the default distance of 25 and to
+ * two at 400, because twelve agent seats commit between one touch of a
+ * file by the owner and the next. A fixture whose pair is one commit
+ * apart cannot see a distance bound at all, which is why this one exists
+ * rather than reusing `editedFixture`.
+ */
+function distantFixture(): string {
+  const dir = newRepo()
+  writeFileSync(join(dir, 'README.md'), '# project\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Base'])
+
+  writeFileSync(join(dir, 'digest.js'), GENERATED + '\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Generate digest module\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+
+  // Four commits by the same person, touching another file, so they are
+  // neither generations nor edits of `digest.js`. They only add distance.
+  for (let i = 1; i <= 4; i++) {
+    writeFileSync(join(dir, `note-${i}.md`), `# note ${i}\n`)
+    git(dir, ['add', '.'])
+    git(dir, ['commit', '-q', '-m', `Unrelated note ${i}`])
+  }
 
   const edited = GENERATED
     .replace('DIGEST — the latest research, summarized for you.', 'The frontier, read for you.')
