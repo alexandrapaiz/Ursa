@@ -267,8 +267,9 @@ joins both. The reasoning is in
 
 Two layers, drawn together because neither explains the company alone.
 The product layer is what a user runs on their own machine. The org
-layer is the set of agent seats that build the product, which run in
-GitHub Actions and write only through pull requests the owner merges.
+layer is the set of agent seats that build the product, which run on
+Alexandra Systems' resident host or in GitHub Actions and write only
+through pull requests the owner merges.
 Every node below is a real file or a real store in this repository, and
 every edge carries the actual type or file that crosses it.
 
@@ -280,7 +281,7 @@ record, and it is the constraint the whole business rests on.
 flowchart TB
   subgraph ORG["Org layer — the agent seats that build it"]
     direction TB
-    WF["<code>.github/workflows/agent-*.yml</code><br/>cron plus workflow_dispatch"]
+    WF["<code>.github/workflows/agent-*.yml</code> plus the host manifest<br/>the clocks live on the host, GitHub is an event source"]
     CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
     PR["a branch and one pull request"]
     OWN{{"the owner's merge<br/>the only authority"}}
@@ -487,10 +488,16 @@ Ursa is a portfolio product of
 [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems)
 and runs on its agent-seat model. Charters live in `prompts/`,
 workflows in `.github/workflows/`, and the standards in
-`docs/standards/`. The OKR, PM, and ExO seats are active on a schedule.
-The builder seats are dormant until one full governance cycle has been
-merged. The owner's merge is the only authority. See
-[`docs/agents/org-chart.md`](docs/agents/org-chart.md).
+`docs/standards/`. Eleven seats hold charters and every one of them is
+active except sales, which stays dormant because Ursa has nothing to
+sell yet. The builder seats stopped being dormant on 2026-09-24 and now
+ship most of the daily work.
+
+Each seat's clock is an entry in the host manifest rather than a cron
+block in its workflow, as of 2026-10-17, so a seat is woken by the event
+bus or by its manifest and GitHub Actions is an event source rather than
+the runtime. The owner's merge is the only authority that lands anything
+here. See [`docs/agents/org-chart.md`](docs/agents/org-chart.md).
 
 ## Constraints that do not move
 
