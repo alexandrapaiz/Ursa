@@ -41,10 +41,19 @@ import type { SpanClass } from './types'
  *
  * Moved from 0.1 to 0.2 on 2026-10-18, when the resolver seat published
  * 0.2.0 for one additive field, `address`, and this viewer gained a
- * route that reads it. The digest this file asked for on the same day is
- * not in 0.2 and is still optional below, so nothing here depends on it.
+ * route that reads it.
+ *
+ * Moved from 0.2 to 0.3 the same day, when that seat published 0.3.0 for
+ * the two fields this file had asked it for: `bytes` and `sha256`. That
+ * is what moves `integrity.ts` from "no site states a digest yet" to a
+ * check that can actually run, so the floor moves with it rather than
+ * discovering the fields on a site one day.
+ *
+ * The floor is a floor and not a requirement. Both fields stay optional
+ * below, because a site published before today states 0.1 or 0.2 and
+ * carries neither, and that site has to keep reading.
  */
-export const INDEX_CONTRACT = { major: 0, minor: 2 } as const
+export const INDEX_CONTRACT = { major: 0, minor: 3 } as const
 
 /**
  * One record, as the index describes it, before any record is fetched.
@@ -81,15 +90,29 @@ export interface PublishedRecordSummary {
    */
   address?: string | null
   /**
-   * Not in contract 0.1 and not in 0.2 either. Requested of the resolver
-   * seat on 2026-10-18 so that a fetched record can be checked against
-   * what was published; see `integrity.ts`. That seat shipped 0.2 for
-   * `address` while this was still an open ask, so it stays optional and
-   * is treated as absent, and the page says it could not check rather
-   * than implying it did.
+   * New in contract 0.3: lower-case hex SHA-256 of this record's file,
+   * sixty-four characters, no prefix, taken by the publisher over the
+   * exact buffer it wrote rather than over a second pass of its own
+   * serializer. That distinction is the resolver seat's and it matters
+   * here: a digest of a re-serialisation would be a claim about that
+   * seat's serializer, and the day its indentation moved, every record
+   * on a published site would fail verification with no way to tell
+   * that from tampering.
+   *
+   * It identifies a file and never a resolution of an input, because the
+   * resolve timestamp is inside the hashed bytes. Resolving the same
+   * work twice gives two different digests and that is not tampering;
+   * see the note on the address route in `integrity.ts`.
+   *
+   * Absent on 0.1 and 0.2 sites, which is why it is optional: the page
+   * then says it could not check rather than implying it did.
    */
   sha256?: string
-  /** Not in contract 0.1 or 0.2, requested alongside `sha256`. */
+  /**
+   * New in contract 0.3 alongside `sha256`: the byte length of this
+   * record's own file, as the publisher counted it. Absent on 0.1 and
+   * 0.2 sites.
+   */
   bytes?: number
 }
 
