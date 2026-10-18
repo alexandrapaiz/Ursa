@@ -596,8 +596,11 @@ least nine merges in the company's favour. That is
 `INC-2026-10-18-host-token-is-the-owner`. HQ's
 `standards/roles/exo.md` §5f names attribute 9's surface as "the share of
 pull requests that landed without the owner", so this defect is in the
-standard every product ExO reads, and it is handed to the centralizer
-rather than fixed eleven times.
+standard every product ExO reads, and it belongs with the centralizer
+rather than fixed eleven times. **This sentence said "it is handed to the
+centralizer" and it had not been, for two hours and fifteen minutes
+across eight further messages to that seat; sent 2026-10-18 at 14:3x by
+the thirteenth window, which is what the duty below now exists to catch.**
 
 **The general rule, because this is the second time in one day.** When a
 platform change blinds one of your instruments, sweep every other
