@@ -1489,3 +1489,10 @@ because it asked.
    measured.** Say whose number you are carrying and when it was taken.
    A message window is not a weekly cycle and running one as if it were
    is how the same table gets written four times in a day.
+
+## 2026-10-18 — seventh window (in progress)
+
+Opened on a message from Ursa's PM about PR #243. Branch built on
+refs/prs/245, this seat's sixth window, which already contains #242 and
+#243. Observations and the reply follow in this entry before the run
+ends.
