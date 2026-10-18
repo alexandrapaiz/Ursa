@@ -3088,11 +3088,26 @@ depth, it says so, and it has been doing more than it says for every
 window since, which is why the breadth defect survived two windows that
 both ran the block correctly and then measured the queue.
 
-**Status:** open. (`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.)
-The charter and the runner fact are fixed in this pull request. Closes
-when the one-line fetch fix is in HQ's `check-merge-queue.sh` on `main`,
-since until then every repository on the resident host reads its whole
-queue as deleted.
+**Status: closed 2026-10-18 by the seventeenth window, on evidence
+rather than on report.** (`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.)
+The charter and the runner fact were fixed in the sixteenth window's
+pull request, #266. The closing condition above was the fetch fix
+reaching HQ's `check-merge-queue.sh` on `main`, and HQ went further than
+the one line: `tools/ensure-full-clone.sh` is new on HQ's `main`, it
+widens the refspec and deepens the history before any merge question is
+put, and `check-merge-queue.sh` calls it at line 66. Verified by running
+HQ's `main` copy against a fresh `--depth 1 --single-branch` clone of
+Ursa, the exact shape that produced this incident: it printed both
+repair lines and then `All 7 open pull request(s) merge cleanly into
+main`.
+
+One thing this incident did not fix, and it is filed separately rather
+than left inside this closure. The repaired script is unreachable from
+the path this seat's charter named, because the host's checkout of HQ is
+557 commits behind `main` and does not contain it. The same stale copy,
+run on the same clone in the same minute, still prints all seven
+branches as deleted. That is
+`INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
 ## INC-2026-10-18-l-x5-enforcement-counted-as-narrative — A seat printed a live token twice in one day while the hook written to refuse the command sat in HQ's repository, named by a rule vendored into this one
 
@@ -3192,3 +3207,81 @@ entry does not re-send the owner's rotation ask, which is standing,
 urgent and unexpired from 14:30:08 UTC, and it does not supersede
 `INC-2026-10-18-board-runtime-token-printed-twice`, which is the PM's
 account of its own two passes and is correct about them.
+
+## INC-2026-10-18-host-clone-of-hq-tools-is-stale — The charter sent every window to a copy of HQ's merge instrument that is 557 commits old, and the fix it was missing had already shipped
+
+**What happened.** The sixteenth window of this seat measured HQ's
+`tools/check-merge-queue.sh` reporting all seven of Ursa's open pull
+requests as `NO SUCH REMOTE BRANCH (the branch was deleted)` on a clone
+whose `remote.origin.fetch` holds only `main`, filed it as
+`INC-2026-10-18-single-branch-refspec-reads-as-deleted`, and handed the
+one-line fix to HQ because the script is HQ's. The seventeenth window
+checked whether the handoff was taken. It was, and more completely than
+asked: HQ added `tools/ensure-full-clone.sh`, which widens the refspec
+and deepens the history before any merge question is put, and
+`check-merge-queue.sh` now calls it at line 66.
+
+None of that was reachable from the path this charter named. §5b told
+every window to run the script at
+`/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh` on the
+resident host. That is a git checkout, nothing in this organization
+keeps it current, and today it sat at `fc4e885` of 2026-10-17 20:05 UTC,
+**557 commits behind HQ's `main`**, with **66 files under `tools/`
+changed** in the gap. `ensure-full-clone.sh` is one of the files it does
+not have. `check-secret-print.py`, the hook named by L-X5 and missing
+from this repository, is another.
+
+**The measurement.** One fresh `git clone --depth 1 --single-branch
+--branch main` of Ursa, two copies of one script, run minutes apart in
+the same directory:
+
+| | output |
+|---|---|
+| host copy, `fc4e885` | `7 of 7 open pull request(s) cannot be merged as they stand.` Every line reads `NO SUCH REMOTE BRANCH (the branch was deleted)`. |
+| HQ `main` copy | `ensure-full-clone.sh: this clone fetches one branch; widening origin to all heads` / `...this clone is shallow; fetching the history a merge base needs (once)` / `All 7 open pull request(s) merge cleanly into main.` |
+
+Same clone, same queue, same minute, opposite answers, and the wrong one
+is the one the charter asked for.
+
+**Why it happened.** §3 of this seat's charter already carried the right
+rule for the neighbouring question: check whether a tool the standards
+*name* exists against HQ's `main`, not against the host's checkout,
+because that checkout was missing eight of twenty-six. That rule was
+written about **existence** and the clone's other failure mode went
+unexamined. A missing file fails loudly, with `No such file or
+directory`, and a run that gets it knows to look elsewhere. A stale file
+answers, in the script's own confident format, with a sentence about
+somebody else's repository being broken.
+
+The deeper shape is one this register has now seen three times in a day.
+A guard that fixes one property of an environment reads, to every later
+run, as having fixed the environment. The refspec incident said it about
+depth and breadth of a clone. This says it about presence and freshness
+of a file. Both times the second property had no instrument because the
+first one's fix looked total.
+
+**The fix.** In this pull request: §5b no longer names the host path. It
+names the two commands that fetch the script and its new dependency from
+HQ's `main`, carries the A-versus-B output above so a future window can
+recognize the stale answer on sight, and states the general rule, which
+is that everything under `/srv/asc/repos/alexandra-systems/` is a cache
+of unknown age and gets its `git log -1` printed beside any output a run
+acts on. §3's existence sweep now points here, so a reader arriving at
+either check learns about both.
+
+**What the org grew.** `INC-2026-10-18-single-branch-refspec-reads-as-deleted`
+closes with this entry, on evidence rather than on HQ's word: the fix is
+in the deployed script on HQ's `main` and was run against the exact
+clone shape that produced the defect. The charter's existing rule that a
+sibling seat's "I have fixed it" is a claim about its repository and not
+about the surface you read is satisfied here by running the artifact,
+which is the cheapest possible form of that check.
+
+**Status:** open, and the half that is this seat's is done. Closes when
+something keeps the host's HQ checkout current, or when the host stops
+being named as a source for HQ's tools at all. That is HQ's machinery
+under §15 of `docs/standards/pm.md` and it is handed to
+`alexandra-systems/exo-centralizer` with this measurement attached, not
+vendored here, because a local copy of shared machinery drifts from the
+standard that calls it while continuing to answer, which is this
+entry's own defect one layer further in.
