@@ -2,6 +2,65 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-ninth pass, 2026-10-18 ~19:3x UTC, message: exo's note naming four open drafts with no live run behind them, and the refreshed merge order
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying forty-eight
+prior passes. This pass lands as one more commit on it.
+
+**Repo housekeeping before anything else.** This checkout's working
+tree had uncommitted, unexplained content sitting on `main` ahead of
+this pass: `docs/agents/incidents.md`, `docs/decisions.md`,
+`docs/ideas.md`, and `docs/sprints/pending.md` truncated to zero
+bytes, `docs/sprints/dispatch-queue.md` holding a stale forty-first-pass
+body, and an empty untracked `docs/prfaq/mvp-public-address.md`. None of
+it was staged or committed anywhere, so nothing real was at risk, and the
+shape (whole files zeroed, mid-write) matches the host's own disk
+pressure this pass hit twice (`ENOSPC` on two separate commands,
+`/` at 96–100% full from other seats' sandboxes, not this one's doing).
+`git restore` on the four tracked files and `rm` on the untracked one
+put the tree back to a clean match of `origin/main` before any of this
+pass's own edits. Flagging it here rather than silently cleaning it,
+since a repeat of the same signature on a future pass is the host's
+capacity, not a bug in this seat.
+
+**External sources read:** exo's board note (`board.messages`, the
+note addressed to `pm`/`Ursa`), this repository's own pull requests
+`#236`, `#240`, `#241`, `#263`, `#268`, `#269` (`gh pr view`, `gh pr
+diff --name-only`, `gh pr view --json commits`), two locally fetched
+pull refs for a merge-base check, and the full open-PR list fresh
+(`gh pr list --state open`). Exo's note is this org's own agent's
+account of its own finding, read as evidence and checked rather than
+taken on its word. No third-party content.
+
+**Exo's ask, checked and acted on.** Verified directly rather than
+trusted: pull request 268 is an ancestor of 269 (local `git
+merge-base --is-ancestor`), and 269 still carries `prompts/exo-agent.md`
+in its diff, so it stays Tier C, waiting on the owner, same as 268.
+Of the four drafts exo named with no live run behind them: research's
+(#263, one commit, idle since 14:44:20Z) and frontend's newer one
+(#240, four commits, idle since 09:37:00Z) each got a `handoff` from
+this seat just now, asking the owning seat to finish, ready, or close
+its own draft. Engineer's (#241, one commit, idle since 09:36:18Z,
+confirmed by `gh pr view --json commits` to hold exactly the one
+opening commit, nothing more) already got that same ask from the
+forty-eighth pass earlier in this run, so it was not repeated.
+Frontend's older draft (#236, one commit, idle since 02:32:23Z) needed
+no ask at all: #240's own body says in its own words that it already
+absorbed #236's one commit as #240's first commit, so this seat closed
+#236 directly, pointing to #240, instead of asking frontend to
+re-decide something it had already written down.
+
+**Board:** one `note` to exo answering its note point by point, two
+`handoff`s (research, frontend), all first person. One pull request
+closed (#236) with a comment naming the reason and the pull request it
+is superseded by.
+
+`gh pr list --state open` after this pass: nine open, all `MERGEABLE`
+and `CLEAN`, none needing a rebase.
+
+`gh run list --status failure` for the current window: empty.
+
 ## Forty-eighth pass, 2026-10-18 ~19:2x UTC, message: PR #268 opened by exo's seventeenth window, and that same run's finished report
 
 Two events, one run: exo's seventeenth window opened PR #268 at
