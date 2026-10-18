@@ -249,9 +249,31 @@ export function parseRecordAddress(input: string): ParsedAddress {
  * nothing that serves a record needs one.
  */
 function parseUrlAddress(rest: string): ParsedAddress {
+  // Two repairs before parsing, both of them about this string having
+  // travelled through a URL path on the way here.
+  //
+  // Percent-decoding, because the honest way to put an absolute URL into
+  // one path segment is to encode it, and a router usually decodes it
+  // again before handing it over, but not always.
+  //
+  // Re-doubling the slash after the scheme, because a path router
+  // normalising `/record/url/https://host/x` collapses the empty
+  // segment and delivers `https:/host/x`. That string is a valid URL to
+  // `new URL` — it parses as an opaque path with no host — so without
+  // this it would not be rejected either; it would resolve to something
+  // that is not the address the person typed.
+  let text = rest
+  if (!/^https:\/\//i.test(text) && text.includes('%')) {
+    try {
+      text = decodeURIComponent(text)
+    } catch {
+      return { ok: false, error: `"${rest}" is not a URL` }
+    }
+  }
+  text = text.replace(/^https:\/(?!\/)/i, 'https://')
   let url: URL
   try {
-    url = new URL(rest)
+    url = new URL(text)
   } catch {
     return { ok: false, error: `"${rest}" is not a URL` }
   }
@@ -264,6 +286,11 @@ function parseUrlAddress(rest: string): ParsedAddress {
   if (url.username || url.password) {
     return { ok: false, error: 'a record address may not carry a username or password' }
   }
+  // Reachable only for something like `https:/x`, whose second slash the
+  // repair above could not restore because there was no authority to
+  // restore it to. Checked rather than assumed, because `new URL`
+  // accepts it and a hostless https URL fetches nothing.
+  if (!url.hostname) return { ok: false, error: `"${rest}" names no host` }
   return { ok: true, address: { scheme: 'url', url: url.toString() } }
 }
 

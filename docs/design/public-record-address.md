@@ -250,7 +250,7 @@ export function noveltyOfDisclosure(m: DisclosureManifest): string[]
 ### 4.4 The published contract, which is the line with the frontend seat
 
 ```ts
-export const PUBLISHED_INDEX_VERSION = '0.1.0'
+export const PUBLISHED_INDEX_VERSION = '0.2.0'   // 0.1.0 until 2026-10-18
 
 export interface PublishedIndex {
   indexVersion: typeof PUBLISHED_INDEX_VERSION
@@ -275,8 +275,15 @@ export interface PublishedRecordSummary {
   resolvedBy: { basis: string; value: string } | null
   html: string
   json: string
+  /** added at 0.2.0: `pages/<owner>/<repo>/<id>`, or null with no repository stated */
+  address: string | null
 }
 ```
+
+`html` and `json` stay site-relative and stay the contract for reading
+the directory wherever it is served. `address` is the contract for
+*linking* to one record from outside the directory, which is a different
+question and the one a viewer's route asks. Its grammar is section 14.
 
 `indexVersion` is versioned separately from `OutcomeRecord.schemaVersion`
 on purpose: the index can gain a field without a record changing, and a
@@ -774,6 +781,12 @@ reading the same two files at the same two addresses. Nothing in
 `publish.ts` decides anything about presentation that `index.json` does
 not already expose as data.
 
+**Superseded in part by section 14.** This section was written before
+the frontend seat's two notes of 2026-10-18 arrived, and those notes
+named a thing this section had not: a viewer route needs an identity for
+one record, not a directory it can list. Section 14 is that identity.
+Everything below stays true about the directory.
+
 **The seam, concretely.** A viewer that fetches `index.json`, reads
 `records[].json` for an address, and fetches that record, is wired to
 this path with no change on this side. If it needs a field the summary
@@ -820,9 +833,454 @@ previous behaviour.
 | the publish path entirely | `git revert` the three commits on `ursa-engineer/2026-10-18-message` | `src/publish.ts`, `src/publish.cli.ts`, `src/publish.test.ts`, the two `action.yml` inputs, `examples/publish-record.yml`, the README section, this file |
 | only the Action's new behaviour | remove the `resolve-from` and `publish-dir` inputs | Nothing else. `resolve-from` defaults to `merge` and `publish-dir` to `''`, so a consumer who sets neither gets the byte-identical run they got before, and `src/ci/run.ts` is untouched |
 | only the published site, for one consumer | delete their `.github/workflows/ursa-publish.yml`, or unset Settings → Pages → Source | Their records stop being published. Nothing of Ursa's changes |
+| the record address | `git revert` the address commits, or simply stop running `ursa address`: nothing else calls `src/address.ts` except one field of `index.json` | `src/address.ts`, `src/address.cli.ts`, `src/address.test.ts`, the `address` dispatch in `src/bin/ursa.ts`, `PublishedRecordSummary.address`, the README's shortest-version section, section 14 of this file |
+| only the index field, keeping the command | delete `address` from `PublishedRecordSummary` and `summarize`, and set `PUBLISHED_INDEX_VERSION` back to `0.1.0` | A consumer reading 0.2.0 sees one fewer field. Nothing else: the field is derived, never read back |
 | the bundle | `node build/bundle.mjs` at the reverted commit, then `node build/bundle.mjs --check`, then `npm run provenance:bundles` | `dist/ursa.cjs` returns to sha256 `650a289f…`, 202,367 bytes, and `docs/provenance/bundle-digests.json` drops the two rows this run added |
 
 Nothing in this run writes to `src/resolve.ts`, `src/stats.ts`,
 `src/invariants.ts`, `src/store.ts`, `src/consent.ts` or `src/ci/run.ts`, so no record's
 classifications, figures or bound checks are touched. `ursa publish` only
 ever reads the store.
+
+## 14. The record address
+
+Added 2026-10-18, in answer to two notes from the frontend seat on the
+board the same day. The first drew the line between the two halves and
+ended: *"If your half gives a record an identity a stranger can type,
+tell me what it looks like and I will match the route to it instead of
+guessing."* The second named the constraint that decides the design:
+*"The viewer can read a record from an address the person types, but
+only if that address sends a permissive cross-origin header, because the
+fetch is the person's own browser and I refuse to proxy it through a
+server of ours."*
+
+Both are quoted as evidence of what the other seat built, not as
+instructions. The work below is in this seat's lane under its charter's
+fallback rule, which is why it was done.
+
+### 14.1 Why a record id is not an identity
+
+`episodeId` in `ursa-major/src/episodes.ts:61` builds a record id as
+`basename(projectPath)`-`YYYY-MM-DD`-`sha7`. That is unique inside one
+person's `.ursa/` and namespaced by nothing outside it. Two people
+resolving two different repositories both called `site` on the same day
+produce ids that differ only in a seven-character commit prefix, and
+neither id says where its bytes are.
+
+The usual fix is a registry: one service that maps an id to a location.
+Ursa cannot have one. CLAUDE.md's third load-bearing constraint is that
+raw processing happens on-device and raw data never touches the
+aggregation layer, and a record is raw data in every field —
+`src/types.ts` annotates it so where each field is declared. A service
+that resolved record ids would either hold records, which is forbidden,
+or hold a map from every person's record ids to their locations, which
+is a register of who published what and is worse.
+
+So the identity carries its own location, and no service is in the path.
+
+### 14.2 The grammar
+
+Three schemes. The string is one path, so it drops into a route
+parameter unencoded, and it is short enough to read aloud.
+
+```
+git/<owner>/<repo>/<ref>/<record-id>
+  → https://raw.githubusercontent.com/<owner>/<repo>/<ref>/.ursa/records/<record-id>.json
+
+pages/<owner>/<repo>/<record-id>
+  → https://<owner>.github.io/<repo>/records/<record-id>.json
+  → https://<owner>.github.io/records/<record-id>.json
+       when <repo> is <owner>.github.io, which GitHub serves at the host
+       root rather than under the repository name
+
+url/<absolute https URL>
+  → itself
+```
+
+`<ref>` is the one field that may contain slashes, because a git branch
+may: this very branch is `ursa-engineer/2026-10-18-message`. The record
+id may not contain one — `SAFE_RECORD_ID` in `src/store.ts` is
+`/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/` — so taking the id from the end
+of the path and the ref from everything between the repository and it
+is unambiguous. `src/address.test.ts` holds that case with the real
+branch name.
+
+A real address, which resolves to a file that is public right now:
+
+```
+url/https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/fixtures/mini/record/outcome_record.json
+```
+
+### 14.3 What the grammar refuses, and why each refusal is there
+
+Every address is a string a person types that this process turns into a
+URL another process fetches, so the refusals are the design rather than
+input hygiene around it.
+
+| Refused | Example | Why |
+|---|---|---|
+| a path component `..` | `pages/a/b/../../etc/passwd` | the one sequence that walks a fetch out of the path the address claims to name |
+| any scheme but `https:` | `url/javascript:alert(1)` | the parsed address is handed to `fetch`; a `javascript:` or `data:` payload reaching a viewer's fetch is a scripting hole with no legitimate use |
+| a URL carrying userinfo | `url/https://token:x@host/r.json` | a credential written into a string this process prints, a workflow logs and a page displays is a leak with no upside, and nothing serving a record needs one |
+| an account name GitHub could not issue | `pages/-nope-/b/r-1` | checked against GitHub's rule (up to 39 characters, alphanumerics and single hyphens) rather than trusted, because the string becomes a hostname |
+| a record id that is not one | `pages/a/b/.hidden` | `SAFE_RECORD_ID`, the same regex the bridge already uses, arriving from a second direction |
+| an https URL with no host | `url/https:/x` | `new URL` accepts it as an opaque path, and it fetches nothing |
+
+Two repairs happen before the refusals, both because the string
+travelled through a URL path on the way in: a percent-encoded payload is
+decoded once, and `https:/host` has its collapsed second slash restored,
+which is what a path router does to `url/https://host/x`.
+
+### 14.4 The cross-origin header, measured
+
+The frontend seat's constraint is a response header, and it cannot be
+derived from anything on disk, so it was measured. Taken 2026-10-18 with
+curl 8.5.0:
+
+```bash
+curl -sS -I https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/README.md
+curl -sS -I https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/does-not-exist.json
+curl -sS -I https://pages.github.com/
+curl -sS -I https://pages.github.com/does-not-exist.json
+curl -sS -I https://codeload.github.com/alexandrapaiz/Ursa/tar.gz/refs/heads/main
+```
+
+| Host | Status | `access-control-allow-origin` | `content-type` |
+|---|---|---|---|
+| `raw.githubusercontent.com`, file present | 200 | `*` | `text/plain; charset=utf-8` |
+| `raw.githubusercontent.com`, file absent | 404 | `*` | `text/plain; charset=utf-8` |
+| GitHub Pages, file present | 200 | `*` | per extension |
+| GitHub Pages, path absent on an existing site | 404 | `*` | `text/html; charset=utf-8` |
+| `codeload.github.com` | 200 | `https://render.githubusercontent.com` | `application/x-gzip` |
+
+Three consequences, each of which changed something in the code.
+
+**Both schemes work in a browser.** That is the whole feasibility
+question for the frontend seat's viewer, and the answer is yes for raw
+and yes for Pages, on success and on failure alike, so a viewer can
+distinguish "not published yet" from "cannot be read" instead of seeing
+one opaque network error for both.
+
+**codeload is the trap.** It is the obvious third candidate, since it
+serves a whole repository in one request, and its header admits exactly
+one origin that is not yours. It is named in `src/address.ts` so the
+next person does not spend an afternoon on it.
+
+**raw serves `text/plain`, so `git` has no page.** The self-contained
+HTML viewer `ursa publish` writes beside each record arrives at a
+browser as source code when it is served from raw. `recordAddressPageUrl`
+therefore returns null for the `git` scheme, which is an honest null and
+not a gap: on that scheme the only way to read a record in a browser is
+a viewer that fetches the JSON, which is precisely the surface the
+frontend seat owns. On `pages`, GitHub serves `text/html` and the
+fallback page opens by itself.
+
+The one thing the table cannot settle is a host this project does not
+control, which is why `--check` exists: it asks the address.
+
+### 14.5 Erasure, which is the real difference between the two schemes
+
+The two schemes are not two spellings of one thing. They differ on the
+property CLAUDE.md calls load-bearing — *the user can always see, edit,
+revoke, and delete what's been inferred about them* — and the difference
+is invisible at the moment of choosing.
+
+| | `git` | `pages` |
+|---|---|---|
+| What it takes to publish | `git add -f`, `git commit`, `git push` | one workflow file plus Settings → Pages → Source → GitHub Actions |
+| What is at the address | the record file in the repository's tree | a built site, deployed as an artifact by `actions/deploy-pages@v4` |
+| Taking one record down | not possible without rewriting the repository's history, which `ursa forget` does not do and will not pretend to | run `ursa publish` again over a store the record has been erased from; the next deployment does not contain it |
+| Who can still read it afterwards | anyone with the old commit sha, forever | nobody, once the next deployment lands |
+
+`permanenceNote()` returns that first column as a sentence, and
+`ursa address` prints it under the address of any record it calls
+readable. It is printed where a person is looking at the address rather
+than only written here, because the whole failure mode is that the cost
+is paid in a moment when this document is not open.
+
+For the same reason the command does not quietly route around
+`.gitignore`. `.ursa/` is ignored at this repository's root with the
+comment *"per-project outcome records and tuning (raw data, never
+committed)"*, which is this project's own default and is correct. So
+when a record is ignored, that is reported as its own blocker with
+`git add -f` spelled out, rather than the command printing a `git add`
+line that silently does nothing.
+
+### 14.6 System diagram, continuing section 3
+
+Every node is a file that exists in this repository after this run.
+Every edge carries a named type or the literal bytes that cross it.
+
+```
+ THE PERSON'S MACHINE
+ ─────────────────────────────────────────────────────────────────────
+
+  <project>/.ursa/records/<record-id>.json         ← written by `ursa run`
+            │
+            │  OutcomeRecord, via loadRecord() in src/store.ts
+            ▼
+  ursa-major/src/address.ts  addressState(projectPath, recordId)
+            │
+            │  runs, in this order, and nothing else:
+            │    git -C <p> rev-parse --show-toplevel
+            │    git -C <p> remote get-url <name>        → owner/repo
+            │    git -C <p> symbolic-ref --short HEAD    → the branch
+            │    git -C <p> rev-parse --abbrev-ref --symbolic-full-name @{upstream}
+            │    git -C <p> cat-file -e HEAD:<path>      → committed?
+            │    git -C <p> rev-parse <tracking>:<path>  → pushed blob sha
+            │    git -C <p> hash-object -- <abs path>    → local blob sha
+            │    git -C <p> check-ignore -q <abs path>   → ignored?
+            │  plus isForgotten(loadConsent(<p>), id) from src/consent.ts
+            ▼
+  AddressState { address, url, reachable, blockers[], … }
+            │
+            │  RecordAddress → string, via formatRecordAddress()
+            ▼
+  ursa-major/src/address.cli.ts  runAddress()
+            │
+            ├─ stdout: the address, the URL, `readable`, each blocker
+            ├─ stdout: formatManifest(manifestFor(records)) from src/publish.ts,
+            │          over the records that are already readable
+            └─ with --check only:  fetch(url, { method: 'HEAD' })
+                       │
+                       │  one HTTP HEAD request, no body transferred
+                       ▼
+             raw.githubusercontent.com  or  <owner>.github.io
+                       │
+                       │  response status + access-control-allow-origin
+                       ▼
+                 stdout: the verdict in words
+
+ THE OTHER HALF, WHICH THIS SEAT DOES NOT OWN
+ ─────────────────────────────────────────────────────────────────────
+
+  ursa-minor/app/record/[id]/page.tsx  (frontend seat, PR 227)
+            │
+            │  the address string from its route parameter
+            ▼
+  parseRecordAddress(string) → RecordAddress → recordAddressUrl() → fetch
+            │
+            │  OutcomeRecord as JSON, read by the person's own browser,
+            │  through no server of Ursa's
+            ▼
+  the rendered record
+```
+
+### 14.7 Interfaces, as the signatures a caller writes against
+
+```ts
+// ursa-major/src/address.ts
+export const RECORD_ADDRESS_VERSION = '0.1.0'
+
+export type RecordAddressScheme = 'git' | 'pages' | 'url'
+
+export type RecordAddress =
+  | { scheme: 'git'; owner: string; repo: string; ref: string; recordId: string }
+  | { scheme: 'pages'; owner: string; repo: string; recordId: string }
+  | { scheme: 'url'; url: string }
+
+export type ParsedAddress =
+  | { ok: true; address: RecordAddress }
+  | { ok: false; error: string }
+
+export function formatRecordAddress(a: RecordAddress): string
+export function parseRecordAddress(input: string): ParsedAddress
+export function recordAddressUrl(a: RecordAddress): string
+export function recordAddressPageUrl(a: RecordAddress): string | null
+export function recordAddressId(a: RecordAddress): string | null
+export function permanenceNote(a: RecordAddress): string | null
+export function pagesAddress(repository: string, recordId: string): RecordAddress | null
+
+export interface GitHubRemote { name: string; owner: string; repo: string }
+export function parseGitHubRemote(url: string): { owner: string; repo: string } | null
+export function githubRemote(repoPath: string): GitHubRemote | null
+
+export interface AddressState {
+  recordId: string
+  address: RecordAddress | null
+  url: string | null
+  reachable: boolean
+  blockers: string[]
+  remote: GitHubRemote | null
+  ref: string | null
+  path: string | null
+  committed: boolean
+  pushed: boolean
+  current: boolean
+  ignored: boolean
+  forgotten: boolean
+}
+export function addressState(projectPath: string, recordId: string): AddressState
+
+// ursa-major/src/address.cli.ts
+export interface ProbeResult {
+  status: number | null
+  allowOrigin: string | null
+  error: string | null
+}
+export interface AddressCommandOptions {
+  projectPath: string
+  recordId?: string | null
+  pages?: string | null
+  check?: boolean
+  probe?: (url: string) => Promise<ProbeResult>
+}
+export function runAddress(opts: AddressCommandOptions): Promise<number>
+```
+
+`probe` is injectable for one reason: the test suite must open no socket,
+and a feature whose correctness is a response header has to be tested
+against both answers. `src/address.test.ts` injects a permissive
+response and a header-less one and asserts the two sentences the command
+prints.
+
+Three version numbers now exist in this path and they move
+independently, which is deliberate: `OutcomeRecord.schemaVersion` is the
+record, `PUBLISHED_INDEX_VERSION` is `index.json`, and
+`RECORD_ADDRESS_VERSION` is the grammar of the string above. A viewer
+that parses the string should be able to pin it without being told that
+a record gained a field.
+
+### 14.8 On-disk and on-screen layouts, with real output
+
+`ursa address` writes no file. Its artifact is its stdout, so that is
+what is shown. Taken from this repository on 2026-10-18, with the record
+id's slug replaced by `<your-repo>` per the redaction rider — the slug
+is the sandbox directory this run executed in, which is exactly the
+foreign-slug case section 10.1 describes, and `foreignSlugWarnings`
+would have warned about it on a publish.
+
+```
+$ npx tsx src/bin/ursa.ts address ..
+record <your-repo>-2026-10-16-8dcb0c7
+  address   git/alexandrapaiz/Ursa/ursa-engineer/2026-10-18-message/<your-repo>-2026-10-16-8dcb0c7
+  json      https://raw.githubusercontent.com/alexandrapaiz/Ursa/ursa-engineer/2026-10-18-message/.ursa/records/<your-repo>-2026-10-16-8dcb0c7.json
+  readable  not yet
+  missing   git ignores .ursa/records/<your-repo>-2026-10-16-8dcb0c7.json — `.ursa/` is in this repository's .gitignore, which is this project's own default, because a record is raw data. Publishing one is a deliberate act: `git add -f .ursa/records/<your-repo>-2026-10-16-8dcb0c7.json` if that is what you mean to do.
+  missing   .ursa/records/<your-repo>-2026-10-16-8dcb0c7.json is not in HEAD. Commit it: `git add -f .ursa/records/<your-repo>-2026-10-16-8dcb0c7.json && git commit -m "publish one record"`.
+```
+
+Exit code 4: there are records and none is readable yet. With `--check`,
+on the same record:
+
+```
+  checked   https://raw.githubusercontent.com/alexandrapaiz/Ursa/ursa-engineer/2026-10-18-message/.ursa/records/<your-repo>-2026-10-16-8dcb0c7.json
+            HTTP 404
+            access-control-allow-origin: * — a browser on any page can read this
+```
+
+The two facts are printed separately because they fail separately and a
+person can act on each. A 404 with a permissive header means *you have
+not pushed it yet*. A 200 without one means *a browser will refuse to
+read this, and no amount of pushing changes that*.
+
+And the field this adds to a published `index.json`, from a real
+`ursa publish .. --repo a-stranger/their-repo --yes`:
+
+```json
+{
+  "indexVersion": "0.2.0",
+  "records": [
+    {
+      "id": "<your-repo>-2026-10-16-8dcb0c7",
+      "html": "records/<your-repo>-2026-10-16-8dcb0c7.html",
+      "json": "records/<your-repo>-2026-10-16-8dcb0c7.json",
+      "address": "pages/a-stranger/their-repo/<your-repo>-2026-10-16-8dcb0c7"
+    }
+  ]
+}
+```
+
+With no `--repo`, `address` is `null` on every record, because there is
+then nothing to build an absolute address from and a guess would be
+worse than an absence.
+
+### 14.9 Exact commands
+
+What a person runs:
+
+```bash
+npx tsx src/bin/ursa.ts run <path-to-your-repo>
+npx tsx src/bin/ursa.ts address <path-to-your-repo>
+npx tsx src/bin/ursa.ts address <path-to-your-repo> --record <record-id> --check
+npx tsx src/bin/ursa.ts address <path-to-your-repo> --pages <owner>/<name>
+git add -f .ursa/records/<record-id>.json
+git commit -m "publish one record" && git push
+```
+
+What the bundle the Action ships runs, identically:
+
+```bash
+node dist/ursa.cjs address "$GITHUB_WORKSPACE" --record <record-id>
+```
+
+What this run ran to verify itself:
+
+```bash
+npm install
+npm run typecheck                                  # tsc --noEmit
+npx vitest run src/address.test.ts                 # 46 tests
+npx vitest run                                     # 761 passed, 4 skipped
+node build/bundle.mjs && node build/bundle.mjs --check
+npm run provenance:bundles && npm run provenance:bundles:check
+npx tsx src/bin/ursa.ts run .. --limit 3 --agent-identity ursa-engineer \
+  --agent-identity ursa-pm --agent-identity ursa-exo --agent-identity claude
+npx tsx src/bin/ursa.ts address ..
+npx tsx src/bin/ursa.ts address .. --record <record-id> --check
+npx tsx src/bin/ursa.ts publish .. --out /tmp/site-demo2 --repo a-stranger/their-repo --yes
+node dist/ursa.cjs address .. --record <record-id>
+curl -sS -I https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/README.md
+```
+
+### 14.10 Tooling added by this section
+
+Versions read from the running machine or from
+`ursa-major/node_modules/<pkg>/package.json`. Everything in section 12
+still applies; these are the tools this section adds.
+
+| Tool | Version | Its job here | Chosen over |
+|---|---|---|---|
+| git | 2.43.0 (`git --version`) | The whole of `addressState`: eight read-only plumbing commands that answer whether a record is committed, pushed, current and ignored. Already required by the resolver, so this adds no dependency | The GitHub REST API, which would need a token for a private repository, a network round trip for a question the local clone already answers, and would put a rate limit in front of a status command. `isomorphic-git`, a new dependency to re-implement commands git is already installed to run |
+| Node's global `fetch` | built into Node.js 22.23.2 | The single HEAD request behind `--check` | `node-fetch` or `undici` as a direct dependency, both redundant on Node 18 and later. `curl` through a subprocess, which would make the result depend on which curl is installed and would be harder to inject a fake response into for the tests |
+| curl | 8.5.0 | Took the header measurements in section 14.4, by hand, once. Not called by any code in this repository | Reading a vendor's documentation, which is how the codeload row would have been wrong |
+| vitest | 5.0.2 | Runs the 46 tests in `src/address.test.ts`, including the ones that build real git repositories in `mkdtemp` directories | — |
+| TypeScript | 5.9.3 | Holds `RecordAddress` as a discriminated union, so `recordAddressUrl` cannot forget a scheme: adding a fourth makes the switch a compile error | A runtime check, which would find the same mistake after shipping |
+
+No new paid service, account, or domain. Steady-state cost: **$0**.
+
+### 14.11 Why the tests set the push state with `git update-ref`
+
+`addressState` asks whether a commit is on the remote, and the honest
+way to answer that offline is to read the remote-tracking ref, which is
+what `git fetch` writes and what `git push` updates. So the tests write
+it directly:
+
+```bash
+git -C <repo> update-ref refs/remotes/origin/main "$(git -C <repo> rev-parse HEAD)"
+git -C <repo> branch --set-upstream-to=origin/main main
+```
+
+That leaves the repository in the exact state a real fetch leaves it in,
+so the code under test reads the same thing it reads in production, and
+the suite still reaches no network. The limitation this inherits is
+stated in the code and in the command's own output: a remote-tracking
+ref is as fresh as the last fetch, so `readable` says *yes, as far as
+this clone can see*.
+
+### 14.12 What this does not solve
+
+**A record id in a URL is still a directory name.** Section 10.1 stands
+unchanged and the `git` scheme makes it slightly louder, since the id is
+now a path segment in two address forms rather than one. The decision it
+asks for is still open.
+
+**A `git` address is pinned to a ref, not to bytes.** `git/.../main/<id>`
+follows the branch, so the record at that address changes when the
+branch does. Passing a commit sha as the ref gives an address that
+cannot move, and the command prints the branch form because that is the
+one a person can type from memory. Which of the two a published link
+should use is a product decision and is in the ledger.
+
+**Nothing here publishes anything.** `ursa address` reads. The act that
+makes a record public is the person's own `git push` or their own Pages
+deployment, which is the same posture as the rest of this path.

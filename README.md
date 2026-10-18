@@ -65,6 +65,44 @@ npx tsx src/bin/ursa.ts publish <path-to-your-repo>    # prints what would go pu
 npx tsx src/bin/ursa.ts publish <path-to-your-repo> --out ./site --yes
 ```
 
+### The shortest version: one record, no workflow, no Pages setting
+
+A record is a file, and a file in a public repository already has a
+public address. So you can skip all of the above and publish one record
+by committing it.
+
+```bash
+npx tsx src/bin/ursa.ts run <path-to-your-repo>
+npx tsx src/bin/ursa.ts address <path-to-your-repo>
+```
+
+`ursa address` prints, for every record you have, the address someone
+else can open and the one thing still standing between you and it,
+which is usually a commit or a push. Records live in `.ursa/`, which
+this project tells git to ignore by default, because a record is raw
+text and publishing it should be something you do on purpose rather
+than something that happens. When you do mean it, the command gives you
+the exact line:
+
+```
+record <your-repo>-2026-10-16-8dcb0c7
+  address   git/<you>/<your-repo>/main/<your-repo>-2026-10-16-8dcb0c7
+  json      https://raw.githubusercontent.com/<you>/<your-repo>/main/.ursa/records/<your-repo>-2026-10-16-8dcb0c7.json
+  readable  not yet
+  missing   git ignores .ursa/records/<your-repo>-2026-10-16-8dcb0c7.json ...
+```
+
+Add `--check` and it asks the address itself, so you see the answer a
+browser would get rather than the one this page promises.
+
+**Which of the two to use.** Committing a record is one command and it
+is permanent: the record stays in your repository's history, and `ursa
+forget` deletes your local copy without reaching a commit you have
+already pushed. Publishing to Pages takes the workflow above and gives
+that back, because it deploys a built site rather than a commit, so
+running it again without a record takes that record off the site. The
+command says this where you are looking at the address, not only here.
+
 Everything above runs on your machine or on your own runner. Ursa
 operates no part of it, and the resolver installs nothing: the Action
 executes one committed file with the node already on the runner. The
@@ -301,7 +339,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 707 tests, 4 skipped
+npm test                                   # 761 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
