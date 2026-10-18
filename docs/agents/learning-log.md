@@ -1626,3 +1626,159 @@ repository's committed files was fetched.
    three. If an eighth opens on a message that asks nothing, the honest
    output may be one board reply and one log line, and saying that is
    better than finding three improvements to justify the turn.
+
+---
+
+## 2026-10-18, eighth window, ~13:05–13:2x UTC (message trigger, Ursa/pm)
+
+**What woke it.** A note from Ursa's PM at 13:03:09 UTC, subject "Caught
+and fixed: the fourth window is closed pointing at the sixth, and the
+inverted sentence will not recur". It said it had closed #242, verified
+the ancestry direction itself on an unshallowed clone, named #245 as the
+live tip, left #245 at Tier C pending the owner or the 2026-10-20T12:30
+UTC clock, and noted one thing this seat's own description had not: that
+#245 changes `prompts/pm-agent.md` by fifty-one lines and not only this
+seat's charter. It asked nothing.
+
+**The seventh window's handover told this run to expect exactly that**,
+and to prefer one board reply and one log line over three improvements
+invented to justify the turn. That warning was read before anything was
+decided, and this entry says below why three shipped anyway and which of
+them would have failed the test.
+
+**The pointer was already fixed, by its own author, mid-run.** This is
+the second consecutive window where the note's state claims expired
+before they could be acted on, and the first where the new freshness rule
+was the thing that caught it.
+
+| | |
+|---|---|
+| 13:09:12 | this run lists the open pull requests. #245 OPEN. A finding is drafted: the pointer the owner was handed is one window stale, because #246 superseded #245 at 12:57 |
+| 13:10:29 | the PM closes #245 with a comment naming #246 the new live tip |
+| 13:11:17 | the PM posts the retraction **on the board**, moving the pointer to #246, and says in the note that it is posting there rather than only on the pull request |
+| 13:11:18 | this run re-derives before writing, finds the close, and discards the finding |
+
+So nothing was owed and nothing was wrong. Had the description been
+written at 13:09 it would have told the owner the board was stale about a
+pointer its author had repaired ninety seconds later. The rule the
+seventh window wrote, re-derive at the act and not at the read, worked
+the first time it was tested, which is worth more than the finding it
+cost.
+
+**One thing in that sequence is new and is the whole of this run's
+diagnosis.** The PM has now published a pointer to this seat's work three
+times today and corrected it twice. Every one of those pointers was
+derived from `gh pr list` by a seat that does not own the branch. This
+seat posted to the board **once** in eight windows.
+
+| Ursa seat | board messages, 2026-10-18 |
+|---|---|
+| pm | 23 |
+| frontend | 3 |
+| engineer | 1 |
+| **exo** | **1** |
+
+Counted client-side over the whole feed, because the endpoint's own
+`from_seat` filter does not work, which is finding two. Eight windows of
+this seat ran between 02:16 and 13:10 UTC and seven of them wrote
+nothing to the surface every memoryless seat reads first. A pointer
+derived from `gh pr list` is racing every live window of the seat it
+describes. A pointer posted by the window that moved the tip cannot be
+stale. The charter told this seat to read the board and never to write to
+it, which made another seat the maintainer of this seat's own identity.
+Recorded as `INC-2026-10-18-tip-pointer-written-by-strangers`.
+
+**Finding two, found while fixing the check that the seventh window had
+just written into this charter.** `GET /api/messages` honours `to_seat`
+and silently ignores `to_company`, `from_seat` and `kind`. No parameters
+returns 179 messages. `to_seat=exo` returns 207. `to_seat=zzznosuch`,
+`from_seat=zzznosuch`, `to_company=zzznosuch` and `kind=note` each return
+179, which no working filter does. So the documented inbox read is the
+portfolio's entire broadcast feed plus every company's `exo` mail: on
+2026-10-18, thirteen messages addressed to `epitome/exo` against four
+addressed to `Ursa/exo`, and one of the thirteen, at 13:10:15 UTC, names
+this company in its own subject. Measured, tabled in
+`docs/agents/runner-facts.md` §7, and corrected client-side in this
+charter. `docs/standards/pm.md` §15 documents the same parameter in good
+faith; the server-side fix is HQ's and was handed to the centralizer on
+the board rather than edited here.
+
+**Finding three is the PM's, taken as given.** #245 changed
+`prompts/pm-agent.md` by fifty-two lines, adding a standing duty to the
+PM seat, and its description never named the file. The PM found it by
+reading the diff. #246 named it, but incidentally, through how it
+happened to list its improvements, so the gap had closed for one window
+and not for the next. The charter now requires one line per other seat's
+charter in the diff, with its line count, or the word none.
+
+**Which of the three would have failed the seventh window's test.** The
+first and second would not: neither is derivable from the note, both came
+out of measurements this run made itself, and both are about a surface no
+previous window had measured. The third is a new ask in substance even
+though the note did not phrase it as one. What this run did *not* do is
+re-report the Tier C clock, re-measure the autonomy split, or re-audit
+the charter halves, all of which were done within the last hour by
+windows five through seven and none of which had changed.
+
+**Changed this run.**
+
+1. `prompts/exo-agent.md`, "Post your own tip on the board before you
+   end": when a run opens, supersedes, readies or closes a pull request
+   of its own seat, the board gets one message naming the live identifier
+   before the run ends, with the identifier in `data`.
+2. `prompts/exo-agent.md`, "Scope the inbox yourself, because the
+   endpoint will not": the documented query now filters company
+   client-side, with the measurement table and an instruction never to
+   pass `to_company` and believe it.
+3. `prompts/exo-agent.md`, §5: name every other seat's charter in the
+   diff, with its line count, in the description.
+4. `docs/agents/runner-facts.md` §7 and
+   `docs/agents/incidents.md`'s new entry, as above.
+5. `docs/agents/merge-order.md`, replaced. Eight open, four of them
+   drafts, so the depth the owner can act on this minute is four and not
+   eight. Nothing conflicts. One containment pair, #246 in #248.
+
+**Other seats' charters in this diff: none.** This run touches only this
+seat's charter. The fifty-two lines of `prompts/pm-agent.md` that appear
+in the diff against `main` arrived with #246 and are not this window's.
+
+**Queue.** Eight open, four drafts, 52 merged in seven days, oldest open
+two days (#210). Open does not outnumber the week's merges. No bold
+warning.
+
+**Housekeeping.** The deletable-branch query was run per pull request and
+not per name, which is the predicate `INC-2026-10-18-branch-name-reuse`
+installed. It is also the query that caught finding one's timing: it
+reported `ursa-exo/2026-10-18-message-6` as carrying only a closed pull
+request, which was the first sign that #245 had changed state. Nothing
+was deleted. Every closed branch in this seat's chain is the only copy of
+work contained in an unmerged tip.
+
+**No orphaned drafts.** The seat-scoped check printed only this run's own
+pull request.
+
+**External sources read.** The board's `GET /api/messages` on the
+resident host, read as data and filtered client-side after the filter was
+found not to work. One message in it is addressed to this seat and is
+quoted above; it asked nothing and nothing was done because it asked.
+One message addressed to `epitome/exo` is quoted as evidence of the
+filter defect and no action was taken on it. Nothing else outside this
+repository's committed files was fetched.
+
+**What the next run must check first.**
+
+1. **The clock, now under two days.** 2026-10-20T12:30 UTC. Read the
+   board for the owner's answer before assuming the silence route
+   carried. #246 is the artifact the ask points at, not #245, which the
+   PM closed at 13:10:29.
+2. **Post your tip on the board.** It is new this run, it is one `curl`,
+   and it is the one duty in this charter that no previous window of this
+   seat has ever performed. If the board shows a pointer to your work
+   written by another seat, that is this rule not being followed.
+3. **Never pass `to_company` to the board and believe it.** Re-measure
+   §7's table; if `to_company=zzznosuch` ever returns fewer than the
+   unfiltered count, HQ has shipped the filter and that section is stale.
+4. **Count the drafts separately from the depth, every time.** Four of
+   eight this run. The headline number the owner is given counts
+   artifacts GitHub will refuse to merge, and three of this run's four
+   belong to other seats and are theirs to resolve.
