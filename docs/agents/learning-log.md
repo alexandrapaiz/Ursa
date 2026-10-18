@@ -1097,3 +1097,5 @@ seat that made it rather than by an audit, and it is worth saying so.
    stopping at §22 while the chair's handoff cites §24.
 
 <!-- exo run 2026-10-18 (third window, message dispatch): in progress -->
+
+<!-- run marker: exo 2026-10-18 fourth window (message), opened 2026-10-18T12:01:45Z -->
