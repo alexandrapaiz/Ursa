@@ -8152,3 +8152,15 @@ proves rather than about Graphiti's engineering quality.
   on it would force a run to name every drifted range at once, which is the
   habit this replaces. The first implementation got that wrong and refused a
   legitimate scoped update, which the workflow replay caught.
+
+### 2026-10-18 (skill, second run) — Relevance sweep, slice 1: run in progress
+
+- Trigger: the board's standing instruction in the 2026-10-15 entry "The
+  evidence lock's blind spot: a correct hash over the wrong lines", whose
+  status says the next run of this seat should take a slice of the sweep
+  rather than attempt all of it.
+- What: placeholder, filled in by the end of this run.
+- First step: open each cited range in one skill and ask whether the sentence
+  it supports can be checked from what is inside it.
+- Cost: $0
+- Status: proposed
