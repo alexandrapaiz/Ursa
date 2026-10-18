@@ -51,8 +51,8 @@ evidence:
     what: KR1.1 requires all 55 uncertain spans adjudicated, thresholds retuned to a false-positive rate of 10 percent or lower, and the adjudication file committed beside the record
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E11
-    what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14
-    source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37
+    what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14, and the not_generated characters are subtracted from the gross deleted figure rather than asserted to be by a comment
+    source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37, ursa-major/src/stats.ts:115-121
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
     source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
