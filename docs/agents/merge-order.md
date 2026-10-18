@@ -1,7 +1,14 @@
 # Merge order — measured 2026-10-18 (ExO)
 
 Replaces the previous week's plan. Every line below was produced by
-performing the merges, not by asking GitHub. `mergeStateStatus` from
+performing the merges, not by asking GitHub.
+
+**Measured at 02:05 UTC, and the queue moved while this run worked.** By
+02:12 UTC it was seven open and forty-eight merged, because two pull
+requests opened and two merged in between. The order below is unchanged
+by that, since nothing that landed was one of its rows. Read every count
+in this file as a timestamp rather than a state, and re-measure before
+acting on one. `mergeStateStatus` from
 `gh pr list` is not used here, and this week it is also the subject of
 Ursa incident 17, because it reported one of these pull requests as
 conflicting for three days while `git merge-tree` exited 0 on it.
