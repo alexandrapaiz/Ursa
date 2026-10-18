@@ -12,17 +12,17 @@ description: >
   the ancestry was not. Does not fire for producing a record in the
   first place, for labelling generations, or for reading a record's
   summary statistics.
-version: 0.3.0
+version: 0.3.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-24
-revised: 2026-10-15
+revised: 2026-10-18
 evidence_scheme: repo
 evidence:
   - ref: E1
     what: the span classes and the generation fates the record uses
-    source: ursa-major/src/types.ts:5-13
+    source: ursa-major/src/types.ts:5-13,37
   - ref: E2
     what: the two thresholds, 0.35 and 0.6, and the combined score they apply to
     source: ursa-major/src/match.ts:6,8,49-52

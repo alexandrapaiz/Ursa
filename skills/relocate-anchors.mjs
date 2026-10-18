@@ -41,6 +41,7 @@ import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from '
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
+import { SOURCE_PATH_RE } from './source-line.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
@@ -71,7 +72,10 @@ export function citedRanges(text, entry) {
     // Both regexes end with the group being located, so the group sits at the
     // tail of its own match and its offset is a subtraction rather than a search.
     const sourceAbs = fmOffset + m.index + (m[0].length - sourceLine.length)
-    for (const hit of sourceLine.matchAll(/([\w./-]+\.(?:ts|md|json|mjs))(?::([\d,-]+))?/g)) {
+    // The shared pattern, so this tool and the checker agree about which
+    // paths exist at all; `matchAll` clones the regex, so the /g flag on a
+    // module-level object is not shared state. See ./source-line.mjs.
+    for (const hit of sourceLine.matchAll(SOURCE_PATH_RE)) {
       const [whole, path, ranges] = hit
       if (!ranges) continue
       const rangesAbs = sourceAbs + hit.index + (whole.length - ranges.length)

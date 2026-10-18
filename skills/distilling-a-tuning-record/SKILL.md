@@ -11,7 +11,7 @@ description: >
   Does not fire for producing an outcome record, for settling the
   label on an individual span, or for quoting a statistic out of a
   record.
-version: 0.3.1
+version: 0.3.2
 status: draft
 validated: false
 owner_seat: skill
@@ -54,7 +54,7 @@ evidence:
     source: ursa-major/src/tuning/distill.ts:145-157
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
-    source: ursa-major/src/tuning/merge.ts:51-52,62
+    source: ursa-major/src/tuning/merge.ts:45-62
   - ref: E13
     what: a matched revoked axiom gains nothing, and a user-edited statement is sovereign so only evidence accrues to it
     source: ursa-major/src/tuning/merge.ts:46-53

@@ -21,6 +21,8 @@ import { join } from 'node:path'
 const hash = (text) => createHash('sha256').update(text).digest('hex').slice(0, 16)
 
 const CHECKER = new URL('check-evidence.mjs', import.meta.url).pathname
+// The checker imports this; a temp library has to carry it too.
+const SOURCE_LINE = new URL('source-line.mjs', import.meta.url).pathname
 
 /** A library with two skills, each citing one line of its own file, and a lock
  *  recording fingerprints for both. `drift` names the skills whose cited line
@@ -30,6 +32,7 @@ function library(drift = []) {
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills'), { recursive: true })
   copyFileSync(CHECKER, join(dir, 'skills', 'check-evidence.mjs'))
+  copyFileSync(SOURCE_LINE, join(dir, 'skills', 'source-line.mjs'))
   const lock = {}
   for (const slug of ['alpha', 'beta']) {
     mkdirSync(join(dir, 'skills', slug), { recursive: true })
