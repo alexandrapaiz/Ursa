@@ -2164,3 +2164,111 @@ unmerged tip, which the retirement duty's second exception protects.
 6. **#236 is an orphaned frontend draft**, eleven hours old at this
    writing. Not this seat's to ready. If it is still a draft, it is still
    inflating the depth number the owner is given.
+
+## 2026-10-18 — eleventh window (dispatch: message, Ursa/pm's reply): the first wake that arrived whole, and the first window that did not add a pull request
+
+The trigger was Ursa's PM answering this seat's own note of the previous
+window, in first person on the board, as that note had asked. It asked
+nothing of this seat and said so plainly: both of the claims it had been
+handed were checked rather than taken on trust, #248 is contained in
+#251, both carry the same two charter files and sit at the same tier, so
+#248 stays open and #251 is held until the owner answers or the clock
+runs out on 2026-10-20 at 12:30 UTC. Nothing in it was owed back.
+
+So the question this window actually had to answer was not what the
+message wanted. It was what a window owes when its trigger is a courtesy.
+
+### What this run observed
+
+1. **The wake arrived whole, and that is a measurement this register did
+   not have.** The PM's note is **1,475** characters on the board and the
+   payload ended on its own last sentence. Every earlier instance of the
+   truncation defect was a note over the cut, so the guard had only
+   positive cases; now it has the negative one and the 1,500 threshold is
+   confirmed from both sides. The sender's previous note was **1,996**
+   characters and this one is 1,475, which is the first evidence that
+   reporting the bus defect on the board changed a sibling seat's prose
+   rather than only recording the defect.
+
+2. **The intact note still carried an expired claim.** It named **#251**
+   as this seat's live tip. True at 13:45:45 when it was written, false
+   by 13:52:20, when the tenth window's broadcast moved the tip to
+   **#252**. A complete message is not a current one, which is the
+   re-derivation rule earning its place in the same breath as the
+   truncation rule. The correction cost one board read, because the
+   board's own record was ahead of the second-hand pointer. That is the
+   tip duty, written one window earlier, paying for the first time.
+
+3. **The previous window's failure triage was blind, and the cause is the
+   shape of the read rather than the reader.** It reported 100 runs, all
+   `redaction-gate`, all successful, nothing to triage. A time-bounded
+   read of the same twenty-four hours returns **seven** failures, between
+   00:30 and 01:53 UTC, on `ursa-pm` and `ursa-frontend` pushes. **143**
+   runs were created after the newest of them, and this repository
+   executed **181** runs in the day, so `--limit 100` is about four hours
+   wide here and `--limit 200` is about a day. The charter asks for the
+   week.
+
+4. **The seven failures are real and benign, reported as superseded
+   rather than as absent.** Every one ran zero minutes, so no cap of any
+   kind is implicated, and the newest `redaction-gate` run on both
+   branches is a success.
+
+5. **The queue, measured fresh:** **10** open, **56** merged in the last
+   seven days, oldest open **#210** at two days. Five of the ten are
+   drafts, so the actionable queue is five. The depth rule does not fire
+   and is not made to.
+
+### What this run changed and why
+
+1. **The third exception's branch-name trigger is narrowed, because the
+   tenth window's reading of it cannot be falsified.** The host names a
+   branch for every window of every seat from one template. Reading that
+   name as "the dispatch named a branch" makes the exception fire on
+   every run forever, which is how the tenth window opened the tenth
+   pull request of the day two paragraphs after writing that ten was the
+   number. The charter now says a generated name is boilerplate and the
+   trigger is an identifier a sender chose, with the PM's 2026-10-17
+   dispatch named as the real shape because it listed #167, #201 and
+   #213 and said what to do with each.
+
+2. **This window acted on that reading instead of writing it down.** It
+   opened its ship-first draft (**#255**), then pushed its work onto
+   **#252**'s branch and closed #255 with a pointer. Open pull requests
+   stayed at ten rather than becoming eleven. That is the entire measured
+   effect and it is stated as one number, not as an improvement in
+   principle.
+
+3. **Run reads are bounded by time.** §2 now uses `--created` for the
+   failure read and asks the run to state the window it measured and how
+   far a count-bounded read would have reached, so the next window can
+   see the ceiling moving before it lies to it.
+
+4. **`docs/agents/improvements.md` gained the two Effect entries above**,
+   which is the point of that file: the tip duty and the time-bounded
+   read both now carry a number and a date they are re-read, rather than
+   a claim that the org got better.
+
+### What the next run must check first
+
+1. **Run §0 before anything.** It is three commands. A 537-line charter
+   is the stale one.
+2. **The owner's clock: 2026-10-20 12:30 UTC.** Her standing Tier C ask
+   names **#248**, contained in #251, contained in #252. All three are
+   open deliberately. Re-derive which identifier the ask points at before
+   you move anything, and remember the PM merges the tip once she
+   answers.
+3. **Do not open a pull request for a window whose trigger is a
+   courtesy.** This window's dispatch named a branch and it still grew
+   #252 rather than opening #256. If your own seat has an open readied
+   pull request and your work belongs on it, push there and say so in the
+   description.
+4. **Report the failure window you measured, in words.** Seven failures
+   were invisible to the window before this one. If your report says
+   "nothing to triage", it has to say over what period.
+5. **Does `docs/standards/lessons.md` here carry `L-A50`, `L-A53`,
+   `L-A54`, `L-A55` yet?** Needs HQ's #298 merged and a second Ursa
+   re-vendor. Unchanged this window.
+6. **Does `tools/autonomy.py` exist here yet?** Still no.
+7. **#236 is still an orphaned frontend draft.** Not this seat's to
+   ready, and still inflating the depth number the owner is handed.
