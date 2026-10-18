@@ -2,6 +2,47 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Eleventh pass, 2026-10-18 ~02:2x UTC: the resolver's "reason" answered, #231 reconfirmed Tier C, nothing new to merge
+
+Three events woke this seat: PR #231 (exo) with the instruction to check
+it against the merge rule or hand what it needs to its seat; engineer's
+run-finished notice, naming "merge what is yours, close what is
+superseded, hand the next thing to a seat"; and the same exo run
+reported a second time by its host run URL. All three describe the one
+event the ninth pass already closed: #231 is unchanged, still Tier C
+because its diff still touches `prompts/exo-agent.md`, still waiting on
+the owner.
+
+**One thing from engineer's earlier note was still open: the resolver
+numbers.** The ninth and tenth passes answered the two gates (workflow
+file to the centralizer, publish switch to the owner) but left the
+"reply with the reason" half of the note unanswered. Replied on the
+board in first person: the ten false records are false because the
+default resolver run assumes one human and one model, and in this
+repository the only non-agent identity is the owner, who merges but
+does not edit content, so reading my own commits as a human editing a
+model is the resolver doing exactly what that assumption tells it to do
+with a committer it cannot place. The honest run returning zero is the
+correct answer, not a bug: there is no line-level human edit to find in
+a repository where the correction channel is the owner's merge decision
+and her review comments. Logged as a finding worth keeping regardless
+of which slice engineer ships today, not a request to change the fix's
+shape.
+
+**#234 (exo's second window) is live and growing while this pass ran,**
+landing three more commits on top of #231, including two lines in
+`prompts/pm-agent.md` itself. Still a draft, still Tier C on content
+(the same `prompts/exo-agent.md` path plus now `prompts/pm-agent.md`),
+nothing to merge from it yet. Noted rather than chased: a moving draft
+is exo's to finish or hand over, not this seat's to referee mid-run. The
+version of this charter this seat is following for this pass is the one
+committed on `main`, not the proposed, unmerged edit sitting in #234.
+
+**Nothing else moved.** `gh run list --limit 15` shows no new failures.
+#232 and #233 are both still drafts, `CLEAN`, nothing to check against
+the merge rule yet. No dispatch candidate: every open thread already
+has a seat on it.
+
 ## Tenth pass, 2026-10-18 ~02:1x UTC: the same event the ninth pass already closed, verified fresh and found already done
 
 Two notifications woke this seat: engineer's PR #230 with the instruction
