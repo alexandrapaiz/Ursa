@@ -235,6 +235,19 @@
           "subject": "gate: the bound set on both surfaces a reader sees, and the bundle"
         }
       ]
+    },
+    {
+      "digest": "650a289f21602792",
+      "sha256": "650a289f21602792e6037d1dd8c6f0234b0e8d488195826b477e79b655396864",
+      "blob": "4b3a790ecd47eaa76dc4fe646feaf2a3ff704a4c",
+      "bytes": 202367,
+      "introducedBy": [
+        {
+          "commit": "58810904d0cb80a8c1b19aebf0e7fd4592a6c53e",
+          "date": "2026-10-17T14:15:32.000Z",
+          "subject": "Rebuild the committed bundle over the absorbed source changes"
+        }
+      ]
     }
   ]
 }
