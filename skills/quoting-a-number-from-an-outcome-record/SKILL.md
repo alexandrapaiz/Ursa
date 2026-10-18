@@ -60,7 +60,7 @@ evidence:
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
-    source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:136-138
+    source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:128,136-138
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
     source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:570,580

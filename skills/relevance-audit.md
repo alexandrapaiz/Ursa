@@ -30,6 +30,13 @@ agree.** Added after slice 2, where two skills made opposite claims about one
 flag and both fingerprints were green. The overlap field did not exist for
 most of slice 2's reads, so the convention starts with slice 3.
 
+**When the dossier names a ref that shares a sentence, the row says which half
+of the claim each one carries.** Added after slice 3, where a sentence citing
+two refs put its load-bearing phrase on the ref whose range could not carry
+it. The split field was written during slice 3 and so was not available for
+slice 3's own reads, which found the failure by hand. The convention starts
+with slice 4.
+
 ## Read so far
 
 | ref | verdict | read | note |
@@ -95,3 +102,40 @@ the result, and four is not a sample that settles anything.
 | `adjudicating-uncertain-spans/E7` | supports | 2026-10-18 | Control, 0 percent miss. Same shape, and the 82.1 percent figure is inside the range. |
 | `adjudicating-uncertain-spans/E2` | supports | 2026-10-18 | Control, 0 percent miss, and a code citation rather than prose: three ranges holding both constants and the function with the doc comment the `what` paraphrases. |
 | `adjudicating-uncertain-spans/E5` | supports | 2026-10-18 | Control, 0 percent miss, code again: a three-line header comment that states the claim in its own words. |
+
+## Slice 3, read 2026-10-18
+
+Twenty refs. Nineteen from the top of the ordering and one, `running/E4`, from
+near the bottom, pulled forward because reading `running/E2` exposed it. No
+claim was false this slice, eight ranges were too narrow for the sentence
+standing on them, and twelve were sound as cited. Two rows record a search
+rather than a range, per `prompts/skill-extract.md` §5l.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `running-an-outcome-record-trial/E2` | widened | 2026-10-18 | Three passages, and the third says the finder "stops at the first match". The range was `1-8,598-626` and ended inside a comment about a bound checked elsewhere. The `break` that stops the walk is line 711, and the tests that make `fin` a legal target are 658-660. Re-ranged to `1-8,598-620,658-660,698-712`, which holds the two loops, the marker and overlap tests, and the push with its break. |
+| `running-an-outcome-record-trial/E4` | widened | 2026-10-18 | Found from E2's dossier, not from its own queue position, which was near the bottom of the slice at a 13 percent miss rate. A passage says the merge exclusion "is written against parent count" and the range was `631-634`, four lines of comment that say a merge is not a pairing target and never mention parents. The `if (fin.parents.length > 1)` test is line 644, now cited, and the `what` says so. Shares `[E2, E4]` with the ref above; E2 carries the pairing rule, E4 carries the merge exclusion, and this phrase had been filed under the wrong half. |
+| `adjudicating-uncertain-spans/E18` | widened | 2026-10-18 | The claim is two counters read over *every* span, and `36-37,52-53` showed two `if` statements with no loop around them. Widened to `36-37,41-53`, the per-file map and the `for (const s of f.spans)` header. Overlap agrees: `quoting/E11` (supports) calls these span counts with no char total, and `quoting/E17` (widened) is about `byModel` over the same loop. |
+| `adjudicating-uncertain-spans/E16` | widened | 2026-10-18 | "No `source`, no `diff`" is an absence in a constructed object, and the object is `{ ...base, ... }`, so the range proved it only through the comment that asserts it. Added `resolve.ts:330`, where `base` is `{ start, end, text }`, so the absence is read off the spread rather than taken from the comment beside it. |
+| `distilling-a-tuning-record/E31` | widened | 2026-10-18 | The range stopped one line short of its subject. "Pushes only ciphertext" needs `body: new Blob([blob.buffer])`, which is line 149; the range was `140-148` and ended at the closing brace of the headers. Widened to `140-150`. The other two passages, the `.ursa/tuning.json` read and the revoked filter, were already in range. |
+| `distilling-a-tuning-record/E10` | widened | 2026-10-18 | "Each kind is one of the six" cited only `VALID_KINDS.has(e.kind)`, so the six were nowhere in range. Added the set itself, `distill.ts:11-18`. The six are correction-loop, feedback-translation, regression, defensive-guardrail, one-shot-correction, episode, and they match the schema union `E3` cites in a different file, which is the cross-check worth having: two lists of six in two files, agreeing. |
+| `distilling-a-tuning-record/E13` | widened | 2026-10-18 | "Only evidence accrues" to a user-edited axiom is a within-branch absence, and `46-53` did not show where the branch began or ended. Widened to `45-54`, `if (match) {` through `} else {`, so a reader can see the whole of what happens to a matched axiom and not just the part quoted. This is also `E12`'s branch, which the overlap field named. |
+| `quoting-a-number-from-an-outcome-record/E14` | widened | 2026-10-18 | "A maximum over the generations that have any surviving characters at all" cited the `Math.max` but not the filter that defines the population. `accepted` is `convGens.filter((g) => g.survivedChars > 0)` at `stats.ts:128`, now cited. Overlap agrees: `running/E6`, the claim slice 1 found false and rewrote, now describes what `turnIndex` counts on the git path while this one describes what the max is taken over. |
+| `distilling-a-tuning-record/E18` | supports | 2026-10-18 | Thirty-nine lines earning all of them: the revoked filter, the domain grouping, the `evidenceCount` sort, the rendered line with basis and count, and the Tensions section with "Ask, do not guess" in the source's own words. 50 percent miss rate because the `what` is written in verbs and the code is written in `filter`, `map`, `sort` and `push`. |
+| `distilling-a-tuning-record/E37` | supports | 2026-10-18 | The fixture declares `accepted: true` with `acceptanceBasis: 'retention'`, which is the sentence. The `what` also says "only fixture", an absence no range carries: `grep -c acceptanceBasis ursa-major/src/tuning/tuning.test.ts` returns 1 and `grep -n 'episode: {'` returns one line, verified 2026-10-18. |
+| `distilling-a-tuning-record/E9` | supports | 2026-10-18 | The flatMap off `conversations[].prompts` and the `USER PROMPTS` line that stringifies it. Both passages, including the privacy one, rest on exactly those two places. |
+| `distilling-a-tuning-record/E6` | supports | 2026-10-18 | Three lines: the signature, the read, the throw. |
+| `distilling-a-tuning-record/E3` | supports | 2026-10-18 | The interface with the six kinds spelled out and `quote?: string` commented "the user's own words, verbatim". Both passages are in range. |
+| `quoting-a-number-from-an-outcome-record/E1` | supports | 2026-10-18 | Three classes in one union, four fates in the other, and the 2026-10-14 date for `not_generated` inside the doc comment the range deliberately covers. Both overlapping refs agree with it: `adjudicating/E1` (widened to reach the fourth fate) and `adjudicating/E11`, which also says four. |
+| `quoting-a-number-from-an-outcome-record/E2` | supports | 2026-10-18 | The three-element `CLASSES` array and the two percentage assignments with their denominators on the same lines. |
+| `running-an-outcome-record-trial/E14` | supports | 2026-10-18 | The source names the trials explicitly, first trial 82 percent and second 7 percent, and this skill's sentence names them the same way. The best-stated of the three refs over this passage. |
+| `adjudicating-uncertain-spans/E13` | supports | 2026-10-18 | Same passage, cited correctly but worded so that "on the second trial" could be read as governing both numbers, when 82 percent is the first trial's. Range unchanged, and the sentence now says "82 percent deletion on the first trial and git capture 7 percent on the second". All three refs over these lines agree on the numbers, and this was the one whose prose did not. |
+| `adjudicating-uncertain-spans/E15` | supports | 2026-10-18 | Three ranges, one per clause: the dashed-underline rule, the legend line with the adjudication count, the three qualifiers concatenated onto the heading. |
+| `running-an-outcome-record-trial/E21` | supports | 2026-10-18 | ADR-003 in full. Launch-based, scope is building, git as the interface, n=2 is alexandria, all four inside fourteen lines. |
+| `running-an-outcome-record-trial/E13` | supports | 2026-10-18 | "Retention is NOT acceptance" is in the `UNDECLARED` basis string verbatim, and "not endorsed, it is not-yet-fixed" is in the `--declare unsatisfied` basis string verbatim. Overlap with `distilling/E21` agrees. |
+
+**Where the sweep stands after three slices.** 63 of 111 refs read, 48 left,
+of which 34 carry a line range. Across the three slices: two false claims, 21
+ranges widened, 40 sound as cited. The share needing a reader has held near
+a third in every slice, which is the number to budget by rather than the hope
+that the first slice took the worst of it.
