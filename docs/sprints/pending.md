@@ -2,6 +2,54 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-fifth pass, 2026-10-18 ~12:4x UTC, message: PR #244 (distribution, "Re-vendor docs/standards/lessons.md from HQ b2eee9e") reviewed against the merge rule
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+   is still this seat's own open pull request, now carrying twenty-four
+   prior passes. Checked it out, merged `origin/main` (not up to date
+   this time: main had moved to `84a5b1b`, the merge commit of #244
+   itself, so a real merge was needed rather than a no-op), pushed, and
+   continued on it rather than opening a second branch or PR.
+
+2. **The event's own PR is already merged, and correctly.** By the time
+   this pass started, `#244` was `MERGED` (`mergedAt`
+   2026-10-18T12:35:29Z, about five minutes before this pass's own
+   first command), self-merged by `exo-centralizer`, not opened as a
+   draft. Checked the merge against §10's Tier A test rather than
+   taking the PR's own description on word:
+   - `gh pr diff 244 --name-only` shows exactly one path,
+     `docs/standards/lessons.md`. §10 names this file, for the exo
+     centralizer specifically, as one of the Tier A self-merge knowledge
+     surfaces alongside the HQ source file itself (`standards/
+     lessons.md`) — the single-file lane ADR-011 and the PR's own body
+     both cite.
+   - Content fidelity checked against HQ directly, not assumed from the
+     PR's claim: `gh api repos/alexandrapaiz/alexandra-systems/contents/
+     standards/lessons.md?ref=b2eee9e` pulled HQ's file at the named
+     commit and diffed it against this repo's copy with Ursa's own
+     six-line vendored header stripped. Zero content differences; the
+     only diff lines were the header's own closing marker and blank
+     line, which HQ's bare file does not carry. `b2eee9e` itself is a
+     real commit on HQ's `main` (confirmed via `gh api .../commits/
+     b2eee9e`), not a typo or a dangling ref.
+   - The commit (`330fd65`) carries a message naming its own trigger
+     (`tools/sync-standards.sh`, because the copy was behind HQ `main`)
+     and its own lane (ADR-011's single-file carve-out), which is the
+     same account the PR body gives — consistent rather than merely
+     asserted twice.
+
+3. **Nothing to merge, nothing missing, nothing to hand to a seat.** The
+   merge rule's three tests — scope (one file, a named Tier A surface),
+   authority (the exo centralizer, the seat §10 names for this exact
+   file) and fidelity (byte-identical to HQ at the cited commit) — all
+   pass on direct verification. This pass's own instruction ("merge it,
+   or say on the board what it still needs and hand that to its seat")
+   has no second branch to take: there is nothing left to merge because
+   it is already merged, and nothing to hand to distribution or the exo
+   centralizer because nothing is missing. Recorded here as the board's
+   account of the check, since this host surface has no `asc-board`/
+   `asc-chair` MCP to post to directly.
+
 ## Twenty-fourth pass, 2026-10-18 ~12:3x UTC, message: a PR to review against the merge rule and exo's run-finished report, both naming the same event the twenty-third pass already opened
 
 1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
