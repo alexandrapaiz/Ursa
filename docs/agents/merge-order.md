@@ -1,116 +1,113 @@
-# Merge order — measured 2026-10-18, fifth window, 13:0x UTC
+# Merge order — measured 2026-10-18, eighth window, 13:14 UTC
 
-Replaces the fourth window's plan, which was three hours old and already
-wrong in five of its eleven rows. This file is information for whoever
-merges, under `docs/standards/pm.md` §21 that is Ursa's PM or any chair.
-Measuring the queue and naming the order is this seat's; merging is not.
+Replaces the fifth window's plan, which was twenty minutes old and
+already wrong in three rows: #199 merged, #245 closed, #248 opened. This
+file is information for whoever merges, under `docs/standards/pm.md` §21
+that is Ursa's PM or any chair. Measuring the queue and naming the order
+is this seat's. Merging is not.
 
 ## The three numbers
 
 | | |
 |---|---|
-| Open pull requests | **8**, four of them drafts, one of the drafts this run's own (#243) |
-| Merged in the last seven days | **53** |
-| Age of the oldest open | **3 days** (#199, opened 2026-10-15) |
+| Open pull requests | **8**, four of them drafts, one of the drafts this run's own (#248) |
+| Merged in the last seven days | **52** |
+| Age of the oldest open | **2 days** (#210, opened 2026-10-16) |
 
 Open does not outnumber the last seven days' merges, so the bold warning
-that stood for three consecutive runs stays withdrawn for a third week.
-The depth went 17 → 37 → 52 → 8 → 11 → 8 across six measurements.
+that stood for three consecutive runs stays withdrawn. The depth went
+17 → 37 → 52 → 8 → 11 → 8 → 9 → 8 across eight measurements.
 
-## Read the authorship before reading the depth as good news, and read it in three buckets
+**Four of the eight cannot be merged by anyone**, because GitHub refuses
+to merge a draft. The depth the owner can act on this minute is four:
+#210, #225, #246, #247. That is the number the queue-depth rule in
+`prompts/exo-agent.md` was really asking for, and it is half the
+headline.
 
-**The fourth window's split was wrong and this is the correction.** It
-reported forty-three merges by the owner against nine by the PM and
-graded autonomy the weakest attribute on that. On the resident host the
-token is the owner's own account, so `mergedBy.login` reports the
-credential and not the decider
-(`INC-2026-10-18-host-token-is-the-owner`). Joined against the board,
-where every PM merge is a `done` carrying its pull request:
+## What conflicts
 
-```
-seat on Actions, app/claude, certain                     9
-seat on the host, PM's explicit board claim, certain      8
-seat on the host, PM claim that omitted the number        1   (#215)
-unattributed, merged before the 2026-10-17 boundary      30   (hers or a chair's; the field still separated them)
-unattributed, merged after it                             5   (#214 #224 #233 #239 #244)
-```
-
-Autonomy is therefore at least seventeen of fifty-three, thirty-two per
-cent, and probably eighteen. Not the seventeen per cent reported this
-morning. **The useful number for the owner is the last row**: five merges
-in two days whose decider this repository cannot name. That row is the
-one to drive to zero, and it closes with one line in the PM standard
-rather than with anything here.
-
-## Nothing conflicts, measured by performing the merge
+Nothing. All eight merge cleanly into `origin/main` at 97a1c66,
+measured by performing the merge rather than by asking GitHub:
 
 ```
-199  clean      210  clean      225  clean      242  clean      243  clean
+$ for p in 210 225 236 240 241 246 247 248; do
+    git merge-tree --write-tree --name-only origin/main refs/prs/$p >/dev/null \
+      && echo "$p CLEAN" || echo "$p CONFLICT"; done
+210 CLEAN  225 CLEAN  236 CLEAN  240 CLEAN
+241 CLEAN  246 CLEAN  247 CLEAN  248 CLEAN
 ```
 
-`git merge-tree --write-tree --name-only origin/main refs/prs/<n>`, every
-open pull request, 13:0x UTC. The drafts #236, #240 and #241 are excluded
-because GitHub refuses to merge a draft at all; they belong to their own
-runs to ready or close.
+`mergeable` from `gh pr list` is not the instrument here and was not
+consulted. On this host the clone arrives shallow and reports every pull
+request as conflicting until `git fetch --unshallow`, which this run did
+first (`runner-facts.md` §3).
 
-**#199's three-day conflict is gone, and not by itself.** The fourth
-window and this one's own first pass both measured it conflicting on
-`docs/ideas.md`. The skill seat merged `main` into its branch at 12:40
-UTC and union-merged the ledger, and `main` itself moved only
-`docs/standards/lessons.md` in the same period. So the fix was a seat's
-work, not drift. Worth stating because Ursa incident 17 is this same
-pull request being reported conflicting for three days, and the lesson
-there was about the instrument. The lesson here is the other half: a
-conflict is a relation between two moving things, so a conflict measured
-three hours ago is not a fact about a pull request.
+## What is contained in what
 
-## Containment: one merge closes two
+One pair, and it is this seat's own:
 
 ```
-242 is contained in 243
+$ git merge-base --is-ancestor refs/prs/246 refs/prs/248 && echo contained
+contained
 ```
 
-Verified with `git merge-base --is-ancestor` on an unshallowed clone.
-#167, #231 and #234 were the rest of this chain and the PM closed all
-three as superseded at 12:38 UTC, correctly, on the same instrument.
+So merging #248 lands #246 as well. The rest are independent. The long
+chain this seat built earlier today, #231 ⊂ #234 ⊂ #235 ⊂ #242 ⊂ #243 ⊂
+#245 ⊂ #246, is already resolved: all six of the earlier ones are closed,
+three by the PM and three by this seat, each with a comment naming its
+successor. Their branches are deliberately not deleted, because
+containment in an unmerged tip lasts exactly as long as the tip.
 
-## The order
+## The order, simulated
 
-1. **#243** — this seat's fifth window. Closes #242 with it, so #242 does
-   not need a separate decision. **It touches `prompts/`, so read its
-   bold declaration line first**: it says no authority moves, which under
-   the PM's reading makes it Tier B, and under §10's uncorrected list
-   makes it Tier C. That question is with the owner until 2026-10-20
-   12:30 UTC and this pull request is content to wait.
-2. **#225** — the PM's own twenty-third-pass record. Clean.
-3. **#210** — the research seat's 2026-10-16 brief. Clean, three days old.
-4. **#199** — the skill seat, now clean after its own rebase. Clean.
-5. The three drafts, **#236**, **#240** and **#241**, are not merge
-   candidates. #240 is the one carrying fifty-four commits on a branch
-   whose earlier pull request already merged, which is the near miss in
-   `INC-2026-10-18-branch-name-reuse`. Do not delete that branch.
+Performed in sequence in a detached scratch worktree off `origin/main`,
+not reasoned about:
 
-Simulated in that order in a detached worktree off `origin/main`, every
-merge clean.
+| # | PR | seat | state | result |
+|---|---|---|---|---|
+| 1 | #210 | research | ready, 2 days | merged clean |
+| 2 | #225 | pm | ready | merged clean |
+| 3 | #247 | skill | ready | merged clean |
+| 4 | #246 | exo | ready, **Tier C by content** | merged clean |
+| 5 | #248 | exo | this run's, **Tier C by content** | merged clean |
 
-## Branches
+The worktree was created with `--detach` and every comparison was made
+against `origin/main` rather than `main`, for the reason the charter
+gives: `git worktree add /tmp/x main` checks out the branch and the
+simulated merges then advance it, corrupting every later comparison.
+The worktree was removed and `origin/main` is still 97a1c66.
 
-**Nothing is deletable this run, and that is the measurement rather than
-an omission.** The charter's old one-line duty, "delete the remote
-branches whose PRs have merged", named one branch,
-`ursa-frontend/2026-10-18-message`. That branch carries merged #227 and
-**open #240**, fifty-four commits apart. The predicate is now over pull
-requests rather than names and it returns an empty list:
+## The two rows that are not the owner's to take on depth alone
 
-```
-$ comm -12 <(git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort) \
-           <(gh pr list --state all --limit 400 --json headRefName,state,mergedAt \
-             | jq -r 'group_by(.headRefName)[] | select(all(.[]; .mergedAt != null)) | .[0].headRefName' | sort -u)
-(no output)
-```
+Rows 4 and 5 are both this seat's and both touch `prompts/`, so both sit
+behind the standing Tier C question the PM put to the owner at 12:29:59
+UTC: whether a charter pull request that truthfully declares in bold that
+it moves no authority and loosens no owner gate becomes the PM's to
+merge. Silence deadline 2026-10-20T12:30 UTC. Nothing has arrived from
+her as of this measurement.
 
-Fifty-nine branches belong to pull requests that closed without merging.
-Those stay until the owner answers the question Ursa's PM carried for
-this seat, or until the silence route carries it at 2026-10-20 12:30 UTC
-on the PM's recommendation, which is to leave them alone unless the
-closing comment said plainly that nothing in them was needed.
+Both declare that line truthfully. Neither should be read as asking for
+the question to be answered early.
+
+**If the owner wants to answer the question on one diff rather than two,
+merge #246 alone.** It is the artifact the ask has pointed at since the
+PM moved the pointer to it at 13:11:17 UTC, and merging it leaves #248
+standing on its own. Merging #248 lands both, which is the right outcome
+if the answer is yes and the wrong one if she wants to read the smaller
+diff first.
+
+## The drafts, named rather than counted
+
+| PR | seat | opened | age |
+|---|---|---|---|
+| #236 | frontend | 02:32 | ~11h |
+| #240 | frontend | 09:30 | ~4h |
+| #241 | engineer | 09:36 | ~4h |
+| #248 | exo | 13:07 | this run's own, readied at its end |
+
+The three that are not this run's have no live window behind them that
+this seat can see, which by the amended ship-first rule makes each one
+its own seat's to resolve on its next window: absorb, ready, or close
+with a pointer. They are not this seat's to ready and not the owner's to
+merge, and they are counted in the headline depth she is given, which is
+the quieter half of what dead drafts cost.
