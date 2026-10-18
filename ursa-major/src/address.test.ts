@@ -413,6 +413,59 @@ describe('the command', () => {
     expect(cap.lines.join('\n')).toMatch(/no access-control-allow-origin header/)
   })
 
+  // The fifth case, which the four measured on 2026-10-18 did not cover
+  // and which the frontend seat found by re-taking the measurement
+  // instead of inheriting it. A 404 with no header on a `pages` address
+  // is not "a host that refuses browsers"; it is an account with no
+  // Pages site at all, answered by the platform's own not-found page.
+  // That is the ordinary first failure on this address form, so it gets
+  // the cause and the one-line fix rather than the symptom.
+  const noSite = async (): Promise<ProbeResult> => ({ status: 404, allowOrigin: null, error: null })
+
+  it('on a pages address, reads a 404 with no header as "there is no site here" and says how to turn one on', async () => {
+    const dir = projectRepo({ gitignore: '.ursa/\n' })
+    writeRecord(dir)
+    commitRecord(dir)
+    markPushed(dir)
+    const cap = capture()
+    try {
+      await runAddress({
+        projectPath: dir, probe: noSite, check: true, pages: 'a-stranger/their-repo',
+      })
+    } finally {
+      cap.restore()
+    }
+    const out = cap.lines.join('\n')
+    expect(out).toMatch(/is not serving a Pages site for their-repo at all/)
+    expect(out).toMatch(/gh api -X POST repos\/a-stranger\/their-repo\/pages/)
+    // With `pages` set, this command checks two addresses: the git one
+    // and the published one. The generic sentence is correct for the
+    // first and wrong for the second, so it must appear exactly once —
+    // asserting its absence would be asserting the git address lost a
+    // line it is entitled to.
+    const generic = out.match(/a reader can download the file but a viewer cannot fetch it/g) ?? []
+    expect(generic).toHaveLength(1)
+  })
+
+  // The same probe on a git address keeps the generic sentence, because
+  // raw.githubusercontent.com exists for every account and a missing
+  // header there means something else entirely.
+  it('keeps the generic cross-origin sentence for a non-pages address', async () => {
+    const dir = projectRepo({ gitignore: '.ursa/\n' })
+    writeRecord(dir)
+    commitRecord(dir)
+    markPushed(dir)
+    const cap = capture()
+    try {
+      await runAddress({ projectPath: dir, probe: noSite, check: true })
+    } finally {
+      cap.restore()
+    }
+    const out = cap.lines.join('\n')
+    expect(out).toMatch(/a reader can download the file but a viewer cannot fetch it/)
+    expect(out).not.toMatch(/is not serving a Pages site/)
+  })
+
   // The disclosure, after the fact. A person who committed a record last
   // week made that disclosure whether or not anybody counted it for
   // them, and this is the same manifest `ursa publish` prints before it
