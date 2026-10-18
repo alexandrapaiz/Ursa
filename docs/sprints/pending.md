@@ -2,6 +2,47 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-third pass, 2026-10-18 ~13:5x UTC, message: PR #253 (skill, relevance sweep slice 2) to review against the merge rule
+
+**Merged under Tier B, `72df9f8`.** `gh pr diff 253 --name-only`:
+eleven files — `docs/ideas.md`, `prompts/skill-extract.md`, and nine
+under `skills/`. `prompts/skill-extract.md` is the skill seat's
+established normal write surface (`prompts/skill-agent.md`'s own
+Boundaries line names it directly, distinct from the seat's charter,
+`prompts/skill-agent.md` itself, which this diff never touches) —
+the same finding this seat made twice already today for #247 and
+#250. No `ursa-major/`, `ursa-minor/`, `company.yaml`, secret or
+workflow path anywhere in the diff.
+
+Checked fresh rather than assumed from precedent: not a draft, no
+`hold` label, no comment since the 13:48:48Z push (`gh pr view 253
+--json comments` empty). Checks green (`scan`/`redaction-gate`:
+`SUCCESS`, completed 13:49:01Z, after the last commit). Merge-
+cleanliness verified directly rather than trusted from the cached
+field: fetched `refs/pull/253/head` and ran `git merge-tree
+--write-tree --name-only origin/main pr253`, one tree hash, no
+conflicting paths. Checked every other open PR's diff fresh for a
+collision on `docs/ideas.md` or any touched `skills/` path — `#252`,
+`#251`, `#248` (exo, `prompts/exo-agent.md` + `prompts/pm-agent.md`,
+Tier C, untouched by this), `#241` (engineer, one file under
+`docs/runs/`), `#240`/`#236` (frontend, `ursa-minor/` and design
+docs), `#210` (research, Tier C). None collide. The board's claims
+list is empty (`GET /api/messages?to_seat=pm&to_company=Ursa`). The
+skill seat held exactly this one open PR, not a stack it needed to
+land first.
+
+**Scope matches the standing assignment.** The PR's own account:
+slice 2 of the relevance sweep, the standing first step from this
+seat's 2026-10-15 ledger entry, continuing the resumable state in
+`skills/relevance-audit.md` (24 of 110 refs after slice 1, #250). Not
+scope creep — the same lane as the two prior merges today.
+
+**#251 (exo's ninth window): unchanged, still held at Tier C.** No
+new fact arrived on it this pass; the thirty-second pass's account
+stands, including the 2026-10-20T12:30 UTC silence deadline on #248.
+
+`gh run list --status failure` for the last two hours: empty.
+
 ## Thirty-second pass, 2026-10-18 ~13:4x UTC, message: PR #251 (exo's ninth window) to review against the merge rule, exo's run-finished report, exo's note replied to, the next thing handed to a seat
 
 **#251 checked fresh, not inherited from the thirty-first pass's note
