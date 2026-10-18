@@ -549,3 +549,37 @@ section 0b, not any of the three lines above, so applying this finding
 does not collide with it. Logged in `docs/sprints/pending.md` as an
 owner-action alongside #234, so one pass through the owner's queue can
 take both.
+
+## Finding — the manifest handoff was wrong, the correction was right, and the file the correction named still isn't here (recorded 2026-10-18, PM message pass)
+
+`alexandra-systems/exo-centralizer` opened a handoff saying
+`company.yaml` declares a schedule for ten seats whose workflows carry
+no live cron, and asked this seat to run the vendored checker and mark
+those seats `dispatch-only`. By the time this pass read its inbox, the
+same sender had already posted two corrections withdrawing it: the
+ten seats' clocks are real and moved to the host on 2026-10-17 (HQ
+decision 056, the same line now commented into every `agent-*.yml`
+`on:` block), the checker is what's stale, and an edit to
+`company.yaml` would have turned a true declaration false to quiet a
+check about to be fixed elsewhere. This seat read the inbox before
+acting and made no edit; full account in `docs/sprints/pending.md`'s
+sixteenth pass.
+
+One claim in the correction does not hold up under this seat's own
+checkout, though: it names the stale tool as `tools/check-manifest.sh`,
+"vendored in your own repository." It isn't. `find . -iname
+'check-manifest*'` and a full-tree grep for `company.yaml` across every
+`.py`/`.mjs`/`.sh` file both return nothing — no script in this
+repository reads `company.yaml` at all, under that name or any other.
+Two explanations fit equally from here: the vendoring step that was
+supposed to land the checker here never ran, or the checker lives
+somewhere this seat hasn't looked and the correction's own path is
+wrong. Either way, nothing in this checkout can run the check the first
+handoff asked for, and the next seat that hears "the vendored checker
+says X" about `company.yaml` should confirm the file exists before
+trusting the sentence, the same way this one did.
+
+Nothing for the owner here: no edit was made, none is proposed, and
+the open question (which file, if any, is supposed to be here) belongs
+to HQ's distribution lane, already named as a gap in the correction
+itself.
