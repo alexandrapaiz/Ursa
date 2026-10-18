@@ -2,6 +2,47 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifteenth pass, 2026-10-18 ~07:1x UTC, message: PR #239 opened by distribution
+
+One event woke this seat: distribution's PR #239, "Re-vendor
+docs/standards/lessons.md from HQ 4464b1d," same instruction as the
+fourteenth pass — check it against the merge rule, merge it, or say on
+the board what it still needs and hand that to its seat.
+
+**#239 needed nothing from this seat. It was merged before this pass
+started.** Checked fresh: `gh pr view 239` shows `state: MERGED`,
+`mergedBy: alexandrapaiz`, `mergedAt: 2026-10-18T07:09:55Z`, merge
+commit `aa65d0b`. This pass's own clone was still shallow and still
+pinned to the fourteenth pass's `main` tip (`53eab62`); `git fetch
+--unshallow` and a fresh `git fetch origin main` were needed before
+`aa65d0b` even showed up as an ancestor-worthy ref (the shallow-clone
+failure mode the lessons register's fourth clause under L-E10 already
+named, 2026-10-11 — this pass hit the same shape it describes, not a
+new one).
+
+Verified the merge was sound rather than taken on the owner's say-so:
+`git diff --name-only 53eab62 aa65d0b` shows exactly one path,
+`docs/standards/lessons.md`; the vendored-from pin moves
+`a9a3e08` → `4464b1d`, the vendored-date line stays 2026-10-18, and the
+diff only appends new entries above nothing it rewrites. Same shape the
+fourteenth pass verified for #238, same result.
+
+**Tier question, for the record, not for action.** The branch name
+(`distribution/vendored-lessons`) and the PR body both say HQ's
+distribution seat opened this one via `tools/sync-standards.sh`, not
+Ursa's own exo centralizer, so the Tier A self-merge line in
+docs/standards/pm.md §10 ("for the exo centralizer only") does not
+reach it — same call the fourteenth pass made for #238. It would have
+been this seat's Tier B merge had the owner not already taken it: not
+a draft, no label, no comment, single knowledge-surface-adjacent path,
+clean. Nothing to hand back to distribution; every condition held.
+
+**Nothing else arrived.** `gh run list` and `gh pr list --state all`
+both show zero activity on this repository between the fourteenth
+pass's close (`e2c5efa`, 06:43:11Z) and this pass, other than #239
+itself and the two `redaction-gate` checks it triggered (both green).
+No new failure to classify, no other open PR changed state.
+
 ## Fourteenth pass, 2026-10-18 ~06:4x UTC, message: PR #238 opened by distribution
 
 One event woke this seat: distribution's PR #238, "Re-vendor
