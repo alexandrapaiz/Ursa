@@ -4764,12 +4764,16 @@ function publish(opts) {
   const { records, skipped } = loadPublishable(opts.projectPath);
   const disclosed = manifestFor(records);
   if (!opts.acknowledged) throw new DisclosureNotAcknowledged(disclosed);
+  const bodies = /* @__PURE__ */ new Map();
+  for (const record of records) {
+    bodies.set(record.task.id, Buffer.from(JSON.stringify(record, null, 2) + "\n", "utf8"));
+  }
   const index = {
     indexVersion: PUBLISHED_INDEX_VERSION,
     publishedAt: opts.publishedAt ?? (/* @__PURE__ */ new Date()).toISOString(),
     repository: opts.repository ?? null,
     recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
-    records: records.map((r) => summarize(r, opts.repository ?? null)),
+    records: records.map((r) => summarize(r, opts.repository ?? null, bodies.get(r.task.id))),
     disclosed
   };
   const recordsDir = (0, import_node_path8.join)(opts.outDir, RECORDS_DIR);
@@ -4781,7 +4785,7 @@ function publish(opts) {
   };
   for (const record of records) {
     write((0, import_node_path8.join)(recordsDir, `${record.task.id}.html`), renderViewer(record));
-    write((0, import_node_path8.join)(recordsDir, `${record.task.id}.json`), JSON.stringify(record, null, 2) + "\n");
+    write((0, import_node_path8.join)(recordsDir, `${record.task.id}.json`), bodies.get(record.task.id));
   }
   write((0, import_node_path8.join)(opts.outDir, INDEX_JSON), JSON.stringify(index, null, 2) + "\n");
   write((0, import_node_path8.join)(opts.outDir, INDEX_HTML), renderIndexPage(index));
@@ -4802,7 +4806,7 @@ function foreignSlugWarnings(records, repository) {
   }
   return out;
 }
-function summarize(record, repository) {
+function summarize(record, repository, body) {
   const chars = {};
   const spans = {};
   for (const [cls, stat] of Object.entries(record.stats.byClass)) {
@@ -4825,7 +4829,9 @@ function summarize(record, repository) {
     resolvedBy: by ? { basis: by.basis, value: resolverValue(by) } : null,
     html: recordHref(record.task.id, "html"),
     json: recordHref(record.task.id, "json"),
-    address: address ? formatRecordAddress(address) : null
+    address: address ? formatRecordAddress(address) : null,
+    bytes: body.byteLength,
+    sha256: (0, import_node_crypto3.createHash)("sha256").update(body).digest("hex")
   };
 }
 function resolverValue(by) {
@@ -4838,15 +4844,18 @@ function renderIndexPage(index) {
     const verbatim = r.charsByClass.survived_verbatim ?? 0;
     const mutated = r.charsByClass.survived_mutated ?? 0;
     const none = r.charsByClass.no_generation_provenance ?? 0;
-    return `<tr>
-  <td class="id"><a href="${escapeAttr(r.html)}">${escapeHtml2(r.id)}</a></td>
-  <td class="num">${n2(r.finalChars)}</td>
-  <td class="num verbatim">${pct(verbatim, r.finalChars)}</td>
-  <td class="num mutated">${pct(mutated, r.finalChars)}</td>
-  <td class="num human">${pct(none, r.finalChars)}</td>
-  <td class="when">${escapeHtml2(r.generatedAt.slice(0, 10))}</td>
-  <td class="raw"><a href="${escapeAttr(r.json)}">JSON</a></td>
-</tr>`;
+    const cell = (cls, label, body) => `  <td class="${cls}"><span class="label">${escapeHtml2(label)}</span>${body}</td>`;
+    return [
+      '<tr class="record">',
+      cell("id", "Record", `<a href="${escapeAttr(r.html)}">${escapeHtml2(r.id)}</a>`),
+      cell("num", "Final characters", n2(r.finalChars)),
+      cell("num verbatim", "Kept unchanged", pct(verbatim, r.finalChars)),
+      cell("num mutated", "Kept, edited", pct(mutated, r.finalChars)),
+      cell("num human", "No model behind it", pct(none, r.finalChars)),
+      cell("when", "Resolved", escapeHtml2(r.generatedAt.slice(0, 10))),
+      cell("raw", "Raw record", `<a href="${escapeAttr(r.json)}">JSON</a>`),
+      "</tr>"
+    ].join("\n");
   }).join("\n");
   const empty = `<p class="empty">This site has no records in it. Either no merge has produced
   one yet, or every work unit in the merge window fell below the
@@ -4904,6 +4913,45 @@ function renderIndexPage(index) {
   .empty { color: var(--text-secondary); max-width: 68ch; margin: 24px 0; }
   code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; color: var(--text-secondary); }
   footer { margin-top: 34px; border-top: 1px solid var(--border); padding-top: 14px; }
+  /* Supplied by the table header on a wide viewport; see the rules below. */
+  .label { display: none; }
+  /* A record id is <directory-name>-<date>-<sha7> and can be 40
+     characters with no space in it, so without this one declaration the
+     id column has a minimum width equal to its longest word and pushes
+     the table past the viewport whatever else the layout does. */
+  td.id, td.id a { overflow-wrap: anywhere; }
+
+  /* THE NARROW VIEWPORT, and why the table stops being a table.
+     Measured by the frontend seat on 2026-10-18: at a 390px viewport
+     this page's document was 521px wide, so the three provenance
+     columns, the date and the JSON link were all off screen with no way
+     to reach them, and each row stood eight lines tall because every
+     record id was breaking one word per line. A seven-column table of
+     numbers has a minimum width that no amount of padding or font size
+     gets under 390px, so the fix is not to shrink it: each row becomes
+     one block carrying its own labels, which is the shape the frontend
+     seat's own set view uses and which has no minimum width at all.
+     760px is the breakpoint because that is where this table's seven
+     columns stop fitting without the numbers colliding, not a round
+     number chosen for a device. Verify with
+     npx tsx tools/measure-index-page.ts (a backtick cannot appear here:
+     this stylesheet lives inside a template literal). */
+  @media (max-width: 760px) {
+    table, tbody, tr, td { display: block; width: auto; }
+    thead { display: none; }
+    table { margin: 18px 0 8px; }
+    tr.record {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 13px; margin: 0 0 12px;
+    }
+    td, th { border-bottom: none; padding: 3px 0; }
+    td.num, td.when, td.raw {
+      display: flex; justify-content: space-between; gap: 14px; text-align: right;
+    }
+    td.id { padding-bottom: 7px; font-size: 15px; }
+    .label { display: block; color: var(--text-muted); font-size: 12px; text-align: left; }
+    td.num .label, td.when .label, td.raw .label { display: inline; }
+  }
 </style>
 </head>
 <body>
@@ -4923,7 +4971,7 @@ ${index.records.length === 0 ? empty : `<table>
 <thead><tr>
   <th>Record</th><th class="num">Final characters</th>
   <th class="num">Kept unchanged</th><th class="num">Kept, edited</th><th class="num">No model behind it</th>
-  <th>Resolved</th><th>Raw</th>
+  <th>Resolved</th><th>Raw record</th>
 </tr></thead>
 <tbody>
 ${rows}
@@ -4957,7 +5005,12 @@ record's page carries both denominators.</p>`}
   Built by Ursa Major's resolver from this repository's own git history, on
   the repository owner's own runner. Index contract version ${escapeHtml2(index.indexVersion)};
   record schema ${escapeHtml2(index.recordSchemaVersions.join(", ") || "none")}. The machine-readable form
-  of this page is <a href="${INDEX_JSON}">${INDEX_JSON}</a>.
+  of this page is <a href="${INDEX_JSON}">${INDEX_JSON}</a>, which states each record's
+  byte count and the SHA-256 of its own file, so a reader who fetches one record can
+  check that it is the record this index was built against. That check catches a
+  truncated download, a stale copy served by a cache, and a record replaced without
+  this page being rebuilt. It does not show that whoever published this site is
+  honest, because this page and the records under it were written by the same run.
 </footer>
 </body>
 </html>
@@ -4969,17 +5022,18 @@ function escapeHtml2(s) {
 function escapeAttr(s) {
   return escapeHtml2(s);
 }
-var import_node_fs7, import_node_path8, PUBLISHED_INDEX_VERSION, INDEX_JSON, INDEX_HTML, RECORDS_DIR, DisclosureNotAcknowledged;
+var import_node_crypto3, import_node_fs7, import_node_path8, PUBLISHED_INDEX_VERSION, INDEX_JSON, INDEX_HTML, RECORDS_DIR, DisclosureNotAcknowledged;
 var init_publish = __esm({
   "src/publish.ts"() {
     "use strict";
+    import_node_crypto3 = require("node:crypto");
     import_node_fs7 = require("node:fs");
     import_node_path8 = require("node:path");
     init_address();
     init_consent();
     init_store();
     init_viewer();
-    PUBLISHED_INDEX_VERSION = "0.2.0";
+    PUBLISHED_INDEX_VERSION = "0.3.0";
     INDEX_JSON = "index.json";
     INDEX_HTML = "index.html";
     RECORDS_DIR = "records";

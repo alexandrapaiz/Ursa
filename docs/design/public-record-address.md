@@ -250,7 +250,7 @@ export function noveltyOfDisclosure(m: DisclosureManifest): string[]
 ### 4.4 The published contract, which is the line with the frontend seat
 
 ```ts
-export const PUBLISHED_INDEX_VERSION = '0.2.0'   // 0.1.0 until 2026-10-18
+export const PUBLISHED_INDEX_VERSION = '0.3.0'   // 0.1.0, then 0.2.0, both on 2026-10-18
 
 export interface PublishedIndex {
   indexVersion: typeof PUBLISHED_INDEX_VERSION
@@ -277,6 +277,10 @@ export interface PublishedRecordSummary {
   json: string
   /** added at 0.2.0: `pages/<owner>/<repo>/<id>`, or null with no repository stated */
   address: string | null
+  /** added at 0.3.0: byte length of `records/<id>.json` as this run wrote it */
+  bytes: number
+  /** added at 0.3.0: SHA-256 of those same bytes, lowercase hex, no prefix */
+  sha256: string
 }
 ```
 
@@ -289,6 +293,12 @@ question and the one a viewer's route asks. Its grammar is section 14.
 on purpose: the index can gain a field without a record changing, and a
 record can change without the index moving, so a consumer pinning one
 must not be told about the other.
+
+`bytes` and `sha256` are what a viewer that fetches one record needs in
+order to say anything about the bytes that arrived. Section 15 is what
+they prove, what they deliberately do not, and why the digest is taken
+over the buffer that gets written rather than over a second
+serialization of the same record.
 
 ### 4.5 Addressing, and the store reads it reuses
 
@@ -835,6 +845,8 @@ previous behaviour.
 | only the published site, for one consumer | delete their `.github/workflows/ursa-publish.yml`, or unset Settings → Pages → Source | Their records stop being published. Nothing of Ursa's changes |
 | the record address | `git revert` the address commits, or simply stop running `ursa address`: nothing else calls `src/address.ts` except one field of `index.json` | `src/address.ts`, `src/address.cli.ts`, `src/address.test.ts`, the `address` dispatch in `src/bin/ursa.ts`, `PublishedRecordSummary.address`, the README's shortest-version section, section 14 of this file |
 | only the index field, keeping the command | delete `address` from `PublishedRecordSummary` and `summarize`, and set `PUBLISHED_INDEX_VERSION` back to `0.1.0` | A consumer reading 0.2.0 sees one fewer field. Nothing else: the field is derived, never read back |
+| the published digest, which is section 15 | delete `bytes` and `sha256` from `PublishedRecordSummary`, delete the `bodies` map in `publish()` and restore `JSON.stringify(record, null, 2) + '\n'` at the write call, and set `PUBLISHED_INDEX_VERSION` back to `0.2.0` | The frontend viewer stops being able to verify a fetched record and falls back to the sentence it already has for a pre-digest site ("this index predates digests", claiming neither verified nor failed). No record changes: the digest is derived at publish time and never stored in a record |
+| the phone layout of the fallback set page | `git revert` the layout commit, which touches only the `<style>` block and the row markup inside `renderIndexPage` in `src/publish.ts` | The page is a seven-column table again at every width, so a 390px reader loses the three provenance columns, the resolved date and the raw-record link off the right edge. No data path is involved: `index.json` is identical either way |
 | the bundle | `node build/bundle.mjs` at the reverted commit, then `node build/bundle.mjs --check`, then `npm run provenance:bundles` | `dist/ursa.cjs` returns to sha256 `650a289f…`, 202,367 bytes, and `docs/provenance/bundle-digests.json` drops the two rows this run added |
 
 Nothing in this run writes to `src/resolve.ts`, `src/stats.ts`,
@@ -1195,6 +1207,11 @@ With no `--repo`, `address` is `null` on every record, because there is
 then nothing to build an absolute address from and a guess would be
 worse than an absence.
 
+That payload is kept as what that run actually produced, which is why it
+reads `0.2.0`. The contract is `0.3.0` from later the same day: section
+15 adds `bytes` and `sha256` beside `address`, and every field shown
+here is unchanged by it.
+
 ### 14.9 Exact commands
 
 What a person runs:
@@ -1284,3 +1301,395 @@ should use is a product decision and is in the ledger.
 **Nothing here publishes anything.** `ursa address` reads. The act that
 makes a record public is the person's own `git push` or their own Pages
 deployment, which is the same posture as the rest of this path.
+
+## 15. The published digest, and the phone the fallback page did not fit
+
+Written on 2026-10-18 by the second engineer run of the day, after the
+frontend seat reported back on the seam this file's section 11 drew.
+Everything in sections 1 to 14 stands. This section adds two fields to
+`index.json` and changes the fallback set page's layout at narrow
+viewport widths. It changes no record and no address.
+
+### 15.1 The request, and the measurement behind it
+
+The frontend seat built its viewer against section 4.4's contract and
+then did the thing this file asks a reader to do, which is measure
+rather than take a number on trust. It ran `ursa run` and `ursa publish`
+over this repository and reported, with its own numbers:
+
+| What it measured | Number it got | What that number is |
+|---|---|---|
+| Records produced by a publish of this repository | 10 | Outcome records written to `.ursa/records/` and then into a site directory |
+| Largest single record page, `records/<id>.html` | 2,568,965 bytes | The self-contained viewer page `renderViewer` writes, with the whole record inlined in it |
+| Largest single record file, `records/<id>.json` | 4,045,345 bytes | The record itself, pretty-printed with two-space indentation |
+| The same record file, gzipped | 293,898 bytes | 7% of its size on disk, which is what a web server with compression enabled actually sends |
+| Finished work inside that record | 124,592 characters | `files[].text` summed: the actual document the work produced |
+| Spans in that record | 2,528 | One `files[].spans[]` entry per classified stretch of the finished work, each carrying its own offsets, class, source pointer and word-level diff |
+| The set page before the viewer changed | 2.5MB | Because the old set view inlined every record to render the list |
+| The set page after, which is this index | 9,744 bytes | `index.json` alone, 1,740 bytes gzipped |
+
+The conclusion the frontend seat drew from its own decomposition, which
+this seat agrees with: the record is not too big, it is being paid for
+at the wrong moment. Looking at a list of ten records should not
+download a record. So the viewer stopped inlining and now fetches one
+record when one is asked for.
+
+That trade gives up exactly one property, and it is a property this
+product cannot shrug at. When the set page carried the record inside it,
+the bytes being rendered were by construction the bytes the set was
+built from. A page that fetches a record over a network has no such
+guarantee and, before this section, no way to get one, because
+`index.json` named a path and said nothing whatsoever about what should
+be at it.
+
+So the ask was two fields, and this section is them.
+
+### 15.2 System diagram, continuing sections 3 and 14.6
+
+Three nodes change. Everything else in section 3 is untouched.
+
+**Node `publish()` in `ursa-major/src/publish.ts`** (existing process,
+same function). It gains one internal store and one changed edge order:
+
+- New internal store: `bodies`, a `Map<string, Buffer>` from
+  `record.task.id` to the UTF-8 bytes of that record's JSON file. Built
+  before the index is, which is the whole mechanism.
+- Edge `publish() → bodies`, carrying `Buffer` values produced by
+  `Buffer.from(JSON.stringify(record, null, 2) + '\n', 'utf8')`.
+- Edge `bodies → summarize()`, carrying one `Buffer` per record as the
+  third parameter.
+- Edge `summarize() → PublishedRecordSummary`, now carrying two more
+  fields: `bytes: number` from `Buffer.byteLength`, and `sha256: string`
+  from `createHash('sha256').update(body).digest('hex')` in Node's
+  built-in `node:crypto`.
+- Edge `bodies → writeFileSync`, carrying the same `Buffer` object that
+  was hashed, to the path `<outDir>/records/<id>.json`.
+
+The reason the last two edges share one `Buffer` rather than each
+building their own is the entire correctness argument of this section,
+and it is stated in 15.4.
+
+**Node `renderIndexPage()` in `ursa-major/src/publish.ts`** (existing
+pure function, `PublishedIndex` in, `string` of HTML out). Its output
+changes shape, not type:
+
+- Each `<tr>` it emits now carries `class="record"`, and each `<td>`
+  inside it opens with a `<span class="label">` holding that column's
+  own name as document text.
+- Its inlined `<style>` block gains a `@media (max-width: 760px)` rule
+  under which `table`, `tbody`, `tr` and `td` all become
+  `display: block`, `thead` becomes `display: none`, and `.label`
+  becomes visible.
+- Its `<footer>` now states what `index.json`'s digests prove and what
+  they do not.
+
+**Node `tools/measure-index-page.ts` in `ursa-major/`** (new file, a
+command run by hand). Edges:
+
+- `tools/measure-index-page.ts → fixtures/mini/` reading `final.md` and
+  `conversations/01-claude.md`, `conversations/02-chatgpt.md` as UTF-8
+  text, the same two files `src/publish.test.ts` reads.
+- `tools/measure-index-page.ts → resolve()` in `src/resolve.ts`,
+  carrying a `ResolveInput`, returning an `OutcomeRecord`.
+- `tools/measure-index-page.ts → saveRecord()` in `src/store.ts`,
+  writing `<tmpdir>/ursa-measure-index-<random>/.ursa/records/<id>.json`.
+- `tools/measure-index-page.ts → publish()` carrying a
+  `PublishOptions`, returning a `PublishResult`.
+- `tools/measure-index-page.ts → chromium.launch()` in the `playwright`
+  package, which is NOT a dependency of `ursa-major` and is imported at
+  run time; then `page.goto('file://<tmpdir>/.../site/index.html')` and
+  one `page.evaluate` returning
+  `{ scrollWidth: number; clientWidth: number; tallestRow: number }`
+  read from `document.documentElement` and the row elements.
+
+### 15.3 Interfaces, as the signatures a caller writes against
+
+The published contract, with the 0.3.0 delta marked. This is the whole
+of what the frontend seat codes against:
+
+```ts
+export const PUBLISHED_INDEX_VERSION = '0.3.0'
+
+export interface PublishedRecordSummary {
+  // ... every field of 0.2.0, unchanged, listed in section 4.4 ...
+  /** site-relative path of the record's own JSON file */
+  json: string
+  /** added at 0.3.0: byte length of that file as this run wrote it */
+  bytes: number
+  /** added at 0.3.0: SHA-256 of those same bytes, lowercase hex, 64 characters, no prefix */
+  sha256: string
+}
+```
+
+The internal signature that changed, which is the one a future editor of
+`publish.ts` has to respect:
+
+```ts
+// before 0.3.0
+function summarize(record: OutcomeRecord, repository: string | null): PublishedRecordSummary
+
+// at 0.3.0: `body` is the exact buffer that will be written to
+// records/<id>.json, passed in rather than computed here
+function summarize(
+  record: OutcomeRecord,
+  repository: string | null,
+  body: Buffer,
+): PublishedRecordSummary
+```
+
+Unchanged, and worth saying so because a consumer might expect
+otherwise: `publish(opts: PublishOptions): PublishResult`,
+`PublishOptions`, `PublishResult`, `manifestFor`, `formatManifest`,
+`recordHref`, `loadPublishable` and `renderIndexPage` all keep the
+signatures section 4.2 states. A caller of `publish()` needs no change
+at all to get the new fields.
+
+The verification a consumer writes against this, in the browser, which
+is the code the two fields exist for:
+
+```ts
+async function fetchVerified(
+  siteRoot: string,
+  summary: PublishedRecordSummary,
+): Promise<{ record: OutcomeRecord; verified: boolean }> {
+  const response = await fetch(new URL(summary.json, siteRoot))
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')
+  return {
+    record: JSON.parse(new TextDecoder().decode(bytes)) as OutcomeRecord,
+    verified: bytes.byteLength === summary.bytes && hex === summary.sha256,
+  }
+}
+```
+
+### 15.4 Why the digest is taken over the buffer and not over the record
+
+`summarize` is handed the `Buffer` that `writeFileSync` receives. It
+would have been one line shorter to let `summarize` call
+`JSON.stringify(record, null, 2)` itself, and that version would pass
+every test in `src/publish.test.ts` today.
+
+It would also be wrong, in the specific way that only shows up later. A
+digest computed from a second serialization is a claim about this
+process's serializer, not about the file a stranger downloads. The two
+agree only while every one of the following holds: key insertion order
+is identical between the two calls, the indentation argument is the same
+at both call sites, the trailing newline is appended at both, and the
+runtime encodes every string to UTF-8 identically in both. Each of those
+is true now. None of them is guaranteed by anything in the codebase, and
+the failure mode when one breaks is not a crash: it is a published site
+whose every record fails verification in a viewer, which reads to a
+stranger exactly like a tampered record.
+
+Sharing the buffer makes the question unaskable. One serialization, one
+hash of it, one write of it.
+
+The cost of that choice, stated: the whole set is held in memory as
+UTF-8 buffers at the same time. For this repository's own ten records
+that is roughly the 21MB of site the frontend seat measured. The records
+are already all in memory as JavaScript objects by that line, which is
+strictly larger than their serialized form, so this adds a constant
+factor to a process that was already proportional to the set size. It
+does not change what the publish path can handle.
+
+### 15.5 On-disk layout, with a real payload
+
+Paths are unchanged from section 5.2. One file's contents change shape.
+
+```
+<outDir>/
+  index.json            <- two new fields per record, contract 0.3.0
+  index.html
+  .nojekyll
+  records/
+    <id>.html
+    <id>.json           <- byte-identical to 0.2.0; the digest is of this file
+```
+
+A real `index.json`, produced by the exact command in 15.6 and trimmed
+to one record, with the fields section 4.4 already lists elided. The
+record ids here come from `tools/measure-index-page.ts`, which names its
+fixture records in the shape `episodeId` produces
+(`<directory-name>-<date>-<sha7>`) without using any real directory on
+any real machine, for the reason section 10.1 gives:
+
+```json
+{
+  "indexVersion": "0.3.0",
+  "publishedAt": "2026-10-18T00:00:00.000Z",
+  "repository": "someone/their-repo",
+  "recordSchemaVersions": ["0.1.0"],
+  "records": [
+    {
+      "id": "ursa-engineer-sandbox-clone-2026-10-10-a1b2c30",
+      "generatedAt": "2026-10-18T01:57:53.716Z",
+      "finished": true,
+      "artifactKind": "chat",
+      "finalChars": 314,
+      "coveredChars": 308,
+      "resolvedBy": null,
+      "html": "records/ursa-engineer-sandbox-clone-2026-10-10-a1b2c30.html",
+      "json": "records/ursa-engineer-sandbox-clone-2026-10-10-a1b2c30.json",
+      "address": "pages/someone/their-repo/ursa-engineer-sandbox-clone-2026-10-10-a1b2c30",
+      "bytes": 7454,
+      "sha256": "1d0b1342345c8a6ddfb08f1385d09b5695152cc24ed3fd9a28e2a07bf4004be7"
+    }
+  ]
+}
+```
+
+Checked against the file itself with a hasher that is not this
+codebase's, which is the point of showing the command rather than the
+claim. Run from the site directory the command above printed:
+
+```bash
+$ stat -c %s records/ursa-engineer-sandbox-clone-2026-10-10-a1b2c30.json
+7454
+$ sha256sum records/ursa-engineer-sandbox-clone-2026-10-10-a1b2c30.json
+1d0b1342345c8a6ddfb08f1385d09b5695152cc24ed3fd9a28e2a07bf4004be7  records/ursa-engineer-sandbox-clone-2026-10-10-a1b2c30.json
+```
+
+**One thing that payload shows and a reader would otherwise trip on.**
+`bytes` is 7,454 on every run of that command, and `sha256` is not. The
+digest is of the record's bytes, and those bytes include
+`task.generatedAt`, which `resolve()` sets from the wall clock, so
+resolving the same input twice produces two records that differ in one
+timestamp and therefore in their digest. The byte count happens to be
+stable only because an ISO-8601 timestamp is a fixed width.
+
+That is correct behaviour for what the field claims — it identifies a
+record file, not a resolution of an input — and it is also the reason
+`bytes` and `sha256` are published rather than recomputed by a consumer
+from a record it resolved itself. A reader who wants to check that two
+separately resolved records describe the same work compares the record,
+not its digest. Reproducible resolution is a separate property this
+codebase does not currently have, and it is in `docs/ideas.md` as of
+today.
+
+### 15.6 Exact commands
+
+What this run ran, from `ursa-major/`, in order:
+
+```bash
+# dependencies, because a fresh clone of this repository has no node_modules
+npm ci --no-audit --no-fund
+
+# the publish suite alone while iterating: 32 tests
+npx vitest run src/publish.test.ts
+
+# the whole suite, which is what CI runs: tsc --noEmit then vitest run
+npm test
+
+# render a real site from the fixture record and print its index
+npx tsx tools/measure-index-page.ts --records 10
+
+# measure the layout at three viewport widths in a real browser engine
+PLAYWRIGHT_MODULE=/path/to/node_modules/playwright \
+  npx tsx tools/measure-index-page.ts --widths 390,768,1280 --records 3
+
+# rebuild the single-file bundle the Action runs, then index its digest.
+# Two commits, in this order, because a commit cannot index its own bundle
+npm run bundle
+npm run provenance:bundles
+```
+
+What a consumer runs to check a published site by hand, with no Ursa
+code involved at all, which is the property the two fields are for:
+
+```bash
+curl -s https://<owner>.github.io/<repo>/index.json \
+  | jq -r '.records[] | "\(.sha256)  records/\(.id).json"' > SHA256SUMS
+curl -sO https://<owner>.github.io/<repo>/records/<id>.json
+sha256sum --check --ignore-missing SHA256SUMS
+```
+
+That last line is the whole claim, in a tool nobody here wrote.
+
+### 15.7 Evidence
+
+| Claim | How it was checked | Result |
+|---|---|---|
+| The digest in the index is the digest of the file on disk | `src/publish.test.ts`, test "states each record's byte count and sha256, both measured against the file on disk": reads `records/<id>.json` back as bytes and hashes it with `node:crypto` | Passes for every record in a two-record set |
+| The same, checked outside this codebase | `sha256sum` and `stat -c %s` over a site rendered by `tools/measure-index-page.ts`, output in 15.5 | Byte count 7,454 and digest `1d0b1342…4be7` both match `index.json` |
+| A record's digest does not move when the site is merely rebuilt | Test "gives two different records two different digests, and the same record the same one": publishes twice with different `publishedAt` values | Digests and byte counts identical across the two builds |
+| A record's digest moves when the record changes | Test "moves a record's digest when the record itself changes": flips `task.finished`, saves through `saveRecord`, republishes | Digest differs, and matches the new file on disk |
+| The two fields are announced by a version bump | Test "announces the two fields with a minor version bump": asserts the minor component is at least 3 | Passes at `0.3.0` |
+| What the two fields cost a ten-record index | Re-serialized a real `index.json` with both fields stripped and compared byte lengths, gzip included | 10,479 bytes with, 9,429 without: 1,050 bytes total, 105.0 bytes per record, 454 bytes after gzip. The frontend seat predicted "about a hundred bytes a record" |
+| Every cell of the set page keeps its column name when the table becomes blocks | Test "gives every cell its own column name as real text", in jsdom | One label per cell, every label also a `thead` heading, and no `attr(data-label)` anywhere in the page |
+| The narrow-viewport rules exist and do what the fix needs | Test "stops being a seven-column table on a narrow viewport": asserts the media query, the `display: block`, the hidden `thead`, both halves of the label rule, and `overflow-wrap: anywhere` on the id | Passes |
+| The whole suite still passes | `npm test` | 764 passed, 9 skipped, 0 failed, after the bundle rebuild and the provenance index |
+
+**The one claim this run could not measure, named rather than implied.**
+The actual width. `jsdom` 30.1.1 parses HTML and performs no layout, so
+`scrollWidth` is `0` for every element in every test in this repository,
+and the 521px-inside-390px defect cannot be reproduced in the test
+suite at all. `tools/measure-index-page.ts` is the instrument that can
+measure it, and in the sandbox this run executed in, Playwright's
+chromium is installed and will not start: `error while loading shared
+libraries: libatk-1.0.so.0`. The tool exits 2 with that sentence rather
+than printing a zero, because a run that reported "no overflow" there
+would be a false green. So the fix is argued from the mechanism — a
+seven-column table has a minimum width that no font size gets under
+390px, and blocks have none — and the re-measurement is handed to the
+frontend seat, which has a working browser and produced the original
+number.
+
+### 15.8 What the digest proves, and what it does not
+
+**It proves** that the record being read is the record this `index.json`
+was written against. Concretely, it catches: a truncated or partially
+written download, a stale copy served by a cache or a CDN edge after the
+site was redeployed, and a record file replaced on the host without the
+index being rewritten.
+
+**It does not prove** that the publisher is honest. `index.json` and
+`records/<id>.json` are written by the same `publish()` call into the
+same directory, so a publisher who changes a record and rebuilds the
+site produces a set that verifies perfectly. Catching that needs a
+signature over the index by a key the reader already trusts, which is a
+different mechanism, is not this one, and is not proposed here.
+
+That limit is on the published page itself, in `renderIndexPage`'s
+footer, and not only in this file: "It does not show that whoever
+published this site is honest, because this page and the records under
+it were written by the same run." A verification UI that implies more
+than the mechanism delivers would be worse than no verification at all,
+which is the frontend seat's own position and the reason it asked for
+the field in those words.
+
+### 15.9 Tooling
+
+| Tool | Version | Its job here | Why it rather than the alternative |
+|---|---|---|---|
+| `node:crypto`, Node's built-in cryptography module | Node.js 22.23.2 | Computes the SHA-256 in `summarize` | Already in the runtime, no dependency to add, and `createHash` takes the `Buffer` directly. The alternative considered was `crypto.subtle.digest`, the Web Crypto API Node also ships: it is async, which would make `publish()` async and change the signature every caller in this repository writes against, for no benefit on the writing side |
+| SHA-256, the hash itself | FIPS 180-4 | The digest published in `index.json` | Chosen over BLAKE3 (faster, no Node built-in, no browser support, so a viewer would have to ship a WASM hasher) and over SHA-512 (no advantage here and twice the hex in every index row). SHA-256 is the one hash that `node:crypto`, `crypto.subtle` in every browser, and `sha256sum` at a shell prompt all compute without anything installed, which is what makes 15.6's last command possible |
+| `playwright`, a browser automation library | 1.64.1 | Launches Chromium in `tools/measure-index-page.ts` and reads `scrollWidth` against `clientWidth` at three viewport widths | Chosen over `puppeteer` because the machines in this organization already carry a Playwright browser cache, and over adding a jsdom-based assertion because jsdom has no layout engine at all and would answer `0` to the only question being asked. Deliberately NOT a dependency of `ursa-major`: it carries a browser download, and `npm ci` has to stay cheap on a runner that will never measure a layout, so it is imported at run time behind one `try` and an `exit 2` |
+| `jsdom`, an HTML parser with DOM APIs | 30.1.1 | Parses the rendered set page in `src/publish.test.ts` to assert structure: labels per cell, headings, footer text | Already a devDependency for this file's existing tests. Kept for structure and explicitly not trusted for geometry, for the reason in 15.7 |
+| `vitest`, the test runner | 5.0.2 | Runs the 32 tests in `src/publish.test.ts` and the 773 in the suite | Already this package's runner; no alternative was considered and none is needed |
+| `esbuild`, a JavaScript bundler | 0.28.0 | Builds `dist/ursa.cjs`, the single file the Action runs, via `npm run bundle` | Already the bundler of record for this path; section 12 states why |
+| `sha256sum` and `stat`, GNU coreutils | 9.x as shipped by the host image | Independently checks the published digest and byte count in 15.5 | The point is precisely that they are not this codebase: a digest verified only by the code that wrote it is not evidence |
+
+### 15.10 What this section does not solve
+
+**The record is still 4MB on disk and a third of that is whitespace.**
+The frontend seat's decomposition says so: pretty-print indentation is
+about a third of the file, and the finished document is stored a second
+time chopped into per-span text, with 2,528 spans each carrying their
+own offsets, class, source pointer and word-level diff. Gzipped it is
+293,898 bytes, 7% of the on-disk size, so a web server with compression
+enabled already sends a fourteenth of the number. Not touched here,
+because the frontend seat's answer — stop paying for it when listing a
+set, pay for it when opening a record — removes the cost at the moment
+that actually hurt, and changing what a record contains changes it for
+every consumer rather than for this one page. In `docs/ideas.md`.
+
+**Compression is not this path's to switch on.** Whether `index.json`
+and the records arrive gzipped is a property of whoever serves the
+directory. GitHub Pages compresses by default, so the Action path in
+section 7.2 gets it for free, and a publisher who copies the directory
+to a bare object store may not. Naming it is all this file can do.
+
+**A viewer still cannot tell a tampered site from an honest one.** 15.8
+is explicit about it. If that matters for a buyer-facing claim later, the
+mechanism is a signature over `index.json`, not a stronger hash.
