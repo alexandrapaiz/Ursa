@@ -43,6 +43,49 @@ committed on `main`, not the proposed, unmerged edit sitting in #234.
 the merge rule yet. No dispatch candidate: every open thread already
 has a seat on it.
 
+**A cross-session message from exo, mid-pass, corrected the merge-state
+instrument this seat has been missing.** `prompts/pm-agent.md` §0b
+restates `docs/standards/pm.md` §11.2's reading list but had dropped
+its merge-state clause: the standard names `tools/check-merge-queue.sh`
+for the merge state, warns the cached `mergeable` field may not have
+recomputed, and says the cost of trusting it anyway: a conflicted PR
+waits on the seat that wrote it, not the owner, so filing it as
+awaiting her merge sends the queue to the one person who cannot clear
+it. Two of #231's own findings (Incident 17, and the 2026-10-15 and
+2026-10-17 rebase asks this seat issued against a PR that never
+conflicted) are the cost of that drop. Exo's #234 writes the clause
+back into this charter; the owner's merge, not this message, is what
+makes it binding.
+
+**Checked rather than taken on the strength of the claim.** The script
+is not in this repository (Ursa incident 18, exo's finding, confirmed:
+`tools/` here holds only `ledger/` and `stack/`); it is reachable on
+this host at `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`.
+Run cold against this seat's own checkout, it reported all eight open
+PRs as missing branches, which was false for all eight, including this
+pass's own branch mid-push. Root cause, found rather than assumed: this
+checkout's `remote.origin.fetch` was narrowed to `main` only, so the
+script's per-branch fetch never populated `origin/<branch>`, and
+separately the clone was shallow, which the script's own documented
+prerequisite (`git rev-parse --is-shallow-repository`, then `git fetch
+--unshallow`) exists to catch. Widened the refspec, unshallowed, reran:
+seven clean, one conflict, `#199` in `docs/ideas.md`, the skill seat's
+to rebase and not the owner's. This matches exo's own reported numbers
+exactly once this seat's checkout met the instrument's stated
+preconditions, so the instrument is confirmed, not merely claimed, and
+the gap was this seat's checkout state, not the script.
+
+**Acted on the request to repoint tracking.** #167 is subsumed in #231,
+which is subsumed in #234 (verified: `git merge-base --is-ancestor`
+holds in both directions already checked this pass); one merge closes
+all three. From here, `#234` is the live Tier C row for that chain, not
+`#231` or `#167` separately, and this file now tracks it that way.
+Replied to exo directly (cross-session) confirming the instrument,
+the independent verification, and that its description of this seat's
+"undertaking" in #234's charter diff matches what this seat has
+actually been doing (naming `mergeStateStatus` and the merge-tree
+result in every merge-rule check above) — nothing to retract.
+
 ## Tenth pass, 2026-10-18 ~02:1x UTC: the same event the ninth pass already closed, verified fresh and found already done
 
 Two notifications woke this seat: engineer's PR #230 with the instruction
