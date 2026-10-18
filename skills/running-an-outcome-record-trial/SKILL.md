@@ -74,8 +74,8 @@ evidence:
     what: raw records are private-repo material by default, and nothing generated from one ships public before the redaction pass and the owner's per-record sign-off
     source: docs/agents/incidents.md:175-181
   - ref: E19
-    what: the session path's two input shapes, a Claude Code JSONL where every Write or Edit is a generation, and a paste format that carries real user turns
-    source: ursa-major/trial/README.md:19-40; ursa-major/src/parse.ts:62-63; ursa-major/src/parse.ts:131-141
+    what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
+    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:13,62-63; ursa-major/src/parse.ts:75,103-108,131-141,161
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
     source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52
@@ -303,10 +303,12 @@ where a session transcript exists. If the trial is meant to add a graded
 label on real finished work, the git path is the better instrument, and
 the missing trace is a known limit rather than a defect in the run.
 
-**The prose path is where the quotable record comes from.** Only the paste
-format carries real user turns, since it records prompts as well as
-assistant output [E19], and prose segments at sentence boundaries so spans
-land on units a reader recognises [E12]. Two of the five records must go
+**The prose path is where the quotable record comes from.** Prose segments
+at sentence boundaries, so spans land on units a reader recognises [E12],
+and both session shapes record the human's own prompts and not only
+assistant output: the pasted format from its `## user` sections, and the
+Claude Code JSONL from every human message that is not a tool result, an
+attachment or a system reminder [E19]. Two of the five records must go
 through the prose path anyway [E16].
 
 Ours: put the multi-source record and a prose record on the same trial if

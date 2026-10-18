@@ -139,3 +139,15 @@ of which 34 carry a line range. Across the three slices: two false claims, 21
 ranges widened, 40 sound as cited. The share needing a reader has held near
 a third in every slice, which is the number to budget by rather than the hope
 that the first slice took the worst of it.
+
+## Slice 4, read 2026-10-18
+
+The rest of the queue. Every unread ref that cites a line range, read in
+one slice, so that the sweep's rangeable half closes rather than carrying a
+tail nobody gets to. The `split` convention announced after slice 3 is in
+force here, and so is the overlap one.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `running-an-outcome-record-trial/E19` | wrong | 2026-10-18 | Said "only the paste format carries real user turns, since it records prompts as well as assistant output". The Claude Code JSONL path carries them too: `parse.ts:103-108` increments `userTurns` and pushes a `UserPrompt` for every `type: "user"` line that is not a sidechain, filtered through `humanPromptText`, which is what makes them real rather than tool output. The contrast the library actually holds is git path against both session shapes, which `E6` states correctly eleven lines earlier in the same skill: the git path records zero. Neither signal could see this. The two refs cite different files, so the overlap field is silent, and they do not share a sentence, so the split field is silent too. Passage rewritten, `what` rewritten, range widened to `README.md:11-40` for the second passage's "lives on the user's own machine", and to both parser signatures plus the JSONL prompt push. |
+| `adjudicating-uncertain-spans/E11` | widened | 2026-10-18 | Four passages, and the third says `not_generated` "is subtracted from `deletedChars`". That subtraction is `stats.ts:121`, and the range held neither it nor anything else from `stats.ts`. What the range did hold was the doc comment at `types.ts:31-33` asserting the subtraction in prose, which is the `adjudicating/E16` shape from slice 3: a comment beside the code standing in for the code. Widened with `stats.ts:115-121`, the `not_generated` reduce and the line that subtracts it. Overlap agrees: `quoting/E6` is about the same `deletedPct` family and `quoting/E1` and `adjudicating/E1` both count four fates. |
