@@ -61,10 +61,11 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { formatRecordAddress, pagesAddress } from './address'
+import { resolvePairingBounds } from './pairfinder'
 import { isForgotten, loadConsent } from './consent'
 import { SAFE_RECORD_ID, listRecordIds, loadRecord } from './store'
 import { renderViewer } from './viewer'
-import type { OutcomeRecord, ResolverIdentity, SpanClass } from './types'
+import type { OutcomeRecord, PairingBounds, ResolverIdentity, SpanClass } from './types'
 
 /**
  * Version of the `index.json` contract below, independent of
@@ -84,7 +85,15 @@ import type { OutcomeRecord, ResolverIdentity, SpanClass } from './types'
 // predates digests" for a 0.1.x or 0.2.x site and claims neither
 // verified nor failed, which is only correct if the version moves when
 // the field arrives.
-export const PUBLISHED_INDEX_VERSION = '0.3.0'
+//
+// 0.4.0, from 0.3.0, for one additive field: `pairing`, the distinct
+// pairing bound sets the records in this set were resolved under. Added
+// 2026-10-18 because the index and the page built from it stated two
+// records and not the two numbers that produced them, and on this
+// repository the resolver's default bounds produce no records at all.
+// A reader who cannot see the bounds cannot tell a set of two from a
+// default-bounds set of zero, and both are honest.
+export const PUBLISHED_INDEX_VERSION = '0.4.0'
 
 /** Site-relative paths. Declared once so the renderer and the index agree. */
 export const INDEX_JSON = 'index.json'
@@ -198,6 +207,22 @@ export interface PublishedIndex {
   repository: string | null
   /** Record schema versions present, so a consumer can refuse a set it cannot read. */
   recordSchemaVersions: string[]
+  /**
+   * The distinct pairing bound sets the records in this set were resolved
+   * under (`OutcomeRecord.task.pairedBy`), deduplicated, widest distance
+   * first. The same idiom as `recordSchemaVersions` above and for the
+   * same reason: one published set can hold records resolved by
+   * different runs, and collapsing that into one claim would invent a
+   * fact.
+   *
+   * Empty means no record in this set states its bounds, which is a
+   * different claim from a set resolved under the defaults: a chat-path
+   * record was never paired at all, and a record written before
+   * 2026-10-18 was paired by a build that stamped nothing. The page
+   * built from this index says which of those it is rather than naming a
+   * number it does not have.
+   */
+  pairing: PairingBounds[]
   records: PublishedRecordSummary[]
   /** The counts the publisher acknowledged before this site was written. */
   disclosed: DisclosureManifest
@@ -244,6 +269,85 @@ export interface DisclosureManifest {
   conversations: number
   prompts: number
   promptChars: number
+}
+
+/**
+ * The distinct pairing bound sets present in a set of records, widest
+ * distance first, with records that state none left out.
+ *
+ * Deduplicated by value rather than by identity, because every record a
+ * single run writes gets the same object today and nothing guarantees
+ * that for a set assembled from two runs' `.ursa/records/` directories,
+ * which is the ordinary case for a project that has resolved twice.
+ */
+function distinctPairingBounds(records: OutcomeRecord[]): PairingBounds[] {
+  const seen = new Map<string, PairingBounds>()
+  for (const r of records) {
+    const b = r.task.pairedBy
+    if (!b) continue
+    seen.set(`${b.maxPairDistance}|${b.maxPairAgeHours}|${b.maxInterposedGenerations}`, b)
+  }
+  return [...seen.values()].sort((a, b) => b.maxPairDistance - a.maxPairDistance)
+}
+
+/** A bound a reader can read, including the unbounded walk. */
+function boundValue(n: number, unit: string): string {
+  if (!Number.isFinite(n)) return `no limit on ${unit}`
+  return `${n.toLocaleString('en-US')} ${unit}`
+}
+
+/**
+ * The sentence the published index page carries about how its records
+ * were paired, and the reason this is a function with its own test
+ * rather than a template literal inside the page.
+ *
+ * A record exists on a published site because a model wrote a file and
+ * somebody edited that same file afterwards. Three numbers decide how
+ * far apart those two commits may be before the resolver stops believing
+ * the second corrects the first, and moving them changes the set
+ * completely rather than at the margin: measured on this repository on
+ * 2026-10-18, the default 25-commit distance produced no records and a
+ * 400-commit distance produced two, because a dozen agent seats commit
+ * between one touch of a file by the owner and the next. So a page that
+ * shows two records and not the bounds behind them reads as a repository
+ * with two records in it, when it is a repository whose honest default
+ * answer is none.
+ *
+ * Returns plain sentences for the page to escape, never markup, so this
+ * is the one place the claim is written and `renderIndexPage` cannot
+ * state a second version of it.
+ */
+export function pairingSentences(index: PublishedIndex): string[] {
+  const d = resolvePairingBounds()
+  const defaults = `The resolver's own defaults are ${boundValue(d.maxPairDistance, 'commits')} and ${boundValue(d.maxPairAgeHours, 'hours')}.`
+  const widening =
+    'Widening either limit admits pairs a narrower one refuses, so the same history published under different bounds is a different set and not a better reading of the same one.'
+  if (index.pairing.length === 0) {
+    if (index.records.length === 0) return []
+    return [
+      'None of the records above states the pairing bounds it was resolved under, because they were written by a resolver that did not record them or by a capture path that walks no commits at all.',
+      defaults,
+    ]
+  }
+  if (index.pairing.length === 1) {
+    const b = index.pairing[0]
+    const interposed = b.maxInterposedGenerations === 0
+      ? 'and no later generation may have rewritten the file in between'
+      : `and at most ${boundValue(b.maxInterposedGenerations, 'later generations')} may have rewritten the file in between`
+    return [
+      `Every record above was paired within ${boundValue(b.maxPairDistance, 'commits')} and ${boundValue(b.maxPairAgeHours, 'hours')} of the generation it corrects, ${interposed}.`,
+      defaults,
+      widening,
+    ]
+  }
+  const sets = index.pairing
+    .map((b) => `${boundValue(b.maxPairDistance, 'commits')} and ${boundValue(b.maxPairAgeHours, 'hours')}`)
+    .join(', ')
+  return [
+    `The records above were resolved under ${index.pairing.length} different sets of pairing bounds: ${sets}. Each record's own JSON states which set produced it.`,
+    defaults,
+    widening,
+  ]
 }
 
 export function manifestFor(records: OutcomeRecord[]): DisclosureManifest {
@@ -505,6 +609,7 @@ export function publish(opts: PublishOptions): PublishResult {
     publishedAt: opts.publishedAt ?? new Date().toISOString(),
     repository: opts.repository ?? null,
     recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
+    pairing: distinctPairingBounds(records),
     records: records.map((r) => summarize(r, opts.repository ?? null, bodies.get(r.task.id)!)),
     disclosed,
   }
@@ -681,10 +786,18 @@ export function renderIndexPage(index: PublishedIndex): string {
     ].join('\n')
   }).join('\n')
 
+  const dflt = resolvePairingBounds()
   const empty = `<p class="empty">This site has no records in it. Either no merge has produced
   one yet, or every work unit in the merge window fell below the
-  <code>min-chars</code> floor. An empty set is reported rather than
-  rendered as a zero, because the two are different claims.</p>`
+  <code>min-chars</code> floor, or no model generation was followed closely
+  enough by somebody editing the same file: the resolver pairs a generation
+  with an edit only within ${n(dflt.maxPairDistance)} commits and
+  ${n(dflt.maxPairAgeHours)} hours of it by default, and on a repository
+  where other writers commit in between, that window closes before the
+  person gets there. Raising <code>max-pair-distance</code> and
+  <code>max-pair-age-hours</code> is what widens it. An empty set is
+  reported rather than rendered as a zero, because the two are different
+  claims.</p>`
 
   const d = index.disclosed
   return `<!doctype html>
@@ -814,7 +927,9 @@ ${rows}
 
 <p class="legend">All three columns divide by the whole finished work, so they do not sum
 to 100%: the characters between labelled spans belong to no class. Each
-record's page carries both denominators.</p>`}
+record's page carries both denominators.</p>
+
+<p class="legend">${escapeHtml(pairingSentences(index).join(' '))}</p>`}
 
 <div class="disclosure">
   <h2>What is on this site</h2>

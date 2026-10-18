@@ -16,6 +16,13 @@ var __export = (target, all) => {
 };
 
 // src/pairfinder.ts
+function resolvePairingBounds(opts) {
+  return {
+    maxPairDistance: opts?.maxPairDistance ?? DEFAULT_MAX_PAIR_DISTANCE,
+    maxPairAgeHours: opts?.maxPairAgeHours ?? DEFAULT_MAX_PAIR_AGE_HOURS,
+    maxInterposedGenerations: opts?.maxInterposedGenerations ?? DEFAULT_MAX_INTERPOSED_GENERATIONS
+  };
+}
 function git(repoPath, args, opts = {}) {
   return (0, import_node_child_process.execFileSync)("git", ["-C", repoPath, ...args], {
     encoding: "utf8",
@@ -115,9 +122,10 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
     const hit = declared.find((d) => name.includes(d) || email.includes(d));
     return hit ? `${c.authorName} <${c.authorEmail}>` : null;
   };
-  const maxDistance = opts.maxPairDistance ?? DEFAULT_MAX_PAIR_DISTANCE;
-  const maxAgeHours = opts.maxPairAgeHours ?? DEFAULT_MAX_PAIR_AGE_HOURS;
-  const maxInterposed = opts.maxInterposedGenerations ?? DEFAULT_MAX_INTERPOSED_GENERATIONS;
+  const bounds = resolvePairingBounds(opts);
+  const maxDistance = bounds.maxPairDistance;
+  const maxAgeHours = bounds.maxPairAgeHours;
+  const maxInterposed = bounds.maxInterposedGenerations;
   const commits = listCommits(repoPath, opts.range);
   const files = /* @__PURE__ */ new Map();
   const touched = (sha) => {
@@ -135,11 +143,7 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
       pattern: String(authorPattern),
       authors: [...new Set(commits.map((c) => c.authorName))].sort()
     } : null,
-    bounds: {
-      maxPairDistance: maxDistance,
-      maxPairAgeHours: maxAgeHours,
-      maxInterposedGenerations: maxInterposed
-    },
+    bounds,
     abandoned: { distance: 0, age: 0, interposedGeneration: 0, notDescendant: 0 },
     mergeGenerationsRefused: 0,
     editorIdentities: []
@@ -2115,6 +2119,9 @@ function clearsSizeFloor(record, minChars) {
 function erasedEpisodeIds(projectPath, episodeIds) {
   const consent = loadConsent(projectPath);
   return new Set(episodeIds.filter((id) => isForgotten(consent, id)));
+}
+function stampPairingBounds(record, bounds) {
+  if (!record.task.pairedBy) record.task.pairedBy = bounds;
 }
 function gateRecords(records) {
   const violations = records.flatMap((r) => checkRecord(r));
@@ -4646,6 +4653,46 @@ var init_viewer = __esm({
 function recordHref(id, ext) {
   return `${RECORDS_DIR}/${id}.${ext}`;
 }
+function distinctPairingBounds(records) {
+  const seen = /* @__PURE__ */ new Map();
+  for (const r of records) {
+    const b = r.task.pairedBy;
+    if (!b) continue;
+    seen.set(`${b.maxPairDistance}|${b.maxPairAgeHours}|${b.maxInterposedGenerations}`, b);
+  }
+  return [...seen.values()].sort((a, b) => b.maxPairDistance - a.maxPairDistance);
+}
+function boundValue(n2, unit) {
+  if (!Number.isFinite(n2)) return `no limit on ${unit}`;
+  return `${n2.toLocaleString("en-US")} ${unit}`;
+}
+function pairingSentences(index) {
+  const d = resolvePairingBounds();
+  const defaults = `The resolver's own defaults are ${boundValue(d.maxPairDistance, "commits")} and ${boundValue(d.maxPairAgeHours, "hours")}.`;
+  const widening = "Widening either limit admits pairs a narrower one refuses, so the same history published under different bounds is a different set and not a better reading of the same one.";
+  if (index.pairing.length === 0) {
+    if (index.records.length === 0) return [];
+    return [
+      "None of the records above states the pairing bounds it was resolved under, because they were written by a resolver that did not record them or by a capture path that walks no commits at all.",
+      defaults
+    ];
+  }
+  if (index.pairing.length === 1) {
+    const b = index.pairing[0];
+    const interposed = b.maxInterposedGenerations === 0 ? "and no later generation may have rewritten the file in between" : `and at most ${boundValue(b.maxInterposedGenerations, "later generations")} may have rewritten the file in between`;
+    return [
+      `Every record above was paired within ${boundValue(b.maxPairDistance, "commits")} and ${boundValue(b.maxPairAgeHours, "hours")} of the generation it corrects, ${interposed}.`,
+      defaults,
+      widening
+    ];
+  }
+  const sets = index.pairing.map((b) => `${boundValue(b.maxPairDistance, "commits")} and ${boundValue(b.maxPairAgeHours, "hours")}`).join(", ");
+  return [
+    `The records above were resolved under ${index.pairing.length} different sets of pairing bounds: ${sets}. Each record's own JSON states which set produced it.`,
+    defaults,
+    widening
+  ];
+}
 function manifestFor(records) {
   const paths = /* @__PURE__ */ new Set();
   const adapters = /* @__PURE__ */ new Set();
@@ -4773,6 +4820,7 @@ function publish(opts) {
     publishedAt: opts.publishedAt ?? (/* @__PURE__ */ new Date()).toISOString(),
     repository: opts.repository ?? null,
     recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
+    pairing: distinctPairingBounds(records),
     records: records.map((r) => summarize(r, opts.repository ?? null, bodies.get(r.task.id))),
     disclosed
   };
@@ -4857,10 +4905,18 @@ function renderIndexPage(index) {
       "</tr>"
     ].join("\n");
   }).join("\n");
+  const dflt = resolvePairingBounds();
   const empty = `<p class="empty">This site has no records in it. Either no merge has produced
   one yet, or every work unit in the merge window fell below the
-  <code>min-chars</code> floor. An empty set is reported rather than
-  rendered as a zero, because the two are different claims.</p>`;
+  <code>min-chars</code> floor, or no model generation was followed closely
+  enough by somebody editing the same file: the resolver pairs a generation
+  with an edit only within ${n2(dflt.maxPairDistance)} commits and
+  ${n2(dflt.maxPairAgeHours)} hours of it by default, and on a repository
+  where other writers commit in between, that window closes before the
+  person gets there. Raising <code>max-pair-distance</code> and
+  <code>max-pair-age-hours</code> is what widens it. An empty set is
+  reported rather than rendered as a zero, because the two are different
+  claims.</p>`;
   const d = index.disclosed;
   return `<!doctype html>
 <html lang="en">
@@ -4989,7 +5045,9 @@ ${rows}
 
 <p class="legend">All three columns divide by the whole finished work, so they do not sum
 to 100%: the characters between labelled spans belong to no class. Each
-record's page carries both denominators.</p>`}
+record's page carries both denominators.</p>
+
+<p class="legend">${escapeHtml2(pairingSentences(index).join(" "))}</p>`}
 
 <div class="disclosure">
   <h2>What is on this site</h2>
@@ -5030,10 +5088,11 @@ var init_publish = __esm({
     import_node_fs7 = require("node:fs");
     import_node_path8 = require("node:path");
     init_address();
+    init_pairfinder();
     init_consent();
     init_store();
     init_viewer();
-    PUBLISHED_INDEX_VERSION = "0.3.0";
+    PUBLISHED_INDEX_VERSION = "0.4.0";
     INDEX_JSON = "index.json";
     INDEX_HTML = "index.html";
     RECORDS_DIR = "records";
@@ -5793,13 +5852,15 @@ async function runCi(opts) {
     log("ursa ci: no declared acceptance to read; silence stays undeclared");
   }
   const declaration2 = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
-  const pairs = findCommitPairs(opts.projectPath, {
+  const pairOptions = {
     range: window.range,
     agentIdentities: opts.agentIdentities,
     maxPairDistance: opts.maxPairDistance,
     maxPairAgeHours: opts.maxPairAgeHours,
     maxInterposedGenerations: opts.maxInterposedGenerations
-  });
+  };
+  const bounds = resolvePairingBounds(pairOptions);
+  const pairs = findCommitPairs(opts.projectPath, pairOptions);
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
   const recordPaths = [];
@@ -5823,6 +5884,7 @@ async function runCi(opts) {
     const signals = deriveSignals(record, declaration2);
     signals.notes = [...signals.notes ?? [], `CI launch: ${window.note}`];
     record.signals = signals;
+    stampPairingBounds(record, bounds);
     recordPaths.push(saveRecord(opts.projectPath, record));
     records.push(record);
   }
@@ -6530,6 +6592,7 @@ async function main(argv) {
     if (!clearsSizeFloor(record, minChars)) continue;
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt);
     record.signals = deriveSignals(record, declaration2);
+    stampPairingBounds(record, diagnostics.bounds);
     saveRecord(projectPath, record);
     records.push(record);
   }

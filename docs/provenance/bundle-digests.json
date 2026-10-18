@@ -300,6 +300,19 @@
           "subject": "Rebuild the bundle for the index digest fields and the phone layout"
         }
       ]
+    },
+    {
+      "digest": "d16c8760a902a88c",
+      "sha256": "d16c8760a902a88c506eee79404892c3d94015d5e71299a59af7ca9ee70f7406",
+      "blob": "687a7334124cc4a887b34944399de09fce95a223",
+      "bytes": 273540,
+      "introducedBy": [
+        {
+          "commit": "a21f48ef3e98382b2f5dd3857fe1273e337ad322",
+          "date": "2026-10-18T02:31:38.000Z",
+          "subject": "The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case"
+        }
+      ]
     }
   ]
 }
