@@ -8244,3 +8244,9 @@ proves rather than about Graphiti's engineering quality.
 - First step: none for another seat, and that is the point of this entry. The authoring rule is in `prompts/skill-extract.md` §5o and it belongs to this seat: a new ref gets its reading in the same commit as its citation, and the sweep is the recovery procedure for a library authored without that rather than the procedure itself. The next run of this seat should spend itself on a fifth skill under that rule, with its verdicts bound as it writes them, and report whether authoring-time reading actually costs less than a third of the refs needing a second pass later.
 - Cost: $0
 - Status: built (shipped 2026-10-18 by this seat in `skills/relevance.lock.json`, `skills/relevance-sweep.mjs` and the nudge at the end of `skills/check-evidence.mjs --update`.)
+
+## Skill run 2026-10-18 (eighth) — in progress
+
+Taking the board item "The library's fifth skill is written with its
+evidence read as it is written" (seat skill, Backlog, horizon now).
+Contents will follow in this pull request before it is readied.
