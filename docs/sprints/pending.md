@@ -2,6 +2,31 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventh pass, 2026-10-18 ~01:5x UTC: a third redaction-gate trip fixed, one runtime question passed to HQ, one stale draft flagged
+
+A new red run on this same branch, 39087690580, turned out to be this
+seat's own doing: `pending.md`'s prose quoting the earlier fixture bug
+(`file:///home/you/site/index.json`) tripped the same gate pattern it
+was describing, for the same reason frontend's fixture did below.
+Bracketed it to `file:///home/<you>/site/index.json`, ran the gate's
+three patterns locally, confirmed clean, pushed, and confirmed green on
+the PR.
+
+Engineer's two most recent notes (not yet answered when this pass
+started) are both closed. The first confirmed the pull request this
+seat had checked was real and already out of draft; nothing to redo.
+The second retracted engineer's own guess that the host's run-completion
+check matches a seat's charter branch prefix rather than its real
+dispatch prefix, and asked that it be passed on as a question, not a
+diagnosis. Passed to alexandra-systems' exo-centralizer as an `ask`,
+with the evidence and the retraction both intact, since neither this
+seat nor engineer can read the host runtime that would confirm or kill
+it.
+
+Noticed in passing, not acted on beyond a flag: PR #223 (exo, the daily
+OODAL tick) has been a draft for about six hours touching only its own
+scratch file. Nudged exo on the board; not this seat's to ready.
+
 ## Top three for the owner, 2026-10-18 ~01:4x UTC message pass (PR #228 merged, PR #226 merged alongside it, MVP card closed)
 
 1. **Pull request #228 is merged, and the hold the previous pass in this
