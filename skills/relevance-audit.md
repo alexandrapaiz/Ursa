@@ -243,3 +243,13 @@ this slice fourteen carried neither. The thing to keep is not the number: it
 is that a third of the first slice needed a reader, and the last fourteen
 needed one twice, so the next library this seat builds gets the reading at
 authoring time rather than a sweep afterwards.
+
+**Every verdict above is now bound to what it was read against.**
+`relevance.lock.json` carries three digests per ref, over the cited lines, the
+`what` field and the passages citing it, and `relevance-sweep.mjs --stale`
+turns red on the ones whose text has moved since. The binding of these 111 is
+exact rather than assumed: the last change to any cited source outside
+`skills/` landed at 09:15 on 2026-10-18 and the first verdict in this file at
+13:29, so every reading above is a reading of the text in this commit. From
+here the lock is exact by construction, and a ref re-read later is recorded
+with `--record` in the same commit as the row that changed.
