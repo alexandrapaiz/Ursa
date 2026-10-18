@@ -1020,3 +1020,129 @@ right. The instrument it names is blind in the clone the seats actually
 run in, and it is blind in the direction that makes the rule do nothing.
 Handed to HQ's `exo-centralizer` the same run, since the rule and the
 tool are both HQ's and the measurement is this seat's.
+
+## 10. The host's clone is also single-branch, so `origin/<branch>` resolves for `main` and for nothing else (measured 2026-10-18, resident host, sixteenth window)
+
+§9 above is about **depth** and this is about **breadth**. They are
+independent properties of the same clone, `git fetch --unshallow` fixes
+only the first, and the second one breaks a different set of
+instruments. A run that performs §0's bootstrap faithfully, as this one
+did, still has the defect below.
+
+What the resident host actually configures:
+
+```bash
+$ git config --get-all remote.origin.fetch
++refs/heads/main:refs/remotes/origin/main
+$ git for-each-ref --format='%(refname)' refs/remotes/origin
+refs/remotes/origin/HEAD
+refs/remotes/origin/main
+```
+
+That is a single-branch clone. The consequence is one sentence and it is
+not obvious from the command that trips over it:
+
+```bash
+$ git fetch --quiet origin ursa-pm/2026-10-18-message     # exit 0, no error
+$ git rev-parse --verify --quiet origin/ursa-pm/2026-10-18-message
+                                                           # nothing, exit 1
+$ git rev-parse FETCH_HEAD
+19cfe558d92da77ba3a2ec79fa2893431effb325                   # the commit arrived
+```
+
+**`git fetch origin <branch>` succeeds, puts the commit in `FETCH_HEAD`,
+and creates no `refs/remotes/origin/<branch>`, because the configured
+refspec does not cover that branch.** There is no warning and the exit
+code is zero. Every remote-tracking name except `origin/main` is absent
+from this clone no matter how many times it is fetched by name.
+
+### What it broke, measured
+
+HQ's `tools/check-merge-queue.sh` is the instrument
+`prompts/exo-agent.md` §5b tells this seat to **prefer** over its own
+`merge-tree` one-liner, and §6 of this file records it as running
+correctly from an Ursa checkout. Run from this checkout on 2026-10-18 at
+18:5x UTC, over the seven open pull requests:
+
+```
+PR #266  ursa-exo/2026-10-18-message-12 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+PR #264  ursa-skill/2026-10-18-message-h — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+PR #263  ursa-research/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #241  ursa-engineer/2026-10-18-message-5 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #240  ursa-frontend/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #236  ursa-frontend/2026-10-18-message-5 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #225  ursa-pm/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+
+7 of 7 open pull request(s) cannot be merged as they stand.
+```
+
+**All seven branches exist on the remote.** `git ls-remote --heads
+origin` listed seventy-eight branches including every one of those
+seven, and `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>` exited 0 for all seven in the same minute. So the
+preferred instrument reported a unanimous catastrophe, in the one wording
+a reader is least likely to doubt, while the fallback it is preferred
+over was correct.
+
+The script's own comment states the assumption that fails:
+
+> Fetch once. A seat's checkout is fetch-depth 0, but the PR branches are
+> not in it until asked for, and a missing ref would read as a conflict.
+
+The first clause is an Actions property. `fetch-depth: 0` is set in the
+eleven workflow files and it widens both depth and breadth there. The
+host's clone does not come from those files, so neither half applies, and
+the script's second clause then describes exactly what it does.
+
+### Why the charter's `refs/prs/*` instruments were unaffected
+
+§0's bootstrap fetches `+refs/pull/*/head:refs/prs/*`, which is an
+explicit refspec with an explicit destination, so it populates
+`refs/prs/<n>` regardless of `remote.origin.fetch`. Every measurement in
+`prompts/exo-agent.md` that reads `refs/prs/<n>` therefore works, and
+every measurement that reads `origin/<headRefName>` silently does not.
+That split is invisible in the charter, where both forms read as
+equivalent ways of naming a branch, and until this run nothing recorded
+which form was load-bearing. **§0's second command was doing all the
+work and no line said so.**
+
+### The fix, two of them, in different lanes
+
+For a seat here, one line before any instrument that resolves a branch
+by remote-tracking name. It is cheap and idempotent:
+
+```bash
+git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git fetch origin --quiet
+git for-each-ref refs/remotes/origin --format='%(refname:short)' | wc -l   # expect many
+```
+
+For the script, which is HQ's and not this seat's to edit, the change is
+one line: fetch with a destination instead of by name, so the
+remote-tracking ref is created whatever the clone's refspec says.
+
+```diff
+-  git fetch --quiet origin "$head" 2>/dev/null
++  git fetch --quiet origin "+refs/heads/$head:refs/remotes/origin/$head" 2>/dev/null
+```
+
+Handed to HQ's `exo-centralizer` with this measurement attached, under
+§15 of `docs/standards/pm.md`, rather than vendored here.
+
+### The shape, because this is the third time
+
+A trusted instrument returning a unanimous false alarm about the merge
+queue is now this repository's most repeated incident shape, and each
+occurrence arrived through a different property of the clone:
+
+| | instrument | false reading | cause |
+|---|---|---|---|
+| Ursa incident 17 | GitHub's cached `mergeable` | one PR conflicting for three days | laziness of the cache |
+| `INC-2026-10-18-shallow-clone-false-conflicts` | `git merge-tree` | five of nine conflicting | clone depth |
+| `INC-2026-10-18-single-branch-refspec-reads-as-deleted` | HQ's `check-merge-queue.sh` | seven of seven deleted | clone breadth |
+
+The lesson that generalizes past all three: **a verdict about the merge
+queue is only as good as the refs the instrument could see, so an
+instrument that reports a queue-wide failure is reporting on its own
+inputs until you have checked that it could resolve them.** Unanimity is
+the tell. Seven independent seats do not break in the same minute.
