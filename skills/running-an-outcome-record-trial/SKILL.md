@@ -26,8 +26,8 @@ evidence:
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
     source: ursa-major/src/pairfinder.ts:1-8,598-620,658-660,698-712
   - ref: E3
-    what: one machine-identity pattern marks a commit as generated through three tests, an owner-declared list, the co-author trailer and the author name, after the trailer pattern was widened on 2026-10-11
-    source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:566-577; docs/design/agent-coauthor-detection.md
+    what: three tests mark a commit as generated and two of them share one machine-identity pattern, the co-author trailer and the author name, while the owner-declared list is a hand-written set of substrings matched against name and email, and the author test alone is suppressed when it matches the whole history
+    source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:520-531,544-548,566-577; docs/design/agent-coauthor-detection.md
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff, and the exclusion is written against parent count
     source: ursa-major/src/pairfinder.ts:631-634,644
@@ -74,8 +74,8 @@ evidence:
     what: raw records are private-repo material by default, and nothing generated from one ships public before the redaction pass and the owner's per-record sign-off
     source: docs/agents/incidents.md:175-181
   - ref: E19
-    what: the session path's two input shapes, a Claude Code JSONL where every Write or Edit is a generation, and a paste format that carries real user turns
-    source: ursa-major/trial/README.md:19-40; ursa-major/src/parse.ts:62-63; ursa-major/src/parse.ts:131-141
+    what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
+    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:13,62-63; ursa-major/src/parse.ts:75,103-108,131-141,161
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
     source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52
@@ -228,12 +228,13 @@ the diff it supplies is precisely what the exclusion's own comment says
 must not be counted as the person's corrections [E4].
 
 Whether it is caught depends on the trailer that survives the squash.
-The marker test now applies one pattern to three places. A commit is an
-agent's if the owner has declared its identity, or if its co-author
-trailer matches `claude|codex|cursor|gpt|copilot|github-actions|\[bot\]`,
-or, failing both, if its author name matches that same pattern [E3]. The
-declared list is checked first and is never suppressed. The author
-fallback still is, whenever it matches every commit in the history,
+The marker test runs three tests in order and two of them share one
+pattern. A commit is an agent's if the owner has declared its identity,
+or if its co-author trailer matches
+`claude|codex|cursor|gpt|copilot|github-actions|\[bot\]`, or, failing
+both, if its author name matches that same pattern [E3]. The declared
+list is checked first and is never suppressed. The author fallback still
+is, whenever it matches every commit in a history of two or more,
 because `GIT_AUTHOR_NAME` is ambient and a harness that exports it labels
 the person's own commits too [E3].
 
@@ -303,10 +304,12 @@ where a session transcript exists. If the trial is meant to add a graded
 label on real finished work, the git path is the better instrument, and
 the missing trace is a known limit rather than a defect in the run.
 
-**The prose path is where the quotable record comes from.** Only the paste
-format carries real user turns, since it records prompts as well as
-assistant output [E19], and prose segments at sentence boundaries so spans
-land on units a reader recognises [E12]. Two of the five records must go
+**The prose path is where the quotable record comes from.** Prose segments
+at sentence boundaries, so spans land on units a reader recognises [E12],
+and both session shapes record the human's own prompts and not only
+assistant output: the pasted format from its `## user` sections, and the
+Claude Code JSONL from every human message that is not a tool result, an
+attachment or a system reminder [E19]. Two of the five records must go
 through the prose path anyway [E16].
 
 Ours: put the multi-source record and a prose record on the same trial if
@@ -318,7 +321,9 @@ sources that fed different work is worse than two clean records.
 **The default detector is loose in one direction by choice, and the
 choice is defensible.** One pattern covering `copilot`,
 `github-actions` and anything bracketed `[bot]` is applied to the
-declared list, the trailer and the author name alike [E3]. So a release
+trailer and to the author name alike; the declared list is a different
+mechanism, a hand-written set of substrings tested against the author's
+name and email, and the pattern is never applied to it [E3]. So a release
 bot or a CI commit is classified as a model generation, and its next
 human touch becomes a correction of it. That is the intended cost. A
 commit classified as a generation stops being eligible as a pairing
