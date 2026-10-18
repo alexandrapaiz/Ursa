@@ -313,6 +313,19 @@
           "subject": "The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case"
         }
       ]
+    },
+    {
+      "digest": "7e2c2afe6ca35b4c",
+      "sha256": "7e2c2afe6ca35b4c1655c2645c584ca4f527fc6906bbd58615e53c6fa6e2084f",
+      "blob": "c7fa67eb1f148079d602f9e003b7686306da84b4",
+      "bytes": 276711,
+      "introducedBy": [
+        {
+          "commit": "2f1f59983a935e789e37bae3a610539270c57910",
+          "date": "2026-10-18T09:21:23.000Z",
+          "subject": "The published page now names the bounds that produced its records"
+        }
+      ]
     }
   ]
 }
