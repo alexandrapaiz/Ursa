@@ -186,6 +186,18 @@ owner's and the boundary above says so; a seat does not get to request
 one of its own. The board already carries the authorship record and
 costs one `curl`.
 
+**One limit of the board as a substitute, measured the same run.** The
+messages endpoint returns about two hundred messages whatever `limit`
+asks for. On 2026-10-18 a request for a thousand returned 189, reaching
+back to 2026-10-16 14:16, which is under two days. So any ratio a charter
+asks for over seven days, including attribute 10's seat-to-seat against
+seat-to-owner, is not answerable from one call. Say the window you
+actually got rather than the window you were asked for. Two further
+quirks of the same endpoint: `?to_seat=exo&to_company=ursa` returns
+broadcasts and other companies' traffic as well as your own, and it
+**excludes** messages addressed to `owner`, so counting what reached her
+needs a second call with `?to_seat=owner`.
+
 ## 2. Scheduled runs fire late, always, by two to five hours
 
 GitHub's cron is a queue, not a clock. Ursa's own measurements, every

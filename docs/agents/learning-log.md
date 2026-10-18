@@ -1252,10 +1252,144 @@ a flattering one.
 
 ---
 
-## 2026-10-18, fifth window (message dispatch): run in progress
+## 2026-10-18, fifth window (message dispatch): the autonomy number this seat reports was a measurement of a credential, and a housekeeping line nearly deleted fifty-four commits
 
-Opened as a draft before the work, per the ship-first rule. Triggered by
-a note from Ursa's PM saying the tier-C-charter-freeze handoff is read
-and agreed with, and that both of this seat's questions are now with the
-owner on a forty-eight-hour silence route. This entry is a placeholder
-and the run's findings replace it before the pull request is readied.
+**Why this run existed.** Ursa's PM wrote to this seat at 12:30 UTC. It
+had read the tier-C-charter-freeze handoff and the declaration in #242,
+agreed with the reading in its own words, declined to adopt the rule on
+its own authority, and put it to the owner under `docs/standards/pm.md`
+§22's silence route with its own recommendation. It carried this seat's
+branch-deletion question in the same ask, reclassified from queue hygiene
+to data deletion. Both carry at **2026-10-20 12:30 UTC** absent her
+reply. Nothing in that note asked this seat to redo anything, so the run
+went looking for what the note changed and found something larger behind
+it.
+
+**Finding 1, and it is against this seat's own output from six hours
+earlier.** The fourth window reported the week's merges as forty-three by
+the owner's account against nine by the PM, graded autonomy the weakest
+of the ten attributes on that split, and wrote "the queue is shallow
+because one person cleared it". On the resident host the token is the
+owner's own personal account:
+
+```
+$ gh api user --jq '.login, .type'
+alexandrapaiz
+User
+```
+
+So every seat on the host merges as her, and `mergedBy.login` reports the
+credential rather than the decider. Of the ten merges on 2026-10-18,
+GitHub records all ten as hers and the PM claims eight on the board, each
+with its pull request and its tier. Joined against the board, the week is
+at least seventeen of fifty-three without the owner, thirty-two per cent,
+not seventeen. The grade moves in the company's favour.
+
+**The boundary date matters more than the number.** 2026-10-17, when HQ
+retired the `schedule:` block in all eleven `agent-*.yml` files and the
+seats' clocks moved to the host. The *first* window of 2026-10-18 found
+that this blinded `gh run list` and patched §2 for it, at about 02:00
+UTC. Ten hours later the fourth window printed a wrong authorship number
+from the same cause. One platform event, two instruments, and the run
+that patched the first never asked what else fed on the same surface.
+That general rule is now in §3e, which is where it will be read.
+`INC-2026-10-18-host-token-is-the-owner`.
+
+**Finding 2, a near miss, and the only reason it is a near miss is the
+PM's reclassification arriving first.** §5b said, as one unqualified
+sentence, "Each run, delete the remote branches whose PRs have merged."
+Run literally this run it named exactly one branch,
+`ursa-frontend/2026-10-18-message`, which carries merged #227 **and open
+#240**, fifty-four commits further on. A branch name is not a key. The
+predicate is now over pull requests, with the query written out, and it
+currently returns an empty list.
+`INC-2026-10-18-branch-name-reuse`.
+
+**The ten attributes, re-graded.** The two numbers that moved from the
+fourth window's table are the two this run measured.
+
+| attribute | grade | the number or the missing surface |
+|---|---|---|
+| Staff on demand | weak | 8 of 11 seats shipped in 7 days; finance, okr and sales silent |
+| Community and crowd | zero | 0 stars, 0 forks, 0 issues ever, public repository |
+| Algorithms | weak | `tools/` holds 2 directories; the standards name 14 scripts, all in HQ's repository |
+| Leveraged assets | strong | cost still $0 |
+| Engagement | near zero | trials at n=1 and n=2, the second declared unsatisfied; n=3 produced zero records |
+| Interfaces | weak | the board's own messages endpoint needs two calls and a stated window to answer one ratio |
+| Dashboards | **weakest** | one platform change on 2026-10-17 blinded two of this seat's instruments; the first was found 36 hours later, the second 10 hours after that, and the second reached the owner as a wrong number first |
+| Experimentation | present | 3 experiments in `improvements.md`, read date 2026-10-25 |
+| Autonomy | ~32%, corrected up from 17% | at least 17 of 53 merges landed without the owner; still 0 of the `prompts/` class |
+| Social technologies | strong, but unmeasurable over a week | 6 directed seat-to-seat against 1 `ask` to the owner, over the 2 days the board feed actually returns |
+
+**Weakest: dashboards, and it is a different answer from this morning's.**
+Autonomy was named weakest on a number that was itself a dashboard
+failure, which is the shape worth remembering: when the instrument is
+broken, every grade it feeds is a grade of the instrument.
+
+**What this run changed.**
+
+1. `prompts/exo-agent.md` §3e: the authorship measurement rewritten as a
+   join against the board, with three reporting buckets instead of two
+   and the unattributed bucket named as a finding rather than as the
+   owner's work. The general rule about sweeping sibling instruments is
+   stated there too.
+2. `prompts/exo-agent.md` §5b: the branch-deletion predicate moved from
+   names to pull requests, and the PM's pending recommendation recorded
+   with its 2026-10-20 12:30 UTC deadline.
+3. `prompts/exo-agent.md` §5: the bold-declaration paragraph now carries
+   the PM's agreement, its quoted wording, the clock, and the
+   instruction not to re-file a known hold.
+4. `docs/agents/incidents.md`: two entries,
+   `INC-2026-10-18-host-token-is-the-owner` and
+   `INC-2026-10-18-branch-name-reuse`.
+5. `docs/agents/runner-facts.md`: new §1c on the host actor field with
+   its probe and a table of what to read instead; the board endpoint's
+   two-hundred-message cap and its two quirks; §1b's closing advice
+   marked superseded as advice and kept as measurement.
+6. `docs/agents/improvements.md`: experiment one's metric corrected the
+   same day it was written, because it asked for a number the host
+   cannot produce. A third experiment added for the join itself.
+7. `docs/agents/merge-order.md` replaced against the current queue.
+8. `README.md`: the governance list advertised the retired
+   pending-workflow queue with its old reason, and the host-clock
+   paragraph named one consequence of the 2026-10-17 move where there are
+   two.
+
+**Compounding ratio.** This run touches 1 charter, 5 org documents and 1
+README in 1 repository. One of the eight items is portfolio-wide and is
+handed up: `standards/roles/exo.md` §5f names attribute 9's surface as
+"the share of pull requests that landed without the owner", which no
+product ExO in the portfolio can measure on a host whose token is the
+owner, and the one-line fix is in HQ's PM standard rather than in eleven
+charters. The curve inside Ursa is flat again. The slope is in the
+handover again, which is the second week running that this is the honest
+answer.
+
+**Three ideas to the owner: not filed this run, deliberately.** §24 asks
+for three a week and the fourth window filed three at 12:20 UTC today,
+four hours before this run. Filing three more in the same day would be
+volume rather than thought. Named here so the next run can see the duty
+was met and by which window.
+
+**What the next run must check first.**
+
+1. **The clock.** At 2026-10-20 12:30 UTC two of the PM's
+   recommendations carry absent the owner's reply: charter pull requests
+   that declare no authority movement become the PM's to merge, and
+   closed-unmerged branches stay unless their closing comment said
+   nothing was needed. Read the board for her answer before assuming
+   either. If you are the run that crosses it, say so plainly.
+2. **Never report authorship from `mergedBy` alone.** Three buckets,
+   §3e. The unattributed count is the number the owner needs, and it was
+   five merges over two days when this was written.
+3. **Fix the clone before any ancestry question**, runner-facts §3. It
+   was still shallow and still narrowed on a fresh host clone this run.
+   Four lines.
+4. **Expect a chain of this seat's own pull requests, not one.** Today
+   had five windows. The PM closed #167, #231 and #234 as superseded at
+   12:38 UTC on an ancestry check, correctly. #242 waits on the owner and
+   #243 contains it.
+5. **Do not re-file the Tier C freeze.** It is agreed, routed and on a
+   clock. Re-reporting a known hold is what burns a window.
+6. **The board feed is two days deep, not seven.** Any weekly ratio
+   needs the window it actually got, stated.
