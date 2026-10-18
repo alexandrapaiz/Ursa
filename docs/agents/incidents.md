@@ -2726,3 +2726,176 @@ its source. **Open** for the read path, which is correct in HQ's branch
 and unmerged, so the client-side company filter stays in every charter
 until a probe says the server scopes the inbox itself. The probe is one
 request and it is in runner-facts §7.
+
+## INC-2026-10-18-correction-never-left-the-repository — A grade this seat could no longer defend sat unretracted in HQ's inbox for two hours, and two of this seat's own registers described the retraction as already sent
+
+### What happened
+
+At 12:19:22 UTC on 2026-10-18 the fourth window of this seat sent Ursa's
+daily tick to HQ's `exo-centralizer`, grading autonomy the weakest of the
+ten ExO attributes at **seventeen per cent**, from forty-three owner
+merges against nine the PM's. The message asked the centralizer to check
+whether autonomy grades low elsewhere "before we treat ours as local".
+
+At 12:20:25 UTC, sixty-three seconds later, the same window handed Ursa's
+PM a charter section titled "A correction to something you said on the
+board belongs on the board", written because the PM had twice put a
+retraction on a pull request where no memoryless seat would read it.
+
+The fifth window then established that the seventeen per cent is not
+measurable: the resident host's token is the owner's personal account, so
+`mergedBy` reports the credential and not the decider. It registered
+`INC-2026-10-18-host-token-is-the-owner`, rewrote §3e of the charter
+around a board join, and put the corrected floor at thirty-two per cent.
+
+It did not tell the centralizer. Neither did the six windows after it.
+
+### The measurement
+
+| | |
+|---|---|
+| grade sent to HQ | 17 per cent (9 of 52) |
+| defensible floor, by the board join | 32 per cent (17 of 53), probably 35 |
+| error, in this company's favour | 8 or 9 merges on the same week's data |
+| time unretracted | 12:19:22 to 14:33:48, **2 h 14 min** |
+| further messages from this seat to that addressee in the gap | **8**, none mentioning it |
+| corrections this seat had ever sent to another company | **0** |
+
+### Why it happened technically
+
+Nothing failed. Every surface this seat is told to maintain was
+maintained correctly. The correction went into
+`docs/agents/incidents.md`, into `prompts/exo-agent.md` §3e, and into
+`docs/agents/improvements.md`. All three are read by this repository and
+by HQ's console, and none of them is read by the seat that had acted on
+the number.
+
+The charter's §3e told the run to produce the number and said nothing
+about the number's afterlife once sent. A duty to report, with no paired
+duty to re-report, is discharged by the first send.
+
+### The part that makes it worse than an omission
+
+Both registers recorded the handoff as performed. `improvements.md` said
+"Handed to `alexandra-systems/exo-centralizer` as well". §3e said "it is
+handed to the centralizer rather than fixed eleven times". The board
+records twelve messages from this seat to `alexandra-systems` that day
+and exactly one mentions autonomy: the 12:19 note carrying the wrong
+figure.
+
+So a memoryless successor reading either register would have found the
+duty marked done and not re-sent it. A false "done" is the one register
+entry that actively prevents its own repair, which is why this is an
+incident and not a backlog item.
+
+### The fix
+
+Sent at 14:33:48 UTC by the thirteenth window, with the old figure, the
+floor, the boundary date and the instrument that changed. Both false
+tenses corrected to "owed", with the correction named in place rather
+than quietly rewritten.
+
+The standing duty is now in `prompts/exo-agent.md` §3e: when a reported
+number moves, the correction goes to every addressee of the original, in
+the pass that establishes it. It carries a one-`curl` audit that lists
+what this seat has told another company, to be run before a run ends.
+
+### What the org grew
+
+A register is where a correction is **kept**. It is never where a
+correction is **delivered**. This seat could see that clearly enough to
+write it into another seat's charter and still not apply it to itself for
+two hours, which says the gap is not insight but the absence of a check
+that fires. The audit is that check.
+
+### Status
+
+Fixed. The one recurrence to watch is the general case rather than this
+number: any figure this seat reports outside Ursa. The next window runs
+the §3e audit and reports two counts, numbers reported and corrections
+sent, on the brief of 2026-10-25.
+
+## INC-2026-10-18-prompts-directory-is-not-the-charter-set — Two seats mistook a directory for a document class within ten minutes, in opposite directions, and the standard's own wording is why
+
+### What happened
+
+`prompts/` holds twelve files. Eleven are `*-agent.md`, one per seat, and
+are charters. The twelfth is `prompts/skill-extract.md`, a format
+specification the skill seat writes as ordinary work, named as a write
+surface by its own charter at `prompts/skill-agent.md` line 56: "Write
+only under `skills/`, `prompts/skill-extract.md`, and ledger".
+
+`docs/standards/pm.md` §10 defines Tier C's first item as "Charters
+(`prompts/`)", by directory.
+
+At pass 35 on 2026-10-18 Ursa's PM held the skill seat's pull request as
+Tier C because the diff touched that file, and told this seat so at
+14:08:41 UTC. That hold is **correct against the text it was reading**.
+At 14:17:27 the PM's next pass reversed it and merged, on the ground that
+the skill seat's own charter names the file as a normal write surface.
+Right in fact, and it resolves a standard's scope against a seat's
+charter, which nothing has written down as a permitted move.
+
+The thirteenth window of this seat then made the inverse error with the
+same predicate, nine minutes later. Measuring the day's charter activity
+it ran `select(test("^prompts/.*\\.md$"))` over the merged pull requests,
+got five, and drafted the conclusion that the owner merges a seat's own
+charter within twenty minutes while holding this seat's stack, so her
+behaviour contradicts the hold criterion the PM applies.
+
+### The measurement
+
+| | |
+|---|---|
+| merged pull requests the loose predicate called charter edits | 5 |
+| of those that touched a charter | **0** |
+| the file all five actually touched | `prompts/skill-extract.md` |
+| cost on the PM's side | one pass of the company merge gate |
+| cost on this seat's side | a vacuous organisational inference, caught two paragraphs before the learning log |
+
+The inference was not merely wrong. One side of the comparison had no
+cases in it at all, so it could not have come out any other way, and it
+would have reached `main` as measured fact for every later window to
+inherit.
+
+### Why it happened technically
+
+A path is cheap to test and a document class is not, so a run reaching
+for a predicate reaches for the directory. The standard's own wording
+licenses exactly that by naming the directory where it means the
+document class, and the standard is the text both seats were obeying.
+
+What caught it was reading `prompts/skill-agent.md`, which answers the
+question outright in one line. No amount of further counting could have,
+because the count was internally consistent.
+
+### The fix
+
+`prompts/exo-agent.md` §5 now states the charter set as
+`prompts/*-agent.md`, names the one exception with the line that
+establishes it, and generalises it: when you classify files by path in
+order to measure something, the classification is a claim about this
+repository and this repository can answer it. Read the seat's charter
+before you trust the glob.
+
+The standard's wording is HQ's and §10 is itself Tier C, so it is not
+this seat's to change. It was added to the existing §10 thread, which
+already carries the banner-versus-list contradiction and sits with the
+owner on a silence clock to **2026-10-20 12:30 UTC**, rather than opened
+as a second thread, because one section with two scope defects is one
+decision for her and two is two.
+
+### What the org grew
+
+This is "read the mechanism before you probe the surface" applied to
+files rather than to services, and it is the second place that rule has
+paid out in one day. A count built on a path guess is not a weaker
+measurement than one built on the stated surfaces. It is a measurement of
+something else, and it reports in the same units, which is what makes it
+dangerous.
+
+### Status
+
+Fixed locally in the charter. **Open** upstream: the standard still says
+`prompts/`, and until it does not, a PM obeying the text will hold a
+format-file edit as Tier C again. Watch the clock named above.
