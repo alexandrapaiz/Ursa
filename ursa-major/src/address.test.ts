@@ -133,6 +133,21 @@ describe('the address grammar', () => {
     })
   })
 
+  // Both of these are what a path router does to an absolute URL on its
+  // way through a route, and neither is the person typing it wrong.
+  it('accepts a url address that arrives percent-encoded', () => {
+    const target = 'https://raw.githubusercontent.com/a/b/main/.ursa/records/r-1.json'
+    const parsed = parseRecordAddress(`url/${encodeURIComponent(target)}`)
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(recordAddressUrl(parsed.address)).toBe(target)
+  })
+
+  it('repairs the slash a path router collapses after the scheme', () => {
+    const parsed = parseRecordAddress('url/https:/example.com/records/r.json')
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(recordAddressUrl(parsed.address)).toBe('https://example.com/records/r.json')
+  })
+
   it('tolerates the leading slash a URL path arrives with', () => {
     const parsed = parseRecordAddress('/pages/a-stranger/their-repo/r-2026-10-18-8dcb0c7')
     expect(parsed.ok).toBe(true)

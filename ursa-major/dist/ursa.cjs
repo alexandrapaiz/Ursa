@@ -3758,6 +3758,201 @@ var init_consent_cli = __esm({
   }
 });
 
+// src/address.ts
+function formatRecordAddress(a) {
+  switch (a.scheme) {
+    case "git":
+      return `git/${a.owner}/${a.repo}/${a.ref}/${a.recordId}`;
+    case "pages":
+      return `pages/${a.owner}/${a.repo}/${a.recordId}`;
+    case "url":
+      return `url/${a.url}`;
+  }
+}
+function recordAddressUrl(a) {
+  switch (a.scheme) {
+    case "git":
+      return `https://${RAW_HOST}/${a.owner}/${a.repo}/${a.ref}/${STORE_RECORD_PATH(a.recordId)}`;
+    case "pages": {
+      const host = `${a.owner.toLowerCase()}.github.io`;
+      const base = a.repo.toLowerCase() === host ? "" : `/${a.repo}`;
+      return `https://${host}${base}/${SITE_RECORD_PATH(a.recordId)}`;
+    }
+    case "url":
+      return a.url;
+  }
+}
+function recordAddressPageUrl(a) {
+  if (a.scheme !== "pages") return null;
+  const host = `${a.owner.toLowerCase()}.github.io`;
+  const base = a.repo.toLowerCase() === host ? "" : `/${a.repo}`;
+  return `https://${host}${base}/records/${a.recordId}.html`;
+}
+function permanenceNote(a) {
+  if (a.scheme === "git") {
+    return "A record committed to a repository stays in that repository's history. `ursa forget` deletes the local file and records the erasure, and it cannot remove a commit you have already pushed; that takes a history rewrite of your own. If you want a published record you can take down later, publish with `ursa publish` to GitHub Pages instead: that path deploys an artifact rather than a commit, so re-publishing without the record removes it.";
+  }
+  return null;
+}
+function git4(repoPath, args) {
+  try {
+    const out = (0, import_node_child_process5.execFileSync)("git", ["-C", repoPath, ...args], {
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "ignore"]
+    });
+    return { ok: true, out: out.trim() };
+  } catch {
+    return { ok: false, out: "" };
+  }
+}
+function parseGitHubRemote(url) {
+  const trimmed = url.trim().replace(/\.git$/, "");
+  const m = trimmed.match(/github\.com[:/]+([^/]+)\/([^/]+)$/);
+  if (!m) return null;
+  const [, owner, repo] = m;
+  if (!OWNER.test(owner) || !REPO.test(repo)) return null;
+  return { owner, repo };
+}
+function githubRemote(repoPath) {
+  const names = [];
+  const upstream = git4(repoPath, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"]);
+  if (upstream.ok && upstream.out.includes("/")) names.push(upstream.out.split("/")[0]);
+  names.push("origin");
+  const all = git4(repoPath, ["remote"]);
+  if (all.ok) names.push(...all.out.split("\n").filter(Boolean));
+  for (const name of [...new Set(names)]) {
+    const url = git4(repoPath, ["remote", "get-url", name]);
+    if (!url.ok) continue;
+    const parsed = parseGitHubRemote(url.out);
+    if (parsed) return { name, ...parsed };
+  }
+  return null;
+}
+function addressState(projectPath, recordId) {
+  const base = {
+    recordId,
+    address: null,
+    url: null,
+    reachable: false,
+    blockers: [],
+    remote: null,
+    ref: null,
+    path: null,
+    committed: false,
+    pushed: false,
+    current: false,
+    ignored: false,
+    forgotten: false
+  };
+  if (isForgotten(loadConsent(projectPath), recordId)) {
+    return {
+      ...base,
+      forgotten: true,
+      blockers: ["you erased this record with `ursa forget`, so this command offers no address for it"]
+    };
+  }
+  if (!SAFE_RECORD_ID.test(recordId)) {
+    return { ...base, blockers: [`"${recordId}" cannot be part of a URL, so no address exists for it`] };
+  }
+  const top = git4(projectPath, ["rev-parse", "--show-toplevel"]);
+  if (!top.ok) {
+    return {
+      ...base,
+      blockers: [
+        `${projectPath} is not a git work tree, so there is no repository to read the record from. Publish the record with \`ursa publish\` instead, which needs no git remote.`
+      ]
+    };
+  }
+  const repoRoot = top.out;
+  const absolute = (0, import_node_path7.join)(projectPath, STORE_RECORD_PATH(recordId));
+  const path = (0, import_node_path7.relative)(repoRoot, absolute).split(import_node_path7.sep).join("/");
+  const onDisk = (0, import_node_fs6.existsSync)(absolute);
+  const remote = githubRemote(repoRoot);
+  const branch = git4(repoRoot, ["symbolic-ref", "--short", "HEAD"]);
+  const upstream = git4(repoRoot, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"]);
+  const ref = branch.ok ? branch.out : null;
+  const trackingRef = upstream.ok && upstream.out ? upstream.out : remote && ref ? `${remote.name}/${ref}` : null;
+  const committed = git4(repoRoot, ["cat-file", "-e", `HEAD:${path}`]).ok;
+  const localBlob = onDisk ? git4(repoRoot, ["hash-object", "--", absolute]) : { ok: false, out: "" };
+  const remoteBlob = trackingRef ? git4(repoRoot, ["rev-parse", `${trackingRef}:${path}`]) : { ok: false, out: "" };
+  const pushed = remoteBlob.ok;
+  const current = pushed && localBlob.ok && remoteBlob.out === localBlob.out;
+  const ignored = git4(projectPath, ["check-ignore", "-q", absolute]).ok;
+  const blockers = [];
+  if (!onDisk && !committed) {
+    blockers.push(
+      `there is no record ${recordId} in ${projectPath}/.ursa/records/. Resolve one with \`ursa run ${projectPath}\` first.`
+    );
+  }
+  if (!remote) {
+    blockers.push(
+      "this repository has no GitHub remote, so no raw address exists for it. Add one with `git remote add origin https://github.com/<you>/<repo>.git`, or publish with `ursa publish`, which needs no remote."
+    );
+  }
+  if (!ref) {
+    blockers.push(
+      "HEAD is detached, so there is no branch to read the record from. Check out a branch first."
+    );
+  }
+  if (ignored && !committed) {
+    blockers.push(
+      `git ignores ${path} \u2014 \`.ursa/\` is in this repository's .gitignore, which is this project's own default, because a record is raw data. Publishing one is a deliberate act: \`git add -f ${path}\` if that is what you mean to do.`
+    );
+  }
+  if (!committed && onDisk) {
+    blockers.push(`${path} is not in HEAD. Commit it: \`git add -f ${path} && git commit -m "publish one record"\`.`);
+  }
+  if (committed && !pushed) {
+    blockers.push(
+      trackingRef ? `${path} is committed and ${trackingRef} does not have it as of your last fetch. Push it: \`git push\`.` : `${path} is committed and this branch tracks no remote branch. Push it: \`git push -u origin ${ref ?? "<branch>"}\`.`
+    );
+  }
+  if (pushed && !current) {
+    blockers.push(
+      `${trackingRef} serves an older version of ${path} than the file on your disk. Commit and push again, or the address shows a record that is not the one you just resolved.`
+    );
+  }
+  const address = remote && ref ? { scheme: "git", owner: remote.owner, repo: remote.repo, ref, recordId } : null;
+  return {
+    recordId,
+    address,
+    url: address ? recordAddressUrl(address) : null,
+    reachable: blockers.length === 0 && address !== null,
+    blockers,
+    remote,
+    ref,
+    path,
+    committed,
+    pushed,
+    current,
+    ignored,
+    forgotten: false
+  };
+}
+function pagesAddress(repository, recordId) {
+  const [owner, repo] = repository.split("/");
+  if (!owner || !repo || !OWNER.test(owner) || !REPO.test(repo)) return null;
+  if (!SAFE_RECORD_ID.test(recordId)) return null;
+  return { scheme: "pages", owner, repo, recordId };
+}
+var import_node_child_process5, import_node_fs6, import_node_path7, SITE_RECORD_PATH, STORE_RECORD_PATH, RAW_HOST, OWNER, REPO;
+var init_address = __esm({
+  "src/address.ts"() {
+    "use strict";
+    import_node_child_process5 = require("node:child_process");
+    import_node_fs6 = require("node:fs");
+    import_node_path7 = require("node:path");
+    init_consent();
+    init_store();
+    SITE_RECORD_PATH = (id) => `records/${id}.json`;
+    STORE_RECORD_PATH = (id) => `.ursa/records/${id}.json`;
+    RAW_HOST = "raw.githubusercontent.com";
+    OWNER = /^[A-Za-z0-9](?:-?[A-Za-z0-9]){0,38}$/;
+    REPO = /^[A-Za-z0-9._-]{1,100}$/;
+  }
+});
+
 // src/audit.ts
 function elicitingPrompt(record, conversationId, turnIndex) {
   const conv = record.conversations.find((c) => c.id === conversationId);
@@ -4554,9 +4749,16 @@ function loadPublishable(projectPath) {
       skipped.push({ id, reason: "unreadable" });
       continue;
     }
+    if (!isRecordShaped(record)) {
+      skipped.push({ id, reason: "unreadable" });
+      continue;
+    }
     records.push(record);
   }
   return { records, skipped };
+}
+function isRecordShaped(r) {
+  return Array.isArray(r.files) && Array.isArray(r.generations) && Array.isArray(r.conversations) && typeof r.task?.id === "string" && typeof r.stats?.finalChars === "number" && typeof r.stats?.byClass === "object";
 }
 function publish(opts) {
   const { records, skipped } = loadPublishable(opts.projectPath);
@@ -4567,23 +4769,23 @@ function publish(opts) {
     publishedAt: opts.publishedAt ?? (/* @__PURE__ */ new Date()).toISOString(),
     repository: opts.repository ?? null,
     recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
-    records: records.map(summarize),
+    records: records.map((r) => summarize(r, opts.repository ?? null)),
     disclosed
   };
-  const recordsDir = (0, import_node_path7.join)(opts.outDir, RECORDS_DIR);
-  (0, import_node_fs6.mkdirSync)(recordsDir, { recursive: true });
+  const recordsDir = (0, import_node_path8.join)(opts.outDir, RECORDS_DIR);
+  (0, import_node_fs7.mkdirSync)(recordsDir, { recursive: true });
   const written = [];
   const write = (path, body) => {
-    (0, import_node_fs6.writeFileSync)(path, body);
+    (0, import_node_fs7.writeFileSync)(path, body);
     written.push(path);
   };
   for (const record of records) {
-    write((0, import_node_path7.join)(recordsDir, `${record.task.id}.html`), renderViewer(record));
-    write((0, import_node_path7.join)(recordsDir, `${record.task.id}.json`), JSON.stringify(record, null, 2) + "\n");
+    write((0, import_node_path8.join)(recordsDir, `${record.task.id}.html`), renderViewer(record));
+    write((0, import_node_path8.join)(recordsDir, `${record.task.id}.json`), JSON.stringify(record, null, 2) + "\n");
   }
-  write((0, import_node_path7.join)(opts.outDir, INDEX_JSON), JSON.stringify(index, null, 2) + "\n");
-  write((0, import_node_path7.join)(opts.outDir, INDEX_HTML), renderIndexPage(index));
-  write((0, import_node_path7.join)(opts.outDir, ".nojekyll"), "");
+  write((0, import_node_path8.join)(opts.outDir, INDEX_JSON), JSON.stringify(index, null, 2) + "\n");
+  write((0, import_node_path8.join)(opts.outDir, INDEX_HTML), renderIndexPage(index));
+  write((0, import_node_path8.join)(opts.outDir, ".nojekyll"), "");
   return { written, index, skipped, warnings: foreignSlugWarnings(records, opts.repository ?? null) };
 }
 function foreignSlugWarnings(records, repository) {
@@ -4600,7 +4802,7 @@ function foreignSlugWarnings(records, repository) {
   }
   return out;
 }
-function summarize(record) {
+function summarize(record, repository) {
   const chars = {};
   const spans = {};
   for (const [cls, stat] of Object.entries(record.stats.byClass)) {
@@ -4608,6 +4810,7 @@ function summarize(record) {
     spans[cls] = stat.spans;
   }
   const by = record.task.resolvedBy;
+  const address = repository ? pagesAddress(repository, record.task.id) : null;
   return {
     id: record.task.id,
     generatedAt: record.task.generatedAt,
@@ -4621,7 +4824,8 @@ function summarize(record) {
     generatedDeletedChars: record.stats.generated.deletedChars,
     resolvedBy: by ? { basis: by.basis, value: resolverValue(by) } : null,
     html: recordHref(record.task.id, "html"),
-    json: recordHref(record.task.id, "json")
+    json: recordHref(record.task.id, "json"),
+    address: address ? formatRecordAddress(address) : null
   };
 }
 function resolverValue(by) {
@@ -4765,16 +4969,17 @@ function escapeHtml2(s) {
 function escapeAttr(s) {
   return escapeHtml2(s);
 }
-var import_node_fs6, import_node_path7, PUBLISHED_INDEX_VERSION, INDEX_JSON, INDEX_HTML, RECORDS_DIR, DisclosureNotAcknowledged;
+var import_node_fs7, import_node_path8, PUBLISHED_INDEX_VERSION, INDEX_JSON, INDEX_HTML, RECORDS_DIR, DisclosureNotAcknowledged;
 var init_publish = __esm({
   "src/publish.ts"() {
     "use strict";
-    import_node_fs6 = require("node:fs");
-    import_node_path7 = require("node:path");
+    import_node_fs7 = require("node:fs");
+    import_node_path8 = require("node:path");
+    init_address();
     init_consent();
     init_store();
     init_viewer();
-    PUBLISHED_INDEX_VERSION = "0.1.0";
+    PUBLISHED_INDEX_VERSION = "0.2.0";
     INDEX_JSON = "index.json";
     INDEX_HTML = "index.html";
     RECORDS_DIR = "records";
@@ -4786,6 +4991,120 @@ var init_publish = __esm({
       }
       manifest;
     };
+  }
+});
+
+// src/address.cli.ts
+var address_cli_exports = {};
+__export(address_cli_exports, {
+  runAddress: () => runAddress
+});
+async function runAddress(opts) {
+  const ids = opts.recordId ? [opts.recordId] : listRecordIds(opts.projectPath);
+  if (ids.length === 0) {
+    console.error(
+      `no records in ${opts.projectPath}/.ursa/records/. Resolve some first with "ursa run ${opts.projectPath}".`
+    );
+    return 0;
+  }
+  const probe = opts.probe ?? headProbe;
+  const states = [];
+  for (const id of ids) {
+    const state = addressState(opts.projectPath, id);
+    states.push(state);
+    await report(state, opts, probe);
+  }
+  const live = states.filter((s) => s.reachable);
+  if (live.length > 0) {
+    const consent = loadConsent(opts.projectPath);
+    const records = live.map((s) => s.recordId).filter((id) => !isForgotten(consent, id)).map((id) => {
+      try {
+        return loadRecord(opts.projectPath, id);
+      } catch {
+        return null;
+      }
+    }).filter((r) => r !== null && isRecordShaped(r));
+    if (records.length > 0) {
+      console.log("");
+      console.log("What is public at the addresses above:");
+      console.log("");
+      console.log(formatManifest(manifestFor(records)));
+    }
+  }
+  return live.length > 0 ? 0 : 4;
+}
+async function report(state, opts, probe) {
+  console.log(`record ${state.recordId}`);
+  if (state.address && state.url) {
+    console.log(`  address   ${formatRecordAddress(state.address)}`);
+    console.log(`  json      ${state.url}`);
+    console.log(`  readable  ${state.reachable ? "yes, as far as this clone can see" : "not yet"}`);
+    if (state.reachable) {
+      const note = permanenceNote(state.address);
+      if (note) console.log(`  permanent ${note}`);
+    }
+  }
+  for (const blocker of state.blockers) console.log(`  missing   ${blocker}`);
+  if (opts.pages) {
+    const pages = pagesAddress(opts.pages, state.recordId);
+    if (!pages) {
+      console.error(`  --pages ${opts.pages} is not an owner/name repository`);
+    } else {
+      console.log(`  address   ${formatRecordAddress(pages)}   (if you publish with \`ursa publish\`)`);
+      console.log(`  json      ${recordAddressUrl(pages)}`);
+      console.log(`  page      ${recordAddressPageUrl(pages)}`);
+    }
+  }
+  if (opts.check) {
+    const targets = [];
+    if (state.address) targets.push(state.address);
+    const pages = opts.pages ? pagesAddress(opts.pages, state.recordId) : null;
+    if (pages) targets.push(pages);
+    for (const target of targets) await checkOne(target, probe);
+  }
+  console.log("");
+}
+async function checkOne(address, probe) {
+  const url = recordAddressUrl(address);
+  const result = await probe(url);
+  if (result.error) {
+    console.log(`  checked   ${url}`);
+    console.log(`            that host could not be reached: ${result.error}`);
+    return;
+  }
+  console.log(`  checked   ${url}`);
+  console.log(`            HTTP ${result.status}`);
+  if (result.allowOrigin === "*") {
+    console.log("            access-control-allow-origin: * \u2014 a browser on any page can read this");
+  } else if (result.allowOrigin) {
+    console.log(
+      `            access-control-allow-origin: ${result.allowOrigin} \u2014 only a page on that origin can read this; a viewer anywhere else will be refused by the browser`
+    );
+  } else {
+    console.log(
+      "            no access-control-allow-origin header \u2014 a browser will not let a page read this address, so a reader can download the file but a viewer cannot fetch it"
+    );
+  }
+}
+async function headProbe(url) {
+  try {
+    const res = await fetch(url, { method: "HEAD", redirect: "follow" });
+    return {
+      status: res.status,
+      allowOrigin: res.headers.get("access-control-allow-origin"),
+      error: null
+    };
+  } catch (err) {
+    return { status: null, allowOrigin: null, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+var init_address_cli = __esm({
+  "src/address.cli.ts"() {
+    "use strict";
+    init_publish();
+    init_address();
+    init_consent();
+    init_store();
   }
 });
 
@@ -4942,11 +5261,11 @@ function distill(record, tuning, model, runner = claudeRunner) {
   const prompt = buildDistillPrompt(record, tuning);
   return parseDistillOutput(runner(prompt, model));
 }
-var import_node_child_process5, VALID_KINDS, EVIDENCE_IS_DATA, BEGIN_EVIDENCE, END_EVIDENCE, claudeRunner;
+var import_node_child_process6, VALID_KINDS, EVIDENCE_IS_DATA, BEGIN_EVIDENCE, END_EVIDENCE, claudeRunner;
 var init_distill = __esm({
   "src/tuning/distill.ts"() {
     "use strict";
-    import_node_child_process5 = require("node:child_process");
+    import_node_child_process6 = require("node:child_process");
     VALID_KINDS = /* @__PURE__ */ new Set([
       "correction-loop",
       "feedback-translation",
@@ -4959,7 +5278,7 @@ var init_distill = __esm({
     BEGIN_EVIDENCE = "BEGIN EVIDENCE";
     END_EVIDENCE = "END EVIDENCE";
     claudeRunner = (prompt, model) => {
-      const out = (0, import_node_child_process5.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
+      const out = (0, import_node_child_process6.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
         input: prompt,
         encoding: "utf8",
         maxBuffer: 16 * 1024 * 1024,
@@ -5100,7 +5419,7 @@ function mergeWindow(payload, opts = {}) {
 }
 function parentCountOf(repoPath, sha) {
   try {
-    const out = (0, import_node_child_process6.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
+    const out = (0, import_node_child_process7.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
       encoding: "utf8"
     }).trim();
     return out.split(/\s+/).filter(Boolean).length - 1;
@@ -5109,15 +5428,15 @@ function parentCountOf(repoPath, sha) {
   }
 }
 function mergeWindowFromEvent(eventPath, repoPath) {
-  const payload = JSON.parse((0, import_node_fs7.readFileSync)(eventPath, "utf8"));
+  const payload = JSON.parse((0, import_node_fs8.readFileSync)(eventPath, "utf8"));
   return mergeWindow(payload, { parentCountOf: (sha) => parentCountOf(repoPath, sha) });
 }
-var import_node_fs7, import_node_child_process6, NotAMergedPullRequest;
+var import_node_fs8, import_node_child_process7, NotAMergedPullRequest;
 var init_window = __esm({
   "src/ci/window.ts"() {
     "use strict";
-    import_node_fs7 = require("node:fs");
-    import_node_child_process6 = require("node:child_process");
+    import_node_fs8 = require("node:fs");
+    import_node_child_process7 = require("node:child_process");
     NotAMergedPullRequest = class extends Error {
     };
   }
@@ -5126,7 +5445,7 @@ var init_window = __esm({
 // src/ci/distill-mode.ts
 function claudeOnPath() {
   try {
-    (0, import_node_child_process7.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
+    (0, import_node_child_process8.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
     return true;
   } catch {
     return false;
@@ -5153,11 +5472,11 @@ function selectDistillMode(env, opts = {}) {
   }
   return { kind: "model", model, reason: `${credential} is set and the claude CLI is on PATH` };
 }
-var import_node_child_process7, CREDENTIAL_VARS;
+var import_node_child_process8, CREDENTIAL_VARS;
 var init_distill_mode = __esm({
   "src/ci/distill-mode.ts"() {
     "use strict";
-    import_node_child_process7 = require("node:child_process");
+    import_node_child_process8 = require("node:child_process");
     CREDENTIAL_VARS = ["ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN"];
   }
 });
@@ -5455,7 +5774,7 @@ async function runCi(opts) {
     range: window.range,
     windowNote: window.note,
     declarationBasis: declaration2.basis,
-    recordsPath: (0, import_node_path8.join)(ursaDir(opts.projectPath), "records"),
+    recordsPath: (0, import_node_path9.join)(ursaDir(opts.projectPath), "records"),
     dropped,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
@@ -5505,7 +5824,7 @@ function renderStepOutputs(fields, commentUrl) {
   ].join("\n");
 }
 function writeStepOutputs(path, fields, commentUrl) {
-  (0, import_node_fs8.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
+  (0, import_node_fs9.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
 }
 async function readReactions(api, prNumber, log) {
   try {
@@ -5524,7 +5843,7 @@ async function readReactions(api, prNumber, log) {
 }
 function appendAcceptance(projectPath, prior) {
   const dir = ursaDir(projectPath);
-  (0, import_node_fs8.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs9.mkdirSync)(dir, { recursive: true });
   const entry = {
     schemaVersion: "0.1.0",
     commentUrl: prior.comment.commentUrl,
@@ -5536,7 +5855,7 @@ function appendAcceptance(projectPath, prior) {
     mark: prior.mark,
     readAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  (0, import_node_fs8.appendFileSync)((0, import_node_path8.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
+  (0, import_node_fs9.appendFileSync)((0, import_node_path9.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
 }
 function distillAll(projectPath, records, mode, log) {
   const base = {
@@ -5550,8 +5869,8 @@ function distillAll(projectPath, records, mode, log) {
     return base;
   }
   if (records.length === 0) return base;
-  const tuningPath = (0, import_node_path8.join)(ursaDir(projectPath), "tuning.json");
-  let tuning = (0, import_node_fs8.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs8.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
+  const tuningPath = (0, import_node_path9.join)(ursaDir(projectPath), "tuning.json");
+  let tuning = (0, import_node_fs9.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs9.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
   for (const record of records) {
     if (tuning.sources.some((s) => s.recordId === record.task.id)) continue;
     try {
@@ -5564,15 +5883,15 @@ function distillAll(projectPath, records, mode, log) {
       log(`ursa ci: distill failed on ${record.task.id} (${err.message}); continuing`);
     }
   }
-  (0, import_node_fs8.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
+  (0, import_node_fs9.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
   return base;
 }
-var import_node_fs8, import_node_path8, NO_PRIOR;
+var import_node_fs9, import_node_path9, NO_PRIOR;
 var init_run = __esm({
   "src/ci/run.ts"() {
     "use strict";
-    import_node_fs8 = require("node:fs");
-    import_node_path8 = require("node:path");
+    import_node_fs9 = require("node:fs");
+    import_node_path9 = require("node:path");
     init_pairfinder();
     init_episodes();
     init_signals();
@@ -5610,7 +5929,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path9 = require("node:path");
+var import_node_path10 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -5987,11 +6306,19 @@ async function main(argv) {
       // mechanism and is deliberately a bare boolean with no default and
       // no environment fallback: see the gate note in src/publish.ts.
       out: { type: "string" },
-      yes: { type: "boolean" }
+      yes: { type: "boolean" },
+      // `ursa address`. `--record` names one record instead of all of
+      // them, `--pages owner/name` asks for the address a published site
+      // would serve, and `--check` is the only flag in this file that
+      // opens a socket: see the note at the top of src/address.cli.ts for
+      // why it is opt-in.
+      record: { type: "string" },
+      pages: { type: "string" },
+      check: { type: "boolean" }
     }
   });
   const [cmd, project] = positionals;
-  if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" && cmd !== "publish" || !project) {
+  if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
     console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
@@ -6001,12 +6328,26 @@ async function main(argv) {
     console.error("       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]");
     console.error("       ursa publish <projectPath> --out <dir> [--repo owner/name] [--yes]");
     console.error("         prints what would become public and writes nothing without --yes");
+    console.error("       ursa address <projectPath> [--record <id>] [--pages owner/name] [--check]");
+    console.error("         prints the address a stranger can type for each record, and what is missing");
     return 2;
+  }
+  if (cmd === "address") {
+    const { runAddress: runAddress2 } = await Promise.resolve().then(() => (init_address_cli(), address_cli_exports));
+    return runAddress2({
+      projectPath: (0, import_node_path10.resolve)(project),
+      recordId: values.record ?? null,
+      // `GITHUB_REPOSITORY` is read here for the same reason `publish`
+      // reads it: on a runner it is the one fact about the repository
+      // that is always present and always right.
+      pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
+      check: values.check === true
+    });
   }
   if (cmd === "publish") {
     const { runPublish: runPublish2 } = await Promise.resolve().then(() => (init_publish_cli(), publish_cli_exports));
     return runPublish2({
-      projectPath: (0, import_node_path9.resolve)(project),
+      projectPath: (0, import_node_path10.resolve)(project),
       outDir: values.out,
       repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
       acknowledged: values.yes === true
@@ -6030,7 +6371,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path9.resolve)(project),
+      projectPath: (0, import_node_path10.resolve)(project),
       eventPath,
       repo,
       token,
@@ -6054,7 +6395,7 @@ async function main(argv) {
     }
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path9.resolve)(project),
+      projectPath: (0, import_node_path10.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -6072,7 +6413,7 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path9.resolve)(project);
+  const projectPath = (0, import_node_path10.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
   let declaration2 = UNDECLARED;
