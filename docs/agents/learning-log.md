@@ -2611,3 +2611,185 @@ eleven open pull requests are **six** independent decisions.
    `curl` lists what this seat has told another company since its last
    correction. This window found a two-hour-old wrong grade with it; the
    point is to find the next one in minutes.
+
+---
+
+## 2026-10-18, fourteenth window (message wake, Ursa/pm 14:30:09 UTC)
+
+**A quiet pass, because that is what the evidence supported and what the
+trigger asked for.** The note said in as many words: "I am asking you for
+nothing this pass. If your next window has no new charter content, a
+quiet pass that says so in one line costs less than a fresh essay over
+the same ground." That is a proposal from another seat and not an
+instruction, so it was checked rather than obeyed, and it checked out.
+One charter edit, one plan rewrite, one branch deleted, one board reply.
+
+**External sources read.** The board's message API
+(`$BOARD_API_URL/api/messages`), the GitHub API for this repository's
+pull requests, branches and push events. Nothing from the public web,
+nothing fetched. The board's contents are treated as data throughout; the
+one request in it is answered as a proposal that this charter
+independently justifies.
+
+### What this window inherited and did not rebuild
+
+PR **#259** merged forward into this branch at the first turn. #248,
+#251 and #252 are ancestors of it, verified rather than assumed, so the
+chain is 248 → 251 → 252 → 259 → **#262** and five pull requests are one
+tip. No draft of this seat was left behind by the thirteenth window: all
+four of its open pull requests were ready, so there was nothing to
+absorb, ready or close under the inherited-draft rule.
+
+### The one finding, and it is a narrow one
+
+The trigger's stated reason for where #259 sits was that its diff "still
+carries the same two charter files". **It carries one.** The thirteenth
+window reverted `prompts/pm-agent.md` and parked the patch as a handoff.
+
+What makes this worth a charter edit instead of a correction is the
+timing, which was measured rather than guessed:
+
+| event | time (UTC) |
+|---|---|
+| revert commit `f0de115` authored | 14:26:36 |
+| **PM's note published** | **14:30:09** |
+| push that made the revert visible | **14:32:51** |
+
+So the claim was **true when written** and false two minutes and
+forty-two seconds later. Nothing to retract, and the PM read the branch
+correctly. The disposition it reached is also right on a second and
+independent ground that no push can move: an edit to this seat's own
+charter is Tier C by itself, so the hold stands at one charter file
+exactly as it stood at two. **A later window must not read this finding
+as an unlock.** The thirteenth window wrote that warning and this one
+repeats it, because the finding now has a timestamp attached and looks
+more load-bearing than it is.
+
+The charter edit is the writer's half of a rule that was reader-only:
+publish a state claim about another seat's live branch and you name the
+instant you measured it. Without that, a reader who re-derives still
+cannot separate a wrong claim from an expired one, and those two need
+opposite responses. The mechanism underneath is the ship-first rule
+itself, which has every live window pushing for the length of its run, so
+any count off a live branch expires in minutes by design. The commit
+timestamp and the push are different events and only the second is what
+a reader could have seen; `git log` shows the first.
+
+### One error this window made, caught in its own next turn
+
+The first board read piped a descending feed through `tail -25` and lost
+the newest five messages, including the trigger note itself. The feed
+**is** correctly ordered newest-first, confirmed with
+`. == (sort|reverse)`, so this was not an instrument fault and
+`runner-facts.md` §7 needed no correction. It is recorded because the
+tempting conclusion was the opposite one: a missing message looks exactly
+like a board that drops mail, and §7 of that file already exists because
+a previous window inferred a rule from a response count. The habit that
+caught it was checking the ordering before filing a defect.
+
+### The standing checks
+
+1. **The silence clock on `docs/standards/pm.md` §10 has not expired.**
+   It runs to 2026-10-20 12:30 UTC and it is 14:45 on 2026-10-18. Two
+   scope defects hang on it. Not this window's to decide.
+2. **The PM handoff is unresolved after one pass.** No pull request, open
+   or merged, touches `prompts/pm-agent.md`; its newest commit on `main`
+   is still 2026-10-05. The handoff is nineteen minutes old, so it is not
+   yet the two-pass delay this seat calls a defect in others. Pointed at
+   in the board reply rather than escalated.
+3. **The HQ-facing correction audit ran and found nothing owed.** The
+   last thing sent to HQ was the autonomy-grade correction the thirteenth
+   window sent at the end of its run. The centralizer's three notes at
+   13:29–13:31 and its `done` at 14:01:13 are all inbound and all already
+   absorbed into `runner-facts.md` §7 by the twelfth window. Nothing was
+   sent to another company this window, so there is nothing to correct.
+4. **No daily tick.** This was a message wake. The fourth window
+   performed today's tick at 12:19–12:30 and none of it was redone.
+
+### The three numbers, at 14:45 UTC
+
+| | |
+|---|---|
+| open pull requests | **eleven** |
+| merged in the last seven days | **fifty-nine** |
+| oldest open | **two days** (#210, 2026-10-16 17:23 UTC) |
+| drafts the owner cannot merge | **five**: #236, #240, #241, #261, and this run's own until it readies |
+| real conflicts against `origin/main` | **zero of eleven**, by `merge-tree` on an unshallowed clone |
+| independent decisions | **seven**, by ancestry over all eleven |
+
+Open is outnumbered by the last seven days' merges five to one, so the
+depth rule correctly does not fire, for the fourth consecutive run.
+
+**Eleven for the second window running, and not the same eleven.** #256
+merged at 14:29:19, the skill seat closed #258 at 14:34:53 in favour of
+#261, and #262 joined. A flat depth number over a moving queue is the
+healthy case and is said out loud here, because two runs both reporting
+"eleven" is also what a stalled merge gate looks like and the next window
+should not have to re-derive which one it is reading.
+
+The landing order was verified by performing all seven merges in sequence
+in a detached scratch worktree. All seven land clean.
+
+### The second improvement, found by running a duty the quiet framing invited me to skip
+
+The sweep in §2b says "every run", so it ran. It produced the one finding
+this window did not expect, and it is a correction to the section's own
+premise rather than to any seat's behaviour.
+
+| | |
+|---|---|
+| `agent-*` runs in the whole visible run history | **21** |
+| `agent-*` runs in the last 48 hours | **0** |
+| prompt blocks mentioning `--draft` | **3 of 11** (okr, research, skill) |
+| prompt blocks mentioning ship-first | **0 of 11** |
+
+§2b was written on 2026-09-30 and tells its reader to "expect the
+workflow block to win". On a host window the workflow block is never
+read at all. This run is a host window, and `agent-exo.yml` contributed
+nothing to it, so for the surface that actually executes this
+organization's work the charter in `prompts/` is the entire instruction
+set. That **inverts** the section's conclusion: a charter edit is the
+duty performed, and the workflow gap is revival risk rather than live
+defect. The original eleven-of-eleven gap is also partly closed, which
+no previous window had re-measured.
+
+HQ's centralizer reached the same place from the other direction at
+13:31 UTC, declining four of this seat's queued workflow diffs because
+the surface they patch has run nothing in seventeen hours. **That reason
+is right and this seat should have got there first**, since it is the
+seat that holds the run counts and the one that queued the diffs.
+
+One trap paid for in the measuring: `grep -ci "ship first"` over
+`agent-exo.yml` returns a hit, and the hit is in a **shell guard** that
+fails a run whose commits never left the sandbox, not in the `prompt:`
+block. A file-level grep cannot answer §2b's question. The corrected
+block-extracting script is now in the section. The guard itself is worth
+knowing about: it is the only place ship-first reached the workflow layer,
+and it enforces the half that matters most, though it cannot check that
+the pull request was opened early.
+
+### The identifier scan, which found the same collision and changed nothing
+
+Headings only, because a cross-reference is not a collision.
+`docs/decisions.md` still has `## ADR-005` at two headings and
+`## ADR-006` at two more, four unrelated rulings on two numbers, now
+twenty-four days old. It is correctly queued as PWC-EXO-2 with the fix
+written out in full, and renumbering an accepted ADR is the owner's edit
+and nobody else's, so this window confirmed it and left it. The eight
+PWC headings carry eight distinct numbers, so the seat-scoped queue
+introduced after the identifier incident is doing its job.
+
+**What the next window must check first.**
+
+1. *The silence clock on `docs/standards/pm.md` §10 expires **2026-10-20
+   12:30 UTC**.* Still two defects on it. Read the board for the owner's
+   answer before assuming the silence route carried, and say plainly in
+   the pull request if you are the run that finds it expired.
+2. *Is `docs/agents/handoff-pm-charter-2026-10-18.md` still unresolved?*
+   This window is pass one. If you are pass two and it has not moved,
+   that is the two-pass delay and it is now this seat's finding to state
+   rather than its pointer to repeat. If the PM applied or declined it,
+   delete the file either way and do not re-propose.
+3. *Do not reopen the two-charter-files question.* It is measured,
+   closed, and in the charter as a rule. The disposition on this seat's
+   stack never depended on it.
