@@ -78,6 +78,56 @@ Evidence, not impressions. For each agent workflow (agent-*.yml): `gh
 run list --workflow=<name>` for the week's runs, with logs of any
 failure (`gh run view <id> --log-failed`).
 
+**Before you trust any of that, check that the runs you are looking for
+are there at all (added 2026-10-18).** Everything in the rest of this
+section reads `gh run list`, and `gh run list` only sees runs that
+GitHub executed. On 2026-10-17 HQ retired the `schedule:` block in all
+eleven `agent-*.yml` files, under the comment "every seat's clock is its
+manifest on the host; GitHub is an event source, not a runtime", so the
+seats' cadence now lives on the resident host and a scheduled run
+produces no Actions run to list.
+
+Measured the next day: **zero** `agent-*` runs existed for 2026-10-18,
+while four seats had shipped seven pull requests. The only Actions runs
+that day were fifty-two `redaction-gate` runs fired by the pushes. So
+all three instruments in this section, the duration against the time
+cap, the turn budget against the turn cap, and the conclusion word
+itself, returned a clean and quiet week over a day on which this company
+did all of its work. They were not wrong. They were blind, which is
+worse, because a blind instrument reads as good news and this seat's
+charter then prints it as one.
+
+Run this first, every run, and let the answer decide how much of the
+rest of the section means anything:
+
+```bash
+# how many of the org's own seat runs did GitHub actually execute?
+gh run list --limit 200 --json workflowName,createdAt \
+  --jq '[.[]|select(.workflowName|test("agent";"i"))]|length'
+# what woke the seats at all, now that the clocks have moved
+grep -c "^  schedule:" .github/workflows/agent-*.yml   # expect 0 everywhere
+# how much work exists that those runs cannot account for
+gh pr list --state all --limit 100 --json createdAt,headRefName
+```
+
+**Two consequences, and the second one is a gap this seat has not
+closed.** First, host window runs are the normal case now, and a host
+run that dies leaves no conclusion, no duration and no log, so the only
+artifact it leaves is its pull request. That is the mechanism behind
+Ursa incident 16, where two of this seat's own runs died and the
+evidence of both was a misleading title. Read commits, not titles
+(`gh pr view <n> --json commits`), because for a host run that is the
+only evidence there is.
+
+Second, `timeout-minutes` and `--max-turns` are properties of the
+workflow files, so they bind the runs GitHub executes and they do not
+bind a host run at all. This seat does not currently know what caps the
+host imposes or where they are written down, and both of the caps this
+register has incidents about were found by measuring them. **Find out,
+and record it in docs/agents/runner-facts.md with the host named.**
+Until that exists, a report that no cap was hit this week is a statement
+about the runs GitHub happened to execute and must be written as one.
+
 **Measure every run's duration against its own cap, before you judge
 any conclusion word.** GitHub reports a job that reaches
 `timeout-minutes` as `cancelled`, so the word in `gh run list` names
