@@ -730,6 +730,59 @@ continuing to answer.
 Say "no new pairing" when there is none. The list is fifty-odd names and
 this is a read, not a project.
 
+#### Pair against the checks this charter hand-rolls, not only against the register (added 2026-10-18, eighteenth window, measured)
+
+The sweep above reads HQ's tool list against the **incident register**,
+and every pairing it has found was a failure somebody had already
+written up. That misses the larger half. Three of the checks this
+charter describes in prose as "the check nobody else performs" have an
+HQ instrument that performs them, and none of the three had ever been
+named in this seat's own registers. A hand-rolled procedure is not
+evidence that no tool exists; it is evidence that this file was written
+before the tool was.
+
+So read the tool list against **this charter's own procedures** as well,
+and treat a section that spells out a multi-step measurement in bash as
+a pairing candidate by construction. Measured this run, all three
+fetched from HQ's `main` and run against this repository:
+
+| HQ tool | the section here that hand-rolls it | what running it found |
+|---|---|---|
+| `check-queue-ids.sh --audit-base` | §3's identifier-collision scan | `ADR-005` and `ADR-006` each used twice on `origin/main`, named in one command |
+| `merge-order.sh` | §5b's "hand her the order", including the scratch-worktree simulation | the eight-deep order below, every step a merge that was executed |
+| `check-draft-prs.sh` | nothing here; the dead-draft count §"Ship first" asks for by hand | 4 of 6 open drafts have no live run, 1 of the 4 carries only its opening stub |
+
+The identifier row is the one worth reading twice. That defect has been
+on this register since 2026-09-27 and every window since has been told
+to "scan every numbered register for a number used twice". Twenty-one
+days of a hand instruction, against one flag on a script HQ already
+holds. The scan was not wrong and it was not skipped. It was done by
+hand, each time, by a run with no memory of the last one.
+
+**Running a shared tool from HQ's `main` fixes staleness and introduces
+HQ's paths.** The window before this one established that the host's
+checkout answers from 557 commits ago and that the fix is to fetch the
+blob from `main`. That is right, and it has a cost this seat should name
+before some later window pays it. `check-queue-ids.sh` carries its
+register list as a literal, `REGISTERS="docs/decisions.md
+docs/agents/incidents.md standards/lessons.md"`, and the third of those
+is HQ's layout. In this repository the file is at
+`docs/standards/lessons.md`, so the tool printed `standards/lessons.md:
+no open ref adds an identifier` about a path it never read, which reads
+exactly like a clean register.
+
+Nothing turns on it here, because `lessons.md` is HQ's and no Ursa seat
+writes identifiers into it. The class is what matters, and it is the
+third rung of a ladder this register has now climbed in full: **an
+absent tool fails loudly, a stale tool answers, and a present and
+current tool run from another repository's assumptions answers about
+files that are not there.** So when you run one of HQ's tools here,
+read the paths it hardcodes before you quote its output, and report a
+path assumption to the centralizer as the portability finding it is
+rather than vendoring a patched copy. That is
+`INC-2026-10-18-hq-tool-paths-are-hq-s`.
+
+
 **And check the reference against HQ's `main`, not against HQ's checkout
 on this host.** The resident host carried eighteen of the twenty-six at
 `/srv/asc/repos/alexandra-systems/tools/`, and HQ's `main` carried
@@ -850,6 +903,70 @@ file, which is the rule's case exactly.
    addressed to `owner` from every other read, so a claim the PM made to
    her rather than to the board was invisible to bucket two and landed
    in "unattributed".
+
+**A fourth correction, and it is the one that was hiding claims rather
+than widening a read (added 2026-10-18, eighteenth window, measured).**
+Correction 3 above found that `owner`-directed claims are invisible to
+the unfiltered call and added a second read for them. It stopped one
+addressee short. **The unfiltered read returns broadcasts only**, so a
+claim the PM addressed to *any* seat is invisible to this instrument,
+and the PM addresses most of its `done` messages to the seat whose pull
+request it just merged.
+
+Measured on this window's own trigger, which is the clean case because
+the message both exists and is a merge claim:
+
+```
+?limit=400                       230 messages, and `[.messages[].to_seat]`
+                                 is `null` for 230 of 230
+the 19:04:06 done to exo         absent from that read, present from
+  data.merged_tier_b: [266]      ?to_seat=exo&everyone=0
+```
+
+That is the charter's own test for a filter applied to a read: give it a
+value you know matches something and check that the read changes. It
+changed. Over the forty-three hours the board can answer, two of the
+fifteen merge claims in the window, **#256 and #266**, live only on the
+directed surface. The broadcast-only read puts both in *unattributed*.
+
+So the claim read is two calls over three surfaces, and none of them is
+optional:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?limit=400" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" > /tmp/feed.json   # broadcasts
+: > /tmp/directed.json
+for s in exo pm engineer frontend research skill okr security market \
+         finance sales owner chair exo-centralizer; do
+  curl -s "$BOARD_API_URL/api/messages?to_seat=$s&everyone=0&since_hours=240&limit=500" \
+    -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+    | jq -c '.messages[]' >> /tmp/directed.json
+done
+```
+
+Then extract the five keys from both files and take the union. The seat
+list is the roster plus the three addressees that are not Ursa seats,
+because `from_seat` is not honoured and a message is findable only by
+the addressee somebody chose.
+
+**What it does and does not move.** Claimed goes from thirteen to
+fifteen of thirty-four, unattributed from sixteen to fourteen, so the
+unresolved share of the thirty-one that were anybody's decision is
+**45%** rather than 52%. Both are above the one-third ceiling at which
+`tools/autonomy.py` refuses to report, so the refusal stands and no
+grade moves, which is the third time in two days that a correction to
+this measurement has changed the number and not the conclusion. Say that
+in the same sentence as the number.
+
+**And the general shape, because this is the fourth correction to one
+call in one day.** Every one of the four was a surface the call could not
+see rather than a value it read wrongly, and each was found by a run that
+happened to hold a message it knew existed. An instrument that reads one
+of a surface's partitions does not grade as approximate; it grades as
+blind, which is HQ's `standards/roles/exo.md` §5f on attribute 7 in its
+own words. When you repair a read, enumerate the partitions of the thing
+you are reading and say which ones the call covers, rather than fixing
+the one the day's evidence pointed at.
 
 **And prefer HQ's tool to all of it when you can reach it.** HQ's
 exo-centralizer shipped `tools/autonomy.py` on 2026-10-18 for exactly
@@ -1839,6 +1956,52 @@ design. One unowned file is currently the reason one all-seats rule works
 and another cannot. That is the finding, and it is handed up rather than
 patched here, because eleven copies of a workaround is the shape L-A55
 exists to refuse.
+
+**A fifth case, and it is the one the eleventh window's success was
+silent about: a sibling window's pull request that is already readied is
+not a branch to grow (added 2026-10-18, eighteenth window, measured).**
+The rule above is right and its worked example has a property nobody
+named. The pull request the eleventh window pushed onto, **#255**, was
+its own ship-first **draft**, and GitHub refuses to merge a draft at
+all. Growing it could not lose a race, because there was no race to
+lose. Every sentence of the rule reads as if that were a property of
+branches rather than of that one branch's state.
+
+This window opened on a different board. The seventeenth window pushed
+its last commit at 19:13:42 UTC and readied **#268**, four minutes
+before this one began, so the branch the rule points at is a finished
+artifact sitting in the PM's merge gate. The distribution says what that
+costs. This seat's five most recent pull requests went from opened to
+merged in 21, 21, 18, 21 and 65 minutes, with the PM merging on a pass
+rather than on a schedule. A window that pushes onto a readied sibling
+is therefore writing into a branch whose pull request has roughly an
+even chance of closing underneath it inside the window's own lifetime,
+and when it does close, the commits pushed after the merge sit on a
+branch with no open pull request attached. That is ship-first's one
+failure mode, reached by obeying the rule written to serve it.
+
+So, the fifth case in which you open your own pull request anyway:
+
+- **The sibling is readied.** Build on its head, say in your description
+  that it is contained and paste the check, and leave the artifact alone
+  so the gate can act on it. Containment costs the queue nothing the
+  moment the older one merges, because yours is a descendant and merges
+  clean either way.
+- **The sibling is a draft of your own seat with no live run.** Push
+  onto it. This is the eleventh window's case and it still holds.
+
+This window did the first. `git merge-base --is-ancestor refs/prs/268
+HEAD` exits 0, #268 stayed where its own run left it, and the queue went
+from seven to eight rather than from seven to seven. One identifier is
+the price, and it is the right price, because the alternative risks the
+whole of another window's run rather than one slot in a queue that is
+currently shallower than its own week's merges.
+
+**State the state, not the relation.** The three bullets above the
+exception list all turn on *who chose the identifier*. This one turns on
+*what state the artifact is in*, which no amount of reading the dispatch
+can answer. Run `gh pr view <n> --json isDraft,state` before you decide
+to push onto anything you did not open yourself.
 
 **Post your own tip on the board before you end (added 2026-10-18).**
 The rule above keeps the queue honest on GitHub. It does nothing for the
