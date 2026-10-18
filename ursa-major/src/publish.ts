@@ -57,6 +57,7 @@
 // write. What the two share is only that neither lets raw data leave by
 // accident.
 
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { formatRecordAddress, pagesAddress } from './address'
@@ -71,12 +72,19 @@ import type { OutcomeRecord, ResolverIdentity, SpanClass } from './types'
  * record changing, and a record can change without the index moving, so
  * a consumer pinning one must not be told about the other.
  */
-// 0.2.0, from 0.1.0, for one additive field: `PublishedRecordSummary.address`.
-// A consumer pinned to 0.1.0 reads every field it knew and ignores the
-// new one. The bump is here rather than silent because the frontend
-// seat's viewer pins this number, and "a field appeared" is a thing it
-// should be able to detect rather than discover.
-export const PUBLISHED_INDEX_VERSION = '0.2.0'
+// 0.3.0, from 0.2.0, for two additive fields:
+// `PublishedRecordSummary.sha256` and `.bytes`. 0.2.0 added `.address`
+// to 0.1.0 on the same terms.
+//
+// A consumer pinned to 0.2.0 reads every field it knew and ignores the
+// two new ones. The bump is here rather than silent because the frontend
+// seat's viewer pins this number and accepts any minor at or above the
+// one it was written against, so "a field appeared" has to be a thing it
+// can detect rather than discover: its record page says "this index
+// predates digests" for a 0.1.x or 0.2.x site and claims neither
+// verified nor failed, which is only correct if the version moves when
+// the field arrives.
+export const PUBLISHED_INDEX_VERSION = '0.3.0'
 
 /** Site-relative paths. Declared once so the renderer and the index agree. */
 export const INDEX_JSON = 'index.json'
@@ -134,6 +142,52 @@ export interface PublishedRecordSummary {
    * different question and the one a viewer's route asks.
    */
   address: string | null
+  /**
+   * Byte length of `records/<id>.json` as this run wrote it, and the
+   * SHA-256 of those same bytes, lowercase hex, no prefix.
+   *
+   * WHY BOTH, AND WHY HERE. A viewer that renders a set from this index
+   * and then fetches one record has to decide what it is allowed to
+   * claim about the bytes that arrived. Before these two fields the only
+   * honest answer was nothing, because the index named a path and said
+   * nothing about what should be at it. The frontend seat's viewer
+   * (2026-10-18) moved from inlining records in the set page to fetching
+   * one on demand, which took a ten-record set from 2.5MB to the 9.7KB
+   * of this index, and that trade gave up the one property inlining had
+   * for free: the bytes you render are the bytes the set was built from.
+   * These two fields buy it back. The viewer hashes what it received and
+   * compares.
+   *
+   * WHAT IT PROVES. That the record being read is the one this index was
+   * written against. It catches a truncated or partial download, a stale
+   * copy cached at an edge or a CDN, and a record file replaced without
+   * the index being rewritten.
+   *
+   * WHAT IT DOES NOT PROVE. That the publisher is honest. The index and
+   * the records come from the same directory written by the same run, so
+   * a publisher who edits both is not detected by this and cannot be:
+   * detecting that needs a signature over the index by a key the reader
+   * already trusts, which is a different mechanism and not this one.
+   * Stating the limit is part of the field, not a caveat on it, and the
+   * viewer says so on the page.
+   *
+   * HASHED OVER THE EXACT BYTES WRITTEN, not over a re-serialization of
+   * the record. `publish` serializes each record once into a `Buffer`,
+   * writes that buffer, and hashes that buffer, so the digest cannot
+   * drift from the file through a difference in key order, indentation,
+   * a trailing newline, or how a future Node encodes a lone surrogate.
+   * A digest computed from `JSON.stringify` a second time would be a
+   * claim about this process's serializer rather than about the file a
+   * stranger downloads.
+   *
+   * `bytes` is stated separately rather than left for the reader to take
+   * from `Content-Length`, because a reader that fetched the file already
+   * has its length and wants to know whether it is the expected one, and
+   * because the cheap check (wrong length) should not require hashing
+   * megabytes to reach.
+   */
+  bytes: number
+  sha256: string
 }
 
 export interface PublishedIndex {
@@ -427,25 +481,44 @@ export function publish(opts: PublishOptions): PublishResult {
   const disclosed = manifestFor(records)
   if (!opts.acknowledged) throw new DisclosureNotAcknowledged(disclosed)
 
+  // Each record is serialized BEFORE the index is built, and the index
+  // is then built from these buffers. That order is the whole mechanism
+  // behind `PublishedRecordSummary.sha256`: the digest in the index is
+  // of the bytes that get written, because they are the same bytes. A
+  // digest taken from a second `JSON.stringify` of the same object would
+  // be a statement about this serializer and not about the file a
+  // stranger downloads, and the two can differ without anyone noticing.
+  //
+  // Cost of holding them all at once: the whole set in memory as UTF-8,
+  // which for this repository's own ten records measured 21MB of site
+  // with a 4MB worst record on 2026-10-18. The records are already all
+  // in memory as objects by this line, which is strictly larger, so this
+  // adds a constant factor to a process that was already proportional to
+  // the set and does not change what the publish path can handle.
+  const bodies = new Map<string, Buffer>()
+  for (const record of records) {
+    bodies.set(record.task.id, Buffer.from(JSON.stringify(record, null, 2) + '\n', 'utf8'))
+  }
+
   const index: PublishedIndex = {
     indexVersion: PUBLISHED_INDEX_VERSION,
     publishedAt: opts.publishedAt ?? new Date().toISOString(),
     repository: opts.repository ?? null,
     recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
-    records: records.map((r) => summarize(r, opts.repository ?? null)),
+    records: records.map((r) => summarize(r, opts.repository ?? null, bodies.get(r.task.id)!)),
     disclosed,
   }
 
   const recordsDir = join(opts.outDir, RECORDS_DIR)
   mkdirSync(recordsDir, { recursive: true })
   const written: string[] = []
-  const write = (path: string, body: string) => {
+  const write = (path: string, body: string | Buffer) => {
     writeFileSync(path, body)
     written.push(path)
   }
   for (const record of records) {
     write(join(recordsDir, `${record.task.id}.html`), renderViewer(record))
-    write(join(recordsDir, `${record.task.id}.json`), JSON.stringify(record, null, 2) + '\n')
+    write(join(recordsDir, `${record.task.id}.json`), bodies.get(record.task.id)!)
   }
   write(join(opts.outDir, INDEX_JSON), JSON.stringify(index, null, 2) + '\n')
   write(join(opts.outDir, INDEX_HTML), renderIndexPage(index))
@@ -511,7 +584,18 @@ export function foreignSlugWarnings(records: OutcomeRecord[], repository: string
   return out
 }
 
-function summarize(record: OutcomeRecord, repository: string | null): PublishedRecordSummary {
+/**
+ * `body` is the exact buffer that will be written to
+ * `records/<id>.json`, passed in rather than computed here so that the
+ * digest this returns and the file `publish` writes cannot come apart.
+ * See `PublishedRecordSummary.sha256` for what the digest is for and
+ * what it deliberately does not claim.
+ */
+function summarize(
+  record: OutcomeRecord,
+  repository: string | null,
+  body: Buffer,
+): PublishedRecordSummary {
   const chars = {} as Record<SpanClass, number>
   const spans = {} as Record<SpanClass, number>
   for (const [cls, stat] of Object.entries(record.stats.byClass)) {
@@ -535,6 +619,8 @@ function summarize(record: OutcomeRecord, repository: string | null): PublishedR
     html: recordHref(record.task.id, 'html'),
     json: recordHref(record.task.id, 'json'),
     address: address ? formatRecordAddress(address) : null,
+    bytes: body.byteLength,
+    sha256: createHash('sha256').update(body).digest('hex'),
   }
 }
 
