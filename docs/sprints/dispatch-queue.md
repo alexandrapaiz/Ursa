@@ -1,43 +1,42 @@
-# Dispatch queue — 2026-10-18, ~13:3x UTC, message pass (thirty-first)
+# Dispatch queue — 2026-10-18, ~13:4x UTC, message pass (thirty-second)
 
-## This pass's event: PR #250 (skill) reviewed against the merge rule and merged
+## This pass's event: PR #251 (exo's ninth window) reviewed against the merge rule; exo's run-finished report read; exo's note answered on the board
 
-The triggering message named the relevance-sweep PR and asked for one
-of two outcomes: merge it, or say on the board what it still needs and
-hand that to its seat. **Merged under Tier B** (`22ebc0f6`). Not a
-draft, no `hold` label, no comment since its last push. Checks green
-(`scan`/`redaction-gate`: `SUCCESS`). `gh pr diff 250 --name-only`:
-seventeen files, one under `prompts/` — `prompts/skill-extract.md`,
-the same format specification (not the seat's charter,
-`prompts/skill-agent.md`, untouched) this seat read as non-Tier-C for
-#247 two passes ago and for #199 before that; same boundary line in
-`skill-agent.md` naming it this seat's normal write surface. No other
-`prompts/` file, no `ursa-major/`, `ursa-minor/`, `company.yaml`,
-secret or workflow path. Clean merge verified with `git merge-tree`
-on an unshallowed clone (`refs/pull/250/head` against `origin/main`,
-no conflicting paths), not trusted from the cached field alone. No
-other open PR touches `docs/ideas.md` or any `skills/` path this PR
-touches — checked every open PR's diff fresh, not assumed. The skill
-seat held one open PR, not a stack. Full account in
-`docs/sprints/pending.md`'s thirty-first-pass entry.
+The triggering message named #251 and asked for one of two outcomes:
+merge it, or say on the board what it still needs and hand that to
+its seat. **Held, not merged.** `gh pr diff 251 --name-only` carries
+`prompts/exo-agent.md` and `prompts/pm-agent.md`, two charter paths,
+Tier C outright under docs/standards/pm.md §9/§10 regardless of its
+green check or its diff's other eight files, all knowledge surfaces.
+`git merge-base --is-ancestor pr248 pr251` confirmed directly that
+#248 is contained in #251, matching exo's own account. #248 stays
+open — closing it now would remove the diff the owner is mid-
+evaluation of, since an earlier pass's note promised her it would
+hold still until she answers or the silence clock runs out
+(2026-10-20T12:30 UTC, ~45h out). #251 is the PR that merges once
+that decision lands. Full account in `docs/sprints/pending.md`'s
+thirty-second-pass entry.
 
-## Tier B candidates checked fresh this pass: none else ready
+## Tier B candidates checked fresh this pass: none ready
 
-`gh pr list --state open` after the merge: `#210` (research, Tier C,
-unchanged), `#225` (this seat's own), `#236`/`#240` (frontend's own
-drafts), `#241` (engineer's own draft), `#248` (exo, Tier C, the
-standing owner-ask, unchanged), `#251` (exo's ninth window, declared
-to subsume #248, Tier C by the same two charter files). None
-independently changed tier since the thirtieth pass's check.
+`gh pr list --state open`: `#210` (research, Tier C, unchanged),
+`#225` (this seat's own), `#236`/`#240` (frontend's own drafts,
+unchanged), `#241` (engineer's own draft, unchanged), `#248`/`#251`
+(exo, both Tier C, held above), `#252` (exo, new draft, no run behind
+it yet), `#253` (skill, new draft, no run behind it yet). Nothing to
+merge.
 
 ## Dispatch: nothing fired
 
-The one criterion this pass's event raised is closed by the merge
-above. Every seat with open work of its own is already mid-session on
-it, which §11.4 rules out dispatching into without an instruction to
-build on that exact branch, and this pass has none to give.
+The one criterion this pass's event raised is closed by the hold
+above, not by a merge. Every seat with open work of its own is
+already mid-session on it (skill on #253, exo on #252, engineer on
+#241, frontend on #236/#240), which §11.4 rules out dispatching into
+without an instruction to build on that exact branch, and this pass
+has none to give. No seat is idle and waiting on a next assignment.
 
 ## Failed-run triage this pass (§11.7)
 
-`gh run list --status failure --created ">=$(date -u -d '-6 hours'
-+%FT%TZ)"`: empty. Nothing failed in the last six hours.
+`gh run list --status failure --created ">=$(date -u -d '-2 hours'
++%FT%TZ)"` returns an empty list. Nothing to classify, rerun, or hand
+off this pass.
