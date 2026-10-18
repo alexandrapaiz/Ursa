@@ -1,177 +1,128 @@
-# The landing plan
+# Merge order — measured 2026-10-18 14:30 UTC, ExO thirteenth window
 
-Rewritten every ExO run, replacing the previous week's plan
-(prompts/exo-agent.md §5b). It exists because three consecutive runs
-reported the queue's depth and the depth went up every time. A number
-tells the owner the queue is deep. This file tells her what to do in the
-next ten minutes.
+Replaces the previous plan entirely, as this file's convention requires.
+Measured against `origin/main` at `392f7f1`.
 
-**Measured 2026-10-05, 03:40 UTC, against `origin/main` at `cf2f28f`.**
-Nothing here is inferred from GitHub's `mergeable` field, which returns
-`UNKNOWN` for most of a queue this size. Every statement below was
-produced by performing the merge.
+**Read the one-line caveat first.** Every number below was taken on an
+**unshallowed** clone. The host hands each run a shallow clone of `main`,
+and in it `merge-tree` exits 128 and reads as a conflict while
+`merge-base --is-ancestor` returns a clean exit meaning the opposite of
+the truth. Run the bootstrap block at the top of `prompts/exo-agent.md`
+before you believe any instrument here, and see
+`docs/agents/runner-facts.md` §9 for why.
 
-## 1. The three numbers
+## The three numbers
 
-| | 2026-09-27 | 2026-09-30 | 2026-10-04 | 2026-10-05 |
-|---|---|---|---|---|
-| Open pull requests | 17 | 37 | 52 | **65** |
-| Merged in the last 7 days | 10 | 9 | 5 | **5** |
-| Age of the oldest open PR | — | — | 10.2 d | **10.5 d** (#13) |
-
-**Open pull requests outnumber the last seven days' merges by thirteen
-to one.** The org produces faster than its only merge gate absorbs,
-which is an owner decision and nobody else's. The five are #78, #73,
-#70, #41 and #23, counted against a rolling seven days ending
-2026-10-05 03:40 UTC. Four of the five are lessons syncs or PM
-standups, which is the same shape the previous two runs reported: the
-merges that happen are the org's own paperwork, and the product work
-stacks.
-
-Thirteen of the thirteen new ones since yesterday arrived in two
-batches: a window dispatch that opened ten seat pull requests between
-03:13 and 03:17 UTC, and three from the night's runs. The dispatch is a
-deliberate act, so this is not drift. It is worth saying plainly
-anyway: a roster-wide window adds ten to the queue in four minutes, and
-the gate that drains it is one person.
-
-## 2. What actually conflicts
-
-**Fifty-six of the sixty-five open pull requests merge clean into
-`origin/main` right now.** Nine conflict, and they conflict on three
-files between them:
-
-| Conflicting PR | File or files |
+| | |
 |---|---|
-| #14, #21, #50, #52, #64, #89 | `docs/ideas.md` and nothing else |
-| #20, #34, #53 | `docs/sprints/pending.md` and `docs/sprints/dispatch-queue.md` |
+| open pull requests | **11** |
+| merged in the last seven days | **59** |
+| age of the oldest open | **2 days** (#210, 2026-10-16 17:23 UTC) |
 
-Conflicts are not what is holding this queue, and this is the third
-consecutive run to measure that. The `docs/ideas.md` group is Ursa
-incident 6, unchanged: six pull requests, one file, append-at-the-end.
-The sprint-file group is the same mechanism on the PM's two queue files,
-and it is new in this measurement.
+**The queue is not this org's bottleneck, and this is the third
+consecutive run that can say so.** Open pull requests are outnumbered by
+the last seven days' merges five to one. The depth rule in the charter
+fires on the opposite condition and correctly does not fire, so this is
+reported plainly and not in bold. The four previous weekly runs reported
+seventeen, thirty-seven, fifty-two, then eleven.
 
-## 3. What is already inside something else
+**Five of the eleven are drafts the owner cannot merge**: #236, #240 and
+#241 have no live run behind them, #258 is the skill seat's current
+window, and #259 is this window's own, readied at the end of the run.
+#236, #240 and #241 belong to the frontend and engineer seats, so under
+the ship-first rule they are those seats' to resolve on their next window
+and are named here rather than touched.
 
-Seats stack, so the queue is far shorter than its count. Measured with
-`git merge-base --is-ancestor` over every pair of the sixty-five heads.
+## Conflicts: none
 
-| Merge this | and these close with it | total |
-|---|---|---|
-| **#77** engineer | #13 #16 #18 #22 #24 #25 #27 #32 #33 #36 #38 #43 #56 #57 #59 #61 #66 #69 #71 #72 #74 | **22** |
-| **#65** frontend | #15 #35 #51 | 4 |
-| **#81** exo | #30 #46 #76 | 4 |
-| **#62** finance | #55 | 2 |
-| **#40** chair | #42 | 2 |
+`git merge-tree --write-tree --name-only origin/main refs/prs/<n>` over
+all eleven exits zero for all eleven. Nothing in this queue waits on the
+seat that wrote it; every open pull request is a decision and not a
+rebase. `mergeable` from `gh pr list` is not the instrument for this and
+returns `UNKNOWN` across most of a queue.
 
-**Five merges close thirty-four of the sixty-five.** The sets are
-disjoint, so the counts add.
+## Containment: eleven pull requests are six decisions
 
-## 4. The order, simulated
+| contained | contains it |
+|---|---|
+| #248 | #251, #252, **#259** |
+| #251 | #252, **#259** |
+| #252 | **#259** |
+| #256 | #258 |
 
-Performed in this sequence in a detached scratch worktree off
-`origin/main`, not reasoned about:
+So the independent tips are **#210, #225, #236, #240, #241, #259** and
+**#258**, and the two stacks collapse seven numbers into two.
 
-1. **#77** — clean.
-2. **#65** — clean.
-3. **#62** — clean.
-4. **#40** — clean.
-5. **#81** — conflicts on two files. Both resolutions are written out in
-   §4b below, so there is nothing to work out at the keyboard.
+## The landing order
 
-### 4a. Why #77 goes first and why it is not mergeable as it stands
+Verified by performing these merges in sequence in a scratch worktree
+created **detached** (`git worktree add --detach`, because
+`git worktree add /tmp/x main` checks out `main` and the simulated merges
+then advance it, corrupting every later comparison), and compared against
+`origin/main` rather than `main` for the same reason.
 
-#77 is the top of the engineer stack and carries twenty-one other pull
-requests, including the things three other seats are blocked on: the
-CSRF fix on the bridge, the `next` RCE upgrade, the ledger merge driver,
-and the test and typecheck gate.
+1. **#259** — ExO's thirteenth window. Closes **#248, #251 and #252** as
+   one decision, because it contains all three. Tier C: it edits
+   `prompts/exo-agent.md`. It no longer edits `prompts/pm-agent.md`,
+   which the three it supersedes did, so this is one seat's charter to
+   read instead of two. See the handoff note below.
+2. **#258** — the skill seat's current window. Contains **#256**. Not a
+   charter edit: `prompts/skill-extract.md` is a format specification the
+   skill seat writes as ordinary work, named as such at
+   `prompts/skill-agent.md` line 56. **Do not read it as Tier C on the
+   path alone**; that misreading held #254 for a pass on 2026-10-18 and
+   the PM reversed it itself at 14:17:27.
+3. **#210** — the research seat, the oldest open at two days.
+4. **#225** — Ursa's PM. Its own pull request, so under
+   `docs/standards/pm.md` §10 it cannot self-merge it.
+5. **#236, #240, #241** — drafts with no run behind them. Not merge
+   candidates until their own seats ready or close them. **#240 shares
+   its branch name with merged #227**, so never delete that branch; see
+   `INC-2026-10-18-branch-name-reuse`.
 
-**#77 is a draft, so GitHub will refuse to merge it at all.** Press
-"Ready for review" first, or `gh pr ready 77`. It is a draft because the
-run that opened it was killed by its workflow's 45-minute job cap at
-02:58 UTC on 2026-10-05, forty-five minutes after it started, so no turn
-was left in which to ready it. That is Ursa incident 10. The single
-highest-value merge available in this repository is blocked by a
-one-click status that a timeout left behind, and that is the clearest
-statement of what HQ's L-A27 is about.
+Five merges, steps 1 to 4, close **nine** of the eleven.
 
-Its title also still reads "draft, in progress". Read the pull request
-before merging it, since its own run never got to say which parts of it
-are finished.
+## Two things the owner is waiting on, both with the same clock
 
-### 4b. The two resolutions for step 5, written out
+Named here because this file is the one page that tries to say what to do
+next, and both of these change what step 1 even requires.
 
-**Applied on 2026-10-06, by the run a handoff from the project manager
-woke.** Both resolutions below were carried out exactly as written, on
-this branch, by merging `main` into it rather than by rebasing it. I
-resolved each one before reading this section, and both landed on the
-same side it names, which is the first time a plan this seat wrote for a
-later run was executed by a different run and agreed with. The branch is
-clean against `main` as of that merge. What follows is kept as the
-record of the decision, not as work still waiting.
+1. **`docs/standards/pm.md` §10 has two scope defects**, not one. The
+   first is its amendment banner against its Tier C list, escalated
+   2026-10-18 12:20 and carried to the owner by the PM at 12:29:59. The
+   second is that the list names Tier C's first item as "Charters
+   (`prompts/`)", by directory, and the directory holds one file that is
+   not a charter. Both were added to the same thread deliberately,
+   because one section with two scope defects is one decision and not
+   two. Silence clock: **2026-10-20 12:30 UTC**.
+2. **Who may delete the branches of pull requests that closed without
+   merging** — fifty-eight of them. The PM reclassified this from queue
+   hygiene to data deletion and put it to the owner with its own
+   recommendation. Same clock.
 
-Both conflicts are between the exo line and the engineer line, and both
-are the same underlying event: Ursa incident 9, two seats editing one
-file from branches neither could read.
+If you are the run that finds either clock expired, read the board for
+her answer before assuming the silence route carried, and say so plainly
+in your pull request and in the learning log.
 
-**`README.md`** — one line, in the commands block.
+## Branch housekeeping
 
-```
-<<<<<<< HEAD
-npm test                                   # 375 tests, 4 skipped
-=======
-npm test                                   # the unit suite
->>>>>>> refs/prs/81
-```
+`0` branches are deletable today. The predicate is over pull requests and
+never over names: a branch is deletable only when **every** pull request
+that ever pointed at it is merged. The naive name-level query still names
+`ursa-frontend/2026-10-18-message`, which carries merged #227 **and open
+draft #240**, fifty-four commits further on. The safe query is in
+`prompts/exo-agent.md` §5b.
 
-**Keep HEAD, the engineer's line.** A measured count from the seat that
-runs the suite beats a generic phrase from the seat that does not. Delete
-the exo side.
+## The handoff that came out of step 1
 
-**`docs/agents/pending-workflow-changes.md`** — one large hunk.
+`docs/agents/handoff-pm-charter-2026-10-18.md` holds the two sections
+#248 through #252 had written directly into `prompts/pm-agent.md`. The PM
+agreed with the content on the board at 02:30:05 and the content is
+unchanged. It is parked rather than applied because this seat has stopped
+editing other seats' charter files.
 
-**Keep the #81 side in full and delete the HEAD side.** The #81 side is
-the seat-scoped convention that exists precisely to stop this collision
-happening again, and the HEAD side is the old shared-counter text plus
-the engineer's `PWC-7` entry.
-
-**Nothing is lost by that, and it was made true before the plan was
-written rather than promised in it.** The engineer's entry is already
-preserved in full at
-`docs/agents/pending-workflow-changes-engineer.md`, created on
-2026-10-05 as part of #81, with the body byte-for-byte as the engineer
-wrote it and only the heading renumbered to `PWC-ENG-1`. Verify that
-before resolving, if you want to:
-
-```bash
-git show refs/prs/77:docs/agents/pending-workflow-changes.md \
-  | sed -n '/^## PWC-7 /,$p' | tail -n +2 > /tmp/a
-sed -n '/^## PWC-ENG-1 /,$p' docs/agents/pending-workflow-changes-engineer.md \
-  | tail -n +2 > /tmp/b
-diff /tmp/a /tmp/b && echo identical
-```
-
-The resolved tree was committed in the scratch worktree and both files
-were checked for leftover markers, so this sequence is verified end to
-end and not described.
-
-## 5. Traps, for whoever runs this next
-
-- **Create the scratch worktree detached.** `git worktree add /tmp/x main`
-  checks out the real `main` branch, and the simulated merges then
-  advance it, which silently corrupts every later `main...` comparison.
-  Use `git worktree add --detach /tmp/x origin/main`.
-- **Compare against `origin/main`, never `main`.** Same reason.
-- **A fresh clone may arrive shallow.** This run's did, with a
-  two-commit history, and `git merge` answered "refusing to merge
-  unrelated histories" for a branch that shares all of its ancestry.
-  `git fetch --unshallow` first. Check with
-  `git rev-parse --is-shallow-repository`.
-- **Fetch every head into one namespace** with
-  `git fetch origin '+refs/pull/*/head:refs/prs/*'`, so the ancestry
-  pass is a local loop and not sixty-five API calls.
-- **`git merge-tree --write-tree --name-only` is the conflict probe.** It
-  exits non-zero and names the files, and it touches no working tree.
-- **Do not trust this file's numbers without re-measuring.** The queue
-  changed by thirteen pull requests in nineteen hours.
+**This does not make #259 mergeable sooner and should not be read as an
+unlock.** An edit to this seat's own charter is Tier C too, so the tier is
+unchanged. What it buys is that the owner decides on one seat's charter
+instead of two, and that the PM can apply content it already agreed to in
+its own pull request rather than waiting on a decision about this seat's.
