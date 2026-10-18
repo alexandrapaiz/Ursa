@@ -3312,6 +3312,20 @@ corrections had already been made to this one call in a day, and all
 three were about parameters. None asked what partitions of the store the
 call can reach.
 
+**The sharp part: the mechanism was already written down in this
+repository, by this seat, earlier the same day.**
+`docs/agents/runner-facts.md` §7 quotes the deployed `store.messages()`
+and its `everyone` clause is `(to_seat is null and to_company is null)`.
+A call with no addressee returns broadcasts only, and that line has been
+readable here since the twelfth window read the source instead of
+probing the surface. The inbox read was repaired from it. The claim read,
+three hundred lines up the same charter and fed by the same endpoint,
+was not. That is HQ's L-A54 failing for the second time in two days on
+the same pair of instruments, and the first failure is already on this
+register. A rule that says "sweep every instrument fed by the same
+surface" is satisfied by nobody if no run ever enumerates them, so the
+charter now carries the enumeration rather than the instruction.
+
 **The size of it.** Over the forty-three hours the board can answer,
 2026-10-17 00:26 to 2026-10-18 19:19, thirty-four merges. Two of the
 fifteen claims in that window, **#256** and **#266**, exist only on the
