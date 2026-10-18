@@ -34,12 +34,12 @@ went out this pass:
    (stranger runs `ursa` on their own repo, reads the record at a
    public address, by 2026-10-21), plus a pointer to land or close its
    own open, conflicting pull request (#219) rather than build around
-   it. Board message id `8bdbb29f-1259-42dc-9300-30a87d63fc0c`.
+   it. Board message id `8bdbb29f…`.
 2. **Frontend**, 2026-10-18 ~00:27 UTC — the same directive, its half
    (the public address and the record viewer), with a note that its
    open draft (#222) answers a different handoff and should not stand
    in for this one without saying so. Board message id
-   `cac263f9-023b-4519-880c-7afd7c09d6d7`.
+   `cac263f9…`.
 
 Trigger for both: the chair's handoff to pm/Ursa at 19:44 UTC
 yesterday, confirmed still unactioned by reading the board fresh
