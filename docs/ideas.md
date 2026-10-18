@@ -7520,3 +7520,244 @@ proves rather than about Graphiti's engineering quality.
   fields rather than inferred.
 - Nothing in any of that material addressed this agent or asked it to do
   anything, and nothing from it was treated as a directive.
+
+### 2026-10-18 — A published record page is megabytes, because the viewer inlines the whole record
+
+- Trigger: measured, not suspected. The first end-to-end run of
+  `ursa publish` on this repository wrote
+  `records/<id>.html` at 2,552,798 bytes and 502,466 bytes for its two
+  records, and the matching `.json` files at 4,030,333 and 736,599
+  bytes. `renderViewer` in `ursa-major/src/viewer.ts` inlines the
+  record into the page so the page needs no network, and on the git
+  path a generation is the entire blob of a touched file, so the
+  inlined payload is the repository's own text several times over.
+- What: self-containment and size are in direct tension and the
+  resolution is currently "self-contained, at any size". That was free
+  while the page was a local file the owner opened from disk. It stops
+  being free the moment the page is the MVP's public address, because
+  the stranger the directive is about is as likely to open it on a
+  phone as on a laptop, and two and a half megabytes of inlined JSON
+  before first paint is the difference between a product and a
+  curiosity. The honest counter-reading, and the reason this is a
+  proposal rather than a fix: a page that fetches its record is a page
+  that can be served a different record than the one it was published
+  with, and the no-network property is load-bearing for a surface whose
+  whole claim is "here is where your data went". Any split has to keep
+  the integrity claim, which probably means the page carries the digest
+  of the record it expects.
+- First step: measure before deciding. Add a column to
+  `ursa publish`'s output giving each page's byte size, then take the
+  three-way split on one real record: how many bytes are the spans the
+  page renders on load, how many are the generations behind them, and
+  how many are text no interaction ever reaches. If the third number is
+  the majority, the fix is to stop inlining what nothing displays,
+  which keeps the no-network property intact and needs no fetch at all.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — Nothing in a published record can be linked to, so the thing worth sharing cannot be sent
+
+- Trigger: today's craft scan of Arena (arena.ai), the one product in
+  `docs/market/landscape.md` whose artifact is also its distribution.
+  The landscape entry records that it is "free to use and browse, no
+  account required" and that it reached $100M annualized run-rate eight
+  months after launching a commercial product, on 7M+ votes. The
+  stealable thing is not the leaderboard. It is that the unit a person
+  wants to show someone else is itself an address, so sharing the
+  product is the same action as using it. Set against that, today's
+  published page has exactly one address per record and none inside it:
+  `renderIndexPage` and `renderViewer` emit no `id` attribute on a span
+  and no fragment anywhere, so a person who finds the one span that
+  proves their point can only send the whole page and describe where to
+  look.
+- What: the published surface is the first Ursa artifact a stranger can
+  send to another stranger, and it is unsendable at the granularity
+  anyone would actually want. A span-level fragment
+  (`records/<id>.html#span-412`) that scrolls to and highlights one
+  classified range turns "AI wrote none of the hard part of this file"
+  from a claim into a link. This is also the cheapest honest marketing
+  this project can do, which matters because `CLAUDE.md` names
+  published methodology as simultaneously the enterprise sales channel
+  and the user trust proof.
+- First step: `renderViewer` already emits one element per classified
+  span. Give each an `id` derived from the span's own file path and
+  character offset rather than its array index, so the address survives
+  a re-resolve that adds a span earlier in the file, and add a
+  `:target` highlight rule to the existing stylesheet. The index page
+  gets nothing and needs nothing. One test that every `source` pointer
+  the audit walks has a resolvable fragment, which is the existing
+  no-broken-pointer property extended to addresses.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — The record id becoming a public URL turns a known wart into a disclosure
+
+- Trigger: `episodeId` in `ursa-major/src/episodes.ts` line 61 builds a
+  record id as `basename(projectPath)`-`date`-`sha7`. Both records this
+  run resolved carry the name of the sandbox directory the run executed
+  in, and `ursa publish` then wrote them as path segments of two URLs
+  and listed both in `index.json`'s `disclosed.recordIds`. This is
+  already in this ledger from 2026-10-16 as a primary key that moves
+  when a folder is renamed; what is new is where the key now appears.
+- What: the id is the one piece of the publisher's filesystem the
+  publish path cannot avoid carrying, because it is the record's
+  identity rather than a field beside it. On a GitHub runner the
+  workspace is `/home/runner/work/<repo>/<repo>` and the slug is the
+  repository's own name, which is the common case and harmless. The
+  loud case is a record resolved anywhere else: resolving
+  `~/work/northwind-pricing` and publishing produces a public,
+  indexable URL naming a client. `foreignSlugWarnings` in
+  `src/publish.ts` shipped today and makes it impossible for that to
+  happen silently, but a warning is not a fix and the fix is a decision
+  about the primary key, not a publish-time transform.
+- First step: decide the key before a stranger publishes, which is a
+  product decision and belongs to the owner. The two candidates, with
+  what each costs: (a) keep the directory slug and let `ursa publish`
+  rewrite ids to the stated `--repo` name on the published copy only,
+  which fixes the URL and leaves the store's key alone but means the
+  page and the store disagree about a record's name; (b) change the key
+  to the generating commit sha alone, which is already in the id, is
+  stable under a rename, and carries nothing of the filesystem, but
+  invalidates every record on disk and every file keyed to one
+  (`episodes.json`, `acceptance.jsonl`, the exclusions, the bridge's
+  by-id reads). (b) is correct and (a) is shippable before Wednesday.
+- Cost: $0 either way
+- Status: proposed
+
+### 2026-10-18 — Competitive scan: Arena (arena.ai)
+
+- The product, from `docs/market/landscape.md`: two anonymous model
+  outputs, one human vote, aggregated into Elo and published as a
+  leaderboard. Free to browse with no account. 7M+ votes across 360+
+  models, $100M annualized run-rate by June 2026.
+- **One thing worth stealing, in the product itself.** The artifact is
+  the distribution. There is no gate between a stranger arriving and a
+  stranger reading the thing the product makes, and the unit a person
+  wants to show someone else is itself an address. Ursa shipped its
+  first ungated artifact today and it has no internal addresses at all,
+  which is the entry above.
+- **One thing Ursa does better.** The vote is a stated preference on a
+  prompt nobody needed answered. Arena asks "which of these looks
+  better to you right now"; the published record answers "which of
+  these characters were still in the work when it shipped", and nobody
+  was asked anything. That is the vision doc's third principle, that
+  tacit knowledge shows up only in action on a particular case, against
+  the survey the same principle warns about. Today's measurement is the
+  concrete form of it: of 26,886 characters of one finished file, 1,489
+  were a model's and kept, and 24,727 traced to no generation at all.
+  No grader produced that 24,727. The work did.
+
+### 2026-10-18 (second run) — A published record address follows a branch, so the record at it can change under the reader
+
+- Trigger: writing the address grammar. `git/<owner>/<repo>/<ref>/<id>`
+  takes anything `raw.githubusercontent.com` accepts in its ref
+  position, and `ursa address` prints the branch form, because that is
+  the one a person can type from memory. A branch moves. So a link
+  someone sends a buyer today resolves to whatever that path holds next
+  month, and the resolver stamps the record with the build that made
+  its claims (`task.resolvedBy`) precisely because those claims move by
+  a factor of eight between resolver commits. An address that does not
+  pin the bytes undoes that stamp from the outside.
+- What: give the command both forms and say what each is for. The
+  branch form stays the default for a person checking their own work.
+  A second line, `pinned`, carries the commit sha the record was
+  pushed in, which `git rev-parse` already answers, and that address
+  cannot change for as long as the commit exists. Published links,
+  anything handed to a buyer, and anything written into `index.json`
+  should be the pinned form. The same question exists on the `pages`
+  scheme and has no answer there, since a deployment replaces the
+  previous one at the same path, which is itself an argument for
+  preferring the pinned `git` form for anything cited.
+- First step: `addressState` already reads the tracking ref; add the
+  commit sha it found and a second `RecordAddress` built from it, then
+  print both with one sentence each.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — The merge comment names five numbers and no address, so nothing in the Action's output can be opened
+
+- Trigger: reading `src/ci/run.ts`'s comment beside today's work. The
+  Action's only escaping artifact is a pull request comment carrying
+  five aggregate figures and a path into a workspace that no longer
+  exists. From today there is a grammar that turns a record into a
+  string a stranger can open, and the runner knows every field it
+  needs: `GITHUB_REPOSITORY` is the owner and the repository, the merge
+  commit is a ref that cannot move, and the record ids are in hand.
+- What: when the workflow publishes (`publish-dir` is set) or when the
+  records are committed, append one line per record to the comment:
+  the address and the URL. The reviewer of that pull request is then
+  one click from the classification of the work they are reviewing,
+  which is the first time this project's output reaches a person who
+  did not run it. Gated on the same acknowledgement `publish` already
+  requires, because a comment on a public pull request is a
+  publication.
+- First step: pass the resolved addresses out of the publish step as a
+  step output and render them in `renderRunComment`, behind the
+  existing `publish-dir` condition so a consumer who publishes nothing
+  sees no change.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — A record published anywhere but GitHub is unreadable by a browser, and the publisher cannot tell
+
+- Trigger: measured today. `raw.githubusercontent.com` and GitHub Pages
+  both send `access-control-allow-origin: *` on 200 and on 404;
+  `codeload.github.com` sends it for one origin that is not yours. The
+  frontend seat's note says the viewer fetches from the person's own
+  browser and will not proxy, so that header is the difference between
+  a record being read at an address and being downloaded as a file.
+  `ursa publish` writes a directory for "serve it anywhere", and on
+  most object stores anywhere means no header and a silent failure the
+  publisher never sees, because the directory works perfectly when they
+  open it themselves from disk.
+- What: write the header configuration beside the site, for the hosts
+  that read one from the artifact rather than from a dashboard:
+  `_headers` for Netlify and Cloudflare Pages, `vercel.json` for
+  Vercel, and a short `README.md` in the output naming the S3 and GCS
+  console settings that have no file form. Four small files, no
+  dependency, no behaviour change for GitHub Pages, which needs none of
+  them. Then `ursa address --check` already tells the publisher whether
+  it worked, against the real host.
+- First step: one function in `src/publish.ts` returning the files, one
+  test asserting each is written and parses, and a row in the design
+  doc's section 14.4 table for each host once it is measured rather
+  than assumed.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — Competitive scan: ByteRover's git-versioned markdown memory
+
+- The product, from the cross-cutting note in
+  `docs/market/landscape.md` dated 2026-10-05: one of two open-source
+  projects whose export preserves more structure than any incumbent's,
+  by keeping the memory as markdown files versioned in the user's own
+  git repository rather than in a vendor's store. The same reviewer who
+  tested seven incumbent products called it "a well-documented
+  dialect" rather than a standard, because no competing product reads
+  it back.
+- **One thing worth stealing, in the product itself.** The storage
+  medium is the distribution medium. A file in the user's own
+  repository is already backed up, already versioned, already diffable,
+  already has access control, and already has a public address if the
+  repository is public, and none of those cost the vendor anything to
+  provide or the user anything to trust. This run arrived at the same
+  place from the opposite direction, which is the strongest form of
+  agreement available: the question was "what address can a stranger
+  read a record at, when Ursa may operate no server", and the answer
+  turned out to be the one ByteRover started from. What is still worth
+  taking is the part this run did not do, which is treating the
+  repository as the medium rather than as a host: diffing two records
+  of the same work over time is a `git diff` nobody has to build.
+- **One thing Ursa does better.** The dialect problem is the whole of
+  it. ByteRover's files are a format nothing else reads, so portability
+  means "you can take the files with you" and stops there. An
+  `OutcomeRecord` is addressed to a second reader by construction: the
+  frontend seat's viewer renders a record it did not write, pinned to
+  `PUBLISHED_INDEX_VERSION` and to the record's own `schemaVersion`,
+  and a lab's pipeline reads the same bytes the person reads at the
+  same URL. The measured consequence today is small and real: the
+  record at
+  `.../main/ursa-major/fixtures/mini/record/outcome_record.json` is
+  8,447 bytes, public, sends `access-control-allow-origin: *`, and the
+  viewer built by a different seat this week reads it without either
+  seat changing a line for the other.

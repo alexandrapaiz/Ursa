@@ -72,6 +72,44 @@ inputs:
     description: 'Set to false to print the run comment in the job log instead of posting it. Useful for a first dry run on a repository nobody wants commented on yet.'
     required: false
     default: 'true'
+  resolve-from:
+    description: |
+      Which history the resolver reads, and therefore which events this Action can run on.
+
+      `merge` (the default, and the only behaviour before 2026-10-18) reads the merge window out of
+      a pull_request event payload, resolves what that one merge accepted, and posts the run comment.
+      It requires a pull_request event and does nothing useful without one.
+
+      `history` reads the whole checkout's git history instead, the way `ursa run` does on a laptop,
+      and needs no event payload at all. Use it on `push` or `workflow_dispatch`, which is what the
+      GitHub Pages path below needs, because a Pages deployment must run on your default branch and a
+      pull_request event does not.
+
+      In `history` mode there is no pull request to comment on, so no comment is posted and the six
+      resolver outputs below are empty. The records, and the site if you asked for one, are the output.
+    required: false
+    default: 'merge'
+  publish-dir:
+    description: |
+      Leave empty and nothing is published; this is the default and the Action behaves exactly as it
+      did before this input existed.
+
+      Set it to a directory and the Action writes a complete static site there after resolving: one
+      self-contained HTML page per record, the record's own JSON beside it, and an index.html and
+      index.json over the set. Nothing is uploaded and nothing leaves the runner. Your own next step
+      decides what happens to the directory; `examples/publish-record.yml` hands it to
+      actions/upload-pages-artifact and publishes it to your repository's own GitHub Pages site.
+
+      READ THIS BEFORE YOU SET IT. A published record carries raw text, not a summary: the full text
+      of every finished file in it, the full text of every model generation, and every message you
+      typed to the model. Setting this input is the acknowledgement of that, and the Action passes
+      `--yes` to `ursa publish` on your behalf because a workflow has no terminal to ask at. The job
+      log prints the exact counts and every file path before it writes anything, so the first run on
+      a repository tells you precisely what a second run would make public. If you want to read that
+      list before anything is written, run once with `publish-dir` set and no Pages deployment step
+      after it.
+    required: false
+    default: ''
   agent-identity:
     description: |
       Identities in this repository that belong to an agent rather than to a person, one per line.
@@ -125,6 +163,9 @@ outputs:
   comment-url:
     description: 'URL of the run comment, or the empty string when post-comment was false.'
     value: ${{ steps.resolve.outputs.comment-url }}
+  publish-dir:
+    description: 'Directory the static site was written to, or the empty string when publish-dir was not set. Pass it to actions/upload-pages-artifact.'
+    value: ${{ steps.publish.outputs.dir }}
 
 runs:
   using: composite
@@ -135,7 +176,10 @@ runs:
     # here, rather than asking every consumer to remember
     # fetch-depth: 0, is the difference between the Action working and
     # the Action silently resolving nothing.
-    - name: Deepen history to the pull request's base
+    #
+    # Runs in both resolve-from modes and matters more in `history`,
+    # which walks the whole history rather than one merge window.
+    - name: Deepen a shallow clone so both sides of each commit pair exist
       shell: bash
       run: |
         set -euo pipefail
@@ -149,6 +193,7 @@ runs:
 
     - name: Resolve the merge into outcome records and post the run comment
       id: resolve
+      if: inputs.resolve-from == 'merge'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
@@ -179,9 +224,54 @@ runs:
         # them rather than from a second pass over the log.
         node "$GITHUB_ACTION_PATH/dist/ursa.cjs" "${args[@]}" | tee "$RUNNER_TEMP/ursa-ci.log"
 
+    # The same resolver over the whole checkout instead of over one merge
+    # window. This is `ursa run`, the launch a person uses on a laptop,
+    # and it reads git history rather than an event payload, which is the
+    # only reason the GitHub Pages path can exist: a Pages deployment has
+    # to run on your default branch, and a pull_request event does not.
+    #
+    # It posts no comment, because on a push there is no pull request to
+    # comment on. The records are the output, and `publish-dir` turns them
+    # into a page.
+    - name: Resolve the whole history into outcome records
+      id: resolve-history
+      if: inputs.resolve-from == 'history'
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        URSA_AGENT_IDENTITY: ${{ inputs.agent-identity }}
+      run: |
+        set -euo pipefail
+        node --version
+        args=(run "${{ inputs.project-path }}" --min-chars "${{ inputs.min-chars }}")
+        # Same loop, same reason, as the merge step above: read from the
+        # environment so a value carrying a quote stays data.
+        while IFS= read -r identity; do
+          [ -n "${identity//[[:space:]]/}" ] || continue
+          args+=(--agent-identity "$identity")
+        done <<< "$URSA_AGENT_IDENTITY"
+        node "$GITHUB_ACTION_PATH/dist/ursa.cjs" "${args[@]}" | tee "$RUNNER_TEMP/ursa-ci.log"
+
+    # Records into a directory of files a web server can serve. Writes
+    # only; nothing is uploaded here and no network call is made. See the
+    # `publish-dir` input above for what a published record contains.
+    - name: Write the records as a static site
+      id: publish
+      if: inputs.publish-dir != ''
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$GITHUB_ACTION_PATH/dist/ursa.cjs" publish "${{ inputs.project-path }}" \
+          --out "${{ inputs.publish-dir }}" \
+          --repo "${{ github.repository }}" \
+          --yes | tee -a "$RUNNER_TEMP/ursa-ci.log"
+        echo "dir=${{ inputs.publish-dir }}" >> "$GITHUB_OUTPUT"
+
     # The five fields again, in the same order, in the job summary. The
     # comment is the feedback a person reads on the pull request; this is
-    # the same reading for whoever opens the run instead.
+    # the same reading for whoever opens the run instead. In `history`
+    # mode there is no comment, and this is the only place the run's own
+    # numbers are reported.
     - name: Repeat the run comment in the job summary
       if: always()
       shell: bash

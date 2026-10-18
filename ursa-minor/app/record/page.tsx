@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/ui/site-header";
 import SiteFooter from "@/components/ui/site-footer";
 import RecordLoader from "@/components/record/record-loader";
+import PublishedSite from "@/components/record/published-site";
 import { publishedIds } from "@/lib/record/published";
 import { CLASS_COPY, SPAN_CLASSES } from "@/lib/record/types";
 
@@ -87,6 +88,8 @@ export default async function RecordIndex() {
             </ul>
           </section>
         ) : null}
+
+        <PublishedSite />
 
         <RecordLoader />
       </main>

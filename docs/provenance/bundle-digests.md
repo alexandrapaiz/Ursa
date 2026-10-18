@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 19.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 22.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -40,6 +40,9 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 19.
 | `71186700e3b07a06` | `f295522` | 2026-10-16 01:43:04 | 201,273 | gate: the counterexample, the unit cases, parity on the bound set, bundle |
 | `d32543070474cc28` | `51ef074` | 2026-10-16 01:45:39 | 201,773 | gate: the bound set on both surfaces a reader sees, and the bundle |
 | `650a289f21602792` | `5881090` | 2026-10-17 14:15:32 | 202,367 | Rebuild the committed bundle over the absorbed source changes |
+| `035e533b20f1097b` | `b34b692` | 2026-10-18 00:47:32 | 255,121 | The Action can write the site, and one workflow publishes it to the stranger's own Pages |
+| `3be06c2173f12c37` | `7c300d5` | 2026-10-18 00:56:34 | 255,382 | publish: consult the consent record, so an erased record cannot reach a public address |
+| `6e57690406db89ed` | `1e0cc3b` | 2026-10-18 01:33:51 | 269,035 | The address in the README, the grammar in the design doc, and a rebuilt bundle |
 
 ## Reading a row
 
@@ -52,7 +55,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob 4b3a790ecd47eaa76dc4fe646feaf2a3ff704a4c | sha256sum
+git cat-file blob 8f7bd5dc245baacb8952c080edec7bb6d19ca69a | sha256sum
 ```
 
 ## What "introduced by" means, exactly

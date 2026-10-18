@@ -248,6 +248,45 @@
           "subject": "Rebuild the committed bundle over the absorbed source changes"
         }
       ]
+    },
+    {
+      "digest": "035e533b20f1097b",
+      "sha256": "035e533b20f1097b9a02275098e8b3240d66d60a42931be48ae2562f1016d866",
+      "blob": "cc8e82e4a476cdfd827f85c21da347452f2ddc82",
+      "bytes": 255121,
+      "introducedBy": [
+        {
+          "commit": "b34b69297e2e7eec9cf43e22f4399844ea0b0188",
+          "date": "2026-10-18T00:47:32.000Z",
+          "subject": "The Action can write the site, and one workflow publishes it to the stranger's own Pages"
+        }
+      ]
+    },
+    {
+      "digest": "3be06c2173f12c37",
+      "sha256": "3be06c2173f12c37371b69d454e8fffd4b0dc2223db4c885a26c0bd7fab1e0a6",
+      "blob": "5abb1efd24af5c93c632b1538027f4e80c382f15",
+      "bytes": 255382,
+      "introducedBy": [
+        {
+          "commit": "7c300d5c7d3a048c1666c533e43a153de328e68f",
+          "date": "2026-10-18T00:56:34.000Z",
+          "subject": "publish: consult the consent record, so an erased record cannot reach a public address"
+        }
+      ]
+    },
+    {
+      "digest": "6e57690406db89ed",
+      "sha256": "6e57690406db89ed7382ba821feb68e40b7b30747aa0beb1d09b49eb3dc713b6",
+      "blob": "8f7bd5dc245baacb8952c080edec7bb6d19ca69a",
+      "bytes": 269035,
+      "introducedBy": [
+        {
+          "commit": "1e0cc3bf7a16aef0bac4365504d438a3c24983c1",
+          "date": "2026-10-18T01:33:51.000Z",
+          "subject": "The address in the README, the grammar in the design doc, and a rebuilt bundle"
+        }
+      ]
     }
   ]
 }

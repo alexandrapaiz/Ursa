@@ -1912,7 +1912,18 @@ function saveEpisodes(projectRoot, episodes) {
   (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
   return path;
 }
-var import_node_fs2, import_node_path3;
+function listRecordIds(projectRoot) {
+  const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
+  if (!(0, import_node_fs2.existsSync)(dir)) return [];
+  return (0, import_node_fs2.readdirSync)(dir).filter((n2) => n2.endsWith(".json")).map((n2) => n2.slice(0, -".json".length)).sort();
+}
+function loadRecord(projectRoot, recordId) {
+  if (!SAFE_RECORD_ID.test(recordId)) return null;
+  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "records", `${recordId}.json`);
+  if (!(0, import_node_fs2.existsSync)(path)) return null;
+  return JSON.parse((0, import_node_fs2.readFileSync)(path, "utf8"));
+}
+var import_node_fs2, import_node_path3, SAFE_RECORD_ID;
 var init_store = __esm({
   "src/store.ts"() {
     "use strict";
@@ -1920,6 +1931,7 @@ var init_store = __esm({
     import_node_path3 = require("node:path");
     init_invariants();
     init_resolver_identity();
+    SAFE_RECORD_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
   }
 });
 
@@ -3746,6 +3758,1415 @@ var init_consent_cli = __esm({
   }
 });
 
+// src/address.ts
+function formatRecordAddress(a) {
+  switch (a.scheme) {
+    case "git":
+      return `git/${a.owner}/${a.repo}/${a.ref}/${a.recordId}`;
+    case "pages":
+      return `pages/${a.owner}/${a.repo}/${a.recordId}`;
+    case "url":
+      return `url/${a.url}`;
+  }
+}
+function recordAddressUrl(a) {
+  switch (a.scheme) {
+    case "git":
+      return `https://${RAW_HOST}/${a.owner}/${a.repo}/${a.ref}/${STORE_RECORD_PATH(a.recordId)}`;
+    case "pages": {
+      const host = `${a.owner.toLowerCase()}.github.io`;
+      const base = a.repo.toLowerCase() === host ? "" : `/${a.repo}`;
+      return `https://${host}${base}/${SITE_RECORD_PATH(a.recordId)}`;
+    }
+    case "url":
+      return a.url;
+  }
+}
+function recordAddressPageUrl(a) {
+  if (a.scheme !== "pages") return null;
+  const host = `${a.owner.toLowerCase()}.github.io`;
+  const base = a.repo.toLowerCase() === host ? "" : `/${a.repo}`;
+  return `https://${host}${base}/records/${a.recordId}.html`;
+}
+function permanenceNote(a) {
+  if (a.scheme === "git") {
+    return "A record committed to a repository stays in that repository's history. `ursa forget` deletes the local file and records the erasure, and it cannot remove a commit you have already pushed; that takes a history rewrite of your own. If you want a published record you can take down later, publish with `ursa publish` to GitHub Pages instead: that path deploys an artifact rather than a commit, so re-publishing without the record removes it.";
+  }
+  return null;
+}
+function git4(repoPath, args) {
+  try {
+    const out = (0, import_node_child_process5.execFileSync)("git", ["-C", repoPath, ...args], {
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "ignore"]
+    });
+    return { ok: true, out: out.trim() };
+  } catch {
+    return { ok: false, out: "" };
+  }
+}
+function parseGitHubRemote(url) {
+  const trimmed = url.trim().replace(/\.git$/, "");
+  const m = trimmed.match(/github\.com[:/]+([^/]+)\/([^/]+)$/);
+  if (!m) return null;
+  const [, owner, repo] = m;
+  if (!OWNER.test(owner) || !REPO.test(repo)) return null;
+  return { owner, repo };
+}
+function githubRemote(repoPath) {
+  const names = [];
+  const upstream = git4(repoPath, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"]);
+  if (upstream.ok && upstream.out.includes("/")) names.push(upstream.out.split("/")[0]);
+  names.push("origin");
+  const all = git4(repoPath, ["remote"]);
+  if (all.ok) names.push(...all.out.split("\n").filter(Boolean));
+  for (const name of [...new Set(names)]) {
+    const url = git4(repoPath, ["remote", "get-url", name]);
+    if (!url.ok) continue;
+    const parsed = parseGitHubRemote(url.out);
+    if (parsed) return { name, ...parsed };
+  }
+  return null;
+}
+function addressState(projectPath, recordId) {
+  const base = {
+    recordId,
+    address: null,
+    url: null,
+    reachable: false,
+    blockers: [],
+    remote: null,
+    ref: null,
+    path: null,
+    committed: false,
+    pushed: false,
+    current: false,
+    ignored: false,
+    forgotten: false
+  };
+  if (isForgotten(loadConsent(projectPath), recordId)) {
+    return {
+      ...base,
+      forgotten: true,
+      blockers: ["you erased this record with `ursa forget`, so this command offers no address for it"]
+    };
+  }
+  if (!SAFE_RECORD_ID.test(recordId)) {
+    return { ...base, blockers: [`"${recordId}" cannot be part of a URL, so no address exists for it`] };
+  }
+  const top = git4(projectPath, ["rev-parse", "--show-toplevel"]);
+  if (!top.ok) {
+    return {
+      ...base,
+      blockers: [
+        `${projectPath} is not a git work tree, so there is no repository to read the record from. Publish the record with \`ursa publish\` instead, which needs no git remote.`
+      ]
+    };
+  }
+  const repoRoot = top.out;
+  const absolute = (0, import_node_path7.join)(projectPath, STORE_RECORD_PATH(recordId));
+  const path = (0, import_node_path7.relative)(repoRoot, absolute).split(import_node_path7.sep).join("/");
+  const onDisk = (0, import_node_fs6.existsSync)(absolute);
+  const remote = githubRemote(repoRoot);
+  const branch = git4(repoRoot, ["symbolic-ref", "--short", "HEAD"]);
+  const upstream = git4(repoRoot, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"]);
+  const ref = branch.ok ? branch.out : null;
+  const trackingRef = upstream.ok && upstream.out ? upstream.out : remote && ref ? `${remote.name}/${ref}` : null;
+  const committed = git4(repoRoot, ["cat-file", "-e", `HEAD:${path}`]).ok;
+  const localBlob = onDisk ? git4(repoRoot, ["hash-object", "--", absolute]) : { ok: false, out: "" };
+  const remoteBlob = trackingRef ? git4(repoRoot, ["rev-parse", `${trackingRef}:${path}`]) : { ok: false, out: "" };
+  const pushed = remoteBlob.ok;
+  const current = pushed && localBlob.ok && remoteBlob.out === localBlob.out;
+  const ignored = git4(projectPath, ["check-ignore", "-q", absolute]).ok;
+  const blockers = [];
+  if (!onDisk && !committed) {
+    blockers.push(
+      `there is no record ${recordId} in ${projectPath}/.ursa/records/. Resolve one with \`ursa run ${projectPath}\` first.`
+    );
+  }
+  if (!remote) {
+    blockers.push(
+      "this repository has no GitHub remote, so no raw address exists for it. Add one with `git remote add origin https://github.com/<you>/<repo>.git`, or publish with `ursa publish`, which needs no remote."
+    );
+  }
+  if (!ref) {
+    blockers.push(
+      "HEAD is detached, so there is no branch to read the record from. Check out a branch first."
+    );
+  }
+  if (ignored && !committed) {
+    blockers.push(
+      `git ignores ${path} \u2014 \`.ursa/\` is in this repository's .gitignore, which is this project's own default, because a record is raw data. Publishing one is a deliberate act: \`git add -f ${path}\` if that is what you mean to do.`
+    );
+  }
+  if (!committed && onDisk) {
+    blockers.push(`${path} is not in HEAD. Commit it: \`git add -f ${path} && git commit -m "publish one record"\`.`);
+  }
+  if (committed && !pushed) {
+    blockers.push(
+      trackingRef ? `${path} is committed and ${trackingRef} does not have it as of your last fetch. Push it: \`git push\`.` : `${path} is committed and this branch tracks no remote branch. Push it: \`git push -u origin ${ref ?? "<branch>"}\`.`
+    );
+  }
+  if (pushed && !current) {
+    blockers.push(
+      `${trackingRef} serves an older version of ${path} than the file on your disk. Commit and push again, or the address shows a record that is not the one you just resolved.`
+    );
+  }
+  const address = remote && ref ? { scheme: "git", owner: remote.owner, repo: remote.repo, ref, recordId } : null;
+  return {
+    recordId,
+    address,
+    url: address ? recordAddressUrl(address) : null,
+    reachable: blockers.length === 0 && address !== null,
+    blockers,
+    remote,
+    ref,
+    path,
+    committed,
+    pushed,
+    current,
+    ignored,
+    forgotten: false
+  };
+}
+function pagesAddress(repository, recordId) {
+  const [owner, repo] = repository.split("/");
+  if (!owner || !repo || !OWNER.test(owner) || !REPO.test(repo)) return null;
+  if (!SAFE_RECORD_ID.test(recordId)) return null;
+  return { scheme: "pages", owner, repo, recordId };
+}
+var import_node_child_process5, import_node_fs6, import_node_path7, SITE_RECORD_PATH, STORE_RECORD_PATH, RAW_HOST, OWNER, REPO;
+var init_address = __esm({
+  "src/address.ts"() {
+    "use strict";
+    import_node_child_process5 = require("node:child_process");
+    import_node_fs6 = require("node:fs");
+    import_node_path7 = require("node:path");
+    init_consent();
+    init_store();
+    SITE_RECORD_PATH = (id) => `records/${id}.json`;
+    STORE_RECORD_PATH = (id) => `.ursa/records/${id}.json`;
+    RAW_HOST = "raw.githubusercontent.com";
+    OWNER = /^[A-Za-z0-9](?:-?[A-Za-z0-9]){0,38}$/;
+    REPO = /^[A-Za-z0-9._-]{1,100}$/;
+  }
+});
+
+// src/audit.ts
+function elicitingPrompt(record, conversationId, turnIndex) {
+  const conv = record.conversations.find((c) => c.id === conversationId);
+  if (!conv?.prompts?.length) return null;
+  let best = null;
+  for (const p of conv.prompts) if (p.step < turnIndex) best = p;
+  return best;
+}
+function elicitingPrompts(record) {
+  return record.generations.map((g) => elicitingPrompt(record, g.conversationId, g.turnIndex));
+}
+var init_audit = __esm({
+  "src/audit.ts"() {
+    "use strict";
+  }
+});
+
+// src/viewer.ts
+function renderViewer(record) {
+  const json = JSON.stringify(record).replace(/</g, "\\u003c");
+  const elicited = JSON.stringify(elicitingPrompts(record)).replace(/</g, "\\u003c");
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outcome Record \u2014 ${escapeHtml(record.task.id)}</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --surface-2: #232322;
+    --surface-3: #2c2c2a;
+    --border: #3a3a37;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8a897e;
+    --verbatim: #199e70;
+    --mutated: #d95926;
+    --human: #3987e5;
+    --deleted: #7a7a72;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 32px clamp(16px, 4vw, 56px) 80px;
+  }
+  header .wordmark {
+    font-size: 12px; letter-spacing: 0.32em; color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  header h1 { font-size: 26px; font-weight: 600; margin: 6px 0 2px; }
+  header .meta { color: var(--text-secondary); font-size: 13px; }
+  header .meta .chip {
+    display: inline-block; border: 1px solid var(--border); border-radius: 99px;
+    padding: 1px 10px; margin-left: 8px; font-size: 12px; color: var(--text-secondary);
+  }
+  header .meta .chip a { color: inherit; text-decoration: underline; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 14px; }
+  .tile {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; min-width: 168px; flex: 0 1 auto;
+  }
+  .tile .label { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 7px; }
+  .tile .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .tile .value { font-size: 24px; font-weight: 650; margin-top: 3px; }
+  .tile .sub { font-size: 12px; color: var(--text-muted); }
+  .distbar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; gap: 2px; background: var(--surface-1); margin: 6px 0 10px; }
+  .distbar div { height: 100%; }
+  .barnote { font-size: 12px; color: var(--text-muted); margin: -4px 0 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--text-secondary); margin-bottom: 26px; }
+  .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+  nav.tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  nav.tabs button {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    color: var(--text-secondary); font: inherit; font-size: 13px; padding: 8px 12px; cursor: pointer;
+  }
+  nav.tabs button.active { color: var(--text-primary); border-bottom-color: var(--human); }
+  pre.doc {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+    font: 12.5px/1.6 ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-muted);
+  }
+  pre.doc .sp { cursor: default; border-radius: 2px; }
+  pre.doc .sp:hover { outline: 1px solid var(--border); background: var(--surface-3); }
+  .c-verbatim { color: var(--verbatim); }
+  .c-mutated { color: var(--mutated); text-decoration: underline dotted; text-underline-offset: 3px; }
+  .c-human { color: var(--human); font-style: italic; }
+  .c-uncertain { text-decoration: underline dashed; text-underline-offset: 3px; }
+  .c-trivial { opacity: 0.72; }
+  .c-deleted { color: var(--deleted); text-decoration: line-through; }
+  #inspector {
+    position: fixed; right: 20px; bottom: 20px; width: min(430px, 90vw);
+    max-height: 46vh; overflow: auto; background: var(--surface-3);
+    border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    font-size: 12.5px; color: var(--text-secondary); display: none;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.5);
+  }
+  #inspector h3 { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  #inspector .diff ins { color: var(--human); background: none; text-decoration: none; font-style: italic; }
+  #inspector .diff del { color: var(--deleted); text-decoration: line-through; }
+  #inspector pre { white-space: pre-wrap; word-break: break-word; font: 11.5px/1.5 ui-monospace, Menlo, monospace; }
+  details.gen { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; background: var(--surface-2); }
+  details.gen summary { padding: 10px 14px; cursor: pointer; font-size: 13px; color: var(--text-secondary); }
+  details.gen summary b { color: var(--text-primary); font-weight: 600; }
+  details.gen pre.doc { border: none; border-top: 1px solid var(--border); border-radius: 0 0 10px 10px; margin: 0; }
+  .survbar { display: inline-block; width: 90px; height: 7px; border-radius: 3px; background: var(--surface-1); vertical-align: middle; margin: 0 6px; overflow: hidden; }
+  .survbar div { height: 100%; background: var(--verbatim); }
+  h2.conv { font-size: 15px; margin: 22px 0 10px; color: var(--text-primary); }
+  h2.conv .sub { color: var(--text-muted); font-weight: 400; font-size: 12.5px; }
+  table.stats { border-collapse: collapse; font-size: 13px; width: 100%; max-width: 900px; }
+  table.stats th, table.stats td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--border); }
+  table.stats th { color: var(--text-muted); font-weight: 500; font-size: 12px; }
+  table.stats td { color: var(--text-secondary); }
+  table.stats td:first-child { color: var(--text-primary); }
+  .num { font-variant-numeric: tabular-nums; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .filenote { font-size: 12.5px; color: var(--text-muted); margin: 0 0 8px; }
+  .prompt {
+    border-left: 2px solid var(--human); background: var(--surface-2);
+    border-radius: 0 8px 8px 0; padding: 9px 13px; margin: 0 0 10px;
+  }
+  .prompt .who { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+  .prompt p { color: var(--text-secondary); font-size: 13px; white-space: pre-wrap; margin-top: 3px; }
+  button.jump {
+    margin-top: 9px; background: var(--surface-2); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 7px; font: inherit; font-size: 12px;
+    padding: 5px 11px; cursor: pointer;
+  }
+  button.jump:hover { border-color: var(--human); color: var(--human); }
+  .nolink { color: var(--text-muted); margin-top: 6px; }
+  pre.doc .hl {
+    background: rgba(57, 135, 229, 0.26);
+    box-shadow: inset 0 0 0 1px var(--human); border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+<script id="record" type="application/json">${json}</script>
+<script id="elicited" type="application/json">${elicited}</script>
+<header>
+  <div class="wordmark">Ursa Major \u2726 provenance-resolved outcome record</div>
+  <h1 id="title"></h1>
+  <div class="meta" id="meta"></div>
+</header>
+<div class="tiles" id="tiles"></div>
+<div class="distbar" id="distbar"></div>
+<div class="barnote" id="barnote"></div>
+<div class="legend" id="legend"></div>
+<nav class="tabs" id="tabs"></nav>
+<div id="panels"></div>
+<aside id="inspector"></aside>
+<script>
+(function () {
+  var R = JSON.parse(document.getElementById('record').textContent);
+  // ELICITED[generationIndex] = the user prompt that produced that generation, or null
+  var ELICITED = JSON.parse(document.getElementById('elicited').textContent);
+  // generationIndex \u2192 function(sourcePointer) that opens that generation and
+  // highlights the source range. Declared here because the tab loop below builds
+  // the Generations panel, which fills it, before any span can call openGeneration.
+  var genBuilders = {};
+  var COLORS = { survived_verbatim: 'var(--verbatim)', survived_mutated: 'var(--mutated)', no_generation_provenance: 'var(--human)' };
+  var LABELS = { survived_verbatim: 'Survived verbatim', survived_mutated: 'Survived mutated', no_generation_provenance: 'No generation provenance', generated_deleted: 'Generated, deleted' };
+  var CLS = { survived_verbatim: 'c-verbatim', survived_mutated: 'c-mutated', no_generation_provenance: 'c-human', generated_deleted: 'c-deleted' };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function pct(x) { return (x * 100).toFixed(1) + '%'; }
+
+  // header
+  document.getElementById('title').textContent = R.task.id;
+  var meta = document.getElementById('meta');
+  meta.textContent = 'generated ' + R.task.generatedAt.slice(0, 10) + ' \xB7 ' + R.files.length + ' files \xB7 ' + R.generations.length + ' generations \xB7 ' + R.conversations.length + ' conversation' + (R.conversations.length === 1 ? '' : 's');
+  meta.appendChild(el('span', 'chip', R.task.finished ? 'finished' : 'abandoned'));
+  // Which build of the resolver classified the spans below. The user is
+  // entitled to see it for the same reason they are entitled to see every
+  // other inference on this page, and the practical case is that two
+  // records in this same directory, with the same id, can have been
+  // written by resolvers that disagreed by a factor of eight about how
+  // much of the work survived (docs/ideas.md, 2026-10-12). Absent on a
+  // record written before the field existed, in which case nothing is
+  // shown rather than a chip claiming an unknown resolver.
+  if (R.task.resolvedBy) {
+    var rb = R.task.resolvedBy;
+    var resolverChip = el('span', 'chip', rb.basis === 'git_commit'
+      ? 'resolved by commit ' + rb.commit + (rb.dirty ? ' plus uncommitted changes' : '')
+      : 'resolved by bundle sha256:' + rb.digest);
+    resolverChip.title = rb.basis === 'git_commit'
+      ? 'The classifications on this page were computed by Ursa Major at commit ' + rb.commit + ' of its own source.' + (rb.dirty ? ' That working tree had uncommitted changes, so the commit alone does not identify the code that ran.' : '')
+      : 'The classifications on this page were computed by a single-file build of Ursa Major whose contents hash to this SHA-256. There was no source checkout to name a commit from, which is the normal case on a GitHub runner.';
+    meta.appendChild(resolverChip);
+  }
+  // What kind of finished thing this record is about. Spelled out rather than
+  // abbreviated, because 'hosted' alone is a bare term to anyone outside Ursa.
+  var ARTIFACT_KINDS = {
+    chat: 'chat trace: the finished work is the conversation',
+    repo: 'repository: the finished work is versioned source',
+    hosted: 'hosted: the finished work is served at a URL',
+    visual: 'visual: the finished work was judged by eye'
+  };
+  var art = R.artifact || { kind: 'chat' };
+  meta.appendChild(el('span', 'chip', ARTIFACT_KINDS[art.kind] || art.kind));
+  if (art.renderRef) {
+    var ref = el('span', 'chip');
+    ref.appendChild(document.createTextNode('rendered at '));
+    // Deliberately not a regex literal. This entire function body is one
+    // JavaScript template literal (the one opened by renderViewer's return),
+    // so a backslash written here is consumed by the template and never
+    // reaches the emitted script: /^https?:\\/\\//i arrives in the HTML as
+    // /^https?:///i, which is a SyntaxError, and one SyntaxError anywhere in
+    // this script means the browser runs none of it and the viewer renders as
+    // an empty shell. Scheme matching by string comparison needs no escape.
+    var scheme = art.renderRef.toLowerCase();
+    if (scheme.indexOf('http://') === 0 || scheme.indexOf('https://') === 0) {
+      var a = el('a', '', art.renderRef);
+      a.href = art.renderRef;
+      a.target = '_blank';
+      a.rel = 'noreferrer noopener';
+      ref.appendChild(a);
+    } else {
+      ref.appendChild(document.createTextNode(art.renderRef));
+    }
+    meta.appendChild(ref);
+  }
+
+  // tiles
+  var tiles = document.getElementById('tiles');
+  ['survived_verbatim', 'survived_mutated', 'no_generation_provenance'].forEach(function (c) {
+    var s = R.stats.byClass[c];
+    var t = el('div', 'tile');
+    var lab = el('div', 'label');
+    var dot = el('span', 'dot'); dot.style.background = COLORS[c];
+    lab.appendChild(dot); lab.appendChild(document.createTextNode(LABELS[c]));
+    t.appendChild(lab);
+    // The headline is the share of the WHOLE finished file, not of the part
+    // some span covered. A reader looking at a tile labelled "kept
+    // unchanged" above a document is asking how much of the document that
+    // is, and the pct field answers a narrower question: 94.9% of the classified
+    // characters on this record's own real-history probe, where the same
+    // characters are 91.0% of the file. Both numbers are shown, each named,
+    // because the narrower one is what the bar below is built from and a
+    // tile and a bar that disagree with no explanation is worse than either.
+    t.appendChild(el('div', 'value num', pct(s.pctOfFinal)));
+    t.appendChild(el('div', 'sub num', 'of the whole finished work'));
+    t.appendChild(el('div', 'sub num', fmt(s.chars) + ' chars \xB7 ' + fmt(s.spans) + ' spans'));
+    t.appendChild(el('div', 'sub num', pct(s.pct) + ' of the ' + fmt(R.stats.coveredChars) + ' chars any span covered'));
+    tiles.appendChild(t);
+  });
+  var g = R.stats.generated;
+  var t = el('div', 'tile');
+  var lab = el('div', 'label');
+  var dot = el('span', 'dot'); dot.style.background = 'var(--deleted)';
+  lab.appendChild(dot); lab.appendChild(document.createTextNode(LABELS.generated_deleted));
+  t.appendChild(lab);
+  // Headline the human's own discard, not the gross figure. A merge can
+  // destroy generated text with nobody reading it, and that is not a
+  // discard; it is reported on its own line so the tile is not a claim
+  // about the reader that the record cannot support.
+  t.appendChild(el('div', 'value num', pct(g.humanDeletedPct)));
+  t.appendChild(el('div', 'sub num', fmt(g.humanDeletedChars) + ' of ' + fmt(g.totalChars) + ' generated chars'));
+  if (g.mergeDeletedChars > 0) {
+    t.appendChild(el('div', 'sub num', '+ ' + fmt(g.mergeDeletedChars) + ' chars destroyed by a merge, not by you'));
+  }
+  // A third line only when there is something to say. The record can tell
+  // the text is gone and cannot tell what took it, and showing that as part
+  // of the discard figure would be the tile claiming more than it knows.
+  if (g.unknownDeletedChars > 0) {
+    t.appendChild(el('div', 'sub num', '+ ' + fmt(g.unknownDeletedChars) + ' chars gone with no readable cause'));
+  }
+  tiles.appendChild(t);
+
+  // distribution bar over covered chars
+  var bar = document.getElementById('distbar');
+  ['survived_verbatim', 'survived_mutated', 'no_generation_provenance'].forEach(function (c) {
+    var seg = el('div');
+    seg.style.width = (R.stats.byClass[c].pct * 100) + '%';
+    seg.style.background = COLORS[c];
+    seg.title = LABELS[c] + ' ' + pct(R.stats.byClass[c].pct);
+    bar.appendChild(seg);
+  });
+
+  // What the bar is a bar of, stated under it. The three segments sum to the
+  // full width by construction, so without this line the bar reads as the
+  // whole finished file; it is the classified part of it, and the remainder
+  // is text no span covered rather than text with no fate.
+  var unclassified = R.stats.finalChars - R.stats.coveredChars;
+  var note = document.getElementById('barnote');
+  note.textContent = unclassified > 0
+    ? 'Full width is the ' + fmt(R.stats.coveredChars) + ' characters some span covered, which is '
+      + pct(R.stats.coveredChars / R.stats.finalChars) + ' of this work. The other '
+      + fmt(unclassified) + ' characters sit between spans and are in no segment above.'
+    : 'Full width is all ' + fmt(R.stats.finalChars) + ' characters of this work. Every one of them is inside a classified span.';
+
+  // legend
+  var legend = document.getElementById('legend');
+  [['survived_verbatim', 'kept unchanged'], ['survived_mutated', 'kept, edited (dotted underline)'], ['no_generation_provenance', 'no model was in the running (italic)'], ['generated_deleted', 'produced, not in the final work (struck; hover a span for whether you dropped it or a merge did)']].forEach(function (pair) {
+    var item = el('span');
+    var sw = el('span', 'sw');
+    sw.style.background = pair[0] === 'generated_deleted' ? 'var(--deleted)' : COLORS[pair[0]];
+    item.appendChild(sw);
+    item.appendChild(document.createTextNode(LABELS[pair[0]] + ' \u2014 ' + pair[1]));
+    legend.appendChild(item);
+  });
+  if (R.stats.uncertainSpans > 0) {
+    legend.appendChild(el('span', '', 'dashed underline = uncertain (' + R.stats.uncertainSpans + ' spans need adjudication)'));
+  }
+
+  // inspector
+  var inspector = document.getElementById('inspector');
+  function convTitle(id) {
+    for (var i = 0; i < R.conversations.length; i++) if (R.conversations[i].id === id) return R.conversations[i].title;
+    return id;
+  }
+  function showSpan(span) {
+    inspector.innerHTML = '';
+    inspector.style.display = 'block';
+    var h = el('h3', '', LABELS[span.class] + (span.uncertain ? ' \xB7 uncertain' : '')
+      + (span.trivial ? ' \xB7 trivial match' : '')
+      + (span.normalizedOnly ? ' \xB7 formatting only' : ''));
+    h.style.color = COLORS[span.class];
+    inspector.appendChild(h);
+    var src = span.source || (span.candidate && span.candidate.source);
+    if (span.score !== undefined) inspector.appendChild(el('div', 'num', 'score ' + span.score));
+    if (span.candidate) inspector.appendChild(el('div', 'num', 'best rejected candidate \xB7 score ' + span.candidate.score));
+    // Why it was rejected. Without this a demoted span shows a 0.948
+    // candidate and no account of why it is not a match, which reads as
+    // the resolver being coy about a near-certainty. The user can always
+    // see what was inferred about them (CLAUDE.md \xA72), and "a commit you
+    // did not write already contained this text" is the inference.
+    if (span.descent && span.descent.basis === 'rival') {
+      // One branch per relation, and four of them because there are four.
+      // Until 2026-10-15 this was a two-way choice and prior_revision fell
+      // through to the sibling wording, so the surface the user reads
+      // described the generation's own parent commit as "a branch this
+      // generation is not an ancestor of" \u2014 the one relation where the
+      // true statement is the strongest one available, that the file
+      // already held this text when the agent opened it. No backticks in
+      // this comment: everything from the doctype above to the closing
+      // backtick of this template literal is one string, so one would end
+      // the document.
+      var rel = span.descent.relation === 'prior_revision'
+        ? 'the commit this generation started from, so the file already held this text when the agent opened it'
+        : span.descent.relation === 'pre_existing'
+          ? 'an earlier commit this generation replaced'
+          : span.descent.relation === 'merged_in'
+            ? 'a branch this work merged, so you had it in front of you'
+            : 'a branch this generation is not an ancestor of';
+      inspector.appendChild(el('div', 'nolink',
+        'Not counted as your edit: this exact text is already in commit ' + span.descent.sha
+        + ' ("' + span.descent.subject + '")'
+        // The date, when the record states one. The user can always see
+        // what was inferred about them (CLAUDE.md \xA72), and "when did that
+        // commit exist" is the question this inference turns on: a rival
+        // dated after the work would have been impossible evidence, which
+        // is what RIVAL_NOT_AFTER_FINAL now refuses before a record
+        // reaches this viewer at all.
+        + (span.descent.date ? ', authored ' + span.descent.date : '')
+        + ', ' + rel
+        + '. You did not reach it by editing the generation above.'));
+    }
+    if (span.descent && span.descent.basis === 'unverified') {
+      inspector.appendChild(el('div', 'nolink',
+        'This edit was not checked against the rest of the history ('
+        + span.descent.reason.replace(/_/g, ' ') + '), so the label stands unguarded.'));
+    }
+    if (src) {
+      inspector.appendChild(el('div', '', convTitle(src.conversationId) + ' \xB7 turn ' + src.turnIndex + ' \xB7 ' + src.model));
+      var gen = R.generations[src.generationIndex];
+      if (gen && gen.filePath) inspector.appendChild(el('div', '', gen.kind + ' \u2192 ' + gen.filePath));
+      if (gen) {
+        var btn = el('button', 'jump', 'Show this generation, highlighted \u2193');
+        btn.addEventListener('click', function (ev) { ev.stopPropagation(); openGeneration(src); });
+        inspector.appendChild(btn);
+      } else {
+        inspector.appendChild(el('div', 'nolink', 'This pointer names generation ' + src.generationIndex + ', which is not in this record.'));
+      }
+      var prompt = ELICITED[src.generationIndex];
+      var ph = el('h3', '', 'What the user asked for'); ph.style.marginTop = '10px';
+      inspector.appendChild(ph);
+      if (prompt) {
+        inspector.appendChild(el('pre', '', prompt.text));
+      } else {
+        inspector.appendChild(el('div', 'nolink', 'No user prompt was captured before turn ' + src.turnIndex + ' in this conversation.'));
+      }
+    } else {
+      inspector.appendChild(el('div', 'nolink', 'No generation in this record produced this text, and nothing scored above the floor. It entered the work outside the model loop.'));
+    }
+    if (span.diff) {
+      var dh = el('h3', '', 'Mutation (generation \u2192 final)');
+      dh.style.marginTop = '10px';
+      inspector.appendChild(dh);
+      // The narrow mutation, named for the reader rather than left to be
+      // inferred from a diff whose only visible content is whitespace.
+      // Before 2026-10-13 this span was labelled "survived verbatim" and the
+      // change was folded away entirely, so saying what the change was is
+      // part of the correction, not decoration.
+      if (span.normalizedOnly) {
+        inspector.appendChild(el('div', 'nolink', 'The two texts are the same text after case folding, smart punctuation folding and whitespace collapsing. What changed is formatting alone: a capital, a dash, or where the line wrapped.'));
+      }
+      var d = el('pre', 'diff');
+      span.diff.forEach(function (part) {
+        var node;
+        if (part.added) node = document.createElement('ins');
+        else if (part.removed) node = document.createElement('del');
+        else node = document.createElement('span');
+        node.textContent = part.value;
+        d.appendChild(node);
+      });
+      inspector.appendChild(d);
+    } else if (span.candidate) {
+      var ch = el('h3', '', 'Candidate text'); ch.style.marginTop = '10px';
+      inspector.appendChild(ch);
+      inspector.appendChild(el('pre', '', span.candidate.text));
+    }
+  }
+  document.addEventListener('click', function (ev) {
+    if (!inspector.contains(ev.target) && !(ev.target.classList && ev.target.classList.contains('sp'))) {
+      inspector.style.display = 'none';
+    }
+  });
+
+  // render one text + spans into a <pre>
+  function renderDoc(text, spans, fateMode, highlight) {
+    var pre = el('pre', 'doc');
+    var cursor = 0;
+    spans.forEach(function (span) {
+      if (span.start > cursor) pre.appendChild(document.createTextNode(text.slice(cursor, span.start)));
+      var lit = highlight && span.start < highlight.end && span.end > highlight.start;
+      var cls = 'sp ' + CLS[fateMode ? span.fate : span.class]
+        + (span.uncertain ? ' c-uncertain' : '') + (span.trivial ? ' c-trivial' : '')
+        + (lit ? ' hl' : '');
+      var node = el('span', cls, text.slice(span.start, span.end));
+      // In the generations panel a deleted span says which kind of
+      // deletion it was, so the struck text is never read as a discard
+      // the person made when a merge is what destroyed it.
+      if (fateMode && span.deletion) {
+        node.title = span.deletion.cause === 'merge'
+          ? 'destroyed by merge ' + span.deletion.mergeSha + ' (' + span.deletion.mergeSubject + '), not dropped by you'
+          : 'you had this and did not keep it';
+      }
+      if (!fateMode) {
+        node.addEventListener('mouseenter', function () { showSpan(span); });
+        node.addEventListener('click', function (ev) { ev.stopPropagation(); showSpan(span); });
+      }
+      pre.appendChild(node);
+      cursor = span.end;
+    });
+    if (cursor < text.length) pre.appendChild(document.createTextNode(text.slice(cursor)));
+    return pre;
+  }
+
+  // tabs + panels
+  var tabs = document.getElementById('tabs');
+  var panels = document.getElementById('panels');
+  var entries = [];
+  R.files.forEach(function (f) { entries.push({ label: f.path, build: function (p) { buildFilePanel(p, f); } }); });
+  var genTab = entries.length;
+  entries.push({ label: 'Generations', build: buildGenerationsPanel });
+  entries.push({ label: 'Sessions', build: buildSessionsPanel });
+  if (R.signals) entries.push({ label: 'Signals', build: buildSignalsPanel });
+  var tabButtons = [];
+  var tabPanels = [];
+  function activateTab(i) {
+    tabButtons.forEach(function (x, j) { x.classList.toggle('active', i === j); });
+    tabPanels.forEach(function (x, j) { x.classList.toggle('active', i === j); });
+  }
+  entries.forEach(function (e, i) {
+    var b = el('button', i === 0 ? 'active' : '', e.label);
+    var p = el('div', 'panel' + (i === 0 ? ' active' : ''));
+    b.addEventListener('click', function () { activateTab(i); });
+    tabButtons.push(b);
+    tabPanels.push(p);
+    tabs.appendChild(b);
+    panels.appendChild(p);
+    e.build(p);
+  });
+
+  // span \u2192 generation: open the Generations tab at the exact source range
+  function openGeneration(src) {
+    var open = genBuilders[src.generationIndex];
+    if (!open) return;
+    activateTab(genTab);
+    open(src);
+  }
+
+  function buildFilePanel(panel, f) {
+    var st = null;
+    for (var i = 0; i < R.stats.perFile.length; i++) if (R.stats.perFile[i].path === f.path) st = R.stats.perFile[i];
+    if (st && st.coveredChars) {
+      panel.appendChild(el('p', 'filenote num',
+        'verbatim ' + pct(st.byClass.survived_verbatim / st.coveredChars)
+        + ' \xB7 mutated ' + pct(st.byClass.survived_mutated / st.coveredChars)
+        + ' \xB7 no provenance ' + pct(st.byClass.no_generation_provenance / st.coveredChars)));
+    }
+    panel.appendChild(renderDoc(f.text, f.spans, false));
+  }
+
+  function promptBlock(p) {
+    var box = el('div', 'prompt');
+    box.appendChild(el('div', 'who', 'user, before turn ' + (p.step + 1)));
+    box.appendChild(el('p', '', p.text));
+    return box;
+  }
+
+  function buildGenerationsPanel(panel) {
+    R.conversations.forEach(function (conv) {
+      var gens = R.generations.filter(function (g) { return g.conversationId === conv.id; });
+      var prompts = conv.prompts || [];
+      if (!gens.length && !prompts.length) return;
+      var h = el('h2', 'conv');
+      h.appendChild(document.createTextNode(conv.title + ' '));
+      h.appendChild(el('span', 'sub', conv.id.slice(0, 8) + ' \xB7 ' + gens.length + ' generations \xB7 ' + prompts.length + ' user prompts'));
+      panel.appendChild(h);
+
+      // one timeline: a prompt at step N sits ahead of the turn it produced (N+1)
+      var items = [];
+      prompts.forEach(function (p) { items.push({ order: p.step + 0.5, prompt: p }); });
+      gens.forEach(function (g) { items.push({ order: g.turnIndex, gen: g }); });
+      items.sort(function (a, b) { return a.order - b.order; });
+
+      items.forEach(function (item) {
+        if (item.prompt) { panel.appendChild(promptBlock(item.prompt)); return; }
+        var gen = item.gen;
+        var d = el('details', 'gen');
+        var s = document.createElement('summary');
+        var head = document.createElement('b');
+        head.textContent = 'turn ' + gen.turnIndex + ' \xB7 ' + gen.kind + (gen.filePath ? ' \xB7 ' + shortPath(gen.filePath) : '');
+        s.appendChild(head);
+        var barWrap = el('span', 'survbar');
+        var barFill = el('div');
+        barFill.style.width = (gen.survivalRate * 100) + '%';
+        barWrap.appendChild(barFill);
+        s.appendChild(barWrap);
+        s.appendChild(el('span', 'num', pct(gen.survivalRate) + ' survived \xB7 ' + fmt(gen.totalChars) + ' chars \xB7 ' + gen.model));
+        d.appendChild(s);
+        var body = null;
+        function buildBody(highlight) {
+          if (body) d.removeChild(body);
+          body = renderDoc(gen.text, gen.spans, true, highlight);
+          d.appendChild(body);
+        }
+        d.addEventListener('toggle', function () {
+          if (d.open && !body) buildBody(null);
+        });
+        genBuilders[gen.generationIndex] = function (src) {
+          d.open = true;
+          buildBody(src);
+          d.scrollIntoView({ block: 'center' });
+        };
+        panel.appendChild(d);
+      });
+    });
+  }
+
+  function shortPath(p) {
+    var parts = p.split('/');
+    return parts.slice(-3).join('/');
+  }
+
+  function buildSessionsPanel(panel) {
+    var tbl = el('table', 'stats');
+    var thead = document.createElement('thead');
+    var hr = document.createElement('tr');
+    ['Conversation', 'Generations', 'Generated chars', 'Survived chars', 'Survival', 'Turns to acceptance'].forEach(function (h) { hr.appendChild(el('th', '', h)); });
+    thead.appendChild(hr); tbl.appendChild(thead);
+    var tb = document.createElement('tbody');
+    R.stats.perConversation.forEach(function (c) {
+      var tr = document.createElement('tr');
+      tr.appendChild(el('td', '', c.title));
+      tr.appendChild(el('td', 'num', fmt(c.generations)));
+      tr.appendChild(el('td', 'num', fmt(c.generatedChars)));
+      tr.appendChild(el('td', 'num', fmt(c.survivedChars)));
+      tr.appendChild(el('td', 'num', pct(c.survivalRate)));
+      tr.appendChild(el('td', 'num', c.turnsToAcceptance === null ? '\u2014' : String(c.turnsToAcceptance)));
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    panel.appendChild(tbl);
+
+    var h2 = el('h2', 'conv', 'By model');
+    panel.appendChild(h2);
+    var mt = el('table', 'stats');
+    var mh = document.createElement('tr');
+    ['Model', 'Chars in final', '% of covered'].forEach(function (h) { mh.appendChild(el('th', '', h)); });
+    mt.appendChild(mh);
+    Object.keys(R.stats.byModel).forEach(function (m) {
+      var tr = document.createElement('tr');
+      tr.appendChild(el('td', '', m));
+      tr.appendChild(el('td', 'num', fmt(R.stats.byModel[m].chars)));
+      tr.appendChild(el('td', 'num', pct(R.stats.byModel[m].pctOfCovered)));
+      mt.appendChild(tr);
+    });
+    panel.appendChild(mt);
+  }
+
+  function table(panel, title, headers, rows) {
+    if (!rows.length) return;
+    panel.appendChild(el('h2', 'conv', title));
+    var t = el('table', 'stats');
+    var hr = document.createElement('tr');
+    headers.forEach(function (h) { hr.appendChild(el('th', '', h)); });
+    t.appendChild(hr);
+    rows.forEach(function (row) {
+      var tr = document.createElement('tr');
+      row.forEach(function (cell) { tr.appendChild(el('td', '', String(cell))); });
+      t.appendChild(tr);
+    });
+    panel.appendChild(t);
+  }
+
+  function buildSignalsPanel(panel) {
+    var S = R.signals;
+    var ep = S.episode;
+    // three states, not two: null means the owner was never asked, which is
+    // not the same claim as her declaring the work unacceptable.
+    var verdict = ep.accepted === null ? 'UNDECLARED' : (ep.accepted ? 'ACCEPTED' : 'NOT ACCEPTED');
+    var note = el('p', 'filenote',
+      'Episode: ' + fmt(ep.steps) + ' steps \xB7 ' + fmt(ep.generations) + ' generations \xB7 ' + verdict
+      + (ep.acceptanceStatedInChat ? ' (an acceptance was stated in chat, which is not a declaration)' : '')
+      + ' \xB7 basis: ' + ep.acceptanceBasis
+      + ' \xB7 labels: ' + S.method);
+    panel.appendChild(note);
+
+    table(panel, 'Correction loops (recurrence = agentic failure count)',
+      ['Loop', 'Theme', 'Recurrences', 'Every prompt step', 'Opened \u2192 closed',
+       'Resolution', 'Files it touched', 'Discovered spec'],
+      S.correctionLoops.map(function (l) {
+        return [l.id, l.theme, l.recurrences, (l.promptSteps || []).join(', '),
+          l.openedStep + ' \u2192 ' + (l.closedStep === null ? 'not closed' : l.closedStep),
+          l.resolution.replace('_', ' '), (l.targetFiles || []).join(', ') || '\u2014',
+          l.discoveredSpec];
+      }));
+
+    table(panel, 'Feedback \u2192 mechanism translations',
+      ['Step', 'User said', 'Fault it turned out to be', 'Resolved by'],
+      S.feedbackTranslations.map(function (t) {
+        return [t.complaintStep, '\u201C' + t.complaint + '\u201D', t.mechanism, 'steps ' + t.resolvedBySteps.join(', ')];
+      }));
+
+    table(panel, 'Repair attempts, graded by the artifact',
+      ['Loop', 'Strategy', 'Steps', 'Outcome', 'Evidence'],
+      S.repairAttempts.map(function (a) {
+        return [a.loopId, a.strategy, a.steps.join(', '), a.outcome.toUpperCase(), a.evidence];
+      }));
+
+    table(panel, 'Regressions (previously accepted state broken)',
+      ['Reported at', 'What broke', 'User words'],
+      S.regressions.map(function (g) {
+        return [g.step, g.brokenState, '\u201C' + g.evidence + '\u201D'];
+      }));
+
+    table(panel, 'Defensive guardrails (trust scar tissue)',
+      ['Step', 'Guardrail', 'Prior incident'],
+      S.defensiveGuardrails.map(function (g) {
+        return [g.step, '\u201C' + g.text + '\u201D', 'step ' + g.priorIncidentStep];
+      }));
+
+    table(panel, 'One-shot corrections (the stateable baseline)',
+      ['Step', 'Correction', 'Domain'],
+      S.oneShotCorrections.map(function (o) {
+        return [o.step, '\u201C' + o.text + '\u201D', o.domain];
+      }));
+
+    (S.notes || []).forEach(function (n) { panel.appendChild(el('p', 'filenote', n)); });
+  }
+})();
+</script>
+</body>
+</html>
+`;
+}
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+var init_viewer = __esm({
+  "src/viewer.ts"() {
+    "use strict";
+    init_audit();
+  }
+});
+
+// src/publish.ts
+function recordHref(id, ext) {
+  return `${RECORDS_DIR}/${id}.${ext}`;
+}
+function manifestFor(records) {
+  const paths = /* @__PURE__ */ new Set();
+  const adapters = /* @__PURE__ */ new Set();
+  let finalChars = 0, generations = 0, generationChars = 0;
+  let conversations = 0, prompts = 0, promptChars = 0;
+  for (const r of records) {
+    for (const f of r.files) {
+      paths.add(f.path);
+      finalChars += f.text.length;
+    }
+    for (const g of r.generations) {
+      generations += 1;
+      generationChars += g.text.length;
+    }
+    for (const c of r.conversations) {
+      conversations += 1;
+      adapters.add(c.adapter);
+      for (const p of c.prompts ?? []) {
+        prompts += 1;
+        promptChars += p.text.length;
+      }
+    }
+  }
+  return {
+    records: records.length,
+    recordIds: records.map((r) => r.task.id),
+    adapters: [...adapters].sort(),
+    finalFiles: [...paths].length,
+    filePaths: [...paths].sort(),
+    finalChars,
+    generations,
+    generationChars,
+    conversations,
+    prompts,
+    promptChars
+  };
+}
+function formatManifest(m) {
+  const n2 = (x) => x.toLocaleString("en-US");
+  const lines = [];
+  lines.push(`Publishing ${n2(m.records)} record${m.records === 1 ? "" : "s"} makes all of the following readable by anyone with the address:`);
+  lines.push("");
+  lines.push(`  the full text of ${n2(m.finalFiles)} finished file${m.finalFiles === 1 ? "" : "s"}   ${n2(m.finalChars)} characters`);
+  lines.push(`  the full text of ${n2(m.generations)} model generation${m.generations === 1 ? "" : "s"}  ${n2(m.generationChars)} characters`);
+  lines.push(`  your own ${n2(m.prompts)} message${m.prompts === 1 ? "" : "s"} to the model      ${n2(m.promptChars)} characters`);
+  lines.push("");
+  if (m.filePaths.length > 0) {
+    lines.push("The file paths that will appear on the page, in full:");
+    for (const p of m.filePaths) lines.push(`  ${p}`);
+    lines.push("");
+  }
+  for (const line of noveltyOfDisclosure(m)) lines.push(line);
+  lines.push("");
+  lines.push("Nothing here is aggregated, redacted or withheld: a published record is");
+  lines.push("the record.");
+  return lines.join("\n");
+}
+function noveltyOfDisclosure(m) {
+  const hasGit = m.adapters.includes("git");
+  const hasChat = m.adapters.some((a) => a === "claude-code" || a === "paste");
+  const out = [];
+  if (hasGit) {
+    out.push("The generations in the git-path records are blobs of files at the agent's");
+    out.push("own commits, so a public repository has already published that text. What");
+    out.push("is new on the page is the classification over it: which characters a model");
+    out.push("wrote, which ones you changed, and which ones it never touched.");
+  }
+  if (hasChat) {
+    if (hasGit) out.push("");
+    out.push("The generations and the messages in the session-path records come from a");
+    out.push("transcript that was never in the repository. Publishing them is the first");
+    out.push("time that text is readable by anyone, and it includes every message you");
+    out.push("typed to the model, in full.");
+  }
+  if (out.length === 0) {
+    out.push("These records name no conversation, so what becomes readable is the");
+    out.push("finished text and the classification over it.");
+  }
+  return out;
+}
+function loadPublishable(projectPath) {
+  const records = [];
+  const skipped = [];
+  const consent = loadConsent(projectPath);
+  for (const id of listRecordIds(projectPath)) {
+    if (!SAFE_RECORD_ID.test(id)) {
+      skipped.push({ id, reason: "unsafe-id" });
+      continue;
+    }
+    if (isForgotten(consent, id)) {
+      skipped.push({ id, reason: "forgotten" });
+      continue;
+    }
+    let record = null;
+    try {
+      record = loadRecord(projectPath, id);
+    } catch {
+      record = null;
+    }
+    if (!record) {
+      skipped.push({ id, reason: "unreadable" });
+      continue;
+    }
+    if (!isRecordShaped(record)) {
+      skipped.push({ id, reason: "unreadable" });
+      continue;
+    }
+    records.push(record);
+  }
+  return { records, skipped };
+}
+function isRecordShaped(r) {
+  return Array.isArray(r.files) && Array.isArray(r.generations) && Array.isArray(r.conversations) && typeof r.task?.id === "string" && typeof r.stats?.finalChars === "number" && typeof r.stats?.byClass === "object";
+}
+function publish(opts) {
+  const { records, skipped } = loadPublishable(opts.projectPath);
+  const disclosed = manifestFor(records);
+  if (!opts.acknowledged) throw new DisclosureNotAcknowledged(disclosed);
+  const index = {
+    indexVersion: PUBLISHED_INDEX_VERSION,
+    publishedAt: opts.publishedAt ?? (/* @__PURE__ */ new Date()).toISOString(),
+    repository: opts.repository ?? null,
+    recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
+    records: records.map((r) => summarize(r, opts.repository ?? null)),
+    disclosed
+  };
+  const recordsDir = (0, import_node_path8.join)(opts.outDir, RECORDS_DIR);
+  (0, import_node_fs7.mkdirSync)(recordsDir, { recursive: true });
+  const written = [];
+  const write = (path, body) => {
+    (0, import_node_fs7.writeFileSync)(path, body);
+    written.push(path);
+  };
+  for (const record of records) {
+    write((0, import_node_path8.join)(recordsDir, `${record.task.id}.html`), renderViewer(record));
+    write((0, import_node_path8.join)(recordsDir, `${record.task.id}.json`), JSON.stringify(record, null, 2) + "\n");
+  }
+  write((0, import_node_path8.join)(opts.outDir, INDEX_JSON), JSON.stringify(index, null, 2) + "\n");
+  write((0, import_node_path8.join)(opts.outDir, INDEX_HTML), renderIndexPage(index));
+  write((0, import_node_path8.join)(opts.outDir, ".nojekyll"), "");
+  return { written, index, skipped, warnings: foreignSlugWarnings(records, opts.repository ?? null) };
+}
+function foreignSlugWarnings(records, repository) {
+  if (!repository) return [];
+  const repoSlug = repository.split("/").pop().toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+  if (!repoSlug) return [];
+  const out = [];
+  for (const r of records) {
+    const slug = r.task.id.replace(/-\d{4}-\d{2}-\d{2}-[0-9a-f]{7}$/, "");
+    if (slug === r.task.id || slug === repoSlug) continue;
+    out.push(
+      `record "${r.task.id}" will be published at ${recordHref(r.task.id, "html")}, and the "${slug}" in that address is the name of the directory this work was resolved in, not "${repoSlug}". If that directory name is not something you want in a public URL, rename the checkout and resolve again before publishing.`
+    );
+  }
+  return out;
+}
+function summarize(record, repository) {
+  const chars = {};
+  const spans = {};
+  for (const [cls, stat] of Object.entries(record.stats.byClass)) {
+    chars[cls] = stat.chars;
+    spans[cls] = stat.spans;
+  }
+  const by = record.task.resolvedBy;
+  const address = repository ? pagesAddress(repository, record.task.id) : null;
+  return {
+    id: record.task.id,
+    generatedAt: record.task.generatedAt,
+    finished: record.task.finished,
+    artifactKind: record.artifact.kind,
+    finalChars: record.stats.finalChars,
+    coveredChars: record.stats.coveredChars,
+    charsByClass: chars,
+    spansByClass: spans,
+    generatedChars: record.stats.generated.charsWritten,
+    generatedDeletedChars: record.stats.generated.deletedChars,
+    resolvedBy: by ? { basis: by.basis, value: resolverValue(by) } : null,
+    html: recordHref(record.task.id, "html"),
+    json: recordHref(record.task.id, "json"),
+    address: address ? formatRecordAddress(address) : null
+  };
+}
+function resolverValue(by) {
+  return by.basis === "git_commit" ? by.commit : by.digest;
+}
+function renderIndexPage(index) {
+  const n2 = (x) => x.toLocaleString("en-US");
+  const pct = (part, whole) => whole > 0 ? (part / whole * 100).toFixed(1) + "%" : "\u2014";
+  const rows = index.records.map((r) => {
+    const verbatim = r.charsByClass.survived_verbatim ?? 0;
+    const mutated = r.charsByClass.survived_mutated ?? 0;
+    const none = r.charsByClass.no_generation_provenance ?? 0;
+    return `<tr>
+  <td class="id"><a href="${escapeAttr(r.html)}">${escapeHtml2(r.id)}</a></td>
+  <td class="num">${n2(r.finalChars)}</td>
+  <td class="num verbatim">${pct(verbatim, r.finalChars)}</td>
+  <td class="num mutated">${pct(mutated, r.finalChars)}</td>
+  <td class="num human">${pct(none, r.finalChars)}</td>
+  <td class="when">${escapeHtml2(r.generatedAt.slice(0, 10))}</td>
+  <td class="raw"><a href="${escapeAttr(r.json)}">JSON</a></td>
+</tr>`;
+  }).join("\n");
+  const empty = `<p class="empty">This site has no records in it. Either no merge has produced
+  one yet, or every work unit in the merge window fell below the
+  <code>min-chars</code> floor. An empty set is reported rather than
+  rendered as a zero, because the two are different claims.</p>`;
+  const d = index.disclosed;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outcome records${index.repository ? ` \u2014 ${escapeHtml2(index.repository)}` : ""}</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --surface-2: #232322;
+    --border: #3a3a37;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8a897e;
+    --verbatim: #199e70;
+    --mutated: #d95926;
+    --human: #3987e5;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--surface-1); color: var(--text-primary);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 32px clamp(16px, 4vw, 56px) 80px;
+  }
+  .wordmark { font-size: 12px; letter-spacing: 0.32em; color: var(--text-muted); text-transform: uppercase; }
+  h1 { font-size: 26px; font-weight: 600; margin: 6px 0 2px; }
+  .meta { color: var(--text-secondary); font-size: 13px; }
+  .lede { color: var(--text-secondary); max-width: 68ch; margin: 18px 0 8px; }
+  table { border-collapse: collapse; width: 100%; margin: 24px 0 8px; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-muted); font-weight: 500; font-size: 12px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.id a { color: var(--text-primary); text-decoration: none; border-bottom: 1px solid var(--border); }
+  td.id a:hover { border-bottom-color: var(--text-primary); }
+  td.raw a, .disclosure a { color: var(--text-secondary); }
+  td.verbatim { color: var(--verbatim); }
+  td.mutated { color: var(--mutated); }
+  td.human { color: var(--human); }
+  td.when { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .legend, .disclosure, footer { color: var(--text-muted); font-size: 13px; max-width: 72ch; }
+  .legend { margin: 14px 0 0; }
+  .legend dt { color: var(--text-secondary); margin-top: 9px; }
+  .disclosure {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; margin: 28px 0 0;
+  }
+  .disclosure h2 { font-size: 13px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px; }
+  .empty { color: var(--text-secondary); max-width: 68ch; margin: 24px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; color: var(--text-secondary); }
+  footer { margin-top: 34px; border-top: 1px solid var(--border); padding-top: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wordmark">Ursa Major</div>
+  <h1>Outcome records${index.repository ? ` for ${escapeHtml2(index.repository)}` : ""}</h1>
+  <div class="meta">${n2(index.records.length)} record${index.records.length === 1 ? "" : "s"} \xB7 built ${escapeHtml2(index.publishedAt.slice(0, 16).replace("T", " "))} UTC</div>
+</header>
+
+<p class="lede">Each record below is one finished piece of work joined backward to every
+model generation that fed it, with every stretch of the final text
+labelled by what happened to it. Open one and the labels are navigable:
+from any span you reach the generation that produced it and the message
+that elicited that generation.</p>
+
+${index.records.length === 0 ? empty : `<table>
+<thead><tr>
+  <th>Record</th><th class="num">Final characters</th>
+  <th class="num">Kept unchanged</th><th class="num">Kept, edited</th><th class="num">No model behind it</th>
+  <th>Resolved</th><th>Raw</th>
+</tr></thead>
+<tbody>
+${rows}
+</tbody>
+</table>
+
+<dl class="legend">
+  <dt>Kept unchanged</dt><dd>Characters of the finished work that a model generated and nobody
+    altered, byte for byte, and that the generation's own parent commit did not already hold.</dd>
+  <dt>Kept, edited</dt><dd>Characters a model generated and a person then changed. The edit is the
+    correction, expressed as an edit rather than as a complaint.</dd>
+  <dt>No model behind it</dt><dd>Characters present in the finished work that trace to no generation
+    at all. The model was never in the running for them.</dd>
+</dl>
+
+<p class="legend">All three columns divide by the whole finished work, so they do not sum
+to 100%: the characters between labelled spans belong to no class. Each
+record's page carries both denominators.</p>`}
+
+<div class="disclosure">
+  <h2>What is on this site</h2>
+  <p>Every record here carries raw text, not a summary: ${n2(d.finalChars)} characters of
+  finished work across ${n2(d.finalFiles)} file${d.finalFiles === 1 ? "" : "s"}, ${n2(d.generationChars)} characters of model
+  output across ${n2(d.generations)} generation${d.generations === 1 ? "" : "s"}, and ${n2(d.promptChars)} characters of the
+  publisher's own messages to the model across ${n2(d.prompts)} message${d.prompts === 1 ? "" : "s"}. Whoever built this
+  site was shown those counts and the file paths, and agreed to them.</p>
+  <p>${escapeHtml2(noveltyOfDisclosure(d).join(" ").replace(/\s+/g, " "))}</p>
+</div>
+
+<footer>
+  Built by Ursa Major's resolver from this repository's own git history, on
+  the repository owner's own runner. Index contract version ${escapeHtml2(index.indexVersion)};
+  record schema ${escapeHtml2(index.recordSchemaVersions.join(", ") || "none")}. The machine-readable form
+  of this page is <a href="${INDEX_JSON}">${INDEX_JSON}</a>.
+</footer>
+</body>
+</html>
+`;
+}
+function escapeHtml2(s) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+function escapeAttr(s) {
+  return escapeHtml2(s);
+}
+var import_node_fs7, import_node_path8, PUBLISHED_INDEX_VERSION, INDEX_JSON, INDEX_HTML, RECORDS_DIR, DisclosureNotAcknowledged;
+var init_publish = __esm({
+  "src/publish.ts"() {
+    "use strict";
+    import_node_fs7 = require("node:fs");
+    import_node_path8 = require("node:path");
+    init_address();
+    init_consent();
+    init_store();
+    init_viewer();
+    PUBLISHED_INDEX_VERSION = "0.2.0";
+    INDEX_JSON = "index.json";
+    INDEX_HTML = "index.html";
+    RECORDS_DIR = "records";
+    DisclosureNotAcknowledged = class extends Error {
+      constructor(manifest) {
+        super("publish refused: the disclosure above was not acknowledged");
+        this.manifest = manifest;
+        this.name = "DisclosureNotAcknowledged";
+      }
+      manifest;
+    };
+  }
+});
+
+// src/address.cli.ts
+var address_cli_exports = {};
+__export(address_cli_exports, {
+  runAddress: () => runAddress
+});
+async function runAddress(opts) {
+  const ids = opts.recordId ? [opts.recordId] : listRecordIds(opts.projectPath);
+  if (ids.length === 0) {
+    console.error(
+      `no records in ${opts.projectPath}/.ursa/records/. Resolve some first with "ursa run ${opts.projectPath}".`
+    );
+    return 0;
+  }
+  const probe = opts.probe ?? headProbe;
+  const states = [];
+  for (const id of ids) {
+    const state = addressState(opts.projectPath, id);
+    states.push(state);
+    await report(state, opts, probe);
+  }
+  const live = states.filter((s) => s.reachable);
+  if (live.length > 0) {
+    const consent = loadConsent(opts.projectPath);
+    const records = live.map((s) => s.recordId).filter((id) => !isForgotten(consent, id)).map((id) => {
+      try {
+        return loadRecord(opts.projectPath, id);
+      } catch {
+        return null;
+      }
+    }).filter((r) => r !== null && isRecordShaped(r));
+    if (records.length > 0) {
+      console.log("");
+      console.log("What is public at the addresses above:");
+      console.log("");
+      console.log(formatManifest(manifestFor(records)));
+    }
+  }
+  return live.length > 0 ? 0 : 4;
+}
+async function report(state, opts, probe) {
+  console.log(`record ${state.recordId}`);
+  if (state.address && state.url) {
+    console.log(`  address   ${formatRecordAddress(state.address)}`);
+    console.log(`  json      ${state.url}`);
+    console.log(`  readable  ${state.reachable ? "yes, as far as this clone can see" : "not yet"}`);
+    if (state.reachable) {
+      const note = permanenceNote(state.address);
+      if (note) console.log(`  permanent ${note}`);
+    }
+  }
+  for (const blocker of state.blockers) console.log(`  missing   ${blocker}`);
+  if (opts.pages) {
+    const pages = pagesAddress(opts.pages, state.recordId);
+    if (!pages) {
+      console.error(`  --pages ${opts.pages} is not an owner/name repository`);
+    } else {
+      console.log(`  address   ${formatRecordAddress(pages)}   (if you publish with \`ursa publish\`)`);
+      console.log(`  json      ${recordAddressUrl(pages)}`);
+      console.log(`  page      ${recordAddressPageUrl(pages)}`);
+    }
+  }
+  if (opts.check) {
+    const targets = [];
+    if (state.address) targets.push(state.address);
+    const pages = opts.pages ? pagesAddress(opts.pages, state.recordId) : null;
+    if (pages) targets.push(pages);
+    for (const target of targets) await checkOne(target, probe);
+  }
+  console.log("");
+}
+async function checkOne(address, probe) {
+  const url = recordAddressUrl(address);
+  const result = await probe(url);
+  if (result.error) {
+    console.log(`  checked   ${url}`);
+    console.log(`            that host could not be reached: ${result.error}`);
+    return;
+  }
+  console.log(`  checked   ${url}`);
+  console.log(`            HTTP ${result.status}`);
+  if (result.allowOrigin === "*") {
+    console.log("            access-control-allow-origin: * \u2014 a browser on any page can read this");
+  } else if (result.allowOrigin) {
+    console.log(
+      `            access-control-allow-origin: ${result.allowOrigin} \u2014 only a page on that origin can read this; a viewer anywhere else will be refused by the browser`
+    );
+  } else {
+    console.log(
+      "            no access-control-allow-origin header \u2014 a browser will not let a page read this address, so a reader can download the file but a viewer cannot fetch it"
+    );
+  }
+}
+async function headProbe(url) {
+  try {
+    const res = await fetch(url, { method: "HEAD", redirect: "follow" });
+    return {
+      status: res.status,
+      allowOrigin: res.headers.get("access-control-allow-origin"),
+      error: null
+    };
+  } catch (err) {
+    return { status: null, allowOrigin: null, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+var init_address_cli = __esm({
+  "src/address.cli.ts"() {
+    "use strict";
+    init_publish();
+    init_address();
+    init_consent();
+    init_store();
+  }
+});
+
+// src/publish.cli.ts
+var publish_cli_exports = {};
+__export(publish_cli_exports, {
+  runPublish: () => runPublish
+});
+function runPublish(opts) {
+  const { records, skipped } = loadPublishable(opts.projectPath);
+  const manifest = manifestFor(records);
+  const why = {
+    "unsafe-id": "this record id cannot be part of a URL, so no address exists for it",
+    unreadable: "the record file could not be read as JSON",
+    forgotten: "you erased this record with `ursa forget`, so it is not published"
+  };
+  for (const s of skipped) console.error(`skipped ${s.id}: ${why[s.reason]}`);
+  if (records.length === 0) {
+    console.error(
+      `no records in ${opts.projectPath}/.ursa/records/. Resolve some first with "ursa run ${opts.projectPath}" or by merging a pull request with the Action installed.`
+    );
+    return 0;
+  }
+  console.log(formatManifest(manifest));
+  if (!opts.acknowledged) {
+    console.log("");
+    console.log("Nothing was written. To publish exactly what is listed above, run again with --yes.");
+    return 3;
+  }
+  if (!opts.outDir) {
+    console.error("ursa publish needs --out <dir> to write the site into");
+    return 2;
+  }
+  try {
+    const result = publish({
+      projectPath: opts.projectPath,
+      outDir: opts.outDir,
+      acknowledged: true,
+      repository: opts.repository
+    });
+    for (const w of result.warnings) console.error(`warning: ${w}`);
+    console.log("");
+    console.log(`wrote ${result.written.length} files to ${opts.outDir}`);
+    console.log(`  ${result.index.records.length} record pages, one index page, one index.json`);
+    console.log("");
+    console.log("This directory is a complete static site. Serve it anywhere; it fetches nothing.");
+    return 0;
+  } catch (err) {
+    if (err instanceof DisclosureNotAcknowledged) {
+      console.error(formatManifest(err.manifest));
+      return 3;
+    }
+    throw err;
+  }
+}
+var init_publish_cli = __esm({
+  "src/publish.cli.ts"() {
+    "use strict";
+    init_publish();
+  }
+});
+
 // src/tuning/distill.ts
 function buildDistillPrompt(record, tuning) {
   const s = record.signals;
@@ -3840,11 +5261,11 @@ function distill(record, tuning, model, runner = claudeRunner) {
   const prompt = buildDistillPrompt(record, tuning);
   return parseDistillOutput(runner(prompt, model));
 }
-var import_node_child_process5, VALID_KINDS, EVIDENCE_IS_DATA, BEGIN_EVIDENCE, END_EVIDENCE, claudeRunner;
+var import_node_child_process6, VALID_KINDS, EVIDENCE_IS_DATA, BEGIN_EVIDENCE, END_EVIDENCE, claudeRunner;
 var init_distill = __esm({
   "src/tuning/distill.ts"() {
     "use strict";
-    import_node_child_process5 = require("node:child_process");
+    import_node_child_process6 = require("node:child_process");
     VALID_KINDS = /* @__PURE__ */ new Set([
       "correction-loop",
       "feedback-translation",
@@ -3857,7 +5278,7 @@ var init_distill = __esm({
     BEGIN_EVIDENCE = "BEGIN EVIDENCE";
     END_EVIDENCE = "END EVIDENCE";
     claudeRunner = (prompt, model) => {
-      const out = (0, import_node_child_process5.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
+      const out = (0, import_node_child_process6.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
         input: prompt,
         encoding: "utf8",
         maxBuffer: 16 * 1024 * 1024,
@@ -3998,7 +5419,7 @@ function mergeWindow(payload, opts = {}) {
 }
 function parentCountOf(repoPath, sha) {
   try {
-    const out = (0, import_node_child_process6.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
+    const out = (0, import_node_child_process7.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
       encoding: "utf8"
     }).trim();
     return out.split(/\s+/).filter(Boolean).length - 1;
@@ -4007,15 +5428,15 @@ function parentCountOf(repoPath, sha) {
   }
 }
 function mergeWindowFromEvent(eventPath, repoPath) {
-  const payload = JSON.parse((0, import_node_fs6.readFileSync)(eventPath, "utf8"));
+  const payload = JSON.parse((0, import_node_fs8.readFileSync)(eventPath, "utf8"));
   return mergeWindow(payload, { parentCountOf: (sha) => parentCountOf(repoPath, sha) });
 }
-var import_node_fs6, import_node_child_process6, NotAMergedPullRequest;
+var import_node_fs8, import_node_child_process7, NotAMergedPullRequest;
 var init_window = __esm({
   "src/ci/window.ts"() {
     "use strict";
-    import_node_fs6 = require("node:fs");
-    import_node_child_process6 = require("node:child_process");
+    import_node_fs8 = require("node:fs");
+    import_node_child_process7 = require("node:child_process");
     NotAMergedPullRequest = class extends Error {
     };
   }
@@ -4024,7 +5445,7 @@ var init_window = __esm({
 // src/ci/distill-mode.ts
 function claudeOnPath() {
   try {
-    (0, import_node_child_process7.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
+    (0, import_node_child_process8.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
     return true;
   } catch {
     return false;
@@ -4051,11 +5472,11 @@ function selectDistillMode(env, opts = {}) {
   }
   return { kind: "model", model, reason: `${credential} is set and the claude CLI is on PATH` };
 }
-var import_node_child_process7, CREDENTIAL_VARS;
+var import_node_child_process8, CREDENTIAL_VARS;
 var init_distill_mode = __esm({
   "src/ci/distill-mode.ts"() {
     "use strict";
-    import_node_child_process7 = require("node:child_process");
+    import_node_child_process8 = require("node:child_process");
     CREDENTIAL_VARS = ["ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN"];
   }
 });
@@ -4353,7 +5774,7 @@ async function runCi(opts) {
     range: window.range,
     windowNote: window.note,
     declarationBasis: declaration2.basis,
-    recordsPath: (0, import_node_path7.join)(ursaDir(opts.projectPath), "records"),
+    recordsPath: (0, import_node_path9.join)(ursaDir(opts.projectPath), "records"),
     dropped,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
@@ -4403,7 +5824,7 @@ function renderStepOutputs(fields, commentUrl) {
   ].join("\n");
 }
 function writeStepOutputs(path, fields, commentUrl) {
-  (0, import_node_fs7.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
+  (0, import_node_fs9.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
 }
 async function readReactions(api, prNumber, log) {
   try {
@@ -4422,7 +5843,7 @@ async function readReactions(api, prNumber, log) {
 }
 function appendAcceptance(projectPath, prior) {
   const dir = ursaDir(projectPath);
-  (0, import_node_fs7.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs9.mkdirSync)(dir, { recursive: true });
   const entry = {
     schemaVersion: "0.1.0",
     commentUrl: prior.comment.commentUrl,
@@ -4434,7 +5855,7 @@ function appendAcceptance(projectPath, prior) {
     mark: prior.mark,
     readAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  (0, import_node_fs7.appendFileSync)((0, import_node_path7.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
+  (0, import_node_fs9.appendFileSync)((0, import_node_path9.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
 }
 function distillAll(projectPath, records, mode, log) {
   const base = {
@@ -4448,8 +5869,8 @@ function distillAll(projectPath, records, mode, log) {
     return base;
   }
   if (records.length === 0) return base;
-  const tuningPath = (0, import_node_path7.join)(ursaDir(projectPath), "tuning.json");
-  let tuning = (0, import_node_fs7.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs7.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
+  const tuningPath = (0, import_node_path9.join)(ursaDir(projectPath), "tuning.json");
+  let tuning = (0, import_node_fs9.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs9.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
   for (const record of records) {
     if (tuning.sources.some((s) => s.recordId === record.task.id)) continue;
     try {
@@ -4462,15 +5883,15 @@ function distillAll(projectPath, records, mode, log) {
       log(`ursa ci: distill failed on ${record.task.id} (${err.message}); continuing`);
     }
   }
-  (0, import_node_fs7.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
+  (0, import_node_fs9.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
   return base;
 }
-var import_node_fs7, import_node_path7, NO_PRIOR;
+var import_node_fs9, import_node_path9, NO_PRIOR;
 var init_run = __esm({
   "src/ci/run.ts"() {
     "use strict";
-    import_node_fs7 = require("node:fs");
-    import_node_path7 = require("node:path");
+    import_node_fs9 = require("node:fs");
+    import_node_path9 = require("node:path");
     init_pairfinder();
     init_episodes();
     init_signals();
@@ -4508,7 +5929,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path8 = require("node:path");
+var import_node_path10 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -4880,11 +6301,24 @@ async function main(argv) {
       repo: { type: "string" },
       event: { type: "string" },
       "run-url": { type: "string" },
-      "no-post": { type: "boolean" }
+      "no-post": { type: "boolean" },
+      // `ursa publish`. `--yes` is the whole of the disclosure consent
+      // mechanism and is deliberately a bare boolean with no default and
+      // no environment fallback: see the gate note in src/publish.ts.
+      out: { type: "string" },
+      yes: { type: "boolean" },
+      // `ursa address`. `--record` names one record instead of all of
+      // them, `--pages owner/name` asks for the address a published site
+      // would serve, and `--check` is the only flag in this file that
+      // opens a socket: see the note at the top of src/address.cli.ts for
+      // why it is opt-in.
+      record: { type: "string" },
+      pages: { type: "string" },
+      check: { type: "boolean" }
     }
   });
   const [cmd, project] = positionals;
-  if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" || !project) {
+  if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
     console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
@@ -4892,7 +6326,32 @@ async function main(argv) {
     console.error("       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]");
     console.error("       ursa forget <projectPath> --record <recordId>");
     console.error("       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]");
+    console.error("       ursa publish <projectPath> --out <dir> [--repo owner/name] [--yes]");
+    console.error("         prints what would become public and writes nothing without --yes");
+    console.error("       ursa address <projectPath> [--record <id>] [--pages owner/name] [--check]");
+    console.error("         prints the address a stranger can type for each record, and what is missing");
     return 2;
+  }
+  if (cmd === "address") {
+    const { runAddress: runAddress2 } = await Promise.resolve().then(() => (init_address_cli(), address_cli_exports));
+    return runAddress2({
+      projectPath: (0, import_node_path10.resolve)(project),
+      recordId: values.record ?? null,
+      // `GITHUB_REPOSITORY` is read here for the same reason `publish`
+      // reads it: on a runner it is the one fact about the repository
+      // that is always present and always right.
+      pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
+      check: values.check === true
+    });
+  }
+  if (cmd === "publish") {
+    const { runPublish: runPublish2 } = await Promise.resolve().then(() => (init_publish_cli(), publish_cli_exports));
+    return runPublish2({
+      projectPath: (0, import_node_path10.resolve)(project),
+      outDir: values.out,
+      repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      acknowledged: values.yes === true
+    });
   }
   if (cmd === "ci") {
     const repo = values.repo ?? process.env.GITHUB_REPOSITORY;
@@ -4912,7 +6371,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path8.resolve)(project),
+      projectPath: (0, import_node_path10.resolve)(project),
       eventPath,
       repo,
       token,
@@ -4936,7 +6395,7 @@ async function main(argv) {
     }
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path8.resolve)(project),
+      projectPath: (0, import_node_path10.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -4954,7 +6413,7 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path8.resolve)(project);
+  const projectPath = (0, import_node_path10.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
   let declaration2 = UNDECLARED;
