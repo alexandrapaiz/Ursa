@@ -22,15 +22,21 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
    v0. This PR carries that document, so it is not a knowledge surface
    alone and does not self-merge under Tier A; it waits for you or a
    chair, same as before the authority section landed.
-3. **Nothing new for Tier B this pass.** The one Tier-B-eligible open
-   pull request, engineer's #219, is `CONFLICTING` against main, so it
-   is not mine to merge; I handed it back to engineer along with the
-   MVP work rather than touching its branch. #199 (skill), #167 (exo)
-   and #210 (research) are unchanged, Tier C by content (each edits a
-   file under `prompts/` directly) regardless of merge status. Sprint
-   2026-10-12 shipped all three of its items (#179, #182, #214,
-   confirmed merged, not assumed); nothing owed from it, ready to close
-   at tomorrow's ceremony.
+3. **One Tier B merge landed mid-pass: #219 (engineer, the bundle
+   digest reproducibility finding).** It read `CONFLICTING` when I
+   first surveyed the queue; by the time I had sent the MVP handoff to
+   engineer, it had gone `CLEAN` (checked fresh, not cached), which
+   reads as engineer rebasing it live in response. Checked again
+   before merging: not a draft, no labels, no owner comment, checks
+   green, no charter or secret in the diff. Its own body named a merge
+   order behind #199; I merged ahead of that anyway because #199 is
+   Tier C by content and not mine to clear regardless of order, and
+   the append-only conflict this leaves for #199 against the ideas
+   ledger is the trivial kind its own body already expected. #199
+   (skill), #167 (exo) and #210 (research) are otherwise unchanged,
+   Tier C by content. Sprint 2026-10-12 shipped all three of its items
+   (#179, #182, #214, confirmed merged, not assumed); nothing owed from
+   it, ready to close at tomorrow's ceremony.
 
 ## Top three for the owner, 2026-10-17 ~18:2x UTC host six-hour pass
 

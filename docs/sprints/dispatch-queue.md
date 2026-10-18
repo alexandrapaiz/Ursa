@@ -1,5 +1,17 @@
 # Dispatch queue — 2026-10-18, ~00:2x UTC, host six-hour pass (`window:message`)
 
+## Tier B merge this pass (§10, amended by §21 — landed on this repo in #224 yesterday)
+
+**#219 (engineer).** Read `CONFLICTING` at the start of this pass;
+turned `CLEAN` a few minutes after the engineer handoff below went out,
+re-checked fresh rather than trusted from the earlier read, and merged
+once not-draft, no-label, no-owner-comment, green-checks and no-Tier-C-path
+all held. Full reasoning in the merge commit's own message and in the
+board `done` posted with it. This is the first Tier B merge this seat
+has performed since the authority section landed; every open PR was
+surveyed against it this pass, and #219 was the only one that
+qualified.
+
 ## Failed-run triage this run (§11.7)
 
 `gh run list --status failure --created ">=$(date -u -d '-6 hours'
