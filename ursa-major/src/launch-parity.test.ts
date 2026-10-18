@@ -47,7 +47,7 @@ import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
 import { clearsSizeFloor } from './launch'
-import { findCommitPairsWithDiagnostics } from './pairfinder'
+import { findCommitPairsWithDiagnostics, resolvePairingBounds } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
 import type { OutcomeRecord } from './types'
@@ -114,6 +114,15 @@ function comparable(record: OutcomeRecord): Record<string, unknown> {
     // bundle:check` into `npm test` by spawning it, which it was not
     // part of when this paragraph was first written.
     'task.gatedBy': record.task.gatedBy,
+    // Which pairing bounds the walk that found this record ran under.
+    // Compared here for the same reason as the two stamps above, and it
+    // is the one of the three that is a caller's argument rather than a
+    // property of the running build: both launches take the bounds from
+    // the same options and stamp them through one shared function
+    // (`stampPairingBounds` in src/launch.ts), so a difference on this
+    // line means one launch wrote an audit trail the other did not from
+    // identical inputs.
+    'task.pairedBy': record.task.pairedBy,
     artifact: record.artifact,
     'stats.byClass': record.stats.byClass,
     'stats.generated': record.stats.generated,
@@ -357,6 +366,26 @@ describe('both launches read the same pairing bounds', () => {
     expect([...ci.keys()]).toEqual([...local.keys()])
     expect(ciExitCode).toBe(0)
     expect(localExitCode).toBe(0)
+  })
+
+  it('stamps the bounds it used into the record, on both launches, defaults filled in', async () => {
+    // The number a reader of a published record sees. Before this
+    // stamp a record stated two commits' shas and no statement of how
+    // far apart the resolver had been willing to let them be, so two
+    // records resolved from one history under different bounds were
+    // indistinguishable. The two unset bounds are asserted as the
+    // resolver's own defaults rather than as `undefined`, because a
+    // record states what the walk used and never what a caller omitted.
+    const repo = distantFixture()
+    const { ci, local } = await bothLaunches(repo, 10, [], { maxPairDistance: 20 }, ROOT)
+    const defaults = resolvePairingBounds()
+    const expected = {
+      maxPairDistance: 20,
+      maxPairAgeHours: defaults.maxPairAgeHours,
+      maxInterposedGenerations: defaults.maxInterposedGenerations,
+    }
+    expect([...local.values()][0].task.pairedBy).toEqual(expected)
+    expect([...ci.values()][0].task.pairedBy).toEqual(expected)
   })
 
   it('says which bound dropped the pair, by the same diagnostic both launches read', () => {
