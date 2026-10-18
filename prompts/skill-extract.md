@@ -277,6 +277,10 @@ So:
    were no longer true, and those needed rewriting rather than moving.
 3. **`--update` goes in the same commit as the re-anchoring**, so the
    lock diff shows a person decided rather than a script having its way.
+   It also has to **name what it is re-recording** now, by skill slug or
+   by lock key. A bare `--update` refuses while anything is drifted,
+   because it used to re-record the whole library from whatever the tree
+   said and one of them cleared 43 red ranges without a word (§5k).
 4. **A new citation fails too**, until its fingerprint is recorded. That
    is deliberate: it puts the "read it once, deliberately" step on the
    author rather than on the reviewer.

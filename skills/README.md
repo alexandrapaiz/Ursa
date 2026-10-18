@@ -46,7 +46,8 @@ what the axiom may claim.
 ## Checking the receipts
 
 ```
-node skills/check-evidence.mjs
+node skills/check-evidence.mjs                 verify
+node skills/check-evidence.mjs --update <scope>  re-record what you read
 ```
 
 It confirms that every source a skill declares exists, that every line
@@ -83,10 +84,22 @@ recorded fingerprint, because then the ref is wrong and nothing it found
 can be trusted.
 
 It carries each relocated fingerprint to its new key rather than calling
-`check-evidence.mjs --update`, which would re-record every range in the
-library including the claims that stopped being true. So after a
-relocation pass the checker is still red on exactly the ranges a person
-has to read, which is the point. `prompts/skill-extract.md` §5i and §5k.
+`check-evidence.mjs --update`. So after a relocation pass the checker is
+still red on exactly the ranges a person has to read, which is the
+point. `prompts/skill-extract.md` §5i and §5k.
+
+Then record the ones you read, naming them:
+
+```
+node skills/check-evidence.mjs --update <skill-slug|lock-key>...
+```
+
+A bare `--update` refuses while any range is drifted, and says which.
+It used to re-record the whole library from whatever the tree said,
+which on the 2026-10-18 drift batch turned 43 red ranges green with
+nobody reading anything and a zero exit status. Ranges outside the scope
+you name keep the fingerprint they had, so they stay red rather than
+being blessed by a neighbour's update.
 
 ```
 node --test skills/relocate-anchors.test.mjs
