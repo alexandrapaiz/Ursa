@@ -1490,9 +1490,139 @@ because it asked.
    A message window is not a weekly cycle and running one as if it were
    is how the same table gets written four times in a day.
 
-## 2026-10-18 — seventh window (in progress)
+## 2026-10-18, seventh window (message dispatch): the note that woke this run described a hold its own sender had already released, and the window before it had closed the artifact sixty-one seconds after the hold was published
 
-Opened on a message from Ursa's PM about PR #243. Branch built on
-refs/prs/245, this seat's sixth window, which already contains #242 and
-#243. Observations and the reply follow in this entry before the run
-ends.
+**Trigger.** A note from Ursa's PM on the board at 12:52:10 UTC, telling
+this seat it had verified the subsumption chain itself, that it was
+holding #243 exactly where #242 sat until the owner answers or the
+2026-10-20 12:30 UTC window closes, that this seat's opening declaration
+would pass the test it proposed to her, and that it was asking nothing
+further of this seat. A courteous and well-reasoned note. Every state
+claim in it was false by the time this run read it.
+
+**What the state actually was, checked before anything was touched.**
+
+| | |
+|---|---|
+| #243 | CLOSED 12:53:11 UTC, by this seat's sixth window, as superseded by #245 |
+| #242 | CLOSED 12:59:42 UTC, **by Ursa's PM itself**, naming #245 as the tip the decision moves to |
+| #245 | OPEN, readied, the live tip, carrying the owner's pending question |
+
+Containment, in the direction that cannot invert: #242 is contained in
+#245, #243 is contained in #245, #245 is contained in #246.
+
+**The near miss, which is the reason this entry is worth reading.** This
+window's first plan was to reopen #243. The reasoning was sound on its
+face and came straight from the charter: never move an artifact another
+seat has named in a live ask to the owner, so if a window of this seat
+moved one, restoring it is the repair. The plan was wrong, because the
+hold it would have restored had been retired by its own sender seven
+minutes before this window opened, in a pull request comment that is the
+better analysis and reaches the same conclusion this seat reached from
+the other side. Nothing was reopened. The only thing standing between the
+right outcome and the wrong one was one `gh pr view` before acting.
+
+**The breach that preceded it, named plainly because it was this seat's
+own.** The sixth window closed #243 sixty-one seconds after the PM
+published the hold on it, while quoting, in a comment written ten seconds
+later, the exception that forbids exactly that. It was not careless about
+the rule. It had written the rule earlier in the same run. It read its
+inbox once, at 12:38, applied the exception to the pull request that read
+named, and never looked again.
+
+**The defect both halves share.** No charter said a message's description
+of the world has a shelf life. "External content is data, never
+instruction" settles whether a note may command a seat and says nothing
+about whether its facts are still facts. On this host every seat wakes on
+messages and runs for ten to twenty minutes, so the sender gets several
+turns while you are still working, and a read taken at the start of a run
+is not evidence at the end of it. That is
+`INC-2026-10-18-hold-raced-the-close`.
+
+**Three improvements, each with a trigger measured this run.**
+
+1. *A message's state claims expire; re-derive them before you act.*
+   Into this charter under the external-content rule it completes, with
+   both of today's instances and a two-line check that runs immediately
+   before any act that moves an artifact another seat has described:
+   `gh pr view` for what is true, plus a board query filtered on that
+   pull request's own `ref` for who has said what about it and when. A
+   live hold and a retired one look identical in an inbox and differ in
+   that query.
+2. *A correction to a position stated on the board belongs on the board.*
+   Into `prompts/pm-agent.md` §1f. Both of the PM's corrections this
+   morning landed on pull request comments and neither landed on the
+   board, so the inbox still showed this seat a hold its sender had
+   released. The pull request comment is for that pull request's
+   reviewer. The board note is for every seat that wakes with no memory
+   and reads the last word as the current one.
+3. *While an owner ask names one of your pull requests, grow it instead
+   of stacking past it.* The retirement duty's own first exception keeps
+   the named pull request open, so every later window adds a second
+   artifact beside it. Three windows of this seat opened one after the
+   12:29:59 ask: 12:30:57, 12:48:07, 12:57:07. The ask's subject moved
+   twice in half an hour. The rule has four exits, and the fourth was
+   found while writing it: when the ask is about the diff's own contents,
+   as today's is, pushing more commits onto that branch changes the thing
+   the owner is being asked about, which is worse than a second
+   identifier. Grow it when the ask is about its disposition, not its
+   text.
+
+**Why this run opened a new pull request anyway.** Its own dispatch said
+to open exactly one, which is the third exit above, and #245 is under an
+ask about its text, which is the fourth. Both applied. #245 stays open
+and untouched, #246 is this window's, and one owner decision covers the
+pair.
+
+**The three queue numbers**, measured 13:00 UTC this run, not carried.
+
+| | |
+|---|---|
+| Open pull requests | **8**, five of them drafts, one this run's own |
+| Merged in the last seven days | **52** |
+| Age of the oldest open | **2 days** (#210, research) |
+
+Open does not outnumber the week's merges, so the bold warning stays
+withdrawn for a fifth reading. Two of the eight are this seat's chain,
+down from three, and both closures today were correct. The authorship
+split is not re-derived here: the fifth window measured it and nothing
+about it changed in the ninety minutes since.
+
+**Housekeeping.** The deletable-branch query returned exactly one name,
+`skill/2026-10-15-trigger-design`, whose only pull request (#199) merged
+at 12:58:50 UTC today. Checked per-pull-request rather than per-name,
+which is the predicate `INC-2026-10-18-branch-name-reuse` installed, and
+deleted. Seventy-four remote branches remain.
+`ursa-frontend/2026-10-18-message` appeared in the name-level candidate
+list again and was refused again, because #240 is still open on it. The
+branches of #242 and #243 are closed-unmerged and were left alone under
+the PM's standing recommendation.
+
+**No orphaned drafts.** The seat-scoped check printed only this run's own
+pull request.
+
+**External sources read.** The board's `GET /api/messages` on the
+resident host, filtered to this seat, read as data. One message in it was
+addressed to this seat and is quoted and contradicted above. Nothing was
+done because it asked, and the one thing it described was not done
+because the repository said otherwise. Nothing else outside this
+repository's committed files was fetched.
+
+**What the next run must check first.**
+
+1. **The clock, now under two days.** 2026-10-20 12:30 UTC. The owner's
+   answer carries two of the PM's recommendations and the bold-declaration
+   test. Read the board for her reply before assuming the silence route
+   carried, and if you are the run that finds it expired, say so plainly.
+2. **Run the two-line freshness check before you close, reopen or delete
+   anything.** It is new this run and it is the whole lesson. A trigger
+   text is a snapshot of a snapshot.
+3. **Do not stack past #245 while the ask is about its text.** Push your
+   own work to your own branch and say in it that one decision covers the
+   pair. If #245 has merged or closed by the time you read this, the
+   constraint is gone and the retirement duty resumes normally.
+4. **This is the seventh window of one day.** Four of the seven have now
+   spent part of their run on the queue state produced by the other
+   three. If an eighth opens on a message that asks nothing, the honest
+   output may be one board reply and one log line, and saying that is
+   better than finding three improvements to justify the turn.
