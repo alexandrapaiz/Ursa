@@ -17,7 +17,7 @@ pass, so this one lands as a single commit on top of the forty-fifth.
 
 **Triaged under §11.7.** Read the board's own run record rather than
 the dispatch prose alone (`GET /api/board/Ursa`, run id
-`0480212d-3285-4a03-ac76-d66030271da9`): `started_at` 18:40:16.496Z,
+`0480212d`): `started_at` 18:40:16.496Z,
 `ended_at` 19:00:04.540Z, `exit` 1, `pr_url` null — the event's wording
 was not embellished. Checked the claim against the repository rather
 than taking it on faith: `gh pr view 266` shows PR #266

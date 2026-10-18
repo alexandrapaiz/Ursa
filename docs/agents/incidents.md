@@ -1177,7 +1177,7 @@ own run, `2026-10-18T18-40-16-496Z-message`: "Host window run of
 ursa-exo on message: 101 turns in 20 min, no pull request. It exited
 1." Read directly from the board's own run record rather than the
 dispatch prose alone (`GET /api/board/Ursa`, run id
-`0480212d-3285-4a03-ac76-d66030271da9`): `started_at`
+`0480212d`): `started_at`
 18:40:16.496Z, `ended_at` 19:00:04.540Z, `exit` 1, `pr_url` null,
 confirming the event payload was not embellished.
 
