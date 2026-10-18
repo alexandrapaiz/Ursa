@@ -81,13 +81,13 @@ evidence:
     source: ursa-major/src/cli.ts:167-173
   - ref: E21
     what: the methods document's own limit, n=1 demonstrates label types rather than statistics and every quantitative claim is an existence proof
-    source: docs/beyond-preference-pairs.md:154-157
+    source: docs/beyond-preference-pairs.md:157-160
   - ref: E22
     what: 82.1 percent of generated characters in task-001 were deleted, and that category is where the spec was forged
-    source: docs/beyond-preference-pairs.md:108-123
+    source: docs/beyond-preference-pairs.md:111-126
   - ref: E23
     what: session capture carries the trace and git capture carries the label, 82 percent against 7 percent, and a record should state which stage of the funnel it measured
-    source: docs/beyond-preference-pairs.md:229-237
+    source: docs/beyond-preference-pairs.md:232-240
   - ref: E24
     what: KR2.1 requires every quantitative claim in the methods document re-grounded in the n>=5 corpus and published by November 30
     source: docs/okrs/2026-q4.md, O2 KR2.1
@@ -99,13 +99,13 @@ evidence:
     source: docs/okrs/2026-q4.md, O4 KR4.1
   - ref: E27
     what: Ursa must always be able to quote a scalar, and every lab-facing deliverable reduces to survival rates with confidence
-    source: docs/beyond-preference-pairs.md:201-206
+    source: docs/beyond-preference-pairs.md:204-209
   - ref: E28
     what: the cross-model claim is a ratio of survival rates on the same user's work, which is a relative price between models
-    source: docs/beyond-preference-pairs.md:189-193
+    source: docs/beyond-preference-pairs.md:192-196
   - ref: E29
     what: every row of every corpus carries step ordinals joining to generations and prompts, so a buyer can audit any label back to the raw generation and the user's verbatim words
-    source: docs/beyond-preference-pairs.md:148-152
+    source: docs/beyond-preference-pairs.md:151-155
   - ref: E30
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds alone
     source: ursa-major/src/match.ts:1-3

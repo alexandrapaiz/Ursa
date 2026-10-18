@@ -36,22 +36,22 @@ evidence:
     source: ursa-major/src/tuning/types.ts:48,52-53
   - ref: E6
     what: the distiller refuses a record with no signals block
-    source: ursa-major/src/tuning/distill.ts:20-22
+    source: ursa-major/src/tuning/distill.ts:40-42
   - ref: E7
     what: the prompt's rules for the model, cite the evidence, prefer the general why, basis definitions, match an existing axiom rather than reword it, never resurrect a revoked one, emit both sides of a genuine conflict, three to twelve axioms
-    source: ursa-major/src/tuning/distill.ts:46-58
+    source: ursa-major/src/tuning/distill.ts:66-78
   - ref: E8
     what: the prompt's acceptance rule, accepted false means survived text is not endorsed and axioms come from the corrections, null means survival is weak evidence at most
-    source: ursa-major/src/tuning/distill.ts:59-65
+    source: ursa-major/src/tuning/distill.ts:79-85
   - ref: E9
     what: the prompt carries the user's verbatim prompts, read off conversations[].prompts
-    source: ursa-major/src/tuning/distill.ts:31-33,86
+    source: ursa-major/src/tuning/distill.ts:51-53,109
   - ref: E10
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
-    source: ursa-major/src/tuning/distill.ts:103-113
+    source: ursa-major/src/tuning/distill.ts:127-137
   - ref: E11
     what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
-    source: ursa-major/src/tuning/distill.ts:121-133
+    source: ursa-major/src/tuning/distill.ts:145-157
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
     source: ursa-major/src/tuning/merge.ts:51-52,62
@@ -69,10 +69,10 @@ evidence:
     source: ursa-major/src/tuning/cli.ts:42-46
   - ref: E17
     what: the exported block tells its reader that confidence is independent evidence count and to follow high-confidence rules from the first message
-    source: ursa-major/src/tuning/export.ts:17-25
+    source: ursa-major/src/tuning/export.ts:59-67
   - ref: E18
     what: export drops revoked axioms, groups by domain, orders by evidenceCount, and lists tensions with an ask-do-not-guess instruction
-    source: ursa-major/src/tuning/export.ts:9-15,27-50
+    source: ursa-major/src/tuning/export.ts:9-15,69-92
   - ref: E19
     what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted
     source: ursa-major/src/signals.ts:1-7,111-137
@@ -84,7 +84,7 @@ evidence:
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:166,188-196
+    source: ursa-major/src/resolve-episode.ts:166,192-200
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
     source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:476-477
@@ -93,10 +93,10 @@ evidence:
     source: ursa-major/src/episodes.ts:60-64
   - ref: E25
     what: the designed distillation watermark, a distilled flag on each episode and an isDistilled lookup against it
-    source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:72-74
+    source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:91-93
   - ref: E26
     what: records, the episode index and the distillation watermark live in a per-project .ursa directory, nothing global and nothing commingled
-    source: ursa-major/src/store.ts:1-3,11-13,48-50
+    source: ursa-major/src/store.ts:1-3,12-14,62-64
   - ref: E27
     what: the per-project decision, and its rider that cross-project aggregation should be an explicit later command rather than an implicit default
     source: docs/design/product-plan.md:91-96

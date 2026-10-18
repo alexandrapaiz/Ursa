@@ -24,25 +24,25 @@ evidence:
     source: ursa-major/src/cli.ts:1-7; ursa-major/src/bin/ursa.ts:1-7
   - ref: E2
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
-    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:577-605
+    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:598-626
   - ref: E3
     what: one machine-identity pattern marks a commit as generated through three tests, an owner-declared list, the co-author trailer and the author name, after the trailer pattern was widened on 2026-10-11
-    source: ursa-major/src/pairfinder.ts:218-263,293; ursa-major/src/pairfinder.ts:545-556; docs/design/agent-coauthor-detection.md
+    source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:566-577; docs/design/agent-coauthor-detection.md
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff
-    source: ursa-major/src/pairfinder.ts:610-613
+    source: ursa-major/src/pairfinder.ts:631-634
   - ref: E5
     what: the commit walk covers every branch by default, and walks one revision range instead when a caller passes one
-    source: ursa-major/src/pairfinder.ts:319-325
+    source: ursa-major/src/pairfinder.ts:343-349
   - ref: E6
     what: the git path records zero user turns, so it carries no user words and no turns-to-acceptance
-    source: ursa-major/src/resolve-episode.ts:188-196
+    source: ursa-major/src/resolve-episode.ts:192-200
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
     source: ursa-major/src/resolve-episode.ts:129,192; ursa-major/src/episodes.ts:25
   - ref: E8
     what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:378-379; ursa-major/src/bin/ursa.ts:437; ursa-major/src/ci/run.ts:194; ursa-major/src/launch.ts:56
+    source: ursa-major/src/bin/ursa.ts:471-472; ursa-major/src/bin/ursa.ts:515; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:76
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
@@ -57,10 +57,10 @@ evidence:
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
   - ref: E13
     what: acceptance is a declaration, and the undeclared default states that retention is not acceptance
-    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:381-386
+    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:474-479
   - ref: E14
     what: the two paths measure different stages of the funnel, 82 percent deletion against 7 percent, and a record should state which stage it measured
-    source: docs/beyond-preference-pairs.md:229-237
+    source: docs/beyond-preference-pairs.md:232-240
   - ref: E15
     what: n=2's commit pairs lacked the fine-tuning trace, which is why the overlay was specified to tail the session log
     source: docs/design/product-plan.md:689-691
@@ -69,7 +69,7 @@ evidence:
     source: docs/okrs/2026-q4.md:28-34
   - ref: E17
     what: at small n the record demonstrates label types and not statistics, and every quantitative claim is an existence proof
-    source: docs/beyond-preference-pairs.md:154-157
+    source: docs/beyond-preference-pairs.md:157-160
   - ref: E18
     what: raw records are private-repo material by default, and nothing generated from one ships public before the redaction pass and the owner's per-record sign-off
     source: docs/agents/incidents.md:175-181
