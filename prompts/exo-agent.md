@@ -271,7 +271,7 @@ two different files, neither citing the other, resolved by the seat in
 favour of the one it could see.
 
 Check that what the standards point at actually exists here, which is
-the third check nobody else performs (added 2026-10-18). A standard
+a third check nobody else performs (added 2026-10-18). A standard
 arrives in `docs/standards/` as text, and only the text crosses the
 sync. Everything the text points at stays behind: a script path, a
 workflow name, an environment variable, a URL, a tool. The reference
@@ -288,12 +288,16 @@ grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/ \
 
 The first sweep, 2026-10-18, printed fourteen of fourteen. Every tool
 script the standards name as a command to run is absent from this
-repository and present in HQ's. Run the sweep, do not enumerate by
-hand: this run's hand-built list said twelve, because it had matched
-only the shell scripts and missed two Python ones. One of them is the merge-state instrument
-`docs/standards/pm.md` §11.2 mandates, and its absence is the upstream
-cause of three days of a seat's work spent on a conflict that did not
-exist (Ursa incidents 17 and 18).
+repository and present in HQ's. One of the fourteen is the merge-state
+instrument `docs/standards/pm.md` §11.2 mandates, and its absence is
+the upstream cause of three days of a seat's work spent on a conflict
+that did not exist (Ursa incidents 17 and 18).
+
+Run the sweep rather than enumerating by hand. The run that wrote this
+section built its list by hand first, said twelve, and missed
+`event-bus-workflows.py` and `new-seat.py`, because its grep matched
+only the shell scripts. An audit that counts by hand is an audit with
+an undercount in it.
 
 Report the count and name every miss, because a missing instrument
 fails silently. It does not give a wrong answer, it gives no answer, and
