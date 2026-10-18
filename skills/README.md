@@ -62,8 +62,35 @@ on 2026-10-08 a check found 58 of 117 citations pointing at unrelated
 code, with the checker passing throughout because in-bounds was all it
 proved. When a fingerprint fails, re-point the anchor and then re-read
 the claim against the new lines, since the second does not follow from
-the first, and run `--update` in the same commit so the lock diff shows
-a person decided. `prompts/skill-extract.md` §5g is the rule.
+the first, and record the fingerprint in the same commit so the lock
+diff shows a person decided. `prompts/skill-extract.md` §5g is the rule.
+
+## When main moves under the library
+
+```
+node skills/relocate-anchors.mjs <old-ref>           show what it would do
+node skills/relocate-anchors.mjs <old-ref> --write   do it
+```
+
+Most of a drift report is a line number that moved while the lines said
+the same thing. Measured twice: 27 of 44 drifted ranges on 2026-10-15,
+then 39 of 43 on 2026-10-18. This separates that part from the part that
+needs reading. It recovers each drifted range's as-cited lines from
+`<old-ref>`, the tree the anchors were written against, which after a
+merge is the merge's first parent. It relocates only on a unique match,
+and it refuses any range whose lines at `<old-ref>` do not hash to the
+recorded fingerprint, because then the ref is wrong and nothing it found
+can be trusted.
+
+It carries each relocated fingerprint to its new key rather than calling
+`check-evidence.mjs --update`, which would re-record every range in the
+library including the claims that stopped being true. So after a
+relocation pass the checker is still red on exactly the ranges a person
+has to read, which is the point. `prompts/skill-extract.md` §5i and §5k.
+
+```
+node --test skills/relocate-anchors.test.mjs
+```
 
 Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked
