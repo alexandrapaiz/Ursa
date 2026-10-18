@@ -300,6 +300,32 @@
           "subject": "Rebuild the bundle for the index digest fields and the phone layout"
         }
       ]
+    },
+    {
+      "digest": "d16c8760a902a88c",
+      "sha256": "d16c8760a902a88c506eee79404892c3d94015d5e71299a59af7ca9ee70f7406",
+      "blob": "687a7334124cc4a887b34944399de09fce95a223",
+      "bytes": 273540,
+      "introducedBy": [
+        {
+          "commit": "a21f48ef3e98382b2f5dd3857fe1273e337ad322",
+          "date": "2026-10-18T02:31:38.000Z",
+          "subject": "The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case"
+        }
+      ]
+    },
+    {
+      "digest": "7e2c2afe6ca35b4c",
+      "sha256": "7e2c2afe6ca35b4c1655c2645c584ca4f527fc6906bbd58615e53c6fa6e2084f",
+      "blob": "c7fa67eb1f148079d602f9e003b7686306da84b4",
+      "bytes": 276711,
+      "introducedBy": [
+        {
+          "commit": "2f1f59983a935e789e37bae3a610539270c57910",
+          "date": "2026-10-18T09:21:23.000Z",
+          "subject": "The published page now names the bounds that produced its records"
+        }
+      ]
     }
   ]
 }
