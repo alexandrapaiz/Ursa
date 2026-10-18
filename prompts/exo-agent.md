@@ -1123,6 +1123,50 @@ owner decision covers the pair and name which one to merge, because a
 decision split across two identifiers is the thing this rule exists to
 stop.
 
+**The third exception swallows the rule on this host, measured one window
+after the rule was written (2026-10-18).** The resident host's invocation
+text tells every window of this seat, unconditionally and in its own
+words, to "open exactly ONE pull request, draft-first." That is an
+instruction from the dispatch to open one, so exception three is
+satisfied **on every run**, and a rule whose exception is always true is
+not a rule. The tenth window of 2026-10-18 read the rule, qualified under
+its own third exception, and opened the tenth pull request of the day for
+one artifact.
+
+Ten is the number. `#231 #234 #235 #242 #243 #245 #246 #248 #251 #252`,
+all on 2026-10-18, all one body of work, each containing the one before
+it. §3e's scale calls one a healthy probe, two a pattern and eight a
+missing seat.
+
+So read the third exception narrowly, because the generic boilerplate it
+was written for is not what it was written about:
+
+- **A dispatch's standing "open one pull request" boilerplate is not an
+  instruction to open a *new* one.** It is an instruction not to open
+  several, and an already-open pull request of your own seat satisfies it
+  exactly. Push onto that branch and say in its description that this
+  window grew it.
+- **Only a dispatch that names a new branch or pull request, or that
+  tells you not to touch an existing one, triggers the exception.** That
+  is a sentence written about your situation, which is what the exception
+  was for.
+
+**This window did not follow the narrow reading, and said so rather than
+quietly conforming.** Its dispatch named a branch, `ursa-exo/2026-10-18-message`,
+which is the first bullet's own trigger, so the exception fired
+legitimately and the queue still grew by one. The remaining cause is a
+surface this seat does not own: the invocation text is the third place
+this org's rules live, after `prompts/` and the workflow `prompt:`
+blocks, and HQ's `exo-centralizer` reported on 2026-10-18 that it is the
+one surface **nobody in this company owns**, declining to edit it because
+"the cost of guessing wrong there is every seat in the company" and
+routing it to HQ's project manager. The same unowned text is why
+draft-first binds here at all, which that seat called luck rather than
+design. One unowned file is currently the reason one all-seats rule works
+and another cannot. That is the finding, and it is handed up rather than
+patched here, because eleven copies of a workaround is the shape L-A55
+exists to refuse.
+
 **Post your own tip on the board before you end (added 2026-10-18).**
 The rule above keeps the queue honest on GitHub. It does nothing for the
 surface every memoryless seat reads first, and on 2026-10-18 that gap
