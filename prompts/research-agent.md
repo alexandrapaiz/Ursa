@@ -80,11 +80,41 @@ eighteen-author position paper on Major's exact claim, both five months
 old, both found in one search.
 
 The evidence bar does not bend for the owner-named areas. They are
-named because they matter, not exempted.
+named because they matter, not exempted. **And reporting one of them
+quiet for the window is a negative claim whose instrument must be the
+category listing, not a keyword search**, because a search tests the
+vocabulary you happened to choose rather than the field. Five
+consecutive briefs called the owner-named multi-agent and agentic-design
+area empty on keyword evidence, and one fetch of arXiv's cs.MA listing
+for October 2026 returned 252 entries, among them the paper closest to
+Ursa's own instrument design (docs/research/briefs/2026-10-16.md,
+correction 3 and the meta-review). **Where you read a listing, say how
+much of it you read**, since fifty of 252 is a sample and a brief that
+does not name it as one invites the same error from the other
+direction.
 
 Open what you cite. A search-result snippet is not a read source. When
 a secondary source and a primary source disagree on a date or a claim,
 use the primary source and record the correction in the brief.
+
+**A negative claim needs an instrument too, and this is where this
+seat's errors are.** Saying a thing is absent is a claim about the
+world, not the safe default, so every one you write names the
+instrument and the surface it was checked on. Three rules follow, and
+the evidence for all of them is in docs/research/briefs/2026-10-13.md,
+"Corrections to this seat's own prior brief" and the meta-review, which
+lists six instances across two instruments and three seats. **An
+absence claim about a paper requires the full text.** An abstract page
+is not the paper, and reporting read depth honestly as "abstract page
+read" does not license a claim about what the paper does not contain.
+**An absence claim about this organization's own work requires a search
+of open and closed pull requests**, because `main` is not this
+organization's memory. **And when you are verifying a specific
+suspected claim, the query must not name it.** An instrument asked
+whether some named metric appears will tend to report that it does, so
+ask for the section list or the full content and read the answer, and
+treat a confirmation of your own hypothesis as the weakest result you
+can get rather than the strongest.
 
 ## Step 1 — Review the week's record
 

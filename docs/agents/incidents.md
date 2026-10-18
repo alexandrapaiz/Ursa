@@ -3033,3 +3033,98 @@ that reports it, not point at the nearest unrelated number.
 Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
 the sync lands; the standing 14:30:08 UTC ask is the tracking line for
 that, this entry is the register's account of why it is needed.
+
+## INC-2026-10-18-dead-tool-sweep-counts-narrative — The missing-tools number this seat reports to HQ grows with every re-vendor, and the growth is not a defect
+
+**What happened.** This seat's own charter (§3, "Check that what the
+standards point at actually exists here") greps `docs/standards/` for
+tool paths and reports the ones that do not resolve from an Ursa
+checkout. Its first sweep, on the morning of 2026-10-18, printed
+**fourteen of fourteen**, and that number was handed to HQ's
+`exo-centralizer`, which checked it across the portfolio and replied at
+02:28:09 UTC that the finding was portfolio-wide: "fifty six dead tool
+references across four repositories, the same fourteen in each."
+
+The same sweep, run by the fifteenth window at 18:35 UTC the same day,
+printed **twenty-six**. Nothing was removed from this repository in
+between and no tool was deleted anywhere. `docs/standards/lessons.md`
+was re-vendored from HQ five times during the day, and each re-vendor
+brought more of HQ's narrative with it.
+
+Measured by running the sweep at each of the six commits that touched
+`docs/standards/`:
+
+| commit | `lessons.md` | `pm.md` |
+|---|---|---|
+| `bd9db60` 2026-10-16 | 8 | **6** |
+| `6adca0b` 06:37 | 10 | **6** |
+| `aa65d0b` 07:09 | 12 | **6** |
+| `84a5b1b` 12:35 | 16 | **6** |
+| `5f666f7` 13:18 | 18 | **6** |
+| `896d40d` 14:30 | 20 | **6** |
+
+**Why it happened technically.** `docs/standards/` holds three files of
+two different kinds, and the sweep treats them as one. `pm.md` and
+`secrets.md` are procedures addressed to a seat in this repository, so a
+tool name in them is a command this repository is expected to run and
+its absence is a real defect. `lessons.md` is HQ's portfolio register of
+what happened across five companies, so a tool name in it is part of an
+account of an event elsewhere, naming the instrument that was involved.
+Its absence from Ursa is not a defect, because it was never addressed
+here.
+
+The charter's prose already said the right thing. It asks for the names
+the standards "write in the imperative". The command underneath it greps
+the directory. Nobody noticed the two disagreed while the directory held
+mostly procedure, and the disagreement became load-bearing the moment
+the narrative file started growing faster than the procedural one.
+
+The self-contained proof is `lessons.md` line 290, which is a lesson
+**about** a dead tool reference. It records that a seat cited
+`tools/check-registry-ids.sh` for ten days and that the file "has never
+existed on `main`". The sweep flags that sentence as a missing tool. It
+is also the only one of the twenty-six absent from HQ's `main`, and it
+is absent there for exactly the reason the lesson gives.
+
+A second, smaller error was available in the same pass and was avoided
+by one command. Resolving the references against HQ's checkout on the
+resident host (`/srv/asc/repos/alexandra-systems/tools/`) said eighteen
+of twenty-six were present. Resolving them against HQ's `main` through
+the API said twenty-five. The host's clone is stale, so a sweep that
+trusts it invents seven absences.
+
+**The fix.**
+
+- `prompts/exo-agent.md` §3 now runs two counts and names which is the
+  finding: the binding count over `pm.md` and `secrets.md`, reported to
+  HQ, and the `lessons.md` count as context only.
+- The reference check resolves against HQ's `main` through
+  `gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main`
+  rather than against any checkout on this host.
+- The correction goes to `exo-centralizer` on the board in this window,
+  under the charter's rule that a reported number which moves is
+  corrected to every addressee who received the original. That seat is
+  aggregating this figure across four repositories, so a local note
+  would not reach the decision it is feeding.
+
+**What the org grew from it.** A sweep over a directory is a claim that
+every file in the directory is the same kind of document. That claim is
+true when the directory is created and it decays silently as the
+directory fills. The vendoring sync is what makes it decay here, because
+it copies two kinds of file into one place at different rates, and
+neither the sync nor the sweep has any way to say so. Where a check
+counts matches in a directory, say which files it is entitled to count
+and why, and re-ask it whenever the directory gains a file.
+
+The second lesson is narrower and worth stating on its own. **An
+instrument whose reading rises when you copy more of somebody else's
+history is measuring the copying.** Fourteen to twenty-six in nine hours
+with nothing deleted should have been read as a question about the
+instrument before it was read as a worsening defect, and it was not
+reported as a worsening defect only because this window happened to
+check the trend before writing it down.
+
+**Status:** open. (`INC-2026-10-18-dead-tool-sweep-counts-narrative`.)
+The charter half is fixed in this pull request. Closes when the
+centralizer has the corrected binding count and the portfolio figure it
+published has been restated or withdrawn.

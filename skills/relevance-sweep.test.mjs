@@ -8,7 +8,7 @@
 // a real library in a temp directory rather than described.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -181,4 +181,166 @@ skipped [E3].
   assert.doesNotMatch(out, /alpha\/E3/)
   // And a ref whose every citation is its own says nothing rather than zero.
   assert.doesNotMatch(run(dir, ['alpha/E3']), /shares? a sentence/)
+})
+
+test('a ref that is half ranged still has its unranged source counted', () => {
+  // The slice-5 failure in words: `unrangeable` is all-or-nothing, so a ref
+  // with one ranged source and one unranged one is in the queue, which means
+  // it is not in the list of refs the queue sets apart, and its undefended
+  // citation is invisible in both places. Two of them hid in this library for
+  // four slices, one with no range and no section name at all. E2 below is
+  // that shape: a real range plus a bare document.
+  const dir = library()
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: a fixture
+evidence:
+  - ref: E1
+    what: the threshold constant is 0.6
+    source: src/a.ts:1
+  - ref: E2
+    what: covered excludes skipped text, and the design document says why
+    source: src/a.ts:3, docs/design.md
+supersedes: []
+---
+
+# Alpha
+
+The threshold is 0.6 [E1] and covered excludes skipped [E2].
+`)
+  mkdirSync(join(dir, 'docs'), { recursive: true })
+  writeFileSync(join(dir, 'docs', 'design.md'), 'why\n')
+  const out = run(dir, [])
+  // It is still in the queue, because it has a range and its signals mean
+  // something. That is exactly why the old count could not see it.
+  assert.match(out, /alpha\/E2/)
+  assert.doesNotMatch(out, /unread refs cite a document and a section name/)
+  assert.match(out, /1 refs are in the queue above and still carry an unranged source/)
+  assert.match(out, /docs\/design\.md {3}\(alpha\/E2\)/)
+  assert.match(out, /1 unranged sources in all, across 1 refs/)
+})
+
+test('a library whose every source is ranged reports no unranged sources', () => {
+  // The closing state of the sweep, asserted so that a later run which adds a
+  // bare document citation sees the count move off zero.
+  const out = run(library(), [])
+  assert.match(out, /0 unranged sources in all, across 0 refs/)
+  assert.doesNotMatch(out, /still carry an unranged source/)
+})
+
+// The verdict lock. `check-evidence.mjs` stops a hash from outliving its
+// lines; these tests are the level above it, where a reading outlives them.
+// The three cases that matter are the three the evidence lock cannot see: a
+// `what` field rewritten under a verdict, a citing passage rewritten under
+// one, and a range re-blessed by `--update` after a change, which is the very
+// act that erases the signal a re-read is owed.
+const runStatus = (dir, args = []) => {
+  try {
+    return { status: 0, out: execFileSync('node', [join(dir, 'skills', 'relevance-sweep.mjs'), ...args], { encoding: 'utf8' }) }
+  } catch (e) {
+    return { status: e.status, out: (e.stdout ?? '') + (e.stderr ?? '') }
+  }
+}
+
+const AUDIT = `# audit
+| ref | verdict | read | note |
+|---|---|---|---|
+| \`alpha/E1\` | supports | 2026-10-18 | the constant is right there |
+| \`alpha/E2\` | widened | 2026-10-18 | widened to the subtraction |
+`
+
+/** A library with both refs read, and both verdicts bound to what was read. */
+function bound() {
+  const dir = library({ audit: AUDIT })
+  const rec = run(dir, ['--record', 'alpha'])
+  assert.match(rec, /bound 2 verdicts to what was read/)
+  assert.match(run(dir, ['--stale']), /2 of 2 verdicts bound to what was read/)
+  return dir
+}
+
+test('--record refuses a bare invocation, and binds a named scope', () => {
+  const dir = library({ audit: AUDIT })
+  // The same refusal check-evidence.mjs --update learned on 2026-10-18, when an
+  // unscoped re-record turned 43 red ranges green with nobody reading anything.
+  // Here the equivalent would bless a stale verdict as freshly read.
+  const bare = runStatus(dir, ['--record'])
+  assert.equal(bare.status, 1)
+  assert.match(bare.out, /--record needs a scope/)
+  // And before anything is recorded, a read ref is read in the audit and
+  // unbound here, which is the state a closed sweep starts from.
+  assert.match(run(dir, []), /2 verdicts are unbound/)
+  assert.equal(runStatus(dir, ['--stale']).status, 1)
+  assert.match(run(dir, ['--record', 'alpha/E1']), /bound 1 verdict to what was read/)
+  assert.match(run(dir, []), /1 verdict is unbound/)
+})
+
+test('a changed cited line makes the verdict stale, naming the lines', () => {
+  const dir = bound()
+  writeFileSync(join(dir, 'src', 'a.ts'), [
+    'export const THRESHOLD = 0.7',
+    'function unrelated() { return 1 }',
+    'const covered = total - skipped',
+  ].join('\n') + '\n')
+  const stale = runStatus(dir, ['--stale'])
+  assert.equal(stale.status, 1)
+  assert.match(stale.out, /stale +alpha\/E1 {2}lines changed since it was read/)
+  assert.doesNotMatch(stale.out, /alpha\/E2/)   // its own line did not move
+  assert.match(run(dir, []), /1 verdict was read against text that has changed since/)
+  // And the audit still holds its verdict, which is the point: the reading is
+  // not erased, it is owed again.
+  assert.match(run(dir, ['--audited']), /supports {2}2026-10-18 {2}stale {3}alpha\/E1/)
+})
+
+test('a rewritten claim or passage makes the verdict stale with the lines untouched', () => {
+  // Neither of these is visible to the evidence lock at all: it hashes cited
+  // lines, and here the cited lines never move. A sentence can be sharpened
+  // after a reading and stand on a verdict that was given to the old one.
+  const dir = bound()
+  const skill = join(dir, 'skills', 'alpha', 'SKILL.md')
+  const before = readFileSync(skill, 'utf8')
+  writeFileSync(skill, before.replace('what: the threshold constant is 0.6',
+    'what: the threshold constant is 0.6, and it is the only one'))
+  let out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 1)
+  assert.match(out.out, /stale +alpha\/E1 {2}what changed since it was read/)
+
+  writeFileSync(skill, before.replace('The threshold is 0.6 [E1]',
+    'The threshold is 0.6 and nothing else is [E1]'))
+  out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 1)
+  assert.match(out.out, /stale +alpha\/E1 {2}passages changed since it was read/)
+})
+
+test('a range relocated onto identical lines keeps its verdict', () => {
+  // The quiet half of the design. Most of a drift report is a line number that
+  // moved while the lines said the same thing: 27 of 44 ranges on 2026-10-15
+  // and 39 of 43 on 2026-10-18. A verdict earned on those lines is still
+  // earned, so the digest covers content and paths and never line numbers, or
+  // every relocation pass would re-queue the whole library for nothing.
+  const dir = bound()
+  writeFileSync(join(dir, 'src', 'a.ts'), [
+    '// a later seat adds a header comment',
+    'export const THRESHOLD = 0.6',
+    'function unrelated() { return 1 }',
+    'const covered = total - skipped',
+  ].join('\n') + '\n')
+  const skill = join(dir, 'skills', 'alpha', 'SKILL.md')
+  writeFileSync(skill, readFileSync(skill, 'utf8')
+    .replace('source: src/a.ts:1\n', 'source: src/a.ts:2\n')
+    .replace('source: src/a.ts:3\n', 'source: src/a.ts:4\n'))
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 0)
+  assert.match(out.out, /2 of 2 verdicts bound to what was read/)
+})
+
+test('a lock entry the audit has moved past is unbound, not bound to the old reading', () => {
+  // The audit file is the authority on the verdict and the lock is the
+  // authority on what it was read against, so a lock written for `supports`
+  // says nothing about a row that now reads `wrong`.
+  const dir = bound()
+  writeFileSync(join(dir, 'skills', 'relevance-audit.md'),
+    AUDIT.replace('| `alpha/E1` | supports | 2026-10-18 |', '| `alpha/E1` | wrong | 2026-10-19 |'))
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 1)
+  assert.match(out.out, /unbound alpha\/E1 {2}the audit row now reads wrong 2026-10-19 and the lock was written for supports 2026-10-18/)
 })

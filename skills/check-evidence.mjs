@@ -7,6 +7,11 @@
 //   node skills/check-evidence.mjs            verify
 //   node skills/check-evidence.mjs --update   re-record the fingerprints
 //
+// What this does not do, and what points at the thing that does. Re-recording
+// a fingerprint says the lines changed and somebody read them. It says nothing
+// about the relevance verdict in skills/relevance-audit.md, which was given to
+// the old lines, so --update ends by naming relevance-sweep.mjs --stale.
+//
 // Why the third check exists. In-bounds is not the same as correct. On
 // 2026-10-05 this library was carried forward onto a newer main with every
 // anchor unchanged, and this script passed on all 133 sources while 58 of
@@ -168,6 +173,16 @@ if (update) {
     for (const d of leftRed) console.log('    ' + d.key)
   }
   if (scope.length) console.log(`  scope: ${scope.join(', ')}`)
+  // The nudge this command owes the reading half of the receipts. Re-recording
+  // a fingerprint is the act that clears the only visible sign a claim needs
+  // re-reading, so this is the moment to say where that duty went: the verdict
+  // in relevance-audit.md was given to the old lines, and relevance-sweep.mjs
+  // is now red on exactly the refs this command just turned green.
+  // prompts/skill-extract.md §5o.
+  console.log(`\nA re-recorded range is a claim somebody has to read again. The verdict in`)
+  console.log(`skills/relevance-audit.md was given to the lines as they were:`)
+  console.log(`  node skills/relevance-sweep.mjs --stale          # which verdicts this moved`)
+  console.log(`  node skills/relevance-sweep.mjs --record <scope> # after you have re-read them`)
   process.exit(problems.length ? 1 : 0)
 }
 

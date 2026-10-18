@@ -1,0 +1,779 @@
+{
+  "adjudicating-uncertain-spans/E1": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "2103c69244fab548",
+    "what": "0b287b583e13cc17",
+    "passages": "8a548e6b4be1e934"
+  },
+  "adjudicating-uncertain-spans/E10": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "e46859c11d73f8d4",
+    "what": "f5b2c315243027a1",
+    "passages": "85e431a0816f322d"
+  },
+  "adjudicating-uncertain-spans/E11": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "40f6719bf9d896cb",
+    "what": "9534f0e23a685b8b",
+    "passages": "b4aeb52b561ce988"
+  },
+  "adjudicating-uncertain-spans/E12": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "b4744108d6ee996c",
+    "what": "1e6100b4c259a662",
+    "passages": "da0d65200dd10d40"
+  },
+  "adjudicating-uncertain-spans/E13": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ccf658327e499e40",
+    "what": "0b5a2226b14378a8",
+    "passages": "700aec03414bf8dc"
+  },
+  "adjudicating-uncertain-spans/E14": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "b01177433ba15874",
+    "what": "67793b06fe2f9817",
+    "passages": "85371dd0a274daea"
+  },
+  "adjudicating-uncertain-spans/E15": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "3e7ed6a2893f45c5",
+    "what": "f2a06800f53d0437",
+    "passages": "c635e0402190cdd9"
+  },
+  "adjudicating-uncertain-spans/E16": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "0e40e62ef99128ee",
+    "what": "a7b2ddb9a05b0bb9",
+    "passages": "3d766bbdc553cf4c"
+  },
+  "adjudicating-uncertain-spans/E17": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "02584be89da0f593",
+    "what": "b538a486e4864f27",
+    "passages": "f5a59412590e08bc"
+  },
+  "adjudicating-uncertain-spans/E18": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "4298e21f4da13bd9",
+    "what": "32546cedc1aee5c1",
+    "passages": "27d870fa12254698"
+  },
+  "adjudicating-uncertain-spans/E2": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "0dc0effadc1e25b2",
+    "what": "1bdcceea1340e438",
+    "passages": "8228f4e889fe45d3"
+  },
+  "adjudicating-uncertain-spans/E3": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "4047645b9fcbfa4e",
+    "what": "c9c70705529423fb",
+    "passages": "cc3b90324867e689"
+  },
+  "adjudicating-uncertain-spans/E4": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "bfb3d346746627ea",
+    "what": "8422ee9942209f53",
+    "passages": "650ae4c93058073a"
+  },
+  "adjudicating-uncertain-spans/E5": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ef58eaa838a51c7a",
+    "what": "fc1cba87ee703989",
+    "passages": "e74eb36324bf843a"
+  },
+  "adjudicating-uncertain-spans/E6": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "1f6a5d1412b5c1c3",
+    "what": "964af30210f129bf",
+    "passages": "169a4d9854d10cf6"
+  },
+  "adjudicating-uncertain-spans/E7": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ce32a57269a96cb4",
+    "what": "9bcfec87d268092a",
+    "passages": "f4060a543d93a355"
+  },
+  "adjudicating-uncertain-spans/E8": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "4a14f325c21622bf",
+    "what": "b28804784de23eb3",
+    "passages": "638558fafffeb1bc"
+  },
+  "adjudicating-uncertain-spans/E9": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "3980e9270d3f96fc",
+    "what": "d683dc80c7fc5235",
+    "passages": "bd0474d06d1bac70"
+  },
+  "distilling-a-tuning-record/E1": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "a398a1634927d2ff",
+    "what": "178e8a0f93a5dd16",
+    "passages": "3c6e46cc3fe5a9ad"
+  },
+  "distilling-a-tuning-record/E10": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "00605ab0deda4107",
+    "what": "36b9694524580921",
+    "passages": "b9e5f5ab6576c455"
+  },
+  "distilling-a-tuning-record/E11": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "205601c2eae4964c",
+    "what": "e461d077ec234969",
+    "passages": "743f5484278f37ee"
+  },
+  "distilling-a-tuning-record/E12": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "1f8d1af3607b9a4b",
+    "what": "f286d5ac20eeb638",
+    "passages": "12794635924bf240"
+  },
+  "distilling-a-tuning-record/E13": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "5f4dee180481f748",
+    "what": "9940c1754e2ee19a",
+    "passages": "a791abd2b1444835"
+  },
+  "distilling-a-tuning-record/E14": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "374c9e2fbcd3500e",
+    "what": "0fd9315fa413f772",
+    "passages": "8b11c09d6f628291"
+  },
+  "distilling-a-tuning-record/E15": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "9d5d01d63ca6ff66",
+    "what": "19a14c366fbcf123",
+    "passages": "59b20d98afe6ed8c"
+  },
+  "distilling-a-tuning-record/E16": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "9ddd26b7dc922a20",
+    "what": "3d34210b9568e283",
+    "passages": "4a99feed589fab2e"
+  },
+  "distilling-a-tuning-record/E17": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "af5cf019da789aac",
+    "what": "5dd8f49d2656f7d4",
+    "passages": "4659995ebdb64805"
+  },
+  "distilling-a-tuning-record/E18": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "25a893fb3e3c0db0",
+    "what": "0cc32f1f8aa02b39",
+    "passages": "e2be49a29e3fdb3e"
+  },
+  "distilling-a-tuning-record/E19": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "73563428f5151539",
+    "what": "a9b3d751c9bf6ff0",
+    "passages": "13e0dd1515f7ee3b"
+  },
+  "distilling-a-tuning-record/E2": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "47f0a48315286c08",
+    "what": "847848747dca7d56",
+    "passages": "f80b5df5d425dcd6"
+  },
+  "distilling-a-tuning-record/E20": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "0d44e8bd59074526",
+    "what": "3aba76984298cc1a",
+    "passages": "d931dd9df5b01f87"
+  },
+  "distilling-a-tuning-record/E21": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "99b71b5c7d74a3d4",
+    "what": "158ec0989b1153cd",
+    "passages": "09293fa9b787a803"
+  },
+  "distilling-a-tuning-record/E22": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "7404a6be8ee6362a",
+    "what": "94871c1cc6c69933",
+    "passages": "5ee66b3a97d65b5c"
+  },
+  "distilling-a-tuning-record/E23": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "8f1a64ca39d4e6a4",
+    "what": "d254fd42d4b86b35",
+    "passages": "7b5434a35175505f"
+  },
+  "distilling-a-tuning-record/E24": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "d9f406d95b6d60ef",
+    "what": "306549e6e86ce10c",
+    "passages": "38c04c177ffb8d6f"
+  },
+  "distilling-a-tuning-record/E25": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "deb4a78051b460e3",
+    "what": "3c368d88e4b1ca5f",
+    "passages": "e21eb96d301a96d8"
+  },
+  "distilling-a-tuning-record/E26": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "9fd96fd07dcb3efc",
+    "what": "36bdaac5599760b0",
+    "passages": "61ca7bf1d7e682fe"
+  },
+  "distilling-a-tuning-record/E27": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "c84001dbb6461426",
+    "what": "7661ad913c6dda71",
+    "passages": "b58a3239b41d164d"
+  },
+  "distilling-a-tuning-record/E28": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "cdf3a1bb754a064e",
+    "what": "223067d09778fc51",
+    "passages": "a0453ccc158898f5"
+  },
+  "distilling-a-tuning-record/E29": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "286a08959b5a7967",
+    "what": "b8169aa741b53496",
+    "passages": "4cda89cfe6f89663"
+  },
+  "distilling-a-tuning-record/E3": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "778cfb0eafc76218",
+    "what": "89a1ec1c25f96f4b",
+    "passages": "f3c893cd9f2d618e"
+  },
+  "distilling-a-tuning-record/E30": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ac277f71248a6d0a",
+    "what": "ec481f914b7f9a06",
+    "passages": "c2d48983fed72b48"
+  },
+  "distilling-a-tuning-record/E31": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "ce29dbdd09b7d200",
+    "what": "32c7fdf789b913e0",
+    "passages": "dde13b52a67c6903"
+  },
+  "distilling-a-tuning-record/E32": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "aa740e0615e25f1c",
+    "what": "2a1a9fe302e312f3",
+    "passages": "b6ec5d455e808e03"
+  },
+  "distilling-a-tuning-record/E33": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "53e2c1893e173e5a",
+    "what": "530ad8fda50a61b6",
+    "passages": "09293fa9b787a803"
+  },
+  "distilling-a-tuning-record/E34": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "58b6aff56166b3cd",
+    "what": "d1bb61c0d539dcbf",
+    "passages": "bb78a0950d9275db"
+  },
+  "distilling-a-tuning-record/E35": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "7a928c9e92eb1eb1",
+    "what": "7fcbcf8b59e8eaab",
+    "passages": "48ea0ea1c22537ea"
+  },
+  "distilling-a-tuning-record/E36": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "cc03097a2cd3e1c2",
+    "what": "02e226edc06793f3",
+    "passages": "8e641f87554c7d5e"
+  },
+  "distilling-a-tuning-record/E37": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "2ce353a74e732928",
+    "what": "661f8b4977ef3245",
+    "passages": "51e07ea0a05a20f9"
+  },
+  "distilling-a-tuning-record/E38": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "1cfe76322b685282",
+    "what": "ad328e2ebf12a6a3",
+    "passages": "bcdb3cf5add30aa6"
+  },
+  "distilling-a-tuning-record/E39": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "057e419c8e294dff",
+    "what": "79395de398ea503d",
+    "passages": "804e6ab642df6680"
+  },
+  "distilling-a-tuning-record/E4": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "436e4266b1178c29",
+    "what": "b80ecb2b7ffd1626",
+    "passages": "12794635924bf240"
+  },
+  "distilling-a-tuning-record/E5": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "381d071ab43c9843",
+    "what": "dd1b3098f677e5f4",
+    "passages": "43fec29753d21da5"
+  },
+  "distilling-a-tuning-record/E6": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "aa61db0d1bab0587",
+    "what": "1fa35d0ce70d3d88",
+    "passages": "59233f62c95310e0"
+  },
+  "distilling-a-tuning-record/E7": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "35055a949ae760d5",
+    "what": "fd297366056b0571",
+    "passages": "9199df6d719cc7fc"
+  },
+  "distilling-a-tuning-record/E8": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "d96a77048748368a",
+    "what": "1da72101064343f5",
+    "passages": "727b2847554712ee"
+  },
+  "distilling-a-tuning-record/E9": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "806aecf9a2520c4a",
+    "what": "52bf4161516a0b73",
+    "passages": "9d0b1decee896477"
+  },
+  "quoting-a-number-from-an-outcome-record/E1": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "d9b81eafb435ea36",
+    "what": "fdd16a7907dc09d8",
+    "passages": "c468734c4145430d"
+  },
+  "quoting-a-number-from-an-outcome-record/E10": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "264a6be6ff783444",
+    "what": "410fbb74a55929a3",
+    "passages": "d080c24d2c99c9cd"
+  },
+  "quoting-a-number-from-an-outcome-record/E11": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "717a9f01c84a92a5",
+    "what": "7c41fbaa88e904a1",
+    "passages": "c9b927e3713192b7"
+  },
+  "quoting-a-number-from-an-outcome-record/E12": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "1f6a5d1412b5c1c3",
+    "what": "d71491e4a3ce5dbc",
+    "passages": "6e3293742cf087c9"
+  },
+  "quoting-a-number-from-an-outcome-record/E13": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "e46859c11d73f8d4",
+    "what": "e531bb868968f26a",
+    "passages": "00e4eb38c306f520"
+  },
+  "quoting-a-number-from-an-outcome-record/E14": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "46c30f04e1385ac5",
+    "what": "8ee4b9fe38abc4b9",
+    "passages": "7c7b78b707fabf85"
+  },
+  "quoting-a-number-from-an-outcome-record/E15": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "626ebc2e6b11e1de",
+    "what": "737663a760d09038",
+    "passages": "ce8bf52854e5dceb"
+  },
+  "quoting-a-number-from-an-outcome-record/E16": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "aaa7bb8f00f77c6d",
+    "what": "202d531dbef84f93",
+    "passages": "ce8bf52854e5dceb"
+  },
+  "quoting-a-number-from-an-outcome-record/E17": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "4f25eaefc7727326",
+    "what": "6af17df7eba675c7",
+    "passages": "635c2749d30b41fc"
+  },
+  "quoting-a-number-from-an-outcome-record/E18": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "7d95177fcbad58b9",
+    "what": "f344115ed97b7186",
+    "passages": "21720358c79005e9"
+  },
+  "quoting-a-number-from-an-outcome-record/E19": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "8e7168481ad7f3d8",
+    "what": "45d96df29cca30c7",
+    "passages": "0469c8840d61a6d9"
+  },
+  "quoting-a-number-from-an-outcome-record/E2": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "830adc5d5d169bdb",
+    "what": "233422af59d6d7ca",
+    "passages": "1c5fa518bd1144a9"
+  },
+  "quoting-a-number-from-an-outcome-record/E20": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "3fff434a6de4fd10",
+    "what": "84d55d11e3450a62",
+    "passages": "f14b34ca0fd6eb1b"
+  },
+  "quoting-a-number-from-an-outcome-record/E21": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "eaf8a27724b630bb",
+    "what": "ceab3d4a7e181f0a",
+    "passages": "e8a37c05dd4d27b2"
+  },
+  "quoting-a-number-from-an-outcome-record/E22": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "fa21132de28cc326",
+    "what": "b61127a976210a8b",
+    "passages": "7b0da3f11dd4b478"
+  },
+  "quoting-a-number-from-an-outcome-record/E23": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "72cf3ad2b665f031",
+    "what": "de8540b1f282b452",
+    "passages": "d543473f387d8ea7"
+  },
+  "quoting-a-number-from-an-outcome-record/E24": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "03c9c169c9fd6274",
+    "what": "accd2813fb1cb717",
+    "passages": "8de4efe0c7665730"
+  },
+  "quoting-a-number-from-an-outcome-record/E25": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "d6633ef9ccd780ec",
+    "what": "2c120817077c39cd",
+    "passages": "6f03ac2101420fa5"
+  },
+  "quoting-a-number-from-an-outcome-record/E26": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "f3cc721b08ce0baf",
+    "what": "28ec3d30d6ad64a7",
+    "passages": "2b1e2dc43386ebf8"
+  },
+  "quoting-a-number-from-an-outcome-record/E27": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "0cd1e050f1f056a0",
+    "what": "ab3f6f54d246a0f8",
+    "passages": "134348e8479448f5"
+  },
+  "quoting-a-number-from-an-outcome-record/E28": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "f9d4c8f7d1bcfc0c",
+    "what": "10fad565657dc1d7",
+    "passages": "0fb3d35be7ea3864"
+  },
+  "quoting-a-number-from-an-outcome-record/E29": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "5dd06452fe4292b4",
+    "what": "d25b23094822d461",
+    "passages": "022d8b24c791a9e8"
+  },
+  "quoting-a-number-from-an-outcome-record/E3": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "f6ae102e8214c20c",
+    "what": "9716ec27d5d155ae",
+    "passages": "ea2449826a4dd94a"
+  },
+  "quoting-a-number-from-an-outcome-record/E30": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ef58eaa838a51c7a",
+    "what": "69d8f47849ffa04d",
+    "passages": "a05b6f8db92ed59f"
+  },
+  "quoting-a-number-from-an-outcome-record/E31": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "7a928c9e92eb1eb1",
+    "what": "d9cb0927b63b7958",
+    "passages": "d00b216cd0e5e183"
+  },
+  "quoting-a-number-from-an-outcome-record/E32": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "eb49fb64b45d0f97",
+    "what": "66a124cb52f01539",
+    "passages": "7e8a59cfdbe1336b"
+  },
+  "quoting-a-number-from-an-outcome-record/E4": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "793a36b207195c9f",
+    "what": "047ffac3f1f67d0e",
+    "passages": "37860efe0e4570a6"
+  },
+  "quoting-a-number-from-an-outcome-record/E5": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "0b6325b487b3056c",
+    "what": "0d22697e87c06a11",
+    "passages": "a6ca36d42acd5bfc"
+  },
+  "quoting-a-number-from-an-outcome-record/E6": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "ffb650b32ab6a2b3",
+    "what": "16549e18e161388e",
+    "passages": "10ab8d56e412dd9c"
+  },
+  "quoting-a-number-from-an-outcome-record/E7": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "8a7a32a84fe62934",
+    "what": "f050918494fcc419",
+    "passages": "2b072d2d04368ae4"
+  },
+  "quoting-a-number-from-an-outcome-record/E8": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "c934bf41e91b8995",
+    "what": "afec5dcb536dc9b9",
+    "passages": "23ee12b1875a18d2"
+  },
+  "quoting-a-number-from-an-outcome-record/E9": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "a12501893fd733dd",
+    "what": "b16650265da044c2",
+    "passages": "de46b89e3615598c"
+  },
+  "running-an-outcome-record-trial/E1": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "55fee4b0307c84cb",
+    "what": "6ca1a5d7aeaaaab9",
+    "passages": "03527c9fd2395923"
+  },
+  "running-an-outcome-record-trial/E10": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ca1d161ab3ab1652",
+    "what": "3c4103c9efbc2dd8",
+    "passages": "f2e8fc9aa43b48d9"
+  },
+  "running-an-outcome-record-trial/E11": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "a4cda0e46d4ba9fe",
+    "what": "c65642103e98c48d",
+    "passages": "2436757822b58501"
+  },
+  "running-an-outcome-record-trial/E12": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "d4a3e4b696601e83",
+    "what": "cfe2c748b2fa727a",
+    "passages": "2c76c96f96ccd0aa"
+  },
+  "running-an-outcome-record-trial/E13": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "be9d7bc170f6f9f0",
+    "what": "8c689eab47907ed1",
+    "passages": "75214048b15e8f77"
+  },
+  "running-an-outcome-record-trial/E14": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "72cf3ad2b665f031",
+    "what": "7e331c4c3d33598d",
+    "passages": "a102c262093fc7e1"
+  },
+  "running-an-outcome-record-trial/E15": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "a73dfef5a9bd887e",
+    "what": "80fac6cff6122a6d",
+    "passages": "ca3584f7caf84ea9"
+  },
+  "running-an-outcome-record-trial/E16": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "65d6f9d6c8326f36",
+    "what": "43c024ee6fe23705",
+    "passages": "ef5b0f5049b102df"
+  },
+  "running-an-outcome-record-trial/E17": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "eaf8a27724b630bb",
+    "what": "1632cde215fd6f36",
+    "passages": "9276409d9adcd875"
+  },
+  "running-an-outcome-record-trial/E18": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "e05266011daf3cbb",
+    "what": "d3de422f3ec66eec",
+    "passages": "a3e4363016f54944"
+  },
+  "running-an-outcome-record-trial/E19": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "fcb46315b66f02d2",
+    "what": "d5ce14c044a781d7",
+    "passages": "81641dcf09a68469"
+  },
+  "running-an-outcome-record-trial/E2": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "fb2d04012b0e80fe",
+    "what": "54671e68bb7f0515",
+    "passages": "63e9cf741d39cd06"
+  },
+  "running-an-outcome-record-trial/E20": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "6195c448e3b9f3cb",
+    "what": "8e323fd0ca647917",
+    "passages": "26667490cef6cf64"
+  },
+  "running-an-outcome-record-trial/E21": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "a98c380558e140ad",
+    "what": "19926664e523e502",
+    "passages": "1c6ce84fff5c59e9"
+  },
+  "running-an-outcome-record-trial/E22": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "ecb79d4bd3fd098c",
+    "what": "b0563c4c7de421ff",
+    "passages": "7b1632477a2a65cb"
+  },
+  "running-an-outcome-record-trial/E3": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "4949702ed2131e40",
+    "what": "61bf160cf9f5d61e",
+    "passages": "f1a115795d03ca46"
+  },
+  "running-an-outcome-record-trial/E4": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "bc0df0f4ced20dfc",
+    "what": "6873e6dd0f0d8d15",
+    "passages": "dfbfa56cf36c6e90"
+  },
+  "running-an-outcome-record-trial/E5": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "4f5fbdfa4d2b3f44",
+    "what": "0453527ccfa672a9",
+    "passages": "b1202ede37f4d781"
+  },
+  "running-an-outcome-record-trial/E6": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "97bf45e3ca4ac5c8",
+    "what": "ed83763b624dc5a9",
+    "passages": "04a75637f0ecfe18"
+  },
+  "running-an-outcome-record-trial/E7": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "315880f1aafc5341",
+    "what": "6355506276b32267",
+    "passages": "c5cbb25da2bcfa9f"
+  },
+  "running-an-outcome-record-trial/E8": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "6e620c501db6b212",
+    "what": "c4da04c6000c4e86",
+    "passages": "902e6202899ac15f"
+  },
+  "running-an-outcome-record-trial/E9": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "f81f9164156226fd",
+    "what": "3342ab568d58f9e1",
+    "passages": "3ad72f1253b892a8"
+  }
+}
