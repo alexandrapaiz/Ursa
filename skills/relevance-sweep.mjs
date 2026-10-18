@@ -131,6 +131,15 @@ for (const entry of readdirSync(skillsDir)) {
       entry, ref, what, sourceLine: sourceLine.trim(), blocks, lineCount,
       sentences: sentencesCiting(body, ref),
       unrangeable: blocks.every((b) => b.from === null),
+      // Every source on this ref's line that carries no range, whether or not
+      // the ref has other sources that do. `unrangeable` above is a property
+      // of the ref and answers "can this be queued at all"; this is a property
+      // of the sources and answers "is anything here undefended". Slice 5 of
+      // the sweep found the two differ: a ref with one ranged source and one
+      // unranged one was counted as ranged, so it never reached the queue and
+      // never reached the list of refs the queue sets apart. Two citations
+      // hid there, one of them with no range and no section name at all.
+      unranged: blocks.filter((b) => b.from === null).map((b) => b.path),
       missRate: tokens.length ? miss.length / tokens.length : 0,
       miss, tokens,
       density: lineCount ? conjuncts(what) / lineCount : Infinity,
@@ -275,3 +284,18 @@ if (unread.length) {
   console.log(`No fingerprint exists for them, so nothing mechanical defends them at all:`)
   for (const r of unread) console.log(`         ${r.sourceLine}   (${r.entry}/${r.ref})`)
 }
+
+// Counted apart from the block above, and the reason is the whole point of it.
+// A ref whose sources are mixed has a range, so it is in the queue and its
+// signals mean something, and it is not in the list above either. Its unranged
+// source is therefore invisible twice over, which is how the least defended
+// citation in this library stayed unread through four slices.
+const partly = refs.filter((r) => r.unranged.length && !r.unrangeable)
+if (partly.length) {
+  console.log(`\n${partly.length} refs are in the queue above and still carry an unranged source:`)
+  for (const r of partly) console.log(`         ${r.unranged.join(', ')}   (${r.entry}/${r.ref})`)
+}
+const unrangedSources = refs.reduce((n, r) => n + r.unranged.length, 0)
+console.log(`\n${unrangedSources} unranged sources in all, across ${
+  refs.filter((r) => r.unranged.length).length} refs. Count sources, not refs: a ref is`)
+console.log(`defended only as well as its weakest citation.`)

@@ -27,7 +27,7 @@ evidence:
     source: ursa-major/src/pairfinder.ts:1-8,598-620,658-660,698-712
   - ref: E3
     what: three tests mark a commit as generated and two of them share one machine-identity pattern, the co-author trailer and the author name, while the owner-declared list is a hand-written set of substrings matched against name and email, and the author test alone is suppressed when it matches the whole history
-    source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:520-531,544-548,566-577; docs/design/agent-coauthor-detection.md
+    source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:520-531,544-548,566-577; docs/design/agent-coauthor-detection.md:71-80,175-180
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff, and the exclusion is written against parent count
     source: ursa-major/src/pairfinder.ts:631-634,644
