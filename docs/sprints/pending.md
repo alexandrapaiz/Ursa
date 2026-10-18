@@ -2,6 +2,72 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-fourth pass, 2026-10-18 ~14:0x UTC, message: the skill seat's run-finished report, exo's pointer-moved note, PR #252 (exo's tenth window) to review against the merge rule, exo's run-finished report
+
+**#252 (exo's tenth window): held, not merged, same as #248 and #251
+before it.** Checked fresh rather than inherited: `gh pr diff 252
+--name-only` lists the same ten files as #248 and #251, including the
+same two charter files, `prompts/exo-agent.md` and
+`prompts/pm-agent.md`. Tier C by docs/standards/pm.md §10, independent
+of its green check (`scan`: `pass`), its clean `mergeStateStatus`, its
+empty comment list and its empty label list. Nothing further is owed
+to the exo seat on it: the work is done and waiting on the owner, not
+on this seat.
+
+**The ancestry chain verified directly, on an unshallowed clone, in
+the direction that matters.** Fetched `refs/pull/248/head`,
+`refs/pull/251/head` and `refs/pull/252/head` and ran `git merge-base
+--is-ancestor` both links: #248 is contained in #251, and #251 is
+contained in #252. Confirmed `.git/shallow` does not exist in this
+checkout before trusting either result, per exo's own caution this
+pass that the same check on a shallow clone returns a clean exit
+meaning the opposite of the truth. Filed here for this seat's own
+future passes, not as a lesson this seat can write into
+`docs/standards/lessons.md`, which is the exo centralizer's surface.
+
+**The standing owner-ask moves to #252; the deadline does not.** Exo's
+board note (13:51:47Z) reports nothing new asked, only that the
+pointer moved one window further since the thirty-second pass wrote
+it down. Taken as settled because this pass verified both halves
+itself rather than inheriting exo's account of them. The
+2026-10-20T12:30 UTC silence deadline is unchanged; it now resolves on
+whichever of #248, #251 or #252 the owner acts on, since merging #252
+closes all three.
+
+**#248 and #251 stay open.** Not superseded-and-closed, on purpose:
+this seat named #248 in a live ask to the owner with that deadline,
+and exo's own retirement duty carries an exception for exactly this
+case — never close an artifact another seat has named to the owner in
+a live ask. Replied to exo on the board, first person, confirming both
+verifications and the moved pointer.
+
+**The skill seat's run finished: slice 3 of the relevance sweep,
+in progress, nothing to merge.** PR #254 is a draft; `gh pr diff 254
+--name-only` shows one file, `skills/relevance-audit.md`, and the only
+change is a progress marker (`<!-- slice 3 in progress -->`), no rows
+landed yet. Checks green (`scan`: `pass`). Not a candidate for Tier B
+merge regardless of content, since a draft fails the merge rule's
+second condition on its own. Nothing superseded by it either. The
+board carries no `done` from the skill seat for this run yet, consistent
+with the work still being mid-slice rather than finished and unposted.
+
+**Hand the next thing to a seat: one card moved, nothing idle beyond
+it.** `gh pr list --state open` this pass: #254 (skill, draft, active),
+#252 (exo, held, above), #241 (engineer, draft, active), #240/#236
+(frontend, drafts, active), #210 (research, Tier C, unchanged), #225
+(this seat's own). Every seat already carrying a pull request is mid-
+task; none is idle and waiting on an instruction. Security carries no
+open pull request and its "This sprint" board card ("Finish the live
+security draft, then draft the redaction standard") was still sitting
+open though the standard it names merged this morning in #214
+(02:07:52Z) — moved that card to Done on the board with a comment
+naming why, since it was the board being wrong rather than the work
+being undone. No new card invented for security: assigning it fresh
+work is a grooming decision for the ceremony, not a judgment this
+message pass has a file or a ruling to cite.
+
+`gh run list --status failure` for the current window: empty.
+
 ## Thirty-third pass, 2026-10-18 ~13:5x UTC, message: PR #253 (skill, relevance sweep slice 2) to review against the merge rule
 
 **Merged under Tier B, `72df9f8`.** `gh pr diff 253 --name-only`:
