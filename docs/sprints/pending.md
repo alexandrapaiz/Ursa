@@ -2,6 +2,56 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-first pass, 2026-10-18 ~09:4x UTC, message: "the engineer seat's run finished," same event the twentieth pass already closed
+
+**The event this pass was handed is the one the pass above already
+answered.** The dispatch names a host run-finished notice for
+`ursa-engineer/2026-10-18T09-09-05-734Z-message` and asks this seat to
+read the report, merge what is mine under the merge rule, close what
+is superseded, and hand the next thing to a seat. That timestamp
+(09:09:05Z) sits inside the window of engineer's third run, the one
+that opened PR #232 and that the twentieth pass above merged at
+09:34:58Z (`4bf9f0f`) — this is a second notice for the same run, not a
+new one. Checked rather than assumed: `gh pr view 232` still reads
+`MERGED`, `mergedAt: 2026-10-18T09:34:58Z`, and `git log origin/main`
+has `4bf9f0f` on the tip this pass's own merge into this branch just
+pulled in clean, with no conflict.
+
+**Merge what is mine: nothing new.** Fresh `gh pr list --state open`:
+`#241` (engineer, fifth run, opened 09:36:18Z, title still literally
+"WIP") is the only PR that did not exist when the twentieth pass
+checked. It is a draft and stays one; nothing to review yet. Every
+other open PR (`#240`, `#236`, `#235`, `#234`, `#231`, `#225` this
+seat's own, `#210`, `#199`, `#167`) is unchanged from the twentieth
+pass's read: live seat drafts, or Tier C by a `prompts/`-touching diff
+regardless of merge state, or this seat's own.
+
+**Close what is superseded: already done, and not by this seat.**
+`#237` (engineer's fourth run, "how much of an outcome record is not
+reproducible") is `CLOSED`. `gh api repos/alexandrapaiz/Ursa/issues/237/timeline`
+shows the close actor is `alexandrapaiz` (the owner) at 09:28:53Z —
+before the twentieth pass even opened PR #232's review. Nothing left
+for this seat to close.
+
+**Hand the next thing to a seat: nothing unclaimed.** Every open
+thread already has a live seat on it (exo's `#231`→`#234`→`#235`
+stack, frontend's `#240` and `#236`, research's `#210`, skill's
+`#199`, engineer's own `#241` mid-write). The twentieth pass's two
+named follow-ups from #232 — HQ copying
+`docs/design/pages-dogfood/ursa-publish.yml` into
+`.github/workflows/`, and the owner's one Pages-enable API call — are
+HQ/owner actions, not seat work, and are already carried below under
+"waits on the owner." Inventing a seat-facing handoff where none
+exists would be the dispatch-queue's own law working backward: a
+framework must never consume more than the work it organizes.
+
+**Inbox, checked fresh.** `to_seat=pm&to_company=Ursa` since the
+nineteenth pass's 09:05:04Z message: nothing new. The twentieth pass's
+own closing `done` (09:38:19Z) is this seat's, not an inbound ask.
+
+**Hygiene.** `gh run list --limit 15`: all green, nothing failed since
+the twentieth pass's check. No new incident.
+
 ## Twentieth pass, 2026-10-18 ~09:3x UTC, message: review PR #232 against the merge rule
 
 **The event.** A dispatch asked this seat to review the engineer's
