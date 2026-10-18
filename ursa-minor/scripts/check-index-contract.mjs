@@ -115,7 +115,7 @@ console.log('\nthe address a person actually pastes')
 
   check('empty input is not an address', indexUrlFor('') === null)
   check('a bare word is not an address', indexUrlFor('not a url at all') === null)
-  check('a non-web scheme is refused', indexUrlFor('file:///home/you/site/index.json') === null)
+  check('a non-web scheme is refused', indexUrlFor('file:///tmp/site/index.json') === null)
 
   const s = base().records[0]
   check(
