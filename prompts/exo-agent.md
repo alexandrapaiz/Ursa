@@ -270,6 +270,41 @@ example payloads and a privacy floor forbidding the owner's paths, in
 two different files, neither citing the other, resolved by the seat in
 favour of the one it could see.
 
+Check that what the standards point at actually exists here, which is
+the third check nobody else performs (added 2026-10-18). A standard
+arrives in `docs/standards/` as text, and only the text crosses the
+sync. Everything the text points at stays behind: a script path, a
+workflow name, an environment variable, a URL, a tool. The reference
+reads correctly in the repository it was written in and resolves to
+nothing in the repository that received it, and nothing about the
+sentence changes to announce that. So each run, extract every path,
+script, env var and tool name the files under `docs/standards/` write
+in the imperative, and check each one resolves from an Ursa checkout:
+
+```bash
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/ \
+  | sort -u | while read -r t; do [ -e "$t" ] || echo "MISSING: $t"; done
+```
+
+The first sweep, 2026-10-18, printed fourteen of fourteen. Every tool
+script the standards name as a command to run is absent from this
+repository and present in HQ's. Run the sweep, do not enumerate by
+hand: this run's hand-built list said twelve, because it had matched
+only the shell scripts and missed two Python ones. One of them is the merge-state instrument
+`docs/standards/pm.md` §11.2 mandates, and its absence is the upstream
+cause of three days of a seat's work spent on a conflict that did not
+exist (Ursa incidents 17 and 18).
+
+Report the count and name every miss, because a missing instrument
+fails silently. It does not give a wrong answer, it gives no answer, and
+a seat that gets "No such file or directory" from the command its
+standard named falls back to whatever is to hand. Fix what is yours,
+which is the charters and runner-facts.md, and hand the rest to HQ under
+§15 of docs/standards/pm.md rather than vendoring a copy. A vendored
+copy of shared machinery drifts from the standard that calls it while
+continuing to answer, and a silently stale instrument is worse than an
+absent one.
+
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
 the only mechanism by which a memoryless run learns why a rule exists,
@@ -446,6 +481,26 @@ previous week's plan:
    names the files. The `mergeable` field from `gh pr list` returns
    `UNKNOWN` for most of a large queue, because GitHub computes it
    lazily, so it is not a usable instrument here.
+
+   **Prefer HQ's script over that one-liner where it is reachable
+   (added 2026-10-18).** `tools/check-merge-queue.sh` sweeps the whole
+   open queue in one throwaway worktree, reports the conflicting files
+   and how far behind `main` each branch is, and prints an explicit line
+   when GitHub's cached field disagrees with the merge it just
+   performed. It is not in this repository. On the resident company host
+   it is at
+   `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh` and
+   runs correctly from an Ursa checkout, verified 2026-10-18. On GitHub
+   Actions it does not exist and the `merge-tree` line above is what you
+   have. That split is Ursa incident 18 and runner-facts.md §4 carries
+   the probe.
+
+   **Record which instrument produced each verdict in
+   merge-order.md.** A conflict verdict with no instrument beside it
+   cannot be re-measured by the seat holding the branch, and this seat
+   has now been on both sides of that: it received three days of
+   verdicts it could not check, and it writes verdicts other seats
+   cannot check for the same reason. One column, every row.
 
    **Its wrong answers are not only `UNKNOWN` (amended 2026-10-18).**
    The same laziness means a cached `CONFLICTING` survives after `main`

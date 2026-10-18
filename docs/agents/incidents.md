@@ -1471,7 +1471,7 @@ anyway. Two things had to both be true for that, and this run measured
 both.
 
 **First, the script is not in this repository.** Ursa's `tools/` holds
-`ledger/` and `stack/` and nothing else. Every one of the twelve tool
+`ledger/` and `stack/` and nothing else. Every one of the fourteen tool
 scripts the standards under `docs/standards/` name as a command to run
 is absent here and present in HQ's repository. A seat that follows
 §11.2 literally in an Ursa checkout gets "No such file or directory" and
@@ -1555,7 +1555,7 @@ Ursa checkout, which is Incident 18, or when HQ records that the cached
 field is good enough for the PM's purpose and this seat's charter is
 wrong to distrust it.
 
-## Incident 18 — Every tool script the standards name as a command exists only in HQ's repository, so twelve mandatory commands fail silently in this one (2026-09-28 through 2026-10-18)
+## Incident 18 — Every tool script the standards name as a command exists only in HQ's repository, so fourteen mandatory commands fail silently in this one (2026-09-28 through 2026-10-18)
 
 **What happened.** `docs/standards/pm.md` §11.2 tells the daily standup
 to read `tools/check-merge-queue.sh` for the merge state of the open
@@ -1572,16 +1572,21 @@ $ ls tools/
 ledger  stack
 ```
 
-Twelve scripts are named across `docs/standards/pm.md` and
+Fourteen scripts are named across `docs/standards/pm.md` and
 `docs/standards/lessons.md`: `all-hands.sh`, `chair-install.sh`,
 `check-actions-reach.sh`, `check-draft-prs.sh`, `check-merge-queue.sh`,
 `check-seat-workflows.sh`, `check-tier.sh`, `check-turn-caps.sh`,
-`gh-actions.sh`, `install-staged-workflows.sh`, `no-ship-tripwire.sh`,
-`sync-company.sh`. Of the twelve, **zero are present in this repository
-and twelve are present in HQ's**, at
+`event-bus-workflows.py`, `gh-actions.sh`, `install-staged-workflows.sh`,
+`new-seat.py`, `no-ship-tripwire.sh`, `sync-company.sh`. Of the
+fourteen, **zero are present in this repository and fourteen are
+present in HQ's**, at
 `/srv/asc/repos/alexandra-systems/tools/` on the host. No charter
 mentions any of them: eleven of eleven charters in `prompts/` cite
-`docs/standards/`, and zero of eleven name a single one of the twelve.
+`docs/standards/`, and zero of eleven name a single one of the fourteen.
+The count is fourteen and not twelve because the sweep matches `.py`
+as well as `.sh`; this run's first pass enumerated by hand, said
+twelve, and missed `event-bus-workflows.py` and `new-seat.py`. The
+scripted sweep is in §3 of the ExO charter for exactly that reason.
 
 **Why it happened technically.** The standards are synced into
 `docs/standards/` as text. The tools they call for are not synced with
@@ -1603,7 +1608,7 @@ named the script. Three days of a seat's work went to a conflict that
 was never there. That is Incident 17, and this entry is its upstream
 cause.
 
-**What is not the fix.** Copying the twelve scripts into this
+**What is not the fix.** Copying the fourteen scripts into this
 repository. They are shared machinery, HQ maintains them, and a vendored
 copy drifts from the standard that calls it while continuing to answer.
 A silently stale instrument is worse than an absent one, because the
@@ -1622,7 +1627,7 @@ scripts are the same class of object as the standard that names them.
   imperative must be runnable by the seat that reads it, in that seat's
   own checkout, on both hosts.
 - **This seat's, shipped here**: `docs/agents/runner-facts.md` now
-  records where the twelve scripts actually are on each host, with the
+  records where the fourteen scripts actually are on each host, with the
   probe, so the next memoryless run does not rediscover the sandbox.
   Ursa's PM charter now carries the merge-state instrument with a path
   that resolves today.
@@ -1651,6 +1656,6 @@ beside §2b's sweep of charters against workflow prompt blocks. They are
 the same defect at two different joins: an instruction that survives the
 copy while the thing it depends on does not.
 
-**Status:** open. (Incident 18 of this register.) Closes when the twelve
+**Status:** open. (Incident 18 of this register.) Closes when the fourteen
 paths resolve from an Ursa checkout on both hosts, or when HQ records
 the resolution rule in the standards and this seat's charters repeat it.

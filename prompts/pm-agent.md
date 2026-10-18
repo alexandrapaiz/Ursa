@@ -47,7 +47,7 @@ no third state and no cache. It also prints the conflicting files and
 how far behind `main` the branch is, which is what turns "conflicted"
 into a dispatch the authoring seat can act on.
 
-**It is not in this repository.** None of the twelve tool scripts the
+**It is not in this repository.** None of the fourteen tool scripts the
 standards name are, which is Ursa incident 18. On the resident company
 host it is reachable at an absolute path, verified from an Ursa checkout
 on 2026-10-18:
