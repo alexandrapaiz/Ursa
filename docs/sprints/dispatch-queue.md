@@ -1,55 +1,42 @@
-# Dispatch queue — 2026-10-18, ~02:3x UTC, message pass (`window:message`)
+# Dispatch queue — 2026-10-18, ~06:2x UTC, host six-hour pass
 
-## Tier B merge this pass (§10, amended by §21)
+## Nothing to propose through `gh workflow run` this pass
 
-**#233 (frontend, the resolver's phone-overflow number and the index
-floor moved to 0.3).** Not a draft, no label, no comment or review
-since its last push, one defined check (`scan`) green,
-`mergeStateStatus: CLEAN`. Diff confined to `docs/design/reviews/` and
-`ursa-minor/` (`app`, `components`, `lib`, `package.json`, `public/
-fixtures`, `scripts`) — no `prompts/`, `.github/workflows/`, or
-`company.yaml` path. Cut from #229 (already merged), so the diff
-against `main` is additive only. Merged.
+Checked fresh before writing this file, not carried from the twelfth
+pass's own account: zero board messages addressed to this seat and
+zero Actions runs of any kind, company-wide on this repository,
+between the twelfth pass's last commit (02:38:58Z) and this pass
+(~06:2x UTC). Nothing failed, nothing stalled on a defect, and nothing
+sits with a review comment unanswered — the company was simply quiet
+for the stretch, between crons and host windows, confirmed by reading
+`gh pr list` and `gh run list` directly rather than assuming the gap
+meant a miss.
 
-## Not merged: #234 (exo), Tier C by content
+Every open pull request already has a live seat on it: `#235` is
+exo's own stack to finish or hand over, `#232`→`#237` is engineer's
+own correctly-shaped stack (confirmed `#232` is an ancestor of `#237`,
+not a competing second build), and `#236` is frontend's own draft.
+None is stuck behind a question or a defect this seat can name, so
+none meets §11.3's bar for a dispatch, and `PM_DISPATCH_ENABLED` is
+still unreadable with this token (`403`, the same gap every prior pass
+in this file has hit) in any case.
 
-`gh pr diff --name-only 234` includes `prompts/exo-agent.md` and
-`prompts/pm-agent.md`. Charters are owner-only (pm.md §9) regardless of
-what this seat's own Tier B/C authority otherwise covers. Still
-subsumes #231 and #167 (confirmed this pass). Named for the owner in
-`pending.md`.
+## Tier B merge this pass (§10, amended by §21): none
 
-## Owner-action logged, not fixed by this seat: eight stale charter branch prefixes
+Ten open pull requests checked fresh. `#167`, `#231`, `#234`, `#235`
+are one subsumption stack, all touching `prompts/exo-agent.md` and/or
+`prompts/pm-agent.md`; `#210` touches `prompts/research-agent.md`;
+`#199` touches `prompts/skill-extract.md` and is also `CONFLICTING`.
+Charters are owner-only (pm.md §9) regardless of how clean or ready
+any of these otherwise read. `#232` is a conflicting draft; `#236` and
+the stack tip `#235` are clean drafts, not yet readied by their own
+seats. Nothing here is both ready and Tier B. Full detail in
+`docs/sprints/pending.md`'s thirteenth-pass entry.
 
-`alexandra-systems/exo-centralizer` named eight Ursa charters whose
-branch-naming line still reads the bare role instead of the registered
-`ursa-<role>` prefix the runtime actually dispatches onto. Verified
-every line named. Not self-edited — charters are the owner's tier. The
-exact one-line diff per file is in `docs/decisions.md` ("eight of
-Ursa's charters..."), for the owner to take directly or hand to a
-routed pull request. Does not collide with #234's own `prompts/
-pm-agent.md` edit, which is a different, unrelated clause.
+## Failed-run triage this pass (§11.7)
 
-## This pass acted through the board, not `gh workflow run`
-
-Per §17, a message-triggered pass answers what woke it and hands work
-onward as board messages rather than firing scheduled dispatches. Two
-replies went to exo-centralizer (the host-report question closed, the
-eight-charter finding confirmed and located) and one to frontend
-(confirming #233's merge), each first person, each answering a message
-addressed to this seat.
-
-## Nothing proposed through `gh workflow run` this pass
-
-`gh variable get PM_DISPATCH_ENABLED` returned `403: Resource not
-accessible by personal access token` again this pass, the same
-token-scope gap pm.md §11.5 describes for Actions calls generally.
-Moot regardless: every open thread this pass found already has a live
-seat on it — #232 (engineer), #235 (exo), #236 (frontend) are all live
-drafts with runs behind them, none idle. Nothing here needed a cold
-`workflow_dispatch` start instead of the message it already had.
-
-## Failed-run triage this run (§11.7)
-
-`gh run list --limit 30` shows no run completing outside success since
-the eleventh pass. No rerun, no new incident.
+`gh run list --status failure --created ">=2026-10-18T00:26:30Z"`
+returns the same seven `redaction-gate` runs the ninth through twelfth
+passes already classified as tripwire false alarms and superseded
+reds, each fixed on the next push to its own branch. No run has failed
+since. No rerun, no new incident.
