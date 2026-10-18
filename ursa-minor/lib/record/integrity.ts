@@ -38,15 +38,26 @@
  * drift from its own index without being caught, which is the property
  * inlining had.
  *
- * ## The contract 0.1 case
+ * ## What a digest identifies, which is narrower than it looks
  *
- * `PublishedRecordSummary` at index contract 0.1 carries no digest. The
+ * The digest identifies a record *file* and never a resolution of an
+ * input. The resolve timestamp lives inside the hashed bytes, so
+ * resolving the same work twice produces two files with two different
+ * digests, and neither one has been tampered with. The resolver seat
+ * measured this and said so before this viewer could render it as a
+ * fault, which is the reason it is written down here and said out loud
+ * on the one screen where a person is invited to compare two numbers.
+ *
+ * ## The contract 0.1 and 0.2 case
+ *
+ * `PublishedRecordSummary` below contract 0.3 carries no digest. The
  * field was requested of the resolver seat on 2026-10-18, as an additive
  * change and a minor version bump, which is the route that seat named
- * for exactly this. Until a site carries it, `verify` returns
- * `unverifiable` and the page says the site's index predates digests. It
- * does not say "verified", and it does not say "failed", because neither
- * is true.
+ * for exactly this, and it landed the same day as contract 0.3.0.
+ * A site published before that states 0.1 or 0.2 and carries no digest,
+ * so `verify` returns `unverifiable` and the page says the site's index
+ * predates digests. It does not say "verified", and it does not say
+ * "failed", because neither is true.
  */
 
 import type { PublishedRecordSummary } from './published-index'
@@ -122,7 +133,7 @@ export function integrityCopy(i: Integrity): { tone: 'good' | 'bad' | 'quiet'; l
         case 'no-index-to-check-against':
           return {
             tone: 'quiet',
-            line: 'A record address names a record and no index, so there is no published digest here to check these bytes against, and this page is not going to imply it checked one. What it can tell you is the digest of what arrived, which is the same number the publisher sees when they print the address, so the two can be read to each other.',
+            line: 'A record address names a record and no index, so there is no published digest here to check these bytes against, and this page is not going to imply it checked one. What it can tell you is the digest of what arrived, which is the same number the publisher sees when they print the address, so the two can be read to each other. Read it against the record they published, not against a fresh run over the same work: resolving work a second time writes a new file with its own timestamp inside it, so the number moves without anything having gone wrong.',
           }
         case 'no-subtle-crypto':
           return {
