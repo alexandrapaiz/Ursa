@@ -54,10 +54,10 @@ evidence:
     source: ursa-major/src/types.ts:532-533, ursa-major/src/stats.ts:36-37,52-53
   - ref: E12
     what: CLAUDE.md lists all four classifications under one heading and calls no_generation_provenance the most valuable
-    source: CLAUDE.md, section 1, span classifications
+    source: CLAUDE.md:65-70 (section 1, span classifications)
   - ref: E13
     what: KR1.1 puts 55 uncertain spans in task-001 and requires the thresholds retuned to a false-positive rate of 10 percent or lower
-    source: docs/okrs/2026-q4.md, O1 KR1.1
+    source: docs/okrs/2026-q4.md:13-18 (O1 KR1.1)
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
     source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:128,136-138
@@ -66,7 +66,7 @@ evidence:
     source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:570,580
   - ref: E16
     what: CLAUDE.md lists turns to acceptance as trajectory metadata wrapped around the record
-    source: CLAUDE.md, section 1, trajectory metadata
+    source: CLAUDE.md:72-74 (section 1, trajectory metadata)
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
     source: ursa-major/src/stats.ts:45-57,148-153
@@ -90,13 +90,13 @@ evidence:
     source: docs/beyond-preference-pairs.md:232-240
   - ref: E24
     what: KR2.1 requires every quantitative claim in the methods document re-grounded in the n>=5 corpus and published by November 30
-    source: docs/okrs/2026-q4.md, O2 KR2.1
+    source: docs/okrs/2026-q4.md:37-40 (O2 KR2.1)
   - ref: E25
-    what: KR1.3 requires five or more records with at least two on the prose path, so the corpus deliberately mixes prose and code
-    source: docs/okrs/2026-q4.md, O1 KR1.3
+    what: KR1.3 requires five or more records with at least two on the prose path, and says nothing about the other three
+    source: docs/okrs/2026-q4.md:28-32 (O1 KR1.3)
   - ref: E26
     what: KR4.1 requires a lab brief naming the four span classes and what a buyer can audit
-    source: docs/okrs/2026-q4.md, O4 KR4.1
+    source: docs/okrs/2026-q4.md:76-78 (O4 KR4.1)
   - ref: E27
     what: Ursa must always be able to quote a scalar, and every lab-facing deliverable reduces to survival rates with confidence
     source: docs/beyond-preference-pairs.md:204-209
@@ -111,7 +111,7 @@ evidence:
     source: ursa-major/src/match.ts:1-3
   - ref: E31
     what: the Pretence principle, systems built on claims of sufficient information conform to the measure rather than the world
-    source: docs/vision.md, section 0b, principle 4
+    source: docs/vision.md:33-35 (section 0b, principle 4)
   - ref: E32
     what: survived_verbatim means byte-identical as of 2026-10-13, and a formatting-only match is now survived_mutated with normalizedOnly set and score 1, which 26 of 770 verbatim claims over ten records of this repository were
     source: ursa-major/src/types.ts:357-388, ursa-major/src/resolve.ts:266-290, ursa-major/src/resolver.test.ts:168
@@ -300,8 +300,10 @@ cd ursa-major && npx tsx src/cli.ts --id fix-mini \
 
 **The coverage gap is larger for code than for prose, so it biases
 exactly the comparison the corpus is built to make.** KR1.3 requires
-five or more records with at least two on the prose path [E25], which
-means prose and code records will be read side by side. Because code
+five or more records with at least two on the prose path [E25]. Ours:
+it requires no code record, so a mixed corpus is what to expect and not
+what the key result guarantees, and the bias below is the thing to check
+for once the mix exists. Because code
 spans are trimmed lines [E4] and prose spans are sentences [E5], the
 fraction of a file that enters no denominator is systematically larger
 for code.

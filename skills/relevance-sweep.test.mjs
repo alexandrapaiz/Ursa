@@ -182,3 +182,48 @@ skipped [E3].
   // And a ref whose every citation is its own says nothing rather than zero.
   assert.doesNotMatch(run(dir, ['alpha/E3']), /shares? a sentence/)
 })
+
+test('a ref that is half ranged still has its unranged source counted', () => {
+  // The slice-5 failure in words: `unrangeable` is all-or-nothing, so a ref
+  // with one ranged source and one unranged one is in the queue, which means
+  // it is not in the list of refs the queue sets apart, and its undefended
+  // citation is invisible in both places. Two of them hid in this library for
+  // four slices, one with no range and no section name at all. E2 below is
+  // that shape: a real range plus a bare document.
+  const dir = library()
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: a fixture
+evidence:
+  - ref: E1
+    what: the threshold constant is 0.6
+    source: src/a.ts:1
+  - ref: E2
+    what: covered excludes skipped text, and the design document says why
+    source: src/a.ts:3, docs/design.md
+supersedes: []
+---
+
+# Alpha
+
+The threshold is 0.6 [E1] and covered excludes skipped [E2].
+`)
+  mkdirSync(join(dir, 'docs'), { recursive: true })
+  writeFileSync(join(dir, 'docs', 'design.md'), 'why\n')
+  const out = run(dir, [])
+  // It is still in the queue, because it has a range and its signals mean
+  // something. That is exactly why the old count could not see it.
+  assert.match(out, /alpha\/E2/)
+  assert.doesNotMatch(out, /unread refs cite a document and a section name/)
+  assert.match(out, /1 refs are in the queue above and still carry an unranged source/)
+  assert.match(out, /docs\/design\.md {3}\(alpha\/E2\)/)
+  assert.match(out, /1 unranged sources in all, across 1 refs/)
+})
+
+test('a library whose every source is ranged reports no unranged sources', () => {
+  // The closing state of the sweep, asserted so that a later run which adds a
+  // bare document citation sees the count move off zero.
+  const out = run(library(), [])
+  assert.match(out, /0 unranged sources in all, across 0 refs/)
+  assert.doesNotMatch(out, /still carry an unranged source/)
+})

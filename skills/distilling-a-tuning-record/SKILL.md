@@ -108,7 +108,7 @@ evidence:
     source: docs/design/tuning-pipeline.md:60-69
   - ref: E30
     what: today's correction signals are hand annotations, and KR1.2 is what retires manual annotation
-    source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md, O1 KR1.2
+    source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md:20-26 (O1 KR1.2)
   - ref: E31
     what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
     source: ursa-major/src/bridge/index.ts:82-98,140-150
@@ -116,17 +116,17 @@ evidence:
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
   - ref: E33
-    what: acceptance is never inferred from retention, only the owner's declaration counts, and the two trials so far were owner-declared unsatisfied
-    source: CLAUDE.md, section 0
+    what: acceptance is never inferred from retention, only the owner's declaration counts, and the second of the two trials was owner-declared unsatisfied
+    source: CLAUDE.md:16-22 (section 0)
   - ref: E34
     what: tacit intelligence, much of what people know cannot be stated as rules and shows up only in action on a particular case
-    source: docs/vision.md, section 0b, principle 3
+    source: docs/vision.md:31-32 (section 0b, principle 3)
   - ref: E35
     what: pretence of intelligence, systems built on claims of sufficient information conform to the measure rather than the world
-    source: docs/vision.md, section 0b, principle 4
+    source: docs/vision.md:33-35 (section 0b, principle 4)
   - ref: E36
     what: Ursa Major's product mission, import your tuning into every model
-    source: docs/vision.md, section 1
+    source: docs/vision.md:53-56 (section 1)
   - ref: E37
     what: the tuning test's only fixture declares the episode accepted with an acceptance basis of retention
     source: ursa-major/src/tuning/tuning.test.ts:18-26
