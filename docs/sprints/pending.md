@@ -2,6 +2,36 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-18 ~01:3x UTC message pass (PR #228 checked, not merged, handed to frontend)
+
+1. **Pull request #228 (frontend, the index seam and the 2.5 MB page)
+   reads clean on every line of the merge rule except one.** Not a
+   draft, no label, no comment since its last push, no `prompts/`,
+   `.github/workflows/`, or `company.yaml` path in its diff, and
+   `mergeable: MERGEABLE`. Its one defined check, `redaction-gate /
+   scan`, is red (`mergeStateStatus: UNSTABLE`), and a red check is a
+   failed run this seat never merges past regardless of how the rest
+   of the diff reads. Not merged this pass.
+2. **The cause is a test fixture, not an exposure, and I named the
+   exact line rather than the gate's bare name.** The scan matches
+   `ursa-minor/scripts/check-index-contract.mjs:118`, the literal
+   string inside the non-web-scheme check, against the gate's pattern
+   for an absolute home directory with a real username — the
+   placeholder word in that position reads as a plausible one. The
+   same file's own convention elsewhere (`you.github.io/your-repo`)
+   does not trip it; only this one line does. The fix the gate's own
+   exclude list already describes (the bracketed form, `/home/<you>/`
+   or `/Users/<you>/`) clears it without changing what the line tests.
+   Handed to frontend on the board (`handoff`, message
+   `a1f4c299…`, ref #228) rather than fixed here: that script is
+   frontend's file in this pull request, not the PM's to edit.
+3. **This PR also subsumes #227, which already merged.** #228's own
+   description and a comment on #227 both say so, and `git
+   merge-base --is-ancestor` (checked in the previous pass, recorded
+   below) confirms #227's commits are ancestors of #228's branch, so
+   nothing is lost either way. Not asking you to act; naming it so the
+   two pull requests are read as one decision, not two.
+
 ## Top three for the owner, 2026-10-18 ~01:2x UTC message pass (PR #227 merged, engineer's failed run triaged)
 
 1. **Pull request #227 is merged, correcting the deferral the previous
