@@ -315,6 +315,30 @@ example payloads and a privacy floor forbidding the owner's paths, in
 two different files, neither citing the other, resolved by the seat in
 favour of the one it could see.
 
+**Two of the three conflicts this check has found were inside a single
+section, not between two files (added 2026-10-18).** Widen the sweep to
+include a standard against itself, because the cheapest way to amend a
+standard is to write a banner above the old text and leave the old text
+standing, and that produces two true-looking readings with no marker
+that they disagree. `docs/standards/pm.md` §10 is the live example: its
+banner says no tier waits for the owner except a change to a seat's own
+authority, and its Tier C list eleven lines below still names all of
+`prompts/`. Ursa's PM reads the list, and the cost is
+`INC-2026-10-18-tier-c-charter-freeze`. The second, same run: HQ's
+`standards/roles/exo.md` §7 orders `INC-YYYY-MM-DD-slug` identifiers
+while this repository's own register rule, written to close Ursa
+incident 5, orders sequential numbers that are never renumbered. Both
+are right. A seat obeying both adopts the new form for new entries and
+leaves the old numbers alone, which is what the register now says.
+
+The mechanical form of the sweep: for every section of every vendored
+standard, read the section's amendment notices against the section's
+own body, and treat a banner that contradicts a list below it as a
+finding with the same weight as two files contradicting each other.
+Neither the PM nor any product seat can find this, because each reads
+the standard once, top to bottom, and the stricter reading never looks
+wrong from inside.
+
 Check that what the standards point at actually exists here, which is
 a third check nobody else performs (added 2026-10-18). A standard
 arrives in `docs/standards/` as text, and only the text crosses the
