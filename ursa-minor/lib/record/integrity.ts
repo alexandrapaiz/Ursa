@@ -54,7 +54,19 @@ import type { PublishedRecordSummary } from './published-index'
 export type Integrity =
   | { state: 'verified'; sha256: string; bytes: number }
   | { state: 'mismatch'; expected: string; got: string; bytes: number }
-  | { state: 'unverifiable'; reason: 'no-digest-in-index' | 'no-subtle-crypto'; bytes: number }
+  | {
+      state: 'unverifiable'
+      reason: 'no-digest-in-index' | 'no-subtle-crypto' | 'no-index-to-check-against'
+      bytes: number
+      /**
+       * The digest of what did arrive, when it could be computed. There
+       * is nothing to compare it to, which is why the state is
+       * unverifiable, but it is not useless: it is the one number a
+       * person can read back to whoever sent them the address, and
+       * `ursa address` prints the same number on the publishing side.
+       */
+      sha256?: string
+    }
 
 /** Lower-case hex SHA-256 of a string, as the publisher would have hashed it. */
 export async function sha256Hex(text: string): Promise<string | null> {
@@ -101,16 +113,48 @@ export function integrityCopy(i: Integrity): { tone: 'good' | 'bad' | 'quiet'; l
         line: 'These bytes are not the ones this site published. The record your browser fetched does not hash to the digest in the index, so something changed between the two. Read what is below as unverified.',
       }
     case 'unverifiable':
-      return i.reason === 'no-digest-in-index'
-        ? {
+      switch (i.reason) {
+        case 'no-digest-in-index':
+          return {
             tone: 'quiet',
             line: 'This site states no digest for its records, so nothing here can check that the copy you were sent is the one it published. Its index predates the field. The record is shown as it arrived.',
           }
-        : {
+        case 'no-index-to-check-against':
+          return {
+            tone: 'quiet',
+            line: 'A record address names a record and no index, so there is no published digest here to check these bytes against, and this page is not going to imply it checked one. What it can tell you is the digest of what arrived, which is the same number the publisher sees when they print the address, so the two can be read to each other.',
+          }
+        case 'no-subtle-crypto':
+          return {
             tone: 'quiet',
             line: 'Your browser does not offer hashing on this page, which happens when a page is served over plain http. The record is shown as it arrived, unchecked.',
           }
+      }
   }
+}
+
+/**
+ * The same honesty, for a record fetched by its own address rather than
+ * through a site's index.
+ *
+ * A record address carries its own location and nothing else. There is
+ * no index in the path, by design, because an index would be a second
+ * thing to fetch and a service that resolved addresses would be a thing
+ * Ursa must not run. So there is no published digest to compare against,
+ * and this cannot and must not report "verified".
+ *
+ * What it can do is compute the digest of what arrived and say plainly
+ * that nothing on this page checked it. That number is checkable by a
+ * person: it is what the publisher's own `ursa address` prints, so the
+ * two can be read to each other, which is weaker than a check and much
+ * better than silence. A record opened through a site's index gets the
+ * real check, and the page below points there.
+ */
+export async function unverifiableDigest(text: string): Promise<Integrity> {
+  const bytes = new TextEncoder().encode(text).length
+  const got = await sha256Hex(text)
+  if (got === null) return { state: 'unverifiable', reason: 'no-subtle-crypto', bytes }
+  return { state: 'unverifiable', reason: 'no-index-to-check-against', bytes, sha256: got }
 }
 
 /** Bytes, for a person rather than for a machine. */
