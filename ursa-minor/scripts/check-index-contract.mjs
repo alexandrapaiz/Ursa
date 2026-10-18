@@ -189,7 +189,7 @@ console.log('\nthe integrity claim')
   check('humanBytes', humanBytes(512) === '512 bytes' && humanBytes(50572) === '49 KB' && humanBytes(4045328) === '3.9 MB')
 }
 
-console.log('\na real 0.3 site, not a hand-written one')
+console.log('\ntwo real sites, not hand-written ones')
 {
   // Everything above asserts behaviour against an object written here,
   // which can only ever agree with itself. This block reads a site that
@@ -221,6 +221,20 @@ console.log('\na real 0.3 site, not a hand-written one')
   // quietly replaced without the index being rewritten.
   const swapped = await verify(summary, recordText.replace('"finished": true', '"finished": false'))
   check('a record changed under a published index is caught', swapped.state === 'mismatch')
+
+  // And the regression that a floor bump is the natural way to cause.
+  // site-02/ was written by the publisher on `main` before digests
+  // existed, which is what every site published before 2026-10-18 is.
+  // It has to keep reading, silently, and it has to come out
+  // unverifiable rather than failed.
+  const old = parsePublishedIndex(readFileSync(join(here, '..', 'public', 'fixtures', 'site-02', 'index.json'), 'utf8'))
+  check('a real 0.2 site still parses', old.ok === true && old.index.indexVersion === '0.2.0')
+  check('and says nothing about it, being below the floor rather than above it', old.ok === true && old.note === null)
+  const oldSummary = old.ok === true ? old.index.records[0] : null
+  check('its record carries an address but no digest', typeof oldSummary?.address === 'string' && oldSummary.sha256 === undefined)
+  const oldText = readFileSync(join(here, '..', 'public', 'fixtures', 'site-02', oldSummary.json), 'utf8')
+  const oldCheck = await verify(oldSummary, oldText)
+  check('and its record is unverifiable, not failed', oldCheck.state === 'unverifiable' && oldCheck.reason === 'no-digest-in-index')
 }
 
 console.log('')
