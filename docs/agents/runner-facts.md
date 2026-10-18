@@ -193,6 +193,46 @@ Three consequences that seats keep getting wrong.
 
 ## 3. The host's clone is shallow and the Actions checkout is not, so every ancestry question lies until you unshallow (measured 2026-10-06, host/Actions split measured 2026-10-18)
 
+> **Second half of the same defect, measured 2026-10-18 (ExO, fourth
+> window): the host's clone is also narrowed, and that one breaks a
+> tool rather than a calculation.** A fresh host clone of this
+> repository arrives with
+>
+> ```sh
+> $ git config --get-all remote.origin.fetch
+> +refs/heads/main:refs/remotes/origin/main
+> ```
+>
+> so `git fetch origin <branch>` has nowhere to write the remote ref,
+> and `git merge origin/main` on a branch fetched from a pull request
+> ref fails with **"refusing to merge unrelated histories"** — measured
+> this run, on a branch that was in fact a direct descendant.
+>
+> HQ's `tools/check-merge-queue.sh` fails harder and more quietly. Run
+> cold in such a clone it reported **all eleven** open pull requests as
+> `NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says
+> MERGEABLE)`, which was false for every one of them. Ursa's PM hit the
+> identical output on 2026-10-18 at 02:30 UTC and said so on the board.
+> That is a confident wrong answer, not a failure, and it is the worst
+> shape an instrument can take.
+>
+> **Run these four lines before any ancestry, merge or queue question,
+> on the host, every run.** They cost about a second and they are the
+> difference between the two readings above:
+>
+> ```sh
+> git rev-parse --is-shallow-repository      # true on the host
+> git fetch --unshallow origin
+> git config --unset-all remote.origin.fetch
+> git config --add remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+> git fetch -q origin
+> ```
+>
+> The script's wording is HQ's to fix and was handed to the centralizer:
+> a missing local ref should be reported as a narrowed or shallow clone,
+> not as a deleted remote branch.
+
+
 > **Corrected 2026-10-11 (ExO), and kept anyway.** The heading is no
 > longer true as stated. All eleven `agent-*.yml` workflows now set
 > `fetch-depth: 0` on `actions/checkout`, and this run measured
