@@ -259,8 +259,8 @@ using the weakest signal in the record.
 
 **Read the uncertain rate against the stage of the funnel first.** The
 two capture paths sit at different points and produce very different
-numbers, with session capture showing 82 percent deletion and git
-capture 7 percent on the second trial [E13]. A record with many
+numbers, with session capture showing 82 percent deletion on the first
+trial and git capture 7 percent on the second [E13]. A record with many
 uncertain spans may be measuring churn rather than revealing broken
 thresholds, and retuning against the wrong stage bakes that confusion
 into the constants.

@@ -48,7 +48,7 @@ evidence:
     source: ursa-major/src/tuning/distill.ts:51-53,109
   - ref: E10
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
-    source: ursa-major/src/tuning/distill.ts:127-137
+    source: ursa-major/src/tuning/distill.ts:11-18,127-137
   - ref: E11
     what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
     source: ursa-major/src/tuning/distill.ts:145-157,163
