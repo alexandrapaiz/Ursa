@@ -121,13 +121,22 @@ of it checks that the lines support the sentence citing them, and a range can
 pass every check and fail that, which is why a green `check-evidence` means
 the receipts have not moved rather than that they are sound.
 
-The sweep gathers each ref's `what` field, the passages citing it and the
-cited lines, and orders the unread ones by two mechanical signals. The
-verdicts are a reader's and live in `relevance-audit.md`, which is also what
-makes the sweep resumable: 110 refs is several runs' work. First slice,
-2026-10-18, 19 refs plus 4 read as a control: one claim false, six ranges too
-narrow for the sentence standing on them. `prompts/skill-extract.md` §5j and
-§5l.
+The sweep gathers each ref's `what` field, the passages citing it, the cited
+lines, and every other ref in the library whose cited lines overlap this
+one's, then orders the unread ones by two mechanical signals. The verdicts are
+a reader's and live in `relevance-audit.md`, which is also what makes the
+sweep resumable: 111 refs is several runs' work.
+
+- First slice, 2026-10-18, 19 refs plus 4 read as a control: one claim false,
+  six ranges too narrow for the sentence standing on them.
+- Second slice, 2026-10-18, 19 refs: one claim false, seven ranges too narrow,
+  eleven sound. 43 of 111 read. The false one was contradicted by another
+  skill's ref over the same helper, with both fingerprints green, which is
+  what the overlap field exists to surface.
+
+Next: the 14 refs the sweep lists apart, which cite a document and a section
+name rather than lines and therefore have no fingerprint at all. Then the
+remaining 54 ranged refs. `prompts/skill-extract.md` §5j, §5l and §5m.
 
 The three tools read a `source:` line through one shared pattern,
 `skills/source-line.mjs`. It is an allowlist of extensions, because a generic

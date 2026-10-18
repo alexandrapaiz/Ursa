@@ -536,3 +536,55 @@ nineteen refs, so about a third of a library that passes every mechanical
 check needs a reader. Budget accordingly, and do not report a green
 `check-evidence` as evidence that the receipts are sound. It is evidence
 that they have not moved.
+
+## 5m. Cite the returns, not the call, and read what the library already says about the same lines
+
+(Added 2026-10-18, ninth run, after the second slice of the sweep.)
+
+Slice 2 read nineteen more refs and the shape of its one false claim is
+different from slice 1's, so it gets its own rule. Two rules, really,
+because the error and the thing that would have caught it are separate.
+
+**A claim about what happens to a value has to cite the returns, not the
+call site.** `adjudicating-uncertain-spans/E4` claimed that a demoted
+short match carries no `trivial` flag, and cited the call that passes
+`trivial: true` into the helper. The call is real and unchanging, so the
+lock stayed green. The flag's fate is decided by which of the helper's
+returns fires, and the helper has two: one spreads `trivial` into a
+`survived_mutated` span, and one returns early as uncertain without it.
+The skill described the second and named the first. So when a sentence
+says what becomes of a field, enumerate every return that can produce
+the object and put all of them in range, even when that makes the
+citation forty lines. `quoting-a-number-from-an-outcome-record/E9` cites
+the whole helper for a claim about the same two paths and gets it right,
+which is the argument: a long range that contains the decision beats a
+short one that contains the handoff.
+
+**Two refs can say opposite things about one piece of code, and nothing
+mechanical notices.** The lock keys on a single ref's own ranges. It has
+no notion of two refs, so a library can hold a claim and its negation
+with both fingerprints valid, and the only reader who would ever see the
+conflict is one who happens to read both in the same sitting. That is
+how this one was found, which is luck and not a procedure.
+
+The procedure: a dossier now names every other ref in the library whose
+cited lines **overlap** this ref's, with that ref's own `what` field, so
+a reader judging one claim is shown the library's other claims about the
+same lines. Overlap rather than same file, because twenty refs cite
+`resolve.ts` and they are not all about each other, so a same-file list
+is noise while a shared-lines list is a question. Measured on the
+library as it stands: 41 of 111 refs have an overlapping co-citation and
+36 of those have one in a different skill, so the field fires on about a
+third of the library and when it fires it almost always points across a
+skill boundary, which is exactly where no single skill's author was
+looking. When it fires, say in the audit row whether the two agree.
+
+Ours, and the general form of both halves. A fingerprint is an argument
+about one range in isolation, and a claim is rarely about one range in
+isolation. Every failure this sweep has found is a claim whose subject
+sits somewhere the range does not reach: in a later return, in a
+different file, in a search that finds nothing, in a list the range cuts
+short, or in another skill's contradicting sentence. Treat the lock as
+proof that nothing moved, treat the reading as the only thing that
+establishes relevance, and expect roughly a third of any un-swept
+library to need one or the other.
