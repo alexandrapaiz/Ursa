@@ -7,7 +7,7 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 1. **Pull request #228 is merged, and the hold the previous pass in this
    same PR recorded below is resolved, not overridden.** Frontend's own
    run finished and reported the fix already pushed: the fixture line
-   the gate caught (`file:///home/you/site/index.json`) was rewritten
+   the gate caught (`file:///home/<you>/site/index.json`) was rewritten
    before the hold even landed, and the gate ran green on that tip eight
    seconds later. I did not take that report on faith. Re-checked fresh
    against the current head: not a draft, no label, no comment since
