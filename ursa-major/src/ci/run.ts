@@ -80,6 +80,32 @@ export interface CiOptions {
    * declares them once in the workflow rather than per invocation.
    */
   agentIdentities?: string[]
+  /**
+   * The three pairing bounds, the CI launch's half of
+   * `--max-pair-distance`, `--max-pair-age-hours` and
+   * `--max-interposed-generations`. Undefined means the resolver's own
+   * default (25 commits, 168 hours, 0 interposed generations), which is
+   * what every caller got before these fields existed, so an omitted
+   * bound changes nothing.
+   *
+   * Here because this is the fifth entry in the drift list
+   * `src/launch.ts` opens with, and the same shape as the fourth: the
+   * local launch read all three flags and this one read none of them, so
+   * two launches over identical history answered "which edit corrected
+   * which generation" differently as soon as a consumer moved a bound.
+   * Measured on this repository on 2026-10-18: at the default distance of
+   * 25 commits its own history resolves to zero records, and at 400 it
+   * resolves to two, because twelve agent seats commit between one touch
+   * of a file by the owner and the next. A bound that decides whether a
+   * repository has any records at all is not one launch's private
+   * setting.
+   *
+   * Carried from `action.yml`'s `max-pair-distance`, `max-pair-age-hours`
+   * and `max-interposed-generations` inputs.
+   */
+  maxPairDistance?: number
+  maxPairAgeHours?: number
+  maxInterposedGenerations?: number
   env?: Record<string, string | undefined>
   /** false writes nothing to GitHub and prints the comment instead */
   post?: boolean
@@ -166,6 +192,9 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const pairs = findCommitPairs(opts.projectPath, {
     range: window.range,
     agentIdentities: opts.agentIdentities,
+    maxPairDistance: opts.maxPairDistance,
+    maxPairAgeHours: opts.maxPairAgeHours,
+    maxInterposedGenerations: opts.maxInterposedGenerations,
   })
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
