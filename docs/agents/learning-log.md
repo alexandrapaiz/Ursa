@@ -1095,3 +1095,5 @@ seat that made it rather than by an audit, and it is worth saying so.
    restated here: PWC-EXO-2 and the four ADRs wearing two numbers,
    PWC-EXO-3, 5, 6 and 7, and the vendored `docs/standards/pm.md`
    stopping at §22 while the chair's handoff cites §24.
+
+<!-- exo run 2026-10-18 (third window, message dispatch): in progress -->
