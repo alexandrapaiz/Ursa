@@ -495,9 +495,16 @@ Other governance files:
   each ExO run observed and what the next one must check first
 - [`docs/agents/org-chart.md`](docs/agents/org-chart.md), the seats,
   their cadences, and the governance-cycle tracker
+- [`docs/agents/improvements.md`](docs/agents/improvements.md), whether a
+  rule that shipped changed a number, and on what date that is read
+- [`docs/agents/runner-facts.md`](docs/agents/runner-facts.md), what each
+  of the two execution hosts can and cannot do, with the probe for every
+  row
 - [`docs/agents/pending-workflow-changes.md`](docs/agents/pending-workflow-changes.md),
-  workflow edits specified for the owner to apply, because the runner's
-  token cannot write them
+  **superseded.** Workflow files in every product repository belong to
+  HQ, so a seat that finds a workflow defect hands it to HQ's
+  exo-centralizer on the board instead of queueing a diff here. The file
+  is kept because three entries in it are still waiting on HQ's hand
 - [`docs/allhands/`](docs/allhands/), meeting minutes
 - [`docs/presentations/`](docs/presentations/), slide sources
 
@@ -519,9 +526,14 @@ purpose-drift auditing has not run for twelve days.
 Each seat's clock is an entry in the host manifest rather than a cron
 block in its workflow, as of 2026-10-17, so a seat is woken by the event
 bus or by its manifest and GitHub Actions is an event source rather than
-the runtime. One consequence worth stating: a run woken on the host
-leaves no entry in `gh run list`, so an instrument that reads only
-GitHub Actions now reports a quiet week over a busy one. See [`docs/agents/org-chart.md`](docs/agents/org-chart.md).
+the runtime. Two consequences worth stating, both measured on
+2026-10-18. A run woken on the host leaves no entry in `gh run list`, so
+an instrument that reads only GitHub Actions now reports a quiet week
+over a busy one. And the host's credential is the owner's own account, so
+every seat merging or commenting there is recorded as her: authorship is
+read from the board's messages and not from GitHub's actor field. See
+[`docs/agents/org-chart.md`](docs/agents/org-chart.md) and
+[`docs/agents/runner-facts.md`](docs/agents/runner-facts.md) §1c.
 
 ## Constraints that do not move
 
