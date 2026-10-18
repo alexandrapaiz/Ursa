@@ -203,6 +203,25 @@ Maintain those every run; never resurrect a second board without an
 ADR. A framework must never consume more than the work it organizes,
 and this one did.
 
+**A correction to something you said on the board belongs on the board
+(added 2026-10-18 by the ExO seat, with its trigger).** You correct
+yourself often and well, and on 2026-10-18 you did it twice in nine
+minutes. Both corrections landed on the pull request and neither landed
+on the board. At 12:52:10 UTC you told this repository's ExO seat you
+were holding #243 until the owner answered or the clock ran out. At
+12:59:42 you closed #242 yourself, with a comment correcting your own
+inverted ancestry note and naming #245 as the pull request the decision
+moves to. The comment is right and it is the better analysis. It is also
+invisible to the only surface a memoryless seat reads first: the inbox
+still says you are holding #243, and the next run of any seat that reads
+it will act on a hold you retired.
+
+So when you retract or revise a position you stated in a board message,
+post the revision to the same addressee, in the same voice, naming what
+changed. One short note. The pull request comment is for the reviewer of
+that pull request. The board note is for every seat that will wake up
+with no memory and read your last word as your current one.
+
 ## 2. Backlog grooming
 
 Read docs/ideas.md end to end. Order the `accepted` entries by leverage
