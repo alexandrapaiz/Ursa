@@ -1,56 +1,88 @@
-# Merge order — measured 2026-10-11 (ExO)
+# Merge order — measured 2026-10-18 (ExO)
 
 Replaces the previous week's plan. Every line below was produced by
-performing the merges, not by asking GitHub. `mergeable` from
-`gh pr list` returns `UNKNOWN` for most of a queue and is not used here.
+performing the merges, not by asking GitHub. `mergeStateStatus` from
+`gh pr list` is not used here, and this week it is also the subject of
+Ursa incident 17, because it reported one of these pull requests as
+conflicting for three days while `git merge-tree` exited 0 on it.
 
-## The headline: the queue inverted
+**Measured on the resident company host, where a fresh clone is
+shallow.** Every number below was taken after `git fetch --unshallow`.
+Before that fetch, `git merge-tree` reported all eight open pull
+requests as having unrelated histories, which read as a queue in which
+nothing could merge. See runner-facts.md §3.
 
-| measure | 2026-09-27 | 2026-10-04 | 2026-10-11 |
-|---|---|---|---|
-| open PRs | 17 | 52 | **15** |
-| merged in last 7 days | ~1 | 5 | **77** |
-| oldest open | — | — | #47, 11 days |
+## The headline: the queue is healthy and the inversion held
 
-For three consecutive runs this file reported a queue growing faster
-than its one merge gate could absorb, and this seat's standing rule is
-to say so in bold when open PRs outnumber the week's merges. **That
-condition does not hold this week and the bold warning is withdrawn.**
-Seventy-seven merges against fifteen open is the gate working. The
-remaining fifteen are not a backlog of the same kind: five are this
-week's live work and the rest are named below.
+| measure | 2026-09-27 | 2026-10-04 | 2026-10-11 | 2026-10-18 |
+|---|---|---|---|---|
+| open PRs | 17 | 52 | 15 | **8** |
+| merged in last 7 days | ~1 | 5 | 77 | **46** |
+| oldest open | — | — | #47, 11 days | **#167, 7 days** |
+| open drafts | — | — | 16 (2026-10-05) | **4** |
+
+The standing rule is to say so in bold when open pull requests outnumber
+the week's merges, because the org is then producing faster than its one
+merge gate absorbs. **That condition does not hold, for the second week
+running.** Forty-six merges against eight open is the gate working, and
+the drop from fifteen open to eight while merges stayed high is the
+queue draining rather than stalling.
+
+All four open drafts are today's live work, which is the only legitimate
+reason for a draft under the 2026-10-05 amendment. Three belong to runs
+of today's message window (#229 frontend, #230 engineer, #231 this run)
+and the fourth is #223, which this run closes. So there are no dead
+drafts in the queue after this run, down from six on 2026-10-05.
+
+The oldest open pull request is this seat's own #167 at seven days, and
+this run absorbed it into #231 rather than leaving it to age further.
 
 ## The order, simulated end to end
 
 Verified in a detached scratch worktree off `origin/main`, merging in
-this sequence. Two conflicts survive and both are small.
+this sequence. One conflict survives and it is one file.
 
 | # | PR | seat | result | note |
 |---|---|---|---|---|
-| 1 | **#165** | security | clean | **merges three PRs at once.** Contains #75 and #85 as ancestors, both of which conflict with `main` on their own. Landing #165 closes them and removes two of the four conflicts in the queue. Draft: needs readying first. |
-| 2 | #166 | pm | clean | the triage that caught incident 15 |
-| 3 | #167 | exo | clean | this run. Contains #113 as an ancestor, so landing it closes #113. |
-| 4 | #112 | security | clean | audit-2026-10-06 |
-| 5 | #124 | security | clean | audit-2026-10-07 |
-| 6 | #141 | frontend | clean | 86 files, visual review |
-| 7 | #91 | finance | clean | October close |
-| 8 | #80 | hq | clean | company manifest |
-| 9 | #49 | sales | clean | **land before #87** |
-| 10 | #87 | sales | **conflicts, but only after #49 lands** | add/add on `docs/sales/README.md`. Against `origin/main` alone it tests clean, which is why this is simulated and not computed pairwise. Same seat, same file, two runs: the later one should be rebased onto the earlier. |
-| 11 | #140 | skill | conflict | `docs/ideas.md` |
-| 12 | #47 | security | conflict | `ursa-major/src/m0.test.ts`, oldest in the queue at 11 days |
+| 1 | **#225** | pm | clean | PM's message pass. Ready, not a draft. Nothing depends on it, so it goes first only because it is the shortest review. |
+| 2 | **#231** | exo | clean | This run. **Contains #167**, so landing it closes two pull requests including the queue's oldest. Agent layer only. |
+| 3 | **#210** | research | clean | Open 2 days, ready. |
+| 4 | **#230** | engineer | clean | Today's engineer run. Draft while its run is live. |
+| 5 | **#229** | frontend | clean | Today's frontend run. Draft while its run is live. |
+| 6 | **#199** | skill | **conflict** | One file, `docs/ideas.md`. See below. |
 
-## Containment, so the same work is not reviewed twice
+`#167` is not a row of its own. It is this seat's work from 2026-10-11,
+clean against `main` on its own, and merged into `#231` with no conflict
+resolution of any kind. Merging `#231` lands both. Closing `#167`
+separately after that is bookkeeping, not a decision.
 
-- #75 and #85 are ancestors of **#165**. Three PRs, one merge.
-- #113 is an ancestor of **#167**. Two PRs, one merge.
+## Containment
 
-Fifteen open PRs are therefore twelve decisions.
+None, apart from `#167` inside `#231`. Checked with
+`git merge-base --is-ancestor` over all 21 ordered pairs of open heads
+after unshallowing. No seat is stacked on another this week, which is
+the opposite of 2026-10-04, when twenty-five of fifty-two open pull
+requests were ancestors of four others. The queue's count is its real
+length now.
 
-## Drafts that need resolving before they can be merged
+## The one conflict
 
-GitHub refuses to merge a draft at all. Six of the fifteen are drafts
-with no live run behind them: #47, #49, #85, #87, #112, #124, plus #141
-and #165 from runs that have since ended. The ship-first amendment makes
-each seat's next run responsible for its own, and this run resolved the
-two belonging to this seat (#113 absorbed into #167, #143 closed).
+**#199 (skill seat), `docs/ideas.md`.** The ideas ledger is a
+single append-only file that more than one seat writes, which is Ursa
+incident 6's shape exactly: every seat appends to one file, so two
+branches that both added an idea collide on the last line. The conflict
+is a content conflict in one file and a person resolves it in under a
+minute by keeping both entries.
+
+It is worth noting that this is the second register in this repository
+to produce the same collision, after the incident register's own
+numbering collision of 2026-10-17. A file that every seat appends to
+will conflict as a matter of arithmetic once more than one seat is
+running per day, and this org now runs several per day.
+
+## What this file is for
+
+Measuring the queue and naming the order is information for the owner.
+Merging is hers alone, and under docs/standards/pm.md §21 also the PMs'
+and the chairs'. This seat never merges its own work, never enables
+auto-merge, and never advises a seat to merge its own.
