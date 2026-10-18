@@ -13,6 +13,7 @@
 //   4. the index page is self-contained: it fetches nothing.
 
 import { describe, it, expect } from 'vitest'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -179,6 +180,105 @@ describe('the published site', () => {
     expect(onDisk).toEqual(JSON.parse(JSON.stringify(result.index)))
   })
 
+  // The frontend seat's viewer stopped inlining records into the set page
+  // on 2026-10-18 and now fetches one record on demand, which is what
+  // these two fields are for: they are how a page that fetched a record
+  // over the network earns the right to say the bytes it is rendering are
+  // the bytes the index was built from. A digest that is merely present
+  // and does not match the file is worse than an absent one, so every
+  // test here reads the file back off disk rather than trusting the
+  // returned index.
+  it('states each record\'s byte count and sha256, both measured against the file on disk', () => {
+    const project = projectWith([fixtureRecord('alpha'), fixtureRecord('beta')])
+    const out = outDirIn(project)
+    const result = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    expect(result.index.records).toHaveLength(2)
+    for (const summary of result.index.records) {
+      const onDisk = readFileSync(join(out, summary.json))
+      expect(summary.bytes, `${summary.id} byte count`).toBe(onDisk.byteLength)
+      expect(summary.sha256, `${summary.id} digest`)
+        .toBe(createHash('sha256').update(onDisk).digest('hex'))
+      expect(summary.sha256).toMatch(/^[0-9a-f]{64}$/)
+      expect(summary.bytes).toBeGreaterThan(0)
+    }
+  })
+
+  it('digests the bytes it wrote, not a second serialization of the record', () => {
+    // The property this protects: `summarize` is handed the buffer that
+    // `write` receives. If it ever recomputed `JSON.stringify` instead,
+    // this test would still pass against today's serializer and would
+    // start failing the day key order, indentation or the trailing
+    // newline moved, which is exactly the silent drift the published
+    // digest exists to make impossible. So the assertion is stated over
+    // the file, and the file is read as bytes rather than as a string.
+    const project = projectWith([fixtureRecord('alpha')])
+    const out = outDirIn(project)
+    const result = publish({ projectPath: project, outDir: out, acknowledged: true })
+    const summary = result.index.records[0]!
+    const bytes = readFileSync(join(out, 'records', 'alpha.json'))
+
+    expect(bytes.byteLength).toBe(summary.bytes)
+    expect(createHash('sha256').update(bytes).digest('hex')).toBe(summary.sha256)
+    // And the digest is of the whole file including its final newline,
+    // since that is what a fetch returns.
+    expect(bytes.subarray(-1).toString('utf8')).toBe('\n')
+  })
+
+  it('gives two different records two different digests, and the same record the same one', () => {
+    const project = projectWith([fixtureRecord('alpha'), fixtureRecord('beta')])
+    const out = outDirIn(project)
+    const first = publish({
+      projectPath: project, outDir: out, acknowledged: true,
+      publishedAt: '2026-10-18T00:00:00.000Z',
+    })
+    const [a, b] = first.index.records
+    // Two records differing only in their id: the digest has to move,
+    // because the id is in the bytes.
+    expect(a!.sha256).not.toBe(b!.sha256)
+
+    // Republishing the same unchanged records at a different build time
+    // must not move a record's digest. `publishedAt` lives in the index
+    // and not in a record, and this is the test that keeps it there: a
+    // digest that changed on every rebuild would make a viewer's "this
+    // is not the record the index names" warning fire on every deploy.
+    const second = publish({
+      projectPath: project, outDir: out, acknowledged: true,
+      publishedAt: '2026-10-19T00:00:00.000Z',
+    })
+    expect(second.index.records.map((r) => [r.sha256, r.bytes]))
+      .toEqual(first.index.records.map((r) => [r.sha256, r.bytes]))
+  })
+
+  it('moves a record\'s digest when the record itself changes', () => {
+    const project = projectWith([fixtureRecord('alpha')])
+    const out = outDirIn(project)
+    const before = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    // The case the digest is actually for: the record at the address was
+    // replaced. Saved through the store rather than written by hand, so
+    // what changes is a record and not a file that happens to sit there.
+    const edited = fixtureRecord('alpha')
+    edited.task.finished = false
+    saveRecord(project, edited, null, null)
+    const after = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    expect(after.index.records[0]!.sha256).not.toBe(before.index.records[0]!.sha256)
+    expect(after.index.records[0]!.sha256)
+      .toBe(createHash('sha256').update(readFileSync(join(out, 'records', 'alpha.json'))).digest('hex'))
+  })
+
+  it('announces the two fields with a minor version bump, since a pinned viewer reads the number', () => {
+    // The frontend viewer pins the major and accepts any minor at or
+    // above what it was written against, and says "this index predates
+    // digests" below that. That sentence is only correct if the contract
+    // version moved when the fields arrived, so the number is asserted
+    // here rather than left as a constant nobody reads.
+    const [major, minor] = PUBLISHED_INDEX_VERSION.split('.').map(Number)
+    expect(major).toBe(0)
+    expect(minor).toBeGreaterThanOrEqual(3)
+  })
+
   it('republishes the whole set rather than appending to it', () => {
     const project = projectWith([fixtureRecord('alpha')])
     const out = outDirIn(project)
@@ -269,6 +369,66 @@ describe('the index page', () => {
     const doc = new JSDOM(html).window.document
     const legend = [...doc.querySelectorAll('.legend')].map((e) => e.textContent).join(' ')
     expect(legend).toContain('do not sum')
+  })
+
+  // THE LIMIT OF THESE TWO TESTS, stated because it decides what they are
+  // worth. jsdom parses this page and lays out none of it: `scrollWidth`
+  // is 0 for every element here, so the actual defect the frontend seat
+  // measured on 2026-10-18 — a 521px document inside a 390px viewport —
+  // cannot be reproduced in this file at all. What is testable here is
+  // the structure the narrow layout needs in order to work, and that is
+  // what these assert. The width itself is measured in a real browser
+  // engine by tools/measure-index-page.ts.
+  it('gives every cell its own column name as real text, so a block layout stays labelled', () => {
+    const doc = new JSDOM(html).window.document
+    const headings = [...doc.querySelectorAll('thead th')].map((th) => th.textContent?.trim())
+    const row = doc.querySelector('tbody tr')!
+    const labels = [...row.querySelectorAll('td')].map((td) => td.querySelector('.label')?.textContent?.trim())
+
+    // One label per cell, no cell left to be read by position alone.
+    expect(labels.filter(Boolean)).toHaveLength(row.querySelectorAll('td').length)
+    // And the labels are the header's own words, so the wide page and
+    // the narrow page name the same column the same way.
+    for (const label of labels) {
+      expect(headings.some((h) => h === label), `"${label}" should be a column heading too`).toBe(true)
+    }
+    // The label is text in the document rather than CSS generated
+    // content, because `content: attr(...)` is not dependably read aloud
+    // and a column name that exists only in a stylesheet can be lost.
+    expect(html).not.toContain('attr(data-label)')
+  })
+
+  it('stops being a seven-column table on a narrow viewport, since seven columns do not fit one', () => {
+    // Asserted against the stylesheet because this page has no other
+    // place to carry it: the page is self-contained by design, so the
+    // rule either is in this string or does not exist. Without it the
+    // table keeps a minimum width equal to its seven columns and a phone
+    // reader loses the three provenance columns off the right edge.
+    const style = html.slice(html.indexOf('<style>'), html.indexOf('</style>'))
+    expect(style).toMatch(/@media \(max-width: \d{3}px\)/)
+    const narrow = style.slice(style.indexOf('@media'))
+    expect(narrow).toMatch(/table[^{]*\{[^}]*display: block/)
+    expect(narrow).toMatch(/thead \{ display: none/)
+    // The labels are hidden on a wide viewport and shown here; both
+    // halves matter, since showing them always would duplicate the
+    // header on every row.
+    expect(style).toMatch(/\.label \{ display: none/)
+    expect(narrow).toMatch(/\.label \{ display: block/)
+    // A record id has no spaces in it and is the one string on this page
+    // that can set the layout's minimum width on its own.
+    expect(style).toMatch(/td\.id, td\.id a \{ overflow-wrap: anywhere/)
+  })
+
+  it('says in the footer what the published digests prove and what they do not', () => {
+    const doc = new JSDOM(html).window.document
+    const footer = doc.querySelector('footer')!.textContent!.replace(/\s+/g, ' ')
+    expect(footer).toContain('SHA-256')
+    expect(footer).toContain('truncated download')
+    // The limit is on the page, not only in the code comments: the index
+    // and the records are written by the same run, so the digest says
+    // nothing about the publisher's honesty and the page must not imply
+    // that it does.
+    expect(footer).toContain('does not show that whoever published this site is honest')
   })
 
   it('escapes a repository name rather than splicing it into the title', () => {
