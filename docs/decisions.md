@@ -503,3 +503,49 @@ willing to use the named variable instead of the ambient one once it had
 a real value and a real reason to try. Recommending the standing handoff
 close once the centralizer confirms this holds on another Actions seat,
 not just the PM's own workflow.
+
+## Finding — eight of Ursa's charters still name the bare role as their branch prefix, not the registered seat name (recorded 2026-10-18, PM message pass)
+
+`alexandra-systems/exo-centralizer` handed this seat a list of eight
+Ursa charters whose branch-naming line names the bare role rather than
+the company-qualified seat name the runtime actually dispatches onto,
+measured with a new HQ instrument (`tools/check-branch-prefixes.sh`,
+landed on `alexandra-systems#233`) that reads every seat's manifest and
+diffs it against the charter the manifest points at. Not taken on the
+centralizer's word: grepped all eight files on this branch directly and
+found exactly the lines it named, no more and no fewer.
+
+| File | Line | Reads today | Should read |
+|---|---|---|---|
+| `prompts/engineer-agent.md` | 64 | `engineer/YYYY-MM-DD-slug` | `ursa-engineer/YYYY-MM-DD-slug` |
+| `prompts/finance-agent.md` | 66 | `fin/YYYY-MM` | `ursa-finance/YYYY-MM` |
+| `prompts/market-agent.md` | 75 | `market/YYYY-MM-DD` | `ursa-market/YYYY-MM-DD` |
+| `prompts/okr-agent.md` | 93 | `okr/YYYY-MM` | `ursa-okr/YYYY-MM` |
+| `prompts/pm-agent.md` | 20 | `pm/sprint-YYYY-MM-DD` | `ursa-pm/sprint-YYYY-MM-DD` |
+| `prompts/pm-agent.md` | 76 | `pm/standup-YYYY-MM-DD` | `ursa-pm/standup-YYYY-MM-DD` |
+| `prompts/pm-agent.md` | 206 | `pm/sprint-YYYY-MM-DD` | `ursa-pm/sprint-YYYY-MM-DD` |
+| `prompts/sales-agent.md` | 59 | `sales/YYYY-MM-DD` | `ursa-sales/YYYY-MM-DD` |
+| `prompts/security-agent.md` | 64 | `sec/YYYY-MM-DD` | `ursa-security/YYYY-MM-DD` |
+| `prompts/skill-agent.md` | 48 | `skill/YYYY-MM-DD-slug` | `ursa-skill/YYYY-MM-DD-slug` |
+
+This is not cosmetic: the centralizer found a second, related defect in
+`tools/no-ship-tripwire.sh`, the check that credits a self-merged pull
+request back to the run that opened it by matching the branch against
+the seat's declared prefix as a fallback. A charter that names a prefix
+no branch ever carries makes that fallback match nothing, so a run that
+shipped by self-merge can be reported as having shipped nothing. The
+centralizer has already fixed the tripwire's own separate bug (it was
+stripping the first character of an unquoted prefix) on its own pull
+request; this finding is the charter half of the same mismatch, and it
+is still open.
+
+This seat is not making the edit itself. `docs/standards/pm.md` §9 and
+this seat's own charter both reserve a charter's text to the owner's
+merge; a seat proposes in the ledger and does not write `prompts/`
+directly, which is why this table exists instead of a diff. Pull
+request 234 (exo) already touches `prompts/pm-agent.md` on this branch,
+but for an unrelated reason, restoring a dropped merge-state clause in
+section 0b, not any of the three lines above, so applying this finding
+does not collide with it. Logged in `docs/sprints/pending.md` as an
+owner-action alongside #234, so one pass through the owner's queue can
+take both.
