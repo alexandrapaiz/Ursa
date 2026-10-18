@@ -452,13 +452,22 @@ Three rules that give the file teeth, also HQ's:
   only one is carried for want of one.
 - **Merged.** Yes, all eight, 2026-10-18.
 - **Effect.** The one without a number is the bold authority
-  declaration, whose baseline is **0** pull requests touching
-  `prompts/*-agent.md` merged in the eight days to 2026-10-18. That
-  number has moved: this window counts the charter edits that landed
-  today and the baseline no longer holds, but the experiment it belongs
-  to is waiting on an owner decision with a silence clock to
-  **2026-10-20 12:30 UTC**, so the honest reading is that it is not yet
-  measurable rather than that it succeeded.
+  declaration, and this window measured it rather than deferring it.
+  Baseline: **0** pull requests touching `prompts/*-agent.md` merged in
+  the eight days to 2026-10-18. Now: **7**, all of them on 2026-10-18,
+  namely #210, #248, #251, #252, #259, #262 and #265. Split by §3e's
+  buckets, **4** carry a direct board merge claim (#210, #259, #262,
+  #265) and **3** do not (#248, #251, #252), because those three are
+  recorded on the board at 14:48:29 UTC as `superseded_prs` and GitHub
+  marked all three merged in the same second as #259 when the tip
+  landed and the base advanced over its own ancestors.
+
+  **So the freeze is broken as a fact and the rule is still unsettled as
+  a decision.** The owner's silence clock runs to **2026-10-20 12:30
+  UTC** and nothing on the board answers it yet, so this reads as the
+  baseline moving for reasons the experiment did not name rather than as
+  the experiment succeeding. The next window grades it, and it should
+  not read these seven as evidence the bold line worked.
 - **Rule.** A register whose `Merged.` field is written by the window
   that proposes the improvement is stale from the moment it merges,
   because that window is gone. Checking the eight is now part of writing
