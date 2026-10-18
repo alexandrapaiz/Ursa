@@ -643,3 +643,74 @@ ones whose subject is somewhere the range does not reach. §5m named five
 of those places. This is the fifth, and it is the only one where the
 subject is not in the code at all. It is in the other half of your own
 sentence.
+
+## 5o. A verdict is bound to what it was read against, or the sweep's closure expires without saying so
+
+(Added 2026-10-18, eleventh run, the day the relevance sweep closed.)
+
+§5j installed the reading step and §5l turned it into a queue. This run read
+the last fourteen refs and the queue went to zero, which is the state that
+exposes the next gap: the sweep decides whether a ref has been read by looking
+for its row in `relevance-audit.md`, and a row is forever. On the day it
+closed, every claim in this library had been read against the lines it cites.
+On any later day, some of those readings are about lines that have changed,
+and nothing anywhere said which.
+
+This is §5g's lesson one level up, and the escalation is worth stating in one
+line. A fingerprint stops a hash from outliving its lines. Nothing stopped a
+reading from outliving them.
+
+The drift numbers are why this could not wait for the failure to arrive: 27 of
+44 ranges drifted on 2026-10-15 and 39 of 43 on 2026-10-18, so a library read
+in October is a library read against October's text, and the sweep would have
+gone on reporting 111 of 111 read for as long as the audit file existed.
+
+**The three failures the evidence lock cannot see.** Each was demonstrated
+before the guard was written, and each leaves `check-evidence` green on all
+210 ranges.
+
+1. **A `what` field rewritten under a verdict.** The lock hashes cited lines
+   and the `what` field is not one of them. A reader's verdict was given to the
+   claim as it then read, and sharpening the claim afterwards inherits it.
+2. **A citing passage rewritten under a verdict.** Same shape, and worse,
+   because the thing judged was whether the lines support the sentence, and
+   this is the sentence changing while the receipt stays still.
+3. **A changed range re-blessed by `check-evidence --update`.** This is the
+   one to remember. When cited lines change, the evidence check goes red and
+   §5g sends a reader to the claim. `--update` is the act that clears the red,
+   and it clears the only visible trace that a re-read was owed. So the signal
+   dies at the moment it is most needed, by design, inside a command whose
+   whole purpose is to be run after a change.
+
+**The mechanical part.** `skills/relevance.lock.json` holds three digests per
+ref, over the cited lines, the `what` field, and the passages citing it,
+beside the verdict and date the audit row gives. `relevance-sweep.mjs --stale`
+exits 1 when any verdict is unbound or stale and names which of the three
+moved, since a reflowed passage costs a minute and a re-pointed range costs
+the reading again. `--record <scope>` binds a verdict after a reading and
+refuses a bare invocation, for the reason §5k's unscoped `--update` taught
+this library the same morning.
+
+The digest covers line content and paths and never line numbers. A relocation
+onto identical lines keeps its verdict, because a verdict earned on those
+lines is still earned, and a re-point to different text does not. Without
+that,
+every relocation pass would re-queue the whole library and the queue would be
+ignored within a week, which is §5i's own warning about a check that cries
+wolf.
+
+**The authoring rule this leaves behind, which matters more than the guard.**
+A third of the first slice needed a reader and two of the last fourteen were
+false, and all of it was found months after the claims were written, by a
+sweep that cost five runs. A new ref gets its reading when it is written: open
+the range you wrote down, read the sentence against it as a stranger would,
+and record the verdict and the binding in the same commit as the citation.
+The sweep is the recovery procedure for a library authored without that. It is
+not the procedure.
+
+Ours: the general form of §5g, §5j and this one together is that every
+receipt in this library is a claim with two dates on it, the day the lines
+were written down and the day somebody read them, and a guard that tracks
+only the first will always report a library in better shape than it is. The
+second date is the expensive one, which is exactly why nothing was recording
+it.

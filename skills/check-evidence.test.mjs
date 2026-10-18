@@ -123,3 +123,23 @@ test('a scope that names nothing drifted is not a way around the refusal', () =>
   assert.equal(lockOf(dir)['alpha/E1/src/alpha.ts:1'], lock['alpha/E1/src/alpha.ts:1'])
   assert.equal(run(dir).status, 1)
 })
+
+test('an --update that records anything says a re-read is owed', () => {
+  // The failure this guards, from prompts/skill-extract.md §5o: when cited
+  // lines change the checker goes red, and --update is the command that clears
+  // the red. The relevance verdict was given to the old lines, so clearing the
+  // red erases the only visible sign that a claim needs reading again. The
+  // reading half is a different file and nobody runs a tool they do not know
+  // about, so the command that hides the signal is the one that has to name it.
+  const { dir } = library(['alpha'])
+  const updated = run(dir, '--update', 'alpha')
+  assert.equal(updated.status, 0)
+  assert.match(updated.out, /A re-recorded range is a claim somebody has to read again/)
+  assert.match(updated.out, /relevance-sweep\.mjs --stale/)
+  assert.match(updated.out, /relevance-sweep\.mjs --record/)
+  // And a refusal does not print it, because nothing was recorded and nothing
+  // is owed yet.
+  const refused = run(library(['alpha']).dir, '--update')
+  assert.equal(refused.status, 2)
+  assert.doesNotMatch(refused.out, /has to read again/)
+})

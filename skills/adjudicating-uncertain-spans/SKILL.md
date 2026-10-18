@@ -37,7 +37,7 @@ evidence:
     source: ursa-major/src/match.ts:1-3
   - ref: E6
     what: no_generation_provenance is the most valuable category, meaning the model was never in the running
-    source: CLAUDE.md, section 1, span classifications
+    source: CLAUDE.md:65-70 (section 1, span classifications)
   - ref: E7
     what: generated_deleted is the constitutive category, and 82.1 percent of generated characters in task-001 were deleted
     source: docs/beyond-preference-pairs.md:111-130
@@ -49,13 +49,13 @@ evidence:
     source: docs/beyond-preference-pairs.md:98-110
   - ref: E10
     what: KR1.1 requires all 55 uncertain spans adjudicated, thresholds retuned to a false-positive rate of 10 percent or lower, and the adjudication file committed beside the record
-    source: docs/okrs/2026-q4.md, O1 KR1.1
+    source: docs/okrs/2026-q4.md:13-18 (O1 KR1.1)
   - ref: E11
     what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14, and the not_generated characters are subtracted from the gross deleted figure rather than asserted to be by a comment
     source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37, ursa-major/src/stats.ts:115-121
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
-    source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
+    source: ursa-major/trial/README.md:64-72 ("Where the records live"); docs/agents/incidents.md:150-158 (Incident 2)
   - ref: E13
     what: session capture and git capture sit at different points of the funnel, 82 percent deletion against 7 percent
     source: docs/beyond-preference-pairs.md:232-239
