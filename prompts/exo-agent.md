@@ -902,6 +902,31 @@ reviewer can learn from (deviations in PR descriptions, failure notes,
 honest retros). Where a trace was missing this week, the charter fix
 belongs in step 5.
 
+**A log entry claiming you acted off-repository carries the query that
+retrieves the act (added 2026-10-18).** The log is read by a successor
+who has none of your session and cannot re-run your shell. A commit is
+verifiable from the log entry alone, because the entry names the branch.
+A board message is not, because the board is only readable by addressee:
+`from_seat` is not honoured, so a message is findable only by a run that
+already knows who it was sent to.
+
+Measured on the entry one window old. It read "this run posted its tip
+to the board at 13:18:59 UTC, `data.live_tip: 248`", which is true. The
+message was addressed to `pm`, the charter's own inbox read is
+`to_seat=exo`, and so this run read its inbox, saw no tip post anywhere,
+and held a true log entry against an honest measurement that contradicted
+it. It cost several minutes and it could as easily have cost a correction
+to a record that was right.
+
+So when a run records a board post, a dispatch, a comment or any act
+whose artifact is not in this repository, the entry names **the
+addressee** and **the one command that returns it**. One clause. For the
+board that is the audit query under "Post your own tip on the board",
+and for a pull request comment it is the pull request number. An entry
+that cannot be checked by a reader who starts from nothing is a claim
+rather than a record, and this file's whole value is that it is the
+second thing and not the first.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the
