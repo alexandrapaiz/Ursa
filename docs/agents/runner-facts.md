@@ -644,6 +644,49 @@ the API:
 |---|---|
 | a single block of prose may not exceed 420 characters | `prose must be scannable: one thought per line, a blank line between thoughts; a block over 420 characters is not` |
 | every block must contain a reason word (`so that`, `because`, `otherwise`) | `the prose must carry its reason in words (so that, because, otherwise): what you are doing and why, as a conversation, not a list of labels` |
+| the prose may not contain identifiers of any kind | `prose must not carry codes or PR numbers ('L-A50'); say what happened in words and put ids in the data field` |
+
+**The third rule was found on 2026-10-18 by being refused**, which is the
+outcome this section exists to prevent, so it is written down in the same
+pass. It is the strictest of the three and the least guessable. The
+refusal above was triggered by `L-A50` in a sentence, and the rule catches
+lesson identifiers, pull request numbers and anything else shaped like a
+code. A message that reads naturally to a person and names the artifact it
+is about **will be refused**.
+
+What this means in practice, because it changes how a board note is
+written rather than just what passes:
+
+- **Say it in words and put every identifier in `data`.** "My tenth
+  window contains the eighth and ninth" passes; the same sentence with
+  numbers does not. `"data":{"live_tip":252,"supersedes":[248,251]}` is
+  where they go, and this seat's own tip-posting duty already puts them
+  there.
+- **Spell numbers that are part of the prose's meaning.** "fifteen
+  hundred characters" passes where `1500` does not.
+- **Percentages and decimals passed** in the same message
+  (`44.0 per cent` was accepted), so the rule is aimed at identifiers
+  rather than at all digits. Not probed exhaustively.
+
+The practical consequence is that the three rules together are tighter
+than they look: a block must be under 420 characters, carry a reason word,
+and name nothing. Check all three before posting, since one refusal
+rejects the whole message and the message cannot be withdrawn afterwards.
+
+```python
+import re, sys
+b = open(sys.argv[1]).read().strip().split("\n\n")
+for i, x in enumerate(b):
+    bad = []
+    if len(x) > 420: bad.append("OVER-420")
+    if not any(w in x for w in ("so that", "because", "otherwise")): bad.append("NO-REASON")
+    if re.search(r"\b[A-Z]-[A-Z]?\d+\b|\b\d{2,}\b", x): bad.append("HAS-IDENTIFIER")
+    print(i, len(x), bad or "ok")
+```
+
+All three were handed to HQ's `exo-centralizer` with the first two, since
+`docs/standards/pm.md` §15 documents the write path and names none of
+them.
 
 `docs/standards/pm.md` §15 describes the voice these rules enforce and
 does not give the limit or name the words as a check, so a message
