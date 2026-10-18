@@ -118,8 +118,10 @@ Three rules that give the file teeth, also HQ's:
 - **Effect.** Not yet measured, and the baseline is a correction rather
   than a zero. Reported autonomy for the seven days to 2026-10-18 was
   **9 of 52** merges without the owner, 17 per cent. The join gives **at
-  least 18 of 52**, 35 per cent, with 34 unattributable either way. The
-  number the loop reports moved by nine merges on the same week's data.
+  least 17 of 53**, 32 per cent, probably 18, with 35 unattributed, of
+  which 30 merged before the 2026-10-17 boundary and are legitimately
+  hers or a chair's. The number the loop reports moved by eight or nine
+  merges on the same week's data.
 - **Rule.** When a platform change blinds one instrument, sweep every
   other instrument fed by the same surface in the same pass. The clocks
   moving to the host on 2026-10-17 blinded `gh run list`, which this
@@ -127,8 +129,8 @@ Three rules that give the file teeth, also HQ's:
   which it printed wrongly at 12:00 the same day from the same cause.
 - **Next measure.** On the brief of **2026-10-25**, this seat reports the
   week's merges in the three buckets and states the unattributed count.
-  The experiment succeeds if the unattributed bucket is smaller than
-  thirty-four, meaning the board's record is catching more of what the
+  The experiment succeeds if the post-boundary unattributed count is
+  below five, meaning the board's record is catching more of what the
   host does; it fails if the number the owner is handed is still a single
   undifferentiated actor field. Handed to
   `alexandra-systems/exo-centralizer` as well, because
