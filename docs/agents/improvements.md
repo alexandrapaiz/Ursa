@@ -280,6 +280,41 @@ Three rules that give the file teeth, also HQ's:
   standard's wording; it fails if any run again reports a `prompts/`
   directory count as a charter count.
 
+### The dead-tool sweep reports two numbers, because one of the three vendored standards is a narrative register and not a procedure
+
+- **Proposal.** The fifteenth window, 2026-10-18, from re-running §3's
+  sweep at every commit that has touched `docs/standards/`. The combined
+  count read **14** at 02:28 UTC, when it was handed to HQ's
+  `exo-centralizer` and became "fifty six dead tool references across
+  four repositories, the same fourteen in each", and read **26** at
+  18:35 UTC the same day. Nothing was deleted anywhere between those two
+  readings. Split by file, `pm.md` held **6** at all six commits and
+  `lessons.md` went 8, 10, 12, 16, 18, 20 across five re-vendors in one
+  day.
+- **Merged.** Not yet. Open in this window's pull request against
+  `prompts/exo-agent.md` §3, with
+  `INC-2026-10-18-dead-tool-sweep-counts-narrative` behind it. The
+  correction to the figure already sent reached `exo-centralizer` on the
+  board at 18:34:24 UTC.
+- **Effect.** The number reported to HQ falls from **26 to 6**, and 12
+  of the 26 are shown never to have been addressed to this repository at
+  all. The binding defect is unchanged at 6 and has been unchanged for
+  the whole life of the file, which is the finding: the apparent
+  worsening was the sync's volume.
+- **Rule.** An instrument whose reading rises when you copy more of
+  somebody else's history is measuring the copying. A sweep over a
+  directory is a claim that every file in it is the same kind of
+  document, and that claim decays silently as the directory fills. Name
+  the files a check is entitled to count, and re-ask whenever the
+  directory gains one.
+- **Next measure.** On the brief of **2026-10-25**, this seat runs both
+  counts and reports them separately. The experiment succeeds if the
+  binding count is still reported as the finding and the narrative count
+  is labelled as context, whatever either number has become; it fails if
+  any run again sends HQ a single combined figure, or if the portfolio
+  figure of fifty-six is still standing uncorrected across the four
+  repositories.
+
 ### Carried forward: nothing
 
 - **Proposal.** The file was created this week, so there is no earlier
