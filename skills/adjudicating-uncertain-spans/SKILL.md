@@ -12,17 +12,17 @@ description: >
   the ancestry was not. Does not fire for producing a record in the
   first place, for labelling generations, or for reading a record's
   summary statistics.
-version: 0.3.0
+version: 0.4.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-24
-revised: 2026-10-15
+revised: 2026-10-18
 evidence_scheme: repo
 evidence:
   - ref: E1
     what: the span classes and the generation fates the record uses
-    source: ursa-major/src/types.ts:5-13
+    source: ursa-major/src/types.ts:5-13,37
   - ref: E2
     what: the two thresholds, 0.35 and 0.6, and the combined score they apply to
     source: ursa-major/src/match.ts:6,8,49-52
@@ -30,8 +30,8 @@ evidence:
     what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
     source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:390-391
   - ref: E4
-    what: trivial is a different flag with a different cause, set on short raw-exact matches only, and stripped when the descent check demotes the span
-    source: ursa-major/src/resolve.ts:371-384, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
+    what: trivial is a different flag with a different cause, set on short raw-exact matches only, kept when the normalized-only demotion fires and dropped when the descent check demotes the span
+    source: ursa-major/src/resolve.ts:232-248,256-263,311-320,371-390, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3
@@ -71,6 +71,9 @@ evidence:
   - ref: E17
     what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
     source: ursa-major/src/resolve.ts:438-443
+  - ref: E18
+    what: uncertainSpans and trivialSpans are two independent reads of the two flags over every span, so a span whose demotion dropped the trivial flag lands in the uncertain count and not in the trivial one
+    source: ursa-major/src/stats.ts:36-37,52-53, ursa-major/src/types.ts:532-533
 supersedes: []
 ---
 
@@ -135,20 +138,40 @@ means you genuinely cannot tell, and it is a real verdict rather than
 an admission, because the count of unresolvables is itself a reading
 on the thresholds. Output: one verdict per span.
 
-**4. Keep `trivial` out of this, and check that it really is still
-flagged.** It is a different flag with a different cause. A final
-segment that normalizes to fewer than 12 characters cannot claim
-verbatim by containment, so the resolver only accepts an exact match
-against a whole generation segment and marks it trivial, which the code
-itself calls weak evidence either way [E4]. The match must now agree on
-raw characters and not only on their normalization. A short segment
-whose normalized form matches while its raw text does not is demoted the
-same way the long branch demotes one, and the demoted span carries no
-`trivial` flag [E4]. So trivial spans are still outside the uncertain
-band and still do not belong in the adjudicated set, but the reason is
-now that demotion strips the flag rather than that the two populations
-never meet. Folding them in inflates the denominator and hides
-whichever problem is real. Output: two separate counts.
+**4. Keep `trivial` out of this, and find the trivial spans that
+arrived without the flag.** It is a different flag with a different
+cause. A final segment that normalizes to fewer than 12 characters
+cannot claim verbatim by containment, so the resolver only accepts an
+exact match against a whole generation segment and marks it trivial,
+which the code itself calls weak evidence either way [E4]. The match
+must agree on raw characters and not only on their normalization, and a
+short segment whose normalized form matches while its raw text does not
+is demoted to `survived_mutated` by the same helper the long branch
+uses. On that path the flag is passed through the demotion and the
+demoted span still carries it [E4], so those spans never reach the
+uncertain band and never enter the adjudicated set.
+
+Ours, and read this before you trust the flag as a filter. There is a
+second demotion and it does not behave the same way. When the descent
+check returns a rival prior revision, the short raw-exact match returns
+early as `no_generation_provenance` with `uncertain` set, and that
+return does not spread `trivial` at all [E4]. So a trivial match can
+reach the uncertain band, and when it does the one marker that would
+have told you its evidence is weak is gone. The record's
+`trivialSpans` count does not include it, because that counter reads
+the flag and nothing else, while `uncertainSpans` reads the flag that
+the demotion did set [E18]. This skill said the opposite until 2026-10-18,
+that demotion strips the flag and the two populations therefore never
+meet, which was true of one demotion and false of the other.
+
+The practical form: do not read the uncertain queue as trivial-free. An
+uncertain span whose `descent` is a rival and whose own `text`
+normalizes to fewer than 12 characters is a demoted trivial match, and
+it should be adjudicated as the weakest evidence in the queue rather
+than as an ordinary low-confidence span. Folding the two counts
+together inflates the denominator and hides whichever problem is real.
+Output: two separate counts, and a third for the uncertain spans short
+enough to have been trivial before they were demoted.
 
 **5. Write the verdicts to a file beside the record.** KR1.1 requires
 the adjudication committed next to the record it adjudicates [E10].

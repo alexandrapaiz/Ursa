@@ -12,9 +12,9 @@ run, quality over count. The owner's merge is the gate.
 | Skill | What it decides | Refs | Status |
 |---|---|---|---|
 | [adjudicating-uncertain-spans](adjudicating-uncertain-spans/SKILL.md) | Whether a span the resolver flagged `uncertain` really descends from a generation, which of the two uncertain queues it is in, and what to retune afterwards | 17 | draft, `validated: false` |
-| [running-an-outcome-record-trial](running-an-outcome-record-trial/SKILL.md) | Which finished work to resolve, which capture path it needs, and what the resulting numbers are allowed to mean | 21 | draft, `validated: false` |
-| [quoting-a-number-from-an-outcome-record](quoting-a-number-from-an-outcome-record/SKILL.md) | What a record statistic is a share of, and whether two records' numbers may be compared or added | 31 | draft, `validated: false` |
-| [distilling-a-tuning-record](distilling-a-tuning-record/SKILL.md) | What an axiom may claim, what its confidence count means, and what may leave the machine with a tuning block | 37 | draft, `validated: false` |
+| [running-an-outcome-record-trial](running-an-outcome-record-trial/SKILL.md) | Which finished work to resolve, which capture path it needs, and what the resulting numbers are allowed to mean | 22 | draft, `validated: false` |
+| [quoting-a-number-from-an-outcome-record](quoting-a-number-from-an-outcome-record/SKILL.md) | What a record statistic is a share of, and whether two records' numbers may be compared or added | 32 | draft, `validated: false` |
+| [distilling-a-tuning-record](distilling-a-tuning-record/SKILL.md) | What an axiom may claim, what its confidence count means, and what may leave the machine with a tuning block | 39 | draft, `validated: false` |
 
 ## Two areas, one edge between them
 
@@ -103,7 +103,46 @@ being blessed by a neighbour's update.
 
 ```
 node --test skills/relocate-anchors.test.mjs
+node --test skills/check-evidence.test.mjs
+node --test skills/source-line.test.mjs
+node --test skills/relevance-sweep.test.mjs
 ```
+
+## Whether a receipt supports its sentence
+
+```
+node skills/relevance-sweep.mjs                 the unread refs, least-defended first
+node skills/relevance-sweep.mjs <skill>[/<ref>] one ref's dossier
+node skills/relevance-sweep.mjs --audited       what has been read, and when
+```
+
+Everything above checks that a citation still points where it pointed. None
+of it checks that the lines support the sentence citing them, and a range can
+pass every check and fail that, which is why a green `check-evidence` means
+the receipts have not moved rather than that they are sound.
+
+The sweep gathers each ref's `what` field, the passages citing it, the cited
+lines, and every other ref in the library whose cited lines overlap this
+one's, then orders the unread ones by two mechanical signals. The verdicts are
+a reader's and live in `relevance-audit.md`, which is also what makes the
+sweep resumable: 111 refs is several runs' work.
+
+- First slice, 2026-10-18, 19 refs plus 4 read as a control: one claim false,
+  six ranges too narrow for the sentence standing on them.
+- Second slice, 2026-10-18, 19 refs: one claim false, seven ranges too narrow,
+  eleven sound. 43 of 111 read. The false one was contradicted by another
+  skill's ref over the same helper, with both fingerprints green, which is
+  what the overlap field exists to surface.
+
+Next: the 14 refs the sweep lists apart, which cite a document and a section
+name rather than lines and therefore have no fingerprint at all. Then the
+remaining 54 ranged refs. `prompts/skill-extract.md` §5j, §5l and §5m.
+
+The three tools read a `source:` line through one shared pattern,
+`skills/source-line.mjs`. It is an allowlist of extensions, because a generic
+matcher reads the thresholds `0.35` and `0.6` out of a `what` field and calls
+them missing files. The sweep found that the old copy of it could not see
+`.gitignore:8-9` at all, so that citation had never been checked.
 
 Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked

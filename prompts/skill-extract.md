@@ -473,3 +473,118 @@ Ours: a relocated anchor means the bytes are the same bytes. It does not
 mean the sentence is still well stated, and it does not discharge §5j.
 Read your relocated citations back as a stranger would, at least for the
 refs whose claims you are also touching this run.
+
+## 5l. The sweep §5j asks for is a queue, and three kinds of claim need a different receipt
+
+(Added 2026-10-18, eighth run, after the first slice of it.)
+
+§5j ends with a reading step and no exit status, and a reading step with
+no queue is a reading step nobody finishes. This is the queue:
+
+```
+node skills/relevance-sweep.mjs                 the unread refs, least-defended first
+node skills/relevance-sweep.mjs <skill>[/<ref>] one ref's dossier: what, passages, cited lines
+node skills/relevance-sweep.mjs --audited       what has been read, and when
+```
+
+Verdicts go in `skills/relevance-audit.md`, one row per ref, because
+relevance is the part that needs a reader and a reader's verdict is not
+something a lock can hold. The file is also what makes the sweep
+resumable: 110 refs is more than one run should take, and a run that
+reads twenty and records them has done a fifth of a job rather than a
+whole job badly.
+
+**What the ordering is worth, measured rather than asserted.** The
+signals are the share of the `what` field's content words that appear
+nowhere in the cited lines, and the number of conjuncts per cited line.
+On the first slice, seven of the nineteen highest-ranked refs needed a
+change and four refs read from the bottom of the ordering as a control
+needed none. That is a real signal with wide error bars at n=23, and the
+mechanism is worth stating because it tells you when to distrust it: the
+miss rate is high exactly when the `what` field is written in the
+record's vocabulary rather than the code's, which is also the condition
+under which an author was most likely anchoring from memory. It is not
+high for a prose citation that quotes its own source, and two code refs
+with a zero miss rate were sound for the same reason, so a low score is
+no defence and a high one is no accusation.
+
+**Three kinds of claim the range cannot carry, found in nineteen refs.**
+
+1. **A claim about absence.** `distilling-a-tuning-record/E25` says a
+   `distilled` flag exists and is never set to true by anything. The
+   first half is three ranges. The second half is a search result, and no
+   line range anywhere proves that nothing else in the tree does a thing.
+   The receipt for an absence is the command that finds nothing, written
+   into the audit row with the date it was run, exactly as §5b does for a
+   measured number.
+2. **A claim whose subject is derived elsewhere.** The trial skill said a
+   git-path record carries no turns-to-acceptance. It carries one: the
+   field is a maximum over `turnIndex`, and on that path `turnIndex`
+   counts the files inside one commit pair. The citation was anchored at
+   `userTurns: 0`, which is true, unchanging, and not what the sentence
+   was about, so the lock was green over it and will stay green forever.
+   When a sentence is about what a field *means*, the range has to reach
+   the code that computes it, not the code that looks related.
+3. **A union, an enum or a list that the range cuts short.**
+   `adjudicating-uncertain-spans/E1` cited `types.ts:5-13` for "the span
+   classes and the generation fates", and line 13 is the third of four
+   fates. A reader learns there are three. The same skill's E11 says four.
+   A range that ends inside a list teaches the truncation as a fact.
+
+Ours: the sweep found one false claim and six too-narrow ranges in
+nineteen refs, so about a third of a library that passes every mechanical
+check needs a reader. Budget accordingly, and do not report a green
+`check-evidence` as evidence that the receipts are sound. It is evidence
+that they have not moved.
+
+## 5m. Cite the returns, not the call, and read what the library already says about the same lines
+
+(Added 2026-10-18, ninth run, after the second slice of the sweep.)
+
+Slice 2 read nineteen more refs and the shape of its one false claim is
+different from slice 1's, so it gets its own rule. Two rules, really,
+because the error and the thing that would have caught it are separate.
+
+**A claim about what happens to a value has to cite the returns, not the
+call site.** `adjudicating-uncertain-spans/E4` claimed that a demoted
+short match carries no `trivial` flag, and cited the call that passes
+`trivial: true` into the helper. The call is real and unchanging, so the
+lock stayed green. The flag's fate is decided by which of the helper's
+returns fires, and the helper has two: one spreads `trivial` into a
+`survived_mutated` span, and one returns early as uncertain without it.
+The skill described the second and named the first. So when a sentence
+says what becomes of a field, enumerate every return that can produce
+the object and put all of them in range, even when that makes the
+citation forty lines. `quoting-a-number-from-an-outcome-record/E9` cites
+the whole helper for a claim about the same two paths and gets it right,
+which is the argument: a long range that contains the decision beats a
+short one that contains the handoff.
+
+**Two refs can say opposite things about one piece of code, and nothing
+mechanical notices.** The lock keys on a single ref's own ranges. It has
+no notion of two refs, so a library can hold a claim and its negation
+with both fingerprints valid, and the only reader who would ever see the
+conflict is one who happens to read both in the same sitting. That is
+how this one was found, which is luck and not a procedure.
+
+The procedure: a dossier now names every other ref in the library whose
+cited lines **overlap** this ref's, with that ref's own `what` field, so
+a reader judging one claim is shown the library's other claims about the
+same lines. Overlap rather than same file, because twenty refs cite
+`resolve.ts` and they are not all about each other, so a same-file list
+is noise while a shared-lines list is a question. Measured on the
+library as it stands: 41 of 111 refs have an overlapping co-citation and
+36 of those have one in a different skill, so the field fires on about a
+third of the library and when it fires it almost always points across a
+skill boundary, which is exactly where no single skill's author was
+looking. When it fires, say in the audit row whether the two agree.
+
+Ours, and the general form of both halves. A fingerprint is an argument
+about one range in isolation, and a claim is rarely about one range in
+isolation. Every failure this sweep has found is a claim whose subject
+sits somewhere the range does not reach: in a later return, in a
+different file, in a search that finds nothing, in a list the range cuts
+short, or in another skill's contradicting sentence. Treat the lock as
+proof that nothing moved, treat the reading as the only thing that
+establishes relevance, and expect roughly a third of any un-swept
+library to need one or the other.

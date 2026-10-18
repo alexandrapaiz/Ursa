@@ -11,12 +11,12 @@ description: >
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
   code, or for redacting a record so it can be published.
-version: 0.3.0
+version: 0.4.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-30
-revised: 2026-10-15
+revised: 2026-10-18
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -35,14 +35,14 @@ evidence:
     what: the commit walk covers every branch by default, and walks one revision range instead when a caller passes one
     source: ursa-major/src/pairfinder.ts:343-349
   - ref: E6
-    what: the git path records zero user turns, so it carries no user words and no turns-to-acceptance
-    source: ursa-major/src/resolve-episode.ts:192-200
+    what: the git path records zero user turns, so it carries no user words, and its turnIndex counts files inside one commit pair rather than conversational turns, which is what turnsToAcceptance then takes a maximum over
+    source: ursa-major/src/resolve-episode.ts:122-134,192-200; ursa-major/src/stats.ts:128,136-138
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
     source: ursa-major/src/resolve-episode.ts:133,196; ursa-major/src/episodes.ts:25
   - ref: E8
     what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:471-472; ursa-major/src/bin/ursa.ts:515; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:76
+    source: ursa-major/src/bin/ursa.ts:471-472; ursa-major/src/bin/ursa.ts:494; ursa-major/src/bin/ursa.ts:515; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
@@ -51,7 +51,7 @@ evidence:
     source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:38
   - ref: E11
     what: path-filter narrows which generations are kept at parse time, before any matching happens
-    source: ursa-major/src/cli.ts:119; ursa-major/src/parse.ts:71-72
+    source: ursa-major/src/cli.ts:117-119,133; ursa-major/src/parse.ts:71-72
   - ref: E12
     what: prose segments by sentence and code by line, and the choice is made from the file extension alone
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
@@ -82,6 +82,9 @@ evidence:
   - ref: E21
     what: ADR-003 makes capture launch-based, scopes it to building, makes git the interface, and names alexandria as n=2
     source: docs/decisions.md:43-56
+  - ref: E22
+    what: a committed git-path record carries a turnsToAcceptance of 1 over a single-file episode, so the field is present on this path rather than absent
+    source: ursa-major/fixtures/real/ursa-main-4d5e401.json:1134-1143
 supersedes: []
 ---
 
@@ -278,9 +281,20 @@ about where in the funnel you captured, which is why 82 percent and 7
 percent are both correct for the same product [E14]. A filtered session
 run moves the same number again, because the filter changes which
 generations are in the denominator [E11]. The git path also
-carries no user turns at all, so there are no user words and no
-turns-to-acceptance in the record [E6], and that absence is exactly what
-made n=2's commit pairs insufficient for the trajectory work [E15].
+carries no user turns at all, so there are no user words in the record
+[E6], and that absence is exactly what made n=2's commit pairs
+insufficient for the trajectory work [E15].
+
+Ours, and read this before quoting a trajectory number off a git-path
+record: the user words are absent, and `turnsToAcceptance` is not. The
+field is computed on this path like any other, from a `turnIndex` that
+counts the files inside one commit pair rather than conversational turns
+[E6], so it reports the position of the last file that had surviving
+text in enumeration order. This repository's own fixture record is a
+one-file episode and carries `turnsToAcceptance: 1` [E22]. A reader who
+expects the field to be missing on this path, as this skill said until
+2026-10-18, will instead find a number that looks like a turn count and
+is a file ordinal.
 
 Ours: read this as a division of labor, not a ranking. If the trial is
 meant to feed correction-basis or loop-detection work, the git path cannot
