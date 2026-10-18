@@ -11,12 +11,12 @@ description: >
   that already exists against the field it cites. Does not fire for
   producing a record, for choosing a trial subject, or for deciding
   the label on any individual span.
-version: 0.3.0
+version: 0.3.2
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-01
-revised: 2026-10-15
+revised: 2026-10-18
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -35,20 +35,20 @@ evidence:
     what: segmentation mode is chosen by file extension, prose for md, mdx, markdown, txt and tex, code for everything else
     source: ursa-major/src/segment.ts:13-15
   - ref: E6
-    what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again
-    source: ursa-major/src/stats.ts:88-91,115-122,159-165
+    what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again, and survivalRate divides by the same generated-chars denominator per generation and per conversation
+    source: ursa-major/src/stats.ts:88-91,115-122,126-135,159-165, ursa-major/src/resolve.ts:515
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
-    source: ursa-major/src/viewer.ts:234-263
+    source: ursa-major/src/viewer.ts:234-266,277-286
   - ref: E8
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/match.ts:7-8
+    source: ursa-major/src/resolve.ts:432-459, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short raw-exact match is labelled survived_verbatim with score 1 and flagged trivial so it sits inside that category's chars, unless the descent check demotes it, which drops the trivial flag
     source: ursa-major/src/resolve.ts:371-384,224-263, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
-    source: ursa-major/src/resolve.ts:458
+    source: ursa-major/src/resolve.ts:448-458
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
     source: ursa-major/src/types.ts:532-533, ursa-major/src/stats.ts:36-37,52-53
@@ -63,13 +63,13 @@ evidence:
     source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:136-138
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
-    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:580
+    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:570,580
   - ref: E16
     what: CLAUDE.md lists turns to acceptance as trajectory metadata wrapped around the record
     source: CLAUDE.md, section 1, trajectory metadata
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
-    source: ursa-major/src/stats.ts:54-57,148-153
+    source: ursa-major/src/stats.ts:45-57,148-153
   - ref: E18
     what: path-filter drops generations at parse time, before any denominator is computed
     source: ursa-major/src/parse.ts:130, ursa-major/src/cli.ts:58,119
