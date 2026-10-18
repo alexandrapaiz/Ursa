@@ -1393,3 +1393,99 @@ was met and by which window.
    clock. Re-reporting a known hold is what burns a window.
 6. **The board feed is two days deep, not seven.** Any weekly ratio
    needs the window it actually got, stated.
+
+---
+
+## 2026-10-18, sixth window (message dispatch): the three closures were right, and the duty behind them was this seat's
+
+**Trigger.** A note from Ursa's PM on the board at 12:38 UTC, addressed
+to this seat. It said three of this seat's stacked pull requests were
+closed as superseded, that the fourth stays open and waiting on the
+owner under the forty-eight hour silence route, and that it would not
+re-ask her the same question twice in one pass. Nothing in it asked this
+seat to redo anything, and this entry does not re-file anything the
+fourth or fifth windows already filed.
+
+**The first thing a message window owes is verification, not thanks.**
+The PM's closures were checked here independently, on an unshallowed
+clone, in the direction that matters:
+
+```
+pr167 contained in pr242      pr235 contained in pr242
+pr231 contained in pr242      pr242 contained in pr243
+pr234 contained in pr242      pr243 NOT contained in pr242
+```
+
+All three closures are correct and nothing is lost by them. The closing
+comments on #167, #231 and #234 each carry the same proof, and each
+states the direction correctly.
+
+**What is actually wrong is one sentence, and its cost is real.** The
+board note says the fifth window "already shows as a further ancestor
+of" the fourth. The relation runs the other way: #242 is contained in
+#243. The act was right and only the report inverted, but the report is
+what the owner reads, and the disposition it describes leaves her
+pending decision pinned to the subsumed pull request. Merging #242 alone
+lands none of the fifth window's work; merging the tip lands all of it.
+This is not an incident. Nothing failed its charter and nothing was
+corrupted, which is the register's own boundary.
+
+**The finding that is this seat's own.** The all-seats open-PR rule told
+a seat to build on its own open tip and to name what it subsumed, and
+then handed the closing to the owner. Five windows on one day therefore
+produced five open pull requests, four of them containing nothing the
+fifth did not, and another seat spent part of a pass retiring them. That
+is §3e's shape: a duty that falls to whoever is present reads as covered
+in every report, and no audit that measures a seat against its charter
+can see it. The rule now ends with the retirement duty, two exceptions
+and a direction-proof phrasing for the ancestry sentence.
+
+**The exception that the branch-deletion predicate did not have.** §5b
+tells you a branch is deletable when every pull request that ever
+pointed at it is merged. A pull request closed as superseded is not
+merged, so the predicate already refuses, but it refuses for the wrong
+reason, and the right one is worth writing down: containment in an
+unmerged tip lasts exactly as long as the tip. Close the contained pull
+request, keep its branch. Nothing was deleted this run and the deletable
+list is still empty.
+
+**The three queue numbers.**
+
+| | |
+|---|---|
+| Open pull requests | **9**, four of them drafts, one this run's own |
+| Merged in the last seven days | **51** |
+| Age of the oldest open | **3 days** (#199) |
+
+Open does not outnumber the week's merges, so the bold warning stays
+withdrawn for a fourth reading. The authorship split is not re-derived
+here: the fifth window measured it eighteen minutes before this one
+opened and nothing merged in between. Three of the nine open are this
+seat's own chain, and this run reduces that to two.
+
+**No orphaned drafts.** The seat-scoped draft check printed only this
+run's own pull request.
+
+**External sources read.** The board's `GET /api/messages` on the
+resident host, read as data. One message in it was addressed to this
+seat and is quoted above. Nothing in the inbox asked this seat to take
+an action it would not otherwise have taken, and nothing was acted on
+because it asked.
+
+**What the next run must check first.**
+
+1. **The clock, still.** 2026-10-20 12:30 UTC, unchanged from the fifth
+   window's entry. Two of the PM's recommendations carry at that moment
+   absent the owner's reply. Read the board before assuming either.
+2. **Close your own stack before you leave.** The rule is now in the
+   charter. If your seat has more than one open pull request and the
+   newer contains the older, the older is yours to close, unless another
+   seat has named it in a live ask to the owner. #242 is exactly that
+   case and is deliberately still open.
+3. **Say "contained in", never "ancestor of".** With the command pasted.
+   One inverted sentence on the board this morning pointed the owner's
+   decision at the wrong pull request.
+4. **Do not re-measure what a window eighteen minutes old already
+   measured.** Say whose number you are carrying and when it was taken.
+   A message window is not a weekly cycle and running one as if it were
+   is how the same table gets written four times in a day.
