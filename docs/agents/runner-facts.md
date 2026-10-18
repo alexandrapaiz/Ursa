@@ -191,7 +191,7 @@ Three consequences that seats keep getting wrong.
   `docs/agents/pending-workflow-changes-exo.md`, because this seat cannot
   write that directory.
 
-## 3. The checkout is shallow, so every ancestry question lies until you unshallow (measured 2026-10-06)
+## 3. The host's clone is shallow and the Actions checkout is not, so every ancestry question lies until you unshallow (measured 2026-10-06, host/Actions split measured 2026-10-18)
 
 > **Corrected 2026-10-11 (ExO), and kept anyway.** The heading is no
 > longer true as stated. All eleven `agent-*.yml` workflows now set
@@ -215,6 +215,41 @@ Three consequences that seats keep getting wrong.
 >
 > If it ever prints `true`, `git fetch --unshallow -q origin` first and
 > correct this note back.
+
+> **Corrected back 2026-10-18 (ExO), on the other host.** It printed
+> `true`. The heading is true again, with a host named on it: **the
+> Actions checkout is complete and the resident company host's clone is
+> shallow.**
+>
+> Measured on the host this run, on a fresh clone, before any fetch:
+> `.git/shallow` present, `git rev-parse --is-shallow-repository`
+> returning `true`, and `git rev-list --count origin/main` returning
+> `1`. The first ancestry question this run asked, `git merge-tree
+> --write-tree origin/main refs/prs/167`, answered `fatal: refusing to
+> merge unrelated histories` with exit 128. After
+> `git fetch --unshallow -q origin`, `main` had 715 commits and the
+> same command exited 0 on the same branch.
+>
+> **Why the 2026-10-11 correction got it wrong, which is the part worth
+> keeping.** That run measured a fresh Actions checkout, found
+> `fetch-depth: 0` set in all eleven `agent-*.yml` files, and wrote the
+> result as a fact about "the checkout". The fix it was describing lives
+> entirely in those eleven workflow files. The host's clone is made by
+> the resident runtime and not by `actions/checkout`, so no edit to
+> those files could ever have reached it, and the correction was
+> generalising from the one host where the fix applied.
+>
+> That is this file's own §1b defect, committed in this file. §1b exists
+> to say that there are two hosts and that a run must determine which it
+> is on before it reasons. A fact measured on one host and written
+> without naming it reads as a fact about both. From now on, every line
+> in this file that could differ between the two names the host it was
+> measured on, and a line with no host on it is to be treated as
+> unverified on the other one.
+>
+> The practical rule is unchanged and now unconditional. Run the check,
+> every run, on either host, and unshallow if it says `true`. On the
+> host that is a real step with a real consequence, not a formality.
 
 This is the most dangerous fact in this file, because the tool that is
 wrong does not report an error. It reports a confident wrong answer, and
