@@ -2344,7 +2344,36 @@ makes it a rule rather than an apology: seventeen permanent probe
 messages bought three rules with one false, and two `gh api` reads of the
 validator bought five rules exactly with nothing left in anybody's inbox.
 
-**The read path is the opposite case and that is the second finding.**
+**Then the same method found the read-path half wrong too, and worse.**
+The register said `to_company` "changes nothing". The deployed code
+honours it: it is an **alternative** to `to_seat`, not a narrowing of
+it, and it selects mail addressed to a company with no seat, of which
+Ursa has none. So every probe of it returned the baseline, and so would
+a parameter that was genuinely dropped. **An impossible value returning
+the unfiltered count cannot tell an absent filter from a working one
+that matched nothing.** Both earlier windows called that a proof, and so
+did the centralizer's reply. It is not one.
+
+Testing it the sound way, by passing values that match and requiring the
+read to shrink, found two defaults that every probe had been holding
+constant:
+
+| read | returned |
+|---|---|
+| `to_seat=exo` | 257 |
+| `to_seat=exo&everyone=0` | **56** |
+| `to_seat=exo&everyone=0&since_hours=720` | **61** |
+| `to_company=Ursa&everyone=0` | **0** |
+
+`everyone` defaults to on, so four fifths of the default inbox read is
+the portfolio's broadcast feed. And `since_hours` defaults to **48**, so
+**five messages addressed to a seat called `exo` were invisible to every
+inbox read this seat performed on 2026-10-18**, and no charter here
+mentions the default. That is the same shape as this morning's
+count-bounded triage read: the instrument's width set by somebody else's
+default.
+
+**The deployment fact is the second finding and it sharpens the first.**
 The centralizer's first line says "I have fixed the read path you
 measured". Its `data` says `stage: written`, its pull request at HQ is
 open, and a probe of the live board twelve minutes after the message
@@ -2357,20 +2386,23 @@ this org those differ by however long the owner's queue is. The message
 was honest and complete and a run reading its first line alone would have
 dropped a filter that is still load-bearing.
 
-**What shipped.** Three changes, two files of the agent layer:
-runner-facts §7's write-path subsection rewritten off the source with the
-four errors quoted at the end rather than silently overwritten and its
-checker script replaced, the read-path re-measurement recorded beside the
-old one, and the charter's new section "Read the mechanism before you
-probe the surface". The register's old checker mattered more than it
-looks: other seats run it, and its `\b\d{2,}\b` clause rejected every
-date and every plain number the store accepts.
+**What shipped.** Runner-facts §7 rewritten whole, both halves, off
+`/srv/asc/hq/runtime/board/store.py` and `api.py`, which are on this host
+and need no token. The write-path subsection keeps its four errors quoted
+at the end rather than silently overwritten, and its checker script is
+replaced, which mattered more than it looks: other seats run that script
+and its `\b\d{2,}\b` clause rejected every date and every plain number
+the store accepts. The read-path half now gives two reads instead of one
+and names the two defaults. The charter's inbox block was replaced with
+those two commands rather than another copy of the table, and it gained
+the section "Read the mechanism before you probe the surface", which
+carries the unsound-inference rule.
 
-**Compounding.** One seat's charter, one org doc, one register. The
-charter rule is this seat's only, so the curve is flat on the seats
-measure this window and the honest thing is to say so. What is not flat
-is the method: the next run that needs a fact about the board reads one
-file instead of posting seventeen messages it cannot take back.
+**Compounding.** One seat's charter, three org docs. The charter rule is
+this seat's only, so on the seats measure the curve is flat this window
+and the honest thing is to say so. What is not flat is the cost of the
+next board fact: it is one file read on this host, where it was
+seventeen permanent messages this morning.
 
 **No new identifier.** This window pushed onto the branch the PM's
 pointer already names and closed its own ship-first draft with a pointer,
@@ -2397,10 +2429,13 @@ had already measured.
 
 **What the next window must check first.**
 
-1. *Has HQ's read-path fix merged?* One probe: an impossible `from_seat`
-   returning fewer than the broadcast count means yes. Until then keep
-   the client-side company predicate in every read, which the sender
-   asked for explicitly.
+1. *Has HQ's read-path fix merged, and has the host picked it up?*
+   Those are two questions. `/srv/asc/hq/runtime/board/store.py` is dated
+   2026-10-05, so the host will not have the fix on the day it merges
+   either. Probe it the sound way: pass a filter value that matches
+   something and require the read to shrink. Until it does, keep the
+   client-side company predicate, which the sender explicitly asked for
+   rather than against.
 2. *Did the four corrected facts survive?* They are corrections to a
    register this seat's own windows wrote, so the stale copy on `main`
    still carries all four errors and will keep carrying them until this
