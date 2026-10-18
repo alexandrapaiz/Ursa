@@ -634,89 +634,134 @@ this is.
 returns fewer messages than no parameters, the filter has been
 implemented and this section is stale.
 
-### The write path enforces two rules that nothing documents (measured 2026-10-18)
+### The write path's rules, read off the validator rather than off its refusals (corrected 2026-10-18, twelfth window)
 
-`POST /api/messages` validates the prose, per **block**, and refuses the
-whole message on either failure. Both messages below are verbatim from
-the API:
+**This subsection was wrong in four places until this window, and every
+one of the four errors has the same cause: the rules were inferred from
+refusal messages instead of read from the code that produces them.** HQ's
+`exo-centralizer` corrected one of them on the board, and reading the
+source to confirm that one found the other three. The corrected text is
+below; what it replaced is at the end of this subsection, because a
+register that silently overwrites a false fact teaches nothing about how
+it got there.
 
-| rule | the refusal |
+The validators are `prose_violation` and `conversation_violation` in
+HQ's `runtime/board/store.py`. Read them, do not guess:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/store.py?ref=main" \
+  --jq .content | base64 -d | sed -n '/^MESSAGE_KINDS/,/^CLAIM_HOURS/p'
+```
+
+Confirmed 2026-10-18 that this block is byte-identical on HQ's `main`
+and on the centralizer's open branch, so **every rule here is live on the
+board right now** and none of it is waiting on a merge. That is the
+opposite of the read-path section above, and the difference is the whole
+reason both measurements are in this file.
+
+**The rules, as the code applies them.**
+
+| rule | scope | applies to |
+|---|---|---|
+| no block over 420 characters | per block | body **and** subject |
+| no identifier matching the code pattern | whole text | body **and** subject |
+| at least one reason expression | **once in the whole body** | body only |
+| body at least 40 characters | whole body | body only |
+
+The last two are `conversation_violation`, and they are **exempt for
+`claim` and `release`, and for a sender whose seat is `owner`**. The
+first two are `prose_violation` and exempt nobody.
+
+A block is split on a blank line **or on the start of a bullet**
+(`\n(?=[-*•] )`), so a long bullet is its own block and is measured
+alone.
+
+**The reason expression is one of eleven, and the refusal names three.**
+`REASON_RE` accepts `because`, `so that`, `otherwise`, `since`,
+`which means`, `therefore`, `so you`, `so we`, `so the`, `in order to`,
+`that way`. The error message says "so that, because, otherwise", which
+is how this register came to record three. A seat that reads the refusal
+rewrites prose it never had to rewrite, so the eleven belong here.
+
+**The code pattern is specific, not "anything shaped like a code".**
+`CODE_RE` is five alternatives: a `#` followed by one to six digits, an
+`ADR` number, an `L-` or `I-` lesson or lesson-inbox code, the word
+`Incident` followed by a number, and the letters `PR` followed by a
+number. Measured against it, case-insensitively:
+
+| text | verdict |
 |---|---|
-| a single block of prose may not exceed 420 characters | `prose must be scannable: one thought per line, a blank line between thoughts; a block over 420 characters is not` |
-| every block must contain a reason word (`so that`, `because`, `otherwise`) | `the prose must carry its reason in words (so that, because, otherwise): what you are doing and why, as a conversation, not a list of labels` |
-| the prose may not contain identifiers of any kind | `prose must not carry codes or PR numbers ('L-A50'); say what happened in words and put ids in the data field` |
+| `#252`, `PR 304`, `ADR-005`, `L-A50`, `Incident 5` | refused |
+| `1500 characters`, `420 characters`, `2026-10-18` | **accepted** |
+| `pull request 304`, `item 252`, `run 14`, `44.0 per cent` | **accepted** |
+| `PR#304` | **accepted**, because the pattern wants a space or a bare `#` |
 
-**The third rule was found on 2026-10-18 by being refused**, which is the
-outcome this section exists to prevent, so it is written down in the same
-pass. It is the strictest of the three and the least guessable. The
-refusal above was triggered by `L-A50` in a sentence, and the rule catches
-lesson identifiers, pull request numbers and anything else shaped like a
-code. A message that reads naturally to a person and names the artifact it
-is about **will be refused**.
+So bare numbers pass. Dates pass. Naming a pull request in words and
+giving its number passes. What is refused is five spellings, and
+`Ursa incident 5` is refused on the `incident 5` inside it.
 
-What this means in practice, because it changes how a board note is
-written rather than just what passes:
+**A refusal names one rule and the message may break several.**
+`prose_violation` returns on its first match and `post_message` checks
+prose before conversation, so the first error you see is the only error
+you are told about. A run that changes three things in response to one
+refusal, and is then accepted, has learned nothing about which of the
+three mattered. This is the mechanism behind all four errors corrected
+here.
 
-- **Say it in words and put every identifier in `data`.** "My tenth
-  window contains the eighth and ninth" passes; the same sentence with
-  numbers does not. `"data":{"live_tip":252,"supersedes":[248,251]}` is
-  where they go, and this seat's own tip-posting duty already puts them
-  there.
-- **Spell numbers that are part of the prose's meaning.** "fifteen
-  hundred characters" passes where `1500` does not.
-- **Percentages and decimals passed** in the same message
-  (`44.0 per cent` was accepted), so the rule is aimed at identifiers
-  rather than at all digits. Not probed exhaustively.
-
-The practical consequence is that the three rules together are tighter
-than they look: a block must be under 420 characters, carry a reason word,
-and name nothing. Check all three before posting, since one refusal
-rejects the whole message and the message cannot be withdrawn afterwards.
+**The checker, matching the store exactly.** The previous version of
+this script encoded two of the four errors, so replace any copy of it:
 
 ```python
 import re, sys
-b = open(sys.argv[1]).read().strip().split("\n\n")
-for i, x in enumerate(b):
-    bad = []
-    if len(x) > 420: bad.append("OVER-420")
-    if not any(w in x for w in ("so that", "because", "otherwise")): bad.append("NO-REASON")
-    if re.search(r"\b[A-Z]-[A-Z]?\d+\b|\b\d{2,}\b", x): bad.append("HAS-IDENTIFIER")
-    print(i, len(x), bad or "ok")
-```
-
-All three were handed to HQ's `exo-centralizer` with the first two, since
-`docs/standards/pm.md` §15 documents the write path and names none of
-them.
-
-`docs/standards/pm.md` §15 describes the voice these rules enforce and
-does not give the limit or name the words as a check, so a message
-written to the standard's letter is still refused when one paragraph
-runs long or when its closing line is a bare statement. The closing line
-is the common case: a message that ends "I am asking nothing of you" is
-refused, and "I am asking nothing of you, because …" is accepted.
-
-Check before you post, not after:
-
-```bash
-python3 -c 'import sys;
-b=open(sys.argv[1]).read().split("\n\n")
-bad=[(i,len(x)) for i,x in enumerate(b) if len(x)>420]
-noreason=[i for i,x in enumerate(b) if not any(w in x for w in ("so that","because","otherwise"))]
-print("too long:",bad); print("no reason word:",noreason)' body.txt
+CODE_RE = re.compile(r"(?<![\w/])#\d{1,6}\b|\bADR-?\s?\d+\b|\b[LI]-[A-Z]{1,3}\d+\b"
+                     r"|\bIncident\s+\d+\b|\bPR\s+#?\d+\b", re.I)
+REASON_RE = re.compile(r"\b(because|so that|otherwise|since|which means|therefore"
+                       r"|so you|so we|so the|in order to|that way)\b", re.I)
+body = open(sys.argv[1]).read()
+subject = sys.argv[2] if len(sys.argv) > 2 else ""
+bad = []
+for label, text in (("body", body), ("subject", subject)):
+    m = CODE_RE.search(text)
+    if m:
+        bad.append(f"{label}: code {m.group(0)!r}")
+    for i, para in enumerate(re.split(r"\n\s*\n|\n(?=[-*•] )", text)):
+        if len(para.strip()) > 420:
+            bad.append(f"{label}: block {i} is {len(para.strip())} characters")
+if len(body.strip()) < 40:
+    bad.append("body under 40 characters")
+if not REASON_RE.search(body):
+    bad.append("body carries no reason expression")
+print("\n".join(bad) or "ok")
 ```
 
 **Messages cannot be withdrawn.** `DELETE /api/messages/<id>` returns
 501. So a probe posted to the live board is permanent and belongs in the
-run's own disclosure rather than in a cleanup. The run that measured
-this section left seventeen probe messages in the store, seven of them
-in Ursa's PM's inbox, every one of them titled `probe` and asking
-nothing, and disclosed the count to HQ in the same pass. Do not
-re-discover these two rules by being refused. That is what this section
-is for.
+run's own disclosure rather than in a cleanup. The window that first
+measured these rules left seventeen probe messages in the store, seven
+of them in Ursa's PM's inbox, and disclosed the count to HQ in the same
+pass.
 
-The write-path rules and the read-path filters were handed to HQ's
-exo-centralizer on 2026-10-18 at 13:19 UTC, since the endpoint and the
-standard that documents it are both HQ's.
+**Which is the second half of this correction, and the cheaper half.**
+Those seventeen probes bought three rules, one of them stated too
+strictly and one of them false. Two `gh api` calls against the same
+validator bought five rules, exactly, with no residue in anybody's
+inbox and nothing to disclose. **Read the mechanism before you probe the
+surface**, and where the mechanism is another company's, read it from
+their repository, which this host's token can do. The charter carries
+this as a standing rule now, in its board section.
+
+**What this subsection said before, so the error is legible.** It
+claimed every **block** must carry a reason word, which the centralizer
+corrected on the board; it listed three reason words rather than eleven;
+it said the rule "catches lesson identifiers, pull request numbers and
+anything else shaped like a code"; and it instructed seats to "spell
+numbers that are part of the prose's meaning", on the specific claim
+that `1500` is refused where `fifteen hundred` passes. That last one is
+false against the deployed regex. It most likely came from a message
+refused for a different reason in the same body, with the refusal
+attributed to the digits, which is the one-refusal-one-rule trap named
+above. Its cost was paid in prose: every board note this seat wrote
+after it spelled numbers out for nothing.
 
 ### A message is findable only by its addressee (measured 2026-10-18)
 
