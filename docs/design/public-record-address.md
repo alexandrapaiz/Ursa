@@ -101,7 +101,7 @@ crosses it, not a verb phrase.
             │         "--agent-identity", "<one per declared line>"]
             ▼
   ursa-major/dist/ursa.cjs                      ← one committed CommonJS
-  (the bundle; 255,121 bytes at this commit)      file, nothing installed
+  (the bundle; 255,382 bytes at this commit)      file, nothing installed
             │
             │  in-process: Episode[] → OutcomeRecord, via
             │  src/pairfinder.ts → src/episodes.ts → src/resolve.ts
@@ -214,7 +214,7 @@ export interface PublishOptions {
 export interface PublishResult {
   written: string[]
   index: PublishedIndex
-  skipped: { id: string; reason: 'unsafe-id' | 'unreadable' }[]
+  skipped: { id: string; reason: 'unsafe-id' | 'unreadable' | 'forgotten' }[]
   warnings: string[]
 }
 
@@ -293,7 +293,7 @@ export function recordHref(id: string, ext: 'html' | 'json'): string
 
 export function loadPublishable(projectPath: string): {
   records: OutcomeRecord[]
-  skipped: PublishResult['skipped']
+  skipped: PublishResult['skipped']   // reason: 'unsafe-id' | 'unreadable' | 'forgotten'
 }
 export function foreignSlugWarnings(
   records: OutcomeRecord[], repository: string | null,
@@ -525,7 +525,33 @@ untouched by this path, because GitHub Pages in the stranger's own
 account is not Ursa's aggregation layer and no byte of this travels to
 one.
 
-### 6.4 What the disclosure may honestly claim
+### 6.4 Erasure reaches this boundary too
+
+`src/disclosure.ts` calls `isForgotten()` before it aggregates anything,
+even though its callers also filter, because a tombstoned record must not
+cross a disclosure boundary on any path. `loadPublishable` now does the
+same, before the record file is read, so a tombstoned record's text is
+never loaded into the process on the way to being refused.
+
+In the ordinary case there is nothing to catch: `ursa forget <project>
+--record <id>` deletes the record file as well as writing the tombstone,
+so the id is already absent from `listRecordIds`. The check is for when
+the file and the tombstone disagree — a `.ursa/` restored from a backup,
+a runner cache that outlived the erasure, a record copied between clones,
+or a tombstone written for a record that was never on this machine.
+
+The argument is stronger here than at the Minor edge. That edge sends
+counters to Ursa and can be re-run; this one writes a page to a public
+address that stays up until something replaces it. This is `CLAUDE.md`'s
+second load-bearing constraint — the user can always see, edit, revoke
+and delete what has been inferred about them — read at the one boundary
+where breaking it is visible to strangers.
+
+A forgotten record is also absent from the `DisclosureManifest`, so its
+characters are never counted in what the publisher is asked to
+acknowledge.
+
+### 6.5 What the disclosure may honestly claim
 
 Until the first end-to-end run, `formatManifest` ended with "text that
 has never been public before, even when the repository is". The run
@@ -650,8 +676,8 @@ writes the same 7 files with it.
 
 ## 9. Tests
 
-22 new tests in `ursa-major/src/publish.test.ts`, plus one strengthened
-in `src/bundle-exec.test.ts`. Full suite: **705 passed, 4 skipped**.
+24 new tests in `ursa-major/src/publish.test.ts`, plus one strengthened
+in `src/bundle-exec.test.ts`. Full suite: **707 passed, 4 skipped**.
 
 | What it holds | Why it is a test and not a reading of the code |
 |---|---|
@@ -670,6 +696,8 @@ in `src/bundle-exec.test.ts`. Full suite: **705 passed, 4 skipped**.
 | A hostile repository name is escaped, not spliced | `repository` reaches the page from `$GITHUB_REPOSITORY` |
 | `noveltyOfDisclosure` says "never in the repository" for a session-path manifest and "already published that text" for a git-path one, and both when both are present | This is the sentence section 6.4 found to be wrong. A test is the only thing that keeps it honest as the code moves |
 | The directory-slug warning fires on a foreign slug, and stays silent on a runner slug, on an absent repository, and on an id not in the resolver's shape | Three silent cases and one loud one; a warning that fires always is ignored always |
+| An erased record is not published even when its file is still on disk, and the refusal is named rather than folded into "unreadable" | `ursa forget` deletes the file too, so the ordinary case has nothing to catch. The test is the disagreeing case, which is the only one the check exists for |
+| An erased record's characters are absent from the disclosure manifest | Otherwise the publisher is asked to acknowledge text that will not be published, which is the same defect pointing the other way |
 | Each Action output wired to `steps.resolve` is written by the bundle's `ci` command, exactly and in order | The pre-existing guarantee, unchanged |
 | Each Action output wired to any other step is appended to `$GITHUB_OUTPUT` by that step's own shell | The new half. A declared output nothing writes resolves to the empty string on every consumer's runner, silently. Confirmed to fail when the `echo … >> "$GITHUB_OUTPUT"` line is deleted |
 
@@ -766,9 +794,9 @@ path, and why it over what else was considered.
 | Tool | Version | Its job in this path | Chosen over |
 |---|---|---|---|
 | Node.js | 22.23.2 (`node --version`); the bundle targets `node22` | Runs the resolver and the publisher. On a runner it is the node already present, which is what "installs nothing" means | A container image, rejected in the product plan §9 because the consumer could not read what runs before it runs. Bun or Deno, rejected because neither is on a stock `ubuntu-latest` runner |
-| esbuild | 0.28.2 | Bundles `src/bin/bundle-entry.ts` into the single committed `dist/ursa.cjs` the Action executes. Grew the file from 202,367 to 255,121 bytes in this run, the increase being `src/viewer.ts` and `src/publish.ts`, neither of which was reachable from the bundle before | `tsc` alone, which emits a module per file and needs a loader on the runner. Rollup or webpack, each of which is a larger dependency for a one-entry CommonJS build with no code splitting |
+| esbuild | 0.28.2 | Bundles `src/bin/bundle-entry.ts` into the single committed `dist/ursa.cjs` the Action executes. Grew the file from 202,367 to 255,382 bytes in this run, the increase being `src/viewer.ts` and `src/publish.ts`, neither of which was reachable from the bundle before | `tsc` alone, which emits a module per file and needs a loader on the runner. Rollup or webpack, each of which is a larger dependency for a one-entry CommonJS build with no code splitting |
 | TypeScript | 5.9.3 | `tsc --noEmit` is the only check that holds `PublishedIndex` and `renderIndexPage` to the same shape, since the renderer reads fields off a typed value rather than a parsed JSON blob | Runtime validation with `zod` 4.6.5, which is already a dependency and is right for untrusted input. The index is constructed in this process from typed values, so a schema check here would validate this module against itself |
-| vitest | 5.0.2 | Runs the 22 new tests and the 705-test suite. Already this package's runner; no new tool | — |
+| vitest | 5.0.2 | Runs the 24 new tests and the 707-test suite. Already this package's runner; no new tool | — |
 | jsdom | 30.1.1 | Parses the rendered pages so self-containment and the column definitions are asserted against a real DOM rather than by substring. `src/provenance.test.ts` already uses it for the viewer's navigation, and reusing it keeps one headless DOM in the tree | Playwright or Puppeteer, which would download a browser, add minutes to the suite, and verify nothing extra for a page with no script in it. A substring check, rejected because the project's own prior test notes record a substring assertion passing against markup a browser would not render |
 | tsx | 4.23.15 | Runs `src/bin/ursa.ts` from source for the local launch and for every command in section 7.3 | `ts-node`, slower on this package and already displaced here |
 | diff | 8.0.4 | Not used by this module. Named because it is inlined into the `dist/ursa.cjs` that this path ships, so the published artifact contains it | — |
@@ -792,9 +820,9 @@ previous behaviour.
 | the publish path entirely | `git revert` the three commits on `ursa-engineer/2026-10-18-message` | `src/publish.ts`, `src/publish.cli.ts`, `src/publish.test.ts`, the two `action.yml` inputs, `examples/publish-record.yml`, the README section, this file |
 | only the Action's new behaviour | remove the `resolve-from` and `publish-dir` inputs | Nothing else. `resolve-from` defaults to `merge` and `publish-dir` to `''`, so a consumer who sets neither gets the byte-identical run they got before, and `src/ci/run.ts` is untouched |
 | only the published site, for one consumer | delete their `.github/workflows/ursa-publish.yml`, or unset Settings → Pages → Source | Their records stop being published. Nothing of Ursa's changes |
-| the bundle | `node build/bundle.mjs` at the reverted commit, then `node build/bundle.mjs --check` | `dist/ursa.cjs` returns to sha256 `650a289f…`, 202,367 bytes |
+| the bundle | `node build/bundle.mjs` at the reverted commit, then `node build/bundle.mjs --check`, then `npm run provenance:bundles` | `dist/ursa.cjs` returns to sha256 `650a289f…`, 202,367 bytes, and `docs/provenance/bundle-digests.json` drops the two rows this run added |
 
 Nothing in this run writes to `src/resolve.ts`, `src/stats.ts`,
-`src/invariants.ts`, `src/store.ts` or `src/ci/run.ts`, so no record's
+`src/invariants.ts`, `src/store.ts`, `src/consent.ts` or `src/ci/run.ts`, so no record's
 classifications, figures or bound checks are touched. `ursa publish` only
 ever reads the store.
