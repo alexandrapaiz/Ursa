@@ -2,6 +2,86 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirteenth pass, 2026-10-18 ~06:2x UTC, host six-hour pass: a quiet window confirmed rather than assumed, nothing new to merge, the sprint goal already shipped
+
+Nothing woke this seat by name. The last commit on this branch (the
+twelfth pass, `bd869bb`, 02:38:58Z) sits almost four hours behind the
+current time, so the first job this pass was to find out whether that
+gap is silence or a miss, not to take it on faith.
+
+**Checked, not assumed.** Re-fetched the board inbox for `pm`/`Ursa`
+fresh: zero messages addressed to this seat after 02:38:58Z. Re-ran
+`gh pr list` and `gh run list` for the same window: zero pull requests
+updated, zero Actions runs of any kind, company-wide on this repository,
+between 02:39:06Z and 06:26Z. That is one fact, not two: no seat ran in
+this window, so there was nothing to triage, answer, or merge, and the
+quiet is the company's cadence between crons and host windows, not a
+dropped message.
+
+**Failed runs: nothing new.** `gh run list --status failure --created
+">=2026-10-18T00:26:30Z"` returns the same seven `redaction-gate` runs
+the ninth through twelfth passes already classified (tripwire false
+alarms and superseded reds on this seat's own and frontend's branches,
+all fixed on the next push). No new failure, no rerun owed.
+
+**Tier B merge check: redone fresh, nothing qualifies.** All ten open
+pull requests checked again rather than carried from the twelfth
+pass's read:
+
+- `#167 → #231 → #234 → #235` is one stack (`git merge-base
+  --is-ancestor` reconfirmed each link). `#235` is the live tip, still
+  a draft, still touching `prompts/exo-agent.md` and
+  `prompts/pm-agent.md`. Charters are owner-only regardless of how
+  clean or how ready the diff reads. Waiting on the owner.
+- `#210` (research) touches `prompts/research-agent.md`. Tier C,
+  unchanged since 2026-10-16. Waiting on the owner.
+- `#199` (skill) is `CONFLICTING`/`DIRTY` and touches
+  `prompts/skill-extract.md`. Waits on the skill seat's rebase before
+  it is even a tier question.
+- `#232` (engineer) is `CONFLICTING`/`DIRTY`, a draft. `#237`
+  (engineer) is a clean draft confirmed an ancestor-including
+  continuation of `#232`, not a second competing build — the stack is
+  already correctly shaped, so the next move is engineer's own next
+  run, not a PM dispatch.
+- `#236` (frontend) is a clean draft, `docs/design/tuning-dashboard.md`
+  only, not yet readied.
+
+Nothing here is a draft the owner can act on, and nothing here is
+clean, ready, and Tier B at once. No merge this pass.
+
+**Sprint: the goal already shipped, before its own deadline.**
+`sprint-2026-10-12.md`'s goal, "Verbatim means what it says," had all
+three backlog items confirmed on `main` this pass: the byte-identical
+assertions in `ursa-major/src/resolver.test.ts`, `RESOLVER_IDENTIFIED`
+in `ursa-major/src/invariants.ts`, and `docs/security/
+redaction-standard.md`, all checked by reading the files on
+`origin/main` directly rather than trusting a merged label. The
+milestone's due date (2026-10-18T00:00 UTC) has passed; it closes at
+tomorrow's Monday ceremony retro per pm.md §3, not early and not by
+this pass.
+
+**What moves today:** nothing owed from this seat. The open MVP and
+charter threads (`#232`→`#237` engineer's stack, `#235` exo's charter
+stack, `#236` frontend's design doc) are each a seat's own to continue
+on its own next run; none is stalled on a defect or an unanswered
+question. No dispatch fired: `PM_DISPATCH_ENABLED` is still unreadable
+with this token (`403`, same gap every prior pass has hit), and moot
+regardless, since nothing this pass found meets §11.3's bar and a
+message/host pass acts through the board under §17, not through a
+cold `workflow_dispatch`.
+
+**Top three for the owner, unchanged from the twelfth pass:**
+
+1. The exo charter stack, now four PRs deep (`#167`, `#231`, `#234`,
+   `#235`, each subsuming the last), waits on her merge because it
+   touches `prompts/exo-agent.md` and `prompts/pm-agent.md`. One merge
+   closes all four.
+2. `#210` (research) and `#199` (skill, also conflicting) each touch
+   their own seat's charter file and wait the same way.
+3. The eight stale charter branch prefixes `alexandra-systems/
+   exo-centralizer` named (full table in `docs/decisions.md`, "eight of
+   Ursa's charters...") are hers to take directly or route; unchanged.
+
 ## Twelfth pass, 2026-10-18 ~02:3x UTC: #233 merged under Tier B, the host's "no pull request" mechanism closed out, eight stale charter prefixes logged for the owner
 
 Six events woke this seat: frontend's PR #233, with the instruction to
