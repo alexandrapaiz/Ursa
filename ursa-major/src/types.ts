@@ -1033,6 +1033,47 @@ export interface GateIdentity {
   boundsDigest: string
 }
 
+/**
+ * The three limits the pair walk ran under, as the walk itself resolved
+ * them, defaults included (`resolvePairingBounds` in src/pairfinder.ts).
+ *
+ * WHY A RECORD CARRIES THIS. Every span class in a git-path record rests
+ * on one claim: that the commit which edited a file after a model wrote
+ * it was correcting that model rather than visiting the same file later
+ * for an unrelated reason. These three numbers are where that claim
+ * stops. Move the distance from 25 commits to 400 on the same history
+ * and the set of records changes completely: measured on this
+ * repository on 2026-10-18, 25 yields nothing at all and 400 yields two
+ * records, because twelve agent seats commit between one touch of a
+ * file by the owner and the next.
+ *
+ * So two records resolved from the same history under different bounds
+ * are not two readings of one fact, and before this field a reader
+ * holding both could not tell them apart. A published set states the
+ * distinct bound sets in it (`PublishedIndex.pairing` in src/publish.ts)
+ * for the same reason, which is the reason the sentence naming them is
+ * on the published index page rather than only in a design document.
+ *
+ * Numbers rather than an optional-with-default shape, deliberately: a
+ * record states what the walk used, never what a caller omitted. The
+ * defaults live in exactly one place (src/pairfinder.ts) and a record
+ * says the value, so reading one never requires knowing which build's
+ * defaults were in force.
+ *
+ * `Infinity` is reachable and JSON-serializes to `null`, which is the
+ * one lossy case here and an honest one: `--max-pair-distance Infinity`
+ * is the unbounded walk, and a reader of that record's JSON sees a null
+ * where a bound would be rather than a number that was never applied.
+ */
+export interface PairingBounds {
+  /** commits walked forward from a generation before the pair claim is abandoned */
+  maxPairDistance: number
+  /** hours between the generation and the edit before the same claim is abandoned */
+  maxPairAgeHours: number
+  /** how many later generations may rewrite the same file in between and the pair still stand */
+  maxInterposedGenerations: number
+}
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
@@ -1073,6 +1114,27 @@ export interface OutcomeRecord {
      * Present does NOT mean the record passed. See `GateIdentity`.
      */
     gatedBy?: GateIdentity
+    /**
+     * The pairing bounds the walk that found this record's generations
+     * ran under, stamped by whichever launch resolved it
+     * (`stampPairingBounds` in src/launch.ts, called by both
+     * `src/bin/ursa.ts` and `src/ci/run.ts`).
+     *
+     * Absent is a real claim and not a gap in three cases, and they are
+     * different from each other: a record from the chat or paste path,
+     * where no commit pair was walked and no bound could apply; a record
+     * written before 2026-10-18, when nothing stamped this; and a record
+     * built in memory and never saved. Absent is never a placeholder for
+     * "the defaults", because the defaults are themselves a bound set and
+     * a record that ran under them says so with numbers.
+     *
+     * Preserved, never rewritten, once set — the rule `resolvedBy` and
+     * `gatedBy` above state and for the same reason: `applyVerdict` in
+     * src/bridge/declare.ts re-saves a record later to write a user's
+     * verdict into `signals`, and the pairs in it were found under the
+     * bounds of the walk that found them.
+     */
+    pairedBy?: PairingBounds
   }
   /** what kind of finished thing this is, and where its rendered state lives */
   artifact: Artifact
