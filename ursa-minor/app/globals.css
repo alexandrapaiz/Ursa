@@ -558,6 +558,41 @@ html {
   text-decoration-color: var(--dim);
 }
 
+/* A word diff puts a removal and its replacement side by side with no
+   separator between them, and on the fixture's one mutated span that
+   rendered as "and nonot by any", which a reader has to decode rather
+   than read. A tenth of an em on each side is the smallest gap that
+   separates the struck words from the kept ones; any more and the
+   sentence stops being a sentence. */
+.rec-diff ins,
+.rec-diff del {
+  padding: 0 0.1em;
+}
+
+/* A command is shown the way a terminal would show it: lines break
+   where the command breaks and nowhere else. The viewer's own documents
+   wrap anywhere, because a span of prose must never be pushed off the
+   side of the page, but a command is the opposite case. Measured
+   2026-10-18 at 390: wrapping the Action's curl line broke the raw
+   githubusercontent URL across three lines, mid-path twice, which reads
+   as a broken address rather than a long one. So this block scrolls
+   instead, which is what every documentation site this one was
+   benchmarked against does with code. */
+.rec-cmd {
+  white-space: pre;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* The one indicator that the line continues past the edge. A thin
+     track in --line is the same hairline every other edge on this site
+     is drawn with, so it says "there is more" without adding a device.
+     It is not a complete answer: iOS paints overlay scrollbars and shows
+     nothing until a finger moves. The copy control carries the whole
+     command regardless of what is visible, which is why clipping is
+     survivable here and would not be in prose. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
 /* The share bar. 1px gaps in --night rather than margins, so the
    segments read as one measure divided and the bar still totals the
    container's width exactly. */

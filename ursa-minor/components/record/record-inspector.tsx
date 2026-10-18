@@ -38,8 +38,8 @@ export function RecordInspector({
     return (
       <aside className="border border-[var(--line)] p-5 sm:p-6">
         <p className="text-[0.85rem] leading-[1.6] text-[var(--dim)]">
-          Choose any highlighted passage on the left to see what happened to it, which model wrote
-          it, and the words of yours that produced it.
+          Choose any highlighted passage to see what happened to it, which model wrote it, and the
+          words of yours that produced it.
         </p>
       </aside>
     );

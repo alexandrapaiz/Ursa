@@ -117,8 +117,14 @@ export function RecordLoader() {
         uploaded, and there is nothing of yours on any machine of ours to delete afterwards.
       </p>
 
-      <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
-        <label className="cta tracked-label inline-block cursor-pointer border border-[rgba(168,199,250,0.4)] py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)]">
+      {/* The two controls stack below sm and sit on one row above it.
+          Measured 2026-10-18 at 390: on one row the address field was left
+          230px beside the button, its placeholder was clipped mid-word, and
+          "read it" sat hard against the field's right edge with no gap the
+          eye could read as separate. There is no phone width where both
+          controls fit a row, so below sm they do not share one. */}
+      <div className="mt-8 flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-x-8">
+        <label className="cta tracked-label inline-block shrink-0 cursor-pointer border border-[rgba(168,199,250,0.4)] py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)]">
           Open a record
           <input
             type="file"
@@ -128,19 +134,27 @@ export function RecordLoader() {
           />
         </label>
 
-        <form onSubmit={onUrl} className="flex flex-1 items-baseline gap-4">
+        {/* The field and its button stack too, below sm. Measured again at
+            390 after they were taken off the button's row: the field was
+            left 229px against a 234px placeholder, so the hint was cut one
+            character before its last word. Stacked, the field takes the full
+            measure and nothing is clipped at any width. */}
+        <form
+          onSubmit={onUrl}
+          className="flex w-full min-w-0 flex-col items-start gap-3 sm:flex-1 sm:flex-row sm:items-baseline sm:gap-5"
+        >
           <input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="or the address you published one at"
+            placeholder="https://somewhere/your-record.json"
             aria-label="the address of a published record"
-            className="min-w-0 flex-1 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.76rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none"
+            className="w-full min-w-0 border-b border-[var(--line)] sm:flex-1 bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
           />
           <button
             type="submit"
             disabled={busy || !url}
-            className="rec-action font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+            className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
           >
             {busy ? "reading…" : "read it"}
           </button>

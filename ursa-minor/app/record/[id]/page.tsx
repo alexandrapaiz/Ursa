@@ -72,7 +72,7 @@ export default async function RecordPage({ params }: { params: Promise<{ id: str
         </section>
       </main>
 
-      <SiteFooter />
+      <SiteFooter measure="wide" />
     </>
   );
 }

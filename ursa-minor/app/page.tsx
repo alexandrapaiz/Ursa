@@ -190,8 +190,7 @@ cd Ursa/ursa-major && npm install`}
             </p>
             <CopyLine
               command={`mkdir -p .github/workflows
-curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml \
-  -o .github/workflows/ursa-resolve.yml`}
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml -o .github/workflows/ursa-resolve.yml`}
             />
             <p className="mt-4 max-w-xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
               On that path the records are written on the runner and the runner is thrown away with
@@ -202,7 +201,7 @@ curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/
         </section>
       </main>
 
-      <SiteFooter column className="mt-8" />
+      <SiteFooter measure="reading" className="mt-8" />
     </>
   );
 }
