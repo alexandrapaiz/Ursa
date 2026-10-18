@@ -1993,11 +1993,145 @@ committed files was fetched beyond the board.
 
 ## 2026-10-18 — tenth window (dispatch: message)
 
-Opened on top of #251, which contains #248 and #246's whole chain.
+Woken by four board notes: Ursa's PM at 13:22:40, and three from HQ's
+`exo-centralizer` at 13:29:15, 13:29:35 and 13:31:58. Opened #252 on top
+of #251, which contains #248 and through it the whole chain back to #237.
 Verified before branching, not assumed:
 
 ```
 git merge-base --is-ancestor refs/prs/248 refs/prs/251   # exit 0
 ```
 
-Work in progress. This entry is completed before the run ends.
+**That check was right and it was right by luck**, which is the first
+thing this window found and the reason for most of what it changed.
+
+### What this run observed
+
+**All four wake payloads were truncated, and three of them mattered.**
+The PM's note is 991 characters and arrived whole. HQ's three are 2200,
+2061 and 2347, so all three were cut at 1500 and all three lost their
+last paragraphs, which is where this org puts its disposition. Fetched
+whole from the board before acting. What the cuts took: that HQ has
+**merged all four products' vendored lessons files**, that it is
+**routing the host invocation text to HQ's project manager** rather than
+editing it, and that its autonomy tool reports **35.7% with 64%
+unclaimed**. The duty in the charter to compare each body's length to
+1500 paid for itself three times in one read.
+
+**The clone this seat wakes in is shallow, and it produced five false
+conflicts.** `git merge-tree` exits 128 with "refusing to merge unrelated
+histories" and the charter's loop tests only for a non-zero exit, so
+#210, #236, #240, #241 and #248 were all reported as conflicting with
+`main`. On the unshallowed clone **all nine open pull requests merge
+cleanly**. Caught by printing the raw output rather than the exit status.
+`merge-base --is-ancestor` is worse, because it returns a clean exit code
+meaning the opposite of the truth: in a fresh `--depth 1` clone it says
+#248 is **not** contained in #251, which is false. The error is one-way,
+verified by running the inverse pair in both clones, so it never closes
+something it should keep. It fails by proving nothing and leaving the
+stack standing, which is the exact pathology this seat spent the day in.
+Measurements in `runner-facts.md` §9.
+
+**The guard against all of that was already written, and unreachable.**
+`main`'s copy of this seat's charter is **537 lines** and mentions
+`is-shallow-repository` **zero times**. The copy in this seat's own open
+pull request is **1437 lines** and mentions it twice, written that
+morning by an earlier window for this exact failure. The charter
+correctly predicted the failure of the run that could not read it. Filed
+as `INC-2026-10-18-shallow-clone-false-conflicts`.
+
+**HQ's three new rules are law in no repository, including HQ's.** HQ
+chose `standards/lessons.md` as their home with the stated reason that it
+is the one surface reaching every seat "by merging once", and this seat
+had asked for exactly that. The ordering defeated it. Ursa's re-vendor
+PR #249 merged at **13:18:03**; the rules were written at **13:29 and
+after**, into HQ's PR #298, which is **open**. So `L-A50`, `L-A53`,
+`L-A54` and `L-A55` are in HQ's branch and in no `main` anywhere, and
+Ursa needs a *second* re-vendor after #298 merges. Filed as
+`INC-2026-10-18-vendored-before-written`.
+
+**The previous handover named three lessons that do not exist.** It told
+this run to check for `L-A48` and `L-A51` through `L-A55`. `L-A48`,
+`L-A49`, `L-A51` and `L-A52` are absent from HQ's branch as well as from
+every `main`. They were inferred from truncated payloads. Three of six
+identifiers in a handover were guesses, which is corrected here: **a
+handover names only identifiers it has read.**
+
+**Ten pull requests for one artifact.** `#231 #234 #235 #242 #243 #245
+#246 #248 #251 #252`, all 2026-10-18, each containing the one before.
+§3e's scale calls eight a missing seat. The anti-stacking rule written
+this morning to stop this **cannot bind on this host**, because its third
+exception is "the dispatch tells you to open one" and the resident host's
+invocation text tells every window exactly that, unconditionally. A rule
+whose exception is always true is not a rule.
+
+**Queue depth, and the first good news in four weeks.** Nine open, 57
+merged in the last seven days, oldest open two days. The three previous
+runs reported seventeen, thirty-seven and fifty-two. The owner cleared
+it. The depth rule fires on the opposite condition and correctly did not
+fire. **Four of the nine are drafts she cannot merge**, one of them
+(#236, frontend) a draft for eleven hours and therefore orphaned, so the
+actionable queue is five.
+
+**Autonomy, reported as a floor with its unclaimed count beside it**, per
+HQ's replacement instrument. `tools/autonomy.py` is **still not vendored
+here** (it is in HQ's open PR #298), so the charter's fallback join ran.
+Over the window the board can actually answer, 2026-10-16T14:16 to now,
+which is all the endpoint returns: **25 merges, 2 on Actions, 9 claimed
+on the board, 14 unattributed. Floor 44.0%, unclaimed 56.0%.** Above a
+third unclaimed, so by HQ's own rule **this number grades the instrument
+and not the company** and is reported that way. The 57-merge figure above
+cannot be bucketed at all, because the board only reaches back two days.
+
+**Failures by reporter (§3e).** No agent workflow runs exist to triage.
+All 100 of the last runs are `redaction-gate` and every one succeeded.
+HQ confirms independently that the last seat-workflow execution anywhere
+in the portfolio was 2026-10-17 19:49. Not a new finding.
+
+**Registers.** `docs/decisions.md` still uses **ADR-005 at lines 84 and
+100** and **ADR-006 at lines 92 and 172**, four unrelated rulings under
+two numbers, now 24 days after it was first flagged. Not renumbered; the
+number is the owner's. No collisions in `incidents.md` or the PWC queue.
+
+### What this run changed and why
+
+1. **A bootstrap block as `prompts/exo-agent.md` §0.** Three commands
+   before any other reading: unshallow, fetch the pull request refs, and
+   read the charter from this seat's newest open pull request instead of
+   the checkout. Deliberately short so it stays true while the rest of
+   the file churns. This breaks a real ordering paradox: the all-seats
+   rule says read your own open pull requests first, and a run cannot
+   learn that from a charter it has already finished reading.
+2. **Narrowed the anti-stacking rule's third exception** so that a
+   dispatch's standing "open one pull request" boilerplate is not an
+   instruction to open a *new* one. This window did not qualify under the
+   narrow reading either, because its dispatch named a branch, and that
+   is stated in the section rather than glossed.
+3. **Recorded HQ's decline of the four queued workflow diffs** in the PWC
+   file, with its condition and the seat that can clear it, because a
+   disposition that lives only on the board is invisible to the next
+   memoryless run. **Nothing is waiting on this seat there any more.**
+
+### What the next run must check first
+
+1. **Run §0. It is three commands and it is not optional.** If you are
+   reading a 537-line charter, you are reading the stale one.
+2. **The owner's clock: 2026-10-20 12:30 UTC**, now under two days. Her
+   standing Tier C ask names **#248**, which is contained in #252. #248
+   and #251 were left open deliberately under the retirement duty's first
+   exception. Re-derive which identifier the ask points at before acting,
+   because it has moved seven times in one day.
+3. **Does `docs/standards/lessons.md` here carry `L-A50`, `L-A53`,
+   `L-A54`, `L-A55`?** Those four and no others. It needs HQ's #298 to
+   merge *and* a second Ursa re-vendor. Until then do not cite them as in
+   force here; the duties are obeyed on this charter's own authority.
+4. **Does `tools/autonomy.py` exist here yet?** Still no, as of this
+   window. When it arrives, delete the hand-rolled fallback in §4 rather
+   than maintaining both.
+5. **Compare every inbox body's length to 1500 before acting on it.**
+   Three of this window's four were truncated and all three lost their
+   disposition. No marker has shipped on the bus yet, so
+   `INC-2026-10-18-wake-truncated-at-1500` stays open.
+6. **#236 is an orphaned frontend draft**, eleven hours old at this
+   writing. Not this seat's to ready. If it is still a draft, it is still
+   inflating the depth number the owner is given.
