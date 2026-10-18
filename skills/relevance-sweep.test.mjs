@@ -143,3 +143,42 @@ The threshold is 0.6 [E1], or 0.7 [E2], and covered excludes skipped [E3].
   // And a ref nobody overlaps says nothing rather than saying zero.
   assert.doesNotMatch(run(dir, ['alpha/E3']), /overlapping lines/)
 })
+
+test('a dossier names the refs that share a sentence, and only those', () => {
+  // The slice-3 failure in words: `[E2, E4]` divides one claim between two
+  // refs, each author knowing which half was theirs and no tool knowing
+  // either. E4's half was anchored at a comment that did not carry it. The
+  // signal ranked it near the bottom of the slice, so the field has to come
+  // from the citation tag and not from the ordering. Sharing a sentence is
+  // the signal, not citing the same file: E3 below cites nothing in common
+  // and must not be dragged in.
+  const dir = library()
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: a fixture
+evidence:
+  - ref: E1
+    what: the threshold constant is 0.6
+    source: src/a.ts:1
+  - ref: E2
+    what: the half of the divided claim nobody audits
+    source: src/a.ts:2
+  - ref: E3
+    what: covered excludes skipped text
+    source: src/a.ts:3
+supersedes: []
+---
+
+# Alpha
+
+The threshold is 0.6 and unrelated returns 1 [E1, E2]. Covered excludes
+skipped [E3].
+`)
+  const out = run(dir, ['alpha/E1'])
+  assert.match(out, /1 other ref shares a sentence with this one/)
+  assert.match(out, /alpha\/E2 {2}src\/a\.ts:2/)
+  assert.match(out, /the half of the divided claim nobody audits/)
+  assert.doesNotMatch(out, /alpha\/E3/)
+  // And a ref whose every citation is its own says nothing rather than zero.
+  assert.doesNotMatch(run(dir, ['alpha/E3']), /shares? a sentence/)
+})
