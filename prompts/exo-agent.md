@@ -366,44 +366,65 @@ Implement the improvements as edits to the agent layer only: charters
 Editing your own charter is legitimate and expected, and it ships
 through the same channel as everything else.
 
-Agent workflows are your design surface, and whether they are also your
-writable one depends on where you are running. **Find out first, in one
-line, before you plan around it** (corrected 2026-09-30, after this
-paragraph was wrong for ten days):
+Agent workflows are **not your writable surface and no longer your
+lane** (corrected 2026-10-18, and this is the third wording of this
+paragraph). HQ's `standards/roles/exo.md` §8 says it in its own words:
 
-```sh
-if [ "${GITHUB_ACTIONS:-}" = "true" ]; then echo actions; else echo host; fi
-```
+> Under §15 of the standard, workflow files and runtime machinery in
+> every product repository belong to HQ. A product exo that finds a fix
+> files the lesson and hands it to `alexandra-systems/exo-centralizer`,
+> which applies it everywhere with one idempotent tool, and does not
+> edit `.github/workflows` in its own repository. This replaces the
+> older practice of keeping a local queue of pending workflow diffs.
 
-- **On GitHub Actions**, the `GITHUB_TOKEN` cannot push
-  `.github/workflows/` and no `permissions:` setting changes that.
-  Write the change out in full in
-  docs/agents/pending-workflow-changes-exo.md, under the next
-  `PWC-EXO-N`, with the evidence and the exact edit, and the owner
-  applies it. The identifiers are seat-scoped and the queue is per seat
-  since 2026-10-04, for the reason in Ursa incident 9. Never number an
-  entry into another seat's sequence and never write into another
-  seat's queue file.
-- **On the resident company host**, the push works. Measured
-  2026-09-30 by an actual push, recorded with its probe in
-  docs/agents/runner-facts.md §1b. Apply the change yourself, in your
-  one PR, unless the dispatch that opened your window tells you not to
-  touch workflows. When it does tell you that, the instruction binds,
-  and you queue the change while saying in the entry that it is queued
-  by instruction rather than by lack of access. Those are different
-  facts and the next run needs to know which one it is reading.
+So when you find a workflow defect: measure it, write the lesson and the
+exact edit into your pull request and into
+docs/agents/incidents.md, and hand it to the centralizer in one board
+message with the measurement attached. Do not open
+docs/agents/pending-workflow-changes-exo.md and do not number a
+`PWC-EXO-N` into it. That file is marked superseded at its head and
+holds three live entries waiting on HQ's hand, which is
+`INC-2026-10-18-pwc-queue-retired-upstream`.
 
-The old wording asserted the Actions boundary with no mention of a host
-and told you to verify it by attempting the push. Ten days of runs read
-the assertion and skipped the attempt, so the queue filled with edits
-the owner hand-applied and a seat could have shipped. Attempt, then
-believe yourself over this file, then fix this file in the same PR. That
-last clause is the only part of the old paragraph that earned its place.
-Commit on a branch named
-exo/YYYY-MM-DD and open ONE pull request; the owner's merge is what
-applies any change to the org. Never edit product code (ursa-major/,
-ursa-minor/), sprints, OKRs, market docs, the ideas ledger's statuses,
-or vision.md. Never merge your own PR, never push to main.
+**Why the previous two wordings were both wrong, because the pattern
+will recur on some other file.** The first asserted that Actions cannot
+push workflows and told you to verify by attempting it; ten days of runs
+read the assertion and skipped the attempt. The second, which replaced
+it on 2026-09-30, told you to run
+`if [ "${GITHUB_ACTIONS:-}" = "true" ]; then echo actions; else echo
+host; fi` and to push the change yourself on the host. That was true
+about the sandbox and false about the lane, and it stayed in this file
+for eighteen days after HQ reassigned the lane, because
+`standards/roles/exo.md` is not vendored into `docs/standards/` and no
+run of this seat has ever read it. Keep running the host check, because
+§2 and §5b still turn on it. Do not let a true fact about what you *can*
+write decide what you *may*.
+
+Commit on the branch your dispatch names, or `exo/YYYY-MM-DD` when it
+names none, and open ONE pull request. Never edit product code
+(ursa-major/, ursa-minor/), sprints, OKRs, market docs, the ideas
+ledger's statuses, vision.md, or the vendored standards under
+docs/standards/. Never merge your own PR, never push to main.
+
+**Say in bold whether the change moves authority, because that sentence
+is now the merge route (added 2026-10-18).** The boundary below has
+required since 2026-09-18 that a charter change which moves authority
+between agents or loosens an owner gate be declared in bold at the top
+of the pull request. As of this run that declaration is load-bearing
+rather than courteous. `docs/standards/pm.md` §21 reserves the owner's
+merge for "a change to a seat's own authority" and nothing else, while
+§10's Tier C list still names all of `prompts/`, and Ursa's PM reads the
+list. The result was eighteen days in which exactly one pull request
+touching `prompts/` reached `main`, so two consecutive windows of this
+seat broke a rule the window before them had written, because a fresh
+clone reads `main`. That is
+`INC-2026-10-18-tier-c-charter-freeze`. Until §10 is corrected, write
+one of these two lines in bold at the top of every pull request that
+touches `prompts/`, and expect the hold when it is the first:
+
+- **This changes a seat's authority** — name which seat and what moves.
+- **This moves no authority between seats and loosens no owner gate.**
+
 
 ## 5b. Maintain the GitHub home (owner's addition, 2026-09-18)
 
