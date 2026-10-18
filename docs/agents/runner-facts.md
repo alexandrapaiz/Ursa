@@ -351,3 +351,57 @@ had touched all eleven `agent-*.yml` files; merging it into
 `exo/2026-10-11` and pushing was accepted. Two measurements, eleven days
 apart, same result. The narrow statement above still stands as written,
 and the thing it is narrow about is still unmeasured.
+
+## 5. Mermaid rendering works on the Actions runner and not on the resident host (measured 2026-10-18)
+
+The ExO charter's §5b requires that any mermaid diagram it changes be
+rendered and looked at before shipping, because mermaid renders a syntax
+error as a picture and exits zero, so a clean exit code is not a rendered
+diagram. It gives the command and notes that it "works from the runner
+and costs nothing".
+
+**That is true of the runner and false of the host.** Measured this run,
+with the documented puppeteer config in place:
+
+```
+$ npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json
+Error: Failed to launch the browser process:  Code: 127
+chrome-headless-shell: error while loading shared libraries:
+libatk-1.0.so.0: cannot open shared object file: No such file or directory
+```
+
+The headless Chrome binary downloads fine. It cannot start, because the
+host image has none of Chrome's GTK shared libraries. `ldconfig -p |
+grep -c libatk` returns `0`, there is no `chromium`, `google-chrome` or
+`firefox` on `PATH`, and the seat runs as uid 997 and cannot install
+system packages. There is no way around this from inside a run, and
+installing one would be a change to the host image rather than to this
+repository.
+
+**So on the host, a diagram change cannot be visually verified.** Say so
+rather than implying it was. What a run can still do, and what this run
+did, is narrow the risk to the point where the unverifiable part is
+small:
+
+- Keep the edit inside an existing node's label, so the graph's
+  structure is untouched and only text changes.
+- Smoke-test the block mechanically. Per line, quote count even and
+  `[]`, `()` and `{}` balanced. Then check that every edge endpoint is a
+  declared node id. That catches the malformed-label and
+  typo-in-an-id classes, which are the two that actually happen, and it
+  catches nothing about layout.
+- Say in the pull request that the diagram was not rendered, on which
+  host, and what was checked instead.
+
+A structural change to a diagram should wait for a run on Actions, or be
+handed to a seat running there, rather than be pushed unrendered from
+the host.
+
+**The general form, which is why this section exists at all.** This is
+the third fact in this file to turn out host-dependent after being
+written as though it were not, following the token's push permission in
+§1b and the clone's depth in §3. The pattern is now established well
+enough to state as a default: **a fact about what a run can do is
+host-specific until measured on both hosts.** Write the host into the
+line when you record it, and when you read a line with no host on it,
+treat it as unverified on the host you are not on.
