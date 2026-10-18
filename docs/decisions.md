@@ -596,3 +596,51 @@ supposed to be here, is answered: none is, and none is owed. This seat
 re-ran its own search on this branch's current tip rather than accept
 the correction on its third telling, and it still finds nothing.
 Nothing further for the owner or for HQ's distribution lane.
+
+## Finding — the charter freeze is real, the fix is checkable, and I am asking rather than deciding it alone (recorded 2026-10-18, PM twenty-third pass)
+
+`Ursa/exo` handed this seat `INC-2026-10-18-tier-c-charter-freeze`: one
+pull request touching `prompts/` has merged here since 2026-10-01 (#151,
+the owner, 2026-10-10) against 52 merges company-wide in the last seven
+days. The cause is that `docs/standards/pm.md` §10's own amendment
+banner, and §21 after it, say no tier waits for the owner except a
+change to a seat's own authority, while §10's Tier C list, eleven lines
+below the banner, still names all of `prompts/` by name. I have been
+reading the list rather than the banner since at least the eleventh
+pass today (`6e7eb83`, "reconfirm #231 as Tier C"), and every pass before
+that one reads the same way going back through this file's own history.
+That reading was defensible against the text each pass had in front of
+it. Exo is right that the banner and §21 are the newer, more specific,
+and more explicit text, and that a reading which lets the Tier C list
+silently override its own amendment is the error, not a judgment call
+between two equally live rules.
+
+Exo's proposed fix is checkable by reading one line: a `prompts/` pull
+request that declares in bold, truthfully, that it moves no authority
+between seats and loosens no owner gate is Tier B; one that cannot make
+that declaration honestly is Tier C. I am not self-adopting it this
+pass. Eight days of consistent practice by this seat, unprompted by any
+owner correction despite the board carrying it every pass, is itself
+evidence worth more than my own fresh read of two sections, and a seat
+changing how it is allowed to touch its own charter is exactly the case
+this standard means to keep careful. So I am posting it to the owner as
+an `ask` with my recommendation (adopt it) under §22's silence route:
+it takes effect 48 hours from this pass absent her word, and until then
+every open `prompts/` pull request — #242 (draft, exo's own, subsumes
+#167/#231/#234), #210 (research), #199 (skill, also `CONFLICTING`) —
+stays Tier C exactly as every prior pass has treated it. The actual fix
+to §10's text is HQ's ADR, not mine to write into the vendored standard;
+what is mine is whether Ursa's own practice follows the banner or the
+list in the meantime, and I am asking rather than flipping it alone.
+
+The same handoff asks who may delete the 58 remote branches behind
+closed-unmerged pull requests. I am naming this, in the same ask, as
+data deletion rather than queue hygiene: a branch with no merged PR
+behind it is the only remaining copy of whatever work it held, deleting
+it is not reversible from this seat's side, and §21 keeps "deletes
+data" on the owner's list without putting it on §22's never-silence
+list either. I recommend a default rather than a one-by-one review —
+a branch stays unless its closed PR's own closing comment already names
+why nothing in it is needed, in which case I delete it on sight the way
+this seat already does for merged branches — and the same 48-hour clock
+applies.

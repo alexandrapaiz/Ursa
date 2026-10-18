@@ -2,6 +2,66 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-third pass, 2026-10-18 ~12:3x UTC, message: exo's tier-C-charter-freeze handoff, routed to the owner rather than decided alone
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+   is this seat's own, open since the twenty-second pass, carrying all
+   prior passes' work. Checked it out and continued on it rather than
+   opening a new branch or PR.
+
+2. **Inbox: one live item, addressed by name.** `exo`/`Ursa`'s `783d0346…`
+   (12:20:25Z, kind `handoff`) is new since the twenty-second pass's
+   last check and asks two things: whether a `prompts/` pull request
+   that declares in bold that it moves no authority is Tier B despite
+   §10's Tier C list naming charters outright, and who may delete the
+   58 remote branches behind closed-unmerged pull requests. The other
+   four messages addressed to `pm`/`Ursa` in the inbox (`d125f6e3…`,
+   `16cb7872…`, `08daaf05…`, `7912ef17…`) are the manifest-checker
+   thread the twenty-second pass already closed; re-read fresh and
+   confirmed still closed, no reply owed a second time.
+
+3. **Failed runs: none in the last six hours.** `gh run list --status
+   failure --created ">=$(date -u -d '-6 hours' +%FT%TZ)"` returns an
+   empty list. The six `redaction-gate` failures in the broader
+   24-hour window are all from 00:30–01:53 UTC, each already triaged
+   by a pass between then and now; not re-triaged a second time.
+
+4. **Tier B merge: nothing merged, every open PR re-read fresh.** `#242`
+   (exo) is a draft and fails Tier B's draft gate regardless of the
+   tier question it raises; it also names itself as subsuming `#167`,
+   `#231`, `#234` (all three exo's own, all still open, all still
+   `prompts/exo-agent.md` edits). `#210` (research) still edits
+   `prompts/research-agent.md` directly. `#199` (skill) still edits
+   `prompts/skill-extract.md` and is still `CONFLICTING`. `#241`
+   (engineer), `#240` and `#236` (frontend) are live drafts, not ready.
+   `#225` is this seat's own. Did not adopt exo's bold-declaration
+   proposal this pass despite finding its reading of §10/§21 correct:
+   see `docs/decisions.md`'s twenty-third-pass entry for why this goes
+   to the owner under §22's silence route instead of changing eight
+   days of this seat's own consistent practice on the spot. Nothing
+   new qualifies for Tier B.
+
+5. **Dispatch: nothing fires.** `PM_DISPATCH_ENABLED` reads unset in
+   this run's own environment. No candidate meets §11.3 regardless:
+   exo, engineer and frontend are each already mid-session on their
+   own open drafts, and dispatching a seat holding an open draft is the
+   one thing §11.4 rules out by name.
+
+6. **Sprint: fully shipped, ahead of its own milestone.** All three of
+   `sprint-2026-10-12.md`'s backlog items are merged — items 1 and 2
+   days ago, item 3 (`docs/security/redaction-standard.md`) in #214 at
+   2026-10-17 18:27 UTC, about five and a half hours before the
+   2026-10-18T00:00 UTC milestone. Nothing moves on the sprint's own
+   backlog today; the retrospective and the next sprint open tomorrow
+   on the Monday ceremony. **Hand-off:** none owed on sprint items;
+   the open hand-off this pass carries is the tier-C ask above, to the
+   owner.
+
+7. **Board:** sent an `ask` to the owner carrying both questions from
+   exo's handoff with this seat's own recommendation on each, a `note`
+   to `exo`/`Ursa` pointing at that ask so its handoff isn't left
+   silent, and one pass-summary `note` naming the reason in prose.
+
 ## Twenty-second pass, 2026-10-18 ~09:4x UTC, message: exo-centralizer's final closing note on the manifest-checker thread, no reply owed
 
 1. **The event, read from the board itself.** The message that woke
