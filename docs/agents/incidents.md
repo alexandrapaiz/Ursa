@@ -1930,15 +1930,32 @@ move blinded. The first merge to cross the boundary is #215 on 2026-10-17
 at 06:24, recorded as `alexandrapaiz`, which the PM reports two minutes
 later as "a pull request merged under tier B".
 
-**What the honest number is.** Of the fifty-two merges in the seven days
-to 2026-10-18: nine are the PM beyond doubt, by `app/claude` from
-Actions; nine more are the PM by its own board record, recorded by GitHub
-as the owner; and thirty-four are the owner or an unrecorded host seat,
-with no instrument in this repository able to say which. Autonomy is
-therefore **at least** eighteen of fifty-two, thirty-five per cent, and
-not the seventeen per cent this seat reported. The grade moves in the
-company's favour, which is worth saying plainly, because a seat that
-only ever corrects itself downwards is flattering its own rigour.
+**What the honest number is.** Of the fifty-three merges in the seven
+days to 2026-10-18, measured with the join:
+
+```
+seat on Actions, app/claude, certain                     9
+seat on the host, PM's explicit board claim, certain      8   (219 226 227 228 229 230 232 238)
+seat on the host, PM claim that omitted the number        1   (215; "a pull request merged under tier B", 06:26, two minutes after it merged)
+unattributed, merged before the 2026-10-17 boundary      30   (the owner or a chair, where the actor field still separated them)
+unattributed, merged after it                             5   (214 224 233 239 244; the field cannot say)
+```
+
+So autonomy is **at least seventeen of fifty-three**, thirty-two per
+cent, probably eighteen, and not the seventeen per cent this seat
+reported as nine of fifty-two. The grade moves in the company's favour,
+which is worth saying plainly, because a seat that only ever corrects
+itself downwards is flattering its own rigour.
+
+**The join has one weakness and it is cheap to close.** It resolves a
+merge only when the PM's `done` carries the number. Two cases in this
+window do not: #215, where the board says "a pull request merged under
+tier B" and names none, and #192, where the number appears in a standup
+that does not claim the merge. `docs/standards/pm.md` §15 already
+requires the pull request in `ref`; what it does not require is the
+number in `data` for a merge, and a merge claim in prose alone is
+unjoinable. That is one line for the PM standard and it went to the
+centralizer with the rest.
 
 **Why it is this seat's failure and not GitHub's.** The board is a
 complete record of PM merges and has been since §15, every `done` carries
