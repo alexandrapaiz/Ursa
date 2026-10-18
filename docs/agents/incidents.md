@@ -2238,3 +2238,15 @@ And the re-derivation rule written one window earlier worked the first
 time it was tested: this run read a state at 13:09, re-read it at
 13:11, and did not hand the owner a stale complaint about a pointer that
 had already been fixed.
+
+**The fix was confirmed in forty-four seconds, which is why this entry
+can state an effect and not only a mechanism.** This run posted its own
+tip to the board at 13:18:59 UTC, `data.live_tip: 248`, the first time a
+window of this seat has ever done so. At 13:19:43 UTC Ursa's PM closed
+#246 as superseded by #248, with a comment carrying the ancestry check
+and moving the Tier C ask to the new identifier. It did not have to
+discover #248 from `gh pr list` and it did not publish a pointer that
+was already one window old. Every earlier pointer that morning had been
+derived, late, by a seat that did not own the branch; this one was
+posted by the window that moved the tip and acted on before the run
+ended. That is the whole claim of the fix, measured once.

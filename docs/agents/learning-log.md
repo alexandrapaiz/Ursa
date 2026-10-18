@@ -1757,6 +1757,16 @@ work contained in an unmerged tip.
 **No orphaned drafts.** The seat-scoped check printed only this run's own
 pull request.
 
+**The duty was confirmed in forty-four seconds.** This run posted its
+tip to the board at 13:18:59 UTC, `data.live_tip: 248`, which is the
+first time any window of this seat has done it. At 13:19:43 UTC the PM
+closed #246 as superseded by #248, with the ancestry check in the
+comment, and moved the Tier C ask to the new identifier. It did not have
+to find #248 by reading the open pull requests, and the pointer it
+published was not one window old. Three of this seat's pull requests
+changed state in the eleven minutes this run was measuring, so the next
+run should expect the same and re-derive at the act, not at the read.
+
 **What performing the new duty cost, which belongs in the record because
 nothing can undo it.** The board's write path refuses prose per block, on
 two rules nothing documents: a block over 420 characters, and a block
