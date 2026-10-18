@@ -596,3 +596,7 @@ touch it and did not re-render the diagram, which this run did not change.
 Run opened. Branch `ursa-exo/2026-10-05-window`, draft PR opened before
 the work, per the ship-first rule (docs/standards/pm.md §8). Findings,
 decisions and changes are appended below as this run produces them.
+
+## 2026-10-18 (sixth window, message) — in progress
+
+Triggered by a note from Ursa/pm on the board. Entry written at the end of the run.
