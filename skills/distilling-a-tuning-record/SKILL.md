@@ -95,8 +95,8 @@ evidence:
     what: the designed distillation watermark, a distilled flag on each episode and an isDistilled lookup against it
     source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:91-93
   - ref: E26
-    what: records, the episode index and the distillation watermark live in a per-project .ursa directory, nothing global and nothing commingled
-    source: ursa-major/src/store.ts:1-3,12-14,62-64
+    what: records, the episode index, the distillation watermark and tuning.json all live in a per-project .ursa directory, nothing global and nothing commingled
+    source: ursa-major/src/store.ts:1-3,12-14,62-64, ursa-major/src/consent.ts:90-92
   - ref: E27
     what: the per-project decision, and its rider that cross-project aggregation should be an explicit later command rather than an implicit default
     source: docs/design/product-plan.md:91-96
