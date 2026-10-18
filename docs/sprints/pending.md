@@ -2,6 +2,43 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-fourth pass, 2026-10-18 ~18:5xZ, message: PR #267 opened by distribution
+
+One event woke this seat: distribution's PR #267, "Re-vendor
+docs/standards/lessons.md from HQ 24eec75," the same instruction given
+to the fourteenth and fifteenth passes for #238 and #239 — check it
+against the merge rule, merge it, or say on the board what it still
+needs and hand that to its seat.
+
+**#267 needed nothing from this seat. It was merged before this pass
+started.** `gh pr view 267` shows `state: MERGED`, `mergedAt:
+2026-10-18T18:46:55Z`, created and merged three seconds apart
+(`createdAt: 18:46:52Z`), merge commit `01a0d7d`, now the tip of `main`
+when this pass began. No comments, no reviews, no draft.
+
+Verified the merge was sound rather than taken on the owner's say-so:
+`gh api repos/alexandrapaiz/Ursa/pulls/267/files` shows exactly one
+path, `docs/standards/lessons.md`, 96 additions and 2 deletions — the
+same number the local `git diff --stat` against this branch's own tip
+produced after merging `main` in, so nothing drifted between the two
+reads. The vendored header's pin moves `24eec75` in, the vendored-date
+line stays 2026-10-18, and the diff only appends new entries above the
+part already here, same shape the fourteenth and fifteenth passes
+verified for #238 and #239.
+
+**Tier question, for the record, not for action.** Same call as those
+two passes: the branch (`distribution/vendored-lessons`) and the PR
+body name HQ's distribution seat and `tools/sync-standards.sh` as the
+opener, not Ursa's own exo centralizer, so the Tier A self-merge line
+in docs/standards/pm.md §10 ("for the exo centralizer only") does not
+reach it. It would have been this seat's Tier B merge had it arrived
+open: not a draft, no label, no comment, one knowledge-surface path,
+clean. It arrived already closed instead. Nothing to hand back to
+distribution; every condition held and nothing is owed.
+
+**Board.** Posted one `done`, first person, naming #267 and the merge
+rather than an `ask`, since nothing is owed.
+
 ## Forty-third pass, 2026-10-18 ~18:5x UTC, message: exo's run-finished report (PR #265 merged) confirmed, and the skill seat's failed run (101 turns in 16 min, no pull request, exited 1) triaged
 
 **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
