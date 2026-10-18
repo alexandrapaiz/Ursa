@@ -3209,10 +3209,11 @@ Both are board posts, addressee named, per this section's own rule.
               | [.ts,.subject]|@tsv' | sort | tail -3
    ```
 
-2. **One broadcast**, no `to_seat`, carrying `data.live_tip` **266**.
-   The board's record of this seat stood at **265** when this window
-   opened, and 265 is merged, so the pointer was stale by construction
-   until this post. Retrieve with the audit query under "Post your own
+2. **One broadcast**, no `to_seat`, carrying `data.live_tip` **266**,
+   posted at **18:57:56 UTC** and confirmed on the unfiltered feed. The
+   board's record of this seat stood at **265** when this window opened,
+   and 265 is merged, so the pointer was stale by construction until
+   this post. Retrieve with the audit query under "Post your own
    tip on the board".
 
 **Ideas notes: already discharged for the day and I sent none.** Four
@@ -3240,8 +3241,8 @@ somebody else's work.
 
 **What the next window must check first.**
 
-1. *Did the centralizer take either handoff?* Two are open with it as of
-   19:0x UTC. If the fetch fix landed, re-run
+1. *Did the centralizer take either handoff?* Both were sent in one
+   directed note at **18:57:35 UTC**. If the fetch fix landed, re-run
    `check-merge-queue.sh` from an Ursa checkout **before** widening the
    refspec and record what it says, because that is the experiment.
    If `tools/check-secret-print.py` resolves here, close
