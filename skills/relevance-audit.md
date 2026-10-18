@@ -253,3 +253,55 @@ exact rather than assumed: the last change to any cited source outside
 13:29, so every reading above is a reading of the text in this commit. From
 here the lock is exact by construction, and a ref re-read later is recorded
 with `--record` in the same commit as the row that changed.
+
+## The fifth skill, read as it was written, 2026-10-18
+
+The first skill in this library whose citations were read at authoring time
+rather than in a sweep afterwards, which is `prompts/skill-extract.md` §5o's
+rule stated as a practice. Thirty-two refs, all written and read in one run,
+and the rows below are the reading. The verdicts are the author's own, which
+is a weaker thing than a second reader and is stated as such: what §5o buys
+is that no claim shipped unread, not that the reader was independent.
+
+**Ten of the thirty-two needed a second pass**, which is the same rough third
+the sweep found in a library written first and checked later. The difference
+is where the cost landed: all ten were repaired before the claim was
+committed, inside one run, instead of being found across five runs months
+later. Read that as the measured answer to the board item this run took. The
+rate at which a first draft of a citation is wrong did not fall. What fell is
+how long a wrong one survives.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `adding-a-bound-to-the-record-gate/E11` | widened | 2026-10-18 | First draft cited `invariants.ts:43-44,445-456,491-497` for "both are pushed inside the final-file span loop in that order". The two push sites were in range and the proof that they sit in ONE loop was not, since 457-490 was cut out. Now one contiguous `445-497`. The declaration-order half of the sentence moved to E4, whose range holds the whole union; E11 carries emission order, E4 carries declaration order. |
+| `adding-a-bound-to-the-record-gate/E12` | widened | 2026-10-18 | The stranded doc comment is five lines and carries two claims the skill makes: that violations come out in declaration order, which is false, and that an empty violation list does not mean the labels are right, which is true and is quoted in Limits. The half about a second doc comment superseding it is not in these five lines and now cites E7, whose range is that comment. Overlap: E7 agrees, they are adjacent rather than contradictory. |
+| `adding-a-bound-to-the-record-gate/E19` | wrong | 2026-10-18 | The draft said four of the base record's six structures arrived with the bound that needed them. The range names the fourth (2026-10-13) and the fifth (2026-10-15); the sixth is in E20's range and no fourth-of-four is anywhere. Restated as three, split `[E19]` for two and `[E20]` for the sixth. |
+| `adding-a-bound-to-the-record-gate/E21` | widened | 2026-10-18 | Cited `123-145` for the per-fixture assertion, then used for the 23-fixture count as well, which is at line 119 and was outside it. Widened to `117-145`. Shared sentence with E18: E18 carries the parse of the `Expected codes:` line, E21 carries the equality assertion over it. |
+| `adding-a-bound-to-the-record-gate/E22` | wrong | 2026-10-18 | The draft said the BOUND_CODES equality "fires in both directions", so a counterexample for a deleted bound would fail it. It would not: with the bound gone the gate stops emitting the code, both sides of the set shrink together, and the line passes. The deletion case fails the slug test (E23) and the per-fixture note equality (E21) instead. Rewritten to say that, with each half cited to the line that catches it. |
+| `adding-a-bound-to-the-record-gate/E23` | widened | 2026-10-18 | The claim named the three `rival-not-after-final-*` fixtures as examples of the clause qualifier. The range explains the qualifier through `descent-checked-uniformly-verbatim` only; the rival spelling is argued in the directory README. Restated to the example the range carries. |
+| `adding-a-bound-to-the-record-gate/E30` | widened | 2026-10-18 | Did not exist in the first draft. The claim about the first-difference window was tagged `[E11]`, whose range stopped at the length comparison, eleven lines before the byte comparison that calls `firstDifference`. New ref over `414-433,498-502`. The quoted window was also wrong by one space against the source and is now the source's bytes. |
+| `adding-a-bound-to-the-record-gate/E31` | widened | 2026-10-18 | Did not exist in the first draft. "The backstops were a by-product of asserting equality rather than containment" was tagged `[E21]`, whose comment says two fixtures changed shape under that assertion and not that the backstops were found by it. The file header says exactly that, so it is a ref now. |
+| `adding-a-bound-to-the-record-gate/E32` | widened | 2026-10-18 | Did not exist in the first draft. "A healthy repository passes a self-check identically whether the check runs or does not exist" was tagged `[E28]`, which is the directory README's procedure section and says nothing of the kind. The measured version, eight launch-parity tests green with the gate's call deleted, is in the README's opening and is the ref. Overlap: E29 cites lines 1-11 of the same file for its stale counts, and the two agree, since E32's own line 11 is one of the stale ones. |
+| `adding-a-bound-to-the-record-gate/E10` | supports | 2026-10-18 | The helper and its `BOUNDS[code]` stamp are wholly in range. The passage's "every violation the gate emits" is an absence claim the range cannot carry, per §5l: the receipt is `grep -nE "out\.push" ursa-major/src/invariants.ts`, which returns line 440 and one unrelated `mutatedWithout.push` at 671, verified 2026-10-18. |
+| `adding-a-bound-to-the-record-gate/E1` | supports | 2026-10-18 | Both figures, the six records, the 344 tests and the sentence about nothing comparing two numbers in one record are all in the file header. |
+| `adding-a-bound-to-the-record-gate/E2` | supports | 2026-10-18 | The two rules are numbered in the range, and the second one's own example is the one the skill reuses. Shared sentence with E3: E2 carries the rule, E3 carries the field that reports the number instead. |
+| `adding-a-bound-to-the-record-gate/E3` | supports | 2026-10-18 | `reusedChars`'s doc comment is the reuse case in full, including why the final-side total can exceed every generation-side total. |
+| `adding-a-bound-to-the-record-gate/E4` | supports | 2026-10-18 | All eighteen members are in range, so both "eighteen of them" and the ordinal half of the emission-order sentence are readable here. Overlap: E11 is about where the codes are pushed, not where they are declared, and the two agree. |
+| `adding-a-bound-to-the-record-gate/E5` | supports | 2026-10-18 | Four fields, four doc comments, including "readable without this file open" and "always including both sides of the bound". |
+| `adding-a-bound-to-the-record-gate/E6` | supports | 2026-10-18 | The table declaration plus two entries, which is enough to show that a statement is prose rather than a comment. |
+| `adding-a-bound-to-the-record-gate/E7` | supports | 2026-10-18 | Zero miss rate and sound: the derivation, the four stale documents, the four days, and the CI run comment are all inside thirteen lines. Shared sentence with E8, which carries the second derived export. |
+| `adding-a-bound-to-the-record-gate/E8` | supports | 2026-10-18 | The doc comment states the test-catches-a-bound-without-a-counterexample purpose directly. |
+| `adding-a-bound-to-the-record-gate/E9` | supports | 2026-10-18 | Forty-six lines and all four of the passages that cite it are checkable inside them: what is hashed, alphabetical rather than declaration order, sixteen hex characters, "same rules or not", and the CLAIM_NOT_WIDER rewording of 2026-10-13. This is the long range §5m argues for. |
+| `adding-a-bound-to-the-record-gate/E13` | supports | 2026-10-18 | The `Case` interface with all five fields and the comment above it that says "and nothing besides". |
+| `adding-a-bound-to-the-record-gate/E14` | supports | 2026-10-18 | Line 542 is the whole claim: length equality and a positional comparison, with the refusal and the printed actual codes below it. |
+| `adding-a-bound-to-the-record-gate/E15` | supports | 2026-10-18 | The base check, the message and the exit are seven consecutive lines. |
+| `adding-a-bound-to-the-record-gate/E16` | supports | 2026-10-18 | The note builder, including the `Expected codes:` line and the `Where`/`Observed`/`Bound` loop over the gate's own violations. |
+| `adding-a-bound-to-the-record-gate/E17` | supports | 2026-10-18 | The pinned field, the live field, and both arguments, in one block of comment and two statements. The best ref in the skill: two opposite choices in adjacent lines with the reason for each. |
+| `adding-a-bound-to-the-record-gate/E18` | supports | 2026-10-18 | The parse and the reason it is not duplicated in the test file. |
+| `adding-a-bound-to-the-record-gate/E20` | supports | 2026-10-18 | The live-set assertion, why a pinned digest would leave the only clause with teeth unreachable, and the stated cost that rewording any bound fails this line with the fix in the message. |
+| `adding-a-bound-to-the-record-gate/E24` | supports | 2026-10-18 | All three companion lists, the nineteen-single count, and the comments that explain which strengthening produced which pair. |
+| `adding-a-bound-to-the-record-gate/E25` | supports | 2026-10-18 | Zero miss rate and sound: both surfaces, the 28-violation assertion and the `gateRecords` case are inside the range. |
+| `adding-a-bound-to-the-record-gate/E26` | supports | 2026-10-18 | The report string is built in range, so the two sentences the skill quotes are readable verbatim. |
+| `adding-a-bound-to-the-record-gate/E27` | supports | 2026-10-18 | The file header gives the whole reason, including the constraint it rests on. |
+| `adding-a-bound-to-the-record-gate/E28` | supports | 2026-10-18 | The procedure section, and the sentence that the suite reads only committed files and never imports the generator. Overlap: E29 cites line 201 inside this range for the stale violation count, and the two agree, since the drift is in the comment on that line and not in the commands. |
+| `adding-a-bound-to-the-record-gate/E29` | supports | 2026-10-18 | A staleness claim, so the receipt is a command and not only a range: `cd ursa-major && npx tsx -e "import('./src/invariants').then(m => console.log(m.BOUND_COUNT))"` prints 18 against the README's "seventeen bounds" at line 11, and `npx tsx src/invariants.cli.ts fixtures/violations \| tail -1` prints "24 records checked, 28 violations." against the "27 violations" annotated at line 201. Both run 2026-10-18. |
