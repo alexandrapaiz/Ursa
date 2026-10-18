@@ -1,5 +1,38 @@
 # Pending owner-applied changes — ExO seat queue
 
+> **SUPERSEDED as a channel, 2026-10-18. Do not add an entry to this
+> file.** HQ's `standards/roles/exo.md` §8 made workflow files and
+> runtime machinery the `exo-centralizer`'s in every product repository
+> and said in as many words that this "replaces the older practice of
+> keeping a local queue of pending workflow diffs". A product exo that
+> finds a workflow defect now measures it, writes the lesson, and hands
+> it to the centralizer on the board. The entries below are kept rather
+> than deleted, because a diff somebody spent a run writing is evidence
+> even after its channel closes, and three of them are live debts. The
+> reason this seat went on filling the queue for eighteen days after the
+> standard closed it is `INC-2026-10-18-pwc-queue-retired-upstream`:
+> `standards/roles/exo.md` is not vendored into `docs/standards/`, so no
+> run of this seat had ever read it.
+
+**Disposition of every entry, taken 2026-10-18.**
+
+| entry | queued | state | where it goes now |
+|---|---|---|---|
+| PWC-EXO-1 — the cron comments are false | 2026-09-27 | **obsolete** | the `schedule:` blocks were retired in all eleven workflows on 2026-10-17 (HQ decision 056), so there are no cron comments left to be false. Nothing to hand over. |
+| PWC-EXO-2 — four ADRs, two numbers | 2026-09-27 | **live, and never a workflow change** | `docs/decisions.md`, which belongs to no seat. Stays an owner item; this seat never renumbers an accepted ADR. |
+| PWC-EXO-3 — draft-first in zero of eleven prompt blocks | 2026-09-30 | **live, 18 days** | handed to `exo-centralizer` |
+| PWC-EXO-4 — the one gate cannot see a conflict marker | 2026-09-30 | live | handed to `exo-centralizer` |
+| PWC-EXO-5 — the engineer's 45-minute cap | 2026-10-05 | **partly moot** | the caps bind only the runs GitHub executes, and zero `agent-*` runs executed on 2026-10-18. Handed with that caveat attached, because an unused cap is still a trap for the next Actions dispatch. |
+| PWC-EXO-6 — external-content rule in zero of eleven prompt blocks | 2026-10-05 | **live, 13 days** | handed to `exo-centralizer` |
+| PWC-EXO-7 — turn caps with no recorded reason, and the bus concatenating quoted text | 2026-10-11 | live (receiver-hardening half) | handed to `exo-centralizer` |
+| PWC-EXO-8 — the measurement behind 3, 6 and 7, re-taken | 2026-10-18 | live | handed to `exo-centralizer`; it is the evidence table for the other three |
+
+The handover message was sent on the board on 2026-10-18 and names
+PWC-EXO-3, 6, 7 and 8 with their measurements. This file closes when
+those have landed in the workflow files by HQ's hand.
+
+---
+
 Entries this seat designed and cannot apply. The convention, the rules
 about what an entry must say, and the reason this file is per-seat are in
 docs/agents/pending-workflow-changes.md. Read that first.
