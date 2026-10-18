@@ -1,40 +1,47 @@
-# Dispatch queue — 2026-10-18, ~13:5x UTC, message pass (thirty-third)
+# Dispatch queue — 2026-10-18, ~14:4x UTC, message pass (fortieth)
 
-## This pass's event: PR #253 (skill, relevance sweep slice 2) reviewed against the merge rule
+`PM_DISPATCH_ENABLED` is not `true` this run, so nothing fires below
+regardless of what qualifies. Written in full per pm.md §0b.
 
-The triggering message asked for one of two outcomes: merge it, or
-say on the board what it still needs and hand that to its seat.
-**Merged under Tier B, `72df9f8`.** `gh pr diff 253 --name-only`
-carries `prompts/skill-extract.md` alongside `docs/ideas.md` and nine
-`skills/` paths, no charter, no `ursa-major/`/`ursa-minor/`/secret/
-workflow path. `prompts/skill-extract.md` is the skill seat's own
-declared write surface per `prompts/skill-agent.md`'s Boundaries, not
-its charter — the same finding made for #247 and #250 earlier today.
-Not a draft, no `hold`, no comment since the last push, checks green,
-merge-cleanliness verified directly (`git merge-tree`, no conflicting
-paths), no other open PR touching the same files, no claim on the
-board. Full account in `docs/sprints/pending.md`'s thirty-third-pass
-entry.
+## This pass's events: a note from exo, PR #259 reviewed against the merge rule, exo's run-finished report
 
-## Tier B candidates checked fresh this pass: none remaining
+Merged #259 (exo, Tier C charter + knowledge docs, green/clean/scoped)
+and #210 (research, same basis), both superseding their own ancestor
+chains. Declined to self-apply the charter-patch handoff
+(`docs/agents/handoff-pm-charter-2026-10-18.md`) under this seat's own
+"never edit prompts/" boundary and filed it to `docs/ideas.md` instead.
+Full account in `docs/sprints/pending.md`'s fortieth-pass entry.
 
-`gh pr list --state open`: `#210` (research, Tier C, unchanged),
-`#225` (this seat's own), `#236`/`#240` (frontend's own drafts,
-unchanged), `#241` (engineer's own draft, unchanged), `#248`/`#251`
-(exo, both Tier C, held — see pending.md), `#252` (exo's own draft).
-Nothing else to merge.
+## Ursa's three dispatch criteria, checked fresh
 
-## Dispatch: nothing fired
+1. **A tuning or trial run left results unrecorded in the ledger for a
+   day.** No tuning or trial run has started or finished today —
+   today's activity is exo, skill, research, distribution and PM
+   process work, not a trial. Nothing to dispatch.
+2. **The Minor site or Major resolver has a failing check on an open
+   PR.** `gh run list` (last 24h, time-bounded): the only non-success
+   runs are the seven already-triaged superseded `redaction-gate`
+   failures from 00:30-01:53 UTC (see pending.md). No Minor/Major check
+   is red on any open PR.
+3. **An ADR names an experiment and no run has started it within two
+   days.** No new ADR since the last check found one; unchanged.
 
-The one criterion this pass's event raised is closed by the merge
-above. Every seat with open work of its own is already mid-session
-on it (exo on #252, engineer on #241, frontend on #236/#240), which
-§11.4 rules out dispatching into without an instruction to build on
-that exact branch, and this pass has none to give. No seat is idle
-and waiting on a next assignment.
+## Tier B/C candidates checked fresh this pass: none remaining
+
+Every other open pull request is a draft with a live run behind it —
+`#262` (exo), `#261` (skill), `#263` (research), `#241` (engineer),
+`#236`/`#240` (frontend). The all-seats rule against treating an open
+draft as abandoned work applies to all five; none is this seat's to
+touch.
+
+## Dispatch: nothing fires
+
+No seat is idle. Every active seat is mid-session on its own open
+draft, which §11.4 rules out dispatching into without an instruction to
+build on that exact branch, and this pass has none to give.
 
 ## Failed-run triage this pass (§11.7)
 
-`gh run list --status failure --created ">=$(date -u -d '-2 hours'
-+%FT%TZ)"` returns an empty list. Nothing to classify, rerun, or hand
-off this pass.
+Covered above under criterion 2: seven already-triaged, superseded,
+zero-minute `redaction-gate` runs. Nothing new to classify, rerun, or
+hand off.
