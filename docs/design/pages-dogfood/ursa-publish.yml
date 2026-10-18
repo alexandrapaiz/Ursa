@@ -1,0 +1,150 @@
+# PROPOSED, NOT INSTALLED. This file is a proposal for
+# `.github/workflows/ursa-publish.yml` in this repository, and it sits
+# here rather than there because workflow files in a product repository
+# belong to headquarters (docs/standards/pm.md §15: "A product seat does
+# not edit .github/workflows in its own repo"), and the engineer seat's
+# own dispatch instruction says the same thing in four words. Landing it
+# is one command, from a seat that owns that directory:
+#
+#   cp docs/design/pages-dogfood/ursa-publish.yml .github/workflows/ursa-publish.yml
+#
+# Everything in it was measured on this repository on 2026-10-18 rather
+# than copied from the generic example. The measurements, and what each
+# input is worth, are in docs/design/pages-dogfood.md.
+#
+# IT PUBLISHES NOTHING UNTIL THE PAGES SOURCE IS SET. The deploy step
+# fails with a message naming the setting until a repository admin runs,
+# once:
+#
+#   gh api -X POST repos/alexandrapaiz/Ursa/pages \
+#     -f 'build_type=workflow'
+#
+# or sets Settings → Pages → Build and deployment → Source → "GitHub
+# Actions" in the browser. That switch is the owner's, not a seat's.
+#
+# WHAT GOES PUBLIC, measured by running the publish step's own disclosure
+# with nothing acknowledged, on 2026-10-18:
+#
+#   2 records
+#   1 finished file, 199,726 characters: docs/standards/lessons.md
+#   2 model generations, 147,539 characters
+#   0 messages typed to a model, because this is the git path and a
+#     commit carries no conversation
+#
+# Every one of those characters is already a blob in this public
+# repository's history. What is new at the address is the classification
+# over them: which characters a model wrote, which ones the owner changed,
+# and which ones no generation ever touched. Nothing private is disclosed
+# by this workflow, and that is a measured statement about these two
+# records rather than a property of the publish path.
+
+name: Ursa publish
+
+on:
+  # No `push` trigger, deliberately, and this is the one place this file
+  # departs from ursa-major/examples/publish-record.yml. The resolve step
+  # walks all 724 commits of this repository's history and takes about
+  # eight minutes at the distance bound set below; this repository takes
+  # a dozen merges to `main` on a busy day; and the `pages` concurrency
+  # group below refuses to cancel a half-finished deployment. A push
+  # trigger would therefore spend the day queued behind itself, and every
+  # run in the queue would publish a set of records that differs from the
+  # one before it by at most one.
+  #
+  # No `schedule` either: every seat's clock left GitHub on 2026-10-17
+  # (headquarters decision 056, see the comment at the top of
+  # .github/workflows/agent-engineer.yml), and GitHub is an event source
+  # here rather than a runtime.
+  #
+  # So: by hand from the Actions tab, or woken by the event bus the way
+  # every seat in this repository is woken.
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ursa.publish]
+
+permissions:
+  contents: read
+  # Both are required by actions/deploy-pages and by nothing else here.
+  # `pages: write` creates the deployment; `id-token: write` is how
+  # deploy-pages proves to GitHub that the artifact came from this run.
+  pages: write
+  id-token: write
+
+# One Pages deployment at a time. `cancel-in-progress: false` rather than
+# true, because cancelling a half-finished deployment can leave the live
+# site serving a partly-written set of records, and a queued run that
+# publishes a slightly older set is the better failure.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      # fetch-depth: 0 because `resolve-from: history` walks the whole
+      # history and the resolver compares a generated commit's file
+      # content with a later human commit's file content, which a depth-1
+      # checkout has neither of. At distance 400 those two commits are up
+      # to 400 apart, so this is not optional here.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - id: ursa
+        uses: ./ursa-major
+        with:
+          resolve-from: history
+          publish-dir: _site
+          # Measured, not chosen. At the resolver's default of 25 this
+          # repository resolves to ZERO records; at 400 it resolves to
+          # two, and both are the owner's own edits to files her agents
+          # wrote. Twelve agent seats commit between one touch of a file
+          # by her and the next, so the correction is simply further away
+          # than the default bound.
+          max-pair-distance: 400
+          # Raised with the distance for the same reason: a correction 400
+          # commits later is usually also more than the default one week
+          # later, and whichever bound is tighter is the one that drops
+          # the pair. 720 hours is 30 days.
+          max-pair-age-hours: 720
+          # This repository's own twelve agent identities, from
+          #   git log --format='%an <%ae>' | sort | uniq -c | sort -rn
+          # Six substrings cover all twelve seats plus the two bots and
+          # the one headquarters identity. Without them the resolver reads
+          # the project manager seat's commits as a person editing a model
+          # and every survival figure on the page is a measurement of one
+          # agent correcting another: that is what the first dogfood run
+          # produced, ten records with ten false numbers.
+          agent-identity: |
+            agents.epito.me
+            claude[bot]
+            ursa.local
+            exo-centralizer
+            alexandra-systems-hq
+            anthropic.com
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.ursa.outputs.publish-dir }}
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Say where it went, and what it weighs
+        run: |
+          echo "Outcome records: ${{ steps.deploy.outputs.page_url }}"
+          echo "Each record page links every span to the generation behind it."
+          # Reported rather than gated, because a page that is heavier
+          # than a budget is still a correct page and this run's job is to
+          # publish it. The number is here so a regression is visible in
+          # the run that caused it. Measured 2026-10-18 on this
+          # repository's two records: 224.2 KiB over the wire, 1.72 MiB to
+          # parse, 98% of which is the record embedded so the page needs
+          # no network.
+          for f in _site/index.html _site/records/*.html; do
+            printf '%10s bytes  %s\n' "$(stat -c%s "$f")" "$f"
+          done

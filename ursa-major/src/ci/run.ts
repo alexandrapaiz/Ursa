@@ -27,14 +27,14 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { findCommitPairs } from '../pairfinder'
+import { findCommitPairs, resolvePairingBounds } from '../pairfinder'
 import { buildEpisodes, type Episode } from '../episodes'
 import { deriveSignals, type Declaration } from '../signals'
 import { saveEpisodes, saveRecord, ursaDir } from '../store'
 import type { OutcomeRecord } from '../types'
 import type { Violation } from '../invariants'
 import { resolveEpisode } from '../resolve-episode'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
+import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
 import { distill } from '../tuning/distill'
 import { emptyTuning, mergeDistill } from '../tuning/merge'
 import type { TuningRecord } from '../tuning/types'
@@ -80,6 +80,32 @@ export interface CiOptions {
    * declares them once in the workflow rather than per invocation.
    */
   agentIdentities?: string[]
+  /**
+   * The three pairing bounds, the CI launch's half of
+   * `--max-pair-distance`, `--max-pair-age-hours` and
+   * `--max-interposed-generations`. Undefined means the resolver's own
+   * default (25 commits, 168 hours, 0 interposed generations), which is
+   * what every caller got before these fields existed, so an omitted
+   * bound changes nothing.
+   *
+   * Here because this is the fifth entry in the drift list
+   * `src/launch.ts` opens with, and the same shape as the fourth: the
+   * local launch read all three flags and this one read none of them, so
+   * two launches over identical history answered "which edit corrected
+   * which generation" differently as soon as a consumer moved a bound.
+   * Measured on this repository on 2026-10-18: at the default distance of
+   * 25 commits its own history resolves to zero records, and at 400 it
+   * resolves to two, because twelve agent seats commit between one touch
+   * of a file by the owner and the next. A bound that decides whether a
+   * repository has any records at all is not one launch's private
+   * setting.
+   *
+   * Carried from `action.yml`'s `max-pair-distance`, `max-pair-age-hours`
+   * and `max-interposed-generations` inputs.
+   */
+  maxPairDistance?: number
+  maxPairAgeHours?: number
+  maxInterposedGenerations?: number
   env?: Record<string, string | undefined>
   /** false writes nothing to GitHub and prints the comment instead */
   post?: boolean
@@ -163,10 +189,20 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR
 
   // 3. Resolve.
-  const pairs = findCommitPairs(opts.projectPath, {
+  // Built once and passed to the walk, so the numbers stamped into every
+  // record below are the numbers the walk used and not a second reading
+  // of the same options (`resolvePairingBounds` in src/pairfinder.ts).
+  // This launch calls `findCommitPairs`, which returns no diagnostics, so
+  // without this it had no access to the resolved bounds at all.
+  const pairOptions = {
     range: window.range,
     agentIdentities: opts.agentIdentities,
-  })
+    maxPairDistance: opts.maxPairDistance,
+    maxPairAgeHours: opts.maxPairAgeHours,
+    maxInterposedGenerations: opts.maxInterposedGenerations,
+  }
+  const bounds = resolvePairingBounds(pairOptions)
+  const pairs = findCommitPairs(opts.projectPath, pairOptions)
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
   const recordPaths: string[] = []
@@ -195,6 +231,10 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     const signals = deriveSignals(record, declaration)
     signals.notes = [...(signals.notes ?? []), `CI launch: ${window.note}`]
     record.signals = signals
+    // The same stamp `ursa run` makes, from the same shared function, so
+    // a record resolved on a runner states its pairing bounds exactly as
+    // one resolved on a laptop does (src/launch.ts).
+    stampPairingBounds(record, bounds)
     recordPaths.push(saveRecord(opts.projectPath, record))
     records.push(record)
   }

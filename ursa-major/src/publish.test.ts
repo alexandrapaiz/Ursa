@@ -20,6 +20,7 @@ import { join } from 'node:path'
 import { JSDOM } from 'jsdom'
 import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
+import { resolvePairingBounds } from './pairfinder'
 import { saveRecord } from './store'
 import { forget } from './consent'
 import type { DisclosureManifest } from './publish'
@@ -30,11 +31,12 @@ import {
   loadPublishable,
   manifestFor,
   noveltyOfDisclosure,
+  pairingSentences,
   publish,
   recordHref,
   renderIndexPage,
 } from './publish'
-import type { OutcomeRecord } from './types'
+import type { OutcomeRecord, PairingBounds } from './types'
 
 const FIXTURE = join(__dirname, '..', 'fixtures', 'mini')
 
@@ -276,7 +278,7 @@ describe('the published site', () => {
     // here rather than left as a constant nobody reads.
     const [major, minor] = PUBLISHED_INDEX_VERSION.split('.').map(Number)
     expect(major).toBe(0)
-    expect(minor).toBeGreaterThanOrEqual(3)
+    expect(minor).toBeGreaterThanOrEqual(4)
   })
 
   it('republishes the whole set rather than appending to it', () => {
@@ -475,6 +477,113 @@ describe('the record id becoming a public URL', () => {
       repository: 'someone/their-repo',
     })
     expect(result.warnings).toEqual([])
+  })
+})
+
+// THE BOUNDS A READER CANNOT SEE.
+//
+// A record is on a published site because a model wrote a file and
+// somebody edited that same file afterwards, and three numbers decide how
+// far apart those two commits may be before the resolver stops believing
+// the second corrects the first. Those numbers move the set wholesale
+// rather than at its margin: resolving this repository's own history on
+// 2026-10-18 produced zero records at the default 25-commit distance and
+// two at 400, because a dozen agent seats commit between one touch of a
+// file by the owner and the next.
+//
+// So a page showing two records and not the bounds behind them reads as a
+// repository with two records in it, when it is a repository whose
+// default-bounds answer is none. These tests hold the number on the page
+// and in `index.json`, in all three states a set can be in: one bound set,
+// several, and none stated at all.
+describe('the pairing bounds behind a published set', () => {
+  const bounds = (maxPairDistance: number, maxPairAgeHours = 720): PairingBounds => ({
+    maxPairDistance, maxPairAgeHours, maxInterposedGenerations: 0,
+  })
+  const pairedRecord = (id: string, b: PairingBounds): OutcomeRecord => {
+    const r = fixtureRecord(id)
+    r.task.pairedBy = b
+    return r
+  }
+  const indexFor = (records: OutcomeRecord[]) => {
+    const project = projectWith(records)
+    return publish({
+      projectPath: project, outDir: outDirIn(project), acknowledged: true,
+      repository: 'someone/their-repo', publishedAt: '2026-10-18T09:30:00.000Z',
+    }).index
+  }
+
+  it('carries the distinct bound sets in index.json, widest first', () => {
+    const index = indexFor([
+      pairedRecord('narrow', bounds(25, 168)),
+      pairedRecord('wide', bounds(400)),
+      pairedRecord('wide-again', bounds(400)),
+    ])
+    // Deduplicated by value: two records resolved by one run hold the
+    // same numbers and must not be listed twice.
+    expect(index.pairing).toEqual([bounds(400), bounds(25, 168)])
+  })
+
+  it('names the numbers on the page, next to the records they produced', () => {
+    const index = indexFor([pairedRecord('alpha', bounds(400))])
+    const doc = new JSDOM(renderIndexPage(index)).window.document
+    const legend = [...doc.querySelectorAll('.legend')].map((e) => e.textContent).join(' ')
+    expect(legend).toContain('400 commits')
+    expect(legend).toContain('720 hours')
+    // And the defaults beside them, because the number is only legible
+    // against the number it is not.
+    expect(legend).toContain('25 commits')
+    expect(legend).toContain('168 hours')
+  })
+
+  it('reads the defaults from the resolver rather than restating them', () => {
+    // The sentence names two numbers that live in src/pairfinder.ts. If
+    // that file's defaults move and this sentence does not, the page
+    // tells a reader the set was widened from a window that no longer
+    // exists.
+    const defaults = resolvePairingBounds()
+    const index = indexFor([pairedRecord('alpha', bounds(400))])
+    const said = pairingSentences(index).join(' ')
+    expect(said).toContain(`${defaults.maxPairDistance} commits`)
+    expect(said).toContain(`${defaults.maxPairAgeHours} hours`)
+  })
+
+  it('says how many sets there were when the records disagree, rather than picking one', () => {
+    const index = indexFor([
+      pairedRecord('narrow', bounds(25, 168)),
+      pairedRecord('wide', bounds(400)),
+    ])
+    const said = pairingSentences(index).join(' ')
+    expect(said).toContain('2 different sets of pairing bounds')
+    expect(said).toContain("Each record's own JSON states which set produced it")
+  })
+
+  it('says no record stated them rather than naming a number it does not have', () => {
+    // Every chat-path record is this case, and so is every record written
+    // before the field existed. Absent is not the defaults.
+    const index = indexFor([fixtureRecord('alpha')])
+    expect(index.pairing).toEqual([])
+    const said = pairingSentences(index).join(' ')
+    expect(said).toContain('None of the records above states the pairing bounds')
+    expect(said).not.toContain('Every record above was paired')
+  })
+
+  it('tells an empty site that the pairing window is one of the reasons it is empty', () => {
+    // The case this whole block exists for. An empty site and a site
+    // with records are indistinguishable to a reader who has not been
+    // told that the default window can close before the person arrives.
+    const project = projectWith([])
+    const index = publish({
+      projectPath: project, outDir: outDirIn(project), acknowledged: true,
+    }).index
+    expect(index.records).toEqual([])
+    const doc = new JSDOM(renderIndexPage(index)).window.document
+    const empty = doc.querySelector('.empty')!.textContent!.replace(/\s+/g, ' ')
+    expect(empty).toContain('max-pair-distance')
+    expect(empty).toContain('25 commits')
+    expect(empty).toContain('168 hours')
+    // And it still refuses to render the absence as a zero.
+    expect(empty).toContain('different claims')
   })
 })
 

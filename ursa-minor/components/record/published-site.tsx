@@ -234,6 +234,15 @@ function SiteSet({
 }) {
   const { index } = site;
 
+  // Whether this page may promise a check at all. A digest arrived in
+  // index contract 0.3, so every site published before 2026-10-18 states
+  // none, and this paragraph used to promise one for all of them. The
+  // record page then said the opposite one click later, which is the
+  // page contradicting itself about the one thing it exists to be
+  // trusted on. See `integrity.ts`.
+  const withDigest = index.records.filter((r) => typeof r.sha256 === "string" && r.sha256.length > 0).length;
+  const digests = withDigest === 0 ? "none" : withDigest === index.records.length ? "all" : "some";
+
   if (index.records.length === 0) {
     return (
       <p className="mt-10 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
@@ -275,7 +284,7 @@ function SiteSet({
               >
                 {/* The id gets the full measure and breaks anywhere. It is
                     a slug long enough to overflow a phone on its own. */}
-                <span className="block break-all font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)] group-hover:underline group-hover:decoration-[var(--polar)] group-hover:underline-offset-4">
+                <span className="block [overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)] group-hover:underline group-hover:decoration-[var(--polar)] group-hover:underline-offset-4">
                   {opening === s.id ? `${s.id} — fetching…` : s.id}
                 </span>
 
@@ -323,7 +332,7 @@ function SiteSet({
                   <Link href={recordAddressHref(s.address)} className="rec-action text-[var(--polar)]">
                     a link to this record alone
                   </Link>
-                  <span className="break-all"> · {s.address}</span>
+                  <span className="[overflow-wrap:anywhere]"> · {s.address}</span>
                 </p>
               ) : null}
             </li>
@@ -334,8 +343,12 @@ function SiteSet({
       <p className="mt-9 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
         The three shares divide the whole finished work rather than the classified part of it, so
         they fall short of 100% by however much a run could not account for. Every number above came
-        out of this site&rsquo;s index. Opening a record fetches that record and nothing else, and
-        this page then checks the bytes it got against what the index says they should be.
+        out of this site&rsquo;s index. Opening a record fetches that record and nothing else
+        {digests === "all"
+          ? ", and this page then checks the bytes it got against the digest the index states for it."
+          : digests === "some"
+            ? ", and this page checks the bytes it got against the digest the index states, on the records that state one. This index states a digest for some of its records and not others, so the record you open will say which it was."
+            : ". This site\u2019s index states no digest for its records, so there is nothing here to check those bytes against, and the record you open will say so rather than implying it checked."}
       </p>
     </div>
   );
@@ -363,7 +376,7 @@ function OpenRecord({
   return (
     <>
       <div className="mt-10 flex flex-wrap items-baseline justify-between gap-4">
-        <span className="break-all font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--star)]">
+        <span className="[overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--star)]">
           {open.summary.id}
         </span>
         <button
