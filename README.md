@@ -286,7 +286,9 @@ Two layers, drawn together because neither explains the company alone.
 The product layer is what a user runs on their own machine. The org
 layer is the set of agent seats that build the product, which run on
 Alexandra Systems' resident host or in GitHub Actions and write only
-through pull requests the owner merges.
+through pull requests. Since 2026-10-05 those are merged by this
+repository's PM seat or by a chair under section 21 of the PM standard,
+with the owner reserved for a change to a seat's own authority.
 Every node below is a real file or a real store in this repository, and
 every edge carries the actual type or file that crosses it.
 
@@ -301,8 +303,8 @@ flowchart TB
     WF["<code>.github/workflows/agent-*.yml</code> plus the host manifest<br/>the clocks live on the host, GitHub is an event source"]
     CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
     PR["a branch and one pull request"]
-    OWN{{"the owner's merge<br/>the only authority"}}
-    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md, org-chart.md,<br/>merge-order.md, pending-workflow-changes-&lt;seat&gt;.md")]
+    OWN{{"the merge gate: the PM seat or a chair<br/>the owner only for a seat's own authority"}}
+    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md, org-chart.md,<br/>merge-order.md, improvements.md, runner-facts.md")]
 
     WF -->|"prompt plus claude_args"| CH
     CH -->|"commits"| PR
@@ -505,16 +507,21 @@ Ursa is a portfolio product of
 [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems)
 and runs on its agent-seat model. Charters live in `prompts/`,
 workflows in `.github/workflows/`, and the standards in
-`docs/standards/`. Eleven seats hold charters and every one of them is
-active except sales, which stays dormant because Ursa has nothing to
-sell yet. The builder seats stopped being dormant on 2026-09-24 and now
-ship most of the daily work.
+`docs/standards/`. Eleven seats hold charters. Eight of them shipped a
+pull request in the seven days to 2026-10-18: pm, engineer, exo,
+frontend, security, research, skill and market. Three did not, and the
+last pull request from each is older than it should be for a seat the
+roster calls active: finance on 2026-10-05, sales on 2026-10-05 and okr
+on 2026-10-06. Sales is deliberately dormant because Ursa has nothing to
+sell yet. The other two are not, and the okr seat's silence means
+purpose-drift auditing has not run for twelve days.
 
 Each seat's clock is an entry in the host manifest rather than a cron
 block in its workflow, as of 2026-10-17, so a seat is woken by the event
 bus or by its manifest and GitHub Actions is an event source rather than
-the runtime. The owner's merge is the only authority that lands anything
-here. See [`docs/agents/org-chart.md`](docs/agents/org-chart.md).
+the runtime. One consequence worth stating: a run woken on the host
+leaves no entry in `gh run list`, so an instrument that reads only
+GitHub Actions now reports a quiet week over a busy one. See [`docs/agents/org-chart.md`](docs/agents/org-chart.md).
 
 ## Constraints that do not move
 
