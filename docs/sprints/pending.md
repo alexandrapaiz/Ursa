@@ -2,6 +2,95 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-seventh pass, 2026-10-18 ~12:5x-13:0x UTC, message: exo's sixth window (#245), skill's done on #199, and exo's handoff on the tier-C contradiction
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
+   (#225) is still this seat's own open pull request, now carrying
+   twenty-six prior passes. Checked it out from `FETCH_HEAD` (not
+   `origin/<branch>`, which this clone could not resolve directly),
+   merged `origin/main` (moved to `97a1c66`, the merge commit of
+   #199), and continued on it rather than opening a second branch.
+
+2. **PR #199 (skill) merged under Tier B.** Re-verified independently
+   rather than trusting skill's or HQ's MBA's account: `gh pr diff 199
+   --name-only` lists thirteen files, none of them
+   `prompts/skill-agent.md` (the seat's actual charter). The one
+   prompts/-rooted file in the diff, `prompts/skill-extract.md`, is a
+   format specification the skill charter itself points at and calls
+   "a proposal to the owner, not a settled standard" — not an agent
+   charter and not something Tier C's "Charters (`prompts/`)" clause
+   was written to cover, consistent with how this seat has read that
+   clause all day (by charter file, not by directory). Checks green
+   (`SUCCESS`), not a draft, no `hold` label, `mergeStateStatus:
+   CLEAN`. The two comments on the PR are both attributed to
+   `alexandrapaiz` by GitHub's own display, but neither is the owner's
+   own word: one is HQ's MBA seat's advisory read (labelled "a voice in
+   the room, not a verdict" in its own text), the other is skill's own
+   rebase account — both artifacts of the host-token-is-the-owner
+   confound exo filed earlier today (`INC-2026-10-18-host-token-is-the-
+   owner`), not an owner comment reserving the PR. Merged normally
+   (`97a1c662`). This corrects this seat's own twenty-fourth-pass
+   handoff, which had told skill the result would need the owner's
+   merge for editing its charter — flagged as false by skill's own
+   done message and independently confirmed here before acting on it.
+
+3. **#242 closed, pointing at #245, correcting an inverted sentence.**
+   exo's sixth window (#245) and its own board note (12:54:39Z) both
+   flagged that this seat's 12:38:17Z note to exo said the fifth window
+   (#243) "already shows as a further ancestor of" the fourth (#242) —
+   backwards. Checked directly: `git merge-base --is-ancestor
+   refs/prs/242/head refs/prs/243/head` succeeds, the reverse fails.
+   #242 is contained in #243, not the other way round, and all of
+   #167/#231/#234/#235/#242/#243 are confirmed ancestors of #245's
+   current tip. The practical cost named by both exo and this seat's
+   own read: the owner's standing ask effectively points at the
+   subsumed PR, so a lone merge of #242 would land none of windows
+   five or six. Closed #242 with a comment naming #245 as the live tip
+   and correcting the direction; branch not deleted, since containment
+   in an unmerged tip lasts only as long as the tip. #243 was already
+   closed by exo itself with a pointer, confirmed via `gh pr view 243`
+   (`state: CLOSED`).
+
+4. **#245 held, same disposition, not a new decision.** `gh pr diff
+   245 --name-only` shows ten files including `prompts/exo-agent.md`
+   and, this pass's own addition to the record, `prompts/pm-agent.md`
+   — a substantive 51-line insertion (the merge-state instrument
+   section), not a pass-through merge artifact, confirmed with `git
+   diff main refs/prs/245/head -- prompts/pm-agent.md`. exo's own
+   description only names its charter and its learning log as "what
+   changed," omitting that this stack also edits this seat's charter;
+   worth naming so the next reader does not take exo's own account as
+   complete, though it does not change the disposition, since two
+   charter files make this Tier C by the same literal reading already
+   applied to #242 and #243. Checks green, `CLEAN`/`MERGEABLE`, not a
+   draft. Left open, pending the owner's word or the same
+   2026-10-20T12:30 UTC silence deadline already filed — not a new ask,
+   since it is the identical question against the same stack one
+   window later.
+
+5. **exo's handoff on the tier-C contradiction (12:20:25Z): already in
+   motion, nothing new owed.** The handoff restates the section-ten
+   contradiction this seat routed to the owner at 12:29:59Z with a
+   named recommendation and the same silence deadline. Checked the
+   board fresh for any reply from `owner` since that ask was filed:
+   none. No second ask filed — doing so would be the exact
+   ask-every-pass anti-pattern this seat has avoided today.
+
+6. **Skill's five `probe`/`probe two`/`probe three` board notes: no
+   action needed.** Skill's own done message (7e3ee9f2, 12:50:17Z)
+   names these as noise from working out what the board store's
+   validation would accept while posting its real reply, and asks this
+   seat to ignore them. Read each one; none carries an ask or a
+   handoff, so none is unanswered under §18 line 1.
+
+7. **Low-priority debt, tracked and not dispatched.** PR #199's merged
+   description names 9 `docs/ideas.md` ledger-contract violations
+   already on `main` that are not skill's: 4 on a CodeRabbit craft
+   scan, 2 on a Mem0 craft scan, 2 on a 2026-10-11 artifact-standard
+   entry, 1 status of "done" on a security entry. None blocks anything
+   today; left for whichever seat next touches those entries rather
+   than dispatched on its own.
+
 ## Twenty-sixth pass, 2026-10-18 ~12:5x UTC, message: PR #243 (exo, fifth window) reviewed against the merge rule
 
 1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
