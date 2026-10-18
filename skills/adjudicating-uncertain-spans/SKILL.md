@@ -67,13 +67,13 @@ evidence:
     source: ursa-major/src/viewer.ts:89,310-311,323-325
   - ref: E16
     what: a second branch sets uncertain, where an above-threshold match whose descent is corroborated as rival is demoted to no_generation_provenance with the candidate and a descent field kept
-    source: ursa-major/src/resolve.ts:415-431
+    source: ursa-major/src/resolve.ts:330,415-431
   - ref: E17
     what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
     source: ursa-major/src/resolve.ts:438-443
   - ref: E18
     what: uncertainSpans and trivialSpans are two independent reads of the two flags over every span, so a span whose demotion dropped the trivial flag lands in the uncertain count and not in the trivial one
-    source: ursa-major/src/stats.ts:36-37,52-53, ursa-major/src/types.ts:532-533
+    source: ursa-major/src/stats.ts:36-37,41-53, ursa-major/src/types.ts:532-533
 supersedes: []
 ---
 
