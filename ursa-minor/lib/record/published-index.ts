@@ -36,8 +36,15 @@
 /** What happened to a stretch of the finished work. Mirrors SpanClass. */
 import type { SpanClass } from './types'
 
-/** The contract version this viewer was written against. */
-export const INDEX_CONTRACT = { major: 0, minor: 1 } as const
+/**
+ * The contract version this viewer was written against.
+ *
+ * Moved from 0.1 to 0.2 on 2026-10-18, when the resolver seat published
+ * 0.2.0 for one additive field, `address`, and this viewer gained a
+ * route that reads it. The digest this file asked for on the same day is
+ * not in 0.2 and is still optional below, so nothing here depends on it.
+ */
+export const INDEX_CONTRACT = { major: 0, minor: 2 } as const
 
 /**
  * One record, as the index describes it, before any record is fetched.
@@ -62,13 +69,27 @@ export interface PublishedRecordSummary {
   /** address of the record itself, relative to the index */
   json?: string
   /**
-   * Not in contract 0.1. Requested of the resolver seat on 2026-10-18 so
-   * that a fetched record can be checked against what was published; see
-   * `integrity.ts`. Optional here, and treated as absent until a site
-   * actually carries it, so this viewer works against 0.1 sites today.
+   * New in contract 0.2: the record's own address, in the grammar of
+   * `address.ts`, as a stranger would type it. Null in the index itself
+   * when the publisher's store knew no repository, since there is then
+   * nothing to build an absolute address from and a guess would be
+   * worse than an absence.
+   *
+   * This is what turns the set view into something a person can share
+   * out of: every row can now carry a link to that record alone, which
+   * is what somebody looking at ten records actually wants to send.
+   */
+  address?: string | null
+  /**
+   * Not in contract 0.1 and not in 0.2 either. Requested of the resolver
+   * seat on 2026-10-18 so that a fetched record can be checked against
+   * what was published; see `integrity.ts`. That seat shipped 0.2 for
+   * `address` while this was still an open ask, so it stays optional and
+   * is treated as absent, and the page says it could not check rather
+   * than implying it did.
    */
   sha256?: string
-  /** Not in contract 0.1, requested alongside `sha256`. */
+  /** Not in contract 0.1 or 0.2, requested alongside `sha256`. */
   bytes?: number
 }
 
