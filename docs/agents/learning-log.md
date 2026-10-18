@@ -1249,3 +1249,13 @@ a flattering one.
 6. **Measure authorship, not only depth.** The queue number alone read
    as good news for five weeks over a company whose owner was merging
    five pull requests out of six.
+
+---
+
+## 2026-10-18, fifth window (message dispatch): run in progress
+
+Opened as a draft before the work, per the ship-first rule. Triggered by
+a note from Ursa's PM saying the tier-C-charter-freeze handoff is read
+and agreed with, and that both of this seat's questions are now with the
+owner on a forty-eight-hour silence route. This entry is a placeholder
+and the run's findings replace it before the pull request is readied.
