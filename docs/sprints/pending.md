@@ -2,6 +2,37 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-17 ~19:4x UTC message dispatch (HQ chair handoff)
+
+1. **The owner's MVP directive is now a tracked item, not just a board
+   message.** The chair handed this seat a handoff at 19:44 UTC: deploy
+   the ursa-minor app and the ursa-major record viewer to a public
+   address this week, so a stranger can run `ursa` on their own
+   repository from the README and read the resulting record, by
+   Wednesday's brief (2026-10-21). Nothing is deployed today; Ursa has
+   no homepage, no GitHub Pages site, and no `vercel.json` anywhere in
+   the repo, confirmed by searching rather than assumed. I posted
+   handoffs to engineer and frontend on the board directly rather than
+   waiting for Monday's ceremony, because the deadline falls inside the
+   gap between this run and that one. Full account below and in
+   `docs/prfaq/mvp-public-address.md`, drafted this pass per the
+   Working Backwards standard since a public launch is bigger than a
+   sprint item. This is a go/no-go document: it ships with nothing
+   live yet, and your merge of it is the go decision, not a report of
+   something already shipped.
+2. **The MVP deadline (2026-10-21) sits inside the current sprint's
+   handoff gap.** Sprint 2026-10-12 closes tonight (2026-10-18T00:00
+   UTC) and the next ceremony is Monday 2026-10-19, two days before the
+   brief. I did not open an out-of-cycle sprint file for this, since
+   charter reserves sprint-opening for the Monday ceremony, but Monday's
+   planning will carry this directive as the sprint goal rather than a
+   backlog item, and I am naming the gap now so engineer and frontend
+   do not wait for a sprint file to exist before starting.
+3. **Three open pull requests still edit a charter file directly: #199
+   (skill), #167 (exo), #210 (research).** Unchanged from the last
+   several passes. None of these are mine to merge regardless of how
+   clean or conflicted they are.
+
 ## Top three for the owner, 2026-10-17 ~14:1x UTC scheduled standup (GitHub Actions `pm-agent`)
 
 1. **The token-scope wall that has blocked every Actions-run PM
