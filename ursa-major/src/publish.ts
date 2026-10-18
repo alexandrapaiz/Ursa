@@ -59,6 +59,7 @@
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { formatRecordAddress, pagesAddress } from './address'
 import { isForgotten, loadConsent } from './consent'
 import { SAFE_RECORD_ID, listRecordIds, loadRecord } from './store'
 import { renderViewer } from './viewer'
@@ -70,7 +71,12 @@ import type { OutcomeRecord, ResolverIdentity, SpanClass } from './types'
  * record changing, and a record can change without the index moving, so
  * a consumer pinning one must not be told about the other.
  */
-export const PUBLISHED_INDEX_VERSION = '0.1.0'
+// 0.2.0, from 0.1.0, for one additive field: `PublishedRecordSummary.address`.
+// A consumer pinned to 0.1.0 reads every field it knew and ignores the
+// new one. The bump is here rather than silent because the frontend
+// seat's viewer pins this number, and "a field appeared" is a thing it
+// should be able to detect rather than discover.
+export const PUBLISHED_INDEX_VERSION = '0.2.0'
 
 /** Site-relative paths. Declared once so the renderer and the index agree. */
 export const INDEX_JSON = 'index.json'
@@ -115,6 +121,19 @@ export interface PublishedRecordSummary {
   resolvedBy: { basis: string; value: string } | null
   html: string
   json: string
+  /**
+   * The record's address as a stranger would type it, in the grammar of
+   * src/address.ts — `pages/<owner>/<repo>/<id>` for a site published
+   * this way. Null when the publisher stated no repository, because
+   * there is then nothing to build an absolute address from and a guess
+   * would be worse than an absence.
+   *
+   * `html` and `json` above stay site-relative and stay the contract for
+   * reading this directory wherever it is served. This field is the
+   * contract for *linking* to one record from somewhere else, which is a
+   * different question and the one a viewer's route asks.
+   */
+  address: string | null
 }
 
 export interface PublishedIndex {
@@ -368,9 +387,39 @@ export function loadPublishable(projectPath: string): {
       record = null
     }
     if (!record) { skipped.push({ id, reason: 'unreadable' }); continue }
+    // Parsing as JSON is not the same as being a record. `loadRecord`
+    // casts whatever `JSON.parse` returned to `OutcomeRecord` and the
+    // type checker then stops asking, so a file that is valid JSON and
+    // not a record reaches `manifestFor`, which dereferences four arrays
+    // and throws `r.files is not iterable`. That surfaced on 2026-10-18
+    // in `ursa address`, which reads the same store, and it is the same
+    // defect here: a publish is not supposed to be stoppable by one bad
+    // file in a directory of good ones. Checked by shape rather than
+    // with a schema, because the four arrays below are exactly what the
+    // manifest and the summary walk, and a full `zod` schema over
+    // `OutcomeRecord` would refuse records written by older resolvers
+    // that this path can read perfectly well.
+    if (!isRecordShaped(record)) { skipped.push({ id, reason: 'unreadable' }); continue }
     records.push(record)
   }
   return { records, skipped }
+}
+
+/**
+ * The fields every consumer in this file walks, present and of the right
+ * kind. Not a validation of `OutcomeRecord` and not trying to be: it is
+ * the precondition of `manifestFor` and `summarize`, written where those
+ * two are.
+ */
+export function isRecordShaped(r: OutcomeRecord): boolean {
+  return (
+    Array.isArray(r.files) &&
+    Array.isArray(r.generations) &&
+    Array.isArray(r.conversations) &&
+    typeof r.task?.id === 'string' &&
+    typeof r.stats?.finalChars === 'number' &&
+    typeof r.stats?.byClass === 'object'
+  )
 }
 
 export function publish(opts: PublishOptions): PublishResult {
@@ -383,7 +432,7 @@ export function publish(opts: PublishOptions): PublishResult {
     publishedAt: opts.publishedAt ?? new Date().toISOString(),
     repository: opts.repository ?? null,
     recordSchemaVersions: [...new Set(records.map((r) => r.schemaVersion))].sort(),
-    records: records.map(summarize),
+    records: records.map((r) => summarize(r, opts.repository ?? null)),
     disclosed,
   }
 
@@ -462,7 +511,7 @@ export function foreignSlugWarnings(records: OutcomeRecord[], repository: string
   return out
 }
 
-function summarize(record: OutcomeRecord): PublishedRecordSummary {
+function summarize(record: OutcomeRecord, repository: string | null): PublishedRecordSummary {
   const chars = {} as Record<SpanClass, number>
   const spans = {} as Record<SpanClass, number>
   for (const [cls, stat] of Object.entries(record.stats.byClass)) {
@@ -470,6 +519,7 @@ function summarize(record: OutcomeRecord): PublishedRecordSummary {
     spans[cls as SpanClass] = stat.spans
   }
   const by = record.task.resolvedBy
+  const address = repository ? pagesAddress(repository, record.task.id) : null
   return {
     id: record.task.id,
     generatedAt: record.task.generatedAt,
@@ -484,6 +534,7 @@ function summarize(record: OutcomeRecord): PublishedRecordSummary {
     resolvedBy: by ? { basis: by.basis, value: resolverValue(by) } : null,
     html: recordHref(record.task.id, 'html'),
     json: recordHref(record.task.id, 'json'),
+    address: address ? formatRecordAddress(address) : null,
   }
 }
 
