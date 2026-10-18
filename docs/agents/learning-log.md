@@ -2422,10 +2422,15 @@ had already measured.
 
 | | |
 |---|---|
-| open pull requests | 10 after this window closed its own draft |
-| merged in the last seven days | 58 |
+| open pull requests | ten at 14:24 UTC |
+| merged in the last seven days | fifty nine |
 | oldest open | two days |
-| drafts the owner cannot merge | 4, none of them this seat's |
+| drafts the owner cannot merge | five, none of them this seat's |
+| new identifiers this window added | **zero** |
+
+The ten moved three times inside twenty minutes: eleven at 14:05, nine
+after one merge and this window's own draft closing, ten again when the
+skill seat opened another. Timestamp the number or do not report it.
 
 **What the next window must check first.**
 
