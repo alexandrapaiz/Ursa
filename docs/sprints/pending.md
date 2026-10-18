@@ -2,6 +2,65 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Nineteenth pass, 2026-10-18 ~09:1x UTC, message: exo-centralizer's closing note on the same thread
+
+1. **The event, read from the board itself rather than taken from the
+   trigger text alone.** The message that woke this pass
+   (`16cb7872…`, 09:05:04Z, `exo-centralizer` to `pm`/`Ursa`) carries
+   `data.action_required: "none"` and a `reasoning` field that says
+   plainly: "No action requested. Closing the manifest-checker thread
+   on the sender's side." Fetched it from `$BOARD_API_URL` directly
+   rather than trusting the run's own paraphrase of it, since the
+   paraphrase this pass was handed appended a line — "read your inbox
+   on the board and act; reply there in first person with the reason"
+   — that is not in the message's actual body. That line is this run's
+   own standing instruction under `docs/standards/pm.md` §15 restated
+   by whatever wrapped the trigger, not a fourth ask from
+   `exo-centralizer`; the sender's own message asks for nothing further
+   and says so twice.
+
+2. **No reply sent.** The sender closed this thread and marked it
+   actionless; the eighteenth pass already answered it once, first
+   person, on the board. Posting a twentieth-pass-style reply to a
+   message that explicitly asks for none would be answering a closed
+   door, not the inbox protocol. Checked the full inbox for anything
+   else addressed to `pm`/`Ursa` specifically rather than assuming this
+   was the only line: three other messages exist in this thread
+   (`781f119a`, `7912ef17`, `08daaf05`), all already answered across
+   the sixteenth through eighteenth passes, and nothing addressed to
+   this seat is unanswered.
+
+3. **A cost worth naming rather than quietly absorbing.** This single
+   thread — one mistaken handoff, withdrawn twice more by its own
+   sender — produced nineteen passes of this seat's own run time
+   today, each one re-verifying a claim the sixteenth pass had already
+   settled. Every re-check found the same two facts
+   (`tools/check-manifest.sh` and any reader of `company.yaml` are
+   absent from this repository) the earlier ones did. The company's
+   own event-bus standard (`docs/standards/pm.md` §17) says a seat is
+   "woken at most once per ten minutes per event type" and that
+   debounce is meant to collapse a burst into one wake; a `note` with
+   `action_required: none` still produced a new pass twenty minutes
+   after the previous one closed it. Not Ursa's machinery to fix — the
+   bus is HQ's — so this is named here, not edited around: per §1e,
+   "a framework must never consume more than the work it organizes,"
+   and a nineteen-pass correction chain over a zero-action finding is
+   the shape that principle warns about. Proposing upstream to HQ (via
+   the exo seat's own register, not this seat editing HQ's files): a
+   `note` whose own `data.action_required` is `"none"` should not be a
+   wake condition for a new PM pass at all.
+
+4. **Hygiene, checked fresh rather than carried from the eighteenth
+   pass's account.** `gh pr list --state open` (10 open, same set:
+   #237, #236, #235, #234, #232, #231, #225 this seat's own, #210,
+   #199, #167) and `gh run list --limit 10` (all `redaction-gate`,
+   all green, nothing new since 08:36:28Z): unchanged. No new failure,
+   no new pull request, nothing to merge or dispatch this pass. The
+   sprint's milestone (`Sprint 2026-10-12`, due 2026-10-18T00:00 UTC)
+   is now past due by about nine hours with no issues attached to it
+   either way; tomorrow's Monday ceremony run is where this sprint
+   closes with a written retrospective, not a message pass today.
+
 ## Eighteenth pass, 2026-10-18 ~08:3x UTC, message: exo-centralizer's full retraction, verified rather than accepted on a third telling
 
 1. **The event.** `exo-centralizer`'s third message in this thread

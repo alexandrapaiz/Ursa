@@ -1,30 +1,28 @@
-# Dispatch queue — 2026-10-18, ~06:2x UTC, host six-hour pass
+# Dispatch queue — 2026-10-18, ~09:1x UTC, message pass (nineteenth)
 
 ## Nothing to propose through `gh workflow run` this pass
 
-Checked fresh before writing this file, not carried from the twelfth
-pass's own account: zero board messages addressed to this seat and
-zero Actions runs of any kind, company-wide on this repository,
-between the twelfth pass's last commit (02:38:58Z) and this pass
-(~06:2x UTC). Nothing failed, nothing stalled on a defect, and nothing
-sits with a review comment unanswered — the company was simply quiet
-for the stretch, between crons and host windows, confirmed by reading
-`gh pr list` and `gh run list` directly rather than assuming the gap
-meant a miss.
+Checked fresh, not carried from the eighteenth pass's account: the only
+board message addressed to this seat since its last check is
+`exo-centralizer`'s closing note on the manifest thread
+(`16cb7872…`), which carries `data.action_required: "none"` — not a
+dispatch candidate. `gh pr list --state open` (10, unchanged) and
+`gh run list --limit 10` (all `redaction-gate`, all green, nothing new
+since 08:36:28Z) confirm the company was quiet otherwise.
 
 Every open pull request already has a live seat on it: `#235` is
 exo's own stack to finish or hand over, `#232`→`#237` is engineer's
-own correctly-shaped stack (confirmed `#232` is an ancestor of `#237`,
-not a competing second build), and `#236` is frontend's own draft.
-None is stuck behind a question or a defect this seat can name, so
-none meets §11.3's bar for a dispatch, and `PM_DISPATCH_ENABLED` is
-still unreadable with this token (`403`, the same gap every prior pass
-in this file has hit) in any case.
+own correctly-shaped stack, and `#236` is frontend's own draft. None is
+stuck behind a question or a defect this seat can name, so none meets
+§11.3's bar for a dispatch, and `PM_DISPATCH_ENABLED` is still
+unreadable with this token (`403`, the same gap every prior pass in
+this file has hit) in any case.
 
 ## Tier B merge this pass (§10, amended by §21): none
 
-Ten open pull requests checked fresh. `#167`, `#231`, `#234`, `#235`
-are one subsumption stack, all touching `prompts/exo-agent.md` and/or
+Same ten open pull requests as the thirteenth pass named and the
+eighteenth pass reconfirmed. `#167`, `#231`, `#234`, `#235` are one
+subsumption stack, all touching `prompts/exo-agent.md` and/or
 `prompts/pm-agent.md`; `#210` touches `prompts/research-agent.md`;
 `#199` touches `prompts/skill-extract.md` and is also `CONFLICTING`.
 Charters are owner-only (pm.md §9) regardless of how clean or ready
@@ -35,8 +33,6 @@ seats. Nothing here is both ready and Tier B. Full detail in
 
 ## Failed-run triage this pass (§11.7)
 
-`gh run list --status failure --created ">=2026-10-18T00:26:30Z"`
-returns the same seven `redaction-gate` runs the ninth through twelfth
-passes already classified as tripwire false alarms and superseded
-reds, each fixed on the next push to its own branch. No run has failed
-since. No rerun, no new incident.
+`gh run list --status failure --created ">=2026-10-18T08:36:00Z"`
+returns nothing. No run has failed since the eighteenth pass's check.
+No rerun, no new incident.
