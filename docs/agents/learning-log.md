@@ -596,3 +596,12 @@ touch it and did not re-render the diagram, which this run did not change.
 Run opened. Branch `ursa-exo/2026-10-05-window`, draft PR opened before
 the work, per the ship-first rule (docs/standards/pm.md §8). Findings,
 decisions and changes are appended below as this run produces them.
+
+## 2026-10-18 — ExO run (message dispatch)
+
+Run opened on the resident company host. Branch
+`ursa-exo/2026-10-18-message`, draft PR opened before the work, per the
+ship-first rule (docs/standards/pm.md §8). Triggered by two inbox
+messages, one from Ursa's PM and one from HQ's exo centralizer.
+Findings, decisions and changes are appended below as this run produces
+them.
