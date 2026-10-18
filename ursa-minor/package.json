@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:example-record": "node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON scripts/check-example-record.mjs"
+    "check:example-record": "node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON scripts/check-example-record.mjs",
+    "check:index-contract": "node --experimental-strip-types --no-warnings scripts/check-index-contract.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
