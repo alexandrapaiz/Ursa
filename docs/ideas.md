@@ -8115,7 +8115,16 @@ proves rather than about Graphiti's engineering quality.
 - What: the drift cost is now measured twice and it does not fall as the library catches up. On 2026-10-15, merging 410 files of movement tripped the lock on 44 of 144 ranges, and 27 of those were pure relocation, so 61 percent was mechanical. On 2026-10-18, three days later, merging again tripped it on 43 of 154, and 39 were pure relocation, so 91 percent was mechanical. The reading cost went from 17 ranges to 4 while the total barely moved, which says the library is converging on `main`'s content and not on `main`'s line numbers. Both times the mechanical pass was a throwaway script written from scratch inside the run, and both times it did the same three things: recover the as-cited lines from the tree the citation was written against, find that block in the current tree, and rewrite the range when exactly one match exists.
 - First step: commit that pass as `skills/relocate-anchors.mjs <old-ref>`. It reads the ranges `check-evidence.mjs` reports as drifted, recovers each one's lines from `<old-ref>`, locates the whitespace-trimmed block in the working tree, and rewrites the range when the match is unique. Everything else it prints under two headings, one for ranges whose text is gone and one for ranges whose text now matches in more than one place, because those two need a person and the relocations do not. Dry-run by default, `--write` to apply, and the run commits the mechanical pass separately from the reading pass as both runs already did by hand.
 - Cost: $0
-- Status: proposed
+- Status: built (shipped 2026-10-18 by this seat as `skills/relocate-anchors.mjs`,
+  dry-run by default, with `skills/relocate-anchors.test.mjs` and
+  `prompts/skill-extract.md` §5k.)
+  Verified by replay rather than by assertion. Checked out the tree at
+  `4882c9c`, the 2026-10-18 merge where 43 of 154 ranges were drifted, and ran
+  the tool with the merge's first parent `4b0e4ad` as `<old-ref>`. It produced
+  the same split the run produced by hand, 39 relocations and 1 content change
+  and 3 ambiguous, and its four rewritten `SKILL.md` files are byte-identical
+  to `53f86e7`, the commit a person wrote. The checker then fell from 43
+  failures to exactly the 4 ranges that run read.
 
 ### 2026-10-18 (skill) — Eight of this seat's own ledger entries failed the ledger contract, and nothing told it
 
@@ -8125,3 +8134,21 @@ proves rather than about Graphiti's engineering quality.
 - First step: every seat's run ends by running `node tools/ledger/check.mjs docs/ideas.md` and fixing what it names in its own entries, which is one command and needs no permission anybody lacks. The durable version is still the workflow.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-18 (skill) — One command takes the receipt guard from 43 red ranges to green, and that command is the one the docs prescribe
+
+- Trigger: writing `skills/relocate-anchors.mjs` forced a decision about how a relocated fingerprint gets recorded, which meant reading what `check-evidence.mjs --update` actually does to the ranges a run has not touched.
+- What: `--update` is all or nothing. It re-records every cited range in the library from whatever the tree says right now, and in update mode it skips the comparison entirely, so a drifted range is not reported and not counted. Demonstrated on the real 2026-10-18 drift batch rather than argued: at `4882c9c` the checker exits 1 with "43 of them drifted", then `node skills/check-evidence.mjs --update` exits 0, and the checker immediately after says "evidence check OK: 142 sources resolved, 152 ranges fingerprinted". Nobody read anything and no anchor moved, so all 43 citations still point at the lines `main` moved under them, and the lock now certifies them. That is the exact 2026-10-08 failure the lock was built to prevent, 58 of 117 citations pointing at unrelated code while the checker reported OK, and it is reachable in one command with no warning and a zero exit status.
+- The part that makes it a defect rather than a sharp tool: `prompts/skill-extract.md` §5g point 3 told runs to put `--update` in the re-anchoring commit, and `skills/README.md` said the same. A run that re-anchors three of forty ranges and follows that instruction silently blesses the other thirty-seven. The two documents are corrected on this branch and the command is not, so the hazard survives the correction.
+- First step: give `--update` a scope, `node skills/check-evidence.mjs --update <skill-slug|ref-key>...`, and make the bare `--update` refuse when any range is drifted and nothing was named, printing the scoped command instead. The safe pattern already exists in `skills/relocate-anchors.mjs`, which carries one verified fingerprint value to one new key and leaves every other key alone; this is that discipline applied to the hand path.
+- Cost: $0
+- Status: built (shipped 2026-10-18 in the same run that found it, since the
+  file is this seat's own. A bare `--update` now exits 2 and writes nothing
+  while any range it would re-record is drifted and unnamed; a scoped update
+  records what was named, keeps every out-of-scope fingerprint as it was, and
+  prints the ranges it left red. Five tests in `skills/check-evidence.test.mjs`.)
+  The refusal is deliberately about what would be re-recorded rather than about
+  what has drifted. Out-of-scope drift is preserved and stays red, so blocking
+  on it would force a run to name every drifted range at once, which is the
+  habit this replaces. The first implementation got that wrong and refused a
+  legitimate scoped update, which the workflow replay caught.

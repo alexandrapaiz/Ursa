@@ -29,11 +29,25 @@ const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
 const lockPath = join(skillsDir, 'evidence.lock.json')
 const update = process.argv.includes('--update')
+// What `--update` is allowed to re-record. Empty means everything, which is
+// safe only when nothing has drifted; see the refusal below. A scope is a
+// skill slug, a skill/ref pair, or a whole lock key.
+const scope = process.argv.slice(2).filter((a) => !a.startsWith('--'))
+// Two predicates, and the difference between them is the guard. An empty scope
+// still records everything, so the ordinary authoring path is unchanged, but it
+// names nothing, so any drifted range is unnamed and the refusal fires.
+const named = (entry, ref, key) =>
+  scope.some((s) => s === entry || s === `${entry}/${ref}` || s === key)
+const inScope = (entry, ref, key) => scope.length === 0 || named(entry, ref, key)
 const lock = existsSync(lockPath) ? JSON.parse(readFileSync(lockPath, 'utf8')) : {}
 const fresh = {}
 let checked = 0
 let stale = 0
 const problems = []
+// Ranges whose recorded fingerprint no longer matches the tree. Collected in
+// update mode too, because the whole point of the refusal is that the run
+// which is about to re-record them has not read them.
+const drifted = []
 
 // The cited lines, whitespace-normalized, hashed. Keyed by skill/ref/path:range
 // so a range that moves gets a new key and cannot inherit an old fingerprint.
@@ -90,6 +104,7 @@ for (const entry of readdirSync(skillsDir)) {
         const key = `${entry}/${ref}/${path}:${part}`
         const fp = fingerprint(body, nums[0], nums[1] ?? nums[0])
         fresh[key] = fp
+        if (key in lock && lock[key] !== fp) drifted.push({ entry, ref, key })
         if (update) continue
         if (!(key in lock)) {
           problems.push(`${entry} ${ref}: ${path}:${part} has no recorded fingerprint (new or re-anchored citation; re-read the claim, then --update)`)
@@ -106,8 +121,58 @@ for (const entry of readdirSync(skillsDir)) {
 }
 
 if (update) {
-  writeFileSync(lockPath, JSON.stringify(fresh, Object.keys(fresh).sort(), 2) + '\n')
-  console.log(`fingerprints recorded: ${Object.keys(fresh).length} ranges in skills/evidence.lock.json`)
+  // A bare `--update` over a drifted library is the one way to discharge this
+  // whole guard by accident, and until 2026-10-18 it was the command the docs
+  // prescribed. Measured on the real 2026-10-18 drift batch: the checker said
+  // "43 of them drifted", one bare `--update` exited 0, and the checker then
+  // said OK while all 43 citations still pointed at the lines main had moved
+  // under them. That is the 2026-10-08 failure the lock exists to prevent,
+  // reachable in one command. So re-recording a drifted range now has to name
+  // it, which is the difference between a run that decided and a run that ran
+  // a command.
+  //
+  // The rule is about what is being re-recorded, not about what has drifted.
+  // A drifted range outside the named scope keeps the value the lock already
+  // holds, so it stays red and needs no refusal; blocking on it would force a
+  // run to name every drifted range at once, which is the "name them all"
+  // habit this is trying to replace. With a scope given this list is therefore
+  // empty by construction, and the case it catches is the bare command.
+  const unnamed = drifted.filter((d) => inScope(d.entry, d.ref, d.key) && !named(d.entry, d.ref, d.key))
+  if (unnamed.length) {
+    console.error(`refusing to --update: it would re-record ${unnamed.length} drifted range${unnamed.length === 1 ? '' : 's'} that nothing on the command line named`)
+    for (const d of unnamed) console.error('  ' + d.key)
+    console.error('\nRe-recording these certifies that you read them against the new lines.')
+    console.error('Most of them are probably a line number that moved while the lines stayed put:')
+    console.error('  node skills/relocate-anchors.mjs <old-ref>        # the mechanical share, no reading needed')
+    console.error('Then name what is left, by skill slug or by lock key:')
+    console.error(`  node skills/check-evidence.mjs --update ${[...new Set(unnamed.map((d) => d.entry))].join(' ')}`)
+    process.exit(2)
+  }
+  // Out of scope means untouched: keep the value the lock already holds, so a
+  // scoped update cannot bless a neighbour, and keep out-of-scope orphans too
+  // rather than dropping keys this run never looked at.
+  const next = {}
+  for (const [key, fp] of Object.entries(fresh)) {
+    const [entry, ref] = key.split('/')
+    if (inScope(entry, ref, key)) next[key] = fp
+    else if (key in lock) next[key] = lock[key]
+  }
+  if (scope.length) for (const [key, fp] of Object.entries(lock)) {
+    const [entry, ref] = key.split('/')
+    if (!(key in fresh) && !inScope(entry, ref, key)) next[key] = fp
+  }
+  writeFileSync(lockPath, JSON.stringify(next, Object.keys(next).sort(), 2) + '\n')
+  const recorded = Object.keys(fresh).filter((k) => {
+    const [entry, ref] = k.split('/')
+    return inScope(entry, ref, k)
+  }).length
+  console.log(`fingerprints recorded: ${scope.length ? `${recorded} of ` : ''}${Object.keys(next).length} ranges in skills/evidence.lock.json`)
+  const leftRed = drifted.filter((d) => !inScope(d.entry, d.ref, d.key))
+  if (leftRed.length) {
+    console.log(`  left drifted on purpose, outside the scope you named:`)
+    for (const d of leftRed) console.log('    ' + d.key)
+  }
+  if (scope.length) console.log(`  scope: ${scope.join(', ')}`)
   process.exit(problems.length ? 1 : 0)
 }
 
