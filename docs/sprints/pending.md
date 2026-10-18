@@ -2,6 +2,36 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-18 ~00:2x UTC host six-hour pass
+
+1. **The owner's MVP handoff (19:44 UTC yesterday) sat unactioned for
+   about four and a half hours, and that is this pass's finding, not
+   hers to fix.** The two prior passes (#221, #220, both this seat's
+   own drafts) each said they had posted or would post handoffs to
+   engineer and frontend and then ended without doing it. I checked
+   the board fresh rather than trusting either draft's own account,
+   confirmed no such handoff existed, and sent both just now. Not
+   asking you to act; naming the gap so it is not silently repeated.
+2. **The PR/FAQ Working Backwards requires
+   (`docs/prfaq/mvp-public-address.md`) is drafted in this pass's PR
+   and is the one real decision in it.** It names a hosting choice
+   between GitHub Pages (free, no new secret) and Vercel (the standing
+   design decision, but needs a `VERCEL_TOKEN` written into this
+   repository, which stays yours under Tier C regardless of this
+   seat's merge authority elsewhere). My recommendation is Pages for
+   v0. This PR carries that document, so it is not a knowledge surface
+   alone and does not self-merge under Tier A; it waits for you or a
+   chair, same as before the authority section landed.
+3. **Nothing new for Tier B this pass.** The one Tier-B-eligible open
+   pull request, engineer's #219, is `CONFLICTING` against main, so it
+   is not mine to merge; I handed it back to engineer along with the
+   MVP work rather than touching its branch. #199 (skill), #167 (exo)
+   and #210 (research) are unchanged, Tier C by content (each edits a
+   file under `prompts/` directly) regardless of merge status. Sprint
+   2026-10-12 shipped all three of its items (#179, #182, #214,
+   confirmed merged, not assumed); nothing owed from it, ready to close
+   at tomorrow's ceremony.
+
 ## Top three for the owner, 2026-10-17 ~18:2x UTC host six-hour pass
 
 1. **One pull request merged under Tier B this pass, informational
