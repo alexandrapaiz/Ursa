@@ -2,8 +2,12 @@
 
 **Status:** measured and ready to land, blocked on two things that are not
 the engineer seat's to do. **Written:** 2026-10-18. **Author:** the
-engineer seat. **Measured against:** this repository at commit `9a17e50`,
-724 commits of history.
+engineer seat. **Measured against:** this repository
+twice. The three-way measurement in §1 was taken at commit `9a17e50`,
+724 commits of history. Every number in §4 was re-taken at commit
+`55a20c7`, 743 commits, after the pairing sentence described at the end
+of §1 was added to the page, because that sentence changes the bytes the
+page weighs.
 
 Held to the engineering-artifact standard in `prompts/engineer-agent.md`:
 a system diagram whose nodes are real, interfaces as TypeScript
@@ -35,7 +39,7 @@ document, produced one of two wrong answers depending on one input:
 | --- | --- | --- |
 | Exactly as `ursa-major/examples/publish-record.yml` tells a consumer to run it, with `agent-identity: github-actions[bot]` and the resolver's default pairing bounds | 10 | **All false.** The resolver credited the edits to `ursa-pm <ursa-pm@agents.epito.me>` (8 pairs) and `Ursa PM Agent <pm-agent@ursa.local>` (2 pairs). Both are agent seats of this company. Every survival figure on those ten pages measures one agent correcting another, and calls it a person correcting a model. |
 | This repository's twelve agent identities declared, resolver's default pairing bounds (25 commits) | 0 | **Honest and empty.** 644 of 724 commits looked generated and not one was followed by an edit of the same file by an undeclared identity within 25 commits. |
-| Twelve identities declared, `--max-pair-distance 400 --max-pair-age-hours 720` | 2 | **Honest and real.** Both edits credited to `alexandrapaiz <111912770+alexandrapaiz@users.noreply.github.com>`, the owner. 18,552 characters survived her editing verbatim out of 147,539 generated. |
+| Twelve identities declared, `--max-pair-distance 400 --max-pair-age-hours 720` | 2 | **Honest and real.** Both edits credited to `alexandrapaiz <111912770+alexandrapaiz@users.noreply.github.com>`, the owner. 18,552 characters survived her editing verbatim out of 147,539 generated. Re-run at `55a20c7` nineteen commits later, the same two records carry 23,075 survived verbatim and 987 survived edited out of 188,531 generated, with 281 generations left out rather than guessed at. |
 
 The third row is the live example. The reason the first two rows are what
 a consumer would have got is a defect in two files this seat owns:
@@ -61,6 +65,40 @@ whose generation and correction are seven commits apart, because the
 three-commit fixtures in that file are one commit apart and cannot see a
 distance bound at all.
 
+**The page now says which row it is.** The three rows above are the same
+history read three ways, and until 2026-10-18 nothing a stranger could
+open said which reading they were looking at. A published site stated two
+records and not the two numbers that produced them, so a reader had no way
+to tell a two-record set from the zero-record set the resolver's own
+defaults produce on this same repository, and both of those are honest.
+The site now carries that sentence, and it carries it because a record
+carries the bounds it was resolved under:
+
+- `OutcomeRecord.task.pairedBy` (`src/types.ts`) states the three bounds
+  the walk that found this record's generations ran under, stamped by both
+  launches through one shared function (`stampPairingBounds` in
+  `src/launch.ts`).
+- `PublishedIndex.pairing` (`src/publish.ts`) states the distinct bound
+  sets present in a published set, which is one set here and can be more
+  than one for a project that resolved twice under different bounds.
+- `pairingSentences` writes the claim on the index page: every record
+  above was paired within 400 commits and 720 hours of the generation it
+  corrects with no later generation rewriting the file in between, the
+  resolver's own defaults are 25 commits and 168 hours, and widening
+  either limit admits pairs a narrower one refuses.
+- The empty-site paragraph on that page now names the pairing window as a
+  third reason a site comes out empty, beside no merge yet and the
+  `min-chars` floor. On a repository where other writers commit between
+  the model and the person, it is the usual reason, and it was the one
+  reason the page did not state.
+
+This is the one addition the advisor seat's handoff asked for after
+reading this document, in a board message from headquarters'
+startup-application advisor seat at 2026-10-18 09:09 UTC, quoted in the
+run report at `docs/runs/engineer-2026-10-18-message-3.md`.
+Its reason is the paragraph above: a reader who cannot see that number
+cannot tell that the defaults show nothing.
+
 **What is still not done, and by whom.** See §8. Neither remaining step is
 code.
 
@@ -73,7 +111,7 @@ data that crosses them, by type name or file format.
 
 ```
                     ┌──────────────────────────────────────┐
-                    │ .git (this repository, 724 commits)  │
+                    │ .git (this repository, 743 commits)  │
                     └──────────────┬───────────────────────┘
                                    │ CommitInfo[]  (src/pairfinder.ts:
                                    │ sha, authorName, authorEmail,
@@ -94,12 +132,16 @@ data that crosses them, by type name or file format.
                           │ ursa-major/dist/ursa.cjs     │
                           │ (bundled src/bin/ursa.ts)    │
                           │  pairingBounds(values)       │
+                          │  resolvePairingBounds        │
                           │  findCommitPairsWithDiagnostics
                           │  buildEpisodes               │
                           │  resolveEpisode              │
+                          │  stampPairingBounds          │
                           │  gateRecords (18 bounds)     │
                           └──────────────┬───────────────┘
                                          │ OutcomeRecord (src/types.ts),
+                                         │ including task.pairedBy:
+                                         │ PairingBounds,
                                          │ one JSON file per record
                                          ▼
                           ┌──────────────────────────────┐
@@ -115,6 +157,9 @@ data that crosses them, by type name or file format.
                           │  manifestFor → DisclosureManifest
                           │  publish({acknowledged:true})│
                           │  renderViewer (src/viewer.ts)│
+                          │  distinctPairingBounds →     │
+                          │    PublishedIndex.pairing    │
+                          │  pairingSentences → the page │
                           │  formatRecordAddress,        │
                           │  pagesAddress (src/address.ts)
                           └──────────────┬───────────────┘
@@ -228,8 +273,60 @@ export function findCommitPairsWithDiagnostics(
   opts?: PairFinderOptions,
 ): { pairs: CommitPair[]; diagnostics: PairFinderDiagnostics }
 
-// src/publish.ts — unchanged by this work, and the contract this
-// document's measurement checks. PUBLISHED_INDEX_VERSION is '0.3.0'.
+// src/types.ts — ADDED. The three bounds as a record states them, after
+// the walk resolved every one the caller left unset. Numbers and not
+// optionals: a record says what the walk used, never what a caller
+// omitted, so reading one never requires knowing which build's defaults
+// were in force.
+export interface PairingBounds {
+  maxPairDistance: number
+  maxPairAgeHours: number
+  maxInterposedGenerations: number
+}
+
+// src/types.ts — ADDED to OutcomeRecord['task'], beside `resolvedBy` and
+// `gatedBy`, with the same preserve-never-overwrite rule. Absent is a
+// claim rather than a gap: a chat-path record walked no commits, and a
+// record written before 2026-10-18 was written by a build that stamped
+// nothing. Absent is never shorthand for the defaults.
+pairedBy?: PairingBounds
+
+// src/pairfinder.ts — ADDED. The resolved numbers, which two callers
+// need and neither could reach before: the walk itself, and the launch
+// that calls `findCommitPairs` and gets no diagnostics back.
+export function resolvePairingBounds(opts?: PairFinderOptions): PairingBounds
+
+// src/launch.ts — ADDED. One stamp for both launches, because the bounds
+// reaching one launch and not the other is drift 5 in that file's own
+// list and a stamp written twice is the same defect one level down,
+// where a reviewer is less likely to see it. One record at a time,
+// because both launches write each record inside the loop that resolved
+// it.
+export function stampPairingBounds(record: OutcomeRecord, bounds: PairingBounds): void
+
+// src/publish.ts — PUBLISHED_INDEX_VERSION moves from '0.3.0' to '0.4.0'
+// for one additive field, `pairing`. The frontend seat's viewer pins the
+// major and accepts any minor at or above the one it was written
+// against, so a field arriving has to move the number to be detectable
+// rather than discoverable.
+export interface PublishedIndex {
+  indexVersion: typeof PUBLISHED_INDEX_VERSION
+  publishedAt: string
+  repository: string | null
+  recordSchemaVersions: string[]
+  pairing: PairingBounds[]          // added: the distinct bound sets present
+  records: PublishedRecordSummary[]
+  disclosed: DisclosureManifest
+}
+
+// src/publish.ts — ADDED. The sentences the index page carries about how
+// its records were paired, written in one place so the page cannot state
+// a second version of the claim. Returns prose for the caller to escape,
+// never markup.
+export function pairingSentences(index: PublishedIndex): string[]
+
+// src/publish.ts — otherwise unchanged by this work, and the contract
+// this document's measurement checks.
 export function manifestFor(records: OutcomeRecord[]): DisclosureManifest
 export function publish(opts: {
   projectPath: string
@@ -255,19 +352,33 @@ export function publish(opts: {
 ## 4. On-disk layout, with a real payload
 
 The site this repository produces, at real paths, with the real file
-sizes measured on 2026-10-18:
+sizes measured on 2026-10-18 at commit `55a20c7`, with the pairing
+sentence on the index page:
 
 ```
 _site/
 ├── .nojekyll                                      0 bytes
-├── index.html                                 9,031 bytes
-├── index.json                                 2,659 bytes
+├── index.html                                 9,448 bytes
+├── index.json                                 2,789 bytes
 └── records/
-    ├── Ursa-2026-09-29-8c453f0.html        1,750,096 bytes
-    ├── Ursa-2026-09-29-8c453f0.json        2,758,007 bytes
-    ├── Ursa-2026-10-05-dc829be.html        1,803,191 bytes
-    └── Ursa-2026-10-05-dc829be.json        2,831,751 bytes
+    ├── Ursa-2026-10-05-dc829be.html        1,793,938 bytes
+    ├── Ursa-2026-10-05-dc829be.json        2,822,533 bytes
+    ├── Ursa-2026-10-18-6adca0b.html        2,191,503 bytes
+    └── Ursa-2026-10-18-6adca0b.json        3,412,104 bytes
 ```
+
+The two record ids are not the two this document's first measurement
+named, and the reason is the file they are about. Both records resolve
+`docs/standards/lessons.md`, which headquarters re-vendors into this
+repository every few days, so the second episode's closing commit moves
+forward as the vendoring commits land: it was `8c453f0` at `9a17e50` and
+is `6adca0b` at `55a20c7`. The set is the same two work units and the
+second one's finished text is nineteen commits newer, which is also why
+its page gained 390 KiB.
+
+The index page gained 417 bytes between the two measurements, which is
+the pairing sentence plus the longer empty-site paragraph, and the index
+gained 130 bytes, which is the `pairing` field.
 
 **On the record ids in this listing.** `episodeId` in `src/episodes.ts`
 builds `<directory-name>-<YYYY-MM-DD>-<sha7>`, so a record is named after
@@ -293,47 +404,54 @@ and different digests.
 
 ```json
 {
-  "indexVersion": "0.3.0",
-  "publishedAt": "2026-10-18T02:21:18.371Z",
+  "indexVersion": "0.4.0",
+  "publishedAt": "2026-10-18T09:23:32.384Z",
   "repository": "alexandrapaiz/Ursa",
   "recordSchemaVersions": ["0.1.0"],
+  "pairing": [
+    {
+      "maxPairDistance": 400,
+      "maxPairAgeHours": 720,
+      "maxInterposedGenerations": 0
+    }
+  ],
   "records": [
     {
-      "id": "Ursa-2026-09-29-8c453f0",
-      "generatedAt": "2026-10-11T20:31:20-06:00",
+      "id": "Ursa-2026-10-18-6adca0b",
+      "generatedAt": "2026-10-18T03:09:55-04:00",
       "finished": true,
       "artifactKind": "repo",
-      "finalChars": 99863,
-      "coveredChars": 95114,
+      "finalChars": 109737,
+      "coveredChars": 104540,
       "charsByClass": {
-        "survived_verbatim": 3979,
-        "survived_mutated": 809,
-        "no_generation_provenance": 90326
+        "survived_verbatim": 8502,
+        "survived_mutated": 203,
+        "no_generation_provenance": 95835
       },
       "spansByClass": {
-        "survived_verbatim": 182,
-        "survived_mutated": 31,
-        "no_generation_provenance": 1728
+        "survived_verbatim": 284,
+        "survived_mutated": 6,
+        "no_generation_provenance": 1813
       },
-      "generatedChars": 66586,
-      "generatedDeletedChars": 384,
-      "resolvedBy": { "basis": "git_commit", "value": "9f69ffa" },
-      "html": "records/Ursa-2026-09-29-8c453f0.html",
-      "json": "records/Ursa-2026-09-29-8c453f0.json",
-      "address": "pages/alexandrapaiz/Ursa/Ursa-2026-09-29-8c453f0",
-      "bytes": 2758007,
-      "sha256": "f72cab08d49b74e6…"
+      "generatedChars": 107578,
+      "generatedDeletedChars": 400,
+      "resolvedBy": { "basis": "git_commit", "value": "55a20c7" },
+      "html": "records/Ursa-2026-10-18-6adca0b.html",
+      "json": "records/Ursa-2026-10-18-6adca0b.json",
+      "address": "pages/alexandrapaiz/Ursa/Ursa-2026-10-18-6adca0b",
+      "bytes": 3412104,
+      "sha256": "7eeb36f8e5c36fcc…"
     }
   ],
   "disclosed": {
     "records": 2,
-    "recordIds": ["Ursa-2026-09-29-8c453f0", "Ursa-2026-10-05-dc829be"],
+    "recordIds": ["Ursa-2026-10-05-dc829be", "Ursa-2026-10-18-6adca0b"],
     "adapters": ["git"],
     "finalFiles": 1,
     "filePaths": ["docs/standards/lessons.md"],
-    "finalChars": 199726,
+    "finalChars": 209600,
     "generations": 2,
-    "generationChars": 147539,
+    "generationChars": 188531,
     "conversations": 2,
     "prompts": 0,
     "promptChars": 0
@@ -341,19 +459,26 @@ and different digests.
 }
 ```
 
-Read that payload for what it says about the first record rather than for
-its shape. 99,863 characters of `docs/standards/lessons.md` as the owner
-left it. 3,979 of them stand exactly as a model wrote them, across 182
-separate spans. 809 more were kept but edited, across 31 spans, and the
-edit is the correction. 90,326 characters — 90% of the file — trace to no
-generation at all, which is the `no_generation_provenance` class and the
-most valuable one: on nine tenths of that document the model was never in
-the running. 66,586 characters were generated and 384 of them were thrown
-away.
+`pairing` is the field this work added, and it is the whole mechanism
+behind the sentence on the page: the index states the bound sets its
+records were resolved under, as an array because one published set can
+hold records from two runs that used different bounds, and the page reads
+that array rather than being told a number by whoever built the site.
+Here it holds one set, so the page states it in one sentence.
+
+Read that payload for what it says about this record rather than for its
+shape. 109,737 characters of `docs/standards/lessons.md` as the owner
+left it. 8,502 of them stand exactly as a model wrote them, across 284
+separate spans. 203 more were kept but edited, across 6 spans, and the
+edit is the correction. 95,835 characters, which is 87% of the file,
+trace to no generation at all. That is the `no_generation_provenance`
+class and the most valuable one: on seven eighths of that document the
+model was never in the running. 107,578 characters were generated and
+400 of them were thrown away.
 
 `"prompts": 0` is load-bearing for what this site may claim. On the git
 path a generation is the blob of a touched file at the agent's own commit,
-so every one of those 147,539 characters is already in this public
+so every one of those 188,531 characters is already in this public
 repository's history and publishing them discloses nothing new. The
 sentence "this text has never been public before" would be false here, and
 `DisclosureManifest.adapters` is the field that lets the disclosure know
@@ -361,37 +486,44 @@ which sentence it is allowed to print.
 
 ### What a reader pays, measured
 
-`npx tsx tools/measure-published-site.ts --site /tmp/ursa-site`:
+`npx tsx tools/measure-published-site.ts --site /tmp/ursa-site
+--max-transfer-kb 512 --max-parse-mb 4`:
 
 ```
+index contract 0.4.0
+published 2026-10-18T09:23:32.384Z, repository alexandrapaiz/Ursa
+2 records
+
 What every reader pays, before opening any record:
-  index.html   transfer    3.3 KiB   parse    8.8 KiB
-  index.json   transfer    0.8 KiB   parse    2.6 KiB
+  index.html   transfer    3.4 KiB   parse    9.2 KiB
+  index.json   transfer    0.8 KiB   parse    2.7 KiB
 
 Per record page, heaviest first:
   transfer     parse    embedded record   record id
-  224.2 KiB  1.72 MiB   1727.9 KiB (98%)   Ursa-2026-10-05-dc829be
-  215.5 KiB  1.67 MiB   1676.0 KiB (98%)   Ursa-2026-09-29-8c453f0
+  257.6 KiB  2.09 MiB   2107.1 KiB (98%)   Ursa-2026-10-18-6adca0b
+  226.6 KiB  1.71 MiB   1718.8 KiB (98%)   Ursa-2026-10-05-dc829be
 
-Whole site on disk: 8.73 MiB across 7 files.
-Sum of every page's transfer, if one reader opened all of them: 443.7 KiB.
-Heaviest single page: 224.2 KiB over the wire, 1.72 MiB to parse, 98% of
+Whole site on disk: 9.76 MiB across 7 files.
+Sum of every page's transfer, if one reader opened all of them: 488.5 KiB.
+Heaviest single page: 257.6 KiB over the wire, 2.09 MiB to parse, 98% of
 it the record embedded for self-containment.
 
 Every byte count and digest in index.json matched the file it describes
 (2 records checked).
+Every page is within the 512 KiB transfer budget.
+Every page is within the 4 MiB parse budget.
 ```
 
 Three readings of that, because the three numbers are not the same cost:
 
-- **The set page is 3.3 KiB over the wire.** The "2.5 MB page" the
+- **The set page is 3.4 KiB over the wire.** The "2.5 MB page" the
   frontend seat fixed on 2026-10-18 was the set page inlining every
   record; it does not recur here, and this is the first time that fix has
   been measured against real records instead of a fixture.
-- **A record page is 224 KiB over the wire and 1.72 MiB to parse.** The
+- **A record page is 258 KiB over the wire and 2.09 MiB to parse.** The
   honest statement about the heavy page is that the reader waits for a
   quarter of a megabyte and the browser then decompresses and parses
-  seven times that. On a phone the second number is the one that is felt.
+  eight times that. On a phone the second number is the one that is felt.
 - **98% of the page is the record embedded in it.** `src/publish.ts`
   embeds the record in a `<script id="record" type="application/json">`
   so the page renders from `file://` with no network, which is the
@@ -434,7 +566,7 @@ node ursa-major/dist/ursa.cjs run . \
 
 # 3. Resolve honestly, at the bounds this repository actually needs.
 #    Produces the two records that are the live example. Takes about
-#    eight minutes on 724 commits.
+#    eight minutes on 743 commits.
 node ursa-major/dist/ursa.cjs run . \
   --max-pair-distance 400 --max-pair-age-hours 720 \
   --agent-identity agents.epito.me \
@@ -487,7 +619,7 @@ rather than the alternative that was considered.
 | Tool | Version | Its job here | Why this and not the alternative |
 | --- | --- | --- | --- |
 | Node.js | 22.23.2 (measured); `ubuntu-latest` runner's own | Runs `dist/ursa.cjs`, which is the resolver and the publisher | Already on every GitHub runner, so the Action installs nothing. The alternative, a container image, adds a pull of hundreds of megabytes per run to a job whose real work is a git walk. |
-| `ursa-major/dist/ursa.cjs` | built from commit `9a17e50` by `build/bundle.mjs`; digest indexed in `docs/provenance/bundle-digests.json` | The single file the Action executes | A published bundle on npm would need a registry account, a release step and a version to pin. A committed bundle is auditable by digest from the repository that produced it, which is what `docs/provenance/bundle-digests.md` exists for. |
+| `ursa-major/dist/ursa.cjs` | built from commit `55a20c7` by `build/bundle.mjs`; digest indexed in `docs/provenance/bundle-digests.json` | The single file the Action executes | A published bundle on npm would need a registry account, a release step and a version to pin. A committed bundle is auditable by digest from the repository that produced it, which is what `docs/provenance/bundle-digests.md` exists for. |
 | esbuild | 0.28.2 | Builds that bundle | Chosen when the bundle landed: one dependency, no config file, and a build measured in milliseconds. Rollup would add a plugin graph for a single-entry CommonJS output. |
 | TypeScript | 5.9.3 | `tsc --noEmit` over `src/` and `tools/` | The record schema is the product, and `OutcomeRecord` is the contract a lab audits. A JSDoc-checked JavaScript codebase cannot express `Record<SpanClass, number>` as a closed key set. |
 | vitest | 5.0.2 | The 1,000-odd assertions, including the three new parity ones | Already this package's runner; reads the same `tsconfig.json` as the build, so a test and the shipped code cannot disagree about module resolution. Jest would need a second transform configuration. |
@@ -515,7 +647,7 @@ rather than the alternative that was considered.
 | Agent identity | A substring of a commit's author name or author email that the repository's owner declares to belong to an agent rather than to a person. Matched case-insensitively. Undeclared identities are read as people. |
 | Disclosure manifest | The counted list of exactly what becomes public, computed and printable before a byte is written. `DisclosureManifest` in `src/publish.ts`; `publish()` refuses to write without `acknowledged: true`. |
 | Transfer bytes / parse bytes | Transfer is the gzip-compressed size a static host sends, which is what the reader waits for. Parse is the size on disk, which the browser must decompress, parse and hold, and is the number a phone feels. |
-| Published index contract | `index.json`, versioned independently of the record schema at `PUBLISHED_INDEX_VERSION` (`0.3.0`), because the index can gain a field without a record changing. |
+| Published index contract | `index.json`, versioned independently of the record schema at `PUBLISHED_INDEX_VERSION` (`0.4.0` as of this work, from `0.3.0`), because the index can gain a field without a record changing. The field it gained here is `pairing`. |
 | Record address | The string a stranger can be sent, in the grammar of `src/address.ts`. For a site published this way it is `pages/<owner>/<repo>/<record-id>`. |
 | Deploy from branch, versus GitHub Actions as Pages source | Two ways GitHub serves a Pages site: from files committed to a branch, or from an artifact a workflow uploads. This path uses the second, so nothing generated is committed. |
 | Drift, and the drift list | A decision that `ursa run` and `ursa ci` must make identically and had come to make differently. The numbered list is at the top of `src/launch.ts`; `src/launch-parity.test.ts` is the test that finds them. |
@@ -544,7 +676,7 @@ cp docs/design/pages-dogfood/ursa-publish.yml \
 
 It differs from `ursa-major/examples/publish-record.yml` in one way worth
 reviewing rather than accepting: **it has no `push` trigger.** The resolve
-step walks all 724 commits and takes about eight minutes at distance 400;
+step walks all 743 commits and takes about eight minutes at distance 400;
 this repository takes a dozen merges to `main` on a busy day; and the
 `pages` concurrency group refuses to cancel a half-finished deployment.
 A push trigger would spend the day queued behind itself, publishing sets
@@ -585,3 +717,6 @@ Each piece independently, in the order that undoes the most with the least.
 | The Action's three new inputs | Revert this document's pull request | Consumers who set no bound are unaffected either way: an unset input appends no flag, so the resolver's defaults were in force before and after. |
 | The bounds on this repository only | Set `max-pair-distance: 25` in the workflow | The site publishes empty rather than wrong. That is the honest failure and it is why the empty case is documented in §1 rather than treated as a bug. |
 | The weight tool | `git rm ursa-major/tools/measure-published-site.ts` | Nothing else imports it. It is not wired into `npm test`. |
+| The sentence on the page, keeping the field | Delete the `<p class="legend">${pairingSentences(index)…}</p>` line and the pairing clause in the empty-site paragraph in `src/publish.ts`, then `npm run bundle` | The index still states `pairing`, so a machine reading `index.json` loses nothing and a person reading the page loses the number again. Two tests in `src/publish.test.ts` fail by name, which is the intended cost of removing a claim. |
+| The field as well as the sentence | Also delete `pairing` from `PublishedIndex` and `distinctPairingBounds`, and set `PUBLISHED_INDEX_VERSION` back to `0.3.0` | A consumer reading 0.4.0 sees one fewer field. Records keep `task.pairedBy`, since the stamp is upstream of publishing and a record states it whether or not a site does. |
+| The stamp in the record | Revert `stampPairingBounds` and its two call sites, and `task.pairedBy` in `src/types.ts` | Records written before this work are unaffected, because the field was always optional and absent already meant "nothing stamped this". Records written after it keep the field, since nothing rewrites a saved record. |
