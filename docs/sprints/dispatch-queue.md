@@ -1,38 +1,41 @@
-# Dispatch queue — 2026-10-18, ~12:4x UTC, message pass (twenty-fifth)
+# Dispatch queue — 2026-10-18, ~12:5x UTC, message pass (twenty-sixth)
 
-## This pass's event: PR #244 (distribution, lessons.md re-vendor), already merged before this pass started
+## This pass's event: PR #243 (exo, fifth window) reviewed against the merge rule, not merged
 
 The instruction was "review it against the merge rule: merge it, or
 say on the board what it still needs and hand that to its seat."
-`#244` was `MERGED` (12:35:29Z, exo-centralizer self-merge) before
-this pass's first command ran. Verified rather than taken on the PR's
-own account: `gh pr diff 244 --name-only` is exactly one path
-(`docs/standards/lessons.md`, a named Tier A surface for the exo
-centralizer under §10/ADR-011), and the content matches HQ's
-`b2eee9e` byte-for-byte once Ursa's own vendored header is stripped
-(`gh api repos/alexandrapaiz/alexandra-systems/contents/standards/
-lessons.md?ref=b2eee9e`, diffed locally). Full account in
-`docs/sprints/pending.md`'s twenty-fifth-pass entry. No gap to hand to
-distribution or the exo centralizer.
+Verified independently that #243 subsumes #242, #231 and #234 (and
+#167 through them) with `git merge-base --is-ancestor` on an
+unshallowed clone — all four confirmed ancestors. Its diff touches
+two charter files (`prompts/exo-agent.md`, `prompts/pm-agent.md`)
+alongside eight knowledge-surface files, which is Tier C by the
+literal list under pm.md §10. That list is the same contradiction
+this seat's twenty-third pass already routed to the owner (the §10
+banner and §21 both say no tier waits on her except an authority
+change), with a proposed bold-declaration test this PR's own opening
+line would pass. The silence deadline on that ask is 2026-10-20T12:30
+UTC and nothing has arrived from the owner since, so this pass holds
+to the practice it already committed to rather than adopting its own
+reading on the strength of one convenient test case. **Not merged.**
+Full account in `docs/sprints/pending.md`'s twenty-sixth-pass entry.
+Nothing to hand to exo; the open item is the owner's, not its seat's.
 
 ## Tier B candidates checked fresh this pass: none ready
 
-`gh pr list --state open` shows the same eight as the last pass:
-`#242` (exo, Tier C, `prompts/exo-agent.md`, pending the owner),
-`#243` (exo's live window, draft), `#241` (engineer, draft), `#240`/
-`#236` (frontend's own drafts), `#225` (this seat's own), `#210`
-(research, Tier C), `#199` (skill, Tier C, now updated 12:42:24Z,
-likely picking up the handoff the last pass sent). None of this
-pass's own event touches any of them, and none independently changed
-tier since the last pass's check. Nothing to merge.
+`gh pr list --state open` shows the same open set modulo #243/#244:
+`#242` (exo, Tier C, now an ancestor of #243, still pending the
+owner), `#241` (engineer, draft), `#240`/`#236` (frontend's own
+drafts), `#225` (this seat's own), `#210` (research, Tier C), `#199`
+(skill, Tier C). None of this pass's own event touches any of them,
+and none independently changed tier since the last pass's check.
+Nothing to merge.
 
 ## Dispatch: nothing fired
 
-No new criterion fired. `#244`'s event is closed (above). The seats
-with open work are each already mid-session on it (exo on `#243`,
-engineer on `#241`, frontend on `#240`/`#236`), which §11.4 rules out
-dispatching into without an instruction to build on that exact
-branch, and this pass has no such instruction to give.
+No new criterion fired. This pass's own event is closed (above). The
+seats with open work are each already mid-session on it, which
+§11.4 rules out dispatching into without an instruction to build on
+that exact branch, and this pass has no such instruction to give.
 
 ## Failed-run triage this pass (§11.7)
 

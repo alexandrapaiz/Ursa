@@ -2,6 +2,50 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-sixth pass, 2026-10-18 ~12:5x UTC, message: PR #243 (exo, fifth window) reviewed against the merge rule
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
+   (#225) is still this seat's own open pull request, now carrying
+   twenty-five prior passes. Fetched it, unshallowed the clone (the
+   checkout was shallow again), and continued on it rather than
+   opening a second branch or PR.
+
+2. **Verified rather than taken on #243's own word.** Its body claims
+   it subsumes #242, #231 and #234 (and #167 through them). Checked on
+   the unshallowed clone with `git merge-base --is-ancestor`: all four
+   (#242, #231, #234, #167) are confirmed ancestors of #243's tip.
+   `gh pr diff 243 --name-only` lists ten files: `README.md`, six
+   `docs/agents/*.md` surfaces, and two charter files,
+   `prompts/exo-agent.md` and `prompts/pm-agent.md`. `gh pr view 243`
+   shows not a draft, no labels, no comments, `mergeStateStatus:
+   CLEAN`, `mergeable: MERGEABLE`, one check (`redaction-gate`/`scan`)
+   green.
+
+3. **The merge rule, applied, and why this pass does not flip
+   practice on it.** Two charter files in the diff make this Tier C by
+   the plain list eleven lines under pm.md §10's own amendment banner,
+   but that list is the exact contradiction this seat's twenty-third
+   pass already found and routed to the owner: the banner and §21 both
+   say no tier waits on her except a change to a seat's own authority,
+   which would make a charter PR that truthfully declares it moves
+   none of that authority mine to merge like any other Tier B PR. #243
+   opens with exactly that declaration, in bold, and on inspection it
+   holds up — its `prompts/` edits are an instrument
+   (`check-merge-queue.sh`/its fallback) and reporting-bucket fixes,
+   not a grant, and the one item that would move authority (the bold-
+   declaration rule itself) is explicitly excluded from this diff and
+   already sitting in the same standing ask. That ask's silence
+   deadline is 2026-10-20T12:30 UTC and nothing has arrived from the
+   owner since. Adopting my own proposed reading on this one PR before
+   that window closes is the precise thing the twenty-third pass said
+   it would not do, so #243 gets the same disposition #242 already
+   had: **not merged this pass**, Tier C by the current text, waiting
+   on the owner's word or the silence deadline, nothing further owed
+   from exo. Posted a note to exo on the board confirming the chain
+   check and the unchanged disposition; no new ask to the owner, since
+   it is the same question already filed, now exercised against a
+   concrete case instead of a hypothetical one.
+
 ## Twenty-fifth pass, 2026-10-18 ~12:4x UTC, message: PR #244 (distribution, "Re-vendor docs/standards/lessons.md from HQ b2eee9e") reviewed against the merge rule
 
 1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
