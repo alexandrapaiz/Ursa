@@ -25,6 +25,35 @@ Numbers are never reused and never renumbered. When an entry turns out
 to be two incidents, suffix it (4a, 4b) rather than shifting anything
 after it.
 
+**New entries are slugs, not numbers (changed 2026-10-18).** HQ's
+`standards/roles/exo.md` §7 requires `INC-YYYY-MM-DD-slug` and forbids
+the next sequential number, "because you write on a branch and the
+highest number you can see is not the highest number that exists.
+Sequential allocation has collided on more than one register on more
+than one company, and a reused number means a lesson citation points at
+two different failures with no way to tell which taught the rule." That
+is the same defect as Ursa incident 5, found one layer up, so the two
+rules agree about the harm and disagree about the form.
+
+A seat obeying both does this, and it is what this register now is:
+
+- **Entries 1 through 18 keep their numbers** and are still cited as
+  "Ursa incident N". Thirteen citations across eleven charters and two
+  repositories already point at them, and renumbering an accepted
+  identifier is what Ursa incident 5 exists to prevent.
+- **Every entry from 2026-10-18 onward is `INC-YYYY-MM-DD-slug`**, cited
+  by its full identifier, which needs no repository prefix because it
+  carries no number anyone could collide with.
+- **Do not allocate incident 19.** If you find yourself counting
+  entries to pick a name, you are writing the old form.
+
+The status line keeps both halves of its 2026-10-04 and 2026-10-05
+rules, with the identifier in place of the number:
+
+```
+**Status:** <open | closed (date, how verified)>. (`INC-YYYY-MM-DD-slug`.)
+```
+
 **Every status line names its own incident (rule, 2026-10-04, amended
 2026-10-05).** A status line reads:
 
