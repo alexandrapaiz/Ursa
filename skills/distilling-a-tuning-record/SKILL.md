@@ -74,8 +74,8 @@ evidence:
     what: export drops revoked axioms, groups by domain, orders by evidenceCount, and lists tensions with an ask-do-not-guess instruction
     source: ursa-major/src/tuning/export.ts:43-57,69-92
   - ref: E19
-    what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted
-    source: ursa-major/src/signals.ts:1-7,111-137
+    what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted, one per survived_mutated span that carries a diff and a source and is not formatting-only
+    source: ursa-major/src/signals.ts:1-7,40-46,62-63,111-137
   - ref: E20
     what: a one-shot correction's domain field is the file path, and its text is an agent-against-final excerpt pair
     source: ursa-major/src/signals.ts:76-77,88-93
@@ -132,7 +132,7 @@ evidence:
     source: ursa-major/src/tuning/tuning.test.ts:18-26
   - ref: E38
     what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
-    source: ursa-major/src/signals.ts:65-79
+    source: ursa-major/src/signals.ts:65-81
   - ref: E39
     what: the four free-text axiom fields, id, statement, domain and each contradicts id, are flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before they are rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere; basis, polarity and evidenceCount are rendered without the sanitizer
     source: ursa-major/src/tuning/export.ts:8-40,44-50,74-78
@@ -252,8 +252,8 @@ schema's own comment describes it as independent evidence entries whose
 confidence signal is recurrence across records [E4]. Those are two
 different quantities whenever one record supplies more than one
 evidence entry for one axiom, which is the ordinary case on a
-commit-pair record, where every mutated span is its own one-shot
-correction [E19, E20]. Ours, measured in this repository: one axiom
+commit-pair record, where each mutated span that is not formatting-only
+is its own one-shot correction [E19, E20]. Ours, measured in this repository: one axiom
 carrying three one-shot corrections from a single record exports as
 `x3`, and a re-resolve of the same work under a different episode id
 reinforces that axiom to `x2` with both ids listed in `sources`.
