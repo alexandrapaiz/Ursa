@@ -1,0 +1,122 @@
+# The whole consumer side of reading your own outcome records at a public
+# address. Copy this file to .github/workflows/ursa-publish.yml in any
+# repository where an AI agent commits, do the one-time Pages setting
+# below, and push. From then on every push to your default branch resolves
+# your repository's history into outcome records and publishes them to
+# your own GitHub Pages site, at
+#
+#   https://<your-user>.github.io/<your-repo>/
+#
+# The one manual step, which cannot be done from a workflow file:
+# Settings → Pages → Build and deployment → Source → "GitHub Actions".
+# Until that is set, the deploy step below fails with a message saying so.
+# Nothing else needs configuring and no secret is involved.
+#
+# WHAT THIS MAKES PUBLIC, because the whole point of the page is that it
+# carries raw text rather than a summary. Every record published here
+# contains the full text of each finished file it classifies, the full
+# text of every model generation behind it, and every message typed to the
+# model on the session path. The job log prints the exact character counts
+# and every file path before it writes a byte, so your first run tells you
+# what the page will hold. If you would rather read that list before
+# anything is published, delete the two deploy steps at the bottom, run
+# once, and read the job summary.
+#
+# On this `push` path the generations are blobs of files at your agent's
+# own commits, so a public repository has already published that text and
+# what is new on the page is the classification over it. That is not true
+# of session-path records, and the job log says which kind you have.
+#
+# What it costs you: one checkout and two node invocations per push, on
+# your own runner, on your own minutes, plus a Pages deployment. No
+# install step, no container pull, no secret, no Ursa-operated compute at
+# any point. The records are resolved on your runner and the site is
+# served by GitHub to you.
+#
+# Why `push` and not `pull_request: closed` the way examples/resolve-on-
+# merge.yml does: a Pages deployment has to run on your default branch,
+# and a pull_request event does not, so this workflow asks the resolver to
+# read your whole git history (`resolve-from: history`) instead of one
+# merge window. That also means it needs no event payload and you can run
+# it by hand from the Actions tab before you trust it to a push.
+#
+# Running both workflows together is fine and is the intended shape: the
+# merge workflow gives you the five-field comment on each pull request,
+# and this one gives you the page. They write to the same `.ursa/` on
+# different runners and neither can see the other's.
+
+name: Ursa publish
+
+on:
+  push:
+    branches: [main]
+  # So you can run it once by hand, read the disclosure in the job
+  # summary, and decide, before any push triggers it.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Both are required by actions/deploy-pages and by nothing else here.
+  # `pages: write` creates the deployment; `id-token: write` is how
+  # deploy-pages proves to GitHub that the artifact came from this run.
+  pages: write
+  id-token: write
+
+# One Pages deployment at a time. `cancel-in-progress: false` rather than
+# true, because cancelling a half-finished deployment can leave the live
+# site serving a partly-written set of records, and a queued run that
+# publishes a slightly older set is the better failure.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      # Surfaces the published address on the run page, so the URL is one
+      # click from the run that produced it rather than something you
+      # reconstruct from your username.
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      # fetch-depth: 0 because `resolve-from: history` walks the whole
+      # history, and because the resolver compares a generated commit's
+      # file content with the next human commit's file content, which a
+      # depth-1 checkout has neither of. The Action deepens a shallow
+      # clone itself as a safety net; fetching once here is cheaper.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - id: ursa
+        uses: alexandrapaiz/Ursa/ursa-major@main
+        with:
+          # Read the whole git history rather than a merge window, since
+          # a push event carries no pull request.
+          resolve-from: history
+          # Setting this is what asks for a site, and is the
+          # acknowledgement of what a published record contains. The
+          # directory name is arbitrary; `_site` is what
+          # upload-pages-artifact defaults to looking for.
+          publish-dir: _site
+          # Optional. Declare any identity in your repository that belongs
+          # to an agent rather than to a person, one per line. The
+          # resolver recognises the harness names it can recognise and
+          # promotes anything else to "a human being" in silence, and
+          # every survival figure on the published page rests on that one
+          # bit. Delete this if no agent commits under its own name.
+          agent-identity: |
+            github-actions[bot]
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.ursa.outputs.publish-dir }}
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Say where it went
+        run: |
+          echo "Your outcome records are at ${{ steps.deploy.outputs.page_url }}"
+          echo "The index lists every record; each one links to the generation behind every span."
