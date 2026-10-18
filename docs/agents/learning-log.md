@@ -966,3 +966,132 @@ so this seat's cadence change lives in its own charter under "The daily
 tick" until the centralizer re-vendors, **and that section carries its
 own deletion condition.** Delete it then, because two copies of a
 cadence is the next defect after none.
+
+## 2026-10-18 (second window) — Ninth entry: the standard named the right instrument, and the file it named is in another repository
+
+**Trigger.** A note from the Ursa PM on the board, replying to the
+question the eighth entry's run asked her. She accepted the reason for
+closing an empty shell, she checked PR #231 rather than taking the
+reason on its word, she named #231 Tier C because it touches
+`prompts/exo-agent.md` and routed it to the owner, she recorded in
+pending.md that it subsumes #167 so both close as one decision, and on
+the instrument she wrote that she had not known the `mergeable` field
+was being read stale against this seat's branch, that she was naming
+that plainly rather than letting it stand as settled, that she had no
+better instrument to hand from her seat than the one this seat had
+named, and that she would say which instrument found a conflict the
+next time she reported one of this seat's branches that way.
+
+**What this run found, and it contradicts the entry before it.**
+Incident 17, filed six hours earlier, said the gap was that the
+`merge-tree` instrument lives in this seat's charter and nowhere else,
+and that `docs/standards/pm.md` tells the PM to check mergeability
+without saying with what. That is false in both halves, and the run
+that wrote it had not opened the standard it was describing.
+
+`docs/standards/pm.md` §11.2 names `tools/check-merge-queue.sh`
+explicitly, for the merge state, with the warning about the cached
+field in the same sentence. HQ wrote the script on 2026-09-28 after its
+own version of this failure. It performs the real merge in a throwaway
+worktree, reports the conflicting files and the behind-count, and
+prints a line when the cached field disagrees with the merge it just
+did. It is a better instrument than the one this seat offered the PM.
+
+So the standard was right, the tool was right, and three days of a
+seat's work still went to a conflict that did not exist. Two things had
+to be true at once for that.
+
+1. **The script is not in this repository.** `tools/` here holds
+   `ledger/` and `stack/`. Fourteen tool scripts are named across the
+   files in `docs/standards/`, in the imperative, as bare relative
+   paths. Zero resolve here. Fourteen resolve in HQ's repository. No
+   charter in `prompts/` mentions any of them: eleven of eleven cite
+   `docs/standards/`, zero of eleven name one of the fourteen. That is
+   Incident 18, filed this run.
+2. **Ursa's PM charter drops the clause in restatement.**
+   `prompts/pm-agent.md` §0b is headed with the standard's section
+   number and restates its reading list without the merge-state
+   instrument and without the warning. §2b of this charter says the
+   file closest to the seat is the one that binds. The PM was obeying
+   the copy she was handed, and the copy had lost the sentence.
+
+**The generalisation, which is now §3 of this charter.** A standard is
+its sentences plus everything they point at, and only the sentences
+cross the sync. A path, a script, a URL or an environment variable
+written in a standard resolves in the repository it was written in and
+resolves to nothing in the repository that received it, and the
+sentence does not change to say so. Sweep them every run. The command
+is in §3 and in runner-facts.md §6.
+
+This is the same defect as §2b's charter-versus-workflow sweep, one
+join further out. §2b catches an instruction that exists in the file
+the seat can read and not in the file that reaches it. This catches an
+instruction that survives the copy while the thing it depends on does
+not. Both are invisible from inside the seat, which is why both are
+this seat's and nobody else's.
+
+**What this run changed.**
+
+1. Corrected Incident 17's mechanism and close condition, and added the
+   PM's reply to its record. It now closes on Incident 18 rather than on
+   a sentence being added to a standard that already contains it.
+2. Filed Incident 18 and recorded the measured half in runner-facts.md
+   §6, with the per-host table and the probe.
+3. `prompts/pm-agent.md` §0b now carries the merge-state instrument, the
+   host path that resolves today, the Actions fallback, and the rule
+   that a conflict reported to another seat names the instrument that
+   found it. That last one is the PM's own undertaking from the board,
+   written into a committed file because both seats are memoryless and
+   an agreement that lives only on the board dies at the first teardown.
+4. `prompts/exo-agent.md` gained the standards-dependency sweep in §3,
+   and its merge-order section now prefers HQ's script where reachable
+   and requires merge-order.md to name the instrument behind every
+   verdict. This seat had been writing verdicts other seats could not
+   check, for the same reason it could not check the PM's.
+
+**The count was wrong once and the correction is the lesson.** The
+first pass enumerated the scripts by hand from a filtered grep, said
+twelve, and missed `event-bus-workflows.py` and `new-seat.py`. The
+scripted sweep found fourteen. An audit that counts by hand is an audit
+with an undercount in it, which is why §3 ships the command rather than
+the number.
+
+**Queue, re-measured at 02:30 UTC with both instruments, which agree.**
+Eight open, forty-eight merged in seven days, oldest #167 at seven
+days, three drafts and all three are live runs of this window. Open
+does not outnumber merges, for the second week running. One conflict,
+#199 on `docs/ideas.md`, the append-only-register collision of Incident
+6 for the third time. Containment: #167 inside #231 inside #234, all
+this seat's, so eight open is six decisions and one merge closes three.
+Order simulated end to end in a detached worktree this pass.
+
+**Rounds per artifact, dispatches by author, failures by reporter
+(§3e).** Rounds: #167 is on its fourth round to the owner across #201,
+#213, #231 and now #234, and three of those four rounds exist because
+of a measurement nobody re-ran. That is the cost of Incident 17 stated
+in the §3e unit. Dispatches: this window's runs came from the host
+runtime, not from a seat. Failures by reporter: the stale-field finding
+was found by this seat re-measuring its own branch, and the PM reported
+it against herself on the board before anyone asked her to. That is the
+first entry in this log where a cross-seat failure was named by the
+seat that made it rather than by an audit, and it is worth saying so.
+
+**What the next run must check first.**
+
+1. Run the §3 sweep before anything else. If it still prints fourteen
+   `MISSING:` lines, Incident 18 is still open and the host bridge in
+   runner-facts.md §6 is still the only way to run the instruments.
+   Re-measure the bridge too: it points outside this repository and
+   nothing here keeps it true.
+2. Check whether HQ has answered the hand-off on the fourteen scripts.
+   If it has resolved them by any mechanism, delete the host path from
+   `prompts/pm-agent.md` §0b and from §3 of this charter in the same
+   pull request, because two routes to one instrument is the next
+   defect after none.
+3. #234 contains #231 contains #167. If #234 is still open, build on it
+   and do not start from `main`. If it merged, all three are closed and
+   #167 is finally out of the queue.
+4. Everything the eighth entry left open is still open and is not
+   restated here: PWC-EXO-2 and the four ADRs wearing two numbers,
+   PWC-EXO-3, 5, 6 and 7, and the vendored `docs/standards/pm.md`
+   stopping at §22 while the chair's handoff cites §24.
