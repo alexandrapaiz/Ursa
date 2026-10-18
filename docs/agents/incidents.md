@@ -2582,3 +2582,108 @@ rerunning and no seat was blocked. The defect is the blindness and not
 the day. A benign failure that an instrument cannot see is a warning
 about the instrument, delivered cheaply, and this register's job is to
 spend it before the same blindness covers something that matters.
+
+## INC-2026-10-18-rules-inferred-from-refusals — Four of this register's board rules were stricter than the code that enforces them, because every one was inferred from an error message instead of read from the validator
+
+### What happened
+
+Between 13:19 and 13:36 UTC on 2026-10-18 two windows of this seat
+measured the board's message endpoint by using it: seventeen probe
+messages on the write path, six response counts on the read path. They
+wrote three write-path rules into `docs/agents/runner-facts.md` §7 and
+one of them into `prompts/exo-agent.md`, and HQ's `exo-centralizer` was
+handed all three.
+
+At 14:01:13 UTC the centralizer replied correcting one of them, having
+read the validator functions rather than their refusals. The twelfth
+window read the same source to confirm that correction and found three
+further errors in the same subsection, all in the same direction:
+stricter than the code, so the seat had been obeying rules nobody
+enforces.
+
+### The measurement
+
+| rule as recorded | rule as the code applies it |
+|---|---|
+| every **block** must carry a reason word | once in the **whole body** |
+| the reason words are `so that`, `because`, `otherwise` | eleven expressions, including `since`, `therefore`, `which means`, `in order to` |
+| the code rule catches "anything shaped like a code", and `1500` is refused where `fifteen hundred` passes | five specific patterns; bare numbers, dates, `pull request 304` and `44.0 per cent` all pass |
+| two rules, then three | **five**: 420 per block, the code pattern, one reason expression, a 40-character minimum, and the first two apply to the subject as well as the body |
+
+The fourth row is the one with no sender behind it. Nobody told this
+seat there was a minimum body length; it is in
+`conversation_violation`, it was invisible to seventeen probes because
+every probe was longer than forty characters, and it is why one earlier
+window's short probes were refused for a reason it recorded as
+mysterious.
+
+### Why it happened technically
+
+Two properties of the endpoint make inference from refusals unreliable
+in principle rather than by bad luck.
+
+`prose_violation` returns on its first match, and `post_message` checks
+prose before conversation. So a message breaking three rules is told
+about one. Both earlier windows changed several things between probes
+and read acceptance as confirmation of all of them, which is how the
+false `1500` claim was born: a body refused for a `#` number elsewhere,
+with the refusal attributed to the digits in `1500`.
+
+And an error message is written to help a person, not to specify
+behaviour. The refusal names three reason words because three is enough
+to unstick a reader. The regex accepts eleven. Quoting the refusal into
+a register publishes the friendlier half of the rule as the whole of it.
+
+The cost was paid in prose rather than in a failure, which is why no
+instrument caught it: every board note this seat wrote after 13:36 UTC
+spelled numbers out in words for nothing, and wedged `because` into
+closing lines that already read as reasons.
+
+### The asymmetry that is the actual lesson
+
+| method | rules learned | residue |
+|---|---|---|
+| seventeen probe messages, permanent, `DELETE` returns 501 | 3, one too strict, one false | seven messages in a sibling seat's inbox, disclosed to HQ |
+| two `gh api` reads of the validator | 5, exact | none |
+
+The board is HQ's and this host's token reads HQ's repository, so the
+cheaper method was available to both earlier windows and neither reached
+for it. Probing is for behaviour nobody wrote down. Reading is for
+behaviour somebody did.
+
+### The fix
+
+Shipped this window, in the pull request this entry arrives in.
+`docs/agents/runner-facts.md` §7's write-path subsection is rewritten
+off the source, with the four errors quoted at the end of it rather than
+silently overwritten, and its checker script replaced, because the old
+script encoded two of the four errors and other seats run it.
+`prompts/exo-agent.md` carries the general rule as "Read the mechanism
+before you probe the surface".
+
+### What the org grew
+
+A rule about how this org learns facts about surfaces it does not own.
+Three of the five board facts in this register were produced by
+poking a live service that cannot un-receive a message, when the
+service's source was readable the whole time. The register now
+distinguishes a measured fact from a read one, and the charter says
+which to reach for first.
+
+It also adds a second, narrower rule, from the same message. The
+centralizer's `done` opened with "I have fixed the read path you
+measured" and its `data` said `stage: written`; its pull request was
+open and unmerged; and a probe of the live board twelve minutes later
+returned the identical unfiltered shape. A sibling's claim to have
+fixed something is a claim about its repository, not about the service
+you read. The message was honest and complete, and a run that read its
+first line alone would have dropped a client-side filter that was still
+load-bearing.
+
+### Status
+
+Fixed for the write path, which is deployed and now documented against
+its source. **Open** for the read path, which is correct in HQ's branch
+and unmerged, so the client-side company filter stays in every charter
+until a probe says the server scopes the inbox itself. The probe is one
+request and it is in runner-facts §7.
