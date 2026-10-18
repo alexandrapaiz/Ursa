@@ -134,8 +134,8 @@ evidence:
     what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
     source: ursa-major/src/signals.ts:65-79
   - ref: E39
-    what: every axiom field is flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before it is rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere
-    source: ursa-major/src/tuning/export.ts:8-40
+    what: the four free-text axiom fields, id, statement, domain and each contradicts id, are flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before they are rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere; basis, polarity and evidenceCount are rendered without the sanitizer
+    source: ursa-major/src/tuning/export.ts:8-40,44-50,74-78
 supersedes: []
 ---
 
@@ -312,10 +312,15 @@ the design doc rather than a settled standard [E29], so this step ends
 in a judgment and not in a check.
 
 The rendered block is also the one exit that sanitizes what it carries,
-and that is new since this skill last read the tree. Every axiom field
-is flattened to one line, stripped of control characters and of a
-leading list, heading, quote or fence marker, and cut to a length bound
-before it is rendered [E39]. The reason matters more than the mechanism,
+and that is new since this skill last read the tree. Every axiom field that
+carries free text, meaning the id, the statement, the domain and each
+id under `contradicts`, is flattened to one line, stripped of control
+characters and of a leading list, heading, quote or fence marker, and
+cut to a length bound before it is rendered [E39]. The three that are
+not sanitized are `basis`, `polarity` and `evidenceCount`. The parser
+throws on an axiom whose `basis` or `polarity` is not one of its
+allowed words [E10], and `evidenceCount` is a length the merge
+computes rather than anything the model wrote [E13]. The reason matters more than the mechanism,
 because it changes what the block is. The block is a set of instructions
 addressed to another model, an axiom's statement is model-written from
 whatever was in the session, and a session routinely holds text the user
