@@ -23,6 +23,15 @@
 //   ursa ci <projectPath> --repo owner/name --event "$GITHUB_EVENT_PATH" \
 //     [--run-url URL] [--min-chars N] [--no-post]
 //
+// ursa address <project> — what do I send someone so they can read this
+// record? Reads the project's git state and prints, for each record, the
+// address a stranger can type, the URL it resolves to, and the one thing
+// still missing if it is not readable yet. No network unless --check is
+// passed, which asks the host for its status and its cross-origin header.
+//
+//   npx tsx src/bin/ursa.ts address <projectPath> [--record <id>] \
+//     [--pages owner/name] [--check]
+//
 // ursa consent / ursa forget — the user's side of the boundary: see what
 // has been derived, revoke one inference, grant or withhold the only
 // scope that may cross the device boundary, emit the consented aggregate
@@ -314,10 +323,23 @@ export async function main(argv: string[]): Promise<number> {
       event: { type: 'string' },
       'run-url': { type: 'string' },
       'no-post': { type: 'boolean' },
+      // `ursa publish`. `--yes` is the whole of the disclosure consent
+      // mechanism and is deliberately a bare boolean with no default and
+      // no environment fallback: see the gate note in src/publish.ts.
+      out: { type: 'string' },
+      yes: { type: 'boolean' },
+      // `ursa address`. `--record` names one record instead of all of
+      // them, `--pages owner/name` asks for the address a published site
+      // would serve, and `--check` is the only flag in this file that
+      // opens a socket: see the note at the top of src/address.cli.ts for
+      // why it is opt-in.
+      record: { type: 'string' },
+      pages: { type: 'string' },
+      check: { type: 'boolean' },
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci') || !project) {
+  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
@@ -325,7 +347,32 @@ export async function main(argv: string[]): Promise<number> {
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
     console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]')
+    console.error('       ursa publish <projectPath> --out <dir> [--repo owner/name] [--yes]')
+    console.error('         prints what would become public and writes nothing without --yes')
+    console.error('       ursa address <projectPath> [--record <id>] [--pages owner/name] [--check]')
+    console.error('         prints the address a stranger can type for each record, and what is missing')
     return 2
+  }
+  if (cmd === 'address') {
+    const { runAddress } = await import('../address.cli')
+    return runAddress({
+      projectPath: absPath(project),
+      recordId: values.record ?? null,
+      // `GITHUB_REPOSITORY` is read here for the same reason `publish`
+      // reads it: on a runner it is the one fact about the repository
+      // that is always present and always right.
+      pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
+      check: values.check === true,
+    })
+  }
+  if (cmd === 'publish') {
+    const { runPublish } = await import('../publish.cli')
+    return runPublish({
+      projectPath: absPath(project),
+      outDir: values.out,
+      repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      acknowledged: values.yes === true,
+    })
   }
   if (cmd === 'ci') {
     const repo = values.repo ?? process.env.GITHUB_REPOSITORY
