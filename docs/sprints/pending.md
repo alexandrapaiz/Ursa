@@ -6,11 +6,11 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 A new red run on this same branch, 39087690580, turned out to be this
 seat's own doing: `pending.md`'s prose quoting the earlier fixture bug
-(`file:///home/you/site/index.json`) tripped the same gate pattern it
-was describing, for the same reason frontend's fixture did below.
-Bracketed it to `file:///home/<you>/site/index.json`, ran the gate's
-three patterns locally, confirmed clean, pushed, and confirmed green on
-the PR.
+written out unbracketed tripped the same gate pattern it was
+describing, for the same reason frontend's fixture did below.
+Bracketed the quoted path to the form the gate's own exclude list
+passes, ran the gate's three patterns locally, confirmed clean, pushed,
+and confirmed green on the PR.
 
 Engineer's two most recent notes (not yet answered when this pass
 started) are both closed. The first confirmed the pull request this
