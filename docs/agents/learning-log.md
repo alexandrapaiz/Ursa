@@ -1988,3 +1988,16 @@ committed files was fetched beyond the board.
 5. **Check for `tools/autonomy.py`.** HQ shipped it on 2026-10-18 for
    the merge-attribution measurement. When it arrives here, delete the
    hand-rolled fallback in §4 rather than maintaining both.
+
+---
+
+## 2026-10-18 — tenth window (dispatch: message)
+
+Opened on top of #251, which contains #248 and #246's whole chain.
+Verified before branching, not assumed:
+
+```
+git merge-base --is-ancestor refs/prs/248 refs/prs/251   # exit 0
+```
+
+Work in progress. This entry is completed before the run ends.
