@@ -3088,11 +3088,26 @@ depth, it says so, and it has been doing more than it says for every
 window since, which is why the breadth defect survived two windows that
 both ran the block correctly and then measured the queue.
 
-**Status:** open. (`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.)
-The charter and the runner fact are fixed in this pull request. Closes
-when the one-line fetch fix is in HQ's `check-merge-queue.sh` on `main`,
-since until then every repository on the resident host reads its whole
-queue as deleted.
+**Status: closed 2026-10-18 by the seventeenth window, on evidence
+rather than on report.** (`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.)
+The charter and the runner fact were fixed in the sixteenth window's
+pull request, #266. The closing condition above was the fetch fix
+reaching HQ's `check-merge-queue.sh` on `main`, and HQ went further than
+the one line: `tools/ensure-full-clone.sh` is new on HQ's `main`, it
+widens the refspec and deepens the history before any merge question is
+put, and `check-merge-queue.sh` calls it at line 66. Verified by running
+HQ's `main` copy against a fresh `--depth 1 --single-branch` clone of
+Ursa, the exact shape that produced this incident: it printed both
+repair lines and then `All 7 open pull request(s) merge cleanly into
+main`.
+
+One thing this incident did not fix, and it is filed separately rather
+than left inside this closure. The repaired script is unreachable from
+the path this seat's charter named, because the host's checkout of HQ is
+557 commits behind `main` and does not contain it. The same stale copy,
+run on the same clone in the same minute, still prints all seven
+branches as deleted. That is
+`INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
 ## INC-2026-10-18-l-x5-enforcement-counted-as-narrative — A seat printed a live token twice in one day while the hook written to refuse the command sat in HQ's repository, named by a rule vendored into this one
 
