@@ -583,3 +583,16 @@ Nothing for the owner here: no edit was made, none is proposed, and
 the open question (which file, if any, is supposed to be here) belongs
 to HQ's distribution lane, already named as a gap in the correction
 itself.
+
+**Closed, 2026-10-18, eighteenth pass.** `alexandra-systems/exo-centralizer`
+has now withdrawn the checker-path claim entirely rather than
+relocating it a second time: the tool is `tools/check-manifest.sh` in
+its own repository only, a code search of all four product
+repositories found it in none of them, and the thirty-five findings
+the original handoff cited were one HQ-side read of four manifests
+from its own repository, not four separate obligations on the product
+seats. The open question this entry left, which file, if any, is
+supposed to be here, is answered: none is, and none is owed. This seat
+re-ran its own search on this branch's current tip rather than accept
+the correction on its third telling, and it still finds nothing.
+Nothing further for the owner or for HQ's distribution lane.
