@@ -13,6 +13,7 @@
 //   4. the index page is self-contained: it fetches nothing.
 
 import { describe, it, expect } from 'vitest'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -177,6 +178,105 @@ describe('the published site', () => {
     const result = publish({ projectPath: project, outDir: out, acknowledged: true })
     const onDisk = JSON.parse(readFileSync(join(out, 'index.json'), 'utf8'))
     expect(onDisk).toEqual(JSON.parse(JSON.stringify(result.index)))
+  })
+
+  // The frontend seat's viewer stopped inlining records into the set page
+  // on 2026-10-18 and now fetches one record on demand, which is what
+  // these two fields are for: they are how a page that fetched a record
+  // over the network earns the right to say the bytes it is rendering are
+  // the bytes the index was built from. A digest that is merely present
+  // and does not match the file is worse than an absent one, so every
+  // test here reads the file back off disk rather than trusting the
+  // returned index.
+  it('states each record\'s byte count and sha256, both measured against the file on disk', () => {
+    const project = projectWith([fixtureRecord('alpha'), fixtureRecord('beta')])
+    const out = outDirIn(project)
+    const result = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    expect(result.index.records).toHaveLength(2)
+    for (const summary of result.index.records) {
+      const onDisk = readFileSync(join(out, summary.json))
+      expect(summary.bytes, `${summary.id} byte count`).toBe(onDisk.byteLength)
+      expect(summary.sha256, `${summary.id} digest`)
+        .toBe(createHash('sha256').update(onDisk).digest('hex'))
+      expect(summary.sha256).toMatch(/^[0-9a-f]{64}$/)
+      expect(summary.bytes).toBeGreaterThan(0)
+    }
+  })
+
+  it('digests the bytes it wrote, not a second serialization of the record', () => {
+    // The property this protects: `summarize` is handed the buffer that
+    // `write` receives. If it ever recomputed `JSON.stringify` instead,
+    // this test would still pass against today's serializer and would
+    // start failing the day key order, indentation or the trailing
+    // newline moved, which is exactly the silent drift the published
+    // digest exists to make impossible. So the assertion is stated over
+    // the file, and the file is read as bytes rather than as a string.
+    const project = projectWith([fixtureRecord('alpha')])
+    const out = outDirIn(project)
+    const result = publish({ projectPath: project, outDir: out, acknowledged: true })
+    const summary = result.index.records[0]!
+    const bytes = readFileSync(join(out, 'records', 'alpha.json'))
+
+    expect(bytes.byteLength).toBe(summary.bytes)
+    expect(createHash('sha256').update(bytes).digest('hex')).toBe(summary.sha256)
+    // And the digest is of the whole file including its final newline,
+    // since that is what a fetch returns.
+    expect(bytes.subarray(-1).toString('utf8')).toBe('\n')
+  })
+
+  it('gives two different records two different digests, and the same record the same one', () => {
+    const project = projectWith([fixtureRecord('alpha'), fixtureRecord('beta')])
+    const out = outDirIn(project)
+    const first = publish({
+      projectPath: project, outDir: out, acknowledged: true,
+      publishedAt: '2026-10-18T00:00:00.000Z',
+    })
+    const [a, b] = first.index.records
+    // Two records differing only in their id: the digest has to move,
+    // because the id is in the bytes.
+    expect(a!.sha256).not.toBe(b!.sha256)
+
+    // Republishing the same unchanged records at a different build time
+    // must not move a record's digest. `publishedAt` lives in the index
+    // and not in a record, and this is the test that keeps it there: a
+    // digest that changed on every rebuild would make a viewer's "this
+    // is not the record the index names" warning fire on every deploy.
+    const second = publish({
+      projectPath: project, outDir: out, acknowledged: true,
+      publishedAt: '2026-10-19T00:00:00.000Z',
+    })
+    expect(second.index.records.map((r) => [r.sha256, r.bytes]))
+      .toEqual(first.index.records.map((r) => [r.sha256, r.bytes]))
+  })
+
+  it('moves a record\'s digest when the record itself changes', () => {
+    const project = projectWith([fixtureRecord('alpha')])
+    const out = outDirIn(project)
+    const before = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    // The case the digest is actually for: the record at the address was
+    // replaced. Saved through the store rather than written by hand, so
+    // what changes is a record and not a file that happens to sit there.
+    const edited = fixtureRecord('alpha')
+    edited.task.finished = false
+    saveRecord(project, edited, null, null)
+    const after = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    expect(after.index.records[0]!.sha256).not.toBe(before.index.records[0]!.sha256)
+    expect(after.index.records[0]!.sha256)
+      .toBe(createHash('sha256').update(readFileSync(join(out, 'records', 'alpha.json'))).digest('hex'))
+  })
+
+  it('announces the two fields with a minor version bump, since a pinned viewer reads the number', () => {
+    // The frontend viewer pins the major and accepts any minor at or
+    // above what it was written against, and says "this index predates
+    // digests" below that. That sentence is only correct if the contract
+    // version moved when the fields arrived, so the number is asserted
+    // here rather than left as a constant nobody reads.
+    const [major, minor] = PUBLISHED_INDEX_VERSION.split('.').map(Number)
+    expect(major).toBe(0)
+    expect(minor).toBeGreaterThanOrEqual(3)
   })
 
   it('republishes the whole set rather than appending to it', () => {
