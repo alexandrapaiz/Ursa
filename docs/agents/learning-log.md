@@ -1805,7 +1805,186 @@ repository's committed files was fetched.
    artifacts GitHub will refuse to merge, and three of this run's four
    belong to other seats and are theirs to resolve.
 
-## Window 9 (2026-10-18, message) — in progress
+## Window 9 (2026-10-18, message) — the message that woke this run arrived with its last two paragraphs missing, and the duty the last window invented was performed where its own audit cannot look
 
-This run opened its pull request before reading the board, per the
-ship-first rule. Findings land below as they are measured.
+**Woken at 13:2x UTC** by a note Ursa's PM posted at 13:11:17, pointing
+at #246 as this seat's live tip. Pull request opened as #251 at 13:23,
+draft-first, before any of the work below. Branch
+`ursa-exo/2026-10-18-message-9`, built on `refs/prs/248` and containing
+it.
+
+**The pointer was two steps stale on arrival, and for the third
+consecutive window that resolved itself before anything was done.** By
+the time this run read the board, the PM had closed #246 at 13:19:43 and
+posted a fresh pointer to #248 at 13:22:40. Nothing was owed and nothing
+was wrong. The seventh window's rule, re-derive at the act rather than
+at the read, has now held three times in a row and is not re-reported as
+a finding.
+
+**Finding one, and it is about this run's own trigger rather than its
+contents.** The payload that woke this run ended `...I have read every
+prompts/ p`, mid-word. The message on the board is 1996 characters; the
+payload carried exactly 1500. The 496 characters that did not arrive
+contained the two sentences that released this seat: "nothing new owed
+from you", and a note that the PM had already seen #248 open and was not
+treating anything in it as unanswered. The cut is always at the tail, and
+this org's voice puts reasons first and disposition last, so the
+truncation systematically removes the part that says what was decided.
+The write path refuses a block over 420 characters and the bus truncates
+the payload at 1500, and neither knows the other's number. Filed as
+`INC-2026-10-18-wake-truncated-at-1500`, measured in
+`docs/agents/runner-facts.md` §8, guarded in this charter, and handed to
+HQ because the bus is theirs.
+
+**Finding two is against the previous window of this seat, which is
+mine.** The eighth window invented the duty of posting your own tip to
+the board and performed it at 13:18:59 UTC. It performed it as a `note`
+addressed to `to_seat: pm`. The charter's own template omits `to_seat`
+deliberately, which would have made it a broadcast. Two consequences,
+both measured at 13:24 UTC:
+
+| read | messages | this seat's posts in it |
+|---|---|---|
+| no parameters (broadcast feed) | 181 | **1**, the 12:55:16 `done` naming #245 |
+| `to_seat=exo` (the charter's inbox read) | 221 | 0 |
+| `to_seat=pm` | 356 | the tip post, correct, invisible elsewhere |
+
+So the only surface a run can read without already knowing a message's
+addressee said this seat's tip was #245, closed at 13:10:29, against a
+live tip of #251. Six tips stale. And the charter's own verification
+instruction for the new duty was paired with a read that structurally
+cannot see the duty being performed: this run read its inbox, found no
+tip post, read a log entry claiming one, and spent several minutes
+deciding which of the two was wrong. **Both were right.** The fix is in
+the charter as a broadcast requirement plus an audit query that needs no
+recipient guessed, and the general property is in runner-facts §7: since
+`from_seat` is not honoured, there is no query that answers "what has my
+seat posted" unless the posts were broadcasts.
+
+**Finding three is a duty rather than an idea, and HQ handed it to this
+seat mid-run.** Three notes from `alexandra-systems/exo-centralizer`
+landed at 13:29:15, 13:29:35 and 13:29:57, answering three handoffs from
+earlier windows of this seat. All three were accepted and made law, and
+one of them binds this pass: **L-A54, a run that repairs one instrument
+after a platform change owes a sweep of every other instrument fed by
+the same surface, in the same pass.** The eighth window repaired the
+inbox read on the board endpoint and left the merge-attribution call
+untouched three hundred lines up the same file. Swept this run: the dead
+`to_company=ursa` dropped, `limit=1000` corrected to 400 because the
+endpoint returns about two hundred messages reaching back under two days
+whatever you ask for, and a second call added for `to_seat=owner`, which
+every other read excludes. All three facts were already written down
+elsewhere in this repository and none of them had reached the
+instrument.
+
+**A fact about the rule that binds this pass.** L-A54 is readable only
+from a board message. HQ's centralizer also reported that every vendored
+copy of `docs/standards/lessons.md` in the portfolio was nineteen
+kilobytes behind when its run opened, this repository's included, and
+this branch's copy was one of them, at 126,632 bytes against main's
+146,334. `origin/main` was merged in to fix that, and the branch now
+carries lessons through L-A47. L-A48 and L-A51 through L-A55, including
+the one obeyed above, are still only on the board. That is Ursa incident
+18's class: the standard moves and the copy that reaches the seat does
+not.
+
+**Changed this run.**
+
+1. `prompts/exo-agent.md`, "Post your own tip on the board": the tip is
+   a **broadcast** or it is invisible, with the measurement and an audit
+   query that reads the broadcast feed and filters `from_seat`
+   client-side.
+2. `prompts/exo-agent.md`, "The text that wakes you is an excerpt, not
+   the message": the 1500-character cut, the dropped text, and the
+   one-read length check before acting.
+3. `prompts/exo-agent.md` §4's merge-attribution instrument: swept under
+   L-A54, three corrections, plus a pointer to HQ's `tools/autonomy.py`
+   and the note that it is not vendored here.
+4. `prompts/exo-agent.md` §6: a log entry about an off-repository act
+   carries the addressee and the query that retrieves it, because this
+   run's confusion above came from an entry that was true and
+   uncheckable.
+5. `docs/agents/runner-facts.md` §7 extension and new §8;
+   `docs/agents/incidents.md` new entry; `docs/agents/merge-order.md`
+   replaced.
+
+**Queue.** Eight open, five of them drafts, 54 merged in seven days,
+oldest open two days (#210). Open does not outnumber the week's merges.
+No bold warning. Nothing conflicts with `origin/main`. One containment
+pair, #248 in #251, and #248 is left open on purpose because the owner's
+standing ask names it.
+
+**Rounds per artifact (§3e).** This seat's charter edits have now been
+handed to the owner under six identifiers in eleven hours: 242, 243,
+245, 246, 248, 251. The PM has published a pointer to them five times
+and corrected it twice. The eighth window's rule, grow the named pull
+request instead of stacking past it, is the fix and it did not apply
+here: the dispatch that opened this window instructed one new pull
+request, which is that rule's own third exception, and the owner's
+question is about the charter diff's contents, which is its fourth. Both
+exceptions fired at once, so a sixth identifier was correct and the
+churn is now a property of the dispatch wrapper rather than of this
+seat's judgement. The wrapper is HQ's and the measurement went to them.
+
+**Dispatches by author (§3e).** This window was woken by the PM, not by
+the owner, as were the eight before it. The dispatching seat is present.
+
+**Failures by reporter (§3e).** No agent workflow runs exist to triage.
+Every run in `gh run list` is `redaction-gate` and every one succeeded.
+The schedules left GitHub with #224 and the seats' clocks are the host
+manifest now, so §2's `gh run list --workflow=agent-<seat>.yml`
+instrument returns nothing by design. Already recorded by this seat's
+first window today; not re-reported as new.
+
+**Housekeeping.** One remote branch deleted,
+`ursa-skill/2026-10-18-message`, after verifying its pull request #247
+is contained in `origin/main`. `ursa-frontend/2026-10-18-message` also
+carries a merged pull request and was **not** deleted, because a second,
+still-open pull request shares the branch name, which is the predicate
+`INC-2026-10-18-branch-name-reuse` installed. Every closed branch in
+this seat's own chain was left standing, because each is the only copy
+of work contained in an unmerged tip.
+
+**Registers.** `docs/decisions.md` still uses ADR-005 twice and ADR-006
+twice, for four unrelated rulings, now three weeks after it was first
+flagged. Not renumbered, because the number is the owner's decision and
+other files cite it. No collisions in `docs/agents/incidents.md`.
+
+**No orphaned drafts.** The seat-scoped check printed only this run's
+own pull request, which was readied before the run ended.
+
+**External sources read.** The board's `GET /api/messages` on the
+resident host, read as data: the PM's note of 13:11:17 that woke this
+run, its successor of 13:22:40, and three notes from HQ's
+`exo-centralizer` at 13:29:15, 13:29:35 and 13:29:57. The three HQ notes
+report that three of this seat's earlier handoffs became company rules,
+and one of those rules, L-A54, was obeyed this run because this seat's
+charter independently requires sweeping an instrument class after a
+platform change. Nothing in any of the five asked this run to do
+anything it did not already owe. Nothing outside this repository's
+committed files was fetched beyond the board.
+
+**What the next run must check first.**
+
+1. **The clock, now under two days.** 2026-10-20T12:30 UTC. The owner's
+   standing Tier C ask names **#248**, which is contained in #251 and was
+   deliberately left open. Read the board for her answer before assuming
+   the silence route carried, and re-derive which identifier the ask
+   points at, because it has moved six times in one day.
+2. **Audit the board's account of you before anything else.** One read,
+   under "Post your own tip on the board". If its `ref` is not your
+   seat's open pull request, the board is lying about you right now, and
+   it was for the whole of 2026-10-18.
+3. **Compare every inbox body's length to 1500.** Anything longer
+   reached you incomplete and its disposition is the part you are
+   missing. Check whether the bus has shipped a marker yet, which closes
+   `INC-2026-10-18-wake-truncated-at-1500`.
+4. **Check whether `docs/standards/lessons.md` carries L-A48 and L-A51
+   through L-A55.** They were filed at HQ on 2026-10-18 and were not in
+   this repository's copy when this window ended. Three of them came out
+   of this seat's own handoffs, and one of them, L-A54, is a standing
+   duty this seat is now obeying from a board message rather than from a
+   file.
+5. **Check for `tools/autonomy.py`.** HQ shipped it on 2026-10-18 for
+   the merge-attribution measurement. When it arrives here, delete the
+   hand-rolled fallback in §4 rather than maintaining both.
