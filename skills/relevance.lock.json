@@ -1,4 +1,228 @@
 {
+  "adding-a-bound-to-the-record-gate/E1": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "9bb8f0fcb30a53d3",
+    "what": "dbba24d613f4d1db",
+    "passages": "315b538e7f64bcbe"
+  },
+  "adding-a-bound-to-the-record-gate/E10": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "7b5668c1786dba20",
+    "what": "16fbd77c7d902cc0",
+    "passages": "11d452d44c425955"
+  },
+  "adding-a-bound-to-the-record-gate/E11": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "87484b9bc4b52c5b",
+    "what": "5ff446f2f690e1e6",
+    "passages": "97c52c26974cea68"
+  },
+  "adding-a-bound-to-the-record-gate/E12": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "43ddd91503339447",
+    "what": "c6c2e2569fd3dc21",
+    "passages": "0786d0ca9ee8306a"
+  },
+  "adding-a-bound-to-the-record-gate/E13": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "b0900ce9608988f1",
+    "what": "1bf20327734d29e0",
+    "passages": "18ce34636ab0b98d"
+  },
+  "adding-a-bound-to-the-record-gate/E14": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "b90f3a8aed8a0d73",
+    "what": "416081db41430689",
+    "passages": "5d52abdcab53aa7c"
+  },
+  "adding-a-bound-to-the-record-gate/E15": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "b0d0e13e49bc051c",
+    "what": "4665774e25d84822",
+    "passages": "16bd69e8751fa9f4"
+  },
+  "adding-a-bound-to-the-record-gate/E16": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "d2ab906aa50c4bd5",
+    "what": "e690ce693ea46c41",
+    "passages": "d09596259bc3accc"
+  },
+  "adding-a-bound-to-the-record-gate/E17": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "cba0cc0bdfb2f452",
+    "what": "39c7a623f585fa83",
+    "passages": "2f588e68c7af6c23"
+  },
+  "adding-a-bound-to-the-record-gate/E18": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "b3edaf6153eb58a1",
+    "what": "1602b8f5cd1eaa83",
+    "passages": "e81253ff82426ddb"
+  },
+  "adding-a-bound-to-the-record-gate/E19": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "c01c59afa317fa00",
+    "what": "d785c5a752e1585a",
+    "passages": "0df5d254e6ec51c6"
+  },
+  "adding-a-bound-to-the-record-gate/E2": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "8594fe44b988e68f",
+    "what": "a79e7bfbdb1f7fef",
+    "passages": "3cde360474f264e9"
+  },
+  "adding-a-bound-to-the-record-gate/E20": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "6f96e7e7c5405ec5",
+    "what": "06d68603ee95bb46",
+    "passages": "6d418b380242e592"
+  },
+  "adding-a-bound-to-the-record-gate/E21": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "2abe16af58e81afb",
+    "what": "a3457b5e2b1cb4db",
+    "passages": "947ea5627e89f333"
+  },
+  "adding-a-bound-to-the-record-gate/E22": {
+    "verdict": "wrong",
+    "read": "2026-10-18",
+    "lines": "7f3ec035c278e29f",
+    "what": "2afa5306086cbc00",
+    "passages": "751ae7cfbc97d4bd"
+  },
+  "adding-a-bound-to-the-record-gate/E23": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "be610415bc24ef62",
+    "what": "1034d25dc48c098a",
+    "passages": "a3147280e9a68f88"
+  },
+  "adding-a-bound-to-the-record-gate/E24": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "395f34c90103082f",
+    "what": "c66ab80afbc9c1bd",
+    "passages": "016d45566457caef"
+  },
+  "adding-a-bound-to-the-record-gate/E25": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "f83173cc4f0533f0",
+    "what": "09a445fe9683e2b4",
+    "passages": "785d1773f13f2560"
+  },
+  "adding-a-bound-to-the-record-gate/E26": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "2f32237d55bf76e0",
+    "what": "b42df637f5387fce",
+    "passages": "78753436e9dec927"
+  },
+  "adding-a-bound-to-the-record-gate/E27": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "0ea2ab3331f5d2fb",
+    "what": "37500660e68f7668",
+    "passages": "53ac4ef10f0625e1"
+  },
+  "adding-a-bound-to-the-record-gate/E28": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "16a48a2d85b7074c",
+    "what": "7493fc267c7f838d",
+    "passages": "fc3a5b4b5ba8a876"
+  },
+  "adding-a-bound-to-the-record-gate/E29": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "e247f095cd1dbdca",
+    "what": "b8b9172f70f63497",
+    "passages": "75b2ecffe57def31"
+  },
+  "adding-a-bound-to-the-record-gate/E3": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "c5b80b5d5c487bbd",
+    "what": "24a68850b06fa580",
+    "passages": "0c7d3648c45dd33e"
+  },
+  "adding-a-bound-to-the-record-gate/E30": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "b4d330c4eba0c17b",
+    "what": "c75f3fc8336b6e28",
+    "passages": "aac3f2fdfe2a2f65"
+  },
+  "adding-a-bound-to-the-record-gate/E31": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "f4701f5af6237186",
+    "what": "311614c31b32f96c",
+    "passages": "2811b683e73e2bf9"
+  },
+  "adding-a-bound-to-the-record-gate/E32": {
+    "verdict": "widened",
+    "read": "2026-10-18",
+    "lines": "7315a66a58df0c1d",
+    "what": "1f1ad4ce643ebfea",
+    "passages": "7fc038acab08f7a8"
+  },
+  "adding-a-bound-to-the-record-gate/E4": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "fe7638dc89a8172b",
+    "what": "8e2ae171f860c103",
+    "passages": "29154e73bec349f3"
+  },
+  "adding-a-bound-to-the-record-gate/E5": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "d26e98e5983b266f",
+    "what": "938f04b516cd5a2d",
+    "passages": "2ad0c8a10895fe84"
+  },
+  "adding-a-bound-to-the-record-gate/E6": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "f9a9e47c4c01047a",
+    "what": "ae7708f746f59ab4",
+    "passages": "0ec29700528503ca"
+  },
+  "adding-a-bound-to-the-record-gate/E7": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "c3fe69ff118db4d6",
+    "what": "481363ca53228099",
+    "passages": "e397383bcaf73e26"
+  },
+  "adding-a-bound-to-the-record-gate/E8": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "8751f07fe3190995",
+    "what": "e2b6d4d3508f26d9",
+    "passages": "503562191029196a"
+  },
+  "adding-a-bound-to-the-record-gate/E9": {
+    "verdict": "supports",
+    "read": "2026-10-18",
+    "lines": "5d679bf2b67bac26",
+    "what": "df343f138739995b",
+    "passages": "43bf81f06b50272e"
+  },
   "adjudicating-uncertain-spans/E1": {
     "verdict": "widened",
     "read": "2026-10-18",
