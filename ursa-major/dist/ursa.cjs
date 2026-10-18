@@ -4534,9 +4534,14 @@ function noveltyOfDisclosure(m) {
 function loadPublishable(projectPath) {
   const records = [];
   const skipped = [];
+  const consent = loadConsent(projectPath);
   for (const id of listRecordIds(projectPath)) {
     if (!SAFE_RECORD_ID.test(id)) {
       skipped.push({ id, reason: "unsafe-id" });
+      continue;
+    }
+    if (isForgotten(consent, id)) {
+      skipped.push({ id, reason: "forgotten" });
       continue;
     }
     let record = null;
@@ -4766,6 +4771,7 @@ var init_publish = __esm({
     "use strict";
     import_node_fs6 = require("node:fs");
     import_node_path7 = require("node:path");
+    init_consent();
     init_store();
     init_viewer();
     PUBLISHED_INDEX_VERSION = "0.1.0";
@@ -4791,11 +4797,12 @@ __export(publish_cli_exports, {
 function runPublish(opts) {
   const { records, skipped } = loadPublishable(opts.projectPath);
   const manifest = manifestFor(records);
-  for (const s of skipped) {
-    console.error(
-      s.reason === "unsafe-id" ? `skipped ${s.id}: this record id cannot be part of a URL, so no address exists for it` : `skipped ${s.id}: the record file could not be read as JSON`
-    );
-  }
+  const why = {
+    "unsafe-id": "this record id cannot be part of a URL, so no address exists for it",
+    unreadable: "the record file could not be read as JSON",
+    forgotten: "you erased this record with `ursa forget`, so it is not published"
+  };
+  for (const s of skipped) console.error(`skipped ${s.id}: ${why[s.reason]}`);
   if (records.length === 0) {
     console.error(
       `no records in ${opts.projectPath}/.ursa/records/. Resolve some first with "ursa run ${opts.projectPath}" or by merging a pull request with the Action installed.`
