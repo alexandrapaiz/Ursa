@@ -42,13 +42,12 @@ export function runPublish(opts: PublishCommandOptions): number {
   const { records, skipped } = loadPublishable(opts.projectPath)
   const manifest = manifestFor(records)
 
-  for (const s of skipped) {
-    console.error(
-      s.reason === 'unsafe-id'
-        ? `skipped ${s.id}: this record id cannot be part of a URL, so no address exists for it`
-        : `skipped ${s.id}: the record file could not be read as JSON`,
-    )
+  const why: Record<typeof skipped[number]['reason'], string> = {
+    'unsafe-id': 'this record id cannot be part of a URL, so no address exists for it',
+    unreadable: 'the record file could not be read as JSON',
+    forgotten: 'you erased this record with `ursa forget`, so it is not published',
   }
+  for (const s of skipped) console.error(`skipped ${s.id}: ${why[s.reason]}`)
 
   if (records.length === 0) {
     console.error(

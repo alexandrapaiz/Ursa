@@ -20,11 +20,13 @@ import { JSDOM } from 'jsdom'
 import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
 import { saveRecord } from './store'
+import { forget } from './consent'
 import type { DisclosureManifest } from './publish'
 import {
   DisclosureNotAcknowledged,
   PUBLISHED_INDEX_VERSION,
   formatManifest,
+  loadPublishable,
   manifestFor,
   noveltyOfDisclosure,
   publish,
@@ -313,5 +315,41 @@ describe('the record id becoming a public URL', () => {
       repository: 'someone/their-repo',
     })
     expect(result.warnings).toEqual([])
+  })
+})
+
+describe('an erased record', () => {
+  it('is not published even when its file is still on disk, and the refusal is named', () => {
+    const project = projectWith([fixtureRecord('kept'), fixtureRecord('erased')])
+    // `ursa forget` deletes the file as well as writing the tombstone, so
+    // this is the disagreeing case the check exists for: a .ursa/ restored
+    // from a backup, a runner cache that outlived the erasure, a record
+    // copied between clones. The file is left in place deliberately.
+    forget(project, 'erased')
+    writeFileSync(
+      join(project, '.ursa', 'records', 'erased.json'),
+      JSON.stringify(fixtureRecord('erased'), null, 2),
+    )
+
+    const result = publish({ projectPath: project, outDir: outDirIn(project), acknowledged: true })
+    expect(result.skipped).toEqual([{ id: 'erased', reason: 'forgotten' }])
+    expect(result.index.records.map((r) => r.id)).toEqual(['kept'])
+    expect(existsSync(join(outDirIn(project), 'records', 'erased.html'))).toBe(false)
+    expect(existsSync(join(outDirIn(project), 'records', 'erased.json'))).toBe(false)
+  })
+
+  it('is absent from the disclosure manifest too, so its characters are never counted', () => {
+    const both = projectWith([fixtureRecord('kept'), fixtureRecord('erased')])
+    const before = manifestFor(loadPublishable(both).records)
+    forget(both, 'erased')
+    writeFileSync(
+      join(both, '.ursa', 'records', 'erased.json'),
+      JSON.stringify(fixtureRecord('erased'), null, 2),
+    )
+    const after = manifestFor(loadPublishable(both).records)
+    expect(before.records).toBe(2)
+    expect(after.records).toBe(1)
+    expect(after.recordIds).toEqual(['kept'])
+    expect(after.finalChars).toBeLessThan(before.finalChars)
   })
 })

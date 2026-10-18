@@ -59,6 +59,7 @@
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { isForgotten, loadConsent } from './consent'
 import { SAFE_RECORD_ID, listRecordIds, loadRecord } from './store'
 import { renderViewer } from './viewer'
 import type { OutcomeRecord, ResolverIdentity, SpanClass } from './types'
@@ -313,7 +314,7 @@ export interface PublishResult {
    * publication of fifty good records, and a silent skip would publish a
    * site that claims to be the project's records and is not.
    */
-  skipped: { id: string; reason: 'unsafe-id' | 'unreadable' }[]
+  skipped: { id: string; reason: 'unsafe-id' | 'unreadable' | 'forgotten' }[]
 }
 
 export class DisclosureNotAcknowledged extends Error {
@@ -323,19 +324,43 @@ export class DisclosureNotAcknowledged extends Error {
   }
 }
 
-/** Every record on disk for this project, in id order, with the unreadable ones named. */
+/**
+ * Every record on disk for this project, in id order, with the ones this
+ * module refused to publish named and reasoned.
+ *
+ * WHY THE CONSENT RECORD IS READ HERE. `ursa forget <project> --record
+ * <id>` deletes the record file and writes a tombstone, so in the
+ * ordinary case a forgotten record is already absent from
+ * `listRecordIds` and this check finds nothing. It is here for the case
+ * where the file and the tombstone disagree: a `.ursa/` restored from a
+ * backup, a runner cache that outlived the erasure, a record copied
+ * between clones, or a tombstone written for a record that was never on
+ * this machine. `projectForMinor` in src/disclosure.ts consults
+ * `isForgotten` for exactly the same reason even though its callers also
+ * filter, and the argument is stronger here: that edge sends counters to
+ * Ursa and can be re-run, while this one writes a page to a public
+ * address that stays up until something replaces it.
+ *
+ * It is the load-bearing constraint in CLAUDE.md — "the user can always
+ * see, edit, revoke, and delete what's been inferred about them" — read
+ * at the one boundary where failing it is visible to strangers.
+ */
 export function loadPublishable(projectPath: string): {
   records: OutcomeRecord[]
   skipped: PublishResult['skipped']
 } {
   const records: OutcomeRecord[] = []
   const skipped: PublishResult['skipped'] = []
+  const consent = loadConsent(projectPath)
   for (const id of listRecordIds(projectPath)) {
     // Checked here and not left to `loadRecord`, which returns null for an
     // unsafe id and for an absent file alike. An id becomes a path segment
     // in `recordHref` and therefore a URL, so the refusal needs to be
     // visible in the result rather than folded into "unreadable".
     if (!SAFE_RECORD_ID.test(id)) { skipped.push({ id, reason: 'unsafe-id' }); continue }
+    // Before the file is read, so a tombstoned record's text is never
+    // even loaded into this process on the way to being refused.
+    if (isForgotten(consent, id)) { skipped.push({ id, reason: 'forgotten' }); continue }
     let record: OutcomeRecord | null = null
     try {
       record = loadRecord(projectPath, id)
