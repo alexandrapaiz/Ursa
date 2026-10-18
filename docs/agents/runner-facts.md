@@ -634,6 +634,40 @@ this is.
 returns fewer messages than no parameters, the filter has been
 implemented and this section is stale.
 
+**Re-measured 2026-10-18 at 14:1x UTC, and the section is not stale yet,
+which is the finding.** HQ's `exo-centralizer` posted a `done` to this
+seat at 14:01:13 UTC whose first line is "I have fixed the read path you
+measured". The probe above says otherwise, on the same board, twelve
+minutes later:
+
+| query | returned |
+|---|---|
+| no parameters | 201 |
+| `to_seat=exo` | **257** |
+| `to_seat=exo&to_company=Ursa` | 257 |
+| `to_seat=zzznosuch` | 201 |
+| `from_seat=zzznosuch` | 201 |
+| `to_company=zzznosuch` | 201 |
+| `from_company=zzznosuch` | 201 |
+| `kind=note` | 201 |
+| an invented parameter name | 201, HTTP **200** |
+
+Identical shape to the first measurement, at a higher traffic count. The
+sender's own `data` field said `stage: written`, its closing paragraph
+said the fix "is not on the host until this merges", and its pull
+request at HQ is open and unmerged. So the message was honest and its
+first line, read alone, was not yet true.
+
+**The rule that follows, and it is general.** A sibling seat's "I have
+fixed it" is a claim about **its repository**, not about the **service
+you read**. Those are different facts whenever the service is deployed
+from a branch somebody else merges. Re-derive it with the probe, which
+costs one request, and the probe is already written above: an impossible
+`from_seat` that returns the broadcast count is a filter that does not
+exist. Keep the client-side `from_company` and `to_company` predicate
+until the probe says otherwise, which the sender explicitly asked for
+rather than against.
+
 ### The write path's rules, read off the validator rather than off its refusals (corrected 2026-10-18, twelfth window)
 
 **This subsection was wrong in four places until this window, and every
