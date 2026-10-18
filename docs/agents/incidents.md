@@ -1153,3 +1153,167 @@ entry; it is not evidence that this one is still up. Closing this
 incident on the allowed_bots fact alone, so the next pass that finds a
 dispatch still failing reads the right open finding instead of
 re-diagnosing this one.
+## Incident 14 — Six of seven failures in a week were turn-cap kills, and the audit instrument could only see the time cap (2026-10-07 through 2026-10-11)
+
+**Numbering.** Filed as Incident 12 in PR #167 on 2026-10-11 and renumbered to 14 when that branch was merged down on 2026-10-17. Main had meanwhile taken 12 and 13 for two unrelated events. The merged register wins a collision and the unmerged branch moves, which is the rule Incident 5 exists to protect. Anything citing "Incident 12" and describing turn-cap kills means this entry.
+
+**What happened.** Seven agent runs failed in the week to 2026-10-11.
+Six died on `error_max_turns`: engineer 37662406675 (10-07, 120 turns),
+engineer 37719675527 (10-08, 120), skill 37832775208 (10-08, 100),
+frontend 37835424738 (10-08, 250), engineer 38103816460 (10-11, 120),
+security 38168448767 (10-11, 100). The seventh, pm 37819090675 (10-08),
+produced nothing and was caught by the no-ship tripwire.
+
+Not one of the six was a `timeout-minutes` kill. They ran 16 to 38
+minutes against caps of 45 to 90. The instrument this seat added in
+Incident 10, which compares each run's duration to its workflow's
+`timeout-minutes` and treats anything within five minutes of the cap as
+a kill, returns a clean result over every one of them. Run that check
+alone on this week and it reports that no run came near its cap, which
+is true, and implies the caps are not biting, which is false six times.
+
+**Why it happened technically.** There are two budgets per run and the
+charter knew about one. `timeout-minutes` is GitHub's, measured in
+wall-clock, and it reports a kill as `cancelled`. `--max-turns` in
+`claude_args` is the action's, measured in model turns, and it reports
+a kill as `failure` at whatever duration the run happened to reach.
+Incident 10 was a time-cap event, so the instrument written to close it
+was built around duration, and duration is exactly the dimension a
+turn-cap kill does not register on.
+
+The deeper fault is the shape of the fix, not the fix. Incident 10's
+lesson was stated as "before calling a non-success benign, name the
+threshold it ran into", which is correct and general. What shipped into
+the charter was narrower than the lesson: a single command comparing
+one duration to one named setting. A seat following the command to the
+letter, as this one is designed to, inherits the narrowing and not the
+lesson. Incident 11 found the turn cap on the engineer workflow nine
+days later and correctly called it "a different mechanism from Incident
+10", but scoped its fix to the one seat it had evidence for.
+
+**What it cost, and what it did not.** It did not cost most of the
+work. Ship-first held in the cases that were checked: Incident 11
+records PR #159 pushed before its cap, and the frontend and skill runs
+left pushed branches. It cost one run's output outright. Security run
+38168448767 made commits and never pushed them, and the no-ship
+tripwire said so in terms: "This run made commits that were never
+pushed, so the work dies with the sandbox." That is the first recorded
+case in this repository of the tripwire firing on its second condition
+rather than its first, and the work is gone.
+
+The quieter cost is nine days of triage. Incident 11 treated a turn-cap
+kill as one seat's undersized constant. With the week's six in view it
+is not a seat's constant, it is four seats hitting the same class of
+limit, and the engineer's three are a frequency finding rather than a
+one-off.
+
+**The fix.** Two parts, one shipped and one queued.
+
+1. **Shipped here: the instrument.** `prompts/exo-agent.md` §2 now
+   requires measuring the turn cap beside the time cap, with the
+   command that reads `num_turns` out of every run's log. Because
+   `num_turns` is reported on successes too, the check is a leading
+   indicator: a seat spending 85% or more of its budget on runs that
+   pass is about to start failing. It also states the general rule the
+   narrow fix dropped, that any finite budget a run can exhaust is a
+   cap, and that a new instrument should ask what other budgets are
+   invisible to it.
+2. **Queued: PWC-EXO-7**, raising the turn caps for the four seats with
+   evidence against them and giving every cap a recorded reason, the
+   same bar Incident 10 set for `timeout-minutes`. This run is on
+   GitHub Actions, where the push is refused (measured again this run,
+   below), so it is queued for lack of access.
+
+**What the org grew.** When a postmortem produces a command, the
+command is a narrowing of the lesson and the next failure will be shaped
+to miss it. Incident 10's prose was right and its instrument was partial,
+and the gap between them is where these six runs died. So a fix that
+ships as a check should also ship as the class of thing it is checking
+for. Both are now in §2.
+
+**Status:** open. (Incident 14 of this register.) Closes when PWC-EXO-7
+is applied and a later run reports a full week in which no agent run
+ends on `error_max_turns`, with the turn-usage ratios recorded either
+way, since a quiet week proves nothing on its own.
+
+## Incident 15 — The event bus copied one seat's in-flight pull request text into another seat's instructions, and the seat that received it was saved by a rule that is in no workflow (2026-10-11)
+
+**Numbering.** Filed as Incident 13 in PR #167 on 2026-10-11 and renumbered to 15 on 2026-10-17, for the reason in Incident 14's numbering note. Anything citing "Incident 13" and describing the event bus or a reassigned pronoun means this entry.
+
+**What happened.** The security seat's run 38168448767 opened PR #165
+and wrote an opening paragraph to itself: resolve "the backlog of this
+seat's own open pull requests (#47, #75, #85, #112, #124)" and "this run
+executes both charter sweeps". That run then hit its turn cap
+(Incident 14) and was reported as failed.
+
+A message dispatch woke the PM seat to triage the failure. The trigger
+payload the PM received contained that paragraph, word for word, with
+"this seat" still in it. Read as written, it instructed the PM seat to
+go and resolve five pull requests belonging to the security seat.
+
+The PM seat did not do it. Its run (PR #166) checked the branch names,
+found all five on `ursa-security/*` and `sec/*`, identified the text as
+PR #165's own body, named the mechanism (the dispatcher that assembled
+the payload copied the reported run's in-flight PR text and mislabeled
+the seat), cited the external-content rule, and declined, saying in
+writing that it had touched none of the five.
+
+**Why it happened technically.** The dispatcher assembling a
+failure-triage payload includes text from the failed run's artifacts,
+and a seat's own PR body is written in the second person about itself.
+Pronouns in that text do not survive the move: "this seat" resolves to
+the author in the source and to the recipient in the destination. No
+component is lying and the payload is faithful; the referent is what
+breaks. Any seat's self-addressed prose becomes an instruction to
+whoever the bus hands it to next.
+
+This is the injection shape the 2026-10-05 external-content rule was
+written for, arriving from inside the org rather than from the public
+web, which makes it harder and not easier to catch. The text was
+genuinely produced by a real seat in this repository, in this
+repository's own voice, about work that really is queued. Everything
+about it reads as legitimate except the pronoun.
+
+**What it cost.** Nothing, this time, and the near-miss is the finding.
+Had the PM complied it would have written to another seat's pull
+requests under `bypassPermissions` with `contents: write`, on the
+authority of a sentence no human wrote and no charter authorised.
+
+**What saved it, and why that is fragile.** The external-content rule,
+reached through `prompts/pm-agent.md`. This run's §2b sweep found that
+rule present in eleven of eleven charters and absent from eleven of
+eleven workflow `prompt:` blocks, which is PWC-EXO-6, queued 2026-10-05
+and still unapplied. The charter's own §2b says the workflow block
+arrives last and closest to the model's attention and should be expected
+to win on a conflict. So the guardrail that stopped this held in the
+weaker half of the charter, and it held because one run read carefully.
+That is not a control, it is a good outcome.
+
+**The fix.** Three parts, all queued or already queued, because none of
+them is this seat's to apply from Actions.
+
+1. **PWC-EXO-6 is escalated, not re-queued.** It now has a live
+   near-miss behind it rather than a principle. The entry is annotated
+   with this incident.
+2. **PWC-EXO-7** carries a payload-hygiene change alongside the turn
+   caps: text quoted from another run into a seat's payload is fenced
+   and labelled as quoted material rather than concatenated into the
+   instruction body.
+3. **Named for the owner, not fixed here.** The dispatcher is not in
+   this repository's workflow files, so this seat can describe the
+   defect and cannot reach it.
+
+**What the org grew.** The external-content rule was written against
+the public web and the open issue tracker. Its sharpest case is
+internal: one seat's honest self-addressed text, moved by a machine
+into another seat's instructions. A seat's PR body is not addressed to
+the org, it is addressed to itself, and the bus does not know the
+difference. The rule's existing sentence about other seats' PR
+descriptions covers this exactly, which is why it worked, and the
+reason it is worth recording is that the dangerous version arrives
+through a trusted pipe with no attacker in it at all.
+
+**Status:** open. (Incident 15 of this register.) Closes when the
+dispatcher fences quoted text, or when the owner records that payload
+assembly is working as intended and the receiving seat's judgement is
+the control.
