@@ -1,0 +1,331 @@
+{
+  "generatedBy": "ursa-major/tools/make-bundle-digest-index.ts (npm run provenance:bundles)",
+  "path": "ursa-major/dist/ursa.cjs",
+  "rows": [
+    {
+      "digest": "a4063468ef71edd9",
+      "sha256": "a4063468ef71edd9043a49ed240f8bbe1c129b5ad04b616bcca858243739d886",
+      "blob": "3c4e67baa71f1daf4235d4a65841dcf43749ed5b",
+      "bytes": 74545,
+      "introducedBy": [
+        {
+          "commit": "0d46fb79eccd58fe357827458d0f667095884fb5",
+          "date": "2026-10-05T03:39:36.000Z",
+          "subject": "feat(ursa-major): ursa ci — the resolver's CI launch, and a one-file bundle"
+        }
+      ]
+    },
+    {
+      "digest": "39a79f21578cc98a",
+      "sha256": "39a79f21578cc98ac5cb7b9c94baf3d192fc7377a9f50e966094ef74666aa14c",
+      "blob": "3363b234cd2e384fd91172be0637c5e8b6ad1e32",
+      "bytes": 75631,
+      "introducedBy": [
+        {
+          "commit": "932b562064d20098b138f79e87f1529a2edd5db3",
+          "date": "2026-10-05T03:43:23.000Z",
+          "subject": "feat(ursa-major): action.yml, the example consumer workflow, and 23 tests"
+        }
+      ]
+    },
+    {
+      "digest": "61b24bb11ec7d243",
+      "sha256": "61b24bb11ec7d243e7a42f5cd981b09055998fc399c346da179eb12986349f41",
+      "blob": "c52bbd4abdab068f2d9e10b7743fb452f0d55adb",
+      "bytes": 166859,
+      "introducedBy": [
+        {
+          "commit": "e27bc68f84aaa35666c0cc26f268be80682d2528",
+          "date": "2026-10-08T03:05:13.000Z",
+          "subject": "Reconcile the resolver-Action branch onto main (subsumes #92, #126, #130)"
+        }
+      ]
+    },
+    {
+      "digest": "db8ebdf738fc759a",
+      "sha256": "db8ebdf738fc759a33ec1ef4605d73ccf0d100145ede24560d6bcabb6e747617",
+      "blob": "02820d45570d73079e130b354930d0224f9d087f",
+      "bytes": 168111,
+      "introducedBy": [
+        {
+          "commit": "d4a57c4c6abd1889a9f131eb1e3f58a2caf3857b",
+          "date": "2026-10-08T03:11:34.000Z",
+          "subject": "The empty-window sentence was asserting a cause it had not checked"
+        }
+      ]
+    },
+    {
+      "digest": "b0db25771d26783b",
+      "sha256": "b0db25771d26783b314701bce61d763d00480f4ec86eaf3c6c050f1e16ca59f1",
+      "blob": "437e3e4a4bcfc4c4b5c3767972843d3c35e13825",
+      "bytes": 169567,
+      "introducedBy": [
+        {
+          "commit": "a675288e6d5e0b354a2aac8ba76b98e04cc40d1c",
+          "date": "2026-10-10T02:46:19.000Z",
+          "subject": "The design artifact, the parity test's own failure message, and the README rows"
+        }
+      ]
+    },
+    {
+      "digest": "92bc09fed803237f",
+      "sha256": "92bc09fed803237f243c239ea7fb5ef75779b6e8f8fe88a13ca9c59bd61c6d7f",
+      "blob": "46e06b20c48429373d0f5763be7f2050692b3b32",
+      "bytes": 169655,
+      "introducedBy": [
+        {
+          "commit": "bdeaeca17092058be356ff1283db2800ae521a63",
+          "date": "2026-10-10T02:50:35.000Z",
+          "subject": "The bound count was thirteen in prose and fifteen in code; derive it"
+        }
+      ]
+    },
+    {
+      "digest": "1b3d13fdd436ff7d",
+      "sha256": "1b3d13fdd436ff7d76ec8d557f49ec5784f2991b5612b593190fb3deb75ffc0b",
+      "blob": "15bc3bcfe8dbf45fd85a6435da1aa1f0ad7f8b12",
+      "bytes": 172919,
+      "introducedBy": [
+        {
+          "commit": "f4400048315fe1c28a6a69074afae07f8a85e18b",
+          "date": "2026-10-11T18:26:19.000Z",
+          "subject": "Engineer 2026-10-11: land the agent-coauthor detection fix (subsumes #159)"
+        }
+      ]
+    },
+    {
+      "digest": "1dd251d21d457c96",
+      "sha256": "1dd251d21d457c96de9e8558bb0adb07cb6d185003063a72fb735fb48ab947c1",
+      "blob": "5c7f31d35872da84d5a97336af80f389b8859231",
+      "bytes": 177322,
+      "introducedBy": [
+        {
+          "commit": "6a993c64271eb44ac031374b54dd15d298772aae",
+          "date": "2026-10-12T20:34:23.000Z",
+          "subject": "Show the resolver to the reader: CI comment line, run output, rebuilt bundle"
+        }
+      ]
+    },
+    {
+      "digest": "14b54a1bbd17b9f4",
+      "sha256": "14b54a1bbd17b9f4efc3f8e717f2a41cf098a38373f10feae5c27fac2d74ec18",
+      "blob": "3be797704696165b2046c9e94f9cd072b42db4c1",
+      "bytes": 179913,
+      "introducedBy": [
+        {
+          "commit": "e8ecb80f8a1ea1eda03b8f0870b0ccc5a12074b2",
+          "date": "2026-10-13T03:59:53.000Z",
+          "subject": "Say it where the reader is: the class table, and the span inspector"
+        }
+      ]
+    },
+    {
+      "digest": "c8dd2ce3132a52ce",
+      "sha256": "c8dd2ce3132a52ce90be76007c732e0dde8518745a8cb7501a4b179e25775679",
+      "blob": "612188466d70df5e39d271a20819f66e40a84ea7",
+      "bytes": 180446,
+      "introducedBy": [
+        {
+          "commit": "939c6fde1b07a8bf4fa9287e8d814e32016ecc79",
+          "date": "2026-10-13T04:00:50.000Z",
+          "subject": "Character granularity for the formatting-only diff"
+        }
+      ]
+    },
+    {
+      "digest": "fbbbf6ea83aecc96",
+      "sha256": "fbbbf6ea83aecc96fd82128ce85e9b719892f3ec3d84949b96eb11b72fdacb39",
+      "blob": "f59b05c8fbcd2deb7dfdd46a8e306d1d6253e5c3",
+      "bytes": 180487,
+      "introducedBy": [
+        {
+          "commit": "d228e90da5f665480f9776f6f60f80fb11e8d671",
+          "date": "2026-10-13T04:07:29.000Z",
+          "subject": "A formatting-only mutation is not a one-shot correction"
+        }
+      ]
+    },
+    {
+      "digest": "e7dd3bfd3576c971",
+      "sha256": "e7dd3bfd3576c971f6fecd4269831bbb4621ca6ecd670af9806cca0c4b1e6fe3",
+      "blob": "0b34dbf6ec8bbe37572ca391ce8b2da86dfe06d9",
+      "bytes": 183316,
+      "introducedBy": [
+        {
+          "commit": "8baff5d88304b748767cfb106ef9b0153c877f00",
+          "date": "2026-10-13T18:33:29.000Z",
+          "subject": "The counts the sixteenth bound moved, and the rebuilt bundle"
+        }
+      ]
+    },
+    {
+      "digest": "bdfe57a5828d8592",
+      "sha256": "bdfe57a5828d8592bc8a32af68cac14e5d44cd71fd51ecb5ea1cac4e9f376f6f",
+      "blob": "cb239bea215f68c83b3db726091c5f23bc34cbd5",
+      "bytes": 186613,
+      "introducedBy": [
+        {
+          "commit": "09ccf7457a3d0609ac22b4392ad7c8f8ab8cdaee",
+          "date": "2026-10-14T02:23:23.000Z",
+          "subject": "The fixture for the new clause, the counts it moved, and the rebuilt bundle"
+        }
+      ]
+    },
+    {
+      "digest": "b1a295d5c6956f08",
+      "sha256": "b1a295d5c6956f085ea5614b9007002ad014e04dce82ba5c639ad5f25f52ba18",
+      "blob": "bf58b0687b47dd93c1eed12d281c7bf5f1a9f4a7",
+      "bytes": 187643,
+      "introducedBy": [
+        {
+          "commit": "dfcda6658315b1d04d305fbc94c9242034791a35",
+          "date": "2026-10-14T16:08:28.000Z",
+          "subject": "Rebuild dist/ursa.cjs for the horizon bound"
+        }
+      ]
+    },
+    {
+      "digest": "74e4aaf58b89e266",
+      "sha256": "74e4aaf58b89e2663866ebf74496f8348d44e98948b57ff9fabd7fd0a209b412",
+      "blob": "0fb637557b809c92d65add0032df5897a1295456",
+      "bytes": 192501,
+      "introducedBy": [
+        {
+          "commit": "18d15c1ec19bd069b8f6f27247118f1bc31886b7",
+          "date": "2026-10-15T02:03:34.000Z",
+          "subject": "Rebuild the bundle, and make the viewer assertion one that can fail"
+        }
+      ]
+    },
+    {
+      "digest": "e099f7e4576f4757",
+      "sha256": "e099f7e4576f4757a970f948c92cdd94ca326a37ffc6ff39ba2daf085d8877b1",
+      "blob": "6f6f482aa217bd8bfbf38e310041cc2cfa9dfa51",
+      "bytes": 196261,
+      "introducedBy": [
+        {
+          "commit": "223a457b4bd9d7ff1b3ab72a8ebc51e4c82a57fd",
+          "date": "2026-10-15T15:53:42.000Z",
+          "subject": "exclusion: the file-level refusal gets the clock the span level got"
+        }
+      ]
+    },
+    {
+      "digest": "71186700e3b07a06",
+      "sha256": "71186700e3b07a06fa3f87b4abaf8567baf7c04d3791a2b01bd6c968cc8a3919",
+      "blob": "3d7ed6bc65a72c4696668b02b9fa8cacb63af5c5",
+      "bytes": 201273,
+      "introducedBy": [
+        {
+          "commit": "f2955226fba9168c2e97b604926245844f197297",
+          "date": "2026-10-16T01:43:04.000Z",
+          "subject": "gate: the counterexample, the unit cases, parity on the bound set, bundle"
+        }
+      ]
+    },
+    {
+      "digest": "d32543070474cc28",
+      "sha256": "d32543070474cc28bdb8300c63791d28fda0b2d14dc5b588ab99cf363de6814d",
+      "blob": "b9b015688eee7600dc2579b12a93ddfa333569c4",
+      "bytes": 201773,
+      "introducedBy": [
+        {
+          "commit": "51ef07424232f896e65d9cfff0f49d555e078c97",
+          "date": "2026-10-16T01:45:39.000Z",
+          "subject": "gate: the bound set on both surfaces a reader sees, and the bundle"
+        }
+      ]
+    },
+    {
+      "digest": "650a289f21602792",
+      "sha256": "650a289f21602792e6037d1dd8c6f0234b0e8d488195826b477e79b655396864",
+      "blob": "4b3a790ecd47eaa76dc4fe646feaf2a3ff704a4c",
+      "bytes": 202367,
+      "introducedBy": [
+        {
+          "commit": "58810904d0cb80a8c1b19aebf0e7fd4592a6c53e",
+          "date": "2026-10-17T14:15:32.000Z",
+          "subject": "Rebuild the committed bundle over the absorbed source changes"
+        }
+      ]
+    },
+    {
+      "digest": "035e533b20f1097b",
+      "sha256": "035e533b20f1097b9a02275098e8b3240d66d60a42931be48ae2562f1016d866",
+      "blob": "cc8e82e4a476cdfd827f85c21da347452f2ddc82",
+      "bytes": 255121,
+      "introducedBy": [
+        {
+          "commit": "b34b69297e2e7eec9cf43e22f4399844ea0b0188",
+          "date": "2026-10-18T00:47:32.000Z",
+          "subject": "The Action can write the site, and one workflow publishes it to the stranger's own Pages"
+        }
+      ]
+    },
+    {
+      "digest": "3be06c2173f12c37",
+      "sha256": "3be06c2173f12c37371b69d454e8fffd4b0dc2223db4c885a26c0bd7fab1e0a6",
+      "blob": "5abb1efd24af5c93c632b1538027f4e80c382f15",
+      "bytes": 255382,
+      "introducedBy": [
+        {
+          "commit": "7c300d5c7d3a048c1666c533e43a153de328e68f",
+          "date": "2026-10-18T00:56:34.000Z",
+          "subject": "publish: consult the consent record, so an erased record cannot reach a public address"
+        }
+      ]
+    },
+    {
+      "digest": "6e57690406db89ed",
+      "sha256": "6e57690406db89ed7382ba821feb68e40b7b30747aa0beb1d09b49eb3dc713b6",
+      "blob": "8f7bd5dc245baacb8952c080edec7bb6d19ca69a",
+      "bytes": 269035,
+      "introducedBy": [
+        {
+          "commit": "1e0cc3bf7a16aef0bac4365504d438a3c24983c1",
+          "date": "2026-10-18T01:33:51.000Z",
+          "subject": "The address in the README, the grammar in the design doc, and a rebuilt bundle"
+        }
+      ]
+    },
+    {
+      "digest": "277611ace7436084",
+      "sha256": "277611ace7436084f435861a174df92833d6b0523d916bbf7a0aa88e0349ee90",
+      "blob": "594697310fe177a11353599e2ecf78e935940398",
+      "bytes": 272223,
+      "introducedBy": [
+        {
+          "commit": "ef8eeaf39a0e3f147b157c6f89cac40440fcf179",
+          "date": "2026-10-18T01:55:09.000Z",
+          "subject": "Rebuild the bundle for the index digest fields and the phone layout"
+        }
+      ]
+    },
+    {
+      "digest": "d16c8760a902a88c",
+      "sha256": "d16c8760a902a88c506eee79404892c3d94015d5e71299a59af7ca9ee70f7406",
+      "blob": "687a7334124cc4a887b34944399de09fce95a223",
+      "bytes": 273540,
+      "introducedBy": [
+        {
+          "commit": "a21f48ef3e98382b2f5dd3857fe1273e337ad322",
+          "date": "2026-10-18T02:31:38.000Z",
+          "subject": "The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case"
+        }
+      ]
+    },
+    {
+      "digest": "7e2c2afe6ca35b4c",
+      "sha256": "7e2c2afe6ca35b4c1655c2645c584ca4f527fc6906bbd58615e53c6fa6e2084f",
+      "blob": "c7fa67eb1f148079d602f9e003b7686306da84b4",
+      "bytes": 276711,
+      "introducedBy": [
+        {
+          "commit": "2f1f59983a935e789e37bae3a610539270c57910",
+          "date": "2026-10-18T09:21:23.000Z",
+          "subject": "The published page now names the bounds that produced its records"
+        }
+      ]
+    }
+  ]
+}

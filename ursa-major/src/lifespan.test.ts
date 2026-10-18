@@ -18,8 +18,18 @@ import { normalize } from './normalize'
 import { tokens } from './match'
 import type { FinalSpan, OutcomeRecord } from './types'
 
-function sh(cwd: string, args: string[]): string {
-  return execFileSync('git', args, { cwd, encoding: 'utf8' })
+// Author identity is set through the environment, not `git config`.
+// GIT_AUTHOR_NAME outranks a repository's user.name and every agent
+// harness exports it, so a fixture that relies on `git config` is
+// authored by whoever runs the suite. See the long note in m0.test.ts.
+const AS = (name: string, email: string) => ({
+  GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email,
+  GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
+})
+const HUMAN_ID = AS('Human Owner', 'human@example.com')
+
+function sh(cwd: string, args: string[], env: Record<string, string> = HUMAN_ID): string {
+  return execFileSync('git', args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8' })
 }
 
 // Two agent-written paragraphs, in two files. Separate files on purpose:

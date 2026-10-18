@@ -13,10 +13,20 @@ const CREDITS = [
  * different column rule, so each was misaligned at a width where the other
  * was fine.
  *
- * `column` aligns the credits with the home page's centred reading column
- * above lg, matching that page's `main` exactly. Without it the credits stay
- * on the page's own left edge, which is what the 404 needs, because it has no
- * reading column for a centred footer to agree with.
+ * `measure` names which of the site's three column widths this footer has to
+ * agree with, because the rule that closes a page has to take the measure of
+ * the content it closes.
+ *
+ *   "page"    the page's own left edge. The 404 needs this: it has no centred
+ *             column for a footer to agree with.
+ *   "reading" the home page's centred reading column above lg, matching that
+ *             page's `main` exactly.
+ *   "wide"    the record routes' centred column above xl. Added 2026-10-18,
+ *             after the first screenshot pass of those routes: at 1440 the
+ *             content hairlines ran 210 to 1050 and the footer ran 84 to 1178,
+ *             so the page ended on a rule a third wider than every rule above
+ *             it. This is the same defect the paragraph below describes, in
+ *             the one measure that did not exist when it was fixed.
  *
  * The rule sits on the padded box rather than on the <footer>, so it takes
  * the measure of the content it closes. Measured on 2026-10-08: as a child of
@@ -26,20 +36,22 @@ const CREDITS = [
  * against 820; 1920: 608 against 1920). Now every hairline on a page shares
  * one measure.
  */
+const MEASURE = {
+  page: "",
+  reading: "lg:mx-auto lg:max-w-2xl lg:px-8",
+  wide: "xl:mx-auto xl:max-w-6xl",
+} as const;
+
 export function SiteFooter({
-  column = false,
+  measure = "page",
   className = "",
 }: {
-  column?: boolean;
+  measure?: keyof typeof MEASURE;
   className?: string;
 }) {
   return (
     <footer className={className}>
-      <div
-        className={`w-full px-[clamp(2rem,8vw,6rem)] ${
-          column ? "lg:mx-auto lg:max-w-2xl lg:px-8" : ""
-        }`}
-      >
+      <div className={`w-full px-[clamp(2rem,8vw,6rem)] ${MEASURE[measure]}`}>
         {/* max-sm:gap-y-4 because below sm each credit becomes two or three
             lines and the grouping has to survive that. Measured at 320, 375,
             390 and 414: the leading inside one credit is 17px and the gap

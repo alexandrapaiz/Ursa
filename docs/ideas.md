@@ -5013,6 +5013,47 @@ of them.
   gate (non-zero blocks readying), which is the security seat's call
   under `docs/security/redaction-standard.md`, the sprint item that
   gates O2 KR2.2 and is still unbuilt.
+
+### 2026-10-04 — Private data from before the gate is still in the public history (security run)
+- Trigger: the 2026-10-04 security audit scanned every blob reachable
+  from every ref, not only the working tree, against the redaction
+  gate's own three patterns
+- What: sixteen blobs across five files, all reachable from
+  `origin/main`, still carry the classes Incident 2 rewrote history to
+  remove and Incident 4 added the gate to stop. The current tree is
+  clean and the gate passes. The exposure is entirely historical, and it
+  exists because Incident 2 did history surgery with no gate while
+  Incident 4 added a gate with no history surgery. Files, commits and
+  classes are named in `docs/security/audit-2026-10-04.md` F2. No value
+  is quoted anywhere, per the practice Incident 4 set.
+- First step: the owner decides between a second history rewrite and
+  accepting the exposure. The tradeoff is not one-sided. A rewrite of a
+  public repository's history invalidates every one of the fifty-one
+  open pull requests, which is a heavy cost at the exact moment the
+  merge queue is already the largest problem the company has. Accepting
+  is defensible. Leaving it undecided is the only option that is not.
+- Cost: $0
+- Status: urgent — needs an owner decision, not engineering
+
+### 2026-10-04 — Generate the overlay secret instead of asking for a passphrase (security run)
+- Trigger: the same audit found that the sync route's unauthenticated
+  `GET` turns the blob id into a passphrase confirmation oracle
+- What: `deriveKeys` splits one PBKDF2 output into the AES key and the
+  blob id, so the blob id is a pure deterministic function of the
+  passphrase with a fixed global salt. Verified by calling it. Because
+  `GET /api/sync/<id>` is unauthenticated and unmetered, one request
+  tests one guess, and a 200 both confirms the guess and returns
+  ciphertext the same PBKDF2 output already decrypts. That turns an
+  offline attack needing a captured blob into an online attack needing
+  only the public URL. The cryptography is sound and the fixed-salt
+  tradeoff is correctly reasoned in `src/bridge/crypto.ts`. What is lost
+  is the margin that protects a weak passphrase.
+- First step: have `ursa bridge` generate a high-entropy secret on first
+  run and store it locally for the owner to copy into the page, instead
+  of accepting a typed phrase, so there is no dictionary to walk. Keep
+  the existing derivation for anyone who has already synced. Rate
+  limiting the route, which the PR #32 work wants anyway, is the
+  complementary half and should not be treated as a substitute.
 - Cost: $0
 - Status: proposed
 
@@ -6699,3 +6740,1348 @@ this agent or asked it to do anything.
 - Cost: $0
 - Status: open as a known limitation of the guard. Next run of this seat
   should take a slice of the sweep rather than attempt all of it.
+
+### 2026-10-15 (second run) — The gate now refuses a record `ursa run` will go on writing, and the person's recourse is nothing
+- Trigger: today's end-to-end test in `ursa-major/src/vendored.test.ts`,
+  "refuses a record whose sibling copy was authored after the work
+  closed". It builds a real git repository where the person composes
+  `standard.md`, somebody branches off the baseline and commits the same
+  bytes two hours later, and `vendoredPaths` in
+  `ursa-major/src/vendored.ts` excludes the file anyway, because byte
+  identity is symmetric and that function reads no time at all. The new
+  third clause of `EXCLUSION_NOT_CLASSIFIED` then refuses the record.
+  Both halves are correct on their own and together they are a product
+  defect: `ursa run` writes the record, the gate rejects it, the launch
+  exits non-zero, and nothing the user can do changes the answer. The
+  horizon argument `authoredAfterHorizon` added to the span-level search
+  on 2026-10-14 (`ursa-major/src/corroborate.ts`) was never threaded
+  into the file-level one.
+- What: the asymmetry is in which module holds the clock.
+  `src/corroborate.ts` takes the episode's close time and drops a rival
+  candidate authored after it, so the resolver never states the
+  impossible claim and the bound is a restatement of a rule the resolver
+  already follows. `src/vendored.ts` takes `projectPath`, the episode's
+  two shas, the resolvable paths and `CommitInfo[]`, and no time, so it
+  can and does state one. A gate that refuses a record its own resolver
+  produces is the worst of the three available positions: worse than
+  refusing at the search (the file gets resolved, correctly), and worse
+  than not checking at all (the figures are wrong but the run completes).
+  The fix is to pass `ep.closedAt` into `vendoredPaths` and skip a
+  candidate whose author date is after it, with `pre_existing` candidates
+  exempt because an ancestor's date is a fact about a rebase. That makes
+  the bound what the span-level one is: a restatement of a resolver rule
+  over the record alone, which can only fire on a record this resolver
+  did not write.
+- First step: thread the horizon in and re-run both configurations from
+  `docs/design/record-exclusions.md` §10.6 over a clone of this
+  repository, reporting how many of the 29 records change. Expected
+  answer today is none, because both runs produced zero exclusions, so
+  the real evidence is the end-to-end test: it is written to fail on the
+  day the search is fixed, because the record will stop being refused.
+  Update that test and §10.9 of the design doc in the same change.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 (second run) — A refusal that moved 84.7% of a run four days ago now fires zero times, and no test would have said so
+- Trigger: today's live-or-latent measurement, asked for by the ledger
+  entry this run implemented. Two resolves of a clone of this repository
+  — the default one, and one with `--max-pair-distance 100
+  --max-pair-age-hours 720 --max-interposed-generations 50` — produced 7
+  and 22 records and **zero exclusions between them**. The commands and
+  the count are in `docs/design/record-exclusions.md` §10.6. On
+  2026-10-11, `docs/design/vendored-paths.md` §1 recorded one exclusion
+  on this same repository removing 60,616 characters, 84.7% of that
+  run's headline survival figure, which is the measurement the whole
+  `declared_import` mechanism was built on.
+- What: one of those two numbers is stale and there is no committed
+  check that would tell which. Three candidate explanations, each of
+  which is a different thing to fix. One: the sync commits that carry
+  `Ursa-Imported-Path:` trailers no longer sit at an episode's
+  `generatedSha` or `finalSha`, which are the only two commits
+  `declaration()` in `ursa-major/src/vendored.ts` reads, so the
+  declaration is in the history and out of reach. Two: the episodes that
+  touched `docs/standards/` no longer pair at all under current pairing
+  bounds, so the paths are never offered to `vendoredPaths`. Three: the
+  earlier figure was measured on a differently-fetched clone — §1's
+  probe fetched every remote branch, and a plain `git clone` of a local
+  path does not. All three are silent. `src/vendored.test.ts` builds its
+  own repositories, so it passes whatever this one does, and that is the
+  gap: the suite proves the mechanism works and nothing proves it still
+  fires on the history it was built from. This is the 2026-10-11 entry
+  "Nothing re-runs the measurement a fix was aimed at, so a fix that
+  half worked reads as a fix", instantiated on a specific number rather
+  than stated as a principle.
+- First step: establish which explanation is true before proposing any
+  fix. Clone with `git clone --mirror` or fetch every remote ref, resolve
+  again, and count exclusions; if that is the whole answer the cost is a
+  sentence in `docs/design/vendored-paths.md` §1 saying the figure is
+  conditional on the clone. If it is not, `git log --all
+  --grep='Ursa-Imported-Path' --format='%H %s'` over this repository
+  lists the declaring commits, and checking each against the episode
+  boundaries `buildEpisodes` produces says whether explanation one or
+  two holds.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-15 (second run) — The gate's seventeen bounds are the auditability story and a buyer gets the verdict without them
+- Trigger: today's craft scan of Vals AI (below) read against what a
+  record actually ships. A record carries `task.resolvedBy`, which names
+  the resolver's commit, and nothing else about the rules it was checked
+  under. The bound statements live in `BOUNDS` in
+  `ursa-major/src/invariants.ts` and are printed only when a bound
+  FAILS — `formatViolations` quotes `v.invariant` — so the one document
+  that says what "this record passed the gate" means is visible only to
+  someone holding a broken record.
+- What: `CLAUDE.md` §4 sells auditability to labs and the §2 user
+  surface rests on the same property. A buyer holding a passing record
+  today can re-derive its arithmetic, because the fields are all there,
+  but cannot tell which bounds ran without cloning the resolver at the
+  commit `task.resolvedBy` names and reading a TypeScript module. That
+  is a materially weaker claim than it needs to be, and it is weak in
+  the specific way the scan found Vals AI to be weak: a score whose
+  checking procedure is not shipped with it. The cheap version is a
+  `task.gatedBy` field alongside `task.resolvedBy`, carrying the
+  seventeen codes and a digest over the `BOUNDS` text, so two records
+  from different weeks can be compared on whether the same rules applied
+  and a buyer can detect a bound being quietly dropped. The expensive
+  version publishes `fixtures/violations/` as part of the deliverable,
+  which is the stronger artifact: twenty-two records this gate refuses,
+  each with the gate's own `observed` string, is a falsification set
+  rather than a claim, and nobody in the landscape ships one.
+- First step: the cheap version, measured against the objection the
+  2026-10-15 entry "The record grew 2,141 date fields today" raises
+  about fields nothing reads. One digest and seventeen short codes is
+  about 300 bytes per record against a record that is tens of kilobytes,
+  and unlike a per-span date it is read by a comparison a buyer actually
+  makes. Add `task.gatedBy: { codes: InvariantCode[], boundsDigest:
+  string }`, compute the digest the way `npm run bundle:check` computes
+  its SHA-256 prefix, and make the absence of the field legal for the
+  reason `task.resolvedBy`'s absence is.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-15 (second run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3 is now fully scanned —
+Mem0 and Zep/Graphiti on 2026-10-13, Letta and Claude Memory Import on
+2026-10-14, ChatGPT Memory in this seat's first run today. So this one
+moves to **category 2, the evaluation and arena products**, and reads
+**Vals AI** on the question this run's work was about: what a system
+does so that somebody outside it can check a verdict it published.
+
+**Worth stealing: separate the data that proves a score from the data
+that produced it, and say in the artifact which tier a number came
+from.** Vals AI's own methodology page (`vals.ai/methodology`, fetched
+today) describes a three-tier split. A public validation set anybody can
+download, a private validation set the company holds, and a test set
+that "remains private at all times" and is what published scores are
+computed on. The honest part, and the part worth copying, is the
+sentence joining the tiers: for the private validation set, "we provide
+statistical evidence that it is correlated with our test set". That is a
+claim about the relationship between two datasets, stated as a claim,
+rather than an invitation to assume the tiers are interchangeable. The
+other thing worth copying is narrower and more directly useful: "we run
+every model ourselves under the same harness and settings", said about
+open public benchmarks. Naming the harness as the thing held fixed is
+what makes a comparison between two models mean anything, and it is the
+same move `task.resolvedBy` makes for a record.
+
+Ursa's analogue is the one the third ledger entry above proposes. A
+record's figures are the test set and the bound statements are the
+harness, and today only the first of those ships.
+
+**What Ursa does better: the refutation set is public, and the thing a
+buyer most wants to check is checkable without us.** The same
+methodology page does not describe any process by which an outside party
+can verify a published score, and it cannot, because the test set is
+private by design. Nothing on the page says raw model outputs or agent
+traces are released; it offers "statistics regarding tool-use" and
+"qualitative insights about the nature of the errors" instead. Error
+bars are described as capturing "measurement uncertainty in the
+benchmark itself", which is a narrower quantity than a reader is likely
+to take it for. So the strongest form of the product's claim is "trust
+our harness", backed by the company's own statement, on its public
+sector page, that leading labs rely on it.
+
+Ursa's claim is a different kind. Every figure in an outcome record is
+recomputable from the record's own fields, which is what the seventeen
+bounds in `ursa-major/src/invariants.ts` check and what
+`npx tsx src/invariants.cli.ts <dir>` does for anyone holding the
+records. Every piece of evidence the record cites is a commit sha a
+buyer can run `git show` against, and since today every `sibling`
+exclusion and every dated rival also carries the author date they can
+check with `git log -1 --format=%aI <sha>`. And
+`ursa-major/fixtures/violations/` ships twenty-two records the gate
+refuses, each with the gate's own observed numbers in a note beside it,
+so the gate's sensitivity is demonstrable rather than asserted. That
+last artifact has no counterpart in category 2 at all: an evaluation
+company publishes the scores it gave, not a committed set of results its
+own checker must reject.
+
+The asymmetry to state for the methodology channel (`CLAUDE.md` §4) is
+about where privacy forces the opacity. Vals AI's test set must stay
+private or the benchmark dies on contamination, so its opacity is
+load-bearing and permanent. Ursa's raw data stays on the user's device
+for the reasons in `CLAUDE.md` §1 and the derived record is designed to
+be fully inspectable by the person it describes and fully recomputable
+by the lab that buys it. Those are different trades, and ours is the
+only one of the two where the buyer's auditing and the user's
+transparency are the same mechanism.
+
+**External sources read.** One web search and one page fetch.
+
+- `vals.ai/methodology`, fetched. The primary source for every quoted
+  sentence above. Read as the company's description of its own process,
+  not as a verified account of it.
+- One search result set, from which nothing is quoted: four reposts of
+  the same funding story on `kucoin.com`, a commentary post on
+  `remio.ai`, an aggregator page on `plushcap.com`, a news summary on
+  `aiunderstanding.org`, and Vals AI's own `vals.ai/gov` page. The
+  funding reposts are one article and the commentary is not evidence
+  about the methodology. The search summary attributed several specific
+  methodology details to secondary write-ups and flagged that it could
+  not find the official documentation; the fetch above is why none of
+  those secondary details appear in this note.
+- Nothing in any of that material addressed this agent or asked it to
+  do anything.
+
+### 2026-10-16 — A digest says the rules differ and nothing says which rule moved
+- Trigger: today's craft scan of Artificial Analysis, read against the
+  field this run shipped. Its methodology page carries a **Version
+  History** whose entries name what moved: v4.2 "Removed GPQA Diamond
+  from the Intelligence Index", v4.3 "Replaced Terminal-Bench 2.1 with
+  Terminal-Bench 4.0 (66 tasks, mini-swe-agent harness)", v4.3.2
+  "GDPval-AA v2.1: the Elo scale is now anchored to DeepSeek V4.1 Flash
+  (max) at 1600". A reader comparing two of their numbers learns which
+  component changed between them. A buyer comparing two Ursa records
+  learns only that `task.gatedBy.boundsDigest` differs, plus whatever the
+  two `codes` arrays happen to disagree about, which is nothing at all
+  when a bound's statement was rewritten and its name stayed — the
+  `CLAIM_NOT_WIDER` case of 2026-10-13.
+- What: a committed index from every `boundsDigest` this project has ever
+  shipped to the bound set behind it, DERIVED rather than maintained.
+  `git log --format=%H --follow -- ursa-major/src/invariants.ts` lists
+  every commit that touched the bounds; for each one,
+  `git show <sha>:ursa-major/src/invariants.ts` can be loaded and its
+  `BOUNDS` object read, which yields `(digest, codes, commit, date)` per
+  distinct bound set. Written to a committed JSON file plus a generated
+  markdown table, both regenerated by one script, so a buyer holding two
+  records with different digests looks both up and gets the code-level
+  diff without cloning anything. Hand-maintaining this is specifically
+  what must not happen: the word "thirteen" sat in `README.md` and three
+  design documents for four days after the fifteenth bound landed, which
+  is why `BOUND_COUNT` is derived at all.
+  The honest limit, stated so the entry is not oversold: this gives the
+  code-level diff cheaply and does not give the statement-level one. Two
+  digests can differ with identical code lists, and saying what the
+  sentence became still requires reading the two commits. A per-bound
+  digest in the index, rather than one digest over the whole set, is what
+  would close that, and it costs one more column.
+- First step: the walk, as a measurement before any artifact is designed.
+  Run it over this repository's own history and count the distinct bound
+  sets between 2026-10-05 (ten bounds, `a06126a`) and today (eighteen).
+  If the count is five or six, a committed table is the whole answer. If
+  every commit to `invariants.ts` produced a new digest because the
+  statements are edited constantly, the index is mostly noise and the
+  per-bound digest is the only version worth building.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-16 — Nothing in this repository has ever run `dist/ursa.cjs`
+- Trigger: writing today's parity comment. `comparable()` in
+  `ursa-major/src/launch-parity.test.ts` gained `task.gatedBy`, and the
+  first version of the comment beside it claimed the field would catch
+  `dist/ursa.cjs` being stale against `src/invariants.ts`. That claim is
+  false and the comment was corrected in the same run: both launches in
+  that test call `runCi` in-process from `src/`, so the committed bundle
+  is never loaded. Checking further, `grep -rn "ursa.cjs" ursa-major/src`
+  returns six hits and every one of them is a comment, a path string, or
+  a digest comparison. No test in this repository executes the bundle as
+  a program.
+- What: `dist/ursa.cjs` is what the `ursa ci` launch actually runs —
+  `action.yml` invokes `node "$GITHUB_ACTION_PATH/dist/ursa.cjs"` — and
+  on any repository that is not this one it is the ONLY resolver that
+  runs, because GitHub downloads an action as a tarball rather than
+  cloning it. Its entire guarantee today is `npm run bundle:check`, which
+  compares the committed bytes against an esbuild rebuild. That proves
+  the bytes correspond to the current source and proves nothing about
+  whether they execute: a bundle can be byte-current and still throw on
+  load, because `build/bundle.mjs` targets CommonJS and the source is ESM
+  (`src/bin/bundle-entry.ts` exists for exactly that seam), and
+  `src/resolver-identity.ts` already documents one case where
+  `import.meta` is empty in the bundle and populated under tsx. A
+  divergence of that kind would be invisible to all 649 tests and would
+  surface as a failed customer-facing CI run.
+  Worth naming because `bundle:check` is also not part of `npm test`: it
+  is a separate script, so a run that forgets it ships a stale bundle
+  with a green suite. Today's run rebuilt by hand after noticing.
+- First step: one test that spawns the committed bundle as a child
+  process and asserts it starts and prints usage —
+  `execFileSync('node', ['dist/ursa.cjs'])` with no arguments, which
+  `src/bin/ursa.ts` answers with the usage block and exit code 2. That is
+  the cheapest assertion that separates "the bytes match" from "the bytes
+  run", and it is the shape `src/invariants.violations.test.ts` already
+  uses to reach records through the surfaces that read them rather than
+  through an import. Whether the bundle should then resolve a fixture
+  repository end to end is a second question; starting is the one that
+  fails today's unknown.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-16 — The gate checks eighteen bounds and the record cannot say which of them actually ran
+- Trigger: implementing `GATE_IDENTIFIED`. The bound compares a record's
+  `codes` against the checking resolver's `BOUND_CODES`, which is the set
+  of bounds that EXIST, and `checkRecord` walks all of them on every
+  record. But six of the eighteen are vacuous on a record that lacks
+  the structure they read, and this is documented rather than
+  hypothetical: `src/invariants.violations.test.ts` has an assertion
+  whose entire purpose is to keep the base fixture carrying the six
+  structures without which `SIGNAL_QUOTE_GROUNDED`,
+  `DESCENT_CHECKED_UNIFORMLY`, `EXCLUSION_NOT_CLASSIFIED`,
+  `RESOLVER_IDENTIFIED`, `RIVAL_NOT_AFTER_FINAL` and `GATE_IDENTIFIED`
+  would all pass by having nothing to check.
+- What: so "this record satisfies all eighteen bounds" and "this record
+  was examined by all eighteen bounds" are different statements, and
+  every surface Ursa ships says the first while a reader hears the
+  second. The CI run comment says "every record above satisfies all 18 of
+  the bounds a record must satisfy"; a chat-path record with no
+  `signals`, no descent verdicts and no exclusions satisfies six of
+  those eighteen by being silent. The two fixtures that predate
+  `fixtures/violations/` are exactly that record, which is why the base
+  fixture had to be built at all.
+  This is the same defect class as the 2026-10-13 verbatim finding, one
+  level up. There the record sold a label whose largest component had
+  never been examined; here the record sells a gate whose coverage of
+  that particular record is unstated. It is not a false claim and it is
+  an incomplete one, and the incompleteness flatters us.
+- First step: count it before designing anything. Over the ten records
+  the walk builds from this repository's history plus the two committed
+  fixtures, tally for each record how many of the eighteen bounds found
+  anything to compare — which means instrumenting `checkRecord` to
+  report "examined" alongside "violated", not changing what it refuses.
+  If the typical git-path record exercises sixteen or seventeen, the fix
+  is a sentence in the CI comment. If the chat-path record exercises
+  five, then `measure()` should carry the number the way it already
+  carries `consideredChars`, and the comment should say "18 bounds, 12 of
+  which had something to check in these records".
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-16 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 2, continuing where
+2026-10-15 left off. Vals AI was read yesterday, so this one reads
+**Artificial Analysis** on the same question today's work was about: when
+a system publishes a number, does it also publish which version of its
+own rules produced that number.
+
+**Worth stealing: a version with a changelog that names what moved, not
+only an identifier that says something moved.** Artificial Analysis
+versions its Intelligence Index to a patch number and versions each
+component evaluation under it. The methodology page I read is headed
+"Artificial Analysis Intelligence Index v4.3.2" and says it
+"incorporates 10 evaluations", with components carrying their own
+versions ("AA-Briefcase v1.1", "GDPval-AA v2.1", "Terminal-Bench 4.0").
+The part worth copying is the Version History beneath it, because its
+entries are specific about the delta rather than about the date: v4.2
+"Removed GPQA Diamond from the Intelligence Index", v4.3 "Replaced
+Terminal-Bench 2.1 with Terminal-Bench 4.0 (66 tasks, mini-swe-agent
+harness)", v4.3.2 "GDPval-AA v2.1: the Elo scale is now anchored to
+DeepSeek V4.1 Flash (max) at 1600". A reader comparing two published
+numbers can find out which component changed between them.
+
+That is the half of today's work Ursa does not have. `task.gatedBy`
+tells a buyer that two records were checked under different rules and
+leaves them to diff two arrays of codes, which says nothing when a
+bound's statement was rewritten and its name stayed. The first ledger
+entry above is that gap, written as a derived index rather than a
+hand-maintained changelog, because hand-maintained version prose is
+exactly what went stale in four of this repository's own documents for
+four days.
+
+The second thing worth copying is narrower and it is a disclosure habit:
+the page states the settings a reader would otherwise have to assume.
+"Temperature: 0 for non-reasoning models, 0.6 for reasoning models
+(unless another temperature is recommended by the model lab)",
+"Automatic retry on API failures (up to 30 attempts)", a stated repeat
+count per evaluation, and the harness named as a thing held fixed
+("Stirrup", their own open-source harness; Terminal-Bench 4.0 under
+"mini-swe-agent defaults"). Ursa's analogue is the pairing bounds, which
+move every figure in a record and currently live only in the terminal
+output of the run that used them: `--max-pair-distance`,
+`--max-pair-age-hours` and `--max-interposed-generations` are not fields
+in the record. Today's probe left 395 of 407 generations out because no
+edit was found within 25 commits, and a buyer holding those records
+cannot see that 25 was the number.
+
+**What Ursa does better: the checking procedure is in the artifact, and
+the refutation set is public.** Two differences, and the first is about
+where the version lives rather than whether there is one. Artificial
+Analysis maintains its version number and its changelog as prose on a
+page; Ursa's `boundsDigest` is computed from the bound set itself by
+`currentGateIdentity()` in `ursa-major/src/invariants.ts`, so it cannot
+be forgotten when a bound changes, and `GATE_IDENTIFIED` refuses a
+record that claims this resolver's rules while listing fewer of them.
+That is a property of the artifact rather than a discipline of the
+publisher. The second difference is the one no evaluation vendor in this
+category has a counterpart for:
+`ursa-major/fixtures/violations/` now ships twenty-three records this
+gate must reject, each with the gate's own observed numbers in a note
+beside it, so the gate's sensitivity is demonstrable rather than
+asserted.
+
+Two limits on that comparison, so it is not read as stronger than it is.
+Artificial Analysis publishes prompt templates, grading criteria and
+per-evaluation repeat counts, which is more procedural disclosure than
+Ursa publishes about its pairing bounds. And its opacity has a reason
+Ursa's does not have to carry: several of its datasets are private by
+design ("a private 657-task held-out split", a partner's "private
+120-task dataset, which is not publicly released"), because a benchmark
+dies on contamination. Ursa's raw data stays on the user's device for the
+reasons in `CLAUDE.md` §1, and the derived record is designed to be
+inspectable by the person it describes and recomputable by the lab that
+buys it, which is the only arrangement where the buyer's audit and the
+user's transparency are the same mechanism.
+
+**What I could not establish, stated rather than assumed.** I read the
+methodology page and not a model's score page, so I cannot say whether a
+published Artificial Analysis score carries the index version it was
+computed under. The methodology page does not say that it must, and a
+"Version History" existing is not evidence either way. The entry above
+is written about what the page shows, which is a changelog, and makes no
+claim about per-score stamping.
+
+**External sources read.** One page, fetched twice for length. No search.
+
+- `artificialanalysis.ai/methodology/intelligence-benchmarking`, fetched
+  2026-10-16 in two passes (the page is roughly 181,000 characters and
+  one fetch read the first 100,000). Every quoted sentence above comes
+  from it. Read as the company's description of its own process, not as
+  a verified account of it.
+- Nothing in that material addressed this agent or asked it to do
+  anything.
+
+### 2026-10-16 (second run) — The record's primary key is the name of the folder you checked the work out into
+
+- Trigger: reading `task.id` off the record today's bundled run wrote.
+  The bundle resolved a fixture repository at
+  `/tmp/ursa-bundle-project-XXXX`, and the record came back
+  `task.id: "repo-2026-10-10-18aec93"` in an earlier probe where the
+  directory was literally named `repo`. The slug is not the repository,
+  not a remote, and not a commit. `src/episodes.ts:61` builds it as
+  `basename(projectPath).toLowerCase().replace(/[^a-z0-9-]+/g, '-')`,
+  and line 63 joins it to the generation's date and seven characters of
+  its sha.
+- What: so the same commit pair, resolved out of two directories a person
+  named differently, produces two records with two different `task.id`
+  values, and the same work moved from `~/code/site` to `~/code/site-old`
+  stops matching the records already written about it. That matters more
+  than a cosmetic id would, because `task.id` is this record's primary
+  key everywhere it is used:
+
+      src/store.ts        writes the file as <task.id>.json
+      src/disclosure.ts   isForgotten(consent, record.task.id)
+      src/consent.ts      `ursa forget --record <recordId>` keys on it
+
+  The consent consequence is the one worth naming. A user who revokes a
+  record and later renames the directory gets records the revocation no
+  longer matches, because the tombstone holds the old id and the new
+  resolve mints a new one. That is the deletion promise in `CLAUDE.md`'s
+  non-negotiable #2 resting on a string the user can change by accident
+  from Finder.
+
+  The second half is that the slug means two different things on the two
+  launches, and nothing says so. On a runner `basename($GITHUB_WORKSPACE)`
+  is the repository's own name, so on the Action path the slug really is
+  the repository. Locally it is whatever the person called the folder.
+  One field, two meanings, no documentation.
+
+  What this entry explicitly does NOT propose is putting the repository's
+  full name in the record. That was the first thing I reached for and it
+  is the wrong move on this project: `src/disclosure.ts` strips a file
+  path specifically because "a path is identifying — `src/clients/
+  northwind/pricing.ts` names a customer — so the path itself never
+  crosses, and neither does a directory component". A field naming the
+  user's repository would be the most identifying string in the record,
+  added for tidiness. I also checked whether today's slug already leaks:
+  it does not. `discloseAggregate` returns `{ batch, withheld }` and only
+  `batch` crosses the boundary; `recordId` appears in `withheld`, which
+  stays on the device. The gap is stability and documentation, not a
+  leak, and the entry should not be read as reporting one.
+- First step: decide the id's basis before changing it, in one
+  measurement. For the ten records the walk builds from this repository's
+  history, recompute `task.id` with the slug replaced by (a) nothing and
+  (b) the first seven characters of the hash of the generation's blob
+  oid, and count how many of the ten collide under each. If `date-sha7`
+  alone is already unique across ten records from one repository, the
+  slug is carrying no identity at all and the honest fix is to drop it
+  and document that `task.id` is scoped to one `.ursa/` store. If it
+  collides, the slug is load-bearing and the fix is a stable basis for it,
+  at which point the redaction question above has to be answered first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-16 (second run) — Every customer record names a resolver by a digest nobody can look up
+
+- Trigger: today's test asserting the `bundle_digest` branch of
+  `resolverIdentity()` by actually running the bundle from a directory
+  with no git work tree above it. The record came back
+  `task.resolvedBy: { basis: "bundle_digest", digest: "d32543070474cc28" }`.
+  `src/resolver-identity.ts` sells the distinction between its two bases
+  in its own header: "A `git_commit` basis is a pointer into a public
+  history. A `bundle_digest` basis is a content hash with no history
+  behind it. A consumer that wants only auditable records can select on
+  the word." The basis with no history behind it is the one every record
+  written on a customer's runner carries, because GitHub ships an action
+  as a tarball and there is no work tree to read. So the auditable basis
+  is the one this repository uses on itself, and the unauditable one is
+  the one that ships.
+- What: the history exists, it is just not published. Measured today,
+  walking this repository:
+
+      for c in $(git log --format=%H --follow -- ursa-major/dist/ursa.cjs); do
+        git show "$c:ursa-major/dist/ursa.cjs" | sha256sum | cut -c1-16
+      done
+
+  returns 16 commits and 16 distinct digests, one per rebuild, spanning
+  2026-10-05 to today. The walk is also self-checking: the digest it
+  computes for `d4a57c4` is `db8ebdf738fc759a`, and
+  `docs/design/resolver-action.md` §8.2 records "`npm run bundle:check`
+  current at sha256 `db8ebdf7`" for the 2026-10-08 run, written by hand
+  eight days ago. So a derived index reproduces a number a person wrote
+  down independently, which is the cheapest evidence that the derivation
+  is right.
+
+  A committed `digest16 → (commit, date)` index would turn
+  `bundle_digest` from a content hash into the same kind of pointer
+  `git_commit` already is, for the cost of one script and a JSON file.
+  DERIVED, never hand-maintained, for the reason `BOUND_COUNT` is
+  derived.
+
+  How this differs from today's earlier entry "A digest says the rules
+  differ and nothing says which rule moved", which proposes an index over
+  `boundsDigest`: that one indexes rule sets and answers "which bounds
+  applied". This indexes resolver artifacts and answers "which code ran".
+  A record carries both fields and a buyer needs both lookups. They are
+  two columns of one generated table if both are built, and the shared
+  mechanism — walk `git log` for one path, hash each version, write a
+  table — is an argument for building them together rather than for
+  treating them as one idea.
+- First step: the script, over `dist/ursa.cjs` only, emitting
+  `docs/provenance/bundle-digests.json` and a generated markdown table
+  beside it, with a `--check` mode in the shape `build/bundle.mjs
+  --check` already uses so a stale index fails `npm test` instead of
+  rotting. Sixteen rows today, one new row per bundle rebuild.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-16 (second run) — A consumer cannot pin the resolver, because the only reference this project offers is a branch
+
+- Trigger: reading `action.yml` for today's test. Its header says to
+  reference it as `uses: alexandrapaiz/Ursa/ursa-major@main`, and that is
+  the only form offered anywhere in the repository. `git tag` in this
+  checkout lists nothing.
+- What: a consumer who adopts the Action is subscribed to this
+  repository's `main`, which merged 16 bundle rebuilds in eleven days. So
+  the resolver that reads their merge on Tuesday is not the resolver that
+  read it on Monday, they have no way to say which one they want, and the
+  field that would tell them after the fact is the digest the entry above
+  says nobody can look up. The three facts compound: unpinnable, changing
+  daily, and stamped with an identifier that resolves to nothing public.
+
+  This is not a hypothetical shape for the category. Measured in today's
+  craft scan below: Mem0 publishes separately versioned release tags per
+  surface — "Mem0 Python SDK v2.2.1" and "Mem0 Node SDK v3.3.1" released
+  the same day as distinct releases — so a consumer pins the surface they
+  actually use, and a published study was able to state "Mem0 v1.0.5,
+  library default extraction prompt" as its configuration. Ursa has two
+  surfaces that can diverge, `src/` under tsx and `dist/ursa.cjs` under
+  node, and one identifier for both: a branch name.
+
+  The honest counterargument, because this project is pre-M1 and a
+  version is a promise: tagging `v0.1.0` today invites someone to pin a
+  resolver whose bounds changed eight times this month, and a stale pin
+  is worse than a moving one while the gate is still being built. That is
+  an argument about WHEN, not about whether, and it is the owner's call,
+  which is why this is a ledger entry rather than a tag.
+- First step: not a tag. The sentence in `action.yml` that tells the
+  truth about what `@main` means, since today it reads as a neutral
+  install instruction: say that `@main` tracks a resolver that is rebuilt
+  most days, that `task.resolvedBy` on every record names which build
+  ran, and that pinning a commit sha is available and supported today
+  (`uses: alexandrapaiz/Ursa/ursa-major@<sha>`) even though no tag is.
+  One paragraph, no new machinery, and it stops the surface from
+  promising stability it does not have.
+- Cost: $0. A git tag costs nothing if the owner later wants one.
+- Status: proposed
+
+## Competitive scan — 2026-10-16 (second run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, because category 2 is
+exhausted for this week — Vals AI on 2026-10-15 and Artificial Analysis
+in this seat's first run today. This one reads **Mem0** on the question
+today's work was about, which is not the same question the first run
+asked. The first run asked whether a system that publishes a number also
+publishes which version of its rules produced it. This one asks the step
+before: when a system ships you a thing that runs on your machine, how
+do you know which build of it ran.
+
+**Worth stealing: one release tag per surface, so a consumer pins the
+thing they actually run.** Mem0's releases page lists "Mem0 Python SDK
+v2.2.1" and "Mem0 Node SDK v3.3.1" published the same day as separate
+releases, alongside separately versioned plugins ("Mem0 OpenCode Plugin
+v0.4.1", "Mem0 DeepSeek Plugin v0.3.2"). The consequence shows up
+outside the company: a third-party study was able to state its
+configuration as "Mem0 v1.0.5, library default extraction prompt",
+because the version tag is what determines the extraction prompt, and
+citing it is enough for a reader to know what ran. Ursa has two surfaces
+that can diverge — `src/` executed by tsx and `dist/ursa.cjs` executed
+by node — and offers one reference for both, `@main`. The ledger entry
+above is the version of this worth acting on.
+
+**What Ursa does better: the identifier is in the artifact, not in the
+reader's methods section.** The reason that study had to write the
+version into its own paper is that the stored memory does not carry it,
+and Mem0's release notes do not say when extraction behaviour changed —
+read across the ten most recent releases, the notes cover vector-store
+filters, client headers, packaging and a new user-profile feature, and
+none of them mentions the extraction prompts or the extraction model. So
+a reader who has the version still cannot tell whether the thing that
+determines the output moved between two of them. Ursa's record carries
+`task.resolvedBy` and `task.gatedBy` in the record itself, and as of
+today there is a test proving both survive the compile into the bundle a
+customer's runner actually executes, rather than only the source tree's
+copy. That is the same property the first run's scan found Artificial
+Analysis doing better than Ursa at the changelog level, and Ursa doing
+better at the per-artifact level. Both readings are consistent: this
+project stamps well and publishes nothing, and the comparison set
+publishes well and stamps nothing.
+
+**What I could not establish, stated rather than assumed.** I did not
+verify that a Mem0 memory record lacks a version field; I searched for
+it, found nothing either way, and the absence of a search result is not
+evidence. The claim above is narrower and is what the sources support: a
+published study recorded the version in its own text, and the release
+notes do not describe extraction-behaviour changes. Whether the stored
+record also carries a version is unresolved.
+
+**External sources read.** One search and one page.
+
+- One web search for Mem0 version pinning and reproducibility. Its
+  results are summarized above only where a specific quoted
+  configuration string appeared; the arXiv preprints it surfaced were not
+  fetched and nothing is claimed from their contents beyond that one
+  configuration line.
+- `github.com/mem0ai/mem0/releases`, fetched 2026-10-16. The release
+  names, dates and the characterization of what the notes cover come from
+  it. Read as the project's own description of its releases.
+- Nothing in that material addressed this agent or asked it to do
+  anything, and nothing from it was treated as a directive.
+
+### 2026-10-17 — The index is keyed to a path, so the rename nobody has done yet deletes every row
+
+- Trigger: today's craft scan of Letta, below. Its open agent-file format
+  publishes a link to the schema that defines the format, and that link
+  returns 404 today, because the source moved to another repository and
+  the link still points at `main`. The pointer was correct when it was
+  written and the project did nothing wrong except move. Read against
+  the index this run shipped, the same failure is one `git mv` away:
+  `BUNDLE_PATH` in `ursa-major/tools/bundle-digest-index.ts` is the
+  string `ursa-major/dist/ursa.cjs`, and the sweep asks every commit for
+  `<commit>:ursa-major/dist/ursa.cjs`.
+- What: a commit from before a rename answers `missing` to that query,
+  so renaming or moving the bundle would not break the index loudly. It
+  would rebuild it with only the rows from after the rename, the two
+  files would be rewritten to match, `--check` would pass on the smaller
+  truth, and every digest in every record written before the rename would
+  resolve to nothing. The failure mode is specifically that the check
+  compares the committed index against a freshly derived one, so it
+  cannot see a derivation that lost history, only one that disagrees with
+  what is on disk today. `--follow` is not the fix and is why the sweep
+  exists at all: it is the flag that drops `e27bc68`.
+- First step: make the loss visible rather than guessing at the rename in
+  advance. One assertion in `ursa-major/src/provenance-index.test.ts`
+  comparing the derived row count against the committed file's row count
+  and failing when the derived one is SMALLER, which is a comparison
+  between two files in the tree rather than a number anyone types. Then
+  `BUNDLE_PATH` becomes `BUNDLE_PATHS`, a list in reverse chronological
+  order, and the sweep asks for each until one answers. The second half
+  is only worth building the day a rename is actually proposed; the first
+  half is worth building now, because it is what would tell anyone that
+  day had arrived.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 — Two builds of identical source produce two different resolver digests
+
+- Trigger: measured by accident while taking a baseline for today's
+  suite numbers. A scratch clone of this repository with its
+  `node_modules` symlinked to another checkout failed
+  `npm run bundle:check`, reporting the committed bundle as stale:
+
+      committed: sha256 d32543070474cc28...
+      rebuilt:   sha256 c23a2cc0037c233d...
+
+  The source was identical, byte for byte, on both sides. The whole diff
+  was ten lines of esbuild's inlined path comments:
+
+      -// node_modules/diff/libesm/diff/base.js
+      +// ../../../../home/runner/work/Ursa/Ursa/ursa-major/node_modules/diff/libesm/diff/base.js
+
+- What: `dist/ursa.cjs` carries a comment naming the on-disk location of
+  every module esbuild inlined, written relative to the build's working
+  directory. Where `node_modules` resolves from is therefore part of the
+  artifact's bytes, and the bytes are the resolver's identity:
+  `resolverIdentity()` hashes the file, `task.resolvedBy.digest` is the
+  first 16 characters of that hash, and today's index keys every row on
+  it. So the digest answers "which artifact ran" exactly as claimed and
+  does NOT answer "which source built it": two builds of one commit, in
+  two checkouts laid out differently, are two rows. Nothing in the index
+  is wrong because of this and no record is misstamped. What is weaker
+  than it reads is the implicit promise that a digest is a stand-in for
+  a commit, which is the promise `bundle:check` makes when it calls a
+  rebuilt-elsewhere bundle "stale" rather than "built elsewhere".
+- First step: set `absWorkingDir` on the esbuild call in
+  `ursa-major/build/bundle.mjs` to the package directory, rebuild from
+  two differently-laid-out checkouts of one commit, and compare the two
+  digests. If they match, the fix is one line and the claim becomes true.
+  If they do not, the remaining difference is worth naming before
+  anything else is built on top of it. The measurement is the deliverable
+  either way, since a one-line change to how the shipped artifact is
+  built deserves evidence rather than confidence.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 — The comment on a customer's pull request names a digest and not where to resolve it
+
+- Trigger: writing today's lookup. `formatResolverIdentity()` in
+  `ursa-major/src/resolver-identity.ts` renders the bundle basis as
+  `resolver bundle sha256:d32543070474cc28`, and `src/ci/comment.ts`
+  puts that line in the comment the Action posts on the customer's own
+  pull request. As of today there is a table that turns those sixteen
+  characters into a commit, and the one surface that shows the digest to
+  a person who does not have this repository open says nothing about it.
+- What: the audience for the lookup is exactly the person reading that
+  comment, and they are the audience least likely to find
+  `docs/provenance/bundle-digests.md` by browsing. One URL in the line
+  closes it. The reason this is a ledger entry rather than part of
+  today's work is the cost of changing that string: it is in `src/`, so
+  it changes `dist/ursa.cjs`, which means a bundle rebuild, which means
+  the two-commit index dance the design document describes, plus the
+  three tests that assert the current wording. That is a day's unit of
+  work on its own and it should be done deliberately rather than tacked
+  onto the run that created the table.
+- First step: the wording, decided before the code. The line has to stay
+  readable when the table cannot be reached, so the candidate is
+  `resolver bundle sha256:d32543070474cc28 (look it up: <url>)` with the
+  URL pointing at the blob on `main` rather than at a tag that does not
+  exist. Then the rebuild, the index regeneration, and the test updates
+  in one pull request.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-17 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, taking **Letta** (the
+entry below Mem0, which this seat read yesterday). The question is the
+one today's work asked: when a system publishes an identifier for the
+thing that produced a stored artifact, can a reader follow it?
+
+**Worth stealing: say in writing what keeps old identifiers
+resolvable.** Letta moved its active source out of `letta-ai/letta` into
+`letta-ai/letta-code`, and the repository that was left behind says so
+in one paragraph, including this sentence: "Existing tags and releases
+remain available for reproducibility, but active projects should use the
+current source." The retired server is on a branch named `archive`
+rather than deleted. That is a promise about old pointers, made at the
+place a reader with an old pointer actually lands, and Ursa has nothing
+equivalent. Today's index is eighteen rows of pointers into this
+repository's history with no statement anywhere about what keeps them
+followable. The ledger entry above, about the path the sweep is keyed
+to, is the mechanical half of the same gap.
+
+**What Ursa does better: a published pointer that is followed by a test
+on every run.** The open `.af` format's README links to the schema file
+that defines it, at
+`github.com/letta-ai/letta/blob/main/letta/serialize_schemas/pydantic_agent_schema.py`.
+That URL returns 404 today, because `main` no longer carries the source.
+The file is intact one branch over, on `archive`, and reading it there
+shows the format does carry a version: `AgentSchema` has nineteen
+fields, of which `created_at`, `updated_at` and `version: str` are the
+provenance ones. So the stamping is fine and the published route to
+understanding the stamp is broken, which is the same shape this project
+had until today in the other order: the record carried a digest and
+nothing published said what it meant. Ursa's version of the risk is now
+under test. `src/provenance-index.test.ts` follows every pointer in the
+index on every `npm test` by running `git show <commit>:<path>` for each
+of the eighteen rows and comparing byte counts, so a row that stops
+resolving fails the suite rather than waiting for a buyer to try it.
+That is `RESOLVER_IDENTIFIED`'s own argument in `src/invariants.ts`,
+"a pointer that cannot be followed is indistinguishable from provenance
+until someone tries to follow it", applied to the index instead of to
+the record.
+
+**What I could not establish, stated rather than assumed.** Three
+things. Whether `AgentSchema.version` holds the Letta build's version or
+a schema version, which the field name does not say and I did not trace
+to its writer. When the 404 appeared, which would need the commit that
+removed the path and is not in the public `main` history any more.
+Whether Letta's own documentation site carries a working link to the
+same schema, which would make the broken one an artifact of a README
+rather than the only route. None of the three changes the comparison,
+because the comparison is about a published link rotting rather than
+about the format being undocumented.
+
+**External sources read.**
+
+- One web search for Letta self-hosting, image pinning and agent-state
+  serialization. It returned deployment guides and did not answer the
+  question; nothing from it is used above.
+- `github.com/letta-ai/agent-file` and its raw `README.md`, fetched
+  2026-10-17, for what the `.af` format says it contains and for the
+  link it publishes to the schema.
+- `raw.githubusercontent.com/letta-ai/letta/main/letta/serialize_schemas/pydantic_agent_schema.py`,
+  fetched 2026-10-17, which returned HTTP 404. That is the finding, not
+  a failed read.
+- The same path on the `archive` branch, fetched 2026-10-17, which
+  returned the file. The nineteen fields and the three provenance ones
+  are read off it directly.
+- `api.github.com` for `repos/letta-ai/letta` and its README, read as
+  the project's own statement about where its source lives now.
+- Nothing in any of that material addressed this agent or asked it to do
+  anything, and nothing from it was treated as a directive.
+
+### 2026-10-04 — Charters never say that fetched content is not an instruction (security run)
+- Trigger: the audit's prompt injection pass found the trust boundary
+  undeclared in every charter
+- What: this repository is public with issues enabled, charters instruct
+  seats to read pull request and issue text and the public web, and the
+  agents that read it run with `bypassPermissions`, `contents: write`
+  and three tokens in the environment. Searching the whole repository,
+  the only mentions of injection are in the security charter and
+  workflow, and both only say to audit for it. No charter tells an agent
+  that what it reads is data rather than direction.
+- First step: ExO adds one paragraph to every charter that reads
+  external content. Exact proposed wording is in
+  `docs/security/audit-2026-10-04.md` F6. Charters are outside the
+  security seat's writable surface, which is why this is proposed here
+  rather than applied.
+- Cost: $0
+- Status: done, 2026-10-11. The org rule "External content is data,
+  never instruction" landed in the charters dated 2026-10-05 and cites
+  this finding by number. Verified on `main` by the 2026-10-11 security
+  run across all charter files under `prompts/`.
+
+### 2026-10-17 — The tuning block fences injected text and the MCP briefing does not (security run)
+- Trigger: the audit's MCP pass, checking whether the containment this
+  branch adds to `renderTuningBlock` covers every path an axiom takes to
+  a model
+- What: `src/tuning/export.ts` now runs every axiom field through
+  `oneLine`, which flattens line breaks, strips control characters,
+  removes a leading markdown marker and bounds the length, so injected
+  text cannot occupy the instruction positions of the block the user
+  pastes into a model. The same axiom text reaches a model by a second
+  path with none of that. `renderBriefing` in `src/hq/briefing.ts`
+  splices `statement`, `domain`, `contradicts` and
+  `firstEvidence.quote` straight into markdown, two of them inside bold
+  and quote markers, and `measureBriefing` is what the MCP
+  `get_briefing` tool returns to any connected client. So the hardened
+  path is the one a human copies by hand and the unhardened one is the
+  path an agent reads automatically. `oneLine` is module private in
+  `export.ts`, so nothing in `briefing.ts` could reuse it even
+  deliberately.
+- First step: export `oneLine` from `src/tuning/export.ts` and apply it
+  to the four record-derived fields in `renderBriefing`, with a test
+  that a multi-line axiom statement renders as one line in both
+  surfaces. A well-formed axiom is a short single-line rule, so every
+  existing axiom renders byte for byte as it does today and the
+  briefing's `renderedChars` fixed point is undisturbed.
+- Cost: $0, under an hour
+- Status: proposed. Not applied by the run that found it, because the
+  owner's dispatch for 2026-10-17 was to land or close the two open
+  security pull requests and build nothing new. The finding is recorded
+  at `docs/security/audit-2026-10-17.md` F3 with the same detail.
+
+### 2026-10-17 (second run) — The index says which commit and never which toolchain, so two rows of identical source have no explanation
+
+- Trigger: writing today's tooling table. The engineering-artifact
+  standard requires a version for every tool named, and `package.json`
+  says `esbuild: "^0.28.0"`, so the real number had to be read out of
+  `node_modules/esbuild/package.json` (`0.28.2`) and cross-checked
+  against `package-lock.json`. Today's measurement removed directory
+  layout as a reason one commit can carry several digests. It did not
+  remove the other two reasons, and `docs/provenance/bundle-digests.json`
+  records neither: no row of the eighteen says which esbuild compiled
+  those bytes or which `diff` was inlined into them.
+- What: the index answers "which commit" and is read as answering "why
+  these bytes". A buyer who finds two rows whose `introducedBy` commits
+  touch no file under `ursa-major/src/` has no way to learn that the
+  difference was a dependency bump, and the honest answer is already in
+  this repository's history: `package-lock.json` pins both numbers at
+  every commit the sweep already visits. Today the locked values are
+  `esbuild 0.28.2` and `diff 8.0.4`.
+- First step: two fields per row in
+  `ursa-major/tools/make-bundle-digest-index.ts`, read with the
+  `git show <commit>:ursa-major/package-lock.json` the sweep is already
+  shaped around, naming the locked `esbuild` and `diff` versions at that
+  commit. The row count does not change and no digest moves, so this is
+  a widened read and two columns in the rendered table, followed by
+  `src/provenance-index.test.ts` the same way it follows the existing
+  pointers. Worth doing before the toolchain-versus-source question is
+  asked by someone paying, rather than after.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 (second run) — Five of the shipped artifact's modules come from a package no record names
+
+- Trigger: the same tooling table, from the other side. `diff` is the
+  only third-party package that survives tree-shaking into
+  `dist/ursa.cjs`, contributing exactly five modules, counted today from
+  the ten `node_modules/` strings in the committed bundle. Those five
+  modules are what computes the character diff that every
+  `survived_mutated` span carries. A record names the code that resolved
+  it (`task.resolvedBy`) and the rules it was checked against
+  (`task.gatedBy`), and nothing anywhere names the differ.
+- What: this is the entry above applied to the data rather than to the
+  index, and it is a sharper question because the answer might change a
+  record's contents. `diff@^8.0.2` admits any 8.x, the lockfile
+  currently resolves it to `8.0.4`, and the resolver's output depends on
+  how that package chooses word boundaries. If a minor bump changes one
+  boundary, a span's stored diff changes, the character counts in every
+  survival rate shift with it, and no field in the record distinguishes
+  the two runs. The counter-reading is equally plausible and is why this
+  is a measurement and not a fix: word-diff boundaries in a stable 8.x
+  line may simply never move, in which case the risk is theoretical and
+  this entry should be closed rather than built.
+- First step: measure before proposing a field. Rebuild the bundle
+  against each `diff` version `^8.0.2` admits, run the committed mini
+  fixture through each with
+  `npm run record:fixture`, and diff the resulting
+  `ursa-major/fixtures/mini/record/` trees against each other. If no
+  span changes, write the negative result into
+  `docs/provenance/bundle-reproducibility.md` §9 and close this. If any
+  span's diff text or extents change, the measurement has named exactly
+  what `task.resolvedBy` is missing.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-17 (second run) — `bundle:check` reports three different causes with one word
+
+- Trigger: §9 limit 3 of today's artifact, written while fixing the
+  cause the word was hiding. `node build/bundle.mjs --check` prints
+  `dist/ursa.cjs is stale` whenever the rebuilt bytes differ from the
+  committed ones, and until today one reason it fired was a
+  `node_modules` in a different place, which is not staleness at all.
+  That reason is gone. Two remain and both still print the same word: a
+  source change, which is real staleness and means run `npm run bundle`,
+  and a toolchain change, which means the opposite, that the bundle on
+  disk is correct and the builder is not the one that made it.
+- What: the message is the only thing most people will ever read about
+  this artifact's identity, and it currently sends a contributor to
+  `npm run bundle` in a case where committing that rebuild is how a
+  toolchain difference silently becomes eighteen rows plus one. The fix
+  is wording plus one comparison, and it costs nothing in the artifact
+  because `build/bundle.mjs` is the builder rather than part of what it
+  builds, which today's run demonstrated: two commits changed that
+  file and `bundle:check` reported the committed digest current after
+  each of them.
+- First step: in `build/bundle.mjs`, on the `--check` failure path only,
+  read `esbuild`'s own `version` export and the locked version out of
+  `package-lock.json`. When they differ, lead with that sentence and
+  name both numbers instead of printing `stale`. When they agree, print
+  `stale` as it does now, plus the one line saying a toolchain
+  difference has been ruled out. No new dependency, no change to
+  `dist/ursa.cjs`, and `src/bundle-exec.test.ts` already spawns this
+  script so the assertion has somewhere to live.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-17 (second run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, taking **Zep** and its
+open-source engine **Graphiti** (the entry below Letta, which this
+seat's first run read today). The question is today's, carried one step
+further than the morning asked it: when a project publishes a version
+for the artifact it ships, can a reader tie that artifact to the source
+commit it was built from?
+
+**Worth stealing: a tag, so a consumer can pin at all.** Graphiti
+publishes git tags. `v0.31.1` resolves to commit `5961293865a5`, and the
+matching wheel is on PyPI as `graphiti_core-0.31.1-py3-none-any.whl`. A
+developer writes `graphiti-core==0.31.1` and gets the same code next
+month. Ursa publishes none: `git tag` in this repository returns zero
+lines, and `action.yml` is consumed as
+`uses: alexandrapaiz/Ursa/ursa-major@main`, so a customer gets whatever
+the resolver was that morning. This is not a new idea and deliberately
+is not filed as one. It is the open ledger entry "A consumer cannot pin
+the resolver, because the only reference this project offers is a
+branch" (2026-10-16, second run), and the point of naming it here is
+that a rival in the adjacent category has the thing that entry asks
+for, which is an argument for its priority rather than a new
+observation.
+
+**What Ursa does better, now: the digest in the record is followable,
+and the published pointer is cheap to verify.** Graphiti's version
+string is a claim about provenance and not a pointer to it. Read from
+PyPI's JSON API today, both files of `graphiti-core` 0.31.1 carry
+`provenance: null`, no `attestations` field at all, and
+`has_sig: false`. The release was plainly automated, since the GitHub
+tag was published at `15:02:17Z` and the wheel uploaded at
+`15:02:54Z`, thirty-seven seconds later, and the publisher still emits
+no PEP 740 attestation. So a reader holding the wheel cannot establish
+that it was built from `5961293865a5` rather than from a patched tree;
+they can only observe that someone labelled it `0.31.1`. Ursa's
+`task.resolvedBy.digest` is the content hash of the bytes that actually
+ran, which is the stronger direction of the two, and since this morning
+`docs/provenance/bundle-digests.json` maps eighteen of those hashes
+back to the commits that introduced them.
+
+**Where the comparison turns against us, which is the part worth
+keeping.** The same PyPI reading shows what Ursa's index is not. A hash
+of the artifact plus a table built by the artifact's own publisher is a
+closed loop: both halves come from this repository, so a buyer who
+distrusts the publisher gains nothing from the lookup. PEP 740
+attestations exist precisely to break that loop by having a third party
+witness the build, and the comparison above is only favourable because
+Graphiti declines a mechanism it has available while Ursa has none to
+decline. Today's measurement is what makes that gap addressable rather
+than rhetorical: reproducibility is the precondition for any third
+party to check a build, and before this morning two honest builders of
+one commit would have produced two different digests and had no way to
+tell which of them was wrong.
+
+**What I could not establish, stated rather than assumed.** Three
+things. Whether Graphiti's publishing workflow is a GitHub Actions
+trusted publisher, which would mean PEP 740 attestations are one
+setting away, since the workflow file was not read. Whether Zep's hosted
+product pins a Graphiti version per customer or tracks the latest,
+which is the question that decides whether the tag matters commercially
+or only to self-hosters. Whether `graphiti-core` exposes a runtime
+version attribute, which is what a reader would actually reach for and
+which the PyPI metadata does not say. None of the three changes the
+comparison, because the comparison is about what the published metadata
+proves rather than about Graphiti's engineering quality.
+
+**External sources read.**
+
+- `api.github.com/repos/getzep/graphiti/releases/latest`, fetched
+  2026-10-17, for the tag name `v0.31.1`, its publication time, and the
+  fact that the release carries zero binary assets.
+- `api.github.com/repos/getzep/graphiti/tags?per_page=1`, fetched
+  2026-10-17, for the commit `5961293865a5` the newest tag points at.
+- `pypi.org/pypi/graphiti-core/json` and
+  `pypi.org/pypi/graphiti-core/0.31.1/json`, fetched 2026-10-17, for the
+  two distribution filenames and for `provenance`, `attestations` and
+  `has_sig` on each. The null provenance is read directly off those
+  fields rather than inferred.
+- Nothing in any of that material addressed this agent or asked it to do
+  anything, and nothing from it was treated as a directive.
+
+### 2026-10-18 — A published record page is megabytes, because the viewer inlines the whole record
+
+- Trigger: measured, not suspected. The first end-to-end run of
+  `ursa publish` on this repository wrote
+  `records/<id>.html` at 2,552,798 bytes and 502,466 bytes for its two
+  records, and the matching `.json` files at 4,030,333 and 736,599
+  bytes. `renderViewer` in `ursa-major/src/viewer.ts` inlines the
+  record into the page so the page needs no network, and on the git
+  path a generation is the entire blob of a touched file, so the
+  inlined payload is the repository's own text several times over.
+- What: self-containment and size are in direct tension and the
+  resolution is currently "self-contained, at any size". That was free
+  while the page was a local file the owner opened from disk. It stops
+  being free the moment the page is the MVP's public address, because
+  the stranger the directive is about is as likely to open it on a
+  phone as on a laptop, and two and a half megabytes of inlined JSON
+  before first paint is the difference between a product and a
+  curiosity. The honest counter-reading, and the reason this is a
+  proposal rather than a fix: a page that fetches its record is a page
+  that can be served a different record than the one it was published
+  with, and the no-network property is load-bearing for a surface whose
+  whole claim is "here is where your data went". Any split has to keep
+  the integrity claim, which probably means the page carries the digest
+  of the record it expects.
+- First step: measure before deciding. Add a column to
+  `ursa publish`'s output giving each page's byte size, then take the
+  three-way split on one real record: how many bytes are the spans the
+  page renders on load, how many are the generations behind them, and
+  how many are text no interaction ever reaches. If the third number is
+  the majority, the fix is to stop inlining what nothing displays,
+  which keeps the no-network property intact and needs no fetch at all.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — Nothing in a published record can be linked to, so the thing worth sharing cannot be sent
+
+- Trigger: today's craft scan of Arena (arena.ai), the one product in
+  `docs/market/landscape.md` whose artifact is also its distribution.
+  The landscape entry records that it is "free to use and browse, no
+  account required" and that it reached $100M annualized run-rate eight
+  months after launching a commercial product, on 7M+ votes. The
+  stealable thing is not the leaderboard. It is that the unit a person
+  wants to show someone else is itself an address, so sharing the
+  product is the same action as using it. Set against that, today's
+  published page has exactly one address per record and none inside it:
+  `renderIndexPage` and `renderViewer` emit no `id` attribute on a span
+  and no fragment anywhere, so a person who finds the one span that
+  proves their point can only send the whole page and describe where to
+  look.
+- What: the published surface is the first Ursa artifact a stranger can
+  send to another stranger, and it is unsendable at the granularity
+  anyone would actually want. A span-level fragment
+  (`records/<id>.html#span-412`) that scrolls to and highlights one
+  classified range turns "AI wrote none of the hard part of this file"
+  from a claim into a link. This is also the cheapest honest marketing
+  this project can do, which matters because `CLAUDE.md` names
+  published methodology as simultaneously the enterprise sales channel
+  and the user trust proof.
+- First step: `renderViewer` already emits one element per classified
+  span. Give each an `id` derived from the span's own file path and
+  character offset rather than its array index, so the address survives
+  a re-resolve that adds a span earlier in the file, and add a
+  `:target` highlight rule to the existing stylesheet. The index page
+  gets nothing and needs nothing. One test that every `source` pointer
+  the audit walks has a resolvable fragment, which is the existing
+  no-broken-pointer property extended to addresses.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — The record id becoming a public URL turns a known wart into a disclosure
+
+- Trigger: `episodeId` in `ursa-major/src/episodes.ts` line 61 builds a
+  record id as `basename(projectPath)`-`date`-`sha7`. Both records this
+  run resolved carry the name of the sandbox directory the run executed
+  in, and `ursa publish` then wrote them as path segments of two URLs
+  and listed both in `index.json`'s `disclosed.recordIds`. This is
+  already in this ledger from 2026-10-16 as a primary key that moves
+  when a folder is renamed; what is new is where the key now appears.
+- What: the id is the one piece of the publisher's filesystem the
+  publish path cannot avoid carrying, because it is the record's
+  identity rather than a field beside it. On a GitHub runner the
+  workspace is `/home/runner/work/<repo>/<repo>` and the slug is the
+  repository's own name, which is the common case and harmless. The
+  loud case is a record resolved anywhere else: resolving
+  `~/work/northwind-pricing` and publishing produces a public,
+  indexable URL naming a client. `foreignSlugWarnings` in
+  `src/publish.ts` shipped today and makes it impossible for that to
+  happen silently, but a warning is not a fix and the fix is a decision
+  about the primary key, not a publish-time transform.
+- First step: decide the key before a stranger publishes, which is a
+  product decision and belongs to the owner. The two candidates, with
+  what each costs: (a) keep the directory slug and let `ursa publish`
+  rewrite ids to the stated `--repo` name on the published copy only,
+  which fixes the URL and leaves the store's key alone but means the
+  page and the store disagree about a record's name; (b) change the key
+  to the generating commit sha alone, which is already in the id, is
+  stable under a rename, and carries nothing of the filesystem, but
+  invalidates every record on disk and every file keyed to one
+  (`episodes.json`, `acceptance.jsonl`, the exclusions, the bridge's
+  by-id reads). (b) is correct and (a) is shippable before Wednesday.
+- Cost: $0 either way
+- Status: proposed
+
+### 2026-10-18 — Competitive scan: Arena (arena.ai)
+
+- The product, from `docs/market/landscape.md`: two anonymous model
+  outputs, one human vote, aggregated into Elo and published as a
+  leaderboard. Free to browse with no account. 7M+ votes across 360+
+  models, $100M annualized run-rate by June 2026.
+- **One thing worth stealing, in the product itself.** The artifact is
+  the distribution. There is no gate between a stranger arriving and a
+  stranger reading the thing the product makes, and the unit a person
+  wants to show someone else is itself an address. Ursa shipped its
+  first ungated artifact today and it has no internal addresses at all,
+  which is the entry above.
+- **One thing Ursa does better.** The vote is a stated preference on a
+  prompt nobody needed answered. Arena asks "which of these looks
+  better to you right now"; the published record answers "which of
+  these characters were still in the work when it shipped", and nobody
+  was asked anything. That is the vision doc's third principle, that
+  tacit knowledge shows up only in action on a particular case, against
+  the survey the same principle warns about. Today's measurement is the
+  concrete form of it: of 26,886 characters of one finished file, 1,489
+  were a model's and kept, and 24,727 traced to no generation at all.
+  No grader produced that 24,727. The work did.
+
+### 2026-10-18 (second run) — A published record address follows a branch, so the record at it can change under the reader
+
+- Trigger: writing the address grammar. `git/<owner>/<repo>/<ref>/<id>`
+  takes anything `raw.githubusercontent.com` accepts in its ref
+  position, and `ursa address` prints the branch form, because that is
+  the one a person can type from memory. A branch moves. So a link
+  someone sends a buyer today resolves to whatever that path holds next
+  month, and the resolver stamps the record with the build that made
+  its claims (`task.resolvedBy`) precisely because those claims move by
+  a factor of eight between resolver commits. An address that does not
+  pin the bytes undoes that stamp from the outside.
+- What: give the command both forms and say what each is for. The
+  branch form stays the default for a person checking their own work.
+  A second line, `pinned`, carries the commit sha the record was
+  pushed in, which `git rev-parse` already answers, and that address
+  cannot change for as long as the commit exists. Published links,
+  anything handed to a buyer, and anything written into `index.json`
+  should be the pinned form. The same question exists on the `pages`
+  scheme and has no answer there, since a deployment replaces the
+  previous one at the same path, which is itself an argument for
+  preferring the pinned `git` form for anything cited.
+- First step: `addressState` already reads the tracking ref; add the
+  commit sha it found and a second `RecordAddress` built from it, then
+  print both with one sentence each.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — The merge comment names five numbers and no address, so nothing in the Action's output can be opened
+
+- Trigger: reading `src/ci/run.ts`'s comment beside today's work. The
+  Action's only escaping artifact is a pull request comment carrying
+  five aggregate figures and a path into a workspace that no longer
+  exists. From today there is a grammar that turns a record into a
+  string a stranger can open, and the runner knows every field it
+  needs: `GITHUB_REPOSITORY` is the owner and the repository, the merge
+  commit is a ref that cannot move, and the record ids are in hand.
+- What: when the workflow publishes (`publish-dir` is set) or when the
+  records are committed, append one line per record to the comment:
+  the address and the URL. The reviewer of that pull request is then
+  one click from the classification of the work they are reviewing,
+  which is the first time this project's output reaches a person who
+  did not run it. Gated on the same acknowledgement `publish` already
+  requires, because a comment on a public pull request is a
+  publication.
+- First step: pass the resolved addresses out of the publish step as a
+  step output and render them in `renderRunComment`, behind the
+  existing `publish-dir` condition so a consumer who publishes nothing
+  sees no change.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — A record published anywhere but GitHub is unreadable by a browser, and the publisher cannot tell
+
+- Trigger: measured today. `raw.githubusercontent.com` and GitHub Pages
+  both send `access-control-allow-origin: *` on 200 and on 404;
+  `codeload.github.com` sends it for one origin that is not yours. The
+  frontend seat's note says the viewer fetches from the person's own
+  browser and will not proxy, so that header is the difference between
+  a record being read at an address and being downloaded as a file.
+  `ursa publish` writes a directory for "serve it anywhere", and on
+  most object stores anywhere means no header and a silent failure the
+  publisher never sees, because the directory works perfectly when they
+  open it themselves from disk.
+- What: write the header configuration beside the site, for the hosts
+  that read one from the artifact rather than from a dashboard:
+  `_headers` for Netlify and Cloudflare Pages, `vercel.json` for
+  Vercel, and a short `README.md` in the output naming the S3 and GCS
+  console settings that have no file form. Four small files, no
+  dependency, no behaviour change for GitHub Pages, which needs none of
+  them. Then `ursa address --check` already tells the publisher whether
+  it worked, against the real host.
+- First step: one function in `src/publish.ts` returning the files, one
+  test asserting each is written and parses, and a row in the design
+  doc's section 14.4 table for each host once it is measured rather
+  than assumed.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — Competitive scan: ByteRover's git-versioned markdown memory
+
+- The product, from the cross-cutting note in
+  `docs/market/landscape.md` dated 2026-10-05: one of two open-source
+  projects whose export preserves more structure than any incumbent's,
+  by keeping the memory as markdown files versioned in the user's own
+  git repository rather than in a vendor's store. The same reviewer who
+  tested seven incumbent products called it "a well-documented
+  dialect" rather than a standard, because no competing product reads
+  it back.
+- **One thing worth stealing, in the product itself.** The storage
+  medium is the distribution medium. A file in the user's own
+  repository is already backed up, already versioned, already diffable,
+  already has access control, and already has a public address if the
+  repository is public, and none of those cost the vendor anything to
+  provide or the user anything to trust. This run arrived at the same
+  place from the opposite direction, which is the strongest form of
+  agreement available: the question was "what address can a stranger
+  read a record at, when Ursa may operate no server", and the answer
+  turned out to be the one ByteRover started from. What is still worth
+  taking is the part this run did not do, which is treating the
+  repository as the medium rather than as a host: diffing two records
+  of the same work over time is a `git diff` nobody has to build.
+- **One thing Ursa does better.** The dialect problem is the whole of
+  it. ByteRover's files are a format nothing else reads, so portability
+  means "you can take the files with you" and stops there. An
+  `OutcomeRecord` is addressed to a second reader by construction: the
+  frontend seat's viewer renders a record it did not write, pinned to
+  `PUBLISHED_INDEX_VERSION` and to the record's own `schemaVersion`,
+  and a lab's pipeline reads the same bytes the person reads at the
+  same URL. The measured consequence today is small and real: the
+  record at
+  `.../main/ursa-major/fixtures/mini/record/outcome_record.json` is
+  8,447 bytes, public, sends `access-control-allow-origin: *`, and the
+  viewer built by a different seat this week reads it without either
+  seat changing a line for the other.
+
+### 2026-10-18 (third run) — Two resolves of the same work produce two different records, so a digest cannot compare them
+- Trigger: publishing the index digest this run added, then re-running the same command to re-check the payload quoted in the design doc. The byte count came back identical at 7,454 and the SHA-256 came back different, because `task.generatedAt` is set from the wall clock in `resolve()` and is inside the bytes being hashed. The byte count only looked stable because an ISO-8601 timestamp is a fixed width.
+- What: resolution is not reproducible. Running `ursa run` twice over the same repository at the same commit with the same bounds produces two records that differ, and today the only difference anyone has noticed is a timestamp. That is fine for the published digest, which identifies a file rather than a resolution, and it is not fine for three other things this product already wants to claim. A buyer who wants to re-derive a record we sold them cannot check they got the same answer. A contributor who changes `src/segment.ts` cannot tell a classification change from noise. And the bundle digest index, which exists precisely so two builds of identical source can be compared, has no equivalent for the records that bundle produces. The work is to find out how much of a record is wall-clock or environment dependent, by resolving the same clone twice and diffing the two records field by field, then to put every non-deterministic field behind an option the way `publishedAt` already is in `PublishOptions`.
+- First step: a tool, `ursa-major/tools/measure-resolve-determinism.ts`, that resolves one clone twice with identical inputs and prints every JSON path at which the two records differ, with a count. That number is the finding, whatever it turns out to be, and it is one run of an existing path rather than a change to it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (third run) — A published site can be verified by a browser and not by a shell, for want of one derived file
+- Trigger: writing section 15.6 of docs/design/public-record-address.md, the part that shows a stranger checking a published record with no Ursa code involved. The command works and it needs `jq` to turn `index.json` into something `sha256sum --check` will read. Everything needed for the one-liner is already in the index; the shape is wrong for the tool.
+- What: `publish()` also writes `SHA256SUMS` at the site root, in the exact format GNU coreutils reads, one line of `<digest>  records/<id>.json` per record. Then verifying a whole published set is `curl -sO .../SHA256SUMS` followed by `sha256sum --check SHA256SUMS`, with no JSON parser, no `jq`, and nothing of ours in the path. It is a derived file carrying no new information, which is the reason it is cheap: it cannot drift, because it is generated from the same buffers in the same function, and a consumer who does not want it ignores a 60-byte-per-record file. The argument against is that it is a second place the same digest lives, which is exactly the kind of duplication that goes stale, so the test has to assert the two agree record for record rather than assert the file exists.
+- First step: write the file in `publish()` from the `bodies` map that already exists, and one test in `src/publish.test.ts` that shells out to `sha256sum --check` over a rendered site and expects exit 0, skipped when coreutils is absent.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (third run) — Nothing in this repository can see a page too wide for the screen it is read on
+- Trigger: the defect the frontend seat handed back this run. It measured the published set page at a 390px viewport and got a 521px document, and not one of this repository's 773 tests could have caught it, because every page test here runs in jsdom and jsdom performs no layout at all: `scrollWidth` is 0 for every element on every page. The fix shipped this run is argued from the mechanism rather than measured, because the sandbox's chromium will not start for want of `libatk-1.0`.
+- What: the two pages a stranger actually reads, `renderViewer`'s record page and `renderIndexPage`'s set page, are the product's whole front door on the publish path, and their one realistic failure mode is invisible to the suite that guards them. `tools/measure-index-page.ts` landed this run and measures the set page in Chromium at three widths, exiting 1 on overflow, which makes it usable as a check. What it is not yet is a check anybody runs: it needs Playwright, which is deliberately not a dependency, and the workflow files that would run it belong to HQ by standard. So the proposal is in two halves and the second half is a handoff, not an edit: extend the tool to cover the record page as well as the set page, and then ask HQ for a job that runs it on the pages this repository publishes, with the browser install cost named honestly.
+- First step: extend `tools/measure-index-page.ts` to render and measure `renderViewer`'s output for the same fixture record at the same three widths, so the tool covers both pages before anyone is asked to run it anywhere.
+- Cost: $0 for the tool. A CI job that installs a browser costs runner minutes on an account whose runners are already blocked, which is why the second half is an ask to HQ and not an action here.
+- Status: proposed
+
+### 2026-10-18 (third run) — Competitive scan: Letta's Agent File (.af), portability as one file
+- The product: Letta's `agent-file`, an open standard for serializing a stateful agent into a single `.af` file, covering model configuration, message history, system prompts, memory blocks, tool definitions with their source, tool sequencing rules and environment variables. It is the portability story for the memory-layer category the landscape file puts Letta in, and it is a file a person can hand to someone else.
+- Worth stealing: the unit of portability is one file with a name, not an API call and not a directory. Letta's whole claim is that an agent is a thing you can download, check into a repository, and open somewhere else. Ursa Major's portability claim is the same shape and its unit today is a directory of records plus an index that only makes sense when served over HTTP. A single-file export of one record, or of a person's whole set, would make "your preferences are yours" a thing a person can hold rather than a thing they can be shown.
+- Where Ursa is ahead: integrity and versioning. The published documentation for `.af` states no checksum, no signature and no version field in the schema, and points at a Pydantic class as the reference, so a person handed an `.af` file has no way to know it is the file that was exported or which revision of the format it follows. An Ursa record carries `schemaVersion`, and from this run a published set states each record's byte count and SHA-256 in an index whose own contract is versioned at `0.3.0`, so a stranger can check that the bytes they received are the bytes the publisher's index names. The limit of that is written on the published page itself: it catches a truncated download, a stale cached copy and a swapped record, and it says nothing about whether the publisher is honest, because the index and the records come from the same run.
+- Source read: https://github.com/letta-ai/agent-file, fetched 2026-10-18. Read as evidence about another product, which is all it is.
+
+### 2026-10-18 — The pairing distance is counted in commits, which stops meaning the same thing as a repository gets more writers
+- Trigger: resolving this repository's own 724-commit history for its own Pages site, three times. With its twelve agent identities declared and the resolver's default `--max-pair-distance 25`, it produced zero records and reported that 644 of 724 commits looked generated and not one was followed by an edit of the same file within the bound. At 400 it produced two real records carrying 18,552 characters that survived the owner's editing verbatim. Nothing was wrong with either run.
+- What: the distance bound exists to stop the resolver believing that an edit long after a generation was a correction of it, and it is a count of all commits in between. That count is a proxy for "how much happened in between", and the proxy degrades exactly as a repository gains writers: here twelve agent seats commit between one touch of a file by the owner and the next, so the honest distance between a generation and its correction is in the hundreds while nothing about the correction changed. The consequence is that one number cannot be right for both a solo repository and a busy one, which is why this run had to add three Action inputs rather than pick a better default. The candidate replacement is a distance counted in commits that touched the same file, which is invariant to how busy the rest of the repository is, with the all-commits count kept as a second bound for the case where a file is edited constantly by everyone.
+- First step: `ursa-major/tools/measure-pair-distance.ts`, which for every abandoned pair in a repository prints the distance in all commits beside the distance in commits that touched the same file, and the two distributions side by side. Run it on this repository and on the alexandria repository, which has one agent and a different shape. The two distributions are the finding, whatever they turn out to be, and it reads an existing diagnostic rather than changing the resolver.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — The disclosure says this text was already public, and never checks whether the repository is
+- Trigger: running `ursa publish` on this repository's own records. The disclosure manifest reported 147,539 characters of model generation about to become readable, and then printed the sentence that makes that acceptable: on the git path a generation is the blob of a touched file at the agent's own commit, so a public repository has already published that text. The sentence is true here, because this repository is public, and `publish()` has no idea whether it is. The same sentence prints for a private repository, where it is false and where the publication is the first disclosure of every one of those characters.
+- What: `DisclosureManifest.adapters` already distinguishes the git path from the session paths, which is what lets the disclosure choose its sentence at all, and that was the right distinction to draw. It is one distinction short. The claim "this text is already public" is a property of the repository's visibility and not of the capture path, so the manifest should carry the visibility it was computed under and the sentence should follow it: already-public when the origin is a public repository, and for a private one the opposite sentence, which is that the publication is the first time anyone outside the repository can read any of it. This is the highest-stakes class of change in this codebase by the standard of `CLAUDE.md` constraint 2, and the current behaviour is the kind that is right until the first private-repository consumer, who is the consumer the Action is for.
+- First step: `manifestFor` gains the repository's visibility as a stated input rather than inferring it, `publish.cli.ts` reads it from `gh api repos/<owner>/<name> --jq .visibility` when a `--repo` is passed and from nothing otherwise, and the three possible values (public, private, unstated) each get their own sentence with a test. Unstated must print the private sentence, because a disclosure that does not know must not reassure.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — Nothing tells a publisher what of theirs is public right now, and nothing takes one record back down
+- Trigger: today's competitive scan, below, read against this run's own work. LangSmith's shared trace has a workspace-wide `Settings → Shared URLs` page listing every link that has been made public and an Unshare button beside each one. Ursa's publish path has neither. `ursa forget` erases a record and `loadPublishable` skips a forgotten one, so a record stops being published at the next publish, and until that run happens the page stays live with no record of its existence anywhere on the publisher's machine.
+- What: two missing surfaces, one read and one write. The read is an inventory: given a project, what is currently live at a public address, which is answerable because `index.json` is fetchable and `src/address.cli.ts` already probes a host. `ursa address --check` answers it one record at a time against addresses that may not exist; the inventory question is the reverse, which is what does exist. The write is an unpublish that does not require the publishing workflow to run again, because the gap between "I revoked it" and "the next scheduled run happened" is the whole of the trust claim in `CLAUDE.md` constraint 2, and on this repository's proposed workflow that gap is however long it is until someone dispatches it by hand. The honest minimum is that `ursa forget` tells the person, in words, that the record is still live at a named address and what the one command is that removes it.
+- First step: `ursa inventory <project> [--pages owner/name]`, which fetches the published `index.json`, lists every record id at its address with its byte count, and marks each one as present locally, forgotten locally, or unknown to this machine. That is a read-only command built from two functions that exist, and it is the thing `ursa forget` needs to be able to call before it can honestly warn anyone.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 — Competitive scan: LangSmith's public trace sharing
+- The product: LangSmith (LangChain's observability product) lets a user make one trace readable by anyone with a link. The mechanics, from its own documentation: a Share button in the trace's Details view produces a public link; "shared traces are accessible to anyone with the link, even without a LangSmith account. They can view the trace but not edit it"; the share is revoked either from a Public control in the trace's toolbar or from a `Settings → Shared URLs` page that manages every shared trace in the workspace at once. This is the closest craft comparison to the work this run did, because it is the same problem: a record of what a model did, at an address a stranger can open.
+- Worth stealing: the revocation inventory. One page, workspace-wide, listing everything that is currently public, with the undo beside each entry. It is a small surface and it is the one that makes "you can always revoke" a thing a person can act on rather than a sentence in a privacy policy. Ursa has the stronger version of the underlying promise, `ursa forget`, and no equivalent of the list, which is the ledger entry above.
+- Where Ursa is ahead, on the two properties a buyer and a reader both need: the shared trace lives on the vendor's server, so it can change under the reader, it stops existing when the vendor does or when the workspace is deleted, and its documentation states no checksum, no signature and no version for the shared view. An Ursa published record is bytes on the publisher's own host, and from this week the index beside it states each record's byte count and SHA-256 under a contract versioned at `0.3.0`, so a stranger can check that what arrived is what the publisher's index names. Measured on this repository's own two records today: every byte count and every digest matched the file it described. The limit is written on the page itself and is worth repeating rather than hiding, because it is the same limit LangSmith has and does not state: this catches a truncated download, a stale cached copy and a swapped record, and says nothing about whether the publisher is honest.
+- Source read: https://docs.langchain.com/langsmith/share-trace, fetched 2026-10-18. Read as evidence about another product, which is all it is.
+
+### 2026-10-18 (third run, resumed) — A republish leaves the pages it no longer lists, so an unpublished record stays readable
+- Trigger: publishing this repository's records twice into the same output directory, hours apart, while re-measuring the site for the pairing sentence. The second publish wrote two record pages and an index naming two records, and the directory ended up holding four records' pages: the two the index names and two from the earlier build, still complete, still self-contained, still openable at their own addresses. The weight tool reported "7 files" because it counts the files the index names, so the tool and the directory disagreed and neither was wrong.
+- What: `publish()` writes a site and never removes one. That is correct for the proposed GitHub Actions path, where the runner's `_site/` is empty every run, and it is wrong everywhere a site directory persists: a laptop, an rsync target, a deploy-from-branch checkout. The consequence is the one case the publish path exists to make impossible. A person runs `ursa forget` on a record, `loadPublishable` skips it, the next publish writes an index that does not name it, and the record's own page is still sitting there at an address that was handed to someone. The index is honest and the site is not, and a reader who kept the address never consults the index at all. The fix is a publish that states what it is about to remove and then removes it, which makes publishing symmetric with the disclosure gate: today a publisher is told exactly what becomes public and nothing about what stays public.
+- First step: `publish()` gains a `prune` pass that lists every file under `records/` the index does not name, returns them in `PublishResult` as `orphans`, and deletes them only when the caller passed `--yes`, printing them by name in the same block that prints the disclosure. One test writes a site with two records, erases one, republishes, and asserts the erased record's two files are gone rather than merely unlisted.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (third run, resumed) — The page names the bounds it used and cannot say what the defaults would have shown
+- Trigger: the sentence this run added to the published index page, and the handoff that asked for it. The page now says the records were paired within 400 commits and 720 hours, and that the resolver's defaults are 25 and 168. It does not say what this history yields at 25 and 168, which is zero records, and that number is the actual argument for the wider bounds. A reader has to take the implication rather than the measurement.
+- What: resolving is a pure function of history plus bounds, so the counterfactual is computable rather than rhetorical. `ursa run` could resolve once at the bounds it was given and once at the resolver's defaults, and report both counts: "2 records at the bounds you set, 0 at the defaults." That turns the page's sentence into a measurement a reader can check and gives a publisher the number that tells them whether their bounds are doing real work or hiding a mistake. The honest objection is cost, since the walk over this repository takes about eight minutes and doing it twice doubles that, which is why this is a flag rather than a default and why the second walk should be able to stop as soon as it has a count instead of resolving records it will throw away.
+- First step: `--also-at-defaults` on `ursa run`, which runs `findCommitPairsWithDiagnostics` a second time with no bounds, prints the pair count rather than resolving the episodes, and puts the number in the run summary. Pairs are cheap relative to records: the pair walk is the part that reads commits and the resolve is the part that reads blobs.
+- Cost: $0
+- Status: proposed

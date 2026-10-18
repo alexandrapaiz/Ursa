@@ -1079,7 +1079,7 @@ npx vitest run                       # 625 passing, 4 skipped as of 2026-10-15
 # The three new fixtures, and the gate reading all twenty off disk.
 npm run fixtures:violations:check    # "41 files match what this script would write."
 npx tsx src/invariants.cli.ts fixtures/violations
-# -> "21 records checked, 24 violations." and exit 1
+# -> "23 records checked, 27 violations." and exit 1
 
 # The bound's own cases, and the relation split's.
 npx vitest run src/invariants.test.ts -t 'a rival from the future'

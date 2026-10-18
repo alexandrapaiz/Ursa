@@ -4,6 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Phone landscape, where the height is the scarce dimension.
+   Measured 2026-10-15: the header spends 88px of padding around a 24px line,
+   which is 23% of a 375px-tall screen, and it pushed the page's only control
+   off the bottom at the two smallest landscape sizes. Bottom of the control
+   against the viewport, as shipped: 667x375 ended at 416, 41px below the fold,
+   with the top hairline of its border sliced by the edge; 720x360 ended at
+   378, 18px below. Landscape has no scroll cue, by design, so nothing said
+   there was more. 430px is the ceiling because it is the tallest phone
+   landscape in the review set (932x430); above it the generous header is right
+   and nothing was ever close to the fold. */
+@custom-variant short-landscape (@media (orientation: landscape) and (max-height: 430px));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -429,6 +441,195 @@ html {
 
 @media (prefers-reduced-motion: reduce) {
   .mark-link .mark {
+    transition-duration: 1ms;
+  }
+}
+
+/* ---------- the outcome record viewer ----------
+
+   This is the one surface on the site that is not prose: it lays the
+   record's claims over the person's own finished text, so the text has to
+   stay the thing you read and the claims have to stay a layer on top of
+   it. Three decisions follow from that, and they are the reason this
+   block exists instead of Tailwind utilities on each span.
+
+   Hue carries the provenance, and only two hues exist here because the
+   palette only has two lights. --polar is the model's light, so every
+   span a model generated is tinted --polar; --star is the page's own
+   text colour, so the span no model ever generated is tinted --star,
+   faintly. A reader learns the mapping once, on the legend, and then
+   reads the document without consulting it again. No third colour is
+   introduced for the third class, because the palette has none to give
+   and a new one would be a new identity.
+
+   Fills are the weakest mark that still separates at a glance. Measured
+   against the night sky at the sizes the document is set in, the two
+   fills come out 1.13:1 (polar at 14%) and 1.05:1 (star at 5%) against
+   --night, which is deliberately below any text-contrast floor: these
+   are not text, they are the region a word belongs to, and the word's
+   own 12.8:1 is what has to be readable. The fill never changes the
+   glyph colour for that reason.
+
+   No radius and no shadow anywhere. Every other edge on this site is a
+   square hairline, and a rounded, shadowed card layer is the single
+   most recognisable tell of a generated interface. */
+
+.rec-doc {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+
+/* A span is a button in everything but the element, because it has to be
+   able to sit inside a line of text without breaking the line box. The
+   handlers are on it; the affordance is the fill shift and the cursor. */
+.sp {
+  cursor: pointer;
+  padding: 0.08em 0;
+  transition: background-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.sp-survived_verbatim {
+  background-color: rgba(168, 199, 250, 0.14);
+}
+
+/* kept, edited. The underline is the person's hand on the model's
+   sentence: same fill as verbatim, because the text did survive, plus one
+   hairline to say it did not survive untouched. box-shadow rather than
+   border-bottom so a span that wraps across two lines is underlined on
+   both of them and the line box does not grow. */
+.sp-survived_mutated {
+  background-color: rgba(168, 199, 250, 0.14);
+  box-shadow: inset 0 -1px 0 var(--polar);
+}
+
+.sp-no_generation_provenance {
+  background-color: rgba(232, 237, 247, 0.05);
+}
+
+@media (hover: hover) {
+  .sp:hover {
+    background-color: rgba(168, 199, 250, 0.26);
+  }
+  .sp-no_generation_provenance:hover {
+    background-color: rgba(232, 237, 247, 0.12);
+  }
+}
+
+/* The press beats the hover, the way the home page's control does. */
+.sp:active {
+  background-color: rgba(168, 199, 250, 0.34);
+  transition-duration: 90ms;
+}
+
+/* Selection is an outline and not a stronger fill, so the selected span
+   keeps saying which class it is. Same treatment as :focus-visible
+   globally, one pixel of --polar, because it means the same thing. */
+.sp-selected {
+  outline: 1px solid var(--polar);
+  outline-offset: 2px;
+}
+
+/* The range inside a generation that a selected final span came from. */
+.sp-hl {
+  background-color: rgba(168, 199, 250, 0.3);
+  box-shadow: inset 0 -1px 0 var(--polar);
+}
+
+.sp-deleted {
+  background-color: rgba(232, 237, 247, 0.05);
+  text-decoration: line-through;
+  text-decoration-color: var(--dim);
+  text-decoration-thickness: 1px;
+}
+
+/* The word-level diff on a mutated span. The person's words are the
+   page's own colour and the model's discarded words are dimmed and
+   struck, which is the same statement the fills make one layer up. */
+.rec-diff ins {
+  background-color: rgba(168, 199, 250, 0.16);
+  color: var(--star);
+  text-decoration: none;
+}
+
+.rec-diff del {
+  color: var(--dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--dim);
+}
+
+/* A word diff puts a removal and its replacement side by side with no
+   separator between them, and on the fixture's one mutated span that
+   rendered as "and nonot by any", which a reader has to decode rather
+   than read. A tenth of an em on each side is the smallest gap that
+   separates the struck words from the kept ones; any more and the
+   sentence stops being a sentence. */
+.rec-diff ins,
+.rec-diff del {
+  padding: 0 0.1em;
+}
+
+/* A command is shown the way a terminal would show it: lines break
+   where the command breaks and nowhere else. The viewer's own documents
+   wrap anywhere, because a span of prose must never be pushed off the
+   side of the page, but a command is the opposite case. Measured
+   2026-10-18 at 390: wrapping the Action's curl line broke the raw
+   githubusercontent URL across three lines, mid-path twice, which reads
+   as a broken address rather than a long one. So this block scrolls
+   instead, which is what every documentation site this one was
+   benchmarked against does with code. */
+.rec-cmd {
+  white-space: pre;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* The one indicator that the line continues past the edge. A thin
+     track in --line is the same hairline every other edge on this site
+     is drawn with, so it says "there is more" without adding a device.
+     It is not a complete answer: iOS paints overlay scrollbars and shows
+     nothing until a finger moves. The copy control carries the whole
+     command regardless of what is visible, which is why clipping is
+     survivable here and would not be in prose. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+/* The share bar. 1px gaps in --night rather than margins, so the
+   segments read as one measure divided and the bar still totals the
+   container's width exactly. */
+.rec-bar {
+  display: flex;
+  height: 6px;
+  gap: 1px;
+}
+
+/* Quiet interactive text: the generation jump, the tabs, the loader's
+   controls. Underline on hover only, the same device as the word-mark,
+   because a page with this many links cannot afford them all underlined
+   at rest. */
+.rec-action {
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (hover: hover) {
+  .rec-action:hover {
+    color: var(--polar);
+    text-decoration-color: var(--polar);
+  }
+}
+
+.rec-action:active {
+  color: var(--polar);
+  text-decoration-color: var(--polar);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp,
+  .rec-action {
     transition-duration: 1ms;
   }
 }

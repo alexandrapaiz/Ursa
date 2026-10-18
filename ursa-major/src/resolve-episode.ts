@@ -114,6 +114,10 @@ export function resolveEpisode(
     subject: v.subject,
     relation: v.relation,
     chars: blobAt(projectPath, ep.finalSha, v.path)?.length ?? 0,
+    // Spread so an absent date stays absent in the written JSON rather
+    // than becoming `"date": undefined`'s omission by accident; see
+    // `Exclusion.date` in src/types.ts for why absence is a true claim.
+    ...(v.date ? { date: v.date } : {}),
   }))
   let turn = 0
   for (const path of candidates) {

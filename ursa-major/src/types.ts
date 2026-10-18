@@ -890,6 +890,37 @@ export interface Exclusion {
    * it moved is a field that drifts.
    */
   chars: number
+  /**
+   * Author date of `sha`, strict ISO 8601 with the author's own UTC offset
+   * (`%aI`), as `DescentEvidence`'s `rival` variant carries it one level
+   * down.
+   *
+   * Why the file level needs it for the same reason the span level did.
+   * A `sibling` exclusion is the only relation here whose claim rests on a
+   * clock: it says the finished file is byte-identical to a copy on a
+   * branch that is neither an ancestor nor a descendant of the generation,
+   * which is evidence that the content came from that branch — and if that
+   * branch's commit was authored after the work closed, the copy is a copy
+   * OF this work rather than a source for it. The refusal is then
+   * backwards, and it is an expensive refusal to get backwards: an
+   * exclusion removes a whole file from every figure in the record, and on
+   * this repository's own history one of them removed 60,616 characters,
+   * 84.7% of a run's headline survival figure.
+   *
+   * `pre_existing` and `declared` are exempt from the ordering for the
+   * reasons `RIVAL_NOT_AFTER_FINAL` exempts `prior_revision`,
+   * `pre_existing` and `merged_in`: a `pre_existing` match is an ancestor
+   * of the generation, so the commit graph vouches for it whatever a
+   * rebase did to its author date, and a `declared` import names a commit
+   * in ANOTHER repository's history whose clock is not comparable to this
+   * one's at all.
+   *
+   * ABSENT is legal and unchecked. Every record this project wrote before
+   * 2026-10-15 has exclusions with no date, and `vendoredPaths` omits the
+   * field rather than writing an empty string when a clone cannot answer.
+   * Read `EXCLUSION_NOT_CLASSIFIED` in src/invariants.ts for the bound.
+   */
+  date?: string
 }
 
 /**
@@ -933,6 +964,116 @@ export type ResolverIdentity =
       digest: string
     }
 
+/**
+ * Which rules a record's claims were checked against.
+ *
+ * WHAT THIS IS NOT, FIRST, BECAUSE THE NAME INVITES THE WRONG READING.
+ * It is not a verdict and it is not a pass. Both launches write every
+ * record BEFORE running the gate over it, deliberately — see
+ * `gateRecords` in src/launch.ts, whose comment says why: a record whose
+ * arithmetic is impossible is still the evidence of the defect, so
+ * nothing is withheld from the user. A record therefore carries this
+ * field whether it passed or failed, and the twenty-three records in
+ * `ursa-major/fixtures/violations/` are the demonstration: every one of
+ * them names the bound set below and every one of them is refused by it.
+ * `gatedBy` answers "which rules applied", never "and they held".
+ *
+ * WHY IT IS IN THE RECORD. `task.resolvedBy` names the code that made
+ * the claims, which is the complete answer for anyone who can clone that
+ * commit, and a weak one for anyone who cannot: the bound set went from
+ * ten to eighteen in eleven days, so two records bought two months apart
+ * were checked under different rules, and before this field the only way
+ * to learn which rules was to clone the resolver at `task.resolvedBy` and
+ * read a TypeScript module. `CLAUDE.md` §4 sells auditability to labs and
+ * the §2 user surface rests on the same property; a buyer holding a
+ * passing record could re-derive all of its arithmetic and could not tell
+ * which checks had run on it.
+ *
+ * WHY BOTH A CODE LIST AND A DIGEST, when either alone looks sufficient.
+ * They answer two different questions and neither answers the other's.
+ * The digest answers "same rules?" between two records in one comparison
+ * and says nothing about which rule moved. The codes answer "which rule
+ * moved?" and cannot see a bound whose STATEMENT was rewritten while its
+ * name stayed, which is a change that silently alters what a record was
+ * checked for. Together they also make one specific tamper visible, which
+ * is the one the ledger entry behind this field asked for: a record whose
+ * digest matches the checking resolver's but whose code list is short has
+ * had a bound dropped from it, and `GATE_IDENTIFIED` in src/invariants.ts
+ * fails such a record rather than reporting consistency.
+ */
+export interface GateIdentity {
+  /**
+   * `InvariantCode` for every bound the resolver that wrote this record
+   * carried, in that resolver's own declaration order — `BOUND_CODES` in
+   * src/invariants.ts.
+   *
+   * Typed as `string[]` and not `InvariantCode[]`, which is the one place
+   * this file deliberately widens a type. A record written by a later
+   * resolver names bounds this build has never heard of, and that record
+   * is not malformed, it is newer: the eighteen codes below are this
+   * build's bound set, not the vocabulary of every record that will ever
+   * exist. Narrowing the field would make the correct handling of a
+   * nineteenth bound a type error at the only place that reads a record
+   * from disk.
+   */
+  codes: string[]
+  /**
+   * First 16 hex characters of the SHA-256 over every bound's code and
+   * statement text, which is the same prefix length `ResolverIdentity`'s
+   * `bundle_digest` uses and the same hash `npm run bundle:check` uses.
+   *
+   * Not verifiable from the record alone, and it is not meant to be: the
+   * bound statements are prose that would multiply a record's size, and
+   * the question this field exists for is comparative. Two records with
+   * the same digest were checked under the same rules; two with different
+   * digests were not, and the code lists say where to look. Computed by
+   * `currentGateIdentity()` in src/invariants.ts, over a canonical
+   * serialization documented there.
+   */
+  boundsDigest: string
+}
+
+/**
+ * The three limits the pair walk ran under, as the walk itself resolved
+ * them, defaults included (`resolvePairingBounds` in src/pairfinder.ts).
+ *
+ * WHY A RECORD CARRIES THIS. Every span class in a git-path record rests
+ * on one claim: that the commit which edited a file after a model wrote
+ * it was correcting that model rather than visiting the same file later
+ * for an unrelated reason. These three numbers are where that claim
+ * stops. Move the distance from 25 commits to 400 on the same history
+ * and the set of records changes completely: measured on this
+ * repository on 2026-10-18, 25 yields nothing at all and 400 yields two
+ * records, because twelve agent seats commit between one touch of a
+ * file by the owner and the next.
+ *
+ * So two records resolved from the same history under different bounds
+ * are not two readings of one fact, and before this field a reader
+ * holding both could not tell them apart. A published set states the
+ * distinct bound sets in it (`PublishedIndex.pairing` in src/publish.ts)
+ * for the same reason, which is the reason the sentence naming them is
+ * on the published index page rather than only in a design document.
+ *
+ * Numbers rather than an optional-with-default shape, deliberately: a
+ * record states what the walk used, never what a caller omitted. The
+ * defaults live in exactly one place (src/pairfinder.ts) and a record
+ * says the value, so reading one never requires knowing which build's
+ * defaults were in force.
+ *
+ * `Infinity` is reachable and JSON-serializes to `null`, which is the
+ * one lossy case here and an honest one: `--max-pair-distance Infinity`
+ * is the unbounded walk, and a reader of that record's JSON sees a null
+ * where a bound would be rather than a number that was never applied.
+ */
+export interface PairingBounds {
+  /** commits walked forward from a generation before the pair claim is abandoned */
+  maxPairDistance: number
+  /** hours between the generation and the edit before the same claim is abandoned */
+  maxPairAgeHours: number
+  /** how many later generations may rewrite the same file in between and the pair still stand */
+  maxInterposedGenerations: number
+}
+
 export interface OutcomeRecord {
   schemaVersion: '0.1.0'
   task: {
@@ -957,6 +1098,43 @@ export interface OutcomeRecord {
      * would credit a later build with claims it did not make.
      */
     resolvedBy?: ResolverIdentity
+    /**
+     * The bound set the resolver above carried, stamped beside
+     * `resolvedBy` by `saveRecord` in src/store.ts.
+     *
+     * Absent and present mean exactly what they mean for `resolvedBy`:
+     * absent says nothing stamped this record, which every record written
+     * before 2026-10-16 says truthfully, and is never a placeholder for
+     * "some bound set". Preserved and never rewritten once set, for the
+     * same reason — `applyVerdict` in src/bridge/declare.ts re-saves a
+     * record months later to write a user's verdict into `signals`, and
+     * the classifications in it were checked under the rules of the build
+     * that made them, not of the build that added a field.
+     *
+     * Present does NOT mean the record passed. See `GateIdentity`.
+     */
+    gatedBy?: GateIdentity
+    /**
+     * The pairing bounds the walk that found this record's generations
+     * ran under, stamped by whichever launch resolved it
+     * (`stampPairingBounds` in src/launch.ts, called by both
+     * `src/bin/ursa.ts` and `src/ci/run.ts`).
+     *
+     * Absent is a real claim and not a gap in three cases, and they are
+     * different from each other: a record from the chat or paste path,
+     * where no commit pair was walked and no bound could apply; a record
+     * written before 2026-10-18, when nothing stamped this; and a record
+     * built in memory and never saved. Absent is never a placeholder for
+     * "the defaults", because the defaults are themselves a bound set and
+     * a record that ran under them says so with numbers.
+     *
+     * Preserved, never rewritten, once set — the rule `resolvedBy` and
+     * `gatedBy` above state and for the same reason: `applyVerdict` in
+     * src/bridge/declare.ts re-saves a record later to write a user's
+     * verdict into `signals`, and the pairs in it were found under the
+     * bounds of the walk that found them.
+     */
+    pairedBy?: PairingBounds
   }
   /** what kind of finished thing this is, and where its rendered state lives */
   artifact: Artifact

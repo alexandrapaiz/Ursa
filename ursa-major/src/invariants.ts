@@ -29,11 +29,13 @@
 //      counted twice by `byClass`, so "verbatim <= generated" is reported
 //      by `measure()` and never fails the gate.
 
+import { createHash } from 'node:crypto'
+
 import { mergedLength } from './intervals'
 import { isExcerptOf } from './text'
 import type {
-  DescentEvidence, FinalFile, FinalSpan, GenerationRecord, LabSignals, OutcomeRecord, QuoteRef,
-  SpanClass,
+  DescentEvidence, FinalFile, FinalSpan, GateIdentity, GenerationRecord, LabSignals, OutcomeRecord,
+  QuoteRef, SpanClass,
 } from './types'
 
 /** Stable identifier for each invariant, so a violation can be grepped for. */
@@ -55,6 +57,7 @@ export type InvariantCode =
   | 'EXCLUSION_NOT_CLASSIFIED'
   | 'RESOLVER_IDENTIFIED'
   | 'RIVAL_NOT_AFTER_FINAL'
+  | 'GATE_IDENTIFIED'
 
 export interface Violation {
   code: InvariantCode
@@ -205,13 +208,15 @@ const BOUNDS: Record<InvariantCode, string> = {
   SIGNAL_QUOTE_GROUNDED:
     'every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()\'s whitespace normalization, and the same excerpt appears in the signal\'s own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.',
   EXCLUSION_NOT_CLASSIFIED:
-    'no path the record excludes appears among its classified files, and every exclusion names a commit and a positive character count. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently.',
+    'no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit\'s author date states one that can be ordered, with a `sibling` exclusion\'s date no later than the record\'s own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved — `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository\'s own history one exclusion removed 60,616 characters, 84.7% of that run\'s headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch\'s commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one\'s. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer.',
   DESCENT_CHECKED_UNIFORMLY:
     'if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record\'s mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation\'s own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.',
   RESOLVER_IDENTIFIED:
     'if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim — it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.',
   RIVAL_NOT_AFTER_FINAL:
     'if a descent verdict names a `sibling` rival and states that commit\'s author date, the date is not later than the record\'s own `task.generatedAt`; and any rival\'s stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them — `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode\'s final commit — and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module\'s second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling\'s date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates — the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode\'s closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written.',
+  GATE_IDENTIFIED:
+    'if a record names the bound set its claims were checked against, the name is one that can be compared. `task.gatedBy.codes` is a non-empty array of distinct bound codes in the shape this module declares them (uppercase letters, digits and underscores, starting with a letter), `task.gatedBy.boundsDigest` is exactly 16 lowercase hexadecimal characters, and a record whose digest equals the CHECKING resolver\'s own digest carries exactly the checking resolver\'s codes. That last clause is the only one with teeth beyond shape, and it is the one the field was added for: a digest is a claim about which rules applied, so a record asserting this build\'s rule set while listing fewer rules than this build has is a record a bound was dropped from, and dropping one quietly is the failure `task.resolvedBy` alone could not catch. Membership is deliberately NOT checked, in the other direction: a record whose digest differs names the bounds of the resolver that wrote it, which on a record from a later build includes codes this one has never heard of, and refusing that record would make every bound added after it a gate against its own future. An ABSENT `task.gatedBy` is legal and unchecked, for the reason `RESOLVER_IDENTIFIED` gives — absence says nothing stamped this record, which every record written before 2026-10-16 says truthfully. Present is NOT a claim that the record passed: both launches write records before the gate runs (`gateRecords` in src/launch.ts), so each of the twenty-three records in fixtures/violations/ names this bound set and is refused by it.',
 }
 
 const r3 = (x: number) => Math.round(x * 1000) / 1000
@@ -358,6 +363,53 @@ export const BOUND_COUNT = Object.keys(BOUNDS).length
  * record that breaks it fails the suite instead of passing quietly.
  */
 export const BOUND_CODES = Object.keys(BOUNDS) as InvariantCode[]
+
+/**
+ * The bound set this build carries, as a record stamps it into
+ * `task.gatedBy` (`saveRecord` in src/store.ts).
+ *
+ * WHY THE DIGEST IS COMPUTED HERE rather than in a module of its own, which
+ * is where `ResolverIdentity` is computed. A digest in another file needs
+ * `BOUNDS` exported, and an exported `BOUNDS` is a second place that can
+ * disagree with this one about what the bound set is — which is the whole
+ * class of defect `BOUND_COUNT` and `BOUND_CODES` exist to close, after
+ * four documents carried the word "thirteen" for four days. The hash and
+ * the thing hashed stay in one scope.
+ *
+ * WHAT IS HASHED, exactly, because a digest whose input is unstated is a
+ * number nobody can reproduce. Each bound contributes its code, a newline,
+ * its statement text, and a newline; the bounds are concatenated in
+ * CODE-ALPHABETICAL order, not declaration order; the result is UTF-8 and
+ * its SHA-256 is truncated to 16 hex characters. The command that
+ * reproduces it, from `ursa-major/`:
+ *
+ *     npx tsx -e "import('./src/invariants').then(m => console.log(m.currentGateIdentity().boundsDigest))"
+ *
+ * Alphabetical and not declaration order for one reason: declaration order
+ * is an editorial choice in this file, and moving a bound up the list
+ * changes nothing about what a record was checked for. A digest that moved
+ * on a reorder would report a rule change where there was none, and the
+ * only reading a consumer can make of the digest is "same rules or not".
+ * Declaration order still matters and is still shipped — `codes` carries
+ * it, and `checkRecord` reports violations in it.
+ *
+ * The statement text is inside the hash, not just the code. A bound whose
+ * name stays and whose sentence is rewritten is the change this field is
+ * least able to afford missing, because it is invisible in `codes` and it
+ * is exactly what happened to `CLAIM_NOT_WIDER` on 2026-10-13: the code
+ * did not move and what the bound checked went from comparing two extents'
+ * lengths to comparing their bytes.
+ */
+export function currentGateIdentity(): GateIdentity {
+  const canonical = [...BOUND_CODES]
+    .sort()
+    .map((code) => `${code}\n${BOUNDS[code]}\n`)
+    .join('')
+  return {
+    codes: [...BOUND_CODES],
+    boundsDigest: createHash('sha256').update(canonical, 'utf8').digest('hex').slice(0, 16),
+  }
+}
 
 /**
  * Where two strings that should be identical stop being identical, with a
@@ -714,6 +766,13 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
   // produce a record that names its own counter-evidence and sells the
   // claim anyway, which is the one defect a buyer could catch before we do.
   const classified = new Set(record.files.map((f) => f.path))
+  // Dated `sibling` exclusions, counted for the same reason `datedSiblings`
+  // is counted above: the record-level complaint about an unreadable
+  // `task.generatedAt` has standing only once something actually needs that
+  // field ordered. Counted separately from the span-level tally because a
+  // record can carry exclusions and no descent verdicts at all, and then
+  // the span-level loop never runs.
+  let datedSiblingExclusions = 0
   for (const [i, x] of (record.exclusions ?? []).entries()) {
     const at = `exclusions[${i}] (${x.path})`
     if (classified.has(x.path)) {
@@ -725,6 +784,37 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       push('EXCLUSION_NOT_CLASSIFIED', at,
         `chars=${x.chars}, sha=${x.sha ? x.sha : '(empty)'}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`)
     }
+    // The time clause, which is `RIVAL_NOT_AFTER_FINAL` one level up. Read
+    // as `unknown` for the reason that bound reads a rival's date that way:
+    // these records reach the gate through `JSON.parse` off a directory
+    // somebody else wrote, so the declared type is an assumption and a
+    // `date` of `1760000000` is reachable in a file.
+    const date = (x as { date?: unknown }).date
+    if (date === undefined) continue
+    const ms = typeof date === 'string' ? Date.parse(date) : Number.NaN
+    // Unreadable fails on every relation, exactly as it does for a rival:
+    // an exempt relation still has no business stating a time nothing can
+    // order, because the field reads as provenance on every surface that
+    // prints it and omitting it was always allowed.
+    if (Number.isNaN(ms)) {
+      push('EXCLUSION_NOT_CLASSIFIED', at,
+        `excluded as ${x.reason} from ${x.sha} (${x.relation}) carrying date ${quoted(date)}, which is not a date Date.parse can read, so the record states a time nothing can order against task.generatedAt ${record.task.generatedAt}`)
+      continue
+    }
+    if (x.relation !== 'sibling') continue
+    datedSiblingExclusions++
+    if (Number.isNaN(finalMs)) continue
+    if (ms > finalMs) {
+      push('EXCLUSION_NOT_CLASSIFIED', at,
+        `sibling copy ${x.sha} authored ${date}, which is after task.generatedAt ${record.task.generatedAt}, so the ${x.chars} chars of this file were dropped from every figure on the evidence of a commit from the record's own future`)
+    }
+  }
+  // One violation for the record rather than one per exclusion, for the
+  // reason the span-level twin above gives: the fault is in the single
+  // field every sibling is ordered against.
+  if (datedSiblingExclusions > 0 && Number.isNaN(finalMs)) {
+    push('EXCLUSION_NOT_CLASSIFIED', 'task.generatedAt',
+      `${datedSiblingExclusions} sibling exclusion${datedSiblingExclusions === 1 ? '' : 's'} carry a date and task.generatedAt is ${quoted(record.task.generatedAt)}, which is not a date Date.parse can read, so no excluded file's copy can be ordered against the work it was dropped from`)
   }
 
   // The resolver the record names, checked the way an exclusion's commit is.
@@ -782,6 +872,82 @@ export function checkRecord(record: OutcomeRecord): Violation[] {
       } else {
         push('RESOLVER_IDENTIFIED', at,
           `basis ${quoted(v.basis)}, which is neither git_commit nor bundle_digest, so nothing downstream knows what kind of identity this is`)
+      }
+    }
+  }
+
+  // GATE_IDENTIFIED. The second shape bound, and `as unknown` for the same
+  // reason the first one is: this value reaches the gate through
+  // `JSON.parse` off a directory somebody else wrote, so the declared type
+  // is an assumption here and narrowing through it first would make every
+  // malformed case unreachable in TypeScript and still reachable in the
+  // file.
+  const gatedBy = record.task.gatedBy as unknown
+  if (gatedBy !== undefined && gatedBy !== null) {
+    const at = 'task.gatedBy'
+    if (typeof gatedBy !== 'object') {
+      push('GATE_IDENTIFIED', at,
+        `the field is ${typeof gatedBy} (${quoted(gatedBy)}), not an object carrying codes and a digest`)
+    } else {
+      const v = gatedBy as Record<string, unknown>
+      const codes = v.codes
+      let codesWellFormed = false
+      if (!Array.isArray(codes)) {
+        push('GATE_IDENTIFIED', at,
+          `codes is ${quoted(codes)}, not an array, so the record does not list the bounds it was checked against`)
+      } else if (codes.length === 0) {
+        // Empty is a different defect from absent and is not the same claim.
+        // Absent says nothing stamped this record. An empty array says a
+        // resolver stamped it and carried no bounds at all, which no build of
+        // this module can be: `BOUNDS` has never had fewer than ten entries.
+        push('GATE_IDENTIFIED', at,
+          'codes is an empty array, so the record names a resolver that checked it against no bounds; absence of the field is how "nothing stamped this" is written')
+      } else {
+        const bad = codes.filter((c) => typeof c !== 'string' || !/^[A-Z][A-Z0-9_]*$/.test(c))
+        const dupes = [...new Set(codes.filter((c, i) => codes.indexOf(c) !== i))]
+        if (bad.length > 0) {
+          push('GATE_IDENTIFIED', at,
+            `codes holds ${bad.length} of ${codes.length} entr${bad.length === 1 ? 'y' : 'ies'} that is not a bound code in this module's shape, the first being ${quoted(bad[0])}`)
+        } else if (dupes.length > 0) {
+          // Distinctness, because `codes` is read as a SET by every
+          // comparison the field exists for, and a list with one code twice
+          // has the same length as the honest list with one code missing.
+          push('GATE_IDENTIFIED', at,
+            `codes names ${quoted(dupes[0])} more than once, so its length is not the number of distinct bounds it claims`)
+        } else {
+          codesWellFormed = true
+        }
+      }
+
+      const digest = v.boundsDigest
+      // Exactly 16 lowercase hex, matching `currentGateIdentity()` above and
+      // the `bundle_digest` prefix RESOLVER_IDENTIFIED checks. A digest of
+      // any other length is from somewhere else, and the one comparison this
+      // field supports would silently never match.
+      const digestWellFormed = typeof digest === 'string' && /^[0-9a-f]{16}$/.test(digest)
+      if (!digestWellFormed) {
+        push('GATE_IDENTIFIED', at,
+          `boundsDigest is ${quoted(digest)}, which is not exactly 16 lowercase hex characters, so it cannot be compared against another record's`)
+      }
+
+      // The clause with teeth. Only runs when both halves are well formed,
+      // so a record with a malformed digest is reported once for the shape
+      // rather than twice for the shape and the comparison it made
+      // impossible.
+      if (codesWellFormed && digestWellFormed) {
+        const mine = currentGateIdentity()
+        if (digest === mine.boundsDigest) {
+          const listed = codes as string[]
+          const claimed = new Set(listed)
+          const missing = mine.codes.filter((c) => !claimed.has(c))
+          const extra = listed.filter((c) => !mine.codes.includes(c))
+          if (missing.length > 0 || extra.length > 0) {
+            push('GATE_IDENTIFIED', at,
+              `boundsDigest ${digest} is this resolver's own, so the record claims this resolver's ${mine.codes.length} bounds, and it lists ${listed.length}` +
+              (missing.length > 0 ? `, missing ${missing.join(', ')}` : '') +
+              (extra.length > 0 ? `, with ${extra.join(', ')} not in this bound set` : ''))
+          }
+        }
       }
     }
   }

@@ -1,9 +1,7 @@
 name: engineer-agent
 
 on:
-  schedule:
-    - cron: "26 11 * * *"  # owner directive 2026-09-24: engineers run twice a day (products are not yet in the users' hands)
-    - cron: "26 23 * * *"
+  # schedule: retired 2026-10-17 (HQ decision 056): every seat's clock is its manifest on the host; GitHub is an event source, not a runtime
   repository_dispatch:
     types: [asc.engineer]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:
@@ -14,6 +12,7 @@ on:
         default: ""
 
 permissions:
+  actions: read # gh run list: a seat reads its own runs (ADR-037)
   contents: write
   pull-requests: write
   id-token: write
@@ -59,6 +58,11 @@ jobs:
           echo "Traced: seat engineer of Ursa, run ${{ github.run_id }}."
       - uses: anthropics/claude-code-action@v1
         with:
+          # A PM dispatch (pm.md 11.5) starts this run as github-actions[bot],
+          # and claude-code-action agent mode refuses a non-User actor unless it
+          # is named here. Without it a dispatched seat dies before it reads its
+          # charter. See ADR-049 and standards/workflow-template.yml.
+          allowed_bots: "github-actions[bot]"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             You are Ursa's daily engineer agent (ADR-14 in docs/decisions.md),
