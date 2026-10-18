@@ -512,7 +512,7 @@ no defence and a high one is no accusation.
 
 1. **A claim about absence.** `distilling-a-tuning-record/E25` says a
    `distilled` flag exists and is never set to true by anything. The
-   first half is three ranges; the second half is a search result, and no
+   first half is three ranges. The second half is a search result, and no
    line range anywhere proves that nothing else in the tree does a thing.
    The receipt for an absence is the command that finds nothing, written
    into the audit row with the date it was run, exactly as §5b does for a
