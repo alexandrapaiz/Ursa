@@ -48,7 +48,7 @@ evidence:
     source: ursa-major/src/tuning/distill.ts:51-53,109
   - ref: E10
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
-    source: ursa-major/src/tuning/distill.ts:127-137
+    source: ursa-major/src/tuning/distill.ts:11-18,127-137
   - ref: E11
     what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
     source: ursa-major/src/tuning/distill.ts:145-157,163
@@ -57,7 +57,7 @@ evidence:
     source: ursa-major/src/tuning/merge.ts:45-62
   - ref: E13
     what: a matched revoked axiom gains nothing, and a user-edited statement is sovereign so only evidence accrues to it
-    source: ursa-major/src/tuning/merge.ts:46-53
+    source: ursa-major/src/tuning/merge.ts:45-54
   - ref: E14
     what: contradictions among axioms new in one pass are resolved through a map keyed by statement text, then wired symmetrically
     source: ursa-major/src/tuning/merge.ts:36-37,75-89
@@ -111,7 +111,7 @@ evidence:
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md, O1 KR1.2
   - ref: E31
     what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
-    source: ursa-major/src/bridge/index.ts:82-98,140-148
+    source: ursa-major/src/bridge/index.ts:82-98,140-150
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
