@@ -1871,3 +1871,183 @@ files are present.
 **Status:** open. (`INC-2026-10-18-pwc-queue-retired-upstream`.) Closes
 when the three live entries have landed in the workflow files by HQ's
 hand and the queue file holds nothing live.
+
+## INC-2026-10-18-host-token-is-the-owner — Every seat on the host merges as the owner's own account, so the autonomy number this seat reports is a measurement of a token
+
+**What happened.** On 2026-10-18 at about 12:00 UTC the fourth window of
+this seat reported the week's merge authorship as forty-three by the
+owner's account against nine by the PM seat, graded autonomy the weakest
+of the ten attributes on that evidence, and wrote the sentence "the queue
+is shallow because one person cleared it" into pull request #242. Six
+hours later, this window measured the same day one join further out and
+found the first number was not a measurement of who decided anything.
+
+Ten pull requests merged in this repository on 2026-10-18. GitHub records
+all ten as merged by `alexandrapaiz`. Ursa's PM seat claims eight of them
+on the board in its own words, each with the pull request as its
+reference and the tier it merged under:
+
+```
+219 00:32  "Tier B merge this pass: pull request 219, the bundle digest ..."
+227 01:05  "pull request 227 checked against the merge rule and ..."
+226 01:45  "pull request 228 merged, pull request 226 merged ..."
+228 01:36  "pull request 228 checked against the merge rule and ..."
+229 02:12  "pull request 229 merged, pull request 230 merged ..."
+230 02:12  (same message)
+238 06:43  "The lessons.md re-vendor is merged, and it needed nothing further"
+232 09:38  "The Pages-dogfood pull request is reviewed against the merge rule and merged"
+```
+
+So the eight merges this seat attributed to the owner were the PM seat
+exercising the merge authority §21 gives it. Two of the ten, #233 and
+#239, are claimed by nobody on the board and may be either.
+
+**Why it happened technically.** The host's `GH_TOKEN` is the owner's own
+personal account, not an app installation. Measured from this seat, on
+the host, in one line:
+
+```
+$ gh api user --jq '.login, .type'
+alexandrapaiz
+User
+```
+
+Every seat running on the resident company host therefore merges,
+comments and pushes as `alexandrapaiz`, and `mergedBy.login` reports the
+credential rather than the decider. On GitHub Actions the same seat
+merges as `app/claude`, which is why the split looked meaningful: all
+nine `app/claude` merges in the week are PM branches merged from Actions
+runs, and the last of them is #218 on 2026-10-17 at 14:16.
+
+**The date the instrument went blind is 2026-10-17**, and it is the same
+event this seat already has an entry for. HQ retired the `schedule:`
+block in all eleven `agent-*.yml` files that day, under the comment
+"every seat's clock is its manifest on the host; GitHub is an event
+source, not a runtime". The first window of 2026-10-18 found that this
+blinded `gh run list`, because a host run produces no Actions run, and
+patched §2 of the charter accordingly. It did not ask what else the same
+move blinded. The first merge to cross the boundary is #215 on 2026-10-17
+at 06:24, recorded as `alexandrapaiz`, which the PM reports two minutes
+later as "a pull request merged under tier B".
+
+**What the honest number is.** Of the fifty-two merges in the seven days
+to 2026-10-18: nine are the PM beyond doubt, by `app/claude` from
+Actions; nine more are the PM by its own board record, recorded by GitHub
+as the owner; and thirty-four are the owner or an unrecorded host seat,
+with no instrument in this repository able to say which. Autonomy is
+therefore **at least** eighteen of fifty-two, thirty-five per cent, and
+not the seventeen per cent this seat reported. The grade moves in the
+company's favour, which is worth saying plainly, because a seat that
+only ever corrects itself downwards is flattering its own rigour.
+
+**Why it is this seat's failure and not GitHub's.** The board is a
+complete record of PM merges and has been since §15, every `done` carries
+the pull request in its `ref`, and this seat read that board in the same
+run that printed the wrong number. Both halves were in hand. The join was
+never made, because §3e of the charter names three authorship questions
+and names `gh pr list` as the instrument for all three, and that
+instrument stopped being able to answer any of them on 2026-10-17.
+
+**The fix.** Three parts, all in this run's pull request:
+
+1. `prompts/exo-agent.md` §3e: the authorship measurement is now the join
+   of GitHub's merge record against the board's `done` messages, written
+   out as a runnable command, with the host-token fact stated as the
+   reason. A merge with no board claim is reported as unattributed and
+   not as the owner's.
+2. `docs/agents/improvements.md`: experiment one's metric said "how many
+   of them the owner's account merged", which this entry shows is
+   unmeasurable as written. Replaced with the board join, same date,
+   same success condition.
+3. `docs/agents/runner-facts.md`: the host-token identity recorded with
+   its probe, beside the clone facts, because it governs more than
+   merges. Every comment and every push a host seat makes carries the
+   owner's name, so any future instrument that reads an actor on this
+   repository has the same defect waiting in it.
+
+**What the org grew from it.** The lesson is not about tokens. It is that
+when a platform change blinds one instrument, the run that patches that
+instrument owes a sweep of every other instrument fed by the same
+surface, in the same pass. On 2026-10-18 this seat found the run-listing
+blindness at 02:00, wrote the patch, and printed a wrong authorship
+number at 12:00 from the identical cause. Two windows, one event, one
+half of it seen. §2 of the charter now says so where the first patch
+landed.
+
+**Handed to HQ.** `standards/roles/exo.md` §5f names attribute 9's
+surface as "the share of pull requests that landed without the owner",
+which is exactly the unmeasurable quantity, and every product ExO seat in
+the portfolio reads that sentence against a host whose token is the
+owner. The measurement belongs in the standard rather than in eleven
+charters, so this went to `alexandra-systems/exo-centralizer` on the
+board with the probe attached. Attribute 7's own text predicted this
+shape: "its silence is indistinguishable from good news".
+
+## INC-2026-10-18-branch-name-reuse — The charter's own housekeeping line would have deleted fifty-four commits of a live pull request, because two pull requests share one branch name
+
+**What happened.** Nothing, this time, and that is the only reason this
+is a near miss rather than a data loss. §5b of this seat's charter says,
+as one unqualified sentence, "Each run, delete the remote branches whose
+PRs have merged." Executed literally this run, that sentence names
+exactly one branch:
+
+```
+$ comm -12 <(git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort) \
+           <(gh pr list --state merged --limit 300 --json headRefName --jq '.[].headRefName' | sort -u)
+ursa-frontend/2026-10-18-message
+```
+
+That branch carries two pull requests, not one:
+
+```
+$ gh pr list --state all --limit 400 --json number,state,headRefName,mergedAt \
+    --jq '.[]|select(.headRefName=="ursa-frontend/2026-10-18-message")|[.number,.state,(.mergedAt//"-")]|@tsv'
+240  OPEN    -
+227  MERGED  2026-10-18T01:14:14Z
+```
+
+The frontend seat merged #227 at 01:14, kept working on the same branch,
+and opened #240 on it. The merged head is an ancestor of the open head
+and there are **fifty-four commits** between them:
+
+```
+$ git merge-base --is-ancestor refs/prs/227 refs/prs/240 && echo contained
+contained
+$ git rev-list --count refs/prs/227..refs/prs/240
+54
+```
+
+So the deletion would have closed a live pull request and removed the
+only remote copy of fifty-four commits of unmerged work.
+
+**Why it happened technically.** The duty is phrased over branch names
+and the authoritative relation is over pull requests. A branch name is
+not a key: GitHub permits any number of pull requests on one branch over
+time, and a seat that reuses its branch after a merge creates exactly
+this state. The query `comm -12 branches merged-heads` answers "has some
+pull request on this name merged", and the question that licenses a
+deletion is "has every pull request that ever pointed at this name been
+merged". Those differ precisely in the case that costs work.
+
+**Why it was caught.** Not by care. Ursa's PM escalated this seat's own
+branch-deletion question to the owner the same morning, reclassified from
+queue hygiene to data deletion, with the reasoning that "an unmerged
+branch is the only surviving copy of whatever work it held". This run
+went to check which branches its charter licensed it to delete, with that
+sentence in front of it, and read the list instead of running it.
+
+**The fix.** `prompts/exo-agent.md` §5b now states the predicate over
+pull requests rather than names, with the query written out, and refuses
+a deletion where any pull request on the branch is open or closed
+unmerged. The PM's own recommendation, pending the owner until
+2026-10-20 12:30 UTC under §22's silence route, is recorded beside it:
+delete on sight once a branch's pull request is merged, and leave the
+fifty-nine closed-unmerged branches alone unless the closing comment said
+plainly that nothing in them was needed.
+
+**What the org grew from it.** A standing duty whose subject is a name
+rather than an identity is a deletion waiting for a collision, and this
+register now has two instances of the same shape: Ursa incident 5 on
+citation numbers, and this one on branch names. Both were found by
+scanning for a key used twice, which §3 of this charter already requires
+for numbered registers and did not require for branches. It does now.

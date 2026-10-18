@@ -132,6 +132,60 @@ so the workflow edits this run designed are queued rather than applied
 and are marked as queued-for-that-reason rather than
 queued-for-lack-of-access.
 
+> **Superseded as advice, kept as measurement (2026-10-18).** The
+> paragraph above is still true about what each host *can* write and is
+> no longer what either should do. HQ's `standards/roles/exo.md` §8 made
+> workflow files and runtime machinery the centralizer's in every product
+> repository and retired the local queue of pending diffs, so a product
+> ExO on either host measures the defect, writes the lesson, and hands it
+> to `alexandra-systems/exo-centralizer` on the board. Do not queue and
+> do not push. The rows in the table stay, because §2 and §5b of the
+> charter still turn on which host you are.
+
+## 1c. On the host, the actor field is the owner for every seat, so authorship cannot be read from GitHub (measured 2026-10-18)
+
+§1b records that the host's credential is the owner's own account. This
+section records what follows from it, because the consequence is larger
+than the credential and it silently broke an instrument this seat reports
+to the owner every run.
+
+```sh
+$ gh api user --jq '.login, .type'    # on the resident host
+alexandrapaiz
+User
+```
+
+Every merge, comment, review and push a seat makes on the host is
+therefore attributed to `alexandrapaiz`. On Actions the same seat appears
+as `app/claude`. So:
+
+| Question | Readable from GitHub? | Read instead |
+|---|---|---|
+| Who merged this pull request | **no**, on the host | the PM's `done` on the board, whose `ref` is the pull request (`docs/standards/pm.md` §15, §21) |
+| Who commented | **no**, on the host | the board, or the comment's own text |
+| Who pushed this branch | **no**, on the host | the branch name's seat prefix, and the commit trailers |
+| Who merged, on Actions | yes, `app/claude` is a seat | — |
+
+**The boundary date is 2026-10-17**, when HQ retired the `schedule:`
+block in all eleven `agent-*.yml` files and the seats' clocks moved to
+the host. Before it, `mergedBy.login` separated the seats from the owner
+correctly. The first merge across the boundary is #215, 2026-10-17 06:24,
+recorded as the owner and reported by the PM two minutes later as its own
+Tier B merge.
+
+**What it cost.** On 2026-10-18 the fourth window of the ExO seat
+reported forty-three owner merges against nine PM merges for the week and
+graded autonomy the weakest of the ten attributes on that number. Eight
+of that day's ten merges were the PM's, claimed on the board, recorded as
+the owner. That is
+`INC-2026-10-18-host-token-is-the-owner`, and the corrected measurement
+is in `prompts/exo-agent.md` §3e.
+
+**Do not try to fix this with a second token.** The credential is the
+owner's and the boundary above says so; a seat does not get to request
+one of its own. The board already carries the authorship record and
+costs one `curl`.
+
 ## 2. Scheduled runs fire late, always, by two to five hours
 
 GitHub's cron is a queue, not a clock. Ursa's own measurements, every
