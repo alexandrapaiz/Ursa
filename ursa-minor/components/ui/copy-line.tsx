@@ -48,8 +48,13 @@ export function CopyLine({ command, label }: { command: string; label?: string }
           {label}
         </div>
       ) : null}
-      <div className="flex items-start gap-4 border border-[var(--line)] p-4 sm:p-5">
-        <pre className="rec-doc min-w-0 flex-1 font-mono text-[0.72rem] leading-[1.8] text-[var(--star)] sm:text-[0.76rem]">
+      {/* Below sm the control sits under the command rather than beside
+          it. Measured 2026-10-18 at 390: beside it, the control and its
+          gap took 94px of a 326px box, a third of the measure, from the
+          one element on the page that has a fixed length and cannot be
+          reflowed. */}
+      <div className="flex flex-col items-start gap-3 border border-[var(--line)] p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-5">
+        <pre className="rec-cmd w-full min-w-0 sm:flex-1 font-mono text-[0.72rem] leading-[1.8] text-[var(--star)] sm:text-[0.76rem]">
           {command}
         </pre>
         <button

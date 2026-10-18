@@ -44,7 +44,7 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
           return (
             <div
               key={c}
-              className={`grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 py-5 sm:grid-cols-[13rem_1fr_7rem] ${
+              className={`grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 py-5 sm:grid-cols-[13rem_1fr_auto] ${
                 i > 0 ? "border-t border-[var(--line)]" : ""
               }`}
             >
@@ -59,7 +59,14 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
               <dd className="order-last col-span-2 text-[0.95rem] text-[#b7c0d4] sm:order-none sm:col-span-1">
                 {CLASS_COPY[c].gloss}
               </dd>
-              <dd className="text-right font-mono text-[0.72rem] text-[var(--star)] tabular-nums">
+              {/* whitespace-nowrap and an auto column, because a fixed 7rem
+                  broke "127 chars · 2 spans" across three lines at every
+                  viewport, leaving the word "spans" alone under the count it
+                  belongs to. Measured 2026-10-18 at 390, 820 and 1440: the
+                  longest of these lines is 19 characters of mono, which is
+                  8.2rem, so no fixed measure short enough to look tidy ever
+                  fits it. */}
+              <dd className="whitespace-nowrap text-right font-mono text-[0.72rem] text-[var(--star)] tabular-nums">
                 {stat ? pct(stat.pct) : "0%"}
                 <span className="block text-[0.66rem] text-[var(--dim)]">
                   {stat ? `${stat.chars} chars · ${stat.spans} span${stat.spans === 1 ? "" : "s"}` : "none"}

@@ -91,7 +91,7 @@ export default async function RecordIndex() {
         <RecordLoader />
       </main>
 
-      <SiteFooter />
+      <SiteFooter measure="wide" />
     </>
   );
 }
