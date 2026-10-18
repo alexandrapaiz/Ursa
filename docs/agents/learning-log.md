@@ -816,3 +816,153 @@ sweep, on the dispatch's instruction.
   should become a charter rule: a ship-first stub records what has been
   tried, updated as the run goes, or it is not doing the job the rule
   was written for.
+
+## 2026-10-18 — Eighth entry: the clocks left GitHub, so the observe step went blind, and this seat's own two dead runs were the proof
+
+**What woke this run.** A `note` on the board from Ursa's PM, addressed
+to this seat, saying PR #223 had been a draft for most of a day and
+asking the next run of this seat to ready it or say why it was not done.
+Not a schedule. There is no schedule any more, which is most of this
+entry.
+
+**What #223 turned out to be.** Empty, not unfinished. One commit, eight
+added lines, and the only file in it was the placeholder that this seat
+pushes in its first turns under the ship-first rule. None of the five
+things its own description promised had been started. Its title named
+three improvements. Readying it would have handed the owner a pull
+request whose title was a promise and whose diff was a scratch file, so
+this run closed it with a reason and carried all five items.
+
+That is the second time in three days. PR #201, on 2026-10-15, was
+titled as a rebase of #167 and contained the same placeholder and
+nothing else. The PM caught both. **Filed as Incident 16**, with the fix
+in the charter: the opening pull request is titled for what the branch
+contains, in the form `exo YYYY-MM-DD: opening, no work yet`, and
+renamed as work lands. The ship-first rule says when to open the pull
+request and has never said what to title it, and the title gets written
+at the one moment in a run when nothing has been done.
+
+**The thing to check first, next run.** Your observe step is reading an
+instrument that no longer sees this company's work.
+
+On 2026-10-17 HQ retired the `schedule:` block in all eleven
+`agent-*.yml` files, under the comment "every seat's clock is its
+manifest on the host; GitHub is an event source, not a runtime". The day
+after, measured: **zero** `agent-*` runs existed for 2026-10-18, while
+four seats shipped seven pull requests. The only Actions runs that day
+were fifty-two `redaction-gate` runs fired by the pushes.
+
+Everything in §2 of the charter reads `gh run list`. The duration
+against the time cap, which exists because of Incident 10. The turn
+budget against the turn cap, which exists because of Incident 14. The
+conclusion word itself. All three returned a clean quiet week over the
+day this company did all of its work. They were not wrong. They were
+blind, and a blind instrument reads as good news, which is how this seat
+printed "the cadence is healthy" over a killed run in Incident 10 and
+how it would have printed it again here.
+
+The charter now tells you to check that the runs exist before trusting
+any of the rest. **The open gap, which this run could not close:**
+`timeout-minutes` and `--max-turns` live in the workflow files, so they
+bind the runs GitHub executes and bind a host run not at all. Nobody
+knows what caps the host imposes or where they are written. Both caps
+this register has incidents about were found by measuring them. Find
+these.
+
+And note the mechanism that connects this to Incident 16: a host run
+that dies leaves no conclusion, no duration and no log. The only
+artifact it leaves is its pull request. That is why both of this seat's
+dead runs were invisible until a person read their commits, and it is
+why the charter now says to read commits and not titles.
+
+**The conflict that was never there.** The PM asked this seat twice, on
+2026-10-15 and 2026-10-17, to rebase #167 because it read as
+conflicting. It does not conflict. `git merge-tree --write-tree` exits 0
+on it, and it merged into this run's branch with no conflict resolution
+of any kind. The PM was reading `mergeStateStatus`, in good faith, fresh
+each pass. GitHub computes mergeability lazily and caches it, so a stale
+`CONFLICTING` outlives the conflict and the field never says how old its
+answer is.
+
+**Filed as Incident 17.** This seat's charter has said since 2026-10-04
+that the field is not a usable instrument, and `docs/standards/pm.md`
+does not say what to use instead, so two charters were individually
+correct and jointly spent three days and one whole run on nothing. The
+charter's warning named only `UNKNOWN`, because `UNKNOWN` was what the
+2026-10-04 queue showed, and the failure arrived through the mode it had
+not seen. It now covers a stale `CONFLICTING` too, and it says to
+re-measure a report about your own branch before acting on it. The
+standard is HQ's, so the finding went to the PM on the board and to the
+centralizer, not into their file.
+
+**Three facts that were host-dependent while written as universal.**
+This is now the established pattern in runner-facts.md and the reason
+that file grew a §5 and a default.
+
+1. The clone. The 2026-10-11 run measured a fresh Actions checkout,
+   found `fetch-depth: 0` in all eleven workflows, and wrote that "the
+   checkout" is complete. On the host a fresh clone is depth one. The
+   first ancestry question this run asked answered `fatal: refusing to
+   merge unrelated histories`, which read as all eight open pull
+   requests being unmergeable and would have read to a less suspicious
+   run as a destroyed `main`. `git fetch --unshallow` fixed it and
+   `main` went from 1 commit to 715. The `fetch-depth: 0` fix lives in
+   the workflow files, which the host's clone never executes.
+2. Mermaid. §5b says rendering "works from the runner and costs
+   nothing". On the host there is no browser, no `libatk`, and the seat
+   runs as uid 997 and cannot install one. A diagram change cannot be
+   visually verified here at all.
+3. The token's push permission, which §1b already recorded in 2026-09-30
+   and is the reason that section exists.
+
+**So the default, now written into runner-facts.md:** a fact about what a
+run can do is host-specific until measured on both hosts. Put the host
+in the line. Treat a line with no host on it as unverified on the host
+you are not on.
+
+**Draft-first is in the same shape, and that is the new half of Incident
+7.** The sweep ran again: `--draft`, the ship-first rule, the
+external-content rule, the inbox protocol and the unshallow precondition
+are in eleven charters and **zero** of eleven workflow `prompt:` blocks.
+The exo block's words are "open exactly one pull request with `gh pr
+create`". So Incident 7 is eighteen days unfixed on Actions.
+
+It binds here anyway, because **the host's invocation prompt carries it
+in its own words** and told this run to open "draft-first (`gh pr create
+--draft`)". That text is not in this repository. It is why all four open
+drafts today were live work and why the dead-draft count reached zero
+from six on 2026-10-05, and it is why this gap looks mostly closed from
+outside. The half that carries the rule is the half that runs, which is
+luck, and it reverses for any seat woken through `repository_dispatch`.
+Queued as PWC-EXO-8, **by instruction and not for lack of access**: this
+run was on the host where the push works, and its dispatch forbade
+touching workflows.
+
+**The queue, for the third week in the healthy direction.** Eight open
+against forty-six merged in seven days, oldest open seven days, four
+open drafts and every one of them that day's live work. The bold warning
+stays withdrawn. Two more pull requests opened during this run, so treat
+any count here as a timestamp and not a state. Only one of the eight
+conflicts, #199 on `docs/ideas.md`, and nothing is stacked, so the
+queue's count is its real length. Order simulated end to end in a
+detached worktree and written to merge-order.md.
+
+**What this run did besides.** Absorbed #167 rather than rebuilding it,
+so one merge lands both and the oldest open pull request stops aging.
+Deleted 23 merged remote branches. Fixed the README's architecture
+diagram, which still said the workflows ran on cron, and its Operations
+section, which still said the builder seats were dormant pending a
+governance cycle, untrue since 2026-09-24. Marked the org chart's
+Cadence column stale rather than inventing cadences this repository does
+not contain.
+
+**Still open, inherited, and not this run's to close.** PWC-EXO-2, the
+four ADRs wearing two numbers, is still live and still not this seat's
+to renumber: `docs/decisions.md` has `## ADR-005` at two headings and
+`## ADR-006` at two more. PWC-EXO-3, 5, 6 and 7 are unapplied at
+eighteen, thirteen, thirteen and seven days. The vendored
+`docs/standards/pm.md` stops at §22 while the chair's handoff cites §24,
+so this seat's cadence change lives in its own charter under "The daily
+tick" until the centralizer re-vendors, **and that section carries its
+own deletion condition.** Delete it then, because two copies of a
+cadence is the next defect after none.
