@@ -362,11 +362,22 @@ held. So the useful ratio is not the drift count. It is that roughly
 60 percent of a drift batch is machine work, and the reading cost sits
 almost entirely in the remainder.
 
+**Measured a second time, 2026-10-18.** Merging `main` again three days
+later tripped 43 of 154 ranges, and 39 of those were pure relocation,
+with 1 content change and 3 ambiguous. So the total barely moved while
+the mechanical share went from 61 percent to 91 percent and the reading
+cost fell from 17 ranges to 4. That is what convergence looks like from
+inside: the library is catching up to `main`'s content and not to
+`main`'s line numbers, and line numbers move every time anybody commits.
+Do not read the falling reading cost as a falling drift cost. The batch
+is the same size and almost all of it is now work no person should do.
+
 Ours: run the mechanical pass first and commit it separately, before
 reading anything. It shrinks the batch to the part that needs judgment,
 it keeps the two kinds of change in separate diffs where a reviewer can
 see which were decided by a person, and it means a run that dies partway
-has still landed the half that was not going to change anyway.
+has still landed the half that was not going to change anyway. §5k is
+the tool that does it.
 
 ## 5j. The lock proves the lines did not change, not that they support the claim
 
@@ -407,3 +418,54 @@ sentence is visible to any reviewer who reads the skill. A
 too-narrow anchor is invisible to every reviewer who does not open the
 file, and invisible to the checker by construction, so it survives
 exactly the review that a confident green run invites.
+
+## 5k. The mechanical pass is a tool, and its one failure mode is the ref you give it
+
+(Added 2026-10-18, seventh run, after writing the same throwaway script
+for the third time.)
+
+§5i says to run the mechanical pass first and commit it separately. Two
+runs did that by writing the pass from scratch inside the run and
+deleting it with the sandbox. It is committed now:
+
+```
+node skills/relocate-anchors.mjs <old-ref>           show what it would do
+node skills/relocate-anchors.mjs <old-ref> --write   do it
+```
+
+`<old-ref>` is the git ref whose tree the current anchors were written
+against, which after a merge is the merge's **first** parent, the branch
+head before `main` came in. Get it with
+`git log -1 --format=%p <merge>` and take the first hash.
+
+Three things about it are worth knowing before you trust it.
+
+1. **It refuses on a ref it cannot verify.** For every drifted range it
+   recovers the as-cited lines from `<old-ref>` and checks that they hash
+   to the fingerprint the lock recorded. If they do not, that ref is not
+   the tree the citation came from, and it says so instead of searching a
+   tree whose lines were never the cited ones. This is the whole safety
+   property and it is also the error you will actually make: this run's
+   first attempt named a plausible wrong ref, got 23 relocations instead
+   of 39, and was told exactly why for all 16 it would not touch. A run
+   that sees a surprising number of "do not match the recorded
+   fingerprint" lines has the wrong ref, not a broken library.
+2. **It carries the fingerprint across rather than calling `--update`.**
+   Because the search is over the same trimmed lines the hash is taken
+   over, a relocated range's new hash is identical to the old one by
+   construction, so `--write` moves that one value to the new key and
+   touches nothing else. This matters because §5g point 3 asks for
+   `--update` in the re-anchoring commit, and `check-evidence.mjs
+   --update` re-records **every** range in the library, including the
+   ones whose claims stopped being true. After a relocation pass, do not
+   reach for `--update` to clear what is left. The ranges still red are
+   precisely the ones §5g point 2 and §5h exist for.
+3. **It will not resolve an ambiguous range for you.** §5i says resolve
+   those by ordinal and not by proximity, so the tool lists every
+   candidate position and stops. On the 2026-10-18 batch two of the three
+   would have come out wrong on distance alone.
+
+Ours: a relocated anchor means the bytes are the same bytes. It does not
+mean the sentence is still well stated, and it does not discharge §5j.
+Read your relocated citations back as a stranger would, at least for the
+refs whose claims you are also touching this run.
