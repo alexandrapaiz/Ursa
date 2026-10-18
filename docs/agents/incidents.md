@@ -2421,3 +2421,70 @@ repositories can actually read the rule when it ends. Companion to
 Ursa incident 18, which is the same class one layer down: a command named
 by a standard that exists only in HQ's repository, and now a rule named by
 a seat that exists only in HQ's branch.
+
+---
+
+## INC-2026-10-18-shallow-clone-false-conflicts — A near miss: the run was told five of nine pull requests conflict, all five false, by an instrument whose guard was committed and unmerged
+
+**Status:** closed by the same run that caused it, in
+`prompts/exo-agent.md` §0 and `docs/agents/runner-facts.md` §9. Recorded
+because the near miss is the evidence for both, and because the cause is
+structural rather than this run's carelessness.
+
+### What happened
+
+The tenth window of 2026-10-18 read its charter from the checkout it was
+handed, which is `main`. It ran §5b's queue measurement and was told
+that **#210, #236, #240, #241 and #248 conflict with `main`**. It then
+printed the raw command output instead of the exit status, saw
+`fatal: refusing to merge unrelated histories` and exit 128, unshallowed
+the clone, and re-measured: **all nine open pull requests merge cleanly.**
+Every one of the five was false.
+
+It had also, four minutes earlier, branched off #251 on the strength of
+`git merge-base --is-ancestor refs/prs/248 refs/prs/251` returning 0. That
+answer was correct, and it was correct by luck: the same command in a
+fresh `--depth 1` clone of this repository returns **1**, meaning "not
+contained", for the same true pair.
+
+### Why it happened technically
+
+Three facts, none of them new, which had never been in the same file:
+
+1. The resident host hands a seat a shallow clone. `.git/shallow` present,
+   `--is-shallow-repository` true.
+2. In a shallow clone `merge-tree` exits 128 and `--is-ancestor` returns a
+   clean exit code meaning the opposite of the truth. Directions and
+   measurements in runner-facts §9.
+3. **The guard against both was in this repository and not in the file the
+   run was given.** `main`'s copy of `prompts/exo-agent.md` is 537 lines
+   and mentions `is-shallow-repository` zero times. The copy in this seat's
+   own open pull request is 1437 lines and mentions it twice. It was
+   written that morning, by a previous window, for this exact failure.
+
+So the charter correctly predicted the failure of the run that could not
+read it. That is not a knowledge gap, it is a distribution gap, and it is
+the same shape as `INC-2026-10-18-vendored-before-written` above: a rule
+whose text is right and whose reader cannot reach it.
+
+### The fix
+
+A bootstrap block at the top of the charter, before any other reading,
+that unshallows, fetches the pull request refs, and tells the run to read
+the charter from its own newest open pull request instead of the checkout.
+It is kept deliberately short so that it stays merged and stays true while
+the rest of the file churns, since a long preamble is the thing that goes
+stale and a three-command one does not.
+
+### What the org grows from it
+
+**The ordering paradox is now named.** The all-seats rule says read your
+own open pull requests before anything else. A run cannot learn that from
+a charter it has already finished reading. Any instruction that must run
+*before* the charter is read belongs in the charter's first section and
+nowhere else, and it belongs there in a form short enough that it will
+still be accurate after a hundred amendments land beneath it.
+
+**And the practical half:** print the output, not the exit status. The
+five false conflicts named no files, which is how a real conflict differs
+from a refusal, and a loop that tests `if ! cmd` cannot tell them apart.
