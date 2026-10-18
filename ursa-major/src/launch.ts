@@ -54,7 +54,7 @@
 
 import { isForgotten, loadConsent } from './consent'
 import { checkRecord, formatViolations, type Violation } from './invariants'
-import type { OutcomeRecord } from './types'
+import type { OutcomeRecord, PairingBounds } from './types'
 
 /**
  * Is this resolved record big enough to be worth writing?
@@ -94,6 +94,40 @@ export function clearsSizeFloor(record: OutcomeRecord, minChars: number): boolea
 export function erasedEpisodeIds(projectPath: string, episodeIds: string[]): Set<string> {
   const consent = loadConsent(projectPath)
   return new Set(episodeIds.filter((id) => isForgotten(consent, id)))
+}
+
+/**
+ * Write the bounds a walk ran under into every record that walk produced.
+ *
+ * Both launches owe this, and it is here rather than in each of them for
+ * the reason the five entries at the top of this file exist: the pairing
+ * bounds themselves reached one launch and not the other for seven days
+ * (drift 5), and a stamp of those bounds written twice would be the same
+ * defect one level down, where it is harder to see. A record whose
+ * `pairedBy` is absent on one launch and present on the other, from
+ * byte-identical history, would be a difference in the audit trail
+ * rather than in a number, which is the kind a test is least likely to
+ * catch and a buyer most likely to find.
+ *
+ * Not in `saveRecord` (src/store.ts), which is where the resolver stamp
+ * and the bound-set stamp live, and the asymmetry is deliberate: those
+ * two facts are properties of the running build and `saveRecord` can
+ * read them from the process itself, while the pairing bounds are an
+ * argument the caller chose. Passing them down to the store so the store
+ * could stamp them would make every caller of `saveRecord` — including
+ * `applyVerdict`, which re-saves a record and knows nothing about any
+ * walk — carry a parameter only two callers can fill.
+ *
+ * Preserve, never overwrite, like both stamps in `saveRecord`: a record
+ * loaded from disk and re-saved keeps the bounds its own walk used.
+ *
+ * One record at a time rather than the set, because both launches write
+ * each record inside the loop that resolved it, so a stamp applied to
+ * the finished set would be applied after the bytes were already on
+ * disk.
+ */
+export function stampPairingBounds(record: OutcomeRecord, bounds: PairingBounds): void {
+  if (!record.task.pairedBy) record.task.pairedBy = bounds
 }
 
 export interface GateResult {

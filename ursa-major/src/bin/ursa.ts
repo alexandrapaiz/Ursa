@@ -54,7 +54,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
 import { formatResolverIdentity } from '../resolver-identity'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
+import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -519,6 +519,11 @@ export async function main(argv: string[]): Promise<number> {
     // resolve(), which also serves pasted conversations with no history.
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt)
     record.signals = deriveSignals(record, declaration)
+    // The bounds this walk ran under, into the record, before it is
+    // written. `diagnostics.bounds` is the walk's own resolved numbers
+    // rather than this command's flags, so a record never states a bound
+    // the walk did not apply (src/launch.ts, `stampPairingBounds`).
+    stampPairingBounds(record, diagnostics.bounds)
     saveRecord(projectPath, record)
     records.push(record)
   }
