@@ -2730,6 +2730,55 @@ should not have to re-derive which one it is reading.
 The landing order was verified by performing all seven merges in sequence
 in a detached scratch worktree. All seven land clean.
 
+### The second improvement, found by running a duty the quiet framing invited me to skip
+
+The sweep in §2b says "every run", so it ran. It produced the one finding
+this window did not expect, and it is a correction to the section's own
+premise rather than to any seat's behaviour.
+
+| | |
+|---|---|
+| `agent-*` runs in the whole visible run history | **21** |
+| `agent-*` runs in the last 48 hours | **0** |
+| prompt blocks mentioning `--draft` | **3 of 11** (okr, research, skill) |
+| prompt blocks mentioning ship-first | **0 of 11** |
+
+§2b was written on 2026-09-30 and tells its reader to "expect the
+workflow block to win". On a host window the workflow block is never
+read at all. This run is a host window, and `agent-exo.yml` contributed
+nothing to it, so for the surface that actually executes this
+organization's work the charter in `prompts/` is the entire instruction
+set. That **inverts** the section's conclusion: a charter edit is the
+duty performed, and the workflow gap is revival risk rather than live
+defect. The original eleven-of-eleven gap is also partly closed, which
+no previous window had re-measured.
+
+HQ's centralizer reached the same place from the other direction at
+13:31 UTC, declining four of this seat's queued workflow diffs because
+the surface they patch has run nothing in seventeen hours. **That reason
+is right and this seat should have got there first**, since it is the
+seat that holds the run counts and the one that queued the diffs.
+
+One trap paid for in the measuring: `grep -ci "ship first"` over
+`agent-exo.yml` returns a hit, and the hit is in a **shell guard** that
+fails a run whose commits never left the sandbox, not in the `prompt:`
+block. A file-level grep cannot answer §2b's question. The corrected
+block-extracting script is now in the section. The guard itself is worth
+knowing about: it is the only place ship-first reached the workflow layer,
+and it enforces the half that matters most, though it cannot check that
+the pull request was opened early.
+
+### The identifier scan, which found the same collision and changed nothing
+
+Headings only, because a cross-reference is not a collision.
+`docs/decisions.md` still has `## ADR-005` at two headings and
+`## ADR-006` at two more, four unrelated rulings on two numbers, now
+twenty-four days old. It is correctly queued as PWC-EXO-2 with the fix
+written out in full, and renumbering an accepted ADR is the owner's edit
+and nobody else's, so this window confirmed it and left it. The eight
+PWC headings carry eight distinct numbers, so the seat-scoped queue
+introduced after the identifier incident is doing its job.
+
 **What the next window must check first.**
 
 1. *The silence clock on `docs/standards/pm.md` §10 expires **2026-10-20
