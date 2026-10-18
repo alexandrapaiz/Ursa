@@ -24,6 +24,7 @@
 import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
+import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
@@ -74,12 +75,10 @@ for (const entry of readdirSync(skillsDir)) {
   for (const m of fm[1].matchAll(/- ref:\s*(\S+)\n(?:.*\n)*?\s*source:\s*(.+)/g)) {
     const [, ref, sourceLine] = m
     declared.add(ref)
-    // One source line may hold several path[:ranges] plus prose. Scan it
-    // rather than splitting on commas first: a comma separates two paths
-    // AND two ranges of one path, so splitting dropped every range after
-    // the first, and `segment.ts:1-3,900-999` passed on a 70-line file.
-    for (const hit of sourceLine.matchAll(/([\w./-]+\.(?:ts|md|json|mjs))(?::([\d,-]+))?/g)) {
-      const [, path, ranges] = hit
+    // One source line may hold several path[:ranges] plus prose; see
+    // ./source-line.mjs for what the pattern can and cannot see, which the
+    // 2026-10-18 relevance sweep found was two things less than assumed.
+    for (const { path, ranges } of sourcePaths(sourceLine)) {
       checked++
       const abs = join(root, path)
       if (!existsSync(abs)) { problems.push(`${entry} ${ref}: missing ${path}`); continue }
@@ -87,22 +86,18 @@ for (const entry of readdirSync(skillsDir)) {
       // Trailing newline makes split() yield one empty extra element, which
       // let a citation one line past the end of the file pass.
       const lines = readFileSync(abs, 'utf8').replace(/\n$/, '').split('\n').length
-      for (const part of ranges.split(',')) {
-        // Only well-formed N or N-M. Number('') is 0, not NaN, so a trailing
-        // comma used to invent a line 0 and fail an otherwise fine source.
-        if (!/^\d+(?:-\d+)?$/.test(part)) continue
-        const nums = part.split('-').map(Number)
-        for (const n of nums)
+      for (const { part, from, to } of lineRanges(ranges)) {
+        for (const n of [from, to])
           if (n < 1 || n > lines)
             problems.push(`${entry} ${ref}: ${path}:${n} out of bounds (${lines} lines)`)
-        if (nums.length === 2 && nums[0] > nums[1]) {
+        if (from > to) {
           problems.push(`${entry} ${ref}: ${path}:${part} is inverted`)
           continue
         }
-        if (nums[0] < 1 || (nums[1] ?? nums[0]) > lines) continue
+        if (from < 1 || to > lines) continue
         const body = readFileSync(abs, 'utf8').replace(/\n$/, '').split('\n')
         const key = `${entry}/${ref}/${path}:${part}`
-        const fp = fingerprint(body, nums[0], nums[1] ?? nums[0])
+        const fp = fingerprint(body, from, to)
         fresh[key] = fp
         if (key in lock && lock[key] !== fp) drifted.push({ entry, ref, key })
         if (update) continue

@@ -86,6 +86,9 @@ test('end to end: relocates on a unique match, refuses on two, reports a real ch
   mkdirSync(join(dir, 'skills', 'fixture'), { recursive: true })
   copyFileSync(new URL('relocate-anchors.mjs', import.meta.url).pathname,
     join(dir, 'skills', 'relocate-anchors.mjs'))
+  // The tool imports the shared source-line reader; copy it too.
+  copyFileSync(new URL('source-line.mjs', import.meta.url).pathname,
+    join(dir, 'skills', 'source-line.mjs'))
 
   // The old tree. E1 moves, E2's text will appear twice, E3's text will go.
   const old = ['moved alpha', 'moved beta', 'twice me', 'gone forever', 'tail']
@@ -165,6 +168,9 @@ test('a wrong old-ref is reported as a wrong old-ref, not relocated anyway', () 
   mkdirSync(join(dir, 'skills', 'fixture'), { recursive: true })
   copyFileSync(new URL('relocate-anchors.mjs', import.meta.url).pathname,
     join(dir, 'skills', 'relocate-anchors.mjs'))
+  // The tool imports the shared source-line reader; copy it too.
+  copyFileSync(new URL('source-line.mjs', import.meta.url).pathname,
+    join(dir, 'skills', 'source-line.mjs'))
   writeFileSync(join(dir, 'src', 'f.ts'), 'unrelated\nunrelated\n')
   writeFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
     what: a thing
