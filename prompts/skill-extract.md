@@ -588,3 +588,58 @@ short, or in another skill's contradicting sentence. Treat the lock as
 proof that nothing moved, treat the reading as the only thing that
 establishes relevance, and expect roughly a third of any un-swept
 library to need one or the other.
+
+## 5n. A sentence that cites two refs divides its claim, and nothing audits the division
+
+(Added 2026-10-18, tenth run, after the third slice of the sweep.)
+
+Slice 3 read twenty refs and found no false claim and eight ranges too
+narrow, which is the same rough third as the two slices before it. One of
+the eight is a new mechanism and gets its own rule, because the thing
+that found it was not the ordering.
+
+`running-an-outcome-record-trial` has a sentence that reads "A pair needs
+a commit marked as generated and then a later commit, not a merge, with
+no agent marker, touching at least one of the same paths [E2, E4]." Two
+refs, one claim, and each author knew which half was theirs. E4's half is
+the merge exclusion, and a later passage states its load-bearing
+consequence: the exclusion "is written against parent count", which is
+why a squash merge slips past it. E4's range was four lines of comment
+saying a merge is not a pairing target. The comment never mentions
+parents. The test that does, `if (fin.parents.length > 1)`, sits ten
+lines below it.
+
+Three things make this worth a rule rather than a row in the audit.
+
+1. **The ordering did not find it and could not have.** E4 ranked near
+   the bottom of the slice, four cited lines and a 13 percent miss rate,
+   because the `what` field was a fair summary of the comment it cited.
+   Both signals measure a ref against its own `what`, and when the `what`
+   describes the range faithfully while the *passage* claims more, there
+   is nothing for either signal to see. What found it was reading E2 and
+   following the tag.
+2. **The division is invisible to every tool by construction.** The lock
+   keys on one ref's ranges. The overlap field §5m added compares ranges
+   to ranges, and these two refs do not overlap: one cites the file header
+   and the walk, the other a comment between them. Only the citation tag
+   knows the two sentences are one sentence.
+3. **It is rare and it is concentrated.** Twelve of this library's 182
+   citation tags name two refs, and all twelve sit inside a single skill,
+   which is the opposite shape from the overlap field, where 36 of 41
+   pointed across a skill boundary. So this is not a common failure. It
+   is a cheap one to check when it fires, and it fires on 7 percent of
+   tags.
+
+The mechanical part, since a reading step with no queue is a reading step
+nobody finishes: a dossier now names every ref this one shares a sentence
+with, beside its `what` and its own audit verdict. When it fires, say in
+the audit row which half of the claim each ref carries. That is the
+sentence E4's row now carries, and writing it is what would have caught
+this in the first place.
+
+Ours: the general form of §5m and this one together. A fingerprint is an
+argument about one range in isolation, and the claims that fail are the
+ones whose subject is somewhere the range does not reach. §5m named five
+of those places. This is the fifth, and it is the only one where the
+subject is not in the code at all. It is in the other half of your own
+sentence.

@@ -51,8 +51,8 @@ evidence:
     what: KR1.1 requires all 55 uncertain spans adjudicated, thresholds retuned to a false-positive rate of 10 percent or lower, and the adjudication file committed beside the record
     source: docs/okrs/2026-q4.md, O1 KR1.1
   - ref: E11
-    what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14
-    source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37
+    what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14, and the not_generated characters are subtracted from the gross deleted figure rather than asserted to be by a comment
+    source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37, ursa-major/src/stats.ts:115-121
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
     source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
@@ -67,13 +67,13 @@ evidence:
     source: ursa-major/src/viewer.ts:89,310-311,323-325
   - ref: E16
     what: a second branch sets uncertain, where an above-threshold match whose descent is corroborated as rival is demoted to no_generation_provenance with the candidate and a descent field kept
-    source: ursa-major/src/resolve.ts:415-431
+    source: ursa-major/src/resolve.ts:330,415-431
   - ref: E17
     what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
     source: ursa-major/src/resolve.ts:438-443
   - ref: E18
     what: uncertainSpans and trivialSpans are two independent reads of the two flags over every span, so a span whose demotion dropped the trivial flag lands in the uncertain count and not in the trivial one
-    source: ursa-major/src/stats.ts:36-37,52-53, ursa-major/src/types.ts:532-533
+    source: ursa-major/src/stats.ts:36-37,41-53, ursa-major/src/types.ts:532-533
 supersedes: []
 ---
 
@@ -259,8 +259,8 @@ using the weakest signal in the record.
 
 **Read the uncertain rate against the stage of the funnel first.** The
 two capture paths sit at different points and produce very different
-numbers, with session capture showing 82 percent deletion and git
-capture 7 percent on the second trial [E13]. A record with many
+numbers, with session capture showing 82 percent deletion on the first
+trial and git capture 7 percent on the second [E13]. A record with many
 uncertain spans may be measuring churn rather than revealing broken
 thresholds, and retuning against the wrong stage bakes that confusion
 into the constants.

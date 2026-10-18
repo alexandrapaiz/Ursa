@@ -12,7 +12,10 @@
 //   node skills/relevance-sweep.mjs <skill>[/<ref>] the dossier for one ref or one skill
 //   node skills/relevance-sweep.mjs --audited       what has been read, and when
 //
-// A dossier also names every other ref whose cited lines OVERLAP this one's,
+// A dossier also names every ref this one SHARES A SENTENCE with, because a
+// tag like `[E2, E4]` divides one claim between two refs and nothing audits
+// the division; that is how slice 3 found its one bad range. And it names
+// every other ref whose cited lines OVERLAP this one's,
 // with its own `what`, because the one false claim slice 2 found was
 // contradicted by another ref over the same helper and nothing mechanical ever
 // compares two refs to each other. Overlap and not merely the same file: this
@@ -159,6 +162,31 @@ const coCited = (r) => {
   return out
 }
 
+// Which refs share a SENTENCE with this one. A tag like `[E2, E4]` divides one
+// claim between two refs, and the division is the part nothing audits: each
+// author knew which half was theirs and no tool knows either. Slice 3 found
+// `running-an-outcome-record-trial/E4` that way. Its sentence says the merge
+// exclusion "is written against parent count", the other half of a claim it
+// shares with E2, and its range was four lines of comment that never mention
+// parents. The test is ten lines below it. The ordering had E4 near the bottom
+// of the slice at a 13 percent miss rate, so the signal did not find this and
+// the neighbouring ref did. Twelve of the library's 182 citation tags name two
+// refs, all twelve inside one skill, so this field is rarer than the overlap
+// one and points inward rather than across a skill boundary.
+const splitWith = (r) => {
+  const out = new Map()
+  for (const s of r.sentences) {
+    for (const tag of s.match(/\[E\d+(?:,\s*E\d+)+\]/g) ?? []) {
+      for (const id of tag.slice(1, -1).split(/,\s*/)) {
+        if (id === r.ref || out.has(id)) continue
+        const o = refs.find((x) => x.entry === r.entry && x.ref === id)
+        if (o) out.set(id, o)
+      }
+    }
+  }
+  return [...out.values()]
+}
+
 const audited = readAudit()
 const args = process.argv.slice(2)
 const flags = args.filter((a) => a.startsWith('--'))
@@ -174,6 +202,17 @@ const dossier = (r) => {
     (r.miss.length ? ` (${r.miss.join(' ')})` : ''))
   console.log(`\ncited by ${r.sentences.length} passage${r.sentences.length === 1 ? '' : 's'}:`)
   for (const s of r.sentences) console.log(`  · ${s}`)
+  const split = splitWith(r)
+  if (split.length) {
+    console.log(`\n${split.length} other ref${split.length === 1 ? '' : 's'} ` +
+      `${split.length === 1 ? 'shares' : 'share'} a sentence with this one, so the claim is ` +
+      `divided. Check which half is yours:`)
+    for (const o of split) {
+      const oa = audited.get(`${o.entry}/${o.ref}`)
+      console.log(`  · ${o.entry}/${o.ref}${oa ? ` [${oa.verdict}]` : ''}  ${o.sourceLine}`)
+      console.log(`      ${o.what}`)
+    }
+  }
   const also = coCited(r)
   if (also.length) {
     console.log(`\n${also.length} other ref${also.length === 1 ? ' cites' : 's cite'} overlapping lines. ` +
