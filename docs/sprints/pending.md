@@ -2,36 +2,32 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-10-17 ~19:4x UTC message dispatch (HQ chair handoff)
+## Top three for the owner, 2026-10-17 ~18:2x UTC host six-hour pass
 
-1. **The owner's MVP directive is now a tracked item, not just a board
-   message.** The chair handed this seat a handoff at 19:44 UTC: deploy
-   the ursa-minor app and the ursa-major record viewer to a public
-   address this week, so a stranger can run `ursa` on their own
-   repository from the README and read the resulting record, by
-   Wednesday's brief (2026-10-21). Nothing is deployed today; Ursa has
-   no homepage, no GitHub Pages site, and no `vercel.json` anywhere in
-   the repo, confirmed by searching rather than assumed. I posted
-   handoffs to engineer and frontend on the board directly rather than
-   waiting for Monday's ceremony, because the deadline falls inside the
-   gap between this run and that one. Full account below and in
-   `docs/prfaq/mvp-public-address.md`, drafted this pass per the
-   Working Backwards standard since a public launch is bigger than a
-   sprint item. This is a go/no-go document: it ships with nothing
-   live yet, and your merge of it is the go decision, not a report of
-   something already shipped.
-2. **The MVP deadline (2026-10-21) sits inside the current sprint's
-   handoff gap.** Sprint 2026-10-12 closes tonight (2026-10-18T00:00
-   UTC) and the next ceremony is Monday 2026-10-19, two days before the
-   brief. I did not open an out-of-cycle sprint file for this, since
-   charter reserves sprint-opening for the Monday ceremony, but Monday's
-   planning will carry this directive as the sprint goal rather than a
-   backlog item, and I am naming the gap now so engineer and frontend
-   do not wait for a sprint file to exist before starting.
-3. **Three open pull requests still edit a charter file directly: #199
-   (skill), #167 (exo), #210 (research).** Unchanged from the last
-   several passes. None of these are mine to merge regardless of how
-   clean or conflicted they are.
+1. **One pull request merged under Tier B this pass, informational
+   rather than a decision: #214 (security).** It lands the sprint's
+   third item, the redaction standard, and absorbs the stale #190
+   stack. Clean, green, not a draft, touched no charter, workflow, or
+   secret, and carried no owner comment since its last push. (This
+   section originally also named engineer's #219 as merged here; that
+   was wrong, caught before this draft shipped. The engineer PR that
+   actually merged today is #215, the first bundle-digest run,
+   06:24:51Z. #219 is that seat's second run on the same topic — "the
+   one-line fix that did not work" — still open and unmerged.) Not
+   asking you to act; naming the real merge so the queue is read
+   correctly.
+2. **Three open pull requests still edit a charter file directly,
+   unchanged from the last several passes: #199 (skill), #210
+   (research), #167 (exo).** None of these are mine to merge no matter
+   how clean or conflicted the rest of the diff is — a charter edit
+   under `prompts/` is Tier C by the standard regardless. #199 is also
+   `CONFLICTING`; I handed that half to the skill seat on the board
+   rather than touching its branch.
+3. **The sprint's milestone (Sprint 2026-10-12, due 2026-10-18T00:00
+   UTC) now has all three backlog items landed or landing this pass.**
+   Items 1 and 2 shipped earlier (#179, #182); item 3, the redaction
+   standard, lands with #214 in this pass. Nothing left owed from this
+   sprint; ready to close at Monday's ceremony. Not asking you to act.
 
 ## Top three for the owner, 2026-10-17 ~14:1x UTC scheduled standup (GitHub Actions `pm-agent`)
 
