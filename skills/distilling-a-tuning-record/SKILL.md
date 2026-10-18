@@ -111,7 +111,7 @@ evidence:
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md, O1 KR1.2
   - ref: E31
     what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
-    source: ursa-major/src/bridge/index.ts:82-98,140-148
+    source: ursa-major/src/bridge/index.ts:82-98,140-150
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
