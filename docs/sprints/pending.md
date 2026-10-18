@@ -2,6 +2,59 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-second pass, 2026-10-18 ~13:4x UTC, message: PR #251 (exo's ninth window) to review against the merge rule, exo's run-finished report, exo's note replied to, the next thing handed to a seat
+
+**#251 checked fresh, not inherited from the thirty-first pass's note
+of it.** `gh pr diff 251 --name-only`: ten files, eight knowledge-
+surface docs and two charter files, `prompts/exo-agent.md` and
+`prompts/pm-agent.md`. Two charter paths put it at Tier C outright
+(docs/standards/pm.md §9/§10), regardless of its checks (`scan`:
+`SUCCESS`) or its cached `mergeable` field (`UNKNOWN`, GitHub has not
+recomputed it, and it would not change the verdict if it had). Not
+mine to merge.
+
+**Exo's claim about #248 verified directly, not taken on its word.**
+`git fetch` of both pull refs, then `git merge-base --is-ancestor
+pr248 pr251` returns true: #248 is an ancestor of #251, so #251 is a
+strict superset carrying the same two charter files. #248 stays open
+rather than closing it as superseded. The reason is exo's own and
+checks out: an earlier pass's note told the owner #248 would stay
+exactly where it is until she answers or the silence clock runs out
+(2026-10-20T12:30 UTC, unchanged, not reached — about forty-five
+hours from this pass), and closing it now would pull the diff she is
+mid-evaluation of out from under her. #251 is the one that merges once
+that decision lands, since it is the live tip and carries both. One
+owner decision still covers the pair, not two.
+
+**Exo's note answered on the board, first person, as it asked.**
+Confirmed its two claims — the truncation cause (my own prior note
+landed at exo cut to 1,500 of 1,996 characters, a bus limit it has
+handed to HQ, not something this seat caused) and the deliberate
+choice to open #251 fresh rather than grow #248's branch — and told it
+nothing further is owed either way. Posted as a `note` to
+`exo`/`Ursa` rather than only in this PR, per its own stated reason
+for writing to the board instead of to a PR alone.
+
+**#250 (skill): nothing new.** Already merged last pass
+(`22ebc0f6`); checked fresh and unchanged.
+
+**Hand the next thing to a seat: surveyed, nothing idle.** `gh pr
+list --state open` fresh this pass: `#253` (skill, draft, pushed
+13:38:50Z), `#252` (exo, draft, pushed 13:40:32Z), `#241` (engineer,
+draft, pushed 09:36:18Z, same session as the last check), `#236`/
+`#240` (frontend, drafts, unchanged), `#210` (research, Tier C,
+unchanged). Every seat carrying active work already has a live
+window of its own in progress; none is idle and waiting on an
+instruction from this seat. No dispatch fired — there is no criterion
+in pm.md §11.3 this pass's evidence satisfies, and an event-driven
+run answering a handoff is not a dispatch occasion under §17 regardless.
+
+**Failed runs: none.** `gh run list --status failure --created
+">=$(date -u -d '-2 hours' +%FT%TZ)"` is empty.
+
+**Board:** posted one reply `note` to exo and one `done` naming this
+pass's disposition in full.
+
 ## Thirty-first pass, 2026-10-18 ~13:3x UTC, message: PR #250 (skill, the relevance sweep) to review against the merge rule, exo's "you owe me nothing" note read
 
 **Merged, not held.** The dispatch asked for one of two outcomes and
