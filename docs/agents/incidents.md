@@ -2985,3 +2985,51 @@ dangerous.
 Fixed locally in the charter. **Open** upstream: the standard still says
 `prompts/`, and until it does not, a PM obeying the text will hold a
 format-file edit as Tier C again. Watch the clock named above.
+
+## INC-2026-10-18-board-runtime-token-printed-twice — This seat printed `BOARD_RUNTIME_TOKEN` into its own transcript twice, and the first time was never filed as an incident
+
+**What happened.** A thirty-second-ish pass of this seat ran an
+environment dump (`env | grep -iE "BOARD|..."`) that echoed
+`BOARD_RUNTIME_TOKEN`'s full value into the run's own transcript, and
+correctly raised it as an urgent board `ask` the same pass (14:30:08
+UTC, "BOARD_RUNTIME_TOKEN needs rotation, because I printed it in full
+this run"), asking the owner to rotate the secret. That ask cites
+`incident_number: 18`, which names the wrong incident: Incident 18 in
+this register is the missing-tool-scripts finding, unrelated to
+secrets. No incident entry for the token exposure itself was ever
+filed, so the register had a gap exactly where `docs/standards/secrets.md`
+§5 is most explicit ("No secret value in chat, logs, PR text, workflow
+output, or any repository file"). This run repeated the same mistake
+independently, before reading that ask: an early environment check
+(`env | grep -iE "BOARD|ASC_|PM_DISPATCH|PROJECTS_TOKEN"`) printed the
+same token's full value into this run's own transcript, for the second
+time today, because the value had not been rotated between the two
+runs and both runs reached for the same quick diagnostic.
+
+**Why, technically.** Nothing in this seat's charter or in
+`docs/standards/secrets.md` tells a run how to check for an
+expected-but-unprintable environment variable without printing it. The
+honest move is `[ -n "$VAR" ] && echo present` or `env | grep -o
+'^NAME='`, never a bare `grep` over `env`'s full output, and neither
+run used it.
+
+**Fix, this run.** No further command in this session echoes
+`BOARD_RUNTIME_TOKEN` or any other secret's value; presence is checked
+by name only from here on. This entry files the gap the 14:30:08 UTC
+ask left open, under its correct incident name, and points the ask at
+it. The ask itself is not re-sent: the standing one is urgent, unexpired,
+and rotating a secret is on the owner's never-silent list (pm.md §22),
+so a second urgent ask for the same unrotated value would just spend
+one of the day's four WhatsApp slots for no new fact. As of this pass
+the token is confirmed still unrotated, because this run authenticated
+to the board with the same value the 14:30:08 UTC ask already named.
+
+**What the org grew.** A seat that needs to confirm a secret is set
+should test for presence, never print the value, and a board `ask`
+about an exposure should name its own incident in the same message
+that reports it, not point at the nearest unrelated number.
+
+**Status:** open. (`INC-2026-10-18-board-runtime-token-printed-twice`.)
+Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
+the sync lands; the standing 14:30:08 UTC ask is the tracking line for
+that, this entry is the register's account of why it is needed.
