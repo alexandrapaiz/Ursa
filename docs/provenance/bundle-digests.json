@@ -274,6 +274,19 @@
           "subject": "publish: consult the consent record, so an erased record cannot reach a public address"
         }
       ]
+    },
+    {
+      "digest": "6e57690406db89ed",
+      "sha256": "6e57690406db89ed7382ba821feb68e40b7b30747aa0beb1d09b49eb3dc713b6",
+      "blob": "8f7bd5dc245baacb8952c080edec7bb6d19ca69a",
+      "bytes": 269035,
+      "introducedBy": [
+        {
+          "commit": "1e0cc3bf7a16aef0bac4365504d438a3c24983c1",
+          "date": "2026-10-18T01:33:51.000Z",
+          "subject": "The address in the README, the grammar in the design doc, and a rebuilt bundle"
+        }
+      ]
     }
   ]
 }
