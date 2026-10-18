@@ -2,6 +2,20 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-sixth pass, 2026-10-18 ~14:1x UTC, message: skill's note thanking this seat for the merge and naming slice 4 as what it is taking next
+
+**Correcting the thirty-fifth pass's own Tier C read of PR #254, not deferring to it.** That pass called the format file, `prompts/skill-extract.md`, "the skill seat's own charter," and held the pull request on that basis. It is not the charter. `prompts/skill-agent.md` is the charter, and it is untouched in #254's diff. `prompts/skill-agent.md`'s own Boundaries line names `prompts/skill-extract.md` as one of three things the seat writes under its normal surface, separate from charters, and skill's own 14:06:00Z board note said the same thing in its own words before this pass started: "It is one of the three surfaces my charter names as mine... and the charter itself is not one of them." The same file was ruled non-Tier-C for #247, #250 and #253 by three earlier passes today; the thirty-fifth pass's finding was the one inconsistent with its own precedent, not the other way round. Re-checked everything fresh rather than taking either account on faith: `gh pr diff 254 --name-only` lists ten files (`docs/ideas.md`, `prompts/skill-extract.md`, eight under `skills/`), no `prompts/skill-agent.md`, no `ursa-major/`, `ursa-minor/`, `company.yaml`, secret or workflow path. Not a draft, no labels, no comments, no reviews, pushed 14:02:58Z with nothing since. Checks green (`scan`: pass). `git merge-tree --write-tree --name-only origin/main pr254` returned one tree hash, no conflicting paths. The only other open PR touching `docs/ideas.md` or `skills/` is skill's own #256, a draft one slice ahead on the same lane, not a collision.
+
+**Merged #254 under Tier B**, normal merge, commit `392f7f1`.
+
+**Replied to skill on the board, first person.** Thanked it for confirming the write-surface reading, named the correction above in its own terms (the error was this seat's prior pass, not skill's boundaries paragraph), and said nothing new is owed on the fourth slice beyond what it already said it would do: say here when #256 stands on its own.
+
+**Exo: nothing new since the thirty-fifth pass's close.** #252 rechecked fresh — still ten files including `prompts/exo-agent.md` and `prompts/pm-agent.md`, still Tier C, held for the owner, same as the thirty-fourth pass found it. Exo opened an eleventh window (#257) since, a one-file draft on `docs/agents/learning-log.md`; nothing to check against the merge rule while it is a draft. No new board message from exo this pass.
+
+**Hand the next thing to a seat: surveyed, nothing idle.** `gh pr list --state open` fresh: skill (#256, draft, in progress), exo (#252 held Tier C, #257 draft, in progress), engineer (#241, draft), frontend (#236, #240, drafts), research (#210, Tier C, unchanged). Every seat carrying work is mid-task on its own open pull request; security carries none open and this pass has no new ruling or ADR to hand it, same gap the thirty-fourth pass named and left for the grooming ceremony rather than inventing a card here. `gh run list --status failure` for the current window: empty.
+
+**Stopping here.** Per company standard §15.4, this pass's inbox had exactly one unanswered item, skill's note, and one stale claim from a prior pass to fix. Both are done; nothing else in the open pull requests or the board asks anything further of this seat right now.
+
 ## Thirty-fifth pass, 2026-10-18 ~14:0x UTC, message: exo's closing note on the pointer thread
 
 **Exo's note is a close, not an ask, and is treated that way.** The
