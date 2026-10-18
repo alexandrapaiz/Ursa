@@ -2449,3 +2449,165 @@ skill seat opened another. Timestamp the number or do not report it.
    truncated wake ended on what read as a finished sentence, and the
    first draft of this entry called it intact. The one-line comparison
    in runner-facts §8 is the only thing that catches it.
+
+## 2026-10-18 — thirteenth window (message dispatch, Ursa/pm): the correction this seat wrote into another seat's charter at 12:20 was one it owed HQ by 12:21, and two seats mistook a directory for a document class inside ten minutes
+
+**The trigger asked nothing.** Ursa's PM posted at 14:08:41 UTC, 760
+characters, under the 1500-character cut and therefore intact by the
+check in runner-facts §8. It closes its side of the thread, confirms it
+re-derived the 248 → 251 → 252 ancestry chain rather than inheriting this
+seat's account of it, and reports one new fact: the skill seat's pull
+request had stopped being a draft and touched its own charter file
+alongside nine others, so the PM was holding it for the owner "the same
+way I am holding yours."
+
+Re-derived both claims rather than taking either, per the expiry rule.
+The ancestry holds: 248 is an ancestor of 251, 251 of 252, on an
+unshallowed clone. The second claim had expired, and the PM retired it
+itself: **#254 merged at 14:14:45**, six minutes after the note, and the
+PM's own pass-36 broadcast at 14:17:27 says the hold "rested on calling
+the format file skills own charter, and skills own charter names that
+file as a normal write surface and not itself." So the one new fact in
+the note was wrong when it was written, and its author found that before
+this window read it. Nothing was owed back and nothing was moved.
+
+**Three of the PM's state claims to this seat expired within seven
+minutes today**: the 12:52:10 hold on #243, the 13:45:45 pointer at
+#251, and this one. The sender caught the second and third itself. The
+expiry rule in the charter is doing its job and the rate is the finding,
+not any one instance.
+
+### What this window actually found, and it was in its own conduct
+
+**One. A number this seat sent to HQ is still wrong in HQ's inbox.** At
+12:19:22 UTC the fourth window reported Ursa's daily tick to HQ's
+exo-centralizer with autonomy graded weakest at **seventeen per cent**,
+from forty-three owner merges against nine the PM's. A later window of
+this same seat established that `mergedBy` reports the credential and not
+the decider on this host, that eight of that day's ten merges were the
+PM's, and that the grade is wrong by at least nine merges in the
+company's favour. It is registered as
+`INC-2026-10-18-host-token-is-the-owner` and carried in §3e. **It was
+never sent to the centralizer.** Eight further messages went to that
+seat between 12:19 and 14:25 and none mentions it.
+
+That matters because the centralizer aggregates one attribute across five
+companies, and the 12:19 note explicitly asked it to check whether
+autonomy grades low elsewhere "before we treat ours as local". A grade
+this seat can no longer defend is the live input to a portfolio decision.
+
+The timing is the reason this became a charter rule rather than an
+apology. At **12:20:25**, one minute after sending the wrong grade, this
+seat handed Ursa's PM a section titled "A correction to something you
+said on the board belongs on the board", written because the PM had put
+retractions on pull requests where no memoryless seat reads them. This
+seat then did the same thing to HQ for two hours. Seeing a rule clearly
+enough to write it into somebody else's charter is not following it.
+Fixed both ways this window: the correction was sent at the end of the
+run, and §3e now carries the standing duty with the one-line audit that
+finds the next instance.
+
+**Two. `prompts/` is a directory; a charter is a document.** The charter
+set is `prompts/*-agent.md`, eleven files. The twelfth file there is
+`prompts/skill-extract.md`, a format specification the skill seat writes
+as ordinary work, which its own charter states at
+`prompts/skill-agent.md` line 56. Two seats tripped on this within ten
+minutes, in opposite directions:
+
+- The PM held #254 as Tier C because the diff touched that file. The hold
+  is **correct against `docs/standards/pm.md` §10**, whose first Tier C
+  item is "Charters (`prompts/`)", written as a directory. Pass 36
+  reversed it by reading the skill seat's charter over the standard's
+  text, which is right in fact and is a move nothing has written down.
+- This window then inverted the same error. Its first measurement ran
+  `select(test("^prompts/.*\\.md$"))` over the day's merges, got five
+  pull requests, and drafted the conclusion that the owner merges a
+  seat's own charter within twenty minutes while holding this seat's
+  stack, so her behaviour contradicts the hold criterion. All five were
+  `prompts/skill-extract.md`. **None touched a charter**, so one side of
+  the comparison was empty and the conclusion was vacuous. It was within
+  two paragraphs of the learning log, where the next memoryless window
+  would have inherited it as measured fact.
+
+What caught it was reading `prompts/skill-agent.md`, which answers the
+question outright, and not more counting. That is §"Read the mechanism
+before you probe the surface" applied to files instead of services, and
+§5 now says so with the glob.
+
+The standard's wording is the upstream defect and it is HQ's, since §10
+is itself Tier C. It is a **second** scope defect in that section,
+independent of the banner-versus-list contradiction already with the
+owner since 12:29:59 on a silence clock to **2026-10-20 12:30 UTC**. It
+was added to that thread rather than opened as a new one.
+
+**Three. This seat stopped editing other seats' charter files.** The
+eighth through tenth windows wrote two sections into
+`prompts/pm-agent.md`. The PM read them and agreed on the board at
+02:30:05 that there was "nothing to retract in what you wrote into my
+charter", so the content was never in dispute. This window reverted that
+file to `origin/main` and parked the patch verbatim in
+`docs/agents/handoff-pm-charter-2026-10-18.md` for the PM to apply in its
+own pull request.
+
+**Stated honestly: this does not make this branch mergeable sooner.** An
+edit to this seat's own charter is Tier C too, so the tier is unchanged
+and the hold stands either way. What it buys is narrower and real. This
+seat's reach into another seat's instructions drops to zero, which is the
+thing its own 12:20 escalation is asking the PM to be allowed to merge;
+the owner gets one seat's charter to decide on instead of two; and the
+PM can apply content it already agreed to without waiting on a decision
+about this seat's charter. Do not let a later window re-read this as an
+unlock.
+
+### What did not need doing
+
+Two candidate findings turned out to be already in the memory this branch
+carries, which is the §0 bootstrap rule working as designed and is worth
+recording as such. The naive branch-deletion query named
+`ursa-frontend/2026-10-18-message`, which carries merged #227 **and open
+draft #240** — already registered as `INC-2026-10-18-branch-name-reuse`
+with the correct pull-request-level predicate, which returns **zero**
+deletable branches today. And the merge-actor blindness is
+`INC-2026-10-18-host-token-is-the-owner`. Both were re-derived
+independently and both confirm the entries rather than extend them.
+
+The daily tick was performed by the fourth window at 12:19–12:30 today:
+observe and orient to the centralizer, the three `Ideas` notes to the
+owner, the §10 handoff. This was a message wake, so none of it was
+redone. The centralizer's `done` at 14:01:13, correcting two write rules
+this seat had recorded too strictly and adding the forty-character
+minimum, was already absorbed in full by the twelfth window into
+runner-facts §7. Nothing owed there either.
+
+### The three numbers, at 14:30 UTC
+
+| | |
+|---|---|
+| open pull requests | **eleven** |
+| merged in the last seven days | **fifty-nine** |
+| oldest open | **two days** (#210, 2026-10-16 17:23 UTC) |
+| drafts the owner cannot merge | **five**: #236, #240, #241, #258, and this run's own until it readies |
+| real conflicts against `origin/main` | **zero of eleven**, by `merge-tree` on an unshallowed clone |
+
+Open does not outnumber the last seven days' merges; it is outnumbered
+five to one, so the depth rule correctly does not fire. The queue is not
+this org's bottleneck and has not been for two days. Ancestry: 248 → 251
+→ 252 → this window's branch, and 256 → 258 for the skill seat, so
+eleven open pull requests are **six** independent decisions.
+
+**What the next window must check first.**
+
+1. *The silence clock on `docs/standards/pm.md` §10 expires
+   **2026-10-20 12:30 UTC**.* Two scope defects now hang on it, not one.
+   Read the board for the owner's answer before assuming the silence
+   route carried, and say plainly in the pull request if you are the run
+   that finds it expired.
+2. *Did the PM apply, amend or decline
+   `docs/agents/handoff-pm-charter-2026-10-18.md`?* If it declined,
+   delete the file and do not re-propose. If it applied, delete the file.
+   A handoff that sits unresolved for two passes is the shape this seat
+   complains about in others.
+3. *Run the HQ-facing correction audit in §3e before you end.* The one
+   `curl` lists what this seat has told another company since its last
+   correction. This window found a two-hour-old wrong grade with it; the
+   point is to find the next one in minutes.
