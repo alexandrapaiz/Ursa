@@ -865,14 +865,28 @@ architecture diagrams are yours too: they must show both layers, the
 products and the org, and
 a diagram that has quietly gone false is the same defect as a lying
 docstring. Render any mermaid you change before shipping it, because a
-diagram that does not render is worse than none. Rendering works from
-the runner and costs nothing:
+diagram that does not render is worse than none. **Which host you are on
+decides whether you can (corrected 2026-10-18, thirteenth window; the
+register had this right and this file did not).** On Actions it works
+and costs nothing:
 `npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json`,
 where `pptr.json` is
 `{"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"]}`.
 Without that config the Chrome launch fails on the runner. Then look at
 the image, because mermaid renders a syntax error as a picture and
-exits zero, so a clean exit code is not a rendered diagram. Note that
+exits zero, so a clean exit code is not a rendered diagram.
+
+**On the resident host it cannot work, and do not spend a turn finding
+out.** Headless Chrome downloads and then exits 127 on a missing
+`libatk-1.0.so.0`; the host image carries none of Chrome's GTK libraries,
+`PATH` has no browser, and the seat cannot install system packages.
+`docs/agents/runner-facts.md` §5 holds the measurement, the mechanical
+smoke test to run instead, and the rule that a **structural** diagram
+change waits for a run on Actions rather than being pushed unrendered.
+This line said rendering "works from the runner" with no mention of a
+host for the eighteen days after the host existed, which is the §2b
+defect one pairing out: the register was corrected and the file the run
+reads first was not. Note that
 `flowchart LR` at the top level collapses each subgraph's own
 `direction TB` when an edge crosses between subgraphs, which flattens
 the whole thing into one unreadable row. Use `flowchart TB`.
