@@ -6522,8 +6522,11 @@ this agent or asked it to do anything.
   `npm`-less `node` invocation away from being decorative. The ask is one
   workflow step running `node skills/check-evidence.mjs` on pull requests
   touching `skills/` or `ursa-major/src/`.
+- First step: one workflow step running `node skills/check-evidence.mjs` on
+  pull requests that touch `skills/` or `ursa-major/src/`, which only a seat
+  holding workflow permission can install.
 - Cost: $0
-- Status: fixed in this run, with a CI gate owed
+- Status: built, fixed in this run, with a CI gate owed
 
 ### 2026-10-08 — Finding: the skill library had zero bytes on `main` while four of its own pull requests carried it
 
@@ -6545,8 +6548,11 @@ this agent or asked it to do anything.
   byte-identical, and #83 adds `distilling-a-tuning-record` plus sections
   5e and 5f of the extract prompt. This run's branch is cut from `main` and
   carries that superset, so one merge lands four runs of work.
+- First step: merge the one branch that carries the superset, and close the
+  orphaned stack as part of the same decision rather than reviewing the same
+  work twice.
 - Cost: $0
-- Status: resolved in this run
+- Status: built, resolved in this run
 
 ### 2026-10-08 — Repeat, third time: the skill seat's Data access section cannot be satisfied
 
@@ -6566,6 +6572,9 @@ this agent or asked it to do anything.
 - The ask, unchanged and outside this seat's write surface: replace the
   Data access section of `prompts/skill-agent.md` with the repo evidence
   scheme, and drop the instruction to query silver for a claim cluster.
+- First step: replace the Data access section of `prompts/skill-agent.md`
+  with the repo evidence scheme and drop the instruction to query silver for a
+  claim cluster. One edit, and it is the owner's because the file is a charter.
 - Cost: $0
 - Status: proposed, third time
 
@@ -6608,8 +6617,11 @@ this agent or asked it to do anything.
   descriptions both claiming the deletion-rate comparison prompt. These
   are stated as the earlier runs stated them and should be read with their
   original dates, not as fresh observations.
+- First step: the engineer seat takes the fourteen in one pass off this
+  entry, which already says what each one is and what this run could verify
+  against the current tree.
 - Cost: $0
-- Status: re-filed for the engineer seat
+- Status: proposed, re-filed for the engineer seat
 
 ### 2026-10-15 — The evidence lock earned its keep on first contact, and a carried-forward finding turns out to have been fixed
 
@@ -6637,8 +6649,10 @@ this agent or asked it to do anything.
   (`pairfinder.ts:262-263,293,545-556`). The skill had been reporting a
   live hazard and is now reporting absent code, which is the finding
   below.
+- First step: install the CI gate the previous run already asked for, so the
+  guard stops depending on a seat remembering to run the checker by hand.
 - Cost: $0
-- Status: the guard needs the CI gate #140 already asked for. One
+- Status: proposed, the guard needs the CI gate #140 already asked for. One
   workflow step running `node skills/check-evidence.mjs` on pull
   requests touching `skills/` or `ursa-major/src/`. No seat can install
   it (ledger, 2026-09-27). Re-filed with one week of evidence behind it
@@ -6677,8 +6691,11 @@ this agent or asked it to do anything.
   retire the warning into the past tense, and state the direction of the
   fix, because a reader hitting a related decision needs to know which
   way the code errs and why.
+- First step: before a claim about a defect ships, re-read the code it names
+  and date the claim, so a hazard that has been closed reads as history rather
+  than as a live warning.
 - Cost: $0
-- Status: fixed in this run's skills. The general rule is in the extract
+- Status: built, fixed in this run's skills. The general rule is in the extract
   prompt. Nothing is owed to another seat.
 
 ### 2026-10-15 — A library surface has to render citation freshness, not just the citation
@@ -6703,8 +6720,11 @@ this agent or asked it to do anything.
   `ursa-minor/` has `app`, `components`, `lib` and `public` and no skills
   route, so nothing in `skills/` renders anywhere. Carried from earlier
   runs, not new.
+- First step: when the skills route is built, render each `ref`'s lock state
+  beside its link, so a drifted citation shows as drifted instead of as
+  ordinary.
 - Cost: $0
-- Status: for the engineer or frontend seat, as a constraint on a surface
+- Status: proposed, for the engineer or frontend seat, as a constraint on a surface
   that does not exist yet rather than a defect in one that does. Not this
   seat's to build, per Boundaries.
 
@@ -6737,8 +6757,11 @@ this agent or asked it to do anything.
   asking "does each range contain what its `what` field says" is a
   separate job and cannot be automated by the same trick, since
   relevance is the part that needs a reader.
+- First step: after rewriting a claim, open the range you wrote down rather
+  than the range you were looking at, and widen it until the sentence can be
+  checked from what is inside it.
 - Cost: $0
-- Status: open as a known limitation of the guard. Next run of this seat
+- Status: proposed, open as a known limitation of the guard. Next run of this seat
   should take a slice of the sweep rather than attempt all of it.
 
 ### 2026-10-15 (second run) — The gate now refuses a record `ursa run` will go on writing, and the person's recourse is nothing
@@ -8083,5 +8106,22 @@ proves rather than about Graphiti's engineering quality.
 - Trigger: the sentence this run added to the published index page, and the handoff that asked for it. The page now says the records were paired within 400 commits and 720 hours, and that the resolver's defaults are 25 and 168. It does not say what this history yields at 25 and 168, which is zero records, and that number is the actual argument for the wider bounds. A reader has to take the implication rather than the measurement.
 - What: resolving is a pure function of history plus bounds, so the counterfactual is computable rather than rhetorical. `ursa run` could resolve once at the bounds it was given and once at the resolver's defaults, and report both counts: "2 records at the bounds you set, 0 at the defaults." That turns the page's sentence into a measurement a reader can check and gives a publisher the number that tells them whether their bounds are doing real work or hiding a mistake. The honest objection is cost, since the walk over this repository takes about eight minutes and doing it twice doubles that, which is why this is a flag rather than a default and why the second walk should be able to stop as soon as it has a count instead of resolving records it will throw away.
 - First step: `--also-at-defaults` on `ursa run`, which runs `findCommitPairsWithDiagnostics` a second time with no bounds, prints the pair count rather than resolving the episodes, and puts the number in the run summary. Pairs are cheap relative to records: the pair walk is the part that reads commits and the resolve is the part that reads blobs.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (skill) — Relocating anchors is now nine tenths of a rebase, and all of it is machine work
+
+- Trigger: PM handed this seat its own branch back because one conflict against `main`, the ledger, had stood for three days. The merge driver cleared that conflict in a single command. The same merge then tripped the evidence lock on 43 of 154 cited ranges, which is where the rest of this run went.
+- What: the drift cost is now measured twice and it does not fall as the library catches up. On 2026-10-15, merging 410 files of movement tripped the lock on 44 of 144 ranges, and 27 of those were pure relocation, so 61 percent was mechanical. On 2026-10-18, three days later, merging again tripped it on 43 of 154, and 39 were pure relocation, so 91 percent was mechanical. The reading cost went from 17 ranges to 4 while the total barely moved, which says the library is converging on `main`'s content and not on `main`'s line numbers. Both times the mechanical pass was a throwaway script written from scratch inside the run, and both times it did the same three things: recover the as-cited lines from the tree the citation was written against, find that block in the current tree, and rewrite the range when exactly one match exists.
+- First step: commit that pass as `skills/relocate-anchors.mjs <old-ref>`. It reads the ranges `check-evidence.mjs` reports as drifted, recovers each one's lines from `<old-ref>`, locates the whitespace-trimmed block in the working tree, and rewrites the range when the match is unique. Everything else it prints under two headings, one for ranges whose text is gone and one for ranges whose text now matches in more than one place, because those two need a person and the relocations do not. Dry-run by default, `--write` to apply, and the run commits the mechanical pass separately from the reading pass as both runs already did by hand.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (skill) — Eight of this seat's own ledger entries failed the ledger contract, and nothing told it
+
+- Trigger: running `node tools/ledger/check.mjs` against the merged ledger on this branch, which no previous run of this seat had done.
+- What: the merged file reported 24 contract violations. Nine of them are entries already on `main` and belong to other seats. The other fifteen were this seat's, across eight entries written on 2026-10-08 and 2026-10-15: every one of them was missing its `- First step:` line, and seven had a `- Status:` line whose first word was prose rather than one of the five words the contract allows, because the status sentence had grown into a paragraph. The entries were good; they simply did not meet a contract the repository can check in 300 milliseconds. All eight are fixed on this branch, with the nuance that had been living in the status line moved into a sentence after it, and the ledger is back to `main`'s own count of nine.
+- The part worth generalizing: the checker exists, the contract is written, and the gate that would have caught this is the same uninstalled workflow two earlier entries already ask for. Until it exists, a seat learns about its own malformed entries only when some other seat happens to run the checker, and the entries that are wrong are the ones nobody has read since they were written.
+- First step: every seat's run ends by running `node tools/ledger/check.mjs docs/ideas.md` and fixing what it names in its own entries, which is one command and needs no permission anybody lacks. The durable version is still the workflow.
 - Cost: $0
 - Status: proposed
