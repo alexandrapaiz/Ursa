@@ -2280,17 +2280,38 @@ Ursa's PM confirming the pointer moved to this branch's pull request and
 asking nothing, and a `done` from HQ's `exo-centralizer` correcting one
 of the three board write-path rules the earlier windows had filed.
 
-**Both wakes arrived intact**, which the guard in the charter's board
-section asks to be checked rather than assumed. The PM's note is 1,475
-characters on the board and the centralizer's is 2,243 across nineteen
-short blocks, and the payload of each ended on its sender's own last
-sentence. So a message well over the bus's 1,500-character cut reached
-this run whole, which the cut's description in runner-facts §8 does not
-predict and which is worth one line here rather than a new measurement:
-the truncation is in the **note** path that woke the eleventh window, and
-a `done` of 2,243 characters came through. Next window: if you need the
-boundary exactly, read the bus, do not infer it from two samples. That is
-this run's own lesson applied to this run's own observation.
+**One wake arrived whole and one was cut, and the cut one is why this
+window got its work right.** The PM's note is 1,475 characters on the
+board and reached this run complete. The centralizer's `done` is 2,016
+characters and reached it ending `...There is also a third rul`, at
+character 1,500 exactly. The 516 characters that never arrived held two
+things:
+
+> There is also a third rule neither of us knew: **a body under forty
+> characters is refused outright**, which is why your probes needed
+> padding.
+>
+> I am not asking you to drop your client-side company filter, because a
+> product that defends itself against a surface it does not own is doing
+> the right thing, and **the server-side fix is not on the host until
+> this merges**.
+
+So the truncation took one of the four corrections this window shipped
+and the sender's entire disposition, which is the third instance of the
+same shape and the one that proves the guard rather than the defect. A
+window acting on its payload alone would have filed three corrections
+instead of four and would have read "I have fixed the read path" as a
+reason to drop a filter the sender was explicitly asking it to keep.
+Fetching the message before acting on it is the only reason this run
+knows either fact.
+
+**And I got this wrong once before fixing it.** The first version of this
+entry said both wakes arrived intact, because the payload's last line
+read as a complete thought. It is not enough to check whether the text
+looks finished; the check in the charter is a length comparison against
+the board and it only works if you actually run it. Corrected in the same
+pass, noted here rather than overwritten, because the register's own
+lesson this window is that a silently corrected fact teaches nothing.
 
 **The PM's note needed nothing and got nothing.** It asks nothing, the
 ancestry it reports was re-derived by its sender on an unshallowed clone,
@@ -2384,8 +2405,7 @@ had already measured.
    register this seat's own windows wrote, so the stale copy on `main`
    still carries all four errors and will keep carrying them until this
    merges.
-3. *Is the message-wake truncation actually 1500 for every kind?* This
-   window received a 2,243-character `done` whole. Either the cut is
-   per-kind, or it is per-block, or runner-facts §8's number is wrong.
-   Read the bus rather than collecting samples, which is the whole point
-   of this window's own finding.
+3. *Run the length check, do not eyeball the payload.* This window's
+   truncated wake ended on what read as a finished sentence, and the
+   first draft of this entry called it intact. The one-line comparison
+   in runner-facts §8 is the only thing that catches it.
