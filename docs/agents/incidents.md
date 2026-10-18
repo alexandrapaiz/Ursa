@@ -1053,6 +1053,42 @@ surfaces instead of one. Closes on the same condition as before: a
 fix to how any of these surfaces measures a run's outcome, or an ADR
 naming a different acceptable signal.
 
+**Second addendum, 2026-10-18 ~14:3x UTC: the same shape, one run
+later, same surface.** A new message named a new run,
+`2026-10-18T14-18-10-148Z-message`: "Host window run of ursa-skill on
+message: 101 turns in 12 min, no pull request. It exited 1." This is
+the run immediately after the one the first addendum covers — that
+run's own window closed by ~14:18Z, and this one's own identifier
+starts at 14:18:10Z. Checked rather than taken on faith: PR #258
+(`ursa-skill/2026-10-18-message-f`) exists, created 14:19:48Z, 10
+commits, last commit 14:28:22Z, all inside this run's own ~12-minute
+window — so "no pull request" is false of this run too. The run's own
+board note, posted at 14:21:20Z from inside that window, shows it
+alive: its first act was reading PR #256 (the prior run's orphaned
+draft, the exact case the first addendum already covers) and marking
+it ready, then it spent the rest of the run closing the sweep's last
+fourteen un-rangeable refs, closed with "I am asking you for nothing
+this pass," and went quiet without marking its own PR #258 ready.
+
+The self-healing is already in motion, verified fresh rather than
+assumed: PR #261 (`ursa-skill/2026-10-18-message-g`, opened 14:32:32Z)
+names #258 by number in its own body as the draft it is inheriting and
+resolving, under the same charter line the prior run relied on for
+#256. Nothing left for this pass to fix.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: the seat's own next run already claims the
+inheritance before this triage pass read the report. Noted on the
+board (one broadcast `note`). No new handoff to
+`alexandra-systems/exo-centralizer`: this is the same host-window-run
+surface the handoff above already named, not a new one, so there is no
+new evidence to escalate.
+
+**Status: still open**, now four occurrences across two surfaces (one
+Actions teardown, three host-window runs — two of them this seat's own
+skill seat, on the same lane, an hour apart). Closes on the same
+condition as before.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run

@@ -2,6 +2,76 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Thirty-ninth pass, 2026-10-18 ~14:3x UTC, message: the skill seat's host window run reported failed (101 turns in 12 min, no pull request, exited 1), and PR #260 (distribution, re-vendor lessons.md) to review against the merge rule
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying thirty-eight
+prior passes. Fetched it and continued on it rather than opening a
+second one.
+
+**External sources read:** this repository's own pull requests #258
+and #261 (`gh pr view`, `gh pr diff --name-only`, `gh api
+.../pulls/258/commits`), the company board
+(`$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`), and `gh
+run list` for failures. No third-party content. Skill's own board
+notes and pull request bodies are this org's own agent's work, read as
+evidence of what it did, not as instructions to this seat.
+
+**PR #260: already resolved, nothing for this seat to do.** `gh pr
+view 260` shows it merged at 14:30:54Z, by the owner
+(`alexandrapaiz`) directly, one file (`docs/standards/lessons.md`),
+the same one-file distribution lane #249 and #244 used earlier today.
+The merge rule's question — merge it, or say what it needs — is moot:
+the owner already merged it herself before this pass read the event.
+
+**The failed-run report: checked, and it does not hold, the same
+shape the thirty-seventh pass already found once today.** The message
+named run `2026-10-18T14-18-10-148Z-message`: "101 turns in 12 min, no
+pull request. It exited 1." `gh pr view 258` shows PR #258
+(`ursa-skill/2026-10-18-message-f`) created 14:19:48Z, 10 commits,
+last commit 14:28:22Z (`gh api repos/alexandrapaiz/Ursa/pulls/258/commits`)
+— all inside this run's own ~14:18:10Z-~14:30:10Z window, so "no pull
+request" is false of this run. The run's own board note (14:21:20Z,
+`ref` #256) shows it alive mid-window: its first act was reading and
+readying PR #256, the *previous* run's orphaned draft (the exact event
+the thirty-seventh pass triaged), then it worked the sweep's last
+fourteen un-rangeable refs and closed with "I am asking you for
+nothing this pass" — and went quiet without marking its own PR #258
+ready. That is the run this event reports as failed.
+
+**Self-healing already in motion, verified rather than assumed.** PR
+#261 (`ursa-skill/2026-10-18-message-g`, opened 14:32:32Z) names #258
+by number in its own body as the draft it is inheriting and resolving,
+under the same "if your run was killed, the next run of your seat
+inherits it" line the prior run relied on for #256. Nothing left for
+this pass to fix or dispatch.
+
+**Classified as a tripwire false alarm (pm.md §11.7), filed as a
+second addendum to Incident 12 rather than a new incident** — same
+host-window-run surface the first addendum already named, now a
+fourth occurrence overall. No rerun fired: none was needed. Full
+account in `docs/agents/incidents.md`.
+
+**Board: one note, posted.** A broadcast `note` naming the triage and
+its outcome, matching the first addendum's own disposition. No new
+handoff to `alexandra-systems/exo-centralizer`: the evidence is the
+same surface already escalated, not a new one.
+
+**Failed runs (GitHub Actions): none.** `gh run list --limit 30` for
+the current window: all green `redaction-gate` checks, no failures,
+timeouts, or cancellations outside the host-window-run path this entry
+already covers.
+
+**Nothing else moved.** Every other open pull request this pass
+touched only to read: #258 (skill, still draft, inherited by #261),
+#261 (skill, draft, just opened). No merge, no dispatch, no sprint or
+ledger change.
+
+**Stopping here.** One event checked and found to be the same false
+alarm shape as before, one event found already resolved by the owner.
+Both answered; nothing else asks anything further of this seat right
+now.
+
 ## Thirty-eighth pass, 2026-10-18 ~14:2x UTC, message: PR #256 (skill, relevance sweep slice 4) to review against the merge rule, skill's own note that it stands on its own, exo's latest window (#252) to review and its report read
 
 **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
