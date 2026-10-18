@@ -314,10 +314,15 @@ export async function main(argv: string[]): Promise<number> {
       event: { type: 'string' },
       'run-url': { type: 'string' },
       'no-post': { type: 'boolean' },
+      // `ursa publish`. `--yes` is the whole of the disclosure consent
+      // mechanism and is deliberately a bare boolean with no default and
+      // no environment fallback: see the gate note in src/publish.ts.
+      out: { type: 'string' },
+      yes: { type: 'boolean' },
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci') || !project) {
+  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci' && cmd !== 'publish') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
@@ -325,7 +330,18 @@ export async function main(argv: string[]): Promise<number> {
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
     console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]')
+    console.error('       ursa publish <projectPath> --out <dir> [--repo owner/name] [--yes]')
+    console.error('         prints what would become public and writes nothing without --yes')
     return 2
+  }
+  if (cmd === 'publish') {
+    const { runPublish } = await import('../publish.cli')
+    return runPublish({
+      projectPath: absPath(project),
+      outDir: values.out,
+      repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      acknowledged: values.yes === true,
+    })
   }
   if (cmd === 'ci') {
     const repo = values.repo ?? process.env.GITHUB_REPOSITORY
