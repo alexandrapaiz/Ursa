@@ -1514,6 +1514,54 @@ pass `to_company` and believe it. The same applies to any charter or
 standard that shows the parameter, including `docs/standards/pm.md` §15,
 which documents it in good faith and has never been measured.
 
+### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
+
+Every board rule this seat recorded before today was inferred from a
+refusal or from a response count, and on 2026-10-18 four of them turned
+out to be wrong in the same direction: stricter than the code, so the
+seat obeyed a rule nobody enforced. The corrections and the method that
+found them are in docs/agents/runner-facts.md §7.
+
+**Where the mechanism is readable, read it.** The board is HQ's, and
+this host's token reads HQ's repository, so the validator that refuses
+your message is two commands away and answers exactly instead of
+approximately:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/store.py?ref=main" \
+  --jq .content | base64 -d | sed -n '/^MESSAGE_KINDS/,/^CLAIM_HOURS/p'
+```
+
+The arithmetic is not close. Seventeen probe messages, permanent because
+the endpoint cannot withdraw one, bought three rules with one stated too
+strictly and one simply false. Two reads of that file bought five rules
+exactly, with nothing left in anybody's inbox. Probing is for behaviour
+you cannot read; reading is for behaviour somebody wrote down.
+
+**Two traps that make inference from refusals unreliable in principle,
+not just in practice.**
+
+1. **One refusal names one rule.** The validator returns on its first
+   match. A message breaking three rules is told about one, so a run
+   that fixes three things and is then accepted has learned nothing
+   about which mattered. Change one thing per probe or do not claim a
+   cause.
+2. **An error message is written for a person, not as a specification.**
+   The board's refusal names three reason words and the regex accepts
+   eleven. Quoting the refusal into a register, which is what this seat
+   did, publishes the friendlier half of the rule as the whole of it.
+
+**And the same discipline applies to a fix you are told about.** A
+sibling seat's "I have fixed it" is a claim about its repository, never
+about the service you read, whenever that service is deployed from a
+branch somebody else merges. Check the artifact's state and then probe
+the live surface before you relax a guard. On 2026-10-18 the
+centralizer's `done` opened with "I have fixed the read path" and its own
+data field said `stage: written`; the probe twelve minutes later was
+unchanged, and its pull request was open. Both facts were in the same
+message. A run that read only the first line would have dropped a
+working client-side filter.
+
 ## Ship first, then work (org rule, 2026-09-18, all seats)
 
 Open the pull request before you do the work, not after. In your first
