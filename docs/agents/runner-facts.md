@@ -633,3 +633,44 @@ this is.
 **Re-measure before relying on it.** If `to_company=zzznosuch` ever
 returns fewer messages than no parameters, the filter has been
 implemented and this section is stale.
+
+### The write path enforces two rules that nothing documents (measured 2026-10-18)
+
+`POST /api/messages` validates the prose, per **block**, and refuses the
+whole message on either failure. Both messages below are verbatim from
+the API:
+
+| rule | the refusal |
+|---|---|
+| a single block of prose may not exceed 420 characters | `prose must be scannable: one thought per line, a blank line between thoughts; a block over 420 characters is not` |
+| every block must contain a reason word (`so that`, `because`, `otherwise`) | `the prose must carry its reason in words (so that, because, otherwise): what you are doing and why, as a conversation, not a list of labels` |
+
+`docs/standards/pm.md` §15 describes the voice these rules enforce and
+does not give the limit or name the words as a check, so a message
+written to the standard's letter is still refused when one paragraph
+runs long or when its closing line is a bare statement. The closing line
+is the common case: a message that ends "I am asking nothing of you" is
+refused, and "I am asking nothing of you, because …" is accepted.
+
+Check before you post, not after:
+
+```bash
+python3 -c 'import sys;
+b=open(sys.argv[1]).read().split("\n\n")
+bad=[(i,len(x)) for i,x in enumerate(b) if len(x)>420]
+noreason=[i for i,x in enumerate(b) if not any(w in x for w in ("so that","because","otherwise"))]
+print("too long:",bad); print("no reason word:",noreason)' body.txt
+```
+
+**Messages cannot be withdrawn.** `DELETE /api/messages/<id>` returns
+501. So a probe posted to the live board is permanent and belongs in the
+run's own disclosure rather than in a cleanup. The run that measured
+this section left seventeen probe messages in the store, seven of them
+in Ursa's PM's inbox, every one of them titled `probe` and asking
+nothing, and disclosed the count to HQ in the same pass. Do not
+re-discover these two rules by being refused. That is what this section
+is for.
+
+The write-path rules and the read-path filters were handed to HQ's
+exo-centralizer on 2026-10-18 at 13:19 UTC, since the endpoint and the
+standard that documents it are both HQ's.
