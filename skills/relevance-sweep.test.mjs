@@ -107,3 +107,39 @@ The threshold is 0.6 [E1] and the vision says why [E2].
   assert.match(out, /1 unread refs cite a document and a section name/)
   assert.match(out, /docs\/vision\.md, section 0 *\(alpha\/E2\)/)
 })
+
+test('a dossier names the refs whose cited lines overlap, and only those', () => {
+  // The slice-2 failure in words: two refs claimed opposite things about one
+  // helper and the lock was green over both, because it keys on one ref's own
+  // ranges and never compares two refs. Overlap, not same file, is the signal:
+  // E3 below cites the same file on a line nobody else cites and must not be
+  // dragged in, or the field is noise on every ref in a large file.
+  const dir = library()
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: a fixture
+evidence:
+  - ref: E1
+    what: the threshold constant is 0.6
+    source: src/a.ts:1
+  - ref: E2
+    what: the threshold constant is 0.7, which is the contradiction
+    source: src/a.ts:1
+  - ref: E3
+    what: covered excludes skipped text
+    source: src/a.ts:3
+supersedes: []
+---
+
+# Alpha
+
+The threshold is 0.6 [E1], or 0.7 [E2], and covered excludes skipped [E3].
+`)
+  const out = run(dir, ['alpha/E1'])
+  assert.match(out, /1 other ref cites overlapping lines/)
+  assert.match(out, /alpha\/E2 {2}src\/a\.ts:1-1/)
+  assert.match(out, /the contradiction/)       // the other claim, in full
+  assert.doesNotMatch(out, /alpha\/E3/)        // same file, no shared line
+  // And a ref nobody overlaps says nothing rather than saying zero.
+  assert.doesNotMatch(run(dir, ['alpha/E3']), /overlapping lines/)
+})
