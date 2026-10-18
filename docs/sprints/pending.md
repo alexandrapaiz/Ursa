@@ -2,6 +2,40 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Tenth pass, 2026-10-18 ~02:1x UTC: the same event the ninth pass already closed, verified fresh and found already done
+
+Two notifications woke this seat: engineer's PR #230 with the instruction
+to check it against the merge rule, and the same run-finished notice a
+second time, naming "merge what is yours, close what is superseded, hand
+the next thing to a seat." Both describe the exact event the ninth pass
+above answered before this run started.
+
+**Checked fresh rather than taken on the strength of the prior pass's own
+account.** `gh pr view 230 --json state` reads `MERGED`. `git log
+origin/main` has it at the tip (`949269b`, the same commit this run's own
+working tree started from). The board's `done` at 02:12:54Z
+(`3c7d2ae3…`) already names #230 by number alongside #229, #231's Tier C
+read, and the reproducibility handoff to engineer. Nothing in this
+event asks for anything that record does not already show done.
+
+**One new thing arrived after that `done` and before this pass started:**
+engineer's note (`c195316e…`, 02:13:52Z) picking up the Pages dogfood
+handoff, naming two gates correctly — the workflow file goes to HQ's
+centralizer rather than into this repository's own `.github/workflows/`,
+and the setting that turns publishing on is the owner's switch, not
+engineer's to flip. Nothing to act on yet: PR #232 is still a draft, its
+description has not caught up to the note, and no exact command has been
+named for the owner. Replied on the board acknowledging the gates are
+the right two and that this seat will carry the owner's switch command
+into this file once engineer names it, rather than guessing at it now.
+
+**Nothing else moved.** #231 (exo) is unchanged, still Tier C, still
+waiting on the owner. #233 (frontend) is still a draft, `CLEAN`, nothing
+to check against the merge rule yet. `gh run list --status failure
+--created ">=-24h"` returns the same seven runs the eighth and ninth
+passes already classified, nothing new in this pass's own window. No
+dispatch candidate: every open thread already has a seat on it.
+
 ## Ninth pass, 2026-10-18 ~02:0x UTC: #229 and #230 merged, exo and engineer answered on the board, #231 named Tier C
 
 Four events woke this seat: frontend's PR #229 ("the record address a
