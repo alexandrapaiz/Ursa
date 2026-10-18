@@ -1,116 +1,139 @@
-# Merge order — measured 2026-10-18 (ExO)
+# Merge order — measured 2026-10-18, fourth window
 
-Replaces the previous week's plan. Every line below was produced by
-performing the merges, not by asking GitHub.
+Replaces the previous week's plan. This file is information for whoever
+merges, under `docs/standards/pm.md` §21 that is Ursa's PM or any chair.
+Measuring the queue and naming the order is this seat's; merging is not.
 
-**Every verdict names the instrument that produced it (rule added
-2026-10-18, second window).** A conflict verdict with no instrument
-beside it cannot be checked by the seat holding the branch, which is
-the whole of Ursa incident 17. Two instruments are used in this file
-and the `instrument` column says which:
+## The three numbers
 
-- `cmq` — `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`,
-  HQ's sweep, which performs the real merge of every open pull request
-  in a throwaway worktree and reports the conflicting files and the
-  behind-count. It is not in this repository, which is Ursa incident
-  18, and the path above is the host bridge recorded in
-  runner-facts.md §6.
-- `mt` — `git merge-tree --write-tree --name-only origin/main
-  refs/prs/<n>`, per pull request, which is what an Actions run has.
+| | |
+|---|---|
+| Open pull requests | **11** (one of them this run's own, #242) |
+| Merged in the last seven days | **52** |
+| Age of the oldest open | **7 days** (#167, opened 2026-10-11, this seat's own, subsumed below) |
 
-Both were run this pass and they agree on all eight rows. What is **not
-used here, at all**, is `mergeable` or `mergeStateStatus` from
-`gh pr list`. That field reported one of these pull requests as
-conflicting for three days while both instruments above exited 0 on it.
+Open does not outnumber the last seven days' merges, so the bold warning
+that stood for three consecutive runs stays withdrawn for a second week.
+The depth went 17 → 37 → 52 → 8 → 11 across five measurements.
 
-**Re-measured at 02:30 UTC, second window of 2026-10-18.** The 02:05
-pass of this file recorded eight open and forty-six merged; at 02:30 it
-is eight open and forty-eight merged, with three pull requests opened
-and two merged in between. Read every count in this file as a timestamp
-rather than a state, and re-measure before acting on one.
+**Read the next number before reading that one as good news.** Of the
+fifty-two merges, **43 were merged by the owner's account and 9 by the
+PM seat**. The queue is shallow because one person cleared it, which
+`standards/roles/exo.md` §5f calls out by name under attribute 9: "a
+queue that is healthy only because one person cleared it is not
+autonomy". The depth improved and the autonomy did not.
 
-**Measured on the resident company host, where a fresh clone is
-shallow.** Every number below was taken after `git fetch --unshallow`.
-Before that fetch, `git merge-tree` reported all eight open pull
-requests as having unrelated histories, which read as a queue in which
-nothing could merge. See runner-facts.md §3.
+```bash
+gh pr list --state merged --limit 200 --json number,mergedAt,mergedBy \
+  --jq '.[]|select(.mergedAt>"2026-10-11")|.mergedBy.login' | sort | uniq -c
+#  43 alexandrapaiz
+#   9 app/claude
+```
 
-## The headline: the queue is healthy and the inversion held
+## Containment: eleven open is really six
 
-| measure | 2026-09-27 | 2026-10-04 | 2026-10-11 | 2026-10-18 02:05 | 2026-10-18 02:30 |
-|---|---|---|---|---|---|
-| open PRs | 17 | 52 | 15 | 8 | **8** |
-| merged in last 7 days | ~1 | 5 | 77 | 46 | **48** |
-| oldest open | — | — | #47, 11 days | #167, 7 days | **#167, 7 days** |
-| open drafts | — | — | 16 (2026-10-05) | 4 | **3** |
+`git merge-base --is-ancestor` over every pair of open heads, on an
+unshallowed clone:
 
-The standing rule is to say so in bold when open pull requests outnumber
-the week's merges, because the org is then producing faster than its one
-merge gate absorbs. **That condition does not hold, for the second week
-running.** Forty-eight merges against eight open is the gate working,
-and the drop from fifteen open to eight while merges stayed high is the
-queue draining rather than stalling.
+```
+167 → 231 → 234 → 235 → 242
+```
 
-All three open drafts are today's live work, which is the only
-legitimate reason for a draft under the 2026-10-05 amendment: #232
-engineer, #233 frontend, and #234 this run. The earlier drafts of the
-window, #229 and #230, have merged. There are no dead drafts in the
-queue, down from six on 2026-10-05.
+Four of the eleven are ancestors of #242, which is this run's branch.
+**Merging #242 closes #167, #231, #234 and #235 as one decision.** The
+rest are independent: #199, #210, #225, #236, #240, #241.
 
-The oldest open pull request is this seat's own #167 at seven days. It
-sits inside #231, which sits inside #234, so one merge closes all
-three.
+## Conflicts: one, and it is not the owner's to fix
 
-## The order, simulated end to end
+Both instruments were run and they agree.
 
-Verified this pass in a detached scratch worktree off `origin/main`,
-performing these six merges in this sequence. Five land clean and the
-sixth conflicts, in one file. Detached on purpose: `git worktree add
-/tmp/x main` checks out the branch and the simulated merges then
-advance it, which silently corrupts every later `main...` comparison.
+```bash
+# this seat's, per the charter
+git merge-tree --write-tree --name-only origin/main refs/prs/<n>
+# HQ's, which is what docs/standards/pm.md §11.2 actually names
+/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh
+```
 
-| # | PR | seat | instrument | result | note |
-|---|---|---|---|---|---|
-| 1 | **#225** | pm | cmq + mt | clean | PM's message pass. Ready, not a draft. Nothing depends on it, so it goes first only because it is the shortest review. |
-| 2 | **#234** | exo | cmq + mt | clean | This run. **Contains #231, which contains #167**, so landing it closes three pull requests including the queue's oldest. Agent layer only. Touches `prompts/`, so Tier C. |
-| 3 | **#210** | research | cmq + mt | clean | Open 2 days, ready. |
-| 4 | **#232** | engineer | cmq + mt | clean | Today's third engineer run. Draft while its run is live. |
-| 5 | **#233** | frontend | cmq + mt | clean | Today's frontend run. Draft while its run is live. |
-| 6 | **#199** | skill | cmq + mt | **conflict** | One file, `docs/ideas.md`. See below. |
+| PR | verdict | instrument |
+|---|---|---|
+| #199 skill | **CONFLICT** in `docs/ideas.md`, behind main by 151 | both |
+| #167, #210, #225, #231, #234, #235, #236, #240, #241, #242 | clean | both |
 
-`#167` and `#231` are not rows of their own. Both are this seat's work,
-both are clean against `main` on their own by both instruments, and both
-are ancestors of `#234` with no conflict resolution of any kind between
-them. Merging `#234` lands all three. Closing `#167` and `#231`
-afterwards is bookkeeping, not a decision.
+#199 is the skill seat's to rebase, not a merger's to resolve, and it
+has been conflicting on the same file since before 2026-10-15. The file
+is `docs/ideas.md`, which is Ursa incident 6's every-seat-appends-to-one-
+file shape, still unfixed.
 
-## Containment
+**A note on the instrument, because it misled a seat this morning and
+will mislead the next one.** Run cold in a fresh clone on this host,
+`check-merge-queue.sh` reported all eleven pull requests as
+`NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)`,
+which is false for all eleven. The cause is the clone, not the script:
+the host hands a seat a shallow clone whose `remote.origin.fetch` is
+narrowed to `+refs/heads/main:refs/remotes/origin/main`, so the script's
+per-branch fetch has nowhere to put the ref. Two lines fix it and they
+belong before any ancestry or merge question:
 
-One chain, `#167` inside `#231` inside `#234`, all three this seat's.
-Checked with `git merge-base --is-ancestor` over all 56 ordered pairs of
-the eight open heads after unshallowing; those are the only three
-relations that hold. No seat is stacked on another seat, which is the
-opposite of 2026-10-04, when twenty-five of fifty-two open pull requests
-were ancestors of four others. Eight open is really six decisions.
+```bash
+git fetch --unshallow origin
+git config --unset-all remote.origin.fetch
+git config --add remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git fetch -q origin
+```
 
-## The one conflict
+The script's wording is the part worth fixing upstream: a missing local
+ref is reported as a deleted remote branch, which is a confident wrong
+answer rather than a failure. Handed to the centralizer.
 
-**#199 (skill seat), `docs/ideas.md`.** The ideas ledger is a
-single append-only file that more than one seat writes, which is Ursa
-incident 6's shape exactly: every seat appends to one file, so two
-branches that both added an idea collide on the last line. The conflict
-is a content conflict in one file and a person resolves it in under a
-minute by keeping both entries.
+## The order, simulated rather than guessed
 
-It is worth noting that this is the second register in this repository
-to produce the same collision, after the incident register's own
-numbering collision of 2026-10-17. A file that every seat appends to
-will conflict as a matter of arithmetic once more than one seat is
-running per day, and this org now runs several per day.
+Performed in a detached scratch worktree off `origin/main`, in this
+sequence, each merge actually run:
 
-## What this file is for
+```bash
+git worktree add --detach /tmp/mo-wt origin/main
+cd /tmp/mo-wt && for n in 242 225 241 210 236 240; do git merge --no-edit refs/prs/$n; done
+```
 
-Measuring the queue and naming the order is information for the owner.
-Merging is hers alone, and under docs/standards/pm.md §21 also the PMs'
-and the chairs'. This seat never merges its own work, never enables
-auto-merge, and never advises a seat to merge its own.
+All six merged clean, in this order:
+
+1. **#242** — exo, this run. Closes #167, #231, #234, #235 with it.
+2. **#225** — PM, zero behind main.
+3. **#241** — engineer, zero behind main. It is a draft titled WIP; if
+   its run is still alive when you read this, leave it.
+4. **#210** — research, 128 behind and still clean.
+5. **#236** — frontend, 19 behind.
+6. **#240** — frontend, 11 behind.
+
+Then **#199** last, after the skill seat rebases it. Nothing above
+depends on it.
+
+Six merges close ten of the eleven open pull requests.
+
+## What a merger needs to know about #242 specifically
+
+**It moves no authority between seats and loosens no owner gate.** It
+touches `prompts/exo-agent.md`, which `docs/standards/pm.md` §10's Tier
+C list calls the owner's and §21 plus §10's own amendment banner call
+the PM's. That disagreement is the subject of
+`INC-2026-10-18-tier-c-charter-freeze`, filed in this pull request. The
+declaration above is the line §21 actually draws, and it is this run's
+proposal that the declaration decides the tier.
+
+## Branch housekeeping
+
+| | |
+|---|---|
+| Remote branches other than `main` | 71 |
+| With an open pull request | 11 |
+| From a merged pull request | 2, one of which this run deleted (`ursa-engineer/2026-10-18-message-3`) |
+| From a closed-unmerged pull request | **58** |
+| With no pull request at all | 1 |
+
+This seat deletes branches whose pull requests merged, which was one
+branch. The fifty-eight behind closed-unmerged pull requests are not
+deleted here, because a closed pull request can hold work nobody
+carried forward and deleting the branch destroys it. That is a rule the
+org does not have, and it is named here rather than acted on: **who may
+delete a branch whose pull request was closed without merging, and after
+how long.** Handed to the PM as a question, not taken as a licence.
