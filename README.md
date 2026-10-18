@@ -45,6 +45,23 @@ edited it, or present in the work with no model behind it at all. From
 any labelled span you reach the generation that produced it. The page
 fetches nothing and runs no script.
 
+**If the site comes out empty, two lines in the workflow decide it.** A
+record needs a model's commit and a later commit of yours editing the
+same file, so the resolver has to know which commits are a model's and
+how far apart the two may be. The `agent-identity` block is where you
+declare any identity in your repository that belongs to an agent rather
+than to a person, and the command that finds yours is
+`git log --format='%an <%ae>' | sort | uniq -c | sort -rn`. The
+`max-pair-distance` input is how many commits may sit between the two,
+and its default of 25 suits a repository where you are the only other
+writer. This repository is not one of those, and resolving its own
+history is how both lines got the values in the file you just copied:
+with twelve agent seats committing in between, 25 found nothing and 400
+found the owner's real corrections. Whichever bound dropped every pair
+is named in the job summary, so an empty site tells you which number to
+move rather than leaving you to guess. The whole measurement is in
+`docs/design/pages-dogfood.md`.
+
 **What it publishes, plainly.** A record carries raw text, not a summary:
 the full text of each file it classifies, the full text of every model
 generation behind them, and, on the session path, every message you typed

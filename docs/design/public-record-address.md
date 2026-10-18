@@ -249,6 +249,13 @@ export function noveltyOfDisclosure(m: DisclosureManifest): string[]
 
 ### 4.4 The published contract, which is the line with the frontend seat
 
+> **Since this document was written.** The contract is `0.4.0` as of
+> 2026-10-18, which added one field, `pairing`, holding the pairing bound
+> sets the set's records were resolved under. Everything below describes
+> the `0.3.0` state this work shipped and is left as the record of it.
+> The newer field and the reason for it are in
+> `docs/design/pages-dogfood.md` §1 and §4.
+
 ```ts
 export const PUBLISHED_INDEX_VERSION = '0.3.0'   // 0.1.0, then 0.2.0, both on 2026-10-18
 
