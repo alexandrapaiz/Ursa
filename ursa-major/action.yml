@@ -8,6 +8,27 @@
 # Reference it as:
 #   uses: alexandrapaiz/Ursa/ursa-major@main
 #
+# WHICH BUILD YOU GET, SAID PLAINLY, because `@main` reads like a neutral
+# install line and it is not one yet. This project publishes no tags and
+# no releases, so `@main` is the only reference it offers, and `main`
+# rebuilt dist/ursa.cjs sixteen times in the eleven days to 2026-10-16.
+# The resolver that reads your merge this week is therefore not
+# guaranteed to be the one that read it last week. Two things follow.
+#
+# You can pin today, without waiting for a tag. A commit sha works and is
+# supported: `uses: alexandrapaiz/Ursa/ursa-major@<sha>`. That freezes
+# both the Action's steps and the bundle they run, which is the whole
+# artifact.
+#
+# And whichever you choose, every record says which build wrote it. Each
+# record carries `task.resolvedBy`, the identity of the code that made
+# its claims, and `task.gatedBy`, the set of rules those claims were
+# checked against. On this path `task.resolvedBy` is a SHA-256 prefix of
+# the bundle's own bytes, because GitHub downloads an action as a tarball
+# and there is no git history under it to name. So a figure in the run
+# comment can always be traced to a build, which is a weaker guarantee
+# than a version number and a stronger one than nothing.
+#
 # Composite rather than a docker container, per the product plan §9: the
 # runner's own checkout happens first, with the runner's own git and
 # token, and the step that reads the repository is plain auditable YAML
@@ -51,6 +72,93 @@ inputs:
     description: 'Set to false to print the run comment in the job log instead of posting it. Useful for a first dry run on a repository nobody wants commented on yet.'
     required: false
     default: 'true'
+  max-pair-distance:
+    description: |
+      How many commits may sit between a model's commit and the commit where you edited the same
+      file, before the resolver stops believing the second one corrected the first.
+
+      Leave it empty and the resolver uses its own default of 25, which is what every run before
+      this input existed used. Raise it on a repository where several agents commit between one
+      touch of a file by a person and the next.
+
+      WHY THIS IS AN INPUT AND NOT A CONSTANT, measured rather than argued. Resolving this
+      repository's own 724-commit history on 2026-10-18 with its twelve agent identities declared
+      produced zero records at the default of 25 and two records at 400, and the two are real: the
+      owner's own edits to files her agents wrote, 18,552 characters of which survived verbatim.
+      Nothing was wrong with the bound. The distance between a generation and its correction is a
+      property of how busy the repository is, and on a repository where agents outnumber people
+      by twelve to one it is far more than 25. Without this input the GitHub Pages example below
+      publishes an empty site on exactly the repositories that have the most to publish.
+
+      The resolver always says which bound dropped a unit, in the job summary and in the run
+      comment, so a site that comes out empty tells you which number to move rather than leaving
+      you to guess.
+
+      `Infinity` is accepted and restores the unbounded walk, which is slow on a long history and
+      is how the measurement in docs/design/pairing-window.md was taken.
+    required: false
+    default: ''
+  max-pair-age-hours:
+    description: |
+      How many hours may pass between a model's commit and your edit of the same file, before the
+      resolver stops believing the second one corrected the first. Empty uses the resolver's own
+      default of 168, which is one week.
+
+      Raise it with `max-pair-distance` when you are resolving a long history rather than one
+      merge: a correction 400 commits later is usually also more than a week later, and whichever
+      bound is tighter is the one that drops the pair.
+    required: false
+    default: ''
+  max-interposed-generations:
+    description: |
+      How many times another model commit may rewrite the same file in between, before the
+      resolver stops believing your edit corrected the first generation rather than the last one.
+      Empty uses the resolver's own default of 0, which is the strict reading: any rewrite in
+      between means your edit corrected that rewrite and not this generation.
+
+      Raise it only if you have read docs/design/pairing-window.md and want the looser claim. Of
+      the three bounds this is the one whose relaxation weakens what a record asserts, rather than
+      just widening where it looks.
+    required: false
+    default: ''
+  resolve-from:
+    description: |
+      Which history the resolver reads, and therefore which events this Action can run on.
+
+      `merge` (the default, and the only behaviour before 2026-10-18) reads the merge window out of
+      a pull_request event payload, resolves what that one merge accepted, and posts the run comment.
+      It requires a pull_request event and does nothing useful without one.
+
+      `history` reads the whole checkout's git history instead, the way `ursa run` does on a laptop,
+      and needs no event payload at all. Use it on `push` or `workflow_dispatch`, which is what the
+      GitHub Pages path below needs, because a Pages deployment must run on your default branch and a
+      pull_request event does not.
+
+      In `history` mode there is no pull request to comment on, so no comment is posted and the six
+      resolver outputs below are empty. The records, and the site if you asked for one, are the output.
+    required: false
+    default: 'merge'
+  publish-dir:
+    description: |
+      Leave empty and nothing is published; this is the default and the Action behaves exactly as it
+      did before this input existed.
+
+      Set it to a directory and the Action writes a complete static site there after resolving: one
+      self-contained HTML page per record, the record's own JSON beside it, and an index.html and
+      index.json over the set. Nothing is uploaded and nothing leaves the runner. Your own next step
+      decides what happens to the directory; `examples/publish-record.yml` hands it to
+      actions/upload-pages-artifact and publishes it to your repository's own GitHub Pages site.
+
+      READ THIS BEFORE YOU SET IT. A published record carries raw text, not a summary: the full text
+      of every finished file in it, the full text of every model generation, and every message you
+      typed to the model. Setting this input is the acknowledgement of that, and the Action passes
+      `--yes` to `ursa publish` on your behalf because a workflow has no terminal to ask at. The job
+      log prints the exact counts and every file path before it writes anything, so the first run on
+      a repository tells you precisely what a second run would make public. If you want to read that
+      list before anything is written, run once with `publish-dir` set and no Pages deployment step
+      after it.
+    required: false
+    default: ''
   agent-identity:
     description: |
       Identities in this repository that belong to an agent rather than to a person, one per line.
@@ -104,6 +212,9 @@ outputs:
   comment-url:
     description: 'URL of the run comment, or the empty string when post-comment was false.'
     value: ${{ steps.resolve.outputs.comment-url }}
+  publish-dir:
+    description: 'Directory the static site was written to, or the empty string when publish-dir was not set. Pass it to actions/upload-pages-artifact.'
+    value: ${{ steps.publish.outputs.dir }}
 
 runs:
   using: composite
@@ -114,7 +225,10 @@ runs:
     # here, rather than asking every consumer to remember
     # fetch-depth: 0, is the difference between the Action working and
     # the Action silently resolving nothing.
-    - name: Deepen history to the pull request's base
+    #
+    # Runs in both resolve-from modes and matters more in `history`,
+    # which walks the whole history rather than one merge window.
+    - name: Deepen a shallow clone so both sides of each commit pair exist
       shell: bash
       run: |
         set -euo pipefail
@@ -128,6 +242,7 @@ runs:
 
     - name: Resolve the merge into outcome records and post the run comment
       id: resolve
+      if: inputs.resolve-from == 'merge'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
@@ -143,6 +258,14 @@ runs:
           --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           --min-chars "${{ inputs.min-chars }}"
         )
+        # The three pairing bounds, appended only when the consumer set
+        # one, so an empty input leaves the resolver's own default as the
+        # single place that number is written down. Both resolve steps
+        # below do this identically: a bound that reaches one launch and
+        # not the other is drift 5 in src/launch.ts.
+        if [ -n "${{ inputs.max-pair-distance }}" ]; then args+=(--max-pair-distance "${{ inputs.max-pair-distance }}"); fi
+        if [ -n "${{ inputs.max-pair-age-hours }}" ]; then args+=(--max-pair-age-hours "${{ inputs.max-pair-age-hours }}"); fi
+        if [ -n "${{ inputs.max-interposed-generations }}" ]; then args+=(--max-interposed-generations "${{ inputs.max-interposed-generations }}"); fi
         if [ "${{ inputs.post-comment }}" != "true" ]; then args+=(--no-post); fi
         # One --agent-identity per non-blank line of the input. Read from
         # the environment rather than interpolated into this script, so a
@@ -158,9 +281,61 @@ runs:
         # them rather than from a second pass over the log.
         node "$GITHUB_ACTION_PATH/dist/ursa.cjs" "${args[@]}" | tee "$RUNNER_TEMP/ursa-ci.log"
 
+    # The same resolver over the whole checkout instead of over one merge
+    # window. This is `ursa run`, the launch a person uses on a laptop,
+    # and it reads git history rather than an event payload, which is the
+    # only reason the GitHub Pages path can exist: a Pages deployment has
+    # to run on your default branch, and a pull_request event does not.
+    #
+    # It posts no comment, because on a push there is no pull request to
+    # comment on. The records are the output, and `publish-dir` turns them
+    # into a page.
+    - name: Resolve the whole history into outcome records
+      id: resolve-history
+      if: inputs.resolve-from == 'history'
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        URSA_AGENT_IDENTITY: ${{ inputs.agent-identity }}
+      run: |
+        set -euo pipefail
+        node --version
+        args=(run "${{ inputs.project-path }}" --min-chars "${{ inputs.min-chars }}")
+        # Same three bounds, same condition, as the merge step above. This
+        # path is the one that needs them: it walks a whole history rather
+        # than one merge window, and on a repository with several agent
+        # seats the default distance of 25 commits resolves nothing.
+        if [ -n "${{ inputs.max-pair-distance }}" ]; then args+=(--max-pair-distance "${{ inputs.max-pair-distance }}"); fi
+        if [ -n "${{ inputs.max-pair-age-hours }}" ]; then args+=(--max-pair-age-hours "${{ inputs.max-pair-age-hours }}"); fi
+        if [ -n "${{ inputs.max-interposed-generations }}" ]; then args+=(--max-interposed-generations "${{ inputs.max-interposed-generations }}"); fi
+        # Same loop, same reason, as the merge step above: read from the
+        # environment so a value carrying a quote stays data.
+        while IFS= read -r identity; do
+          [ -n "${identity//[[:space:]]/}" ] || continue
+          args+=(--agent-identity "$identity")
+        done <<< "$URSA_AGENT_IDENTITY"
+        node "$GITHUB_ACTION_PATH/dist/ursa.cjs" "${args[@]}" | tee "$RUNNER_TEMP/ursa-ci.log"
+
+    # Records into a directory of files a web server can serve. Writes
+    # only; nothing is uploaded here and no network call is made. See the
+    # `publish-dir` input above for what a published record contains.
+    - name: Write the records as a static site
+      id: publish
+      if: inputs.publish-dir != ''
+      shell: bash
+      run: |
+        set -euo pipefail
+        node "$GITHUB_ACTION_PATH/dist/ursa.cjs" publish "${{ inputs.project-path }}" \
+          --out "${{ inputs.publish-dir }}" \
+          --repo "${{ github.repository }}" \
+          --yes | tee -a "$RUNNER_TEMP/ursa-ci.log"
+        echo "dir=${{ inputs.publish-dir }}" >> "$GITHUB_OUTPUT"
+
     # The five fields again, in the same order, in the job summary. The
     # comment is the feedback a person reads on the pull request; this is
-    # the same reading for whoever opens the run instead.
+    # the same reading for whoever opens the run instead. In `history`
+    # mode there is no comment, and this is the only place the run's own
+    # numbers are reported.
     - name: Repeat the run comment in the job summary
       if: always()
       shell: bash

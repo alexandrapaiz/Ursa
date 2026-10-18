@@ -21,7 +21,7 @@
 // (src/ci/reactions.ts). It is versioned, because a later field order
 // would be a different contract and must not be mistaken for this one.
 
-import { BOUND_COUNT } from '../invariants'
+import { BOUND_COUNT, currentGateIdentity } from '../invariants'
 import { formatResolverIdentity } from '../resolver-identity'
 import type { OutcomeRecord, ResolverIdentity } from '../types'
 import type { Episode } from '../episodes'
@@ -244,6 +244,14 @@ export function renderRunComment(f: RunCommentFields, ctx: RunCommentContext): s
   if (ctx.resolvedBy !== undefined) {
     lines.push(`- Resolver that produced these records: ${formatResolverIdentity(ctx.resolvedBy)}. Every record above carries it as \`task.resolvedBy\`, so a figure in this table can be traced to the code that computed it.`)
   }
+  // The bound set, beside the resolver and not folded into the self-check
+  // line above it. That line says how many bounds held; this one says WHICH,
+  // and the two are different facts: a count is the same word whether or not
+  // a bound was dropped from the set being counted. The digest is here
+  // rather than only in the record because this comment is the surface a
+  // reader sees without opening a record at all, and comparing two runs'
+  // digests is the one check the field supports.
+  lines.push(`- Bound set those records were checked against: \`${currentGateIdentity().boundsDigest}\`, over ${BOUND_COUNT} bounds. Every record above carries it as \`task.gatedBy\`, so two runs can be compared on whether the same rules applied. It names the rules, not a verdict: the self-check line above is what says they held.`)
   if (ctx.runUrl) lines.push(`- Workflow run: ${ctx.runUrl}`)
   lines.push('')
   lines.push('</details>')

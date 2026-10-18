@@ -23,6 +23,15 @@
 //   ursa ci <projectPath> --repo owner/name --event "$GITHUB_EVENT_PATH" \
 //     [--run-url URL] [--min-chars N] [--no-post]
 //
+// ursa address <project> — what do I send someone so they can read this
+// record? Reads the project's git state and prints, for each record, the
+// address a stranger can type, the URL it resolves to, and the one thing
+// still missing if it is not readable yet. No network unless --check is
+// passed, which asks the host for its status and its cross-origin header.
+//
+//   npx tsx src/bin/ursa.ts address <projectPath> [--record <id>] \
+//     [--pages owner/name] [--check]
+//
 // ursa consent / ursa forget — the user's side of the boundary: see what
 // has been derived, revoke one inference, grant or withhold the only
 // scope that may cross the device boundary, emit the consented aggregate
@@ -45,7 +54,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
 import { formatResolverIdentity } from '../resolver-identity'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords } from '../launch'
+import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -276,6 +285,47 @@ export function renderRunSummary(
   return lines.join('\n')
 }
 
+/**
+ * The three pairing bounds as the two launches both read them, parsed
+ * once here rather than in each command, because reading them in one
+ * launch and not the other is the drift this helper's single call site
+ * per launch exists to prevent (`src/launch.ts`, drift 5; pinned in
+ * `src/launch-parity.test.ts`).
+ *
+ * An absent flag stays `undefined` rather than becoming a number, so the
+ * resolver's own defaults in `src/pairfinder.ts` remain the single place
+ * they are written down.
+ *
+ * `Infinity` is reachable on purpose: `--max-pair-distance Infinity`
+ * restores the unbounded walk for someone who wants to see what the
+ * bounds removed, which is how the measurement in
+ * docs/design/pairing-window.md §8 was taken.
+ */
+export function pairingBounds(values: {
+  'max-pair-distance'?: string
+  'max-pair-age-hours'?: string
+  'max-interposed-generations'?: string
+}): {
+  maxPairDistance: number | undefined
+  maxPairAgeHours: number | undefined
+  maxInterposedGenerations: number | undefined
+} {
+  const bound = (
+    flag: 'max-pair-distance' | 'max-pair-age-hours' | 'max-interposed-generations',
+  ): number | undefined => {
+    const raw = values[flag]
+    if (raw === undefined) return undefined
+    const n = Number(raw)
+    if (!Number.isFinite(n) && raw !== 'Infinity') return undefined
+    return n
+  }
+  return {
+    maxPairDistance: bound('max-pair-distance'),
+    maxPairAgeHours: bound('max-pair-age-hours'),
+    maxInterposedGenerations: bound('max-interposed-generations'),
+  }
+}
+
 export async function main(argv: string[]): Promise<number> {
   // Dispatched BEFORE parseArgs, deliberately. `parseArgs` is configured
   // with `run`'s and `bridge`'s options and throws
@@ -314,10 +364,23 @@ export async function main(argv: string[]): Promise<number> {
       event: { type: 'string' },
       'run-url': { type: 'string' },
       'no-post': { type: 'boolean' },
+      // `ursa publish`. `--yes` is the whole of the disclosure consent
+      // mechanism and is deliberately a bare boolean with no default and
+      // no environment fallback: see the gate note in src/publish.ts.
+      out: { type: 'string' },
+      yes: { type: 'boolean' },
+      // `ursa address`. `--record` names one record instead of all of
+      // them, `--pages owner/name` asks for the address a published site
+      // would serve, and `--check` is the only flag in this file that
+      // opens a socket: see the note at the top of src/address.cli.ts for
+      // why it is opt-in.
+      record: { type: 'string' },
+      pages: { type: 'string' },
+      check: { type: 'boolean' },
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci') || !project) {
+  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
@@ -325,7 +388,32 @@ export async function main(argv: string[]): Promise<number> {
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
     console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]')
+    console.error('       ursa publish <projectPath> --out <dir> [--repo owner/name] [--yes]')
+    console.error('         prints what would become public and writes nothing without --yes')
+    console.error('       ursa address <projectPath> [--record <id>] [--pages owner/name] [--check]')
+    console.error('         prints the address a stranger can type for each record, and what is missing')
     return 2
+  }
+  if (cmd === 'address') {
+    const { runAddress } = await import('../address.cli')
+    return runAddress({
+      projectPath: absPath(project),
+      recordId: values.record ?? null,
+      // `GITHUB_REPOSITORY` is read here for the same reason `publish`
+      // reads it: on a runner it is the one fact about the repository
+      // that is always present and always right.
+      pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
+      check: values.check === true,
+    })
+  }
+  if (cmd === 'publish') {
+    const { runPublish } = await import('../publish.cli')
+    return runPublish({
+      projectPath: absPath(project),
+      outDir: values.out,
+      repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      acknowledged: values.yes === true,
+    })
   }
   if (cmd === 'ci') {
     const repo = values.repo ?? process.env.GITHUB_REPOSITORY
@@ -351,6 +439,11 @@ export async function main(argv: string[]): Promise<number> {
       // one-resolver-two-launches claim is false for any repository
       // whose agents git cannot recognise by name (src/launch.ts).
       agentIdentities: values['agent-identity'],
+      // Drift 5, the same shape as the agent-identity drift above: the
+      // local launch read all three pairing bounds and this one read
+      // none, so moving a bound changed one launch's records and not the
+      // other's over identical history.
+      ...pairingBounds(values),
       post: values['no-post'] !== true,
     })
     return result.exitCode
@@ -385,23 +478,8 @@ export async function main(argv: string[]): Promise<number> {
     declaration = { accepted: false, basis: 'owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed' }
   }
 
-  // `Infinity` is reachable on purpose: `--max-pair-distance Infinity`
-  // restores the unbounded walk for someone who wants to see what the
-  // bounds removed, which is how the measurement in
-  // docs/design/pairing-window.md §8 was taken.
-  const bound = (
-    flag: 'max-pair-distance' | 'max-pair-age-hours' | 'max-interposed-generations',
-  ): number | undefined => {
-    const raw = values[flag]
-    if (raw === undefined) return undefined
-    const n = Number(raw)
-    if (!Number.isFinite(n) && raw !== 'Infinity') return undefined
-    return n
-  }
   const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath, {
-    maxPairDistance: bound('max-pair-distance'),
-    maxPairAgeHours: bound('max-pair-age-hours'),
-    maxInterposedGenerations: bound('max-interposed-generations'),
+    ...pairingBounds(values),
     agentIdentities: values['agent-identity'],
   })
   // One graph read for the whole run. Every episode's corroborator needs
@@ -441,6 +519,11 @@ export async function main(argv: string[]): Promise<number> {
     // resolve(), which also serves pasted conversations with no history.
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt)
     record.signals = deriveSignals(record, declaration)
+    // The bounds this walk ran under, into the record, before it is
+    // written. `diagnostics.bounds` is the walk's own resolved numbers
+    // rather than this command's flags, so a record never states a bound
+    // the walk did not apply (src/launch.ts, `stampPairingBounds`).
+    stampPairingBounds(record, diagnostics.bounds)
     saveRecord(projectPath, record)
     records.push(record)
   }
@@ -464,6 +547,16 @@ export async function main(argv: string[]): Promise<number> {
   // nothing was written, since there is then no claim to attribute.
   if (records.length > 0) {
     console.log(`Resolved by: ${formatResolverIdentity(records[0].task.resolvedBy ?? null)}`)
+    // And which rules those claims were checked against, read off the
+    // record rather than from `currentGateIdentity()` directly. The
+    // difference matters on exactly one path: `saveRecord` preserves an
+    // existing `task.gatedBy` and never rewrites it, so a re-saved record
+    // carries the bound set its classifications were made under and this
+    // line has to say that one rather than today's.
+    const gate = records[0].task.gatedBy
+    if (gate) {
+      console.log(`Checked against: ${gate.codes.length} bounds, set \`${gate.boundsDigest}\``)
+    }
   }
 
   // The gate runs on every run, after the records are on disk, and its

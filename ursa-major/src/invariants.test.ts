@@ -18,7 +18,9 @@ import { describe, expect, it } from 'vitest'
 import { auditProvenance } from './audit'
 import { renderRunSummary } from './bin/ursa'
 import { mergedLength } from './intervals'
-import { checkRecord, measure, type InvariantCode } from './invariants'
+import {
+  BOUND_CODES, checkRecord, currentGateIdentity, measure, type InvariantCode,
+} from './invariants'
 import { runGate } from './invariants.cli'
 import { parsePasteConversation } from './parse'
 import { resolve } from './resolve'
@@ -756,6 +758,147 @@ describe('a path the record excludes and the figures it left', () => {
 })
 
 // ---------------------------------------------------------------------------
+// The same bound's third clause, added 2026-10-15: the time ordering a
+// `sibling` exclusion depends on. This is RIVAL_NOT_AFTER_FINAL one level up,
+// and the level matters. A span-level mistake moves one span; an exclusion
+// removes a whole file from every figure in the record, and on this
+// repository's own history one of them removed 60,616 characters, 84.7% of
+// that run's headline survival figure (docs/design/vendored-paths.md §1).
+//
+// What the clause refuses. A `sibling` exclusion says the finished file is
+// byte-identical to a copy on a branch that is neither an ancestor nor a
+// descendant of the generation, and infers from the identity that the content
+// came from that branch. If the branch's commit was authored after the work
+// closed, the inference runs backwards: the copy is a copy OF this work, and
+// the record drops a file the person did write. `vendoredPaths` in
+// src/vendored.ts applies no time bound of its own, so until this clause
+// existed nothing anywhere would notice.
+// ---------------------------------------------------------------------------
+
+describe('an excluded file\'s copy is not a copy of the work that excluded it', () => {
+  const FINAL = '2026-10-05T00:00:00.000Z'
+
+  /**
+   * A record with one exclusion on a path that is NOT among its classified
+   * files, so the first clause of this bound stays quiet and only the time
+   * clause can speak. `date` is spread in as `unknown` for the reason the
+   * rival cases below do it: these records reach the gate through
+   * `JSON.parse`, and the values a JSON file can hold are wider than the
+   * declared type.
+   */
+  const withExcluded = (patch: Record<string, unknown>): OutcomeRecord => {
+    const r = resolvedRecord([{
+      path: 'docs/standards/pm.md',
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'Re-vendor docs/standards/pm.md from HQ main @ 683c7dd',
+      relation: 'sibling',
+      chars: 21_656,
+      ...patch,
+    } as unknown as Exclusion])
+    expect(r.task.generatedAt).toBe(FINAL)
+    return r
+  }
+  const codesOf = (patch: Record<string, unknown>) =>
+    checkRecord(withExcluded(patch)).map((v) => v.code)
+  const fired = (patch: Record<string, unknown>) =>
+    checkRecord(withExcluded(patch)).find((v) => v.code === 'EXCLUSION_NOT_CLASSIFIED')
+
+  it('accepts a sibling copy authored before the work ended, including the same instant', () => {
+    expect(codesOf({ date: '2026-10-04T23:59:59.000Z' })).toEqual([])
+    // Equality is legal, for the reason it is legal one level down: a copy
+    // authored in the same second as the final commit was still there to
+    // take the file from.
+    expect(codesOf({ date: FINAL })).toEqual([])
+  })
+
+  it('fires on a sibling copy authored after the work closed, naming what it cost', () => {
+    expect(codesOf({ date: '2026-10-12T00:00:00Z' })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    const v = fired({ date: '2026-10-12T00:00:00Z' })!
+    // Both sides of the comparison and the size of the refusal, which is
+    // this module's rule for a message: the number the reader needs to see
+    // is how much of the record moved on this evidence.
+    expect(v.observed).toContain('2026-10-12T00:00:00Z')
+    expect(v.observed).toContain(FINAL)
+    expect(v.observed).toContain('96ed4e5')
+    expect(v.observed).toContain('21656 chars')
+    expect(v.where).toContain('docs/standards/pm.md')
+  })
+
+  it('compares instants and not strings, so a UTC offset cannot smuggle a date through', () => {
+    // `2026-10-04T19:00:00-06:00` is `2026-10-05T01:00:00Z`, an hour after
+    // the horizon, while its text sorts before `2026-10-05`. The twin case
+    // for rivals records that a string compare shipped this mistake once.
+    expect(codesOf({ date: '2026-10-04T17:00:00-06:00' })).toEqual([])
+    expect(codesOf({ date: '2026-10-04T19:00:00-06:00' })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+  })
+
+  it('accepts an exclusion with no date, which is every record written before 2026-10-15', () => {
+    expect(codesOf({})).toEqual([])
+    // Including on a record whose own clock is unreadable: nothing is being
+    // ordered, so there is nothing to refuse.
+    const r = withExcluded({})
+    r.task.generatedAt = 'whenever'
+    expect(checkRecord(r).map((v) => v.code)).toEqual([])
+    // And the two records committed to this repository, which predate the
+    // field, exactly as the rival clause's own case asserts.
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      expect(checkRecord(load(p)), p).toEqual([])
+    }
+  })
+
+  it('exempts the two relations whose clocks are not this repository\'s to order', () => {
+    // Rule 2 at the top of src/invariants.ts, applied. `pre_existing` is an
+    // ancestor of the generation, so the commit graph vouches for it whatever
+    // a rebase did to its author date. `declared` names a commit in ANOTHER
+    // repository, whose clock has no defined relation to this one's at all,
+    // and whose date is therefore not evidence about when the content was
+    // available here.
+    for (const relation of ['pre_existing', 'declared']) {
+      expect(codesOf({ relation, date: '2027-06-01T00:00:00Z' }), relation).toEqual([])
+    }
+    // The same date under the policed relation fires, so the exemption is
+    // the relation and not something about the date.
+    expect(codesOf({ date: '2027-06-01T00:00:00Z' })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+  })
+
+  it('fires on a date nothing can order, on every relation including the exempt ones', () => {
+    for (const relation of ['pre_existing', 'declared', 'sibling']) {
+      expect(codesOf({ relation, date: 'last Tuesday' }), relation)
+        .toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    }
+    expect(fired({ date: 'last Tuesday' })!.observed).toContain('Date.parse can read')
+    // The types a JSON file can hold and TypeScript cannot, which is why the
+    // bound reads the field as `unknown`.
+    expect(codesOf({ date: 1760000000 })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(codesOf({ date: null })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(fired({ date: 1760000000 })!.observed).toContain('1760000000')
+  })
+
+  it('fires once, naming the clock, when the record\'s own horizon is unreadable', () => {
+    const r = withExcluded({ date: '2026-10-04T00:00:00Z' })
+    r.task.generatedAt = '2026-13-45T99:00:00Z'
+    const found = checkRecord(r)
+    expect(found.map((v) => v.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(found[0].where).toBe('invariants-unit task.generatedAt')
+    expect(found[0].observed).toContain('1 sibling exclusion')
+    expect(found[0].observed).toContain('2026-13-45T99:00:00Z')
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-exclusion-not-after-final-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(withExcluded({ date: '2026-10-12T00:00:00Z' }), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('EXCLUSION_NOT_CLASSIFIED')
+    expect(lines.join('\n')).toContain('2026-10-12T00:00:00Z')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // The fourteenth and fifteenth bounds. Both are about a record that states a
 // true number and does not state which question it answers.
 //
@@ -1188,5 +1331,173 @@ describe('a rival from the future is not where the text came from', () => {
     expect(violations).toBe(1)
     expect(lines.join('\n')).toContain('RIVAL_NOT_AFTER_FINAL')
     expect(lines.join('\n')).toContain('2026-10-09T00:00:00Z')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The eighteenth bound. The third one about a SHAPE rather than two numbers,
+// and the first whose strongest clause compares the record against THIS
+// BUILD rather than against the record's own other fields.
+//
+// GATE_IDENTIFIED guards `task.gatedBy`, which says which rules the record's
+// claims were checked against (`GateIdentity` in src/types.ts). The field
+// was added on 2026-10-16 because `task.resolvedBy` answers "which code"
+// and nothing answered "which rules": the bound set went from ten to
+// eighteen in eleven days, so two records bought two months apart were
+// checked differently, and learning how meant cloning the resolver at the
+// commit the record names and reading this module.
+//
+// `fixtures/violations/gate-identified.json` is the committed counterexample
+// and covers the one case that matters most — this build's own digest over a
+// code list one bound short. The cases below are the shape cases, which one
+// fixture cannot hold at once, plus the two directions of the digest
+// comparison that a committed file cannot demonstrate because one of them
+// depends on what this build's digest IS.
+// ---------------------------------------------------------------------------
+
+describe('a named bound set is one that can be compared', () => {
+  const MINE = currentGateIdentity()
+
+  const gated = (gatedBy: unknown): OutcomeRecord => {
+    const r = resolvedRecord()
+    ;(r.task as unknown as Record<string, unknown>).gatedBy = gatedBy
+    return r
+  }
+  const codesOf = (gatedBy: unknown) => checkRecord(gated(gatedBy)).map((v) => v.code)
+  const fired = (gatedBy: unknown) =>
+    checkRecord(gated(gatedBy)).find((v) => v.code === 'GATE_IDENTIFIED')
+
+  it('accepts what this build stamps, which is the value `saveRecord` writes', () => {
+    expect(codesOf(MINE)).toEqual([])
+    // And the digest is the shape the bound requires, asserted here rather
+    // than trusted: `currentGateIdentity()` and the bound are in one module
+    // and could agree with each other while both being wrong about the
+    // 16-hex convention `ResolverIdentity`'s `bundle_digest` uses.
+    expect(MINE.boundsDigest).toMatch(/^[0-9a-f]{16}$/)
+    expect(MINE.codes).toEqual([...BOUND_CODES])
+  })
+
+  it('accepts a record that names no bound set at all, which is every record before today', () => {
+    // Absence is a true claim and the bound does not touch it, the same rule
+    // RESOLVER_IDENTIFIED follows. Both committed fixtures predate the
+    // field, so a bound that required it would fail on the two records it is
+    // supposed to be checked against.
+    expect(codesOf(undefined)).toEqual([])
+    expect(codesOf(null)).toEqual([])
+    for (const p of [PUBLIC_FIXTURE, REAL_FIXTURE]) {
+      expect(load(p).task.gatedBy, p).toBeUndefined()
+      expect(checkRecord(load(p)), p).toEqual([])
+    }
+  })
+
+  it('accepts a bound set from another build, including codes this one has never heard of', () => {
+    // The deliberate non-check, and the reason the field is typed
+    // `string[]`. A record written by a later resolver names a nineteenth
+    // bound, and refusing it would turn this gate into a gate against its
+    // own future. A record written by an earlier one names fifteen, which is
+    // every record this project wrote between 2026-10-06 and 2026-10-12.
+    expect(codesOf({ codes: [...BOUND_CODES, 'A_NINETEENTH_BOUND'], boundsDigest: 'a'.repeat(16) }))
+      .toEqual([])
+    expect(codesOf({ codes: BOUND_CODES.slice(0, 15), boundsDigest: 'b'.repeat(16) })).toEqual([])
+  })
+
+  it('fires when a record claims THIS build\'s rules and lists fewer of them', () => {
+    // The clause the field exists for, and the one `gate-identified.json`
+    // commits. A digest is a claim about which rules applied, so a record
+    // asserting this build\'s rule set while listing fewer rules than this
+    // build has is a record a bound was dropped from.
+    const dropped = MINE.codes.filter((c) => c !== 'RIVAL_NOT_AFTER_FINAL')
+    const v = fired({ codes: dropped, boundsDigest: MINE.boundsDigest })!
+    expect(v.observed).toContain(MINE.boundsDigest)
+    expect(v.observed).toContain('missing RIVAL_NOT_AFTER_FINAL')
+    expect(v.observed).toContain(`lists ${dropped.length}`)
+    expect(codesOf({ codes: dropped, boundsDigest: MINE.boundsDigest })).toEqual(['GATE_IDENTIFIED'])
+  })
+
+  it('fires in the other direction too, on a code this build does not have under its own digest', () => {
+    // Not symmetric with the case above by accident. A SHORT list under this
+    // digest means a bound was dropped; a LONG one means the digest was
+    // copied onto a record checked by something else, and both make the same
+    // same-digest comparison wrong.
+    const v = fired({ codes: [...MINE.codes, 'INVENTED_BOUND'], boundsDigest: MINE.boundsDigest })!
+    expect(v.observed).toContain('INVENTED_BOUND not in this bound set')
+  })
+
+  it('fires on an empty code list, which is not the same claim as absence', () => {
+    // Absence says nothing stamped this record. An empty array says a
+    // resolver stamped it and checked it against no bounds, which no build
+    // of this module can be: `BOUNDS` has never held fewer than ten entries.
+    const v = fired({ codes: [], boundsDigest: MINE.boundsDigest })!
+    expect(v.observed).toContain('empty array')
+    expect(v.observed).toContain('absence of the field')
+  })
+
+  it('fires on a code list that is not a list of codes', () => {
+    for (const codes of [[''], ['lowercase_code'], ['1_LEADING_DIGIT'], ['HAS SPACE'], [17]]) {
+      expect(codesOf({ codes, boundsDigest: MINE.boundsDigest }), JSON.stringify(codes))
+        .toEqual(['GATE_IDENTIFIED'])
+    }
+    // The flattened form the field was deliberately not given, and the one a
+    // lossy round trip produces.
+    expect(fired({ codes: BOUND_CODES.join(','), boundsDigest: MINE.boundsDigest })!.observed)
+      .toContain('not an array')
+  })
+
+  it('fires on a duplicated code, because the list is read as a set', () => {
+    // A list with one code twice has the same LENGTH as the honest list with
+    // one code missing, so a length-only comparison cannot tell them apart.
+    const v = fired({
+      codes: [...MINE.codes.slice(0, -1), 'CLAIM_NOT_WIDER'],
+      boundsDigest: MINE.boundsDigest,
+    })!
+    expect(v.observed).toContain('"CLAIM_NOT_WIDER" more than once')
+  })
+
+  it('fires on a digest that cannot be compared against another record\'s', () => {
+    // 16 exactly, matching `currentGateIdentity()` and the `bundle_digest`
+    // prefix RESOLVER_IDENTIFIED checks. Anything else is a digest from
+    // somewhere else and the one comparison this field supports would
+    // silently never match.
+    for (const boundsDigest of ['0123456789abcde', '0123456789abcdef0', 'f'.repeat(64), 'ABCDEF0123456789', '']) {
+      expect(codesOf({ codes: [...BOUND_CODES], boundsDigest }), JSON.stringify(boundsDigest))
+        .toEqual(['GATE_IDENTIFIED'])
+    }
+    // Reported once, for the shape, and not twice for the shape and the
+    // comparison the shape made impossible.
+    expect(codesOf({ codes: [], boundsDigest: 'nope' })).toEqual(['GATE_IDENTIFIED', 'GATE_IDENTIFIED'])
+  })
+
+  it('fires on a field that is not an object', () => {
+    expect(fired(MINE.boundsDigest)!.observed).toContain('not an object carrying codes and a digest')
+    expect(codesOf(17)).toEqual(['GATE_IDENTIFIED'])
+    // An object missing both halves fires twice, once per half, because the
+    // two are independent facts and a reader fixing one should still see the
+    // other.
+    expect(codesOf({})).toEqual(['GATE_IDENTIFIED', 'GATE_IDENTIFIED'])
+  })
+
+  it('does not read the field as a verdict: a record can carry it and still fail', () => {
+    // The reading the name invites and the record does not make. Both
+    // launches write records BEFORE the gate runs (`gateRecords` in
+    // src/launch.ts), so `gatedBy` says which rules applied and never that
+    // they held. Asserted on a record that carries this build\'s own stamp
+    // and breaks a different bound.
+    const r = gated(MINE)
+    r.stats.byClass.survived_verbatim.chars += 1
+    const codes = checkRecord(r).map((v) => v.code)
+    expect(codes).not.toContain('GATE_IDENTIFIED')
+    expect(codes.length).toBeGreaterThan(0)
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-gate-identified-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(gated({ codes: [...BOUND_CODES], boundsDigest: 'HEAD' }), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('GATE_IDENTIFIED')
+    expect(lines.join('\n')).toContain('"HEAD"')
   })
 })

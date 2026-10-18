@@ -14,6 +14,117 @@ Ursa is a subcompany of **Alexandra Systems Company**, which generalizes
 operations across the portfolio; its standards, seats and chair reach
 into this repository by design (see `CLAUDE.md`, "The holding company").
 
+## Run it on your own repository
+
+If an AI agent commits to a repository of yours, you can see what it
+actually contributed and read the result at a web address of your own.
+Two steps, no account with us, no key, and nothing of yours sent
+anywhere.
+
+```bash
+# 1. Add the workflow. Run this from the root of your own repository.
+mkdir -p .github/workflows
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/publish-record.yml \
+  -o .github/workflows/ursa-publish.yml
+git add .github/workflows/ursa-publish.yml && git commit -m "Add Ursa" && git push
+```
+
+2. In your repository's **Settings → Pages**, set **Source** to **GitHub
+   Actions**. That is the one step a workflow file cannot do for you.
+
+The next push to your default branch resolves your history into outcome
+records on your own runner and publishes them to
+
+```
+https://<your-user>.github.io/<your-repo>/
+```
+
+The index lists every record. Open one and every stretch of the finished
+work is labelled by what happened to it: kept unchanged, kept after you
+edited it, or present in the work with no model behind it at all. From
+any labelled span you reach the generation that produced it. The page
+fetches nothing and runs no script.
+
+**If the site comes out empty, two lines in the workflow decide it.** A
+record needs a model's commit and a later commit of yours editing the
+same file, so the resolver has to know which commits are a model's and
+how far apart the two may be. The `agent-identity` block is where you
+declare any identity in your repository that belongs to an agent rather
+than to a person, and the command that finds yours is
+`git log --format='%an <%ae>' | sort | uniq -c | sort -rn`. The
+`max-pair-distance` input is how many commits may sit between the two,
+and its default of 25 suits a repository where you are the only other
+writer. This repository is not one of those, and resolving its own
+history is how both lines got the values in the file you just copied:
+with twelve agent seats committing in between, 25 found nothing and 400
+found the owner's real corrections. Whichever bound dropped every pair
+is named in the job summary, so an empty site tells you which number to
+move rather than leaving you to guess. The whole measurement is in
+`docs/design/pages-dogfood.md`.
+
+**What it publishes, plainly.** A record carries raw text, not a summary:
+the full text of each file it classifies, the full text of every model
+generation behind them, and, on the session path, every message you typed
+to the model. On this workflow's path a generation is a blob of a file at
+your agent's own commit, so a public repository has already published
+that text and what is new on the page is the classification over it. The
+job log prints the exact character counts and every file path before it
+writes anything, so your first run tells you what the page will hold. To
+read that list and publish nothing, delete the two deploy steps at the
+bottom of the workflow and run it once by hand from the Actions tab.
+
+To do the same thing locally, without publishing anything:
+
+```bash
+git clone https://github.com/alexandrapaiz/Ursa && cd Ursa/ursa-major && npm install
+npx tsx src/bin/ursa.ts run <path-to-your-repo>
+npx tsx src/bin/ursa.ts publish <path-to-your-repo>    # prints what would go public
+npx tsx src/bin/ursa.ts publish <path-to-your-repo> --out ./site --yes
+```
+
+### The shortest version: one record, no workflow, no Pages setting
+
+A record is a file, and a file in a public repository already has a
+public address. So you can skip all of the above and publish one record
+by committing it.
+
+```bash
+npx tsx src/bin/ursa.ts run <path-to-your-repo>
+npx tsx src/bin/ursa.ts address <path-to-your-repo>
+```
+
+`ursa address` prints, for every record you have, the address someone
+else can open and the one thing still standing between you and it,
+which is usually a commit or a push. Records live in `.ursa/`, which
+this project tells git to ignore by default, because a record is raw
+text and publishing it should be something you do on purpose rather
+than something that happens. When you do mean it, the command gives you
+the exact line:
+
+```
+record <your-repo>-2026-10-16-8dcb0c7
+  address   git/<you>/<your-repo>/main/<your-repo>-2026-10-16-8dcb0c7
+  json      https://raw.githubusercontent.com/<you>/<your-repo>/main/.ursa/records/<your-repo>-2026-10-16-8dcb0c7.json
+  readable  not yet
+  missing   git ignores .ursa/records/<your-repo>-2026-10-16-8dcb0c7.json ...
+```
+
+Add `--check` and it asks the address itself, so you see the answer a
+browser would get rather than the one this page promises.
+
+**Which of the two to use.** Committing a record is one command and it
+is permanent: the record stays in your repository's history, and `ursa
+forget` deletes your local copy without reaching a commit you have
+already pushed. Publishing to Pages takes the workflow above and gives
+that back, because it deploys a built site rather than a commit, so
+running it again without a record takes that record off the site. The
+command says this where you are looking at the address, not only here.
+
+Everything above runs on your machine or on your own runner. Ursa
+operates no part of it, and the resolver installs nothing: the Action
+executes one committed file with the node already on the runner. The
+design is [`docs/design/public-record-address.md`](docs/design/public-record-address.md).
+
 ## The principles
 
 Four theses, taken from the Ursa Minor site, guide every decision here.
@@ -119,8 +230,8 @@ How it is measured is in
 
 Every record also names **which build of the resolver made its claims**,
 in `task.resolvedBy`. The reason is that the rules underneath the classes
-above are young and they move: the bound count went from ten to seventeen
-in nine days, and the change that started refusing imported files silently
+above are young and they move: the bound count went from ten to eighteen
+in eleven days, and the change that started refusing imported files silently
 moved every figure in every record written after it. Two records with the
 same identifier, resolved by two commits of the resolver, disagreed about
 how much of one piece of work survived by a factor of eight, and nothing
@@ -133,8 +244,35 @@ a resolver. What it may not be is a placeholder: as of 2026-10-13 the
 `RESOLVER_IDENTIFIED` bound refuses a record whose commit is not 7 to 40
 hexadecimal characters or whose digest is not the 16-character prefix the
 build compares against, so a name in this field is one a reader can
-resolve. How each one is read is in
-[`docs/design/resolver-identity.md`](docs/design/resolver-identity.md).
+resolve. Resolving the digest half needs a table, because a hash of the
+bundle's bytes carries no history with it, and every record written on a
+runner carries that half. The table is
+[`docs/provenance/bundle-digests.md`](docs/provenance/bundle-digests.md):
+one row per version of the bundle that has existed, giving the commit
+that introduced it and when. It is generated from this repository's own
+history and `npm test` fails when it drifts. How each identity is read is
+in [`docs/design/resolver-identity.md`](docs/design/resolver-identity.md),
+and how the table is built is in
+[`docs/design/bundle-digest-index.md`](docs/design/bundle-digest-index.md).
+
+And since 2026-10-16 every record also names **which rules its claims
+were checked against**, in `task.gatedBy`: the code of every bound the
+resolver carried, and a 16-character SHA-256 prefix over those bounds'
+statements. Naming the code was not enough on its own. The bound set
+moves faster than the resolver's own identity suggests, so two records
+bought two months apart were checked under different rules, and the only
+way to learn which rules was to clone the resolver at the commit
+`task.resolvedBy` names and read a TypeScript module. Two records can now
+be compared on that question directly: the same digest means the same
+rules, a different digest means they differ, and the code lists say
+where. It names the rules and never a verdict, because both launches
+write their records before the gate runs, so a record carries this field
+whether it passed or failed. The `GATE_IDENTIFIED` bound refuses the one
+record that could lie about it, which is a record carrying the checking
+resolver's own digest over a shorter list of bounds than that resolver
+has. How the digest is computed, and why membership is deliberately not
+checked the other way, is in
+[`docs/design/gate-identity.md`](docs/design/gate-identity.md).
 
 Two capture paths feed it. Session logs carry the **trace**, which is
 where the fine-tuning churns. Git commit pairs carry the **label**, a
@@ -218,7 +356,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 505 tests, 4 skipped
+npm test                                   # 761 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
@@ -305,8 +443,8 @@ holds the two launches to the same record is
 | `src/adapters/github-pr.ts` | reads one pull request as a source of corrections, for repositories where the work is reviewed in pull requests rather than edited on the default branch, and reports the merges that sat between a generation and its closure so `src/deletion.ts` can judge them (`docs/design/pr-path-merge-attribution.md`) |
 | `src/store.ts` | writes records and the episode index to `<project>/.ursa/`, and stamps each record with the resolver that made its claims as it does. Here rather than in `src/resolve.ts` because writing is where a record stops being a value inside a process and becomes an artifact somebody can buy, and because it is the one place all four callers that save records pass through. Stamped once and never rewritten: the bridge loads a finished record months later to write the user's own acceptance verdict into it, and that save must not credit a later build with the original resolver's classifications (`docs/design/resolver-identity.md` §3.3) |
 | `src/resolver-identity.ts` | answers which build of the resolver is running, so the record can say so. Two answers, because the two launches ship the resolver as two different artifacts: `ursa run` executes the source from a git work tree, so the identity is that tree's commit plus a flag for whether the tree matched it, and `ursa ci` executes the committed single-file bundle on a runner GitHub handed an unpacked tarball, where there is no commit to read and the identity is the SHA-256 of the bytes that ran, which is the same number the build's own staleness check prints. Which kind of evidence it is stays in the record as a value, so a buyer who will only accept records auditable against a public commit filters on the word instead of reading prose. Reads the path of the running script from `process.argv[1]` rather than `import.meta.url` or `__dirname`, because this is the one module that is compiled both ways and neither of those exists in both (`docs/design/resolver-identity.md`) |
-| `src/invariants.ts` | checks a record against itself: seventeen bounds a record must satisfy, twelve of them arithmetic or structural and reported with both sides of the number they broke, one that re-reads every excerpt a signal quotes against the raw text it names, one that checks the record kept neither a mutation label nor a survival label it had already found the evidence against, one that checks it did not classify a file it had already declared an import, one that checks the resolver the record names is one a reader can look up rather than a placeholder in the shape of a pointer, and one that checks the evidence a span's descent verdict names is not dated after the work it is evidence about, because a commit from the episode's own future cannot be where the text came from. The count is `BOUND_COUNT`, derived from the bounds themselves, because this line said thirteen for four days after the fifteenth was added. both launches exit non-zero when one is violated, after writing the records, because an impossible record is still the evidence, and the CI launch's run comment says in its detail block how far to trust the five fields above it. Every bound has a committed record that breaks it, at `fixtures/violations/`, twenty records over seventeen codes, each with a note quoting the gate's own numbers: a bound with no counterexample behind it fails the suite, two of the seventeen turned out to be unbreakable on their own, `DESCENT_CHECKED_UNIFORMLY` has two records because two of its three clauses are separate failure modes, and `RIVAL_NOT_AFTER_FINAL` has three, one per failure mode, the sharpest of which is dated so that a gate comparing date strings instead of instants would pass it (`docs/design/generated-denominator.md`, `docs/design/signal-grounding.md`, `docs/design/corroborated-descent.md`, `docs/design/record-exclusions.md`, `docs/design/violation-fixtures.md`) |
-| `src/launch.ts` | the one definition of the three decisions each launch makes around the resolve step, shared by `src/bin/ursa.ts` and `src/ci/run.ts` so the two cannot answer them differently: whether a resolved record clears the `--min-chars` floor (a refusal-only record has no generation side to measure, so it is exempt), which episodes the user erased (both launches rebuild episodes from git history, so a launch that skips the consent record undoes `ursa forget`), and whether every record just written satisfies all seventeen bounds. All three had drifted apart between the two launches, found by resolving one fixture repository both ways and diffing the records. That differential test has now found four divergences; the fourth, on 2026-10-11, was the CI launch not reading `--agent-identity`, so the two launches disagreed about who the person was on any repository running agent seats of its own (`docs/design/launch-parity.md` §8) |
+| `src/invariants.ts` | checks a record against itself: eighteen bounds a record must satisfy, twelve of them arithmetic or structural and reported with both sides of the number they broke, one that re-reads every excerpt a signal quotes against the raw text it names, one that checks the record kept neither a mutation label nor a survival label it had already found the evidence against, one that checks it did not classify a file it had already declared an import and that the commit an import rests on is not itself dated after the work, one that checks the resolver the record names is one a reader can look up rather than a placeholder in the shape of a pointer, one that checks the evidence a span's descent verdict names is not dated after the work it is evidence about, because a commit from the episode's own future cannot be where the text came from, and one that checks the bound set a record says it was checked against is one that can be compared, so a record claiming this resolver's rules while listing fewer of them is refused rather than read as consistent. The count is `BOUND_COUNT`, derived from the bounds themselves, because this line said thirteen for four days after the fifteenth was added. both launches exit non-zero when one is violated, after writing the records, because an impossible record is still the evidence, and the CI launch's run comment says in its detail block how far to trust the five fields above it. Every bound has a committed record that breaks it, at `fixtures/violations/`, twenty-three records over eighteen codes, each with a note quoting the gate's own numbers: a bound with no counterexample behind it fails the suite, two of the eighteen turned out to be unbreakable on their own, `DESCENT_CHECKED_UNIFORMLY` has two records because two of its three clauses are separate failure modes, `RIVAL_NOT_AFTER_FINAL` has three, one per failure mode, the sharpest of which is dated so that a gate comparing date strings instead of instants would pass it, and `EXCLUSION_NOT_CLASSIFIED` has three because the same time check at the file level removes a whole file from every figure rather than one span (`docs/design/generated-denominator.md`, `docs/design/signal-grounding.md`, `docs/design/corroborated-descent.md`, `docs/design/record-exclusions.md`, `docs/design/violation-fixtures.md`, `docs/design/gate-identity.md`) |
+| `src/launch.ts` | the one definition of the three decisions each launch makes around the resolve step, shared by `src/bin/ursa.ts` and `src/ci/run.ts` so the two cannot answer them differently: whether a resolved record clears the `--min-chars` floor (a refusal-only record has no generation side to measure, so it is exempt), which episodes the user erased (both launches rebuild episodes from git history, so a launch that skips the consent record undoes `ursa forget`), and whether every record just written satisfies all eighteen bounds. All three had drifted apart between the two launches, found by resolving one fixture repository both ways and diffing the records. That differential test has now found four divergences; the fourth, on 2026-10-11, was the CI launch not reading `--agent-identity`, so the two launches disagreed about who the person was on any repository running agent seats of its own (`docs/design/launch-parity.md` §8) |
 | `src/intervals.ts` | the one definition of how many distinct characters a set of extents covers, shared by `src/stats.ts` and `src/invariants.ts` so a generated sentence reused in two places is counted once where it should be and twice where it should be |
 | `src/text.ts` | the one definition of a quoted, truncated excerpt, shared by `src/signals.ts` and `src/loops.ts`, plus the predicate `src/invariants.ts` uses to decide whether a quote really appears in the text it claims to come from |
 | `src/tuning/` | distillation into rules and cases, deterministic merge with revocation tombstones, export |
@@ -380,3 +518,11 @@ merged. The owner's merge is the only authority. See
    Ursa-operated compute.
 4. The software is not the moat. The consenting constellation of users
    is.
+
+## Part of Alexandra Systems Company
+
+Ursa is a subcompany of [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems), the holding company that runs every product in the portfolio as a company of agent seats.
+
+- HQ's standards are vendored at `docs/standards/` and bind every seat here; the PM seat merges every tier in this repository under section 21 of the PM standard, and HQ's PM holds the portfolio while the owner is away.
+- The company board is at https://alexandra-systems-company.com; a message addressed to a seat there wakes it through the event bus, and every run reports to the board.
+- `company.yaml` in this repository is what HQ reads to see this company: its seats, cadences and surfaces.

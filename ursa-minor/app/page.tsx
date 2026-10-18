@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import Constellation from "@/components/ui/constellation";
+import CopyLine from "@/components/ui/copy-line";
 import PixelSky from "@/components/ui/pixel-sky";
 import SiteHeader from "@/components/ui/site-header";
 import ScrollCue from "@/components/ui/scroll-cue";
@@ -67,17 +70,30 @@ export default function Home() {
               of them with a margin. Nothing that already fits moves: min()
               picks 3.8vw or the 2.7rem ceiling at every landscape size from
               1024x768 up, and 1024x600 changes by half a pixel. */}
-          <p className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)] landscape:max-w-[46vw] landscape:text-[min(3.8vw,6.4vh,2.7rem)]">
+          {/* text-balance stops at Chromium's line limit, and this sentence
+              crosses it at every size where the box is narrower than about
+              550px: measured 2026-10-15, balance, pretty and auto return the
+              identical rag at 320, 375, 390, 414, 667x375, 1024x600, 1024x768
+              and 1180x820, all of them seven lines or more. Where balance is a
+              no-op the sentence ends on "feedback." alone, 101 to 163px of ink
+              against a 256 to 543px box, 33 to 45% of the measure. Binding the
+              final two words is the same device the sentence already uses on
+              "A new": it takes the last line to 58 to 79% at every one of
+              those sizes, changes nothing at any size where balance still
+              reaches (360, 480, 600, 740, 820, 844, 896, 932, 1280, 1366,
+              1440, 1920 are byte-identical before and after), never changes
+              the line count, and never overflows the box. */}
+          <h1 className="text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)] landscape:max-w-[46vw] landscape:text-[min(3.8vw,6.4vh,2.7rem)]">
             <em className="not-italic text-[var(--polar)]">Polaris</em> —
             peer-to-peer supervised fine-tuning; outcome reward for open-ended
             generation. A{"\u00a0"}new approach to reinforcement learning from
-            human feedback.
-          </p>
+            human{"\u00a0"}feedback.
+          </h1>
           <button
             type="button"
             disabled
             aria-disabled="true"
-            className="cta tracked-label mt-10 border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)] disabled:cursor-not-allowed disabled:opacity-55"
+            className="cta tracked-label mt-10 short-landscape:mt-6 border border-[rgba(168,199,250,0.4)] px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.22em] text-[var(--polar)] disabled:cursor-not-allowed disabled:opacity-55"
           >
             Get Polaris
           </button>
@@ -86,9 +102,13 @@ export default function Home() {
 
       <main className="w-full px-[clamp(2rem,8vw,6rem)] lg:mx-auto lg:max-w-2xl lg:px-8">
         <section className="border-t border-[var(--line)] py-22">
-          <div className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
+          {/* an <h2>, not a <div>: this is the section's heading, and until
+              today neither route had a single heading element on it. The
+              classes are unchanged and preflight already resets the UA's
+              heading font and margin, so nothing moves. */}
+          <h2 className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> North stars
-          </div>
+          </h2>
           <ul>
             {NORTH_STARS.map((star, i) => (
               <li
@@ -105,9 +125,83 @@ export default function Home() {
             ))}
           </ul>
         </section>
+
+        {/* The run section (added 2026-10-18, for the owner's MVP directive:
+            a stranger opens a URL, runs ursa against their own repository
+            from a line they copy, and reads the record at that address).
+            Until today this page had one control on it and it was disabled,
+            so a person who believed the four theses above had nothing to do
+            next. The commands are the ones in the repository README, copied
+            exactly rather than paraphrased, because a quickstart that drifts
+            from the thing it starts is worse than no quickstart. */}
+        <section className="border-t border-[var(--line)] py-22">
+          <h2 className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
+            <span className="text-[var(--polar)]">✦</span> Run it on your own work
+          </h2>
+          <p className="max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+            Point it at a project you have finished and it reads the git history for the places a
+            model wrote something and you changed it. Everything it reads stays on your machine.
+            Nobody here is in the loop.
+          </p>
+
+          <CopyLine
+            label="1 — get the resolver"
+            command={`git clone https://github.com/alexandrapaiz/Ursa.git
+cd Ursa/ursa-major && npm install`}
+          />
+          <CopyLine
+            label="2 — point it at your own repository"
+            command="npx tsx src/bin/ursa.ts run ~/code/your-project --declare satisfied"
+          />
+
+          <div className="mt-8 border-t border-[var(--line)] pt-8">
+            <div className="mb-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[var(--dim)]">
+              3 — read what it found
+            </div>
+            <p className="max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+              It writes your record to{" "}
+              <span className="font-mono text-[0.85rem] text-[var(--star)]">
+                your-project/.ursa/records/&lt;id&gt;.json
+              </span>
+              . Open it in{" "}
+              <Link href="/record" className="rec-action text-[var(--polar)]">
+                the record viewer
+              </Link>
+              , which reads it in your own browser and sends it nowhere. There is{" "}
+              <Link href="/record/mini-fixture" className="rec-action text-[var(--polar)]">
+                a published record
+              </Link>{" "}
+              there to look at first.
+            </p>
+          </div>
+
+          {/* The second launch, with its limit stated. The Action resolves on
+              the consumer's own runner and the runner's workspace is destroyed
+              when the job ends, so what leaves today is the comment and not the
+              record. Saying so is the difference between a quickstart and a
+              claim: the record-to-address hop is being built, and a page that
+              implied it already worked would send a stranger looking for a file
+              that is not there. */}
+          <div className="mt-10 border-t border-[var(--line)] pt-8">
+            <p className="max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+              Or resolve every merged pull request automatically, on your own runner. One committed
+              file runs on the node the runner already has: no install, no container, no secret,
+              and no compute of ours anywhere in it.
+            </p>
+            <CopyLine
+              command={`mkdir -p .github/workflows
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml -o .github/workflows/ursa-resolve.yml`}
+            />
+            <p className="mt-4 max-w-xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+              On that path the records are written on the runner and the runner is thrown away with
+              them, so what you get back today is the five-field comment on the pull request. The
+              local run above is the one that leaves you a record to open.
+            </p>
+          </div>
+        </section>
       </main>
 
-      <SiteFooter column className="mt-8" />
+      <SiteFooter measure="reading" className="mt-8" />
     </>
   );
 }

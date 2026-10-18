@@ -42,6 +42,7 @@
 // that cost on this repository's own history.
 
 import { execFileSync } from 'node:child_process'
+import type { PairingBounds } from './types'
 
 /** a merge commit sitting between the generated and final commit */
 export interface MergeEvent {
@@ -167,12 +168,14 @@ export interface PairFinderDiagnostics {
    * the thing to change (or to override with agentAuthorPattern).
    */
   authorFallbackSuppressed: { pattern: string; authors: string[] } | null
-  /** the bounds this walk ran under, so a caller can name them to the user */
-  bounds: {
-    maxPairDistance: number
-    maxPairAgeHours: number
-    maxInterposedGenerations: number
-  }
+  /**
+   * The bounds this walk ran under, so a caller can name them to the
+   * user and stamp them into every record the walk produced
+   * (`OutcomeRecord.task.pairedBy`, src/types.ts). The same shape as the
+   * record's field, from the same resolver call, so the number a record
+   * states and the number the run printed cannot differ.
+   */
+  bounds: PairingBounds
   /**
    * Generations that found no edit because the walk hit a bound, counted by
    * whichever bound stopped it FIRST. A generation appears at most once
@@ -283,6 +286,27 @@ const DEFAULT_TRAILER = MACHINE_IDENTITY
 const DEFAULT_MAX_PAIR_DISTANCE = 25
 const DEFAULT_MAX_PAIR_AGE_HOURS = 168
 const DEFAULT_MAX_INTERPOSED_GENERATIONS = 0
+
+/**
+ * The three bounds a walk will actually use, with this module's defaults
+ * filled in for whatever the caller left unset.
+ *
+ * Exported because two callers need the resolved numbers rather than the
+ * caller's optional ones: the walk itself, and the launches that stamp
+ * them into every record they write (`stampPairingBounds` in
+ * src/launch.ts). Before this function the defaults were applied inside
+ * `findCommitPairsWithDiagnostics` only, so a caller that wanted to say
+ * which bounds had been in force had to re-apply `?? 25` itself, and the
+ * launch that did not have diagnostics in hand (`src/ci/run.ts`, which
+ * calls `findCommitPairs`) had no way to reach them at all.
+ */
+export function resolvePairingBounds(opts?: PairFinderOptions): PairingBounds {
+  return {
+    maxPairDistance: opts?.maxPairDistance ?? DEFAULT_MAX_PAIR_DISTANCE,
+    maxPairAgeHours: opts?.maxPairAgeHours ?? DEFAULT_MAX_PAIR_AGE_HOURS,
+    maxInterposedGenerations: opts?.maxInterposedGenerations ?? DEFAULT_MAX_INTERPOSED_GENERATIONS,
+  }
+}
 /**
  * The author-name fallback reads the same vocabulary, deliberately the
  * same constant rather than a second list that happens to agree today.
@@ -505,9 +529,10 @@ export function findCommitPairsWithDiagnostics(
     const hit = declared.find((d) => name.includes(d) || email.includes(d))
     return hit ? `${c.authorName} <${c.authorEmail}>` : null
   }
-  const maxDistance = opts.maxPairDistance ?? DEFAULT_MAX_PAIR_DISTANCE
-  const maxAgeHours = opts.maxPairAgeHours ?? DEFAULT_MAX_PAIR_AGE_HOURS
-  const maxInterposed = opts.maxInterposedGenerations ?? DEFAULT_MAX_INTERPOSED_GENERATIONS
+  const bounds = resolvePairingBounds(opts)
+  const maxDistance = bounds.maxPairDistance
+  const maxAgeHours = bounds.maxPairAgeHours
+  const maxInterposed = bounds.maxInterposedGenerations
   const commits = listCommits(repoPath, opts.range)
   const files = new Map<string, string[]>()
   const touched = (sha: string) => {
@@ -532,11 +557,7 @@ export function findCommitPairsWithDiagnostics(
           authors: [...new Set(commits.map((c) => c.authorName))].sort(),
         }
       : null,
-    bounds: {
-      maxPairDistance: maxDistance,
-      maxPairAgeHours: maxAgeHours,
-      maxInterposedGenerations: maxInterposed,
-    },
+    bounds,
     abandoned: { distance: 0, age: 0, interposedGeneration: 0, notDescendant: 0 },
     mergeGenerationsRefused: 0,
     editorIdentities: [],

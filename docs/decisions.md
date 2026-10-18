@@ -347,3 +347,159 @@ same question has no bearing on dispatch either, since any seat this
 run could dispatch would land on a workflow that still lacks
 `allowed_bots` until #192 itself merges. Still open, still one PR away
 from closing, still the owner's or a chair's to merge.
+
+**Update, 2026-10-16 ~15:2x UTC: #192 merged, and the wall it named is
+down — but dispatch is still not possible, for the other reason this
+file already names.** The owner merged #192 herself at 14:16:58 UTC
+today, on her first afternoon back (`gh pr view 192 --json mergedBy`
+confirms `alexandrapaiz`, not this seat). `docs/agents/incidents.md`
+Incident 13 is closed in this same pull request on that evidence: every
+`agent-*.yml` in this repo now carries `allowed_bots:
+"github-actions[bot]"`, confirmed by `git show` on the merge commit.
+
+That is not the same thing as dispatch working, and this pass checked
+rather than assumed. The sprint's open item (security, #190) met every
+§11.3/§11.4 criterion this pass walked fresh — due this week, the
+owning seat hasn't run via Actions since before the sprint started, its
+one open PR is a draft and the instruction names it by number and says
+to build on it — so this pass fired the real command rather than
+queuing a fourth proposal:
+
+```
+gh workflow run agent-security.yml -f owner_instructions='...'
+```
+
+It failed immediately: `HTTP 403: Resource not accessible by
+integration` on the `.../actions/workflows/.../dispatches` endpoint
+itself, before any workflow run was created. That is not the
+actor-type rejection Incident 13 described (this call never reached a
+workflow run at all, so there was nothing for `allowed_bots` to admit
+or refuse). It is the symptom this file's **first** open finding above
+("the re-vendored PM standard names dispatch tools this repo does not
+have") already named: the Claude Code action overwrites this run's
+`GH_TOKEN`/`GITHUB_TOKEN` with its own installation token before this
+seat ever gets a shell, and that token's scopes (confirmed directly:
+`GH_TOKEN="$GH_TOKEN" gh api user` also 403s "Resource not accessible
+by integration") don't include starting another workflow run. §11.5's
+named escape hatch, an env var carrying the original job token
+(`DEFAULT_WORKFLOW_TOKEN` there, `OVERRIDE_GITHUB_TOKEN` in this run's
+own environment), is present as a name but empty as a value here, and
+`tools/gh-actions.sh` still does not exist in this repo (`ls tools`:
+only `ledger/` and `stack/`), so there is no wrapper to route around it
+either.
+
+So: two independent walls, one now gone. Incident 13 (allowed_bots) is
+closed. The token-scope wall (this file's first finding, still open) is
+the sole remaining blocker, confirmed by a live attempt rather than
+inferred from a diff, and it is unchanged by anything that happened
+today. Handed to `alexandra-systems/exo-centralizer` again on the board
+this pass, naming this exact 403 as the first dispatch to actually
+clear Incident 13 and hit the second wall cleanly, with nothing else
+in the way to confuse the two.
+
+**Update, 2026-10-15 ~18:25 UTC.** Unchanged again, this time from a
+host six-hour pass. #192 is still `MERGEABLE`/`CLEAN`, still waiting on
+the owner or a chair for the same reason. Two other pull requests that
+would otherwise be this seat's to merge under §21 turned out to carry
+the same kind of boundary, for a different reason: #199 and #184 both
+edit a file under `prompts/` directly (`skill-extract.md` and
+`research-agent.md`), which is a charter edit regardless of how clean
+or green the rest of the diff is, so both wait on the owner the same
+way #167 already did. This pass did find two real Tier B actions to
+take elsewhere — engineer's #198 merged, skill's stale #140 closed as
+superseded — so the standing boundary on workflows and charters is not
+blocking everything, only the specific pull requests that touch those
+two surfaces.
+
+**Update, 2026-10-16 ~12:2x UTC.** Unchanged again, now across six
+passes and three run environments. #192 is still `MERGEABLE`/`CLEAN`,
+still the one pull request that would clear Incident 13's dispatch
+wall, still not re-asked this pass because nothing about the facts has
+moved since the last ask. #199, #184 and #167 are unchanged too: all
+three still touch a file under `prompts/` directly, #167 is also still
+`CONFLICTING` and sits with a standing handoff to the exo seat (its own
+PR #201 proposes the rebase but has not landed). #80 (`company.yaml`)
+stays on the roster-and-secrets carve-out. The sprint's own milestone
+(`Sprint 2026-10-12`, due 2026-10-18) is now two days out with item 3
+still open on security's revived branch (#190), which this same wall
+would also block if a PM dispatch tried to wake it — not a new fact,
+the same one named in `docs/sprints/dispatch-queue.md` every pass this
+week, just closer to the date now.
+
+**Update, 2026-10-16 ~14:26 UTC.** Still unchanged on every fact named
+above: #192 still `MERGEABLE`/`CLEAN` and unmerged, #199/#184/#167
+still touch `prompts/` directly (#184 now shows `MERGEABLE`/`CLEAN`
+rather than conflicting, but that does not change which tier it sits
+in), #167 still `CONFLICTING` with its own rebase PR #201 still open,
+and #190 still a draft two days from the sprint milestone. The one new
+fact this pass: the owner posted to the whole company, through
+`chair:hq-console`, that she was out eleven days for surgery, has
+started work again today, and that her own merges resume this
+afternoon. That bears directly on every line above once she acts on
+it, but nothing above has moved yet as of this pass, so the standing
+asks are not repeated.
+
+Her message also carried a standing instruction unrelated to any open
+PR: when a seat's Kimi route runs out, route it to Sonnet on her own
+subscription rather than failing or waiting. Checked against this
+repo's own workflows rather than assumed: every `agent-*.yml` file,
+including this seat's own, already runs the open-routed Kimi step with
+`continue-on-error: true` and a second step gated on that step's
+failure or absence that runs on the Claude subscription token instead.
+Ursa's fallback already does what she asked before she asked for it;
+no workflow change follows from this on this seat's side.
+
+**Update, 2026-10-17 ~00:2x UTC, host six-hour pass.** Checked whether
+this run's own credential shape changes anything about the token-scope
+wall above, since a host pass authenticates as `gh` logged in to
+`alexandrapaiz` rather than as the Claude Code action's installation
+token. It does not clear the wall, and it adds a small new fact rather
+than removing the old one: `gh variable get PM_DISPATCH_ENABLED` on
+this host token returns `403: Resource not accessible by personal
+access token`, so this surface cannot even confirm the dispatch switch
+is on, let alone fire a dispatch past the wall this file already
+tracks. The host token and the Actions installation token fail on two
+different permissions (reading a repository variable here, starting a
+workflow run there), which says the gap is in what each credential is
+scoped to do, not in one specific API call. Not spending this pass's
+one real test on firing blind with the switch state unconfirmed; the
+candidate (security, sprint item 3, PR #190) is unchanged from the
+2026-10-16 attempt and the fix for either wall is still HQ's
+machinery, already named to `alexandra-systems/exo-centralizer`. This
+is folded into the standing handoff as new evidence, not opened as a
+second one. #199 and #167 are unchanged too (`CONFLICTING`, still
+editing `prompts/` directly); #210 is new since the last pass, also
+edits `prompts/research-agent.md` directly, and sits with the same
+two for the same reason, `MERGEABLE`/`CLEAN` or not.
+
+**Update, 2026-10-17 ~14:1x UTC, scheduled standup (GitHub Actions
+`pm-agent`, this file's own run type). The token-scope wall is closed.**
+Checked the three facts that changed since the 2026-10-16 live attempt
+rather than assuming the wall still stands. First, `DEFAULT_WORKFLOW_TOKEN`
+is non-empty in this run's environment (`[ -n "$DEFAULT_WORKFLOW_TOKEN" ]`
+true), where every earlier Actions pass found it present as a name but
+empty as a value. Second, confirmed directly that the ambient `GH_TOKEN`
+(the Claude Code action's installation token) still 403s on
+`gh api user` exactly as before — that half of the finding has not
+changed. Third, used `GH_TOKEN="$DEFAULT_WORKFLOW_TOKEN"` explicitly, the
+exact substitution §11.5 describes for the missing `tools/gh-actions.sh`
+wrapper (still absent: `ls tools` shows only `ledger/` and `stack/`), and
+fired `gh workflow run agent-security.yml -f owner_instructions='…'` for
+real. It returned a run URL, not a 403:
+`https://github.com/alexandrapaiz/Ursa/actions/runs/39039722291`. The
+same substitution fired a second dispatch at `agent-exo.yml` roughly
+three minutes later (§11.4 spacing), also for real work (PR #167's
+stale conflict), not as a second test of the same fact.
+
+So the wall was never un-fixable; it was that every prior Actions pass
+read `DEFAULT_WORKFLOW_TOKEN` as empty and had no live reason to retest
+it once it stopped being empty. This pass had both: a non-empty value
+and a dispatch criterion that actually fired (§11.3's "two or more open
+PRs on one scope, none merged," true for both security — #190, #214 —
+and exo — #201, #213). Handing this to `alexandra-systems/exo-centralizer`
+as a correction to the standing handoff, not a new incident: the fix was
+already in the run's own environment, the missing piece was a pass
+willing to use the named variable instead of the ambient one once it had
+a real value and a real reason to try. Recommending the standing handoff
+close once the centralizer confirms this holds on another Actions seat,
+not just the PM's own workflow.

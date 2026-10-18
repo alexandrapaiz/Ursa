@@ -1,0 +1,53 @@
+{
+  "indexVersion": "0.2.0",
+  "publishedAt": "2026-10-18T00:00:00.000Z",
+  "repository": "someone/their-repo",
+  "recordSchemaVersions": [
+    "0.1.0"
+  ],
+  "records": [
+    {
+      "id": "their-repo-2026-10-16-8dcb0c7",
+      "generatedAt": "2026-10-18T02:16:41.478Z",
+      "finished": true,
+      "artifactKind": "chat",
+      "finalChars": 314,
+      "coveredChars": 308,
+      "charsByClass": {
+        "survived_verbatim": 127,
+        "survived_mutated": 74,
+        "no_generation_provenance": 107
+      },
+      "spansByClass": {
+        "survived_verbatim": 2,
+        "survived_mutated": 1,
+        "no_generation_provenance": 2
+      },
+      "generatedChars": 309,
+      "generatedDeletedChars": 92,
+      "resolvedBy": null,
+      "html": "records/their-repo-2026-10-16-8dcb0c7.html",
+      "json": "records/their-repo-2026-10-16-8dcb0c7.json",
+      "address": "pages/someone/their-repo/their-repo-2026-10-16-8dcb0c7"
+    }
+  ],
+  "disclosed": {
+    "records": 1,
+    "recordIds": [
+      "their-repo-2026-10-16-8dcb0c7"
+    ],
+    "adapters": [
+      "paste"
+    ],
+    "finalFiles": 1,
+    "filePaths": [
+      "final.md"
+    ],
+    "finalChars": 314,
+    "generations": 2,
+    "generationChars": 309,
+    "conversations": 2,
+    "prompts": 2,
+    "promptChars": 65
+  }
+}

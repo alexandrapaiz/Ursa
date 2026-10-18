@@ -162,6 +162,28 @@ export interface VendoredPath {
    * own exclusion reason downstream.
    */
   relation: 'pre_existing' | 'sibling' | 'declared'
+  /**
+   * Author date of `sha`, strict ISO 8601 with the author's own UTC offset,
+   * exactly as `PathCommit.date` and `CommitInfo.date` carry it (`%aI`).
+   *
+   * This is the file-level twin of the date a `rival` descent verdict
+   * carries. A `sibling` exclusion asserts the finished file is byte-
+   * identical to a copy on a branch outside this work, and that assertion
+   * rests on a clock the way the span-level `sibling` claim does: if the
+   * matching commit was authored after the work closed, the copy is a copy
+   * OF this work rather than a source for it, and the refusal is backwards
+   * — the record drops a file the person did write. `EXCLUSION_NOT_CLASSIFIED`
+   * in src/invariants.ts is what reads it.
+   *
+   * Optional for one reason only: `declaration()` below returns an empty
+   * date when the clone cannot answer, and an empty string in the record
+   * is a date nothing can order, which is the one thing the bound refuses
+   * outright. Absent says "no time was established", which is true; `''`
+   * would say "here is the time" and be unreadable. The blob-identity
+   * relations always have one, because `commitsTouchingPath` read it in
+   * the same call that found the candidate.
+   */
+  date?: string
 }
 
 /**
@@ -211,11 +233,13 @@ function blobOid(repoPath: string, sha: string, path: string): string | null {
  */
 export const IMPORT_TRAILER = 'Ursa-Imported-Path'
 
-/** What one commit says about itself: its subject, and the paths it imported. */
+/** What one commit says about itself: its subject, its date, and the paths it imported. */
 interface Declaration {
   /** full sha, as passed in; truncated only when it reaches a `VendoredPath` */
   sha: string
   subject: string
+  /** author date (`%aI`), empty string when this clone could not answer */
+  date: string
   /** paths named by `IMPORT_TRAILER` lines, empty on a commit that declares nothing */
   paths: Set<string>
 }
@@ -246,19 +270,30 @@ function declaration(repoPath: string, sha: string): Declaration {
   try {
     out = execFileSync('git', [
       '-C', repoPath, 'log', '-1',
-      `--pretty=format:%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
+      `--pretty=format:%aI%x00%s%x00%(trailers:key=${IMPORT_TRAILER},valueonly,separator=%x09)`,
       sha,
     ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
   } catch {
-    return { sha, subject: '', paths: new Set() }
+    return { sha, subject: '', date: '', paths: new Set() }
   }
-  const nul = out.indexOf('\0')
-  if (nul < 0) return { sha, subject: out.trim(), paths: new Set() }
+  // Split on NUL and not on tab. `%aI` cannot contain either character, a
+  // subject can contain a tab, and the trailer list is tab-separated — so
+  // three NUL-separated fields is the only parse that survives a subject
+  // with a tab in it. The same reasoning put `%aI` BEFORE `%s` in
+  // `commitsTouchingPath` (src/pairfinder.ts), where there was no NUL to
+  // use and the subject had to stay the line's remainder.
+  const [date, subject, trailers] = out.split('\0')
+  // A format string git did not expand to three fields is a git this code
+  // does not understand. Report the subject if there is one and declare
+  // nothing, which is the same answer the catch above gives: an unreadable
+  // clone is not evidence of an import.
+  if (subject === undefined) return { sha, subject: (date ?? '').trim(), date: '', paths: new Set() }
   return {
     sha,
-    subject: out.slice(0, nul),
+    subject,
+    date,
     paths: new Set(
-      out.slice(nul + 1).split('\t').map((x) => x.trim()).filter((x) => x.length > 0),
+      (trailers ?? '').split('\t').map((x) => x.trim()).filter((x) => x.length > 0),
     ),
   }
 }
@@ -315,7 +350,15 @@ export function vendoredPaths(
     // saves up to `MAX_CANDIDATE_BLOBS` + 1 subprocesses per such path.
     const d = declared.find((x) => x.paths.has(path))
     if (d !== undefined) {
-      found.push({ path, sha: d.sha.slice(0, SHORT), subject: d.subject, relation: 'declared' })
+      found.push({
+        path,
+        sha: d.sha.slice(0, SHORT),
+        subject: d.subject,
+        relation: 'declared',
+        // Omitted rather than empty when the clone could not answer; see
+        // `VendoredPath.date`.
+        ...(d.date ? { date: d.date } : {}),
+      })
       continue
     }
     const touching = commitsTouchingPath(projectPath, path)
@@ -334,6 +377,9 @@ export function vendoredPaths(
         path,
         sha: c.sha.slice(0, SHORT),
         subject: c.subject,
+        // `commitsTouchingPath` reads `%aI` in the same `git log` that
+        // enumerated these candidates, so the date costs no extra call.
+        date: c.date,
         relation: ancestors.has(c.sha) ? 'pre_existing' : 'sibling',
       })
       break

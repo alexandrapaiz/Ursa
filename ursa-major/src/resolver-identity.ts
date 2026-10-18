@@ -53,6 +53,13 @@
 // any prose. A `git_commit` basis is a pointer into a public history. A
 // `bundle_digest` basis is a content hash with no history behind it. A
 // consumer that wants only auditable records can select on the word.
+// Since 2026-10-17 the history is published separately, so the content
+// hash can be turned back into a commit: `docs/provenance/bundle-digests.md`
+// holds one row per version of `dist/ursa.cjs` that has ever existed, and
+// `npx tsx tools/make-bundle-digest-index.ts --lookup <digest>` reads it.
+// That table is generated and checked by `npm test`; it is not a thing
+// this module reads, because on the runner that writes the digest there
+// is no repository to read it from.
 //
 // WHY NOT BAKE THE COMMIT INTO THE BUNDLE AT BUILD TIME, which is the
 // obvious alternative: `dist/ursa.cjs` is committed, and

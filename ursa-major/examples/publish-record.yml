@@ -1,0 +1,168 @@
+# The whole consumer side of reading your own outcome records at a public
+# address. Copy this file to .github/workflows/ursa-publish.yml in any
+# repository where an AI agent commits, do the one-time Pages setting
+# below, and push. From then on every push to your default branch resolves
+# your repository's history into outcome records and publishes them to
+# your own GitHub Pages site, at
+#
+#   https://<your-user>.github.io/<your-repo>/
+#
+# The one manual step, which cannot be done from a workflow file:
+# Settings → Pages → Build and deployment → Source → "GitHub Actions".
+# Until that is set, the deploy step below fails with a message saying so.
+# Nothing else needs configuring and no secret is involved.
+#
+# WHAT THIS MAKES PUBLIC, because the whole point of the page is that it
+# carries raw text rather than a summary. Every record published here
+# contains the full text of each finished file it classifies, the full
+# text of every model generation behind it, and every message typed to the
+# model on the session path. The job log prints the exact character counts
+# and every file path before it writes a byte, so your first run tells you
+# what the page will hold. If you would rather read that list before
+# anything is published, delete the two deploy steps at the bottom, run
+# once, and read the job summary.
+#
+# On this `push` path the generations are blobs of files at your agent's
+# own commits, so a public repository has already published that text and
+# what is new on the page is the classification over it. That is not true
+# of session-path records, and the job log says which kind you have.
+#
+# What it costs you: one checkout and two node invocations per push, on
+# your own runner, on your own minutes, plus a Pages deployment. No
+# install step, no container pull, no secret, no Ursa-operated compute at
+# any point. The records are resolved on your runner and the site is
+# served by GitHub to you.
+#
+# Why `push` and not `pull_request: closed` the way examples/resolve-on-
+# merge.yml does: a Pages deployment has to run on your default branch,
+# and a pull_request event does not, so this workflow asks the resolver to
+# read your whole git history (`resolve-from: history`) instead of one
+# merge window. That also means it needs no event payload and you can run
+# it by hand from the Actions tab before you trust it to a push.
+#
+# Running both workflows together is fine and is the intended shape: the
+# merge workflow gives you the five-field comment on each pull request,
+# and this one gives you the page. They write to the same `.ursa/` on
+# different runners and neither can see the other's.
+
+name: Ursa publish
+
+on:
+  push:
+    branches: [main]
+  # So you can run it once by hand, read the disclosure in the job
+  # summary, and decide, before any push triggers it.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Both are required by actions/deploy-pages and by nothing else here.
+  # `pages: write` creates the deployment; `id-token: write` is how
+  # deploy-pages proves to GitHub that the artifact came from this run.
+  pages: write
+  id-token: write
+
+# One Pages deployment at a time. `cancel-in-progress: false` rather than
+# true, because cancelling a half-finished deployment can leave the live
+# site serving a partly-written set of records, and a queued run that
+# publishes a slightly older set is the better failure.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      # Surfaces the published address on the run page, so the URL is one
+      # click from the run that produced it rather than something you
+      # reconstruct from your username.
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      # fetch-depth: 0 because `resolve-from: history` walks the whole
+      # history, and because the resolver compares a generated commit's
+      # file content with the next human commit's file content, which a
+      # depth-1 checkout has neither of. The Action deepens a shallow
+      # clone itself as a safety net; fetching once here is cheaper.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - id: ursa
+        uses: alexandrapaiz/Ursa/ursa-major@main
+        with:
+          # Read the whole git history rather than a merge window, since
+          # a push event carries no pull request.
+          resolve-from: history
+          # How many commits may sit between a model's commit and your
+          # edit of the same file. The resolver's own default is 25, and
+          # 25 is right for a repository where you are the only other
+          # writer. It is wrong for a repository where several agents
+          # commit between one touch of a file by you and the next,
+          # because the correction is then further away than the bound
+          # and the resolver drops the pair rather than guess.
+          #
+          # Measured on this repository, which is the one this file is
+          # copied out of: 724 commits, twelve agent identities declared,
+          # ZERO records at 25 and TWO real records at 400. The two carry
+          # 18,552 characters that survived the owner's editing verbatim.
+          # Without this line the site publishes empty, and the empty
+          # site looks exactly like a repository with nothing to show.
+          #
+          # If your site comes out empty, the job summary names the bound
+          # that dropped every pair and how many pairs it dropped, so the
+          # next value to try is in the log rather than in a guess.
+          max-pair-distance: 400
+          # Setting this is what asks for a site, and is the
+          # acknowledgement of what a published record contains. The
+          # directory name is arbitrary; `_site` is what
+          # upload-pages-artifact defaults to looking for.
+          publish-dir: _site
+          # Declare every identity in your repository that belongs to an
+          # agent rather than to a person, one substring per line, matched
+          # case-insensitively against each commit's author name and
+          # author email.
+          #
+          # This is the single most consequential line in the file. The
+          # resolver recognises the harness and vendor names it can
+          # recognise and promotes anything else to "a human being" in
+          # silence, so an undeclared agent is read as you editing a
+          # model, and every survival figure on the published page is then
+          # a measurement of one agent correcting another. Resolving this
+          # repository without these lines produced ten records whose
+          # every number was false in exactly that way.
+          #
+          # Find yours before you trust the page, with one command in your
+          # own checkout:
+          #
+          #   git log --format='%an <%ae>' | sort | uniq -c | sort -rn
+          #
+          # Every line of that output that is not a person goes below. The
+          # list here is this repository's own, which is what a repository
+          # with twelve agent seats looks like; yours will be shorter.
+          # Delete the block entirely only if no agent in your repository
+          # commits under its own name.
+          #
+          # The run prints which identities it credited your edits to, so
+          # a name you missed is in the job summary rather than silently
+          # inside a number.
+          agent-identity: |
+            agents.epito.me
+            claude[bot]
+            ursa.local
+            exo-centralizer
+            alexandra-systems-hq
+            anthropic.com
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.ursa.outputs.publish-dir }}
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Say where it went
+        run: |
+          echo "Your outcome records are at ${{ steps.deploy.outputs.page_url }}"
+          echo "The index lists every record; each one links to the generation behind every span."
