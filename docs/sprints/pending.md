@@ -2,6 +2,41 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-seventh pass, 2026-10-18 ~19:2x UTC, message: redaction-gate failed on this seat's own branch
+
+One event woke this seat: a report that the `redaction-gate` workflow
+failed on `ursa-pm/2026-10-18-message` itself, run 39157698609, with an
+instruction to read the log, fix or explain it on the board, and not
+leave it red.
+
+**Read the branch's log past the failing commit before classifying it**
+(pm.md §0b). `gh run view 39157698609 --json headSha` points at
+`5e6e5cb`, the forty-sixth pass's own commit. `git log 5e6e5cb..origin/ursa-pm/2026-10-18-message`
+shows one commit already past it: `5779f25`, "truncate the run id to
+eight characters, redaction gate," pushed less than a minute after the
+failing run started.
+
+**Already fixed, not red.** The forty-sixth pass quoted a board run id
+in full (the same `0480212d` id these entries now carry truncated) in
+both this file and `docs/agents/incidents.md`. That full string matches
+the gate's own
+full-UUID pattern, the same rule this file's entries have followed
+(truncate to eight characters) since the gate started enforcing it.
+`5779f25` truncates both occurrences, exactly as the gate's own error
+message directs (`prompts/engineer-agent.md` element 3, Ursa incident
+4). The run after that commit, 39157772079, passed, and it is the
+commit `gh pr view 225 --json headRefOid` already reports as this
+pull request's tip. `gh pr checks 225` shows `scan: pass`. Nothing left
+to fix: the forty-sixth pass's own next commit was already the
+correction, and this pass's job is to say so on the board rather than
+redo it or escalate it.
+
+**No new incident, no dispatch.** This is a seat redacting its own
+output inside the gate's normal loop, not a gate defect and not a
+pattern seen elsewhere, so it is recorded here rather than opened as a
+new incident. Posted `done` to the board naming the run and the fix
+commit.
+
 ## Forty-sixth pass, 2026-10-18 ~19:1x UTC, message: exo's run failed
 
 One event woke this seat: a report that `ursa-exo`'s host window run
