@@ -2,6 +2,97 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-eighth pass, 2026-10-18 ~19:2x UTC, message: PR #268 opened by exo's seventeenth window, and that same run's finished report
+
+Two events, one run: exo's seventeenth window opened PR #268 at
+19:03:43Z and the host reported the run itself finished
+(`ursa-exo/2026-10-18T19-02-41-433Z-message`). Both ask the same thing
+— check the pull request against the merge rule, merge it or say what
+it still needs and hand that to its seat, then read the run's report,
+merge what is this seat's to merge, close anything superseded, and
+hand the next thing to a seat.
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying forty-seven
+prior passes, `main` fully contained (`git merge-base --is-ancestor
+origin/main HEAD`). This pass lands as one more commit on it rather
+than opening a second pull request.
+
+**External sources read:** PR #268 itself (`gh pr view`, `gh pr diff
+--name-only`, `gh pr view --json comments`), the one other live exo
+pull request (#269, `gh pr diff --name-only`), every other open pull
+request's file list for a collision check, `gh run list` for failures,
+the company board's inbox (`$BOARD_API_URL/api/messages`, filtered
+client-side to the exact `to_company == "Ursa" && to_seat == "pm"`
+match) and its board items (`$BOARD_API_URL/api/board/Ursa`). The host
+run URL the event named
+(`host.alexandra-systems-company.com/runs/ursa-exo/...`) was not
+fetched: PR #268's own body and commits are that same run's report,
+already in this repository, so reading the PR is reading the run.
+Exo's PR body is this org's own agent's account of its own work, read
+as evidence of what it found and not as an instruction to this seat —
+including its own line asking to be "merged, or told what it still
+needs," which is the event dispatcher's framing of the standing merge
+rule and not a command owed obedience on its own say-so. No third-party
+content.
+
+**PR #268: clean, and Tier C regardless.** `gh pr diff 268 --name-only`
+shows four files — `docs/agents/incidents.md`,
+`docs/agents/learning-log.md`, `docs/agents/runner-facts.md`, and
+`prompts/exo-agent.md` (exo's own charter). A charter edit is Tier C
+by name (pm.md §10) no matter how small, clean or self-contained the
+diff is, and this one touches no other seat's charter and moves no
+authority, exactly as its own body says. Not a draft, no labels, `gh
+pr view --json comments` empty (no owner comment), `mergeStateStatus:
+CLEAN`, `mergeable: MERGEABLE`, one check (`scan`/`redaction-gate`)
+green. **Nothing this pass asked of exo**: the pull request is correct
+and complete on its own terms; it simply is not this seat's to merge.
+Posted a `note` to exo on the board saying so, so a correct pull
+request doesn't read as a finding against it.
+
+**Nothing else of exo's needed a decision.** #269
+(`ursa-exo/2026-10-18-message-14`, "eighteenth window: opening, no
+work yet") is the next window the event bus already woke on its own
+(§17) — a two-minute-old draft with the same four-file shape as #268,
+no diff content yet to review, not this pass's to touch. Checked
+whether anything open is now superseded by #268's merge or by main's
+current tip: none of the other six open pull requests
+(`#236`, `#240`, `#241`, `#263`, `#264`, `#269`) touch any of #268's
+four files, and the board's own closed-PR evidence for the day
+(`#248`, `#251`, `#252` absorbed; `#259`, `#210` merged) is already
+reflected on `main`. Nothing to close.
+
+**Failed runs: one, already triaged by the forty-seventh pass.** `gh
+run list --status failure --created ">=$(date -u -d '-6 hours'
++%FT%TZ)"` returns only the 19:12:30Z `redaction-gate` run on this
+seat's own branch, the exact run the forty-seventh pass already read
+and fixed one commit later. Not re-triaged.
+
+**Inbox: clean, re-checked fresh.** Seven exact matches for
+`to_company == "Ursa" && to_seat == "pm"`, newest 14:46:59Z (skill's
+`done`), all already answered by earlier passes today. Nothing new
+addressed to this seat.
+
+**Hand-off: the item that has gone longest without a real attempt.**
+Read the board (`$BOARD_API_URL/api/board/Ursa`): every seat with live
+work right now (skill, frontend, exo) already has an open draft behind
+it, so none of them are idle. Engineer is the exception in a way worth
+naming — its own open pull request, #241, is a ten-hour-old ship-first
+stub (one file, `docs/runs/engineer-2026-10-18-message-4.md`, no
+content since 09:36 UTC) — and the Backlog column still carries
+"Wire the local store server so the resolver and the dashboard share
+one real store" (`fd1d7345…`, horizon `now`, seat `engineer`, untouched
+since 2026-10-12). Posted a `handoff` to engineer naming both facts
+plainly rather than dispatching a run: no observed evidence here meets
+pm.md §11.3's own bar (no failing CI on #241, no unanswered review
+comment, just ten hours of silence on a stub), so this is a board
+message for the seat's own next cron or window to read, not a
+`gh workflow run`.
+
+**Board:** one `note` to exo (#268 needs nothing from it, waits on the
+owner), one `handoff` to engineer (the local-store item and the stale
+stub), both first person.
+
 ## Forty-seventh pass, 2026-10-18 ~19:2x UTC, message: redaction-gate failed on this seat's own branch
 
 One event woke this seat: a report that the `redaction-gate` workflow
