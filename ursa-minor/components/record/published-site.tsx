@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { parseRecord } from "@/lib/record/parse";
+import { recordAddressHref } from "@/lib/record/address";
 import {
   indexUrlFor,
   parsePublishedIndex,
@@ -175,7 +177,12 @@ export function PublishedSite() {
       <p className="mt-7 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
         <span className="font-mono text-[0.85rem] text-[var(--star)]">ursa publish</span> turns your
         records into a static site on hosting you own. Paste its address and this page reads the
-        index at its root, which is how you see the whole set before fetching any of it.
+        index at its root, which is how you see the whole set before fetching any of it. If what you
+        were sent is one record rather than a whole site,{" "}
+        <Link href="/record/at" className="rec-action text-[var(--polar)]">
+          read it at its own address
+        </Link>
+        .
       </p>
 
       <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5">
@@ -227,6 +234,15 @@ function SiteSet({
 }) {
   const { index } = site;
 
+  // Whether this page may promise a check at all. A digest arrived in
+  // index contract 0.3, so every site published before 2026-10-18 states
+  // none, and this paragraph used to promise one for all of them. The
+  // record page then said the opposite one click later, which is the
+  // page contradicting itself about the one thing it exists to be
+  // trusted on. See `integrity.ts`.
+  const withDigest = index.records.filter((r) => typeof r.sha256 === "string" && r.sha256.length > 0).length;
+  const digests = withDigest === 0 ? "none" : withDigest === index.records.length ? "all" : "some";
+
   if (index.records.length === 0) {
     return (
       <p className="mt-10 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
@@ -254,16 +270,21 @@ function SiteSet({
         {index.records.map((s, i) => {
           const shares = sharesOf(s);
           return (
-            <li key={s.id} className={i > 0 ? "border-t border-[var(--line)]" : ""}>
+            <li key={s.id} className={`py-7 ${i > 0 ? "border-t border-[var(--line)]" : ""}`}>
+              {/* The padding is the item's rather than the button's, so
+                  that the address line below can sit inside the same
+                  block without stacking two paddings between rows. An
+                  anchor may not live inside a button, which is the other
+                  reason it is a sibling and not part of the control. */}
               <button
                 type="button"
                 onClick={() => onOpen(s)}
                 disabled={opening !== null}
-                className="group block w-full py-7 text-left disabled:cursor-wait"
+                className="group block w-full text-left disabled:cursor-wait"
               >
                 {/* The id gets the full measure and breaks anywhere. It is
                     a slug long enough to overflow a phone on its own. */}
-                <span className="block break-all font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)] group-hover:underline group-hover:decoration-[var(--polar)] group-hover:underline-offset-4">
+                <span className="block [overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)] group-hover:underline group-hover:decoration-[var(--polar)] group-hover:underline-offset-4">
                   {opening === s.id ? `${s.id} — fetching…` : s.id}
                 </span>
 
@@ -299,6 +320,21 @@ function SiteSet({
                 </span>
 
               </button>
+
+              {/* New in index contract 0.2: the record states its own
+                  address, so the set stops being a place you can only
+                  look and becomes a place you can share out of. This is
+                  the link to that record alone, with the address itself
+                  beside it, because the string is the thing a person
+                  pastes into a message. */}
+              {s.address ? (
+                <p className="mt-5 font-mono text-[0.68rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
+                  <Link href={recordAddressHref(s.address)} className="rec-action text-[var(--polar)]">
+                    a link to this record alone
+                  </Link>
+                  <span className="[overflow-wrap:anywhere]"> · {s.address}</span>
+                </p>
+              ) : null}
             </li>
           );
         })}
@@ -307,8 +343,12 @@ function SiteSet({
       <p className="mt-9 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
         The three shares divide the whole finished work rather than the classified part of it, so
         they fall short of 100% by however much a run could not account for. Every number above came
-        out of this site&rsquo;s index. Opening a record fetches that record and nothing else, and
-        this page then checks the bytes it got against what the index says they should be.
+        out of this site&rsquo;s index. Opening a record fetches that record and nothing else
+        {digests === "all"
+          ? ", and this page then checks the bytes it got against the digest the index states for it."
+          : digests === "some"
+            ? ", and this page checks the bytes it got against the digest the index states, on the records that state one. This index states a digest for some of its records and not others, so the record you open will say which it was."
+            : ". This site\u2019s index states no digest for its records, so there is nothing here to check those bytes against, and the record you open will say so rather than implying it checked."}
       </p>
     </div>
   );
@@ -336,7 +376,7 @@ function OpenRecord({
   return (
     <>
       <div className="mt-10 flex flex-wrap items-baseline justify-between gap-4">
-        <span className="break-all font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--star)]">
+        <span className="[overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--star)]">
           {open.summary.id}
         </span>
         <button
@@ -369,6 +409,17 @@ function OpenRecord({
               <a href={url} className="rec-action text-[var(--polar)]" target="_blank" rel="noreferrer">
                 the bytes themselves
               </a>
+            </>
+          ) : null}
+          {open.summary.address ? (
+            <>
+              {" · "}
+              <Link
+                href={recordAddressHref(open.summary.address)}
+                className="rec-action text-[var(--polar)]"
+              >
+                a link to this record alone
+              </Link>
             </>
           ) : null}
         </p>
