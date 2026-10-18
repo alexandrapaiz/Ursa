@@ -40,13 +40,13 @@ evidence:
     source: CLAUDE.md, section 1, span classifications
   - ref: E7
     what: generated_deleted is the constitutive category, and 82.1 percent of generated characters in task-001 were deleted
-    source: docs/beyond-preference-pairs.md:108-127
+    source: docs/beyond-preference-pairs.md:111-130
   - ref: E8
     what: instructions are trajectory and not ground truth, shown by two sincere contradictory instructions at steps 650 and 710
-    source: docs/beyond-preference-pairs.md:36-47,208-224
+    source: docs/beyond-preference-pairs.md:39-50,211-227
   - ref: E9
     what: acceptance can be tacit, with loop C closing at steps 757 to 758 and acceptanceStatedInChat false
-    source: docs/beyond-preference-pairs.md:95-107
+    source: docs/beyond-preference-pairs.md:98-110
   - ref: E10
     what: KR1.1 requires all 55 uncertain spans adjudicated, thresholds retuned to a false-positive rate of 10 percent or lower, and the adjudication file committed beside the record
     source: docs/okrs/2026-q4.md, O1 KR1.1
@@ -58,10 +58,10 @@ evidence:
     source: ursa-major/trial/README.md, "Where the records live"; docs/agents/incidents.md, Incident 2
   - ref: E13
     what: session capture and git capture sit at different points of the funnel, 82 percent deletion against 7 percent
-    source: docs/beyond-preference-pairs.md:229-236
+    source: docs/beyond-preference-pairs.md:232-239
   - ref: E14
     what: the methods document's own limits, n=1 demonstrates label types and not statistics
-    source: docs/beyond-preference-pairs.md:154-170
+    source: docs/beyond-preference-pairs.md:157-173
   - ref: E15
     what: the viewer marks uncertain spans with a dashed underline, prints the count needing adjudication, and labels spans uncertain, trivial match or formatting only
     source: ursa-major/src/viewer.ts:89,310-311,323-325
