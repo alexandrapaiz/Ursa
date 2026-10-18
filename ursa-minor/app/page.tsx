@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import Constellation from "@/components/ui/constellation";
+import CopyLine from "@/components/ui/copy-line";
 import PixelSky from "@/components/ui/pixel-sky";
 import SiteHeader from "@/components/ui/site-header";
 import ScrollCue from "@/components/ui/scroll-cue";
@@ -122,9 +125,83 @@ export default function Home() {
             ))}
           </ul>
         </section>
+
+        {/* The run section (added 2026-10-18, for the owner's MVP directive:
+            a stranger opens a URL, runs ursa against their own repository
+            from a line they copy, and reads the record at that address).
+            Until today this page had one control on it and it was disabled,
+            so a person who believed the four theses above had nothing to do
+            next. The commands are the ones in the repository README, copied
+            exactly rather than paraphrased, because a quickstart that drifts
+            from the thing it starts is worse than no quickstart. */}
+        <section className="border-t border-[var(--line)] py-22">
+          <h2 className="mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
+            <span className="text-[var(--polar)]">✦</span> Run it on your own work
+          </h2>
+          <p className="max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+            Point it at a project you have finished and it reads the git history for the places a
+            model wrote something and you changed it. Everything it reads stays on your machine.
+            Nobody here is in the loop.
+          </p>
+
+          <CopyLine
+            label="1 — get the resolver"
+            command={`git clone https://github.com/alexandrapaiz/Ursa.git
+cd Ursa/ursa-major && npm install`}
+          />
+          <CopyLine
+            label="2 — point it at your own repository"
+            command="npx tsx src/bin/ursa.ts run ~/code/your-project --declare satisfied"
+          />
+
+          <div className="mt-8 border-t border-[var(--line)] pt-8">
+            <div className="mb-3 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-[var(--dim)]">
+              3 — read what it found
+            </div>
+            <p className="max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+              It writes your record to{" "}
+              <span className="font-mono text-[0.85rem] text-[var(--star)]">
+                your-project/.ursa/records/&lt;id&gt;.json
+              </span>
+              . Open it in{" "}
+              <Link href="/record" className="rec-action text-[var(--polar)]">
+                the record viewer
+              </Link>
+              , which reads it in your own browser and sends it nowhere. There is{" "}
+              <Link href="/record/mini-fixture" className="rec-action text-[var(--polar)]">
+                a published record
+              </Link>{" "}
+              there to look at first.
+            </p>
+          </div>
+
+          {/* The second launch, with its limit stated. The Action resolves on
+              the consumer's own runner and the runner's workspace is destroyed
+              when the job ends, so what leaves today is the comment and not the
+              record. Saying so is the difference between a quickstart and a
+              claim: the record-to-address hop is being built, and a page that
+              implied it already worked would send a stranger looking for a file
+              that is not there. */}
+          <div className="mt-10 border-t border-[var(--line)] pt-8">
+            <p className="max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+              Or resolve every merged pull request automatically, on your own runner. One committed
+              file runs on the node the runner already has: no install, no container, no secret,
+              and no compute of ours anywhere in it.
+            </p>
+            <CopyLine
+              command={`mkdir -p .github/workflows
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml -o .github/workflows/ursa-resolve.yml`}
+            />
+            <p className="mt-4 max-w-xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+              On that path the records are written on the runner and the runner is thrown away with
+              them, so what you get back today is the five-field comment on the pull request. The
+              local run above is the one that leaves you a record to open.
+            </p>
+          </div>
+        </section>
       </main>
 
-      <SiteFooter column className="mt-8" />
+      <SiteFooter measure="reading" className="mt-8" />
     </>
   );
 }
