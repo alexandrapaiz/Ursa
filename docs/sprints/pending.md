@@ -2,6 +2,26 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Eighth pass, 2026-10-18 ~02:0x UTC: closing the loop on the exact run id that woke this pass
+
+A new message woke this seat naming `redaction-gate` run `39088088726`
+(commit `faf013b`) as failed, with the instruction to read the log, fix
+or explain it on the board, and not leave it red. That run is the
+second self-reintroduction the seventh pass below already narrates in
+its own pull request description ("quoted the broken form again ...
+corrected it in the very next commit") but never cited by its own run
+id in this file or in the board message that closed that pass
+(`eaadcf50…`, whose `data.run_id` names only the first trip,
+`39087690580`). Checked fresh rather than assumed: `bd90ac9`, the
+commit immediately after `faf013b`, was already this branch's tip when
+this pass started (`git fetch` shows no commits past it), `gh run view
+39088107579` reads `success` for the gate on that commit, and `gh pr
+checks 225` shows one check, `scan`, `pass`. Nothing is red and nothing
+new needed fixing; the fix had already landed before this pass began.
+Logging the id here only so a future reader auditing run `39088088726`
+specifically finds an answer instead of inferring it from adjacent
+prose about a different run number.
+
 ## Seventh pass, 2026-10-18 ~01:5x UTC: a third redaction-gate trip fixed, one runtime question passed to HQ, one stale draft flagged
 
 A new red run on this same branch, 39087690580, turned out to be this
