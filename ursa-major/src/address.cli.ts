@@ -186,6 +186,42 @@ async function checkOne(
       `            access-control-allow-origin: ${result.allowOrigin} — only a page on that ` +
       'origin can read this; a viewer anywhere else will be refused by the browser',
     )
+  } else if (address.scheme === 'pages' && result.status === 404) {
+    // The fifth case, and the one this command got wrong until
+    // 2026-10-18. The other four were measured on hosts that exist:
+    // raw.githubusercontent.com and a deployed Pages site both answer
+    // with `access-control-allow-origin: *` on a 200 and on a 404, which
+    // is what lets a viewer tell a missing record from an unreadable
+    // host. But the header follows the HOST and not the path, so an
+    // account with no Pages site at all is answered by the platform's own
+    // not-found page, which sends no header — and a browser then reports
+    // a cross-origin refusal rather than a 404.
+    //
+    // That is the ordinary FIRST failure on this address form, because
+    // the publisher has usually not turned Pages on yet, and the
+    // frontend seat's viewer now names this cause before blaming the
+    // reader's network. Measured here against
+    // alexandrapaiz.github.io/Ursa on 2026-10-18, when this repository
+    // had no Pages site: HTTP 404, no header.
+    //
+    // Reported as a cause with a fix rather than as a symptom, because
+    // "a browser will not let a page read this" is true and sends the
+    // reader looking in the wrong place.
+    console.log(
+      '            no access-control-allow-origin header, and a 404 — which together mean ' +
+      `https://${address.owner.toLowerCase()}.github.io is not serving a Pages site for ` +
+      `${address.repo} at all`,
+    )
+    console.log(
+      '            A deployed site answers a missing record with the header present, so a ' +
+      'viewer could tell you the record is missing. This answer is the platform\'s own ' +
+      'not-found page, and a browser reports it as a refusal rather than as a status.',
+    )
+    console.log(
+      `            Turn publishing on once: gh api -X POST repos/${address.owner}/${address.repo}` +
+      '/pages -f \'build_type=workflow\'   (or Settings → Pages → Source → "GitHub Actions"), ' +
+      'then publish.',
+    )
   } else {
     console.log(
       '            no access-control-allow-origin header — a browser will not let a page read ' +

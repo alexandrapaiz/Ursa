@@ -285,6 +285,47 @@ export function renderRunSummary(
   return lines.join('\n')
 }
 
+/**
+ * The three pairing bounds as the two launches both read them, parsed
+ * once here rather than in each command, because reading them in one
+ * launch and not the other is the drift this helper's single call site
+ * per launch exists to prevent (`src/launch.ts`, drift 5; pinned in
+ * `src/launch-parity.test.ts`).
+ *
+ * An absent flag stays `undefined` rather than becoming a number, so the
+ * resolver's own defaults in `src/pairfinder.ts` remain the single place
+ * they are written down.
+ *
+ * `Infinity` is reachable on purpose: `--max-pair-distance Infinity`
+ * restores the unbounded walk for someone who wants to see what the
+ * bounds removed, which is how the measurement in
+ * docs/design/pairing-window.md §8 was taken.
+ */
+export function pairingBounds(values: {
+  'max-pair-distance'?: string
+  'max-pair-age-hours'?: string
+  'max-interposed-generations'?: string
+}): {
+  maxPairDistance: number | undefined
+  maxPairAgeHours: number | undefined
+  maxInterposedGenerations: number | undefined
+} {
+  const bound = (
+    flag: 'max-pair-distance' | 'max-pair-age-hours' | 'max-interposed-generations',
+  ): number | undefined => {
+    const raw = values[flag]
+    if (raw === undefined) return undefined
+    const n = Number(raw)
+    if (!Number.isFinite(n) && raw !== 'Infinity') return undefined
+    return n
+  }
+  return {
+    maxPairDistance: bound('max-pair-distance'),
+    maxPairAgeHours: bound('max-pair-age-hours'),
+    maxInterposedGenerations: bound('max-interposed-generations'),
+  }
+}
+
 export async function main(argv: string[]): Promise<number> {
   // Dispatched BEFORE parseArgs, deliberately. `parseArgs` is configured
   // with `run`'s and `bridge`'s options and throws
@@ -398,6 +439,11 @@ export async function main(argv: string[]): Promise<number> {
       // one-resolver-two-launches claim is false for any repository
       // whose agents git cannot recognise by name (src/launch.ts).
       agentIdentities: values['agent-identity'],
+      // Drift 5, the same shape as the agent-identity drift above: the
+      // local launch read all three pairing bounds and this one read
+      // none, so moving a bound changed one launch's records and not the
+      // other's over identical history.
+      ...pairingBounds(values),
       post: values['no-post'] !== true,
     })
     return result.exitCode
@@ -432,23 +478,8 @@ export async function main(argv: string[]): Promise<number> {
     declaration = { accepted: false, basis: 'owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed' }
   }
 
-  // `Infinity` is reachable on purpose: `--max-pair-distance Infinity`
-  // restores the unbounded walk for someone who wants to see what the
-  // bounds removed, which is how the measurement in
-  // docs/design/pairing-window.md §8 was taken.
-  const bound = (
-    flag: 'max-pair-distance' | 'max-pair-age-hours' | 'max-interposed-generations',
-  ): number | undefined => {
-    const raw = values[flag]
-    if (raw === undefined) return undefined
-    const n = Number(raw)
-    if (!Number.isFinite(n) && raw !== 'Infinity') return undefined
-    return n
-  }
   const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath, {
-    maxPairDistance: bound('max-pair-distance'),
-    maxPairAgeHours: bound('max-pair-age-hours'),
-    maxInterposedGenerations: bound('max-interposed-generations'),
+    ...pairingBounds(values),
     agentIdentities: values['agent-identity'],
   })
   // One graph read for the whole run. Every episode's corroborator needs
