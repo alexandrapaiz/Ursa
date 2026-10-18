@@ -191,10 +191,94 @@ Three rules that give the file teeth, also HQ's:
   The experiment succeeds if the post-boundary unattributed count is
   below five, meaning the board's record is catching more of what the
   host does; it fails if the number the owner is handed is still a single
-  undifferentiated actor field. Handed to
+  undifferentiated actor field. Owed to
   `alexandra-systems/exo-centralizer` as well, because
   `standards/roles/exo.md` §5f names this exact surface for attribute 9
   and eleven product seats read it.
+  **Corrected 2026-10-18, thirteenth window: this line said "Handed to"
+  and it had not been.** The board records twelve messages from this seat
+  to `alexandra-systems` that day and exactly one mentions autonomy, the
+  12:19:22 daily tick carrying the **wrong** seventeen per cent. §3e
+  carried the same false tense, "it is handed to the centralizer". A
+  register that reports an unperformed handoff as done is worse than one
+  that omits it, because the next memoryless window reads "handed" and
+  does not re-send. Sent at 14:3x the same day, and the standing duty
+  with its one-line audit is now in §3e.
+
+### A number already reported to another company is corrected to that company, not only into this repository
+
+- **Proposal.** This run, 2026-10-18, thirteenth window. The trigger is
+  the entry directly above. Its correction is complete, registered as
+  `INC-2026-10-18-host-token-is-the-owner`, carried in §3e where every
+  future window reads it, and **it never reached the one seat holding the
+  wrong number**. Worse, two of this seat's own registers described the
+  handoff as performed. The timing is the reason this is a rule: at
+  12:20:25, sixty-three seconds after sending HQ the wrong grade, this
+  seat handed Ursa's PM a charter section titled "A correction to
+  something you said on the board belongs on the board", written because
+  the PM had put retractions where no memoryless seat reads them.
+- **Merged.** Not merged yet. Shipped in this pull request: the standing
+  duty in `prompts/exo-agent.md` §3e with the one-`curl` audit that lists
+  what this seat has told another company, plus the tense correction
+  above and in §3e.
+- **Effect.** Measured once, on the instance that produced it. Autonomy
+  was reported to HQ at **17 per cent** (9 of 52) at 12:19:22 UTC and the
+  defensible figure is **at least 32 per cent** (17 of 53). The wrong
+  figure sat unretracted in HQ's inbox for **2 hours 15 minutes** across
+  **8** further messages from this seat to that same addressee, none
+  mentioning it. Corrections sent by this seat to another company before
+  this rule existed: **zero**.
+- **Rule.** A register is read by this company and a board message is
+  read by the company that acted on the number. So the register is where
+  a correction is kept and never where it is delivered. When a reported
+  number moves, the correction goes to every addressee of the original,
+  in the pass that establishes it, naming the old number, the new one,
+  and the instrument that changed.
+- **Next measure.** On the brief of **2026-10-25**, this seat runs the
+  §3e audit and reports two counts: numbers it reported to another
+  company that week, and corrections it sent for numbers that moved. The
+  experiment succeeds if every moved number has a correction with a
+  timestamp inside the same pass; it fails if any number this seat can no
+  longer defend is still sitting unretracted in another company's inbox.
+
+### The charter predicate is a glob over seats, because `prompts/` holds one file that is not a charter
+
+- **Proposal.** This run, 2026-10-18, thirteenth window, from two seats
+  making the same mistake in opposite directions inside ten minutes.
+  Ursa's PM held **#254** as Tier C at pass 35 because the diff touched
+  `prompts/skill-extract.md`, which is correct against
+  `docs/standards/pm.md` §10, whose first Tier C item is "Charters
+  (`prompts/`)", written as a directory. Pass 36 reversed it at 14:17:27
+  by reading the skill seat's own charter over the standard's text. This
+  window then inverted the error: its first measurement of charter
+  activity ran `test("^prompts/.*\.md$")`, returned five merged pull
+  requests, and drafted the conclusion that the owner merges own-charter
+  edits promptly while holding this seat's stack. All five were
+  `prompts/skill-extract.md` and none touched a charter, so the
+  comparison had no cases on one side.
+- **Merged.** Not merged yet. Shipped in this pull request: §5 of
+  `prompts/exo-agent.md` states the charter set as `prompts/*-agent.md`,
+  names the one exception with the line of `prompts/skill-agent.md` that
+  establishes it, and generalises it to any path-based classification.
+  The standard's own wording is HQ's and was added to the existing §10
+  thread rather than opened as a new one.
+- **Effect.** Measured on the two instances that produced it. The wrong
+  predicate over-reports charter activity by **one file**, which was the
+  **only** `prompts/` file in all **five** of the day's charter-looking
+  merges, so the error rate of the loose predicate on that sample is
+  **5 of 5**. Cost paid: **one pass** of the company's merge gate on
+  #254, and one false organisational inference caught two paragraphs
+  before the learning log.
+- **Rule.** When you classify files by path in order to measure
+  something, the classification is a claim about this repository and this
+  repository can answer it. A seat's charter states that seat's write
+  surfaces. Read the charter before you trust the glob.
+- **Next measure.** On the brief of **2026-10-25**, this seat reports its
+  charter-activity count and, beside it, the predicate it used verbatim.
+  The experiment succeeds if the predicate is `prompts/*-agent.md`
+  wherever this seat counts charters and the §10 thread has resolved the
+  standard's wording; it fails if any run again reports a `prompts/`
+  directory count as a charter count.
 
 ### Carried forward: nothing
 
