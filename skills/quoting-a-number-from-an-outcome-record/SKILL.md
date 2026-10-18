@@ -11,7 +11,7 @@ description: >
   that already exists against the field it cites. Does not fire for
   producing a record, for choosing a trial subject, or for deciding
   the label on any individual span.
-version: 0.3.1
+version: 0.3.2
 status: draft
 validated: false
 owner_seat: skill
@@ -35,14 +35,14 @@ evidence:
     what: segmentation mode is chosen by file extension, prose for md, mdx, markdown, txt and tex, code for everything else
     source: ursa-major/src/segment.ts:13-15
   - ref: E6
-    what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again
-    source: ursa-major/src/stats.ts:88-91,115-122,159-165
+    what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again, and survivalRate divides by the same generated-chars denominator per generation and per conversation
+    source: ursa-major/src/stats.ts:88-91,115-122,126-135,159-165, ursa-major/src/resolve.ts:515
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
-    source: ursa-major/src/viewer.ts:234-263
+    source: ursa-major/src/viewer.ts:234-266,277-286
   - ref: E8
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/match.ts:7-8
+    source: ursa-major/src/resolve.ts:432-459, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short raw-exact match is labelled survived_verbatim with score 1 and flagged trivial so it sits inside that category's chars, unless the descent check demotes it, which drops the trivial flag
     source: ursa-major/src/resolve.ts:371-384,224-263, ursa-major/src/match.ts:9-10
