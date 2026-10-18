@@ -25,6 +25,11 @@ reading one ref costs one command.
 A `supports` row is not a promise that the claim is important or well worded.
 It is one reader saying that the receipt covers the sentence.
 
+**When the dossier names an overlapping ref, the row says whether the two
+agree.** Added after slice 2, where two skills made opposite claims about one
+flag and both fingerprints were green. The overlap field did not exist for
+most of slice 2's reads, so the convention starts with slice 3.
+
 ## Read so far
 
 | ref | verdict | read | note |

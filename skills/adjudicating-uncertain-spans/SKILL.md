@@ -31,7 +31,7 @@ evidence:
     source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:390-391
   - ref: E4
     what: trivial is a different flag with a different cause, set on short raw-exact matches only, kept when the normalized-only demotion fires and dropped when the descent check demotes the span
-    source: ursa-major/src/resolve.ts:371-390,232-248,256-263,311-320, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
+    source: ursa-major/src/resolve.ts:232-248,256-263,311-320,371-390, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3

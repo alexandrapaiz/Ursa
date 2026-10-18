@@ -12,6 +12,13 @@
 //   node skills/relevance-sweep.mjs <skill>[/<ref>] the dossier for one ref or one skill
 //   node skills/relevance-sweep.mjs --audited       what has been read, and when
 //
+// A dossier also names every other ref whose cited lines OVERLAP this one's,
+// with its own `what`, because the one false claim slice 2 found was
+// contradicted by another ref over the same helper and nothing mechanical ever
+// compares two refs to each other. Overlap and not merely the same file: this
+// library cites `resolve.ts` from twenty refs and they are not all about each
+// other, so a same-file list is noise and a shared-lines list is a question.
+//
 // What this tool does and does not do. It gathers: for each ref it puts the
 // `what` field, the sentences that cite it, and the actual cited lines in one
 // place, so reading a ref costs one command instead of five. It then orders
@@ -129,6 +136,29 @@ for (const entry of readdirSync(skillsDir)) {
   }
 }
 
+// Which other refs cite the same file. The slice-2 reading found
+// `adjudicating-uncertain-spans/E4` and `quoting-a-number-from-an-outcome-record/E9`
+// making opposite claims about the same flag in the same helper, and the lock
+// was green over both, because it keys on one ref's own ranges and nothing in
+// it ever compares two refs to each other. That contradiction was found by
+// luck, by reading the second ref an hour after the first. This is the part
+// that does not need luck: a dossier names every other ref citing any of its
+// files, so a reader is shown the library's other statements about the same
+// code while judging this one. It is not a check and it cannot be, since two
+// refs about one file usually agree and should.
+const overlaps = (a, b) =>
+  a.path === b.path && a.from !== null && b.from !== null && a.from <= b.to && b.from <= a.to
+
+const coCited = (r) => {
+  const out = []
+  for (const o of refs) {
+    if (o === r) continue
+    const shared = o.blocks.filter((ob) => r.blocks.some((mb) => overlaps(mb, ob)))
+    if (shared.length) out.push({ ref: o, shared })
+  }
+  return out
+}
+
 const audited = readAudit()
 const args = process.argv.slice(2)
 const flags = args.filter((a) => a.startsWith('--'))
@@ -144,6 +174,17 @@ const dossier = (r) => {
     (r.miss.length ? ` (${r.miss.join(' ')})` : ''))
   console.log(`\ncited by ${r.sentences.length} passage${r.sentences.length === 1 ? '' : 's'}:`)
   for (const s of r.sentences) console.log(`  · ${s}`)
+  const also = coCited(r)
+  if (also.length) {
+    console.log(`\n${also.length} other ref${also.length === 1 ? ' cites' : 's cite'} overlapping lines. ` +
+      `Read what they claim about the same code:`)
+    for (const { ref: o, shared } of also) {
+      const oa = audited.get(`${o.entry}/${o.ref}`)
+      console.log(`  · ${o.entry}/${o.ref}${oa ? ` [${oa.verdict}]` : ''}  ` +
+        `${shared.map((b) => `${b.path}:${b.from}-${b.to}`).join(', ')}`)
+      console.log(`      ${o.what}`)
+    }
+  }
   for (const b of r.blocks) {
     console.log(`\n--- ${b.path}${b.from === null ? '  (no line range: outside both guards)' : `:${b.from}-${b.to}`}`)
     if (!b.lines) continue
