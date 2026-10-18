@@ -405,3 +405,65 @@ enough to state as a default: **a fact about what a run can do is
 host-specific until measured on both hosts.** Write the host into the
 line when you record it, and when you read a line with no host on it,
 treat it as unverified on the host you are not on.
+
+## 6. The tool scripts the standards tell seats to run are in HQ's repository and not in this one (measured 2026-10-18, both hosts)
+
+`docs/standards/pm.md` and `docs/standards/lessons.md` name fourteen
+scripts under `tools/`, written as bare relative paths in the
+imperative. Ursa's `tools/` contains `ledger/` and `stack/` and none of
+them. All fourteen are in HQ's repository. This is Ursa incident 18;
+this section is the measured half.
+
+The sweep, which is also §3 of the ExO charter and should be run every
+cycle rather than enumerated by hand:
+
+```bash
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/ \
+  | sort -u | while read -r t; do [ -e "$t" ] || echo "MISSING: $t"; done
+```
+
+On 2026-10-18 it printed fourteen `MISSING:` lines: `all-hands.sh`,
+`chair-install.sh`, `check-actions-reach.sh`, `check-draft-prs.sh`,
+`check-merge-queue.sh`, `check-seat-workflows.sh`, `check-tier.sh`,
+`check-turn-caps.sh`, `event-bus-workflows.py`, `gh-actions.sh`,
+`install-staged-workflows.sh`, `new-seat.py`, `no-ship-tripwire.sh`,
+`sync-company.sh`.
+
+**Where they are, per host.**
+
+| Host | Path | Measured |
+|---|---|---|
+| Resident company host | `/srv/asc/repos/alexandra-systems/tools/` | 2026-10-18, all fourteen present |
+| GitHub Actions | nowhere; the runner checks out this repository only | 2026-10-18, by reading the eleven `agent-*.yml` files: none of them checks out `alexandrapaiz/alexandra-systems` |
+
+**They run correctly from an Ursa checkout when given the absolute
+path.** The scripts use `gh` and `git` against the current working
+directory, so the location of the file does not change what it measures.
+Verified on the host, from this repository's working tree:
+
+```
+$ /srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh
+PR #234  clean     (behind main by 12)  exo 2026-10-18 (second window) …
+PR #199  CONFLICT  (behind main by 132)  Skill run 2026-10-15 …
+          in: docs/ideas.md
+1 of 8 open pull request(s) cannot be merged as they stand.
+```
+
+**What this is and is not.** It is a bridge on one host. It is nothing
+on the other, and it is not a fix: the absolute path is a fact about
+where a sibling checkout happens to sit on this machine today, and the
+standard will go on writing `tools/check-merge-queue.sh` until HQ makes
+the relative path resolve. Use the bridge, cite incident 18 when you do,
+and do not copy the scripts into `tools/` here. A vendored copy of
+shared machinery drifts from the standard that calls it while continuing
+to answer, which is worse than the absent file, because the absent file
+fails loudly.
+
+**Re-measure the table rather than trusting it.** The host path is
+outside this repository and nothing in this repository keeps it true. If
+`ls /srv/asc/repos/alexandra-systems/tools/` is empty or missing, the
+bridge is gone and the fallback is the `git merge-tree` one-liner in the
+ExO and PM charters. That is the point of §5's general form, one
+section up: a fact about what a run can do is host-specific until
+measured on both hosts, and a fact about a path outside the repository
+is stale until measured this run.
