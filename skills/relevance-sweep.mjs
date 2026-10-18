@@ -11,6 +11,24 @@
 //   node skills/relevance-sweep.mjs                 the queue, least-defended first
 //   node skills/relevance-sweep.mjs <skill>[/<ref>] the dossier for one ref or one skill
 //   node skills/relevance-sweep.mjs --audited       what has been read, and when
+//   node skills/relevance-sweep.mjs --record <scope> bind a verdict to what was read
+//   node skills/relevance-sweep.mjs --stale          exit 1 if any verdict is unbound or stale
+//
+// A verdict is only as good as the lines it was read against, so each one is
+// bound to them in skills/relevance.lock.json: three digests per ref, over the
+// cited lines, the `what` field, and the passages citing it. When any of the
+// three moves, the ref is read in the audit and stale here, and it is listed
+// for a re-read with the input that moved named. This is the same failure the
+// evidence lock already learned once, one level up: a fingerprint stops a hash
+// from outliving its lines, and this stops a reading from outliving them. The
+// library's own drift measurements are why it cannot wait: 27 of 44 ranges
+// drifted on 2026-10-15 and 39 of 43 on 2026-10-18, so a library read once in
+// October is a library read against October's text and nothing says so.
+//
+// The digest over the lines covers their content and their paths, never their
+// line numbers, because relocate-anchors.mjs moves a range whose lines are
+// identical and a verdict earned on those lines is still earned. A re-point
+// to different text invalidates; a pure relocation does not.
 //
 // A dossier also names every ref this one SHARES A SENTENCE with, because a
 // tag like `[E2, E4]` divides one claim between two refs and nothing audits
@@ -28,13 +46,15 @@
 // the unread refs by two mechanical signals. It does not decide. Relevance is
 // the part that needs a reader, which is why the verdicts live in a file a
 // person writes, skills/relevance-audit.md, and not in a lock a script writes.
-import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
 const auditPath = join(skillsDir, 'relevance-audit.md')
+const verdictLockPath = join(skillsDir, 'relevance.lock.json')
 
 // Words that carry no claim, so their presence or absence in the cited lines
 // says nothing. Kept deliberately short: a stoplist that grows starts hiding
@@ -197,6 +217,44 @@ const splitWith = (r) => {
 }
 
 const audited = readAudit()
+
+// What a verdict was read against, hashed. Three inputs, hashed apart rather
+// than together, because which one moved decides what the re-read costs: a
+// reflowed passage is a minute and a re-pointed range is the whole reading
+// again. Line content and paths, never line numbers, for the reason in the
+// header. Whitespace per line is trimmed, matching the evidence lock, so
+// reformatting is not an alarm and a changed word is.
+const hash = (s) => createHash('sha256').update(s).digest('hex').slice(0, 16)
+const readAgainst = (r) => ({
+  lines: hash(r.blocks.map((b) =>
+    `${b.path}\n${(b.lines ?? ['(no line range)']).map((l) => l.trim()).join('\n')}`).join('\n')),
+  what: hash(r.what),
+  passages: hash(r.sentences.map((x) => x.trim()).join('\n')),
+})
+
+const verdictLock = existsSync(verdictLockPath)
+  ? JSON.parse(readFileSync(verdictLockPath, 'utf8'))
+  : {}
+
+// The audit file is the authority on the verdict; the lock is the authority on
+// what the verdict was read against. So a lock entry whose verdict or date no
+// longer matches the audit row is not evidence about today's verdict at all,
+// and the ref counts as unbound rather than as bound to something else.
+const verdictState = (r) => {
+  const key = `${r.entry}/${r.ref}`
+  const a = audited.get(key)
+  if (!a) return null
+  const rec = verdictLock[key]
+  if (!rec) return { key, audit: a, status: 'unbound', why: 'no verdict digest recorded' }
+  if (rec.verdict !== a.verdict || rec.read !== a.date) {
+    return { key, audit: a, status: 'unbound', why: `the audit row now reads ${a.verdict} ${a.date} and the lock was written for ${rec.verdict} ${rec.read}` }
+  }
+  const now = readAgainst(r)
+  const moved = ['lines', 'what', 'passages'].filter((k) => rec[k] !== now[k])
+  if (moved.length) return { key, audit: a, status: 'stale', why: `${moved.join(' and ')} changed since it was read`, moved }
+  return { key, audit: a, status: 'bound' }
+}
+
 const args = process.argv.slice(2)
 const flags = args.filter((a) => a.startsWith('--'))
 const targets = args.filter((a) => !a.startsWith('--'))
@@ -240,6 +298,58 @@ const dossier = (r) => {
   }
 }
 
+// `--record <scope>` writes the digests for refs the audit already has a
+// verdict for. It refuses a bare `--record`, the way `check-evidence.mjs
+// --update` learned to: an unscoped re-record on 2026-10-18 turned 43 red
+// ranges green with nobody reading anything and a zero exit status, and this
+// file would fail the same way one level up, by blessing a stale verdict as
+// freshly read. Naming the scope is the act that says a person decided.
+if (flags.includes('--record')) {
+  if (!targets.length) {
+    console.error('--record needs a scope: a skill slug, or skill/ref, one or more.')
+    console.error('A bare --record would bind every verdict in the audit to whatever')
+    console.error('the tree says today, which is the one thing this lock exists to stop.')
+    process.exit(1)
+  }
+  const want = refs.filter((r) => targets.some((t) => t === r.entry || t === `${r.entry}/${r.ref}`))
+  if (!want.length) { console.error(`no ref matches ${targets.join(' ')}`); process.exit(1) }
+  const next = { ...verdictLock }
+  const wrote = []
+  const skipped = []
+  for (const r of want) {
+    const key = `${r.entry}/${r.ref}`
+    const a = audited.get(key)
+    if (!a) { skipped.push(`${key}  no verdict in relevance-audit.md`); continue }
+    const before = verdictLock[key]
+    next[key] = { verdict: a.verdict, read: a.date, ...readAgainst(r) }
+    wrote.push(`${key}  ${a.verdict} ${a.date}${before ? ' (rebound)' : ''}`)
+  }
+  const sorted = {}
+  for (const k of Object.keys(next).sort()) sorted[k] = next[k]
+  writeFileSync(verdictLockPath, JSON.stringify(sorted, null, 2) + '\n')
+  console.log(`bound ${wrote.length} verdict${wrote.length === 1 ? '' : 's'} to what was read:`)
+  for (const w of wrote) console.log(`  ${w}`)
+  if (skipped.length) {
+    console.log(`\n${skipped.length} ref${skipped.length === 1 ? '' : 's'} in scope had nothing to bind:`)
+    for (const w of skipped) console.log(`  ${w}`)
+  }
+  process.exit(0)
+}
+
+// `--stale` is the exit status the reading step never had. The default run
+// reports the same thing in prose and still exits 0, because a queue is not a
+// failure; an unbound or stale verdict is, and a check that cannot fail is a
+// check nobody runs twice.
+if (flags.includes('--stale')) {
+  const states = refs.map(verdictState).filter(Boolean)
+  const bad = states.filter((v) => v.status !== 'bound')
+  const unread = refs.filter((r) => !audited.has(`${r.entry}/${r.ref}`))
+  for (const v of bad) console.log(`${v.status.padEnd(7)} ${v.key}  ${v.why}`)
+  console.log(`${states.length - bad.length} of ${states.length} verdicts bound to what was read` +
+    `, ${unread.length} ref${unread.length === 1 ? '' : 's'} unread`)
+  process.exit(bad.length ? 1 : 0)
+}
+
 if (targets.length) {
   const want = refs.filter((r) => targets.some((t) => t === r.entry || t === `${r.entry}/${r.ref}`))
   if (!want.length) { console.error(`no ref matches ${targets.join(' ')}`); process.exit(1) }
@@ -252,7 +362,9 @@ if (flags.includes('--audited')) {
   console.log(`read: ${done.length} of ${refs.length} refs\n`)
   for (const r of done) {
     const a = audited.get(`${r.entry}/${r.ref}`)
-    console.log(`  ${a.verdict.padEnd(9)} ${a.date}  ${r.entry}/${r.ref}  ${a.note}`)
+    const v = verdictState(r)
+    console.log(`  ${a.verdict.padEnd(9)} ${a.date}  ${
+      (v.status === 'bound' ? '' : v.status).padEnd(8)}${r.entry}/${r.ref}  ${a.note}`)
   }
   process.exit(0)
 }
@@ -299,3 +411,25 @@ const unrangedSources = refs.reduce((n, r) => n + r.unranged.length, 0)
 console.log(`\n${unrangedSources} unranged sources in all, across ${
   refs.filter((r) => r.unranged.length).length} refs. Count sources, not refs: a ref is`)
 console.log(`defended only as well as its weakest citation.`)
+
+// The queue above answers which refs nobody has read. This answers which of
+// the read ones were read against text the repository has since changed, which
+// is a different question and the one a closed sweep turns into: on the day it
+// closed, every ref in this library was read, and on any later day some of
+// those readings are about lines that are gone.
+const states = refs.map(verdictState).filter(Boolean)
+const unbound = states.filter((v) => v.status === 'unbound')
+const staleVerdicts = states.filter((v) => v.status === 'stale')
+console.log(`\n${states.length - unbound.length - staleVerdicts.length} of ${
+  states.length} verdicts are bound to what was read.`)
+if (unbound.length) {
+  console.log(`\n${unbound.length} verdict${unbound.length === 1 ? ' is' : 's are'} unbound, so nothing says what ${
+    unbound.length === 1 ? 'it was' : 'they were'} read against:`)
+  for (const v of unbound) console.log(`  ${v.key}  ${v.why}`)
+  console.log(`  Bind them with --record, naming the skill or the ref.`)
+}
+if (staleVerdicts.length) {
+  console.log(`\n${staleVerdicts.length} verdict${staleVerdicts.length === 1 ? ' was' : 's were'} read against text that has changed since. Re-read ${
+    staleVerdicts.length === 1 ? 'it' : 'them'}, then --record:`)
+  for (const v of staleVerdicts) console.log(`  ${v.key}  ${v.audit.verdict} ${v.audit.date}, ${v.why}`)
+}
