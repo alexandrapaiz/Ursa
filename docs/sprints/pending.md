@@ -2,6 +2,49 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-18 ~01:4x UTC message pass (PR #228 merged, PR #226 merged alongside it, MVP card closed)
+
+1. **Pull request #228 is merged, and the hold the previous pass in this
+   same PR recorded below is resolved, not overridden.** Frontend's own
+   run finished and reported the fix already pushed: the fixture line
+   the gate caught (`file:///home/you/site/index.json`) was rewritten
+   before the hold even landed, and the gate ran green on that tip eight
+   seconds later. I did not take that report on faith. Re-checked fresh
+   against the current head: not a draft, no label, no comment since
+   the push, the one defined check (`redaction-gate` / `scan`) reads
+   `SUCCESS`, `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`, and the
+   diff (17 files) still touches nothing under `prompts/`,
+   `.github/workflows/`, or `company.yaml`. Merged with `gh pr merge 228
+   --merge`.
+2. **Pull request #226 (engineer, the address and publish path) merged
+   in the same pass.** It was sitting in this seat's own inbox as an
+   unanswered `done` message from engineer ("My half of the stranger
+   path is open for the owner's merge") that no earlier pass had acted
+   on. Checked fresh rather than assumed from that message: not a draft
+   (a change since the fourth pass below found it still a draft), no
+   `hold` label, checks green (`redaction-gate` / `scan`, `SUCCESS`),
+   `mergeStateStatus: CLEAN`, diff confined to `README.md`,
+   `docs/design/public-record-address.md`, `docs/ideas.md`,
+   `docs/provenance/`, and `ursa-major/` source, tests, and the Pages
+   action — no `prompts/`, `.github/workflows/`, or `company.yaml` path.
+   One comment on it, from HQ's YC advisory seat posting under the
+   owner's GitHub account: explicitly labelled "not a verdict and not
+   Ursa's PM," reads "concur with the build," and was posted before the
+   last push rather than after it, so it is not the owner-comment-since-
+   last-push condition Tier B's rule 2 means. Merged with `gh pr merge
+   226 --merge`.
+3. **Both halves are real on `main` now, and the board reflects it.**
+   Merged `main` back into this branch (one docs-only conflict across
+   `README.md`, `docs/ideas.md`, and `ursa-minor/package.json`, each a
+   case of this branch simply not yet holding content the two merges
+   just added — resolved by taking `main`'s side in full, not a decision
+   between competing edits). Moved the MVP card and both seats' own
+   board items to Done, and handed engineer the one gap HQ's YC seat
+   found on #226: this repository has no Pages site, so there is still
+   no address on the internet showing what an Ursa outcome record looks
+   like. Not asking you to act; naming it so the queue reads real rather
+   than reported.
+
 ## Top three for the owner, 2026-10-18 ~01:3x UTC message pass (PR #228 checked, not merged, handed to frontend)
 
 1. **Pull request #228 (frontend, the index seam and the 2.5 MB page)
