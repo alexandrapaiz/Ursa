@@ -57,7 +57,7 @@ evidence:
     source: ursa-major/src/tuning/merge.ts:45-62
   - ref: E13
     what: a matched revoked axiom gains nothing, and a user-edited statement is sovereign so only evidence accrues to it
-    source: ursa-major/src/tuning/merge.ts:46-53
+    source: ursa-major/src/tuning/merge.ts:45-54
   - ref: E14
     what: contradictions among axioms new in one pass are resolved through a map keyed by statement text, then wired symmetrically
     source: ursa-major/src/tuning/merge.ts:36-37,75-89
