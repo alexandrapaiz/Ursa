@@ -14,6 +14,62 @@ Ursa is a subcompany of **Alexandra Systems Company**, which generalizes
 operations across the portfolio; its standards, seats and chair reach
 into this repository by design (see `CLAUDE.md`, "The holding company").
 
+## Run it on your own repository
+
+If an AI agent commits to a repository of yours, you can see what it
+actually contributed and read the result at a web address of your own.
+Two steps, no account with us, no key, and nothing of yours sent
+anywhere.
+
+```bash
+# 1. Add the workflow. Run this from the root of your own repository.
+mkdir -p .github/workflows
+curl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/publish-record.yml \
+  -o .github/workflows/ursa-publish.yml
+git add .github/workflows/ursa-publish.yml && git commit -m "Add Ursa" && git push
+```
+
+2. In your repository's **Settings → Pages**, set **Source** to **GitHub
+   Actions**. That is the one step a workflow file cannot do for you.
+
+The next push to your default branch resolves your history into outcome
+records on your own runner and publishes them to
+
+```
+https://<your-user>.github.io/<your-repo>/
+```
+
+The index lists every record. Open one and every stretch of the finished
+work is labelled by what happened to it: kept unchanged, kept after you
+edited it, or present in the work with no model behind it at all. From
+any labelled span you reach the generation that produced it. The page
+fetches nothing and runs no script.
+
+**What it publishes, plainly.** A record carries raw text, not a summary:
+the full text of each file it classifies, the full text of every model
+generation behind them, and, on the session path, every message you typed
+to the model. On this workflow's path a generation is a blob of a file at
+your agent's own commit, so a public repository has already published
+that text and what is new on the page is the classification over it. The
+job log prints the exact character counts and every file path before it
+writes anything, so your first run tells you what the page will hold. To
+read that list and publish nothing, delete the two deploy steps at the
+bottom of the workflow and run it once by hand from the Actions tab.
+
+To do the same thing locally, without publishing anything:
+
+```bash
+git clone https://github.com/alexandrapaiz/Ursa && cd Ursa/ursa-major && npm install
+npx tsx src/bin/ursa.ts run <path-to-your-repo>
+npx tsx src/bin/ursa.ts publish <path-to-your-repo>    # prints what would go public
+npx tsx src/bin/ursa.ts publish <path-to-your-repo> --out ./site --yes
+```
+
+Everything above runs on your machine or on your own runner. Ursa
+operates no part of it, and the resolver installs nothing: the Action
+executes one committed file with the node already on the runner. The
+design is [`docs/design/public-record-address.md`](docs/design/public-record-address.md).
+
 ## The principles
 
 Four theses, taken from the Ursa Minor site, guide every decision here.
@@ -245,7 +301,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 505 tests, 4 skipped
+npm test                                   # 705 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
