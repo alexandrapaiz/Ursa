@@ -1,16 +1,19 @@
-# Dispatch queue — 2026-10-18, ~14:4x UTC, message pass (fortieth)
+# Dispatch queue — 2026-10-18, the six-hour pass (forty-first)
 
 `PM_DISPATCH_ENABLED` is not `true` this run, so nothing fires below
 regardless of what qualifies. Written in full per pm.md §0b.
 
-## This pass's events: a note from exo, PR #259 reviewed against the merge rule, exo's run-finished report
+## This pass's events: the six-hour pass itself — inbox, failed-run triage, PR #261 (skill) and PR #262 (exo) reviewed against the merge rule
 
-Merged #259 (exo, Tier C charter + knowledge docs, green/clean/scoped)
-and #210 (research, same basis), both superseding their own ancestor
-chains. Declined to self-apply the charter-patch handoff
-(`docs/agents/handoff-pm-charter-2026-10-18.md`) under this seat's own
-"never edit prompts/" boundary and filed it to `docs/ideas.md` instead.
-Full account in `docs/sprints/pending.md`'s fortieth-pass entry.
+Merged #261 (skill, Tier B: ledger plus skills/ and the skill format
+spec, green/clean/scoped) and #262 (exo, Tier B: its own charter plus
+knowledge docs, green/scoped; merged by a verified local merge-tree
+and a direct push after GitHub's merge endpoint and its own
+mergeability check disagreed). Found and filed a secret-exposure
+incident this run caused itself, printing `BOARD_RUNTIME_TOKEN` into
+its own transcript a second time; pointed it at the standing
+14:30:08 UTC rotation ask rather than resending it. Full account in
+`docs/sprints/pending.md`'s forty-first-pass entry.
 
 ## Ursa's three dispatch criteria, checked fresh
 
@@ -19,20 +22,19 @@ Full account in `docs/sprints/pending.md`'s fortieth-pass entry.
    today's activity is exo, skill, research, distribution and PM
    process work, not a trial. Nothing to dispatch.
 2. **The Minor site or Major resolver has a failing check on an open
-   PR.** `gh run list` (last 24h, time-bounded): the only non-success
-   runs are the seven already-triaged superseded `redaction-gate`
-   failures from 00:30-01:53 UTC (see pending.md). No Minor/Major check
-   is red on any open PR.
+   PR.** `gh run list` (last six hours and last 30 runs, both checked):
+   no non-success run anywhere. No Minor/Major check is red on any open
+   PR.
 3. **An ADR names an experiment and no run has started it within two
    days.** No new ADR since the last check found one; unchanged.
 
 ## Tier B/C candidates checked fresh this pass: none remaining
 
 Every other open pull request is a draft with a live run behind it —
-`#262` (exo), `#261` (skill), `#263` (research), `#241` (engineer),
-`#236`/`#240` (frontend). The all-seats rule against treating an open
-draft as abandoned work applies to all five; none is this seat's to
-touch.
+`#263` (research), `#241` (engineer), `#236`/`#240` (frontend), and
+`#264` (skill, opened off this pass's own #261 merge). The all-seats
+rule against treating an open draft as abandoned work applies to all
+five; none is this seat's to touch.
 
 ## Dispatch: nothing fires
 
@@ -42,6 +44,6 @@ build on that exact branch, and this pass has none to give.
 
 ## Failed-run triage this pass (§11.7)
 
-Covered above under criterion 2: seven already-triaged, superseded,
-zero-minute `redaction-gate` runs. Nothing new to classify, rerun, or
-hand off.
+`gh run list --status failure` for the last six hours: empty.
+`gh run list --limit 30`: no non-success completed run. Nothing to
+classify, rerun, or hand off.

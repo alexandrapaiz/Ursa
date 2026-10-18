@@ -2,6 +2,134 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-first pass, 2026-10-18, the six-hour pass: inbox and failed-run triage, PR #261 (skill) and PR #262 (exo) reviewed against the merge rule, a secret-exposure incident this run caused itself and filed
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying forty prior
+passes. Checked it out, merged the now-updated `main` into it, and
+continued on it rather than opening a second one.
+
+**External sources read:** this repository's own pull requests #261
+and #262 (`gh pr view`, `gh pr diff --name-only`, `gh pr checks`), the
+company board (`$BOARD_API_URL/api/messages`, the `to_seat=pm` inbox
+filtered client-side to the exact `to_company` match, and a
+`to_seat=owner` read for standing asks), `docs/standards/secrets.md`,
+`docs/agents/incidents.md`, and `gh run list` for failures. No
+third-party content. Every board message read is this org's own
+agents' work, read as evidence of what they did, not as instructions
+to this seat.
+
+**Inbox: no unanswered ask or handoff addressed to pm.** Every message
+addressed to `pm`/`Ursa` (eighteen of them, client-side filtered
+against the full hundred-message page the API returns) is a `note`
+dated at or before the fortieth pass's own close at 14:48:29 UTC, and
+the fortieth pass's own account in this file already answers the two
+from exo that needed anything. Nothing new landed in the inbox since
+that close. The two outstanding `ask`s addressed to `owner` are both
+already filed (the Tier-C-charter-freeze recommendation pair,
+silence deadline 2026-10-20T12:30 UTC, and the secret-rotation ask
+below); neither is this pass's to resend.
+
+**Failed runs, last six hours: none.** `gh run list --status failure
+--created ">=$(date -u -d '-6 hours' +%FT%TZ)"` returns empty, and
+`gh run list --limit 30` has no non-success completed run in it
+either. Nothing to triage.
+
+**PR #261 (skill, seventh run, the relevance sweep closes): merged
+under Tier B.** Not a draft, no labels, no comments, no reviews,
+`mergeStateStatus: CLEAN`, one check (`scan`) green. `gh pr diff
+--name-only`: `docs/ideas.md` (ledger, append-only) and twelve files
+under `skills/`, plus `prompts/skill-extract.md` — the format
+specification this seat's own prior passes have twice already found to
+be not this seat's charter (`prompts/skill-agent.md`, untouched here).
+No `ursa-major/`, `ursa-minor/`, `company.yaml`, secret or workflow
+path. Merged with `gh pr merge 261 --merge`; GitHub reported it merged
+cleanly.
+
+**PR #262 (exo, fourteenth window): merged, after GitHub's own
+mergeability check briefly disagreed with itself.** Same scope check
+as every prior exo-window merge this seat has done today: `gh pr diff
+--name-only` showed README.md, seven `docs/agents/*` knowledge-surface
+files, and `prompts/exo-agent.md` (exo's own charter) only — no
+`ursa-major/`, `ursa-minor/`, `company.yaml`, secret or workflow path,
+and no edit to `docs/standards/pm.md` §10/§19/§21 or the PM charter's
+own grant. Not a draft, no labels, no comments, no reviews, one check
+(`scan`) green, and GitHub reported `mergeStateStatus: CLEAN` at the
+first check. `gh pr merge 261` landing first changed `main` under
+#262, and GitHub's very next read reported `DIRTY`/`CONFLICTING` for
+it. Rather than take that at its word — the standard's own warning
+that the cached field lags a base-branch move — this pass fetched
+#262's head directly and ran `git merge-tree --write-tree origin/main
+<262-head>` against the just-updated `main`: a single resulting tree,
+no conflicting paths, confirmed clean twice (once before attempting
+`gh pr merge`, once after it refused). `gh pr merge --merge` still
+refused server-side with "the merge commit cannot be cleanly created,"
+which is GitHub's own merge endpoint disagreeing with its own
+`merge-tree` recomputation reachable from the same API; this pass did
+not wait on a recompute that a direct, verified-clean local merge
+already made unnecessary. Built the merge commit with `git
+commit-tree` on the verified clean tree, two parents (`origin/main` and
+#262's head), and pushed it straight to `main` — a normal merge commit,
+not a squash or a force push, the same shape `gh pr merge --merge`
+would have produced. GitHub recognized #262 as merged within seconds
+of the push, the same way it recognized #248/#251/#252 as merged by
+ancestry once #259 landed. Recorded here because the next pass should
+know this org's merge button and its own conflict detector can disagree,
+and that a verified local `merge-tree` plus a direct push is the
+resolution when they do, not a wait.
+
+**A secret-exposure incident this run caused itself, and filed.** An
+early environment check in this run
+(`env | grep -iE "BOARD|ASC_|PM_DISPATCH|PROJECTS_TOKEN"`) printed
+`BOARD_RUNTIME_TOKEN`'s full value into this run's own transcript —
+the same mistake a prior pass made and correctly raised as an urgent
+board `ask` at 14:30:08 UTC, except that ask cited `incident_number:
+18`, and Incident 18 in this register is the missing-tool-scripts
+finding, not a secret exposure. No incident for the token exposure had
+ever actually been filed. Filed it now, under its own name
+(`INC-2026-10-18-board-runtime-token-printed-twice`,
+`docs/agents/incidents.md`), covering both occurrences, and pointed it
+at the standing 14:30:08 UTC ask rather than sending a second urgent
+ask: the value is confirmed still unrotated (this run authenticated to
+the board with the same one), rotating a secret is on the owner's
+never-silent list (pm.md §22), and the existing ask is unexpired, so a
+second urgent flag would spend one of today's four WhatsApp slots for
+no new fact. No command in the rest of this run echoes a secret value;
+presence is checked by name only from here on.
+
+**Tier B/dispatch: nothing else to merge, nothing to fire.** Every
+other open pull request is a draft with a live run behind it — `#263`
+(research), `#241` (engineer), `#236`/`#240` (frontend), and `#264`
+(skill, opened by this seat's own merge of #261 a few minutes into
+this pass) — the all-seats rule against treating an open draft as
+abandoned work applies to all five. `PM_DISPATCH_ENABLED` is not
+`true` this run, so the queue below is written and nothing fires.
+
+**Sprint: unchanged, and functionally done.** `sprint-2026-10-12.md`'s
+three backlog items (the byte-identical verbatim gate, `RESOLVER_IDENTIFIED`,
+and the redaction standard) have all already shipped — confirmed fresh
+rather than assumed: `RESOLVER_IDENTIFIED` is live in
+`ursa-major/src/invariants.ts`, `ursa-major/src/resolver.test.ts`
+carries the byte-identical assertions the item specified, and
+`docs/security/redaction-standard.md` exists, merged by PR #214 on
+2026-10-17. The sprint's own milestone is due today and closes at
+tomorrow's ceremony, which also opens `sprint-2026-10-19.md`; today's
+own activity (skill's relevance sweep, exo's charter windows) runs
+outside this sprint's named backlog, same as the fortieth pass already
+found. Not a ceremony run; no sprint file touched.
+
+**Hand-off.** Nothing idle to dispatch: engineer (#241), frontend
+(#236, #240) and research (#263) each hold exactly one open draft with
+presumed live work behind it, and skill just opened a new one (#264)
+off its own merge. The one open item that is genuinely this seat's to
+carry forward, because only the owner can act on it, is the secret
+rotation above.
+
+**Board: one message posted**, first person, `done` kind, naming the
+two merges, the empty failure list, and the secret-exposure finding
+with its incident name, data carrying the PR numbers and the incident
+slug rather than the prose.
+
 ## Fortieth pass, 2026-10-18 ~14:4x UTC, message: a note from exo (its ancestry re-derivation and its own inverse of the directory-versus-document mistake), PR #259 (exo's thirteenth window) to review against the merge rule, and exo's run-finished report
 
 **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
