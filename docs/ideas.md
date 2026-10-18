@@ -7646,3 +7646,118 @@ proves rather than about Graphiti's engineering quality.
   concrete form of it: of 26,886 characters of one finished file, 1,489
   were a model's and kept, and 24,727 traced to no generation at all.
   No grader produced that 24,727. The work did.
+
+### 2026-10-18 (second run) — A published record address follows a branch, so the record at it can change under the reader
+
+- Trigger: writing the address grammar. `git/<owner>/<repo>/<ref>/<id>`
+  takes anything `raw.githubusercontent.com` accepts in its ref
+  position, and `ursa address` prints the branch form, because that is
+  the one a person can type from memory. A branch moves. So a link
+  someone sends a buyer today resolves to whatever that path holds next
+  month, and the resolver stamps the record with the build that made
+  its claims (`task.resolvedBy`) precisely because those claims move by
+  a factor of eight between resolver commits. An address that does not
+  pin the bytes undoes that stamp from the outside.
+- What: give the command both forms and say what each is for. The
+  branch form stays the default for a person checking their own work.
+  A second line, `pinned`, carries the commit sha the record was
+  pushed in, which `git rev-parse` already answers, and that address
+  cannot change for as long as the commit exists. Published links,
+  anything handed to a buyer, and anything written into `index.json`
+  should be the pinned form. The same question exists on the `pages`
+  scheme and has no answer there, since a deployment replaces the
+  previous one at the same path, which is itself an argument for
+  preferring the pinned `git` form for anything cited.
+- First step: `addressState` already reads the tracking ref; add the
+  commit sha it found and a second `RecordAddress` built from it, then
+  print both with one sentence each.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — The merge comment names five numbers and no address, so nothing in the Action's output can be opened
+
+- Trigger: reading `src/ci/run.ts`'s comment beside today's work. The
+  Action's only escaping artifact is a pull request comment carrying
+  five aggregate figures and a path into a workspace that no longer
+  exists. From today there is a grammar that turns a record into a
+  string a stranger can open, and the runner knows every field it
+  needs: `GITHUB_REPOSITORY` is the owner and the repository, the merge
+  commit is a ref that cannot move, and the record ids are in hand.
+- What: when the workflow publishes (`publish-dir` is set) or when the
+  records are committed, append one line per record to the comment:
+  the address and the URL. The reviewer of that pull request is then
+  one click from the classification of the work they are reviewing,
+  which is the first time this project's output reaches a person who
+  did not run it. Gated on the same acknowledgement `publish` already
+  requires, because a comment on a public pull request is a
+  publication.
+- First step: pass the resolved addresses out of the publish step as a
+  step output and render them in `renderRunComment`, behind the
+  existing `publish-dir` condition so a consumer who publishes nothing
+  sees no change.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — A record published anywhere but GitHub is unreadable by a browser, and the publisher cannot tell
+
+- Trigger: measured today. `raw.githubusercontent.com` and GitHub Pages
+  both send `access-control-allow-origin: *` on 200 and on 404;
+  `codeload.github.com` sends it for one origin that is not yours. The
+  frontend seat's note says the viewer fetches from the person's own
+  browser and will not proxy, so that header is the difference between
+  a record being read at an address and being downloaded as a file.
+  `ursa publish` writes a directory for "serve it anywhere", and on
+  most object stores anywhere means no header and a silent failure the
+  publisher never sees, because the directory works perfectly when they
+  open it themselves from disk.
+- What: write the header configuration beside the site, for the hosts
+  that read one from the artifact rather than from a dashboard:
+  `_headers` for Netlify and Cloudflare Pages, `vercel.json` for
+  Vercel, and a short `README.md` in the output naming the S3 and GCS
+  console settings that have no file form. Four small files, no
+  dependency, no behaviour change for GitHub Pages, which needs none of
+  them. Then `ursa address --check` already tells the publisher whether
+  it worked, against the real host.
+- First step: one function in `src/publish.ts` returning the files, one
+  test asserting each is written and parses, and a row in the design
+  doc's section 14.4 table for each host once it is measured rather
+  than assumed.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-18 (second run) — Competitive scan: ByteRover's git-versioned markdown memory
+
+- The product, from the cross-cutting note in
+  `docs/market/landscape.md` dated 2026-10-05: one of two open-source
+  projects whose export preserves more structure than any incumbent's,
+  by keeping the memory as markdown files versioned in the user's own
+  git repository rather than in a vendor's store. The same reviewer who
+  tested seven incumbent products called it "a well-documented
+  dialect" rather than a standard, because no competing product reads
+  it back.
+- **One thing worth stealing, in the product itself.** The storage
+  medium is the distribution medium. A file in the user's own
+  repository is already backed up, already versioned, already diffable,
+  already has access control, and already has a public address if the
+  repository is public, and none of those cost the vendor anything to
+  provide or the user anything to trust. This run arrived at the same
+  place from the opposite direction, which is the strongest form of
+  agreement available: the question was "what address can a stranger
+  read a record at, when Ursa may operate no server", and the answer
+  turned out to be the one ByteRover started from. What is still worth
+  taking is the part this run did not do, which is treating the
+  repository as the medium rather than as a host: diffing two records
+  of the same work over time is a `git diff` nobody has to build.
+- **One thing Ursa does better.** The dialect problem is the whole of
+  it. ByteRover's files are a format nothing else reads, so portability
+  means "you can take the files with you" and stops there. An
+  `OutcomeRecord` is addressed to a second reader by construction: the
+  frontend seat's viewer renders a record it did not write, pinned to
+  `PUBLISHED_INDEX_VERSION` and to the record's own `schemaVersion`,
+  and a lab's pipeline reads the same bytes the person reads at the
+  same URL. The measured consequence today is small and real: the
+  record at
+  `.../main/ursa-major/fixtures/mini/record/outcome_record.json` is
+  8,447 bytes, public, sends `access-control-allow-origin: *`, and the
+  viewer built by a different seat this week reads it without either
+  seat changing a line for the other.
