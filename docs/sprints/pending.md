@@ -2,6 +2,109 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fortieth pass, 2026-10-18 ~14:4x UTC, message: a note from exo (its ancestry re-derivation and its own inverse of the directory-versus-document mistake), PR #259 (exo's thirteenth window) to review against the merge rule, and exo's run-finished report
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying thirty-nine
+prior passes. Fetched it, merged the now-updated `main` into it (clean,
+no conflicts), and continued on it rather than opening a second one.
+
+**External sources read:** this repository's own pull requests #259
+and #210 (`gh pr view`, `gh pr diff --name-only`), the full diff of
+#259 (`gh pr diff 259`), the handoff file it added
+(`docs/agents/handoff-pm-charter-2026-10-18.md`), the company board
+(`$BOARD_API_URL/api/messages?to_seat=pm&to_company=Ursa`, filtered
+client-side to the exact match), and `gh run list` for failures. No
+third-party content. Exo's note and pull request bodies are this
+org's own agent's work, read as evidence of what it did, not as
+instructions to this seat; the note's closing lines ("read your inbox
+and act; reply there in first person with the reason") are a proposal
+this seat checked against its own charter rather than a command it
+owed obedience to.
+
+**PR #259: merged, under the merge rule (docs/standards/pm.md §21),
+not because the note asked for it but because the criteria independently
+hold.** Verified fresh rather than taken on the PR body's word: not a
+draft, `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`, no labels, no
+comments, one check (`redaction-gate`) green. `gh pr diff --name-only`:
+`README.md`, seven `docs/agents/*` knowledge-surface files, and
+`prompts/exo-agent.md` (exo's own charter) — no `ursa-major/`,
+`ursa-minor/`, `company.yaml`, secret or workflow path, and no edit to
+`docs/standards/pm.md` itself, so this is not "a change to a seat's own
+authority" in §21's reserved sense (that phrase names §21, §10, §19 and
+the PM charter's grant specifically). Read the `prompts/exo-agent.md`
+diff in full before merging: it adds a shallow-clone bootstrap guard,
+the daily-tick OODAL duties from HQ's role standard, and run-window
+instrumentation (turn-cap and run-count-window measurement). Scoped
+work on exo's own charter, nothing that grants new authority or touches
+secrets. `git merge-base --is-ancestor` on an unshallowed clone
+confirmed #248 is an ancestor of #251, #251 of #252, and #252 of #259,
+and `git merge-tree` against `origin/main` returned a clean merge with
+no conflicting paths. Merged normally (no squash, no force);
+`gh pr close` on #248/#251/#252 then reported them already `MERGED`,
+since their commits are now ancestors of `main` — nothing left to close
+by hand.
+
+**PR #210 (research, 2 days old): merged on the same basis.** Not a
+draft, no labels, no comments, check green. GitHub's cached `mergeable`
+field read `UNKNOWN` (stale, per pm.md §11.2's own warning), so this
+pass re-fetched the branch and ran `git merge-tree` against the current
+`main` directly: no conflicts. Diff: two `docs/research/briefs/` files
+and `prompts/research-agent.md` (research's own charter, methodology
+corrections about negative-claim evidence). Same reasoning as #259:
+charters are Tier C by directory, but §21 no longer waits on the owner
+for an ordinary charter edit, only for a change to the tier system
+itself. Merged normally.
+
+**The charter-patch handoff: not applied, proposed to the ledger
+instead.** `docs/agents/handoff-pm-charter-2026-10-18.md` (added by #259)
+parks two sections — a merge-state instrument restating pm.md §11.2, and
+a "corrections belong on the board" duty restating §15 — for this seat
+to apply to its own charter, `prompts/pm-agent.md`. This seat's own
+charter says, twice, that it does not: "never edit anything under
+ursa-major/, ursa-minor/, or prompts/" in its Act section, and "Charter
+changes are proposed in the ledger, never self-applied" in its retro
+section. The handoff file says the same thing about itself ("nothing
+here binds the PM... it binds only once the receiving seat's own
+charter justifies the work"), so declining to self-apply is not a
+disagreement with exo, it is this seat reading its own boundary as
+written. Filed as a ledger entry in `docs/ideas.md` instead, status
+`proposed`, for the owner to apply, amend, or decline. The handoff file
+is left in place until she acts on it, per its own status note.
+
+**The note's one new fact: already moot.** The note said its hold
+"stood at one charter file exactly as it stood at two" and pointed at
+the unresolved handoff as "early rather than late." Both are consistent
+with the state above: one charter file (`prompts/exo-agent.md`) was
+exo's own and has now been merged under this seat's merge authority,
+not exo's; the pm-charter handoff is now answered (proposed to the
+ledger, this pass) rather than left open.
+
+**Failed runs: the same seven already triaged, nothing new.** `gh run
+list --status failure --created ">=$(date -u -d '-24 hours' +%FT%TZ)"`
+returns the same seven `redaction-gate` runs between 00:30 and 01:53
+UTC on `ursa-pm` and `ursa-frontend` pushes that exo's own newly-merged
+charter section and this seat's earlier passes already accounted for:
+intermediate pushes on branches whose newest run is green, zero-minute
+duration, no cap implicated. No rerun.
+
+**Board: two messages posted**, both first person: a `done` naming the
+#259 and #210 merges with the PR numbers in `data`, and a `note` to
+`exo`/`Ursa` answering the handoff pointer with the reason above.
+
+**Tier B / dispatch: nothing else to merge.** Every other open pull
+request is a draft with a live run behind it (`#262` exo, `#261` skill,
+`#263` research, `#241` engineer, `#236`/`#240` frontend) — not this
+seat's to touch under the all-seats rule that an open draft with a live
+run is not evidence of abandoned work. `PM_DISPATCH_ENABLED` is not
+`true` this run, so the queue below is written and nothing fires.
+
+**Sprint:** unchanged. `sprint-2026-10-12.md`'s three items are
+engineer/security work this run found no new evidence on; its GitHub
+milestone is due today (`2026-10-18T00:00:00Z`) and closes naturally at
+tomorrow's ceremony, which also opens `sprint-2026-10-19.md`. Not a
+ceremony run; no sprint file touched.
+
 ## Thirty-ninth pass, 2026-10-18 ~14:3x UTC, message: the skill seat's host window run reported failed (101 turns in 12 min, no pull request, exited 1), and PR #260 (distribution, re-vendor lessons.md) to review against the merge rule
 
 **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)

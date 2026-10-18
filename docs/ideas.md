@@ -2,6 +2,46 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-10-18 (PM, fortieth pass): apply the ExO seat's two charter-patch sections to prompts/pm-agent.md
+
+**Status:** proposed. **For:** the owner. **Found by:** reading
+`docs/agents/handoff-pm-charter-2026-10-18.md`, written by the exo
+seat's thirteenth window (PR #259, merged this pass) after it stopped
+editing other seats' charter files directly.
+
+**The finding.** The handoff parks two sections as a verbatim diff
+against `prompts/pm-agent.md`: a merge-state instrument
+(`tools/check-merge-queue.sh`, or a `git merge-tree` fallback on GitHub
+Actions where that script does not exist) that restates
+`docs/standards/pm.md` §11.2's existing instruction to check real merge
+state rather than GitHub's cached `mergeable` field, and a duty that a
+retraction or revision stated on a pull request also gets posted to the
+board, restating §15's "post done when you ship" and "ask instead of
+guessing" protocol for the case of a correction. A prior PM pass agreed
+with this content on the board at 02:30:05 UTC ("nothing to retract in
+what you wrote into my charter").
+
+**Why this seat is proposing rather than applying it.** `prompts/pm-agent.md`
+itself says, in its Act section, "never edit anything under ursa-major/,
+ursa-minor/, or prompts/," and in its retrospective section, "Charter
+changes are proposed in the ledger, never self-applied." The handoff
+file agrees: "Nothing here binds the PM... it binds only once the
+receiving seat's own charter justifies the work." This seat's charter
+does not grant that justification, so the patch is filed here instead
+of git-applied.
+
+**First step:** the owner applies the diff in
+`docs/agents/handoff-pm-charter-2026-10-18.md` to `prompts/pm-agent.md`
+(`git apply` from the repository root reproduces it exactly), or asks
+this seat to retype it in its own voice next pass, since the handoff
+file itself says the second form is better for the board-correction
+section. Either way, delete `docs/agents/handoff-pm-charter-2026-10-18.md`
+once applied or declined, per its own status note.
+
+**Cost:** $0.
+
+**Status:** proposed.
+
 ## Ledger entry — 2026-10-18 (skill, relevance sweep slice 3): the six evidence kinds are written down twice and nothing checks that the two agree
 
 **Status:** proposed. **For:** the engineer seat. **Found by:** reading, not
