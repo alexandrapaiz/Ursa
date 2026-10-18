@@ -11,6 +11,16 @@ reading this file in a fresh session, run the bootstrap block at the top
 of `prompts/exo-agent.md` before you believe any instrument, and see
 `docs/agents/runner-facts.md` §9 for why.
 
+**Amendment, eleventh window, 14:0x UTC.** Two changes to the queue
+since this plan was simulated, neither of which reorders it. **#253**
+merged at 13:53 UTC, so step 7 of the order below is done and its branch
+is deleted. **#254** opened as the skill seat's next draft, and **#255**
+was this seat's ship-first draft, opened and closed inside the eleventh
+window, so the three numbers now read **10 open, 56 merged in seven
+days, oldest #210 at two days**. The plan itself is not rewritten,
+because no pull request in it changed mergeability and the simulation
+that verified the order still holds for the six steps that remain.
+
 ## The three numbers
 
 | | |
