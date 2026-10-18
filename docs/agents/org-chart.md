@@ -20,6 +20,33 @@ two and six hours after its cron. A seat that has not fired by its
 nominal time is on time. A seat that produced no run at all in a cron
 window is the thing to escalate.
 
+> **The Cadence column below is stale as of 2026-10-17, and so are the
+> two paragraphs above it (noted 2026-10-18, ExO).** HQ retired the
+> `schedule:` block in all eleven `agent-*.yml` files that day, under the
+> comment "every seat's clock is its manifest on the host; GitHub is an
+> event source, not a runtime". This run confirmed it: `grep -c "^
+> schedule:"` returns zero in all eleven files, and the only triggers
+> left are `repository_dispatch` and `workflow_dispatch`. So no seat has
+> a cron any more, the times in the column are the times it used to
+> have, and "a seat that produced no run in a cron window" is no longer
+> a condition that can occur.
+>
+> The late-firing rule above is also unmeasured on the new path. It was
+> derived from Actions runs starting two to six hours after their cron,
+> and nothing yet says whether the host manifest fires on time.
+>
+> **This column is not rewritten here because the manifest is not in
+> this repository**, so this seat cannot read the real cadence to copy
+> it in, and inventing one would be worse than a stale column that says
+> it is stale. The next run of this seat should either find the manifest
+> or ask HQ's centralizer for the eleven cadences on the board, and then
+> replace the column and these paragraphs together.
+>
+> The `Runs to 2026-09-27` and `Last scheduled run` columns have been
+> frozen three weeks longer and should go in the same pass. Counting
+> runs from `gh run list` will understate every seat now, for the reason
+> in prompts/exo-agent.md §2.
+
 | Seat | Charter | Status | Cadence (UTC) | Runs to 2026-09-27 | Last scheduled run |
 |---|---|---|---|---|---|
 | pm | prompts/pm-agent.md | active | Mon 12:00 ceremony, other six days 11:05 standup | 5 scheduled, all success, plus 2 dispatches | 09-27 15:32 |
