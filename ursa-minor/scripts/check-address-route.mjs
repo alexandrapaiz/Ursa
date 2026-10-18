@@ -185,7 +185,14 @@ console.log('\nwhy a fetch failed, in words a person can act on')
   check('404 on a committed record talks about committing and pushing', fetchFailure(git, 404).includes('pushed'))
   check('404 on a published record talks about publishing', fetchFailure(pages, 404).includes('published'))
   check('and names taking one down, which is what that path buys', fetchFailure(pages, 404).includes('taken down'))
-  check('a thrown fetch on a known host is not reported as a missing record', fetchFailure(git, 'threw').includes('not answering'))
+  check('a thrown fetch on raw is not reported as a missing record', fetchFailure(git, 'threw').includes('not answering'))
+  // Re-measured on 2026-10-18 with an Origin header: the permissive
+  // header follows the host, so an account with no Pages site anywhere
+  // answers 404 with no header and the browser reports a failure rather
+  // than a status. That is the likeliest cause here, so it is named
+  // first rather than blamed on the network.
+  check('a thrown fetch on pages names the account with no site', fetchFailure(pages, 'threw').includes('no Pages site at all'))
+  check('and offers the wrong-account reading too', fetchFailure(pages, 'threw').includes('not the one that published'))
   check('a thrown fetch on an unknown host explains the cross-origin refusal', fetchFailure(any, 'threw').includes('cross-origin'))
   check('and says nothing of ours will fetch it instead', fetchFailure(any, 'threw').includes('nothing on our side'))
   check('403 is the private-repository case, named', fetchFailure(git, 403).includes('private repository'))
