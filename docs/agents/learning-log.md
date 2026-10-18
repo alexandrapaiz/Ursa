@@ -2793,3 +2793,204 @@ introduced after the identifier incident is doing its job.
 3. *Do not reopen the two-charter-files question.* It is measured,
    closed, and in the charter as a rule. The disposition on this seat's
    stack never depended on it.
+
+## 2026-10-18, fifteenth window — the dead-tool number went from fourteen to twenty-six in nine hours, and nothing had broken
+
+Woken by a message event reporting that the fourteenth window's pull
+request, #262, had merged, and asking for the next item in this seat's
+lane.
+
+**Bootstrap, before anything else.** The clone was shallow, as it always
+is on this host. Unshallowed, fetched the pull request refs, and checked
+for open pull requests of this seat: **none**. So the checkout's charter
+at 1925 lines was the current one, and for the first window in some days
+there was no stack of this seat's own work to inherit or absorb.
+
+**What the previous window asked me to check first, answered.**
+
+1. *The silence clock on `docs/standards/pm.md` §10, expiring 2026-10-20
+   12:30 UTC.* **Not expired.** It is 2026-10-18. No answer from the
+   owner on the board. Nothing to do and nothing to re-file.
+2. *Is `docs/agents/handoff-pm-charter-2026-10-18.md` still unresolved?*
+   **Resolved, in the sense the file's own Status section did not
+   anticipate.** The PM neither applied nor declined it. At 14:48:29 UTC
+   it filed the content as a ledger entry for the owner, on the ground
+   that its own charter says twice that it does not edit anything under
+   `prompts/`, and said plainly that it was leaving the handoff file in
+   place until she acts. So the two-pass delay this seat was told to
+   state as a finding **did not happen**, and the instruction to delete
+   the file on a decline does not fire, because there was no decline.
+   The file stays. This seat has not re-proposed it and will not.
+3. *Do not reopen the two-charter-files question.* Not reopened.
+
+**The item I took.** The sweep in §3 that checks whether the things the
+vendored standards point at actually exist here. It printed **twenty-six
+missing** this evening. The same sweep printed **fourteen** this morning,
+and that fourteen was handed to HQ's `exo-centralizer`, which checked it
+across the portfolio and replied that it was "fifty six dead tool
+references across four repositories, the same fourteen in each".
+
+Nothing was deleted anywhere in between. The growth is the instrument.
+
+Running the sweep at each of the six commits that have touched
+`docs/standards/`:
+
+| commit | `lessons.md` | `pm.md` |
+|---|---|---|
+| `bd9db60` 2026-10-16 | 8 | **6** |
+| `6adca0b` 06:37 | 10 | **6** |
+| `aa65d0b` 07:09 | 12 | **6** |
+| `84a5b1b` 12:35 | 16 | **6** |
+| `5f666f7` 13:18 | 18 | **6** |
+| `896d40d` 14:30 | 20 | **6** |
+
+`lessons.md` was re-vendored from HQ five times on 2026-10-18 and that
+is the whole of the movement. The binding count, over the two files in
+that directory that are procedures addressed to a seat here, has been
+six at every single commit.
+
+**Why the sweep was wrong and the prose above it was right.** §3's own
+sentence asks for the names the standards "write in the imperative". The
+command under it greps the directory. That was harmless while the
+directory was mostly procedure. `lessons.md` is HQ's narrative register
+of what happened across five companies, so a tool name in it is part of
+an account of an event somewhere else, naming the instrument involved.
+Its absence from Ursa was never a defect.
+
+The proof I trusted is self-contained and worth repeating, because it is
+the kind that does not depend on my judgement about what counts as
+imperative. `lessons.md` line 290 is a lesson **about a dead tool
+reference**. It records that a seat cited `tools/check-registry-ids.sh`
+for ten days and that the file "has never existed on `main`". My sweep
+flags that sentence as a missing tool. It is also the only one of the
+twenty-six genuinely absent from HQ's `main`, and it is absent for the
+reason the lesson gives.
+
+**A second error, avoided by one command.** Resolving the twenty-six
+against HQ's checkout on this host said eighteen were present. Resolving
+them against HQ's `main` through the API said twenty-five. The host's
+clone is stale, so a sweep that trusts what is on disk here invents
+seven absences. The charter now says to resolve against `main`.
+
+**What I did about it.** Charter §3 now runs two counts and names which
+one is the finding. The incident is
+`INC-2026-10-18-dead-tool-sweep-counts-narrative`. And the correction
+went to `exo-centralizer` on the board at **18:34:24 UTC**, because that
+seat is aggregating this figure across four repositories and a
+correction that stayed in this register would not reach the decision it
+feeds. Addressee `alexandra-systems/exo-centralizer`; retrieve it with:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo-centralizer&everyone=0&since_hours=24&limit=200" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|select(.from_company=="Ursa")|[.ts,.subject]|@tsv'
+```
+
+If the other three repositories were measured with this sweep or one
+shaped like it, their fourteens are drifting upward too, and for a
+reason that has nothing to do with their machinery.
+
+## The three numbers, at 18:40 UTC
+
+| | |
+|---|---|
+| open pull requests | **seven** |
+| merged in the last seven days | **sixty-four** |
+| oldest open | **eighteen hours** (#225, 2026-10-18 00:26 UTC) |
+| drafts the owner cannot merge | **six of seven** |
+| real conflicts against `origin/main` | **zero of seven** |
+| independent decisions | **seven** |
+
+This is the shallowest the queue has been since this file started
+reporting it, and the first time **every open pull request was created
+on the day of the measurement**. The previous window's oldest was two
+days; twenty-six pull requests merged today against seven survivors. The
+depth rule does not fire for the fifth consecutive run.
+
+Say the healthy reading out loud, because it has a dangerous twin. Seven
+independent decisions with nothing contained in anything is the first
+time `merge-order.md` has had nothing to collapse, and on 2026-10-04 the
+same section found twenty-five of fifty-two were ancestors of four
+others. Every seat is now on one branch of its own. **Six of the seven
+are drafts, and five of those belong to runs that are over**, so the
+number the owner is handed as "open" is mostly work she cannot act on.
+That is the figure to watch now, not the depth.
+
+## The standing sweeps, run, with nothing new in any of them
+
+- **Charter against workflow prompt blocks (§2b).** Unchanged at **3 of
+  11** mentioning `--draft` and **0 of 11** mentioning ship-first. Zero
+  `agent-*` runs executed in the last twenty-four hours; the last was
+  2026-10-17 14:18. Still revival risk and still not a live defect, and
+  I am not re-escalating it.
+- **Run caps.** Seven failures in the last twenty-four hours, all
+  `redaction-gate`, all zero minutes, all on intermediate pushes whose
+  branches are green now. The same seven the previous two windows found;
+  nothing new since 01:53 UTC. No cap of any kind is implicated.
+- **Instrument width.** A 200-run count-bounded read now reaches back to
+  01:59 UTC, about sixteen hours. The eleventh window measured the same
+  read at about four hours. Run volume fell with the board's quiet, so
+  the ceiling moved away from us rather than towards us. Keep passing
+  `--created` anyway; the width is not ours to control.
+- **Authorship (§3e).** Twenty-six merges today, **all twenty-six**
+  recorded as `alexandrapaiz`, six carrying a structured board claim.
+  Twenty of twenty-six unattributed, which is seventy-seven per cent and
+  far above the third at which HQ's `tools/autonomy.py` refuses to
+  report. **So this window publishes no autonomy grade.** The number
+  grades the instrument. `tools/autonomy.py` is on HQ's `main` and still
+  not vendored here.
+- **Branch hygiene.** Seven branches satisfied the pull-request-level
+  predicate, five of them this seat's own, and all seven were deleted.
+  Remote branches went from eighty-four to seventy-seven.
+- **Identifier collisions.** Unchanged. `docs/decisions.md` still has
+  `## ADR-005` twice and `## ADR-006` twice. Owner's edit, not mine.
+
+## The anomaly worth naming
+
+**The whole portfolio board went silent at 14:48:29 UTC and was still
+silent when this window opened at 18:26**, three hours and thirty-eight
+minutes later, across five companies. The store's newest message at
+18:30 was that same 14:48 one. Over the preceding hours the same store
+was taking a message every two or three minutes.
+
+In the same gap this repository merged exactly two pull requests, #261
+and #262, at 18:25 and 18:26, with no board claim behind either, and
+#262's merge is what woke this window. So work resumed on GitHub before
+anything resumed on the board.
+
+I am recording this rather than diagnosing it. The bus is HQ's, this
+seat has no instrument that can see why a host stops dispatching, and
+the two surfaces disagreeing is exactly the shape §2 says to report
+rather than to explain. **If you are the next window and the board is
+still quiet, that is no longer an anomaly, it is an outage, and it
+belongs with the centralizer.**
+
+## Compounding ratio
+
+Flat, and said plainly. This window touched **four files in one
+repository and one seat's charter, this seat's own.** The charter fix
+generalizes in principle, because any seat sweeping a vendored directory
+has the same exposure, but no other seat runs this sweep today, so the
+honest ratio is one seat and one repository. The one change that does
+reach further is the correction sent to the centralizer, which lands on
+a figure covering four repositories, and whether that compounds is that
+seat's to decide and not mine to claim.
+
+**What the next window must check first.**
+
+1. *Is the board still silent?* It stopped at 2026-10-18 14:48:29 UTC.
+   Read the store's newest timestamp before anything else. If it has not
+   moved, say so to `exo-centralizer` as an outage rather than filing it
+   here again.
+2. *Did the centralizer answer the dead-tool correction?* Sent
+   18:34:24 UTC. If it restated or withdrew the portfolio figure, close
+   `INC-2026-10-18-dead-tool-sweep-counts-narrative`. If it has not, the
+   incident stays open and the fourteen is still live in four
+   repositories.
+3. *The silence clock on `docs/standards/pm.md` §10 expires 2026-10-20
+   12:30 UTC.* Two defects still on it. Read the board for her answer
+   before assuming the silence route carried.
+4. *Six of seven open pull requests are drafts and five have no live run
+   behind them.* That is the queue number that matters now. It is each
+   seat's own to resolve, so report it, and do not close another seat's
+   draft.

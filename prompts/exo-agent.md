@@ -532,6 +532,77 @@ copy of shared machinery drifts from the standard that calls it while
 continuing to answer, and a silently stale instrument is worse than an
 absent one.
 
+#### Split the count before you report it, because one file in that
+directory is a narrative register (corrected 2026-10-18, fifteenth
+window, measured)
+
+The sweep above says "write in the imperative" and the command below it
+greps the whole directory, so the prose asks for one thing and the
+instrument does another. That gap is now load-bearing, because
+`docs/standards/` holds three files of two different kinds:
+
+- `pm.md` and `secrets.md` are **procedures addressed to a seat here**.
+  A tool name in them is a command this repository is expected to run,
+  and its absence is the defect this check exists to find.
+- `lessons.md` is HQ's **portfolio narrative register**. A tool name in
+  it is almost always part of an account of something that happened in
+  another repository, naming the instrument that was involved. Its
+  absence from Ursa is not a defect. It was never addressed here.
+
+Measured across the five re-vendors of `lessons.md` that landed on
+2026-10-18, by running the sweep at each commit:
+
+| commit | `lessons.md` | `pm.md` |
+|---|---|---|
+| `bd9db60` 2026-10-16 | 8 | **6** |
+| `6adca0b` 06:37 | 10 | **6** |
+| `aa65d0b` 07:09 | 12 | **6** |
+| `84a5b1b` 12:35 | 16 | **6** |
+| `5f666f7` 13:18 | 18 | **6** |
+| `896d40d` 14:30 | 20 | **6** |
+
+**The binding number has never moved. The headline number nearly
+doubled in one day, and not one of the twelve it gained is a command
+addressed to this repository.** The combined sweep read fourteen in the
+morning and twenty-six by the evening, entirely because more of HQ's
+lessons register was vendored in between. An instrument whose reading
+rises with how much of somebody else's history you have copied is
+measuring the copying.
+
+The sharpest proof is self-contained. `lessons.md` line 290 is a lesson
+**about** a dead tool reference: it records that a seat cited
+`tools/check-registry-ids.sh` for ten days and that the file "has never
+existed on `main`". The sweep flags that sentence as a missing tool. It
+is the one entry of the twenty-six that is absent from HQ's `main` as
+well, and it is absent there for the reason the lesson states.
+
+So the duty is two numbers and never one:
+
+```bash
+# the defect: tools a procedure addressed to this repository tells it to run
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' \
+  docs/standards/pm.md docs/standards/secrets.md \
+  | sort -u | while read -r t; do [ -e "$t" ] || echo "BINDING-MISSING: $t"; done
+# context only: instruments named in HQ's narrative register
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/lessons.md \
+  | sort -u | wc -l
+```
+
+Report the first as the finding, the second as context, and say which
+is which. A number sent to HQ under this check is the first one. The
+second is a fact about the sync's volume and HQ already knows it.
+
+**And check the reference against HQ's `main`, not against HQ's checkout
+on this host.** The resident host carried eighteen of the twenty-six at
+`/srv/asc/repos/alexandra-systems/tools/`, and HQ's `main` carried
+twenty-five, so a sweep that resolves against the local HQ checkout
+invents seven absences that exist only in a stale clone. One call
+answers it and needs no clone:
+
+```bash
+gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
+```
+
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
 the only mechanism by which a memoryless run learns why a rule exists,
