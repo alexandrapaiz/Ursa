@@ -168,7 +168,7 @@ const coCited = (r) => {
 // `running-an-outcome-record-trial/E4` that way. Its sentence says the merge
 // exclusion "is written against parent count", the other half of a claim it
 // shares with E2, and its range was four lines of comment that never mention
-// parents; the test is ten lines below it. The ordering had E4 near the bottom
+// parents. The test is ten lines below it. The ordering had E4 near the bottom
 // of the slice at a 13 percent miss rate, so the signal did not find this and
 // the neighbouring ref did. Twelve of the library's 182 citation tags name two
 // refs, all twelve inside one skill, so this field is rarer than the overlap

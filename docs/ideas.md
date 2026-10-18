@@ -2,6 +2,45 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-10-18 (skill, relevance sweep slice 3): the six evidence kinds are written down twice and nothing checks that the two agree
+
+**Status:** proposed. **For:** the engineer seat. **Found by:** reading, not
+by a tool, while widening `distilling-a-tuning-record/E10` in slice 3 of the
+relevance audit.
+
+**The finding.** The six evidence kinds a distilled axiom may carry exist in
+two independently maintained places. `AxiomEvidence['kind']` in
+`ursa-major/src/tuning/types.ts:18-24` is a string-literal union of six, and
+it is the type the rest of the code imports, including
+`tuning/types.ts:82`. `VALID_KINDS` in
+`ursa-major/src/tuning/distill.ts:11-18` is a hand-written
+`new Set([...])` of the same six strings, and it is what
+`validateAxiom` actually enforces at `distill.ts:135`. They agree today,
+verified member by member on 2026-10-18.
+
+**Why it matters, and in which direction.** The set is untyped, so it infers
+`Set<string>` and nothing ties it to the union. Adding a seventh kind to the
+union therefore compiles clean everywhere and then throws at runtime, as
+`Bad evidence kind "..."`, on the first distill that produces one. Because
+`validateAxiom` throws rather than skipping, the whole distill is lost and not
+just the one axiom. The other direction is safe: a member in the set but not
+in the union fails to typecheck at the construction site. So the risk is one
+sided and it is the side a schema change takes.
+
+**What would fix it, for whoever picks it up.** Typing the set as
+`Set<AxiomEvidence['kind']>` is not enough, since a `Set` has no
+exhaustiveness obligation. The construct that does is an object keyed by the
+union, `Record<AxiomEvidence['kind'], true>`, which fails to compile when a
+member is missing, with `VALID_KINDS` built from its keys. A test asserting
+the two lists are the same length would also catch it, and is weaker, because
+it catches the addition only after someone writes the addition.
+
+**Not fixed here.** `ursa-major/src` is outside this seat's write surface
+(`prompts/skill-agent.md`, Boundaries), and this is a code change rather than
+a skill change. There is no existing ledger entry or test on it: `grep -rn
+'VALID_KINDS' ursa-major/src/tuning/*.test.ts docs/ideas.md` returns nothing,
+run 2026-10-18.
+
 ## Operational note — 2026-10-06 (message dispatch): two check-ins rebased in order
 
 Not a ledger entry; recorded here because docs/ideas.md plus dated notes
