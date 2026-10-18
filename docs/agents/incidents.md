@@ -1659,3 +1659,186 @@ copy while the thing it depends on does not.
 **Status:** open. (Incident 18 of this register.) Closes when the fourteen
 paths resolve from an Ursa checkout on both hosts, or when HQ records
 the resolution rule in the standards and this seat's charters repeat it.
+
+## INC-2026-10-18-tier-c-charter-freeze — Nothing in `prompts/` has merged for eight days, because section 10's list and section 21's amendment of it disagree inside the same section
+
+**Numbering note.** This is the first entry under HQ's convention
+(`standards/roles/exo.md` §7: "Number every entry `INC-YYYY-MM-DD-slug`
+and never with the next sequential number, because you write on a branch
+and the highest number you can see is not the highest number that
+exists"). The eighteen numbered entries above keep their numbers,
+because citations across eleven charters and two repositories point at
+them and renumbering an accepted identifier is the defect Ursa incident
+5 exists to prevent. New entries are slugs from here on. The convention
+change itself is recorded in the learning log and handed to the
+centralizer, because it arrived in an HQ role standard that this
+repository does not vendor.
+
+**What happened.** The last pull request touching `prompts/` to reach
+`main` is #151, merged 2026-10-10 by the owner. Measured 2026-10-18:
+
+```
+$ for m in $(gh pr list --state merged --limit 60 --json number,mergedAt \
+      --jq '.[]|select(.mergedAt>"2026-10-01")|.number'); do
+    [ "$(gh pr diff $m --name-only | grep -c '^prompts/')" -gt 0 ] && \
+      echo "$m $(gh pr view $m --json mergedAt,mergedBy --jq '[.mergedAt[0:10],.mergedBy.login]|@tsv')"
+  done
+151  2026-10-10  alexandrapaiz
+```
+
+One pull request in eighteen days. In the same seven days this
+repository merged fifty-two pull requests, so the freeze is specific to
+`prompts/` and is not a queue-depth problem.
+
+The cost is measurable and it has already been paid twice. Ursa incident
+16 is this seat opening pull requests whose titles name finished work
+over a diff that is a placeholder. Its fix, the opening title
+`exo YYYY-MM-DD: opening, no work yet`, was written into
+`prompts/exo-agent.md` on 2026-10-18 at about 02:00 UTC in PR #231. The
+two windows of this seat that followed it both broke it: the third
+window opened #235 at 02:29 titled "HQ answered both asks, so the inbox
+reply and the ten-attribute grade" over a branch containing one
+placeholder commit, and this run opened #242 at its first turn titled
+for its plan and had to rename it mid-run. Neither window was
+disobedient. Both read the charter they were given, and a fresh clone is
+given `main`.
+
+**Why it happened technically.** `docs/standards/pm.md` §10 contradicts
+itself inside one section. Its opening line, added by the owner on
+2026-10-05, reads:
+
+> **Amended by section 21 (owner, 2026-10-05).** The PM seat merges
+> every tier in its own company and a chair merges in any company; the
+> tiers below still say what must be true before a merge (green, scoped,
+> reported), but no tier waits for the owner any more except a change to
+> a seat's own authority.
+
+Its Tier C paragraph, eleven lines further down, still reads:
+
+> **Tier C — owner merge.** Charters (`prompts/`), this section and any
+> change to the tiers or the dispatch stops ... These wait, and the
+> merge-or-close rule escalates them rather than bypassing her.
+
+§21 itself says the same thing as the banner, in its own words:
+"Standards, charters, workflows and decisions included. The owner merges
+nothing in the ordinary course", with the reservation narrowed to "a
+change to a seat's own authority".
+
+So a reader who takes the banner merges charter pull requests, and a
+reader who takes the list routes them to the owner. Ursa's PM took the
+list, and said so plainly on the board on 2026-10-18 at 02:09 UTC: "It
+also touches `prompts/exo-agent.md`, which makes it Tier C regardless of
+how clean the rest of its diff reads, so it waits on her merge and not
+on mine." That reading is defensible against the text in front of it.
+The text is what is wrong.
+
+The second half of the mechanism is that `prompts/` is where this seat's
+corrections live. Every instrument this seat builds, every convention it
+agrees with another seat, and every record of a cadence change is a
+charter edit, so a frozen `prompts/` is a seat whose learning cannot
+reach its own successors. The loop that HQ's `standards/pm.md` §24 asks
+for ends in "write what held into the standard, not only into a
+register", and this is the gate that sentence runs into.
+
+**What is not the cause.** Not queue depth: eleven open against
+fifty-two merged in seven days is the healthiest ratio this repository
+has posted. Not conflicts: every open pull request except #199 merges
+clean against `origin/main` under `git merge-tree`. Not the PM: it
+merged nine pull requests in the week and gave a named reason for each
+hold.
+
+**The fix.** Three parts, split by who owns what.
+
+- **HQ's**, handed over by this run to `exo-centralizer` and to Ursa's
+  PM: make §10's Tier C list agree with its own amendment banner and
+  with §21. This seat does not edit a vendored standard, for the reason
+  Ursa incident 18 gives.
+- **The mechanism this repository can offer, because it already has
+  it.** `prompts/exo-agent.md` has required since 2026-09-18 that a
+  charter change which "would move authority between agents or loosen an
+  owner gate" be declared in bold at the top of the pull request
+  description. That declaration is exactly the line §21 draws. A charter
+  pull request that carries it is Tier C; one that declares in bold that
+  it moves no authority is Tier B and the PM merges it. The rule is
+  cheap, it is checkable by reading one line, and it needs no new
+  instrument. Proposed here, not self-granted: it is the PM's to adopt
+  under §22's silence route and HQ's to write into §10.
+- **This seat's, shipped here**: this entry, the charter paragraph that
+  tells the next run to declare the authority line in bold and to expect
+  the hold if it does not, and the first entry of
+  `docs/agents/improvements.md`, which is where the number that proves
+  or disproves the fix gets taken.
+
+**What the org grew from it.** A standard that amends itself in place
+leaves two true-looking readings in one section, and the reader who
+picks the stricter one is never visibly wrong. Nothing fires. The work
+simply does not land, and every report in the company reads normal,
+because the instruments count merges and this failure is an absence of
+one class of merge inside a healthy total. When a standard is amended,
+the amended text is edited, not annotated above.
+
+**Status:** open. (`INC-2026-10-18-tier-c-charter-freeze`.) Closes when
+a pull request touching `prompts/` merges without the owner's hand, or
+when §10's Tier C list and its amendment banner are made to agree.
+
+## INC-2026-10-18-pwc-queue-retired-upstream — This seat kept eight queued workflow diffs for a channel HQ closed, and three of them are the oldest unpaid debts on the register
+
+**What happened.** `docs/agents/pending-workflow-changes-exo.md` holds
+eight entries, PWC-EXO-1 through PWC-EXO-8, queued between 2026-09-27
+and today. The queue's premise is the paragraph in this seat's charter
+that says a workflow change this seat cannot push is written out in full
+for the owner to apply.
+
+HQ's `standards/roles/exo.md` §8 closed that channel:
+
+> **Workflow files are your design surface and not your writable one,
+> and they are no longer even your lane.** Under §15 of the standard,
+> workflow files and runtime machinery in every product repository
+> belong to HQ. A product exo that finds a fix files the lesson and
+> hands it to `alexandra-systems/exo-centralizer`, which applies it
+> everywhere with one idempotent tool, and does not edit
+> `.github/workflows` in its own repository. **This replaces the older
+> practice of keeping a local queue of pending workflow diffs**, and it
+> exists because two chairs and two product seats rewrote the same
+> workflow files in the same hour without knowing of each other.
+
+So the eight entries are addressed to a reader who is no longer there.
+Three of them are not cosmetic. PWC-EXO-3 (queued 2026-09-30) and
+PWC-EXO-6 (queued 2026-10-05) are the draft-first rule and the
+external-content rule, each present in eleven of eleven charters and
+zero of eleven workflow prompt blocks, which is Ursa incident 7's
+mechanism. PWC-EXO-8 (queued today) re-measures both. They have been
+waiting eighteen and thirteen days respectively for a hand that the
+standard has since reassigned.
+
+**Why it happened technically.** This seat reads `prompts/exo-agent.md`
+and `docs/standards/`. HQ's role standards live at
+`standards/roles/exo.md` in HQ's repository and are not vendored into
+this one, so the sentence that retired the queue has never been in any
+file a run of this seat reads. The same join that Ursa incident 18 is
+about: the standard changed, and the copy that reaches the seat did not.
+Incident 18 is a standard pointing at a tool that did not cross the
+sync; this is a standard that did not cross the sync at all.
+
+**The fix.**
+
+- The queue file is marked superseded at its head, with each live entry
+  named and its destination stated, rather than deleted. A diff somebody
+  spent a run writing is evidence even when its channel closes.
+- The three live entries are handed to `exo-centralizer` on the board in
+  one message, with the measurement behind each.
+- `prompts/exo-agent.md` §5 loses the host-versus-Actions branch for
+  workflow edits and gains the handover, so the next run does not
+  re-queue.
+
+**What the org grew from it.** Vendoring is per file, and a standard
+that is not vendored is a standard the seat will obey the previous
+version of indefinitely, with no error anywhere. The repository's
+`docs/standards/` holds `pm.md`, `lessons.md` and `secrets.md`, and the
+role standard that governs this seat's lane is not among them. Ask, each
+run, which files upstream considers binding here, rather than which
+files are present.
+
+**Status:** open. (`INC-2026-10-18-pwc-queue-retired-upstream`.) Closes
+when the three live entries have landed in the workflow files by HQ's
+hand and the queue file holds nothing live.
