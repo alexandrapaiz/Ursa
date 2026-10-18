@@ -284,8 +284,11 @@ joins both. The reasoning is in
 
 Two layers, drawn together because neither explains the company alone.
 The product layer is what a user runs on their own machine. The org
-layer is the set of agent seats that build the product, which run in
-GitHub Actions and write only through pull requests the owner merges.
+layer is the set of agent seats that build the product, which run on
+Alexandra Systems' resident host or in GitHub Actions and write only
+through pull requests. Since 2026-10-05 those are merged by this
+repository's PM seat or by a chair under section 21 of the PM standard,
+with the owner reserved for a change to a seat's own authority.
 Every node below is a real file or a real store in this repository, and
 every edge carries the actual type or file that crosses it.
 
@@ -297,11 +300,11 @@ record, and it is the constraint the whole business rests on.
 flowchart TB
   subgraph ORG["Org layer — the agent seats that build it"]
     direction TB
-    WF["<code>.github/workflows/agent-*.yml</code><br/>cron plus workflow_dispatch"]
+    WF["<code>.github/workflows/agent-*.yml</code> plus the host manifest<br/>the clocks live on the host, GitHub is an event source"]
     CH["<code>prompts/*-agent.md</code><br/>one charter per seat"]
     PR["a branch and one pull request"]
-    OWN{{"the owner's merge<br/>the only authority"}}
-    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md,<br/>org-chart.md, pending-workflow-changes.md")]
+    OWN{{"the merge gate: the PM seat or a chair<br/>the owner only for a seat's own authority"}}
+    MEM[("<code>docs/agents/</code><br/>incidents.md, learning-log.md, org-chart.md,<br/>merge-order.md, improvements.md, runner-facts.md")]
 
     WF -->|"prompt plus claude_args"| CH
     CH -->|"commits"| PR
@@ -492,9 +495,16 @@ Other governance files:
   each ExO run observed and what the next one must check first
 - [`docs/agents/org-chart.md`](docs/agents/org-chart.md), the seats,
   their cadences, and the governance-cycle tracker
+- [`docs/agents/improvements.md`](docs/agents/improvements.md), whether a
+  rule that shipped changed a number, and on what date that is read
+- [`docs/agents/runner-facts.md`](docs/agents/runner-facts.md), what each
+  of the two execution hosts can and cannot do, with the probe for every
+  row
 - [`docs/agents/pending-workflow-changes.md`](docs/agents/pending-workflow-changes.md),
-  workflow edits specified for the owner to apply, because the runner's
-  token cannot write them
+  **superseded.** Workflow files in every product repository belong to
+  HQ, so a seat that finds a workflow defect hands it to HQ's
+  exo-centralizer on the board instead of queueing a diff here. The file
+  is kept because three entries in it are still waiting on HQ's hand
 - [`docs/allhands/`](docs/allhands/), meeting minutes
 - [`docs/presentations/`](docs/presentations/), slide sources
 
@@ -504,10 +514,26 @@ Ursa is a portfolio product of
 [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems)
 and runs on its agent-seat model. Charters live in `prompts/`,
 workflows in `.github/workflows/`, and the standards in
-`docs/standards/`. The OKR, PM, and ExO seats are active on a schedule.
-The builder seats are dormant until one full governance cycle has been
-merged. The owner's merge is the only authority. See
-[`docs/agents/org-chart.md`](docs/agents/org-chart.md).
+`docs/standards/`. Eleven seats hold charters. Eight of them shipped a
+pull request in the seven days to 2026-10-18: pm, engineer, exo,
+frontend, security, research, skill and market. Three did not, and the
+last pull request from each is older than it should be for a seat the
+roster calls active: finance on 2026-10-05, sales on 2026-10-05 and okr
+on 2026-10-06. Sales is deliberately dormant because Ursa has nothing to
+sell yet. The other two are not, and the okr seat's silence means
+purpose-drift auditing has not run for twelve days.
+
+Each seat's clock is an entry in the host manifest rather than a cron
+block in its workflow, as of 2026-10-17, so a seat is woken by the event
+bus or by its manifest and GitHub Actions is an event source rather than
+the runtime. Two consequences worth stating, both measured on
+2026-10-18. A run woken on the host leaves no entry in `gh run list`, so
+an instrument that reads only GitHub Actions now reports a quiet week
+over a busy one. And the host's credential is the owner's own account, so
+every seat merging or commenting there is recorded as her: authorship is
+read from the board's messages and not from GitHub's actor field. See
+[`docs/agents/org-chart.md`](docs/agents/org-chart.md) and
+[`docs/agents/runner-facts.md`](docs/agents/runner-facts.md) §1c.
 
 ## Constraints that do not move
 
