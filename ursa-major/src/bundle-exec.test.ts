@@ -324,11 +324,34 @@ describe('the bundle resolves a repository the way a customer runner does', () =
  * would therefore produce a short list and a failing assertion below,
  * which is the right direction to fail in.
  */
-function declaredActionOutputs(): string[] {
+function declaredActionOutputs(): { name: string; step: string; key: string }[] {
   const yaml = readFileSync('action.yml', 'utf8')
   const block = yaml.split('\noutputs:\n')[1]?.split('\nruns:')[0]
   if (!block) throw new Error('action.yml has no top-level outputs: block')
-  return [...block.matchAll(/^ {2}([a-z][a-z0-9-]*):$/gm)].map((m) => m[1])
+  // Each output is a two-space-indented key followed by a `value:` that
+  // names the step it reads from. The step id is part of what is being
+  // asserted, not incidental: an output wired to `steps.resolve` is a
+  // claim about what the bundle's `ci` command writes, and one wired to
+  // any other step is a claim about that step's own shell. The two
+  // cannot be checked the same way and conflating them is what let
+  // `publish-dir` fail this suite on 2026-10-18 for being correct.
+  // `key` is the name the STEP writes, which need not be the name the
+  // Action exposes: `publish-dir` reads `steps.publish.outputs.dir`. The
+  // check below has to look for the step's own name or it asserts against
+  // a string that was never going to be in the file.
+  const out: { name: string; step: string; key: string }[] = []
+  for (const m of block.matchAll(
+    /^ {2}([a-z][a-z0-9-]*):$[\s\S]*?^ {4}value: \$\{\{ steps\.([A-Za-z0-9_-]+)\.outputs\.([A-Za-z0-9_-]+)/gm,
+  )) {
+    out.push({ name: m[1], step: m[2], key: m[3] })
+  }
+  if (out.length === 0) throw new Error('action.yml declares no outputs wired to a step')
+  return out
+}
+
+/** The outputs the bundle's `ci` command is responsible for writing. */
+function outputsFromResolveStep(): string[] {
+  return declaredActionOutputs().filter((o) => o.step === 'resolve').map((o) => o.name)
 }
 
 /**
@@ -380,8 +403,27 @@ describe('the bundle writes every step output action.yml declares', () => {
     )
   })
 
-  it('writes exactly the declared names, in the declared order', () => {
-    expect([...written.keys()]).toEqual(declaredActionOutputs())
+  it('writes exactly the names the resolve step declares, in the declared order', () => {
+    expect([...written.keys()]).toEqual(outputsFromResolveStep())
+  })
+
+  it('leaves no declared output unwritten by the step it names', () => {
+    // The other half of the same guarantee. An output wired to a step
+    // whose own `run:` never appends it to $GITHUB_OUTPUT resolves to the
+    // empty string on every consumer's runner, exactly as silently as an
+    // unwritten `ci` output does, and this is the only place the two
+    // halves are checked together.
+    const yaml = readFileSync('action.yml', 'utf8')
+    const resolveOutputs = new Set(outputsFromResolveStep())
+    const others = declaredActionOutputs().filter((o) => !resolveOutputs.has(o.name))
+    // Not asserted as a count: the point is that whatever the set is, every
+    // member of it is written somewhere in the YAML by a shell that says so.
+    for (const o of others) {
+      const step = yaml.split(`\n      id: ${o.step}\n`)[1]?.split('\n    - name:')[0] ?? ''
+      expect(step, `action.yml has no step with id ${o.step}`).not.toBe('')
+      expect(step, `step ${o.step} never appends ${o.key} to $GITHUB_OUTPUT`)
+        .toMatch(new RegExp(`${o.key}=[^"]*"? *>> *"\\$GITHUB_OUTPUT"`))
+    }
   })
 
   it('gives the five figures the run comment reports, not placeholders', () => {
