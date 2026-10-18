@@ -20,12 +20,27 @@
 // error that says exactly that, instead of shipping code that would
 // resolve a wrong path at runtime.
 //
+// Why the bytes are canonicalized before they are hashed: esbuild
+// annotates every module it inlines with the path it read that module
+// from, written relative to the build's working directory, and it does
+// so in two places — a `// <path>` comment above the module and a
+// property key in the `__esm` / `__commonJS` registry object. Where
+// `node_modules` resolves from is therefore part of the artifact's
+// bytes, and the bytes are the resolver's identity:
+// `resolverIdentity()` hashes this file and `task.resolvedBy.digest`
+// is the first 16 characters of that hash. Measured on 2026-10-17, one
+// commit built from four layouts produced three different digests. See
+// `docs/provenance/bundle-reproducibility.md` for the numbers and for
+// the candidate fix that measurement refuted.
+//
 //   node build/bundle.mjs            # write dist/ursa.cjs
 //   node build/bundle.mjs --check    # rebuild into memory and compare
 
 import { build } from 'esbuild'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+
+import { canonicalizeInlinedPaths } from './canonicalize.mjs'
 
 const OUT = 'dist/ursa.cjs'
 const check = process.argv.includes('--check')
@@ -60,10 +75,13 @@ const result = await build({
   legalComments: 'inline',
   banner: { js: '#!/usr/bin/env node' },
   write: false,
+  // Asked for so the canonicalization below can name the paths esbuild
+  // actually read instead of guessing at them from the output.
+  metafile: true,
   logLevel: 'warning',
 })
 
-const text = result.outputFiles[0].text
+const text = canonicalizeInlinedPaths(result.outputFiles[0].text, result.metafile)
 const digest = createHash('sha256').update(text).digest('hex')
 
 if (check) {
