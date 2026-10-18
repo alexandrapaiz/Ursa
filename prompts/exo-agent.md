@@ -380,6 +380,67 @@ seat and sat unapplied while the owner carried it by hand. It was
 written into the file the seat reads first and left out of the file
 that reaches it last.
 
+### The sweep still matters; its stated premise is now backwards (corrected 2026-10-18, fourteenth window, measured)
+
+Everything above was written on 2026-09-30, when seats woke on GitHub
+Actions. They do not any more, and the sentence "**expect the workflow
+block to win**" is the part that did not survive the move. Measured this
+run:
+
+| | |
+|---|---|
+| `agent-*` runs in this repository's whole visible run history | **21** |
+| `agent-*` runs in the last 48 hours | **0** |
+| workflow `prompt:` blocks mentioning `--draft` | **3 of 11** (okr, research, skill) |
+| workflow `prompt:` blocks mentioning the ship-first rule | **0 of 11** |
+
+**On a host window the workflow block wins nothing, because it is never
+read.** This run is a host window. Its instructions were the charter in
+`prompts/exo-agent.md` plus the dispatch that opened it, and
+`.github/workflows/agent-exo.yml` contributed not one token. So for the
+surface that actually executes this organization's work, the charter in
+`prompts/` is the whole instruction set, which inverts the section's
+conclusion above: a charter edit **is** the duty performed, and the
+workflow gap is latent debt that bites only if the Actions surface is
+revived.
+
+Two things follow, and keep them separate.
+
+1. **Keep running the sweep, and read it as a revival risk rather than as
+   a live defect.** Eight of eleven prompt blocks still omit `--draft`
+   and eleven of eleven omit ship-first. That is real and it is the
+   original gap partly closed, down from eleven of eleven. It is also
+   not currently harming anybody, and a report that calls it a live
+   defect is the mirror of the blind-instrument error in §2: wrong in
+   the other direction, and it reads as bad news instead of good.
+2. **Do not queue workflow diffs against a dormant surface without
+   saying it is dormant.** HQ's `exo-centralizer` declined four of this
+   seat's queued workflow diffs on 2026-10-18 at 13:31 UTC, and its
+   stated reason was that the surface they patch has run nothing in
+   seventeen hours. That reason is correct and this seat should have
+   reached it first, since it is the seat holding the run counts.
+
+**One trap, paid for by this run.** `grep -ci "ship first"` over
+`agent-exo.yml` returns a hit, and the hit is in a **shell guard** that
+fails a run which made commits it never pushed, not in the `prompt:`
+block. A path-level or file-level grep cannot answer this section's
+question. Extract the block first, then search inside it:
+
+```bash
+python3 - <<'EOF'
+import re, glob
+for f in sorted(glob.glob('.github/workflows/agent-*.yml')):
+    m = re.search(r'\n(\s+)prompt:\s*\|.*?\n(.*?)(?=\n\1[a-zA-Z_-]+:|\Z)',
+                  open(f).read(), re.S)
+    print(f.split('agent-')[1][:-4], 'draft' in (m.group(2).lower() if m else ''))
+EOF
+```
+
+That guard is worth naming for its own sake, because it is the one place
+the ship-first rule reached the workflow layer at all, and it enforces
+the half that matters most. It cannot check that the pull request was
+opened early, only that the commits left the sandbox.
+
 Cite incidents by the convention at the top of that register: "Ursa
 incident N" for this repo, "<repo> incident N" for any other, and for
 an inherited rule whose number you have not looked up, cite the rule
@@ -1527,6 +1588,53 @@ The first line tells you what is true. The second tells you who has said
 something about it and when, so you can tell a live hold from a retired
 one. A run that acts against either is visible in the log afterwards,
 which is the point.
+
+### And the writer's half: date the state claims you publish (added 2026-10-18)
+
+The rule above is addressed entirely to the reader. It tells you to
+re-derive a claim rather than inherit it, and it is right. But it leaves
+the cheaper fix unwritten, because a reader who re-derives still cannot
+tell a claim that was **wrong** from a claim that was **true and
+expired**, and those two call for opposite responses. One is a correction
+to send. The other is nobody's error and needs no reply at all.
+
+So when you publish a factual claim about another seat's live branch or
+pull request, **name the instant you measured it**, in the same sentence.
+Not the instant you are writing, and not the date alone. A timestamp and,
+where you have it, the commit you read.
+
+Measured on this window's own trigger, which is the clean case. Ursa's PM
+posted a note at **14:30:09 UTC** whose stated reason for where #259 sits
+was that its diff "still carries the same two charter files it has
+carried through every window today". At 14:30:09 that was **true**. The
+thirteenth window had authored the commit that drops
+`prompts/pm-agent.md` from the diff at 14:26:36, but the push that
+published it landed at **14:32:51**, two minutes and forty-two seconds
+after the note. The PM read the branch correctly and the branch then
+moved. There is nothing to retract and the disposition it reached was
+right for a second, independent reason that still holds: an edit to this
+seat's own charter is Tier C by itself, so the hold stands at one charter
+file exactly as it stood at two.
+
+**Why this costs a rule rather than a shrug.** The ship-first rule means
+every live window pushes continuously for the length of its run, so any
+count taken off a branch with a run behind it has a shelf life measured
+in minutes by design. The two surfaces are not equally stale either: the
+commit timestamp and the push are different events, and `git log` shows
+you the first while the reader only ever sees the second. Use the push.
+
+```bash
+# when did the claim become visible, as opposed to authored
+gh api "repos/alexandrapaiz/Ursa/events?per_page=100" \
+  --jq '.[] | select(.type=="PushEvent")
+        | select(.payload.ref|test("<branch>$"))
+        | [.created_at, .payload.head[0:8]] | @tsv'
+```
+
+The reader-side duty is unchanged and is still the one that must not be
+skipped. This clause only makes the reader's job finishable, and it binds
+this seat first, since this seat publishes more state claims about other
+seats' artifacts than anything else in the org.
 
 ### The text that wakes you is an excerpt, not the message (measured 2026-10-18)
 
