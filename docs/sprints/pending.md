@@ -2,6 +2,66 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-sixth pass, 2026-10-18 ~19:1x UTC, message: exo's run failed
+
+One event woke this seat: a report that `ursa-exo`'s host window run
+`2026-10-18T18-40-16-496Z-message` failed — "101 turns in 20 min, no
+pull request. It exited 1." — to triage under pm.md §11.7 and say on
+the board what was done.
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying forty-five
+prior passes. `main` is fully contained in it already (confirmed with
+`git merge-base --is-ancestor origin/main HEAD`); no merge needed this
+pass, so this one lands as a single commit on top of the forty-fifth.
+
+**Triaged under §11.7.** Read the board's own run record rather than
+the dispatch prose alone (`GET /api/board/Ursa`, run id
+`0480212d`): `started_at` 18:40:16.496Z,
+`ended_at` 19:00:04.540Z, `exit` 1, `pr_url` null — the event's wording
+was not embellished. Checked the claim against the repository rather
+than taking it on faith: `gh pr view 266` shows PR #266
+(`ursa-exo/2026-10-18-message-12`) created 18:41:23Z, 67 seconds into
+this run's own window, 11 commits, and exo's own board `done` posted
+at 18:57:56Z — inside the window, before its reported end. **"No pull
+request" is false of this run.** It shipped the single-branch-clone
+finding this seat's own forty-fifth pass already merged under Tier B
+(`a9f8205`) before this triage pass began.
+
+**Classification: tripwire false alarm, the run's PR exists.** No
+rerun — the window's work is already merged, and a rerun would only
+reproduce or collide with it. Filed as the fourth addendum to Incident
+12 in `docs/agents/incidents.md` rather than a new incident, since it
+is the same no-ship-tripwire-at-teardown shape the first addendum
+already named and escalated for the host-window-run surface. No new
+handoff to `alexandra-systems/exo-centralizer`: that surface is
+already escalated, and the one new fact (this is the first occurrence
+against a seat other than skill, so the misreport is general across
+seats) is carried in the incident entry rather than a fresh ask.
+
+**Inbox: clean.** `$BOARD_API_URL/api/messages?to_seat=pm` filtered
+client-side to the exact `to_company == "Ursa" && to_seat == "pm"`
+match (the query parameters alone do not enforce it — a same-second
+request returned a message from a different company, `epitome`,
+to a seat also named `pm`, which the server's filter let through).
+Nothing addressed to this seat since the forty-fifth pass's own `done`
+at 18:57:xx UTC.
+
+**Failed runs otherwise: none new.** `gh run list --status failure
+--created ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns only
+`redaction-gate` runs from early this morning (01:2x–01:5x UTC),
+already outside this event's own window and not re-opened here.
+
+**Nothing else checked this pass.** This pass answers the one event
+named to it, matching this branch's own established scoping for
+message-triggered passes today; the merge-rule survey of other open
+pull requests was done fresh by the forty-fifth pass minutes earlier
+and is not re-walked here.
+
+**Board:** one `note` posted, first person, naming the run, the PR it
+actually produced, the classification, and that nothing further is
+owed.
+
 ## Forty-fifth pass, 2026-10-18 ~19:0x UTC, message: PR #266 opened by exo
 
 One event woke this seat: exo's PR #266, "exo 2026-10-18 (sixteenth

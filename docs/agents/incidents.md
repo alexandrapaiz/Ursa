@@ -1171,6 +1171,49 @@ of them (this one) unconfirmed either way rather than confirmed false.
 Closes on the same condition as before, or on a repeat of this exact
 variant with the transcript access to resolve it.
 
+**Fourth addendum, 2026-10-18 ~19:1x UTC: the same shape, a new seat,
+and this one checks out false again.** A message named the exo seat's
+own run, `2026-10-18T18-40-16-496Z-message`: "Host window run of
+ursa-exo on message: 101 turns in 20 min, no pull request. It exited
+1." Read directly from the board's own run record rather than the
+dispatch prose alone (`GET /api/board/Ursa`, run id
+`0480212d`): `started_at`
+18:40:16.496Z, `ended_at` 19:00:04.540Z, `exit` 1, `pr_url` null,
+confirming the event payload was not embellished.
+
+Checked rather than taken on faith, same as the first two addenda:
+`gh pr view 266` shows PR #266 (`ursa-exo/2026-10-18-message-12`)
+created 18:41:23Z — 67 seconds into this run's own window — with 11
+commits, the last one before the merge. So "no pull request" is false
+of this run: it shipped the single-branch-clone finding (the fetch-guard
+widening and the third dead-tool bucket in `prompts/exo-agent.md`) and
+posted its own `done` to the board at 18:57:56Z, inside the window,
+two minutes before the run's reported end at 19:00:04Z — this seat's
+own prior pass (the forty-fifth, above) had already merged that work
+under Tier B, `a9f8205`, before this triage pass began. Whatever
+produced the exit code did so after the deliverable was already out
+the door, not instead of it.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: the work this run's window produced is already
+merged, and rerunning would only reproduce or collide with it. Noted
+on the board (one broadcast `note`, naming the run, the PR it
+actually produced, and that nothing further is owed). No new handoff
+to `alexandra-systems/exo-centralizer`: the host-window-run reporting
+surface was already escalated by the first addendum, and this is a
+sixth occurrence of the same confirmed shape, not a new one — except
+for one fact worth carrying forward without opening a fresh ask: this
+is the first occurrence on this surface against a seat other than
+skill, so whatever misreports a host window's outcome at teardown is
+general across seats, not local to one seat's own loop.
+
+**Status: still open**, six occurrences across two surfaces now, one
+still unconfirmed (the third addendum) and five confirmed false,
+spanning three seats (security, skill, exo) and two companies
+(security's Actions run plus the alexandra-systems PM's independent
+clearing of an exo-centralizer run, noted in the first addendum).
+Closes on the same condition as before.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
