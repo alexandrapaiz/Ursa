@@ -5134,6 +5134,16 @@ async function checkOne(address, probe) {
     console.log(
       `            access-control-allow-origin: ${result.allowOrigin} \u2014 only a page on that origin can read this; a viewer anywhere else will be refused by the browser`
     );
+  } else if (address.scheme === "pages" && result.status === 404) {
+    console.log(
+      `            no access-control-allow-origin header, and a 404 \u2014 which together mean https://${address.owner.toLowerCase()}.github.io is not serving a Pages site for ${address.repo} at all`
+    );
+    console.log(
+      "            A deployed site answers a missing record with the header present, so a viewer could tell you the record is missing. This answer is the platform's own not-found page, and a browser reports it as a refusal rather than as a status."
+    );
+    console.log(
+      `            Turn publishing on once: gh api -X POST repos/${address.owner}/${address.repo}/pages -f 'build_type=workflow'   (or Settings \u2192 Pages \u2192 Source \u2192 "GitHub Actions"), then publish.`
+    );
   } else {
     console.log(
       "            no access-control-allow-origin header \u2014 a browser will not let a page read this address, so a reader can download the file but a viewer cannot fetch it"
@@ -5785,7 +5795,10 @@ async function runCi(opts) {
   const declaration2 = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR;
   const pairs = findCommitPairs(opts.projectPath, {
     range: window.range,
-    agentIdentities: opts.agentIdentities
+    agentIdentities: opts.agentIdentities,
+    maxPairDistance: opts.maxPairDistance,
+    maxPairAgeHours: opts.maxPairAgeHours,
+    maxInterposedGenerations: opts.maxInterposedGenerations
   });
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
@@ -6323,6 +6336,20 @@ function renderRunSummary(records, episodes, diagnostics) {
   }
   return lines.join("\n");
 }
+function pairingBounds(values) {
+  const bound = (flag2) => {
+    const raw = values[flag2];
+    if (raw === void 0) return void 0;
+    const n2 = Number(raw);
+    if (!Number.isFinite(n2) && raw !== "Infinity") return void 0;
+    return n2;
+  };
+  return {
+    maxPairDistance: bound("max-pair-distance"),
+    maxPairAgeHours: bound("max-pair-age-hours"),
+    maxInterposedGenerations: bound("max-interposed-generations")
+  };
+}
 async function main(argv) {
   if (argv[0] === "consent") {
     const { runConsentCommand: runConsentCommand2 } = await Promise.resolve().then(() => (init_consent_cli(), consent_cli_exports));
@@ -6437,6 +6464,11 @@ async function main(argv) {
       // one-resolver-two-launches claim is false for any repository
       // whose agents git cannot recognise by name (src/launch.ts).
       agentIdentities: values["agent-identity"],
+      // Drift 5, the same shape as the agent-identity drift above: the
+      // local launch read all three pairing bounds and this one read
+      // none, so moving a bound changed one launch's records and not the
+      // other's over identical history.
+      ...pairingBounds(values),
       post: values["no-post"] !== true
     });
     return result.exitCode;
@@ -6476,17 +6508,8 @@ async function main(argv) {
   } else if (values.declare === "unsatisfied") {
     declaration2 = { accepted: false, basis: "owner-declared unsatisfied at launch (--declare unsatisfied): survived text is not endorsed, it is not-yet-fixed" };
   }
-  const bound = (flag2) => {
-    const raw = values[flag2];
-    if (raw === void 0) return void 0;
-    const n2 = Number(raw);
-    if (!Number.isFinite(n2) && raw !== "Infinity") return void 0;
-    return n2;
-  };
   const { pairs, diagnostics } = findCommitPairsWithDiagnostics(projectPath, {
-    maxPairDistance: bound("max-pair-distance"),
-    maxPairAgeHours: bound("max-pair-age-hours"),
-    maxInterposedGenerations: bound("max-interposed-generations"),
+    ...pairingBounds(values),
     agentIdentities: values["agent-identity"]
   });
   const commits = listCommits(projectPath);
