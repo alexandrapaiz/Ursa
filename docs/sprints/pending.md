@@ -2,6 +2,69 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twentieth pass, 2026-10-18 ~09:3x UTC, message: review PR #232 against the merge rule
+
+**The event.** A dispatch asked this seat to review the engineer's
+PR #232 ("this repository publishes its own outcome records to its
+own Pages site") against the merge rule and either merge it or say on
+the board what it still needs and hand that to its seat.
+
+**Checked against docs/standards/pm.md §10/§21 (Tier B), not taken on
+the dispatch's word:**
+
+1. Not this seat's own PR — engineer's branch.
+2. Not a draft (`isDraft: false`), no `hold` label, no labels at all.
+3. Checks green: `redaction-gate / scan` passed on the final commit.
+4. `gh pr diff --name-only` crosses no Tier C path — no `prompts/`, no
+   `company.yaml`, no `.github/workflows/`. The PR deliberately commits
+   its new workflow at `docs/design/pages-dogfood/ursa-publish.yml`,
+   outside `.github/workflows/`, with its own description naming that
+   as HQ's file to land, not this one's.
+5. Merges clean: `mergeable: MERGEABLE`, `mergeStateStatus: CLEAN`.
+6. Opened and last pushed today, well inside seven days.
+7. One PR comment total, from HQ's advisory seat via the owner's
+   account (2026-10-18T09:06:26Z), landing on the branch "without
+   qualification" and asking only that it be readied — which the
+   branch already was. That comment predates the branch's last four
+   commits, so there is no owner comment since the last push.
+
+All seven held. **Merged** (`gh pr merge 232 --merge`, commit
+`4bf9f0f`), normal merge, not force, not squash. Logged as a `done` on
+the board per §21's instruction to record the reason there.
+
+**What the merge does not yet do, named so nobody reads "merged" as
+"live."** The PR's own body is explicit about two steps outside its
+own scope, neither blocked by anything this seat found:
+
+- **The workflow still has to move.** `docs/design/pages-dogfood/ursa-publish.yml`
+  lands with one `cp` into `.github/workflows/`, and the PR says that
+  file is headquarters' to place in a product repository, not the
+  engineer's or this seat's. Nothing in this repository can run it
+  from its current path. Handed to HQ: the file is on `main` now at
+  that path, waiting to be copied in.
+- **Pages itself is still off.** `https://alexandrapaiz.github.io/Ursa/`
+  has returned 404 since 2026-08-01 per the advisory comment, and
+  turning it on is one reversible call
+  (`gh api -X POST repos/alexandrapaiz/Ursa/pages -f 'build_type=workflow'`)
+  the PR explicitly left to the owner. Flagged below under "waits on
+  the owner."
+- One substantive point from the advisory comment is reported, not
+  enforced: it asks that only git-path records publish until
+  `docs/security/redaction-standard.md` exists, because a session-path
+  record carries every message a person typed. The PR's two records
+  are both git-path today (`index.json` states `"adapters": ["git"]`),
+  so the condition holds as a current fact, not as a gate in code. The
+  PR itself says making it a gate is the owner's and the security
+  seat's call, not this one's to add while merging — named here so it
+  is not lost between "merged" and "built."
+
+**Hygiene, checked fresh.** `gh pr list --state open` now shows nine
+(it showed ten before this pass's merge; #232 is the one that left).
+`gh run list --limit 10` shows nothing failed since the nineteenth
+pass's check; the only new runs are #232's merge-triggered
+`redaction-gate` pass (green) and frontend's #240 push (green). No new
+failure, no new incident.
+
 ## Nineteenth pass, 2026-10-18 ~09:1x UTC, message: exo-centralizer's closing note on the same thread
 
 1. **The event, read from the board itself rather than taken from the
