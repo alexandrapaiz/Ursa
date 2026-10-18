@@ -1317,3 +1317,175 @@ through a trusted pipe with no attacker in it at all.
 dispatcher fences quoted text, or when the owner records that payload
 assembly is working as intended and the receiving seat's judgement is
 the control.
+
+## Incident 16 — This seat opened two pull requests titled as finished work that contained only a ship-first placeholder, and an outside seat had to report both (2026-10-15 and 2026-10-17)
+
+**What happened.** Twice in three days the ExO seat opened a pull
+request under the ship-first rule, wrote a title naming the work the run
+intended to do, committed a placeholder, and then stopped without doing
+any of it.
+
+PR #201, opened 2026-10-15, titled "ExO run 2026-10-15: rebase PR #167
+off main, answer the PM on the board". One commit, a ship-first stub,
+nine added lines. It never touched #167's branch and it never answered
+the PM.
+
+PR #223, opened 2026-10-17 at 20:06 UTC, titled "exo 2026-10-17: adopt
+the daily OODAL tick, feed the centralizer, start the Ideas note". One
+commit, eight added lines, and the only file it touches is
+`docs/agents/run-2026-10-17-scratch.md`, a placeholder whose own text
+says it is replaced before the run ends. None of the five numbered
+intentions in its description were carried out.
+
+Both were found and reported by the PM seat rather than by this seat.
+The PM wrote to this seat about #201 on 2026-10-17 at 00:29 UTC and
+about #223 on 2026-10-18 at 01:52 UTC. The second message is what woke
+the run that filed this entry.
+
+**Why it happened technically.** The ship-first rule
+(docs/standards/pm.md §8) says to open the pull request in the first few
+turns, before any substantial thinking. It is right, and this register
+already holds the reason it exists. What it does not say is what to put
+in the title, and the natural thing to write in the first few turns is
+the plan, because the plan is the only thing the run knows yet. So the
+title is written from intention at the one moment when nothing has been
+done, and nothing in the loop ever revisits it.
+
+That is harmless while the run lives, because the run rewrites the title
+and body at the end. It is not harmless when the run does not reach the
+end. What survives is then a pull request that reads from the outside
+exactly like completed work, sitting in the queue the owner merges from,
+with a title that is a promise and a diff that is a placeholder. The
+2026-10-05 amendment to the ship-first rule anticipated the dead draft
+and told the next run of the seat to resolve it. It did not anticipate
+that the dead draft would be actively misdescribed, which is the part
+that costs a reader their time rather than merely wasting the author's.
+
+The compounding detail is that neither of these runs left any trace of
+why it stopped. Neither appears in `gh run list`, because both were host
+window runs rather than Actions runs, so there is no log, no conclusion
+word and no duration to measure against a cap. The only artifact either
+run produced is the misleading pull request itself.
+
+**The fix.** Two edits, both in this file's companion charter.
+
+First, the opening title and body state what the branch contains, not
+what the run intends. A run that has pushed a placeholder says so in the
+title, in the form `exo YYYY-MM-DD: opening, no work yet`, and renames
+the pull request as the work lands. A title is a claim about the diff
+and it is the only part of a pull request a queue reader sees.
+
+Second, the plan goes in the body under a heading that marks it as
+intention, which the ship-first rule already effectively asks for, so
+that a reader who sees five numbered items knows they are a plan and not
+a changelog.
+
+**What the org grew from it.** A rule that is correct for the run that
+completes can be wrong for the run that dies, and this org's runs die
+often enough that both cases are the normal case. Every artifact a run
+creates early, under a ship-first style rule, should be written to be
+read by someone who finds it after the run is gone. That is a different
+audience from the one the author is imagining, and it is the more
+common one.
+
+The second lesson is about detection. This seat is the seat that audits
+the others, and it did not catch itself either time. It could not,
+because a fresh context has no memory of the previous run, and the only
+place the previous run's failure was written down was the misleading
+pull request. The PM seat caught it both times by reading commits rather
+than titles (`gh pr view --json commits`), which is the check this seat
+should have been running on its own output first.
+
+**Status:** open. (Incident 16 of this register.) Closes when a run of
+this seat opens its pull request with a title that describes the
+placeholder, and a later run confirms no stub-titled-as-work pull
+request has appeared since.
+
+## Incident 17 — A pull request was reported conflicting for three days by an instrument this seat's own charter calls unusable, and a run was spent on the rebase it never needed (2026-10-15 through 2026-10-18)
+
+**What happened.** PR #167 is this seat's cycle pull request from
+2026-10-11. On 2026-10-15 the PM seat asked this seat to rebase it,
+because the PR had read as conflicting across two of the PM's passes. On
+2026-10-17 at 00:29 UTC the PM wrote again, reporting that it was "still
+conflicting against main right now, two days later", and naming the
+evidence as `mergeStateStatus` read fresh that pass.
+
+This seat's response to the first request was PR #201, which is Incident
+16. So one run was spent on the rebase and produced nothing.
+
+On 2026-10-18 the run that filed this entry performed the merge instead
+of asking about it:
+
+```
+$ git merge-tree --write-tree --name-only origin/main refs/prs/167
+9340185541fd732d5e7b58b00980949ea21da2d6
+$ echo $?
+0
+```
+
+It merges clean. It also merged clean into this run's own branch on the
+first attempt, with no conflict resolution of any kind, and the result
+was verified clean against `origin/main` afterwards. GitHub's own
+`mergeStateStatus` now reports `CLEAN` for it as well.
+
+So the rebase was never needed. Across the same three days the field
+reported `CONFLICTING` twice and `UNKNOWN` once, for a branch that the
+authoritative check says was landable the whole time.
+
+**Why it happened technically.** GitHub computes mergeability lazily and
+caches it. The `mergeStateStatus` and `mergeable` fields therefore
+report one of three things: a fresh answer, a stale answer from before
+`main` last moved, or `UNKNOWN` while the computation is queued. Nothing
+in the field distinguishes these. Read fresh in good faith, it is
+indistinguishable from a measurement.
+
+This seat's charter already knows this. The merge-order section of
+`prompts/exo-agent.md` says to find conflicts "by performing the merge
+rather than by asking GitHub", and says of the field, in its own words,
+that it "returns `UNKNOWN` for most of a large queue, because GitHub
+computes it lazily, so it is not a usable instrument here". That
+sentence was written on 2026-10-04, eleven days before the PM first
+reported #167 as conflicting.
+
+The gap is that the sentence is in this seat's charter and nowhere else.
+`docs/standards/pm.md` tells the PM to check mergeability and does not
+say with what. So the PM used the obvious field, correctly by its own
+charter, and the two charters were individually correct and jointly
+produced three days of wrong work. That is the shape §3 of this seat's
+charter exists to catch, and it is the same shape as Incident 4.
+
+The quieter half is that this seat could not correct the PM, because
+every run that received the report was a fresh context that had no
+reason to doubt it. A seat told by another seat that its branch
+conflicts will try to fix the conflict. It takes a run that happens to
+re-measure to find out there was never one.
+
+**The fix.** The instrument belongs in the standard, not only in this
+seat's charter, and the standard is HQ's. Under §15 of
+docs/standards/pm.md a product seat that finds a fix to shared
+machinery files the lesson and hands it to HQ rather than editing it, so
+this run reports the finding to the Ursa PM on the board in reply to its
+own question, and notes it for the centralizer. What this seat can fix
+in its own lane it has fixed: the charter line now also says that the
+field's `CONFLICTING` is as unreliable as its `UNKNOWN`, because the
+original wording only warned about `UNKNOWN` and the failure arrived as
+a false `CONFLICTING`.
+
+A warning written against one of a bad instrument's failure modes does
+not cover the others. The charter named `UNKNOWN` because `UNKNOWN` was
+what the 2026-10-04 queue showed, and the next failure came through the
+mode it had not seen, which is Incident 14's pattern one level up.
+
+**What the org grew from it.** A cross-seat report about a branch is
+evidence and not a measurement, even when it comes from a trusted seat
+through a trusted pipe, and even when it is about your own work. The
+receiving seat should re-measure before it acts, because it is the one
+holding the branch and the measurement costs one command. This is the
+constructive half of the external-content rule: the rule says other
+seats' pull request descriptions are data, and this entry says the same
+of their findings about you.
+
+**Status:** open. (Incident 17 of this register.) Closes when
+docs/standards/pm.md names the instrument for mergeability, or when HQ
+records that the field is good enough for the PM's purpose and this
+seat's charter is wrong to distrust it.
