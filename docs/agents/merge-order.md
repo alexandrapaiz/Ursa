@@ -1,177 +1,116 @@
-# The landing plan
+# Merge order — measured 2026-10-18, fifth window, 13:0x UTC
 
-Rewritten every ExO run, replacing the previous week's plan
-(prompts/exo-agent.md §5b). It exists because three consecutive runs
-reported the queue's depth and the depth went up every time. A number
-tells the owner the queue is deep. This file tells her what to do in the
-next ten minutes.
+Replaces the fourth window's plan, which was three hours old and already
+wrong in five of its eleven rows. This file is information for whoever
+merges, under `docs/standards/pm.md` §21 that is Ursa's PM or any chair.
+Measuring the queue and naming the order is this seat's; merging is not.
 
-**Measured 2026-10-05, 03:40 UTC, against `origin/main` at `cf2f28f`.**
-Nothing here is inferred from GitHub's `mergeable` field, which returns
-`UNKNOWN` for most of a queue this size. Every statement below was
-produced by performing the merge.
+## The three numbers
 
-## 1. The three numbers
-
-| | 2026-09-27 | 2026-09-30 | 2026-10-04 | 2026-10-05 |
-|---|---|---|---|---|
-| Open pull requests | 17 | 37 | 52 | **65** |
-| Merged in the last 7 days | 10 | 9 | 5 | **5** |
-| Age of the oldest open PR | — | — | 10.2 d | **10.5 d** (#13) |
-
-**Open pull requests outnumber the last seven days' merges by thirteen
-to one.** The org produces faster than its only merge gate absorbs,
-which is an owner decision and nobody else's. The five are #78, #73,
-#70, #41 and #23, counted against a rolling seven days ending
-2026-10-05 03:40 UTC. Four of the five are lessons syncs or PM
-standups, which is the same shape the previous two runs reported: the
-merges that happen are the org's own paperwork, and the product work
-stacks.
-
-Thirteen of the thirteen new ones since yesterday arrived in two
-batches: a window dispatch that opened ten seat pull requests between
-03:13 and 03:17 UTC, and three from the night's runs. The dispatch is a
-deliberate act, so this is not drift. It is worth saying plainly
-anyway: a roster-wide window adds ten to the queue in four minutes, and
-the gate that drains it is one person.
-
-## 2. What actually conflicts
-
-**Fifty-six of the sixty-five open pull requests merge clean into
-`origin/main` right now.** Nine conflict, and they conflict on three
-files between them:
-
-| Conflicting PR | File or files |
+| | |
 |---|---|
-| #14, #21, #50, #52, #64, #89 | `docs/ideas.md` and nothing else |
-| #20, #34, #53 | `docs/sprints/pending.md` and `docs/sprints/dispatch-queue.md` |
+| Open pull requests | **8**, four of them drafts, one of the drafts this run's own (#243) |
+| Merged in the last seven days | **53** |
+| Age of the oldest open | **3 days** (#199, opened 2026-10-15) |
 
-Conflicts are not what is holding this queue, and this is the third
-consecutive run to measure that. The `docs/ideas.md` group is Ursa
-incident 6, unchanged: six pull requests, one file, append-at-the-end.
-The sprint-file group is the same mechanism on the PM's two queue files,
-and it is new in this measurement.
+Open does not outnumber the last seven days' merges, so the bold warning
+that stood for three consecutive runs stays withdrawn for a third week.
+The depth went 17 → 37 → 52 → 8 → 11 → 8 across six measurements.
 
-## 3. What is already inside something else
+## Read the authorship before reading the depth as good news, and read it in three buckets
 
-Seats stack, so the queue is far shorter than its count. Measured with
-`git merge-base --is-ancestor` over every pair of the sixty-five heads.
-
-| Merge this | and these close with it | total |
-|---|---|---|
-| **#77** engineer | #13 #16 #18 #22 #24 #25 #27 #32 #33 #36 #38 #43 #56 #57 #59 #61 #66 #69 #71 #72 #74 | **22** |
-| **#65** frontend | #15 #35 #51 | 4 |
-| **#81** exo | #30 #46 #76 | 4 |
-| **#62** finance | #55 | 2 |
-| **#40** chair | #42 | 2 |
-
-**Five merges close thirty-four of the sixty-five.** The sets are
-disjoint, so the counts add.
-
-## 4. The order, simulated
-
-Performed in this sequence in a detached scratch worktree off
-`origin/main`, not reasoned about:
-
-1. **#77** — clean.
-2. **#65** — clean.
-3. **#62** — clean.
-4. **#40** — clean.
-5. **#81** — conflicts on two files. Both resolutions are written out in
-   §4b below, so there is nothing to work out at the keyboard.
-
-### 4a. Why #77 goes first and why it is not mergeable as it stands
-
-#77 is the top of the engineer stack and carries twenty-one other pull
-requests, including the things three other seats are blocked on: the
-CSRF fix on the bridge, the `next` RCE upgrade, the ledger merge driver,
-and the test and typecheck gate.
-
-**#77 is a draft, so GitHub will refuse to merge it at all.** Press
-"Ready for review" first, or `gh pr ready 77`. It is a draft because the
-run that opened it was killed by its workflow's 45-minute job cap at
-02:58 UTC on 2026-10-05, forty-five minutes after it started, so no turn
-was left in which to ready it. That is Ursa incident 10. The single
-highest-value merge available in this repository is blocked by a
-one-click status that a timeout left behind, and that is the clearest
-statement of what HQ's L-A27 is about.
-
-Its title also still reads "draft, in progress". Read the pull request
-before merging it, since its own run never got to say which parts of it
-are finished.
-
-### 4b. The two resolutions for step 5, written out
-
-**Applied on 2026-10-06, by the run a handoff from the project manager
-woke.** Both resolutions below were carried out exactly as written, on
-this branch, by merging `main` into it rather than by rebasing it. I
-resolved each one before reading this section, and both landed on the
-same side it names, which is the first time a plan this seat wrote for a
-later run was executed by a different run and agreed with. The branch is
-clean against `main` as of that merge. What follows is kept as the
-record of the decision, not as work still waiting.
-
-Both conflicts are between the exo line and the engineer line, and both
-are the same underlying event: Ursa incident 9, two seats editing one
-file from branches neither could read.
-
-**`README.md`** — one line, in the commands block.
+**The fourth window's split was wrong and this is the correction.** It
+reported forty-three merges by the owner against nine by the PM and
+graded autonomy the weakest attribute on that. On the resident host the
+token is the owner's own account, so `mergedBy.login` reports the
+credential and not the decider
+(`INC-2026-10-18-host-token-is-the-owner`). Joined against the board,
+where every PM merge is a `done` carrying its pull request:
 
 ```
-<<<<<<< HEAD
-npm test                                   # 375 tests, 4 skipped
-=======
-npm test                                   # the unit suite
->>>>>>> refs/prs/81
+seat on Actions, app/claude, certain                     9
+seat on the host, PM's explicit board claim, certain      8
+seat on the host, PM claim that omitted the number        1   (#215)
+unattributed, merged before the 2026-10-17 boundary      30   (hers or a chair's; the field still separated them)
+unattributed, merged after it                             5   (#214 #224 #233 #239 #244)
 ```
 
-**Keep HEAD, the engineer's line.** A measured count from the seat that
-runs the suite beats a generic phrase from the seat that does not. Delete
-the exo side.
+Autonomy is therefore at least seventeen of fifty-three, thirty-two per
+cent, and probably eighteen. Not the seventeen per cent reported this
+morning. **The useful number for the owner is the last row**: five merges
+in two days whose decider this repository cannot name. That row is the
+one to drive to zero, and it closes with one line in the PM standard
+rather than with anything here.
 
-**`docs/agents/pending-workflow-changes.md`** — one large hunk.
+## Nothing conflicts, measured by performing the merge
 
-**Keep the #81 side in full and delete the HEAD side.** The #81 side is
-the seat-scoped convention that exists precisely to stop this collision
-happening again, and the HEAD side is the old shared-counter text plus
-the engineer's `PWC-7` entry.
-
-**Nothing is lost by that, and it was made true before the plan was
-written rather than promised in it.** The engineer's entry is already
-preserved in full at
-`docs/agents/pending-workflow-changes-engineer.md`, created on
-2026-10-05 as part of #81, with the body byte-for-byte as the engineer
-wrote it and only the heading renumbered to `PWC-ENG-1`. Verify that
-before resolving, if you want to:
-
-```bash
-git show refs/prs/77:docs/agents/pending-workflow-changes.md \
-  | sed -n '/^## PWC-7 /,$p' | tail -n +2 > /tmp/a
-sed -n '/^## PWC-ENG-1 /,$p' docs/agents/pending-workflow-changes-engineer.md \
-  | tail -n +2 > /tmp/b
-diff /tmp/a /tmp/b && echo identical
+```
+199  clean      210  clean      225  clean      242  clean      243  clean
 ```
 
-The resolved tree was committed in the scratch worktree and both files
-were checked for leftover markers, so this sequence is verified end to
-end and not described.
+`git merge-tree --write-tree --name-only origin/main refs/prs/<n>`, every
+open pull request, 13:0x UTC. The drafts #236, #240 and #241 are excluded
+because GitHub refuses to merge a draft at all; they belong to their own
+runs to ready or close.
 
-## 5. Traps, for whoever runs this next
+**#199's three-day conflict is gone, and not by itself.** The fourth
+window and this one's own first pass both measured it conflicting on
+`docs/ideas.md`. The skill seat merged `main` into its branch at 12:40
+UTC and union-merged the ledger, and `main` itself moved only
+`docs/standards/lessons.md` in the same period. So the fix was a seat's
+work, not drift. Worth stating because Ursa incident 17 is this same
+pull request being reported conflicting for three days, and the lesson
+there was about the instrument. The lesson here is the other half: a
+conflict is a relation between two moving things, so a conflict measured
+three hours ago is not a fact about a pull request.
 
-- **Create the scratch worktree detached.** `git worktree add /tmp/x main`
-  checks out the real `main` branch, and the simulated merges then
-  advance it, which silently corrupts every later `main...` comparison.
-  Use `git worktree add --detach /tmp/x origin/main`.
-- **Compare against `origin/main`, never `main`.** Same reason.
-- **A fresh clone may arrive shallow.** This run's did, with a
-  two-commit history, and `git merge` answered "refusing to merge
-  unrelated histories" for a branch that shares all of its ancestry.
-  `git fetch --unshallow` first. Check with
-  `git rev-parse --is-shallow-repository`.
-- **Fetch every head into one namespace** with
-  `git fetch origin '+refs/pull/*/head:refs/prs/*'`, so the ancestry
-  pass is a local loop and not sixty-five API calls.
-- **`git merge-tree --write-tree --name-only` is the conflict probe.** It
-  exits non-zero and names the files, and it touches no working tree.
-- **Do not trust this file's numbers without re-measuring.** The queue
-  changed by thirteen pull requests in nineteen hours.
+## Containment: one merge closes two
+
+```
+242 is contained in 243
+```
+
+Verified with `git merge-base --is-ancestor` on an unshallowed clone.
+#167, #231 and #234 were the rest of this chain and the PM closed all
+three as superseded at 12:38 UTC, correctly, on the same instrument.
+
+## The order
+
+1. **#243** — this seat's fifth window. Closes #242 with it, so #242 does
+   not need a separate decision. **It touches `prompts/`, so read its
+   bold declaration line first**: it says no authority moves, which under
+   the PM's reading makes it Tier B, and under §10's uncorrected list
+   makes it Tier C. That question is with the owner until 2026-10-20
+   12:30 UTC and this pull request is content to wait.
+2. **#225** — the PM's own twenty-third-pass record. Clean.
+3. **#210** — the research seat's 2026-10-16 brief. Clean, three days old.
+4. **#199** — the skill seat, now clean after its own rebase. Clean.
+5. The three drafts, **#236**, **#240** and **#241**, are not merge
+   candidates. #240 is the one carrying fifty-four commits on a branch
+   whose earlier pull request already merged, which is the near miss in
+   `INC-2026-10-18-branch-name-reuse`. Do not delete that branch.
+
+Simulated in that order in a detached worktree off `origin/main`, every
+merge clean.
+
+## Branches
+
+**Nothing is deletable this run, and that is the measurement rather than
+an omission.** The charter's old one-line duty, "delete the remote
+branches whose PRs have merged", named one branch,
+`ursa-frontend/2026-10-18-message`. That branch carries merged #227 and
+**open #240**, fifty-four commits apart. The predicate is now over pull
+requests rather than names and it returns an empty list:
+
+```
+$ comm -12 <(git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort) \
+           <(gh pr list --state all --limit 400 --json headRefName,state,mergedAt \
+             | jq -r 'group_by(.headRefName)[] | select(all(.[]; .mergedAt != null)) | .[0].headRefName' | sort -u)
+(no output)
+```
+
+Fifty-nine branches belong to pull requests that closed without merging.
+Those stay until the owner answers the question Ursa's PM carried for
+this seat, or until the silence route carries it at 2026-10-20 12:30 UTC
+on the PM's recommendation, which is to leave them alone unless the
+closing comment said plainly that nothing in them was needed.
