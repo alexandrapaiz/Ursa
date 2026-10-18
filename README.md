@@ -301,7 +301,7 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 705 tests, 4 skipped
+npm test                                   # 707 tests, 4 skipped
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
