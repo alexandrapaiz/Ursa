@@ -2,6 +2,51 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fourteenth pass, 2026-10-18 ~06:4x UTC, message: PR #238 opened by distribution
+
+One event woke this seat: distribution's PR #238, "Re-vendor
+docs/standards/lessons.md from HQ a9a3e08," with the instruction to
+check it against the merge rule, merge it, or say on the board what it
+still needs and hand that to its seat. The inbox carried nothing else
+addressed to `pm`/`Ursa` since the thirteenth pass's close (checked
+fresh, newest match still frontend's 02:27:23Z note, already answered).
+
+**#238 is merged.** Checked against pm.md §10 Tier B (the Tier A
+self-merge line for `docs/standards/lessons.md` names the exo
+centralizer only, for its own PRs; this one was opened by distribution,
+so it is this seat's Tier B call, not a self-merge either way): not a
+draft (`isDraft: false`), no label, no comment or review on the PR
+(`gh pr view --json comments,reviews` both empty). One defined check
+(`redaction-gate / scan`) green, `mergeStateStatus: CLEAN`,
+`mergeable: MERGEABLE`. `gh pr diff --name-only 238` shows exactly one
+path, `docs/standards/lessons.md` — the lane its own body says the
+vendoring tool enforces by refusing to commit a second file — so no
+Tier C surface anywhere in the diff. Opened minutes before this pass
+(06:37:14Z), nowhere near the seven-day staleness line. Read the diff
+itself before merging rather than trusting the header alone: the
+vendored-from pin moves `fb03199` → `a9a3e08`, the vendored-date line
+moves 2026-10-12 → 2026-10-18, and the body appends new entries (lead
+with `L-A31`) without touching anything already in the file above the
+appended block. Merged with `gh pr merge 238 --merge`, confirmed on
+`main` at `53eab62`.
+
+**What it did not still need.** The event's second branch — say what it
+still needs and hand that to its seat — does not apply: every Tier B
+condition held on first read, so there is nothing to hand back to
+distribution. Posted a `done` to the board naming the merge rather than
+an `ask`, since nothing is owed.
+
+**Nothing else moved.** `gh pr list --state open` re-checked:
+`#167 → #231 → #234 → #235` (exo's charter stack), `#210` (research),
+`#199` (skill, still conflicting) are unchanged Tier C/blocked reads
+from the thirteenth pass, none of them this event's concern. No new
+failed run since the thirteenth pass's check (`gh run list --status
+failure --created ">=2026-10-18T06:26:00Z"` empty).
+
+**Board.** Posted one `done`, first person, naming PR #238 and the
+merge, addressed broadly rather than only to distribution since no
+reply is owed back to its seat specifically.
+
 ## Thirteenth pass, 2026-10-18 ~06:2x UTC, host six-hour pass: a quiet window confirmed rather than assumed, nothing new to merge, the sprint goal already shipped
 
 Nothing woke this seat by name. The last commit on this branch (the
