@@ -1096,6 +1096,156 @@ seat that made it rather than by an audit, and it is worth saying so.
    PWC-EXO-3, 5, 6 and 7, and the vendored `docs/standards/pm.md`
    stopping at §22 while the chair's handoff cites §24.
 
-<!-- exo run 2026-10-18 (third window, message dispatch): in progress -->
 
-<!-- run marker: exo 2026-10-18 fourth window (message), opened 2026-10-18T12:01:45Z -->
+## 2026-10-18 (fourth window) — Tenth entry: the depth is shallow because one person cleared it, and the charter that fixes this seat has not merged in eight days
+
+**Trigger.** The daily brief, which is the learning loop's tick under
+`standards/pm.md` §24. This is the first run of this seat that could
+actually perform the orient phase, because the ten attributes had no
+agreed definition until the centralizer wrote one last night in
+`standards/roles/exo.md` §5f, at this seat's request.
+
+**What this run inherited, and the inheriting is the lesson.** Three
+open pull requests from this seat's three earlier windows today, plus
+last week's cycle PR, in a chain where each contains the one before it.
+This branch is built on the newest of the four and subsumes all of them.
+The third window's pull request was a draft containing one placeholder
+commit under a title naming finished work, which is Ursa incident 16
+recurring for the third time. This run opened its own pull request the
+same way and had to rename it mid-run, which is the fourth.
+
+**The finding this run exists for.** Both of those recurrences happened
+*after* the fix for them was written. The fix is in
+`prompts/exo-agent.md` and it says to open with the title
+`exo YYYY-MM-DD: opening, no work yet`. It was committed at about 02:00
+UTC today. Neither later window saw it, because a fresh run clones
+`main`, and `main`'s copy of this charter is from 2026-10-11.
+
+So the question stopped being why this seat keeps mistitling pull
+requests and became why its charter does not move. The answer is
+measured:
+
+```
+PRs touching prompts/ merged since 2026-10-01:   1   (#151, 2026-10-10, by the owner)
+PRs merged in the 7 days to 2026-10-18:         52
+of those, merged by the owner:                  43
+of those, merged by the PM seat:                 9
+```
+
+`docs/standards/pm.md` §10 contradicts itself inside one section. The
+amendment banner at its head says no tier waits for the owner except a
+change to a seat's own authority. The Tier C paragraph eleven lines
+below still names all of `prompts/`. §21 agrees with the banner and
+names charters explicitly. Ursa's PM reads the list and said so on the
+board at 02:09 UTC, correctly against the text in front of it. Filed as
+`INC-2026-10-18-tier-c-charter-freeze`.
+
+**The correction this run owes its own predecessor.** The second
+window's entry, six hours earlier, reported eight open against
+forty-eight merged as the healthiest reading the company had posted, and
+the centralizer agreed in writing. That number is right and the
+conclusion drawn from it was not. Forty-three of the fifty-two merges
+this week were the owner's hand. The depth improved and the autonomy did
+not, which is exactly what attribute 9 of the ExO model warns about: a
+queue that is healthy only because one person cleared it is not
+autonomy. Every previous run of this seat measured the depth and none
+measured the authorship, so the instrument that watched the queue for
+five weeks could not see the thing the queue was hiding.
+
+**Second finding, and it has the same shape as Incident 18.** HQ's
+`standards/roles/exo.md` §8 retired this seat's pending-workflow queue
+eighteen days ago and made workflow files the centralizer's. This seat
+went on filling the queue, up to and including an entry queued this
+morning, because that standard is not vendored into `docs/standards/`
+and no run had ever read it. Incident 18 is a standard pointing at a
+tool that did not cross the sync. This is a standard that did not cross
+the sync at all. Filed as
+`INC-2026-10-18-pwc-queue-retired-upstream`.
+
+**The ten attributes, graded against §5f's named surfaces.**
+
+| attribute | grade | the number or the missing surface |
+|---|---|---|
+| Staff on demand | weak | 8 of 11 chartered seats shipped in 7 days; finance and sales last shipped 2026-10-05, okr 2026-10-06 |
+| Community and crowd | zero | 0 stars, 0 forks, 0 watchers, 0 issues ever, on a public repository |
+| Algorithms | weak | `tools/` holds 2 entries; the standards name 14 scripts, all of them in HQ's repository |
+| Leveraged assets | strong | cost still $0; heavy processing on the user's own machine by design |
+| Engagement | near zero | trials at n=1 and n=2, the second owner-declared unsatisfied; no return measurement exists |
+| Interfaces | weak | three instruments answer "is this mergeable" and two were wrong at different times this week |
+| Dashboards | weak, improving | 0 `agent-*` Actions runs on 2026-10-18 while 4 seats shipped 7 PRs |
+| Experimentation | **zero until this run** | `docs/agents/improvements.md` did not exist, so the surface the grade reads was absent |
+| Autonomy | **weakest, 17%** | 9 of 52 merges landed without the owner; 0 of the `prompts/` class in 18 days |
+| Social technologies | strong | 83 directed seat-to-seat messages against 1 addressed to the owner, 7 days |
+
+Named weakest: **autonomy**. Not experimentation, although its zero was
+lower, because that zero was a missing file this run could close itself
+and autonomy's has a mechanism this seat cannot reach.
+
+**What this run changed.**
+
+1. Filed `INC-2026-10-18-tier-c-charter-freeze` and
+   `INC-2026-10-18-pwc-queue-retired-upstream`, the first two entries
+   under HQ's `INC-YYYY-MM-DD-slug` convention. The eighteen numbered
+   entries keep their numbers, and the register's header now says why
+   both forms are present.
+2. Created `docs/agents/improvements.md` in HQ's parsed format, with
+   this week's two experiments, their baselines and their read date of
+   2026-10-25. This closes the experimentation zero by creating the
+   surface the grade reads.
+3. `prompts/exo-agent.md`: the daily-tick section rewritten from §24's
+   own text rather than from the handoff's summary, which had lost two
+   of the five phases and said one idea where the standard says three;
+   §3's standards-conflict check widened to sweep a standard against
+   itself; §5's host-versus-Actions workflow branch replaced with the
+   handover to the centralizer; and the bold authority declaration made
+   the merge route for any pull request touching `prompts/`.
+4. `docs/agents/pending-workflow-changes-exo.md` marked superseded at
+   its head, with a disposition table for all eight entries.
+5. `docs/agents/runner-facts.md` §3: the host's clone is narrowed as
+   well as shallow, which makes `git merge origin/main` fail with
+   "refusing to merge unrelated histories" on a direct descendant and
+   makes HQ's merge-queue checker report every open pull request as a
+   deleted branch. Four lines fix it and they are written out.
+6. `docs/agents/merge-order.md` replaced: six merges close ten of the
+   eleven open pull requests, simulated in a detached worktree off
+   `origin/main`, with both instruments agreeing that only #199
+   conflicts.
+7. `README.md`: the diagram and the operations section said the owner's
+   merge is the only authority, which §21 stopped being true on
+   2026-10-05 and which the README's own last section already
+   contradicted. Also corrected the seat-activity sentence, which
+   claimed every seat but sales was active.
+8. Board: the tick to the centralizer with the grade; the workflow
+   handover and the tool bug to the centralizer; the Tier C mechanism
+   and the branch-deletion question to Ursa's PM; three `Ideas` notes
+   to the owner.
+
+**Compounding ratio, which §24 asks for and this seat has never
+reported.** This run's changes touch 1 charter, 5 org documents and 1
+README in 1 repository. Two of the eight items are handed upstream and
+would apply to 4 repositories if the centralizer takes them: the
+fourteen-missing-tools mechanism, already confirmed portfolio-wide at
+fifty-six dead references, and the two rules missing from eleven of
+eleven workflow prompt blocks. The curve inside Ursa is flat. The slope
+is entirely in what was handed over, which is the honest reading and not
+a flattering one.
+
+**What the next run must check first.**
+
+1. **Did anything touching `prompts/` merge?** That is experiment one's
+   metric, due on the brief of 2026-10-25. Count PRs touching
+   `prompts/` merged in the preceding seven days and how many the
+   owner's account merged. One or more merged by the PM is a pass.
+2. **Fix the clone before anything else**, with the four lines in
+   runner-facts §3. Unshallow and widen the refspec. Every ancestry
+   answer and HQ's merge-queue checker are wrong until you do.
+3. **Read your own seat's open pull requests**, and expect a chain
+   rather than one. Today had four windows and each built on the last.
+4. **Fetch §24 and `standards/roles/exo.md` from HQ**, because neither
+   is vendored here, and delete the charter's daily-tick section if the
+   centralizer has re-vendored them.
+5. **Do not open `pending-workflow-changes-exo.md`.** It is superseded.
+   A workflow finding goes to the centralizer in a board message.
+6. **Measure authorship, not only depth.** The queue number alone read
+   as good news for five weeks over a company whose owner was merging
+   five pull requests out of six.
