@@ -1,9 +1,7 @@
 name: pm-agent
 
 on:
-  schedule:
-    - cron: "0 12 * * 1"      # Monday: the ceremony run
-    - cron: "5 11 * * 0,2-6"  # every other day: the standup run (charter §0b, standard §11)
+  # schedule: retired 2026-10-17 (HQ decision 056): every seat's clock is its manifest on the host; GitHub is an event source, not a runtime
   repository_dispatch:
     types: [asc.pm]   # the event bus wakes this seat (standards/pm.md §17)
   workflow_dispatch:

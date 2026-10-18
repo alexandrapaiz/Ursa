@@ -7,3 +7,12 @@ node_modules/
 
 # per-project outcome records and tuning (raw data, never committed)
 .ursa/
+
+# Trial outputs: real outcome records and their viewers, built from real
+# sessions. Never committed, and until now nothing said so — the docs cite
+# ursa-major/trial/task-001/ and no branch has ever carried it. The
+# redaction gate is a backstop, not this one's: it looks for session UUIDs,
+# home paths and project slugs, and a record built from pasted
+# conversations (fixtures/mini uses ids like 01-claude) carries verbatim
+# prompt text with none of those shapes.
+ursa-major/trial/*/

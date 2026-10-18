@@ -29,8 +29,18 @@ const UNSATISFIED: Verdict = {
   confidence: 'stated',
 }
 
-function sh(cwd: string, cmd: string, args: string[]) {
-  execFileSync(cmd, args, { cwd, env: process.env, encoding: 'utf8' })
+// Author identity is set through the environment, not `git config`.
+// GIT_AUTHOR_NAME outranks a repository's user.name and every agent
+// harness exports it, so a fixture that relies on `git config` is
+// authored by whoever runs the suite. See the long note in m0.test.ts.
+const AS = (name: string, email: string) => ({
+  GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email,
+  GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
+})
+const HUMAN = AS('Human Owner', 'human@example.com')
+
+function sh(cwd: string, cmd: string, args: string[], env: Record<string, string> = HUMAN) {
+  execFileSync(cmd, args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8' })
 }
 
 /** A project with one generated→edited commit pair, the M0 shape. */
