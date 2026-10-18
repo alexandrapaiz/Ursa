@@ -11,12 +11,12 @@ description: >
   Does not fire for producing an outcome record, for settling the
   label on an individual span, or for quoting a statistic out of a
   record.
-version: 0.3.0
+version: 0.3.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-05
-revised: 2026-10-15
+revised: 2026-10-18
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -72,7 +72,7 @@ evidence:
     source: ursa-major/src/tuning/export.ts:59-67
   - ref: E18
     what: export drops revoked axioms, groups by domain, orders by evidenceCount, and lists tensions with an ask-do-not-guess instruction
-    source: ursa-major/src/tuning/export.ts:9-15,69-92
+    source: ursa-major/src/tuning/export.ts:43-57,69-92
   - ref: E19
     what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted
     source: ursa-major/src/signals.ts:1-7,111-137
@@ -84,7 +84,7 @@ evidence:
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:166,192-200
+    source: ursa-major/src/resolve-episode.ts:170,192-200
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
     source: ursa-major/src/parse.ts:51,107, ursa-major/src/types.ts:476-477
@@ -133,6 +133,9 @@ evidence:
   - ref: E38
     what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
     source: ursa-major/src/signals.ts:65-79
+  - ref: E39
+    what: every axiom field is flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before it is rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere
+    source: ursa-major/src/tuning/export.ts:8-40
 supersedes: []
 ---
 
@@ -307,6 +310,20 @@ The overlay payload drops revoked axioms too and goes out as ciphertext
 says what is in it. The redaction interaction is an open question in
 the design doc rather than a settled standard [E29], so this step ends
 in a judgment and not in a check.
+
+The rendered block is also the one exit that sanitizes what it carries,
+and that is new since this skill last read the tree. Every axiom field
+is flattened to one line, stripped of control characters and of a
+leading list, heading, quote or fence marker, and cut to a length bound
+before it is rendered [E39]. The reason matters more than the mechanism,
+because it changes what the block is. The block is a set of instructions
+addressed to another model, an axiom's statement is model-written from
+whatever was in the session, and a session routinely holds text the user
+pasted in from somewhere else. So the sanitizer keeps injected text out
+of the block's instruction positions, and that is all it does. It cannot
+tell whether a well-formed one-line rule is a harmful rule, and the code
+says as much about itself. Ours: read the block before you paste it,
+because containment is not review.
 
 ## Judgment
 
