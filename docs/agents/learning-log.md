@@ -2272,3 +2272,120 @@ message wanted. It was what a window owes when its trigger is a courtesy.
 6. **Does `tools/autonomy.py` exist here yet?** Still no.
 7. **#236 is still an orphaned frontend draft.** Not this seat's to
    ready, and still inflating the depth number the owner is handed.
+
+## 2026-10-18 — twelfth window (message dispatch, two senders)
+
+**What woke it.** Two messages, both timestamped 14:01 UTC. A note from
+Ursa's PM confirming the pointer moved to this branch's pull request and
+asking nothing, and a `done` from HQ's `exo-centralizer` correcting one
+of the three board write-path rules the earlier windows had filed.
+
+**Both wakes arrived intact**, which the guard in the charter's board
+section asks to be checked rather than assumed. The PM's note is 1,475
+characters on the board and the centralizer's is 2,243 across nineteen
+short blocks, and the payload of each ended on its sender's own last
+sentence. So a message well over the bus's 1,500-character cut reached
+this run whole, which the cut's description in runner-facts §8 does not
+predict and which is worth one line here rather than a new measurement:
+the truncation is in the **note** path that woke the eleventh window, and
+a `done` of 2,243 characters came through. Next window: if you need the
+boundary exactly, read the bus, do not infer it from two samples. That is
+this run's own lesson applied to this run's own observation.
+
+**The PM's note needed nothing and got nothing.** It asks nothing, the
+ancestry it reports was re-derived by its sender on an unshallowed clone,
+and a second note at 14:08:41 UTC closed its side of the thread
+explicitly. Re-derived here anyway, because a message's state claims
+expire: the pointer it names is open and not a draft. Answered on the
+board in one line and no further.
+
+**The centralizer's correction was right, and confirming it found three
+more.** It said the reason word is required once in the whole body rather
+than once per block, and that a body under forty characters is refused
+outright. Reading the two validator functions in HQ's repository to
+confirm that showed the subsection was wrong in four places, all in the
+same direction, all stricter than the code:
+
+| recorded | actual |
+|---|---|
+| reason word per block | once per body |
+| three reason words | eleven expressions |
+| the code rule catches anything code-shaped, `1500` refused | five specific patterns; bare numbers, dates and `pull request 304` pass |
+| three rules | five, two of which also apply to the subject |
+
+**The cause is one method, not four slips.** Every one of those rules was
+inferred from a refusal message. The validator returns on its first
+match, so a message breaking three rules is told about one; and an error
+message is written to help a person, so the refusal names three reason
+words where the regex accepts eleven. Filed as
+INC-2026-10-18-rules-inferred-from-refusals, with the arithmetic that
+makes it a rule rather than an apology: seventeen permanent probe
+messages bought three rules with one false, and two `gh api` reads of the
+validator bought five rules exactly with nothing left in anybody's inbox.
+
+**The read path is the opposite case and that is the second finding.**
+The centralizer's first line says "I have fixed the read path you
+measured". Its `data` says `stage: written`, its pull request at HQ is
+open, and a probe of the live board twelve minutes after the message
+returned the identical unfiltered shape as this morning: nine queries,
+one honoured filter, an invented parameter still answered with 200. The
+write-path rules above, by contrast, are byte-identical on HQ's `main`
+and on that branch, so they are live right now. **A sibling's fix claim
+is a claim about its repository, not about the service you read**, and in
+this org those differ by however long the owner's queue is. The message
+was honest and complete and a run reading its first line alone would have
+dropped a filter that is still load-bearing.
+
+**What shipped.** Three changes, two files of the agent layer:
+runner-facts §7's write-path subsection rewritten off the source with the
+four errors quoted at the end rather than silently overwritten and its
+checker script replaced, the read-path re-measurement recorded beside the
+old one, and the charter's new section "Read the mechanism before you
+probe the surface". The register's old checker mattered more than it
+looks: other seats run it, and its `\b\d{2,}\b` clause rejected every
+date and every plain number the store accepts.
+
+**Compounding.** One seat's charter, one org doc, one register. The
+charter rule is this seat's only, so the curve is flat on the seats
+measure this window and the honest thing is to say so. What is not flat
+is the method: the next run that needs a fact about the board reads one
+file instead of posting seventeen messages it cannot take back.
+
+**No new identifier.** This window pushed onto the branch the PM's
+pointer already names and closed its own ship-first draft with a pointer,
+which is the second consecutive window to do so. Open pull requests went
+from eleven to ten rather than to twelve. The narrow reading of the
+anti-stacking rule's third exception is holding on its second use, and
+the fourth exception was checked rather than assumed: the standing ask is
+the bold-declaration policy question, which the PM's own reasoning states,
+and not this diff's text, so growing the named pull request was the right
+side of that line.
+
+**This was a message wake and it stayed inside the message.** No weekly
+cycle, no three unsolicited ideas, no experiment. The standard says an
+event-driven run answers its event and stops, so the queue numbers below
+are reported and nothing was re-derived that a window ten minutes earlier
+had already measured.
+
+| | |
+|---|---|
+| open pull requests | 10 after this window closed its own draft |
+| merged in the last seven days | 58 |
+| oldest open | two days |
+| drafts the owner cannot merge | 4, none of them this seat's |
+
+**What the next window must check first.**
+
+1. *Has HQ's read-path fix merged?* One probe: an impossible `from_seat`
+   returning fewer than the broadcast count means yes. Until then keep
+   the client-side company predicate in every read, which the sender
+   asked for explicitly.
+2. *Did the four corrected facts survive?* They are corrections to a
+   register this seat's own windows wrote, so the stale copy on `main`
+   still carries all four errors and will keep carrying them until this
+   merges.
+3. *Is the message-wake truncation actually 1500 for every kind?* This
+   window received a 2,243-character `done` whole. Either the cut is
+   per-kind, or it is per-block, or runner-facts §8's number is wrong.
+   Read the bus rather than collecting samples, which is the whole point
+   of this window's own finding.
