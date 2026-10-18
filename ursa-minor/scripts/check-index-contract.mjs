@@ -16,6 +16,10 @@
 //
 //   node --experimental-strip-types scripts/check-index-contract.mjs
 
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import {
   INDEX_CONTRACT,
   indexUrlFor,
@@ -36,7 +40,7 @@ function check(what, cond, detail = '') {
 }
 
 const base = (over = {}) => ({
-  indexVersion: '0.2.0',
+  indexVersion: '0.3.0',
   publishedAt: '2026-10-18T00:40:16.247Z',
   repository: 'someone/their-repo',
   recordSchemaVersions: ['0.1.0'],
@@ -55,6 +59,9 @@ const base = (over = {}) => ({
       resolvedBy: { basis: 'git_commit', value: '2e0ce00' },
       html: 'records/their-repo-2026-10-16-8dcb0c7.html',
       json: 'records/their-repo-2026-10-16-8dcb0c7.json',
+      address: 'pages/someone/their-repo/their-repo-2026-10-16-8dcb0c7',
+      bytes: 26886,
+      sha256: '0'.repeat(64),
     },
   ],
   ...over,
@@ -64,17 +71,19 @@ console.log('\nthe version gate')
 {
   const ours = `${INDEX_CONTRACT.major}.${INDEX_CONTRACT.minor}`
   // Moved to 0.2 when the resolver seat published 0.2.0 for one additive
-  // field, `address`, and the set view started reading it.
-  check(`pinned at ${ours}`, ours === '0.2')
+  // field, `address`, and the set view started reading it. Moved to 0.3
+  // when that seat published `bytes` and `sha256`, which is what makes
+  // the integrity check below able to run against a real site at all.
+  check(`pinned at ${ours}`, ours === '0.3')
 
   const same = parsePublishedIndex(base())
   check('reads the contract it was written against', same.ok === true && same.note === null)
 
   // The resolver seat's promise is that a minor bump is additive, so a
   // newer minor is readable and the page says what it is not showing.
-  const newer = parsePublishedIndex(base({ indexVersion: '0.3.0' }))
+  const newer = parsePublishedIndex(base({ indexVersion: '0.4.0' }))
   check('reads a newer minor', newer.ok === true)
-  check('and says so rather than silently dropping fields', newer.ok === true && typeof newer.note === 'string' && newer.note.includes('0.3.0'))
+  check('and says so rather than silently dropping fields', newer.ok === true && typeof newer.note === 'string' && newer.note.includes('0.4.0'))
 
   // An older minor is the ordinary case of a site published before a
   // field existed, which is why every summary field is optional.
@@ -84,11 +93,19 @@ console.log('\nthe version gate')
   const older = parsePublishedIndex(base({ indexVersion: '0.1.0' }))
   check('reads an older minor without complaint', older.ok === true && older.note === null)
 
+  // The floor is a floor, not a requirement: a 0.2 site states no digest
+  // and still has to read, which is the whole reason both fields stay
+  // optional on the summary.
+  const twoNoDigest = parsePublishedIndex(
+    base({ indexVersion: '0.2.0', records: [{ id: 'a', json: 'records/a.json' }] }),
+  )
+  check('a 0.2 site with no digest still reads', twoNoDigest.ok === true && twoNoDigest.note === null)
+
   // A major bump means the contract changed incompatibly. Guessing at it
   // is how a page ends up confidently wrong about someone's data.
   const major = parsePublishedIndex(base({ indexVersion: '1.0.0' }))
   check('refuses a different major', major.ok === false)
-  check('and names both versions when it does', major.ok === false && major.error.includes('1.0.0') && major.error.includes('0.2'))
+  check('and names both versions when it does', major.ok === false && major.error.includes('1.0.0') && major.error.includes('0.3'))
 }
 
 console.log('\nwhat is not an index')
@@ -96,7 +113,7 @@ console.log('\nwhat is not an index')
   check('plain text', parsePublishedIndex('not json').ok === false)
   check('an array', parsePublishedIndex([]).ok === false)
   check('json with no indexVersion', parsePublishedIndex({ records: [] }).ok === false)
-  check('an index with no records array', parsePublishedIndex({ indexVersion: '0.2.0' }).ok === false)
+  check('an index with no records array', parsePublishedIndex({ indexVersion: '0.3.0' }).ok === false)
   check('a record that has no id', parsePublishedIndex(base({ records: [{ finalChars: 1 }] })).ok === false)
 
   // A site with nothing published yet is a person, not an error.
@@ -160,9 +177,9 @@ console.log('\nthe integrity claim')
   check('one changed character is caught', bad.state === 'mismatch')
   check('and the mismatch carries both digests', bad.state === 'mismatch' && bad.expected !== bad.got)
 
-  // No contract yet carries a digest: it was asked for on 2026-10-18 and
-  // 0.2 landed for `address` instead. The honest answer is neither a
-  // pass nor a failure.
+  // A 0.1 or 0.2 site carries no digest, and every site published before
+  // 2026-10-18 is one. The honest answer there is neither a pass nor a
+  // failure.
   const none = await verify({ id: 'a', json: 'records/a.json' }, text)
   check('no digest in the index is unverifiable, not verified', none.state === 'unverifiable' && none.reason === 'no-digest-in-index')
 
@@ -170,6 +187,54 @@ console.log('\nthe integrity claim')
   check('bytes are counted as bytes, not characters', (await verify({ id: 'a' }, '€')).bytes === 3)
 
   check('humanBytes', humanBytes(512) === '512 bytes' && humanBytes(50572) === '49 KB' && humanBytes(4045328) === '3.9 MB')
+}
+
+console.log('\ntwo real sites, not hand-written ones')
+{
+  // Everything above asserts behaviour against an object written here,
+  // which can only ever agree with itself. This block reads a site that
+  // `ursa publish` actually wrote, committed under public/fixtures/
+  // site-03/, so the thing being checked is the publisher's bytes and
+  // not this file's idea of them. It is the end of the claim: index on
+  // disk, record on disk, digest computed here, "verified" on the page.
+  const here = dirname(fileURLToPath(import.meta.url))
+  const site = join(here, '..', 'public', 'fixtures', 'site-03')
+  const index = parsePublishedIndex(readFileSync(join(site, 'index.json'), 'utf8'))
+  check('the fixture site parses', index.ok === true)
+  check('and states contract 0.3.0', index.ok === true && index.index.indexVersion === '0.3.0')
+  check('with no note, being exactly the contract this viewer pins', index.ok === true && index.note === null)
+
+  const summary = index.ok === true ? index.index.records[0] : null
+  check('its record states a 64-character lower-case digest', /^[0-9a-f]{64}$/.test(summary?.sha256 ?? ''))
+  check('and a byte count', Number.isInteger(summary?.bytes) && summary.bytes > 0)
+  check('and its own address', typeof summary?.address === 'string' && summary.address.startsWith('pages/'))
+
+  // The bytes as they are on disk, not parsed and re-serialised, because
+  // that is what the digest is over and what a browser would receive.
+  const recordText = readFileSync(join(site, summary.json), 'utf8')
+  check('the index agrees with the file about its length', new TextEncoder().encode(recordText).length === summary.bytes)
+
+  const real = await verify(summary, recordText)
+  check('the published record verifies against its own index', real.state === 'verified', real.state === 'mismatch' ? `expected ${real.expected}, got ${real.got}` : real.state)
+
+  // The failure that matters is the one nobody can stage: a record
+  // quietly replaced without the index being rewritten.
+  const swapped = await verify(summary, recordText.replace('"finished": true', '"finished": false'))
+  check('a record changed under a published index is caught', swapped.state === 'mismatch')
+
+  // And the regression that a floor bump is the natural way to cause.
+  // site-02/ was written by the publisher on `main` before digests
+  // existed, which is what every site published before 2026-10-18 is.
+  // It has to keep reading, silently, and it has to come out
+  // unverifiable rather than failed.
+  const old = parsePublishedIndex(readFileSync(join(here, '..', 'public', 'fixtures', 'site-02', 'index.json'), 'utf8'))
+  check('a real 0.2 site still parses', old.ok === true && old.index.indexVersion === '0.2.0')
+  check('and says nothing about it, being below the floor rather than above it', old.ok === true && old.note === null)
+  const oldSummary = old.ok === true ? old.index.records[0] : null
+  check('its record carries an address but no digest', typeof oldSummary?.address === 'string' && oldSummary.sha256 === undefined)
+  const oldText = readFileSync(join(here, '..', 'public', 'fixtures', 'site-02', oldSummary.json), 'utf8')
+  const oldCheck = await verify(oldSummary, oldText)
+  check('and its record is unverifiable, not failed', oldCheck.state === 'unverifiable' && oldCheck.reason === 'no-digest-in-index')
 }
 
 console.log('')
