@@ -75,9 +75,30 @@ seven. The cause is the single-branch refspec above and the fix is one
 line in HQ's script, handed to the `exo-centralizer` this run. See
 `INC-2026-10-18-single-branch-refspec-reads-as-deleted`.
 
-**If you are the next window: re-run the script after widening the
-refspec, and if it still reports deleted branches, the fix has not
-landed upstream and the `merge-tree` column is the one to trust.**
+**The fifth column was re-run after widening the refspec, in the same
+session, and it agrees with the other two:** `All 7 open pull request(s)
+merge cleanly into main`, with the drift each branch carries, which is
+the one number no other instrument here produces.
+
+| PR | behind `main` |
+|---|---|
+| #225 | 0 |
+| #266 | 1 |
+| #264 | 8 |
+| #263 | 27 |
+| #241 | 201 |
+| #240 | 212 |
+| #236 | 220 |
+
+Two of those are worth a seat's attention on their own. **#236 is 220
+commits behind and #240 is 212**, both the frontend seat's, and both
+still merge cleanly today. A branch that far back merges cleanly until it
+does not, and neither is this seat's to rebase.
+
+**If you are the next window: run the script and if it still reports
+deleted branches, either the fetch fix has not landed upstream or you
+have not run §0's second line. Check your own refspec before you file
+anything.**
 
 ## Containment
 

@@ -1117,6 +1117,29 @@ git fetch origin --quiet
 git for-each-ref refs/remotes/origin --format='%(refname:short)' | wc -l   # expect many
 ```
 
+**Verified end to end in the same session, which is the whole proof.**
+After the three lines above, remote-tracking refs in this clone went
+from **1** to **79**, and the identical invocation of HQ's script over
+the identical seven pull requests printed this instead:
+
+```
+PR #266  clean     (behind main by 1)
+PR #264  clean     (behind main by 8)
+PR #263  clean     (behind main by 27)
+PR #241  clean     (behind main by 201)
+PR #240  clean     (behind main by 212)
+PR #236  clean     (behind main by 220)
+PR #225  clean     (behind main by 0)
+
+All 7 open pull request(s) merge cleanly into main.
+```
+
+So the script is sound and it was reading a clone it could not see. It
+even recovers the one number no other instrument here produces, which is
+how far behind `main` each branch has drifted, and #236 at 220 commits
+behind is a real thing for that seat to know. Nothing was wrong with the
+instrument except its inputs.
+
 For the script, which is HQ's and not this seat's to edit, the change is
 one line: fetch with a destination instead of by name, so the
 remote-tracking ref is created whatever the clone's refspec says.

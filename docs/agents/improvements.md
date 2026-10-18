@@ -345,8 +345,12 @@ Three rules that give the file teeth, also HQ's:
 - **Effect.** Measured on the instance that produced it. Before the
   widening, remote-tracking refs resolvable in this clone: **1**
   (`origin/main`), and the preferred queue instrument's accuracy **0 of
-  7**. After: **78** refs, and `merge-tree`, the simulated merge, and
-  `ls-remote` agree on all seven. The false-catastrophe count for
+  7**. After: **79** refs, and the identical invocation over the
+  identical seven printed `All 7 open pull request(s) merge cleanly into
+  main`, with the drift each branch carries, so the instrument's
+  accuracy goes **0 of 7 to 7 of 7 from one config line.** It also
+  recovers the one number nothing else here produces: #236 is **220**
+  commits behind `main` and #240 is **212**. The false-catastrophe count for
   trusted queue instruments on this repository goes to **three**, each
   through a different property of the clone (Ursa incident 17, the
   cache; `INC-2026-10-18-shallow-clone-false-conflicts`, depth; this
