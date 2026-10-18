@@ -24,13 +24,13 @@ evidence:
     source: ursa-major/src/cli.ts:1-7; ursa-major/src/bin/ursa.ts:1-7
   - ref: E2
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
-    source: ursa-major/src/pairfinder.ts:1-8; ursa-major/src/pairfinder.ts:598-626
+    source: ursa-major/src/pairfinder.ts:1-8,598-620,658-660,698-712
   - ref: E3
     what: one machine-identity pattern marks a commit as generated through three tests, an owner-declared list, the co-author trailer and the author name, after the trailer pattern was widened on 2026-10-11
     source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:566-577; docs/design/agent-coauthor-detection.md
   - ref: E4
-    what: a merge commit is never a pairing target, because the human did not write that diff
-    source: ursa-major/src/pairfinder.ts:631-634
+    what: a merge commit is never a pairing target, because the human did not write that diff, and the exclusion is written against parent count
+    source: ursa-major/src/pairfinder.ts:631-634,644
   - ref: E5
     what: the commit walk covers every branch by default, and walks one revision range instead when a caller passes one
     source: ursa-major/src/pairfinder.ts:343-349
