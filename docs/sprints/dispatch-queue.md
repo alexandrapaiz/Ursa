@@ -1,41 +1,38 @@
-# Dispatch queue — 2026-10-18, ~12:5x UTC, message pass (twenty-sixth)
+# Dispatch queue — 2026-10-18, ~13:1x UTC, message pass (twenty-ninth)
 
-## This pass's event: PR #243 (exo, fifth window) reviewed against the merge rule, not merged
+## This pass's events: PR #246 (exo) and PR #247 (skill) reviewed against the merge rule; both seats' run-finished reports read
 
-The instruction was "review it against the merge rule: merge it, or
-say on the board what it still needs and hand that to its seat."
-Verified independently that #243 subsumes #242, #231 and #234 (and
-#167 through them) with `git merge-base --is-ancestor` on an
-unshallowed clone — all four confirmed ancestors. Its diff touches
-two charter files (`prompts/exo-agent.md`, `prompts/pm-agent.md`)
-alongside eight knowledge-surface files, which is Tier C by the
-literal list under pm.md §10. That list is the same contradiction
-this seat's twenty-third pass already routed to the owner (the §10
-banner and §21 both say no tier waits on her except an authority
-change), with a proposed bold-declaration test this PR's own opening
-line would pass. The silence deadline on that ask is 2026-10-20T12:30
-UTC and nothing has arrived from the owner since, so this pass holds
-to the practice it already committed to rather than adopting its own
-reading on the strength of one convenient test case. **Not merged.**
-Full account in `docs/sprints/pending.md`'s twenty-sixth-pass entry.
-Nothing to hand to exo; the open item is the owner's, not its seat's.
+Four event lines, two pairs covering the same two pull requests.
+**#247 merged under Tier B** — its one `prompts/` file is the
+skill-extract format specification, not the seat's actual charter
+(`prompts/skill-agent.md`, untouched), the same read this seat applied
+to #199 last pass; green checks, clean merge verified with
+`git merge-tree` on an unshallowed clone, no other open PR touching
+`docs/ideas.md`. **#246 closed, superseded by #248** (exo's eighth
+window, opened mid-pass and confirmed by ancestry to contain #246) —
+#248 carries the same two charter files and sits at the same Tier C
+disposition this seat has held all day, pending the owner's word on
+the standing ask (silence deadline 2026-10-20T12:30 UTC). Not merged,
+not a new decision — a pointer move. Full account in
+`docs/sprints/pending.md`'s twenty-ninth-pass entry. Nothing to hand
+to either seat: skill's item shipped, exo's open item is the owner's.
 
 ## Tier B candidates checked fresh this pass: none ready
 
-`gh pr list --state open` shows the same open set modulo #243/#244:
-`#242` (exo, Tier C, now an ancestor of #243, still pending the
-owner), `#241` (engineer, draft), `#240`/`#236` (frontend's own
-drafts), `#225` (this seat's own), `#210` (research, Tier C), `#199`
-(skill, Tier C). None of this pass's own event touches any of them,
-and none independently changed tier since the last pass's check.
-Nothing to merge.
+`gh pr list --state open` after both actions: `#210` (research, Tier
+C, unchanged), `#225` (this seat's own), `#236`/`#240` (frontend's own
+drafts), `#241` (engineer's own draft), `#248` (exo, Tier C, the new
+live tip), `#250` (skill, new draft opened mid-pass, run in progress).
+None independently changed tier since the last pass's check, and
+`#250` has no run behind it to check yet. Nothing to merge.
 
 ## Dispatch: nothing fired
 
-No new criterion fired. This pass's own event is closed (above). The
-seats with open work are each already mid-session on it, which
-§11.4 rules out dispatching into without an instruction to build on
-that exact branch, and this pass has no such instruction to give.
+No new criterion fired. Both of this pass's own events are closed
+(above). Every seat with open work is already mid-session on it,
+which §11.4 rules out dispatching into without an instruction to build
+on that exact branch, and this pass has no such instruction to give
+any of them.
 
 ## Failed-run triage this pass (§11.7)
 

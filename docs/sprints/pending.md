@@ -2,6 +2,76 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Twenty-ninth pass, 2026-10-18 ~13:1x-13:2x UTC, message: PR #246 (exo) and PR #247 (skill) reviewed against the merge rule, exo's and skill's run-finished reports read
+
+1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
+   (#225) is still this seat's own open pull request, now carrying
+   twenty-eight prior passes. Checked out from `FETCH_HEAD`, confirmed
+   the twenty-eighth pass's commit (`6c44cc9`) as the tip, and
+   continued on it.
+
+2. **PR #247 (skill) merged under Tier B.** `gh pr diff 247
+   --name-only`: seven files — `docs/ideas.md`,
+   `prompts/skill-extract.md`, `skills/README.md`,
+   `skills/check-evidence.mjs` and its test, `skills/relocate-anchors.mjs`
+   (new) and its test. `prompts/skill-extract.md` is the format
+   specification, not `prompts/skill-agent.md` (the seat's actual
+   charter, untouched here) — the same read this seat applied to
+   #199's twenty-seventh pass, confirmed again by `skill-agent.md`'s
+   own boundary line naming `prompts/skill-extract.md` as this seat's
+   normal write surface, not a charter. Not a draft, no `hold` label,
+   no comments. Checks green (`scan`/`redaction-gate`: `SUCCESS`).
+   Confirmed the clone was shallow (`git rev-parse
+   --is-shallow-repository` → `true`), ran `git fetch --unshallow`,
+   then `git merge-tree --write-tree --name-only origin/main
+   refs/prs/247` returned a tree with no conflicting paths — merges
+   clean, not trusting the cached `mergeable`/`mergeStateStatus` alone.
+   No other open PR touches `docs/ideas.md`. Merged normally
+   (`e1b3bf6`).
+
+3. **PR #246 (exo, seventh window) closed, superseded by #248 (exo's
+   eighth window, opened mid-pass).** `gh pr diff 246 --name-only`
+   lists ten files including `prompts/exo-agent.md` and
+   `prompts/pm-agent.md` — held Tier C, same disposition as
+   #242/#243/#245 before it, under the standing ask to the owner
+   (6e2e7e38, 12:29:59Z silence deadline 2026-10-20T12:30 UTC), per
+   the twenty-eighth pass's own finding. Checking it fresh rather than
+   trusting that finding's timestamp: `gh pr view 248` shows `OPEN`,
+   not a draft, `CLEAN`/`MERGEABLE`, one check green, and its own body
+   says it is built on #246 (`exo: build this window on refs/prs/246`).
+   `git merge-base --is-ancestor refs/prs/246 refs/prs/248` confirms
+   #246's tip is a strict ancestor of #248's current tip on an
+   unshallowed clone. #248 carries the same two charter files
+   (confirmed in its own body: "`prompts/pm-agent.md` (+71/-0),
+   inherited from #246"), so it sits at the identical Tier C
+   disposition, same silence deadline — this is a pointer move, not a
+   new decision. exo's own board note asked this seat to read #246
+   first "if she wants to answer on one diff instead of two," since
+   #248 is the larger stack; not adopting that as a reason to leave
+   both open, for the same reason the twenty-eighth pass did not leave
+   #245 open beside #246 — a strict ancestor of a later open tip adds
+   a second artifact to track for no decision it changes, and this
+   seat has closed every such ancestor today rather than keep one.
+   Closed #246 with a comment naming the ancestry check and #248 as
+   the new live tip.
+
+4. **Nothing new to merge or hand off beyond the above.** `gh pr list
+   --state open` after both actions: #210 (research, Tier C,
+   unchanged), #225 (this seat's own), #236/#240 (frontend's own open
+   drafts), #241 (engineer's own open draft), #248 (exo, Tier C, the
+   new live tip), #250 (skill, new draft opened mid-pass, "-b" suffix,
+   run in progress — not actionable, nothing to check yet). Per §11.4,
+   none of the seats with open work of their own is dispatched into
+   without an instruction to build on that exact branch, and this pass
+   has no such instruction for any of them.
+
+5. **Failed runs: none.** `gh run list --status failure --created`
+   over the last six hours is empty.
+
+6. **Board.** Posted one `note` on `Ursa`/`pm`'s own inbox pass log
+   naming the merge, the closure, and the unchanged owner-ask clock;
+   posted one closing `done` naming the pass.
+
 ## Twenty-eighth pass, 2026-10-18 ~13:0x-13:1x UTC, message: exo's note that the hold it was about to restore was already retired, and that the breach was its own previous window's
 
 1. **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message`
