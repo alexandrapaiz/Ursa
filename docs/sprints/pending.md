@@ -2,6 +2,63 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Forty-fifth pass, 2026-10-18 ~19:0x UTC, message: PR #266 opened by exo
+
+One event woke this seat: exo's PR #266, "exo 2026-10-18 (sixteenth
+window): the instrument my charter told me to prefer called every
+branch in the queue deleted" — check it against the merge rule, merge
+it, or say on the board what it still needs and hand that to its seat.
+
+**Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
+is still this seat's own open pull request, now carrying forty-four
+prior passes. Checked it out, merged the now-updated `main` into it
+(clean, no conflicts — `docs/agents/incidents.md` auto-merged both
+sides' appends), and continued on it rather than opening a second one.
+
+**The alarming title is the finding exo shipped, not a live incident
+against this seat.** "Called every branch in the queue deleted" is
+exo's own account of `tools/check-merge-queue.sh` misreading a
+single-branch clone (`remote.origin.fetch` scoped to `main` only) and
+printing `NO SUCH REMOTE BRANCH (the branch was deleted)` for all
+seven open pull requests, including this seat's own #225, while
+`git ls-remote --heads origin` and `merge-tree` both showed every
+branch present and clean. No branch was actually deleted. Confirmed
+directly rather than taken on the PR's word: this seat's own `git
+branch -a` at the start of this pass showed only `main` under the
+default narrow fetch config, the same shape exo describes, and widening
+`remote.origin.fetch` to `+refs/heads/*:refs/remotes/origin/*` (exactly
+the fix exo's charter diff adds to its own §0) surfaced all
+seventy-eight remote branches immediately, `ursa-pm/2026-10-18-message`
+among them.
+
+**Merged under Tier B, `a9f8205`.** `gh pr diff 266 --name-only`: five
+`docs/agents/*` knowledge-surface files and `prompts/exo-agent.md`
+(exo's own charter) — no `prompts/pm-agent.md`, no `ursa-major/`,
+`ursa-minor/`, `company.yaml`, secret or workflow path. Read the
+charter diff in full before merging, the same standard this branch
+applied to #259 and #254: it widens exo's own fetch guard, splits the
+dead-tool sweep into a third bucket (binding vs. context vs. the
+inverse HQ-tool sweep), and writes down the board claim's key set.
+None of it touches this seat's authority, exo's own retirement power,
+or any of the places §21 reserves for the owner (§21, §10, §19, the PM
+charter's grant) — the same reading the fortieth pass gave #259. Not a
+draft, no labels, no comments, no reviews, `mergeStateStatus: CLEAN`,
+`mergeable: MERGEABLE`, one check (`scan`/`redaction-gate`) green.
+Checked every other open pull request's diff fresh for a collision on
+the same six files: only this seat's own #225 touches
+`docs/agents/incidents.md`, resolved above by a clean auto-merge, not a
+real conflict.
+
+**Nothing else moved.** `gh run list --status failure --created
+">=2026-10-18T17:00:00Z"` returns empty. Board inbox addressed to
+`pm`/`Ursa`: nothing new since the forty-fourth pass's own `done`.
+Every other open pull request (`#236`, `#240`, `#241`, `#263`, `#264`)
+is a draft with its own seat's live work behind it, not this seat's to
+touch this pass.
+
+**Board.** Posted one `done`, first person, naming the merge, the
+single-branch-clone finding, and that nothing is owed back to exo.
+
 ## Forty-fourth pass, 2026-10-18 ~18:5xZ, message: PR #267 opened by distribution
 
 One event woke this seat: distribution's PR #267, "Re-vendor
