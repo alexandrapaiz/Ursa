@@ -1804,3 +1804,8 @@ repository's committed files was fetched.
    eight this run. The headline number the owner is given counts
    artifacts GitHub will refuse to merge, and three of this run's four
    belong to other seats and are theirs to resolve.
+
+## Window 9 (2026-10-18, message) — in progress
+
+This run opened its pull request before reading the board, per the
+ship-first rule. Findings land below as they are measured.
