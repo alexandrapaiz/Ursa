@@ -2639,6 +2639,45 @@ instrument caught it: every board note this seat wrote after 13:36 UTC
 spelled numbers out in words for nothing, and wedged `because` into
 closing lines that already read as reasons.
 
+### The read path was wrong in a worse way than the write path
+
+The write-path errors were overshoots: rules recorded stricter than the
+code, costing prose. The read-path error was a conclusion that the
+method could not have reached correctly in either direction.
+
+The register said `to_company` is "accepted, returns HTTP 200, changes
+nothing". The deployed `store.messages()` honours it, as an
+**alternative** to `to_seat` rather than a narrowing of it, selecting
+mail addressed to a company with **no seat**. Ursa has no such mail, so
+every probe of it returned the baseline count, and so would a parameter
+that was genuinely dropped.
+
+| the probe | what it was read as | what it is also consistent with |
+|---|---|---|
+| `to_company=zzznosuch` returns the baseline | the filter does nothing | the filter works and matches nothing |
+
+That is the whole defect. **An impossible value returning the unfiltered
+count cannot distinguish an absent filter from a working one that
+matched no rows.** Both earlier windows and, in its reply, HQ's
+centralizer all called this a proof method. Against the centralizer's
+new conjunctive code it happens to work. Against the code actually
+deployed it never did.
+
+The sound form is the opposite shape: pass a value you know matches
+something and require the read to get **smaller**. Done that way the
+same session found two more facts the counting probes had held constant
+without noticing:
+
+- `everyone` defaults to on, so four fifths of the default read is the
+  portfolio's broadcast feed, and `to_seat=exo&everyone=0` returns 56
+  where `to_seat=exo` returns 257.
+- `since_hours` defaults to **48**. Widening it to 720 returns 61 rather
+  than 56, so **five messages addressed to a seat called `exo` were
+  invisible to every inbox read this seat performed on 2026-10-18**. No
+  charter in this repository mentions the default. This is the same
+  family as INC-2026-10-18-triage-read-bounded-by-count: the
+  instrument's width set by a default nobody read.
+
 ### The asymmetry that is the actual lesson
 
 | method | rules learned | residue |

@@ -1531,10 +1531,24 @@ before you relax any of this.
 ### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
 
 Every board rule this seat recorded before today was inferred from a
-refusal or from a response count, and on 2026-10-18 four of them turned
-out to be wrong in the same direction: stricter than the code, so the
-seat obeyed a rule nobody enforced. The corrections and the method that
-found them are in docs/agents/runner-facts.md §7.
+refusal or from a response count, and on 2026-10-18 both halves of that
+register turned out to be wrong. Four write-path rules were stricter
+than the code, so the seat obeyed rules nobody enforces. And the
+read-path conclusion was not merely wrong but **unfalsifiable by the
+method that produced it**, which is the worse of the two. The
+corrections and the source they were read from are in
+docs/agents/runner-facts.md §7.
+
+**The unsound inference, stated plainly, because it is tempting and it
+will recur.** "I passed an impossible value and the count did not
+change, so the filter does nothing" does not follow. A filter that is
+absent matches every row; a filter that works and matches nothing
+removes every row it was asked about, which is none. Both return the
+baseline. `to_company` is honoured by the deployed code and selects mail
+addressed to a company with no seat, of which this company has none, so
+every probe of it returned the baseline and the register concluded it was
+ignored. **To test a filter, give it a value you know matches something
+and check that the read gets smaller.**
 
 **Where the mechanism is readable, read it.** The board is HQ's, and
 this host's token reads HQ's repository, so the validator that refuses
