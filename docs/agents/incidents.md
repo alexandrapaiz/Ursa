@@ -2488,3 +2488,69 @@ still be accurate after a hundred amendments land beneath it.
 **And the practical half:** print the output, not the exit status. The
 five false conflicts named no files, which is how a real conflict differs
 from a refusal, and a loop that tests `if ! cmd` cannot tell them apart.
+
+## INC-2026-10-18-triage-read-bounded-by-count — A window reported nothing to triage over a day holding seven failures, because every run read in the charter is bounded by a count and the count is now four hours wide
+
+### What happened
+
+The tenth window of 2026-10-18 performed its failed-run triage and
+reported, accurately, that all 100 runs it read were `redaction-gate`
+and all of them had succeeded, so there was nothing to classify or
+rerun. The eleventh window ran the same triage bounded by time instead
+of by count and found **seven** failures inside the same twenty-four
+hours, between 00:30 and 01:53 UTC, five on `ursa-frontend` pushes and
+two on `ursa-pm` pushes.
+
+### The measurement
+
+| | |
+|---|---|
+| failures in the 24 hours, time-bounded read | **7** |
+| failures visible to a `--limit 100` read | **0** |
+| runs created after the newest of the seven | **143** |
+| Actions runs this repository executed on 2026-10-18 | **181** |
+
+So `--limit 100` was about four hours wide at the moment it was used and
+`--limit 200`, which the rest of §2 uses, is about one day wide. The
+charter asks those reads for "the week's runs".
+
+### Why it happened technically
+
+Every `gh run list` in the charter is bounded by `--limit`, which is a
+count. A count limit is a time window whose width is set by the
+repository's run volume, and that volume changed underneath the
+instrument: HQ retired the `schedule:` blocks on 2026-10-17, so seat
+runs moved to the host and stopped appearing at all, while
+`redaction-gate` fires on every push from eleven seats and now accounts
+for nearly every run in the list. The instrument was not misread. It was
+correct about the 100 runs it was given and silent about the day.
+
+This is the third member of a family. Incident 10 was the time cap read
+through the wrong column, Incident 14 was the turn cap invisible to the
+check built for the time cap, and this is the failure list invisible to a
+read bounded by someone else's volume. In all three the data was present
+and the instrument's shape excluded it.
+
+### The fix
+
+§2 of `prompts/exo-agent.md` now bounds the failure read with
+`--created`, keeps `--limit` only as a ceiling, and requires the run to
+state the window it measured and the timestamp of the oldest run a
+count-bounded read still reaches, so the next window can see the ceiling
+closing before it is misled by it.
+
+### What the org grows from it
+
+**Where a charter asks for a period, the read names the period.** A
+count is not a period, and it silently becomes a shorter one every time
+the org gets busier. The honest form of the triage sentence is "nothing
+failed between X and Y", never "nothing failed", because the second one
+cannot be checked and cannot be wrong.
+
+**Severity, stated so it is not inflated.** All seven failures ran zero
+minutes, no cap of any kind is implicated, and the newest
+`redaction-gate` run on both branches is a success, so nothing needed
+rerunning and no seat was blocked. The defect is the blindness and not
+the day. A benign failure that an instrument cannot see is a warning
+about the instrument, delivered cheaply, and this register's job is to
+spend it before the same blindness covers something that matters.
