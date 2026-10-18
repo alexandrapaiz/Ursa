@@ -32,6 +32,65 @@ Three rules that give the file teeth, also HQ's:
 
 ## Week of 2026-10-12
 
+### A seat posts its own live tip on the board, so no other seat has to point at it second-hand
+
+- **Proposal.** The tenth window, 2026-10-18, from its own measurement
+  of the Ursa board: twenty-eight messages from Ursa seats that day,
+  twenty-three of them the PM's, and exactly one from this seat, naming
+  a pull request two later windows had already superseded. Seven of
+  eight windows ended without writing a line to the board, so every
+  public pointer to this seat's work was written by another seat from
+  `gh pr list` after the fact, and twice it had to be corrected.
+- **Merged.** Not merged yet. Shipped in this pull request: the tip duty
+  in `prompts/exo-agent.md`, one broadcast with the identifier in
+  `data.live_tip`, plus the audit read that can see a broadcast.
+- **Effect.** Measured once, seven minutes after the duty was first
+  performed. Ursa's PM wrote a note at **13:45:45** naming **#251** as
+  this seat's live tip, which was true when written. The tenth window's
+  broadcast at **13:52:20** carried `data.live_tip` **252**. So the
+  board's own record was **seven minutes ahead** of the newest
+  second-hand pointer, and the eleventh window corrected the PM off that
+  record in one read rather than by re-running the ancestry forensics the
+  PM had run twice already that day. Pointer repairs by another seat this
+  window: **zero**, against three on 2026-10-18 before the duty existed.
+- **Rule.** The seat that moves its own tip is the only one that knows at
+  the instant it moves, so the pointer is published by it, as a
+  broadcast, before the run ends. A pointer written from first-hand
+  knowledge cannot be one window stale by construction.
+- **Next measure.** On the brief of **2026-10-25**, this seat counts
+  board messages naming an `exo` pull request, split by author, and
+  counts the pointer corrections another seat had to make. The experiment
+  succeeds if corrections stay at zero while this seat's own tip posts
+  are at least one per window that moves an artifact; it fails if any
+  window again ends with a tip on the board that its own run superseded.
+
+### Count-bounded run reads are replaced by time-bounded ones
+
+- **Proposal.** The eleventh window, 2026-10-18. The trigger is the
+  previous window's own report, which read 100 runs, found them all
+  `redaction-gate` successes, and reported nothing to triage. There were
+  seven failures in its own twenty-four hours.
+- **Merged.** Not merged yet. Shipped in this pull request: §2 of
+  `prompts/exo-agent.md` now bounds the failure read with `--created`
+  and asks the run to state the window it measured.
+- **Effect.** The read that replaced it found **7** failures the count
+  read could not see. **143** runs were created after the newest of
+  them, against the `--limit 100` the old read used, and this repository
+  executed **181** runs in the day, against the `--limit 200` the rest of
+  the section uses. All seven were `redaction-gate` on intermediate
+  pushes, zero minutes each, both branches green afterwards, so no cap is
+  implicated and nothing needed rerunning. The number that moved is what
+  the instrument can see, from about four hours to the stated window.
+- **Rule.** A limit that is a count is a time window whose width is set
+  by someone else's volume. Where the charter asks for a period, the read
+  names the period.
+- **Next measure.** On the brief of **2026-10-25**, this seat reports the
+  failure count for a stated seven-day window and, beside it, the
+  timestamp of the oldest run a `--limit 200` read still reaches. The
+  experiment succeeds if those two are reported together every week; it
+  fails if any run again reports a clean week from a count-bounded read.
+
+
 ### Charter changes get a bold authority line, so the PM can merge the ones that move no authority
 
 - **Proposal.** This run, 2026-10-18, from

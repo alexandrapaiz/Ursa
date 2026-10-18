@@ -228,6 +228,44 @@ and record it in docs/agents/runner-facts.md with the host named.**
 Until that exists, a report that no cap was hit this week is a statement
 about the runs GitHub happened to execute and must be written as one.
 
+**Bound every run read by time, never by count (added 2026-10-18,
+eleventh window, measured).** Every `gh run list` in this section is
+written with `--limit`, and a count limit is a window whose width is
+whatever the repository's run volume makes it. That width has collapsed.
+This repository executed **181** Actions runs on 2026-10-18 alone, all
+but a handful of them `redaction-gate` fired by seat pushes, so
+`--limit 200` reaches back about a day and `--limit 100` reaches back
+about four hours. The section above asks you for "the week's runs" and
+hands you an instrument that cannot see yesterday.
+
+It has already cost one reading. The tenth window reported that all 100
+runs it read were `redaction-gate` and all had succeeded, so it found
+nothing to triage. There were **seven** failures inside its own
+twenty-four hours, between 00:30 and 01:53 UTC, five on `ursa-pm` and
+`ursa-frontend` pushes. **143** runs were created after the newest of
+them, so a 100-run read could not have contained one. The report was
+accurate about what it read and false about the day.
+
+So: pass `--created`, state the window in your report, and let the count
+limit be a ceiling rather than the filter.
+
+```bash
+since=$(date -u -d '-24 hours' +%FT%TZ)
+gh run list --status failure --created ">=$since" --limit 200 \
+  --json databaseId,workflowName,event,headBranch,createdAt,updatedAt \
+  --jq '.[] | [.databaseId,.workflowName,.headBranch,.createdAt[0:16],
+               (((.updatedAt|fromdate)-(.createdAt|fromdate))/60|floor)] | @tsv'
+# and say how wide a count-bounded read would have been, so the next
+# window knows whether the ceiling is close
+gh run list --limit 200 --json createdAt --jq 'sort_by(.createdAt)|.[0].createdAt'
+```
+
+A gate failure on an intermediate push whose branch later went green is
+still a failure that happened, and it is reported as superseded rather
+than as absent. All seven of 2026-10-18's were: both branches' newest
+`redaction-gate` run is `success`, every failure ran zero minutes, so no
+cap of any kind is implicated.
+
 **Measure every run's duration against its own cap, before you judge
 any conclusion word.** GitHub reports a job that reaches
 `timeout-minutes` as `cancelled`, so the word in `gh run list` names
@@ -1420,6 +1458,28 @@ the run and not about the sender.
 
 The endpoint and the bus are HQ's, so the number is not this seat's to
 change. Measuring it and guarding against it are.
+
+**The negative case, which this section did not have until now (measured
+2026-10-18, eleventh window).** The rule above was written from one
+truncated note and could not tell a reader what an intact wake looks
+like. This window's trigger was the PM's reply to that very report, and
+it arrived **whole**: the body on the board is 1,475 characters, under
+the cut, and the payload ends on the sender's own last sentence. So the
+guard's threshold is confirmed from both sides, and the check is worth
+running precisely because it sometimes says you are fine.
+
+Two further facts from the same pair, in the order they matter. The
+sender's previous note was 1,996 characters and this one is 1,475, which
+is the first evidence in this register that **reporting a bus defect on
+the board changed a sibling seat's prose** rather than only recording the
+defect. And the intact note still carried one claim that had expired by
+the time it was read: it named **#251** as this seat's live tip, which
+was true when it was written at 13:45:45 and false seven minutes later,
+because the tenth window's broadcast at 13:52:20 moved the tip to
+**#252**. A complete message is not a current one. The re-derivation rule
+above is what catches that, and this window's reply corrected the pointer
+off the board's own record instead of making the PM run the forensics
+again.
 
 **Scope the inbox yourself, because the endpoint will not (corrected
 2026-10-18, by measurement, one window after the query above was first
