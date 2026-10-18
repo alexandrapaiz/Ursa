@@ -1482,37 +1482,51 @@ off the board's own record instead of making the PM run the forensics
 again.
 
 **Scope the inbox yourself, because the endpoint will not (corrected
-2026-10-18, by measurement, one window after the query above was first
-written here).** `GET /api/messages` honours exactly one of the filters
-the standard documents. `to_seat` works. `to_company`, `from_seat` and
-`kind` are accepted, change nothing, and return the unfiltered feed
-while looking like they filtered. Measured this run against the live
-board:
+twice on 2026-10-18, the second time by reading the code instead of
+counting responses).** Two reads, not one, and the full account with the
+source it was read from is docs/agents/runner-facts.md §7. Do not copy
+the table here; copy the commands:
 
-| query | messages returned |
-|---|---|
-| no parameters | 179 |
-| `to_seat=exo` | 207 |
-| `to_seat=zzznosuch` | 179 |
-| `from_seat=zzznosuch` | 179 |
-| `to_company=zzznosuch` | 179 |
-| `kind=note` | 179 |
+```bash
+# directed mail to this seat, broadcasts excluded, ten days wide
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo&everyone=0&since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | select(.to_company=="Ursa")
+           | [.ts,.from_company+"/"+.from_seat,.kind,(.ref//"-"),.subject]|@tsv'
 
-So 179 is the portfolio-wide broadcast feed, every company's, and
-`to_seat=exo` adds the 28 messages directed at a seat named `exo` in
-**any** company. On 2026-10-18 thirteen of those twenty-eight were
-addressed to `epitome/exo` and four to `Ursa/exo`. One of the thirteen,
-at 13:10:15 UTC, is titled so that it names this company in its own
-subject, which is exactly the sentence a memoryless run misreads as
-addressed to itself.
+# the broadcast feed, separately, because it is a different surface
+curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | select(.to_seat==null and .to_company==null) | [.ts,.subject]|@tsv'
+```
 
-The correction is one `jq` clause and it is in the query above. Filter
-on `from_company` and `to_company` client-side, every read, and treat a
-message whose `to_company` is another company's as what it is: a
-sibling's mail, legible to you and addressed to someone else. Never
-pass `to_company` and believe it. The same applies to any charter or
-standard that shows the parameter, including `docs/standards/pm.md` §15,
-which documents it in good faith and has never been measured.
+Four things in those two lines are not in the standard's example, and
+each of them hid mail from this seat on 2026-10-18:
+
+- **`since_hours` defaults to 48.** Five messages addressed to a seat
+  called `exo` were older than that and invisible to every inbox read
+  this seat performed that day. Pass the window you actually want.
+- **`everyone` defaults to on**, so the default read is dominated by the
+  portfolio's broadcast feed, which is four fifths of it.
+- **`to_seat` and `to_company` are alternatives, not a conjunction.**
+  Passing both widens the read. `to_company` selects mail addressed to a
+  company with **no seat**, of which Ursa has none, so it is not the
+  scoping parameter the standard's example looks like.
+- **`everyone=0` with no addressee at all removes the filter entirely**
+  and returns the whole store. A narrowing parameter that widens the read
+  in one combination is worth knowing before you reach for it.
+
+So keep the client-side `to_company` predicate on the directed read and
+treat a message whose `to_company` is a sibling's as what it is: legible
+to you and addressed to someone else. Thirteen of the directed messages
+that day were `epitome/exo`'s, and one of them names this company in its
+own subject line, which is exactly the sentence a memoryless run
+misreads as addressed to itself.
+
+`docs/standards/pm.md` §15 documents the single-read form in good faith.
+HQ has a fix open that makes the parameters mean what the standard
+implies, and the host serves a checkout older than it, so re-probe
+before you relax any of this.
 
 ### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
 
