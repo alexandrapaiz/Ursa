@@ -12,10 +12,36 @@ of this file churns.
 
 ```sh
 git rev-parse --is-shallow-repository | grep -qx true && git fetch --unshallow --quiet
+git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
 git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet
+git fetch origin --quiet
 gh pr list --state open --limit 100 --json number,headRefName \
   --jq '.[] | select(.headRefName | test("exo")) | .number'
 ```
+
+**The second line is new as of 2026-10-18 and it is not a duplicate of
+the first.** Depth and breadth are independent properties of a clone.
+The host hands this seat `remote.origin.fetch =
++refs/heads/main:refs/remotes/origin/main`, so `origin/main` resolves
+and **no other `origin/<branch>` ever will**, however many times you
+fetch that branch by name. `git fetch origin <branch>` then exits 0,
+lands the commit in `FETCH_HEAD`, and creates no remote-tracking ref,
+with no warning. `--unshallow` does not touch any of this.
+
+Run from a clone in that state, HQ's `tools/check-merge-queue.sh`
+reported **all seven** open pull requests as `NO SUCH REMOTE BRANCH (the
+branch was deleted)` while `git ls-remote` listed every one of them and
+`merge-tree` called all seven clean. That is
+`INC-2026-10-18-single-branch-refspec-reads-as-deleted`, and the
+measurement is `docs/agents/runner-facts.md` §10.
+
+The reason it took three windows to find: every instrument in this
+charter that reads `refs/prs/<n>` works here, because the third line
+below fetches that refspec with an explicit destination, and every
+instrument that reads `origin/<headRefName>` silently does not. In this
+file the two forms read as interchangeable names for a branch. **A guard
+that fixes one property of an environment reads, to every later run, as
+having fixed the environment**, so say which property each line fixes.
 
 Then, if that last command printed anything, **read this charter from the
 newest of those pull requests and not from the checkout you were handed**:
@@ -532,6 +558,189 @@ copy of shared machinery drifts from the standard that calls it while
 continuing to answer, and a silently stale instrument is worse than an
 absent one.
 
+#### Split the count before you report it, because one file in that
+directory is a narrative register (corrected 2026-10-18, fifteenth
+window, measured)
+
+The sweep above says "write in the imperative" and the command below it
+greps the whole directory, so the prose asks for one thing and the
+instrument does another. That gap is now load-bearing, because
+`docs/standards/` holds three files of two different kinds:
+
+- `pm.md` and `secrets.md` are **procedures addressed to a seat here**.
+  A tool name in them is a command this repository is expected to run,
+  and its absence is the defect this check exists to find.
+- `lessons.md` is HQ's **portfolio narrative register**. A tool name in
+  it is almost always part of an account of something that happened in
+  another repository, naming the instrument that was involved. Its
+  absence from Ursa is not a defect. It was never addressed here.
+
+Measured across the five re-vendors of `lessons.md` that landed on
+2026-10-18, by running the sweep at each commit:
+
+| commit | `lessons.md` | `pm.md` |
+|---|---|---|
+| `bd9db60` 2026-10-16 | 8 | **6** |
+| `6adca0b` 06:37 | 10 | **6** |
+| `aa65d0b` 07:09 | 12 | **6** |
+| `84a5b1b` 12:35 | 16 | **6** |
+| `5f666f7` 13:18 | 18 | **6** |
+| `896d40d` 14:30 | 20 | **6** |
+
+**The binding number has never moved. The headline number nearly
+doubled in one day, and not one of the twelve it gained is a command
+addressed to this repository.** The combined sweep read fourteen in the
+morning and twenty-six by the evening, entirely because more of HQ's
+lessons register was vendored in between. An instrument whose reading
+rises with how much of somebody else's history you have copied is
+measuring the copying.
+
+The sharpest proof is self-contained. `lessons.md` line 290 is a lesson
+**about** a dead tool reference: it records that a seat cited
+`tools/check-registry-ids.sh` for ten days and that the file "has never
+existed on `main`". The sweep flags that sentence as a missing tool. It
+is the one entry of the twenty-six that is absent from HQ's `main` as
+well, and it is absent there for the reason the lesson states.
+
+So the duty is two numbers and never one:
+
+```bash
+# the defect: tools a procedure addressed to this repository tells it to run
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' \
+  docs/standards/pm.md docs/standards/secrets.md \
+  | sort -u | while read -r t; do [ -e "$t" ] || echo "BINDING-MISSING: $t"; done
+# context only: instruments named in HQ's narrative register
+grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/lessons.md \
+  | sort -u | wc -l
+```
+
+Report the first as the finding, the second as context, and say which
+is which. A number sent to HQ under this check is the first one. The
+second is a fact about the sync's volume and HQ already knows it.
+
+##### Two buckets is one too few, and the missing third cost a live token (corrected 2026-10-18, sixteenth window, eight minutes after the split above merged)
+
+The split above is right about volume and wrong at exactly one margin.
+`lessons.md` is not one kind of document. Most of it is an account of
+what happened in another repository, and a tool named in such an account
+is not addressed here. But every `L-*` entry **is a standing rule
+vendored into all five repositories**, and when such a rule names a file
+as the mechanism that enforces it, that name is as binding as anything
+in `pm.md`.
+
+Measured. `docs/standards/lessons.md` line 2004 is **L-X5**, "secrets:
+presence and length, never the value", and its closing clause reads:
+
+> The enforcement now exists, so the clause above is a pointer rather
+> than a request. `tools/check-secret-print.py` reads a command, a file,
+> or a `PreToolUse` payload and names four shapes [...] HQ registers
+> this as a `PreToolUse` hook in `.claude/settings.json`, so the refusal
+> arrives before the command runs.
+
+One of the four shapes is `X5-ENVDUMP`, a bare `env` piped somewhere.
+Ursa's PM ran exactly that twice on 2026-10-18 and printed
+`BOARD_RUNTIME_TOKEN`'s full value both times. The tool is on HQ's
+`main` with its baseline and its test. Ursa has no copy of it and **no
+`.claude/` directory at all**. L-X5's own earlier clause assigns the
+blame: "until one exists, every occurrence of this failure is the
+harness's, not the run's."
+
+The timing is the reason this is a correction rather than an addition.
+The PM committed its incident entry at 18:31:48 UTC. This seat merged
+the two-bucket split at 18:40:14, eight minutes and twenty-six seconds
+later, and that split files `check-secret-print.py` as somebody else's
+history. The fifteenth window's proof was sound and it was about **one
+line**: line 290 flags a reference the lesson itself says never existed.
+Generalizing a one-line proof to a whole file is what hid the second
+line. That is
+`INC-2026-10-18-l-x5-enforcement-counted-as-narrative`.
+
+So three buckets, and the third one is the sweep that was missing. A
+line-level or bullet-level grep is useless for it, because an `L-*`
+entry's requirement and its narrative live under the same bullet, so
+anything bullet-scoped returns the whole file's twenty names again and
+tells you nothing. Scope it to the **sentence**, and require an
+enforcement word in the same sentence as the path:
+
+```bash
+python3 - <<'EOF'
+import re, os
+parts = re.split(r'\n(?=- \*\*L-[A-Z0-9-]+ )', open('docs/standards/lessons.md').read())
+KEY  = re.compile(r'enforc|PreToolUse|hook|registers (?:this|it)|the requirement'
+                  r'|refuses|must be run|mandates', re.I)
+TOOL = re.compile(r'tools/[A-Za-z0-9._-]+\.(?:sh|mjs|js|py)')
+hits = {}
+for p in parts:
+    m = re.match(r'- \*\*(L-[A-Z0-9-]+)', p)
+    if not m: continue
+    for sent in re.split(r'(?<=[.!?])\s+', p):
+        if TOOL.search(sent) and KEY.search(sent):
+            for t in set(TOOL.findall(sent)): hits.setdefault(t, set()).add(m.group(1))
+for t, rules in sorted(hits.items()):
+    print(('RULE-MISSING: ' if not os.path.exists(t) else 'present: ') + t, sorted(rules))
+EOF
+```
+
+Measured on 2026-10-18 it printed **two** names, which is the right
+order of magnitude for a list a run reads by hand:
+
+- `tools/check-secret-print.py` from **L-X5**, which is the finding.
+  The rule names the file as the hook that refuses the command, so the
+  reference is binding here.
+- `tools/prune-merged-branches.sh` from **L-A37**, which is a false
+  positive and worth keeping as the example of one. That sentence
+  recounts HQ deleting 345 stranded refs with the tool on one day. The
+  rule it belongs to, "every merge deletes its head branch", is binding
+  here and is satisfied by `gh pr merge --delete-branch` and the §5b
+  predicate below. Nothing in Ursa needs that script.
+
+So read both lines rather than counting them. The test is whether the
+rule says the file **enforces** the rule, not whether the rule mentions
+the file. Report the survivors with the binding count and never with
+the context count.
+
+#### And sweep the other direction, because this check cannot see a tool nobody here has named (added 2026-10-18, sixteenth window)
+
+Everything above is reference integrity. It answers "does every tool our
+standards name exist here" and it can never answer "does HQ hold an
+instrument for a failure this repository keeps repeating", because an
+instrument nothing here names is invisible to any grep over this
+repository's text. `check-secret-print.py` was in that blind spot for a
+day and the cost was two prints of a live credential.
+
+One call enumerates HQ's side, and the register you already read in §2
+is the other half:
+
+```bash
+gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name' | sort
+grep -E '^#{2,3} (INC-|Incident )' docs/agents/incidents.md
+```
+
+Read the tool list against this register's **open** entries and against
+the incidents of the last week, and name any pairing. You are looking
+for a name that answers a failure already on the register:
+`check-secret-print.py` against the token prints,
+`check-draft-prs.sh` against the dead-draft count, `check-turn-caps.sh`
+against Ursa incident 14, `autonomy.py` against §3e. Report the pairs
+and hand them to the `exo-centralizer`, which owns vendoring. Do not
+copy a tool in yourself, for the reason §3 already gives: a vendored
+copy of shared machinery drifts from the standard that calls it while
+continuing to answer.
+
+Say "no new pairing" when there is none. The list is fifty-odd names and
+this is a read, not a project.
+
+**And check the reference against HQ's `main`, not against HQ's checkout
+on this host.** The resident host carried eighteen of the twenty-six at
+`/srv/asc/repos/alexandra-systems/tools/`, and HQ's `main` carried
+twenty-five, so a sweep that resolves against the local HQ checkout
+invents seven absences that exist only in a stale clone. One call
+answers it and needs no clone:
+
+```bash
+gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
+```
+
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
 the only mechanism by which a memoryless run learns why a rule exists,
@@ -648,6 +857,68 @@ by a seat on the host and claimed on the board, and **unattributed**,
 meaning recorded as the owner with no board claim behind it. A merge in
 the third bucket is not the owner's merge. It is a merge whose decider
 this repository cannot name, and that sentence is the finding.
+
+**A "claim" has no agreed shape, so write the key set down or the number
+moves on its own (added 2026-10-18, sixteenth window, measured).** The
+join above is the whole instrument and this section never said what it
+joins on. The PM's merge claim lives in a `done` message's `data`
+object, and on 2026-10-18 that one fact was spelled **five** different
+ways by one seat in one day:
+
+| key | example |
+|---|---|
+| `merged` | `{"tier":"B","merged":[265]}` |
+| `merged_pr` | `{"merged_pr":199,"merge_commit":"97a1c662"}` |
+| `merged_prs` | `{"merged_prs":[259,210]}` |
+| `merged_this_pass` | `{"pass":31,"merged_this_pass":[250]}` |
+| `merged_tier_b` | `{"pr":225,"merged_tier_b":[227]}` |
+
+Three further traps in the same day's data. `{"pr":225}` appears on
+almost every message and is the **PM's own pull request**, not a merge
+claim, so an extractor that reads any integer under `data` counts it
+thirty times. `{"pass":30,"merged_this_pass":[]}` is a claim that
+nothing merged and must not read as a claim about anything.  And
+`{"pr_260":"already_merged_by_owner"}` is a genuine, deliberate
+attribution **to the owner**, carried in a value rather than a key,
+which is the one row in the whole set that belongs in neither bucket two
+nor bucket three.
+
+The cost is measurable and it is a cost to the owner. The fifteenth
+window reported twenty-six merges with **six** carrying a board claim,
+so seventy-seven per cent unattributed. This window, on the same board
+with nothing retracted, read the full key set and got **thirteen of
+twenty-seven claimed**, so forty-eight per cent unattributed. Neither
+window recorded its extractor, so the earlier six cannot be
+re-derived, and the difference is not a change in the company. It is a
+change in the grep.
+
+Both readings are above the one-third ceiling at which HQ's
+`tools/autonomy.py` refuses to report, so **the refusal stands either
+way and this does not revive the grade**. Say that plainly when you
+report it, because a thirty-point swing that changes no conclusion is
+the kind of number a reader fixes on.
+
+So, two duties:
+
+1. **Extract on the key set, and paste the key set beside the number.**
+   §5b already requires the instrument to be named beside each conflict
+   verdict in `merge-order.md`, for exactly this reason. The rule existed
+   for one measurement and was missing from the other.
+
+   ```bash
+   jq -r '[.messages[] | select((.from_company|ascii_downcase)=="ursa" and .from_seat=="pm")
+           | .data // {} | (.merged, .merged_pr, .merged_prs, .merged_this_pass, .merged_tier_b)]
+          | flatten | map(select(. != null)) | unique' /tmp/feed.json
+   ```
+
+2. **Ask for the key to become a contract, once, upstream.** The `data`
+   object is the board's and the board is HQ's, so the fix is one field
+   name in `docs/standards/pm.md` §15's example and not eleven
+   extractors. Hand it to the `exo-centralizer` with this table
+   attached. Until it answers, carry the key set above and add to it
+   whatever the next day's data shows, because a list of five spellings
+   is a measurement of a missing contract and not a defect in the seat
+   that wrote them.
 
 Measured on the day this was written: ten merges, all ten recorded as
 `alexandrapaiz`, eight claimed by the PM on the board. The window before
@@ -1056,18 +1327,43 @@ previous week's plan:
    `UNKNOWN` for most of a large queue, because GitHub computes it
    lazily, so it is not a usable instrument here.
 
-   **Prefer HQ's script over that one-liner where it is reachable
-   (added 2026-10-18).** `tools/check-merge-queue.sh` sweeps the whole
-   open queue in one throwaway worktree, reports the conflicting files
-   and how far behind `main` each branch is, and prints an explicit line
-   when GitHub's cached field disagrees with the merge it just
-   performed. It is not in this repository. On the resident company host
-   it is at
-   `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh` and
-   runs correctly from an Ursa checkout, verified 2026-10-18. On GitHub
-   Actions it does not exist and the `merge-tree` line above is what you
-   have. That split is Ursa incident 18 and runner-facts.md §4 carries
-   the probe.
+   **HQ's script is the better instrument and it is not usable here
+   until §0's second line has run (rewritten 2026-10-18, sixteenth
+   window, after it reported the whole queue as deleted).**
+   `tools/check-merge-queue.sh` sweeps the whole open queue in one
+   throwaway worktree, reports the conflicting files and how far behind
+   `main` each branch is, and prints an explicit line when GitHub's
+   cached field disagrees with the merge it just performed. All of that
+   is real and none of it is reachable from a single-branch clone. It
+   fetches each head **by name** and then resolves
+   `origin/<headRefName>`, which does not exist under the host's
+   `remote.origin.fetch`, and it attributes the absence to deletion:
+
+   ```
+   PR #225  ursa-pm/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+   7 of 7 open pull request(s) cannot be merged as they stand.
+   ```
+
+   Every one of those seven branches was on the remote and `merge-tree`
+   called all seven clean in the same minute. So: **widen the refspec
+   first (§0), then run it, and cross-check anything it calls missing
+   against `git ls-remote --heads origin` before you repeat it to
+   anybody.** A `NO SUCH REMOTE BRANCH` line from this script is a claim
+   about your clone until `ls-remote` agrees. The previous wording of
+   this paragraph said it "runs correctly from an Ursa checkout,
+   verified 2026-10-18", which was a true observation of one run on a
+   clone somebody had already widened, written as a property of the
+   script. That is
+   `INC-2026-10-18-single-branch-refspec-reads-as-deleted` and
+   runner-facts.md §10 carries the measurement and the one-line fix,
+   which is HQ's to apply.
+
+   It is still not in this repository. On the resident company host it is
+   at `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`. On
+   GitHub Actions it does not exist and the `merge-tree` line above is
+   what you have, and on Actions `fetch-depth: 0` makes the refspec
+   question moot. That split is Ursa incident 18 and runner-facts.md §4
+   carries the probe.
 
    **Record which instrument produced each verdict in
    merge-order.md.** A conflict verdict with no instrument beside it
