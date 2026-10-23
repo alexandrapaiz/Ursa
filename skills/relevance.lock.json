@@ -148,10 +148,10 @@
   },
   "adding-a-bound-to-the-record-gate/E29": {
     "verdict": "supports",
-    "read": "2026-10-18",
+    "read": "2026-10-23",
     "lines": "e247f095cd1dbdca",
     "what": "b8b9172f70f63497",
-    "passages": "75b2ecffe57def31"
+    "passages": "a4045a5a51c9bb51"
   },
   "adding-a-bound-to-the-record-gate/E3": {
     "verdict": "supports",

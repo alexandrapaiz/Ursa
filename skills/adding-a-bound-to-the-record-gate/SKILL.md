@@ -301,11 +301,25 @@ As of 2026-10-18 the numbers a new bound moves are three in the suite,
 violations when the gate is run over the directory [E25], plus the
 hand-written counts in the directory README and the root README.
 
-**Ours, measured 2026-10-18:** the directory README is currently one
-bound behind in three places. Its heading says twenty-two records, its
-opening says seventeen bounds, and its command block annotates the
-gate run as 27 violations [E29], while the live gate reports 18 bounds
-and 28 violations over 24 records:
+**Ours, measured 2026-10-18; the spread below re-counted 2026-10-23
+with grep, the gate figures not re-run:** the directory README is one
+bound behind throughout, not in one spot. Three of the
+stale spellings are in the range cited here, the heading's twenty-two
+records, the opening's seventeen bounds, and the command block's
+annotation of the gate run as 27 violations [E29], while the live gate
+reports 18 bounds and 28 violations over 24 records. Those three are
+the ref; the extent is a grep, because an absence-and-spread claim is
+not something a line range can carry (`prompts/skill-extract.md` §5l):
+
+```bash
+grep -cE 'seventeen|twenty-two' ursa-major/fixtures/violations/README.md
+# 8    lines 1, 5, 11, 42, 61, 87, 88 and 120, plus the count on 201
+```
+
+So nine lines rather than three, and one of them, line 87, is a second
+derived number gone stale the same way: it says eighteen of the
+twenty-two fixtures fire exactly one violation, against 19 of 23 live.
+The commands:
 
 ```bash
 cd ursa-major
