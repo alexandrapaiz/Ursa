@@ -26,8 +26,7 @@ import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
 import { parseClaudeSession } from '../parse'
 import { readVerdict, NO_VERDICT, type Verdict, type VerdictRunner, claudeVerdictRunner } from '../verdict'
-import type { TuningRecord } from '../tuning/types'
-import { listRecordIds, loadRecord } from '../store'
+import { allowedOrigin, handleStoreRequest, tuningUnits } from '../serve'
 import { applyVerdict, NOTHING_APPLIED, type AppliedVerdict } from './declare'
 import { deriveKeys, encryptJson, type DerivedKeys } from './crypto'
 import {
@@ -79,11 +78,20 @@ export function newestSessionFile(projectPath: string): string | null {
   return best?.path ?? null
 }
 
+/**
+ * The tuning lines the overlay payload carries.
+ *
+ * Reads the store through `tuningUnits` in src/serve.ts rather than
+ * opening `.ursa/tuning.json` here, so there is one reader of the
+ * tuning store and not two that can disagree about what an axiom is.
+ * What stays local to the overlay is the filter: a revoked axiom is a
+ * tombstone the store keeps forever, and the payload is a live read of
+ * what is steering the model right now, so revoked lines are dropped
+ * here and served in full on `GET /tuning` for a surface that shows the
+ * user their revocation held.
+ */
 export function tuningLines(projectPath: string): OverlayTuningLine[] {
-  const p = join(projectPath, '.ursa', 'tuning.json')
-  if (!existsSync(p)) return []
-  const record = JSON.parse(readFileSync(p, 'utf8')) as TuningRecord
-  return record.axioms
+  return tuningUnits(projectPath)
     .filter((a) => a.status !== 'revoked')
     .map((a) => ({
       statement: a.statement,
@@ -91,10 +99,9 @@ export function tuningLines(projectPath: string): OverlayTuningLine[] {
       polarity: a.polarity,
       basis: a.basis,
       evidenceCount: a.evidenceCount,
-      tension: a.contradicts.length > 0,
+      tension: a.tension,
       status: a.status,
     }))
-    .sort((a, b) => b.evidenceCount - a.evidenceCount)
 }
 
 export interface BridgeOptions {
@@ -213,12 +220,12 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
   // no page can suppress that header, so it is not a forgery vector and
   // stays allowed. An opaque origin arrives as the literal "null" and is
   // matched by neither rule, so it is refused with every other stranger.
-  const loopback = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
-  const allowed = (origin: string | undefined): string | null => {
-    if (!origin) return null
-    if (loopback.test(origin) || (opts.allowOrigins ?? []).includes(origin)) return origin
-    return null
-  }
+  // The same rule the store server applies (`allowedOrigin` in
+  // src/serve.ts), called rather than restated: both doors serve the
+  // same records and an allowlist that differs between them is a
+  // difference nobody would notice until it mattered.
+  const allowed = (origin: string | undefined): string | null =>
+    allowedOrigin(origin, opts.allowOrigins ?? [])
   /** true when the request may cause an effect: same-origin, allowlisted, or not from a browser. */
   const mayAct = (req: { headers: { origin?: string | string[] } }): boolean => {
     const raw = req.headers.origin
@@ -269,24 +276,16 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
       sendJson(200, lastPayload)
       return
     }
-    if (req.method === 'GET' && req.url === '/records') {
-      sendJson(200, { project, ids: listRecordIds(opts.projectPath) })
-      return
-    }
-    if (req.method === 'GET' && req.url?.startsWith('/records/')) {
-      const id = decodeURIComponent(req.url.slice('/records/'.length))
-      const record = loadRecord(opts.projectPath, id)
-      // loadRecord refuses an id outside SAFE_RECORD_ID rather than
-      // joining it onto a path, so a traversal attempt reads as 404.
-      if (!record) { sendJson(404, { error: `no record ${id}` }); return }
-      sendJson(200, record)
-      return
-    }
-    if (req.method === 'GET' && req.url === '/health') {
-      res.writeHead(200, { ...cors, 'content-type': 'application/json' })
-      res.end(JSON.stringify({ project, ok: true }))
-      return
-    }
+    // Everything else that reads `.ursa/` is the store server's route
+    // table (`handleStoreRequest` in src/serve.ts): `/records`,
+    // `/records/<id>`, `/tuning`, `/store`, `/health`. The bridge used to
+    // carry its own copies of the first two and the last, and the
+    // dashboard could not be served without a passphrase and a sync
+    // deployment because of it. Delegating means a page can open against
+    // `ursa serve` or against `ursa bridge` and read the same shapes from
+    // the same reader.
+    const store = handleStoreRequest(opts.projectPath, req.method, req.url)
+    if (store) { sendJson(store.status, store.body); return }
     res.writeHead(404, cors); res.end()
   })
   await new Promise<void>((r) => server.listen(port, '127.0.0.1', r))

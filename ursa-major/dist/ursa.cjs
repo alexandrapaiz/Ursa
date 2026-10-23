@@ -1916,6 +1916,11 @@ function saveEpisodes(projectRoot, episodes) {
   (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
   return path;
 }
+function loadEpisodes(projectRoot) {
+  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "episodes.json");
+  if (!(0, import_node_fs2.existsSync)(path)) return [];
+  return JSON.parse((0, import_node_fs2.readFileSync)(path, "utf8"));
+}
 function listRecordIds(projectRoot) {
   const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
   if (!(0, import_node_fs2.existsSync)(dir)) return [];
@@ -6273,6 +6278,179 @@ var init_run = __esm({
   }
 });
 
+// src/serve.ts
+var serve_exports = {};
+__export(serve_exports, {
+  DEFAULT_SERVE_PORT: () => DEFAULT_SERVE_PORT,
+  STORE_DIR_NAME: () => STORE_DIR_NAME,
+  allowedOrigin: () => allowedOrigin,
+  handleStoreRequest: () => handleStoreRequest,
+  recordSummary: () => recordSummary,
+  startStoreServer: () => startStoreServer,
+  storePayload: () => storePayload,
+  tuningUnits: () => tuningUnits
+});
+function tuningUnits(projectPath) {
+  const path = (0, import_node_path10.join)(ursaDir(projectPath), "tuning.json");
+  if (!(0, import_node_fs10.existsSync)(path)) return [];
+  const record = JSON.parse((0, import_node_fs10.readFileSync)(path, "utf8"));
+  return record.axioms.map((a) => ({
+    id: a.id,
+    statement: a.statement,
+    domain: a.domain,
+    polarity: a.polarity,
+    basis: a.basis,
+    evidenceCount: a.evidenceCount,
+    tension: a.contradicts.length > 0,
+    contradicts: a.contradicts,
+    status: a.status,
+    firstSeen: a.firstSeen,
+    lastSeen: a.lastSeen
+  })).sort((a, b) => b.evidenceCount - a.evidenceCount);
+}
+function recordSummary(record, distilled) {
+  const byClass = record.stats.byClass;
+  return {
+    id: record.task.id,
+    artifactKind: record.artifact.kind,
+    generatedAt: record.task.generatedAt,
+    finished: record.task.finished,
+    accepted: record.signals?.episode.accepted ?? null,
+    finalChars: record.stats.finalChars,
+    coveredChars: record.stats.coveredChars,
+    charsByClass: {
+      survived_verbatim: byClass.survived_verbatim?.chars ?? 0,
+      survived_mutated: byClass.survived_mutated?.chars ?? 0,
+      no_generation_provenance: byClass.no_generation_provenance?.chars ?? 0
+    },
+    humanDeletedChars: record.stats.generated.humanDeletedChars,
+    distilled,
+    resolvedBy: record.task.resolvedBy ?? null
+  };
+}
+function storePayload(projectPath) {
+  const dir = ursaDir(projectPath);
+  const exists = (0, import_node_fs10.existsSync)(dir);
+  const ids = listRecordIds(projectPath);
+  const distilledIds = new Set(loadEpisodes(projectPath).filter((e) => e.distilled).map((e) => e.id));
+  const records = [];
+  for (const id of ids) {
+    const record = loadRecord(projectPath, id);
+    if (record) records.push(recordSummary(record, distilledIds.has(id)));
+  }
+  return {
+    schemaVersion: "0.1.0",
+    project: (0, import_node_path10.basename)(projectPath),
+    store: STORE_DIR_NAME,
+    storeExists: exists,
+    readAt: (/* @__PURE__ */ new Date()).toISOString(),
+    recordCount: records.length,
+    records,
+    tuning: tuningUnits(projectPath)
+  };
+}
+function handleStoreRequest(projectPath, method, url) {
+  if (method !== "GET" || !url) return null;
+  const path = url.split("?")[0];
+  if (path === "/health") {
+    return {
+      status: 200,
+      body: {
+        project: (0, import_node_path10.basename)(projectPath),
+        ok: true,
+        store: STORE_DIR_NAME,
+        storeExists: (0, import_node_fs10.existsSync)(ursaDir(projectPath)),
+        recordCount: listRecordIds(projectPath).length
+      }
+    };
+  }
+  if (path === "/store") {
+    return { status: 200, body: storePayload(projectPath) };
+  }
+  if (path === "/records") {
+    return { status: 200, body: { project: (0, import_node_path10.basename)(projectPath), ids: listRecordIds(projectPath) } };
+  }
+  if (path === "/tuning") {
+    return { status: 200, body: { project: (0, import_node_path10.basename)(projectPath), units: tuningUnits(projectPath) } };
+  }
+  if (path.startsWith("/records/")) {
+    const id = decodeURIComponent(path.slice("/records/".length));
+    const record = loadRecord(projectPath, id);
+    if (!record) return { status: 404, body: { error: `no record ${id}` } };
+    return { status: 200, body: record };
+  }
+  return null;
+}
+function allowedOrigin(origin, extra = []) {
+  if (!origin) return null;
+  if (LOOPBACK_ORIGIN.test(origin) || extra.includes(origin)) return origin;
+  return null;
+}
+async function startStoreServer(opts) {
+  const log = opts.log ?? ((l) => console.log(l));
+  const projectPath = opts.projectPath;
+  const server = (0, import_node_http.createServer)((req, res) => {
+    const origin = allowedOrigin(req.headers.origin, opts.allowOrigins ?? []);
+    const cors = origin ? { "access-control-allow-origin": origin, "access-control-allow-methods": "GET, OPTIONS" } : {};
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, cors);
+      res.end();
+      return;
+    }
+    const reply = handleStoreRequest(projectPath, req.method, req.url);
+    if (reply) {
+      res.writeHead(reply.status, { ...cors, "content-type": "application/json" });
+      res.end(JSON.stringify(reply.body));
+      return;
+    }
+    if (req.method === "GET" && (req.url === "/" || req.url?.split("?")[0] === "/")) {
+      res.writeHead(200, { ...cors, "content-type": "application/json" });
+      res.end(JSON.stringify({
+        server: "ursa-store",
+        project: (0, import_node_path10.basename)(projectPath),
+        store: STORE_DIR_NAME,
+        routes: ["/health", "/store", "/records", "/records/<id>", "/tuning"]
+      }));
+      return;
+    }
+    res.writeHead(404, { ...cors, "content-type": "application/json" });
+    res.end(JSON.stringify({ error: `no route ${req.method} ${req.url}` }));
+  });
+  const port = opts.port ?? DEFAULT_SERVE_PORT;
+  await new Promise((resolve2, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", () => {
+      server.removeListener("error", reject);
+      resolve2();
+    });
+  });
+  const address = server.address();
+  const bound = typeof address === "object" && address ? address.port : port;
+  const dir = ursaDir(projectPath);
+  const state = (0, import_node_fs10.existsSync)(dir) && (0, import_node_fs10.statSync)(dir).isDirectory() ? `${listRecordIds(projectPath).length} record(s) in ${STORE_DIR_NAME}/` : `no ${STORE_DIR_NAME}/ yet: run \`ursa run ${projectPath}\` and reload, nothing here is cached`;
+  log(`store server up: ${(0, import_node_path10.basename)(projectPath)} on http://127.0.0.1:${bound} \u2014 ${state}`);
+  return {
+    port: bound,
+    url: `http://127.0.0.1:${bound}`,
+    stop: () => new Promise((resolve2) => {
+      server.close(() => resolve2());
+    })
+  };
+}
+var import_node_http, import_node_fs10, import_node_path10, STORE_DIR_NAME, DEFAULT_SERVE_PORT, LOOPBACK_ORIGIN;
+var init_serve = __esm({
+  "src/serve.ts"() {
+    "use strict";
+    import_node_http = require("node:http");
+    import_node_fs10 = require("node:fs");
+    import_node_path10 = require("node:path");
+    init_store();
+    STORE_DIR_NAME = ".ursa";
+    DEFAULT_SERVE_PORT = 7818;
+    LOOPBACK_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+  }
+});
+
 // ursa-stub:ursa:bridge-stub
 var ursa_bridge_stub_exports = {};
 __export(ursa_bridge_stub_exports, {
@@ -6290,7 +6468,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path10 = require("node:path");
+var import_node_path11 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -6693,11 +6871,13 @@ async function main(argv) {
     }
   });
   const [cmd, project] = positionals;
-  if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
+  if (cmd !== "run" && cmd !== "bridge" && cmd !== "serve" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
     console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
     console.error("       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]");
+    console.error("       ursa serve <projectPath> [--port N]");
+    console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model");
     console.error("       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]");
     console.error("       ursa forget <projectPath> --record <recordId>");
     console.error("       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]");
@@ -6710,7 +6890,7 @@ async function main(argv) {
   if (cmd === "address") {
     const { runAddress: runAddress2 } = await Promise.resolve().then(() => (init_address_cli(), address_cli_exports));
     return runAddress2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       recordId: values.record ?? null,
       // `GITHUB_REPOSITORY` is read here for the same reason `publish`
       // reads it: on a runner it is the one fact about the repository
@@ -6722,7 +6902,7 @@ async function main(argv) {
   if (cmd === "publish") {
     const { runPublish: runPublish2 } = await Promise.resolve().then(() => (init_publish_cli(), publish_cli_exports));
     return runPublish2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       outDir: values.out,
       repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
       acknowledged: values.yes === true
@@ -6746,7 +6926,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       eventPath,
       repo,
       token,
@@ -6767,6 +6947,22 @@ async function main(argv) {
     });
     return result.exitCode;
   }
+  if (cmd === "serve") {
+    const { startStoreServer: startStoreServer2 } = await Promise.resolve().then(() => (init_serve(), serve_exports));
+    const handle = await startStoreServer2({
+      projectPath: (0, import_node_path11.resolve)(project),
+      port: values.port ? Number(values.port) : void 0
+    });
+    await new Promise((resolve2) => {
+      process.on("SIGINT", () => {
+        void handle.stop().then(resolve2);
+      });
+      process.on("SIGTERM", () => {
+        void handle.stop().then(resolve2);
+      });
+    });
+    return 0;
+  }
   if (cmd === "bridge") {
     const passphrase = process.env.URSA_PASSPHRASE ?? await promptHidden("passphrase (held in memory only): ");
     if (!passphrase) {
@@ -6775,7 +6971,7 @@ async function main(argv) {
     }
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -6793,7 +6989,7 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path10.resolve)(project);
+  const projectPath = (0, import_node_path11.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
   let declaration2 = UNDECLARED;
