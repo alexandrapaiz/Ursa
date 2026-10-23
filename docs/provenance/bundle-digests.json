@@ -9,7 +9,7 @@
       "bytes": 74545,
       "introducedBy": [
         {
-          "commit": "0d46fb79eccd58fe357827458d0f667095884fb5",
+          "commit": "cdba4813f6a73aa8f450f80119899d07dc61c233",
           "date": "2026-10-05T03:39:36.000Z",
           "subject": "feat(ursa-major): ursa ci — the resolver's CI launch, and a one-file bundle"
         }
@@ -22,7 +22,7 @@
       "bytes": 75631,
       "introducedBy": [
         {
-          "commit": "932b562064d20098b138f79e87f1529a2edd5db3",
+          "commit": "93aa83b55f062dfd0e9a3326a3deda68f9fa8974",
           "date": "2026-10-05T03:43:23.000Z",
           "subject": "feat(ursa-major): action.yml, the example consumer workflow, and 23 tests"
         }
@@ -35,7 +35,7 @@
       "bytes": 166859,
       "introducedBy": [
         {
-          "commit": "e27bc68f84aaa35666c0cc26f268be80682d2528",
+          "commit": "bc004b9a3c82ef5ef72a4cd5347b5229f584df4d",
           "date": "2026-10-08T03:05:13.000Z",
           "subject": "Reconcile the resolver-Action branch onto main (subsumes #92, #126, #130)"
         }
@@ -48,7 +48,7 @@
       "bytes": 168111,
       "introducedBy": [
         {
-          "commit": "d4a57c4c6abd1889a9f131eb1e3f58a2caf3857b",
+          "commit": "eabc6b7460eac7c8f175983762f3a3124e3b2dae",
           "date": "2026-10-08T03:11:34.000Z",
           "subject": "The empty-window sentence was asserting a cause it had not checked"
         }
@@ -61,7 +61,7 @@
       "bytes": 169567,
       "introducedBy": [
         {
-          "commit": "a675288e6d5e0b354a2aac8ba76b98e04cc40d1c",
+          "commit": "b27dd1a6cf2959e335fd605cec718cf0fdadd68e",
           "date": "2026-10-10T02:46:19.000Z",
           "subject": "The design artifact, the parity test's own failure message, and the README rows"
         }
@@ -74,7 +74,7 @@
       "bytes": 169655,
       "introducedBy": [
         {
-          "commit": "bdeaeca17092058be356ff1283db2800ae521a63",
+          "commit": "496f40c13f4bf1a1de00a0412ba2a5865dc9b13e",
           "date": "2026-10-10T02:50:35.000Z",
           "subject": "The bound count was thirteen in prose and fifteen in code; derive it"
         }
@@ -87,7 +87,7 @@
       "bytes": 172919,
       "introducedBy": [
         {
-          "commit": "f4400048315fe1c28a6a69074afae07f8a85e18b",
+          "commit": "53ac9ce621f7f680a528ddd6beef14eb73206565",
           "date": "2026-10-11T18:26:19.000Z",
           "subject": "Engineer 2026-10-11: land the agent-coauthor detection fix (subsumes #159)"
         }
@@ -100,7 +100,7 @@
       "bytes": 177322,
       "introducedBy": [
         {
-          "commit": "6a993c64271eb44ac031374b54dd15d298772aae",
+          "commit": "d40ba692a4f7b480a358fc49df3e87da5e093f5d",
           "date": "2026-10-12T20:34:23.000Z",
           "subject": "Show the resolver to the reader: CI comment line, run output, rebuilt bundle"
         }
@@ -113,7 +113,7 @@
       "bytes": 179913,
       "introducedBy": [
         {
-          "commit": "e8ecb80f8a1ea1eda03b8f0870b0ccc5a12074b2",
+          "commit": "6b13f008bca0d88169a95516b14329678f61a47a",
           "date": "2026-10-13T03:59:53.000Z",
           "subject": "Say it where the reader is: the class table, and the span inspector"
         }
@@ -126,7 +126,7 @@
       "bytes": 180446,
       "introducedBy": [
         {
-          "commit": "939c6fde1b07a8bf4fa9287e8d814e32016ecc79",
+          "commit": "a5b8adfcaa62116e99f39419b604fbc064c30ee1",
           "date": "2026-10-13T04:00:50.000Z",
           "subject": "Character granularity for the formatting-only diff"
         }
@@ -139,7 +139,7 @@
       "bytes": 180487,
       "introducedBy": [
         {
-          "commit": "d228e90da5f665480f9776f6f60f80fb11e8d671",
+          "commit": "467ba564f0f557d85c7d6228e27af1f381aa1759",
           "date": "2026-10-13T04:07:29.000Z",
           "subject": "A formatting-only mutation is not a one-shot correction"
         }
@@ -152,7 +152,7 @@
       "bytes": 183316,
       "introducedBy": [
         {
-          "commit": "8baff5d88304b748767cfb106ef9b0153c877f00",
+          "commit": "75042095f219b36cfb3d702a7450157119f1439a",
           "date": "2026-10-13T18:33:29.000Z",
           "subject": "The counts the sixteenth bound moved, and the rebuilt bundle"
         }
@@ -165,7 +165,7 @@
       "bytes": 186613,
       "introducedBy": [
         {
-          "commit": "09ccf7457a3d0609ac22b4392ad7c8f8ab8cdaee",
+          "commit": "b11a976b215e58f876b6a11983dbe8fcb4ceb285",
           "date": "2026-10-14T02:23:23.000Z",
           "subject": "The fixture for the new clause, the counts it moved, and the rebuilt bundle"
         }
@@ -178,7 +178,7 @@
       "bytes": 187643,
       "introducedBy": [
         {
-          "commit": "dfcda6658315b1d04d305fbc94c9242034791a35",
+          "commit": "d0be2600395491c67867aa948e6845dd0d6fe857",
           "date": "2026-10-14T16:08:28.000Z",
           "subject": "Rebuild dist/ursa.cjs for the horizon bound"
         }
@@ -191,7 +191,7 @@
       "bytes": 192501,
       "introducedBy": [
         {
-          "commit": "18d15c1ec19bd069b8f6f27247118f1bc31886b7",
+          "commit": "41c1ab07e7864ce957fb790af0a8c551f7cbdfd3",
           "date": "2026-10-15T02:03:34.000Z",
           "subject": "Rebuild the bundle, and make the viewer assertion one that can fail"
         }
@@ -204,7 +204,7 @@
       "bytes": 196261,
       "introducedBy": [
         {
-          "commit": "223a457b4bd9d7ff1b3ab72a8ebc51e4c82a57fd",
+          "commit": "9fc6bac3caaeebb53f2063cefe048deb6dc84364",
           "date": "2026-10-15T15:53:42.000Z",
           "subject": "exclusion: the file-level refusal gets the clock the span level got"
         }
@@ -217,7 +217,7 @@
       "bytes": 201273,
       "introducedBy": [
         {
-          "commit": "f2955226fba9168c2e97b604926245844f197297",
+          "commit": "6e2828af8367f325be5e93ab1558c974324f6752",
           "date": "2026-10-16T01:43:04.000Z",
           "subject": "gate: the counterexample, the unit cases, parity on the bound set, bundle"
         }
@@ -230,7 +230,7 @@
       "bytes": 201773,
       "introducedBy": [
         {
-          "commit": "51ef07424232f896e65d9cfff0f49d555e078c97",
+          "commit": "f2a9048e4c24a742e5ae144399c2c8fce99a58ec",
           "date": "2026-10-16T01:45:39.000Z",
           "subject": "gate: the bound set on both surfaces a reader sees, and the bundle"
         }
@@ -243,7 +243,7 @@
       "bytes": 202367,
       "introducedBy": [
         {
-          "commit": "58810904d0cb80a8c1b19aebf0e7fd4592a6c53e",
+          "commit": "43c86e8a2240748fa139cc27dba7ab510ca617bd",
           "date": "2026-10-17T14:15:32.000Z",
           "subject": "Rebuild the committed bundle over the absorbed source changes"
         }
@@ -256,7 +256,7 @@
       "bytes": 255121,
       "introducedBy": [
         {
-          "commit": "b34b69297e2e7eec9cf43e22f4399844ea0b0188",
+          "commit": "aff33eb02daa01caf21d86df275835219980e218",
           "date": "2026-10-18T00:47:32.000Z",
           "subject": "The Action can write the site, and one workflow publishes it to the stranger's own Pages"
         }
@@ -269,7 +269,7 @@
       "bytes": 255382,
       "introducedBy": [
         {
-          "commit": "7c300d5c7d3a048c1666c533e43a153de328e68f",
+          "commit": "c0d07882fbef9cfeb07601acea0f165059461b01",
           "date": "2026-10-18T00:56:34.000Z",
           "subject": "publish: consult the consent record, so an erased record cannot reach a public address"
         }
@@ -282,7 +282,7 @@
       "bytes": 269035,
       "introducedBy": [
         {
-          "commit": "1e0cc3bf7a16aef0bac4365504d438a3c24983c1",
+          "commit": "5f5f8ad94d882e7aead4fe1a70db41fb72b9e910",
           "date": "2026-10-18T01:33:51.000Z",
           "subject": "The address in the README, the grammar in the design doc, and a rebuilt bundle"
         }
@@ -295,7 +295,7 @@
       "bytes": 272223,
       "introducedBy": [
         {
-          "commit": "ef8eeaf39a0e3f147b157c6f89cac40440fcf179",
+          "commit": "6f4f96beec019027b32f1606b01731ea14aa66b3",
           "date": "2026-10-18T01:55:09.000Z",
           "subject": "Rebuild the bundle for the index digest fields and the phone layout"
         }
@@ -308,7 +308,7 @@
       "bytes": 273540,
       "introducedBy": [
         {
-          "commit": "a21f48ef3e98382b2f5dd3857fe1273e337ad322",
+          "commit": "2229b68cfdbcbf7113783a95b2368028dda9e1e1",
           "date": "2026-10-18T02:31:38.000Z",
           "subject": "The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case"
         }
@@ -321,7 +321,7 @@
       "bytes": 276711,
       "introducedBy": [
         {
-          "commit": "2f1f59983a935e789e37bae3a610539270c57910",
+          "commit": "6d9426d3d7053ad53ec77ffb20a2552ad9f510d9",
           "date": "2026-10-18T09:21:23.000Z",
           "subject": "The published page now names the bounds that produced its records"
         }
