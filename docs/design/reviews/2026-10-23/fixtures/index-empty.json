@@ -1,0 +1,30 @@
+{
+  "indexVersion": "0.4.0",
+  "publishedAt": "2026-10-18T09:33:50.724Z",
+  "repository": "someone/their-repo",
+  "recordSchemaVersions": [
+    "0.1.0"
+  ],
+  "pairing": [],
+  "records": [],
+  "disclosed": {
+    "records": 2,
+    "recordIds": [
+      "their-repo-2026-10-17-9f8e7d6",
+      "their-repo-2026-10-18-a1b2c3d"
+    ],
+    "adapters": [
+      "paste"
+    ],
+    "finalFiles": 1,
+    "filePaths": [
+      "final.md"
+    ],
+    "finalChars": 628,
+    "generations": 4,
+    "generationChars": 618,
+    "conversations": 4,
+    "prompts": 4,
+    "promptChars": 130
+  }
+}
