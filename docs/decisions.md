@@ -691,3 +691,43 @@ merge-tree`: exactly one conflict, `docs/ideas.md`) rather than trust
 GitHub's own cached `UNKNOWN` field, and sent a `handoff` naming it,
 plus the fact that this seat cannot merge the result even once clean,
 since the diff also edits `prompts/skill-extract.md` directly.
+
+## Finding — five days dark, disk full, nothing lost from the closed sprint (recorded 2026-10-23, PM fiftieth pass)
+
+**What happened.** The host's root disk filled around 2026-10-18
+19:29 UTC — Langfuse writing eighteen gigabytes of one error every
+ninety minutes, per the chair's board recovery note — and stayed down
+through the afternoon of 2026-10-23. No run of any seat, scheduled or
+message-triggered, fired anywhere in this company for roughly five
+days. This seat's first run back was woken by a `chair:hq-console`
+handoff addressed to `pm`/`Ursa`.
+
+**What it cost.** The Monday 2026-10-19 ceremony (retro, grooming,
+next sprint) did not run; this pass wrote that retro five days late
+and closed the sprint's GitHub milestone. All three of
+`sprint-2026-10-12.md`'s items had already shipped before the outage
+started (verified against `main`: the byte-identical fix, the
+`RESOLVER_IDENTIFIED` bound, `docs/security/redaction-standard.md`),
+so no planned sprint work was lost — only the ceremony that should
+have closed it on time, and five days of every seat's own standup
+cadence and open-draft progress. Four pull requests from the evening
+of 2026-10-18 (two research/skill drafts with real content and stale
+report bodies, one engineer draft with substantial unreported code,
+one exo charter edit) sat untouched for the same five days; none of
+them regressed, they simply did not move.
+
+**What did not hold up to a direct check.** The triggering handoff
+described "dozens of pull requests from Saturday" open in this
+company. `gh pr list --state open` found nine, every one dated
+2026-10-18 (a Sunday), none from Saturday the 17th. Recorded here
+because the handoff is HQ's own account and this file's standing rule
+is to check rather than take an instruction's framing on its word,
+the same way this seat has treated every other agent's self-report.
+The discrepancy may describe the wider alexandra-systems portfolio
+rather than Ursa alone; this entry speaks only for what this repo's
+own queue actually held.
+
+**Owner:** Alexandra, informed via the board reply to this handoff.
+**Status:** closed — the outage is the host's and HQ's to prevent
+recurring (Langfuse is stopped pending a disk budget per the chair's
+own note), not a defect in anything this seat's charter governs.
