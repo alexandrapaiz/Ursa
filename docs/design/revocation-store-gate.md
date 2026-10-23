@@ -66,6 +66,20 @@ What it deliberately does not do: delete the statement. It is parked in a
 new field, `TuningRecord.blockedByRevocation`, which no existing reader
 reads. That choice is the load-bearing one and §3 is about why.
 
+**What it cannot do, stated here rather than discovered later.** The gate
+runs inside one distillation pass, on a candidate statement, so it
+decides about statements that arrive after a revocation and about nothing
+else. A record built by the old create path may already hold a reworded
+duplicate of an axiom as a second `active` entry with its own id, and
+revoking one of that pair revokes one id. The twin keeps its status, its
+evidence and its place in every export, so the user sees her revocation
+take effect on the axiom she named and not on the rule she meant. Every
+tuning record that exists today was built by the old path, so this
+population is not hypothetical. The repair is a report rather than a
+sweep, because silently revoking a second axiom the user did not name is
+its own dark pattern, and it is filed in `docs/ideas.md` under 2026-10-23
+as `revocationTwins`. It is not built here.
+
 ## 3. System diagram
 
 Every node is a file or an exported function that exists today. Every

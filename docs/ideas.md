@@ -8272,3 +8272,84 @@ proves rather than about Graphiti's engineering quality.
 - First step: for the engineer seat, since `ursa-major/` is outside this seat's write surface. Derive the three counts in the directory README the way the root README derives its one, or if that file has to stay hand-written, add it to whatever the bounds digest change already touches so it cannot go stale alone. Separately, move the `checkRecord` doc comment back onto `checkRecord` and fix the ordering sentence, or delete the clause; its other clause, that an empty violation list means the record is self-consistent and not that the labels are right, is true and worth keeping.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-23 (engineer) — Two of our label families have no measured error rate, and one harness shape produces both
+
+- Trigger: two things in the same run. The research seat's handoff of one sentence in `docs/design/verdict-eval.md` line 17, which said the backward join of finished work to the generations that fed it "is a factual operation: a span either survived or it did not", and this run's own calibration of the revocation gate, which separates 10 hand-written paraphrase pairs from 28 distinct ones and is therefore a calibration on 38 pairs rather than an error rate.
+- What: Ursa ships two kinds of label it has never measured. The span classes are the commercial object: `survived_verbatim`, `survived_mutated`, `generated_deleted` and `no_generation_provenance`, the last of which `CLAUDE.md` §1 calls the most valuable category and which is a negative claim, the hardest kind to be right about. The revocation gate's block is the second, added today in `ursa-major/src/tuning/revocation.ts`, where a miss revives an inference the user revoked. Neither has a number. For the span classes the reason was a sentence, now deleted with the correction left visible in `verdict-eval.md` §1, and the sentence was already falsified internally: `docs/design/verbatim-byte-identity.md` §1 records the resolver calling a span untouched model output when a case had changed or an em dash had been retyped, on this repository's own history at record `ursa-2026-10-07-2f610e9`. It is falsified externally too, because the published attribution work closest to this operation (arXiv:2610.17488) had to manufacture ground truth by injecting known faults, reports 96.8% exact attribution over 158 queries, and concentrates its residual errors where an identical observation leaves the real relationship ambiguous, which is our coincidental-match case. The harness has one shape for both: take a real artifact, inject provenance whose truth we fixed ourselves, run the labeller, and report the exact-label rate per class including the class whose right answer is nothing. For spans the injection is into the conversation fixtures under `ursa-major/fixtures/`; for the gate it is pairs of (revoked statement, candidate statement, is this a restatement) drawn from real tuning records rather than written by the person choosing the threshold.
+- Why it is one entry and not two: the thing worth building is not either measurement, it is the injection harness, because both label families are unverifiable for the same reason. Nothing in the finished artifact records which generation it came from, so ground truth has to be put there on purpose or it does not exist. `ursa-major/src/evals/` holds three files today and all three are the verdict reader's, and `gh pr list --state all` returns exactly one evaluation ever built in this repository (PR #25).
+- First step: the span side, because the record it labels is what Ursa Minor sells. One fixture, one injected generation whose relationship to the final text we chose, and a script under `ursa-major/src/evals/` that reports the per-class exact-label rate over it. One fixture is not a rate either, and saying so in the output is part of the first step.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer) — The revocation gate only protects the future, and any record written before today may already hold the duplicate it would have blocked
+
+- Trigger: reading `revokeAxiom` while wiring the gate into `mergeDistill`. The gate runs inside one distillation pass, so it decides about statements arriving after a revocation and about nothing else.
+- What: before today a model that reworded an axiom and left `matchesExisting` null got a second active axiom with a different id and nearly the same words. Revoking one of a pair like that revokes one id. The twin stays `active`, keeps its own evidence, and keeps flowing to `renderTuningBlock`, the dashboard overlay and the MCP read, so the user watches her revocation take effect on the thing she clicked and not on the thing she meant. The gate cannot see this case by construction: `findRevocationBlock` is called on a candidate from a distillation pass, and the twin is already in `axioms`. The fix is small and it is a product decision rather than a mechanical one, because silently revoking a second axiom the user did not name is its own dark pattern. The honest shape is a report: an exported `revocationTwins(tuning, unitId)` using the same `revocationSimilarity`, called by `ursa consent revoke-axiom`, printing "ax-007 says nearly the same thing, and it is still active. Revoke it too with --axiom ax-007" and leaving the decision with her.
+- Why it matters more than it looks: every tuning record that exists today was built by the old create path, so this is not a hypothetical population. It is every record in the repository's fixtures and every record on any user's disk.
+- First step: `revocationTwins` plus the line in `consent revoke-axiom`, with a test that seeds two near-identical active axioms, revokes one, and asserts the other is named in the output and not touched in the file.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer) — Our erasure scope is described in prose, and prose is how it went one row short
+
+- Trigger: today's craft scan of cognee's `forget()` documentation, read against what this run had just had to fix in `ursa forget`.
+- What: `forgetRecordInTuning` strips a record from `axioms` and from `sources`, and until this run it did not touch the statements the revocation gate parks in `blockedByRevocation`, which carry a statement derived from the erased record and the evidence quotes lifted out of it. The miss was not subtle and it was not caught by anything, because what `forget` reaches is written as sentences in `docs/design/consent-and-erasure.md` §6c and as a tombstone whose fields happen to be the ones somebody remembered. cognee publishes a table instead: one row per deletion mode, a column for what is removed and a column for what is preserved, and it states the limit out loud, that deletion "does not scrub the bytes from the storage engines". A table with a preserved column is a checklist a reviewer can walk when a new field is added to the thing being erased. Ursa has one place where it already does this well and the pattern is worth copying from ourselves too: the root README prints `BOUND_COUNT` rather than spelling the number in words.
+- First step: derive the scope table. One exported constant in `ursa-major/src/consent.ts` naming every field of `TuningRecord` and `ConsentRecord` that `forget` touches and every field it deliberately does not, a test that fails when a new field appears in either type and is in neither column, and the table rendered into `consent-and-erasure.md` §6c from that constant rather than typed by hand.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-23 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, was read out on 2026-10-13 and 2026-10-14. Today's run is
+a break-fix on the one promise category 3 competes on, which is what
+happens when a user takes something back, so this scan goes outside the
+map on purpose and reads the two memory systems that are **not** in it,
+**cognee** and **LangMem**, on one question: when a user says forget
+this, does the product enforce that at its store or does it ask a model
+to cooperate. Both are named in arXiv:2609.08258, the study the research
+seat's handoff rests on, so reading their own documentation is also a
+check on that paper's claim about them.
+
+**What they do.** cognee's `forget()` is store-level and deterministic.
+The caller names a dataset, or a dataset and a data id, or passes
+`everything=True`, and the documentation says the operation "only
+remove[s] data" and that it "never call[s] the LLM or embedding model, so
+they consume no tokens". The model has no role in deciding what
+disappears. LangMem goes the other way. Deletion is a capability of its
+memory manager, gated behind `enable_deletes`, documented as "Whether to
+allow deleting existing memories that are outdated or contradicted by new
+information", type `bool`, **default `False`**, and the deletions it
+enables are ones the model proposes from new information rather than ones
+a user demanded.
+
+**Worth stealing: publish a deletion scope table with a preserved
+column, and state the limit in it.** cognee's forget page is a table of
+deletion modes against what each one removes, and the row that makes it
+credible is the one that says what survives: with `memory_only=True`,
+"Raw files and the dataset/data records are preserved", and even a full
+delete "does not scrub the bytes from the storage engines". Ursa
+describes the same thing in sentences, in `consent-and-erasure.md` §6c,
+and this run is the evidence that sentences let a row go missing: the
+blocked-statement list was not swept by `ursa forget` until today, and
+nothing failed when it was not. The ledger entry above is the version of
+this we should build, where the table is derived from the code rather
+than typed beside it.
+
+**What Ursa does better: a revocation here is the user's instruction, not
+a model's inference, and as of today the store is what enforces it.**
+LangMem's default is the sharp comparison. Its store-level delete is an
+opt-in flag that ships off, and what the flag enables is still the model
+removing memories it judges outdated. Ursa's `revokeAxiom` is a command
+the user runs about an id she picked, the tombstone it leaves is never
+disclosed, and `findRevocationBlock` now scores every later candidate
+against that tombstone with no model-supplied field in the path. The part
+worth not getting smug about is that Ursa documented this property for
+twenty-two days before it was true: `consent-and-erasure.md` §6c claimed
+the merge enforced it, and the merge asked the model whether to. The
+twenty-two is from the consent gate run of 2026-10-01
+(`docs/agents/engineer-2026-10-01-consent-gate.md`, and the real payload
+in §6 of that design document is stamped `2026-10-01T02:32:03.357Z`),
+counted to today. It is not from `git log`, which reports this file as
+added at `21944ab` today because the clone is shallow.
