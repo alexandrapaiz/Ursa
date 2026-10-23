@@ -157,17 +157,21 @@ tools that do not exist, two documents disagreeing on a fact, a finding
 filed twice by two seats, a status line that no longer matches reality.
 Note each one. These observations feed the meta-review.
 
-**Read your own prior runs off the open pull requests, not off `main`.**
-`docs/research/briefs/` may not exist on `main` at all, because a brief
-lands only when the owner merges it, and Step 2 asks you to connect this
-period to previous ones. So before writing, run
-`gh pr list --state all --search research` and read every prior brief on
-its branch, with `git fetch origin <branch>:refs/prior` and
-`git show refs/prior:docs/research/briefs/<date>.md`. Then file new
-findings only. Re-filing a defect a prior brief already named spends
-the owner's attention twice on one thing, and correcting a prior brief
-that got something wrong is part of the job rather than an exception to
-it. This is L-E10's principle, which binds builder seats by its own
+**Read your own prior runs off both `main` and the open pull requests.**
+`main` holds the merged prefix of this seat's record and not the whole of
+it, because a brief lands only when the owner merges it, and the newest
+ones are routinely still open. On 2026-10-23 ten briefs were on `main`
+and the two most recent were not, which is the shape to expect. So read
+`docs/research/briefs/` on `main` first, since it is the cheapest read
+and it is most of the record, and then run
+`gh pr list --state all --search research` and read on its branch every
+brief that is not there yet, with `git fetch origin <branch>:refs/prior`
+and `git show refs/prior:docs/research/briefs/<date>.md`. Step 2 asks you
+to connect this period to previous ones, and either surface alone gives
+you a truncated record. Then file new findings only. Re-filing a defect
+a prior brief already named spends the owner's attention twice on one
+thing, and correcting a prior brief that got something wrong is part of
+the job rather than an exception to it. This is L-E10's principle, which binds builder seats by its own
 text and describes this seat's failure mode exactly: an unmerged PR is
 not evidence the work was never done.
 
