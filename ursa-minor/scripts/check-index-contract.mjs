@@ -23,6 +23,7 @@ import { fileURLToPath } from 'node:url'
 import {
   INDEX_CONTRACT,
   indexUrlFor,
+  pairingCopy,
   parsePublishedIndex,
   recordUrlFor,
   sharesOf,
@@ -40,10 +41,11 @@ function check(what, cond, detail = '') {
 }
 
 const base = (over = {}) => ({
-  indexVersion: '0.3.0',
+  indexVersion: '0.4.0',
   publishedAt: '2026-10-18T00:40:16.247Z',
   repository: 'someone/their-repo',
   recordSchemaVersions: ['0.1.0'],
+  pairing: [{ maxPairDistance: 400, maxPairAgeHours: 720, maxInterposedGenerations: 2 }],
   records: [
     {
       id: 'their-repo-2026-10-16-8dcb0c7',
@@ -74,16 +76,18 @@ console.log('\nthe version gate')
   // field, `address`, and the set view started reading it. Moved to 0.3
   // when that seat published `bytes` and `sha256`, which is what makes
   // the integrity check below able to run against a real site at all.
-  check(`pinned at ${ours}`, ours === '0.3')
+  // Moved to 0.4 when that seat published `pairing` and the set view
+  // started saying what the set it is showing was resolved under.
+  check(`pinned at ${ours}`, ours === '0.4')
 
   const same = parsePublishedIndex(base())
   check('reads the contract it was written against', same.ok === true && same.note === null)
 
   // The resolver seat's promise is that a minor bump is additive, so a
   // newer minor is readable and the page says what it is not showing.
-  const newer = parsePublishedIndex(base({ indexVersion: '0.4.0' }))
+  const newer = parsePublishedIndex(base({ indexVersion: '0.5.0' }))
   check('reads a newer minor', newer.ok === true)
-  check('and says so rather than silently dropping fields', newer.ok === true && typeof newer.note === 'string' && newer.note.includes('0.4.0'))
+  check('and says so rather than silently dropping fields', newer.ok === true && typeof newer.note === 'string' && newer.note.includes('0.5.0'))
 
   // An older minor is the ordinary case of a site published before a
   // field existed, which is why every summary field is optional.
@@ -92,6 +96,13 @@ console.log('\nthe version gate')
   // published before today states it and carries no record address.
   const older = parsePublishedIndex(base({ indexVersion: '0.1.0' }))
   check('reads an older minor without complaint', older.ok === true && older.note === null)
+
+  // The case the pin moved for. A 0.3 site is every site published
+  // before this afternoon and states no bounds at all, and it has to
+  // keep reading in silence rather than being told it is behind.
+  const three = parsePublishedIndex(base({ indexVersion: '0.3.0', pairing: undefined }))
+  check('a 0.3 site with no pairing field still reads', three.ok === true && three.note === null)
+  check('and its pairing field stays absent rather than becoming an empty claim', three.ok === true && three.index.pairing === undefined)
 
   // The floor is a floor, not a requirement: a 0.2 site states no digest
   // and still has to read, which is the whole reason both fields stay
@@ -105,7 +116,7 @@ console.log('\nthe version gate')
   // is how a page ends up confidently wrong about someone's data.
   const major = parsePublishedIndex(base({ indexVersion: '1.0.0' }))
   check('refuses a different major', major.ok === false)
-  check('and names both versions when it does', major.ok === false && major.error.includes('1.0.0') && major.error.includes('0.3'))
+  check('and names both versions when it does', major.ok === false && major.error.includes('1.0.0') && major.error.includes('0.4'))
 }
 
 console.log('\nwhat is not an index')
@@ -113,7 +124,7 @@ console.log('\nwhat is not an index')
   check('plain text', parsePublishedIndex('not json').ok === false)
   check('an array', parsePublishedIndex([]).ok === false)
   check('json with no indexVersion', parsePublishedIndex({ records: [] }).ok === false)
-  check('an index with no records array', parsePublishedIndex({ indexVersion: '0.3.0' }).ok === false)
+  check('an index with no records array', parsePublishedIndex({ indexVersion: '0.4.0' }).ok === false)
   check('a record that has no id', parsePublishedIndex(base({ records: [{ finalChars: 1 }] })).ok === false)
 
   // A site with nothing published yet is a person, not an error.
@@ -163,6 +174,45 @@ console.log('\nthe headline shares')
   check('a summary with no counts is zeroes rather than a crash', sharesOf({ id: 'a' }).every((x) => x.pct === 0))
 }
 
+console.log('\nthe bounds the set was found under')
+{
+  // Four states, and the two absences have to stay distinct in the
+  // prose, because a reader who is told "no bounds" when the site simply
+  // predates the field has been told something false about the run.
+  const one = pairingCopy({ indexVersion: '0.4.0', records: [], pairing: [{ maxPairDistance: 400, maxPairAgeHours: 720, maxInterposedGenerations: 2 }] })
+  check('one bound set says all three numbers', one.line.includes('400') && one.line.includes('720') && one.line.includes('2 later generations'))
+  check('and needs no list beside it', one.sets.length === 0)
+
+  const two = pairingCopy({
+    indexVersion: '0.4.0',
+    records: [],
+    pairing: [
+      { maxPairDistance: 400, maxPairAgeHours: 720, maxInterposedGenerations: 2 },
+      { maxPairDistance: 25, maxPairAgeHours: 168, maxInterposedGenerations: 2 },
+    ],
+  })
+  check('two bound sets are stated per run, not averaged', two.sets.length === 2)
+  check('the widest first, as the publisher ordered them', two.sets[0].startsWith('400'))
+  check('and the sentence says why there are two', two.line.includes('did not look the same distance'))
+
+  const none = pairingCopy({ indexVersion: '0.4.0', records: [], pairing: [] })
+  check('an empty list is "no record states them"', none.line.includes('No record in this set states'))
+  check('and never names the resolver defaults', !/\b25\b|\b168\b/.test(none.line))
+
+  const absent = pairingCopy({ indexVersion: '0.3.0', records: [] })
+  check('an absent field is "published before the index stated it"', absent.line.includes('published before'))
+  check('which is a different sentence from the empty list', absent.line !== none.line)
+
+  // Infinity is a reachable bound on the resolver's side and serializes
+  // to null. A page that printed "at most null commits" would be worse
+  // than one that said nothing.
+  const unbounded = pairingCopy({ indexVersion: '0.4.0', records: [], pairing: [{ maxPairDistance: null, maxPairAgeHours: null, maxInterposedGenerations: null }] })
+  check('the unbounded walk is words, not a null', !unbounded.line.includes('null') && unbounded.line.includes('as far as the history went'))
+
+  const oneCommit = pairingCopy({ indexVersion: '0.4.0', records: [], pairing: [{ maxPairDistance: 1, maxPairAgeHours: 1, maxInterposedGenerations: 1 }] })
+  check('a bound of one is singular', oneCommit.line.includes('1 commit forward') && oneCommit.line.includes('1 hour between'))
+}
+
 console.log('\nthe integrity claim')
 {
   const text = '{"task":{"id":"a"}}'
@@ -189,7 +239,7 @@ console.log('\nthe integrity claim')
   check('humanBytes', humanBytes(512) === '512 bytes' && humanBytes(50572) === '49 KB' && humanBytes(4045328) === '3.9 MB')
 }
 
-console.log('\ntwo real sites, not hand-written ones')
+console.log('\nthree real sites, not hand-written ones')
 {
   // Everything above asserts behaviour against an object written here,
   // which can only ever agree with itself. This block reads a site that
@@ -202,7 +252,12 @@ console.log('\ntwo real sites, not hand-written ones')
   const index = parsePublishedIndex(readFileSync(join(site, 'index.json'), 'utf8'))
   check('the fixture site parses', index.ok === true)
   check('and states contract 0.3.0', index.ok === true && index.index.indexVersion === '0.3.0')
-  check('with no note, being exactly the contract this viewer pins', index.ok === true && index.note === null)
+  // 0.3 was the pin until this afternoon and is now one below it, so the
+  // silence here is the floor-is-a-floor case rather than the exact-match
+  // case. The site is a real one and it still has to read without being
+  // told it is behind.
+  check('with no note, being below the floor rather than above it', index.ok === true && index.note === null)
+  check('and states no pairing bounds, having been written before the field', index.ok === true && index.index.pairing === undefined)
 
   const summary = index.ok === true ? index.index.records[0] : null
   check('its record states a 64-character lower-case digest', /^[0-9a-f]{64}$/.test(summary?.sha256 ?? ''))
@@ -235,6 +290,24 @@ console.log('\ntwo real sites, not hand-written ones')
   const oldText = readFileSync(join(here, '..', 'public', 'fixtures', 'site-02', oldSummary.json), 'utf8')
   const oldCheck = await verify(oldSummary, oldText)
   check('and its record is unverifiable, not failed', oldCheck.state === 'unverifiable' && oldCheck.reason === 'no-digest-in-index')
+
+  // site-04/ is the contract this viewer now pins, written by the
+  // publisher on the resolver seat's own branch against two records that
+  // differ only in the bounds they state. The interesting case is not
+  // that the field parses; it is that one published set holds two
+  // different answers, which is the case the field was added for and the
+  // one a hand-written fixture would never have produced.
+  const four = parsePublishedIndex(readFileSync(join(here, '..', 'public', 'fixtures', 'site-04', 'index.json'), 'utf8'))
+  check('a real 0.4 site parses', four.ok === true && four.index.indexVersion === '0.4.0')
+  check('with no note, being exactly the contract this viewer pins', four.ok === true && four.note === null)
+  check('and states two distinct bound sets', four.ok === true && four.index.pairing.length === 2)
+  const fourCopy = four.ok === true ? pairingCopy(four.index) : null
+  check('which the page states per run', fourCopy?.sets.length === 2)
+  check('widest walk first, as the publisher wrote them', fourCopy?.sets[0].startsWith('400'))
+
+  const fourText = readFileSync(join(here, '..', 'public', 'fixtures', 'site-04', four.index.records[0].json), 'utf8')
+  const fourCheck = await verify(four.index.records[0], fourText)
+  check('and its first record still verifies against its own index', fourCheck.state === 'verified')
 }
 
 console.log('')
