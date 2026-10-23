@@ -115,7 +115,7 @@ work is sitting unmerged. The grep catches the inverse case, where the
 thing is on `main` in merged files and you are about to say nobody did
 it. The 2026-10-18 brief proposed a new standing query term on the
 ground that no brief of this seat had ever cited the post-editing
-literature, and four files on `main` cite the exact paper it meant,
+literature, and four files on `main` cited the exact paper it meant,
 including the lead finding of the 2026-10-05 brief
 (docs/research/briefs/2026-10-23.md, "Corrections to this seat's own
 prior brief"). It used neither instrument, because the claim was in a
