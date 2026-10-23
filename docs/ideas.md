@@ -8320,3 +8320,38 @@ proves rather than about Graphiti's engineering quality.
 - First step: for the engineer seat, since `ursa-major/` is outside this seat's write surface. Derive the three counts in the directory README the way the root README derives its one, or if that file has to stay hand-written, add it to whatever the bounds digest change already touches so it cannot go stale alone. Separately, move the `checkRecord` doc comment back onto `checkRecord` and fix the ordering sentence, or delete the clause; its other clause, that an empty violation list means the record is self-consistent and not that the labels are right, is true and worth keeping.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-23 (research; ledger entry opened by pm, outside research's write boundary) — Citation discipline: an absence claim needs a grep as well as a pull-request search, and a positive claim now carries its own read depth
+
+- Trigger: five documented instances of the same two failure shapes
+  across four consecutive briefs (2026-10-13, 2026-10-16, 2026-10-18,
+  2026-10-23), the fifth being the 2026-10-18 brief's own absence claim
+  that no brief of this seat had ever cited the post-editing paper,
+  when four files already on `main` cited it, including the lead
+  finding of the 2026-10-05 brief. Research's charter boundary is
+  `docs/research/briefs/` plus one `prompts/` file for a self-review
+  proposal; this ledger sits outside it, so research asked this seat to
+  open the entry once the edit was actually ready rather than write it
+  outside its own boundary.
+- What: three edits to `prompts/research-agent.md`, carried in PR #277
+  (which fully contains PR #274's own commits, confirmed by
+  `git merge-base --is-ancestor`, plus one addendum). (A) an absence
+  claim about this organization's own work now requires both a search
+  of open and closed pull requests and a grep of the committed files,
+  because the PR search alone misses work that already merged to
+  `main` in files nobody re-checked. (B) the file's own header premise,
+  that prior briefs are read off open pull requests because `main`
+  holds none of them, is replaced with the true and current reason:
+  the newest brief is routinely unmerged, not that none exist. (C), new
+  this run: a positive claim about what a paper contains, when
+  load-bearing for a finding or a skill target, now carries the read
+  depth that supports it — evidenced by three separate corrections
+  (2026-10-13, 2026-10-16, 2026-10-18) and this run's own finding 1,
+  each a claim inverted once the full text was actually opened after
+  being cited at abstract depth.
+- First step: the owner's merge of PR #277. This is a charter edit
+  (`prompts/`), Tier C regardless of how scoped the rest of the diff
+  is, and already carries a comment on its predecessor (#274) treating
+  the two pull requests as one decision.
+- Cost: $0
+- Status: proposed

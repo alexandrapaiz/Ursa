@@ -2,6 +2,117 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-third pass, 2026-10-23 ~17:4x UTC, message: a skill `done` re-delivered, and research's PR reviewed against the merge rule
+
+**Not a standup.** Two things this run's trigger named, both checked
+fresh rather than taken on the trigger's word.
+
+**Event 1, the skill `done` message, was already closed out.** The
+trigger re-delivered skill's "draft resolved" message (ref #276,
+timestamped 17:31:12Z), but this seat's own fifty-second pass (below,
+backfilled this pass — see the gap it is closing) already read it,
+merged #276, and replied on the board at 17:36:33Z ("Your fifth-skill
+pull request is merged"). Confirmed via `GET
+/api/messages?to_seat=skill&to_company=Ursa` that the reply exists and
+via `git log` that the merge commit (21944ab) is already an ancestor
+of this branch. Nothing further to do: answering it twice would be
+noise, not diligence.
+
+**Event 2, PR #274 reviewed against the merge rule, and so was its
+successor.** `gh pr view 274` now shows five commits (the placeholder
+plus the brief plus the charter edit the fifty-first pass found
+missing) and an existing comment, posted under the owner's own
+account, saying the pull request is superseded by #277 and that #277
+"contains every commit here plus one addendum commit" with "the Tier
+C charter edit in it... unchanged." Checked rather than taken on the
+comment's word: `git merge-base --is-ancestor` over both fetched
+branches confirms #274 is a full ancestor of #277, and a direct diff
+of `prompts/research-agent.md` between the two branch tips is empty.
+So the comment is accurate, and this pass treats the two as the one
+decision the comment already says they are, the same way the
+forty-eighth pass treated #268 and #269.
+
+**The verdict: neither merges, and neither needs anything more from
+research.** Both carry the charter edit to `prompts/research-agent.md`
+(absence claims now need a pull-request search and a grep of committed
+files, not the PR search alone; positive claims carry their own read
+depth), which is a charter edit regardless of how clean and well-
+reasoned the rest of either diff is — Tier C, same as every charter
+edit this file has tracked since 2026-10-15. Checks are green and both
+diffs are scoped exactly to what the seat was asked (a brief plus one
+proposal file). Research's own body already says the right thing
+("this is a proposal. The owner's merge is the promotion.") Nothing to
+hand back to its seat; the one open item was the ledger entry, below.
+
+**The ledger entry research couldn't write, written.** Research's note
+this morning (17:35:34Z) said it could not open the `docs/ideas.md`
+entry for the charter-edit proposal because the ideas ledger sits
+outside its write boundary (briefs plus one charter file, and the
+ledger is neither). Opened it this pass — see `docs/ideas.md`,
+2026-10-23, "Citation discipline" — naming the three edits and the
+evidence for each, so the entry does not keep waiting on a boundary
+neither seat can cross for it.
+
+**Standing gap, named rather than re-decided.** The twenty-third pass's
+`ask` to the owner (`INC-2026-10-18-tier-c-charter-freeze`,
+docs/decisions.md) proposed that a `prompts/` pull request able to
+declare honestly that it moves no authority and loosens no owner gate
+should be Tier B, not Tier C, with a 48-hour silence clock from
+2026-10-18. That clock ran out during the outage with no pass alive to
+act on it either way, and no pass since (the fiftieth, the fifty-first,
+or this one) has applied the declare-and-check test to any `prompts/`
+PR — each, including this one, has defaulted to the blanket reading
+instead. This pass did the same, deliberately: the specific comment
+already on #274, posted under the owner's own account minutes ago, is
+fresher and more specific than a standing ask from five days and one
+outage ago, and following her own word on the pull request in front of
+me is a safer read than re-litigating the general question on her
+behalf. The general question itself is still open and is named here
+again so it does not quietly resolve itself by nobody ever applying it.
+
+**Failed runs: none new** (`gh run list --status failure --created
+">=2026-10-23T11:00:00Z"`, empty, same window the fifty-first pass
+already checked).
+
+**Board:** replied to research's note in first person, naming the
+independent verification, the no-merge decision, and the ledger entry
+now open.
+
+## Fifty-second pass, 2026-10-23 ~17:3x UTC, message: skill's `done` reply on its own inherited draft (backfilled this pass — see below)
+
+**A tracking gap, closed rather than carried forward.** This entry
+should have been written live, in the same pass that did the work it
+describes (the pass whose commits already carry the "third late
+addition" section of this branch's own pull request body and the
+17:36:33Z board reply to skill). The commits that do the work —
+merging #276, closing nothing further, replying on the board — all
+landed; the one thing that did not land was this file. Writing it now,
+after the fact, rather than leaving the gap for the next pass to
+discover and wonder whether the merge happened without a record of
+why. The org rule this seat holds every other seat to ("an open card is
+not evidence that nobody built it") cuts the other way too: a missing
+tracker line is not evidence that nothing happened, and the fix is to
+check `git log` and the board before assuming either.
+
+**What happened.** Skill's `done` message (17:31:12Z) reported its
+inherited draft (#264) resolved: absorbed whole into a new branch,
+read as a resumption rather than an abandonment, #276 readied in its
+place with all four of #264's commits unchanged, #264 closed with a
+comment re-declaring what it owed so the close reads without opening
+#276. Checked against the merge rule rather than taken on the report's
+word: not a draft, `scan` green, `CLEAN`/`MERGEABLE`, diff confined to
+`skills/` and `docs/ideas.md`, the four `node` checks the body cited
+re-run against the branch here and matching what it reported. Merged.
+The merge put this branch's own tail-of-file addition to `docs/ideas.md`
+into conflict with #276's addition at the identical anchor line; the
+conflict resolved by hand, both entries kept, and this branch became a
+merge commit of `main` back into itself as a result. Posted `done` to
+skill on the board naming that side effect (17:36:33Z, "Your fifth-
+skill pull request is merged").
+
+**Board:** one reply posted, first person, named above; no further
+action needed since #264 was already closed by skill's own hand.
+
 ## Fifty-first pass, 2026-10-23 ~17:2x UTC, message: research's `done` reply on #263
 
 **Not a standup.** One message addressed to this seat, answered on
