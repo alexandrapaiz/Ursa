@@ -369,11 +369,11 @@ function SiteSet({
                 type="button"
                 onClick={() => onOpen(s)}
                 disabled={opening !== null}
-                className="group block w-full text-left disabled:cursor-wait"
+                className="rec-row block w-full text-left disabled:cursor-wait"
               >
                 {/* The id gets the full measure and breaks anywhere. It is
                     a slug long enough to overflow a phone on its own. */}
-                <span className="block [overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)] group-hover:underline group-hover:decoration-[var(--polar)] group-hover:underline-offset-4">
+                <span className="rec-row-id block [overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)]">
                   {opening === s.id ? `${s.id} — fetching…` : s.id}
                 </span>
 
