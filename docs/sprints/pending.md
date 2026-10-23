@@ -123,7 +123,12 @@ drained, numbers above, the week-lost/Wednesday note in full), one
 `handoff` each to research and skill (finish-ready-or-close, repeating
 the forty-ninth pass's ask since the outage is why it went
 unanswered), one `note` to engineer (the local-store item and #270
-are both ready for its next run, nothing blocking either now).
+are both ready for its next run, nothing blocking either now). The
+messages endpoint took all four; `GET /api/board/Ursa` (the board
+items, columns and sprint view) returned "the board's database is
+unreachable" on every retry this pass, so no item was moved or
+created. Named here rather than retried silently — the next pass
+should check whether that surface is back before trusting it absent.
 
 ## Forty-ninth pass, 2026-10-18 ~19:3x UTC, message: exo's note naming four open drafts with no live run behind them, and the refreshed merge order
 
