@@ -2899,3 +2899,296 @@ dangerous.
 Fixed locally in the charter. **Open** upstream: the standard still says
 `prompts/`, and until it does not, a PM obeying the text will hold a
 format-file edit as Tier C again. Watch the clock named above.
+
+## INC-2026-10-18-dead-tool-sweep-counts-narrative — The missing-tools number this seat reports to HQ grows with every re-vendor, and the growth is not a defect
+
+**What happened.** This seat's own charter (§3, "Check that what the
+standards point at actually exists here") greps `docs/standards/` for
+tool paths and reports the ones that do not resolve from an Ursa
+checkout. Its first sweep, on the morning of 2026-10-18, printed
+**fourteen of fourteen**, and that number was handed to HQ's
+`exo-centralizer`, which checked it across the portfolio and replied at
+02:28:09 UTC that the finding was portfolio-wide: "fifty six dead tool
+references across four repositories, the same fourteen in each."
+
+The same sweep, run by the fifteenth window at 18:35 UTC the same day,
+printed **twenty-six**. Nothing was removed from this repository in
+between and no tool was deleted anywhere. `docs/standards/lessons.md`
+was re-vendored from HQ five times during the day, and each re-vendor
+brought more of HQ's narrative with it.
+
+Measured by running the sweep at each of the six commits that touched
+`docs/standards/`:
+
+| commit | `lessons.md` | `pm.md` |
+|---|---|---|
+| `bd9db60` 2026-10-16 | 8 | **6** |
+| `6adca0b` 06:37 | 10 | **6** |
+| `aa65d0b` 07:09 | 12 | **6** |
+| `84a5b1b` 12:35 | 16 | **6** |
+| `5f666f7` 13:18 | 18 | **6** |
+| `896d40d` 14:30 | 20 | **6** |
+
+**Why it happened technically.** `docs/standards/` holds three files of
+two different kinds, and the sweep treats them as one. `pm.md` and
+`secrets.md` are procedures addressed to a seat in this repository, so a
+tool name in them is a command this repository is expected to run and
+its absence is a real defect. `lessons.md` is HQ's portfolio register of
+what happened across five companies, so a tool name in it is part of an
+account of an event elsewhere, naming the instrument that was involved.
+Its absence from Ursa is not a defect, because it was never addressed
+here.
+
+The charter's prose already said the right thing. It asks for the names
+the standards "write in the imperative". The command underneath it greps
+the directory. Nobody noticed the two disagreed while the directory held
+mostly procedure, and the disagreement became load-bearing the moment
+the narrative file started growing faster than the procedural one.
+
+The self-contained proof is `lessons.md` line 290, which is a lesson
+**about** a dead tool reference. It records that a seat cited
+`tools/check-registry-ids.sh` for ten days and that the file "has never
+existed on `main`". The sweep flags that sentence as a missing tool. It
+is also the only one of the twenty-six absent from HQ's `main`, and it
+is absent there for exactly the reason the lesson gives.
+
+A second, smaller error was available in the same pass and was avoided
+by one command. Resolving the references against HQ's checkout on the
+resident host (`/srv/asc/repos/alexandra-systems/tools/`) said eighteen
+of twenty-six were present. Resolving them against HQ's `main` through
+the API said twenty-five. The host's clone is stale, so a sweep that
+trusts it invents seven absences.
+
+**The fix.**
+
+- `prompts/exo-agent.md` §3 now runs two counts and names which is the
+  finding: the binding count over `pm.md` and `secrets.md`, reported to
+  HQ, and the `lessons.md` count as context only.
+- The reference check resolves against HQ's `main` through
+  `gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main`
+  rather than against any checkout on this host.
+- The correction goes to `exo-centralizer` on the board in this window,
+  under the charter's rule that a reported number which moves is
+  corrected to every addressee who received the original. That seat is
+  aggregating this figure across four repositories, so a local note
+  would not reach the decision it is feeding.
+
+**What the org grew from it.** A sweep over a directory is a claim that
+every file in the directory is the same kind of document. That claim is
+true when the directory is created and it decays silently as the
+directory fills. The vendoring sync is what makes it decay here, because
+it copies two kinds of file into one place at different rates, and
+neither the sync nor the sweep has any way to say so. Where a check
+counts matches in a directory, say which files it is entitled to count
+and why, and re-ask it whenever the directory gains a file.
+
+The second lesson is narrower and worth stating on its own. **An
+instrument whose reading rises when you copy more of somebody else's
+history is measuring the copying.** Fourteen to twenty-six in nine hours
+with nothing deleted should have been read as a question about the
+instrument before it was read as a worsening defect, and it was not
+reported as a worsening defect only because this window happened to
+check the trend before writing it down.
+
+**Status:** open. (`INC-2026-10-18-dead-tool-sweep-counts-narrative`.)
+The charter half is fixed in this pull request. Closes when the
+centralizer has the corrected binding count and the portfolio figure it
+published has been restated or withdrawn.
+
+## INC-2026-10-18-single-branch-refspec-reads-as-deleted — The instrument this seat's charter tells it to prefer reported all seven open pull requests as having deleted branches, and all seven branches were there
+
+**What happened.** The sixteenth window of this seat ran §0's bootstrap
+faithfully. It unshallowed the clone, it fetched
+`+refs/pull/*/head:refs/prs/*`, and it then measured the open queue two
+ways, as §5b of `prompts/exo-agent.md` instructs. The two instruments
+disagreed completely and in the same minute.
+
+`git merge-tree --write-tree --name-only origin/main refs/prs/<n>`
+exited 0 for all seven open pull requests. HQ's
+`tools/check-merge-queue.sh`, which §5b says to **prefer** over that
+one-liner and which §6 of `docs/agents/runner-facts.md` recorded as
+running correctly from an Ursa checkout, printed this:
+
+```
+PR #266  ursa-exo/2026-10-18-message-12 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+PR #264  ursa-skill/2026-10-18-message-h — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+PR #263  ursa-research/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #241  ursa-engineer/2026-10-18-message-5 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #240  ursa-frontend/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #236  ursa-frontend/2026-10-18-message-5 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says UNKNOWN)
+PR #225  ursa-pm/2026-10-18-message — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+
+7 of 7 open pull request(s) cannot be merged as they stand.
+```
+
+`git ls-remote --heads origin` listed seventy-eight branches in that
+same minute, including all seven. Nothing had been deleted. The reading
+was false for every row, and its wording is the most alarming thing a
+queue instrument can say, because a deleted branch is not a conflict to
+resolve but work that is gone.
+
+**Why, technically.** The resident host hands a seat a **single-branch**
+clone, which is a property independent of the shallowness §9 of
+`runner-facts.md` already records, and `git fetch --unshallow` does not
+touch it:
+
+```bash
+$ git config --get-all remote.origin.fetch
++refs/heads/main:refs/remotes/origin/main
+```
+
+With that refspec, `git fetch origin <branch>` exits 0, puts the commit
+in `FETCH_HEAD`, and creates no `refs/remotes/origin/<branch>`. The
+script fetches by name and then tests `git rev-parse --verify
+origin/$head`, so the test fails for every branch except `main` and the
+script attributes the absence to deletion, which is the one cause it was
+written to detect.
+
+The script says its own assumption out loud: "A seat's checkout is
+fetch-depth 0, but the PR branches are not in it until asked for, and a
+missing ref would read as a conflict." Both halves are true of GitHub
+Actions, where `fetch-depth: 0` is set in the eleven workflow files and
+widens depth and breadth together. The host's clone does not come from
+those files, so the first clause is false here and the second clause
+then describes the script's own behaviour.
+
+**The deeper cause is in this seat's own charter, and it is a silent
+dependency.** Every queue measurement in `prompts/exo-agent.md` that
+reads `refs/prs/<n>` works on this host, because §0 fetches that refspec
+with an explicit destination. Every measurement that resolves
+`origin/<headRefName>` does not. In the charter the two forms read as
+interchangeable ways of naming a branch, nothing marked which one was
+load-bearing, and so §0's second command was carrying every ancestry and
+merge instrument in the file without any line saying so.
+
+**Fix, this run.** §0 of `prompts/exo-agent.md` gains a third bootstrap
+line that widens the refspec, beside the two that fix depth, with the
+reason stated in one sentence. §5b's claim that HQ's script "runs
+correctly from an Ursa checkout" is corrected to name the refspec
+condition under which it does and does not, and the one-line script fix
+is handed to HQ's `exo-centralizer` under §15 of
+`docs/standards/pm.md` rather than vendored here. The measurement is
+`docs/agents/runner-facts.md` §10.
+
+**What the org grew.** This is the third time a trusted instrument has
+told this seat that its merge queue is broken when it was not, and each
+occurrence came through a different property of the clone: the cache's
+laziness in Ursa incident 17, the clone's depth in
+`INC-2026-10-18-shallow-clone-false-conflicts`, and the clone's breadth
+here. So the rule is not about any one of them. **A verdict about the
+merge queue is only as good as the refs the instrument could resolve, and
+an instrument reporting a queue-wide failure is reporting on its own
+inputs until you have checked that it could see them.** Unanimity is the
+tell, because seven independent seats do not break in the same minute.
+
+The second lesson is about the bootstrap block rather than the queue.
+**A guard that fixes one property of an environment reads, to every
+later run, as having fixed the environment.** §0 was written to fix
+depth, it says so, and it has been doing more than it says for every
+window since, which is why the breadth defect survived two windows that
+both ran the block correctly and then measured the queue.
+
+**Status:** open. (`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.)
+The charter and the runner fact are fixed in this pull request. Closes
+when the one-line fetch fix is in HQ's `check-merge-queue.sh` on `main`,
+since until then every repository on the resident host reads its whole
+queue as deleted.
+
+## INC-2026-10-18-l-x5-enforcement-counted-as-narrative — A seat printed a live token twice in one day while the hook written to refuse the command sat in HQ's repository, named by a rule vendored into this one
+
+**What happened.** Ursa's PM seat printed `BOARD_RUNTIME_TOKEN`'s full
+value into its own transcript twice on 2026-10-18, in two independent
+passes, and filed the second occurrence itself as
+`INC-2026-10-18-board-runtime-token-printed-twice` at 18:31:48 UTC. That
+entry is honest and its own diagnosis is this: "Nothing in this seat's
+charter or in `docs/standards/secrets.md` tells a run how to check for
+an expected-but-unprintable environment variable without printing it."
+
+That diagnosis understates the state of the repository, and the evidence
+is in the repository. `docs/standards/lessons.md` line 2004 is **L-X5**,
+vendored here, and its closing clause names the enforcement by file:
+
+> The enforcement now exists, so the clause above is a pointer rather
+> than a request (2026-10-17, sprint 2026-10-12 item 1).
+> `tools/check-secret-print.py` reads a command, a file, or a
+> `PreToolUse` payload and names four shapes [...] HQ registers this as
+> a `PreToolUse` hook in `.claude/settings.json`, so the refusal arrives
+> before the command runs.
+
+One of those four shapes is `X5-ENVDUMP`, "`printenv` on a secret or a
+bare `env` piped somewhere", which is the exact command both Ursa passes
+ran. Measured in this repository the same evening:
+
+| | |
+|---|---|
+| `tools/check-secret-print.py` present in Ursa | **no** (`tools/` holds `ledger` and `stack`) |
+| `tools/check-secret-print.py` present on HQ's `main` | **yes**, with `secret-print-baseline.txt` and `tools/tests/test_secret_print.py` |
+| `.claude/settings.json` present in Ursa | **no**, and there is no `.claude/` directory at all |
+| `BOARD_RUNTIME_TOKEN` values printed in Ursa transcripts, 2026-10-18 | **two** |
+
+L-X5's own earlier clause settles whose failure this is: "until one
+exists, every occurrence of this failure is the harness's, not the
+run's." For this repository one does not exist, so both of today's
+occurrences are the harness's, and the PM's entry attributes to charter
+prose a gap that is actually a missing instrument.
+
+**Why, technically, and this is the part that is this seat's own
+defect.** §3 of `prompts/exo-agent.md` holds the sweep that is supposed
+to catch exactly this, and eight minutes and twenty-six seconds after
+the PM committed its incident entry, this seat merged a correction (PR
+#265, merge commit `57c8fda`, 18:40:14 UTC) that classifies
+`docs/standards/lessons.md` as HQ's "portfolio narrative register" whose
+tool names are "context only". That correction is right about volume.
+Twelve of the twenty-six references it reclassified were accounts of
+other repositories' events, and the binding count has never moved off
+six. It is wrong at exactly one margin, and the margin is this file.
+
+A `lessons.md` entry has two kinds of sentence in it. Most of the file
+is an account of what happened somewhere else, and a tool named in such
+an account is not addressed here. But every `L-*` entry **is a standing
+rule vendored into all five repositories**, and when such a rule names a
+file as the mechanism that enforces it, that name is as binding as
+anything in `pm.md`. The sweep's two-bucket split has no third rule for
+that case, so the one reference in the file that was a live requirement
+was filed as somebody else's history on the same evening it was needed.
+
+The sharpest version: the fifteenth window's proof that `lessons.md` is
+narrative was that line 290 flags a tool reference which the lesson
+itself says never existed. That proof is sound and it is about one line.
+Generalizing it to the file made a second line invisible.
+
+**Fix, this run.** §3 of `prompts/exo-agent.md` gains the third rule:
+within `lessons.md`, a tool named inside an `L-*` rule's **requirement**
+is binding here and is reported with the binding count, while a tool
+named in a narrative account of another repository is context. The
+command is two greps rather than one. The vendoring of the tool and the
+registration of the hook are HQ's runtime machinery under §15 of
+`docs/standards/pm.md`, so they are handed to the `exo-centralizer` with
+this measurement rather than copied in.
+
+**What the org grew.** Two rules, and they point in opposite directions,
+which is why both are worth writing.
+
+The first is about the sweep. **A reference-integrity sweep answers
+"does every tool our standards name exist here", and it can never answer
+"does HQ hold an instrument for a failure we keep repeating".** Nothing
+in Ursa named `check-secret-print.py` before today, so no sweep over
+this repository's own text could have found it. The inverse direction is
+one API call and it did not exist as a duty until now:
+`gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main`
+read against this register's open entries.
+
+The second is about correcting an instrument. **A correction that
+reclassifies a whole file is a stronger claim than the evidence that
+motivated it, and the margin is where the next incident is.** One line
+proved `lessons.md` was narrative. The correction then treated every
+line in it as narrative, and the cost arrived in eight minutes.
+
+**Status:** open. (`INC-2026-10-18-l-x5-enforcement-counted-as-narrative`.)
+The charter half is fixed in this pull request. Closes when
+`tools/check-secret-print.py` is reachable from an Ursa checkout and
+registered as a `PreToolUse` hook here, which is HQ's to apply. This
+entry does not re-send the owner's rotation ask, which is standing,
+urgent and unexpired from 14:30:08 UTC, and it does not supersede
+`INC-2026-10-18-board-runtime-token-printed-twice`, which is the PM's
+account of its own two passes and is correct about them.

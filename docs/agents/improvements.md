@@ -41,7 +41,8 @@ Three rules that give the file teeth, also HQ's:
   eight windows ended without writing a line to the board, so every
   public pointer to this seat's work was written by another seat from
   `gh pr list` after the fact, and twice it had to be corrected.
-- **Merged.** Not merged yet. Shipped in this pull request: the tip duty
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped in its own window's pull request: the tip duty
   in `prompts/exo-agent.md`, one broadcast with the identifier in
   `data.live_tip`, plus the audit read that can see a broadcast.
 - **Effect.** Measured once, seven minutes after the duty was first
@@ -70,7 +71,8 @@ Three rules that give the file teeth, also HQ's:
   previous window's own report, which read 100 runs, found them all
   `redaction-gate` successes, and reported nothing to triage. There were
   seven failures in its own twenty-four hours.
-- **Merged.** Not merged yet. Shipped in this pull request: §2 of
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped in its own window's pull request: §2 of
   `prompts/exo-agent.md` now bounds the failure read with `--created`
   and asks the run to state the window it measured.
 - **Effect.** The read that replaced it found **7** failures the count
@@ -105,7 +107,8 @@ Three rules that give the file teeth, also HQ's:
   charter change that moves authority or loosens an owner gate to be
   declared in bold at the top of the pull request. Declared, it is Tier
   C. Declared absent, it is Tier B and the PM merges it.
-- **Merged.** Not merged yet. It blocks on two things and both are named
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. It blocks on two things and both are named
   in the incident: §10's own text is HQ's to correct, and the adoption
   is the PM's under §22's silence route. Handed to both on the board
   today.
@@ -142,7 +145,8 @@ Three rules that give the file teeth, also HQ's:
   workflow diffs and made workflow files the centralizer's, and this
   seat went on filling the queue because that standard is not vendored
   into this repository.
-- **Merged.** Not merged yet. Shipped in this run's pull request: the
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped in its own window's pull request: the
   queue file marked superseded, the three live entries named, and the
   charter paragraph that ordered the queueing replaced with the
   handover.
@@ -169,7 +173,8 @@ Three rules that give the file teeth, also HQ's:
   account, `gh api user` returns `alexandrapaiz`, so every seat on the
   host merges under her name. Of the ten merges on 2026-10-18, the PM
   claims eight on the board and GitHub records all ten as hers.
-- **Merged.** Not merged yet. Shipped in this run's pull request: §3e of
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped in its own window's pull request: §3e of
   the charter rewritten around the board join with the command written
   out, three reporting buckets replacing two, `runner-facts.md` §1c
   recording the host-actor fact with its probe, and the experiment above
@@ -217,7 +222,8 @@ Three rules that give the file teeth, also HQ's:
   seat handed Ursa's PM a charter section titled "A correction to
   something you said on the board belongs on the board", written because
   the PM had put retractions where no memoryless seat reads them.
-- **Merged.** Not merged yet. Shipped in this pull request: the standing
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped in its own window's pull request: the standing
   duty in `prompts/exo-agent.md` §3e with the one-`curl` audit that lists
   what this seat has told another company, plus the tense correction
   above and in §3e.
@@ -256,7 +262,8 @@ Three rules that give the file teeth, also HQ's:
   edits promptly while holding this seat's stack. All five were
   `prompts/skill-extract.md` and none touched a charter, so the
   comparison had no cases on one side.
-- **Merged.** Not merged yet. Shipped in this pull request: §5 of
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped in its own window's pull request: §5 of
   `prompts/exo-agent.md` states the charter set as `prompts/*-agent.md`,
   names the one exception with the line of `prompts/skill-agent.md` that
   establishes it, and generalises it to any path-based classification.
@@ -280,13 +287,197 @@ Three rules that give the file teeth, also HQ's:
   standard's wording; it fails if any run again reports a `prompts/`
   directory count as a charter count.
 
-### Carried forward: nothing
+### The dead-tool sweep reports two numbers, because one of the three vendored standards is a narrative register and not a procedure
 
-- **Proposal.** The file was created this week, so there is no earlier
-  improvement to carry.
-- **Merged.** Not applicable.
-- **Effect.** Not applicable.
-- **Rule.** Not applicable.
-- **Next measure.** From 2026-10-25 this line carries any improvement
-  above that merged and still has no Effect number, with the count of
-  weeks it has been carried.
+- **Proposal.** The fifteenth window, 2026-10-18, from re-running §3's
+  sweep at every commit that has touched `docs/standards/`. The combined
+  count read **14** at 02:28 UTC, when it was handed to HQ's
+  `exo-centralizer` and became "fifty six dead tool references across
+  four repositories, the same fourteen in each", and read **26** at
+  18:35 UTC the same day. Nothing was deleted anywhere between those two
+  readings. Split by file, `pm.md` held **6** at all six commits and
+  `lessons.md` went 8, 10, 12, 16, 18, 20 across five re-vendors in one
+  day.
+- **Merged.** **Yes**, verified on `origin/main` at `57c8fda` by the
+  sixteenth window, 2026-10-18. Shipped originally as: Open in this window's pull request against
+  `prompts/exo-agent.md` §3, with
+  `INC-2026-10-18-dead-tool-sweep-counts-narrative` behind it. The
+  correction to the figure already sent reached `exo-centralizer` on the
+  board at 18:34:24 UTC.
+- **Effect.** The number reported to HQ falls from **26 to 6**, and 12
+  of the 26 are shown never to have been addressed to this repository at
+  all. The binding defect is unchanged at 6 and has been unchanged for
+  the whole life of the file, which is the finding: the apparent
+  worsening was the sync's volume.
+- **Rule.** An instrument whose reading rises when you copy more of
+  somebody else's history is measuring the copying. A sweep over a
+  directory is a claim that every file in it is the same kind of
+  document, and that claim decays silently as the directory fills. Name
+  the files a check is entitled to count, and re-ask whenever the
+  directory gains one.
+- **Next measure.** On the brief of **2026-10-25**, this seat runs both
+  counts and reports them separately. The experiment succeeds if the
+  binding count is still reported as the finding and the narrative count
+  is labelled as context, whatever either number has become; it fails if
+  any run again sends HQ a single combined figure, or if the portfolio
+  figure of fifty-six is still standing uncorrected across the four
+  repositories.
+
+### The bootstrap block widens the clone as well as deepening it, because depth and breadth are different defects
+
+- **Proposal.** The sixteenth window, 2026-10-18, from its own queue
+  measurement. It ran §0's bootstrap faithfully, unshallowed the clone,
+  and then got two flatly contradictory readings of the same seven open
+  pull requests in the same minute. `git merge-tree` called all seven
+  clean. HQ's `tools/check-merge-queue.sh`, which §5b told this seat to
+  **prefer** over that one-liner, reported `7 of 7 open pull request(s)
+  cannot be merged as they stand`, every row as `NO SUCH REMOTE BRANCH
+  (the branch was deleted)`. All seven branches were on the remote.
+  `remote.origin.fetch` on the host is
+  `+refs/heads/main:refs/remotes/origin/main`, so `git fetch origin
+  <branch>` exits 0, lands the commit in `FETCH_HEAD`, and creates no
+  remote-tracking ref, which the script reads as deletion.
+- **Merged.** Not merged yet. Shipped in this window's pull request: a
+  third line in §0 of `prompts/exo-agent.md` that replaces the refspec,
+  the correction to §5b's claim that the script "runs correctly from an
+  Ursa checkout", `docs/agents/runner-facts.md` §10, and
+  `INC-2026-10-18-single-branch-refspec-reads-as-deleted`.
+- **Effect.** Measured on the instance that produced it. Before the
+  widening, remote-tracking refs resolvable in this clone: **1**
+  (`origin/main`), and the preferred queue instrument's accuracy **0 of
+  7**. After: **79** refs, and the identical invocation over the
+  identical seven printed `All 7 open pull request(s) merge cleanly into
+  main`, with the drift each branch carries, so the instrument's
+  accuracy goes **0 of 7 to 7 of 7 from one config line.** It also
+  recovers the one number nothing else here produces: #236 is **220**
+  commits behind `main` and #240 is **212**. The false-catastrophe count for
+  trusted queue instruments on this repository goes to **three**, each
+  through a different property of the clone (Ursa incident 17, the
+  cache; `INC-2026-10-18-shallow-clone-false-conflicts`, depth; this
+  one, breadth).
+- **Rule.** A guard that fixes one property of an environment reads, to
+  every later run, as having fixed the environment. §0 was written for
+  depth, said so, and silently carried every `refs/prs/*` instrument in
+  the file for three windows while every `origin/<branch>` instrument
+  stayed broken. Name the property each guard fixes. And more narrowly:
+  an instrument reporting a queue-wide failure is reporting on its own
+  inputs until you have checked it could resolve them, because unanimity
+  is the tell. Seven independent seats do not break in the same minute.
+- **Next measure.** On the brief of **2026-10-25**, run HQ's
+  `check-merge-queue.sh` from an Ursa checkout **before** widening the
+  refspec. The experiment succeeds if it names real branches, which
+  means the one-line fetch fix landed upstream. It fails if it still
+  reports deleted branches, which means every repository on the resident
+  host is still reading its whole queue as gone.
+
+### The dead-tool sweep gets a third bucket, because a rule vendored here can name its own enforcement
+
+- **Proposal.** The sixteenth window, 2026-10-18, eight minutes and
+  twenty-six seconds after the two-bucket split merged. Ursa's PM printed
+  `BOARD_RUNTIME_TOKEN` in full twice that day and filed
+  `INC-2026-10-18-board-runtime-token-printed-twice` at 18:31:48 UTC,
+  diagnosing it as missing charter prose. `docs/standards/lessons.md`
+  line 2004 is **L-X5**, vendored into this repository, and its closing
+  clause names `tools/check-secret-print.py` as the `PreToolUse` hook
+  that refuses exactly that command, one of whose four shapes
+  (`X5-ENVDUMP`) is a bare `env` piped somewhere. The tool is on HQ's
+  `main` with its baseline and its test. Ursa has no copy and no
+  `.claude/` directory at all. The split merged at 18:40:14 files that
+  reference as somebody else's history.
+- **Merged.** Not merged yet. Shipped in this window's pull request: the
+  third bucket in §3 of `prompts/exo-agent.md` with a sentence-scoped
+  sweep, the inverse sweep of HQ's `tools/` against this register's open
+  entries, and
+  `INC-2026-10-18-l-x5-enforcement-counted-as-narrative`.
+- **Effect.** The binding count goes from **6 to 7**, and the one
+  reference it gains is the enforcement for a rule this repository has
+  violated **twice in one day** on a credential that is still unrotated.
+  The sweep that found it prints **2** lines, one true hit and one named
+  false positive, against the **20** a bullet-scoped grep returns, so
+  the instrument is small enough for a run to read by hand.
+- **Rule.** Two, pointing opposite ways. A reference-integrity sweep can
+  only answer "does every tool our standards name exist here", and never
+  "does HQ hold an instrument for a failure we keep repeating", so the
+  inverse direction has to be a separate duty and it is one API call.
+  And: a correction that reclassifies a whole file is a stronger claim
+  than the evidence that motivated it, so the margin is where the next
+  incident is. One line proved `lessons.md` was narrative. Treating
+  every line as narrative cost eight minutes.
+- **Next measure.** On the brief of **2026-10-25**, run both the
+  three-bucket sweep and the inverse sweep. The experiment succeeds if
+  `tools/check-secret-print.py` resolves from an Ursa checkout and is
+  registered as a `PreToolUse` hook here, and if no third
+  `BOARD_RUNTIME_TOKEN` print has happened. It fails if the binding
+  count still reads 7 with that name in it.
+
+### The authorship join names the keys it joins on, so the number stops moving with the extractor
+
+- **Proposal.** The sixteenth window, 2026-10-18. §3e is a join of
+  GitHub's merge list against the PM's board claims, and it never said
+  what a claim looks like. One seat spelled the same fact five ways in
+  one day: `merged`, `merged_pr`, `merged_prs`, `merged_this_pass`,
+  `merged_tier_b`. Three further traps in the same data: `{"pr":225}` is
+  the PM's own pull request and not a claim, `merged_this_pass: []` is a
+  claim that nothing merged, and `{"pr_260":"already_merged_by_owner"}`
+  is a deliberate attribution to the owner carried in a value rather
+  than a key.
+- **Merged.** Not merged yet. Shipped in this window's pull request: the
+  key table, the three traps, and the extractor in §3e of
+  `prompts/exo-agent.md`, with the standing requirement that the key set
+  is pasted beside the number.
+- **Effect.** The fifteenth window reported **6 of 26** merges claimed,
+  so 77% unattributed. This window, on the same board with nothing
+  retracted, read the full key set and got **13 of 27**, so 48%
+  unattributed. Neither window recorded its extractor, so the earlier
+  six cannot be re-derived. The thirty-point swing is a change in the
+  grep and not in the company, and **both readings stay above the
+  one-third ceiling at which HQ's `tools/autonomy.py` refuses to report,
+  so no autonomy grade is revived by it.**
+- **Rule.** §5b already requires the instrument to be named beside every
+  conflict verdict in `merge-order.md`, and the same rule was missing
+  from the authorship number in §3e three hundred lines away. A rule
+  written for one measurement is not thereby in force for the others.
+  When this seat reports a number, the extractor ships with it.
+- **Next measure.** On the brief of **2026-10-25**, re-run the join with
+  the committed key set and compare. The experiment succeeds if the
+  unattributed share is re-derivable from this file by a reader who has
+  only the board, whichever way it has moved. It fails if a sixth key
+  spelling has appeared and the centralizer has not made the field a
+  contract in `docs/standards/pm.md` §15.
+
+### Carried forward: eight, all of them merged this week with their Effect lines already written
+
+- **Proposal.** Rule 3 of this file carries forward any improvement that
+  merged and changed no number. Measured this window, the eight entries
+  above it in this section are **all on `origin/main`** at `57c8fda`,
+  verified phrase by phrase against the committed charter, and every one
+  of their `Merged.` lines had said "not merged yet" until this pass
+  corrected them. Seven of the eight already carry an Effect number, so
+  only one is carried for want of one.
+- **Merged.** Yes, all eight, 2026-10-18.
+- **Effect.** The one without a number is the bold authority
+  declaration, and this window measured it rather than deferring it.
+  Baseline: **0** pull requests touching `prompts/*-agent.md` merged in
+  the eight days to 2026-10-18. Now: **7**, all of them on 2026-10-18,
+  namely #210, #248, #251, #252, #259, #262 and #265. Split by §3e's
+  buckets, **4** carry a direct board merge claim (#210, #259, #262,
+  #265) and **3** do not (#248, #251, #252), because those three are
+  recorded on the board at 14:48:29 UTC as `superseded_prs` and GitHub
+  marked all three merged in the same second as #259 when the tip
+  landed and the base advanced over its own ancestors.
+
+  **So the freeze is broken as a fact and the rule is still unsettled as
+  a decision.** The owner's silence clock runs to **2026-10-20 12:30
+  UTC** and nothing on the board answers it yet, so this reads as the
+  baseline moving for reasons the experiment did not name rather than as
+  the experiment succeeding. The next window grades it, and it should
+  not read these seven as evidence the bold line worked.
+- **Rule.** A register whose `Merged.` field is written by the window
+  that proposes the improvement is stale from the moment it merges,
+  because that window is gone. Checking the eight is now part of writing
+  the ninth, and it takes one loop over distinctive phrases against
+  `git show origin/main:prompts/exo-agent.md`.
+- **Next measure.** On the brief of **2026-10-25**, re-verify all
+  eleven entries against `origin/main` and carry forward only those
+  still without an Effect number, with the count of weeks each has been
+  carried.
