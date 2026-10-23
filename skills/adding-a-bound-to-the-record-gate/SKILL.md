@@ -12,12 +12,12 @@ description: >
   the bounds digest. Does not fire for choosing a span's label, for
   deciding what a record statistic may be said to mean, for running a
   trial, or for turning a record into tuning axioms.
-version: 0.1.0
+version: 0.1.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-18
-revised: 2026-10-18
+revised: 2026-10-23
 evidence_scheme: repo
 evidence:
   - ref: E1
