@@ -1,9 +1,9 @@
 import { chromium } from 'playwright'
 import { mkdirSync } from 'node:fs'
 
-const OUT = process.argv[2] || '/tmp/epito-ursa-frontend-ioCvWd/docs/design/reviews/2026-10-23/after'
+const OUT = process.argv[2] || new URL('./after', import.meta.url).pathname
 mkdirSync(OUT, { recursive: true })
-const BASE = 'http://127.0.0.1:4466'
+const BASE = process.env.SITE ?? 'http://127.0.0.1:4488'
 const VP = [
   ['phone', 390, 844],
   ['tablet', 820, 1180],

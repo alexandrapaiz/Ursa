@@ -1,11 +1,12 @@
 import { chromium } from 'playwright'
 const out = process.argv[2]
 const at = Number(process.argv[3] ?? 40)
+const BASE = process.env.SITE ?? 'http://127.0.0.1:4488'
 const browser = await chromium.launch()
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 })
 const page = await ctx.newPage()
-await page.goto('http://127.0.0.1:4466/record', { waitUntil: 'networkidle' })
-await page.fill('input[type=url]', 'http://127.0.0.1:4466/fixtures/site-04/')
+await page.goto(BASE + '/record', { waitUntil: 'networkidle' })
+await page.fill('input[type=url]', BASE + '/fixtures/site-04/')
 await page.click('button[type=submit]')
 await page.waitForFunction(() => /record(s)?\s·/.test(document.body.innerText), null, { timeout: 15000 })
 await page.waitForTimeout(300)

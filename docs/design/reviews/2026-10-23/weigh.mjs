@@ -4,7 +4,7 @@ const rows = []
 for (const [label, url] of [
   ['published site, no pairing stamp (as 0.3 published)', 'http://127.0.0.1:4344/a/'],
   ['published site, pairing stamped (0.4)',               'http://127.0.0.1:4344/b/'],
-  ['viewer /record (ursa-minor, the set reader)',          'http://127.0.0.1:4455/record'],
+  ['viewer /record (ursa-minor, the set reader)',          (process.env.SITE ?? 'http://127.0.0.1:4488') + '/record'],
 ]) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await ctx.newPage()
