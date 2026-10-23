@@ -36,8 +36,8 @@ evidence:
     what: projectForMinor fails closed in three places in a stated order and reports every withholding, because a gate that drops data silently is indistinguishable to the user from one that leaks it
     source: ursa-major/src/disclosure.ts:224-285
   - ref: E6
-    what: the k-anonymity floor of five contributors, that the withheld-row count is publishable while the rows are not, and the generation-weighted mean the plan's schema forces on a merge
-    source: ursa-major/src/disclosure.ts:311-334,357-366
+    what: the k-anonymity floor's constant of five contributors, that the withheld-row count is publishable while the rows are not, and the generation-weighted mean the plan's schema forces on a merge
+    source: ursa-major/src/disclosure.ts:165-166,311-334,357-366
   - ref: E7
     what: the closed vocabulary as exact membership plus one date pattern, with no length-bounded free-form case left, which is what makes check 1 strong
     source: ursa-major/src/disclosure.ts:385-405
@@ -57,8 +57,8 @@ evidence:
     what: the adapters field decides what a disclosure may honestly claim, because a git-path generation is a blob already in the repository's history while a session-path one was never there, measured at 143,218 characters and zero prompts on 2026-10-18
     source: ursa-major/src/publish.ts:245-263
   - ref: E13
-    what: the manifest must be computable and printable before a byte is written, and filePaths is the one field that is strings rather than counts because a character total cannot stop a publication for a reason a number could not reach
-    source: ursa-major/src/publish.ts:231-241
+    what: the manifest must be computable and printable before a byte is written, it is carried into the published index as the counts the publisher acknowledged, and filePaths is the one field that is strings rather than counts because a character total cannot stop a publication for a reason a number could not reach
+    source: ursa-major/src/publish.ts:227-241
   - ref: E14
     what: the manifest is printed as prose with the numbers inline rather than as a table, and it ends by saying that nothing is aggregated, redacted or withheld, because a published record is the record
     source: ursa-major/src/publish.ts:391-416
@@ -137,6 +137,12 @@ evidence:
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
     source: docs/ideas.md:8137-8140
+  - ref: E40
+    what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
+    source: ursa-major/src/disclosure.test.ts:256-310
+  - ref: E41
+    what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
+    source: docs/security/redaction-standard.md:173-181
 supersedes: []
 ---
 
@@ -260,7 +266,7 @@ would report a leak the moment anyone resolves this repository [E9].
 Leaf values are joined by a run of NUL characters at least one shingle
 wide, so no window can span two values and manufacture a match [E9].
 
-Output: either a `batch.json` whose every string is one of about thirty
+Output: either a `batch.json` whose every string is one of thirty-two
 literals or an ISO date [E7], or an exit status of 1 and a list of
 findings.
 
@@ -307,7 +313,7 @@ Read three parts of it before saying yes.
   false on the only path the Action uses [E15].
 - **The warnings.** A record id is the name of the directory the work
   was resolved in, and publishing turns it into a path segment in a URL
-  a search engine can index. A slug that is not the repository's name is
+  anyone can read and a search engine can index [E17]. A slug that is not the repository's name is
   warned about and not refused, because the publisher may well have
   meant it and a refusal would be the module overruling the person whose
   data it is [E17].
@@ -386,7 +392,7 @@ implementation detail [E34].
 
 | The user is saying | Command | What happens |
 |---|---|---|
-| stop disclosing anything at all | `ursa consent revoke --scope minor-aggregate` | the scope goes back to withheld, and the transition is appended to the history [E19] |
+| stop disclosing anything at all | `ursa consent revoke --scope minor-aggregate` | the scope goes back to withheld [E24], and the transition is appended to the history [E19] |
 | this inference about me is wrong | `ursa consent revoke-axiom --axiom ax-003` | the axiom is kept as a tombstone so a later distillation cannot revive it, and it leaves every export and the overlay [E25] |
 | erase this piece of my work | `ursa forget --record <id>` | the record file goes, evidence is stripped, and an axiom grounded only in this record is deleted outright rather than tombstoned [E34] |
 
@@ -438,12 +444,17 @@ already guarantees that no text crosses. It guarantees it by an argument
 that only holds while somebody reads the code, and it stops being true
 the first time anyone adds a field. So the audit re-derives the
 guarantee from outside, over the serialized payload, knowing nothing
-about how it was produced, and the suite poisons the payload four ways
-to prove the audit can fail at all [E2]. That shape is worth copying
+about how it was produced, and a check that cannot fail proves nothing,
+so the suite poisons the payload once for each of the two checks [E2].
+It has grown to five poisoned payloads since, the last of them the
+whole record passed off as a batch, which is the failure mode that
+existed before the module [E40]. That shape is worth copying
 whenever a guarantee is the product rather than a property of it.
 
 **Any constraint loose enough to admit the unknown is loose enough to
-admit prose.** This is the enum lesson stated generally [E4]. The
+admit prose.** That sentence is the file's own, written about regular
+expressions and the name of a model nobody has heard of yet [E4].
+**Ours** is only that it generalises past regular expressions. The
 accepted cost is that a model absent from the vocabulary is withheld
 and reported, so the list is maintenance, and that is the correct
 direction for the failure to point [E4]. When you are tempted by a
@@ -491,9 +502,9 @@ lock, arriving at a different boundary.
 **Zone B does not exist.** The ingest route and the `survival_stats`
 table are specified and unbuilt, and `aggregate()` is the reference
 implementation of the floor that route owes rather than the route
-[E36]. A single device cannot enforce the floor, because contributors
-are only countable where they are collected, and every row a device
-emits carries a contributor count of 1 [E6].
+[E36]. A single device cannot enforce the floor, because it lives where
+contributors are countable, and the contributor count is 1 in every row
+a device emits [E36].
 
 **The merged scalar is an approximation, and it is reported rather than
 hidden.** The plan's table carries no character total, so two
@@ -521,7 +532,7 @@ the owner [E36]. This skill does not rule on it.
 **Class A has no automated check anywhere.** The standard says so in its
 own limits, and it gives a field list instead so that a seat about to
 quote a record can see which fields are dangerous without rediscovering
-the incident that made them dangerous [E27]. Everything in step 4 is a
+the incident that made them dangerous [E41]. Everything in step 4 is a
 person's judgment, and that is the design rather than a gap waiting on
 a tool.
 
