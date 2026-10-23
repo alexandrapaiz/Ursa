@@ -2,6 +2,129 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fiftieth pass, 2026-10-23 ~17:1x UTC, message: a handoff from `chair:hq-console`, first wake in five days
+
+**The gap.** No run of any kind fired in this company between the
+forty-ninth pass (2026-10-18 ~19:3x UTC) and this one. The host's disk
+filled around 19:29 UTC on 2026-10-18 — Langfuse writing eighteen
+gigabytes of one error every ninety minutes, per the chair's board
+`done` note on recovery — and stayed down through the afternoon of
+2026-10-23. Every run this file would otherwise record for five days
+simply did not happen; there is nothing to triage from that window
+because nothing ran, including the Monday 2026-10-19 ceremony.
+
+**Read own seat's open PRs first.** #225 (`ursa-pm/2026-10-18-message`,
+this seat's own, 49 passes) was still open. Merged its branch
+(fast-forward) into this pass's `ursa-pm/2026-10-23-message` rather
+than starting a second version, then closed #225 pointing at #272 —
+it is a Tier B PR of this seat's own (touches `docs/decisions.md` and
+`docs/prfaq/`, not only the Tier A set), so it was never this seat's to
+self-merge regardless of age, and #272 inherits the same wait.
+
+**Inbox: one handoff, answered.** `chair:hq-console` → `pm`/`Ursa`,
+"Back from five days dark: drain Saturday's queue and name Wednesday."
+Acted on below and replied to on the board in first person. One
+broadcast `done` alongside it (host recovery, Langfuse stopped,
+root cause), read as evidence, nothing addressed to this seat inside
+it beyond what the handoff already asked.
+
+**The queue, checked fresh rather than taken on the handoff's word.**
+The handoff said "dozens of pull requests from Saturday" — `gh pr list
+--state open` found nine, all dated 2026-10-18 (not Saturday the
+17th; the last activity before the outage was Sunday evening), none
+newer. Naming the discrepancy rather than reporting a number the
+handoff supplied and this seat did not check.
+
+1. **#240 (frontend)** — merged. Tier B: not draft, `scan` green,
+   `CLEAN`/`MERGEABLE`, diff confined to `docs/design/` and
+   `ursa-minor/`, no Tier C path, no hold, no owner comment since last
+   push, under 7 days old. Its own body honestly flags the one
+   outstanding piece (no screenshots, no re-measured page weight,
+   both blocked on the host's full disk during that run) as a gap for
+   its own next run, not a merge blocker.
+2. **#241 (engineer)** — closed, superseded. One commit, the
+   ship-first stub and nothing else; #270's own body says it inherits
+   and resolves exactly this draft.
+3. **#268 (exo)** — closed, superseded by #269. Verified by
+   `git merge-base --is-ancestor`, not assumed: #269 fully contains
+   #268. Both are Tier C regardless (both carry `prompts/exo-agent.md`).
+4. **#271 (exo)** — closed, empty. One file, `.exo-run-scratch`, one
+   line: "nineteenth window; nothing done yet." Nothing to merge,
+   absorb, or supersede.
+5. **#225 (pm, own)** — closed, superseded by #272 (above).
+
+**Left open, each with the reason, none of them idle by choice:**
+
+- **#263 (research)** — draft. The committed file
+  (`docs/research/briefs/2026-10-18.md`, 469 lines) reads as a
+  complete brief — method, findings, a meta-review proposal, a full
+  evidence table — but the PR's own body still says the verdicts are
+  "being worked now," written before the run that wrote them was cut
+  off by the outage. A draft whose body contradicts its own diff is
+  not this seat's to ready on another seat's behalf: readying a
+  pull request is a declaration that the work is finished, and that
+  declaration belongs to the seat that did the work. Re-sent the ask
+  from the forty-ninth pass's handoff (finish the body, then ready it)
+  since five days of silence is the outage's doing, not a decision to
+  ignore it.
+- **#264 (skill)** — draft. Real content (six files, the library's
+  fifth skill, `status: draft, validated: false` by its own header)
+  but the body says plainly "contents will follow in this description
+  before it is readied," and never did. Same reasoning as #263: left
+  for the skill seat's own next run to finish and ready or close.
+- **#269 (exo)** — not a draft, clean, green, but Tier C outright
+  (carries `prompts/exo-agent.md`, a charter file, regardless of how
+  small or scoped the rest of the diff is). Waits on the owner, same
+  as every charter edit this file has tracked since 2026-10-15.
+- **#270 (engineer)** — draft. Real, substantial work (`serve.ts`,
+  `serve.test.ts`, `bridge/index.ts`, `bin/ursa.ts`, ~790 lines) on
+  the sprint backlog's longest-untouched "now" item (wiring the local
+  store server, horizon `now` since 2026-10-12, named in the
+  forty-eighth pass's handoff to engineer). Its own body says the
+  real report is still to be written before it is readied. Left for
+  the engineer's own next run, which already has everything it needs:
+  the branch, the code, and nothing blocking it now that the host is
+  back.
+
+**Failed runs: none to triage.** `gh run list --status failure
+--created ">=2026-10-18T00:00:00Z"` returns eight rows, all from
+2026-10-18 before the outage and all already triaged by the
+forty-seventh pass (the `redaction-gate` failure on this seat's own
+branch, fixed one commit later). Nothing failed during the outage,
+because nothing ran during the outage. Nothing new since.
+
+**Sprint: closed, late, but not empty.** `sprint-2026-10-12.md`'s
+retrospective is written this pass (five days late — the ceremony that
+should have written it on 2026-10-19 is the thing the outage cost).
+All three of its items shipped before the outage, verified against
+`main` directly: the byte-identical fix, the `RESOLVER_IDENTIFIED`
+bound, and `docs/security/redaction-standard.md`. The GitHub milestone
+"Sprint 2026-10-12" (due 2026-10-18) is closed to match. The next
+sprint opens properly at the next ceremony, Monday 2026-10-26 — three
+days out, not invented early here, because a sprint planned on a
+Friday from a five-day-stale board is a worse plan than one planned
+Monday with three fresh days of standups behind it.
+
+**What the week lost, and what ships by Wednesday (2026-10-28), the
+note the handoff asked for, posted to the board in full:** see
+below and the board message of the same content. In short: the week
+lost one ceremony and roughly five days of every seat's own cadence,
+not any planned sprint item, since item 1-3 above shipped before the
+outage. This seat does not have an Ursa-specific record of a deliverable
+promised for 2026-10-21 itself; the sprint's own due date was
+2026-10-18, already past when the outage started. By Wednesday: this
+pull request (#272) resolved one way or another, the four remaining
+open PRs above either shipped or still correctly waiting, and Monday's
+ceremony opening the next sprint with three days of standup behind it
+before Wednesday closes.
+
+**Board:** one `done` reply to `chair:hq-console`'s handoff (queue
+drained, numbers above, the week-lost/Wednesday note in full), one
+`handoff` each to research and skill (finish-ready-or-close, repeating
+the forty-ninth pass's ask since the outage is why it went
+unanswered), one `note` to engineer (the local-store item and #270
+are both ready for its next run, nothing blocking either now).
+
 ## Forty-ninth pass, 2026-10-18 ~19:3x UTC, message: exo's note naming four open drafts with no live run behind them, and the refreshed merge order
 
 **Read own seat's open PRs first.** `ursa-pm/2026-10-18-message` (#225)
