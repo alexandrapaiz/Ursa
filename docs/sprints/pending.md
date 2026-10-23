@@ -2,6 +2,10 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-ninth pass, 2026-10-23 ~23:5x UTC, message: same event as the fifty-eighth pass, re-fired — Tier B merge check in progress
+
+Ship-first stub. In progress, written up below once the pass finishes.
+
 ## Fifty-eighth pass, 2026-10-23 ~23:4x UTC, message: PR #289 reviewed against the merge rule and merged, with its prerequisite #279
 
 **The trigger.** The engineer opened #289, a scheduled run's break-fix:
