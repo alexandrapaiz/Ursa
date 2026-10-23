@@ -4,10 +4,15 @@ Seven prompts, written against the `description` field in `SKILL.md`.
 Three should activate the skill. Four are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test. The reasoning below points at the
-skill's own steps and limits rather than at evidence refs, because
-`check-evidence.mjs` and `relevance-sweep.mjs` both read only
-`SKILL.md`, so an `[E…]` tag in this file would be a receipt nothing
-fingerprints.
+skill's own steps and limits rather than at evidence refs. When this
+file was written that was forced: `check-evidence.mjs` and
+`relevance-sweep.mjs` both read only `SKILL.md`, so an `[E…]` tag here
+would have been a receipt nothing fingerprints. The tenth run fixed
+that and §5p is the rule, so a tag in this file is now a receipt like
+any other. It stays a choice rather than a defect, because a trigger
+test argues about where the description's edge falls and not about
+what the code says, and routing through a step keeps one claim in one
+place instead of two.
 
 The budget is four near misses rather than two because §5c sets one
 near miss per adjacent skill, and this skill has four neighbours: every
