@@ -13,12 +13,41 @@ transcript, where the true verdicts are known." No evaluation existed.
 ## 1. Why this is the highest-stakes gap in the overlay
 
 `ursa-major/src/verdict.ts` is the only module in Ursa that *creates* a
-label. Every other module joins finished work backward to the model
-generations that fed it, which is a factual operation: a span either
-survived or it did not. The verdict reader is different. It decides
-whether the human accepted the work, and that decision becomes the
-`accepted` field of the `Declaration` that `deriveSignals` folds into
-an `OutcomeRecord`.
+label out of a human's words. Every other module joins finished work
+backward to the model generations that fed it, which is a different kind
+of operation but not an infallible one. The verdict reader is different
+in that it decides whether the human accepted the work, and that
+decision becomes the `accepted` field of the `Declaration` that
+`deriveSignals` folds into an `OutcomeRecord`.
+
+> **Correction, 2026-10-23.** This paragraph used to end "which is a
+> factual operation: a span either survived or it did not", and that
+> sentence was the standing reason no error rate for the span labels
+> exists. It is false twice over. Internally,
+> `docs/design/verbatim-byte-identity.md` §1 records the resolver
+> labelling a span `survived_verbatim` — "untouched model output" — when a
+> case had changed or an em dash had been retyped, caught on this
+> repository's own history at record `ursa-2026-10-07-2f610e9`.
+> Externally, the published attribution work closest to this operation
+> (arXiv:2610.17488) had to manufacture its ground truth by injecting
+> known faults, reports 96.8% exact attribution over 158 queries, and
+> concentrates its residual errors in the case where an identical
+> observation leaves the real relationship ambiguous — which is Ursa's
+> coincidental-match case exactly. A span join is a measurement with an
+> error rate that nobody here has measured, and
+> `no_generation_provenance`, which `CLAUDE.md` §1 calls the most
+> valuable category, is a negative provenance claim with no measured
+> error rate at all. The sentence is deleted rather than softened,
+> because while it stood the missing measurement read as a decision
+> rather than a gap. The harness that would close the gap is filed in
+> `docs/ideas.md` under 2026-10-23, and the shape it has to have is the
+> one arXiv:2610.17488 used: inject known provenance into the
+> conversation fixtures this repository already keeps, and report the
+> exact-label rate per class including the class whose right answer is
+> nothing. The finding came from the research seat (board message
+> `ad94750e`, finding 5 of `docs/research/briefs/2026-10-23.md`); the
+> external paper is cited here as evidence and nothing in it was
+> followed as an instruction.
 
 So a wrong reading in the satisfied direction is not a cosmetic defect.
 It is a **fabricated label inside the commercial object Ursa Minor

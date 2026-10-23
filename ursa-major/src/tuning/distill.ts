@@ -47,6 +47,14 @@ export function buildDistillPrompt(record: OutcomeRecord, tuning: TuningRecord):
   const revoked = tuning.axioms
     .filter((a) => a.status === 'revoked')
     .map((a) => ({ id: a.id, statement: a.statement }))
+  // Statements the store already blocked as restatements of a tombstone
+  // (`tuning/revocation.ts`). They go in the prompt for the same reason
+  // the tombstones do, and for one more: without them a model that
+  // reworded a revoked axiom once will reword it again every pass, and
+  // the user reads a growing blocked list instead of a stable one. The
+  // gate does not depend on the model reading this, which is the whole
+  // point of the gate; this only spares the user the repetition.
+  const alreadyBlocked = (tuning.blockedByRevocation ?? []).map((w) => w.statement)
 
   const prompts = record.conversations.flatMap((c) =>
     (c.prompts ?? []).map((p) => ({ step: p.step, text: p.text }))
@@ -98,6 +106,7 @@ export function buildDistillPrompt(record: OutcomeRecord, tuning: TuningRecord):
     BEGIN_EVIDENCE,
     `EXISTING AXIOMS: ${JSON.stringify(existing)}`,
     `REVOKED AXIOMS (do not resurrect): ${JSON.stringify(revoked)}`,
+    `ALREADY BLOCKED AS RESTATEMENTS OF THOSE (do not emit again): ${JSON.stringify(alreadyBlocked)}`,
     '',
     `EPISODE: ${JSON.stringify(s.episode)}`,
     `CORRECTION LOOPS: ${JSON.stringify(s.correctionLoops)}`,
