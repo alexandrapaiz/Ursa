@@ -15,18 +15,21 @@ run, quality over count. The owner's merge is the gate.
 | [running-an-outcome-record-trial](running-an-outcome-record-trial/SKILL.md) | Which finished work to resolve, which capture path it needs, and what the resulting numbers are allowed to mean | 22 | draft, `validated: false` |
 | [quoting-a-number-from-an-outcome-record](quoting-a-number-from-an-outcome-record/SKILL.md) | What a record statistic is a share of, and whether two records' numbers may be compared or added | 32 | draft, `validated: false` |
 | [distilling-a-tuning-record](distilling-a-tuning-record/SKILL.md) | What an axiom may claim, what its confidence count means, and what may leave the machine with a tuning block | 39 | draft, `validated: false` |
+| [adding-a-bound-to-the-record-gate](adding-a-bound-to-the-record-gate/SKILL.md) | Whether a proposed rule about outcome records is a bound or a measurement, how its statement and its committed counterexample are written, and whether a violation means the bound or the resolver is wrong | 32 | draft, `validated: false` |
 
-## Two areas, one edge between them
+## Three areas, and the edges between them
 
 The first three skills work on `outcome_record.json`. The fourth works
-on `tuning.json`. The handoff between those two files is the only
-boundary in the library, and every near miss in
-`distilling-a-tuning-record/TRIGGER-TEST.md` fails by sitting on the
-record side of it.
+on `tuning.json`. The fifth works on neither: it works on the checker
+those records are held against. Every near miss in
+`distilling-a-tuning-record/TRIGGER-TEST.md` and in
+`adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
+the record side of its own edge, which is what `prompts/skill-extract.md`
+§5e means by counting artifacts rather than neighbours.
 
 **The record area.** The three are adjacent and share almost all their
 vocabulary, so each ships a `TRIGGER-TEST.md` whose near misses include
-its siblings' triggers. Read those before adding a fifth skill in this
+its siblings' triggers. Read those before adding another skill in this
 area.
 
 They sit in order along one pipeline. The trial skill chooses what to
@@ -42,6 +45,18 @@ that spans the edge, for example whether a confidence count may be
 quoted in the methods document, is handled record-side first: the
 quoting skill rules on the number, then the distilling skill rules on
 what the axiom may claim.
+
+**The gate area.** `adding-a-bound-to-the-record-gate` is the first
+skill here whose object is code rather than a record:
+`ursa-major/src/invariants.ts` and the committed counterexamples under
+`ursa-major/fixtures/violations/`. It therefore has all four others as
+neighbours and is still one edge, between the records and the thing
+that checks them. A prompt that spans the edge is handled records-side
+first in one direction and gate-side first in the other. Which label a
+span carries is never a gate question, because a bound can only catch a
+record contradicting itself. Whether a rule about records should exist
+at all is never a record question, because no record can say what it
+was checked against.
 
 ## Checking the receipts
 
@@ -149,6 +164,19 @@ sweep resumable: 111 refs is several runs' work.
 **Closed 2026-10-18: 111 of 111 refs read, six false claims, 26 ranges
 widened, 79 sound as cited.** Every ref in the library carries a line range
 and a fingerprint. `prompts/skill-extract.md` §5j, §5l, §5m and §5n.
+
+- The fifth skill, 2026-10-18, 32 refs, read as they were written rather than
+  in a sweep afterwards, which is §5o's rule stated as a practice. Nine of the
+  32 needed a second pass, two claims wrong and seven ranges widened, which is
+  28 percent against the sweep's 29. So authoring-time reading did not make
+  the first draft of a citation more likely to be right. What it changed is
+  that all nine were repaired before the claim was committed, inside one run,
+  rather than across five slices afterwards. The verdicts are the author's
+  own, which is weaker than a second reader and is stated as such in
+  `relevance-audit.md`.
+
+**143 of 143 refs read as of 2026-10-23: 102 sound as cited, 33 ranges
+widened, eight claims wrong.**
 
 ## A verdict is only as good as the lines it was read against
 

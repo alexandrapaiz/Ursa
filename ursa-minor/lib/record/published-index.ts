@@ -52,8 +52,40 @@ import type { SpanClass } from './types'
  * The floor is a floor and not a requirement. Both fields stay optional
  * below, because a site published before today states 0.1 or 0.2 and
  * carries neither, and that site has to keep reading.
+ *
+ * Moved from 0.3 to 0.4 on 2026-10-18, when that seat published 0.4.0
+ * for one additive field, `pairing`, and this viewer started saying what
+ * the set it is showing was resolved under. The seat told this one about
+ * the field rather than letting it be found, and left the decision of
+ * whether to show it here; the reason for showing it is in
+ * `docs/design/pairing-bounds-in-the-set-view.md`.
  */
-export const INDEX_CONTRACT = { major: 0, minor: 3 } as const
+export const INDEX_CONTRACT = { major: 0, minor: 4 } as const
+
+/**
+ * How far the resolver's pairing walk was allowed to go, as the record
+ * states it (`OutcomeRecord.task.pairedBy`) and the index repeats it for
+ * the set.
+ *
+ * These are the three numbers that decide how many records a repository
+ * yields, which is why the set view names them: a set of two found under
+ * a 400-commit walk and a set of zero found under a 25-commit walk are
+ * both honest answers about the same history, and without the bounds a
+ * reader cannot tell which question was asked.
+ *
+ * `null` is the unbounded walk. `Infinity` is reachable as a bound on the
+ * resolver's side and JSON-serializes to `null`, so a null here means the
+ * walk had no limit rather than that the limit is unknown; an unknown
+ * limit is the whole field being absent or empty.
+ */
+export interface PairingBounds {
+  /** commits walked forward from a generation before the pair claim is abandoned */
+  maxPairDistance: number | null
+  /** hours between the generation and the edit before the same claim is abandoned */
+  maxPairAgeHours: number | null
+  /** how many later generations may rewrite the same file in between and the pair still stand */
+  maxInterposedGenerations: number | null
+}
 
 /**
  * One record, as the index describes it, before any record is fetched.
@@ -136,6 +168,22 @@ export interface PublishedIndex {
   publishedAt?: string
   repository?: string | null
   recordSchemaVersions?: string[]
+  /**
+   * New in contract 0.4: the distinct pairing bound sets the records in
+   * this set were resolved under, deduplicated by the publisher, widest
+   * walk first.
+   *
+   * Optional and, when present, possibly empty, and the two absences
+   * mean different things to the reader even though the page says the
+   * same sentence for both. Absent is a site published under 0.1 to 0.3,
+   * whose publisher never stamped the bounds. Empty is a 0.4 site none
+   * of whose records state bounds, which is a chat-path record that was
+   * never paired at all or a record written by a build that stamped
+   * nothing. Neither of them is the defaults, and the page never says
+   * the defaults, because a viewer that names a number the site did not
+   * state is the failure this whole file is written against.
+   */
+  pairing?: PairingBounds[]
   records: PublishedRecordSummary[]
   disclosed?: DisclosureManifest
 }
@@ -301,4 +349,101 @@ export function sharesOf(s: PublishedRecordSummary): Array<{ cls: SpanClass; cha
     const chars = by[cls] ?? 0
     return { cls, chars, pct: final > 0 ? (chars / final) * 100 : 0 }
   })
+}
+
+/**
+ * What this page may say about how the set in front of it was found.
+ *
+ * The problem this answers, in the resolver seat's words when it handed
+ * the field over: a reader of a published page could see two records and
+ * not the two numbers that produced them, and on the repository it was
+ * publishing, the resolver's default bounds produce no records at all.
+ * Two records and zero records are both honest answers about the same
+ * history, and the page could not tell them apart.
+ *
+ * So the bounds are not a detail about the resolver. They are the
+ * question the set is the answer to, and a set shown without them is a
+ * number a reader will read as a total.
+ *
+ * Four states, and the two absences are kept distinct in the prose
+ * because they are distinct facts:
+ *
+ * - several bound sets: one published set holding records from runs that
+ *   looked different distances. Stated per run, never averaged.
+ * - one bound set: the ordinary case, stated in words.
+ * - present and empty: a 0.4 site whose records state no bounds, which
+ *   is the chat path or a build that stamped nothing.
+ * - absent: a site published under 0.1 to 0.3, before the field existed.
+ *
+ * What it never does is name the resolver's defaults. The defaults live
+ * in the resolver and they have changed; a viewer that filled an absence
+ * with them would be stating a number this site never published.
+ */
+export interface PairingCopy {
+  /** the sentence that governs the whole set, always present */
+  line: string
+  /** one phrase per distinct bound set, only when there are several */
+  sets: string[]
+}
+
+/** One bound, in words, with the unbounded walk said as such. */
+function boundPhrases(b: PairingBounds): { distance: string; age: string; interposed: string } {
+  return {
+    distance:
+      typeof b.maxPairDistance === 'number'
+        ? `walked at most ${b.maxPairDistance.toLocaleString()} commit${b.maxPairDistance === 1 ? '' : 's'} forward from a generation`
+        : 'walked forward as far as the history went',
+    age:
+      typeof b.maxPairAgeHours === 'number'
+        ? `allowed at most ${b.maxPairAgeHours.toLocaleString()} hour${b.maxPairAgeHours === 1 ? '' : 's'} between the generation and the edit`
+        : 'put no limit on the time between the generation and the edit',
+    interposed:
+      typeof b.maxInterposedGenerations === 'number'
+        ? `tolerated at most ${b.maxInterposedGenerations.toLocaleString()} later generation${b.maxInterposedGenerations === 1 ? '' : 's'} of the same file in between`
+        : 'did not count how many later generations rewrote the same file in between',
+  }
+}
+
+/** The same bound as a line of three facts, for when there are several. */
+function boundLine(b: PairingBounds): string {
+  const d = typeof b.maxPairDistance === 'number' ? `${b.maxPairDistance.toLocaleString()} commits forward` : 'no commit limit'
+  const h = typeof b.maxPairAgeHours === 'number' ? `${b.maxPairAgeHours.toLocaleString()} hours` : 'no time limit'
+  const g =
+    typeof b.maxInterposedGenerations === 'number'
+      ? `${b.maxInterposedGenerations.toLocaleString()} interposed generation${b.maxInterposedGenerations === 1 ? '' : 's'}`
+      : 'any number of interposed generations'
+  return `${d} · ${h} · ${g}`
+}
+
+export function pairingCopy(index: PublishedIndex): PairingCopy {
+  const bounds = index.pairing
+
+  if (bounds === undefined) {
+    return {
+      line:
+        'This site was published before the index stated how far the resolver looked, so this page cannot tell you what bounds produced the set above. That matters more than it sounds: the same history yields a different number of records at a different walk, and a set shown without its bounds reads like a total when it is an answer to one question.',
+      sets: [],
+    }
+  }
+
+  if (bounds.length === 0) {
+    return {
+      line:
+        'No record in this set states how far the resolver looked, so this page cannot tell you what bounds produced it. A record captured from a chat session was never paired against a repository at all, and a record resolved by an older build was paired by something that stamped no bounds. Neither of those is the same claim as the resolver’s defaults, which is why this page names no number here rather than filling the gap with one.',
+      sets: [],
+    }
+  }
+
+  if (bounds.length === 1) {
+    const p = boundPhrases(bounds[0])
+    return {
+      line: `Every record above was found by a pairing walk that ${p.distance}, ${p.age}, and ${p.interposed}. Those three numbers are why the set is the size it is. A narrower walk over the same history finds fewer records and is no less honest, so read the count above as the answer to this question rather than as everything that happened.`,
+      sets: [],
+    }
+  }
+
+  return {
+    line: `The records above came from runs that did not look the same distance, so the bounds are stated once per run rather than collapsed into one claim that would be true of neither. One published set can hold ${bounds.length} of them, and the widest walk is first.`,
+    sets: bounds.map(boundLine),
+  }
 }
