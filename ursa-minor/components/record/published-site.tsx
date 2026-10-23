@@ -8,6 +8,7 @@ import {
   indexUrlFor,
   parsePublishedIndex,
   recordUrlFor,
+  pairingCopy,
   sharesOf,
   type PublishedIndex,
   type PublishedRecordSummary,
@@ -240,15 +241,33 @@ function SiteSet({
   // record page then said the opposite one click later, which is the
   // page contradicting itself about the one thing it exists to be
   // trusted on. See `integrity.ts`.
+  const pairing = pairingCopy(index);
+
   const withDigest = index.records.filter((r) => typeof r.sha256 === "string" && r.sha256.length > 0).length;
   const digests = withDigest === 0 ? "none" : withDigest === index.records.length ? "all" : "some";
 
+  // An empty set has two causes and this page used to name only the
+  // kinder one. The other arrived with index contract 0.4: a resolver
+  // run whose pairing bounds were too narrow for this history finds
+  // nothing, writes an honest empty set, and looks identical to a site
+  // nobody has resolved anything on. An empty index carries no `pairing`
+  // to show either, because the field is derived from the records, so the
+  // only honest thing this page can do is name both causes.
   if (index.records.length === 0) {
     return (
-      <p className="mt-10 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
-        This is a published Ursa site and it lists no records yet. Somebody set up publishing before
-        resolving any work, which is the ordinary order to do it in.
-      </p>
+      <>
+        <p className="mt-10 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+          This is a published Ursa site and it lists no records. Either nobody has resolved any work
+          here yet, which is the ordinary order to do it in, or the resolver did run and its pairing
+          bounds were narrower than this history needed, in which case it found nothing to pair and
+          published that honestly.
+        </p>
+        <p className="mt-5 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+          This page cannot tell you which of the two it is. The bounds a run used are stated per
+          record, so a set with no records in it states none, and whoever published this is the only
+          person who can say how far their resolver was allowed to look.
+        </p>
+      </>
     );
   }
 
@@ -264,6 +283,27 @@ function SiteSet({
 
       {site.note ? (
         <p className="mt-5 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">{site.note}</p>
+      ) : null}
+
+      {/* New in index contract 0.4: how far the resolver was allowed to
+          walk when it found this set. It sits here, under the count and
+          above the records, rather than in the closing paragraph with
+          the digest sentence, because it is not a caveat about the
+          numbers in each row. It is the question the count itself is the
+          answer to, and a reader who has already scrolled past ten
+          records has read the count as a total. */}
+      <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{pairing.line}</p>
+      {pairing.sets.length > 0 ? (
+        <ul className="mt-4">
+          {pairing.sets.map((b) => (
+            <li
+              key={b}
+              className="border-l border-[var(--line)] py-1 pl-5 font-mono text-[0.68rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]"
+            >
+              {b}
+            </li>
+          ))}
+        </ul>
       ) : null}
 
       <ul className="mt-9">
