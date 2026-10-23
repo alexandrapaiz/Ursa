@@ -263,13 +263,22 @@ and the rows below are the reading. The verdicts are the author's own, which
 is a weaker thing than a second reader and is stated as such: what §5o buys
 is that no claim shipped unread, not that the reader was independent.
 
-**Ten of the thirty-two needed a second pass**, which is the same rough third
-the sweep found in a library written first and checked later. The difference
-is where the cost landed: all ten were repaired before the claim was
-committed, inside one run, instead of being found across five runs months
-later. Read that as the measured answer to the board item this run took. The
-rate at which a first draft of a citation is wrong did not fall. What fell is
-how long a wrong one survives.
+**Nine of the thirty-two needed a second pass**, two claims wrong and seven
+ranges widened, which is 28 percent against the 29 percent the sweep found in
+a library written first and checked later (32 of 111: six wrong, 26 widened).
+The difference is where the cost landed: all nine were repaired before the
+claim was committed, inside one run, instead of being found across five runs
+and five slices afterwards. Read that as the measured answer to the board item
+this run took. The rate at which a first draft of a citation is wrong did not
+fall, and on this sample it is indistinguishable from the sweep's. What fell
+is how long a wrong one survives.
+
+(Corrected 2026-10-23, ninth run. The sentence above read "ten of the
+thirty-two" when this section was written on 2026-10-18. The table below has
+nine non-`supports` rows and `node skills/relevance-sweep.mjs --audited`
+counts 23 `supports`, 7 `widened` and 2 `wrong` for this skill. The error was
+in the headline of the one number the board item asked for, which is the worst
+place for it, and it was in prose that no tool reads. Nine is the number.)
 
 | ref | verdict | read | note |
 |---|---|---|---|
