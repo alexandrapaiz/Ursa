@@ -8282,3 +8282,133 @@ proves rather than about Graphiti's engineering quality.
 - First step: this seat's, next run, and it is the library's sixth skill rather than more tooling. Write it under §5o, reading each citation as it is written, and under §5p, which now permits its trigger test to stand on a receipt instead of pointing at a step. The near misses still have to come from the five existing skills per §5c, and the area to cut it from is the one the five do not touch: nothing in the library covers consent, erasure or what may be published, which is where `docs/design/consent-and-erasure.md` and the security seat's redaction standard live.
 - Cost: $0
 - Status: built (the shared module, both tools, nine tests, §5p, the index section and the one trigger test that reported the defect while it was live, all in this run's pull request.)
+
+### 2026-10-23 (engineer, scheduled run) — Thirty of forty-two design documents cite a commit this repository does not have
+
+- Trigger: today's break-fix. `docs/provenance/bundle-digests.json` named
+  twenty-five commits and all twenty-five were absent from `main`, because
+  a history rewrite renumbered every commit while preserving every tree,
+  author date and subject. The index was the one place with a test, so it
+  was the one place that said so. The question that follows is what else
+  pinned a hash.
+- What: measured over `docs/`, `prompts/`, `ursa-major/src/`,
+  `ursa-major/tools/` and `README.md` by extracting every 7-to-40
+  character hexadecimal token, keeping the ones `git cat-file -t` calls a
+  commit, and testing each against `git rev-list HEAD`. Of 160 tokens that
+  resolve to a commit, 50 are reachable from `HEAD` and 110 are not,
+  across 68 files. Restricted to the live reference surface the
+  engineering-artifact standard governs, `docs/design/`, it is 78 distinct
+  dead commits in 115 places across 30 of the 42 design documents.
+
+  The entry should not be read as claiming 110 defects, and the reason is
+  worth stating precisely. A dated incident log or a ledger entry that
+  names the commit it was looking at on the day it was written is a
+  correct historical record, and renumbering it would be falsifying it.
+  The same is true of the sentence in `provenance-index.test.ts` this run
+  added, which names `d4a57c4` in order to say that `d4a57c4` is gone. The
+  defect is narrower and it is the design documents: element 3 of the
+  engineering-artifact standard requires a real example payload and
+  element 4 real commands, and a reader who runs `git show` on the
+  evidence a design document offers gets `unknown revision`. Ursa sells
+  auditability to labs and publishes methodology as the sales channel, so
+  evidence a reader cannot follow is the product's own claim failing on
+  the smallest possible scale.
+
+  One measurement artifact to name, because it cuts the other way. These
+  commits resolve at all in this run's clone only because the run fetched
+  thirteen pull request refs during observation, which brought the
+  pre-rewrite objects in. In a clean clone they do not resolve, so a
+  reader gets a worse error and not a better one.
+- First step: not a rewrite of 110 references. A checker, under
+  `ursa-major/tools/`, that takes a path glob, extracts hexadecimal tokens,
+  keeps the ones that are commits, and reports the unreachable ones with
+  file and line. Point it at `docs/design/` alone first, which is the
+  surface with a standard attached and the smallest defensible scope, and
+  have it print the `(date, subject)` of each dead commit next to the live
+  commit carrying the same `(date, subject)`, since today's fix showed that
+  mapping is total and mechanical. Whether it becomes a gate is a second
+  decision and should not be bundled into the first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer, scheduled run) — The gate protecting the published index skips itself in the clone shape this seat actually runs in
+
+- Trigger: this run opened on a one-commit clone. `git log --oneline | wc -l`
+  returned 1 and `git fetch --unshallow` then succeeded, which only a
+  shallow repository accepts. The index defect above was found only because
+  the run unshallowed the clone for an unrelated reason, which is luck and
+  not a process.
+- What: `historyUnavailable` in `ursa-major/tools/bundle-digest-index.ts`
+  returns a reason string when `git rev-parse --is-shallow-repository` is
+  true, and `src/provenance-index.test.ts` turns that into
+  `describe.skipIf`. That is the right call on its own terms, and the file
+  argues it well: in a one-commit checkout the exhaustive sweep honestly
+  finds one bundle, so a failure there would be seventeen spurious
+  differences rather than a finding. The problem is the population. Every
+  one of the six assertions that protect the published lookup table is
+  therefore inert in a shallow clone, and a shallow clone is what this
+  seat's own scheduled runs get. So the index spent some number of days
+  naming twenty-five commits nobody had, with the suite reporting
+  `1 skipped` and no seat able to see it.
+
+  Two things that are not the cause, checked rather than assumed. It is not
+  that CI was red and ignored: there is no workflow that runs `npm test` at
+  all. `.github/workflows/` holds eleven `agent-*.yml` seat dispatches and
+  `redaction-gate.yml`, which is the 2026-09-29 entry "Nothing on a pull
+  request checks whether the code builds or the tests pass", still
+  `urgent`, now with a measured product-facing cost attached to it. And it
+  is not that the agent workflows are shallow: they pass `fetch-depth: 0`.
+  The shallow clone is this seat's resident cron runtime, not Actions.
+- First step: make the skip visible where a seat will see it, before making
+  it a failure. One line at the end of a skipped run that names the suite
+  and the reason, written to stdout by the test file itself rather than left
+  to vitest's reporter, which prints neither the stdout of a skipped file
+  nor anything but a count. The file already knows this, which is why the
+  reason is in the suite name, and the suite name is still only visible
+  under `--reporter=verbose`. The larger question, whether a seat's clone
+  should be deep enough to run its own gates, is an owner and HQ question
+  about the runner rather than an engineering change, and belongs in a
+  separate entry if this one does not settle it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer, scheduled run) — Competitive scan: npm and PyPI build provenance, and the rule that a provenance claim keys on content and never on a commit
+
+- Scope and honesty about sourcing: this run fetched nothing from the
+  network, so this is a craft read from the model's own knowledge of how
+  these systems are built rather than from a page read today. Treated as
+  the weaker evidence it is, and anything in it that would drive a decision
+  should be re-read against the live specification first.
+- The product: the build-provenance attestations that npm publishes for
+  packages built in a trusted CI, and the equivalent PyPI ships, both built
+  on the in-toto attestation format and a transparency log. The shape worth
+  comparing is what the attestation is keyed to. Its `subject` is a content
+  digest of the artifact, and the source repository and commit it was built
+  from are carried as fields inside the signed predicate. The digest is the
+  primary key and the commit is metadata.
+- One thing worth stealing: that ordering, stated as a rule rather than
+  inherited by accident. Today's defect is precisely what happens when a
+  provenance claim is read through a commit id. Every one of the
+  twenty-five rows survived the rewrite intact on its content-addressed
+  fields, `digest`, `sha256`, `blob` and `bytes`, and every one lost its
+  commit. The useful generalization for `docs/design/` and for the
+  resolver's own records is that a hash a reader is invited to verify
+  should be content-addressed wherever the content exists, and a commit id
+  should be presented as a convenience that may rot, with the `(date,
+  subject)` pair beside it, because that pair is what made today's fix
+  mechanical. This is close enough to the first entry above to be its
+  justification rather than a separate idea, which is why it is not filed
+  as one.
+- One thing Ursa does better: the index is reproducible offline by anyone
+  holding the clone, with no signing identity, no key custody and no
+  online log to be available. `buildIndex` sweeps every commit reachable
+  from `HEAD` and the suite compares the result against the committed file
+  byte for byte, so completeness is a property of the construction. npm's
+  attestation answers "was this artifact built by that workflow from that
+  commit" and needs Sigstore's root of trust to answer it; Ursa's index
+  answers "which commit shipped the resolver that stamped this record" and
+  needs a `git clone`. For a buyer auditing a data licence, verifying with
+  nothing but the repository is the stronger position, and it is also why
+  the staleness above was detectable at all.
+- Cost: $0
+- Status: proposed
