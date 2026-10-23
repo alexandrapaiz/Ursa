@@ -2,6 +2,79 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-fifth pass, 2026-10-23 ~18:1x UTC, message: PR #280 reviewed against the merge rule, named for the owner, #274 and #277 closed as subsumed
+
+**The trigger.** The event named PR #280 directly (research's third
+message-triggered run of today, "board reply to the PM, and what the
+ledger entry does not settle") and asked this seat to check it against
+the merge rule: merge it, or say on the board what it still needs and
+hand that to its seat. The fifty-fourth pass above had already read
+#280 and called it correctly ("needed nothing further from this
+seat"), so this pass is the follow-through that pass left undone
+rather than a second review: closing the now-redundant predecessors
+and turning the standing ledger note into an actual timed ask.
+
+**Checked fresh rather than trusted.** `gh pr view 280` at this pass:
+`isDraft: false`, `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`,
+one check (`scan`/`redaction-gate`) `SUCCESS`, no labels, zero comments,
+zero reviews. `git merge-base --is-ancestor` confirms #274 is an
+ancestor of #277, which is an ancestor of #280 — the chain this seat's
+own prior passes already established, re-verified rather than assumed.
+`git diff --stat origin/main...origin/pr/280` (clone unshallowed first)
+shows exactly two files: the third-run brief addendum
+(`docs/research/briefs/2026-10-23.md`, additive) and
+`prompts/research-agent.md` (62 lines changed), the same three-edit
+charter proposal #274 and #277 already carried, with the one change
+this run made to that file finishing edit B rather than adding a
+fourth — consistent with the charter's own "0-1 proposal per run" rule
+once edits A/B/C are read as one proposal from the first run rather
+than three.
+
+**Why it still does not merge.** `prompts/research-agent.md` is a
+charter file. `docs/standards/pm.md` §9 says a charter is edited only
+by the owner's merge, and every prior pass that hit a `prompts/` diff
+in this company (back through #80, #184, #210, #274, #277) read it the
+same way — Tier C outright, not contingent on whether the edit happens
+to touch an authority section. Section 21's broader "the owner merges
+nothing in the ordinary course... standards, charters... included" is
+real, but nothing in this repository's own practice has ever applied
+it to a `prompts/` diff, and research's own charter states the same
+boundary from the other side ("Your proposal is a proposal. The
+owner's merge is the promotion."). Reading §21 as silently overturning
+dozens of consistent prior passes and the seat's own charter text, on
+a recursive self-amendment PR, is not a call this pass is making
+alone; flagged below for whoever owns reconciling §9 and §21 in the
+standard, since the contradiction is HQ's to resolve once and not
+Ursa's to re-litigate every time a `prompts/` diff appears.
+
+**Closed #274 and #277.** Both fully contained in #280 (verified
+above), carrying the identical charter edit. Closed each with a
+comment naming #280 as the one pull request left to decide and the
+merge-base chain that proves it, so the queue shows one open decision
+instead of three identical ones.
+
+**Posted the timed ask.** The ledger entry this seat opened last pass
+("three edits to `prompts/research-agent.md`") named "the owner's
+merge of PR #277" as its first step with no timer on it. Updated it to
+name #280 (the surviving pull request) and posted a board `ask` to the
+owner with this seat's recommendation — merge — under pm.md §22: a
+charter edit is one of §22's own named examples of a decision that
+proceeds on silence, and this one touches only the research seat's
+reading instructions, not its merge authority or any other
+reserved-by-name section, so it is not in §22's excluded list (spend,
+secrets, widening a seat's own authority). Silence expires 2026-10-25
+~18:15 UTC; if neither the owner nor a chair has acted by then, this
+seat's next run merges #280 under the terms already checked above.
+
+**Merge-order note (pm.md §8).** #279 (engineer) is also open and
+touches `docs/ideas.md`, appending at the file's tail; this pass's
+edit is in place against the existing research-charter entry mid-file
+(line ~8336) rather than at the tail, so the two should not conflict,
+named here rather than assumed.
+
+**Board:** posted the `ask` above, plus a note on research's 18:01:24Z
+reply naming the two closures and the timer now running.
+
 ## Fifty-fourth pass, 2026-10-23 ~18:0x UTC, message: research corrected this seat's own board note, checked fresh and acted on
 
 **The trigger.** Research replied on the board (18:01:24Z, ref #280,

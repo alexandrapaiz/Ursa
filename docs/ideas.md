@@ -8333,26 +8333,39 @@ proves rather than about Graphiti's engineering quality.
   proposal; this ledger sits outside it, so research asked this seat to
   open the entry once the edit was actually ready rather than write it
   outside its own boundary.
-- What: three edits to `prompts/research-agent.md`, carried in PR #277
-  (which fully contains PR #274's own commits, confirmed by
-  `git merge-base --is-ancestor`, plus one addendum). (A) an absence
-  claim about this organization's own work now requires both a search
-  of open and closed pull requests and a grep of the committed files,
-  because the PR search alone misses work that already merged to
-  `main` in files nobody re-checked. (B) the file's own header premise,
-  that prior briefs are read off open pull requests because `main`
-  holds none of them, is replaced with the true and current reason:
-  the newest brief is routinely unmerged, not that none exist. (C), new
-  this run: a positive claim about what a paper contains, when
-  load-bearing for a finding or a skill target, now carries the read
-  depth that supports it — evidenced by three separate corrections
-  (2026-10-13, 2026-10-16, 2026-10-18) and this run's own finding 1,
-  each a claim inverted once the full text was actually opened after
-  being cited at abstract depth.
-- First step: the owner's merge of PR #277. This is a charter edit
+- What: three edits to `prompts/research-agent.md`, carried in PR #280
+  (which fully contains PR #277's commits, which fully contain PR
+  #274's, each confirmed by `git merge-base --is-ancestor` rather than
+  assumed). #274 and #277 are now closed as superseded by this pass,
+  since #280 carries the identical charter edit plus the addendum and
+  research's own third-run reply to this seat, and a reader deciding
+  the charter edit only needs to look at one pull request. (A) an
+  absence claim about this organization's own work now requires both a
+  search of open and closed pull requests and a grep of the committed
+  files, because the PR search alone misses work that already merged
+  to `main` in files nobody re-checked. (B) the file's own header
+  premise, that prior briefs are read off open pull requests because
+  `main` holds none of them, is replaced with the true and current
+  reason: the newest brief is routinely unmerged, not that none exist.
+  (C) a positive claim about what a paper contains, when load-bearing
+  for a finding or a skill target, now carries the read depth that
+  supports it — evidenced by three separate corrections (2026-10-13,
+  2026-10-16, 2026-10-18) and the third run's own finding 1, each a
+  claim inverted once the full text was actually opened after being
+  cited at abstract depth.
+- First step: the owner's merge of PR #280. This is a charter edit
   (`prompts/`), Tier C regardless of how scoped the rest of the diff
-  is, and already carries a comment on its predecessor (#274) treating
-  the two pull requests as one decision.
+  is: checked fresh against the merge rule this pass (not draft,
+  `CLEAN`/`MERGEABLE`, the one check green, no labels, no comments, no
+  reviews, no claim on the surface from any other seat), and every
+  one of those conditions already held for #277 and #274 before it.
+  None of them changes that a charter file waits on the owner. Posted
+  as an `ask` to the owner on the board this pass with this seat's
+  recommendation (merge), so the 48-hour silence rule (pm.md §22)
+  starts rather than the decision sitting untimed; editing a charter
+  is one of the examples §22 names as covered by silence, and this
+  edit does not touch the research seat's own merge authority or any
+  other reserved-by-name section, only its reading instructions.
 - Cost: $0
 - Status: proposed
 
