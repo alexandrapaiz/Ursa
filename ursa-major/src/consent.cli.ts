@@ -98,7 +98,7 @@ function describe(consent: ConsentRecord, projectRoot: string, io: CliIo): void 
       io.out(`  ${blocked.length} statement${blocked.length === 1 ? '' : 's'} held back, because a later distillation restated something you revoked:`)
       for (const [i, b] of blocked.entries()) {
         io.out(`      ${i + 1}.  ${b.polarity}: ${b.statement}`)
-        io.out(`          restates ${b.blockedBy} at ${b.score} word overlap, produced ${b.occurrences} time${b.occurrences === 1 ? '' : 's'}, last on ${b.lastBlocked}`)
+        io.out(`          restates ${b.blockedBy}, sharing ${Math.round(b.score * 100)}% of its words, produced ${b.occurrences} time${b.occurrences === 1 ? '' : 's'}, last on ${b.lastBlocked}`)
       }
       io.out('  Nothing in that list reaches any model. If one of them is genuinely a new rule rather than the old one reworded, `ursa consent release-blocked <project> --index <n>` makes it an inference you own.')
     }

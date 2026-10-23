@@ -57,7 +57,7 @@ export const STATEMENT_STOPWORDS = new Set([
  * tokens at all and score 0.17, which is indistinguishable from two
  * unrelated statements. Folding four English suffixes lifts that pair to
  * 0.75. It is wrong on irregular forms, and that is tolerable here
- * because a miss costs a review (the statement is withheld, not lost)
+ * because a miss costs a review (the statement is held, not lost)
  * while an over-fold costs nothing at all: both strings fold the same
  * way or they do not.
  */
@@ -95,16 +95,16 @@ export function contentTokens(statement: string): string[] {
  * prose that was edited in place and the wrong one for a rule that was
  * reworded, because reordering a clause destroys character alignment
  * while leaving the rule identical. On the calibration set in
- * `docs/design/revocation-store-gate.md` §4 the combined score put
- * paraphrases as low as 0.317 and unrelated statements as high as
+ * `docs/design/revocation-store-gate.md` section 4, the combined score
+ * put paraphrases as low as 0.317 and unrelated statements as high as
  * 0.477, with no threshold between them. Content-token containment
- * separates the same set at every paraphrase ≥ 0.600 and every
- * unrelated pair ≤ 0.500.
+ * separates the same set at every paraphrase >= 0.600 and every
+ * unrelated pair <= 0.500.
  *
  * `polarity` is not consulted. A model that wanted to slip a revoked
  * rule past a polarity check could flip the field and negate the words,
  * and negation words are stopped out here, so a polarity exemption would
- * be an exemption in name only. The withheld entry records the polarity
+ * be an exemption in name only. The blocked entry records the polarity
  * it arrived with, and the user decides.
  */
 export function revocationSimilarity(a: string, b: string): number {
@@ -117,19 +117,20 @@ export function revocationSimilarity(a: string, b: string): number {
 /**
  * The one threshold a block is explainable from.
  *
- * Calibrated on the statements this repository actually contains: 36
+ * Calibrated on the statements this repository actually contains: 28
  * pairs of distinct statements and 10 paraphrase pairs
  * (`docs/design/revocation-store-gate.md` §4). Distinct pairs topped out
  * at 0.500, paraphrases bottomed out at 0.600, and this sits between
- * them. It is a calibration on 46 pairs and not an error rate; the
+ * them. It is a calibration on 38 pairs and not an error rate; the
  * harness that would produce an error rate is named as the next slice in
  * that document's §7.
  *
  * It is set low on purpose. The two failure directions do not cost the
  * same thing. A miss revives an inference the user revoked, which is the
  * failure this whole module exists to prevent and which the user cannot
- * see. An over-block holds a legitimately new axiom in `withheld`, where
- * the user can read it and run one command to release it.
+ * see. An over-block parks a legitimately new axiom in
+ * `TuningRecord.blockedByRevocation`, where the user can read it and run
+ * one command to release it.
  */
 export const THETA_REVOKED = 0.55
 
@@ -147,7 +148,7 @@ export interface RevocationBlock {
  * when it may be created.
  *
  * The `live` argument is why the gate does not fight the user. Once she
- * releases a withheld statement it becomes a live axiom, and a later
+ * releases a blocked statement it becomes a live axiom, and a later
  * pass that emits the same statement without declaring a match would
  * otherwise be blocked again by the same tombstone, forever. So a
  * candidate that sits at least as close to an axiom she still holds as
