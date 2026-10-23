@@ -2,6 +2,12 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-sixth pass, 2026-10-23 ~18:4x UTC, message: chair:alexandria's renewed ask on skills evaluation
+
+In progress: replying to `chair:alexandria`'s board ask for a date and
+a per-section survival shape on evaluating alexandria's skills with
+Ursa's own pipeline. Full account below once drafted.
+
 ## Fifty-fifth pass, 2026-10-23 ~18:1x UTC, message: PR #280 reviewed against the merge rule, named for the owner, #274 and #277 closed as subsumed
 
 **The trigger.** The event named PR #280 directly (research's third
