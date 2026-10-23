@@ -74,6 +74,12 @@ export interface Tombstone {
     evidenceStripped: number
     /** entries removed from tuning.sources */
     sourcesRemoved: number
+    /**
+     * Statements in `tuning.blockedByRevocation` dropped because this
+     * record was their only evidence. Optional so a tombstone written
+     * before the revocation gate existed still reads back.
+     */
+    blockedDropped?: number
   }
 }
 
@@ -215,6 +221,7 @@ export function forget(
   let axiomsDeleted: string[] = []
   let evidenceStripped = 0
   let sourcesRemoved = 0
+  let blockedDropped = 0
   const tPath = tuningPathFor(projectRoot)
   if (existsSync(tPath)) {
     const tuning = JSON.parse(readFileSync(tPath, 'utf8')) as TuningRecord
@@ -223,12 +230,13 @@ export function forget(
     axiomsDeleted = result.axiomsDeleted
     evidenceStripped = result.evidenceStripped
     sourcesRemoved = result.sourcesRemoved
+    blockedDropped = result.blockedDropped
   }
 
   const tombstone: Tombstone = {
     recordId,
     forgottenAt: now,
-    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved },
+    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved, blockedDropped },
   }
   const consent = loadConsent(projectRoot)
   saveConsent(projectRoot, {

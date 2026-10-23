@@ -7,6 +7,7 @@
 //   ursa consent revoke   <project> [--scope minor-aggregate]
 //   ursa consent disclose <project> [--out <file>]
 //   ursa consent revoke-axiom <project> --axiom ax-003
+//   ursa consent release-blocked <project> --index 1
 //   ursa forget <project> --record <recordId>
 //
 // One decision worth stating because the opposite is the obvious build:
@@ -32,7 +33,7 @@ import {
   tuningPathFor,
 } from './consent'
 import { auditBatch, projectForMinor } from './disclosure'
-import { revokeAxiom } from './tuning/revoke'
+import { releaseBlocked, revokeAxiom } from './tuning/revoke'
 import type { TuningRecord } from './tuning/types'
 
 export interface CliIo {
@@ -87,6 +88,20 @@ function describe(consent: ConsentRecord, projectRoot: string, io: CliIo): void 
     for (const a of active) {
       io.out(`      ${a.id}  ${a.polarity}: ${a.statement}  (${a.domain}, x${a.evidenceCount})`)
     }
+    // The gate's own output, printed here and nowhere else. A block that
+    // the user cannot read is a silent deletion of something a model
+    // thought it had learned about her, which is the same class of thing
+    // this command exists to prevent.
+    const blocked = tuning.blockedByRevocation ?? []
+    if (blocked.length > 0) {
+      io.out('')
+      io.out(`  ${blocked.length} statement${blocked.length === 1 ? '' : 's'} held back, because a later distillation restated something you revoked:`)
+      for (const [i, b] of blocked.entries()) {
+        io.out(`      ${i + 1}.  ${b.polarity}: ${b.statement}`)
+        io.out(`          restates ${b.blockedBy} at ${b.score} word overlap, produced ${b.occurrences} time${b.occurrences === 1 ? '' : 's'}, last on ${b.lastBlocked}`)
+      }
+      io.out('  Nothing in that list reaches any model. If one of them is genuinely a new rule rather than the old one reworded, `ursa consent release-blocked <project> --index <n>` makes it an inference you own.')
+    }
   } else {
     io.out('  No inferences yet. Nothing has been derived about you.')
   }
@@ -106,7 +121,7 @@ function describe(consent: ConsentRecord, projectRoot: string, io: CliIo): void 
 export async function runConsentCommand(argv: string[], io: CliIo = stdio): Promise<number> {
   const [sub, project, ...rest] = argv
   if (!sub || !project) {
-    io.err('Usage: ursa consent show|grant|revoke|disclose|revoke-axiom <project> [options]')
+    io.err('Usage: ursa consent show|grant|revoke|disclose|revoke-axiom|release-blocked <project> [options]')
     return 2
   }
   const projectRoot = absPath(project)
@@ -144,6 +159,24 @@ export async function runConsentCommand(argv: string[], io: CliIo = stdio): Prom
     }
   }
 
+  if (sub === 'release-blocked') {
+    const raw = flag(rest, 'index')
+    const index = Number(raw)
+    if (!raw || !Number.isInteger(index) || index < 1) {
+      io.err('release-blocked needs --index <n>, the number `ursa consent show` prints beside the statement, for example --index 1')
+      return 2
+    }
+    try {
+      const { released } = releaseBlocked(tuningPathFor(projectRoot), index)
+      io.out(`Released "${released.statement}" as ${released.id}.`)
+      io.out('It is yours now rather than the distillation\'s, so no later pass can reword it, and the revocation it resembled is still in force.')
+      return 0
+    } catch (e) {
+      io.err((e as Error).message)
+      return 1
+    }
+  }
+
   if (sub === 'disclose') {
     const consent = loadConsent(projectRoot)
     const records = loadRecords(projectRoot)
@@ -170,7 +203,7 @@ export async function runConsentCommand(argv: string[], io: CliIo = stdio): Prom
     return 0
   }
 
-  io.err(`Unknown subcommand "${sub}". Try show, grant, revoke, disclose or revoke-axiom.`)
+  io.err(`Unknown subcommand "${sub}". Try show, grant, revoke, disclose, revoke-axiom or release-blocked.`)
   return 2
 }
 
@@ -194,6 +227,9 @@ export async function runForgetCommand(argv: string[], io: CliIo = stdio): Promi
   }
   if (t.removed.evidenceStripped > 0) {
     io.out(`  ${t.removed.evidenceStripped} evidence entr${t.removed.evidenceStripped === 1 ? 'y' : 'ies'} stripped from inferences that still rest on other records.`)
+  }
+  if ((t.removed.blockedDropped ?? 0) > 0) {
+    io.out(`  ${t.removed.blockedDropped} held-back statement${t.removed.blockedDropped === 1 ? '' : 's'} dropped, because this record was the only evidence behind ${t.removed.blockedDropped === 1 ? 'it' : 'them'} too.`)
   }
   if (t.removed.sourcesRemoved > 0) io.out('  It is no longer listed as a source of your tuning.')
   io.out('  Its id is tombstoned, so `ursa run` will not rebuild it from the git history it came from.')

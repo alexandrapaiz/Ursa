@@ -3,8 +3,10 @@
 // counts. Confidence IS evidenceCount — recurrence across records,
 // never a model's self-reported score.
 
+import { normalize } from '../normalize'
 import type { OutcomeRecord } from '../types'
-import type { DistillOutput, TuningAxiom, TuningRecord } from './types'
+import { findRevocationBlock } from './revocation'
+import type { AxiomEvidence, BlockedStatement, DistillOutput, TuningAxiom, TuningRecord } from './types'
 
 function axiomId(existing: TuningAxiom[]): string {
   let n = existing.length + 1
@@ -20,6 +22,7 @@ export function emptyTuning(owner: string): TuningRecord {
     updatedAt: new Date().toISOString(),
     sources: [],
     axioms: [],
+    blockedByRevocation: [],
   }
 }
 
@@ -35,6 +38,15 @@ export function mergeDistill(
   const byId = new Map(axioms.map((a) => [a.id, a]))
   // Second pass resolves contradiction ids for axioms new in this run.
   const newIdsByStatement = new Map<string, string>()
+  // The revocation gate's two inputs. Neither changes during the loop: a
+  // tombstone cannot be un-revoked here and every axiom this pass creates
+  // is 'active', so both are read once.
+  const tombstones = axioms.filter((a) => a.status === 'revoked')
+  const live = axioms.filter((a) => a.status !== 'revoked')
+  const blocked: BlockedStatement[] = (tuning.blockedByRevocation ?? []).map((w) => ({
+    ...w,
+    evidence: [...w.evidence],
+  }))
 
   for (const d of output.axioms) {
     const evidence = d.evidence.map((e) => ({ ...e, recordId }))
@@ -52,6 +64,14 @@ export function mergeDistill(
       match.evidenceCount = match.evidence.length
       match.lastSeen = now
     } else {
+      // The model declared this statement new. That declaration is not
+      // evidence that it is new, so the store checks it against the
+      // tombstones itself before it builds anything.
+      const block = findRevocationBlock(d.statement, tombstones, live)
+      if (block) {
+        parkBlocked(blocked, d, evidence, block, now)
+        continue
+      }
       const id = axiomId(axioms)
       const created: TuningAxiom = {
         id,
@@ -93,5 +113,47 @@ export function mergeDistill(
     updatedAt: now,
     sources: [...tuning.sources, { recordId, distilledAt: now, method: 'rlaif-claude', model }],
     axioms,
+    blockedByRevocation: blocked,
   }
+}
+
+/**
+ * Park a blocked statement where the user can see it.
+ *
+ * A pass that produces the same blocked statement again accrues onto the
+ * existing entry instead of appending a second copy, because the
+ * distillation prompt keeps handing the model the same tombstones and a
+ * model that ignores them once will ignore them every run. Identity here
+ * is the normalized statement, not the raw one, so a retyped dash does
+ * not fork the entry — the same reason `verbatim-byte-identity.md` gives
+ * for normalizing before comparing spans.
+ */
+function parkBlocked(
+  blocked: BlockedStatement[],
+  d: DistillOutput['axioms'][number],
+  evidence: AxiomEvidence[],
+  block: { blockedBy: string; score: number },
+  now: string
+): void {
+  const key = normalize(d.statement).norm
+  const existing = blocked.find((w) => normalize(w.statement).norm === key)
+  if (existing) {
+    existing.evidence.push(...evidence)
+    existing.occurrences += 1
+    existing.lastBlocked = now
+    existing.score = Math.max(existing.score, block.score)
+    return
+  }
+  blocked.push({
+    statement: d.statement,
+    domain: d.domain,
+    polarity: d.polarity,
+    basis: d.basis,
+    evidence,
+    blockedBy: block.blockedBy,
+    score: block.score,
+    occurrences: 1,
+    firstBlocked: now,
+    lastBlocked: now,
+  })
 }
