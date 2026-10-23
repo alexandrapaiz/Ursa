@@ -20,8 +20,8 @@ function library({ audit } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'relevance-sweep-'))
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills', 'alpha'), { recursive: true })
-  copyFileSync(here('relevance-sweep.mjs'), join(dir, 'skills', 'relevance-sweep.mjs'))
-  copyFileSync(here('source-line.mjs'), join(dir, 'skills', 'source-line.mjs'))
+  for (const f of ['relevance-sweep.mjs', 'source-line.mjs', 'citing-files.mjs'])
+    copyFileSync(here(f), join(dir, 'skills', f))
   writeFileSync(join(dir, 'src', 'a.ts'), [
     'export const THRESHOLD = 0.6',          // 1
     'function unrelated() { return 1 }',     // 2
@@ -343,4 +343,55 @@ test('a lock entry the audit has moved past is unbound, not bound to the old rea
   const out = runStatus(dir, ['--stale'])
   assert.equal(out.status, 1)
   assert.match(out.out, /unbound alpha\/E1 {2}the audit row now reads wrong 2026-10-19 and the lock was written for supports 2026-10-18/)
+})
+
+// The 2026-10-23 widening: a passage citing a ref can live in any markdown
+// file of the skill directory. For this tool that has two consequences, and
+// they pull in opposite directions, which is why both are asserted. A trigger
+// test's prompt is a claim standing on a range, so it belongs in the dossier
+// and in the `passages` digest. And the widening must not restate every
+// verdict in the library as stale on the day it lands, because nothing was
+// re-read. skills/citing-files.mjs carries the account.
+
+test('a passage in a trigger test reaches the dossier, attributed to its file', () => {
+  const dir = library()
+  writeFileSync(join(dir, 'skills', 'alpha', 'TRIGGER-TEST.md'),
+    'Prompt 1 asks whether the cutoff is still six tenths, which the threshold sets [E1].\n')
+  const out = run(dir, ['alpha/E1'])
+  assert.match(out, /cited by 2 passages/)
+  assert.match(out, /TRIGGER-TEST\.md:/)
+  assert.match(out, /whether the cutoff is still six tenths/)
+  // SKILL.md's own passage is still first and still unlabelled-by-accident:
+  // the file heading appears for it too, so a reader is never guessing.
+  assert.match(out, /SKILL\.md:/)
+  // A ref the trigger test does not cite gains nothing and says nothing.
+  const other = run(dir, ['alpha/E2'])
+  assert.match(other, /cited by 1 passage/)
+  assert.doesNotMatch(other, /TRIGGER-TEST\.md/)
+})
+
+test('a new citing passage in a sibling file makes that ref stale, and only it', () => {
+  // The behaviour the digest is for: a prompt in the activation test is a
+  // second claim standing on the same range, and a verdict given before it
+  // was written was not given to it.
+  const dir = bound()
+  writeFileSync(join(dir, 'skills', 'alpha', 'TRIGGER-TEST.md'),
+    'Prompt 1 turns on the threshold [E1].\n')
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 1)
+  assert.match(out.out, /stale +alpha\/E1 {2}passages changed since it was read/)
+  assert.doesNotMatch(out.out, /alpha\/E2/)
+})
+
+test('a sibling file that cites nothing leaves every verdict bound', () => {
+  // The day the widening lands, measured: the four trigger tests in the real
+  // library cite no refs, so no verdict may move. A tool change is not a
+  // reading, and a sweep that closes and immediately reopens for a tool
+  // change teaches a reader to ignore the signal.
+  const dir = bound()
+  writeFileSync(join(dir, 'skills', 'alpha', 'TRIGGER-TEST.md'),
+    'Five prompts, written against the description field. Three fire, two do not.\n')
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 0)
+  assert.match(out.out, /2 of 2 verdicts bound to what was read/)
 })

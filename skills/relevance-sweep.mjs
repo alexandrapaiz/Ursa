@@ -50,6 +50,7 @@ import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from '
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
+import { citingTexts } from './citing-files.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
@@ -139,7 +140,10 @@ for (const entry of readdirSync(skillsDir)) {
   const text = readFileSync(file, 'utf8')
   const fm = text.match(/^---\n([\s\S]*?)\n---\n/)
   if (!fm) continue
-  const body = text.slice(fm[0].length)
+  // Every markdown file in the directory, SKILL.md first, because a passage in
+  // a TRIGGER-TEST.md cites a ref as load-bearingly as one in the body and
+  // used to be read by nothing. ./citing-files.mjs holds the defect.
+  const citing = citingTexts(join(skillsDir, entry))
   for (const m of fm[1].matchAll(/- ref:\s*(\S+)\n\s*what:\s*([\s\S]*?)\n\s*source:\s*(.+)/g)) {
     const [, ref, whatRaw, sourceLine] = m
     const what = whatRaw.replace(/\s+/g, ' ').trim()
@@ -147,9 +151,18 @@ for (const entry of readdirSync(skillsDir)) {
     const { text: cited, blocks } = citedText(ranges)
     const lineCount = blocks.reduce((n, b) => n + (b.lines?.length ?? 0), 0)
     const { tokens, miss } = missing(what, cited)
+    // Grouped by file for the dossier, flattened for everything else. The
+    // flattening keeps SKILL.md's passages first and in their old order, so
+    // the `passages` digest of a ref no other file cites is byte-identical to
+    // what it was before this widening, and no verdict goes stale for a
+    // change in a tool.
+    const passages = citing
+      .map(({ file, text: body }) => ({ file, sentences: sentencesCiting(body, ref) }))
+      .filter((p) => p.sentences.length)
     refs.push({
       entry, ref, what, sourceLine: sourceLine.trim(), blocks, lineCount,
-      sentences: sentencesCiting(body, ref),
+      passages,
+      sentences: passages.flatMap((p) => p.sentences),
       unrangeable: blocks.every((b) => b.from === null),
       // Every source on this ref's line that carries no range, whether or not
       // the ref has other sources that do. `unrangeable` above is a property
@@ -268,7 +281,13 @@ const dossier = (r) => {
     `${r.miss.length}/${r.tokens.length} what-words absent` +
     (r.miss.length ? ` (${r.miss.join(' ')})` : ''))
   console.log(`\ncited by ${r.sentences.length} passage${r.sentences.length === 1 ? '' : 's'}:`)
-  for (const s of r.sentences) console.log(`  · ${s}`)
+  // Attributed per file once there is more than one, because a prompt in a
+  // trigger test and a step in the procedure are different kinds of claim to
+  // stand on a range, and a reader judging the range should know which it is.
+  for (const p of r.passages) {
+    if (r.passages.length > 1) console.log(`  ${p.file}:`)
+    for (const s of p.sentences) console.log(`  · ${s}`)
+  }
   const split = splitWith(r)
   if (split.length) {
     console.log(`\n${split.length} other ref${split.length === 1 ? '' : 's'} ` +
