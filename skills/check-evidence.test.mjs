@@ -21,8 +21,9 @@ import { join } from 'node:path'
 const hash = (text) => createHash('sha256').update(text).digest('hex').slice(0, 16)
 
 const CHECKER = new URL('check-evidence.mjs', import.meta.url).pathname
-// The checker imports this; a temp library has to carry it too.
-const SOURCE_LINE = new URL('source-line.mjs', import.meta.url).pathname
+// The checker imports these; a temp library has to carry them too.
+const IMPORTS = ['source-line.mjs', 'citing-files.mjs']
+  .map((f) => new URL(f, import.meta.url).pathname)
 
 /** A library with two skills, each citing one line of its own file, and a lock
  *  recording fingerprints for both. `drift` names the skills whose cited line
@@ -32,7 +33,7 @@ function library(drift = []) {
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills'), { recursive: true })
   copyFileSync(CHECKER, join(dir, 'skills', 'check-evidence.mjs'))
-  copyFileSync(SOURCE_LINE, join(dir, 'skills', 'source-line.mjs'))
+  for (const f of IMPORTS) copyFileSync(f, join(dir, 'skills', f.split('/').pop()))
   const lock = {}
   for (const slug of ['alpha', 'beta']) {
     mkdirSync(join(dir, 'skills', slug), { recursive: true })
@@ -142,4 +143,64 @@ test('an --update that records anything says a re-read is owed', () => {
   const refused = run(library(['alpha']).dir, '--update')
   assert.equal(refused.status, 2)
   assert.doesNotMatch(refused.out, /has to read again/)
+})
+
+// The 2026-10-23 widening: a citation lives in any markdown file of a skill
+// directory, not only in SKILL.md. Before it, the ten `[E…]` tags in the first
+// draft of one TRIGGER-TEST.md were invisible to this checker and to the
+// relevance sweep, and both exited 0 over all ten, which is a receipt nothing
+// fingerprints. skills/citing-files.mjs carries the account.
+
+/** Write a sibling file into one skill's directory. */
+const sibling = (dir, slug, name, text) =>
+  writeFileSync(join(dir, 'skills', slug, name), text)
+
+test('a trigger test citing an undeclared ref fails, and says which file', () => {
+  const { dir } = library()
+  sibling(dir, 'alpha', 'TRIGGER-TEST.md', 'Near miss 1 turns on the threshold [E9].\n')
+  const out = run(dir)
+  assert.equal(out.status, 1)
+  assert.match(out.out, /alpha: TRIGGER-TEST\.md cites E9, not declared/)
+})
+
+test('a ref cited only in a trigger test counts as cited and is still fingerprinted', () => {
+  // The other direction of the same rule. An uncited ref fails deliberately,
+  // since it is a receipt for a claim the skill does not make, and a claim
+  // made in the activation test is a claim the skill makes.
+  const { dir } = library()
+  const skill = join(dir, 'skills', 'alpha', 'SKILL.md')
+  writeFileSync(skill, readFileSync(skill, 'utf8')
+    .replace('A claim [E1].', 'A claim with no tag on it.'))
+  const without = run(dir)
+  assert.equal(without.status, 1)
+  assert.match(without.out, /alpha: E1 declared but never cited/)
+  sibling(dir, 'alpha', 'TRIGGER-TEST.md', 'Prompt 1 asks about the cited line [E1].\n')
+  const withIt = run(dir)
+  assert.equal(withIt.status, 0)
+  // And the fingerprint is unaffected either way: it follows the declaration
+  // in the frontmatter, not the file the citation sits in.
+  assert.ok('alpha/E1/src/alpha.ts:1' in lockOf(dir))
+})
+
+test('a tag in a file no tool reads is reported rather than counted', () => {
+  // The residual the widening leaves: `.md` is now read, and a tag in a
+  // fixture or a note beside it would be exactly as green and exactly as
+  // empty. Two shapes, a sibling file and one nested a directory down.
+  const { dir } = library()
+  sibling(dir, 'alpha', 'notes.txt', 'the reasoning for prompt 2 [E1]\n')
+  mkdirSync(join(dir, 'skills', 'alpha', 'cases'), { recursive: true })
+  writeFileSync(join(dir, 'skills', 'alpha', 'cases', 'one.json'), '{"why": "[E1]"}\n')
+  const out = run(dir)
+  assert.equal(out.status, 1)
+  assert.match(out.out, /alpha: notes\.txt cites E1, and nothing reads that file/)
+  assert.match(out.out, /alpha: cases\/one\.json cites E1, and nothing reads that file/)
+})
+
+test('a skill directory with no stray tags is unaffected', () => {
+  // The ordinary case, asserted so the stray scan cannot start charging the
+  // library for files that cite nothing.
+  const { dir } = library()
+  sibling(dir, 'alpha', 'TRIGGER-TEST.md', 'Five prompts, reasoning per prompt.\n')
+  sibling(dir, 'alpha', 'notes.txt', 'no tags here\n')
+  assert.equal(run(dir).status, 0)
 })
