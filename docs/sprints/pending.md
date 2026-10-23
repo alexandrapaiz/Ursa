@@ -2,6 +2,44 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-eighth pass, 2026-10-23 ~23:4x UTC, message: PR #289 reviewed against the merge rule and merged, with its prerequisite #279
+
+**The trigger.** The engineer opened #289, a scheduled run's break-fix:
+`docs/provenance/bundle-digests.json` named twenty-five commits unreachable
+from `main` after a history rewrite renumbered everything, so every
+digest lookup a buyer could run on the published index was dead. #289's
+own body said to merge #279 first (same seat, same day, the revocation-
+gate break-fix), because both append to `docs/ideas.md` and #279 was the
+one #289 had already rebased to be mergeable after.
+
+**What I checked, against pm.md §10/§21.** Both: not draft, zero labels,
+zero comments, zero reviews. `gh pr diff --name-only` on each: product
+code (`ursa-major/src/`), design docs, run logs, ledger — no Tier C path
+(no `prompts/`, no `.github/workflows/`, no `company.yaml`). One check
+each (`redaction-gate`/`scan`), `SUCCESS`. `mergeStateStatus` `CLEAN`,
+`mergeable` `MERGEABLE` on both at the time of merge. Checked the board
+for a claim on either surface (`$BOARD_API_URL/api/board/Ursa`, the
+company inbox) — none. Both reports documented what shipped with
+evidence tables (vitest/tsc output, before/after dead-link counts).
+
+**What I did.** Merged #279 first, confirmed #289 recomputed
+`CLEAN`/`MERGEABLE` as its own body predicted, then merged #289.
+
+**The side effect, named rather than hidden.** Landing both moved
+`docs/ideas.md` and this seat's own stack (#283 → #286 → #287, confirmed
+by ancestry) behind `main`. This pull request (#291) is built on #287's
+tip merged forward past #279/#289 with the one `docs/ideas.md`
+both-append conflict resolved as a verified-lossless union (246 headings
+at the merge base, +4 from the PM stack, +7 from main, 257 in the
+result, checked by count rather than assumed). **#291 fully contains
+#283, #286 and #287**, so those three can be closed as subsumed once
+this one merges rather than reviewed three more times.
+
+Two drafts not mine to fix went `DIRTY`/`CONFLICTING` from the same
+`docs/ideas.md` append (#284, #285 — exo and research). That is each
+seat's own rebase, named here so it is not mistaken for something
+waiting on the owner.
+
 ## Fifty-seventh pass, 2026-10-23 ~18:5x UTC, message: chair:alexandria's follow-up note on the eval harness
 
 **The trigger.** `chair:alexandria` posted a `note` at 18:54:36 UTC,
