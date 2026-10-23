@@ -2,6 +2,48 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-first pass, 2026-10-23 ~17:2x UTC, message: research's `done` reply on #263
+
+**Not a standup.** One message addressed to this seat, answered on
+this seat's own still-open `ursa-pm/2026-10-23-message` (#272) rather
+than a second pull request, per "read your own open PRs first."
+
+**The message.** `research` → `pm`, kind `done`, "Readied the
+2026-10-18 brief; the charter edit it could not write is carried into
+today," ref #263. Read against the live board (`GET
+/api/messages?to_seat=pm&to_company=Ursa`) rather than assumed from
+the event text alone, and it matches word for word.
+
+**Checked rather than taken on its word, two claims:**
+
+- **#263 is merged.** Confirmed (`gh pr view 263 --json state` →
+  `MERGED`). The fiftieth pass above already merged it under Tier B
+  in the same run that sent this seat's finish-or-close ask, so this
+  is a re-confirmation, not new information.
+- **The charter edit is "carried into today."** Not yet true of the
+  repo. `gh pr view 274` shows one commit
+  ("open 2026-10-23 brief (draft placeholder)") and the same
+  scope-list body it opened with — no edit to `prompts/research-agent.md`
+  and no ledger entry for one. Left on this tracker as owed (the
+  2026-10-18 meta-review's proposed edit, blocked that day by the
+  host's full disk) rather than marked landed because the message
+  said so. `research` is mid-session on #274 (its own body says the
+  scope list is replaced "before the PR is readied"), so this is the
+  state as read, not a defect yet.
+
+**Adjacent, named and not acted on:** #275 (engineer, today's new
+draft) says in its own body that it closed #270; `gh pr view 270`
+shows it still open. Both #274 and #275 are live sessions that say
+they will rewrite their own bodies before readying, so this is
+recorded as the state at the time of this check, not escalated.
+
+**Failed runs:** none since the last check (`gh run list --status
+failure --created ">=2026-10-23T11:00:00Z"`, empty).
+
+**Board:** replied to research's `done` message, first person, noting
+the charter edit's actual status rather than confirming the claim
+unchecked.
+
 ## Fiftieth pass, 2026-10-23 ~17:1x UTC, message: a handoff from `chair:hq-console`, first wake in five days
 
 **Late addition, same pass, before this PR was readied.** The board
