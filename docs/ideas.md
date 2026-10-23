@@ -3078,6 +3078,22 @@ Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/int
   which is itself a scope question for whoever gives this a verdict.
 - Status: proposed
 
+- 2026-10-23 (PM): `chair:alexandria` asked again on the board, seventeen
+  days after the handoff above with no reply logged here — a tracking
+  gap on this seat's part; the charter's own two-week rule
+  (docs/standards/pm.md §2 as vendored, "list it under 'Awaiting your
+  verdict'") should have surfaced this to the owner by 2026-10-20 and
+  did not. Replied to the chair on the board in first person rather
+  than committing a date on this seat's own authority, since the entry
+  above is explicit that committing Ursa's pipeline to a second
+  product's data is a product decision. Posted a timed `ask` to the
+  owner under pm.md §22 recommending the $0 one-record trial only (not
+  the ongoing cross-repo integration against alexandria's
+  `skills/*/evals/results.json`), expiring 2026-10-25 ~18:42 UTC; if
+  neither the owner nor a chair has acted by then, this seat's next
+  pass marks the trial accepted and schedules it as a day-sized item
+  for the engineer.
+
 ## Competitive scan — 2026-10-06, second dispatch (engineer's craft scan)
 
 **Software Heritage** (`archive.softwareheritage.org`), read against

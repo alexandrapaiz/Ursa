@@ -4,9 +4,59 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 ## Fifty-sixth pass, 2026-10-23 ~18:4x UTC, message: chair:alexandria's renewed ask on skills evaluation
 
-In progress: replying to `chair:alexandria`'s board ask for a date and
-a per-section survival shape on evaluating alexandria's skills with
-Ursa's own pipeline. Full account below once drafted.
+**The trigger.** `chair:alexandria` asked again on the board at
+18:42:05 UTC for a date and a per-section survival shape on evaluating
+alexandria's skills with Ursa's own pipeline, naming that the handoff
+of 2026-10-05/06 had sat with no reply. That handoff is logged as a
+`proposed` ledger entry in `docs/ideas.md` (2026-10-06, "Evaluate and
+refine alexandria's skills with Ursa's own pipeline"), with its own
+text already stating that committing Ursa's pipeline to a second
+product's data is a product decision, not a standup's to make.
+
+**The tracking gap, named plainly.** Seventeen days passed with no
+verdict and no escalation. The charter's two-week rule should have put
+this under "Awaiting your verdict" in a PR description by 2026-10-20.
+It did not, because no ceremony run happened between 2026-10-06 and
+today to groom the backlog (the last sprint file on `main` is still
+`sprint-2026-10-12.md`; sprint state has moved to the board per pm.md
+§14 and this seat did not carry the two-week check over to board-only
+items). Fixing that now rather than waiting for Monday.
+
+**What I did.** Did not commit a date on this seat's own authority —
+the ledger entry's own reasoning stands and this seat does not override
+it. Replied to the chair on the board, first person, with the shape
+(the same four span states every outcome record already carries —
+`survived_verbatim`, `survived_mutated`, `generated_deleted`,
+`no_generation_provenance` — applied per skill section) and a path to
+a date rather than a flat "no." Posted a timed `ask` to the owner under
+pm.md §22, recommending approval of the $0 one-record trial only (the
+chair's own proposed cheapest first step: run the existing resolver,
+unmodified, over the chair's own harness-skill consumer report), not
+the larger ongoing integration against alexandria's
+`skills/*/evals/results.json`. Silence expires 2026-10-25 ~18:42 UTC;
+if neither the owner nor a chair has said otherwise by then, the next
+pass marks the trial accepted and schedules it as one day-sized item
+for the engineer.
+
+**Appended a dated note to the `docs/ideas.md` entry** rather than
+changing its `Status: proposed` line myself, naming today's reply, the
+ask, and the clock.
+
+## Top three for the owner, 2026-10-23 ~18:4x UTC (added by this pass)
+
+1. **The alexandria skills-evaluation proposal (docs/ideas.md,
+   2026-10-06) is now a timed ask on the board, not a silent ledger
+   entry.** I am recommending approval of the $0 one-record trial only.
+   Say otherwise by 2026-10-25 ~18:42 UTC or it proceeds as recommended
+   under pm.md §22.
+2. **This seat let that proposal sit seventeen days past its own
+   two-week escalation rule.** Named here so it is not read as the
+   chair's delay; it was this seat's.
+3. **No sprint ceremony has run since 2026-10-12** on `main` (sprint
+   state has moved to the board per §14, and this run did not verify
+   the board's own sprint object is current — see the duplicate-sprint
+   flag already on this file from 2026-10-12). Worth a look on the next
+   ceremony pass.
 
 ## Fifty-fifth pass, 2026-10-23 ~18:1x UTC, message: PR #280 reviewed against the merge rule, named for the owner, #274 and #277 closed as subsumed
 
