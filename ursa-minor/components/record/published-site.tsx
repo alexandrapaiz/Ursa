@@ -5,6 +5,7 @@ import Link from "next/link";
 import { parseRecord } from "@/lib/record/parse";
 import { recordAddressHref } from "@/lib/record/address";
 import {
+  FACT_SEPARATOR,
   indexUrlFor,
   parsePublishedIndex,
   recordUrlFor,
@@ -223,6 +224,51 @@ export function PublishedSite() {
   );
 }
 
+/**
+ * A middot line that breaks between its facts and never inside one.
+ *
+ * Both lines in the set header are lists of short facts joined by a
+ * middot, and at 390px both of them used to break wherever the measure
+ * ran out. The count line split `published` from its date and `no
+ * record` from `fetched`; the bounds list split `2` from `interposed
+ * generations`, which leaves a bare numeral at the end of a line with
+ * nothing saying what it counts. The middot is what tells the reader
+ * where one fact stops, so a break that lands anywhere else contradicts
+ * the punctuation.
+ *
+ * So each fact keeps its own separator glued to its right, the way a
+ * comma stays with the word before it, and the only breaking space left
+ * is the one between facts. The line then folds at the middots and
+ * nowhere else.
+ *
+ * The exception is the fact that is one token, which here is the
+ * repository name. It has no internal space to protect, and it is the
+ * only fact whose length a stranger controls, so it is left breakable:
+ * `someone/a-very-long-repository-name` must be allowed to wrap inside
+ * itself rather than push the viewport sideways on a phone. Refusing to
+ * break a word is only safe when something else bounds its length.
+ */
+function FactLine({ facts }: { facts: string[] }) {
+  const shown = facts.filter((f) => f.length > 0);
+  return (
+    <>
+      {shown.map((f, i) => {
+        const last = i === shown.length - 1;
+        const multiWord = f.includes(" ");
+        return (
+          <span key={f}>
+            <span className={multiWord ? "whitespace-nowrap" : "[overflow-wrap:anywhere]"}>
+              {f}
+              {last ? null : "\u00a0·"}
+            </span>
+            {last ? null : " "}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 /** The set, drawn from the index alone. No record is fetched for this. */
 function SiteSet({
   site,
@@ -274,11 +320,14 @@ function SiteSet({
   return (
     <div className="mt-10">
       <p className="font-mono text-[0.7rem] leading-[1.8] tracking-[0.04em] text-[var(--dim)]">
-        {index.records.length} record{index.records.length === 1 ? "" : "s"}
-        {index.repository ? ` · ${index.repository}` : ""}
-        {index.publishedAt ? ` · published ${index.publishedAt.slice(0, 10)}` : ""}
-        {" · "}
-        {humanBytes(site.bytes)} of index read, no record fetched
+        <FactLine
+          facts={[
+            `${index.records.length} record${index.records.length === 1 ? "" : "s"}`,
+            index.repository ?? "",
+            index.publishedAt ? `published ${index.publishedAt.slice(0, 10)}` : "",
+            `${humanBytes(site.bytes)} of index read, no record fetched`,
+          ]}
+        />
       </p>
 
       {site.note ? (
@@ -294,13 +343,13 @@ function SiteSet({
           records has read the count as a total. */}
       <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{pairing.line}</p>
       {pairing.sets.length > 0 ? (
-        <ul className="mt-4">
+        <ul className="mt-4 max-w-2xl">
           {pairing.sets.map((b) => (
             <li
               key={b}
               className="border-l border-[var(--line)] py-1 pl-5 font-mono text-[0.68rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]"
             >
-              {b}
+              <FactLine facts={b.split(FACT_SEPARATOR)} />
             </li>
           ))}
         </ul>
@@ -320,11 +369,11 @@ function SiteSet({
                 type="button"
                 onClick={() => onOpen(s)}
                 disabled={opening !== null}
-                className="group block w-full text-left disabled:cursor-wait"
+                className="rec-row block w-full text-left disabled:cursor-wait"
               >
                 {/* The id gets the full measure and breaks anywhere. It is
                     a slug long enough to overflow a phone on its own. */}
-                <span className="block [overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)] group-hover:underline group-hover:decoration-[var(--polar)] group-hover:underline-offset-4">
+                <span className="rec-row-id block [overflow-wrap:anywhere] font-mono text-[0.76rem] leading-[1.6] tracking-[0.04em] text-[var(--polar)]">
                   {opening === s.id ? `${s.id} — fetching…` : s.id}
                 </span>
 
