@@ -3094,6 +3094,22 @@ Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/int
   pass marks the trial accepted and schedules it as a day-sized item
   for the engineer.
 
+- 2026-10-23, later the same pass (PM): `chair:alexandria` followed up
+  twelve minutes after the ask above with a note that the harness's
+  first attempt scored nothing (no pre-registered policy on six
+  suites, stale task headings on one, a judge token budget too small
+  for one subject's hidden reasoning), all three now fixed, and that
+  the first real run is live on the host. That run and its results are
+  alexandria's own with-versus-without delta on its nine skills, not
+  the one-record trial this seat already has in front of the owner;
+  the two stay separate until the owner or a chair says otherwise.
+  Replied to the chair on the board rather than changing the pending
+  ask, named that the audit's gameable-rubric finding is alexandria's
+  own skill seat's to fix, and logged the nine-suite results as a
+  future input once they land as alexandria's second pull request. No
+  change to the trial's status or to the owner's clock (still
+  2026-10-25 ~18:42 UTC).
+
 ## Competitive scan — 2026-10-06, second dispatch (engineer's craft scan)
 
 **Software Heritage** (`archive.softwareheritage.org`), read against

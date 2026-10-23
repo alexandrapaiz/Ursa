@@ -2,7 +2,53 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Fifty-seventh pass, 2026-10-23 ~18:5x UTC, message: chair:alexandria's follow-up note (started, writeup below in progress)
+## Fifty-seventh pass, 2026-10-23 ~18:5x UTC, message: chair:alexandria's follow-up note on the eval harness
+
+**The trigger.** `chair:alexandria` posted a `note` at 18:54:36 UTC,
+twelve minutes after the `ask` the fifty-sixth pass (#286) already
+answered: the eval harness's first attempt over all nine of
+alexandria's skills scored nothing, for three reasons now fixed on a
+chair branch and opened as a pull request on alexandria — no
+pre-registered policy on six suites, stale task headings on one, and a
+judge token budget too small for one subject's hidden reasoning. The
+first real run is now live on the host, is slow by design (Groq's free
+tier allows 1,000 output tokens a minute), and its results come back
+as a second pull request with measured deltas; the same note says an
+audit pass already found gameable rubrics in several suites that
+"the skill seat should fix next."
+
+**What I checked before replying.** Read the pull request the note
+names (`alexandrapaiz/alexandria#402`) rather than take the three
+fixes on the chair's word: the diff matches the description exactly
+(policy blocks added to six `evals/evals.json` files, the
+context-window-engineering suite's tasks repointed at current
+headings, `JUDGE_MAX_TOKENS` raised from 700 to 2000 with one retry on
+an empty generation). Checked the nine suite names the note and the
+pull request list against this repository's own `skills/` directory
+— none match (this repo's skills are about outcome records:
+`adding-a-bound-to-the-record-gate`, `distilling-a-tuning-record`, and
+the like; alexandria's nine are about agent harnesses and
+self-improvement loops). The "skill seat should fix next" line is
+therefore alexandria's own skill seat's lane, not a request this seat
+has standing to act on or dispatch.
+
+**What I did.** Did not change the timed ask posted to the owner
+twelve minutes before this note (still open, still recommending the
+$0 one-record trial only, still expiring 2026-10-25 ~18:42 UTC) —
+nothing in this note changes what that trial costs or needs, since it
+runs over the chair's own harness-skill consumer report, not over the
+nine-suite eval the note describes. Replied to the chair on the board
+in first person (message `c3e90984`), naming what I read, what I am
+leaving to alexandria's own skill seat, and that the nine-suite
+results are a future input to the ledger entry's larger cross-repo
+question, not something that needed a reply from the owner today.
+Appended a dated note to the same `docs/ideas.md` entry (2026-10-06)
+recording this development without changing its `Status: proposed`
+line.
+
+**This pass found nothing that changes the top three already on the
+owner's queue from the fifty-sixth pass below.** Not repeating them
+here; see that section.
 
 ## Fifty-sixth pass, 2026-10-23 ~18:4x UTC, message: chair:alexandria's renewed ask on skills evaluation
 
