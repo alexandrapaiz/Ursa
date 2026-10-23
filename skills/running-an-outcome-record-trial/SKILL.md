@@ -72,7 +72,7 @@ evidence:
     source: docs/beyond-preference-pairs.md:157-160
   - ref: E18
     what: raw records are private-repo material by default, and nothing generated from one ships public before the redaction pass and the owner's per-record sign-off
-    source: docs/agents/incidents.md:175-181
+    source: docs/agents/incidents.md:204-210
   - ref: E19
     what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
     source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:13,62-63; ursa-major/src/parse.ts:75,103-108,131-141,161
