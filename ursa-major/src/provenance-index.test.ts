@@ -93,8 +93,54 @@ describe.skipIf(blocked !== null)(SUITE, () => {
     // would survive this module being rewritten.
     const doc = readFileSync(join(root as string, 'docs/design/resolver-action.md'), 'utf8')
     expect(doc).toContain('db8ebdf7')
-    const row = index.rows.find((r) => r.introducedBy.some((c) => c.commit.startsWith('d4a57c4')))
+    // Anchored on the commit's date and subject rather than its object
+    // id, which is the whole lesson of 2026-10-23. This line read
+    // `c.commit.startsWith('d4a57c4')` until then, and `d4a57c4` is a
+    // commit this repository no longer has: a history rewrite renumbered
+    // every commit while preserving every tree, author date and subject,
+    // so the hand-written hash rotted and the date and the subject did
+    // not. A row's identity for the purposes of this assertion is "the
+    // bundle introduced by the commit of that day with that message",
+    // which survives a renumbering; its object id does not.
+    const row = index.rows.find((r) => r.introducedBy.some((c) =>
+      c.date.startsWith('2026-10-08')
+      && c.subject === 'The empty-window sentence was asserting a cause it had not checked'))
+    expect(row, 'no row for the 2026-10-08 bundle resolver-action.md §8.2 names').toBeDefined()
     expect(row?.digest.startsWith('db8ebdf7')).toBe(true)
+  })
+
+  it('names, for every row, a commit this repository actually has', () => {
+    // The claim the whole index exists to support, asserted directly
+    // instead of as a side effect of the text comparison above.
+    //
+    // A row is an answer to "which commit shipped the resolver that
+    // stamped this record", so a row naming a commit absent from HEAD's
+    // history is not a stale derived file, it is a dead link in the one
+    // lookup `task.resolvedBy.digest` is sold as supporting. On
+    // 2026-10-23 all twenty-five rows named commits no longer in this
+    // repository, because a history rewrite renumbered them and the index
+    // was never regenerated. The staleness gate above did fail, but it
+    // failed as a fifty-line text diff whose cause a reader has to infer.
+    // This one says the cause in a sentence, and it is the assertion that
+    // would have named the defect on the day of the rewrite.
+    // Read from the COMMITTED file, not from `index`. The first version
+    // of this assertion walked `index`, which is `buildIndex(root)`, and
+    // every commit in that is reachable from HEAD by construction — it
+    // was derived from `git rev-list HEAD` moments earlier. It therefore
+    // passed against the very stale file that motivated it. The shipped
+    // artifact is the committed JSON, so that is what has to be read.
+    const committed = JSON.parse(readFileSync(join(root as string, INDEX_JSON), 'utf8')) as {
+      rows: Array<{ introducedBy: Array<{ commit: string; date: string; subject: string }> }>
+    }
+    const known = new Set(
+      execFileSync('git', ['-C', root as string, 'rev-list', 'HEAD'], {
+        encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+      }).split('\n').filter(Boolean),
+    )
+    const dangling = committed.rows.flatMap((r) =>
+      r.introducedBy.filter((c) => !known.has(c.commit)).map((c) => `${c.commit} (${c.date} ${c.subject})`))
+    expect(dangling, `the index names ${dangling.length} commit(s) not reachable from HEAD; `
+      + 'if the history was rewritten, run: npm run provenance:bundles').toEqual([])
   })
 
   it('gives every version a distinct digest, which is what makes a lookup an answer', () => {

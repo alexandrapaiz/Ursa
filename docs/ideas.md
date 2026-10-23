@@ -8401,6 +8401,86 @@ proves rather than about Graphiti's engineering quality.
 - Cost: $0
 - Status: proposed
 
+### 2026-10-23 (engineer) — Two of our label families have no measured error rate, and one harness shape produces both
+
+- Trigger: two things in the same run. The research seat's handoff of one sentence in `docs/design/verdict-eval.md` line 17, which said the backward join of finished work to the generations that fed it "is a factual operation: a span either survived or it did not", and this run's own calibration of the revocation gate, which separates 10 hand-written paraphrase pairs from 28 distinct ones and is therefore a calibration on 38 pairs rather than an error rate.
+- What: Ursa ships two kinds of label it has never measured. The span classes are the commercial object: `survived_verbatim`, `survived_mutated`, `generated_deleted` and `no_generation_provenance`, the last of which `CLAUDE.md` §1 calls the most valuable category and which is a negative claim, the hardest kind to be right about. The revocation gate's block is the second, added today in `ursa-major/src/tuning/revocation.ts`, where a miss revives an inference the user revoked. Neither has a number. For the span classes the reason was a sentence, now deleted with the correction left visible in `verdict-eval.md` §1, and the sentence was already falsified internally: `docs/design/verbatim-byte-identity.md` §1 records the resolver calling a span untouched model output when a case had changed or an em dash had been retyped, on this repository's own history at record `ursa-2026-10-07-2f610e9`. It is falsified externally too, because the published attribution work closest to this operation (arXiv:2610.17488) had to manufacture ground truth by injecting known faults, reports 96.8% exact attribution over 158 queries, and concentrates its residual errors where an identical observation leaves the real relationship ambiguous, which is our coincidental-match case. The harness has one shape for both: take a real artifact, inject provenance whose truth we fixed ourselves, run the labeller, and report the exact-label rate per class including the class whose right answer is nothing. For spans the injection is into the conversation fixtures under `ursa-major/fixtures/`; for the gate it is pairs of (revoked statement, candidate statement, is this a restatement) drawn from real tuning records rather than written by the person choosing the threshold.
+- Why it is one entry and not two: the thing worth building is not either measurement, it is the injection harness, because both label families are unverifiable for the same reason. Nothing in the finished artifact records which generation it came from, so ground truth has to be put there on purpose or it does not exist. `ursa-major/src/evals/` holds three files today and all three are the verdict reader's, and `gh pr list --state all` returns exactly one evaluation ever built in this repository (PR #25).
+- First step: the span side, because the record it labels is what Ursa Minor sells. One fixture, one injected generation whose relationship to the final text we chose, and a script under `ursa-major/src/evals/` that reports the per-class exact-label rate over it. One fixture is not a rate either, and saying so in the output is part of the first step.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer) — The revocation gate only protects the future, and any record written before today may already hold the duplicate it would have blocked
+
+- Trigger: reading `revokeAxiom` while wiring the gate into `mergeDistill`. The gate runs inside one distillation pass, so it decides about statements arriving after a revocation and about nothing else.
+- What: before today a model that reworded an axiom and left `matchesExisting` null got a second active axiom with a different id and nearly the same words. Revoking one of a pair like that revokes one id. The twin stays `active`, keeps its own evidence, and keeps flowing to `renderTuningBlock`, the dashboard overlay and the MCP read, so the user watches her revocation take effect on the thing she clicked and not on the thing she meant. The gate cannot see this case by construction: `findRevocationBlock` is called on a candidate from a distillation pass, and the twin is already in `axioms`. The fix is small and it is a product decision rather than a mechanical one, because silently revoking a second axiom the user did not name is its own dark pattern. The honest shape is a report: an exported `revocationTwins(tuning, unitId)` using the same `revocationSimilarity`, called by `ursa consent revoke-axiom`, printing "ax-007 says nearly the same thing, and it is still active. Revoke it too with --axiom ax-007" and leaving the decision with her.
+- Why it matters more than it looks: every tuning record that exists today was built by the old create path, so this is not a hypothetical population. It is every record in the repository's fixtures and every record on any user's disk.
+- First step: `revocationTwins` plus the line in `consent revoke-axiom`, with a test that seeds two near-identical active axioms, revokes one, and asserts the other is named in the output and not touched in the file.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer) — Our erasure scope is described in prose, and prose is how it went one row short
+
+- Trigger: today's craft scan of cognee's `forget()` documentation, read against what this run had just had to fix in `ursa forget`.
+- What: `forgetRecordInTuning` strips a record from `axioms` and from `sources`, and until this run it did not touch the statements the revocation gate parks in `blockedByRevocation`, which carry a statement derived from the erased record and the evidence quotes lifted out of it. The miss was not subtle and it was not caught by anything, because what `forget` reaches is written as sentences in `docs/design/consent-and-erasure.md` §6c and as a tombstone whose fields happen to be the ones somebody remembered. cognee publishes a table instead: one row per deletion mode, a column for what is removed and a column for what is preserved, and it states the limit out loud, that deletion "does not scrub the bytes from the storage engines". A table with a preserved column is a checklist a reviewer can walk when a new field is added to the thing being erased. Ursa has one place where it already does this well and the pattern is worth copying from ourselves too: the root README prints `BOUND_COUNT` rather than spelling the number in words.
+- First step: derive the scope table. One exported constant in `ursa-major/src/consent.ts` naming every field of `TuningRecord` and `ConsentRecord` that `forget` touches and every field it deliberately does not, a test that fails when a new field appears in either type and is in neither column, and the table rendered into `consent-and-erasure.md` §6c from that constant rather than typed by hand.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-23 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, was read out on 2026-10-13 and 2026-10-14. Today's run is
+a break-fix on the one promise category 3 competes on, which is what
+happens when a user takes something back, so this scan goes outside the
+map on purpose and reads the two memory systems that are **not** in it,
+**cognee** and **LangMem**, on one question: when a user says forget
+this, does the product enforce that at its store or does it ask a model
+to cooperate. Both are named in arXiv:2609.08258, the study the research
+seat's handoff rests on, so reading their own documentation is also a
+check on that paper's claim about them.
+
+**What they do.** cognee's `forget()` is store-level and deterministic.
+The caller names a dataset, or a dataset and a data id, or passes
+`everything=True`, and the documentation says the operation "only
+remove[s] data" and that it "never call[s] the LLM or embedding model, so
+they consume no tokens". The model has no role in deciding what
+disappears. LangMem goes the other way. Deletion is a capability of its
+memory manager, gated behind `enable_deletes`, documented as "Whether to
+allow deleting existing memories that are outdated or contradicted by new
+information", type `bool`, **default `False`**, and the deletions it
+enables are ones the model proposes from new information rather than ones
+a user demanded.
+
+**Worth stealing: publish a deletion scope table with a preserved
+column, and state the limit in it.** cognee's forget page is a table of
+deletion modes against what each one removes, and the row that makes it
+credible is the one that says what survives: with `memory_only=True`,
+"Raw files and the dataset/data records are preserved", and even a full
+delete "does not scrub the bytes from the storage engines". Ursa
+describes the same thing in sentences, in `consent-and-erasure.md` §6c,
+and this run is the evidence that sentences let a row go missing: the
+blocked-statement list was not swept by `ursa forget` until today, and
+nothing failed when it was not. The ledger entry above is the version of
+this we should build, where the table is derived from the code rather
+than typed beside it.
+
+**What Ursa does better: a revocation here is the user's instruction, not
+a model's inference, and as of today the store is what enforces it.**
+LangMem's default is the sharp comparison. Its store-level delete is an
+opt-in flag that ships off, and what the flag enables is still the model
+removing memories it judges outdated. Ursa's `revokeAxiom` is a command
+the user runs about an id she picked, the tombstone it leaves is never
+disclosed, and `findRevocationBlock` now scores every later candidate
+against that tombstone with no model-supplied field in the path. The part
+worth not getting smug about is that Ursa documented this property for
+twenty-two days before it was true: `consent-and-erasure.md` §6c claimed
+the merge enforced it, and the merge asked the model whether to. The
+twenty-two is from the consent gate run of 2026-10-01
+(`docs/agents/engineer-2026-10-01-consent-gate.md`, and the real payload
+in §6 of that design document is stamped `2026-10-01T02:32:03.357Z`),
+counted to today. It is not from `git log`, which reports this file as
+added at `21944ab` today because the clone is shallow.
 ### 2026-10-23 (skill, tenth run) — A guard's scope is a claim with a date on it, and both receipt guards were scoped to a one-file skill
 
 - Trigger: the ninth run's entry above, "A trigger test is outside every checker this library has", whose first step named this seat and this run and prescribed two shapes to choose between.
@@ -8423,3 +8503,133 @@ proves rather than about Graphiti's engineering quality.
 
 **First step:** for the owner, to decide whether to carry this to HQ as a standard amendment (a sentence in `docs/standards/pm.md`'s merge-tier sections naming reviews and merge state, not comment authorship, as the instrument for "has the owner acted") or to record it as an Ursa-only ADR if HQ's standard already covers this elsewhere and this seat missed it.
 **Cost:** $0.
+
+### 2026-10-23 (engineer, scheduled run) — Thirty of forty-two design documents cite a commit this repository does not have
+
+- Trigger: today's break-fix. `docs/provenance/bundle-digests.json` named
+  twenty-five commits and all twenty-five were absent from `main`, because
+  a history rewrite renumbered every commit while preserving every tree,
+  author date and subject. The index was the one place with a test, so it
+  was the one place that said so. The question that follows is what else
+  pinned a hash.
+- What: measured over `docs/`, `prompts/`, `ursa-major/src/`,
+  `ursa-major/tools/` and `README.md` by extracting every 7-to-40
+  character hexadecimal token, keeping the ones `git cat-file -t` calls a
+  commit, and testing each against `git rev-list HEAD`. Of 160 tokens that
+  resolve to a commit, 50 are reachable from `HEAD` and 110 are not,
+  across 68 files. Restricted to the live reference surface the
+  engineering-artifact standard governs, `docs/design/`, it is 78 distinct
+  dead commits in 115 places across 30 of the 42 design documents.
+
+  The entry should not be read as claiming 110 defects, and the reason is
+  worth stating precisely. A dated incident log or a ledger entry that
+  names the commit it was looking at on the day it was written is a
+  correct historical record, and renumbering it would be falsifying it.
+  The same is true of the sentence in `provenance-index.test.ts` this run
+  added, which names `d4a57c4` in order to say that `d4a57c4` is gone. The
+  defect is narrower and it is the design documents: element 3 of the
+  engineering-artifact standard requires a real example payload and
+  element 4 real commands, and a reader who runs `git show` on the
+  evidence a design document offers gets `unknown revision`. Ursa sells
+  auditability to labs and publishes methodology as the sales channel, so
+  evidence a reader cannot follow is the product's own claim failing on
+  the smallest possible scale.
+
+  One measurement artifact to name, because it cuts the other way. These
+  commits resolve at all in this run's clone only because the run fetched
+  thirteen pull request refs during observation, which brought the
+  pre-rewrite objects in. In a clean clone they do not resolve, so a
+  reader gets a worse error and not a better one.
+- First step: not a rewrite of 110 references. A checker, under
+  `ursa-major/tools/`, that takes a path glob, extracts hexadecimal tokens,
+  keeps the ones that are commits, and reports the unreachable ones with
+  file and line. Point it at `docs/design/` alone first, which is the
+  surface with a standard attached and the smallest defensible scope, and
+  have it print the `(date, subject)` of each dead commit next to the live
+  commit carrying the same `(date, subject)`, since today's fix showed that
+  mapping is total and mechanical. Whether it becomes a gate is a second
+  decision and should not be bundled into the first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer, scheduled run) — The gate protecting the published index skips itself in the clone shape this seat actually runs in
+
+- Trigger: this run opened on a one-commit clone. `git log --oneline | wc -l`
+  returned 1 and `git fetch --unshallow` then succeeded, which only a
+  shallow repository accepts. The index defect above was found only because
+  the run unshallowed the clone for an unrelated reason, which is luck and
+  not a process.
+- What: `historyUnavailable` in `ursa-major/tools/bundle-digest-index.ts`
+  returns a reason string when `git rev-parse --is-shallow-repository` is
+  true, and `src/provenance-index.test.ts` turns that into
+  `describe.skipIf`. That is the right call on its own terms, and the file
+  argues it well: in a one-commit checkout the exhaustive sweep honestly
+  finds one bundle, so a failure there would be seventeen spurious
+  differences rather than a finding. The problem is the population. Every
+  one of the six assertions that protect the published lookup table is
+  therefore inert in a shallow clone, and a shallow clone is what this
+  seat's own scheduled runs get. So the index spent some number of days
+  naming twenty-five commits nobody had, with the suite reporting
+  `1 skipped` and no seat able to see it.
+
+  Two things that are not the cause, checked rather than assumed. It is not
+  that CI was red and ignored: there is no workflow that runs `npm test` at
+  all. `.github/workflows/` holds eleven `agent-*.yml` seat dispatches and
+  `redaction-gate.yml`, which is the 2026-09-29 entry "Nothing on a pull
+  request checks whether the code builds or the tests pass", still
+  `urgent`, now with a measured product-facing cost attached to it. And it
+  is not that the agent workflows are shallow: they pass `fetch-depth: 0`.
+  The shallow clone is this seat's resident cron runtime, not Actions.
+- First step: make the skip visible where a seat will see it, before making
+  it a failure. One line at the end of a skipped run that names the suite
+  and the reason, written to stdout by the test file itself rather than left
+  to vitest's reporter, which prints neither the stdout of a skipped file
+  nor anything but a count. The file already knows this, which is why the
+  reason is in the suite name, and the suite name is still only visible
+  under `--reporter=verbose`. The larger question, whether a seat's clone
+  should be deep enough to run its own gates, is an owner and HQ question
+  about the runner rather than an engineering change, and belongs in a
+  separate entry if this one does not settle it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (engineer, scheduled run) — Competitive scan: npm and PyPI build provenance, and the rule that a provenance claim keys on content and never on a commit
+
+- Scope and honesty about sourcing: this run fetched nothing from the
+  network, so this is a craft read from the model's own knowledge of how
+  these systems are built rather than from a page read today. Treated as
+  the weaker evidence it is, and anything in it that would drive a decision
+  should be re-read against the live specification first.
+- The product: the build-provenance attestations that npm publishes for
+  packages built in a trusted CI, and the equivalent PyPI ships, both built
+  on the in-toto attestation format and a transparency log. The shape worth
+  comparing is what the attestation is keyed to. Its `subject` is a content
+  digest of the artifact, and the source repository and commit it was built
+  from are carried as fields inside the signed predicate. The digest is the
+  primary key and the commit is metadata.
+- One thing worth stealing: that ordering, stated as a rule rather than
+  inherited by accident. Today's defect is precisely what happens when a
+  provenance claim is read through a commit id. Every one of the
+  twenty-five rows survived the rewrite intact on its content-addressed
+  fields, `digest`, `sha256`, `blob` and `bytes`, and every one lost its
+  commit. The useful generalization for `docs/design/` and for the
+  resolver's own records is that a hash a reader is invited to verify
+  should be content-addressed wherever the content exists, and a commit id
+  should be presented as a convenience that may rot, with the `(date,
+  subject)` pair beside it, because that pair is what made today's fix
+  mechanical. This is close enough to the first entry above to be its
+  justification rather than a separate idea, which is why it is not filed
+  as one.
+- One thing Ursa does better: the index is reproducible offline by anyone
+  holding the clone, with no signing identity, no key custody and no
+  online log to be available. `buildIndex` sweeps every commit reachable
+  from `HEAD` and the suite compares the result against the committed file
+  byte for byte, so completeness is a property of the construction. npm's
+  attestation answers "was this artifact built by that workflow from that
+  commit" and needs Sigstore's root of trust to answer it; Ursa's index
+  answers "which commit shipped the resolver that stamped this record" and
+  needs a `git clone`. For a buyer auditing a data licence, verifying with
+  nothing but the repository is the stronger position, and it is also why
+  the staleness above was detectable at all.
+- Cost: $0
+- Status: proposed

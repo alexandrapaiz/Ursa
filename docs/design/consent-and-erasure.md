@@ -131,12 +131,25 @@ export interface ForgetResult {
   axiomsDeleted: string[]
   evidenceStripped: number
   sourcesRemoved: number
+  /** added 2026-10-23: blocked statements this erasure also dropped */
+  blockedDropped: number
 }
 
 export function forgetRecordInTuning(tuning: TuningRecord, recordId: string, now?: string): ForgetResult
 
 /** product-plan.md §2 component 9, at the signature the plan names. */
 export function revokeAxiom(tuningPath: string, unitId: string, now?: string): TuningRecord
+
+/**
+ * Added 2026-10-23 with the revocation gate
+ * (`docs/design/revocation-store-gate.md`). The user's answer to a gate
+ * that held back a statement which was genuinely a new rule: it becomes
+ * an axiom with `status: 'user-edited'`, which is hers rather than the
+ * distillation's. `index` is the one-based position `ursa consent show`
+ * prints.
+ */
+export interface ReleaseResult { tuning: TuningRecord; released: TuningAxiom }
+export function releaseBlocked(tuningPath: string, index: number, now?: string): ReleaseResult
 ```
 
 From `ursa-major/src/disclosure.ts`:
@@ -320,6 +333,10 @@ npx tsx src/bin/ursa.ts consent disclose /tmp/ursa-demo --out /tmp/ursa-demo/bat
 # Withdraw one inference, keeping a tombstone so a re-distill cannot revive it.
 npx tsx src/bin/ursa.ts consent revoke-axiom /tmp/ursa-demo --axiom ax-003
 
+# Release a statement the revocation gate held back that was in fact a new
+# rule. The index is the number `consent show` prints beside it.
+npx tsx src/bin/ursa.ts consent release-blocked /tmp/ursa-demo --index 1
+
 # Erase one record and everything derived from it.
 npx tsx src/bin/ursa.ts forget /tmp/ursa-demo --record ursa-demo-2026-10-01-e0a2c66
 
@@ -417,7 +434,32 @@ These are different operations and the difference is the design.
 | Mechanism | `status: 'revoked'`, kept as a tombstone | the record file is deleted; evidence is stripped from every axiom |
 | An axiom grounded only in this | n/a | **deleted outright**, not tombstoned |
 | An axiom also grounded elsewhere | n/a | keeps its statement, loses this evidence, `evidenceCount` recounted |
-| Can a later distillation revive it | No. `tuning/merge.ts` already skips a matched revoked axiom and `distill.ts` passes the tombstones to the model as "do not resurrect". | Yes, if grounded in a record the user has not erased, and that is correct. |
+| A statement held in `blockedByRevocation` grounded only in this | n/a | **dropped outright**, counted as `blockedDropped`, for the same reason an axiom is: the entry carries a statement derived from the erased record and the evidence quotes lifted out of it |
+| Can a later distillation revive it | No, and as of 2026-10-23 that is enforced rather than requested. See the correction below this table. | Yes, if grounded in a record the user has not erased, and that is correct. |
+
+**Correction, 2026-10-23.** The sentence this row used to carry was
+wrong, and `docs/design/revocation-store-gate.md` is the repair. It read:
+"No. `tuning/merge.ts` already skips a matched revoked axiom and
+`distill.ts` passes the tombstones to the model as 'do not resurrect'."
+The load-bearing word was **matched**. The merge check read
+`match.status === 'revoked'`, and `match` came from
+`DistilledAxiom.matchesExisting`, a field the model fills in, so a model
+that restated a revoked axiom in new words and left that field null never
+reached the check and got a fresh `status: 'active'` axiom. The prompt
+instruction was the only defense that held, and prompt instructions are
+the weaker half of the pair by a measured margin (arXiv:2609.08258: store
+filtering 0% unsafe, prompt hardening 37.2%, from a 43.1% baseline).
+Since 2026-10-23 the check is `findRevocationBlock` in
+`ursa-major/src/tuning/revocation.ts`, which scores every candidate
+statement against the tombstones with no model-supplied field, and a
+statement it blocks is parked in `TuningRecord.blockedByRevocation`
+where `ursa consent show` prints it and no exporter reads it. The user
+promotes one into an axiom she owns with
+`ursa consent release-blocked <project> --index <n>`. The guarantee is
+tested in `ursa-major/src/tuning/revocation.test.ts`, including the case
+this table used to assert without testing: a re-distill after a
+revocation does not revive the statement even when the model declares no
+match.
 
 A tombstone is the wrong answer for erasure, because a tombstone preserves
 the statement derived from the thing being erased. `tuning/types.ts` already
