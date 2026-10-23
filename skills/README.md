@@ -206,6 +206,27 @@ matcher reads the thresholds `0.35` and `0.6` out of a `what` field and calls
 them missing files. The sweep found that the old copy of it could not see
 `.gitignore:8-9` at all, so that citation had never been checked.
 
+## Where a citation may stand
+
+A `[E7]` tag is a receipt in any `.md` file of a skill's directory, which
+since 2026-10-23 means the trigger test as well as the skill. Before that
+date both tools read `SKILL.md` and nothing else, so a tag in a
+`TRIGGER-TEST.md` had no fingerprint, no lock row, no place in the dossier of
+passages citing that ref, and no way to go red when its range moved. One
+draft shipped ten of them with both tools exiting 0.
+
+Two things follow. A ref cited only in a trigger test counts as cited, since
+a claim made in the activation test is a claim the skill makes. And writing
+such a passage makes that ref stale in `relevance.lock.json`, because a new
+sentence standing on a range was not what the verdict was given to.
+
+A tag in a file neither tool reads, a `.json` fixture or a note beside the
+skill, is reported as a failure rather than fingerprinted. The fix is to move
+the claim into a file a reader would look in. `skills/citing-files.mjs` is the
+one place that answers which files count, shared for the reason
+`source-line.mjs` is shared: two tools disagreeing about scope leave a ref
+half-defended and neither says so. `prompts/skill-extract.md` §5p.
+
 Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked
 out. That gap is a ledger entry for the engineer or frontend seat, not
