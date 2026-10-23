@@ -386,7 +386,7 @@ export async function main(argv: string[]): Promise<number> {
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
     console.error('       ursa serve <projectPath> [--port N]')
-    console.error('         serves this project\\'s .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model')
+    console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model")
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
     console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]')

@@ -244,6 +244,11 @@ describe('the local store server', () => {
       closureHeuristic: 'git-commit-pair', touchedFiles: ['digest.js'],
       generatedSha: 'aaaaaaa', finalSha: 'bbbbbbb', agentMarker: 'Claude',
       subject: 'Tighten digest prose', distilled: true,
+      // No merge sat between the two shas. An empty array is "none" and
+      // not "unknown"; the absent-means-unknown case is `unreadableMerges`
+      // (src/episodes.ts), which this episode does not set because every
+      // boundary merge here was readable, there being none.
+      interveningMerges: [],
     }])
     const server = await serve(project)
 
