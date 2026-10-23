@@ -30,6 +30,7 @@ import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from '
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
+import { citingTexts, refsIn, strayCitations } from './citing-files.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
@@ -71,10 +72,18 @@ for (const entry of readdirSync(skillsDir)) {
   const fm = text.match(/^---\n([\s\S]*?)\n---\n/)
   if (!fm) { problems.push(`${entry}: no frontmatter`); continue }
 
-  // refs the body actually cites, e.g. [E3] or [E3, E7]
-  const cited = new Set()
-  for (const m of text.slice(fm[0].length).matchAll(/\[((?:E\d+)(?:,\s*E\d+)*)\]/g))
-    for (const r of m[1].split(/,\s*/)) cited.add(r)
+  // refs the skill actually cites, e.g. [E3] or [E3, E7], in every markdown
+  // file of the directory and not only SKILL.md. See ./citing-files.mjs for
+  // the defect that bought this: a tag in a TRIGGER-TEST.md used to be
+  // invisible here, so an undeclared ref cited there passed.
+  const cited = new Map()
+  for (const { file, text: body } of citingTexts(join(skillsDir, entry)))
+    for (const r of refsIn(body)) if (!cited.has(r)) cited.set(r, file)
+
+  // And a tag in a file no tool here reads is not a receipt at all, which is
+  // the one case widening to `.md` leaves open.
+  for (const { file, refs } of strayCitations(join(skillsDir, entry)))
+    problems.push(`${entry}: ${file} cites ${refs.join(', ')}, and nothing reads that file — move the claim into a .md file or drop the tag`)
 
   const declared = new Set()
   for (const m of fm[1].matchAll(/- ref:\s*(\S+)\n(?:.*\n)*?\s*source:\s*(.+)/g)) {
@@ -116,7 +125,7 @@ for (const entry of readdirSync(skillsDir)) {
     }
   }
 
-  for (const r of cited) if (!declared.has(r)) problems.push(`${entry}: body cites ${r}, not declared`)
+  for (const [r, file] of cited) if (!declared.has(r)) problems.push(`${entry}: ${file} cites ${r}, not declared`)
   for (const r of declared) if (!cited.has(r)) problems.push(`${entry}: ${r} declared but never cited`)
 }
 
