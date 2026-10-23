@@ -34,6 +34,7 @@ import {
 } from './consent'
 import { auditBatch, projectForMinor } from './disclosure'
 import { releaseBlocked, revokeAxiom } from './tuning/revoke'
+import { allRevocationTwins, revocationTwins, type RevocationTwin } from './tuning/revocation'
 import type { TuningRecord } from './tuning/types'
 
 export interface CliIo {
@@ -66,6 +67,22 @@ function scopeFrom(argv: string[], io: CliIo): DisclosureScope | null {
   return raw as DisclosureScope
 }
 
+/**
+ * One line of a twin report, used by both `revoke-axiom` and `show` so
+ * the same pair is described the same way in both places.
+ *
+ * The score is printed as a share of words rather than as 0.714, for the
+ * same reason the blocked listing above does it: the number is only
+ * there so she can tell a close pair from a borderline one, and a bare
+ * decimal invites her to read a precision this score does not have.
+ */
+function printTwin(t: RevocationTwin, io: CliIo, indent = '      '): void {
+  io.out(`${indent}${t.id}  sharing ${Math.round(t.score * 100)}% of its words: "${t.statement}"`)
+  if (t.status === 'user-edited') {
+    io.out(`${indent}    You wrote or released this one yourself, so no distillation pass put it there.`)
+  }
+}
+
 function describe(consent: ConsentRecord, projectRoot: string, io: CliIo): void {
   io.out(`Consent for ${projectRoot}`)
   io.out('')
@@ -88,6 +105,27 @@ function describe(consent: ConsentRecord, projectRoot: string, io: CliIo): void 
     for (const a of active) {
       io.out(`      ${a.id}  ${a.polarity}: ${a.statement}  (${a.domain}, x${a.evidenceCount})`)
     }
+    // Revocations that only half took effect. This is the surface that
+    // reaches records which already exist, and it is the reason the twin
+    // report is not only wired into `revoke-axiom`: a report that fires
+    // at the moment of revocation helps revocations made from today on,
+    // while every tuning record on disk right now was written by the old
+    // create path that produced these pairs. She should not have to
+    // revoke something a second time to find out the first one was
+    // incomplete.
+    const pairs = allRevocationTwins(tuning)
+    if (pairs.length > 0) {
+      io.out('')
+      io.out(pairs.length === 1
+        ? '  One thing you revoked is still being said by an inference you hold:'
+        : `  ${pairs.length} things you revoked are still being said by inferences you hold:`)
+      for (const p of pairs) {
+        io.out(`      ${p.revoked.id}, which you revoked: "${p.revoked.statement}"`)
+        for (const t of p.twins) printTwin(t, io, '          still active: ')
+      }
+      io.out(`  This happens because an inference written before the store checked for it could be the same rule twice under two ids, and withdrawing one id leaves the other one working. Withdraw the rest with \`ursa consent revoke-axiom ${projectRoot} --axiom <id>\`, or leave them. Nothing above was changed for you.`)
+    }
+
     // The gate's own output, printed here and nowhere else. A block that
     // the user cannot read is a silent deletion of something a model
     // thought it had learned about her, which is the same class of thing
@@ -152,6 +190,21 @@ export async function runConsentCommand(argv: string[], io: CliIo = stdio): Prom
       const target = tuning.axioms.find((a) => a.id === axiom)!
       io.out(`Revoked ${axiom}: "${target.statement}"`)
       io.out('It is kept as a tombstone so a later distillation cannot bring it back, and it is excluded from every export and from the overlay.')
+      // The twin report. A revocation she believes happened and which
+      // only half happened is the worst outcome this command has, and
+      // before today nothing told her: the gate in `tuning/revocation.ts`
+      // runs inside a distillation pass, so it cannot see a duplicate
+      // that was already an axiom when she clicked.
+      const twins = revocationTwins(tuning, axiom)
+      if (twins.length > 0) {
+        io.out('')
+        io.out(twins.length === 1
+          ? 'One inference you still hold says nearly the same thing, and revoking this one did not touch it:'
+          : `${twins.length} inferences you still hold say nearly the same thing, and revoking this one did not touch them:`)
+        for (const t of twins) printTwin(t, io)
+        io.out('')
+        io.out(`Those are still active, so they still reach every model. Withdraw one too with \`ursa consent revoke-axiom ${project} --axiom ${twins[0].id}\`, or leave it where it is. Nothing in that list was changed for you, because which of them you actually meant is yours to say and not ours to guess.`)
+      }
       return 0
     } catch (e) {
       io.err((e as Error).message)
