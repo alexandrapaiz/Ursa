@@ -11,13 +11,17 @@ cadence, not a handoff from here). By the time this entry was closed
 out, four new draft pull requests existed — frontend re-measuring the
 screenshots #240 owed itself, research and skill each resuming and
 absorbing their stale drafts, engineer absorbing and closing #270 from
-inside its own new branch. None of them had finished as of this pass's
-last check (`gh pr view` on each still showed a ship-first stub body),
-so none of this pass's merge/close decisions above changed, and none
-of their work is touched here — they are live sessions, not evidence
-to act on yet. Naming this so the next pass does not mistake "four PRs
-opened" for "four PRs this pass decided," and does not re-ask the same
-three seats something they are already mid-session on.
+inside its own new branch. Three of the four (frontend's #273, skill's
+#276, engineer's #275) were still live, ship-first-stub bodies, not
+evidence to act on. The fourth moved: research's own run readied #263
+directly, rewriting its body to say so in its own words rather than
+mine, before #274 (its own newer, separate draft) finished. #263
+qualified outright once readied — not draft, green, scoped to
+`docs/research/briefs/`, no Tier C path — so I merged it under Tier B
+in the same pass rather than waiting for the standup after this one.
+#274 is untouched; it is a live session, and whether it is new work or
+a second version of the same thing is that seat's own "read your own
+open PRs first" call, not mine to make for it.
 
 **The gap.** No run of any kind fired in this company between the
 forty-ninth pass (2026-10-18 ~19:3x UTC) and this one. The host's disk
