@@ -714,3 +714,59 @@ were written down and the day somebody read them, and a guard that tracks
 only the first will always report a library in better shape than it is. The
 second date is the expensive one, which is exactly why nothing was recording
 it.
+
+## 5p. A ref may be cited in any markdown file of the skill directory, and nowhere else
+
+(Added 2026-10-23, tenth run, closing the ninth run's finding.)
+
+§2 says a skill is two files, `SKILL.md` and `TRIGGER-TEST.md`. Every rule
+about citations up to here was written as if it were one. `check-evidence.mjs`
+and `relevance-sweep.mjs` both enumerated `skills/<slug>/SKILL.md` and read
+nothing else in the directory, so an `[E7]` tag written into a trigger test
+was invisible to both: no fingerprint over the lines it pointed at, no row in
+`relevance.lock.json`, no entry in the dossier of passages citing that ref,
+and nothing that went red when the range moved. It looked exactly like a
+receipt and was not one, which is the single failure §5g and §5j exist to
+prevent, one file over from where they were looking.
+
+The measurement, from the run that found it. The first draft of
+`adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` carried ten such tags.
+`grep -c "\[E" skills/*/TRIGGER-TEST.md` returned 0 for the four older trigger
+tests and 10 for that one, with `node skills/check-evidence.mjs` and `node
+skills/relevance-sweep.mjs --stale` both exiting 0 over all ten. The four
+older files happen to cite nothing, which was a convention nobody had written
+down and no check enforced.
+
+**The rule.** A citation may stand in any `.md` file of a skill's directory,
+and both tools read all of them. Three consequences follow, and the third is
+the one to remember.
+
+1. A tag naming an undeclared ref now fails wherever it sits, and the failure
+   names the file it was found in.
+2. A ref cited only in a trigger test counts as cited, so the uncited-ref
+   failure in §3 no longer fires on it. A claim made in the activation test is
+   a claim the skill makes, and its receipt is owed the same way.
+3. The relevance sweep gathers citing passages per file, `SKILL.md` first, so
+   a prompt in a trigger test enters both the dossier and the `passages`
+   digest. A new passage citing a range is a second claim standing on it, and
+   a verdict given before that passage was written was not given to it. So
+   writing one makes the ref stale and owes a re-read.
+
+**A tag in a file neither tool reads is reported, not fingerprinted.** Widening
+to `.md` says nothing about a tag in a `.json` fixture or a `notes.txt` beside
+it, which would be exactly as green and exactly as empty. Those are named as a
+failure with the instruction to move the claim into a file the tools read. The
+alternative, teaching the tools every format a skill directory might hold, buys
+nothing: a receipt has to be readable by a person following it, and a tag
+inside a fixture is not where anybody looks for one.
+
+`relocate-anchors.mjs` still reads `SKILL.md` alone and is right to. It rewrites
+`source:` lines, and the evidence table is declared in frontmatter, so there is
+exactly one file in which a range can be re-pointed.
+
+Ours: the shape to carry forward is that a guard's scope is itself a claim with
+a date on it. Both tools were correct on the day they were written, when a
+skill was one file in practice, and they went quietly wrong when the format
+grew a second file. So when §2 gains a third, this section is what has to be
+read again, and `skills/citing-files.mjs` is the one place that answers which
+files count.
