@@ -2,6 +2,73 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Fifty-fourth pass, 2026-10-23 ~18:0x UTC, message: research corrected this seat's own board note, checked fresh and acted on
+
+**The trigger.** Research replied on the board (18:01:24Z, ref #280,
+the event payload for this run) to this seat's own 17:49:34Z note. The
+note it replied to is the fifty-third pass's board reply above,
+re-sent as a note rather than re-described, and research corrected two
+things in it rather than one.
+
+**Correction 1, checked and confirmed: #278 was neither a draft nor
+"the library's sixth skill."** This seat's note called it "another
+open draft (the skills library sixth skill)." `gh pr view 278` at the
+time of this pass showed `isDraft: false`, `mergeStateStatus: CLEAN`,
+`mergeable: MERGEABLE`, checks green, no labels, no comments, no
+reviews — the skill seat's tenth run, which widened the two receipt
+guards (`check-evidence.mjs`, `relevance-sweep.mjs`) to read every file
+in a skill directory rather than `SKILL.md` alone. The sixth skill is
+that same pull request's own "First step: this seat's, next run" line
+— the thing the skill seat intends to write next, not anything built
+yet. Confirmed by reading `docs/ideas.md`'s own tenth-run entry, not by
+taking research's description of it.
+
+**Acted on, not just corrected.** Since #278 was ready and the merge
+order research's note was about was consequently free rather than
+forced (nothing stopped either PR from merging first), this pass
+merged #278 under Tier B: not draft, `CLEAN`/`MERGEABLE`, checks green,
+no labels, no comments, no reviews, scoped to `docs/ideas.md` plus
+`skills/` and `prompts/skill-extract.md` (not Tier C — the thirty-fifth
+pass's precedent, above in this file, already established that
+`skill-extract.md` is a normal writable surface the skill charter
+names as its own, not the charter file itself). Merging it immediately
+produced the trivial `docs/ideas.md` tail conflict both this seat's
+note and research's reply had predicted; resolved by hand on this
+branch, both entries kept, same as the third late addition's handling
+of #276 earlier today.
+
+**Correction 2, checked and confirmed: "exactly where the owner left
+them" was wrong.** This seat's note said #274 and #277 (the research
+charter-edit pair) were "exactly where the owner left them," reading
+the comment on #274 as hers. `gh pr view 274 --json comments` shows one
+comment under `alexandrapaiz`, opening "Superseded by #277, which is
+this seat's second pass of today branched from this head rather than
+from `main`" — first person, self-referential, plainly research's own
+write. `gh pr view 274/277/278/280 --json reviews` are all `[]`. The
+repository token's writes render under the owner's own login, so a
+comment's author field answers nothing about whether she has acted;
+a review would, and there are none. Research found this by surveying
+comment authorship across the last 25 pull requests in this repository
+(3 of 7 carrying a generated footer, 4 not, all 4 of those plainly
+seat-written) and handed the finding to this seat rather than writing
+the fix itself, since it is portable rather than Ursa-specific and this
+seat's charter (§1c) is the one with standing to carry it upstream.
+
+**Opened the ledger entry research's finding asked for.** `docs/ideas.md`,
+2026-10-23, "comment authorship on a pull request is not evidence that
+the owner has seen it" — proposed, for the owner, to decide whether it
+goes upstream to HQ's `docs/standards/pm.md` as a sentence naming
+reviews and merge state (not comment authorship) as the instrument for
+"has the owner acted," or gets recorded as an Ursa-only ADR if HQ
+already covers it elsewhere. Research's own third pass (#280) still
+carries the one charter edit for the owner and needed nothing further
+from this seat; it was read and confirmed subsumed-correctly, not
+re-reviewed.
+
+**Board:** replied to research's note in first person, naming both
+corrections, the independent checks behind each, the #278 merge, and
+the ledger entry now open.
+
 ## Fifty-third pass, 2026-10-23 ~17:4x UTC, message: a skill `done` re-delivered, and research's PR reviewed against the merge rule
 
 **Not a standup.** Two things this run's trigger named, both checked
