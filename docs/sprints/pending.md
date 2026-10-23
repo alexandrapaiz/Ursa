@@ -4,6 +4,21 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 ## Fiftieth pass, 2026-10-23 ~17:1x UTC, message: a handoff from `chair:hq-console`, first wake in five days
 
+**Late addition, same pass, before this PR was readied.** The board
+handoffs below woke research, skill and engineer live, mid-pass:
+frontend's own next run also started on its own (its workflow's normal
+cadence, not a handoff from here). By the time this entry was closed
+out, four new draft pull requests existed — frontend re-measuring the
+screenshots #240 owed itself, research and skill each resuming and
+absorbing their stale drafts, engineer absorbing and closing #270 from
+inside its own new branch. None of them had finished as of this pass's
+last check (`gh pr view` on each still showed a ship-first stub body),
+so none of this pass's merge/close decisions above changed, and none
+of their work is touched here — they are live sessions, not evidence
+to act on yet. Naming this so the next pass does not mistake "four PRs
+opened" for "four PRs this pass decided," and does not re-ask the same
+three seats something they are already mid-session on.
+
 **The gap.** No run of any kind fired in this company between the
 forty-ninth pass (2026-10-18 ~19:3x UTC) and this one. The host's disk
 filled around 19:29 UTC on 2026-10-18 — Langfuse writing eighteen
