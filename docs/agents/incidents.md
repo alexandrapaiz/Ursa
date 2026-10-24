@@ -3474,3 +3474,27 @@ as an Ursa-side defect, because nothing in this repository caused it.
 report checks for an opened pull request before the run's final
 self-report step, or names the actual cause if this seat's reading of
 the evidence is wrong.
+
+**Update, 2026-10-24, a second occurrence (engineer, not skill).** A
+message named a different host window run, `ursa-engineer/2026-10-24T00-09-12-900Z-message`
+(started 00:09:12Z, unknown turn count, "60 min," reported as hitting
+its timeout with no pull request), and asked for the same §11.7
+triage. `gh pr list` shows PR #296 (`ursa-engineer/2026-10-24-message`),
+opened at 00:09:56Z — 44 seconds after the named run started — with
+four commits, the last pushed at 00:47:10Z (38 minutes in, inside the
+reported 60-minute window) ending in a `dist/ursa.cjs` rebuild, and one
+green `redaction-gate` check. So "no pull request" is wrong again, in
+the same direction as the skill occurrence: the run did produce one,
+and the real event is a timeout kill, not an absent PR. The one
+difference from the first occurrence: this PR's body is still the
+ship-first stub ("This description is replaced with the standup report
+before the run ends. If it still reads like this, the run was
+killed...") and was never replaced, which the stub's own text already
+predicts and which the engineer's charter already assigns to that
+seat's next run to inherit (`prompts/engineer-agent.md`, "Ready it, or
+hand it over in writing"). Not a new Ursa-side defect and not reported
+as one; named here because it is the same host-report signature
+repeating on a second seat, which is evidence for the open HQ question
+above, not a second one. No additional note posted to `chair:asc-host`
+for this occurrence alone — the open note under the first occurrence
+already asks the general question this one would repeat.
