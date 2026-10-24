@@ -111,3 +111,70 @@ chain tip, which absorbs #269, #288, #302 and #307 in one decision.
 **Instrument named beside every verdict above**, per this file's own
 rule, because a conflict verdict a seat cannot re-measure is a verdict
 that costs a run (Ursa incidents 17 and 18).
+
+## 2026-10-24 ~11:5x UTC — twenty-fourth window: the queue grew by nine in five hours and the order above still holds
+
+**Re-measured, not inherited.** The section above was written at 06:57
+with fourteen open. There are now **twenty-three**, and four of the
+identifiers it sequenced (314, 315, 319, and the one it called row 307's
+partner) have left the queue, so its list is read for its *reasoning*
+rather than copied.
+
+Instrument, named per this file's rule, on a clone that ran §0's
+bootstrap in full — unshallowed **and** widened, because a single-branch
+refspec reports every branch as deleted (runner-facts §11, §13):
+
+```bash
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet && git fetch origin --quiet
+git merge-tree --write-tree origin/main refs/prs/<n> >/dev/null 2>&1   # exit 0 = clean
+git rev-list --count refs/prs/<n>..origin/main                         # how far behind
+```
+
+| | |
+|---|---|
+| open pull requests | **23** (was 14 at 06:57) |
+| conflicting with `main` | **5** — 290, 305, 316, 320, and draft 331 |
+| clean | 18 |
+| drafts | **3**, all other seats': 329, 331, 333 |
+| this seat's drafts | **zero**, which is the point of this window |
+
+**This seat's chain is unchanged and is one decision.** 269 → 288 → 302
+→ 307 → **318**, each contained in the next, all five **readied**:
+
+```bash
+git merge-base --is-ancestor refs/prs/307 refs/prs/318   # exit 0 = contained
+```
+
+318 merges clean and is 5 commits behind `main`. Merging 318 alone lands
+all five; merging them in order also works, because each is an ancestor
+of the next. The four older ones are deliberately **left standing**
+rather than closed, under the fifth case in the charter's own-open-PRs
+rule: they are readied artifacts sitting in a gate, and a descendant
+costs the queue nothing once the older one merges.
+
+**The two preconditions from 06:57 both still apply and neither has
+been met.** `bash tools/ledger/install-driver.sh` is still per-clone and
+still run by nothing, and **#305**, which wires `docs/agents/incidents.md`
+to a `## `-keyed driver, is **still conflicting** and still unrebased —
+12 behind. Until it lands, every pair of this org's windows that appends
+to `docs/agents/incidents.md` collides by construction. That is the
+single highest-leverage merge in the queue and it is blocked on its
+author rebasing, not on a decision.
+
+**Order worth handing the owner, newest measurement:**
+
+1. **#305 first**, after its author rebases — it unblocks the register
+   collisions for every later merge.
+2. The clean, unconflicted PM and research rows, which are the bulk:
+   313, 317, 321, 322, 323, 325, 326, 327, 328, 330, 332.
+3. **#318**, which absorbs 269, 288, 302 and 307 in one decision.
+4. 290, 316, 320 after their authors rebase. Draft 331 is not a
+   decision yet and conflicts; its own seat's next window owns it.
+
+**One number for the drag, because it belongs beside the order.** This
+seat's work feed reports `shipped: 0` across three days against five
+pull requests in review, and the charter copy on `main` is **654 lines
+behind** the copy this window actually ran on — read from `refs/prs/318`
+per §0, because the handed checkout does not carry this seat's own
+rules. Every rule in this window's diff that compounds across
+forty-one seats compounds nothing while it sits here.
