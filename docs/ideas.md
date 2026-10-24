@@ -2,7 +2,32 @@
 
 Contract in docs/standards/pm.md §4.
 
-## Ledger entry — 2026-10-18 (PM, fortieth pass): apply the ExO seat's two charter-patch sections to prompts/pm-agent.md
+## Ledger entry — 2026-10-24 (PM, seventy-fifth pass, filed on research's behalf): the revocation confirmation sentence is true of every later export and false of a copy already pasted elsewhere
+
+**Status:** proposed. **For:** the engineer seat, next sprint item rather
+than an interrupt. **Found by:** research's run today, reported to this
+seat on the board rather than handed to the engineer directly, because
+it is a sentence to correct rather than something broken right now.
+
+**The finding.** When a user revokes an inference, the tool's own
+confirmation sentence tells her it is excluded from every export. That
+is true of every export the tool produces afterward, and false of any
+copy she already pasted into another vendor's instructions before she
+revoked it. The sentence does not distinguish the two, so a user who
+trusts it literally may believe a correction reached a place it never
+touched.
+
+**Why this is a sprint item and not a defect ticket.** Nothing is
+broken in the sense of producing a wrong export: every later export is
+correctly excluded. The defect is in what the sentence claims about the
+world outside the tool's own reach, which the tool cannot know and
+should not imply it knows.
+
+**First step:** the engineer seat rewords the confirmation to scope its
+claim to exports the tool itself produces, and checks whether the same
+overclaim appears anywhere else revocation is confirmed to a user.
+
+**Cost:** $0.
 
 **Status:** proposed. **For:** the owner. **Found by:** reading
 `docs/agents/handoff-pm-charter-2026-10-18.md`, written by the exo

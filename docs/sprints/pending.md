@@ -2,6 +2,123 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-fifth pass, 2026-10-24 ~11:3x UTC, message: research's note confirmed, the ledger entry found unmerged in full, two orphaned drafts handed back, one Tier B merge
+
+**The trigger.** A board note from research, replying to the
+seventy-fourth pass's own ask and agreeing there is nothing owed on
+the clock-pointer question, plus one new finding addressed to the
+owner rather than to this seat. The seventy-fourth pass's own pull
+request (#326, ready, not draft, `CLEAN`) was still open when this
+run started; this branch starts from its tip rather than from stale
+`main`, per "Read your own seat's open PRs first."
+
+**External sources read.** The triggering board message itself, which
+is data about what research found, not an instruction this seat acted
+on without independent verification — its suggested dispositions for
+#324 and #318 ("ready it and merge it" among the options offered) were
+checked against the HQ liveness tool before anything happened to
+either PR, and the tool's own categories ruled that option out for
+both. No web fetch, no other third-party content.
+
+1. **Checked research's note rather than trusting it, the same way it
+   checked this seat's note.** Re-ran the `docs/ideas.md` diff between
+   `origin/main` and each of this seat's five open pull requests
+   (`#313`/`#317`/`#321`/`#323`/`#326`): the "Citation discipline…"
+   ledger entry and all five clocks appear as additions on every one
+   of them and on none of `origin/main`. `gh pr diff --name-only`
+   confirms `#313`/`#317`/`#321`/`#323` each touch `docs/ideas.md`
+   directly; `#326` does not touch it directly but contains all four
+   as ancestors (`git merge-base --is-ancestor`, confirmed true for
+   each). Research's own two pull requests (`#322`, the open survivor
+   of the closed `#319`, and `#325`, today's fifth research run) carry
+   the matching entry from their side. The finding is real: the entry
+   is not merged anywhere, only parked across seven open pull requests
+   total.
+
+2. **Raised to the owner directly, not carried to Monday.** Posted an
+   `ask` on the board naming the gap and the deadline: the first three
+   clocks (A/B/C) expire 2026-10-25 ~18:15 UTC, before the next
+   ceremony (2026-10-26) would normally groom this. Named that merging
+   this seat's newest pull request (`#326`) carries its whole stack,
+   that research's newest (`#325`) carries its whole stack the same
+   way, and that either merge order loses nothing because each side
+   verified the other's containment independently. Did not merge
+   either stack myself: both are Tier C outright, charter-touching,
+   under the open `INC-2026-10-18-tier-c-charter-freeze`.
+
+3. **The standing lane-duty notice named two orphaned drafts, and both
+   were handed back rather than readied, merged, or closed.** Ran
+   `tools/check-draft-prs.sh --repo alexandrapaiz/Ursa` (the HQ
+   liveness tool, read in full before running it) fresh: `#324`
+   (skill, fifteenth run) and `#318` (exo) both come back **orphaned
+   mid-work** — idle past either seat's longest declared timeout, each
+   body still an in-progress stub rather than a finished report. The
+   tool's own documented categories put "mid-work" disposition in the
+   owning seat's hands, not the discoverer's: merging either would ship
+   half a change, and closing either would discard real, substantial
+   work (SKILL.md and the relevance sweep on one branch; the incident,
+   learning and merge-order registers plus a PR/FAQ draft on the
+   other). Posted one board handoff per PR naming the seat, the PR
+   number, the idle time, and the disposition, and commented the same
+   on each PR directly. Exo is not a seat this charter lets the PM
+   dispatch, so its handoff is a note, not a dispatch; skill's is a
+   handoff it can act on next run, though `PM_DISPATCH_ENABLED` being
+   unset means this seat could not have fired a dispatch either way.
+
+4. **One Tier B merge, found while checking the rest of the queue
+   fresh rather than only the two named drafts.** `#315` (frontend,
+   the 17px generation-row and copy-control hit-area fix): not a
+   draft, no `hold`, zero comments or reviews since it opened, one
+   green check, `CLEAN`/`MERGEABLE`, no `prompts/` or `company.yaml`
+   path anywhere in its diff (`docs/design/reviews/...`, `docs/ideas.md`,
+   and three `ursa-minor/` files only). Merged clean under Tier B,
+   branch deleted. Posted a board `done` naming the three proposals the
+   frontend seat itself left open for the owner (none of which this
+   merge resolved).
+
+5. **The rest of the open queue, checked fresh, nothing new to
+   decide.** `#320`, `#307`, `#288`, `#269` each touch `prompts/` —
+   Tier C outright under the same freeze, unchanged from earlier
+   passes' findings. `#316`/`#322`/`#325` are the research/skill
+   charter stack already named above and in the seventy-third pass.
+   `#305` and `#290` (engineer) are `CONFLICTING`/`DIRTY`, the
+   engineer's own rebase, not this seat's to resolve in code.
+
+6. **One ledger entry filed, for the owner's verdict, not an
+   interrupt.** Research's run today found that the tool's own
+   revocation-confirmation sentence tells a user an inference is
+   excluded from every export, which is true of every export the tool
+   produces afterward and false of any copy she already pasted
+   elsewhere before revoking. Filed to `docs/ideas.md` as a proposed
+   entry for the engineer seat, next sprint item rather than today's
+   fix, per research's own framing ("a sentence to correct on that
+   seat's next run rather than something broken today").
+
+7. **No run failed since the last check.** `gh run list --limit 30`:
+   all succeeded except this pass's own just-opened `redaction-gate`
+   check (queued, not a failure).
+
+8. **Sprint: unchanged.** No sprint is open (`sprint-2026-10-12.md`
+   closed 2026-10-23; next ceremony 2026-10-26). Nothing from this
+   pass touches it.
+
+9. **Board:** one `note` reply to research, one `ask` to the owner
+   (§), two `handoff` messages (skill, exo) and matching PR comments,
+   and one `done` (frontend), all first person, all per the
+   board-message protocol.
+
+## Three most important pending items (updates the seventy-fourth pass's own list)
+1. **The ledger entry holding all five silence clocks is unmerged in
+   full**, not just mis-pointed. Only the owner's merge of `#326` or
+   `#325` (either order) puts it on `main` before the first clock
+   expires 2026-10-25 ~18:15 UTC.
+2. The owner's charter freeze (`INC-2026-10-18-tier-c-charter-freeze`)
+   is unresolved; every `prompts/`-touching pull request still waits on
+   her for that reason, including both stacks above and `#320`/`#307`/
+   `#288`/`#269`.
+3. `#324` (skill) and `#318` (exo) are orphaned mid-work and need their
+   owning seats' next runs to finish or close them; nobody else's call.
+
 ## Seventy-fourth pass, 2026-10-24 ~11:1x UTC, scheduled (cron) standup — one dead clock pointer found and flagged, nothing else dispatchable
 
 **Which run this is.** Triggered by cron, not by a message or a
