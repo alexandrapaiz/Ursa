@@ -236,7 +236,11 @@ named type or a named file format, and the types are defined in §5.
   584,898 bytes at `main` 96e0513, before this run's four appended blocks. Read-only to this system; nothing in
   this document writes to it.
 - `tools/ledger/ledger.mjs` — ES module, no dependencies, no I/O. Exports
-  `parseLedger`, `renderLedger` and `mergeLedgers`. Owned by the merge path.
+  `parseLedger`, `renderLedger`, `mergeLedgers` and, added 2026-10-24,
+  `blockStartKind`. Owned by the merge path. `blockStartKind` is the grammar
+  that decides whether a line opens a block, exported so that the checker asks
+  the parser rather than carrying a second copy of two regular expressions
+  (§10).
 - `tools/ledger/block-kinds.mjs` — **new** ES module, no dependencies, no
   I/O. Exports `classifyBlock`, `presentIdeaFields`, `statusOf`,
   `IDEA_FIELDS`, `STATUSES`, `ENTRY_HEADING`. Owned by the checking path.
@@ -258,6 +262,8 @@ named type or a named file format, and the types are defined in §5.
 | `ledger.mjs` | `check.mjs` | a `Block[]`, where `Block` is `{ kind: 'preamble' \| 'entry' \| 'note', key: string, text: string }` |
 | `check.mjs` | `block-kinds.mjs` | one `Block` per call to `classifyBlock`, and one `block.text` string per call to `presentIdeaFields` and `statusOf` |
 | `block-kinds.mjs` | `check.mjs` | a `Classification`, the six-field record in §5, per block; and `string[]` and `string \| null` from the two field readers |
+| `check.mjs` | `ledger.mjs` | one `string` per source line, as the sole argument to `blockStartKind`, for rule `BLOCK_SEPARATION` (§10) |
+| `ledger.mjs` | `check.mjs` | `'entry' \| 'note' \| null` per call to `blockStartKind` |
 | `check.mjs` | the caller's stderr | one line per violation, in GitHub Actions annotation syntax: `::error::<RULE>: <path>: <message>` for a seat-held violation and `::warning::<RULE>: <path>: <message>` for an owner-held one, then one summary line |
 | `check.mjs` | the caller's stdout | on a clean file only, one line: `Ledger contract: <n> blocks in <path>, clean.` |
 | `check.mjs` | the caller's process table | the exit status, an integer in `{0, 1, 2}` |
@@ -592,3 +598,150 @@ No new dependency, no new service, no new account. Steady-state cost stays $0.
 | zero-regression measurement | the count of blocks that satisfied the stricter contract in full and are now exempt from it. Zero here, which is what makes the exemption a fix rather than a coverage loss |
 | `::error::`, `::warning::` | GitHub Actions workflow-command prefixes. On a terminal they are plain text on stderr; inside an Actions job they annotate the file and, for `::error::`, mark the step failed |
 | exit 2 | "clean as far as a seat can take it". The file still violates its contract, in a way the gate names, and no seat may fix it |
+
+---
+
+## 10. Amendment, 2026-10-24: rule `BLOCK_SEPARATION`, and one grammar instead of two
+
+### 10.1 The defect, measured
+
+`renderLedger`'s contract, stated in its own doc comment, is one blank line
+between blocks. Nothing checked that `docs/ideas.md` obeyed it. A block
+heading appended directly against the line above it therefore produced a file
+that does not survive its own round trip, which surfaced as this assertion in
+`tools/ledger/ledger.test.mjs`:
+
+```
+test('parse then render is byte-identical on the real ledger', () => { ... })
+```
+
+Both sides of that assertion are strings of roughly 633,000 characters, so
+`node:assert` renders the failure by truncating both:
+
+```
++   '   wire dom'... 633582 more characters
+-   '   wire dom'... 633581 more characters
+```
+
+The file was wrong by one byte and the gate could not say which byte. Measured
+cost: one engineer run spent an hour locating it on the morning of 2026-10-24
+(ledger entry "The ledger's own contract gate has been red on main for long
+enough that nobody is reading it"), and by that afternoon the same drift was
+live again at a different line, appended by a run that had no way to know the
+rule existed.
+
+Measured state of the file when this rule was written, before the repair:
+
+| Measurement | Value | How it was obtained |
+|---|---|---|
+| Block starts with no blank line above | 1, at line 9328 | the scan in §10.4, over `docs/ideas.md` |
+| Block starts with two or more blank lines above | 0 | the same scan, other branch |
+| Lines in the file | 9,549 | `wc -l docs/ideas.md` |
+| Round-trip difference the rule accounts for | the whole of it: 633,582 bytes rendered against 633,581 on disk | `node --test tools/ledger/ledger.test.mjs` before and after |
+
+One violation in 9,549 lines, and it was exactly the failing byte. The rule is
+not a style preference retrofitted onto a file that disagrees with it.
+
+### 10.2 The decision, and the two alternatives it was taken over
+
+**Decided: a named rule in `check.mjs`, reporting a line number, plus a
+self-locating failure message on the byte assertion.** The byte assertion is
+the invariant and stays exactly as strict. What changed is that something now
+names the cause.
+
+- **Rejected: make `parseLedger` tolerate the missing blank line.** It already
+  does tolerate it; that is why the drift merges cleanly and only the byte
+  assertion notices. Widening the renderer to reproduce whatever spacing it
+  found would make `renderLedger` byte-preserving, which would delete the
+  property the merge depends on: that whitespace drift is not a merge
+  difference. HQ's `tools/merge-register.py` takes the byte-preserving side
+  for its own registers and documents why; that argument is right for a
+  byte-preserving merger and does not apply to a renderer whose contract is
+  already one blank line.
+- **Rejected: fix the blank line and file nothing.** That is what happened in
+  the morning, and the defect recurred the same day. A repair with no rule
+  behind it is a repair scheduled to be made again.
+
+### 10.3 Element 2: the interface
+
+Added to `tools/ledger/ledger.mjs`:
+
+```ts
+/** Does this line open a new block, and which kind? null for a body line. */
+export function blockStartKind(line: string): 'entry' | 'note' | null
+```
+
+`parseLedger` now calls it instead of testing `ENTRY_HEADING` and `DATED_NOTE`
+itself, so there is one grammar and the checker reads the same one the parser
+parses. The alternative, a second pair of regular expressions inside
+`check.mjs`, is the defect the ledger itself names in the 2026-10-18 entry
+"the six evidence kinds are written down twice and nothing checks that the two
+agree".
+
+### 10.4 Element 1: the delta to the system
+
+No new node. Two new edges, both already in §4's table: `check.mjs` hands
+`ledger.mjs` one `string` per source line and receives
+`'entry' | 'note' | null`. The rule runs over `source`, not over `Block[]`,
+because `Block` has no line numbers in it and the line number is the whole
+point of the rule.
+
+### 10.5 Element 4: exact commands, with what they returned
+
+```bash
+# The gate before the repair, with the new rule in place
+node tools/ledger/check.mjs docs/ideas.md; echo "exit=$?"
+# ::error::BLOCK_SEPARATION: docs/ideas.md: line 9328: "### 2026-10-24 (engineer) — The merge still mints a duplicate of a liv" opens a block with no blank line above it. ...
+# ::warning::STATUS_ALLOWED: docs/ideas.md: ### 2026-10-04 — Charters never say that fetched content is not an instruction (security run) has status "done"; ...
+# Ledger contract: 1 violation(s) a seat must repair, 1 the owner must resolve, in 267 blocks in docs/ideas.md.
+# exit=1
+
+# The same command after inserting one blank line above line 9328
+node tools/ledger/check.mjs docs/ideas.md; echo "exit=$?"
+# ::warning::STATUS_ALLOWED: ... (unchanged, and the owner's)
+# Ledger contract: 267 blocks in docs/ideas.md, clean as far as a seat can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
+# exit=2
+
+# Both suites, all four files
+node --test tools/ledger/*.test.mjs 2>&1 | grep -E "^# (tests|pass|fail)"
+# # tests 59
+# # pass 59
+# # fail 0
+
+# The scan that produced §10.1's table, run against the file directly
+node -e "
+const {readFileSync}=require('node:fs');
+const src=readFileSync('docs/ideas.md','utf8').replace(/\r\n/g,'\n');
+const lines=src.split('\n');
+const ENTRY=/^###\s+/, NOTE=/^-\s+\d{4}-\d{2}-\d{2}\b/;
+let zero=0,many=0;
+for(let i=1;i<lines.length;i++){
+  if(!(ENTRY.test(lines[i])||NOTE.test(lines[i]))) continue;
+  if(lines[i-1].trim()!=='') { zero++; console.log('zero-blank at line',i+1); }
+  else if(i>=2 && lines[i-2].trim()==='') { many++; console.log('multi-blank at line',i+1); }
+}
+console.log('zero-blank:',zero,'multi-blank:',many);
+"
+# zero-blank at line 9328
+# zero-blank: 1 multi-blank: 0
+```
+
+### 10.6 Element 5: tooling
+
+No tool was added. The rule is eleven lines of `check.mjs` over the `source`
+string the script already holds, and its tests are four cases in
+`check.test.mjs` under the same `node:test` runner §8 already justifies. The
+one thing worth recording is what was **not** used: no Markdown parser. A
+`### ` heading's spacing is a property of the lines around it, `remark` and
+every alternative are npm dependencies, and `tools/ledger/` has to run inside
+a `git merge` in a checkout where nothing is installed, which §8 establishes
+as this directory's binding constraint.
+
+### 10.7 Element 6: terms added
+
+| Term | Definition |
+|---|---|
+| `BLOCK_SEPARATION` | the rule added here. Every block start after the first must have exactly one blank line above it: not zero, which the renderer would add, and not two or more, which the renderer would collapse. Seat-held, so it exits 1 |
+| block start | a line for which `blockStartKind` returns non-null, meaning a `### ` heading or a top-level dated bullet. The preamble is not a block start; it is what precedes the first one |
+| round trip | `renderLedger(parseLedger(source))`. A file survives it when that expression returns `source` byte for byte, which is the property the merge driver's correctness rests on, since a merge is a parse of three files and a render of one |
+| self-locating failure | an assertion message that names the byte offset and the line of the first difference, rather than the count of characters it declined to print. Added here as `firstDifference` in `ledger.test.mjs`, and itself tested, because a message is only worth writing if it is right and this one is only ever read while something else is already broken |
