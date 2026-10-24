@@ -24,12 +24,6 @@ interface OpenedRecord {
   integrity: Integrity;
 }
 
-const FILL: Record<string, string> = {
-  survived_verbatim: "rgba(168, 199, 250, 0.55)",
-  survived_mutated: "rgba(168, 199, 250, 0.28)",
-  no_generation_provenance: "rgba(232, 237, 247, 0.12)",
-};
-
 /**
  * Read a published site: the set first, then one record.
  *
@@ -398,8 +392,8 @@ function SiteSet({
                     .map((x) => (
                       <span
                         key={x.cls}
-                        className="block h-full"
-                        style={{ width: `${x.pct}%`, backgroundColor: FILL[x.cls] }}
+                        className={`rec-seg rec-seg-${x.cls}`}
+                        style={{ width: `${x.pct}%` }}
                       />
                     ))}
                 </span>

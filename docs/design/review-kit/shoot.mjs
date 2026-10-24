@@ -30,6 +30,19 @@ const BASE = arg('base', 'http://127.0.0.1:4488')
 const ONLY = arg('only', null)
 const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page-does-not-exist').split(',')
 const LIVE = process.argv.includes('--live')
+// How long to let the page settle after `networkidle` before the shutter.
+// 400ms is right for a static page. A surface that fetches its own data
+// after hydration needs longer, and the dashboard in overlay/ is one: at
+// 400ms it photographs its own loading state. The number is reported in
+// measurements.txt, because a frame is only comparable with another frame
+// shot at the same settle.
+const WAIT = Number(arg('wait', 400))
+// A selector that must be present before the shutter. `--wait` alone is a
+// race on any page that fetches after hydration: the dashboard in
+// overlay/ photographed its own loading state at 400ms, and then again at
+// 1500ms on one viewport of three while the other two were fine. A
+// timeout tuned until it usually works is not a measurement.
+const UNTIL = arg('until', null)
 
 mkdirSync(OUT, { recursive: true })
 const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '-'))
@@ -44,7 +57,8 @@ for (const [vname, w, h] of VIEWPORTS) {
   for (const path of PAGES) {
     const name = `${slug(path)}-${vname}`
     const status = (await page.goto(BASE + path, { waitUntil: 'networkidle' }))?.status()
-    await page.waitForTimeout(400)
+    if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+    await page.waitForTimeout(WAIT)
     // `animations: 'disabled'` is the other half of the freeze: lib/freeze.mjs
     // pins the two canvases, which are driven by requestAnimationFrame, and
     // this rewinds the declarative animations, which are not. The scroll cue
@@ -80,8 +94,9 @@ const line = (r) => `${r.name.padEnd(32)} ${String(r.status).padStart(3)}  ${Str
 const header = LIVE
   ? '# --live: the sky is animating in these frames. Do not pixel-diff them.'
   : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.`
+const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''} before each shutter.`
 const report = rows.map(line).join('\n')
-writeFileSync(`${OUT}/measurements.txt`, `${header}\n${report}\n`)
+writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${report}\n`)
 console.log(report)
 const bad = rows.filter((r) => r.scrollWidth > r.clientWidth)
 console.log(bad.length ? `\n${bad.length} frame(s) overflow` : '\nno frame overflows its viewport')

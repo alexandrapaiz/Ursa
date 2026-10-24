@@ -777,13 +777,92 @@ html {
   );
 }
 
-/* The share bar. 1px gaps in --night rather than margins, so the
-   segments read as one measure divided and the bar still totals the
-   container's width exactly. */
+/* ---------- the share bar ----------
+
+   1px gaps rather than margins, so the segments read as one measure
+   divided and the bar still totals the container's width exactly.
+
+   WHAT WAS WRONG WITH IT UNTIL 2026-10-24h. The three segments were
+   painted in the span-highlight fills, rgba(168,199,250,0.55), the same
+   at 0.28, and rgba(232,237,247,0.12). Sampled out of a rendered frame
+   at 1440 (`docs/design/reviews/2026-10-24h/data/fills-before.txt`),
+   those are 3.99:1, 1.78:1 and 1.25:1 against the night, and 2.24:1 and
+   1.42:1 against each other.
+
+   The fills are not wrong where they came from. Behind a span of the
+   document they sit under words that carry 12.8:1 of their own, so the
+   fill only has to say which region a word belongs to and is
+   deliberately below any contrast floor. **A 6px bar has no words in
+   it,** and neither does the 0.5rem swatch that keys the legend to it,
+   so a fill that is only a hint there is the whole mark here. The
+   segment carrying no_generation_provenance — the class CLAUDE.md §1
+   calls the most valuable category in the artifact, 34.7% of the
+   published fixture — was the one at 1.25:1.
+
+   This is the same defect the dashboard in ursa-major/overlay found in
+   its own first draft on 2026-10-24g, from the same cause: it had
+   copied these fills. That page settled a vocabulary for it, and this
+   is that vocabulary brought back to the surface it was copied from,
+   rather than a second answer to one question.
+
+     kept as written  --polar solid, 11.99:1
+     kept and edited  --polar solid with a 2px --night foot. Separated
+                      from the one above by shape rather than lightness,
+                      which is `.sp-survived_mutated`'s own device: the
+                      person's hand laid on the model's sentence.
+     yours            --star at 45%, 4.73:1, and 3.95:1 against the
+                      track.
+
+   One pair stays under 3:1 deliberately: "yours" against "kept as
+   written" is 2.53:1, told apart by hue rather than by lightness. Four
+   fills cannot be separated on one axis in a palette with two lights,
+   because at equal lightness --polar and --star land within 1.25:1 of
+   each other.
+
+   THE TRACK. --line at 1.20:1, and an absence drawn as an absence. On
+   the published set view the three shares divide the whole finished
+   work rather than the classified part of it, so a record with
+   unclassified characters leaves the track showing, and that is exactly
+   what the paragraph under that list says in words. Nothing on either
+   page depends on reading the bar: every share is printed beside it. */
 .rec-bar {
   display: flex;
   height: 6px;
   gap: 1px;
+  background: var(--line);
+}
+
+.rec-seg {
+  display: block;
+  height: 100%;
+}
+
+.rec-seg-survived_verbatim {
+  background: var(--polar);
+}
+
+.rec-seg-survived_mutated {
+  background: var(--polar);
+  box-shadow: inset 0 -2px 0 var(--night);
+}
+
+.rec-seg-no_generation_provenance {
+  background: rgba(232, 237, 247, 0.45);
+}
+
+/* The legend's swatch, which has to carry the same three marks at
+   0.5rem square. The 2px foot would be half the swatch, so the edited
+   segment's device is scaled with it: a third of its height, which is
+   the same proportion the bar gives it. */
+.rec-swatch {
+  display: block;
+  height: 0.5rem;
+  width: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.rec-swatch.rec-seg-survived_mutated {
+  box-shadow: inset 0 -0.17rem 0 var(--night);
 }
 
 /* Quiet interactive text: the generation jump, the tabs, the loader's
