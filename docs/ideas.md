@@ -9086,3 +9086,334 @@ context file here.
   constructed one, before assuming the gap is stable.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (engineer, message-triggered run) — `SourcePointer.model` is a git identity on the only path that produces records, and the record never says so
+
+- Trigger: looking for where to put the apparatus field research asked
+  for (board note, 2026-10-24) meant reading what the field beside it
+  actually holds. `src/resolve-episode.ts:133` sets
+  `SourcePointer.model` from `episode.agentMarker`, and
+  `src/pairfinder.ts:566-577` builds that from a declared agent identity,
+  a `Co-Authored-By` trailer, or an author name. Resolving this
+  repository's own history yields four distinct values: three that happen
+  to name a model, because this org's commit convention puts one in the
+  trailer, and `claude[bot]`, which is a GitHub App and names no model at
+  all.
+- What: the field is not one kind of thing. On one corpus it is
+  sometimes a model id and sometimes a bot identity, and which one
+  depends on whether a commit came from a seat or from an Action. A lab
+  grouping records by `model` to compare vendors would read
+  `claude[bot]` as a vendor. This run documented the field in place
+  (`src/types.ts`) rather than changing it, because changing what
+  `model` means rewrites every record on disk and that is a product
+  decision rather than an engineering one. The options are: keep it and
+  rename it to `signedBy`, which is what it is; or split it into
+  `signedBy` plus a `modelId` that only the transcript path can fill,
+  and let the git path leave `modelId` absent the way it now leaves the
+  apparatus unobservable.
+- First step: the owner rules on whether `model` is renamed or split.
+  Either way the change is mechanical and the migration question is the
+  real one, since records on disk carry the old field name.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message-triggered run) — The apparatus claim has no invariant, and adding one means regenerating twenty-three fixtures
+
+- Trigger: this run added `apparatus` to every generation
+  (`src/apparatus.ts`, `docs/design/apparatus-provenance.md`) and
+  deliberately did not gate it. The natural bound is structural: an
+  `unobservable` apparatus must carry a `reason` and no apparatus facts,
+  and an `observed` one must carry no `reason`. Nothing checks that
+  today, so a hand-edited or third-party record can claim `observed`
+  while carrying a `reason`, which is a record lying about the
+  provenance of its own provenance.
+- What: the bound itself is about fifteen lines. The cost is everything
+  around it, and it is a cost this repository imposes on purpose:
+  `src/invariants.violations.test.ts:157` asserts that the set of codes
+  tripped across `fixtures/violations/` equals `BOUND_CODES` exactly, so
+  a new bound requires a new violation fixture that trips it. Adding one
+  changes `BOUND_COUNT` and the gate's `boundsDigest`, which means
+  regenerating all twenty-three fixtures through
+  `npm run fixtures:violations` and updating two tests that assert on the
+  count (`src/launch-parity.test.ts:518`, `src/ci/gate-wiring.test.ts:98`).
+  That is the right slice boundary rather than an obstacle: landing
+  twenty-three regenerated fixtures in the same diff as a schema change
+  makes neither reviewable.
+- First step: write the violation fixture case in
+  `tools/make-violation-fixtures.ts` (the `Case` list at its tail is the
+  whole surface), then add the bound and regenerate. One day.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message-triggered run) — The committed bundle survives a two-branch merge correctly, and nothing in the repo says why it is allowed to
+
+- Trigger: this run and open pull request 290 both regenerate
+  `ursa-major/dist/ursa.cjs`, whose bytes are the resolver's identity
+  (`resolverIdentity()` hashes it into `task.resolvedBy.digest`). Git
+  auto-merges that file with no conflict, which looked like silent
+  corruption of the one artifact whose bytes are a published claim, so
+  this run tested it: the auto-merged file hashes to `4919b0a7…`, which
+  matches neither side nor `main`, and a clean `npm run bundle` from the
+  merged sources produces `4919b0a7…` byte-for-byte. The merge is
+  correct. The reason is that esbuild emits each source module as its own
+  contiguous block, so two changes in different modules are
+  non-overlapping hunks.
+- What: it is correct by a property of esbuild's output layout that
+  nothing in this repository states, tests, or depends on deliberately,
+  and the failure mode if it ever stops holding is the worst available:
+  a committed resolver that no source tree generates, stamped into the
+  `resolvedBy.digest` of every record the Action writes, with no conflict
+  to warn anyone. The property holds only while two branches touch
+  different modules. Two branches editing the same function in
+  `src/resolve.ts` would produce overlapping hunks in the bundle, and
+  then the text merge is a guess.
+- First step: a test in `src/bundle-canonical.test.ts` that asserts the
+  committed bundle equals a rebuild — which already exists — plus a
+  pre-merge check the owner can run, or a `.gitattributes` entry marking
+  `ursa-major/dist/ursa.cjs` as requiring rebuild-on-merge rather than
+  text merge. The cheapest honest version is `merge=binary` on that path,
+  which turns the silent guess into a conflict the resolver's own build
+  step resolves.
+- Cost: $0
+- Status: proposed
+
+**Competitive scan, 2026-10-24 (engineer's craft scan).** arXiv's
+information-retrieval and computation-and-language listings, via the
+paper research surfaced (2610.00253) and its framing of stored-response
+reuse. **Worth stealing:** the paper's design of recording the harness
+configuration *alongside* each stored response rather than once per
+experiment, so a response can be re-analysed years later by someone who
+never saw the harness. That is the same move as this run's
+per-generation `apparatus` and it is the reason the field went on the
+generation rather than on the record: a record-level stamp would be
+wrong the moment one record mixes two ingest paths, which
+`src/resolve.ts` already permits since `conversations[]` and
+`generations[]` are both arrays. **What Ursa does better:** the paper
+records the harness as metadata a reader must interpret, with no
+vocabulary for "this collection method could not observe the harness."
+Ursa's `ApparatusObservability` makes that a value in the type, so an
+unanswerable question and an unanswered one are different bytes rather
+than the same blank field. That distinction is what lets a lab drop the
+blind records from a denominator instead of quietly averaging over them.
+### 2026-10-24 (engineer) — The merge still mints a duplicate of a live axiom, which is where the twin population comes from and it has not stopped growing
+
+- Trigger: a test this run wrote as a precondition and which passed first time, `is a real population: the old create path builds the pair with no revocation in sight` in `ursa-major/src/tuning/revocation.test.ts`. Two distillation passes emit one rule in different words, both declare `matchesExisting: null`, and the record ends with `ax-001` and `ax-002` both `active`, scoring 1.000 against each other, and `blockedByRevocation` empty. That test is about history, and it is green against today's code.
+- What: `findRevocationBlock` scores a candidate against tombstones only. A candidate that duplicates an axiom the user still holds is compared against nothing, exactly as before 2026-10-23, because the gate was built to protect revocations and a duplicate of a live axiom revokes nothing. So the pair the twin report names is still being minted, one pass at a time, and the report this run shipped is a cleanup for a tap that is still running. The cost is not only the revocation case. A duplicate inflates nothing in `evidenceCount` (each twin counts its own evidence separately), which means recurrence across records, the one confidence signal `tuning/types.ts` says is never a model's self-report, is split across two ids and reads lower than the evidence supports on both. The rule the user has demonstrated twice looks like two rules she demonstrated once.
+- The decision this needs, which is why it is a ledger entry and not a fix: a candidate scoring at or above a threshold against a live axiom is either merged into it (one id, evidence appended, `evidenceCount` recounted) or left alone and flagged. Merging is what `matchesExisting` was supposed to do and what the arithmetic wants. It is also the first place in this product where code would overwrite the model's judgment about identity in a direction that changes what the user sees, rather than withholding something, so the owner should decide whether a lexical score may do that silently.
+- First step: measurement before behaviour, and it is cheap because the function exists. A script under `ursa-major/tools/` that runs `revocationSimilarity` over every pair of live axioms in every tuning record in `ursa-major/fixtures/`, printing the pairs at or above `THETA_REVOKED` and the count. That number is how many duplicates this product has actually produced, and nobody has it. It also decides whether this is urgent or theoretical, which no argument in this entry can.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer) — The twin report cannot tell a pair she has already decided about from one she has never seen
+
+- Trigger: wiring `allRevocationTwins` into `ursa consent show` and then reading its output against what `releaseBlocked` does. A released statement becomes an axiom with `status: 'user-edited'`, live and exporting, and the gate deliberately lets it stay (`findRevocationBlock` passes a candidate whose closest live axiom is at least as close as the tombstone). So after a release, the tombstone it resembled and the statement she released are a twin pair by this report's own definition.
+- What: that pair is reported on every `ursa consent show`, forever. It is not a false positive, because the two statements really do say nearly the same thing and one really is still exporting. It is worse than a false positive: it is a true statement about a decision she already made, repeated indefinitely, which is how a consent surface teaches its user to skim. The mitigation shipped today is one line of wording, `You wrote or released this one yourself, so no distillation pass put it there`, and that is a label on the noise rather than the absence of it. The missing concept is adjudication. A pair she has looked at and kept is a different object from a pair she has never been shown, and nothing in `TuningRecord` can hold that difference.
+- Why not just suppress `user-edited` twins: because that throws away the case this report exists for. A `user-edited` axiom is also what she gets when she edits a statement by hand, and a hand-edited axiom that happens to restate something she later revoked is exactly a twin she has never been shown. Status is not adjudication and using it as a proxy would make the report wrong in the direction that matters.
+- First step: the smallest honest shape, which is a list and not a flag. An optional `acknowledgedTwins?: Array<{ revoked: string; twin: string; at: string }>` on `TuningRecord`, written only by a new `ursa consent keep-twin <project> --revoked ax-001 --twin ax-002`, read only by `allRevocationTwins` to omit that pair, with the pairs she has acknowledged still printed by `consent show` under a heading that says she decided this and when. Omitting it from the report is not the same as hiding it, and a consent surface that can hide a pair on her instruction has to be able to show her what she hid.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer) — Erasure takes one record id and nothing else, so wanting out entirely is a loop the user writes
+
+- Trigger: today's craft scan of Mem0's delete API, read against `runForgetCommand` in `ursa-major/src/consent.cli.ts` immediately after.
+- What: `ursa forget <project> --record <recordId>` is the only erasure verb this product has, and `--record` takes exactly one id. There is no scope. A user who wants every record from a project gone enumerates them, which means reading `.ursa/records/` herself and writing a shell loop, and a user who wants every inference in one domain gone cannot express that at all. `CLAUDE.md` load-bearing constraint 2 ends in the word `delete`, and the shape of the command makes the easy deletion the small one and the complete deletion the one that takes a loop and a correct list. The failure mode is not that the guarantee is false. It is that a user who asks for everything and gets 19 of 20 records has no way to tell, because nothing counts what she asked for against what went.
+- The thing worth copying, precisely: Mem0's delete endpoint takes filters rather than ids (`user_id`, `agent_id`, `app_id`, `run_id`, `metadata`), it refuses a call with no filter at all, and `*` is how a caller says "all of this category" out loud. Two properties in one design. Erasure is scoped rather than enumerated, and the scope of everything has to be spelled rather than reached by omitting an argument. Ursa already has the second half for the wrong reason: `forget` refuses a call with no `--record` because it has no other mode, not because a broad default was closed on purpose.
+- First step: `--scope`, one value, and a dry run. `ursa forget <project> --scope all --dry-run` prints the record ids it would erase, the inferences that would be deleted outright and the evidence entries that would be stripped, and exits 0 without writing. The same command without `--dry-run` does it and prints the same three counts as what happened. One flag, one value, and the count printed twice so she can compare, before any further scope value is designed.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers. **Mem0**, which the landscape has carried since
+2026-09-26 on its pricing and funding and never on its mechanics. Read
+on exactly this run's question, which is what another memory product
+does when one stored statement contradicts or duplicates another.
+
+**Worth stealing: erasure takes a scope, and the scope of everything is
+spelled out rather than reached by leaving an argument off.** Mem0's
+delete endpoint accepts no memory id at all. It takes filters
+(`user_id`, `agent_id`, `app_id`, `run_id`, `metadata`, `org_id`,
+`project_id`), `*` matches everything in a category, and wiping a
+project means setting all four primary filters to `*` deliberately. The
+docs also say plainly that the API now requires at least one filter and
+that omitting them used to delete everything, which is a prior unsafe
+default published in the API reference a caller actually reads rather
+than buried in a changelog. Ursa's `ursa forget` takes one `--record`
+and has no scope, so it is accidentally safe rather than deliberately
+so, and the complete deletion is the one that costs the user a shell
+loop. Filed as the third ledger entry above.
+
+**What Ursa does better: the duplicate is a defect here and the storage
+model there.** Mem0's documented core principle is additive, "New
+memories are added without overwriting or deleting existing memories",
+and its delete API has no duplicate detection of any kind, so a
+superseded memory and the one that supersedes it coexist by design and
+deleting either leaves the other. The twin pair this run spent the day
+on is Mem0's steady state. Ursa treats it as a failure of the revocation
+guarantee, names the pair, prints the command that ends it, and leaves
+the decision with the user. The qualification worth stating, because the
+previous scan's entry made the same point about LangMem and this seat
+should not keep awarding itself the comparison: Ursa only stopped
+producing the pair against tombstones. Against live axioms it still
+produces it, today, which is the first ledger entry above and is the
+honest limit on this paragraph.
+
+### 2026-10-24 (engineer, third run) — Whether the matcher's document-frequency cutoff should be a fraction of the corpus, which needs a wall-clock measurement nobody has taken
+
+- Trigger: finding 52 routed by Ursa's research seat, and this run's own
+  reproduction of it. `MAX_TOKEN_DF` in `ursa-major/src/match.ts` is the
+  absolute number 500, counted over generation segments, and the number
+  of generation segments grows every time anyone runs the tool. This run
+  built the two-corpus probe that proves the consequence: the sentence
+  `Row holds alpha beta gamma delta onwards.` scores 0.882 and is
+  labelled `survived_mutated` with a word diff against a corpus of 4
+  segments, and is a bare `no_generation_provenance` against a corpus of
+  501 segments holding the same vocabulary. Only the corpus size
+  changed.
+- What: this run shipped the half that is a field, so a span the matcher
+  declined to look at now carries `noCandidate: 'df_cutoff_suppressed'`
+  and the record counts them in `stats.blindSpans`. It deliberately did
+  not touch the constant, because the cutoff is not an accident: it
+  exists so that the fuzzy pass does not run full edit distance over
+  every pair of segments, and Ursa Major runs on the user's own device,
+  where that cost is the user's battery. The decision is between leaving
+  it absolute and reporting the blindness, making it relative (something
+  like `Math.max(500, Math.ceil(0.01 * corpusSegments))`, which holds the
+  blind fraction roughly constant and lets the per-span candidate count
+  grow), and a third option that keeps the constant and adds a fallback
+  pass running only on spans that seeded nothing, so the extra work is
+  proportional to the defect rather than to the corpus. The three are
+  laid out with their costs in §7 of `docs/design/df-cutoff-blindness.md`.
+- First step: the measurement, and it is the thing standing between here
+  and a decision. A script under `ursa-major/tools/` that calls
+  `resolve()` against synthetic corpora of 1,000 through 100,000
+  generation segments at each of the three options, reporting wall-clock
+  seconds, peak resident memory and the resulting `stats.blindSpans`.
+  Option 1 is correct while `blindSpans` is zero on real records, and
+  this is the table that says what the other two cost when it stops
+  being zero.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, third run) — The viewer draws a span the matcher never looked at exactly like one it looked at and could not place
+
+- Trigger: wiring `noCandidate` through `computeStats` and then reading
+  `ursa-major/src/viewer.ts:310` immediately after. The viewer's legend
+  has one line about doubt in it, `dashed underline = uncertain (N spans
+  need adjudication)`, driven by `R.stats.uncertainSpans`. Nothing reads
+  `noCandidate`, so the span the matcher never scored is rendered with
+  the same plain styling as the span it scored at 0.34 and the span whose
+  vocabulary genuinely appears in no generation.
+- What: the viewer is the surface where a person actually reads a record,
+  which makes it the place the new distinction either lands or does not.
+  The three bare `no_generation_provenance` reasons want different
+  treatment rather than the same one. `absent_from_corpus` is the honest
+  label and should look like a clean result. `scored_below_floor` is a
+  near miss and already has a candidate to show when it clears
+  `THETA_LOW`. `df_cutoff_suppressed` is not a result at all and should
+  be visually excluded from the class totals the reader's eye adds up,
+  because every one of those spans is a span the record is counting in
+  the category `CLAUDE.md` §1 calls most valuable without having earned
+  it. The failure this prevents is specific: a reader who opens the HTML
+  at a corpus size where `blindSpans` is nonzero and reads the
+  `no_generation_provenance` bar as a finding about the work.
+- First step: one legend line and one styling rule, conditioned on
+  `R.stats.blindSpans` the way the existing line is conditioned on
+  `R.stats.uncertainSpans`, plus a `title` attribute on the span itself
+  carrying its `tokenSuppression` numbers so hovering says six of seven
+  words were too common to search on. No new concept, no new data, and
+  it is the same shape as the line already there.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, third run) — The MCP server is the only delivery route whose revocation can ever be enforced, and nothing tells the user that
+
+- Trigger: writing §10.6 of `docs/design/consent-and-erasure.md` for the
+  paste channel, and noticing while doing it that
+  `ursa-major/src/mcp/server.ts:198` already serves `renderTuningBlock`
+  over a surface the model re-reads on every call. The paste channel
+  cannot enforce a revocation because its gateway is a text field inside
+  another vendor's product, which can neither emit a receipt nor be
+  enumerated. The MCP route has neither of those properties: the server
+  is Ursa's, it renders fresh each time it is asked, and a revoked axiom
+  is gone from the next render with nothing for the user to do.
+- What: so the product already ships both an unenforceable channel and
+  an enforceable one, and presents them as two export conveniences. The
+  user is never told that the choice between them is also a choice about
+  whether her revocations will work. This is not a new mechanism, it is
+  the honest naming of one that exists: `ursa tuning export` should say
+  what the block it just wrote cannot do, and point at the route that
+  can. The risk of saying nothing is the one `CLAUDE.md` constraint 2
+  names, since a user who believes revocation is global and chose the
+  paste route has been handed a true sentence at the one moment she
+  cannot check it, which is the dark pattern available here.
+- First step: two lines on the `tuning export` output, next to the
+  existing `Exported N axioms → <path>` line, saying that a pasted block
+  keeps working until replaced by hand and naming `ursa mcp` as the
+  route that does not need replacing. Then the real question for the
+  owner, which the lines do not settle: whether the MCP route should
+  become the documented default and the paste block the fallback, which
+  is a distribution decision, since the paste block is what works
+  without asking any vendor for anything and is therefore the reason the
+  product reaches anyone at all.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (third run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, next entry after the Mem0 read this seat filed earlier
+today. **Letta, formerly MemGPT**, read on exactly this run's question,
+which is what another memory product does when its own retrieval
+declines to look at something.
+
+**Worth stealing: the budget is drawn at every turn, not reported once
+at the end.** Letta's terminal client renders a context chart on an
+ongoing basis, splitting the model's context window into six named
+categories with their token counts: `System`, `Core Memory`, `Tools`,
+`Messages`, `Summary` and `Other`, the last of which carries the
+description `external memory, archival storage` and is fed by
+`num_tokens_external_memory_summary`
+(`src/cli/helpers/context-chart.ts` in `letta-ai/letta-code`). The
+property worth copying is not the chart. It is that the thing the user
+would otherwise have to ask about is on screen without being asked for,
+every turn, so the boundary between what is in play and what is in
+storage is never invisible. Ursa prints its equivalent once, at the end
+of `ursa run`, in `ursa-major/src/cli.ts`. This run took the smallest
+version of the lesson and added a line to that summary for the spans
+the matcher never scored, printed only when the count is not zero. The
+larger version is the second ledger entry above, which is the same
+thought aimed at the viewer.
+
+**What Ursa does better: the recall boundary is in the record and in
+readable source, rather than behind a service.** The question this run
+spent the day on, whether a search came back empty because nothing
+matched or because a limit was reached, cannot be answered about Letta
+from outside it. The two documentation pages read for this scan, the
+stateful-agents memory guide and the archival-memory guide, name
+`query`, `tags` and `page` and state that results are semantically
+relevant, and neither gives a result limit, a default page size, or any
+indication that a response will say how many matches it omitted. The
+source cannot settle it either: `letta-ai/letta`, at 25,241 stars, now
+holds ten files, all of them policy and documentation, with its README
+pointing at `letta-ai/letta-code` for current source and at an
+`archive` branch for the retired V1 API server, and the archival search
+implementation is in neither, because it runs server-side. That is a
+reasonable commercial choice and it is not a criticism of the product.
+It does mean the comparison is real: Ursa's equivalent constant is
+`MAX_TOKEN_DF = 500` on line 12 of a sixty-line file anyone can read,
+its consequence is now a typed field on the span it affected, and the
+count is on the record. The honest limit on this paragraph, since this
+seat should not keep awarding itself the comparison: until today Ursa's
+constant was equally invisible in practice, documented nowhere, named
+in no design note, and it took another seat reading the source to find
+it.
+
+**External sources read for this scan**, since none of them is a
+committed file of this repository and none of them instructed this run:
+`docs.letta.com/guides/agents/memory`,
+`docs.letta.com/guides/agents/archival-memory`,
+`docs.letta.com/api-reference/agents/passages/list`, the GitHub API
+listings and README of `letta-ai/letta`, and the repository listing and
+`src/cli/helpers/context-chart.ts` of `letta-ai/letta-code`.

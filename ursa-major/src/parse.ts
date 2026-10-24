@@ -3,6 +3,7 @@
 //   - parseClaudeSession: Claude Code session transcripts (~/.claude/projects/**.jsonl)
 //   - parsePasteConversation: hand-pasted transcripts (frontmatter + ## user / ## assistant)
 
+import { apparatusFromClaudeSession, declaredApparatus } from './apparatus'
 import type { ConversationMeta, RawGeneration, UserPrompt } from './types'
 
 export interface ParsedConversation {
@@ -45,6 +46,11 @@ export function parsePasteConversation(raw: string, id: string): ParsedConversat
           turnIndex: assistantOrdinal,
           kind: 'assistant_text',
           text,
+          // Declared, never observed: the frontmatter `model:` is a
+          // person's word for text they copied out of a web UI, and that
+          // UI's output cap was never in the paste. `source` is what they
+          // said the client was, carried so a reader sees it as hearsay.
+          apparatus: declaredApparatus(source),
         })
       }
     } else if (text) {
@@ -119,6 +125,16 @@ export function parseClaudeSession(
     lastAssistantUuid = o.uuid
     if (o.timestamp && !firstTs) firstTs = o.timestamp
 
+    // The apparatus facts this transcript line carries about its own
+    // call. They were being dropped on the floor until 2026-10-24: the
+    // parser read `msg.model` and ignored `msg.stop_reason`, `msg.usage`
+    // and the line's client `version`, which are the only direct
+    // evidence anywhere in this system of an output cap and of a
+    // generation cut off by one. One value per line rather than per
+    // tool_use, because the stop reason belongs to the call and a single
+    // assistant message can carry several Write/Edit blocks.
+    const apparatus = apparatusFromClaudeSession(msg, (o as any).version)
+
     const content = Array.isArray(msg.content) ? msg.content : []
     for (const c of content) {
       if (!c || c.type !== 'tool_use') continue
@@ -131,19 +147,19 @@ export function parseClaudeSession(
       if (c.name === 'Write' && keep(inp.content)) {
         generations.push({
           conversationId: id, model, turnIndex: assistantOrdinal,
-          kind: 'write', filePath, timestamp: o.timestamp, text: inp.content,
+          kind: 'write', filePath, timestamp: o.timestamp, text: inp.content, apparatus,
         })
       } else if (c.name === 'Edit' && keep(inp.new_string)) {
         generations.push({
           conversationId: id, model, turnIndex: assistantOrdinal,
-          kind: 'edit', filePath, timestamp: o.timestamp, text: inp.new_string,
+          kind: 'edit', filePath, timestamp: o.timestamp, text: inp.new_string, apparatus,
         })
       } else if (c.name === 'MultiEdit' && Array.isArray(inp.edits)) {
         for (const e of inp.edits) {
           if (keep(e?.new_string)) {
             generations.push({
               conversationId: id, model, turnIndex: assistantOrdinal,
-              kind: 'edit', filePath, timestamp: o.timestamp, text: e.new_string,
+              kind: 'edit', filePath, timestamp: o.timestamp, text: e.new_string, apparatus,
             })
           }
         }

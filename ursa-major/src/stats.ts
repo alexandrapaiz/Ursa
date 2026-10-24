@@ -35,6 +35,8 @@ export function computeStats(
   let finalChars = 0
   let uncertainSpans = 0
   let trivialSpans = 0
+  let blindSpans = 0
+  let suppressedTokenSpans = 0
   const byModelChars = new Map<string, number>()
   const byConvChars = new Map<string, number>()
 
@@ -51,6 +53,8 @@ export function computeStats(
       fileByClass[s.class] += chars
       if (s.uncertain) uncertainSpans++
       if (s.trivial) trivialSpans++
+      if (s.noCandidate === 'df_cutoff_suppressed') blindSpans++
+      if (s.tokenSuppression) suppressedTokenSpans++
       if (s.source) {
         byModelChars.set(s.source.model, (byModelChars.get(s.source.model) ?? 0) + chars)
         byConvChars.set(s.source.conversationId, (byConvChars.get(s.source.conversationId) ?? 0) + chars)
@@ -145,6 +149,8 @@ export function computeStats(
     byClass,
     uncertainSpans,
     trivialSpans,
+    blindSpans,
+    suppressedTokenSpans,
     byModel: Object.fromEntries(
       [...byModelChars.entries()].map(([m, chars]) => [
         m,
