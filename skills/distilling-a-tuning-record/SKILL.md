@@ -27,40 +27,40 @@ evidence:
     source: ursa-major/src/tuning/types.ts:10-12
   - ref: E3
     what: the evidence shape, a record id, one of six signal kinds, a ref, step ordinals, and an optional verbatim quote of the user's own words
-    source: ursa-major/src/tuning/types.ts:14-30
+    source: ursa-major/src/tuning/types.ts:17-33
   - ref: E4
     what: evidenceCount is code-owned and documented as independent evidence entries, with recurrence across records named as the confidence signal
-    source: ursa-major/src/tuning/types.ts:42-46
+    source: ursa-major/src/tuning/types.ts:45-49
   - ref: E5
     what: contradictions are surfaced and never averaged, and revoked axioms are kept as tombstones
-    source: ursa-major/src/tuning/types.ts:48,52-53
+    source: ursa-major/src/tuning/types.ts:51,55-56
   - ref: E6
     what: the distiller refuses a record with no signals block
     source: ursa-major/src/tuning/distill.ts:40-42
   - ref: E7
     what: the prompt's rules for the model, cite the evidence, prefer the general why, basis definitions, match an existing axiom rather than reword it, never resurrect a revoked one, emit both sides of a genuine conflict, three to twelve axioms
-    source: ursa-major/src/tuning/distill.ts:66-78
+    source: ursa-major/src/tuning/distill.ts:74-86
   - ref: E8
     what: the prompt's acceptance rule, accepted false means survived text is not endorsed and axioms come from the corrections, null means survival is weak evidence at most
-    source: ursa-major/src/tuning/distill.ts:79-85
+    source: ursa-major/src/tuning/distill.ts:87-93
   - ref: E9
     what: the prompt carries the user's verbatim prompts, read off conversations[].prompts
-    source: ursa-major/src/tuning/distill.ts:51-53,109
+    source: ursa-major/src/tuning/distill.ts:59-61,118
   - ref: E10
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
-    source: ursa-major/src/tuning/distill.ts:11-18,127-137
+    source: ursa-major/src/tuning/distill.ts:11-18,136-146
   - ref: E11
     what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
-    source: ursa-major/src/tuning/distill.ts:145-157,163
+    source: ursa-major/src/tuning/distill.ts:154-166,172
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
     source: ursa-major/src/tuning/merge.ts:45-62
   - ref: E13
     what: a matched revoked axiom gains nothing, and a user-edited statement is sovereign so only evidence accrues to it
-    source: ursa-major/src/tuning/merge.ts:45-54
+    source: ursa-major/src/tuning/merge.ts:57-66
   - ref: E14
     what: contradictions among axioms new in one pass are resolved through a map keyed by statement text, then wired symmetrically
-    source: ursa-major/src/tuning/merge.ts:36-37,75-89
+    source: ursa-major/src/tuning/merge.ts:39-40,95-109
   - ref: E15
     what: distill, merge and write happen in one invocation, and the only double-distill guard is a task-id lookup in sources
     source: ursa-major/src/tuning/cli.ts:32-41
@@ -96,7 +96,7 @@ evidence:
     source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:91-93
   - ref: E26
     what: records, the episode index, the distillation watermark and tuning.json all live in a per-project .ursa directory, nothing global and nothing commingled
-    source: ursa-major/src/store.ts:1-3,12-14,62-64, ursa-major/src/consent.ts:90-92
+    source: ursa-major/src/store.ts:1-3,12-14,62-64, ursa-major/src/consent.ts:96-98
   - ref: E27
     what: the per-project decision, and its rider that cross-project aggregation should be an explicit later command rather than an implicit default
     source: docs/design/product-plan.md:91-96
@@ -111,7 +111,7 @@ evidence:
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md:20-26 (O1 KR1.2)
   - ref: E31
     what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
-    source: ursa-major/src/bridge/index.ts:82-98,140-150
+    source: ursa-major/src/bridge/index.ts:82-98,147-157
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
