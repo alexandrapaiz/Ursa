@@ -19,9 +19,10 @@
 #             tools/registers/merge-driver.mjs wrapping HQ's vendored merger.
 #
 # Pointing either one at the other's file is not a near miss. Measured on
-# 2026-10-24: the ledger driver run over docs/agents/incidents.md keys 35
-# blocks on sub-headings like `### What happened`, seven of which repeat, and
-# merging two clean appends then produced a 373,591-byte file from inputs of
+# 2026-10-24: the ledger driver run over docs/agents/incidents.md parses it
+# into 36 blocks, 35 of them keyed on sub-headings like `### What happened`,
+# of which seven keys repeat, and
+# merging two clean appends then produced a 372,901-byte file from inputs of
 # 183,353 and 209,366, with 75 `## ` entries where both sides had at most 42.
 # That is the silent corruption both drivers' docstrings warn about, so the
 # register driver refuses any path registers.json does not declare.
