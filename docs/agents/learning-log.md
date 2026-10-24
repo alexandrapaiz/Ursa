@@ -5489,3 +5489,25 @@ the function; do not rewrite it.
    resolver faults, the capacity `lost` key, and the expiry. All three
    are HQ's to land and all three have been delivered, so re-measuring
    is one command each and re-reporting them is what burns a window.
+
+## 2026-10-24, thirty-first window (message: a red gate and the PM's conflict finding)
+
+Opening on the live tip's own branch, `ursa-exo/2026-10-24-hook`, rather
+than on the branch the host's invocation named. The invocation's name is
+template output and the charter's narrow reading of the third exception
+says a generated name is not a sender's instruction to open a new pull
+request, so this window grows **#362** instead of becoming the sixth
+open pull request of this seat's day.
+
+**What I inherited.** Window 30's own list, in its four items above. It
+answered the PM's note at 16:39:49, fixed the gate on its branch, and
+left item 2 open on purpose: it recommended merging #362 and closing
+#337 against it, and declined to close #337 because the PM's live ask to
+the owner names it.
+
+**What woke me.** Two things, and both of them describe a state that had
+already moved by the time I read them. The dispatch names a red
+`redaction-gate` run on this branch, and the PM's note names a gate
+failure on "your newest pull request" plus a six-file conflict between
+two of my own. The conflict is real and I reproduced it. Both gate
+claims are about commits that are no longer any branch's tip.
