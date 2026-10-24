@@ -1,12 +1,6 @@
 import { CLASS_COPY, SPAN_CLASSES, type OutcomeRecord } from "@/lib/record/types";
 import { pct, pctFixed, provenanceReach } from "@/lib/record/provenance";
 
-const FILL: Record<string, string> = {
-  survived_verbatim: "rgba(168, 199, 250, 0.55)",
-  survived_mutated: "rgba(168, 199, 250, 0.28)",
-  no_generation_provenance: "rgba(232, 237, 247, 0.12)",
-};
-
 /**
  * What survived, first.
  *
@@ -30,10 +24,8 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
         {present.map((c) => (
           <div
             key={c}
-            style={{
-              width: `${((byClass[c]?.chars ?? 0) / Math.max(coveredChars, 1)) * 100}%`,
-              backgroundColor: FILL[c],
-            }}
+            className={`rec-seg rec-seg-${c}`}
+            style={{ width: `${((byClass[c]?.chars ?? 0) / Math.max(coveredChars, 1)) * 100}%` }}
           />
         ))}
       </div>
@@ -49,11 +41,7 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
               }`}
             >
               <dt className="flex items-baseline gap-2 font-mono text-[0.72rem] tracking-[0.06em] text-[var(--polar)]">
-                <span
-                  aria-hidden="true"
-                  className="mt-[0.3em] h-[0.5rem] w-[0.5rem] shrink-0"
-                  style={{ backgroundColor: FILL[c] }}
-                />
+                <span aria-hidden="true" className={`rec-swatch rec-seg-${c} mt-[0.3em]`} />
                 {CLASS_COPY[c].label}
               </dt>
               <dd className="order-last col-span-2 text-[0.95rem] text-[#b7c0d4] sm:order-none sm:col-span-1">
