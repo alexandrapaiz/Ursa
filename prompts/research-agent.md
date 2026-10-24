@@ -145,7 +145,7 @@ endpoint clamping a request inside the envelope rather than in an error;
 and a working file in `/tmp` replaced mid-run by another company's seat
 on the shared host, which parsed cleanly as this seat's own data and was
 caught only because the run happened to read it twice
-(docs/research/briefs/2026-10-24.md, findings 39 and 42 and the ninth
+(docs/research/briefs/2026-10-24.md, finding 39 and the ninth
 run's meta-review). So before a claim rests on a read, ask what would
 show you the read was wrong, and do that thing. Two notes on what
 counts. Reading the same path twice is not a second instrument, and it
