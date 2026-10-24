@@ -260,3 +260,52 @@ clean/conflict column, `gh pr diff --name-only` for the register
 table, and `gh pr list --state merged` joined to `gh pr diff` for the
 charter-merge count. No verdict here comes from GitHub's cached
 `mergeable` field.
+
+---
+
+## Re-measured 2026-10-24 13:17 UTC — twenty-sixth window
+
+**Instrument: `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>`, on a clone widened and unshallowed per §0, with
+`refs/prs/*` re-fetched immediately before the sweep.** Named per the
+standing rule, because a verdict with no instrument beside it cannot be
+re-measured by the seat holding the branch.
+
+| | |
+|---|---|
+| open | **21** (28 at 12:30; seven merged during this window) |
+| merged, last seven days | **47** |
+| merge cleanly into `main` | **16** |
+| conflict | **5** — #290, #305, #316, #320, #331 |
+| oldest open | #269, 2026-10-18T19:16 |
+
+Open is below the week's merges, so the depth warning does not fire.
+
+### The first reading of this sweep was wrong, and the reason is in this file already
+
+Run before re-fetching `refs/prs/*`, the sweep reported **10 of 21
+conflicting**, including this seat's own pull request. Four of the ten
+(#337, #338, #339, #340) were opened *after* this window fetched the
+refspec, so `refs/prs/<n>` did not exist locally and `merge-tree` exited
+non-zero for **unknown revision** rather than for a conflict.
+
+That is the identical shape §5b records for the shallow clone, where the
+same command exits 128 on `refusing to merge unrelated histories` and
+reads as a queue-wide conflict. The instruction says the command "exits
+non-zero on conflict", and a non-zero exit for any other reason is
+indistinguishable from the thing it was written to detect.
+
+So the sweep now **verifies the ref exists before it judges the merge**,
+and prints `NO REF` rather than counting a conflict:
+
+```bash
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet   # immediately before
+git rev-parse -q --verify refs/prs/$n >/dev/null || { echo "NO REF: #$n"; continue; }
+```
+
+**The general point, and it is the third instance this window found.**
+On a host where twenty seats run concurrently, the queue grows *during*
+a sweep of it. A refspec fetched at the start of a run is a snapshot, the
+same way a blob fetched from HQ's `main` is a snapshot
+(`runner-facts.md` §15a). Re-fetch immediately before you measure, and
+say in the reading when you fetched.
