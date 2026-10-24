@@ -62,6 +62,105 @@ export interface FileRevision {
   at: string
   author: string
   subject: string
+  /**
+   * The path the traced file occupies **in this revision's tree**, which
+   * is not always the path the record calls the file. A commit that
+   * renames `a.md` to `b.md` is still a revision of the same text, and
+   * the only place that text can be read at that commit is `b.md`. The
+   * walk reads `rev.path`, never the record's path, for exactly this
+   * reason; see the rename note on `revisionsAfter`.
+   */
+  path: string
+  /** set only on a revision that renamed the file: the path it moved from */
+  renamedFrom?: string
+}
+
+/**
+ * The first commit in `sha..HEAD` at which `path` stopped existing,
+ * or null if it never did. `--diff-filter=D` with a pathspec and no
+ * rename detection is what makes this cheap: git reports a rename-away
+ * as a deletion of the old path, so one log call finds both the real
+ * deletions and the renames, and only that one commit pays for the
+ * second call that tells them apart.
+ *
+ * `--reverse` is applied after selection, so there is no `--max-count=1`
+ * here: with it git would select the newest commit and then reverse a
+ * one-element list. The first line of the reversed output is the answer.
+ */
+function firstVanish(repoPath: string, sha: string, path: string): string | null {
+  let out: string
+  try {
+    out = git(repoPath, [
+      'log', '--reverse', '--topo-order', '--diff-filter=D',
+      '--pretty=format:%H', `${sha}..HEAD`, '--', path,
+    ])
+  } catch {
+    return null
+  }
+  const first = out.split('\n').find(Boolean)
+  return first ? first.trim() : null
+}
+
+/**
+ * If commit `sha` renamed `path` to somewhere else, the path it renamed
+ * it to; otherwise null.
+ *
+ * The pathspec is deliberately absent. `git diff-tree -M -- old` filters
+ * the rename pair down to one side and prints `D old`, which is the
+ * deletion reading this function exists to refute, so the diff is taken
+ * whole and the `R` line is found by matching its source path.
+ *
+ * `-z` rather than the default output because git quotes and
+ * backslash-escapes a path containing a space, a quote or a non-ASCII
+ * byte when `core.quotePath` is on, and a quoted path would not compare
+ * equal to the record's own. With `-z` the fields arrive raw, as
+ * `R<score>\0<old>\0<new>\0`.
+ *
+ * Merge commits print nothing here, because `git diff-tree` on a merge
+ * emits no diff without `-m` or `-c`. A rename performed by a merge
+ * commit therefore still reads as a deletion. That is the pre-existing
+ * behaviour, narrowed rather than removed: `git log -- path` only
+ * surfaces a merge when the path differs from every parent, which a
+ * rename resolved identically on both sides does not do.
+ */
+function renameTarget(repoPath: string, sha: string, path: string): string | null {
+  let out: string
+  try {
+    out = git(repoPath, ['diff-tree', '-r', '-M', '--name-status', '--no-commit-id', '-z', sha])
+  } catch {
+    return null
+  }
+  const f = out.split('\0')
+  for (let i = 0; i < f.length; i++) {
+    if (!/^R\d*$/.test(f[i])) continue
+    if (f[i + 1] === path && f[i + 2]) return f[i + 2]
+    i += 2
+  }
+  return null
+}
+
+/** One `git log` over one path. The rename-following loop in `revisionsAfter` calls this once per path. */
+function logOnePath(
+  repoPath: string,
+  sha: string,
+  path: string,
+  limit: number,
+): Omit<FileRevision, 'path'>[] {
+  let out: string
+  try {
+    out = git(repoPath, [
+      'log', '--reverse', '--topo-order', '--date=iso-strict',
+      `--max-count=${limit}`,
+      '--pretty=format:%H%x09%aI%x09%an%x09%s',
+      `${sha}..HEAD`, '--', path,
+    ])
+  } catch {
+    return []
+  }
+  return out.split('\n').filter(Boolean).map((line) => {
+    const [revSha, at, author, ...rest] = line.split('\t')
+    return { sha: revSha, at, author, subject: rest.join('\t') }
+  })
 }
 
 /**
@@ -89,14 +188,44 @@ export function headSha(repoPath: string): string | null {
 
 /**
  * Commits touching `path` that are descendants of `sha` on the current
- * branch, oldest first. `sha..HEAD` is deliberate: it asks what the
- * work that actually shipped did to this text, not what some abandoned
- * branch did. If `sha` is not an ancestor of HEAD the range is empty,
- * and the caller reports `untested` rather than guessing.
+ * branch, oldest first, **following the file across renames**. `sha..HEAD`
+ * is deliberate: it asks what the work that actually shipped did to this
+ * text, not what some abandoned branch did. If `sha` is not an ancestor of
+ * HEAD the range is empty, and the caller reports `untested` rather than
+ * guessing.
  *
- * `--follow` is deliberately NOT used: it would make a rename look like
- * continuity of content, and the question here is about the text, not
- * about the path it lives at.
+ * ## Why renames are followed, when this function used to refuse to
+ *
+ * Until 2026-10-24 the comment here read: "`--follow` is deliberately NOT
+ * used: it would make a rename look like continuity of content, and the
+ * question here is about the text, not about the path it lives at."
+ *
+ * The intent was right and the behaviour was the opposite of it. A
+ * path-limited log still returns the commit that renamed the path **away**,
+ * because git reports a rename-away as a deletion of the old path. The walk
+ * then read `git show <rename>:<old path>`, got nothing, and `traceFile`
+ * reads nothing as a deletion — so every unit of every span in that file
+ * died at the move. Not "false continuity": total destruction, of text
+ * sitting unmodified at the tip under another name.
+ *
+ * Measured on a three-commit repository with one `git mv` in it
+ * (`docs/design/rename-reads-as-death.md` §1): `unitsTraced` 6,
+ * `unitsSurviving` 0, `decayedChars` 488, `fate` `decayed`, `liveAtTip`
+ * false, and the text present at HEAD in full.
+ *
+ * Following the rename does not assert that the content continued. The
+ * presence test is `spanPresent`, which reads the blob and asks whether the
+ * span's own text is in it, so a commit that both moved a file and gutted it
+ * still reports death at that commit — now for the real reason. What the
+ * rename buys is only the right place to look.
+ *
+ * `--follow` itself is still not used. It takes one pathspec, applies
+ * history simplification of its own, and leaves no way to tell a caller
+ * *that* a rename happened. Instead the rename is resolved explicitly, with
+ * `firstVanish` and `renameTarget` above, and recorded on the revision
+ * (`FileRevision.renamedFrom`) and on the record (`SpanLifespan.renamedTo`,
+ * `Durability.renamesFollowed`), because a walk that silently crosses a
+ * rename is a walk a reviewer cannot audit.
  */
 export function revisionsAfter(
   repoPath: string,
@@ -104,24 +233,51 @@ export function revisionsAfter(
   path: string,
   limit = MAX_REVISIONS,
 ): FileRevision[] {
-  let out: string
-  try {
-    out = git(repoPath, [
-      'log', '--reverse', '--topo-order', '--date=iso-strict',
-      `--max-count=${limit}`,
-      '--pretty=format:%H%x09%aI%x09%an%x09%s',
-      `${sha}..HEAD`, '--', path,
-    ])
-  } catch {
-    return []
+  const out: FileRevision[] = []
+  // Cycle guard. `a -> b` then `b -> a` in the same range is legal git and
+  // would otherwise loop forever, and `seen` also stops a self-rename.
+  const seen = new Set<string>([path])
+  let currentPath = path
+  let from = sha
+
+  while (out.length < limit) {
+    const batch = logOnePath(repoPath, from, currentPath, limit - out.length)
+    if (batch.length === 0) break
+    const vanishedAt = firstVanish(repoPath, from, currentPath)
+    const movedTo = vanishedAt ? renameTarget(repoPath, vanishedAt, currentPath) : null
+
+    let followed = false
+    for (const rev of batch) {
+      if (out.length >= limit) break
+      if (movedTo && rev.sha === vanishedAt) {
+        // The content is at `movedTo` from this commit onward, including
+        // in this commit's own tree, so this revision is read there.
+        out.push({ ...rev, path: movedTo, renamedFrom: currentPath })
+        currentPath = movedTo
+        from = rev.sha
+        followed = true
+        break
+      }
+      out.push({ ...rev, path: currentPath })
+    }
+
+    // No rename to follow: either the range held none, or the path was
+    // genuinely deleted. A real deletion is a real death and the remaining
+    // commits on that path — a later file created at the same name — are
+    // already in `batch`, exactly as before this function learned renames.
+    if (!followed) break
+    if (seen.has(currentPath)) break
+    seen.add(currentPath)
   }
-  return out.split('\n').filter(Boolean).map((line) => {
-    const [revSha, at, author, ...rest] = line.split('\t')
-    return { sha: revSha, at, author, subject: rest.join('\t') }
-  })
+  return out
 }
 
-/** File contents at a revision; null when the revision deleted the file. */
+/**
+ * File contents at `path` as of `sha`; null when `path` is not in that
+ * tree. The caller must have established *why* it is not there before
+ * reading null as a death: `revisionsAfter` resolves rename-aways first,
+ * so by the time this returns null the path really was deleted.
+ */
 function blobAt(repoPath: string, sha: string, path: string): string | null {
   try {
     return git(repoPath, ['show', `${sha}:${path}`])
@@ -183,6 +339,11 @@ export function traceFile(
   closedAt: string,
   revisions: FileRevision[],
 ): FinalSpan[] {
+  // The path the record knows, which decides how the span's own text is cut
+  // into units. A rename that also changes the extension does not change
+  // that: the units come from text written under the original path, and
+  // re-segmenting them by the destination's rules would compare sentences
+  // against lines.
   const mode = modeForPath(path)
   const closedMs = Date.parse(closedAt)
 
@@ -221,11 +382,18 @@ export function traceFile(
   if (revisions.length === 0) return spans
 
   let remaining = live.length
+  let renamesFollowed = 0
+  let lastPath = path
   for (const rev of revisions) {
     if (remaining === 0) break
-    const text = blobAt(repoPath, rev.sha, path)
+    const text = blobAt(repoPath, rev.sha, rev.path)
+    if (rev.renamedFrom) renamesFollowed++
+    lastPath = rev.path
     // A null blob means this revision deleted the file. That is a real
     // death for every unit in it, not a reason to skip the revision.
+    // `rev.path` rather than `path` is what makes that true: a revision
+    // that only moved the file reads its content at the new path and
+    // reports no death at all (see revisionsAfter).
     const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? '' : normalize(text).norm
     const fileTokens = new Set(tokens(fileNorm))
     const revMs = Date.parse(rev.at)
@@ -270,6 +438,19 @@ export function traceFile(
     }
     life.fate = lost.length === 0 ? 'durable' : lost.length === units.length ? 'decayed' : 'eroded'
   }
+  // Written on every span of the file, including the untested ones, and
+  // only when a rename was actually crossed. Absent means "this walk saw
+  // no rename"; it does not mean "written before the walk could see one",
+  // which is why the field is optional and never set to 0 or to `path`.
+  if (renamesFollowed > 0) {
+    // `lastPath`, not the last element of `revisions`: the loop above stops
+    // early once every unit is dead, so a rename after that point was never
+    // crossed and must not be claimed as one.
+    for (const span of spans) {
+      span.lifespan!.renamesFollowed = renamesFollowed
+      span.lifespan!.renamedTo = lastPath
+    }
+  }
   return spans
 }
 
@@ -310,11 +491,16 @@ export function annotateDurability(
   let testedSpans = 0, durableSpans = 0, erodedSpans = 0, decayedSpans = 0
   let durableChars = 0, decayedChars = 0
   let baseDurable = 0, baseDecayed = 0
+  // Summed over spans rather than over files, so it is the count a reader
+  // of the span records can reconcile against; a file whose three spans
+  // each crossed one rename contributes three.
+  let renames = 0
   const lifetimes: number[] = []
 
   for (const file of record.files) {
     for (const span of file.spans) {
       const life = span.lifespan
+      if (life?.renamesFollowed) renames += life.renamesFollowed
       if (!life || life.fate === 'untested') continue
       if (SURVIVING.has(span.class)) {
         testedSpans++
@@ -351,6 +537,7 @@ export function annotateDurability(
     medianIntactSeconds: median(lifetimes),
     maxRevisionsWalked: maxRevisions,
     minTraceableLen: MIN_TRACEABLE_LEN,
+    ...(renames > 0 ? { renamesFollowed: renames } : {}),
   }
   return record
 }
