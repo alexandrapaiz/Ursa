@@ -512,7 +512,51 @@ ledger entries of the 2026-10-24 run.
   with its origin commit recorded, so that it can be run without network
   access and audited without trust.
 - **Negative control.** A test that asserts something does *not* happen,
-  and which therefore also passes when the feature is disabled. Four of
-  the ten driver tests are refusal tests and are not negative controls:
-  each one fails when the refusal is removed, because each asserts the
-  specific message and the marked file, not merely that the merge failed.
+  and which therefore also passes when the feature is disabled. Named
+  here because the honest count of what these tests prove is smaller
+  than the count of the tests, and §11 measures which is which.
+
+---
+
+## 11. Which tests are evidence, measured by disabling the thing they test
+
+Seventeen tests were added and all seventeen pass, which on its own says
+nothing about whether they would have caught the defect. So each guard
+was disabled in place and the suites re-run. The number that matters is
+the second column.
+
+| suite | tests added | fail with the guard disabled | pass regardless |
+|---|---|---|---|
+| `tools/registers/merge-driver.test.mjs` | 10 | **4** | 6 |
+| `tools/ledger/ledger.test.mjs` | 7 | **5** | 2 |
+
+**The four driver tests that are evidence**, with `--identifier` dropped
+from `registers.json` and the undeclared-path and disabled-register
+refusals short-circuited: `two seats that allocate the same identifier
+are refused by name`, `a refusal leaves conflict markers in the file`,
+`an undeclared path is refused rather than parsed with somebody else's
+grammar`, and `a declared but disabled register merges the ordinary way`.
+
+**The six that pass regardless** assert the happy path (three of them),
+that the table and `.gitattributes` name the same files, that the
+vendored sha matches, and that the real registers on `main` parse to
+unique headings. They are worth having and they are not evidence about
+the gap: the first three would pass against a correct merger with no
+driver logic at all, and the last three are preconditions rather than
+behaviour.
+
+**The five ledger tests that are evidence**, with `duplicateKeys`
+returning `[]` and the no-entries check short-circuited: the two
+duplicate-key refusals, the no-entries refusal, `the real incidents
+register is refused by this grammar`, and the driver-level
+`union-merge.mjs turns a refusal into a conflicted file and a non-zero
+exit`.
+
+**The two that pass regardless** are `the ideas ledger itself still
+merges two concurrent appends with no refusal` and `a clean merge still
+reports refusal: null`. Both exist to catch the guard costing the thing
+it guards, which is a real risk and is not the same as evidence that the
+guard works.
+
+Stated this way rather than as "17 of 17 pass" because the latter is the
+more impressive number and the less true one.
