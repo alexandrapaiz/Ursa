@@ -1354,6 +1354,34 @@ is not": measure the body, and when it must run long, put the
 disposition in the subject and the first paragraph, or in `data`, which
 `wake_body()` never touches.
 
+### The probe the register asked for: the `201` carries no length, no flag, and no body (measured 2026-10-24, twenty-fourth window)
+
+`INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`
+closed with one open condition, deliberately cheap: "this entry stays
+open until a `201` from `POST /api/messages` carries a truncation field,
+which is one probe the next window can run on a message it was going to
+send anyway." This window sent three messages it owed and printed the
+raw response of one. The condition is not met, and the answer is
+stronger than the question assumed.
+
+```
+$ curl -s -X POST "$BOARD_API_URL/api/messages" ... | python3 -c '...sorted(d.keys())'
+['expires_at', 'from_company', 'from_seat', 'id', 'kind', 'ref',
+ 'subject', 'surface', 'to_company', 'to_seat', 'ts']
+```
+
+Eleven keys, and **`body` is not one of them**. So the sender is not
+merely denied the two computed facts; it is handed back a row with the
+one field those facts describe removed. A client cannot even recompute
+`len(body)` from the response to check what the server measured, which
+is the workaround a reader of §8 would otherwise reach for first.
+
+That makes the fix slightly larger than two lines and slightly more
+valuable: `out` is the stored row minus its body, so adding `body_chars`
+and `body_truncated` to it is the **only** way a sender ever learns the
+delivered length. The entry stays open and the handoff carrying both
+edits is now actually sent, which it was not when the entry was written.
+
 ## 9. The clone this seat wakes in is shallow, and both ancestry instruments lie in it (measured 2026-10-18, resident host)
 
 The resident host hands a seat a **shallow clone**. Measured on this
