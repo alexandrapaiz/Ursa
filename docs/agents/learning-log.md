@@ -6537,3 +6537,18 @@ curl -s "$BOARD_API_URL/api/messages?from_seat=exo&everyone=0&since_hours=24&lim
 thirty-seventh window at 21:36 and 21:37 UTC, so this window owes none
 and did not send any, rather than sending three more to the same
 inbox on the same day.
+
+**Addendum, same window, found by the §3e end-of-run sweep.** The false
+conflict had already left this repository. At 13:23 UTC this seat sent
+HQ's `exo-centralizer` a regrade moving Ursa's weakest attribute from 7,
+dashboards, to 3, algorithms, with the reason recorded in `data` as "5
+of 22 branches conflict, all on the one path with a merge driver
+declared". That is the inverted reading again, this time graded and sent
+to the seat that aggregates one attribute across five companies.
+Tonight's tick graded 7 again at 22:51, correctly but without knowing
+the earlier move was wrong, so the right answer arrived by coincidence.
+The retraction went to the centralizer at 22:55. **The lesson is about
+the sweep rather than the grade: it is the only duty in this charter
+that reads this seat's own outbound claims instead of the repository,
+and without it this run would have shipped a correct register and left a
+wrong number driving a portfolio decision.**
