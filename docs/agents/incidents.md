@@ -4581,3 +4581,157 @@ readied at 11:36 UTC, the board pointer broadcast at 11:38, and the
 unsent handoff delivered at 11:4x. The resolve-when-it-stands rule is
 handed to HQ's `exo-centralizer` as an all-seats change, because the
 schedule it fixes is a property of this host and not of this seat.
+
+## INC-2026-10-24-authority-clock-written-into-the-asking-seats-charter — A silence clock meant to release charter merges expired four days ago and nothing fired, because the rule binding the merging seat was recorded only in the charter of the seat that asked
+
+**What happened.** On 2026-10-18 at 12:29:59 UTC Ursa's PM put a
+question to the owner under the silence route of `docs/standards/pm.md`
+§22, with its own recommendation: a charter pull request that declares in
+bold, truthfully, that it moves no authority between seats and loosens no
+owner gate becomes the PM's to merge as Tier B, and one that cannot say
+that honestly stays the owner's. Absent her reply the recommendation took
+effect at **2026-10-20 12:30 UTC**.
+
+It did not take effect. Measured 2026-10-24 at around 12:00 UTC, four
+days later:
+
+- **No reply from the owner exists on the board.** The narrowed read that
+  reaches furthest back returns sixty-three rows to 2026-10-07, holds the
+  ask itself, and holds no answer to it.
+- **Fourteen pull requests have merged since the clock fired and not one
+  touches a `prompts/*-agent.md` file.** The last charter-touching merge
+  in this repository is 2026-10-18, when eight landed. Six days, zero.
+- **The queue is not the constraint.** Twenty-five open against
+  forty-seven merged in seven days, so §5b's depth warning does not fire.
+  The gate is absorbing work faster than the org produces it, and one
+  class of file is frozen inside a working gate.
+- **The PM has reverted to the pre-clock reading, correctly.** Its note to
+  the owner at 11:32:55 on 2026-10-24 says every charter-touching pull
+  request "has waited on you outright since the tier freeze opened on
+  2026-10-18", with no mention of the release route it proposed itself.
+
+**Why it happened technically.** The proposed rule releases a merge from
+the owner's hand into the PM's, so the seat that must act when the clock
+fires is the PM. The only charter the PM reads is
+`prompts/pm-agent.md`. On `origin/main`:
+
+```bash
+git show origin/main:prompts/exo-agent.md | grep -c "2026-10-20 12:30"   # 4
+git show origin/main:prompts/pm-agent.md  | grep -ciE "2026-10-20|silence route|moves no authority|tier c"   # 0
+```
+
+Four mentions in the charter of the seat that asked. Zero in the charter
+of the seat that would act. All three hundred and ninety lines of the
+PM's charter on `main` contain the clock, the silence route, the bold
+declaration and the phrase Tier C exactly nowhere. So four of this seat's
+five open pull requests carry a declaration written to satisfy a rule the
+reader of that declaration has never been told exists, and both seats
+report their own state correctly the whole way through.
+
+A second surface compounds it. The ask that set the clock is already
+outside the board's default window: the bare message read is capped at
+five hundred rows and its oldest row today is 2026-10-18 18:49, which is
+six hours after the ask was posted at 12:29:59. The clock's founding
+document is reachable now only by a read narrowed to `from_seat=pm` and
+`to_seat=owner`, which no charter tells any seat to run.
+
+And a third: this seat had **no window at all between 2026-10-18 19:16
+and 2026-10-23 19:08 UTC**, so nothing of this seat was alive at the
+moment its own clock fired, and the five windows since inherited a
+charter describing the deadline in the future tense.
+
+**The direction of the failure is the part worth keeping.** A clock that
+transfers authority does not fail loudly at its deadline. It never fires.
+The silence route exists so that the owner's non-response **releases** a
+decision, and a clock the acting seat cannot read turns her non-response
+into a **permanent hold**, inverting the mechanism while every seat
+involved behaves correctly. Nobody defied anything and there is nothing
+to retract.
+
+**The fix.** Not applied here, deliberately. Writing the clock into
+`prompts/pm-agent.md` would hand the PM a merge the owner currently
+holds, which loosens an owner gate, and this seat's boundary forbids that
+outright. What shipped instead: the measurement and the rule in
+`prompts/exo-agent.md` §5, which says that a deadline moving authority is
+written into the charter of the seat that will act on it or it does not
+exist, with the one-line grep that tests it. The decision itself was
+escalated to the PM to add to the ask it already has open, rather than
+opened as a second ask, because one section with three defects is one
+decision for the owner and three is three.
+
+**What the org grew from it.** This is Ursa incident 7 one surface over.
+That one was a rule written into the file a seat reads first and left out
+of the file that reaches it last. This is a rule written into the file of
+the seat that cannot use it and left out of the file of the seat that
+can. The general test is now in the charter: before relying on a clock,
+ask which seat acts when it fires, and grep that seat's charter on `main`
+for it. A zero means the clock does not exist.
+
+**Status.** Shipped in `prompts/exo-agent.md` and here. Five further
+clocks are in the same state as of today, three of them firing
+2026-10-25 around 18:15 UTC, and the PM found that half independently
+and told the owner at 11:32:55 that the entry holding them "lives only
+inside my own five open pull requests and nowhere on the default branch".
+The generalisation is handed to HQ's `exo-centralizer`, because the
+silence route is HQ's §22 and the defect is in the route's design rather
+than in Ursa's use of it.
+
+## INC-2026-10-24-body-rewrite-drops-the-bodys-standing-rules — The rule that tells a window to replace its pull request body voided three older rules about what that body must contain, and the artifact the owner was being pointed at was the only one in its chain that could not state its own tier
+
+**What happened.** The twenty-fourth window inherited a dead window's
+draft, readied it, and replaced its placeholder body with an account of
+what the branch contains, exactly as the rule added that same morning
+tells it to. Audited the next morning against the standing list of things
+a body in this organization must carry, the rewritten body was missing
+three of five, and the four pull requests it supersedes carry all five:
+
+| requirement | four earlier windows | the rewritten tip |
+|---|---|---|
+| the bold authority declaration | present in all four | **absent** |
+| other seats' charters, with line counts | present | **absent** |
+| the queue's three numbers | present | **absent** |
+| subsumed pull requests, with the ancestry command | present | present |
+| `External sources read` | present | present |
+
+The first is the costly one. This charter says in bold that the
+declaration is "what the merge route reads, and a declaration that is
+absent is a hold", so the tip of a five-deep chain, the artifact the PM
+was pointing the owner at, was the only one of the five unable to state
+its own tier.
+
+**Why it happened technically.** The instruction is "replace the plan
+body with what the branch actually contains". A body rewritten from the
+branch's contents reconstructs the contents faithfully and drops the
+requirements, because none of the requirements follow from what the diff
+contains. They are standing rules about the artifact, written into this
+charter across four weeks, and the rewrite has no reason to recall them.
+Nothing was careless. The window performed the newest instruction
+correctly and that is what broke the older ones.
+
+**The class, which §3's existing sweep cannot see.** That sweep looks for
+two standing rules a seat cannot jointly obey. These are two rules a seat
+obeys one at a time, in the same file, written six days apart, where
+performing the newer one correctly is the mechanism that breaks the
+older. Reading them side by side shows no contradiction, so no
+text-level check finds it. Only auditing the produced artifact does.
+
+**Be precise about the blast radius.** This did not cause the freeze. The
+four pull requests carrying the declaration are unmerged too, so the hold
+is `INC-2026-10-24-authority-clock-written-into-the-asking-seats-charter`
+above and not this. This defect was **masked** by the larger one and
+would have bitten alone the moment the freeze lifted. It is filed anyway,
+because clearing the larger one is not this seat's to do.
+
+**The fix.** The tip's body now carries all five, prepended rather than
+rewritten, with the queue measured at the instant it was written. No
+identifier was spent, because a body is not a commit. The charter now
+says that a body rewrite is a re-derivation of the checklist rather than
+a retelling of the diff, and carries the five-row audit as one command to
+run before `gh pr ready`. The general duty added beside it: when you add
+a rule that replaces an artifact wholesale, name what that artifact
+already owes in the same breath, because the window after you cannot see
+the rule it is violating while it is doing exactly what the newest
+instruction says.
+
+**Status.** Shipped in `prompts/exo-agent.md` and here, and the artifact
+is repaired.
