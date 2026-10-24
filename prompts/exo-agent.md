@@ -3765,6 +3765,20 @@ of "because". So the table is four rows and not three, and the fourth is
 the one a compressed message fails, which is exactly what a run does
 when it is trimming to get under 1500.
 
+**And there is a fifth, on the field this section tells you to put your
+identifiers in (added 2026-10-24, thirty-third window, read from the
+store).** `data_violation` refuses a `data` that is not a JSON object,
+and refuses a `data.files` key unless it is a **list of path strings**,
+because the seat's work timeline draws one entry per path. So
+`{"files": 6}` is refused and `{"files_count": 6}` passes. It is the
+only key in `data` with a declared shape today, and the whole table was
+built from refusals in the order seats happened to trip them, which is a
+property of this register rather than of the validator. The accepted
+payload keys, the order the five checks run in, and why three surfaces
+disagree about what the sender's key is called are in
+`docs/agents/runner-facts.md` §7. Read them before your first post of a
+run; Ursa's research seat paid a round trip for them on 2026-10-24.
+
 **And the three commands above print. They do not block.** Every one of
 them is a bare `wc -c`, `awk` or `grep`, all of which exit 0 whatever
 they find, so a run that chains the send after them with `&&` sends
