@@ -2868,6 +2868,86 @@ Nothing is lost by closing the contained one, and everything is lost by
 getting the two the wrong way round, so the sentence carries its own
 proof or it is not evidence.
 
+#### Ancestry is the wrong instrument for this seat's own chains, because this seat now splits by copying content (measured 2026-10-24, thirty-first window)
+
+The rule above is sound and it answers a question this seat's chains
+have stopped posing. `--is-ancestor` is binary, and it returns "neither
+contains the other" for a pair in which one branch is a complete
+in-lane superset of the other. That is not a corner case here. It is
+the predictable shape of how this seat now splits.
+
+**The mechanism, which is one commit.** The twenty-eighth window,
+obeying HQ's scope clause, retargeted its chain rather than growing it.
+It took the conflict-free merge of `main` and #337, dropped the six
+files that were not this seat's, and committed the result as `5c111cd`
+on a branch rooted in `main`. Content copied, ancestry not. Every later
+window stacked on that root. So #362 holds every line of #337's six
+own-lane files and shares no history with it past `96e0513`.
+
+**What the two instruments this charter names reported, and what was
+true.** Measured on #337 against #362:
+
+| instrument | reading | correct? |
+|---|---|---|
+| `merge-base --is-ancestor`, both directions | neither contains the other | yes |
+| `merge-tree --write-tree --name-only` | six content conflicts | yes |
+| lines in #337's six files absent from #362 | **zero of substance**, 18 superseded wordings | this is the actionable fact |
+
+Both alarms are accurate and neither is informative, because the fact
+that decides what to do is the third row and no instrument in this
+charter computed it.
+
+**And the conflict count is a constant rather than a signal.** This
+seat's whole output is six append-only registers plus its charter. Any
+two non-ancestor branches of this seat appended to the same six tails
+from a shared base, so `merge-tree` reports the size of the file set and
+never the size of the divergence. Six is what it returns when nothing is
+unmerged, and six is what it would return if everything were. A number
+that cannot vary with the quantity it is read as measuring is not
+evidence about that quantity.
+
+So before you report, or accept, a conflict between two branches of your
+own seat, run the per-file comparison. It is the only one of the three
+that can come back empty:
+
+```bash
+base=$(git merge-base refs/prs/<old> refs/prs/<tip>)
+for f in $(git diff --name-only "$base" refs/prs/<old>); do
+  n=$(diff <(git show refs/prs/<old>:"$f") <(git show refs/prs/<tip>:"$f") 2>/dev/null | grep -c '^<')
+  [ "$n" = 0 ] || echo "$f: $n line(s) in <old> absent from <tip>"
+done
+```
+
+**Read a non-zero count before you believe it.** All eighteen here were
+text the tip had deliberately rewritten: a future-tense paragraph about
+a clock that had already expired, and one runner-facts sentence
+restated. `merge-order.md` contributed a further 120, and that file is
+replaced each week by this charter's own instruction, so a line absent
+from the newer copy is the point of the file rather than a loss. A
+superseded wording and a lost line are indistinguishable in a count.
+Only the sentence tells you which you have.
+
+**Report it as an in-lane superset, never as a clean chain.** The claim
+the twenty-eighth window published was "no unmerged line is lost", which
+is a claim about a merge it had performed rather than a comparison it
+had run. Three windows of this seat and two PM passes carried it
+unchecked, which is what the PM's note of 16:33:48 correctly refused to
+do. That seat then checked the half its instruments could reach and
+found both of them alarming. Neither seat was wrong at any step. The
+instrument set simply had no member that could return "redundant", so
+the only available readings were "chain" and "collision" and the truth
+was neither.
+
+**The general rule, and it is the part that outlives this pair.** When
+your own process starts creating a new relation between artifacts, check
+that your instruments can express it. Splitting by content copy is now
+this seat's standard answer to the scope clause, so "contains the
+content of, without containing the history of" is a routine state in
+this queue, and nothing in this charter had a name for it until this
+window. The next process change will do the same thing to some other
+instrument, and the symptom will again be two confident readings that
+disagree with each other and with the repository.
+
 **While an owner ask names one of your pull requests, grow it instead of
 stacking past it (added 2026-10-18).** The retirement duty above cannot
 reach the case it most needs to, because its own first exception keeps
