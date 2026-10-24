@@ -6249,3 +6249,39 @@ window that was writing about gates.
    of the two Ursa seats with an artifact over an hour old had a stale
    public pointer. Re-run it, and remember the PM row is meaningless by
    construction.
+6. *Did the engineer flip the learning log's register flag?* Check
+   `tools/registers/registers.json` for `docs/agents/learning-log.md`.
+   Its `enabled: false` is blocked on a condition this chain has already
+   discharged, and that seat was told on the board this window.
+
+**A second finding, from the §5b queue sweep rather than from the
+trigger.** `tools/registers/registers.json` declares this file with
+`"enabled": false`, and the reason is a condition, not a judgement: the
+log held `## Compounding ratio` twice, the entry-keyed merger refuses at
+parse before it reaches any merge question, and the note says in its own
+words *"The file is the exo seat's, so the repair is theirs; this flips
+to true once the heading is unique."*
+
+That repair is **done and unmerged**. `origin/main` has 33 `## `
+headings and 32 unique; this chain's tip has 37 and 37. Some window of
+this seat re-levelled the duplicate while writing its own entry and
+never knew it was discharging a condition, because the condition is
+written in a tool config this seat's charter has no reason to open.
+
+Three things worth separating, because only one of them is a defect:
+
+- **Nobody was careless.** The engineer wrote the blocking reason into
+  the file where the flag lives, which is the right place for it, and
+  named the seat that owns the repair, which is more than most entries
+  do. It just named a seat rather than telling it.
+- **It is the same shape this window's main finding has**, arriving on a
+  third surface: a duty that is legible to the wrong party. The audit
+  defect was a check that could not see the duty beside it. This is a
+  repair request that could not reach the seat charged with it.
+- **It is also the §0 bootstrap paradox.** The condition is true on
+  `main` and false on the branch, so every reader who checks is correct
+  and out of date, and the seat that fixed it could not know.
+
+Reported to `Ursa/engineer` on the board rather than fixed here, because
+`tools/` is not this seat's writable surface under §5. The merge-order
+file carries the measurement.

@@ -8,7 +8,7 @@ Every verdict below names the instrument that produced it, because a
 conflict verdict with no instrument beside it cannot be re-measured by
 the seat holding the branch.
 
-## Measured 2026-10-24, 17:35 UTC, thirty-third exo window
+## Measured 2026-10-24, 18:0x UTC, thirty-fifth exo window
 
 Clone state when these were measured, because both of this file's
 instruments lie otherwise (runner-facts §9 and §10):
@@ -18,89 +18,72 @@ before the reads.
 
 | | |
 |---|---|
-| open pull requests | **21** |
-| of those, drafts | **3** (#359 skill, #379 engineer, #380 research) |
+| open pull requests | **23** |
 | merged in the last seven days | **54** |
-| oldest open | **#290**, 2026-10-23T23:45:51Z, about seventeen hours |
-| open that are contained in another open one | **8 of 21** |
-| merges that would close all twenty-one | **13** |
-| open that conflict with `main` | **5**, and they are one chain |
+| oldest open | **#290**, 2026-10-23 23:45 UTC, about 18 hours |
+| open drafts | **5**, four of them live runs opened in the last few minutes |
 
-Open does not outnumber the week's merges and it is not close —
-fifty-four against twenty-one — so the depth warning does not fire. The
-queue fell from twenty-five to twenty-one in thirty minutes while the
-decisions in it went from nine to thirteen, which is the gate absorbing
-stacks faster than new tips arrive.
+**The depth warning does not fire.** Twenty-three open against
+fifty-four merged in seven days: the owner is absorbing work more than
+twice as fast as the org produces it. The queue is not the constraint
+this week, and the one class of file that is — anything under
+`prompts/` — is held by the expired Tier C clock and not by depth.
 
-**Thirteen tips, not twenty-one artifacts.** The tips are #359, #360,
-#361, #369, #372, #373, #375, #376, #377, #378, #379, #380, #381.
-Measured, in the direction that cannot invert:
+### Conflicts with `main`, by performing the merge
 
-```
-#290 contained in #379      #342 contained in #360
-#316 contained in #320      #362 contained in #374
-#316 contained in #348      #374 contained in #378
-#320 contained in #348
-#348 contained in #359
-```
+Instrument: `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>`, run over every open pull request. **Five conflict,
+eighteen are clean, and all five conflict on the same single file.**
 
-Each line is `git merge-base --is-ancestor refs/prs/<contained>
-refs/prs/<tip>` exiting 0, on the unshallowed clone. **All of these are
-true ancestry and not the in-lane-superset relation** the thirty-first
-and thirty-second windows had to rule on, so no per-file comparison is
-needed to act on them. That is worth saying because it is the first
-queue reading in three windows where the cheap instrument is the
-sufficient one.
-
-## Five conflicts with `main`, one chain, one file
-
-| pull request | conflicting file |
+| conflicting | file |
 |---|---|
-| #290 | `docs/ideas.md` |
-| #316 | `docs/ideas.md` |
-| #320 | `docs/ideas.md` |
-| #348 | `docs/ideas.md` |
-| #359 | `docs/ideas.md` |
+| #290, #316, #320, #348, #359 | `docs/ideas.md` |
 
-```bash
-git merge-tree --write-tree --name-only origin/main refs/prs/<n>
-```
+#290 also touches `ursa-major/dist/ursa.cjs`, which auto-merged. No
+other file collides anywhere in the queue.
 
-One file, five artifacts, and four of the five are contained in the
-fifth. So this is **one conflict to resolve, not five**, and the seat
-that has to resolve it is whoever holds #359 — the skill seat, whose tip
-is a draft. `docs/ideas.md` is an append-only proposal list and the
-collision is the shape the register-merge work in #378's inherited
-`docs/design/register-merge.md` is aimed at: two seats appending to the
-same tail from a shared base.
+**Read the five against the driver before you call them work.**
+`.gitattributes` on `main` declares `docs/ideas.md merge=ledger`, and
+that driver is registered **per clone** by
+`tools/ledger/install-driver.sh`. This clone has no merge driver
+configured, so the reading above is the no-driver reading. That is the
+right reading for a merge performed on GitHub, which does not run
+custom merge drivers, and the wrong one for a merge performed locally
+by somebody who has installed it. Say which you mean. The five are
+genuine for the owner's web merge and automatic for a local one.
 
-**Nothing of this seat's conflicts.** #378, #374 and #362 all merge
-clean against `main` by the same instrument.
+### Suggested order
 
-## This seat's own stack
+1. **The eighteen clean ones**, in any order. Nothing in the queue
+   collides with anything except through `docs/ideas.md`.
+2. **The `prompts/` chain**, once the Tier C question is answered.
+   #378, #382 and #384 are one chain under one decision, newest last.
+3. **The five on `docs/ideas.md`**, last, and either locally with the
+   ledger driver installed or with one hand resolution that serves all
+   five, since they collide on one file and not with each other's
+   content.
 
-- **#378** is the tip. It contains **#374** and **#362** by ancestry,
-  and it additionally contains `main`, which #374 does not — `main` is
-  not an ancestor of #374, so #378 is the only one of the three that is
-  a descendant of the default branch.
-- **#374 and #362 are left open deliberately.** Both are named in this
-  seat's own note to the owner of 17:12:54 UTC, whose data says
-  `merge_this: 374`. "Read your own seat's open PRs first" forbids
-  closing a pull request named in an open ask to her. The pointer
-  correction is published on the board instead.
-- Tier: **C**, because the stack edits `prompts/exo-agent.md`. #378's
-  own 14 lines of that file are instruction and move no authority.
+### One unblock the owner gets for free when this chain merges
 
-## The charter freeze, restated by date
+`tools/registers/registers.json` declares
+`docs/agents/learning-log.md` with `"enabled": false`, and its stated
+reason is a condition rather than a decision: the log held
+`## Compounding ratio` twice, so the entry-keyed merger refuses at
+parse before it reaches any merge question. The note ends *"The file is
+the exo seat's, so the repair is theirs; this flips to true once the
+heading is unique."*
 
-**Zero merges of any `prompts/*-agent.md` file since 2026-10-18 at
-19:02 UTC**, which is now five days and twenty-two hours. State this by
-date and never by a seven-day window: the seven-day query returns eight
-charter merges and every one of them landed on 2026-10-18, five inside
-the same minute, so a window reading the seven-day count concludes the
-freeze has lifted. That is
-`INC-2026-10-18-tier-c-charter-freeze` and the expired silence clock
-recorded with it.
+**The repair is already done and it is unmerged.** Measured both sides
+this window:
 
-Four of the thirteen tips touch no charter at all, so the freeze is not
-what is holding this queue.
+| | `## ` headings | unique |
+|---|---|---|
+| `origin/main` | 33 | **32** |
+| this chain's tip | 37 | **37** |
+
+A window of this seat re-levelled the duplicate while writing its own
+entry, without knowing it was discharging anything. So the flag's
+precondition is satisfied on the branch and not on the branch anybody
+reads, which is this organization's standing shape: the condition lives
+where it is read and the repair lives where it was done. The flag is
+the engineer seat's to flip and that seat has been told.
