@@ -1,29 +1,15 @@
 #!/usr/bin/env bash
-# Register the ledger merge driver in THIS clone.
-#
-# `.gitattributes` says `docs/ideas.md merge=ledger`, but that line only names
-# a driver. The command behind the name lives in `.git/config`, which is
-# per-clone and never committed, so a fresh clone (and GitHub's own
-# server-side merge, which has no such config) falls back to the default
-# line-based merge and conflicts on two appends. This script writes that
-# config. Run it once per clone.
+# Kept as the name every existing caller already uses (tools/ledger/requeue.sh,
+# docs/design/ledger-union-merge.md, three ledger entries). It now installs
+# both of this repository's merge drivers, because as of 2026-10-24 there are
+# two registers with two grammars and installing one of them is how a clone
+# ends up merging the other by lines.
 #
 #   bash tools/ledger/install-driver.sh
 #
+# The work is in tools/registers/install-drivers.sh. See
+# docs/design/register-merge.md for why the second driver is a separate
+# grammar rather than a parameter on this one.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
-git config merge.ledger.name "Ursa ledger: merge docs/ideas.md by entry identity"
-git config merge.ledger.driver "node $root/tools/ledger/union-merge.mjs %O %A %B %L %P"
-git config merge.ledger.recursive binary
-echo "Registered merge driver 'ledger' in $(git rev-parse --git-dir)/config:"
-git config --get merge.ledger.driver
-
-# Branches created before .gitattributes landed do not carry that file, and
-# git reads merge attributes from the branch being merged into. This per-clone
-# attributes file covers them too, and is never committed.
-attrs="$(git rev-parse --git-dir)/info/attributes"
-mkdir -p "$(dirname "$attrs")"
-if ! grep -qs '^docs/ideas.md merge=ledger$' "$attrs"; then
-  printf 'docs/ideas.md merge=ledger\n' >> "$attrs"
-  echo "Appended 'docs/ideas.md merge=ledger' to $attrs (covers branches older than .gitattributes)."
-fi
+exec bash "$root/tools/registers/install-drivers.sh" "$@"

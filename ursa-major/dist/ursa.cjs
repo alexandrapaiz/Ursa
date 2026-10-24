@@ -6285,11 +6285,28 @@ __export(serve_exports, {
   STORE_DIR_NAME: () => STORE_DIR_NAME,
   allowedOrigin: () => allowedOrigin,
   handleStoreRequest: () => handleStoreRequest,
+  listenOnLoopback: () => listenOnLoopback,
   recordSummary: () => recordSummary,
   startStoreServer: () => startStoreServer,
   storePayload: () => storePayload,
   tuningUnits: () => tuningUnits
 });
+async function listenOnLoopback(server, port, what) {
+  await new Promise((resolve2, reject) => {
+    const onError = (e) => {
+      reject(e.code === "EADDRINUSE" ? new Error(
+        `${what} cannot start: 127.0.0.1:${port} is already in use. Another ${what} is probably still running. Stop it, or pass --port <number> to bind a different one.`
+      ) : e);
+    };
+    server.once("error", onError);
+    server.listen(port, "127.0.0.1", () => {
+      server.removeListener("error", onError);
+      resolve2();
+    });
+  });
+  const address = server.address();
+  return typeof address === "object" && address ? address.port : port;
+}
 function tuningUnits(projectPath) {
   const path = (0, import_node_path10.join)(ursaDir(projectPath), "tuning.json");
   if (!(0, import_node_fs10.existsSync)(path)) return [];
@@ -6417,15 +6434,7 @@ async function startStoreServer(opts) {
     res.end(JSON.stringify({ error: `no route ${req.method} ${req.url}` }));
   });
   const port = opts.port ?? DEFAULT_SERVE_PORT;
-  await new Promise((resolve2, reject) => {
-    server.once("error", reject);
-    server.listen(port, "127.0.0.1", () => {
-      server.removeListener("error", reject);
-      resolve2();
-    });
-  });
-  const address = server.address();
-  const bound = typeof address === "object" && address ? address.port : port;
+  const bound = await listenOnLoopback(server, port, "the store server");
   const dir = ursaDir(projectPath);
   const state = (0, import_node_fs10.existsSync)(dir) && (0, import_node_fs10.statSync)(dir).isDirectory() ? `${listRecordIds(projectPath).length} record(s) in ${STORE_DIR_NAME}/` : `no ${STORE_DIR_NAME}/ yet: run \`ursa run ${projectPath}\` and reload, nothing here is cached`;
   log(`store server up: ${(0, import_node_path10.basename)(projectPath)} on http://127.0.0.1:${bound} \u2014 ${state}`);

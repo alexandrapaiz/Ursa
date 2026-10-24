@@ -26,7 +26,7 @@ import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
 import { parseClaudeSession } from '../parse'
 import { readVerdict, NO_VERDICT, type Verdict, type VerdictRunner, claudeVerdictRunner } from '../verdict'
-import { allowedOrigin, handleStoreRequest, tuningUnits } from '../serve'
+import { allowedOrigin, handleStoreRequest, listenOnLoopback, tuningUnits } from '../serve'
 import { applyVerdict, NOTHING_APPLIED, type AppliedVerdict } from './declare'
 import { deriveKeys, encryptJson, type DerivedKeys } from './crypto'
 import {
@@ -104,20 +104,69 @@ export function tuningLines(projectPath: string): OverlayTuningLine[] {
     }))
 }
 
+/** The port `ursa bridge` listens on when the caller names none. */
+export const DEFAULT_BRIDGE_PORT = 7817
+
+/**
+ * Performs the launch the run channel was asked for, and resolves with the
+ * summary line a page displays. Rejects when the launch failed, carrying
+ * the message the page should be shown.
+ *
+ * WHY THIS IS AN INJECTED DEPENDENCY RATHER THAN A CALL IN THE HANDLER.
+ * `startBridge` already takes its verdict reader (`runner`) and its log
+ * sink (`log`) from the caller, for the same reason: both reach outside the
+ * process, and a test of the run channel is not a test of either. The run
+ * channel's own subject is who may cause an effect, and until now asserting
+ * that meant really spawning `npx tsx src/bin/ursa.ts run`. Measured on
+ * 2026-10-24, the three tests that take the allow branch cost 7.48s, 5.64s
+ * and 5.07s against vitest's 5s default timeout, so they were over budget
+ * on an idle machine and failed outright under parallel load. The spawn was
+ * never what they asserted: `logs` is written before the launch starts.
+ */
+export type Launcher = (projectPath: string) => Promise<string>
+
+/**
+ * The real launcher: `ursa run <project>` as a child process.
+ *
+ * It is a subprocess and not an in-process call to `main(['run', path])`
+ * because a launch that throws, exhausts memory, or runs for ten minutes
+ * must not take the bridge down with it; the bridge is the thing holding
+ * the user's page open. The 600s timeout and the 16MB buffer are that
+ * containment, and they are the values this function existed with before
+ * it had a name.
+ */
+export const npxLauncher: Launcher = (projectPath) => new Promise<string>((resolve, reject) => {
+  execFile(
+    'npx', ['tsx', join(import.meta.dirname, '..', 'bin', 'ursa.ts'), 'run', projectPath],
+    { cwd: join(import.meta.dirname, '..', '..'), timeout: 600_000, maxBuffer: 16 * 1024 * 1024 },
+    (err, stdout, stderr) => {
+      if (err) reject(new Error(stderr || err.message))
+      else resolve(stdout.trim())
+    },
+  )
+})
+
 export interface BridgeOptions {
   projectPath: string
   passphrase: string
   syncUrl: string
   session?: string
   intervalMs?: number
+  /** 0 asks the OS for a free port, which is what the tests want */
   port?: number
   /** origins allowed to POST /run; loopback dev origins are always allowed */
   allowOrigins?: string[]
   runner?: VerdictRunner
+  /** what POST /run actually launches; defaults to `npxLauncher` above */
+  launch?: Launcher
   log?: (line: string) => void
 }
 
 export interface BridgeHandle {
+  /** the port actually bound, which is the only useful answer when port 0 was asked for */
+  readonly port: number
+  /** `http://127.0.0.1:<port>`, the base a page fetches against */
+  readonly url: string
   stop(): Promise<void>
   /** one tick, exposed for tests and for --once */
   tick(): Promise<OverlayPayload | null>
@@ -126,8 +175,9 @@ export interface BridgeHandle {
 export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
   const log = opts.log ?? ((l: string) => console.log(l))
   const intervalMs = opts.intervalMs ?? 5_000
-  const port = opts.port ?? 7817
+  const port = opts.port ?? DEFAULT_BRIDGE_PORT
   const runner = opts.runner ?? claudeVerdictRunner
+  const launch = opts.launch ?? npxLauncher
   const keys: DerivedKeys = await deriveKeys(opts.passphrase)
   const project = basename(opts.projectPath)
 
@@ -247,21 +297,27 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
       if (running) { res.writeHead(409, cors); res.end('a run is already in progress'); return }
       running = true
       log('run requested from the page')
-      execFile('npx', ['tsx', join(import.meta.dirname, '..', 'bin', 'ursa.ts'), 'run', opts.projectPath],
-        { cwd: join(import.meta.dirname, '..', '..'), timeout: 600_000, maxBuffer: 16 * 1024 * 1024 },
-        (err, stdout, stderr) => {
-          running = false
-          lastRunSummary = err ? `run failed: ${stderr || err.message}` : stdout.trim()
+      const settle = (status: number, summary: string) => {
+        running = false
+        lastRunSummary = summary
+        lastPushedHash = '' // force a sync with the fresh summary
+        res.writeHead(status, { ...cors, 'content-type': 'application/json' })
+        res.end(JSON.stringify({ summary }))
+      }
+      void launch(opts.projectPath).then(
+        (summary) => {
           // A run writes records that start out undeclared, so the
-          // verdict already read has to reach the new ones too.
-          if (!err && verdict.accepted !== null) {
+          // verdict already read has to reach the new ones too. This
+          // happens before the reply, so a page that re-reads the store
+          // the moment it is answered sees the declaration.
+          if (verdict.accepted !== null) {
             applied = applyVerdict(opts.projectPath, verdict)
             log(`declared: ${applied.declared.length} record(s) after the run`)
           }
-          lastPushedHash = '' // force a sync with the fresh summary
-          res.writeHead(err ? 500 : 200, { ...cors, 'content-type': 'application/json' })
-          res.end(JSON.stringify({ summary: lastRunSummary }))
-        })
+          settle(200, summary)
+        },
+        (e: Error) => settle(500, `run failed: ${e.message}`),
+      )
       return
     }
     // `.ursa/` over the local channel, in the clear: this is the owner's
@@ -288,13 +344,18 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
     if (store) { sendJson(store.status, store.body); return }
     res.writeHead(404, cors); res.end()
   })
-  await new Promise<void>((r) => server.listen(port, '127.0.0.1', r))
-  log(`bridge up: watching ${project}, run channel on 127.0.0.1:${port}, blob ${keys.blobId.slice(0, 8)}…`)
+  // Shared with `ursa serve` (`listenOnLoopback` in src/serve.ts) rather
+  // than wrapped here, because the version written here passed no `error`
+  // handler and so hung instead of failing when the port was taken.
+  const bound = await listenOnLoopback(server, port, 'the bridge')
+  log(`bridge up: watching ${project}, run channel on 127.0.0.1:${bound}, blob ${keys.blobId.slice(0, 8)}…`)
 
   await tick().catch((e) => log(`first tick failed: ${(e as Error).message}`))
   const timer = setInterval(() => { void tick().catch((e) => log(`tick failed: ${(e as Error).message}`)) }, intervalMs)
 
   return {
+    port: bound,
+    url: `http://127.0.0.1:${bound}`,
     tick,
     stop: () => new Promise((r) => { clearInterval(timer); server.close(() => r()) }),
   }
