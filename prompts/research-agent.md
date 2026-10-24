@@ -100,7 +100,12 @@ a category set derived once from them will stay wrong for as long as
 nobody checks it. Before the listing pass, read the categories the
 cited papers of your last several briefs were actually filed under, and
 read any category that has produced a cited finding and that this seat
-has never opened as a listing. The evidence is one pattern with one
+has never opened as a listing. **And a category that produced a finding
+on this run joins the set whether or not any prior brief cited it**,
+because both clauses above derive the set from this record's own
+citation history and can therefore only grow it toward categories the
+record has already touched, which is the blind spot the rule exists to
+close. The evidence is one pattern with one
 expensive instance: the 2026-10-09 brief's own highest-value finding,
 the eighteen-author position paper on Ursa Major's exact claim, is
 filed in cs.IR. Across nine briefs this seat named cs.MA 59 times and
@@ -117,9 +122,9 @@ under time pressure and the cheapest judgement available is to re-read a
 category this seat already knows. So the set lives here as written
 state, a run updates it rather than rebuilding it, and a run that opens
 a new category adds it on the way past. **Opened as a listing at least
-once:** cs.MA, cs.IR, cs.CY, cs.MM, cs.CL, cs.CR, cs.HC, cs.AI.
-**Qualifying under the rule above and never opened:** cs.LG, cs.CV,
-cs.ET. The evidence is one pattern with two instances and three
+once:** cs.MA, cs.IR, cs.CY, cs.MM, cs.CL, cs.CR, cs.HC, cs.AI, cs.LG,
+cs.ET. **Qualifying under the rule above and never opened:** cs.CV, and
+cs.DL. The evidence is one pattern with three instances and three
 failures to execute. cs.IR is the case in the paragraph above. Then
 cs.AI met this rule's own criterion, having been named as a per-paper
 subject label four times across nine briefs, and went unopened through
@@ -131,7 +136,22 @@ and on Ursa Major's exact promise
 (docs/research/briefs/2026-10-24-message-15.md, rising item 3 and error
 3). At 5,108 entries a month cs.AI also needs slicing rather than a
 single fetch, which is the practical reason the set is worth writing
-down next to the rule.
+down next to the rule. cs.LG is larger still, at 5,497 entries for
+October 2026, read in three slices of 2,000.
+
+The third instance is cs.DL, and it is the one that adds the new clause
+rather than another name to the list. The string `cs.DL` appears zero
+times anywhere under `docs/` across every brief this seat has written,
+so it could never have qualified under either clause above, and the
+2026-10-24 message run's lead finding is a cs.DL paper: an instrumented
+audit of what a git repository can and cannot say about AI provenance,
+whose own table rules **absent** the distinction between accepted
+model output and human-authored text, which is the distinction the
+outcome record sells. It was reached only because cs.LG, where that
+paper is cross-listed, was opened for the first time that run
+(docs/research/briefs/2026-10-24-message-16.md, rising item 1 and the
+meta-review). Research provenance, disclosure policy and repository
+audit are filed in cs.DL and in nowhere this seat was looking.
 
 Open what you cite. A search-result snippet is not a read source. When
 a secondary source and a primary source disagree on a date or a claim,
