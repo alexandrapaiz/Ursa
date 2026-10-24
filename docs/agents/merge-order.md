@@ -1,122 +1,79 @@
-# Merge order — 2026-10-24 01:3x UTC
+# Merge order — measured 2026-10-24 01:5x UTC (twenty-first exo window)
 
-Written by the ExO seat's twentieth window, replacing the previous
-week's plan. The owner merges. This file is information for that
-decision and nothing else.
+Replaces the previous plan, per `prompts/exo-agent.md` §5b. This is
+information for the owner. Merging is hers alone, and the PM's Tier B
+route under `docs/standards/pm.md` §21 is unaffected by anything here.
 
 ## The three numbers
 
 | | |
 |---|---|
 | open pull requests | **14** |
-| merged in the last seven days | **45** |
-| age of the oldest open | **6 days** (the exo seat's eighteenth window) |
+| merged in the last 7 days | **46** |
+| age of the oldest open | #269, opened 2026-10-18T19:16Z, **5 days** |
 
-**The queue is not deep.** Open is 14 against 45 merges in seven days,
-so the gate is absorbing more than three times what the queue holds.
-This is the fourth consecutive window in which the depth rule did not
-fire, and it is worth saying plainly after the weeks in which it did:
-the organization is no longer producing faster than its merge gate.
+**The queue is shallower than the week it merged**, 14 against 46, so
+the sentence §5b asks for in bold does not fire. That is the second
+consecutive window able to say so, after three weeks in which the
+opposite was true and the depth ran 17 → 37 → 52.
 
-Five of the fourteen are drafts. One of the five, the research seat's
-fifth run, is idle seven hours with no live run behind it, which HQ's
-`check-draft-prs.sh` classes as orphaned mid-work. It is that seat's to
-ready or close and the PM has already handed it back on a staleness
-finding, so it is named here and not re-reported.
+## The order, simulated
 
-## Conflicts, by instrument
+Fourteen open pull requests are **six decisions**, because seats stack
+and eleven containment relations hold across the queue.
 
-Instrument: `tools/check-merge-queue.sh`, fetched from
-`alexandra-systems:main` this window and not read from the host's
-checkout, which the register measures as a cache of unknown age. The
-clone was widened and unshallowed first, per §0 of the exo charter.
+Verified by performing the merges in sequence in a detached scratch
+worktree off `origin/main`, not by asking GitHub. Thirteen of fourteen
+merged clean in the order below; the fourteenth is the only conflict in
+the queue.
 
-**13 of 14 merge cleanly.** One conflicts.
-
-| pull request | verdict | behind main | instrument |
+| step | land | instrument | verdict |
 |---|---|---|---|
-| #302 #301 #300 #299 #298 #296 #293 #292 #290 #288 #282 #280 #269 | clean | 0 to 58 | `check-merge-queue.sh` |
-| #285 research, fifth run | **CONFLICT**, 35 files | **1003** | `check-merge-queue.sh` |
+| 1 | **#308** (PM, sixty-seventh pass) | sequential `git merge` in scratch worktree | clean; contains **#306**, which contains **#304** |
+| 2 | **#307** (exo, twenty-first window) | sequential `git merge` in scratch worktree | clean; contains **#302** → **#288** → **#269** |
+| 3 | **#305** (engineer) | sequential `git merge` in scratch worktree | clean; contains **#296** |
+| 4 | **#282** (research) | sequential `git merge` in scratch worktree | clean; contains **#280** |
+| 5 | **#303** (frontend), **#290** (engineer), **#293** (skill) | sequential `git merge` in scratch worktree | clean, independent of each other |
+| 6 | **#285** (research) | `git merge-tree --write-tree --name-only` **and** sequential merge, both | **CONFLICT**, 54 files |
 
-#285's distance is the finding rather than its conflict. Every other
-branch in the queue is between 0 and 58 commits behind. The chair
-posted on 2026-10-23 at 18:32 that the public history was rewritten that
-day to remove private data, and told every seat to fetch and reset
-before any push. #285 predates that rewrite and is the only open branch
-that does. So its conflict is not drift between two seats' work, it is
-one branch still rooted in the history that was replaced, and rebasing
-it onto the current `main` is the whole of the fix. That is the
-authoring seat's under `docs/standards/pm.md` §11.3, not the owner's.
+Merging steps 1 through 5 closes **thirteen** of the fourteen.
 
-## Containment, so the order is shorter than the count
+## The containment relations, stated in the direction that cannot invert
 
-Measured with `git merge-base --is-ancestor <contained> <tip>`, exit 0
-meaning contained, over every ordered pair of open heads.
+`#269` is contained in `#288`, which is contained in `#302`, which is
+contained in `#307`. `#280` is contained in `#282`. `#296` is contained
+in `#305`. `#304` is contained in `#306`, which is contained in `#308`.
 
-| contained | tip |
-|---|---|
-| #269 | #288, #302 |
-| #288 | #302 |
-| #280 | #282 |
-| #292 | #298, #300, #301 |
-| #298 | #300, #301 |
-| #300 | #301 |
-| #301 | #302, after the resolution below |
-
-**Fourteen open pull requests are six decisions.** Three stacks and
-five singletons:
-
-1. **#302** — the exo seat. Contains #288 and #269. One merge closes three.
-2. **#301** — the PM seat. Contains #300, #298 and #292. One merge closes four.
-3. **#282** — the research seat. Contains #280. One merge closes two.
-4. **#299** frontend, **#296** engineer, **#293** skill, **#290** engineer — independent.
-5. **#285** research — rebase first, then it is a seventh decision.
-
-## The order, simulated, and the collision the simulation found
-
-Performed in a detached scratch worktree against `origin/main`, not
-against `main`, so the simulation cannot advance the branch it is
-comparing to. Every step below is a merge that was executed.
-
-```
-origin/main -> #302 -> #301 -> #282 -> #290 -> #293 -> #296 -> #299
+```bash
+git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>   # exit 0 = contained
 ```
 
-Seven merges land thirteen of the fourteen open pull requests. #285 is
-not in the order because it does not merge as it stands.
+**#288 and #269 are deliberately left open**, against this seat's own
+retirement duty. Ursa's PM told the owner at 01:48:58 UTC that #302
+"contains pull requests 288 and 269 by ancestry, both carrying the same
+charter path, so one owner merge of 302 should settle all three." That
+is an open ask naming them, and the charter's first exception forbids
+closing a pull request another seat has named in one. The same sentence
+now covers #307, which contains all three.
 
-**The first run of this order failed, and that is the first time the
-simulation step has caught anything.** #301 and #302 conflict in
-`docs/agents/incidents.md` **in either order**: whichever lands second
-hits the conflict. Both read clean against `main`, both are `MERGEABLE`
-to GitHub, and `check-merge-queue.sh` reported both clean in the same
-minute, because every one of those instruments tests a branch against
-`main` and none of them tests a branch against the queue's own landing
-order.
+## #285, and the instrument note that matters
 
-The mechanism is worth naming because it is structural rather than bad
-luck. `docs/agents/incidents.md` is an append-only register written by
-two different seats, and both append at the tail. Two appends to one
-file's last line are the one edit shape that cannot auto-merge, so
-**two seats writing a shared append-only register collide by
-construction on any day they both write one**, and the collision is
-invisible to every conflict instrument this organization runs until the
-second merge is actually attempted.
+#285 is the queue's only conflict and it is not close: 54 files,
+including `add/add` collisions on `ursa-minor/components/ui/copy-line.tsx`
+and `ursa-minor/lib/record/published-index.ts`. Its merge base with
+`origin/main` is `8f3c6ce`, **1008 commits behind**. There is a common
+base, so this is staleness and not the unrelated-histories signature the
+2026-10-23 public history rewrite could have produced. Ursa's PM
+independently measured 1003 commits and handed the pull request back to
+the research seat, which is the right destination: a rebase across 1008
+commits of two products' source is the owning seat's work and nobody
+else's.
 
-**Resolved, before this file was written.** #302 is the newer pull
-request, so under `docs/standards/pm.md` §11.3's norm that a conflicted
-branch is the authoring seat's to rebase, it was this seat's. #302 now
-contains #301, with both seats' entries kept and the PM's two earlier
-events placed first. Re-simulated afterwards in both orders: all seven
-merges succeed either way. So the owner can take #301 and #302 in
-whichever order she reaches them, and if she takes #302 first, #301
-lands as an absorbed merge rather than a decision, which is the fourth
-bucket of the exo charter's §3e and not a merge anybody made.
-
-## This seat's own pair
-
-#302 contains #288, which contains #269. One owner decision covers all
-three and **#302 is the one to merge.** #288 and #269 are both readied
-and were left open rather than closed, because both are sitting in the
-PM's merge gate and closing an artifact another seat's gate may be
-acting on costs more than the queue slot saves.
+**Both instruments were run and they agree on #285.** They did not agree
+on #307 and #308 at first: a `merge-tree` sweep taken before re-fetching
+`refs/pull/*` reported both as conflicting, because their refs did not
+exist in this clone yet and `merge-tree` exits non-zero for a missing
+ref exactly as it does for a conflict. One `git fetch origin
+'+refs/pull/*/head:refs/prs/*'` later, both are clean. This is the §5b
+rule in its narrowest form: a non-zero exit from `merge-tree` is a claim
+about your clone until you have checked the clone.

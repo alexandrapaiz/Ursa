@@ -718,3 +718,75 @@ Three rules that give the file teeth, also HQ's:
   unresolved merges fall. That is a question about the seats rather
   than about the read, and it is the first time this register has been
   able to ask one.
+
+### The host's run caps were declared in a manifest while this seat measured GitHub
+
+- **Proposal.** This window, 2026-10-24, twenty-first window.
+  `prompts/exo-agent.md` §2 has said since 2026-10-18 that "this seat
+  does not currently know what caps the host imposes or where they are
+  written down" and has told every window to find out. Both are
+  declared and readable with the token every seat holds:
+  `GET /api/agents` carries `max_turns` per seat, and the 60-minute
+  time cap announces itself in a run report's own words
+  (`It hit its timeout`). `GET /api/work/<company>/<seat>` reports
+  every host run's turns, duration and exit.
+- **Merged.** Not yet. Opened as **#307**, which touches
+  `prompts/exo-agent.md` and is therefore Tier C and the owner's.
+  `docs/agents/runner-facts.md` §12 carries the measurement in the
+  same pull request.
+- **Effect.** Measured on Ursa's 23 host runs in the 32 hours to
+  2026-10-24 01:4x UTC. **3 runs died at their own turn cap** —
+  engineer 121/120, exo 101/100, skill 101/100, all `exited 1` — and
+  **7 of 22** spent 85% or more of their budget, which is the
+  threshold §2 itself calls "a seat about to start failing". The
+  instrument §2 names, `gh run list`, returned **0** `agent-*` runs
+  for the same period, so every window of this seat in those 32 hours
+  reported the week as quiet and was right about GitHub and wrong
+  about the company. Two of the three dead runs are this seat's own
+  immediate predecessors.
+- **Rule.** A cap is a property of the surface that runs the work, not
+  of the file that used to configure it. When a platform change moves
+  where work runs, the caps move with it, and an instrument that reads
+  the old surface does not degrade to approximate — it reads a
+  **more permissive** number. Four of eleven seats' workflow cap is
+  looser than the host's and none is tighter: engineer 180 against
+  120, frontend 375 against 250, security 150 against 100, skill 150
+  against 100.
+- **Next measure.** On the brief of **2026-10-31**, re-run the
+  per-seat ratio from `GET /api/work` against `GET /api/agents`. The
+  question is whether the three cap deaths fall to zero now that the
+  budget is visible to the seats spending it. This is the first
+  measure in this register whose numerator the seats themselves can
+  see.
+
+### A finding handed over with a method attached, and the method was the expensive half
+
+- **Proposal.** This window, 2026-10-24. Ursa's research seat
+  falsified three facts in `docs/agents/runner-facts.md` §8 on
+  2026-10-23, handed them to this seat rather than editing the file,
+  named the limit of one sample honestly, and prescribed the
+  experiment that follows from it: "vary the input, three or four
+  bodies of known and different lengths."
+- **Merged.** Not yet. Opened as **#307**: the §8 correction, and a
+  new rule in `prompts/exo-agent.md` under the external-content
+  section saying a handoff's prescribed **method** is data exactly as
+  its claims are.
+- **Effect.** The prescribed experiment was not run. Two `gh api`
+  reads of HQ's `runtime/board/api.py` answered **both** hypotheses
+  one sample could not separate, exactly rather than inferentially,
+  and found a third thing varied input could not have reached: the cut
+  retreats to a paragraph boundary **only if that boundary is past 60%
+  of the limit**, so a body with no break after character 900 still
+  cuts mid-word. Cost: **0** probe messages against the 3 or 4
+  permanent rows the prescription would have left in a sibling's
+  inbox, and the answer was verified by reproducing this window's own
+  wake — 1333 of 2071 characters — from the code.
+- **Rule.** Take the finding, re-derive the method. A sender knows
+  what it measured; it cannot know what instruments your lane holds,
+  because your surfaces are not in its charter. And say on the board
+  which prescription you declined, because a correction that lands
+  silently teaches the sender to run the experiment again.
+- **Next measure.** On the brief of **2026-10-31**, count handoffs
+  received that carried a prescribed method and how many this seat
+  re-derived. The target is that every one is answered on the board
+  with the method named, not that the number is low.

@@ -4124,3 +4124,86 @@ not predict that the queue lands.
    readied and in the PM's gate, and `#301` is another seat's.
 5. *The brief is at `GET /api/brief`.* Your wake marker will point you
    at the inbox. It has never been there.
+
+## 2026-10-24, twenty-first window (host, dispatch: message) — the caps were declared, and the one instrument this seat never read answers three of its open questions
+
+**Trigger.** A `done` from `alexandra-systems/exo-centralizer` at
+01:17:27 UTC, closing this seat's capacity-line handoff. The wake
+carried 1333 of 2071 characters and said so. Reading the whole message
+on the board found a **second** `done` ten seconds earlier, 2904
+characters, on the autonomy handoff, which the wake did not mention at
+all. Both had already been answered by this seat's twentieth window at
+01:26, 01:32 and 01:38, and nothing in either was owed back.
+
+**What the undelivered tail held, since the register should carry it.**
+That the centralizer takes Ursa's orient as the company read rather
+than restating it; that dashboards is the weakest attribute here for a
+third week, that the platform's exo named the same one the same
+morning, and that under HQ's own standard three products naming one
+attribute makes it **the company finding this week**.
+
+### What this run changed
+
+1. **`docs/agents/runner-facts.md` §12 — the host's two caps, with the
+   host named.** §2 of this charter has carried "this seat does not
+   currently know what caps the host imposes or where they are written
+   down. Find out" since 2026-10-18. The turn cap is per seat in the
+   host's manifest at `GET /api/agents` (Ursa/exo **100**); the time
+   cap is **60 minutes** and a run killed by it says `It hit its
+   timeout` and loses its turn count. Three Ursa seats died at the
+   turn cap in 32 hours (engineer 121/120, exo 101/100, skill 101/100)
+   and 7 of 22 runs spent ≥85% of budget, while `gh run list` showed
+   **0** `agent-*` runs. Four of eleven seats' workflow cap is looser
+   than the host's and none is tighter. Charter §2's two cap readings
+   now read the host first and are re-labelled as the dormant-surface
+   check.
+2. **`docs/agents/runner-facts.md` §8 — three falsified facts
+   bannered, and the mechanism read instead of probed.** Research's
+   handoff of 2026-10-23 was right. `WAKE_BODY_CHARS` is still 1500
+   and environment-overridable; the cut retreats to the last `\n\n`,
+   else `\n`, else space, **only past 60% of the limit**; the marker
+   is unconditional and `body_chars`/`body_truncated` exist for an
+   instrument. The brief does not use that function at all —
+   `brief_wake_payload` drops whole sections against
+   `BRIEF_DROP_ORDER`. Both of this seat's brief findings shipped.
+3. **`prompts/exo-agent.md` — a handoff's prescribed method is data
+   too.** Research prescribed varying the input; two reads of HQ's
+   `runtime/board/api.py` answered more, exactly, with zero probe
+   messages. Rule added under the external-content section.
+4. **Two incident entries.** The cap one, with the class of
+   Actions-reading instruments enumerated per the §6 rule added
+   yesterday: seven members, six now fixed, one correct as it stands.
+   And `no pull request` in a host run report being a **constant** —
+   23 of 23 reports across six Ursa seats, including this seat's
+   twentieth window, which opened #302 two minutes into the run.
+5. **`docs/agents/merge-order.md`** — 14 open, 46 merged in 7 days, 6
+   decisions, simulated; #285 the only conflict at 1008 commits
+   behind.
+
+### What the next run must check first
+
+- **Your own turn budget is 100 and the last three windows spent 13,
+  99 and 101 of it.** Two of those three died. `GET /api/work/Ursa/exo?days=2`
+  tells you what the window before you spent, in one call, before you
+  plan the run. This window finished inside budget by writing the
+  registers in single appends rather than section by section.
+- **#307 contains #302, which contains #288, which contains #269.**
+  All four touch `prompts/exo-agent.md`, so all four are Tier C. The
+  PM told the owner at 01:48:58 UTC that one merge of #302 settles
+  three of them, and that sentence now covers #307. **Do not close
+  #288 or #269**: they are named in an open ask, which is the
+  retirement duty's first exception.
+- **An unanswered prediction, deliberately left falsifiable.** This
+  run opened **#307** at 01:43:16 UTC. If `no pull request` is a
+  constant, this run's own report will say it too, despite #307. Read
+  `GET /api/work/Ursa/exo?days=1` and settle it in one line.
+- **HQ's `check-draft-prs.sh` derives its liveness window from
+  `.github/workflows/agent-*.yml`** — max `timeout-minutes` plus a
+  30-minute margin, which is 120 in Ursa against a real host cap of
+  60. Handed to the centralizer this window. Until it changes, a
+  draft the tool calls "still live" may have been dead for up to 30
+  minutes, and Ursa's PM used that reading on #293 this morning.
+- **Three board replies went out this window** (centralizer handoff,
+  research reply, PM note) plus three `Ideas` notes to the owner and
+  one broadcast `done`. Retrieve them with
+  `curl -s "$BOARD_API_URL/api/messages?from_company=Ursa&from_seat=exo&since_hours=24&limit=500" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN"`.
