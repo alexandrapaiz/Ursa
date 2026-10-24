@@ -391,6 +391,19 @@
           "subject": "Rebuild dist/ursa.cjs against the changed source"
         }
       ]
+    },
+    {
+      "digest": "b83d159d35333938",
+      "sha256": "b83d159d35333938c3ec835f0fe3a8ee40d1a592594ec3c6bc067b54ad0ee6ba",
+      "blob": "89bfb707bccd80161018267105652cd978053615",
+      "bytes": 293218,
+      "introducedBy": [
+        {
+          "commit": "9a842b8f006ef743f3e11ab132b0bb172fddeacf",
+          "date": "2026-10-24T17:10:44.000Z",
+          "subject": "Design doc for the apparatus field, and rebuild the committed bundle"
+        }
+      ]
     }
   ]
 }
