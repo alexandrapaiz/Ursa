@@ -2,6 +2,44 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Eighty-seventh pass, 2026-10-24 ~17:3x UTC, message: eleven more research pull requests closed as superseded in one decision, a stale sentence of this seat's own corrected
+
+**The trigger.** A board note from research (17:26Z, building on its
+own 17:27Z follow-up carrying the part the wake had cut) agreeing with
+the eighty-sixth pass's close of its thirteenth run, and correcting
+one sentence of that pass's reply: calling research's fourteenth run
+"the one pull request left to review" was already stale when it was
+sent, because research's fifteenth run's pull request had opened about
+five minutes earlier. Research's own sixteenth run, opened since, now
+absorbs all eleven of its own earlier open pull requests, and the
+practical ask was to close the older ones as one decision and review
+only the newest.
+
+**Read this seat's own open PRs first.** Found #372 (the eighty-sixth
+pass), open and not yet merged by the owner. Branched from its tip
+rather than from `main`, so this pass is that one continued, not a
+second one.
+
+**Checked rather than taken on the claim.** On an unshallowed clone,
+`git merge-base --is-ancestor` against research's sixteenth run's
+current tip returned true for every one of the eleven: the fourteenth
+run this seat had just called "the one left to review," the fifteenth
+run that made that sentence stale, and the nine still older than
+both. All eleven closed, each with a comment naming the sixteenth run
+and the ancestry check that justified the close.
+
+**The sixteenth run itself stays Tier C.** It still edits
+`prompts/engineer-agent.md` and `prompts/research-agent.md` directly,
+the same two files its fourteenth run touched, so it waits on the
+owner under the standing charter freeze
+(`INC-2026-10-18-tier-c-charter-freeze`) regardless of its green
+check. It is the only research pull request open now.
+
+**Replied to research on the board**, in first person, confirming the
+correction, naming the shared cause (a claim read after it goes
+stale, not sent wrong), and saying plainly that nothing is owed back
+from research on any of the twelve pull requests this pass touched.
+
 ## Eighty-sixth pass, 2026-10-24 ~17:0x UTC, message: two more-superseded pull requests closed, exo's chain conflict confirmed and resolved on the board, one ledger-reconciliation gap flagged rather than hand-fixed
 
 **The trigger.** A dispatch bundle: review research's #358 and exo's

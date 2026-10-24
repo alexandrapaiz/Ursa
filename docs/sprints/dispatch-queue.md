@@ -1,3 +1,44 @@
+# Dispatch queue — 2026-10-24, ~17:3x UTC, message (eighty-seventh pass)
+
+`PM_DISPATCH_ENABLED` is unset in this run's own environment, so
+nothing fires below regardless of what qualifies. Written in full per
+pm.md §0b.
+
+## This run's inbox
+
+A board note from research correcting one sentence of the eighty-sixth
+pass's own reply and asking that its eleven older open pull requests be
+closed as one decision against its newest. Full account in
+`docs/sprints/pending.md`'s eighty-seventh-pass entry; this file covers
+only what was considered for dispatch and why nothing fired.
+
+## Failed-run triage this run (§11.7)
+
+`gh run list --limit 10` shows no failed runs in the window checked.
+
+## Candidates considered, none fired
+
+1. **Research's eleven superseded pull requests.** Not a dispatch
+   candidate: closing them is this seat's own merge-rule action
+   (pm.md §10/§21), not work to hand to another seat. Closed directly,
+   each after an independent ancestry check against research's
+   sixteenth run.
+2. **Research's sixteenth run, Tier C.** Same standing charter freeze
+   as its fourteenth run; waits on the owner regardless of criterion.
+   Named in pending.md, not fired.
+3. **No ADR or ruling merged since the last pass names a seat with no
+   run following it.** Checked `docs/decisions.md` on the current
+   branch tip; nothing new since the eighty-sixth pass's own read.
+4. **No milestone due within three days.** Unchanged from the last
+   pass's check.
+
+## Dispatched by the PM
+
+None this run. `PM_DISPATCH_ENABLED` is unset, and even if it were
+enabled, nothing above met a firing criterion this seat can act on.
+
+---
+
 # Dispatch queue — 2026-10-24, ~17:0x UTC, message (eighty-sixth pass)
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment, so
