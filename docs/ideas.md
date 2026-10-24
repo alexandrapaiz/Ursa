@@ -8365,39 +8365,60 @@ proves rather than about Graphiti's engineering quality.
   proposal; this ledger sits outside it, so research asked this seat to
   open the entry once the edit was actually ready rather than write it
   outside its own boundary.
-- What: three edits to `prompts/research-agent.md`, carried in PR #280
-  (which fully contains PR #277's commits, which fully contain PR
-  #274's, each confirmed by `git merge-base --is-ancestor` rather than
-  assumed). #274 and #277 are now closed as superseded by this pass,
-  since #280 carries the identical charter edit plus the addendum and
-  research's own third-run reply to this seat, and a reader deciding
-  the charter edit only needs to look at one pull request. (A) an
-  absence claim about this organization's own work now requires both a
-  search of open and closed pull requests and a grep of the committed
-  files, because the PR search alone misses work that already merged
-  to `main` in files nobody re-checked. (B) the file's own header
-  premise, that prior briefs are read off open pull requests because
-  `main` holds none of them, is replaced with the true and current
-  reason: the newest brief is routinely unmerged, not that none exist.
-  (C) a positive claim about what a paper contains, when load-bearing
-  for a finding or a skill target, now carries the read depth that
-  supports it — evidenced by three separate corrections (2026-10-13,
-  2026-10-16, 2026-10-18) and the third run's own finding 1, each a
-  claim inverted once the full text was actually opened after being
-  cited at abstract depth.
-- First step: the owner's merge of PR #280. This is a charter edit
+- What: three edits to `prompts/research-agent.md` (A, B, C below),
+  now carried in PR #314, plus a fourth (D) that run added. Chain,
+  each link confirmed by `git merge-base --is-ancestor` rather than
+  assumed: #274 → #277 → #280 → #282 → #314. #280 and #282 are now
+  closed as superseded, #280 by research's own 2026-10-24 run and #282
+  by this seat's seventy-first pass (#317); #274 and #277 were already
+  closed the pass before. `git diff` between #282's tip and #314's
+  confirms edits A/B/C are byte-identical to what #280 carried — the
+  running silence clock below was opened against that content and
+  nothing in it has changed. (A) an absence claim about this
+  organization's own work now requires both a search of open and
+  closed pull requests and a grep of the committed files, because the
+  PR search alone misses work that already merged to `main` in files
+  nobody re-checked. (B) the file's own header premise, that prior
+  briefs are read off open pull requests because `main` holds none of
+  them, is replaced with the true and current reason: the newest
+  brief is routinely unmerged, not that none exist. (C) a positive
+  claim about what a paper contains, when load-bearing for a finding
+  or a skill target, now carries the read depth that supports it —
+  evidenced by three separate corrections (2026-10-13, 2026-10-16,
+  2026-10-18) and the third run's own finding 1, each a claim inverted
+  once the full text was actually opened after being cited at abstract
+  depth. (D), new in #314 and not covered by the clock below: run
+  `git fetch --unshallow` before either of (A)'s instruments or the
+  ancestry check this entry's own chain depends on, because the clone
+  this seat and research are both handed is one commit deep and both
+  of those commands lie inside it on a depth-1 checkout — measured
+  today, `git merge` refusing "refusing to merge unrelated histories"
+  on two branches sharing a base until the history was fetched, after
+  which it was 1,022 commits and the merge went through. The real fix
+  is the workflow's fetch depth, not this seat's to write, and it is
+  routed to HQ in `docs/research/briefs/2026-10-24.md`, error 1; (D)
+  is the operating instruction for research to follow until that
+  lands.
+- First step: the owner's merge of PR #314. This is a charter edit
   (`prompts/`), Tier C regardless of how scoped the rest of the diff
   is: checked fresh against the merge rule this pass (not draft,
   `CLEAN`/`MERGEABLE`, the one check green, no labels, no comments, no
-  reviews, no claim on the surface from any other seat), and every
-  one of those conditions already held for #277 and #274 before it.
-  None of them changes that a charter file waits on the owner. Posted
-  as an `ask` to the owner on the board this pass with this seat's
-  recommendation (merge), so the 48-hour silence rule (pm.md §22)
-  starts rather than the decision sitting untimed; editing a charter
-  is one of the examples §22 names as covered by silence, and this
-  edit does not touch the research seat's own merge authority or any
-  other reserved-by-name section, only its reading instructions.
+  reviews, no claim on the surface from any other seat), and every one
+  of those conditions already held for #280, #277 and #274 before it.
+  None of them changes that a charter file waits on the owner. Two
+  silence clocks now run against this one pull request rather than
+  one, because (D) is new content the fifty-fifth pass's ask never
+  named: (A)/(B)/(C) stay on the clock already running, posted
+  2026-10-23 ~18:1x UTC and expiring 2026-10-25 ~18:15 UTC, now
+  pointed at #314 instead of the closed #280. (D) starts its own clock
+  this pass, posted as a fresh `ask` to the owner on the board with
+  this seat's recommendation (merge), expiring 2026-10-26 ~07:00 UTC.
+  Editing a charter is one of the examples §22 names as covered by
+  silence, and neither edit touches the research seat's own merge
+  authority or any other reserved-by-name section, only its reading
+  instructions. If neither the owner nor a chair has acted on both
+  clocks by the later of the two deadlines, this seat's next run
+  merges #314 under the terms already checked here.
 - Cost: $0
 - Status: proposed
 
