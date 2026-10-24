@@ -9258,3 +9258,162 @@ should not keep awarding itself the comparison: Ursa only stopped
 producing the pair against tombstones. Against live axioms it still
 produces it, today, which is the first ledger entry above and is the
 honest limit on this paragraph.
+
+### 2026-10-24 (engineer, third run) — Whether the matcher's document-frequency cutoff should be a fraction of the corpus, which needs a wall-clock measurement nobody has taken
+
+- Trigger: finding 52 routed by Ursa's research seat, and this run's own
+  reproduction of it. `MAX_TOKEN_DF` in `ursa-major/src/match.ts` is the
+  absolute number 500, counted over generation segments, and the number
+  of generation segments grows every time anyone runs the tool. This run
+  built the two-corpus probe that proves the consequence: the sentence
+  `Row holds alpha beta gamma delta onwards.` scores 0.882 and is
+  labelled `survived_mutated` with a word diff against a corpus of 4
+  segments, and is a bare `no_generation_provenance` against a corpus of
+  501 segments holding the same vocabulary. Only the corpus size
+  changed.
+- What: this run shipped the half that is a field, so a span the matcher
+  declined to look at now carries `noCandidate: 'df_cutoff_suppressed'`
+  and the record counts them in `stats.blindSpans`. It deliberately did
+  not touch the constant, because the cutoff is not an accident: it
+  exists so that the fuzzy pass does not run full edit distance over
+  every pair of segments, and Ursa Major runs on the user's own device,
+  where that cost is the user's battery. The decision is between leaving
+  it absolute and reporting the blindness, making it relative (something
+  like `Math.max(500, Math.ceil(0.01 * corpusSegments))`, which holds the
+  blind fraction roughly constant and lets the per-span candidate count
+  grow), and a third option that keeps the constant and adds a fallback
+  pass running only on spans that seeded nothing, so the extra work is
+  proportional to the defect rather than to the corpus. The three are
+  laid out with their costs in §7 of `docs/design/df-cutoff-blindness.md`.
+- First step: the measurement, and it is the thing standing between here
+  and a decision. A script under `ursa-major/tools/` that calls
+  `resolve()` against synthetic corpora of 1,000 through 100,000
+  generation segments at each of the three options, reporting wall-clock
+  seconds, peak resident memory and the resulting `stats.blindSpans`.
+  Option 1 is correct while `blindSpans` is zero on real records, and
+  this is the table that says what the other two cost when it stops
+  being zero.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, third run) — The viewer draws a span the matcher never looked at exactly like one it looked at and could not place
+
+- Trigger: wiring `noCandidate` through `computeStats` and then reading
+  `ursa-major/src/viewer.ts:310` immediately after. The viewer's legend
+  has one line about doubt in it, `dashed underline = uncertain (N spans
+  need adjudication)`, driven by `R.stats.uncertainSpans`. Nothing reads
+  `noCandidate`, so the span the matcher never scored is rendered with
+  the same plain styling as the span it scored at 0.34 and the span whose
+  vocabulary genuinely appears in no generation.
+- What: the viewer is the surface where a person actually reads a record,
+  which makes it the place the new distinction either lands or does not.
+  The three bare `no_generation_provenance` reasons want different
+  treatment rather than the same one. `absent_from_corpus` is the honest
+  label and should look like a clean result. `scored_below_floor` is a
+  near miss and already has a candidate to show when it clears
+  `THETA_LOW`. `df_cutoff_suppressed` is not a result at all and should
+  be visually excluded from the class totals the reader's eye adds up,
+  because every one of those spans is a span the record is counting in
+  the category `CLAUDE.md` §1 calls most valuable without having earned
+  it. The failure this prevents is specific: a reader who opens the HTML
+  at a corpus size where `blindSpans` is nonzero and reads the
+  `no_generation_provenance` bar as a finding about the work.
+- First step: one legend line and one styling rule, conditioned on
+  `R.stats.blindSpans` the way the existing line is conditioned on
+  `R.stats.uncertainSpans`, plus a `title` attribute on the span itself
+  carrying its `tokenSuppression` numbers so hovering says six of seven
+  words were too common to search on. No new concept, no new data, and
+  it is the same shape as the line already there.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, third run) — The MCP server is the only delivery route whose revocation can ever be enforced, and nothing tells the user that
+
+- Trigger: writing §10.6 of `docs/design/consent-and-erasure.md` for the
+  paste channel, and noticing while doing it that
+  `ursa-major/src/mcp/server.ts:198` already serves `renderTuningBlock`
+  over a surface the model re-reads on every call. The paste channel
+  cannot enforce a revocation because its gateway is a text field inside
+  another vendor's product, which can neither emit a receipt nor be
+  enumerated. The MCP route has neither of those properties: the server
+  is Ursa's, it renders fresh each time it is asked, and a revoked axiom
+  is gone from the next render with nothing for the user to do.
+- What: so the product already ships both an unenforceable channel and
+  an enforceable one, and presents them as two export conveniences. The
+  user is never told that the choice between them is also a choice about
+  whether her revocations will work. This is not a new mechanism, it is
+  the honest naming of one that exists: `ursa tuning export` should say
+  what the block it just wrote cannot do, and point at the route that
+  can. The risk of saying nothing is the one `CLAUDE.md` constraint 2
+  names, since a user who believes revocation is global and chose the
+  paste route has been handed a true sentence at the one moment she
+  cannot check it, which is the dark pattern available here.
+- First step: two lines on the `tuning export` output, next to the
+  existing `Exported N axioms → <path>` line, saying that a pasted block
+  keeps working until replaced by hand and naming `ursa mcp` as the
+  route that does not need replacing. Then the real question for the
+  owner, which the lines do not settle: whether the MCP route should
+  become the documented default and the paste block the fallback, which
+  is a distribution decision, since the paste block is what works
+  without asking any vendor for anything and is therefore the reason the
+  product reaches anyone at all.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (third run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, next entry after the Mem0 read this seat filed earlier
+today. **Letta, formerly MemGPT**, read on exactly this run's question,
+which is what another memory product does when its own retrieval
+declines to look at something.
+
+**Worth stealing: the budget is drawn at every turn, not reported once
+at the end.** Letta's terminal client renders a context chart on an
+ongoing basis, splitting the model's context window into six named
+categories with their token counts: `System`, `Core Memory`, `Tools`,
+`Messages`, `Summary` and `Other`, the last of which carries the
+description `external memory, archival storage` and is fed by
+`num_tokens_external_memory_summary`
+(`src/cli/helpers/context-chart.ts` in `letta-ai/letta-code`). The
+property worth copying is not the chart. It is that the thing the user
+would otherwise have to ask about is on screen without being asked for,
+every turn, so the boundary between what is in play and what is in
+storage is never invisible. Ursa prints its equivalent once, at the end
+of `ursa run`, in `ursa-major/src/cli.ts`. This run took the smallest
+version of the lesson and added a line to that summary for the spans
+the matcher never scored, printed only when the count is not zero. The
+larger version is the second ledger entry above, which is the same
+thought aimed at the viewer.
+
+**What Ursa does better: the recall boundary is in the record and in
+readable source, rather than behind a service.** The question this run
+spent the day on, whether a search came back empty because nothing
+matched or because a limit was reached, cannot be answered about Letta
+from outside it. The two documentation pages read for this scan, the
+stateful-agents memory guide and the archival-memory guide, name
+`query`, `tags` and `page` and state that results are semantically
+relevant, and neither gives a result limit, a default page size, or any
+indication that a response will say how many matches it omitted. The
+source cannot settle it either: `letta-ai/letta`, at 25,241 stars, now
+holds ten files, all of them policy and documentation, with its README
+pointing at `letta-ai/letta-code` for current source and at an
+`archive` branch for the retired V1 API server, and the archival search
+implementation is in neither, because it runs server-side. That is a
+reasonable commercial choice and it is not a criticism of the product.
+It does mean the comparison is real: Ursa's equivalent constant is
+`MAX_TOKEN_DF = 500` on line 12 of a sixty-line file anyone can read,
+its consequence is now a typed field on the span it affected, and the
+count is on the record. The honest limit on this paragraph, since this
+seat should not keep awarding itself the comparison: until today Ursa's
+constant was equally invisible in practice, documented nowhere, named
+in no design note, and it took another seat reading the source to find
+it.
+
+**External sources read for this scan**, since none of them is a
+committed file of this repository and none of them instructed this run:
+`docs.letta.com/guides/agents/memory`,
+`docs.letta.com/guides/agents/archival-memory`,
+`docs.letta.com/api-reference/agents/passages/list`, the GitHub API
+listings and README of `letta-ai/letta`, and the repository listing and
+`src/cli/helpers/context-chart.ts` of `letta-ai/letta-code`.

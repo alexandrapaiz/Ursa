@@ -170,6 +170,15 @@ function main() {
     console.log(`  ${cls.padEnd(26)} ${pct(st.pctOfFinal).padStart(9)} ${pct(st.pct).padStart(14)}  (${st.chars.toLocaleString()} chars, ${st.spans} spans)`)
   }
   console.log(`  uncertain: ${s.uncertainSpans} spans · trivial: ${s.trivialSpans} spans`)
+  // Printed only when it is not zero, because a line that reads zero on
+  // every run is a line people stop seeing, and this one is zero at both
+  // of this project's trial scales. When it is not zero the matcher
+  // declined to look at that many spans and labelled them
+  // no_generation_provenance anyway, which is a fact about MAX_TOKEN_DF
+  // rather than about the work. See docs/design/df-cutoff-blindness.md.
+  if (s.blindSpans) {
+    console.log(`  ${s.blindSpans} spans the matcher never scored, because every word in them is too common in this corpus to search on. They are counted as no_generation_provenance and should not be.`)
+  }
   console.log(`generated: ${s.generated.totalChars.toLocaleString()} chars → deleted ${pct(s.generated.deletedPct)}`)
   for (const c of s.perConversation) {
     console.log(`  ${c.title}: ${c.generations} gens, survival ${pct(c.survivalRate)}, turns-to-acceptance ${c.turnsToAcceptance ?? '—'}`)
