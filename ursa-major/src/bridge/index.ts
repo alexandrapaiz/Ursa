@@ -26,7 +26,7 @@ import { homedir } from 'node:os'
 import { basename, join } from 'node:path'
 import { parseClaudeSession } from '../parse'
 import { readVerdict, NO_VERDICT, type Verdict, type VerdictRunner, claudeVerdictRunner } from '../verdict'
-import { allowedOrigin, handleStoreRequest, tuningUnits } from '../serve'
+import { allowedOrigin, handleStoreRequest, listenOnLoopback, tuningUnits } from '../serve'
 import { applyVerdict, NOTHING_APPLIED, type AppliedVerdict } from './declare'
 import { deriveKeys, encryptJson, type DerivedKeys } from './crypto'
 import {
@@ -104,12 +104,16 @@ export function tuningLines(projectPath: string): OverlayTuningLine[] {
     }))
 }
 
+/** The port `ursa bridge` listens on when the caller names none. */
+export const DEFAULT_BRIDGE_PORT = 7817
+
 export interface BridgeOptions {
   projectPath: string
   passphrase: string
   syncUrl: string
   session?: string
   intervalMs?: number
+  /** 0 asks the OS for a free port, which is what the tests want */
   port?: number
   /** origins allowed to POST /run; loopback dev origins are always allowed */
   allowOrigins?: string[]
@@ -118,6 +122,10 @@ export interface BridgeOptions {
 }
 
 export interface BridgeHandle {
+  /** the port actually bound, which is the only useful answer when port 0 was asked for */
+  readonly port: number
+  /** `http://127.0.0.1:<port>`, the base a page fetches against */
+  readonly url: string
   stop(): Promise<void>
   /** one tick, exposed for tests and for --once */
   tick(): Promise<OverlayPayload | null>
@@ -126,7 +134,7 @@ export interface BridgeHandle {
 export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
   const log = opts.log ?? ((l: string) => console.log(l))
   const intervalMs = opts.intervalMs ?? 5_000
-  const port = opts.port ?? 7817
+  const port = opts.port ?? DEFAULT_BRIDGE_PORT
   const runner = opts.runner ?? claudeVerdictRunner
   const keys: DerivedKeys = await deriveKeys(opts.passphrase)
   const project = basename(opts.projectPath)
@@ -288,13 +296,18 @@ export async function startBridge(opts: BridgeOptions): Promise<BridgeHandle> {
     if (store) { sendJson(store.status, store.body); return }
     res.writeHead(404, cors); res.end()
   })
-  await new Promise<void>((r) => server.listen(port, '127.0.0.1', r))
-  log(`bridge up: watching ${project}, run channel on 127.0.0.1:${port}, blob ${keys.blobId.slice(0, 8)}…`)
+  // Shared with `ursa serve` (`listenOnLoopback` in src/serve.ts) rather
+  // than wrapped here, because the version written here passed no `error`
+  // handler and so hung instead of failing when the port was taken.
+  const bound = await listenOnLoopback(server, port, 'the bridge')
+  log(`bridge up: watching ${project}, run channel on 127.0.0.1:${bound}, blob ${keys.blobId.slice(0, 8)}…`)
 
   await tick().catch((e) => log(`first tick failed: ${(e as Error).message}`))
   const timer = setInterval(() => { void tick().catch((e) => log(`tick failed: ${(e as Error).message}`)) }, intervalMs)
 
   return {
+    port: bound,
+    url: `http://127.0.0.1:${bound}`,
     tick,
     stop: () => new Promise((r) => { clearInterval(timer); server.close(() => r()) }),
   }
