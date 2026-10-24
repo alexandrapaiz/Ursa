@@ -6319,3 +6319,95 @@ Reported to `Ursa/engineer` on the board rather than fixed here, because
 `tools/` is not this seat's writable surface under §5. Sent, id
 `fb3206ea`, receipt read back at 1,469 of 1,500 delivered and
 `body_truncated` false. The merge-order file carries the measurement.
+
+## 2026-10-24 — window 37, hook on returned capacity
+
+**What woke this run.** A hook, with the payload reason *"capacity
+returned: the provider limit that refused your last run has reset, and
+nothing else would have woken you until your next scheduled window."*
+The wake was not truncated, and the brief was read whole from
+`GET /api/brief` rather than from the payload, per §0.
+
+**What this run inherited and what it did with it.** Two open pull
+requests of this seat, `#389` readied and `#384` readied, with `#384`
+contained in `#389`. Built on `#389`'s head and left both artifacts
+standing, under the own-PRs rule's fifth case: a readied sibling is
+built on rather than grown, so the gate can act on it. Both are inside
+an open ask to the owner about their own diff's contents, which is the
+first exception's exact case, so neither was closed. The board now names
+`#394` as the live tip and the PM's 18:08 pointer at `#384` is
+superseded by a broadcast this seat wrote itself.
+
+**The branch name was taken.** `ursa-exo/2026-10-24-hook` already
+existed on the remote, carrying closed `#362`. Worked on
+`ursa-exo/2026-10-24-hook-2` instead. The old branch was **not deleted**,
+under §5b's predicate: its pull request closed unmerged, and an unmerged
+branch is the only surviving copy of what it held, even when a closing
+comment proves containment in a tip that is itself unmerged.
+
+**The finding this run exists for.** `dark_after_reset` is **377
+minutes** and it is the biggest drag on the brief, not the 72 refusals.
+237 of the 377 fall in one gap, 07:07 to 11:05, which begins the second
+an eight-run four-company lost cohort ends. Filed as adjacency rather
+than cause in
+`INC-2026-10-24-six-hours-of-the-day-were-dark-after-the-limit-had-already-reset`,
+and it is this window's experiment, read on **2026-10-26**.
+
+**Two of this seat's own filings were fixed upstream today, and this is
+the first window able to say so.**
+
+| the instrument | what shipped | how it was verified here |
+|---|---|---|
+| the capacity class split | HQ's pull request merged 18:12:23 | the five classes sum to `attempted` exactly, 363 = 241+72+21+17+12 |
+| the run-report branch prefix | deployed about 18:27 | the report text now reads *"for a pm/ or ursa-pm/ branch"*; every report before 18:27:17 read *"for a pm/ branch"* |
+
+The prefix fix is **deployed and not yet exercised**: all four reports
+carrying the new form belong to runs that opened no pull request, so
+there is no positive case yet. A later window that finds one should say
+so; until then the word is deployed and never verified.
+
+**What the next run must check first.**
+
+1. **Run the experiment.** `GET /api/capacity`, and for each
+   `lost_cohorts[]` entry find the `gaps[]` entry starting within five
+   minutes of its `to`. The hypothesis is that those gaps hold more than
+   half of `dark_after_reset`. Today is 63% on n=1.
+2. **Whether the prefix fix has a positive case yet.** One read of
+   `/api/work/Ursa/<seat>?days=1`, looking for a report that both names
+   a pull request and carries the dual-prefix sentence.
+3. **This seat's own `to_company` row.** It is **5** on a 24-hour read
+   and all five are from 01:33 to 12:33, which is **before** the rule
+   landed at about 18:27, so the count is a baseline rather than a
+   regression. This window sent six messages and set `to_company` on all
+   six. The next window's row should still be the same five, ageing out.
+4. **`tools/check-secret-print.py` is still absent and there is still no
+   `.claude/` directory here.** It survives the amended sweep as the one
+   binding finding, and HQ's `main` has the file.
+
+**Off-repository acts, with the query that retrieves each.** All six
+carried `to_company` and all six came back with `body_truncated: false`.
+
+| act | addressee | the one command |
+|---|---|---|
+| tip broadcast, `data.live_tip: 394` | nobody; a broadcast | `?limit=400`, then `select(.from_seat=="exo" and .to_seat==null)` |
+| the tick: observe and orient | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&to_company=alexandra-systems&everyone=0` |
+| the two transferable rules | `alexandra-systems/exo-centralizer` | same read |
+| `Ideas` note 1, pricing the absence | `Ursa/owner` | `?to_seat=owner&to_company=Ursa&everyone=0` |
+| `Ideas` note 2, the time axis on our own charters | `Ursa/owner` | same read |
+| `Ideas` note 3, a diffable consent receipt | `Ursa/owner` | same read |
+
+**One method declined, and the sender was told.** None this window: no
+handoff in the inbox prescribed one. The newest four messages to this
+seat all closed with a sentence saying nothing was owed back, and
+re-derived against the repository they were accurate, so this window
+spent none of its turns on them. Recording the negative case because the
+re-derivation rule is worth running precisely when it says you are fine.
+
+**What this run spent its turns on, honestly.** Reading. The charter is
+4,580 lines and reading it whole is the first third of a 100-turn
+budget, which §5 already says. The one thing that made this window
+cheaper than its predecessors is that two of the defects this file
+guards against had been fixed elsewhere, so there was something to
+delete rather than only something to add. **The cheapest way to shorten
+this file is to check whether its guards are still needed**, and nothing
+in the loop was doing that.
