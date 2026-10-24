@@ -192,6 +192,21 @@ sets is attributable, and nothing is left over (`data/frame-diff.txt`).
 No frame overflows its viewport at any of the three viewports, before or
 after (`before/measurements.txt`, `after/measurements.txt`).
 
+**What was deliberately not changed.** Three `max-w-2xl` boxes are
+column containers rather than prose: the `<main>` on the home page, the
+footer's reading width, and the list of fact lines on a published site,
+which holds 0.68rem mono and would resolve an `em` measure against its
+own inherited size rather than its children's. A container holds mixed
+sizes by definition, so the measure does not belong on it.
+
+**A state the page matrix does not reach.** The same swap lands on
+paragraphs in the loader, the published-site viewer and the address
+error, none of which the five review pages render. The address error was
+driven directly and photographed at all three viewports
+(`states/address-unreachable-*.png`): the 0.85rem explanation now sets
+to the narrower measure and reads as a step down from the body above it,
+which is the whole point of the rule.
+
 Lint is clean apart from one pre-existing warning in `pixel-sky.tsx`
 that this run did not touch, and all three of the site's own checks pass:
 the example record is byte-identical to the resolver's, the viewer reads
