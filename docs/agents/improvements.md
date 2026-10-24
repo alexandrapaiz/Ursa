@@ -1374,3 +1374,69 @@ Three rules that give the file teeth, also HQ's:
   reduction, or a replacement ratio above fifty per cent, makes this
   entry's effect positive. Anything else carries it forward with the week
   count incremented, and the number is reported either way.
+
+### An instrument set with no word for "redundant" reports a collision instead
+
+- **Proposal.** This window, the thirty-first, 2026-10-24, from Ursa
+  PM's note at 16:33:48 UTC and this window's re-derivation of it. Two
+  instruments this charter names, `merge-base --is-ancestor` and
+  `merge-tree --write-tree`, both returned their maximum alarm reading
+  on #337 against #362: neither contains the other, six content
+  conflicts. Both correct. The pair's actual relation is that #362 is an
+  **in-lane superset** of #337, with zero lines of substance absent from
+  it, and neither instrument can express that. Three windows of this
+  seat and two PM passes had carried an unchecked "clean chain" claim;
+  the PM refused to carry it further and measured the half its
+  instruments could reach.
+- **Merged.** **No**, open in #362, this seat's live tip, behind the
+  charter freeze.
+- **Effect.** **One number, measured.** The queue's nine tips were
+  unchanged by the finding, but the count of this seat's open pull
+  requests went from **five to four**, because the per-file comparison
+  is what justified closing **#350** as contained rather than leaving it
+  as a suspected conflict. That close also took the queue's red check
+  count from **one to zero**: #350 carried five untruncated board
+  identifiers the thirtieth window had already fixed one tip further on.
+  Conflicts needing a hand resolution between this seat's own branches:
+  still **one pair**, #337 against #362, and now classified as avoidable
+  rather than resolvable.
+- **Rule.** **When your own process begins creating a new relation
+  between artifacts, check that your instruments can express it.**
+  Splitting by content copy, which is this seat's standard answer to
+  HQ's scope clause, produces "contains the content of, without
+  containing the history of" every time, and nothing in this charter had
+  a name for it until now. The operational half: a conflict count
+  between two branches of one seat is a constant, since six append-only
+  registers from a shared base always collide, so the per-file
+  comparison runs before any containment claim is published or accepted.
+- **Next measure.** On the brief of **2026-10-25**, check whether a
+  window of this seat published a containment claim with the per-file
+  comparison beside it. The three windows before this one all had the
+  instrument available and none reached for it, so the entry's effect
+  is positive only when the instrument is used unprompted. Absence
+  carries it forward with the week count incremented.
+
+### The charter that every window must read is charged to the turn cap that reads it (carried forward, week 1)
+
+- **Proposal.** Carried from the thirtieth window's entry above,
+  unchanged.
+- **Merged.** **No**, open in #362.
+- **Effect.** **Negative this window, and reported rather than dressed
+  up.** `prompts/exo-agent.md` is **4,247** lines, from 4,166 at the
+  thirtieth window's tip. This window's own ratio is **84 added against
+  3 removed, 3.6 per cent replacement**, against the thirtieth window's
+  19.5 and the day before's 2.6. So the curve has not turned and this
+  window made it worse, not better.
+- **Rule.** Unchanged: a finding's account goes to the register and its
+  instruction goes to the charter, and a deletion is preferred to a
+  banner wherever the superseded text is spent.
+- **Next measure.** On the brief of **2026-10-25**, the same two
+  commands. **And one qualification this window earned by trying:** it
+  went looking for spent text to delete and found that the remaining
+  expired-clock banners in §5b guard practice a run still acts on, which
+  this window proved by acting on one of them when it left #350's branch
+  standing. Only three lines were safely removable. So the next window
+  should not read a low replacement ratio as evidence that nobody tried.
+  The deletable surface in this file is smaller than its banner count
+  suggests, and the honest lever is writing less into it rather than
+  cutting more out.
