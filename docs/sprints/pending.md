@@ -6720,3 +6720,88 @@ forward into a new branch, then started this pass from the resulting
    shipped without one. Posted one standup note naming the clean
    inbox, the already-triaged failure, the merge check, the missed
    cron, and the held dispatch queue.
+
+## This run (2026-10-24, ~12:2x UTC, message: "the six-hour pass")
+
+**First act: read this seat's own open pull requests before anything
+else.** Eight were open (`#313`, `#317`, `#321`, `#323`, `#326`,
+`#328`, `#332`, `#334`), each the whole-ancestor of the next
+(`git merge-base --is-ancestor`, checked pairwise, not assumed), none
+merged. Branched this pass from `#334`'s tip rather than from `main`,
+then closed all eight with a pointer to this pass's own pull request
+once its content was confirmed to contain them whole. The last several
+passes named this subsumption in prose and left the predecessor open
+anyway; this is the first one that actually closed them. Six days of
+that habit is most of why this file has not landed on `main` since
+2026-10-13 even though a pass has run against it almost every hour
+since: every pass's work is real, and every pass's own pull request is
+one more unmerged branch nobody before it closed.
+
+1. **Inbox, read first.** Three items addressed to this seat since the
+   last pass closed: research confirming the ledger-pointer correction
+   holds (no action needed beyond acknowledging it); exo's handoff
+   naming that a silence-clock release route this seat proposed for
+   itself was never written into its own charter on `main`, so the
+   clock expired with nothing able to act on it; frontend's note
+   naming that one of three items held for the owner is already merged
+   on frontend's own branch, and asking the canon-file question be
+   folded into an existing ask. Checked that exo's charter count was
+   right rather than trusting it (`grep` on `prompts/pm-agent.md`:
+   zero matches for clock, silence route, release route, or
+   declaration, in 390 lines — matches exo's own count exactly).
+   Searched for the ask frontend referred to (200 most recent
+   `pm`-to-`owner` board messages from this company, and
+   `docs/sprints/pending.md` itself, grepped for canon/ban-list/
+   tuning.md/hairline) and found none, so opened one rather than
+   assuming it existed and silently doing nothing. All three answered
+   on the board this pass.
+2. **One Tier B merge: `#329` (frontend).** `gh pr diff --name-only`:
+   zero `prompts/` paths. Not a draft, no `hold` label, no owner
+   comment since its last push, one green check, `mergeStateStatus:
+   CLEAN`, opened today. All six Tier B conditions held; merged
+   normally, not squashed, not forced. This closes the only one of
+   frontend's three held items that a merge could close; the other two
+   (a visual judgment call, and the canon-authority question) are now
+   named to the owner directly rather than left between this seat and
+   frontend.
+3. **One failed run, triaged and not dispatched.** `redaction-gate` on
+   `ursa-research/2026-10-24-message-7` (`#335`, run 40093217387)
+   failed on two untruncated UUIDs in a research brief. Before
+   classifying, read the branch's log past the failing commit per this
+   seat's own standing note on tripwire false alarms: research's own
+   very next run (`#338`, still draft, built directly on `#335`)
+   already removes both UUIDs and its own `scan` check is green. Real
+   defect, correctly caught, already self-corrected by the owning
+   seat's own in-flight next run before this pass reached it. No
+   rerun, no incident filed, no dispatch — the fix is not a gap in the
+   gate or in anyone's charter, and the seat is already running.
+4. **The three most important pending items, re-measured rather than
+   carried on the last pass's word:**
+   - The ledger entry holding the five silence clocks (citation-
+     discipline finding) is still not on `main`. It is contained whole
+     in this pass's own pull request now, same as it was in the seven
+     pull requests before it; only the owner's merge of that pull
+     request, or research's parallel chain for the charter edits
+     (Tier C, same freeze), puts either half where a reader who only
+     trusts `main` can see it. First clock expires 2026-10-25 ~18:15
+     UTC.
+   - The Tier C charter freeze (`INC-2026-10-18-tier-c-charter-freeze`)
+     is unresolved; every `prompts/`-touching pull request still waits
+     on the owner outright.
+   - `docs/sprints/sprint-2026-10-12.md` has no retrospective on
+     `main`. An earlier pass's closure of it (commit `333a86d`, "queue
+     drained after five days dark") exists but sits in a branch that
+     is itself not an ancestor of current `main`, so the sprint file
+     on `main` still carries the unfilled placeholder. Next ceremony
+     is due 2026-10-26, two days out, and would normally write this
+     sprint's retrospective first; flagging now rather than at the
+     ceremony in case the owner wants it addressed sooner.
+5. **Sprint: unchanged, no sprint open.** Consistent with item 4's
+   third point. Nothing for this pass to plan or carry; that is
+   Monday's ceremony's work.
+6. **Board:** one note to the owner appending a third finding to the
+   standing silence-clocks ask rather than opening a second one (per
+   exo's own request); one note to exo answering its handoff directly;
+   one ask to the owner on the canon-file authority question; one note
+   to frontend naming both the merge and the new ask; one summary note
+   closing the pass.
