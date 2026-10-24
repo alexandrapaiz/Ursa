@@ -2,6 +2,55 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixtieth pass, 2026-10-24 ~00:1x UTC, message: #290 checked against the merge rule, handed back rather than merged
+
+**The trigger.** An engineer PR opened, #290, "the revocation landed on
+the id she clicked, not on the rule she meant," with the instruction to
+check it against the merge rule and either merge it or say on the board
+what it still needs and hand that to its seat.
+
+**The shallow clone, fixed before trusting anything git told me about
+it.** This runner's default `remote.origin.fetch` only resolves
+`origin/main`, so an unfixed clone reports a real merge conflict's
+history as "unrelated" and a resolved one as unmergeable. Ran the ExO
+charter's own two-line fix (`git fetch --unshallow`, then replace the
+fetch refspec and fetch `refs/pull/*/head:refs/prs/*`) before computing
+a single merge-base.
+
+**#290 had a real conflict when the run started, and it was gone by the
+time I finished checking it.** Both PRs its own description named as
+sharing files, #289 and #275, merged into `main` while #290 was open.
+I reproduced the resulting conflict in a scratch worktree (`git merge
+origin/main`: `docs/ideas.md` append-against-append, `dist/ursa.cjs`
+auto-merged clean) and resolved the ledger conflict by keeping both
+sides' entries in date order, which `docs/standards/pm.md` §10's Tier B
+rule 5 permits a PM to do for a docs-only conflict. Before pushing that
+resolution, I refetched and found the engineer's own run had already
+pushed the identical fix (`3266c9e`, `0f171aa`) a few minutes earlier.
+Nothing of mine needed to land; I verified theirs matches what an
+independent resolution produces and left it alone.
+
+**What stopped the merge: a real test failure the one configured check
+doesn't see.** No workflow in this repo runs `npm test`; the only check
+on #290 is `redaction-gate / scan`, and it's green. I ran the suite
+myself against the PR's actual tip and got 812 passed, 1 failed, 4
+skipped, reproduced twice to rule out the port-collision flake
+`bridge.test.ts` can throw under concurrent runs. The one real failure
+is `src/provenance-index.test.ts`: the `git merge main` that absorbed
+#289/#275 auto-merged `docs/provenance/bundle-digests.{json,md}`
+textually, and the merged content doesn't match what
+`npm run provenance:bundles` produces now that #275's own earlier
+bundle-rebuild commits are reachable from `main`. Confirmed with
+`npm run provenance:bundles:check` (`2 of 2 files differ`) and by
+running the regeneration locally, which turns the suite green. Did not
+push that fix: it is the engineer's branch to finish, and the fix is a
+single mechanical regeneration with no design decision in it.
+
+**Handed to its seat rather than merged.** Commented the full finding
+on #290, labelled it `seat:engineer` and `blocked`. The fix is
+`npm run provenance:bundles`, confirm `npm test` is clean, commit.
+Nothing here needs the owner.
+
 ## Fifty-ninth pass, 2026-10-23 ~23:5x UTC, message: same event as the fifty-eighth pass, re-fired
 
 **The trigger, checked against what already happened.** This pass woke
