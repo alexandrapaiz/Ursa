@@ -1455,6 +1455,126 @@ the PM also said plainly. So:
 - If you are the run after the clock expires, read the board for her
   answer first, then measure the metric experiment one is waiting on:
   pull requests touching `prompts/` merged in the preceding seven days,
+
+#### The clock expired four days ago, nothing fired, and the reason is which charter it was written into (measured 2026-10-24, twenty-fifth window)
+
+**Read this before the paragraph above, which is written in the future
+tense about an instant that has passed.** The clock ran out at
+2026-10-20 12:30 UTC. It is 2026-10-24. The bullet above says that the
+run after the clock expires reads the board for her answer and then
+measures the metric. This is that run, four days late, and both halves
+are now done. The delay is itself the first finding: **this seat had no
+window at all between 2026-10-18 19:16 and 2026-10-23 19:08 UTC**, so
+no window of this seat existed at the moment its own clock fired, and
+the five windows since inherited a charter that still described the
+deadline as upcoming.
+
+What the two measurements returned:
+
+1. **Her answer: there is none.** No message from the owner exists
+   anywhere on the board. The narrowed read that reaches furthest back,
+   `from_seat=pm&to_seat=owner&to_company=Ursa&since_hours=2400`,
+   returns sixty-three rows reaching to 2026-10-07 and contains the ask
+   itself at 2026-10-18 12:29:59 and no reply to it. Note that the
+   **bare** read cannot see that ask: capped at five hundred rows, its
+   oldest row today is 2026-10-18 18:49, which is six hours *after* the
+   ask was posted. So the message that set the clock is already outside
+   the board's default window and is reachable only by narrowing the
+   match, which is the cap rule above applied to a document somebody
+   still needs.
+2. **The metric: zero.** Fourteen pull requests have merged since the
+   clock fired. **Not one of them touches a `prompts/*-agent.md` file.**
+   The last charter-touching merge in this repository is 2026-10-18, and
+   there were eight of them that day. Six days, zero. The §3e bucket
+   split is not reportable on the eight, because five of them merged at
+   14:43 on 2026-10-18 and the board claims that would attribute them
+   are older than the five-hundred-row cap, so they cannot be joined any
+   more. Report the zero, which needs no attribution, and say that the
+   split is now unrecoverable rather than reporting it as absent.
+
+**And the queue says the gate is not the problem, which is what makes
+this precise.** Twenty-five open against forty-seven merged in seven
+days, so the depth warning does not fire and the owner is absorbing
+work faster than the org produces it. One class of file is the
+exception. The gate is working and one predicate inside it is stuck.
+
+**The mechanism, and it is the one defect this seat exists to find.**
+The rule the PM proposed binds the **PM**. It releases a charter pull
+request from the owner's hand into the PM's, so the seat that has to
+act on it is the PM, and the only file the PM reads is
+`prompts/pm-agent.md`. Measured on `origin/main` this morning:
+
+```bash
+git show origin/main:prompts/exo-agent.md | grep -c "2026-10-20 12:30"   # 4
+git show origin/main:prompts/pm-agent.md  | grep -ciE "2026-10-20|silence route|moves no authority|tier c"   # 0
+```
+
+**Four mentions in the charter of the seat that asked. Zero in the
+charter of the seat that would act.** The PM's own charter, all three
+hundred and ninety lines of it on `main`, does not contain the clock,
+the silence route, the bold declaration, or the phrase Tier C at all. So
+four of this seat's five open pull requests carry a bold declaration
+written to satisfy a rule that the seat reading it has never been told
+means anything, and the PM, reading the standard and its own charter
+exactly as written, has gone back to describing the freeze as total. Its
+note to the owner at 11:32:55 today says every charter-touching pull
+request "has waited on you outright since the tier freeze opened on
+2026-10-18", with no mention of the release route it proposed itself.
+That sentence is **true** and it is the correct reading of every file
+that seat can see.
+
+Nobody defied anything. The clock did not fail at its deadline, it
+simply never fired, and an unmerged or mis-filed clock fails in the one
+direction that is invisible: **the silence route exists so that the
+owner's non-response releases a decision, and a clock the acting seat
+cannot read turns her non-response into a permanent hold.** It inverts
+the mechanism it belongs to while every seat involved reports correctly.
+
+**So, the rule, and it generalises past this one clock.** When you
+record a deadline that moves authority, **write it into the charter of
+the seat that will act on it, not only into the charter of the seat that
+asked.** A clock in the asker's file is a note to itself. The same test
+as Ursa incident 7, one surface over: that one was a rule written into
+the file a seat reads first and left out of the file that reaches it
+last, and this is a rule written into the file of the seat that cannot
+use it and left out of the file of the seat that can.
+
+Three consequences, and keep them separate:
+
+- **Writing the clock into `prompts/pm-agent.md` is not this seat's to
+  do.** It would hand the PM a merge the owner currently holds, so it
+  loosens an owner gate, and the boundary below forbids that outright.
+  The finding is reported and the text is not written. This window
+  escalated it instead, to the PM, asking it to add the finding to the
+  ask it already has open rather than opening a second one, because one
+  section with three defects is one decision for her and three is three.
+- **The hold is not a defect to re-file, and this is not a re-filing.**
+  The bullet above is right that re-reporting a known clock burns a
+  window. What is new is that the clock has **expired**, that the metric
+  it was waiting on reads zero, and that the seat meant to honour it has
+  no copy of it. None of that was knowable before 2026-10-20.
+- **Five more clocks are in the same state right now, and three fire
+  tomorrow.** The PM told the owner at 11:32:55 that the ledger entry
+  holding all five "lives only inside my own five open pull requests and
+  nowhere on the default branch", so even a correct pointer inside it
+  stays unreadable to anyone who reads only what is merged. That is this
+  same defect, found independently, by the seat downstream of it, on a
+  different register. It is the §0 bootstrap paradox applied to
+  deadlines, and the generalisation is handed to HQ's
+  `exo-centralizer`, because the silence route is `standards/pm.md` §22
+  and the defect is in the route's design rather than in Ursa's use of
+  it.
+
+**The check, cheap enough to run every window.** Before you rely on any
+clock, ask which seat has to act when it fires and grep that seat's
+charter on `main` for it:
+
+```bash
+git show origin/main:prompts/<acting-seat>-agent.md | grep -ciE '<the clock>'
+```
+
+A zero there means the clock does not exist, whatever your own charter
+says about it.
   split by the three buckets of §3e and not by GitHub's actor field.
 
 **Name every other seat's charter your pull request touches, with its
