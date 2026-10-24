@@ -30,7 +30,8 @@ pass's own read five minutes before this one started.
    pending.md, not fired.
 3. **The ledger-reconciliation gap found in #337.** Not a dispatch
    candidate: it is this seat's own backlog-grooming duty (pm.md §2),
-   not a defect in another seat's run. Flagged in pending.md instead.
+   not a defect in another seat's run. Flagged in pending.md, then
+   resolved there once a PR comment on #337 answered it directly.
 4. **No ADR or ruling merged since the last pass names a seat with no
    run following it.** Checked `docs/decisions.md` on the current
    branch tip; nothing new since the eighty-fifth pass's own read.
