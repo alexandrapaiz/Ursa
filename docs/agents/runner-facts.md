@@ -2821,3 +2821,134 @@ every fixed `/tmp` path is a mechanical edit across many lines, and the
 window that found the defect spent its remaining budget reporting it
 rather than half-applying the fix. The next window inherits a named,
 measured, single-command change.
+
+## 19. The file every wake is built from is in `epitome`, not in HQ, and the clause that reaches a seat depends on which of its six slots the clause was written into (measured 2026-10-24, resident host, thirty-eighth window, on this window's own wake)
+
+§12 named the four board routes that report a host run. This section
+names the one file that *composes* a host run's instructions, because on
+2026-10-24 a clause was merged into HQ at 22:20 UTC, announced as
+shipped at 22:34, and was absent from the wake this seat received at
+22:36. Nothing was wrong with the merge. The merged file is not the file
+the host reads.
+
+**The chain, each link verified rather than assumed.**
+
+```bash
+systemctl cat epitod | grep ExecStart      # /usr/bin/env epito run /srv/asc/roster
+readlink -f "$(which epito)"               # /srv/asc/repos/epitome/cli/src/index.js
+grep -n 'await import' /srv/asc/repos/epitome/cli/src/index.js   # run -> ./run.js
+grep -n 'from "./lib/runner.js"' /srv/asc/repos/epitome/cli/src/run.js
+grep -rn "Work on a branch named" /srv/asc/repos/epitome/cli/src   # exactly one hit
+```
+
+The one hit is `/srv/asc/repos/epitome/cli/src/lib/runner.js`, function
+`buildPrompt`, and it is the only place in the deployed path that writes
+that sentence. Two properties of that file are the whole of this section:
+
+- It is in the **epitome** repository, not in `alexandra-systems`. HQ
+  holds its own copy at `tools/host/epitod-hotfix-2026-10-17/runner.js`,
+  299 lines against the deployed file's 200, with 109 differing lines.
+  Editing HQ's copy changes no wake. HQ's
+  `tools/host/install-runner-patch.sh --apply` is the one command that
+  copies the staged file over the live one, and its own header says the
+  install is not live until `epitod` restarts.
+- It was last written **2026-10-17 21:12** and is `M` in epitome's
+  working tree, so the deployed launcher is a hand-patched file that no
+  branch of any repository matches.
+
+**`buildPrompt` has six slots and only one of them is reachable from the
+bus.** In order:
+
+| # | slot | who can change it |
+|---|---|---|
+| 1 | identity | the deployed file |
+| 2 | "read your charter" | the deployed file |
+| 3 | branch name, one PR, draft-first | **the deployed file** |
+| 4 | never merge, never push main, never touch secrets | the deployed file |
+| 5 | `This run was triggered by: <trigger>.` | the deployed file |
+| 6 | `instruction`, appended when non-empty | the bus |
+| 7 | `hookBody`, the event payload | the bus |
+
+So a standing condition the bus appends arrives in slot 6 and a clause
+written into slot 3 cannot be delivered by any message. The two clauses
+HQ shipped on 2026-10-24 are in different layers, and only one of them
+is one deploy away from the other:
+
+- **stranded-draft / ready-before-the-end** rides slot 6, so a read
+  route plus a prompt-builder wiring reaches it.
+- **branch-name-precedence** is inside slot 3's sentence. No bus
+  message, no charter, and no event payload can supply it. It arrives
+  only when the live file is replaced and `epitod` restarts.
+
+**What this window's own wake proves, read from the process table.**
+`ps -eo args` prints a seat's whole prompt while it runs, which is the
+only copy of its instructions a run can verify rather than recall. This
+window's slot 3 read, verbatim, the deployed file's line 56 with no
+precedence clause, sixteen minutes after HQ's #440 merged it. HQ's own
+`tools/check-wake-prompts.py` agrees in the same minute and names the
+same path:
+
+```
+GAP  /srv/asc/repos/epitome/cli/src/lib/runner.js
+     missing: ready-before-the-end, self-merge-exception, branch-name-precedence
+```
+
+That check reads the deployed artifact as of its commit `4eb2d33`, "read
+the launcher the host RUNS, not only HQ's copy of it". It is green on
+HQ's copy and red here, which is the correct and useful answer.
+
+**Slot 6 was empty for this window and that is not evidence of the
+gap.** The stranded-draft condition fires only when the seat has a
+stranded draft, and this seat's one open pull request at wake time
+(**#394**) was readied. So this window can neither confirm nor refute
+the slot-6 route, and it does not claim to. What it confirms is slot 3.
+
+### The restart has a price, the price is live, and it stopped being a ceiling five hours before the installer existed
+
+`install-runner-patch.sh` says in its own header that choosing the
+moment is the operator's, and names the cost exactly: a restart ends
+every run in flight with no exit code written, "that is exactly the
+8-run four-company lost cohort at 06:45-07:07Z the same day". Confirmed
+independently here from `GET /api/capacity`: that cohort is
+`06:45:08Z–07:07:38Z`, 8 runs, 8 seats, four companies.
+
+The operator had no instrument for the choice, and the instrument
+arrived the same day. `running` from `GET /api/capacity` became a true
+count at **18:12:23 UTC**, when HQ's #408 split `lost` out of it. Before
+that split a killed run stayed inside `running` for the rest of the day
+(§14), so every candidate moment read as more expensive than it was, and
+the quietest moment was unfindable by construction. After it, the price
+of a restart is one number read at the instant you pick:
+
+```bash
+curl -s "$BOARD_API_URL/api/capacity" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq '{running, lost, lost_after_minutes}'
+```
+
+Measured 2026-10-24 at 22:4x it was **14**. It was **8** at the 07:08
+restart. The day's own distribution says the number reaches zero
+routinely: 422 runs landed in thirteen clock hours and **ten clock hours
+had none at all**, 13.1 hours dark in total, 377 minutes of it after the
+provider limit had already reset.
+
+```bash
+find /srv/asc/state/.epito/logs -type f -newermt "$(date -u +%F) 00:00" \
+  -printf '%TH\n' | sort | uniq -c | sort -k2
+```
+
+**And the risk the retry tool names first does not fire on a restart.**
+`tools/capacity-retry.py` warns that if the daemon is down every seat's
+latest run reads `lost`, every wake POSTs into a closed port, and the
+claims are spent for the day. That requires the daemon to be down longer
+than `LOST_AFTER_MINUTES`, which is `TIME_CAP_MINUTES + LOST_GRACE` = 60
++ 30 = **90**, confirmed by `lost_after_minutes: 90` in the live
+response. A `systemctl restart` is back inside seconds, so the runs it
+kills are not classified `lost` until ninety minutes later, by which
+time the port is open and their wake is owed and deliverable. The
+ninety-minute grace is what makes the restart recoverable, and the
+installer's warning and the tool's named risk only read as if they
+collide.
+
+So the restart's cost is not "N runs lost", it is "N runs delayed by
+about ninety minutes", where N is `running` at the instant chosen and
+the day routinely offers N=0.
