@@ -451,3 +451,25 @@ list being transposed when the two refs were written.
 | `clearing-a-record-for-release/E39` | supports | 2026-10-24 | The measured case is in range: two publishes hours apart into one directory left four records' pages, "the two the index names and two from the earlier build, still complete, still self-contained, still openable at their own addresses" (8138), which is the skill's "still complete and still openable" almost verbatim. The consequence the skill rests on is 8139, an erased record's page still sitting at an address that was handed to someone while the index is honest about not naming it. |
 | `clearing-a-record-for-release/E40` | supports | 2026-10-24 | Five poisoned payloads, countable in range as five `it` blocks: a later-added field carrying prose (260), a file path smuggled into a row (269), the 62-character sentence against the old `model` regex (277), a value assembled inside a later-added field (291), and the whole record passed off as a batch (303). The last one's comment says "before this module, transmitting anything meant transmitting the record" (304-305), which is the citing sentence's claim. Worth noting that the skill gets the growth right where its own sources disagree: E2's range says the suite poisons the payload for each of the two checks and E34's old range said four ways, and the skill says it "has grown to five", which is what the test file now holds. |
 | `clearing-a-record-for-release/E41` | widened | 2026-10-24 | Widened `173-181` to `173-182`. The range stopped on "What it gives is the", one line before the clause the citing sentence is about, the field list existing so a seat can see which fields are dangerous "without having to rediscover incident 2" (182). The rest was in range: the standard installs nothing (175), and "Class A has no automated check here and this file does not pretend to give it one" (179-180). |
+
+## Three verdicts re-read after the sentence splitter was fixed, 2026-10-24
+
+The sweep used to end a sentence at any `:` followed by a space, including the
+one inside an inline code span, so the passage it put in front of a reader for
+the ref citing such a sentence was whatever followed the colon. For two refs
+that was three characters and the tag. A third was segmented in the wrong
+places across five passages. Nothing about the ranges changed and the fix
+changes the `passages` digest, so all three came back as stale and are read
+again here against what their sentences actually say.
+
+Worth naming, because it is the argument for the rule in the section above:
+`running-an-outcome-record-trial/E22` is the ref whose absent-word ratio sent
+a reader to it, and the fragment was found on the way. The defect had been in
+the tool since the sweep was written and the two refs it hit were read through
+it, verdict and all, without either reader saying the passage was unreadable.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `running-an-outcome-record-trial/E22` | supports | 2026-10-24 | Re-read against the whole sentence, "This repository's own fixture record is a one-file episode and carries `turnsToAcceptance: 1`", where the reader used to be shown "1` [E22]." and nothing else. Verdict unchanged and the range is exact: `turnsToAcceptance: 1` at 1142 is the number, `generations: 1` at 1138 is the single-generation episode, and `conversationId: "git-4d5e401"` at 1136 is what makes it the git path rather than the session path. The ratio stays above the rule's line at 0.909 and always will, because the claim's load-bearing words are "present rather than absent", which no JSON can contain. That is the note the rule asks for. |
+| `adjudicating-uncertain-spans/E9` | supports | 2026-10-24 | Re-read against the whole sentence, "Loop C in the first trial closed at steps 757 to 758 with no verbal approval at all, and the record declares `acceptanceStatedInChat: false`", where the reader used to be shown "false` [E9]." Verdict unchanged, and the 2026-10-18 note was right about the source: the steps, the absence of verbal approval and `signals.episode.acceptanceStatedInChat: false` are one parenthesis at 102-104, wholly in range. The reader reached the right verdict from the source with the passage unreadable, which is the quiet cost of this defect: it does not produce wrong verdicts, it produces verdicts reached without the sentence they are about. |
+| `quoting-a-number-from-an-outcome-record/E32` | supports | 2026-10-24 | Re-read because three of its five passages moved. Still five, still one per paragraph of the same two doc comments, and the second now reads "It carries `score: 1` like a verbatim match, so a filter written on the score alone will not separate them" rather than beginning after the colon. The 2026-10-18 note describes the five correctly, so the verdict and the fifty-eight-line range stand unchanged. |

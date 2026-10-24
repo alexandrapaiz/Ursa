@@ -344,10 +344,10 @@
   },
   "adjudicating-uncertain-spans/E9": {
     "verdict": "supports",
-    "read": "2026-10-18",
+    "read": "2026-10-24",
     "lines": "3980e9270d3f96fc",
     "what": "d683dc80c7fc5235",
-    "passages": "bd0474d06d1bac70"
+    "passages": "f96ffbf032161be6"
   },
   "clearing-a-record-for-release/E1": {
     "verdict": "supports",
@@ -1086,10 +1086,10 @@
   },
   "quoting-a-number-from-an-outcome-record/E32": {
     "verdict": "supports",
-    "read": "2026-10-18",
+    "read": "2026-10-24",
     "lines": "eb49fb64b45d0f97",
     "what": "66a124cb52f01539",
-    "passages": "7e8a59cfdbe1336b"
+    "passages": "bafafcc9dbfc62f5"
   },
   "quoting-a-number-from-an-outcome-record/E4": {
     "verdict": "supports",
@@ -1233,10 +1233,10 @@
   },
   "running-an-outcome-record-trial/E22": {
     "verdict": "supports",
-    "read": "2026-10-18",
+    "read": "2026-10-24",
     "lines": "ecb79d4bd3fd098c",
     "what": "b0563c4c7de421ff",
-    "passages": "7b1632477a2a65cb"
+    "passages": "0c9f780b1fcb860c"
   },
   "running-an-outcome-record-trial/E3": {
     "verdict": "wrong",
