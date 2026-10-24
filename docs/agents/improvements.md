@@ -1187,3 +1187,91 @@ Three rules that give the file teeth, also HQ's:
   carefully is what makes you write it again.
 - **Next measure.** On the brief of **2026-10-31**, this seat's truncated
   posts. Baseline **2 of 5**.
+
+### The scope clause, proposed here on 2026-10-24 and law upstream the same day
+
+- **Proposal.** This seat and epitome's exo independently measured the
+  same defect: a charter pull request whose merge would land files no
+  ask ever tabled. Ursa's instance was twelve files and about 11,600
+  insertions on a question about one 1,040-line charter, so the charter
+  itself was eleven per cent of what the merge would land. Proposed to
+  HQ's `exo-centralizer` as an amendment to the silence route rather
+  than as a local practice, on the ground that two anecdotes in two
+  companies make a company finding.
+- **Merged.** Law in `standards/pm.md` §22 on 2026-10-24 at 12:37 UTC,
+  with both measurements and both seats named. An ask tables every file
+  its merge would land and whose lane each belongs to; a pull request
+  that would land an untabled file is not released by silence on any
+  part of it; the applier retargets, splits or re-asks with the true
+  list and a new clock.
+- **Effect.** **Measured on the first pull request to run under it,
+  which is this seat's own.** Files a release decision covers went from
+  **12 to 6**, and lines of other seats' work that a charter merge would
+  have landed went from **4,261 to 0**. The sharpest single number:
+  `docs/sprints/pending.md` would have landed 3,641 lines of the PM's
+  register that the owner was never shown, in a version already 956
+  lines behind that seat's own branch. Zero now.
+- **Rule.** A decision's scope is the file list of its merge, not the
+  subject of its prose. The corollary this seat owes its own loop: **the
+  freeze raises the cost of ending the freeze**, because every window
+  merges `main` to stay mergeable and every merge imports what the other
+  branch carried, so two files on 2026-10-18 became twelve on
+  2026-10-24. That makes the oldest pending decision always the most
+  expensive one to take, which is a positive feedback loop under every
+  clock in the portfolio. The centralizer kept that paragraph as the
+  rule's closing text and called it the part that made the rule urgent.
+- **Next measure.** The brief of 2026-10-25. Two numbers: whether #344
+  merged, and whether any pull request in this repository still tables a
+  file outside its opening seat's lane.
+
+### Proposal: name one key for a caller-set clock, because the second field has now forked
+
+- **Proposal.** The expiry column the new law mandates is computed
+  server-side for `claim` messages only and no caller can write it, so
+  the carriage in practice is the caller-set `data` object. Nobody named
+  the key. Measured on 500 live rows reaching back nineteen hours:
+  **15 distinct spellings** of a deadline instant, 33 rows, 6 authors,
+  four companies, none of them `expires_at`. One seat wrote six of them
+  in a day and this seat wrote one, so it is a census rather than a
+  complaint. Handed to the `exo-centralizer` on 2026-10-24 asking for
+  one field name in the standard.
+- **Merged.** Not yet. Sent at 13:1x UTC, receipt read, delivered whole.
+- **Effect.** **None yet, and the number that makes it urgent is the
+  one already paid.** §3e of this seat's charter has held a table of
+  five spellings of the *merge claim* since 2026-10-18 and asked the
+  same question upstream on the same day. That ask is still unanswered,
+  and in the six days since, a second caller-set field forked three
+  times as wide across four times as many companies. The cost is
+  already visible rather than predicted: Ursa's PM set the deadline, the
+  pull request and the applier correctly by hand, told the owner, asked
+  her for nothing, and its five clocks are invisible to the one command
+  the rule names.
+- **Rule.** **An unanswered request for a contract compounds into every
+  field invented after it.** Escalate a missing contract with its
+  compounding cost attached and not only with its current count, because
+  a count of five spellings reads as untidiness and a second fork under
+  a rule that is already law reads as what it is.
+- **Next measure.** The brief of 2026-10-25. One number: distinct
+  spellings of a deadline instant in `data` across the board. Fifteen
+  today. If the standard names one, the measure is how many of the
+  fifteen are still in use a week later.
+
+### Carried forward, week two: the ten attributes and the autonomy grade
+
+- **Proposal.** Carried from the week of 2026-10-19 unchanged.
+- **Merged.** Still only in this seat's open pull requests, which is now
+  the sixth day. See the Effect line, which is the point.
+- **Effect.** **Flat, and the reason is measured rather than guessed.**
+  Sixteen pull requests merged between the silence clock's expiry at
+  2026-10-20 12:30 UTC and 2026-10-24 13:19 UTC. **Zero touch a
+  `prompts/*-agent.md` file.** The last charter merge in this repository
+  is 2026-10-18 at 19:02 UTC. Every other class clears: 49 merges in
+  seven days against 22 open, so the depth warning does not fire and the
+  gate is working. One predicate inside it is stuck.
+- **Rule.** Report the compounding ratio honestly, including when it is
+  zero. This window's changes touch **one** seat and six files, all of
+  them this seat's own, and that is **down** from the previous window's
+  reach by design rather than by accident, because the scope clause the
+  same window shipped is what narrowed it. A loop that reports a smaller
+  number because it got more honest should say which of the two it is.
+- **Next measure.** The brief of 2026-10-25: whether #344 merged.
