@@ -119,6 +119,21 @@ evidence:
   - ref: E32
     what: survived_verbatim means byte-identical as of 2026-10-13, and a formatting-only match is now survived_mutated with normalizedOnly set and score 1, which 26 of 770 verbatim claims over ten records of this repository were
     source: ursa-major/src/types.ts:396-427, ursa-major/src/resolve.ts:275-299, ursa-major/src/resolver.test.ts:168
+  - ref: E33
+    what: noCandidate names which of four things produced a no_generation_provenance span, and df_cutoff_suppressed is the value that reports the matcher never looked rather than anything about the work
+    source: ursa-major/src/types.ts:435-451, ursa-major/src/resolve.ts:488-507
+  - ref: E34
+    what: Stats carries blindSpans and suppressedTokenSpans as span counts, blindSpans being the df-cutoff-suppressed spans and suppressedTokenSpans a superset that were mostly scored anyway
+    source: ursa-major/src/types.ts:664-693, ursa-major/src/stats.ts:56-57
+  - ref: E35
+    what: blindSpans and notGeneratedChars are both optional and both read as zero when absent, and the schema says absence means a true zero for one and an unknowable value for the other
+    source: ursa-major/src/types.ts:678-683,724-727
+  - ref: E36
+    what: the CLI prints the blind-span line only when the count is non-zero, and its own wording says those spans are counted as no_generation_provenance and should not be
+    source: ursa-major/src/cli.ts:173-181
+  - ref: E37
+    what: the cutoff is an absolute count against a corpus that grows, so the blind share can only grow with it, which makes a rise between two records the signal rather than the level in any one, and both of this project's trials sit where the figure is zero
+    source: ursa-major/src/types.ts:453-468
 supersedes: []
 ---
 
@@ -211,9 +226,38 @@ whitespace collapsing, and differs in raw characters only [E32]. It
 carries `score: 1` like a verbatim match, so a filter written on the
 score alone will not separate them [E32]. Neither
 flag has a character total in the schema, only a span count [E11], so
-the subtraction has to be done from `files[].spans` directly. Output:
-either an adjusted figure with its method stated, or the sentence
-carries the flag counts beside the percentage.
+the subtraction has to be done from `files[].spans` directly.
+
+There is a fourth population and it is the one to subtract first,
+because it is the only one that is not a fact about the work at all. A
+`no_generation_provenance` span now carries `noCandidate`, which says
+which of four things produced the label, and one of the four values is
+`df_cutoff_suppressed`: at least one word of the span is in the
+generation corpus, every word that is was skipped for being too common
+to search on, and so the matcher never scored the span before labelling
+it [E33]. `Stats` counts those as `blindSpans`, beside a wider
+`suppressedTokenSpans` for spans that lost some of their words to the
+cutoff and were scored on the rest [E34]. The CLI says what it thinks
+of them in its own output, that they "are counted as
+no_generation_provenance and should not be" [E36]. Output: the
+`no_generation_provenance` figure with `blindSpans` subtracted, or the
+count quoted beside it.
+
+Ours, on why this one is worth the extra sentence rather than being one
+more flag in a list. The other three flags move a span between two
+honest readings of the same evidence. This one moves work the model may
+well have written into the category CLAUDE.md calls the most valuable
+[E12], and the schema says the direction is not an accident: the
+cutoff is an absolute count against a corpus that grows every time the
+tool runs, so the blind share can only grow with the dataset [E37].
+That makes it the one number here whose level in a single record is
+almost uninformative and whose movement between two records of the same
+project is the whole signal [E37]. Both of this project's trials sit at
+the scale where it is zero [E37], which is also why a reader who
+learned the output format from a trial transcript has never seen the
+line that reports it [E36]. Output: either an adjusted figure with its
+method stated, or the sentence carries the flag counts beside the
+percentage.
 
 **5. State the capture path and the funnel stage.** Session capture
 carries the trace and git capture carries the label, which is why the
@@ -256,6 +300,28 @@ document's own limit is that n=1 demonstrates label types rather than
 statistics, and that every quantitative claim in it is an existence
 proof [E21]. Output: the claim is marked as an existence proof, or it
 is held until the corpus supports it.
+
+**11. An absent optional field is not a zero, and two of them disagree
+about what absence means.** `blindSpans` and
+`generated.notGeneratedChars` are both declared optional and both
+documented as read-as-zero when absent, so they look like the same kind
+of field and a reader who learns the rule from one will apply it to the
+other. The schema says they are opposites. For `notGeneratedChars`,
+every record written before 2026-10-14 omits it and zero is the true
+value for those records, because no descent gate ran on them and no
+segment of them could carry the fate. For `blindSpans`, every record
+written before 2026-10-24 omits it and zero is wrong but unknowable,
+because the cutoff was always suppressing tokens and nothing counted
+them [E35]. Output: before quoting either field at zero, check whether
+the record predates it, and quote "not measured" rather than zero where
+it does.
+
+Ours: the general form is that optionality in this schema is a
+statement about when a field was added and not about whether its
+subject occurred, so the question to ask of any absent field is which
+of those two the author meant. The schema answers it in prose each
+time, which is the only reason this is checkable, and it is a good
+argument for reading the field's comment rather than its type.
 
 ## Judgment
 
