@@ -3820,10 +3820,10 @@ function scopeFrom(argv, io) {
   }
   return raw;
 }
-function printTwin(t, io) {
-  io.out(`      ${t.id}  sharing ${Math.round(t.score * 100)}% of its words: "${t.statement}"`);
+function printTwin(t, io, indent = "      ") {
+  io.out(`${indent}${t.id}  sharing ${Math.round(t.score * 100)}% of its words: "${t.statement}"`);
   if (t.status === "user-edited") {
-    io.out("          You wrote or released this one yourself, so no distillation pass put it there.");
+    io.out(`${indent}    You wrote or released this one yourself, so no distillation pass put it there.`);
   }
 }
 function describe(consent, projectRoot, io) {
@@ -3854,9 +3854,9 @@ function describe(consent, projectRoot, io) {
       io.out(pairs.length === 1 ? "  One thing you revoked is still being said by an inference you hold:" : `  ${pairs.length} things you revoked are still being said by inferences you hold:`);
       for (const p of pairs) {
         io.out(`      ${p.revoked.id}, which you revoked: "${p.revoked.statement}"`);
-        for (const t of p.twins) printTwin(t, io);
+        for (const t of p.twins) printTwin(t, io, "          still active: ");
       }
-      io.out("  This happens because inferences written before the store checked for it could be the same rule twice under two ids, and withdrawing one id leaves the other active. Withdraw the rest with `ursa consent revoke-axiom <project> --axiom <id>`. Nothing above was changed for you.");
+      io.out(`  This happens because an inference written before the store checked for it could be the same rule twice under two ids, and withdrawing one id leaves the other one working. Withdraw the rest with \`ursa consent revoke-axiom ${projectRoot} --axiom <id>\`, or leave them. Nothing above was changed for you.`);
     }
     const blocked = tuning.blockedByRevocation ?? [];
     if (blocked.length > 0) {
