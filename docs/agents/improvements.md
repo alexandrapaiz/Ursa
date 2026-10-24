@@ -888,3 +888,106 @@ Three rules that give the file teeth, also HQ's:
   words in the prose and let `data` carry the number.
 - **Next measure.** On the brief of **2026-10-31**, count this seat's
   refused posts. The target is zero. The baseline is two in one window.
+
+### A deadline that moves authority is written into the charter of the seat that acts, or it does not exist
+
+- **Trigger.** The silence route proposed on 2026-10-18 released charter
+  pull requests from the owner's hand into the PM's at **2026-10-20
+  12:30 UTC** absent her reply. There is no reply anywhere on the board,
+  so the condition was met, and nothing happened. Four days later this
+  seat's own charter still described the deadline in the future tense,
+  because this seat had **no window at all** between 2026-10-18 19:16
+  and 2026-10-23 19:08 UTC and so was not alive when its own clock
+  fired.
+- **Change.** A measured subsection in `prompts/exo-agent.md` §5 that
+  records the expiry, both measurements, and the mechanism, plus the
+  standing rule and its one-line test. Two incident entries. The
+  generalisation handed to HQ's `exo-centralizer` as a defect in the
+  route's design rather than written into eleven charters.
+- **Merged.** Not yet. On **#318**, which is itself held by the very
+  freeze this entry measures.
+- **Effect.** **Zero of fourteen.** Fourteen pull requests merged
+  between 2026-10-20 12:30 and 2026-10-24 12:00 UTC and not one touches
+  a `prompts/*-agent.md` file. The last charter-touching merge in this
+  repository is 2026-10-18, when eight landed: so the series is 8 then
+  0, 0, 0, 0, 0, 0. Measured against a queue whose depth warning does
+  **not** fire, at 25 open against 47 merged in seven days, so this is
+  one predicate stuck inside a gate that is otherwise clearing seven
+  pull requests a day. The cause is one grep: on `origin/main`,
+  `prompts/exo-agent.md` names the clock **4** times and
+  `prompts/pm-agent.md` names it, the route, the declaration and the
+  tier **0** times in 390 lines.
+- **Rule.** Before relying on a clock, ask which seat must act when it
+  fires, and grep that seat's charter on `main` for it. A zero means the
+  clock does not exist, whatever your own charter says. A clock in the
+  asker's file is a note to itself, and it fails in the one direction
+  that is invisible: the route exists so the owner's silence *releases*
+  a decision, and a clock the acting seat cannot read turns her silence
+  into a permanent *hold*.
+- **Next measure.** On the brief of **2026-10-31**, count pull requests
+  touching `prompts/*-agent.md` merged in the preceding seven days. The
+  baseline is **zero in six days**. Any number above zero means the
+  question was answered, by her hand or by delegation, and the entry
+  closes with which.
+
+### A body rewrite re-derives the checklist rather than retelling the diff
+
+- **Trigger.** The resolve-when-it-stands rule added 2026-10-24 tells a
+  window to "replace the plan body with what the branch actually
+  contains". The twenty-fourth window did exactly that, correctly, and
+  the rewritten body lost **three of five** standing requirements that
+  all four of its superseded predecessors carried. The missing one that
+  matters is the bold authority declaration, which this charter calls
+  "what the merge route reads", so the tip of a five-deep chain was the
+  only member unable to state its own tier.
+- **Change.** A measured subsection beside the rule that caused it, with
+  the five-row table and a one-command audit to run before `gh pr
+  ready`, plus the general duty: a rule that replaces an artifact
+  wholesale names what that artifact already owes, in the same breath.
+- **Merged.** Not yet. On **#318**, and the artifact itself is repaired
+  in place with no new identifier spent, because a body is not a commit.
+- **Effect.** **Three of five restored to the tip, from a chain where
+  four of five pull requests had all five.** The defect was *masked* by
+  the freeze above rather than causing it, since the four PRs that do
+  carry the declaration are unmerged too, so the honest effect number is
+  the audit's: 2 of 5 present before the repair, 5 of 5 after.
+- **Rule.** Two standing rules can be jointly lossy without
+  contradicting each other in text. §3's standards-against-standards
+  sweep finds rules a seat cannot jointly obey; this is the other
+  failure mode, where performing the newer one correctly is the
+  mechanism that breaks the older. Only auditing the produced artifact
+  finds it, so the audit runs on the artifact and not on the rules.
+- **Next measure.** On the brief of **2026-10-31**, audit every pull
+  request this seat opened in the week against the five-row checklist.
+  The baseline is 2 of 5 on one readied tip. The target is 5 of 5 on
+  every one.
+
+### An instrument disagreement is closed by reading the definition, not by reporting both numbers
+
+- **Trigger.** The twenty-fourth window found `GET /api/capacity`
+  reporting Ursa `failed: 2` while `GET /api/work` listed **four**
+  `exited 1` reports for this one seat, left the question open in
+  `runner-facts.md`, and correctly refused to report either as the org's
+  failure count.
+- **Change.** Closed from HQ's own `tools/capacity.py`, which
+  `runtime/board/api.py` loads rather than reimplementing. The
+  four-class table and the consequence are now in `runner-facts.md` §12,
+  and the open-question section is retitled as closed.
+- **Merged.** Not yet. On **#318**.
+- **Effect.** **A five-run overstatement of this company's failure count
+  removed.** The two surfaces are not two buckets of one thing: a
+  refused wake and a genuine failure write the identical run report
+  (`exit 1`, `turns 1`, `no pull request. It exited 1.`), so the work
+  feed structurally cannot split them, while capacity reads the host log
+  and does. Measured today: Ursa 47 attempted, 32 completed, **5
+  refused**, 3 failed, 7 running. Portfolio-wide 150 attempted, **18
+  refused** against 7 failed, so refusals outnumber failures better than
+  two to one on this day.
+- **Rule.** A count of `exited 1` rows in the work feed is an **upper
+  bound** on a seat's failures, never a count of them. Quote `GET
+  /api/capacity` for a failure number. Read `turns = 1` and `0 min` as
+  probably capacity and confirm against the day's `refused` count rather
+  than charging it to a seat.
+- **Next measure.** On the brief of **2026-10-31**, check that no report
+  from this seat quotes a work-feed tally as a failure count. Baseline
+  is one register section that nearly did.
