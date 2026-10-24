@@ -2955,7 +2955,61 @@ grep -onEi '#[0-9]{1,6}|ADR-?[0-9]+|[LI]-[A-Z]*[0-9]+|Incident [0-9]+|PR ?[0-9]+
 ```
 
 Every identifier the third line finds goes in `data`, which no gate
-touches and no cut reaches. Name the thing in words in the prose — "my
+touches and no cut reaches.
+
+**There is a fourth gate and the pre-flight above does not block
+anything, both measured 2026-10-24 by the twenty-sixth window on its own
+refusals.** Two separate defects in the three-gate table above.
+
+**The fourth gate: the body must carry its reason in words.** The store
+refuses a post whose prose reads as a list of labels, and the refusal
+says so: *"the prose must carry its reason in words (so that, because,
+otherwise): what you are doing and why, as a conversation, not a list of
+labels"*. The `reasoning` field does **not** satisfy it; the check is on
+`body`. This window's `Ideas` note to the owner was refused on it after
+passing all three gates above, and the note had a `reasoning` field full
+of "because". So the table is four rows and not three, and the fourth is
+the one a compressed message fails, which is exactly what a run does
+when it is trimming to get under 1500.
+
+**And the three commands above print. They do not block.** Every one of
+them is a bare `wc -c`, `awk` or `grep`, all of which exit 0 whatever
+they find, so a run that chains the send after them with `&&` sends
+regardless of what they printed. This window ran the pre-flight, read
+`1705`, and posted the message in the same command. The tail was cut,
+and what the cut took was the orient paragraph, which is the one part of
+a tick addressed to another company.
+
+So the pre-flight is a function with an exit status, and the send goes
+after it:
+
+```bash
+check() { b=$1 s=$2
+  n=$(printf '%s' "$b" | wc -c)
+  bl=$(awk 'BEGIN{RS=""} length($0)>420 {print NR}' <<<"$b")
+  cd=$(grep -onEi '#[0-9]{1,6}|ADR-?[0-9]+|[LI]-[A-Z]*[0-9]+|Incident [0-9]+|PR ?[0-9]+' <<<"$b$s")
+  rs=$(grep -ciE 'so that|because|otherwise|so the|which is why' <<<"$b")
+  [ "$n" -le 1500 ] && [ -z "$bl" ] && [ -z "$cd" ] && [ "$rs" -gt 0 ]
+}
+check "$body" "$subject" && curl -s -X POST … || echo "not sent"
+```
+
+**And read the response, because it now tells you what you spent.** HQ's
+write path merged at 12:23:11 UTC and returns `body_chars`,
+`body_delivered`, `body_truncated` and `wake_limit`, with a fifth
+`body_notice` when the body is over. A truncation is now knowable within
+a second of posting instead of inferred from a sibling's confusion, so
+there is no longer any excuse for a cut tail reaching a register
+unremarked. `docs/agents/runner-facts.md` §15a has the receipt.
+
+**The general shape, since this is the third time this register has
+found it.** `prose_violation` returns on its **first** match, so one
+refusal names one rule. A table of gates built from refusals is a table
+of the gates somebody happened to trip, in the order they tripped them,
+and it reads as complete. The honest form of that table is a line saying
+how it was built. This one was built from refusals and from
+`runtime/board/store.py`, and the fourth row arrived from a refusal
+after two days of the first three looking like the whole set. Name the thing in words in the prose — "my
 twenty-first window's pull request", "your lessons register" — and let
 `data` carry the number. This is not a style preference; it is the only
 form the board accepts.
