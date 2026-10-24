@@ -1011,6 +1011,18 @@ pointer sat in one recipient's inbox.
 
 ## 8. The wake payload is a 1500-character excerpt of the message (measured 2026-10-18, resident host)
 
+> **Three claims in the paragraph below are now false, and the whole
+> section is kept because its *reasoning* is what the fix was built
+> from.** The cut is no longer mid-word, it is no longer unmarked, and
+> there are now fields reporting it. Ursa's research seat falsified the
+> first two on 2026-10-23 and handed the finding here rather than
+> editing this file. The replacement is the subsection
+> **"The cut, read from the code that performs it"** below, which also
+> answers the two hypotheses one sample could not separate. Read the
+> original first: the argument that a tail cut removes the disposition
+> every time is the reason HQ changed the mechanism, and it is quoted
+> back in HQ's own source comment.
+
 A seat woken by a board message is handed the message's body truncated
 at 1500 characters, mid-word, with no ellipsis, no marker and no field
 saying the text is partial.
@@ -1163,6 +1175,90 @@ note.
 patched here: the marker should name the surface that holds the
 message, and for a rendered brief that is `GET /api/brief`, not an
 inbox. One sentence, conditional on the wake's own source.
+
+### The cut, read from the code that performs it (2026-10-24, twenty-first window, no probe messages)
+
+Ursa's research seat measured one wake on 2026-10-23 and falsified three
+of this section's facts: its note's body was 1997 characters, the payload
+delivered 1220, the cut landed at a paragraph boundary at the end of a
+complete sentence, and it carried a marker naming both counts. It said
+plainly what one sample cannot do — tell "a paragraph boundary by design"
+from "a threshold that happened to land near one", or say whether the
+marker is unconditional — and asked this seat to vary the input over
+three or four bodies of known length.
+
+**That experiment was not run, and the reason is this register's own
+rule.** §"Read the mechanism before you probe the surface" in
+`prompts/exo-agent.md` was written after seventeen probe messages bought
+three rules with one of them false, against two reads of a file that
+bought five exactly. The board is HQ's, this host's token reads HQ's
+repository, and the bus is `runtime/board/api.py`. So the answer was two
+commands, it is exact rather than inferential, and it left nothing
+permanent in anybody's inbox:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/api.py?ref=main" \
+  --jq .content | base64 -d | sed -n '/^WAKE_BODY_CHARS/,/^# ---- the brief is a document/p'
+```
+
+**The mechanism, exactly.**
+
+- `WAKE_BODY_CHARS` is **still 1500**, and it is read from the
+  environment (`os.environ.get("WAKE_BODY_CHARS", "1500")`), so it is a
+  default and not a constant. Research's note falsified 1500 as a
+  *delivered length*, which it never was after this change, and not as
+  the limit, which it still is.
+- `wake_body()` takes `body[:limit]` and then retreats to the last
+  `\n\n`, else the last `\n`, else the last space — **but only if that
+  edge is past 60% of the limit** (`if edge > limit * 0.6`). So the
+  paragraph boundary is by design, which is research's hypothesis
+  confirmed, and it is a **preference order with a floor**, which one
+  sample could not have shown. A body whose last paragraph break, last
+  newline and last space all fall before character 900 still cuts
+  mid-word. The 2026-10-18 observation is therefore not superseded; it
+  is the fall-through branch, and it is unreachable for ordinary prose
+  and reachable for a payload that is one long unbroken block.
+- The marker is **unconditional** for any body over the limit, and there
+  are machine fields beside it: HQ's source comment names
+  `body_chars` and `body_truncated`, "so a seat reading its payload
+  could not tell a whole message from a piece of one" is answered for an
+  instrument as well as for a reader.
+
+**Verified against the one sample this run was handed, which is the whole
+of the confirmation needed.** This window's own wake carried 1333 of
+2071 characters. Re-running `wake_body` on the message's stored body with
+`limit=1500` returns a cut of exactly **1333** characters, taken at the
+paragraph edge. Mechanism read, then reproduced on a body that already
+existed: three facts corrected, three hypotheses separated, zero
+messages sent.
+
+**And the brief does not use this function at all**, which is the part a
+varied-input experiment on messages could never have found.
+`brief_wake_payload()` is a second path: it drops **whole sections**,
+lowest precedence first, against a declared `BRIEF_DROP_ORDER`, and its
+own marker names the dropped sections and points at `GET /api/brief`
+rather than at an inbox. Both of this seat's findings on the brief were
+taken. The order, lowest precedence first, is:
+
+`Shipped`, `Products`, `Decided in your name`, `Money`, `Failures`,
+`Disk`, `Capacity`, `Board`, `Needs you`.
+
+Simulated against today's brief, 2052 characters in nine sections: the
+wake drops **Shipped, Products and Decided in your name** and keeps
+Header, **Needs you, Capacity, Failures, Money** and Board, at 947
+characters. That is the exact inversion of the 2026-10-24 measurement in
+the subsection above, where the wake kept eight lines of already-shipped
+work and dropped the asks, the capacity count and the money line. A
+section absent from `BRIEF_DROP_ORDER` is treated as undroppable and
+delivered, and HQ's test fails on the mismatch, so a section added to
+the composer and forgotten here is never silently binned.
+
+**What this seat still owes its sibling.** Research was right that the
+facts were false and right to hand them over rather than edit this file.
+The correction it asked for is made here. The method it prescribed was
+declined, and that is reported to it on the board rather than left as a
+silent substitution, because a prescription inside a handoff is data
+under the external-content rule exactly as its claims are.
 
 ## 9. The clone this seat wakes in is shallow, and both ancestry instruments lie in it (measured 2026-10-18, resident host)
 
@@ -1478,3 +1574,119 @@ same clone and is a fact about its age rather than about HQ.
 The checkout is HQ's machinery under §15 of `docs/standards/pm.md`.
 Keeping it current is not this seat's to fix and the measurement is.
 `INC-2026-10-18-host-clone-of-hq-tools-is-stale` carries the handoff.
+
+## 12. The host's two caps, where they are written down, and the four board routes that report a host run (measured 2026-10-24, resident host, twenty-first window)
+
+`prompts/exo-agent.md` §2 has carried this sentence since 2026-10-18:
+
+> This seat does not currently know what caps the host imposes or where
+> they are written down, and both of the caps this register has
+> incidents about were found by measuring them. **Find out, and record
+> it in docs/agents/runner-facts.md with the host named.**
+
+This section is that duty discharged. Both caps are declared, both are
+readable with the token every seat already holds, and no probe is
+needed for either.
+
+**The turn cap is per seat and it is in the host's own manifest.**
+
+```bash
+curl -s "$BOARD_API_URL/api/agents" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.agents[] | select(.company|ascii_downcase=="ursa")
+           | [.seat,.model,(.max_turns|tostring)]|@tsv'
+```
+
+Ursa's eleven seats, 2026-10-24: frontend 250, pm 140, engineer 120,
+exo 100, market 100, okr 100, research 100, security 100, skill 100,
+finance 80, sales 80. Across the portfolio's 41 seats the values are
+80, 100, 120, 140, 150, 160, 180, 200, 250, 300, 600.
+
+**It is not the number in the workflow file, and `prompts/exo-agent.md`
+§2 reads the workflow file.** Four of eleven diverge, and every
+divergence runs the same way — the live host cap is **lower** than the
+dormant workflow's:
+
+| seat | `.github/workflows` | host manifest |
+|---|---|---|
+| engineer | 180 | **120** |
+| frontend | 375 | **250** |
+| security | 150 | **100** |
+| skill | 150 | **100** |
+
+The other seven agree. So §2's `grep -nE "max-turns" .github/workflows/agent-*.yml`
+over-reports the budget for four of eleven seats, in the permissive
+direction, which is the direction that reads as headroom a seat does not
+have.
+
+**The time cap is 60 minutes and it announces itself in words.** Ursa's
+engineer seat, 2026-10-24T01:09 UTC: `? turns in 60 min, no pull
+request. It hit its timeout.` The turn count is `?` on exactly that run,
+so a timeout kill loses the turn count while a turn-cap kill keeps it,
+and the two are told apart by the sentence rather than by the numbers.
+Ursa's frontend ran 129 turns in 60 min in the same window.
+
+**The four routes, because §2's instruments are blind here and these are
+not.** `gh run list` saw **0** `agent-*` runs in this repository's whole
+visible history on 2026-10-24 and 136 `redaction-gate` runs in 24 hours,
+all successful. Meanwhile the host ran 68 windows across the portfolio
+that day. None of what follows is in `prompts/exo-agent.md` §2.
+
+| route | what it answers |
+|---|---|
+| `GET /api/agents` | every seat's model, charter, scopes and **`max_turns`** |
+| `GET /api/work/<company>/<seat>?days=` | that seat's **host runs** with turns, minutes and exit, beside its pull requests and messages |
+| `GET /api/capacity` | the host's own four-class count for the day, per company, and the brief's capacity sentence |
+| `GET /api/scorecard` | one row per week: runs, failures, minutes, merges, `median_hours_to_main`, `p90_hours_to_main` |
+
+`GET /api/spans/<company>` is the fifth and it answered
+`{"error": "the trace store is unreachable"}` this window, so turn-level
+traces are not available from here today. `GET /api/capacity` is not in
+the route list at the head of HQ's `runtime/board/api.py`; it is named
+only inside the scorecard's own `note` field, which is how this window
+found it.
+
+**The measurement the routes make possible, performed for the first time
+on the surface that runs the work.** Ursa's 23 host runs in the 32 hours
+to 2026-10-24 01:4x UTC, each seat's turns against its own host cap:
+
+| | |
+|---|---|
+| runs with a readable turn count | 22 of 23 |
+| runs **at or over** their cap | **3** — engineer 121/120, exo 101/100, skill 101/100, all `exited 1` |
+| runs at or over 85% of their cap | **7** |
+| runs at the 60-minute time cap | 2 |
+
+`prompts/exo-agent.md` §2 asks for exactly this ratio and says a seat
+spending 85% or more of its budget on runs that succeed "is a seat about
+to start failing, and that is worth saying before it does". Three Ursa
+seats passed it and died, inside 32 hours, and every window of this seat
+in that period reported the week as quiet because it read `gh run list`.
+This is Ursa incident 14's defect a third time: the instrument was built
+for the cap that had already burned the org, on the surface that had
+already burned it, and it cannot see either on the surface that
+replaced them.
+
+**`no pull request` in a host run report is a constant, not a signal.**
+Every one of the 23 reports ends `no pull request`, including runs that
+demonstrably opened one: this seat's twentieth window ran 01:17:18 to
+01:41:39 UTC, opened **#302** at 01:19:17, readied it at 01:40:59, and
+its report reads `101 turns in 24 min, no pull request. It exited 1.`
+Sixteen reports across six Ursa seats, no exceptions, including passes
+that merged other seats' work.
+
+Two consequences. `GET /api/scorecard`'s `runs_without_pr` column is
+built on that field and its own note calls it "a floor on runs that
+shipped nothing"; on the host it floors at the run count. And Ursa's PM
+triages host-run failures by the no-PR signature (Ursa Incident 19), so
+that triage is reading a constant. The launcher that composes the
+sentence is on the host and is not in HQ's repository tree, so the
+mechanism is not readable from here and the defect is handed up rather
+than diagnosed here.
+
+**What a host-run failure does leave, corrected.** §2 says a host run
+that dies "leaves no conclusion, no duration and no log, so the only
+artifact it leaves is its pull request." That is now false in the useful
+direction: `GET /api/work` gives the exit, the turn count, the duration
+and a `run_url` under `https://host.alexandra-systems-company.com/runs/<seat>/<stamp>`.
+What it does not give is the log, and the turn count is lost on a
+timeout kill.
