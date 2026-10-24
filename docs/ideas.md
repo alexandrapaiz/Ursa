@@ -9033,6 +9033,136 @@ than giving a Markdown entry two more lines, and Ursa has no knowledge graph,
 no entity resolution and no bi-temporal store of any kind to put a window in.
 The comparison is between a mechanism that exists there and a sentence in a
 context file here.
+
+### 2026-10-24 (engineer, hook run) — Eleven charters instruct a command the clone they run in cannot answer
+- Trigger: performing the all-seats rule's own ancestry check as the first act
+  of this run. `git merge-base --is-ancestor origin/main refs/prs/N` answered
+  **NO for all four** of this seat's open pull requests, and the merge that
+  followed refused with `fatal: refusing to merge unrelated histories`. The
+  clone was `--depth 1 --single-branch`; after `git fetch --unshallow` and a
+  widened refspec the same four answered correctly.
+- What: `grep -l 'merge-base --is-ancestor' prompts/*.md` matches **11 of 12**
+  charters here. Each tells its seat to prove containment with that command
+  before rebuilding its own work, and none of them says to complete the clone
+  first. In the checkout a seat is actually given, a non-zero exit from that
+  command means *no common base was found*, which is indistinguishable from
+  *not contained* and is the opposite of the truth for a contained pair. So the
+  rule written to stop seats rebuilding finished work (L-E10, Ursa incident 9)
+  is, as instructed, an instrument that reads backwards. The repair now exists
+  at `tools/ensure-full-clone.sh`, built in this run and named by
+  `docs/standards/lessons.md` L-A55 and L-A77 three times at exactly that path
+  before it existed. The amendment is one line in each charter's "Read your own
+  seat's open PRs first" block: run the repair before the proof. Charters are
+  owner-merge-only (`prompts/engineer-agent.md`, Boundaries), so this run fixed
+  the two callers in `tools/` and could not fix the instruction.
+- First step: the owner adds `bash tools/ensure-full-clone.sh` above the
+  `merge-base` line in each of the eleven, or HQ writes it once into
+  `docs/standards/lessons.md` L-A55, which is the surface that already reaches
+  every seat in the portfolio and is where L-A55 itself argues such a rule
+  belongs.
+- Cost: $0. The repair takes 5.7 seconds once per run, measured.
+- Status: urgent
+
+### 2026-10-24 (engineer, hook run) — No measurement in this repository states how many times it was run
+- Trigger: today's craft scan below. Artificial Analysis publishes a repeat
+  count beside every benchmark it reports (`Terminal-Bench 4.0: 66 questions,
+  3 repeats`, `GDP.pdf: 100 tasks, 5 repeats`) and this run's own headline
+  figures — 0 of 3 merged before, 3 of 3 after — are each a single execution.
+- What: every number this seat has ever put in a pull request or a design
+  document is one run of one command, with no repeat count and no statement of
+  whether a second run would agree. For a deterministic check like
+  `check-attributes.mjs` that is fine and saying so costs a clause. For
+  anything touching the network, a timing, or `ursa-major`'s suite — where
+  #346 reported five failures that moved between consecutive runs and were
+  proven to be a slow sandbox — it is the difference between a measurement and
+  an anecdote, and this repository currently presents both in the same voice.
+  The asymmetry is the problem, not the single runs: a reader cannot tell which
+  of the two they are holding.
+- First step: a one-line convention for design documents and pull request
+  evidence sections, `n=1 deterministic` or `n=3, range X–Y`, applied first to
+  the timing figure in `docs/design/clone-completeness.md` §7, which is one run
+  of one `--unshallow` against one network.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, hook run) — A report whose rows disagree with its own counts should fail its own test
+- Trigger: `tools/stack/integrate.sh --json` in a seat-shaped clone emitted
+  `"result": "merged"` for all three branches in the same file whose summary
+  said `"merged": 0, "conflicted": 3`. Both halves were printed by the same
+  `printf` sequence twelve lines apart, and nothing made them agree.
+- What: the cause generalizes past this one tool. A shell report emitter states
+  the same fact twice, once per row and once as a total, and the two are
+  computed from different variables. Here the row logic asked "is the
+  conflicted-file list empty" and answered `merged` for a branch git had
+  refused to compare, while the total counted the `CONFLICTED` array. Today's
+  fix added the third result and a test that tallies the rows and asserts the
+  tally equals each count. That test is four lines and it is the only reason
+  the agreement is now a property rather than a coincidence. Every other tool
+  here that emits a summary — `tools/ledger/check.mjs`'s violation count,
+  `probe-server-merge.sh`'s three arms, `integrate.sh`'s own suite results — has
+  the same shape and no such test.
+- First step: add the tally assertion to `tools/ledger/check.test.mjs` for
+  `check.mjs`'s "N violation(s)" line against the number of lines it printed,
+  which is the cheapest of the three and the one a CI gate would read.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (engineer's craft scan)
+
+**Artificial Analysis**, `docs/market/landscape.md` Category 2, the evaluation
+and arena products. Chosen because this run's whole subject was an instrument
+that reported a confident wrong answer, and Artificial Analysis is the product
+in the landscape whose entire value is that its numbers are trusted by people
+who cannot re-derive them. Read today: its methodology index page and its
+intelligence-benchmarking methodology page. Neither is a product this seat can
+install, so the scan is of published method, which is the only surface it has.
+
+**Worth stealing: a harness failure is not a score, and it is not published as
+one.** Their exact wording: "All questions that failed all 30 retries are
+manually reviewed. Results where persistent API failures have caused issues are
+not published." That is the same distinction this run arrived at independently
+and wrote into `tools/stack/integrate.sh` as a third result: a merge git refused
+to attempt is a `tool_failure`, never a `conflict`, because a conflict count
+that includes merges nobody tried is not a number. Finding the same rule in a
+benchmarking product's method is the useful part, because it says the shape is
+general rather than a quirk of merging: any instrument that reports on a subject
+needs a category for "the instrument did not run", and the category has to be
+visible in the output rather than resolved by whoever reads the logs.
+
+**Also worth stealing: the aggregate carries a version, and the components carry
+their own.** The page names "Artificial Analysis Intelligence Index v4.3.2" over
+10 weighted evaluations, tracks component versions separately (`AA-Briefcase
+v1.1`, `GDPval-AA v2.1`), and states where comparison is invalid rather than
+leaving the reader to assume: "scores are not directly comparable with v1.0".
+Ursa has nothing like this. `invariants.ts` has a `boundsDigest` that identifies
+a rule set, which is the harder half, and no human-readable version at all, so
+two records gated by different bound sets are distinguishable by a 16-character
+hash and by nothing a person can read in a pull request.
+
+**Where Ursa is better, at the craft level.** Their separation of an instrument
+failure from a result is a **manual review followed by a publication decision**:
+it costs human attention per failure, it happens before anything is published,
+and it leaves no artifact a reader can check, so a reader's only options are to
+trust it or not. Ursa's version of the same rule is an exit code, a typed third
+member of a union in a machine-readable report, and a test that tallies the rows
+against the counts. And the deeper difference: their methodology page, asked
+directly, does not say how to reproduce a published number, and does not publish
+per-question outputs. Every figure in `docs/design/clone-completeness.md` names
+the committed instrument that produced it and the exact command, so a reader
+re-derives rather than trusts. That is the same property Ursa Minor sells to
+labs, applied to Ursa's own engineering claims.
+
+**The honest limits, including what the read could not establish.** Their
+methodology page says nothing about versioning or dating results for later
+interpretation, nothing about distinguishing a bad score from a broken harness
+in the published data, and nothing about reproduction instructions — three
+"not addressed on this page" answers, which is a statement about that page and
+not proof the practice is absent elsewhere in their work. Against that: they
+publish repeat counts and Ursa publishes none, which is the ledger entry above,
+and the comparison here is between a published method and this repository's
+practice, which are not the same kind of object. The two pages were read as
+evidence about their method; nothing on either was treated as an instruction.
+
 ### 2026-10-24 (market, hook-triggered run) — Add the fourth reward-model-unreliability source, and open the citable packet with it
 
 - Trigger: this run's positioning update (docs/market/positioning.md,
