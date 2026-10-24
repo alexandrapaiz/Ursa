@@ -3065,6 +3065,90 @@ resolves it under the same before-you-end deadline. Handed to HQ's
 `exo-centralizer` as an all-seats amendment rather than written into
 eleven charters, which is the shape `L-A55` asks for.
 
+#### Replacing the body drops every standing rule about the body, and it cost the tip of this chain three of them (measured 2026-10-24, twenty-fifth window)
+
+Step 1 above says "replace the plan body with what the branch actually
+contains". That instruction is right and it is **destructive**, which
+the sentence does not say. A pull request body in this organization is
+not free prose. It is the carrier for at least five standing
+requirements written into this charter across four weeks, and a rewrite
+that starts from the branch's contents reconstructs the *contents* and
+silently drops the *requirements*, because none of them follow from
+what the diff contains.
+
+Measured on this seat's own chain, which is the cleanest possible case
+because nothing about the rewrite was careless. The twenty-fourth window
+readied the tip and replaced its body with a genuinely excellent
+account of the work, the subsumed pull requests with their ancestry
+proofs, the end-of-run checks and the external sources. Audited this
+morning against the standing list, that body was missing:
+
+| requirement | where it is written | four earlier windows | the rewritten tip |
+|---|---|---|---|
+| the bold authority declaration | §5, "Say in bold whether the change moves authority" | **present in all four** | **absent** |
+| other seats' charters, with line counts | §5, "Name every other seat's charter" | present | absent |
+| the queue's three numbers | §5b, "Watch the queue's depth" | present | absent |
+| pull requests subsumed, with the ancestry command | "Read your own seat's open PRs first" | present | present |
+| `External sources read` | the external-content rule | present | present |
+
+**Three of five, and the one that matters most is the first.** The
+declaration is not decoration, it is the merge route: this charter says
+in bold that it is "what the merge route reads, and a declaration that
+is absent is a hold". So the artifact the whole chain was pointing the
+owner at was the only one of the five that could not state its own
+tier, and the four it supersedes each could. A reader comparing them
+would conclude the tip was the careless one, and the opposite is true.
+It is the only one whose body was **rewritten** rather than written.
+
+**Be precise about what this did and did not cause.** It did not cause
+the freeze. The four pull requests that carry the declaration are
+unmerged too, so the hold is the expired clock above and not this. The
+honest statement is that this defect was **masked** by a larger one, and
+it would have bitten alone the moment the freeze lifted. A defect
+sitting behind a bigger defect still gets filed, because the bigger one
+is somebody else's to clear.
+
+**The general shape, which is why this is a rule and not a fix.** A new
+standing rule that tells you to *replace* an artifact voids every older
+standing rule about that artifact's contents, and it does so without
+contradicting any of them in text, so §3's standards-against-standards
+sweep cannot see it by reading. Two sections of **this one file**,
+written six days apart, both correct, jointly lossy. That sweep looks
+for two rules a seat cannot jointly obey. This is the other failure
+mode: two rules a seat obeys one at a time, where performing the newer
+one correctly is what breaks the older one.
+
+So, two duties.
+
+1. **A body rewrite is a re-derivation of the checklist, not a
+   retelling of the diff.** Before `gh pr ready`, run the audit rather
+   than remembering it. It is one command and it reads the body you are
+   about to ship:
+
+   ```bash
+   gh pr view <n> --json body --jq .body > /tmp/body.md
+   for p in "moves no authority|changes a seat.s authority" \
+            "Other seats. charters" "open pull request" \
+            "External sources read" "is contained in|is-ancestor"; do
+     printf '%-45s %s\n' "$p" "$(grep -ciE "$p" /tmp/body.md)"
+   done
+   ```
+
+   A zero in the first row on a diff that touches `prompts/` is a hold
+   you have written yourself.
+
+2. **When you add a rule that replaces an artifact wholesale, name what
+   the artifact already owes in the same breath.** The cost of not doing
+   it is paid by the window after you, which cannot see the rule it is
+   violating because it is doing exactly what the newest instruction
+   says.
+
+Repaired in place rather than by opening anything: the tip's body now
+carries all five, prepended by this window, with the queue measured at
+the moment it was written. The commit history of the branch is
+unchanged, because a body is not a commit and repairing one costs no
+identifier.
+
 ### Write the receipt, then the register (added 2026-10-24, twenty-fourth window)
 
 The rule above saves the artifact. It does not save a **claim about an
