@@ -2,6 +2,88 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Eighty-sixth pass, 2026-10-24 ~17:0x UTC, message: two more-superseded pull requests closed, exo's chain conflict confirmed and resolved on the board, one ledger-reconciliation gap flagged rather than hand-fixed
+
+**The trigger.** A dispatch bundle: review research's #358 and exo's
+two conflicting chains (#337 and #362) against the merge rule, plus
+exo's own board note (16:39Z) confirming a chain conflict this seat
+had named at 16:33Z and recommending "merge 362, close 337 against
+it." Market's #363 (also named in the bundle) was already merged by
+the eighty-fifth pass before this one started — read live, not
+assumed.
+
+**Read this seat's own open PRs first.** Found #367 (the eighty-fifth
+pass), still open and not yet merged by the owner. Branched from its
+tip rather than from `main`, confirmed `main` is fully contained in
+it (`git merge-base --is-ancestor origin/main HEAD`), so no rebase was
+needed.
+
+**Findings, in the order acted on.**
+
+1. **#358 (research) closed as superseded, not reviewed on its own.**
+   Research's board message (16:53Z, PR #366) names #358 as one of
+   eleven earlier runs its fourteenth run absorbs. Checked on an
+   unshallowed clone rather than taken on the claim: `git merge-base
+   --is-ancestor` confirms #358's tip is a strict ancestor of #366's
+   current tip. Closed #358 with a comment naming #366 and the check
+   that confirmed it, and posted a `note` to research on the board
+   doing the same. #366 itself is not merged: it edits
+   `prompts/engineer-agent.md` and `prompts/research-agent.md`
+   directly, so it is Tier C under the standing charter freeze
+   (`INC-2026-10-18-tier-c-charter-freeze`) regardless of its green
+   check and clean `MERGEABLE` state. Waits on the owner.
+2. **Exo's chain conflict confirmed exactly as exo re-measured it, and
+   #362 stays Tier C despite its gate fix.** Exo's note says it
+   re-derived both of this seat's earlier findings (the conflict, and
+   the live redaction-gate failure) rather than accepting them, found
+   both true, fixed the gate, and recommends merging #362 (the newer
+   chain) and closing #337 (the older, conflicting one) against it.
+   Checked independently rather than trusted: `git merge-base
+   --is-ancestor` confirms #344 is an ancestor of #362 and #337 is an
+   ancestor of neither, matching exo's own simulation exactly. #362's
+   `scan` check is now `SUCCESS` live (was failing as of the
+   eighty-fifth pass an hour earlier) — exo's fix holds. None of this
+   changes #362's tier: it still edits `prompts/exo-agent.md` directly,
+   so it is Tier C under the same standing freeze as #366 above, and
+   stays with the owner regardless of how clean the rest of the diff
+   reads.
+3. **#337 closed as superseded, with one gap exo's note did not
+   name.** Closed #337 (comment naming #362, the ancestry check, and
+   exo as the owning seat), since every commit it carries that exo
+   described — the charter and register files — survives on #362.
+   What exo's note did not mention: #337 also carried `docs/ideas.md`
+   and `docs/decisions.md` content (ledger proposals from around this
+   seat's own fortieth pass, imported into exo's branch the same way
+   the sprint files were) that is **not** byte-identical to either
+   current `main` or this seat's own branch (#367/this pass). Diffed
+   all three directly rather than assumed. Did not reconcile it by
+   hand this pass: closing a pull request does not delete its branch,
+   so nothing here is unrecoverable, and reconciling two divergent
+   six-day-old ledger snapshots line by line is grooming work, not a
+   merge-rule judgment, and risks introducing an error under time
+   pressure that a calmer grooming pass would not. **Flagged here for
+   whoever next grooms `docs/ideas.md` end to end**: diff
+   `origin/ursa-exo/2026-10-24-message-6`'s `docs/ideas.md` and
+   `docs/decisions.md` (branch kept, PR closed as #337) against current
+   `main` before assuming nothing of value is sitting there unmerged.
+4. **Replied to exo on the board**, in first person, confirming both
+   closes, naming the one gap above, and saying plainly that nothing
+   is owed back from exo on either pull request. Posted a parallel
+   note to research for the same reason on #358.
+
+## Carried from the eighty-fifth pass, unchanged by this one
+
+- **Two tool scripts the standard names do not exist in this
+  repository**: `tools/check-draft-prs.sh` and
+  `tools/check-merge-queue.sh` (docs/standards/pm.md §11.2). Still
+  absent as of this pass (`find . -iname` both return nothing). Every
+  check they would automate is being done by hand each pass instead,
+  which costs turns. Not built here; `tools/` is outside this seat's
+  writable surface.
+- **The ledger-reconciliation gap named in finding 3 above** is new
+  this pass, not carried, but belongs in the same bucket: real work,
+  not urgent, not this seat's to fix alone under time pressure.
+
 ## Eighty-fifth pass, 2026-10-24 ~16:4x UTC, message: two Tier B merges against the engineer and market chains, a real docs/ideas.md conflict resolved by hand, both named draft dispositions already resolved by their own seats
 
 **The trigger.** A dispatch bundle naming three open pull requests to

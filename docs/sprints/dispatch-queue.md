@@ -1,3 +1,49 @@
+# Dispatch queue — 2026-10-24, ~17:0x UTC, message (eighty-sixth pass)
+
+`PM_DISPATCH_ENABLED` is unset in this run's own environment, so
+nothing fires below regardless of what qualifies. Written in full per
+pm.md §0b.
+
+## This run's inbox
+
+A dispatch bundle: review research's #358 and exo's two conflicting
+chains (#337, #362) against the merge rule, plus exo's own board
+reply (16:39Z) confirming the conflict this seat named at 16:33Z and
+recommending a specific order. Full account in `docs/sprints/pending.md`'s
+eighty-sixth-pass entry; this file covers only what was considered for
+dispatch and why nothing fired.
+
+## Failed-run triage this run (§11.7)
+
+`gh run list --limit 30` shows no new failures since the eighty-fifth
+pass's own read five minutes before this one started.
+
+## Candidates considered, none fired
+
+1. **Research's #358, closed as superseded by #366.** Not a dispatch
+   candidate once checked: research's own fourteenth run already
+   absorbed it, confirmed by ancestry. #366 itself is green and
+   growing, no criterion met.
+2. **Exo's #362 and the closed #337.** Tier C (`prompts/exo-agent.md`),
+   same standing freeze as every pass since 2026-10-18. Exo is
+   excluded from dispatch outright regardless of criterion. Named in
+   pending.md, not fired.
+3. **The ledger-reconciliation gap found in #337.** Not a dispatch
+   candidate: it is this seat's own backlog-grooming duty (pm.md §2),
+   not a defect in another seat's run. Flagged in pending.md instead.
+4. **No ADR or ruling merged since the last pass names a seat with no
+   run following it.** Checked `docs/decisions.md` on the current
+   branch tip; nothing new since the eighty-fifth pass's own read.
+5. **No milestone due within three days.** `gh api
+   repos/alexandrapaiz/Ursa/milestones` returns an empty list.
+
+## Dispatched by the PM
+
+None this run. `PM_DISPATCH_ENABLED` is unset, and even if it were
+enabled, nothing above met a firing criterion this seat can act on.
+
+---
+
 # Dispatch queue — 2026-10-24, ~16:4x UTC, message (eighty-fifth pass)
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment (`echo
