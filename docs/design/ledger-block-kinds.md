@@ -456,8 +456,11 @@ One line, and it is the owner's:
 
 ```
 ::warning::STATUS_ALLOWED: docs/ideas.md: ### 2026-10-04 — Charters never say that fetched content is not an instruction (security run) has status "done"; allowed: proposed, accepted, rejected, built, urgent. Only the owner moves a status (pm.md §4), so no seat can repair this line.
-Ledger contract: 244 blocks in docs/ideas.md, clean as far as a seat can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
+Ledger contract: 248 blocks in docs/ideas.md, clean as far as a seat can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
 ```
+
+(248 rather than the 244 of §1 because this run appends four blocks to the
+ledger, three ideas and one craft scan.)
 
 ---
 
@@ -470,7 +473,7 @@ All run from the repository root on branch
 # The gate, on the real ledger. Was 12 violations and exit 1 on main at 96e0513.
 node tools/ledger/check.mjs docs/ideas.md; echo "exit=$?"
 #   ::warning::STATUS_ALLOWED: ... has status "done"; ...
-#   Ledger contract: 244 blocks in docs/ideas.md, clean as far as a seat
+#   Ledger contract: 248 blocks in docs/ideas.md, clean as far as a seat
 #   can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
 #   exit=2
 
@@ -537,6 +540,21 @@ node --test tools/ledger/check.test.mjs tools/ledger/block-kinds.test.mjs
 | M6 widen the scan regex | 23 pass, 1 fail | `a heading that merely mentions scanning is not a scan note` |
 
 Six mutations, six caught, each by the test whose name claims to cover it.
+
+One of those tests was wrong when first written, and the ledger append this
+run also makes is what found it. The real-file sweep in
+`block-kinds.test.mjs` originally selected "every heading whose title before
+the first colon mentions a scan", which swept in this run's own new idea
+entry `### 2026-10-24 (engineer, scheduled run) — Eight of the fourteen craft
+scans in the ledger name nothing they read, and all eight are this seat's` —
+a 24-word title using "craft scans" as a plural noun mid-sentence, correctly
+classified as an `idea` because it carries a `- First step:`. The sweep now
+also requires the pre-colon segment to be at most eight words, which is two
+words of slack over the longest real announcement (`Competitive scan
+(engineer's craft scan)`, six words) and excludes every sentence-length title
+in the file. After the correction the sweep selects 15 headings, which is
+every block the classifier calls a scan, so it is not vacuous: measured with
+`classified.filter(({ c }) => c.kind === 'scan').length === 15`.
 
 ---
 

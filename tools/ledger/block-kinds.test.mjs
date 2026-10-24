@@ -126,10 +126,28 @@ test('the preamble and the chair’s dated note bullets owe no field contract', 
 const realBlocks = parseLedger(readFileSync(LEDGER, 'utf8'));
 const classified = realBlocks.map((b) => ({ block: b, c: classifyBlock(b) }));
 
-test('every real heading that names a scan is classified as one', () => {
-  const named = classified.filter(
-    ({ c }) => c.title !== null && /\bscans?\b/i.test(c.title.split(':')[0]),
-  );
+test('every real heading that announces a scan is classified as one', () => {
+  // A sweep for the failure that matters: a seat invents a spelling of the
+  // scan heading that SCAN_TITLE does not know, the block silently becomes an
+  // `idea`, and the gate goes red on a note that owes nothing.
+  //
+  // The sweep has to be looser than SCAN_TITLE or it tests nothing, and it
+  // cannot be as loose as "the title mentions a scan" or it sweeps in ideas
+  // ABOUT scanning. The 2026-10-24 entry `Eight of the fourteen craft scans
+  // in the ledger name nothing they read` is the real block that proved the
+  // looser version wrong: a 24-word title using `craft scans` as a plural
+  // noun in the middle of a sentence. An announcement is short and sits
+  // before a colon (`Craft scan:`, `Competitive scan (engineer's craft
+  // scan):`, the longest real one being six words), so the sweep is "the
+  // segment before the first colon mentions a scan AND is at most eight
+  // words", which admits two words of slack for a spelling nobody has used
+  // yet and excludes every sentence-length title in the file.
+  const ANNOUNCEMENT_MAX_WORDS = 8;
+  const named = classified.filter(({ c }) => {
+    if (c.title === null) return false;
+    const head = c.title.split(':')[0];
+    return /\bscans?\b/i.test(head) && head.trim().split(/\s+/).length <= ANNOUNCEMENT_MAX_WORDS;
+  });
   assert.ok(named.length >= 14, `expected at least the 14 known scan notes, found ${named.length}`);
   const missed = named.filter(({ c }) => c.kind !== 'scan').map(({ c }) => c.heading);
   assert.deepEqual(
