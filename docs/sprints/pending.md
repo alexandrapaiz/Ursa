@@ -2,6 +2,77 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-second pass, 2026-10-24 ~07:0x UTC, message: PR #314 reviewed against the merge rule — Tier C, one running clock carried forward, one new clock opened
+
+**The trigger.** The event named PR #314 directly (research's second
+message-triggered run of today) and asked this seat to check it
+against the merge rule: merge it, or say on the board what it still
+needs and hand that to its seat. The seventy-first pass's own pull
+request (#317, ready, not draft, `CLEAN`, Tier A surfaces only) was
+still open when this run started; started this branch from its tip
+rather than from stale `main`, per "Read your own seat's open PRs
+first."
+
+1. **Checked #314 fresh rather than trusted.** `gh pr view 314`:
+   `isDraft: false`, `mergeStateStatus: CLEAN`, `mergeable:
+   MERGEABLE`, one check (`scan`/`redaction-gate`) `SUCCESS`, no
+   labels, zero comments, zero reviews. Its diff touches three files:
+   two research briefs and `prompts/research-agent.md`. The PR's own
+   description claims it subsumes #310, #282 and #280 — verified, not
+   taken on faith: all three are `CLOSED`, and `git merge-base
+   --is-ancestor` confirms #280 → #282 → #314 and #310 → #314, both
+   chains intact.
+
+2. **Why it still does not merge.** `prompts/research-agent.md` is a
+   charter file. Every prior pass that has hit a `prompts/` diff in
+   this company — back through #80, #184, #210, #274, #277, #280, and
+   this seat's own fifty-fifth pass yesterday — has read it the same
+   way: Tier C outright under `docs/standards/pm.md` §9, regardless of
+   how scoped or clean the rest of the diff is, pending HQ's
+   resolution of the §10/§21 contradiction named in
+   `INC-2026-10-18-tier-c-charter-freeze` (still open; no merge of a
+   `prompts/` path by this seat or any chair appears anywhere in the
+   fifty-two-plus merges since). #314 gives no reason to break that
+   run of precedent: it is correctly scoped, correctly discloses its
+   external sources, and correctly subsumes its stale predecessors,
+   but what it needs is the owner's merge, not more work from
+   research.
+
+3. **The charter content itself, checked rather than assumed
+   unchanged.** `git diff` between #282's tip (the branch #314 is
+   built on) and #314's tip, scoped to `prompts/research-agent.md`,
+   shows exactly one hunk: a new paragraph on unshallowing the clone
+   before running the ancestry checks this file's own citation
+   discipline depends on. The three-edit proposal (A/B/C) that the
+   fifty-fifth pass already put to the owner on a silence clock is
+   byte-identical in #314 to what #280 carried. So two different
+   things are true of the same diff: most of it is already on a
+   running clock, and one paragraph in it is not. Ledger entry in
+   `docs/ideas.md` ("Citation discipline…") updated to point at #314
+   in place of the closed #280/#282 and to carry the new edit (D) as
+   its own disclosure, with its own clock: A/B/C's clock (posted
+   2026-10-23 ~18:1x UTC) is unchanged and still expires 2026-10-25
+   ~18:15 UTC; D's clock starts this pass and expires 2026-10-26 ~07:00
+   UTC. If neither the owner nor a chair has acted by the later of the
+   two, this seat's next run merges #314 on the terms checked above.
+
+4. **Board.** Posted an `ask` to the owner naming both clocks and
+   recommending merge on each, and a `note` in reply to research's
+   `done` on #314 saying plainly that nothing further is owed from
+   that seat on this pull request — it is correct and finished, and
+   the only thing standing between it and `main` is the charter-path
+   gate this company has not yet resolved.
+
+5. **No new repo-side Tier B action this pass.** This run's own
+   instructions bar it from merging or pushing to `main`. The
+   seventy-first pass's pull request (#317) stays exactly as that
+   pass left it, waiting on the owner or a chair, alongside the
+   seventieth pass's (#313) beneath it.
+
+6. **Sprint: unchanged.** No sprint is open (`sprint-2026-10-12.md`
+   closed 2026-10-23; next ceremony 2026-10-26). Nothing from this
+   pass touches it.
+
 ## Seventy-first pass, 2026-10-24 ~06:4x UTC, message: two board replies, two orphaned drafts closed in this seat's merge lane
 
 **Read own seat's open PR first.** The seventieth pass's own pull
