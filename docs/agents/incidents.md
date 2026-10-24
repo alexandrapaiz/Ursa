@@ -5939,3 +5939,94 @@ a file still lands in the right section.** The seat that receives one
 should check the whole claim rather than the clause, and should reply
 with where the correction already is — which is a different act from
 agreeing with it, and the only one that stops the sibling paying again.
+
+## INC-2026-10-24-the-tip-audit-cannot-see-a-directed-message — A duty and the check written under it in the same breath, where the check tests a proper subset of the duty and so passes over its exact failure
+
+**Status:** closed by the charter edit in this window's pull request.
+The audit now filters to broadcasts, reads `live_tip` rather than `ref`,
+and returns an exit status. Nothing further is owed, because the defect
+was in a command's text and the corrected command is in the same file.
+
+**What happened.** On 2026-10-18 the eleventh window of this seat found
+that its own tip-broadcast duty had been performed by a **directed**
+message, so the public feed stayed six tips stale while a correct
+pointer sat in one recipient's inbox. It corrected the duty in exactly
+the right words: *"one broadcast, meaning no `to_seat` in the body, with
+the identifier in `data.live_tip`. Address a seat directly only in
+addition to that and never instead of it."* Under that sentence it put
+an audit, and the audit does not test either half of it.
+
+```
+[.messages[] | select(.from_company=="Ursa" and .from_seat=="exo")]
+| sort_by(.ts) | last | [.ts,.kind,(.ref//"-"),((.data.live_tip)//"-")|tostring]
+```
+
+There is no predicate on `to_seat`, so a directed message is eligible to
+be `last`. And the instruction under it reads *"if the `ref` it prints
+is not the pull request your seat has open, the board is lying about
+you"*, which names the third column while the duty's identifier lives in
+the fourth.
+
+**The sequence, measured on this window's own trigger.** Six days later,
+to the minute:
+
+| UTC | event |
+|---|---|
+| 17:37:22 | this seat broadcasts `done`, `ref` at `/pull/378`, `data.live_tip` **378**. Correct. |
+| 17:40:00 | the thirty-fourth window opens its tip, **#382**. No broadcast. |
+| 17:40:51 | Ursa's PM closes two predecessors, its comments naming #378 as "exo's current tip" |
+| 17:44:40 | Ursa's PM publishes its merge-rule verdict **against #378** |
+| 17:47:03 | this seat posts `done` **directed** to HQ's centralizer, `ref` at `/pull/382`, identifier under `data.my_pr`, **no `live_tip`** |
+
+Run verbatim at the start of the thirty-fifth window, the old audit
+printed `17:47:03  done  …/pull/382  -`. A reader following its
+instruction compares column three to the open pull request, finds #382,
+and concludes the board is not lying. The board was lying. Its newest
+broadcast said 378 and still does.
+
+**Why it happened technically.** Two independent gaps, and the message
+that triggered the window slipped through both. The missing `to_seat`
+predicate makes a directed message eligible, which is the failure the
+duty was written about. The `ref` field then masks the absence of
+`live_tip`, because a window that moves its tip naturally sets `ref` to
+the new pull request whoever it is writing to, so `ref` tracks the truth
+while the field the duty specifies goes unset. The dash printed for an
+absent `live_tip` is also indistinguishable from the dash printed for an
+empty one, in a column nothing told the reader to read.
+
+**Who paid.** Ursa's PM, and it did nothing wrong at any step. Its note
+of 17:44:40 opens *"your own board note already named your live tip and
+its tier"*, which is precisely what this charter asks a reader of the
+board to do, and the verdict it reached is correct and independently
+re-derived in this window: `prompts/pm-agent.md` on `main` is 390 lines
+and contains zero mentions of the clock, the silence route, the bold
+declaration or the phrase Tier C, against four in this seat's own
+charter, so the Tier C list governs and the tip waits on the owner. The
+only thing wrong with that review is the identifier it is attached to,
+and this seat supplied the identifier.
+
+**What the org grew from it.** This register already carries two
+versions of a larger pattern, both filed today: *a rule that reschedules
+an act must reschedule that act's checks with it*, and *a rule that
+replaces an artifact voids the older rules about its contents*. Both are
+two correct rules written weeks apart, which a reader can at least find
+by reading both. This is the narrower and worse case — **one rule and
+its own check, authored in one breath by one window, where the check
+tests a proper subset of the rule**. The standards-against-standards
+sweep in §3 looks for two rules a seat cannot jointly obey, and this
+contradicts nothing. It passes.
+
+So the duty, written into the charter beside the corrected command:
+**when you write a duty with a command under it, read the command back
+against each clause of the duty and name any clause it does not test.**
+The check is free and it happens at the one moment the author still has
+both texts in front of them, which is the only moment anybody ever does.
+
+**And one note on where the cost actually landed, because it is not
+where it looks.** The stale pointer did not change the disposition. #378
+waits on the owner, #382 contains #378, and this window's pull request
+contains #382, so the same decision covers all three and the content is
+identical in the only sense that matters. What was spent is a PM pass
+reviewing an identifier that had been superseded four minutes earlier,
+and an owner ask that now names the oldest member of a three-deep chain.
+That is cheap, which is exactly why it went six days unnoticed.
