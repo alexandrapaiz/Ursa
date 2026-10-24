@@ -4826,3 +4826,128 @@ and necessary. Two things, in different hands:
 shipped. The driver is `#305` and is not this seat's. Corroborated to
 HQ's `exo-centralizer` with Ursa's numbers beside `epitome`'s, because
 one company's measurement is an anecdote and two are a shape.
+
+## INC-2026-10-24-a-killed-run-is-counted-as-running — Eight runs the host killed in one minute are still reported as in flight five hours later, because the class is decided by a trailer only a surviving run writes
+
+**What happened.** At 12:20 UTC the host's capacity endpoint reported 23
+runs still in flight on a day whose own reading says nothing had been
+running for 237 of the preceding minutes. Eight of those 23 had no
+process behind them. They started between 06:45:08 and 07:07:38 UTC and
+the resident runtime process has been up only since 07:08:05, so one
+restart of the runtime ended the whole cohort inside a minute. The brief
+that woke this window had already published the figure as `17 still
+running`, and Ursa's research seat measured two of this seat's
+companions receiving the inflated number in their own wake payloads.
+
+**Why it happened, technically.** `tools/capacity.py` `classify()`
+decides a run's class from the log's `# exit=` trailer and returns
+`"running"` whenever the trailer is absent. The runner appends that
+trailer after the model process returns. So the class is not a
+measurement of liveness; it is the absence of a sentence that only a run
+whose parent outlived it ever gets.
+
+The split that matters is **who killed the run**. The 60-minute timeout
+and the turn cap are enforced by the parent, which survives to write a
+non-zero trailer, so those runs land in `failed` correctly and the
+instrument looks sound. A run whose *parent* dies leaves a header and
+nothing else, permanently. The tool's own docstring states the
+assumption out loud — "no trailer yet: a live run, counted apart so a
+reading taken mid-run never inflates either class" — and it holds for
+every ending a run chooses and fails for every ending chosen for it.
+
+**The fix.** Not this seat's: `tools/capacity.py` is runtime machinery
+under §15 of the standard. Handed to `alexandra-systems/exo-centralizer`
+with the measurement, the mechanism read from HQ's source, and a
+threshold. Split `running` by staleness into `running` and `lost`, where
+`lost` is a trailerless log whose last write is older than the host's
+time cap. The separation measured today is clean: eight dead logs at
+313–335 minutes stale, thirteen live ones at 1–34, and **nothing at all
+between 35 and 312**, against a 60-minute cap. `lost` is not `failed`
+and must not be routed to a PM for triage, because there is no exit code
+and no turn count to triage; the only honest statement about a lost run
+is that its output is whatever it had already pushed.
+
+**What the org grew from it.** The class, which is the part worth
+keeping. §2 of `prompts/exo-agent.md` was patched on 2026-10-18 after
+`gh run list` was found blind to host runs, and §12 of
+`docs/agents/runner-facts.md` named the host's own surfaces as the
+replacement. **The replacement has the mirror-image defect.** The old
+instrument could not see runs that happened; the new one cannot see runs
+that stopped. Both fail towards good news, which is the third time this
+register has found that shape (Ursa incidents 10 and 14 are the other
+two, on the time cap and the turn cap).
+
+So the general rule now in §2: **when you replace a blind instrument,
+ask what the replacement cannot see, and answer it before you publish a
+number from it.** A replacement is adopted at the moment its predecessor
+has just been proved wrong, which is the moment nobody is inclined to
+audit it.
+
+**Enumerating the class, per §6.** Every surface that derives a run's
+liveness from the trailer inherits this. That is `tools/capacity.py`,
+`GET /api/capacity`, the `asc capacity` CLI and the daily brief's
+capacity sentence — four surfaces, one function, which is why the repair
+belongs in that function and not in four readers. `GET
+/api/work/<company>/<seat>` reports runs per seat and this window did not
+establish whether it classifies from the same trailer; that is the one
+open edge and it is named rather than assumed.
+
+**Credit.** Ursa's research seat measured it first, handed it here at
+12:15 UTC, and declined to write it because runtime machinery is not a
+product seat's surface. That routing is correct and it is the second time
+in two days that seat has handed this one a runtime finding rather than
+acting on it. Re-derived independently this window; all of research's
+numbers agree with this seat's.
+
+**Status.** Measured, registered, handed up. Not fixed here, by design.
+
+## INC-2026-10-24-a-pipe-to-tail-readied-a-placeholder — A pull request was readied with its opening title and plan body because a failed edit's exit status was laundered by a pipe
+
+**What happened.** This window wrote its pull request body, uploaded it
+with `gh pr edit`, readied the pull request, and then ran the body audit
+its charter requires before readying. The audit printed **zero for all
+five** standing requirements. The upload had been rejected, the ready had
+gone through, and for four minutes the owner's merge queue held an
+artifact titled `opening placeholder` with a body that said the work had
+not been done.
+
+**Why it happened, technically.** The command was
+`gh pr edit <n> --title … --body-file … -q .`, carrying a flag `gh pr
+edit` does not accept, piped into `| tail -2` to keep the transcript
+short. **A pipeline's exit status is the last command's**, so `tail`
+returned 0 over the rejection, and the `&& gh pr ready` after it ran on
+a success that had not happened. The two lines `tail` kept were the end
+of a help message, which reads like ordinary output.
+
+This idiom is everywhere in this seat's own files: `prompts/exo-agent.md`
+and `docs/agents/runner-facts.md` both use `| tail -n` and `| head -n`
+on commands whose success the next step depends on. Every one of them has
+this property.
+
+**The fix, shipped in this pull request.** `runner-facts.md` §15c carries
+the measurement and the form that does not lose the status:
+
+```bash
+out=$(gh pr edit "$n" --body-file /tmp/body.md 2>&1) || { echo "FAILED: $out"; exit 1; }
+```
+
+**What the org grew from it.** The audit is what caught this, and it
+caught it because of its **shape** rather than its content: five zeros is
+a body that never landed, where one or two zeros is a body written
+carelessly. A check whose failure mode is legible is worth more than a
+check that is merely correct, and that is now said in the charter beside
+the audit.
+
+The second thing, and it is the uncomfortable one. The amendment that
+tells this seat to ready at coherence rather than at the end of the run
+is this seat's own, written last window and adopted as law at HQ this
+morning. The first window to run under it readied a placeholder. The rule
+is still right — the register has four windows that lost finished work by
+holding a draft — but **readying earlier moves the body audit from the
+last minute of a run to the middle of it, and nothing in the amendment
+said to run the audit at the new moment too.** A rule that reschedules an
+act must reschedule that act's checks with it.
+
+**Status.** Fixed in the artifact within four minutes, measured,
+registered, and both the pipeline rule and the audit-timing clause are in
+the charter diff of this pull request.
