@@ -32,22 +32,41 @@
  * usage: node measure-hit-areas.mjs out.txt [out.json]
  *        URSA_BASE overrides the server, VIEWPORT picks one of the three.
  */
-import { launch, VIEWPORTS } from "../../review-kit/lib/browser.mjs";
+import { launch, VIEWPORTS } from "./lib/browser.mjs";
 import { writeFileSync } from "node:fs";
 
-const BASE = process.env.URSA_BASE ?? "http://127.0.0.1:4953";
-const OUT = process.argv[2] ?? "hit-areas.txt";
-const JSON_OUT = process.argv[3] ?? null;
-const ONLY = process.env.VIEWPORT ?? null;
+// Promoted into the kit on 2026-10-24g from the review that wrote it,
+// `reviews/2026-10-24e/`, because a second surface needed it the same
+// day and the kit exists so that the next run finds it instead of
+// writing a third copy. The only change is that the three things that
+// were hardcoded to ursa-minor are now flags.
+//
+//   node measure-hit-areas.mjs --base http://127.0.0.1:3000 \
+//     --pages dashboard=/dashboard --out hit-areas.txt --json hit-areas.json
+//
+const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1]; };
+const BASE = arg("base", process.env.URSA_BASE ?? "http://127.0.0.1:4953");
+const OUT = arg("out", "hit-areas.txt");
+const JSON_OUT = arg("json", null);
+const ONLY = arg("only", process.env.VIEWPORT ?? null);
 const MIN = 44;
+// Same gate shoot.mjs grew on 2026-10-24g: a surface that fetches after
+// hydration has no controls at all until its data lands, and this script
+// reported "0 targets seen" rather than failing, which is the worst way
+// for a measurement to be wrong.
+const UNTIL = arg("until", null);
 
-const PAGES = [
-  ["home", "/"],
-  ["set", "/record"],
-  ["record", "/record/mini-fixture"],
-  ["address", "/record/at"],
-  ["404", "/this-page-does-not-exist"],
-];
+// `name=/path`, comma separated. The default is ursa-minor's five, which
+// is what every run of this script before today measured.
+const PAGES = arg(
+  "pages",
+  "home=/,set=/record,record=/record/mini-fixture,address=/record/at,404=/this-page-does-not-exist",
+)
+  .split(",")
+  .map((p) => {
+    const i = p.indexOf("=");
+    return [p.slice(0, i), p.slice(i + 1)];
+  });
 
 const probe = (MIN) => {
   /* A press "owns" a control if it lands on the control, on something
@@ -155,6 +174,7 @@ for (const [vname, w, h] of VIEWPORTS) {
   const page = await ctx.newPage();
   for (const [name, path] of PAGES) {
     await page.goto(BASE + path, { waitUntil: "networkidle" });
+    if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
     await page.waitForTimeout(250);
     const rows = await page.evaluate(probe, MIN);
     all[`${vname}/${name}`] = rows;

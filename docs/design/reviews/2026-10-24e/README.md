@@ -306,7 +306,10 @@ node ../docs/design/review-kit/shoot.mjs --base http://127.0.0.1:4953 \
 
 cd ../docs/design/reviews/2026-10-24e
 node probe-forms.mjs      data/forms-after.txt
-node measure-hit-areas.mjs data/hit-areas-after.txt data/hit-areas-after.json
+# promoted into the kit on 2026-10-24g, and its three hardcoded values
+# are flags now; this is the same measurement that produced the numbers above
+node ../../review-kit/measure-hit-areas.mjs --base http://127.0.0.1:4953 \
+  --out data/hit-areas-after.txt --json data/hit-areas-after.json
 node verify-fields.mjs    data/field-verification.txt   # the 119 checks
 node crop-forms.mjs       after                         # the 3x pairs in §2
 python3 ../../review-kit/diff-frames.py before after data/frame-diff.txt

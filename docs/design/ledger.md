@@ -255,13 +255,177 @@ which place each belongs to. The rule generalises past percentages: any
 figure that lives in a column is formatted to a fixed shape, and any
 figure that lives in a sentence is formatted to be read aloud.
 
+## L12 — A fill made for text is the wrong fill for a bar
+
+**measured**, 2026-10-24 (sixth run). `reviews/2026-10-24g/README.md`
+§3.1, `data/bar-pixels.txt`.
+
+This site's span fills are deliberately below every contrast floor:
+1.13:1 and 1.05:1, because a word sits on them and the word carries
+12.8:1 of its own. Reusing them for a 6px bar, which has no words in it,
+drew the 94.4% of a record that is the owner's own text at **1.40:1**,
+and at **1.17:1 against the class beside it**.
+
+The rule: a fill that is a background for type and a fill that is a mark
+in its own right are two different decisions, even when they mean the
+same thing. Any value copied from the `.sp-*` block into something
+without glyphs on it has to be re-measured before it is believed.
+
+**Found a second time, 2026-10-24 (ninth run), on the surface the first
+copy was made from.** `reviews/2026-10-24h/README.md` §1. The record
+viewer's own `.rec-bar` and its legend swatches were still painted out
+of these fills: 3.99:1, **1.78:1** and **1.25:1** against the night, the
+faintest of them carrying `no_generation_provenance`. The sixth run had
+reasoned that the viewer's fills were "correct there", which is true of
+the fills behind words and was not true of the bar in the same file.
+
+So the rule gets a second half. **Two copies of one constant will drift,
+and the first thing either copy loses is the reason it was chosen.**
+`record-summary.tsx` and `published-site.tsx` each held an identical
+private `FILL` map and the dashboard made a third. There is now one
+block in `ursa-minor/app/globals.css`, carrying its own argument, that
+all three take.
+
+## L13 — Four fills do not fit in a two-light palette
+
+**measured**, 2026-10-24 (sixth run).
+
+At equal lightness `--polar` and `--star` land within **1.25:1** of each
+other, so a four-step ramp built from them always has two steps nobody
+can tell apart. Every attempt at four in that review's working set had
+one pair under 1.3:1.
+
+The way out is not a fifth colour. It is to paint three things and let
+the fourth be the **bare track**, which works here because the fourth
+quantity is an absence: the part of a finished work no span covered at
+all. A surface that needs four *present* categories in this palette has
+a real problem and should say so rather than inventing a hue.
+
+## L14 — The 44px overlay takes nothing from a neighbour on this page
+
+**measured**, 2026-10-24 (sixth run). `reviews/2026-10-24g/data/overlap.txt`.
+
+L3 left a caution that an overlay lifting an inline control to 44px
+reaches over the words above and below it and starts swallowing their
+clicks. Asked of the dashboard rather than reasoned about: 60 controls
+at three viewports, each a 17.9px box answering a 44px target, so the
+overlay reaches 13.0px in each direction. At every probe point inside
+that reach, `elementFromPoint` returns prose. **Presses taken from
+another control: 0 of 60, at all three viewports.**
+
+So the caution is real and conditional, not a reason to drop the floor.
+The condition is control density: it bites where two controls sit within
+26px of each other vertically, and this page has no such pair. A page
+that does has to measure before it keeps the symmetric inset.
+
+## L15 — A timeout is not a wait
+
+**this seat's judgement**, 2026-10-24 (sixth run).
+
+The kit settled a fixed 400ms after `networkidle` before each shutter,
+which is right for a page whose content is in its HTML and wrong for one
+that fetches after hydration. The dashboard photographed its own loading
+state at 400ms. At 1500ms two viewports of three were correct and the
+third was still racing, which is the signature of a timeout tuned until
+it usually works.
+
+`shoot.mjs` and `measure-hit-areas.mjs` now take `--until <selector>` and
+gate the shutter on content. The second of those had been reporting
+`0 targets seen` rather than failing, which is the worse shape: a
+measurement that returns a confident number for a page it never saw.
+
+
+## L16 — A sample that cannot check itself is not a measurement
+
+**this seat's judgement**, 2026-10-24 (ninth run).
+`reviews/2026-10-24h/README.md` §6.
+
+Two instruments in one run read pixels out of a frame at coordinates
+taken from somewhere else, and both returned confident numbers for marks
+they had never looked at: one sampled viewport rects against a full-page
+frame and reported the ground, 1.00:1, four times in a row; one read
+rects, let a page lazy-load, and then shot it, and reported a segment the
+site declares blue as pure white.
+
+The guard is cheap and general. **Compose the colour the stylesheet
+declares over the ground, and require the frame to agree within 6 of 255
+per channel.** A sample that disagrees is kept in the output and excluded
+from every number. It caught both errors, and it also caught a real one:
+a translucent segment inside a painted track composes over the track and
+not over the page, so the same fill is 4.73:1 against the night and
+3.95:1 against the track, and only one of those two is the number a
+reader experiences.
+
+Where a frame cannot be trusted to hold still, photograph **the element**
+rather than the page: an element screenshot is clipped at shutter time,
+so a reflow moves the frame with the mark instead of past it.
+
+## L17 — What a wordless bar is worth on the one site that ships one
+
+**measured**, 2026-10-24 (ninth run).
+`reviews/2026-10-24h/data/benchmark-thin-marks.json`.
+
+Of Linear, Vercel, Stripe, Consensus and Claude, **none** draws any
+element 2 to 12 pixels tall and at least 60 wide with a painted
+background, anywhere on its home page. A thin segmented bar is a product
+surface object and not a marketing page one, which is worth knowing
+before a run plans to benchmark it.
+
+The one real comparable is GitHub's repository language bar: 8px,
+segmented, quantities with no words inside it. Its JavaScript segment
+measures **1.06:1 against its own track** and its TypeScript segment
+3.18:1. It works at all because its segments differ from each other by
+**hue**, which a palette with one night and two lights cannot spend. So
+this house separates by lightness and by shape instead, and the result
+sits above the benchmark on every verified number rather than beside it.
+A defect shipped by the most-used developer product in the world is
+still a defect.
+
 ---
 
 ## Open, and not this seat's to close
 
-**Where Ursa's canon comes from.** Eight consecutive reviews have
+**Where Ursa's canon comes from.** Nine consecutive reviews have
 recorded that `canon.md`, `ban-list.md` and `tuning.md` do not exist
-here. L1, L4 and L10 are the kind of measured material canon is made of,
-and this seat is deliberately not promoting them. A ruling from the
-owner is the unblocker, and it is smaller than writing a file: it is
+here. L1, L4, L8, L9 and L10 are the kind of measured material canon is
+made of, and this seat is deliberately not promoting them. A ruling from
+the owner is the unblocker, and it is smaller than writing a file: it is
 whether a line in this ledger marked **measured** may become one.
+
+As of 2026-10-24 this is no longer sitting between two seats: Ursa's
+project manager opened the question with the owner directly, naming this
+seat's reasoning for not writing the files itself rather than restating
+it. Nothing here changes until she answers; the count above is kept so
+the cost of waiting stays visible.
+
+**Ursa Major has two web surfaces and two identities.** Measured on
+2026-10-24 (`reviews/2026-10-24g/README.md` §7): the capture panel is
+drawn at 6px radii in two Google faces with three hues the rest of Ursa
+does not have, and the record viewer is square hairlines, Helvetica, two
+lights on one night. Three of the panel's tokens are near-copies of
+house tokens under different names. Neither has a contrast problem, so
+this is drift and not a defect. It is left open rather than fixed
+because the panel's three hues carry satisfied, unsatisfied and tension,
+which is meaning the two-light palette currently cannot say, and
+choosing which identity wins is the owner's.
+
+**Editing an inference has no door.** `ursa consent revoke-axiom` and
+`ursa forget` exist; nothing anywhere lets the owner reword an axiom,
+and `user-edited` is written by one function that releases a held
+statement rather than by any edit. `CLAUDE.md` calls "see, edit, revoke
+and delete" load-bearing. Named here by the seat that found it while
+building the first surface that would offer one, and routed to the
+engineer rather than designed around.
+
+**One record, two percentages, two pages of one product.**
+`/record/mini-fixture` prints 41.2 / 24.0 / 34.7 and the published set
+view prints 40.4 / 23.6 / 34.1 for the same record. The record file
+carries both figures, `pct` over the classified characters and
+`pctOfFinal` over the whole finished work, and each surface picked one.
+`published-index.ts` says in its own comment that `finalChars` is the
+denominator "the resolver's own fallback page uses, so the two surfaces
+cannot disagree about the same record". They disagree. Named by the
+frontend seat on 2026-10-24 (ninth run) while fixing the bar that draws
+both, and left alone: changing a published number is a product decision,
+and the viewer's bar and its printed figures at least agree with each
+other today.
