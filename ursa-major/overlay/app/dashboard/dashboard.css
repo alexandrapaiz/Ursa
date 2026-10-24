@@ -249,21 +249,24 @@
    covered at all, is the bare track showing through. That is also what
    it means: an absence is drawn as an absence.
 
-   The three painted values, measured against #020308:
+   The three painted values, sampled out of a rendered frame rather than
+   read off this file, because 45% of --star over the track is not 45%
+   of --star over the night (`reviews/2026-10-24g/data/bar-pixels.txt`):
 
-     kept as written   --polar solid                11.99:1
-     kept and edited   --polar solid, 2px night foot 11.99:1, separated
-                       from the one above by shape rather than lightness,
-                       which is the same device the viewer's
-                       `.sp-survived_mutated` uses: the person's hand on
-                       the model's sentence.
-     yours             --star at 45%                 3.93:1, and 3.05:1
-                       against both of the above.
+     kept as written   --polar solid      rgb(168,199,250)   11.99:1
+     kept and edited   --polar solid with a 2px --night foot, separated
+                       from the one above by shape rather than lightness.
+                       Same device as the viewer's `.sp-survived_mutated`:
+                       the person's hand on the model's sentence.
+     yours             --star at 45%      rgb(116,121,134)    4.73:1,
+                       and 3.95:1 against the track.
 
-   The track is --line at 1.20:1 and is below the 3:1 non-text floor on
-   purpose. Nothing on this page depends on reading it: every one of the
-   four figures is also printed in words under the bar, and the bar
-   carries an aria-label naming all four. */
+   One pair is below 3:1 and is left there deliberately: "yours" against
+   "kept as written" is 2.53:1, separated by hue rather than lightness.
+   The track is --line at 1.20:1, also deliberate, because it is an
+   absence. Nothing on this page depends on reading either: all four
+   figures are printed in words under the bar and named in its
+   aria-label. */
 .dash-bar {
   display: flex;
   height: 6px;
