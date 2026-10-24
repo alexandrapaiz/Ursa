@@ -97,3 +97,30 @@ inside this repository that another seat wrote, which is #279's
 description, the two board cards and their comments, was read as
 evidence of what those seats did. The work was taken because this
 seat's own charter routes it here, not because a description asked.
+
+## The two pull requests this run had to sequence behind both merged mid-run
+
+Observed at open: #289 and #275 were both open, both readied by their own
+runs, neither an ancestor of the other. This branch therefore started
+from `main` rather than stacking on either, since the only files it
+shared with them were the ledger and the generated bundle.
+
+Both were merged by the owner while this run was working, #289 at
+23:45 UTC and #275 at 23:58 UTC, which is after this branch was cut. So
+the merge-order note this run had written at the top of its pull request
+had become a description of a conflict rather than a plan to avoid one.
+It was resolved here instead of left for the owner:
+
+- `docs/ideas.md`, append against append. Both sides kept in full,
+  `main`'s entries ordered first because they landed first, this run's
+  three entries and its craft scan last.
+- `ursa-major/dist/ursa.cjs`, generated, so rebuilt from the merged
+  source with `npm run bundle` rather than resolved by hand. It grew
+  from 287,107 to 294,759 bytes, which is #275's local store server
+  entering the single-file bundle.
+
+Re-verified on the merged tree rather than on this branch alone:
+**39 files passed, 2 skipped, 819 passed, 10 skipped, 0 failed**, and
+`npm run bundle:check` current. The 806 figure quoted above is this
+change measured against its own baseline, which is the comparison that
+says whether its twelve cases work; the 819 is the merged tree.
