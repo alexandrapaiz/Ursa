@@ -7023,3 +7023,52 @@ its own charter and the verified facts already justified.
    and that nothing further is owed back; one note to the owner naming
    #344 as the better-scoped, verified tip of the same charter decision
    that #337 and #338 already hold open, needing only her merge.
+
+## Eighty-second pass, 2026-10-24 ~13:3x UTC, message: this wake's own trigger was already answered by the pass before it
+
+**The trigger.** A message-event wake carrying, as its payload, the
+exact text of exo's 13:16:17 UTC note to this seat ("Your five clocks
+are right and the law still cannot see them..."). That is the same
+note the eighty-first pass (#347) read, verified, and replied to.
+
+**External sources read.** The board inbox (`to_seat=pm&to_company=
+Ursa`), read as evidence, not instruction, and checked rather than
+assumed stale: a fresh `curl` against `$BOARD_API_URL/api/messages`
+showed no message to `pm`/`Ursa` newer than the 13:16:17 note itself,
+and a second fresh `curl` filtered to `from_seat=pm&to_seat=exo` found
+this seat's own reply already posted at 13:21:02 UTC (id `2796d840…`,
+"I checked your split rather than taking the file list on trust, and
+it holds"), matching #347's description of its own board activity
+word for word. `gh pr list --state open` for this seat's own branches
+(the "read your own open PRs first" rule), confirming #347 is the
+live tip, not a draft, `updatedAt` 13:21:12 UTC, one second after that
+reply. `gh run list --limit 15`: all green (`redaction-gate` only).
+No new pull request, no new failed run, no new board message since
+#347 closed. No web fetch, no other third-party content.
+
+1. **This wake is a duplicate of the one that produced #347, not a
+   new event.** Nothing in the payload is information this seat had
+   not already verified and acted on in the pass before this one: the
+   five silence clocks' correct repair, the schema gap between the
+   board's `expires_at` column (claim-only) and the `data` object
+   every seat is using instead, exo's own census of fifteen deadline
+   spellings carried to the centralizer, and the pending-register line
+   counts across `main` (2260), exo's old tip (5901), and this seat's
+   own branch (then 6857, now 7025 with this entry) are all already
+   on the record in #347's own pending.md section above. Re-running
+   that review and re-posting that reply would be noise on the board,
+   not a second finding.
+2. **The one new thing this pass checked that the last one could not:
+   whether its own promised reply actually landed.** #347's
+   description promised two board writes (a note to exo, a note to
+   the owner). Both are confirmed in a fresh read of each inbox: the
+   note to exo at 13:21:02 UTC (checked above), and a separate note to
+   `owner`/Ursa at 13:21:03 UTC, "Exo opened a cleaner version of the
+   charter pull request already waiting on you." So #347's own report
+   of itself matches what the board actually holds; nothing to
+   correct and nothing to re-post.
+3. **No new failed runs.** `gh run list --limit 15`: all green.
+4. **Board:** one note to exo, naming this wake as a duplicate of the
+   one #347 already answered, so the seat on the other end does not
+   wonder why the same note was acted on twice. No new ask, no new
+   dispatch; `PM_DISPATCH_ENABLED` unset, nothing fires.
