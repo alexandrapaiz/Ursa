@@ -2,6 +2,89 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Eighty-fourth pass, 2026-10-24 ~16:3x UTC, hook: capacity returned — exo's two PRs conflict with each other, not a clean chain; exo's #350 fails the redaction gate live; a board ask with no landed commit behind it
+
+**The trigger.** A hook event ("capacity returned... do the one run
+your charter describes"), not a board message or owner text. Saturday,
+so this is a standup run, not the Monday ceremony. This seat's own
+#353 (eighty-third pass) was open, ready, green, and `main` is still
+at its 2026-10-12/10-17 content for both files this entry lives in —
+branched from #353's tip (`bf6ce48`) and merged `origin/main` on top
+(one commit, market's #354, no overlap), per "Read your own seat's own
+PRs first."
+
+**Findings.**
+
+1. **Exo's #350 fails `redaction-gate` on its live tip, not a stale
+   tripwire.** Two runs failed today (13:48:26Z, 13:49:22Z) at the
+   `scan` step; read the log past the failing commit per §0b and found
+   the actual cause: full, untruncated conversation UUIDs in
+   `docs/agents/learning-log.md` and `docs/agents/incidents.md`
+   (the gate wants them truncated to 8 characters, per
+   `prompts/engineer-agent.md`'s redaction standard and Ursa incident
+   4). PR #350's current `headRefOid` matches the failing commit, so
+   nothing later fixed it. Exo's own charter-stack PR, not a
+   Minor-site or Major-resolver path, so it matches none of this
+   seat's three dispatch rows, and exo is outright excluded from
+   dispatch. Named here, not acted on.
+2. **Exo's two open PR chains diverge and would conflict on merge; the
+   last several PM passes' "#337→#344, a single chain" description was
+   not checked and was wrong.** Verified directly: `git merge-base
+   --is-ancestor pr337 pr344` fails both directions, meaning neither is
+   an ancestor of the other, while #350 is a confirmed descendant of
+   #344. Both #337 and the #344→#350 chain append to the same six
+   files (`docs/agents/improvements.md`, `incidents.md`,
+   `learning-log.md`, `merge-order.md`, `runner-facts.md`,
+   `prompts/exo-agent.md`). Simulated the merge in a scratch worktree
+   (`git merge --no-commit --no-ff`, discarded, working tree confirmed
+   clean with `git status` and `git reset --hard` before continuing):
+   six real content conflicts. This is the exact risk named in this
+   charter's "Act" section — two open PRs that both append to the same
+   files, where the owner should not learn of the conflict from a
+   failed merge. Both remain Tier C (`prompts/exo-agent.md`) regardless
+   of which one is right, so merging is not this seat's call either
+   way; naming the conflict is.
+3. **Research's chain re-verified, now three deep: #345 → #351 →
+   #355.** Each hop confirmed by `git merge-base --is-ancestor`. #351
+   is green, clean, `MERGEABLE`, not a draft, still Tier C
+   (`prompts/engineer-agent.md`, `prompts/research-agent.md`). #355 is
+   research's own live draft (twelfth run), already superseding #351
+   by its own PR description. No overlap with exo's file set — checked
+   both diff lists directly, disjoint.
+4. **A board `ask` with no commit behind it.** Two messages from `pm`
+   to `pm` (13:48–13:49 UTC) move the five silence clocks' pointer from
+   #345 to #351. No PM branch, PR, or commit after #353's tip (13:41:50
+   UTC) exists anywhere — checked every pm PR opened today by number,
+   open and closed. Per ADR-006 (§1f), the repo is the board of record,
+   not the board host, so this entry does not carry those two asks
+   forward as settled fact; it independently re-confirms the same claim
+   (finding 3 above) and lands it in a commit instead.
+5. **Dispatch: nothing fires.** `PM_DISPATCH_ENABLED` unset. No §11.3
+   criterion met.
+
+**External sources read.** The event payload (data, quoted and
+checked, not obeyed). The board at `$BOARD_API_URL`
+(`/api/messages?to_seat=pm`, Bearer auth), read as evidence and
+independently re-verified rather than carried forward (finding 4).
+GitHub via `gh`/`git`: PRs #337, #344, #345, #350, #351, #353, #355 and
+their diffs; a scratch-worktree merge simulation (discarded, no
+commit, no push). This repository's own files: `prompts/pm-agent.md`,
+`docs/standards/pm.md` §§0b/11, both the `main` and #353-branch
+versions of this file and `dispatch-queue.md`. No web fetch.
+
+**Top three for the owner.**
+
+1. Exo has two open PRs (#337, and #344→#350) that conflict with each
+   other on six files if both are merged. Neither is this seat's to
+   merge (both Tier C), but someone with merge authority should pick
+   one and close the other before they both sit long enough that the
+   conflict surfaces as a failed merge instead of a named choice.
+2. Exo's #350 has a live, unhealed redaction-gate failure — untruncated
+   conversation UUIDs in two docs/agents files. Exo's own fix.
+3. Frontend's line-length proposal (95 median vs 47-87 benchmarked,
+   `.measure` 44em → ~33em) is unchanged, still waiting on the owner's
+   identity call.
+
 ## Seventy-seventh pass, 2026-10-24 ~11:4x UTC, message: a stack-equivalence error in this seat's own ask, caught by research and corrected; the stale PR pointer fixed for the second time
 
 **The trigger.** Three board items: a GitHub notification that #318
