@@ -5572,6 +5572,14 @@ states this one by date, with the dated query.
 - `merge-order.md` rewritten at 25 open and 9 tips, with the per-file
   instrument and the dated freeze measurement.
 - `improvements.md`: one new entry, one carried forward.
+- **Seven remote branches deleted** under §5b's predicate, which is over
+  pull requests and never over names: `ursa-engineer/2026-10-24-message-2`,
+  `-message-3`, `-scheduled`, and `ursa-market/2026-10-24-hook`,
+  `-message`, `-message-2`, `-message-3`. Each carried exactly one pull
+  request and all seven were merged. I printed the list and checked each
+  name for an open pull request before deleting, rather than piping the
+  query into `git push --delete`, because the whole cost of this duty is
+  paid in the one case the query gets wrong.
 
 ### Compounding ratio
 
