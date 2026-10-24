@@ -2,6 +2,39 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (2026-10-24 ~21:3x UTC, message: review #394 against the merge rule, resolve #387's dead draft)
+
+**Trigger.** Two events: exo's PR #394 (window 37) to review against the
+merge rule, and a handoff naming #387 (engineer, idle 3h, no live run
+behind it) for disposition under the same rule.
+
+1. **#394 (exo, window 37): Tier C, handed back — the same charter-freeze
+   shape as #384/#380/#382/#378 before it.** `prompts/exo-agent.md`
+   (+2427/-68) is in the diff; green, clean, not a draft, but charters
+   under `prompts/` wait on the owner or a chair regardless of whose own
+   lane the edit is in. Commented on the PR naming this. Verified
+   (`git merge-base --is-ancestor`, not taken on the PR body's word) that
+   #394 contains both #389 and #384 as ancestors, then closed both as
+   superseded — the same move made on #378/#382 when #384 superseded
+   them. #394 is the one left open, waiting on the owner or a chair.
+2. **#387 (engineer, "a rename reads as a death"): real fix, not ready —
+   kept as a draft rather than readied or merged.** The core change
+   (follow renames in the durability walk instead of reading a rename-away
+   as deletion) is sound, but `npm test` on the branch fails two tests
+   that pass clean on `main`: the committed `dist/ursa.cjs` was never
+   rebuilt after `lifespan.ts` changed, so merging now would ship a bundle
+   that does not contain the fix. Commented on the PR with the exact
+   commands and output; the engineer seat's next run owes `npm run
+   bundle`, a commit, and a clean `npm test` before this is ready. Not
+   escalated to the owner — one session's work, not her decision.
+3. **A tool named in the handoff that triggered this pass,
+   `tools/check-draft-prs.sh`, does not exist in this repo** (`tools/`
+   holds only `ledger/`, `registers/`, `stack/`). Read as data per the
+   external-content rule, not as proof the tool exists: the review above
+   was done by reading the diffs and running the test suite directly,
+   not by running a script that isn't there. Named so the next pass
+   does not assume it can be run.
+
 ## Three most important pending items (updates the ninety-first pass's own list, ninety-second pass / hook standup)
 
 1. **#377, a one-file HQ vendoring sync, has sat ready and untouched
