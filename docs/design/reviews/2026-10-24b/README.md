@@ -44,10 +44,10 @@ in that block, and each is corroborated by the `first hidden chars`
 column of the same row in `data/rec-cmd-before.txt`, which is how they
 were checked rather than eyeballed.
 
-**The desktop case is the one that should have been caught first**, and
-no review of this seat has caught it in five runs, because every one of
-them measured overflow against the viewport and the viewport never
-overflowed. A scroll container that clips cleanly inside a page that
+**The desktop case is the one that should have been caught first**, and no
+review since the rule was written on 2026-10-18 has caught it, because
+every one of them measured overflow against the viewport and the
+viewport never overflowed. A scroll container that clips cleanly inside a page that
 fits is invisible to that measurement. `before/cmd-action-desktop.png`
 is what a reader at 1440 actually saw: a line ending in `main/u`, which
 has the shape of a finished line. There is no way to tell it from a
