@@ -16,7 +16,7 @@
   ok    desktop/404: same number of targets                            got 2  want 2
   ok    no target anywhere lost hit area                               got 0  want 0
   ok    no drawn box anywhere changed size                             got 0  want 0
-  -> 18 hit areas grew, 72 unchanged, 0 shrank; 93 drawn boxes identical, 0 changed
+  -> 18 hit areas grew, 75 unchanged, 0 shrank; 93 drawn boxes identical, 0 changed
 
 === phone 390x844 · set /record ===
   ok    set: 2 label target(s) wearing .rec-field                      got 2  want 2

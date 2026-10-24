@@ -16,7 +16,7 @@
   168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
   326x26.3      326x28       1      SHORT by 16       input.w-full ""
   99.8x16.8     101x18       1      SHORT by 26       button.rec-action "read the site"
-  1x1           -x-          1      COVERED           input.sr-only ""
+  1x1           183x48       1      ok                input.sr-only ""
   326x26.3      326x28       1      SHORT by 16       input.w-full ""
   53.7x16.8     55x18        1      SHORT by 26       button.rec-action "read it"
   -> 4 of 6 standalone controls under 44px tall (2 inline, exempt)
@@ -67,7 +67,7 @@
   168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
   569.1x27.2    570x28       1      SHORT by 16       input.w-full ""
   99.8x16.8     100x18       1      SHORT by 26       button.rec-action "read the site"
-  1x1           -x-          1      COVERED           input.sr-only ""
+  1x1           183x48       1      ok                input.sr-only ""
   401.2x27.2    402x28       1      SHORT by 16       input.w-full ""
   53.7x16.8     54x18        1      SHORT by 26       button.rec-action "read it"
   -> 4 of 6 standalone controls under 44px tall (2 inline, exempt)
@@ -118,7 +118,7 @@
   168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
   840.3x27.2    599x28       1      SHORT by 16       input.w-full ""
   99.8x16.8     100x18       1      SHORT by 26       button.rec-action "read the site"
-  1x1           -x-          1      COVERED           input.sr-only ""
+  1x1           183x48       1      ok                input.sr-only ""
   672.3x27.2    599x28       1      SHORT by 16       input.w-full ""
   53.7x16.8     54x18        1      SHORT by 26       button.rec-action "read it"
   -> 4 of 6 standalone controls under 44px tall (2 inline, exempt)

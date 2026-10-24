@@ -176,8 +176,8 @@
       "boxW": 1,
       "boxH": 1,
       "lineH": 1,
-      "hitW": null,
-      "hitH": null,
+      "hitW": 183,
+      "hitH": 48,
       "inline": false,
       "short": false,
       "afterPosition": "static"
@@ -651,8 +651,8 @@
       "boxW": 1,
       "boxH": 1,
       "lineH": 1,
-      "hitW": null,
-      "hitH": null,
+      "hitW": 183,
+      "hitH": 48,
       "inline": false,
       "short": false,
       "afterPosition": "static"
@@ -1126,8 +1126,8 @@
       "boxW": 1,
       "boxH": 1,
       "lineH": 1,
-      "hitW": null,
-      "hitH": null,
+      "hitW": 183,
+      "hitH": 48,
       "inline": false,
       "short": false,
       "afterPosition": "static"

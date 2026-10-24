@@ -1,0 +1,28 @@
+
+=== https://vercel.com/login · 1440x900 · 1 field(s) ===
+  input[email] "Email Address"                box    40  target    40 (input)  pad 0px/0px  ring none
+
+=== https://consensus.app · 1440x900 · 1 field(s) ===
+  textarea "Ask the research..."              box    24  target    24 (textarea)  pad 0px/0px  ring none
+
+=== https://github.com/login · 1440x900 · 1 field(s) ===
+  input[text] "login"                         box    40  target    40 (input)  pad 5px/5px  ring box-shadow
+
+=== https://stripe.com · 1440x900 · 1 field(s) ===
+  input[email] "Enter work email"             box    46  target    46 (input)  pad 0px/0px  ring none
+
+=== https://www.figma.com/login · 1440x900 · 1 field(s) ===
+  input[email] "email"                        box    53  target    53 (input)  pad 24px/6px  ring box-shadow
+
+=== https://claude.com · 1440x900 · 1 field(s) ===
+  textarea "Ask Claude"                       box    25  target    25 (textarea)  pad 4px/4px  ring none
+
+=== https://duckduckgo.com · 1440x900 · 1 field(s) ===
+  textarea "Search with DuckDuckGo"           box    32  target    32 (textarea)  pad 6px/0px  ring none
+
+=== https://news.ycombinator.com/login · 1440x900 · 2 field(s) ===
+  input[text] "acct"                          box    21  target    21 (input)  pad 1px/1px  ring 1px off 0px
+  input[text] "acct"                          box    21  target    21 (input)  pad 1px/1px  ring 1px off 0px
+
+=== 9 fields: 7 under 44px of target, 2 under 24px ===
+    of the ones drawing an outline ring, 2 trace the drawn box exactly, 0 do not
