@@ -54,7 +54,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
 import { formatResolverIdentity } from '../resolver-identity'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
+import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, stampPairingBounds, type DroppedUnits } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -63,12 +63,19 @@ import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types
 // before the CI launch existed, and moving the definition is not a reason
 // to make every caller move with it.
 export { artifactFor, resolvablePaths, resolveEpisode } from '../resolve-episode'
-import { artifactFor, resolvablePaths, resolveEpisode } from '../resolve-episode'
+import { artifactFor, MAX_BLOB_CHARS, resolvablePaths, resolveEpisode } from '../resolve-episode'
 
 export function renderRunSummary(
   records: OutcomeRecord[],
   episodes: Episode[],
   diagnostics?: PairFinderDiagnostics,
+  /**
+   * Which bound dropped each work unit that did not become a record
+   * (`src/launch.ts`). Omitted by a caller that does not track it, in
+   * which case the gap between the two counts on the first line goes
+   * unexplained, exactly as it did on every local run before 2026-10-24.
+   */
+  droppedUnits?: DroppedUnits,
 ): string {
   const lines: string[] = []
   let verbatim = 0, mutated = 0, written = 0, traced = 0, claimed = 0
@@ -94,8 +101,62 @@ export function renderRunSummary(
     unknownDeleted += r.stats.generated.unknownDeletedChars
   }
   lines.push(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, ${records.length} resolved into record${records.length === 1 ? '' : 's'}.`)
-  lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
-  lines.push(`That's the part worth noticing: not what got written, what got kept.`)
+  // Only when something was written. With no records these two lines are
+  // `0 chars survived your editing verbatim, 0 survived edited.` followed
+  // by an instruction to notice it, which is the shape the erased-episode
+  // path in `main` already refuses to print for the same reason: reciting
+  // zeros at someone reads as a failed run, and here the run has not
+  // failed, it has an answer it is about to give lower down.
+  if (records.length > 0) {
+    lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
+    lines.push(`That's the part worth noticing: not what got written, what got kept.`)
+  }
+
+  // The gap on the line above, named. Two entirely different situations
+  // used to print the same seven words. Measured 2026-10-24 on two
+  // three-commit fixtures: a pair whose generation is 32 characters and a
+  // pair whose generated file the human then deleted both printed `1 work
+  // unit found, 0 resolved into records.` and nothing else. One of those
+  // is fixed by a flag and the other cannot be fixed by any flag, and the
+  // terminal gave the reader no way to tell which one they had. The CI
+  // launch has named these same two reasons in its pull-request comment
+  // since 2026-10-08 (src/ci/comment.ts, `emptyWindowSentence`), so this
+  // is the local launch catching up to the runner, and the tally itself
+  // is now shared between them (src/launch.ts, drift 6).
+  if (droppedUnits) {
+    const d = droppedUnits
+    const unrecorded = d.unresolvable + d.belowMinChars
+    if (unrecorded > 0) {
+      const one = unrecorded === 1
+      lines.push('')
+      lines.push(
+        `${unrecorded} work unit${one ? ' was' : 's were'} found and not recorded, and this is which bound dropped ${one ? 'it' : 'them'}.`,
+      )
+      if (d.belowMinChars > 0) {
+        const floorOne = d.belowMinChars === 1
+        // The remedy names a value and not a placeholder. `--min-chars
+        // <largest>` is exactly the lowest floor that would have kept at
+        // least one of these units, because the floor is `>=`, and the
+        // run already knew the number. Withholding it is what made this
+        // fix two guesses instead of one.
+        const remedy = d.largestBelowFloor > 0
+          ? ` ${floorOne ? 'It generated' : 'The largest of them generated'} ${d.largestBelowFloor.toLocaleString()}, so --min-chars ${d.largestBelowFloor} is the lowest floor that would have recorded ${floorOne ? 'it' : 'any of them'}.`
+          : ` ${floorOne ? 'It generated no' : 'None of them generated any'} text a span could be taken from, so no floor would record ${floorOne ? 'it' : 'them'}.`
+        lines.push(
+          `${d.belowMinChars} carried fewer than ${d.minChars.toLocaleString()} generated characters, which is the --min-chars floor, because a survival figure taken over that little text would be noise.${remedy}`,
+        )
+      }
+      if (d.unresolvable > 0) {
+        const unOne = d.unresolvable === 1
+        lines.push(
+          `${d.unresolvable} resolved to nothing this run could stand behind, meaning no file in ${unOne ? 'it' : 'them'} had a readable version at both commits of the pair and nothing arrived whole from elsewhere either, so there was no refusal to state instead.`,
+        )
+        lines.push(
+          `No flag changes that one. The usual causes are a generated file your edit deleted outright, a commit this clone does not have the blobs for, and a file over the ${MAX_BLOB_CHARS.toLocaleString()}-character ceiling the resolver reads up to. If the clone is shallow, run git fetch and ursa run again.`,
+        )
+      }
+    }
+  }
   if (written > 0) {
     lines.push(`${written.toLocaleString()} chars were generated to get there, and ${claimed.toLocaleString()} of them reached the finished work unedited.`)
   }
@@ -523,17 +584,25 @@ export async function main(argv: string[]): Promise<number> {
   // entirely and so resurrected what this one refuses to.
   const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id))
   let suppressed = 0
+  // Which bound dropped each work unit that did not become a record, so
+  // the summary can name it. Shared with `ursa ci`, which has kept this
+  // tally since 2026-10-08 (src/launch.ts, `newDroppedUnits`).
+  const dropped = newDroppedUnits(minChars)
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
     if (erased.has(ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep, commits)
     // `--min-chars` filters out an episode too small to carry signal, and
     // it is measured on the generation side, which a refusal-only record
-    // has none of. Without the second clause the record this run writes to
-    // explain an import would be dropped by a threshold aimed at something
-    // else, and the absence would be back.
-    if (!record) continue
-    if (!clearsSizeFloor(record, minChars)) continue
+    // has none of. Without that exemption the record this run writes to
+    // explain an import would be dropped by a threshold aimed at
+    // something else, and the absence would be back.
+    //
+    // Both drops are asked by one shared function, which also tallies
+    // which one fired, because until 2026-10-24 this loop dropped a unit
+    // silently and the summary below could only print a zero
+    // (src/launch.ts, drift 6, `keepRecord`).
+    if (!keepRecord(record, minChars, dropped)) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the
     // real work did to each span. Git-only, so it lives here and not in
@@ -554,7 +623,7 @@ export async function main(argv: string[]): Promise<number> {
   if (records.length === 0 && suppressed > 0) {
     console.log(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, and ${suppressed === episodes.length ? 'every one of them is' : `${suppressed} of them are`} erased. Nothing was rebuilt.`)
   } else {
-    console.log(renderRunSummary(records, episodes, diagnostics))
+    console.log(renderRunSummary(records, episodes, diagnostics, dropped))
     if (suppressed > 0) {
       console.log(`\n${suppressed} work unit${suppressed === 1 ? '' : 's'} you erased stayed erased.`)
     }

@@ -51,6 +51,17 @@
 //      seats commit between one touch of a file by the owner and the
 //      next. Fixed in `src/bin/ursa.ts` (`pairingBounds`),
 //      `src/ci/run.ts` and `action.yml`.
+//   6. Why a work unit was dropped. The first drift that runs the other
+//      way: `ursa ci` has counted its two drop reasons since 2026-10-08
+//      and names them in the pull-request comment, and `ursa run` counted
+//      nothing and printed `1 work unit found, 0 resolved into records.`
+//      So the launch a person types was the one that could not say which
+//      bound to move, and the two surfaces could not be compared at all
+//      because only one of them held a number. Found 2026-10-24 by
+//      resolving two three-commit fixtures locally and getting
+//      byte-identical output from a unit below the size floor and a unit
+//      whose generated file was deleted. Fixed in `DroppedUnits` and
+//      `keepRecord` below, read by `src/bin/ursa.ts` and `src/ci/run.ts`.
 
 import { isForgotten, loadConsent } from './consent'
 import { checkRecord, formatViolations, type Violation } from './invariants'
@@ -164,4 +175,87 @@ export function gateRecords(records: OutcomeRecord[]): GateResult {
       'still the evidence, but the numbers above cannot all be true at once, so this run is not ' +
       `reporting success.\n${formatViolations(violations)}`,
   }
+}
+
+/**
+ * Why the work units a launch found did not become records.
+ *
+ * Both launches drop a resolved episode for exactly two reasons, and they
+ * used to count them in two places: `src/ci/run.ts` kept this tally and
+ * put it in the pull-request comment, and `src/bin/ursa.ts` kept none at
+ * all and printed `1 work unit found, 0 resolved into records.` That is
+ * drift 6 at the top of this file, and it is the one drift so far that
+ * runs the other way, with the runner's surface ahead of the one a person
+ * types.
+ *
+ * Measured on 2026-10-24, on two three-commit fixtures a few lines apart:
+ * a pair whose generation is below the floor, and a pair whose generated
+ * file the human then deleted, produce byte-identical local output. One
+ * needs a flag and the other needs nothing, and the terminal cannot tell
+ * the two apart.
+ *
+ * The counting is shared; the wording is not. A terminal and a markdown
+ * comment are different surfaces and already say the same facts
+ * differently everywhere else in this codebase. What can silently
+ * diverge into a WRONG NUMBER — which episode counts as which kind of
+ * drop — is decided once, in `keepRecord` below. That both surfaces name
+ * the same flag is pinned by a test instead
+ * (`src/launch-parity.test.ts`).
+ */
+export interface DroppedUnits {
+  /** units `resolveEpisode` returned nothing for, with no exclusion to state */
+  unresolvable: number
+  /** units whose generation side was smaller than the `--min-chars` floor */
+  belowMinChars: number
+  /** the floor those units fell under, so the reader can raise it */
+  minChars: number
+  /**
+   * The biggest generation side among the units the floor dropped, in
+   * characters, or 0 when it dropped none.
+   *
+   * Carried so the remedy can name a value rather than a placeholder. The
+   * run already knows this number and withholding it is what made the
+   * fix two guesses instead of one: `--min-chars 1` was the second guess,
+   * and `--min-chars <this>` is the smallest value that would have
+   * recorded something. It is not part of the CI comment's own `dropped`
+   * shape (`src/ci/comment.ts`), which predates it and compares
+   * structurally, so passing this richer object to it needs no change
+   * there.
+   */
+  largestBelowFloor: number
+}
+
+export function newDroppedUnits(minChars: number): DroppedUnits {
+  return { unresolvable: 0, belowMinChars: 0, minChars, largestBelowFloor: 0 }
+}
+
+/**
+ * Is this resolved episode one to write, and if not, which bound dropped it?
+ *
+ * The two `continue`s both launches had, written once. Returns false and
+ * records the reason in `dropped`, so a caller's loop is
+ * `if (!keepRecord(record, minChars, dropped)) continue` and the decision
+ * and its label cannot be made in one place and counted in another.
+ *
+ * A type predicate because the caller needs the non-null narrowing the
+ * `if (!record)` it replaces used to give it.
+ */
+export function keepRecord(
+  record: OutcomeRecord | null,
+  minChars: number,
+  dropped: DroppedUnits,
+): record is OutcomeRecord {
+  if (!record) {
+    dropped.unresolvable++
+    return false
+  }
+  if (!clearsSizeFloor(record, minChars)) {
+    dropped.belowMinChars++
+    dropped.largestBelowFloor = Math.max(
+      dropped.largestBelowFloor,
+      record.stats.generated.totalChars,
+    )
+    return false
+  }
+  return true
 }

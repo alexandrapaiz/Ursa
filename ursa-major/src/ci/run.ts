@@ -34,7 +34,7 @@ import { saveEpisodes, saveRecord, ursaDir } from '../store'
 import type { OutcomeRecord } from '../types'
 import type { Violation } from '../invariants'
 import { resolveEpisode } from '../resolve-episode'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
+import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, stampPairingBounds } from '../launch'
 import { distill } from '../tuning/distill'
 import { emptyTuning, mergeDistill } from '../tuning/merge'
 import type { TuningRecord } from '../tuning/types'
@@ -209,7 +209,7 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   // Counted so the run comment can say which bound dropped a unit instead of
   // asserting the one reason it is most likely NOT to be (src/ci/comment.ts,
   // emptyWindowSentence).
-  const dropped = { unresolvable: 0, belowMinChars: 0, minChars }
+  const dropped = newDroppedUnits(minChars)
   // Erasure survives re-derivation on this launch too. A runner that has
   // the project's `.ursa/` (committed, cached, or simply the same machine
   // on a self-hosted runner) holds the tombstones `ursa forget` wrote, and
@@ -221,13 +221,14 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   for (const episode of episodes) {
     if (erased.has(episode.id)) { suppressed++; continue }
     const record = resolveEpisode(opts.projectPath, episode)
-    if (!record) { dropped.unresolvable++; continue }
-    // The same floor `ursa run` applies, and for the same reason it exempts
-    // a refusal-only record from it (src/launch.ts, clearsSizeFloor). Asked
-    // here as `record.stats.generated.totalChars < minChars` alone until
-    // 2026-10-10, which dropped the one record whose whole job is to say
-    // out loud that an episode's every path was an import.
-    if (!clearsSizeFloor(record, minChars)) { dropped.belowMinChars++; continue }
+    // Both drops and both tallies in one call, shared with `ursa run`
+    // (src/launch.ts, `keepRecord`). The floor it asks is the same one
+    // `ursa run` asks, and for the same reason it exempts a refusal-only
+    // record from it. This was `record.stats.generated.totalChars <
+    // minChars` alone until 2026-10-10, which dropped the one record
+    // whose whole job is to say out loud that an episode's every path was
+    // an import.
+    if (!keepRecord(record, minChars, dropped)) continue
     const signals = deriveSignals(record, declaration)
     signals.notes = [...(signals.notes ?? []), `CI launch: ${window.note}`]
     record.signals = signals
