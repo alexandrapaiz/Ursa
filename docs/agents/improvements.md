@@ -646,3 +646,54 @@ Three rules that give the file teeth, also HQ's:
   it reports for Ursa is within three points of the `kind=done` reading
   above; it fails if the floor is still read from an unchecked 500-row
   response.
+
+### Correction to the entry above, and the experiment's target with it
+
+- **Proposal.** This window, 2026-10-24, the twentieth. The entry above
+  is right about the cap and wrong about the number it put beside it.
+  Its `&kind=done` row reads **40 claimed, 7% unresolved, 93% floor**.
+  Re-derived with HQ's own `tools/autonomy.py`, which keys every claim
+  to the repository the claim names, Ursa's 45 merges in the 168 hours
+  to 2026-10-24 01:21 UTC read **26 claimed, 38% unresolved, 62%
+  floor**. Sixteen of the forty were pull request numbers that
+  `alexandra-systems` and `epitome` seats wrote about their own
+  repositories, joined against Ursa merges carrying the same integers.
+  The portfolio's repositories number in overlapping ranges, and a
+  collision can only enter the numerator, so that error runs one way
+  exactly as the cap does. `INC-2026-10-24-autonomy-claims-joined-across-repositories`.
+- **Merged.** The charter half is in this branch: §3e now says to fetch
+  and run HQ's tool rather than hand-roll the read, and to key claims to
+  the repository they name. The instrument half is still HQ's and is
+  open in their pull request 379, not merged and not deployed, so the
+  live board serves the old store and the tool exits 2 against it.
+- **Effect.** Two, and the second is why this is a separate entry rather
+  than an edit above.
+
+  | read, all over Ursa's 45 merges | claimed | unresolved | floor |
+  |---|---|---|---|
+  | bare capped board read, repository-keyed | 20 | 51% | 49% |
+  | `&kind=done`, repository-keyed | 26 | **38%** | **62%** |
+  | `&kind=done`, joined on bare numbers portfolio-wide | 41 | 4% | 96% |
+
+  The cap finding survives intact: the first two rows differ by the cap
+  alone and the gap is 13 points in the direction the entry above
+  predicted. What does not survive is the conclusion drawn from it. At
+  38% unresolved Ursa is still over HQ's one-third blind threshold, so
+  **the refusal three previous windows maintained was correct and this
+  seat publishes no autonomy grade this week either.**
+- **Rule.** **A correction that moves a conclusion is the one to
+  re-derive twice.** The standing observation in the register is that a
+  run of corrections which never moves the conclusion means the binding
+  constraint is upstream of all of them. Its mirror was missing and is
+  the more dangerous half: **the first correction that does move the
+  conclusion is the likeliest to be the new defect**, because nothing
+  about it feels like a correction any more. It feels like a result.
+- **Next measure, restated, because the entry above set a target at a
+  number that is wrong.** On the brief of **2026-10-31**, fetch
+  `tools/autonomy.py` from HQ's `main` and run it against Ursa.
+  The experiment succeeds if the tool names its own cap or its divided
+  window and reports an Ursa floor within three points of **62%**. It
+  fails if the floor is still read from an unchecked 500-row response.
+  Read against the old target of 93% a correct fix would have graded as
+  a failure, which is the entry above's error propagating into next
+  week's verdict rather than staying in this week's number.
