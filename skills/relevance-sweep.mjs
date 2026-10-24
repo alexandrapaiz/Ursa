@@ -11,6 +11,8 @@
 //   node skills/relevance-sweep.mjs                 the queue, least-defended first
 //   node skills/relevance-sweep.mjs <skill>[/<ref>] the dossier for one ref or one skill
 //   node skills/relevance-sweep.mjs --audited       what has been read, and when
+//   node skills/relevance-sweep.mjs --signal        the absent-word ratio of every
+//                                                   ref beside its verdict
 //   node skills/relevance-sweep.mjs --record <scope> bind a verdict to what was read
 //   node skills/relevance-sweep.mjs --stale          exit 1 if any verdict is
 //                                                   unread, unbound or stale
@@ -352,6 +354,43 @@ if (flags.includes('--record')) {
   if (skipped.length) {
     console.log(`\n${skipped.length} ref${skipped.length === 1 ? '' : 's'} in scope had nothing to bind:`)
     for (const w of skipped) console.log(`  ${w}`)
+  }
+  process.exit(0)
+}
+
+// `--signal` prints the absent-word ratio of every ref beside the verdict a
+// reader gave it. It exists because the ratio was proposed as a third failure
+// class for `--stale` on the strength of 41 refs in one skill, and a threshold
+// argued from one skill is a threshold fitted to it. This flag is the cheapest
+// form of the counter-check: on a library whose every ref has been read and
+// repaired, a ref scoring high today is by construction a ref the proposed
+// gate would fail while a reader says it holds, so the top of this list is the
+// gate's false-positive rate and nothing else. It says nothing about what the
+// gate would catch; only the ranges as they stood before they were corrected
+// can answer that, and those live in git rather than in the tree.
+if (flags.includes('--signal')) {
+  const rows = refs.map((r) => ({
+    key: `${r.entry}/${r.ref}`,
+    verdict: audited.get(`${r.entry}/${r.ref}`)?.verdict ?? 'unread',
+    r,
+  })).sort((a, b) => b.r.missRate - a.r.missRate)
+  console.log(`  ratio  absent   lines  verdict      ref`)
+  for (const { key, verdict, r } of rows) {
+    console.log(`   ${r.missRate.toFixed(2)}  ${
+      `${r.miss.length}/${r.tokens.length}`.padStart(6)}  ${
+      String(r.lineCount).padStart(5)}  ${verdict.padEnd(11)}  ${key}${
+      r.unrangeable ? '   (no line range)' : ''}`)
+  }
+  // Grouped by verdict, because the question is whether the ratio separates
+  // them, and a sorted list of 184 rows does not answer that by itself.
+  const by = {}
+  for (const { verdict, r } of rows) (by[verdict] ??= []).push(r.missRate)
+  console.log(`\n  verdict      n   min   med   max`)
+  for (const [v, xs] of Object.entries(by).sort()) {
+    const sorted = [...xs].sort((a, b) => a - b)
+    const med = sorted[Math.floor(sorted.length / 2)]
+    console.log(`  ${v.padEnd(11)}${String(xs.length).padStart(3)}  ${
+      sorted[0].toFixed(2)}  ${med.toFixed(2)}  ${sorted[sorted.length - 1].toFixed(2)}`)
   }
   process.exit(0)
 }
