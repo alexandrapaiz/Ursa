@@ -16,12 +16,14 @@ run, quality over count. The owner's merge is the gate.
 | [quoting-a-number-from-an-outcome-record](quoting-a-number-from-an-outcome-record/SKILL.md) | What a record statistic is a share of, and whether two records' numbers may be compared or added | 32 | draft, `validated: false` |
 | [distilling-a-tuning-record](distilling-a-tuning-record/SKILL.md) | What an axiom may claim, what its confidence count means, and what may leave the machine with a tuning block | 39 | draft, `validated: false` |
 | [adding-a-bound-to-the-record-gate](adding-a-bound-to-the-record-gate/SKILL.md) | Whether a proposed rule about outcome records is a bound or a measurement, how its statement and its committed counterexample are written, and whether a violation means the bound or the resolver is wrong | 32 | draft, `validated: false` |
+| [clearing-a-record-for-release](clearing-a-record-for-release/SKILL.md) | Which of the three exits a release is taking, what that exit demands of raw text, and what an erasure has to reach once something has already left | 41 | draft, `validated: false` |
 
-## Three areas, and the edges between them
+## Four areas, and the edges between them
 
 The first three skills work on `outcome_record.json`. The fourth works
 on `tuning.json`. The fifth works on neither: it works on the checker
-those records are held against. Every near miss in
+those records are held against. The sixth works on none of the three: it
+works on what leaves the machine. Every near miss in
 `distilling-a-tuning-record/TRIGGER-TEST.md` and in
 `adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
 the record side of its own edge, which is what `prompts/skill-extract.md`
@@ -57,6 +59,28 @@ span carries is never a gate question, because a bound can only catch a
 record contradicting itself. Whether a rule about records should exist
 at all is never a record question, because no record can say what it
 was checked against.
+
+**The release area.** `clearing-a-record-for-release` is the only skill
+here whose object is not an artifact at all. It is a boundary: the three
+exits by which something derived from a record becomes readable by
+someone else, which are the disclosure batch to Ursa Minor, a public
+publication, and a person quoting a passage into a document. Two of the
+three are governed by opposite rules about raw text, raw text never
+crosses the Minor edge and raw text is the whole point of a published
+page, and all three are called *disclosure* in the code and in the
+prose. So reaching for the nearest check is a live way to be wrong in
+either direction, which is the argument the skill is built on.
+
+It has all five others as neighbours and still one edge, and the edge is
+a handoff rather than a border: the five decide what a record says, this
+one decides what may leave with it. Both directions are handled
+record-side first, because nothing can be cleared for release until it
+is settled what it is. The near miss worth reading is the quoting
+skill's own first trigger, since the two share every noun. The line is
+mechanical and not a matter of taste: every field under `stats` ships,
+so a one-record statistic is never blocked here, and the only number
+this skill rules on is an aggregate across contributors, which no single
+record carries.
 
 ## Checking the receipts
 
@@ -231,5 +255,3 @@ Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked
 out. That gap is a ledger entry for the engineer or frontend seat, not
 work this seat does (`prompts/skill-extract.md` §6).
-
-<!-- skill run 2026-10-23 (twelfth): run marker, replaced before ready -->
