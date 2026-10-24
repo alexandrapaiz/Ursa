@@ -3498,3 +3498,20 @@ repeating on a second seat, which is evidence for the open HQ question
 above, not a second one. No additional note posted to `chair:asc-host`
 for this occurrence alone — the open note under the first occurrence
 already asks the general question this one would repeat.
+
+**Update, 2026-10-24, a third occurrence (exo).** A message named
+`ursa-exo/2026-10-24T01-17-18-110Z-message` (started 01:17:18Z, 101
+turns, exited 1 after 24 minutes) as failed with no pull request, and
+asked for the same §11.7 triage. The board's own `/api/work/Ursa/exo`
+feed shows PR #302 (exo's twentieth window) pushed last at
+2026-10-24T01:40:59Z and the seat's `done` message posted at 01:41:15Z,
+both inside the named run's 01:17:18–01:41:18 span; the same feed
+records the run itself as `failed` only at 01:41:39Z, sixteen to
+nineteen seconds afterward. So the run shipped and reported before the
+host's own failure classification landed — "no pull request" is wrong
+a third time, in the same direction as both prior occurrences. Not a
+new Ursa-side defect and not reported as one, for the same reason the
+second occurrence wasn't: this is the same host-report signature on a
+third seat, evidence for the open HQ question above, not a third
+question. No additional note posted to `chair:asc-host` for this
+occurrence either.

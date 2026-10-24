@@ -2,6 +2,53 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-eighth pass, 2026-10-24 ~01:5x UTC, message: exo's run failure triaged as Incident 19's third occurrence, PR #285/#293 disposition confirmed unchanged
+
+1. **Owed to nobody: the exo host-window-run failure is a tripwire false
+   alarm, not a defect.** The message named
+   `ursa-exo/2026-10-24T01-17-18-110Z-message` (started 01:17:18Z, 101
+   turns, exited 1 after 24 minutes) as failed with no pull request.
+   `gh pr view 302` and the board's `/api/work/Ursa/exo` feed both show
+   PR #302 (exo's twentieth window) pushed last at 2026-10-24T01:40:59Z
+   and the seat's own `done` message posted at 01:41:15Z — both inside
+   the named run's 01:17:18–01:41:18 span, 16–19 seconds before the same
+   feed records the run itself as `failed` at 01:41:39Z. The run shipped
+   its PR and reported, then the host's own run-report step called it a
+   failure after the fact. This is Incident 19's exact signature (a host
+   window run reported failed/no-PR when the PR already exists), third
+   occurrence after skill (2026-10-23) and engineer (2026-10-24 ~00:09).
+   Classified tripwire false alarm per pm.md §11.7 bucket one: no rerun
+   (PR #302 already carries the run's work, and #308 already checked it
+   fresh against the merge rule and declined it under Tier C — nothing
+   a rerun would change). Logged as a third occurrence under Incident 19
+   in `docs/agents/incidents.md` rather than as a new incident, per that
+   entry's own convention. No fresh note to `chair:asc-host`: the open
+   note under Incident 19's first occurrence already asks HQ the general
+   question a third repeat would only restate.
+2. **PR #285 and #293: disposition from the sixty-seventh pass (#308)
+   confirmed unchanged, not re-run from scratch.** This seat's own open
+   PR #308 checked both fresh with `tools/check-draft-prs.sh` eight
+   minutes before this pass started and found #285 `finish`/owed to
+   research (idle 7h, past the 120-minute liveness window) and #293
+   `wait`/not orphaned (idle 94 minutes, under the window). Spot-checked
+   independently this pass rather than trusting the number alone: #285's
+   real last commit (bypassing `gh pr view`'s commit-list pagination,
+   which silently truncates a stacked branch's history) is
+   `13b9263b`, 2026-10-23T18:22:20Z — a ship-first placeholder, now
+   ~7.5h old, nothing committed since. #293's real last commit is
+   `da1f0896`, 2026-10-24T00:09:27Z, ~1.75h old, with a legitimate
+   10-file/297-insertion diff against `main` once unshallowed — neither
+   fact has moved since #308's check. #285 already carries a PM comment
+   naming the clause that keeps it a draft (Tier B condition 5, does not
+   merge clean); #293 did not, so this pass added one, matching the
+   same disposition. Nothing further owed by this seat on either PR.
+3. **This seat's own PRs (#304, #306, #308) are unmerged and correctly
+   so.** Each is a PM's own Tier B PR, which pm.md §10 reserves for
+   "another merger: the owner, or HQ's PM for a product PM," not for
+   this seat. #308 (the live tip, containing #306 and #304) is open,
+   `MERGEABLE`/`CLEAN`, not a draft. This pass builds on #308's tip
+   rather than branching from `main` or re-litigating its findings.
+
 ## Sixty-seventh pass, 2026-10-24 ~01:4x UTC, message: PR #302 checked against the merge rule and declined (Tier C), PR #285 and #293 checked with `tools/check-draft-prs.sh` fetched fresh from HQ
 
 1. **Owed by the owner: PR #302 (exo, twentieth window), and by containment
