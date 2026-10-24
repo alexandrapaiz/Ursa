@@ -1,0 +1,99 @@
+[
+  {
+    "url": "https://claude.com",
+    "error": null,
+    "groups": [
+      {
+        "shape": "h28 f12px p4/12 b0 r8px",
+        "members": 6,
+        "distinctMotions": 1,
+        "motions": [
+          "color,background-color,border-color,box-shadow|0.1s,0.2s,0.2s,0.2s|ease-in-out,ease-in-out,ease-in-out,ease"
+        ],
+        "examples": [
+          "Download apps",
+          "Login (opens in new tab)",
+          "Developer docs",
+          "Console"
+        ]
+      },
+      {
+        "shape": "h36 f15px p8/16 b0 r8px",
+        "members": 2,
+        "distinctMotions": 1,
+        "motions": [
+          "color,background-color,border-color,box-shadow|0.1s,0.2s,0.2s,0.2s|ease-in-out,ease-in-out,ease-in-out,ease"
+        ],
+        "examples": [
+          "Contact sales",
+          "Try Claude"
+        ]
+      },
+      {
+        "shape": "h44 f17px p8/20 b1 r9.6px",
+        "members": 3,
+        "distinctMotions": 1,
+        "motions": [
+          "transform,background-color,border-color|0.1s,0.1s,0.1s|ease,ease,ease"
+        ],
+        "examples": [
+          "Continue with Google",
+          "Continue with SSO",
+          "Download desktop app"
+        ]
+      },
+      {
+        "shape": "h40 f17px p8/24 b0 r8px",
+        "members": 3,
+        "distinctMotions": 1,
+        "motions": [
+          "color,background-color,border-color,box-shadow|0.1s,0.2s,0.2s,0.2s|ease-in-out,ease-in-out,ease-in-out,ease"
+        ],
+        "examples": [
+          "Try Claude",
+          "Try Claude",
+          "Try Claude"
+        ]
+      }
+    ],
+    "totalBoxControls": 17,
+    "anySpring": false
+  },
+  {
+    "url": "https://stripe.com",
+    "error": null,
+    "groups": [
+      {
+        "shape": "h48 f16px p16/24 b0 r4px",
+        "members": 9,
+        "distinctMotions": 2,
+        "motions": [
+          "background-color,color,outline-color,border|0.3s,0.3s,0.3s,0.3s|cubic-bezier(0.25,1,0.5,1),cubic-bezier(",
+          "background-color,color|0.3s,0.3s|cubic-bezier(0.25,1,0.5,1),cubic-bezier("
+        ],
+        "examples": [
+          "Get started",
+          "Watch now",
+          "Stripe for enterprises",
+          "Stripe for startups"
+        ]
+      },
+      {
+        "shape": "h48 f16px p15/24 b1 r4px",
+        "members": 11,
+        "distinctMotions": 1,
+        "motions": [
+          "background-color,color,outline-color,border|0.3s,0.3s,0.3s,0.3s|cubic-bezier(0.25,1,0.5,1),cubic-bezier("
+        ],
+        "examples": [
+          "Sign up with Google",
+          "View Stripe’s GitHub",
+          "Read the letter",
+          "See the numbers"
+        ]
+      }
+    ],
+    "totalBoxControls": 22,
+    "anySpring": false
+  }
+]

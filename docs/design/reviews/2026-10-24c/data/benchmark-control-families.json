@@ -1,0 +1,125 @@
+[
+  {
+    "url": "https://linear.app",
+    "error": null,
+    "groups": [
+      {
+        "shape": "h24 f12px p0/7 b1 r16px",
+        "members": 2,
+        "distinctMotions": 1,
+        "motions": [
+          "filter,transform|0.16s,0.16s|cubic-bezier(0.25,0.46,0.45,0.94),cubic-"
+        ],
+        "examples": [
+          "Performance",
+          "iOS"
+        ]
+      }
+    ],
+    "totalBoxControls": 7,
+    "anySpring": false
+  },
+  {
+    "url": "https://vercel.com",
+    "error": null,
+    "groups": [
+      {
+        "shape": "h40 f16px p0/14 b0 r8px",
+        "members": 3,
+        "distinctMotions": 1,
+        "motions": [
+          "all|0.15s|cubic-bezier(0.4,0,0.2,1)"
+        ],
+        "examples": [
+          "Get a Demo",
+          "Log In",
+          "Sign Up"
+        ]
+      },
+      {
+        "shape": "h40 f16px p0/12 b0 r3.35544e+07px",
+        "members": 3,
+        "distinctMotions": 1,
+        "motions": [
+          "all|0.15s|cubic-bezier(0.4,0,0.2,1)"
+        ],
+        "examples": [
+          "Deploy now",
+          "Talk to sales",
+          "Deploy now"
+        ]
+      }
+    ],
+    "totalBoxControls": 6,
+    "anySpring": false
+  },
+  {
+    "url": "https://elicit.com",
+    "error": null,
+    "groups": [
+      {
+        "shape": "h54 f12px p14/16 b0 r8px",
+        "members": 7,
+        "distinctMotions": 1,
+        "motions": [
+          "all|0s|ease"
+        ],
+        "examples": [
+          "Try now",
+          "Learn more",
+          "Learn more",
+          "Learn more"
+        ]
+      },
+      {
+        "shape": "h25 f12px p3/8 b0 r100px",
+        "members": 4,
+        "distinctMotions": 1,
+        "motions": [
+          "all|0s|ease"
+        ],
+        "examples": [
+          "Features",
+          "Industries",
+          "New features",
+          "Case studies"
+        ]
+      },
+      {
+        "shape": "h32 f12px p4/8 b0 r8px",
+        "members": 2,
+        "distinctMotions": 1,
+        "motions": [
+          "all|0s|ease"
+        ],
+        "examples": [
+          "Mitigating Temperature Drift i",
+          "Energy-Latency Trade-offs in G"
+        ]
+      }
+    ],
+    "totalBoxControls": 16,
+    "anySpring": false
+  },
+  {
+    "url": "https://www.consensus.app",
+    "error": null,
+    "groups": [
+      {
+        "shape": "h36 f15.04px p0/12 b1 r9999.04px",
+        "members": 3,
+        "distinctMotions": 1,
+        "motions": [
+          "background-color,color,outline-color|0.1s,0.1s,0.1s|ease,ease,ease"
+        ],
+        "examples": [
+          "Sign in",
+          "Sign up",
+          "Skills"
+        ]
+      }
+    ],
+    "totalBoxControls": 3,
+    "anySpring": false
+  }
+]
