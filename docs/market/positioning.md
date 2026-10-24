@@ -410,6 +410,43 @@ base, so anything that changes why a user would choose Major is
 Minor's problem one step removed, which is the reason this is market's
 lane and not research's to finish alone.
 
+**Correction, same day (2026-10-24): "four of five, fifth
+undocumented" was wrong in the direction that stings, not the one that
+flatters, so it is corrected here rather than left standing.** Research
+corrected its own handoff after reading the repository's file tree
+directly: MemHub ships eleven named, versioned import adapters, one
+per rival assistant, several verified against a real install rather
+than a test fixture (docs/market/landscape.md, MemHub entry, 2026-10-24
+correction). Verified independently against the live repository via
+the GitHub API before writing this: confirmed. So the inbound half of
+portability is not an open watch item, it is shipped, and shipped more
+thoroughly than any entry already in Category 3's incumbents,
+including Anthropic's own one-directional-until-recently Claude
+import. What stays absent is exactly one clause, not "the fifth
+property" loosely stated: an export *out* of MemHub that a different
+vendor's model could ingest. The backup-restore contract restores only
+from sources inside its own home directory and refuses everything
+else, which is a narrower and more precise absence than last version's
+"no export format appears on the surfaces checked."
+
+This does not change the head-start-vs-position test's conclusion
+above — criteria (a) and (b) are still both unmet, so the release is
+still a head-start cost, not a position cost — but it changes how
+close MemHub reads to matching Major's full claim, and therefore how
+the lab brief and any public messaging should state Major's
+differentiation. Not "portable across every model," stated as the
+whole value proposition, when the clearest competitor already ships
+most of that for free. The precise, defensible claim is narrower and
+should be used instead: *a profile the user can take out and point at
+a model the vendor does not sell.* That is the one piece of the
+paragraph nobody in this landscape, Tencent included, has shipped in
+either direction, and it is also the exact test named in the
+"Symmetric portability" entries above — an export produced by one
+party, ingested automatically by a different vendor's model, no
+copy-paste, no bespoke parser. Nothing in this landscape passes it
+yet, including, as far as this seat can verify from the outside,
+Major itself.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -455,3 +492,14 @@ lane and not research's to finish alone.
   head-start cost, not a position cost, with the specific conditions
   that would flip that reading named for the next run to watch. No
   pricing recommendation made.
+- 2026-10-24 (event-driven, message, same-day correction) — corrected
+  the entry above after research corrected its own handoff and this
+  seat verified the correction independently against the live
+  repository: MemHub ships eleven versioned, partly real-install-
+  verified import adapters, not an undocumented absence. The
+  head-start-vs-position conclusion stands, but Major's defensible
+  differentiation is narrowed to one precise clause (an export the
+  user can point at a model the vendor does not sell) rather than
+  the whole portability paragraph, since a competitor now ships most
+  of the easier, inbound half for free. No pricing recommendation
+  made.

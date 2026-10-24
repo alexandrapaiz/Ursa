@@ -569,6 +569,55 @@ touch. Last observed 2026-10-24: Tencent-Hunyuan/Hy-Memory,
 `README.md` and `memhub/README.md`, read in full
 (github.com/Tencent-Hunyuan/Hy-Memory).
 
+Update 2026-10-24 (correction, same day): the paragraph above
+undersells the import side of the "fifth property" and the correction
+is worth stating precisely rather than folded in silently. Reading the
+repository's own file tree directly (`gh api
+repos/Tencent-Hunyuan/Hy-Memory/git/trees/main?recursive=1`), the
+`imports/` module is not the two generic files first reported. It is
+eleven named, per-vendor adapters under
+`memhub/apps/core/src/one_memory/imports/sources/`: `claude_code.py`,
+`codex.py`, `cursor_unified.py`, `deepseek_harness.py`, `hermes.py`,
+`openclaw.py`, `opencode.py`, `pi.py`, `qwen_code.py`, `qwenwork.py`,
+and `workbuddy.py` (a twelfth file, `cursor.py`, appears superseded by
+`cursor_unified.py`, which is the one the source registry actually
+wires in). Each is registered with a `VerificationLevel` field
+(`host_packages.py`) of either `fixture_only` or `real_replayed`;
+several of the eleven, including Claude Code, Codex, and the Cursor
+adapter, are tagged `real_replayed` rather than `fixture_only`, and
+each tracks a `source_version` string. So the inbound direction is not
+an undocumented afterthought: it is eleven maintained, versioned,
+some-verified-against-a-real-install adapters, one per rival product.
+A user can already carry their history out of eleven competing tools
+and into this one, under a permissive licence, today.
+
+What stays absent, now bounded more precisely than "no export found":
+the backup-restore contract (`memhub/packages/contracts/src/backup-restore.ts`)
+defines a `backup_restore_source_outside_home` failure code and its
+own comment states plainly that "Core... accepts only managed sources
+under the One Memory Home `backups/` directory" — restore is built to
+read this product's own backups, not a competitor's export, and there
+is no symmetric path the other direction either. `export_public_snapshot.py`
+remains a maintainer tool, not a user-facing feature, per the original
+read above.
+
+The corrected positioning is narrower than either the original
+handoff ("stopped short of portability," wrong) or this entry's first
+pass ("the fifth property is undocumented," incomplete) allowed: most
+of portability is shipped, verified, and given away for free. What
+remains distinctively Ursa Major's is one clause of its own value
+proposition, not the paragraph — a profile the user can take out and
+point at a model the vendor does not already sell. See
+docs/market/positioning.md's correction to "Software parity is not
+position parity" for what this changes. Verified independently via
+the GitHub API against the live repository tree and three source
+files, not taken from either seat's paraphrase. Last observed
+2026-10-24: Tencent-Hunyuan/Hy-Memory,
+`memhub/apps/core/src/one_memory/imports/sources/registry.py`,
+`memhub/apps/core/src/one_memory/imports/host_packages.py`, and
+`memhub/packages/contracts/src/backup-restore.ts`, read in full
+(github.com/Tencent-Hunyuan/Hy-Memory).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -634,3 +683,14 @@ at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Perman
   files; both confirm the fifth property, cross-vendor portability, is
   still undocumented anywhere checked. Positioning consequence in
   docs/market/positioning.md.
+- 2026-10-24 (event-driven, message, same-day correction) — research
+  corrected its own earlier handoff: the repository ships eleven
+  named, versioned, partly real-install-verified import adapters, not
+  an undocumented absence. Read the repository's git tree and three
+  source files directly via the GitHub API to verify the correction
+  independently rather than take either seat's word for it; confirmed.
+  Updated the MemHub entry with the precise count, file names, and
+  verification levels, and narrowed what remains absent to the
+  outbound/export direction specifically (the backup-restore contract
+  refuses any source outside its own home directory). Positioning
+  correction in docs/market/positioning.md.
