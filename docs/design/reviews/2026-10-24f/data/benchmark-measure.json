@@ -1,0 +1,499 @@
+[
+  {
+    "url": "https://linear.app",
+    "ok": true,
+    "paragraphs": 13,
+    "median": 47,
+    "longest": 86,
+    "widest": 540,
+    "sizes": [
+      "14px",
+      "15px",
+      "24px",
+      "13px"
+    ],
+    "blocks": [
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz DbHpe KFZpfa_descri",
+        "px": 540,
+        "size": "14px",
+        "leading": "21px",
+        "lines": 2,
+        "max": 46,
+        "median": 46,
+        "head": "sync when minimum required state i"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz jqlWID",
+        "px": 0,
+        "size": "15px",
+        "leading": "24px",
+        "lines": 1,
+        "max": 86,
+        "median": 86,
+        "head": "Designed for workflows shared by h"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz jqlWID",
+        "px": 0,
+        "size": "15px",
+        "leading": "24px",
+        "lines": 1,
+        "max": 84,
+        "median": 84,
+        "head": "Reduces noise and restores momentu"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz kFzTUE",
+        "px": 362,
+        "size": "15px",
+        "leading": "24px",
+        "lines": 2,
+        "max": 44,
+        "median": 44,
+        "head": "Designed for workflows shared by h"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz kFzTUE",
+        "px": 368,
+        "size": "15px",
+        "leading": "24px",
+        "lines": 2,
+        "max": 39,
+        "median": 39,
+        "head": "Reduces noise and restores momentu"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz ePlzPw b-30Va_descr",
+        "px": 532,
+        "size": "24px",
+        "leading": "31.92px",
+        "lines": 3,
+        "max": 51,
+        "median": 51,
+        "head": "Automatically turn conversations a"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz ePlzPw b-30Va_descr",
+        "px": 532,
+        "size": "24px",
+        "leading": "31.92px",
+        "lines": 3,
+        "max": 51,
+        "median": 51,
+        "head": "Plan and navigate from idea to lau"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz ePlzPw b-30Va_descr",
+        "px": 532,
+        "size": "24px",
+        "leading": "31.92px",
+        "lines": 3,
+        "max": 47,
+        "median": 47,
+        "head": "Build and deploy AI agents that wo"
+      },
+      {
+        "tag": "p",
+        "cls": "q1lnWq_bubble",
+        "px": 342,
+        "size": "13px",
+        "leading": "20px",
+        "lines": 3,
+        "max": 45,
+        "median": 45,
+        "head": "what are the three most important "
+      },
+      {
+        "tag": "p",
+        "cls": "q1lnWq_bubble",
+        "px": 342,
+        "size": "13px",
+        "leading": "20px",
+        "lines": 2,
+        "max": 47,
+        "median": 47,
+        "head": "review this issue, draft complete "
+      },
+      {
+        "tag": "p",
+        "cls": "q1lnWq_responseText",
+        "px": 386,
+        "size": "13px",
+        "leading": "20px",
+        "lines": 2,
+        "max": 50,
+        "median": 50,
+        "head": "Updated the issue with requirement"
+      },
+      {
+        "tag": "p",
+        "cls": "sc-KOGVz ePlzPw b-30Va_descr",
+        "px": 532,
+        "size": "24px",
+        "leading": "31.92px",
+        "lines": 3,
+        "max": 49,
+        "median": 49,
+        "head": "Streamline code reviews with clear"
+      }
+    ]
+  },
+  {
+    "url": "https://vercel.com",
+    "ok": false,
+    "paragraphs": 0,
+    "median": null,
+    "longest": null,
+    "widest": null,
+    "sizes": [],
+    "blocks": []
+  },
+  {
+    "url": "https://stripe.com",
+    "ok": true,
+    "paragraphs": 30,
+    "median": 60,
+    "longest": 83,
+    "widest": 920,
+    "sizes": [
+      "32px",
+      "18px",
+      "16px",
+      "26px"
+    ],
+    "blocks": [
+      {
+        "tag": "p",
+        "cls": "hds-heading modular-solution",
+        "px": 815,
+        "size": "32px",
+        "leading": "35.2px",
+        "lines": 3,
+        "max": 60,
+        "median": 60,
+        "head": "Grow your business with a comprehe"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-heading modular-solution",
+        "px": 0,
+        "size": "32px",
+        "leading": "35.2px",
+        "lines": 1,
+        "max": 83,
+        "median": 83,
+        "head": "Grow your business with the most c"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text section-header__des",
+        "px": 504,
+        "size": "18px",
+        "leading": "25.2px",
+        "lines": 3,
+        "max": 60,
+        "median": 60,
+        "head": "50% of Fortune 100 companies have "
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 367,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 48,
+        "median": 48,
+        "head": "Get tailored guidance from Stripe "
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 359,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 49,
+        "median": 49,
+        "head": "Work with a Stripe consulting part"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 354,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 48,
+        "median": 48,
+        "head": "Receive ongoing assistance and day"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text section-header__des",
+        "px": 504,
+        "size": "18px",
+        "leading": "25.2px",
+        "lines": 3,
+        "max": 60,
+        "median": 60,
+        "head": "From stablecoin pioneers to 88% of"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 313,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 42,
+        "median": 42,
+        "head": "Access financial benefits, a focus"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 326,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 40,
+        "median": 40,
+        "head": "Incorporate and get everything you"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text section-header__des",
+        "px": 504,
+        "size": "18px",
+        "leading": "25.2px",
+        "lines": 3,
+        "max": 60,
+        "median": 60,
+        "head": "From the Fortune 100 to the Forbes"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 362,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 47,
+        "median": 47,
+        "head": "Launch and scale payments products"
+      },
+      {
+        "tag": "p",
+        "cls": "hds-text hds-text--md hds-te",
+        "px": 338,
+        "size": "16px",
+        "leading": "22.4px",
+        "lines": 3,
+        "max": 38,
+        "median": 38,
+        "head": "Monetize platform transactions—inc"
+      }
+    ]
+  },
+  {
+    "url": "https://elicit.com",
+    "ok": false,
+    "error": "TimeoutError: page.goto: Timeout 45000ms exceeded."
+  },
+  {
+    "url": "https://consensus.app",
+    "ok": true,
+    "paragraphs": 2,
+    "median": 87,
+    "longest": 87,
+    "widest": 768,
+    "sizes": [
+      "16px"
+    ],
+    "blocks": [
+      {
+        "tag": "p",
+        "cls": "Type_base__uyb_k Type_text-s",
+        "px": 768,
+        "size": "16px",
+        "leading": "24px",
+        "lines": 2,
+        "max": 79,
+        "median": 79,
+        "head": "Search and analyze peer-reviewed l"
+      },
+      {
+        "tag": "p",
+        "cls": "Type_base__uyb_k Type_text-s",
+        "px": 768,
+        "size": "16px",
+        "leading": "24px",
+        "lines": 3,
+        "max": 87,
+        "median": 87,
+        "head": "10 million researchers, students, "
+      }
+    ]
+  },
+  {
+    "url": "https://claude.com",
+    "ok": true,
+    "paragraphs": 5,
+    "median": 80,
+    "longest": 109,
+    "widest": 1312,
+    "sizes": [
+      "12px",
+      "17px"
+    ],
+    "blocks": [
+      {
+        "tag": "p",
+        "cls": "Plans-module-scss-module__bk",
+        "px": 1312,
+        "size": "12px",
+        "leading": "19.2px",
+        "lines": 1,
+        "max": 109,
+        "median": 109,
+        "head": "Prices shown don't include applica"
+      },
+      {
+        "tag": "p",
+        "cls": "",
+        "px": 660,
+        "size": "17px",
+        "leading": "27.2px",
+        "lines": 3,
+        "max": 86,
+        "median": 86,
+        "head": "Claude is an artificial intelligen"
+      },
+      {
+        "tag": "p",
+        "cls": "",
+        "px": 660,
+        "size": "17px",
+        "leading": "27.2px",
+        "lines": 2,
+        "max": 73,
+        "median": 73,
+        "head": "You can use Claude for your own pe"
+      },
+      {
+        "tag": "p",
+        "cls": "",
+        "px": 660,
+        "size": "17px",
+        "leading": "27.2px",
+        "lines": 4,
+        "max": 81,
+        "median": 80,
+        "head": "If you can dream it, Claude can he"
+      },
+      {
+        "tag": "p",
+        "cls": "",
+        "px": 660,
+        "size": "17px",
+        "leading": "27.2px",
+        "lines": 2,
+        "max": 80,
+        "median": 80,
+        "head": "Claude has five pricing plans avai"
+      }
+    ]
+  },
+  {
+    "url": "https://www.figma.com",
+    "ok": true,
+    "paragraphs": 1,
+    "median": 49,
+    "longest": 49,
+    "widest": 901,
+    "sizes": [
+      "44px"
+    ],
+    "blocks": [
+      {
+        "tag": "p",
+        "cls": "",
+        "px": 901,
+        "size": "44px",
+        "leading": "48.4px",
+        "lines": 4,
+        "max": 49,
+        "median": 49,
+        "head": "Everyone is able to influence, ins"
+      }
+    ]
+  },
+  {
+    "url": "https://github.com",
+    "ok": true,
+    "paragraphs": 4,
+    "median": 82,
+    "longest": 86,
+    "widest": 720,
+    "sizes": [
+      "18px",
+      "16px"
+    ],
+    "blocks": [
+      {
+        "tag": "p",
+        "cls": "Primer_Brand__Text-module__T",
+        "px": 600,
+        "size": "18px",
+        "leading": "27px",
+        "lines": 2,
+        "max": 65,
+        "median": 65,
+        "head": "Tools and trends evolve, but colla"
+      },
+      {
+        "tag": "p",
+        "cls": "Primer_Brand__Text-module__T",
+        "px": 696,
+        "size": "16px",
+        "leading": "24px",
+        "lines": 2,
+        "max": 82,
+        "median": 82,
+        "head": "Write, test, and fix code quickly "
+      },
+      {
+        "tag": "p",
+        "cls": "Primer_Brand__Text-module__T",
+        "px": 720,
+        "size": "18px",
+        "leading": "27px",
+        "lines": 3,
+        "max": 86,
+        "median": 86,
+        "head": "Whether you’re scaling your develo"
+      },
+      {
+        "tag": "p",
+        "cls": "Primer_Brand__Text-module__T",
+        "px": 384,
+        "size": "16px",
+        "leading": "24px",
+        "lines": 2,
+        "max": 48,
+        "median": 48,
+        "head": "Get tips, technical guides, and be"
+      }
+    ]
+  }
+]

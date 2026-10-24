@@ -985,3 +985,43 @@ html {
     transition-duration: 1ms;
   }
 }
+
+/* ---------- the measure ----------
+
+   The measure is a property of the type, not of the column, and until
+   2026-10-24 this site had it the other way round. Every prose box was a
+   pixel width, `max-w-xl` or `max-w-2xl`, and both of them were used at
+   two type sizes: 0.95rem for the body and 0.85rem for the smaller
+   paragraph that usually follows it. A box that does not change when the
+   type shrinks gives the smaller type a longer line, so the small print
+   ended up with the longest line on the page. Counted character by
+   character with a Range, at 1440 on the shipped build: on `/record/at`
+   the 0.85rem paragraph ran to 113 characters while the 0.95rem
+   paragraphs above it ran to 96, and on the home page the closing note
+   ran to 98 against its neighbours' 85
+   (`docs/design/reviews/2026-10-24f/data/measure-before.txt`).
+
+   In `em` the box is the type's own, so both sizes land on the same
+   count and a third size added later lands there too without anybody
+   remembering to pick a width for it.
+
+   The two values are the ones the 0.95rem paragraphs already had, to
+   within a rounding: 672px is 44.21em of 15.2px type and 576px is
+   37.89em. They are written as 44 and 38 rather than carried to four
+   decimals, which moves a 0.95rem paragraph by 3.2px and 1.6px
+   respectively, and the frame diff in that review says what that cost.
+
+   Both are above the measure every benchmarked site holds, and that is
+   deliberate rather than overlooked. 44em is about 100 characters where
+   six design-led products measured the same way sit between 47 and 87
+   (`data/benchmark-measure.json`). Narrowing the column is an identity
+   decision about how generous this page is, so it is recorded as a
+   proposal to the owner in §9 of that review and not taken here. This
+   rule fixes the drift and leaves the width where she can see it. */
+.measure {
+  max-width: 44em;
+}
+
+.measure-narrow {
+  max-width: 38em;
+}

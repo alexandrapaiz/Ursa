@@ -27,7 +27,7 @@ export default async function RecordIndex() {
         <h1 className="mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
           Nobody judged this output. The work either used it or it didn&rsquo;t.
         </h1>
-        <p className="mt-8 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+        <p className="mt-8 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
           An outcome record is not a rating and not a preference pair. It is a finished piece of
           work, joined backward to every model generation that fed it, with each passage of the
           final thing classified by what happened to it.
@@ -69,7 +69,7 @@ export default async function RecordIndex() {
             <h2 className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
               <span className="text-[var(--polar)]">✦</span> Read one now
             </h2>
-            <p className="mt-7 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+            <p className="mt-7 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
               Published here, from data that is safe to publish. It is small on purpose: every
               pointer in it can be followed by hand, which is how you check that the viewer is
               showing you what the record says.

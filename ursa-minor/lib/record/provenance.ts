@@ -109,8 +109,26 @@ export function provenanceReach(record: OutcomeRecord): ProvenanceReach {
   return { spansTotal, spansWithSource, spansReachingPrompt, brokenSources }
 }
 
-/** Percent with one decimal, and no trailing ".0" noise. */
+/**
+ * Percent for a sentence: one decimal, and no trailing ".0" noise, because
+ * "30.0% thrown away" reads as a machine talking.
+ */
 export function pct(n: number): string {
   const v = n * 100
   return `${Number.isInteger(v) ? v : v.toFixed(1)}%`
+}
+
+/**
+ * Percent for a column: always one decimal, so the decimal points line up.
+ *
+ * These two exist separately because the right rule is not the same in the
+ * two places. In prose the shorter string is better. In a right-aligned
+ * stack of figures set in a monospace face with `tabular-nums`, dropping
+ * the decimal shifts every digit two cells sideways, and the column had
+ * already paid for alignment twice over before throwing it away: measured
+ * 2026-10-24 on /record/mini-fixture, "24%" sat two cells right of where
+ * "41.2%" and "34.7%" put their tenths.
+ */
+export function pctFixed(n: number): string {
+  return `${(n * 100).toFixed(1)}%`
 }

@@ -1,5 +1,5 @@
 import { CLASS_COPY, SPAN_CLASSES, type OutcomeRecord } from "@/lib/record/types";
-import { pct, provenanceReach } from "@/lib/record/provenance";
+import { pct, pctFixed, provenanceReach } from "@/lib/record/provenance";
 
 const FILL: Record<string, string> = {
   survived_verbatim: "rgba(168, 199, 250, 0.55)",
@@ -67,7 +67,7 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
                   8.2rem, so no fixed measure short enough to look tidy ever
                   fits it. */}
               <dd className="whitespace-nowrap text-right font-mono text-[0.72rem] text-[var(--star)] tabular-nums">
-                {stat ? pct(stat.pct) : "0%"}
+                {stat ? pctFixed(stat.pct) : "0.0%"}
                 <span className="block text-[0.66rem] text-[var(--dim)]">
                   {stat ? `${stat.chars} chars · ${stat.spans} span${stat.spans === 1 ? "" : "s"}` : "none"}
                 </span>
