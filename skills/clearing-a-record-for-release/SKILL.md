@@ -21,7 +21,7 @@ revised: 2026-10-23
 evidence_scheme: repo
 evidence:
   - ref: E1
-    what: disclosure.ts is the only code allowed to turn a record into something that may leave the device, the four places a record holds raw text, that a comment is not a boundary, and the plan's three crossing edges with the survival_stats SQL
+    what: disclosure.ts is the only code allowed to turn a record into something that may leave the device, the three fields a record holds raw text in, that a comment is not a boundary, and the plan's three crossing edges with the survival_stats SQL
     source: ursa-major/src/disclosure.ts:1-24
   - ref: E2
     what: building the payload out of counters alone would be correct and not checkable, so auditBatch re-derives the guarantee from outside the projection with two independent checks, and a check that cannot fail proves nothing
@@ -82,22 +82,22 @@ evidence:
     source: ursa-major/src/consent.ts:106-141
   - ref: E21
     what: forget deletes the record file, strips the record from the tuning, and tombstones the id so a later run does not rebuild it from the git history it came from
-    source: ursa-major/src/consent.ts:197-240
+    source: ursa-major/src/consent.ts:197-247
   - ref: E22
     what: `ursa consent disclose` has no --audit flag, because an opt-in audit is a check that gets skipped on the day it would have mattered
-    source: ursa-major/src/consent.cli.ts:1-17
+    source: ursa-major/src/consent.cli.ts:1-18
   - ref: E23
     what: what `ursa consent show` prints, including the active and revoked inference counts, the erasures with what each removed, and the closing sentence that differs by consent state
-    source: ursa-major/src/consent.cli.ts:68-104
+    source: ursa-major/src/consent.cli.ts:68-119
   - ref: E24
     what: revoking a scope is a stop and not an undo, and deletion of what was already sent is a request to the aggregation layer
-    source: ursa-major/src/consent.cli.ts:119-129
+    source: ursa-major/src/consent.cli.ts:134-143
   - ref: E25
     what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay
-    source: ursa-major/src/consent.cli.ts:131-145
+    source: ursa-major/src/consent.cli.ts:146-159
   - ref: E26
     what: the order disclose runs in, project then report the withholdings then audit, and that a single finding means nothing is written and the command exits 1
-    source: ursa-major/src/consent.cli.ts:147-171
+    source: ursa-major/src/consent.cli.ts:180-194
   - ref: E27
     what: the redaction standard is field-level rather than pattern-level, because the workflow gate catches three regular expressions and not the ordinary English that actually leaked
     source: docs/security/redaction-standard.md:11-27
@@ -121,13 +121,13 @@ evidence:
     source: docs/design/consent-and-erasure.md:83-85
   - ref: E34
     what: erasure against revocation, mechanism by mechanism, and why an axiom grounded only in the erased record is deleted outright rather than tombstoned
-    source: docs/design/consent-and-erasure.md:410-436
+    source: docs/design/consent-and-erasure.md:427-438
   - ref: E35
     what: aggregate() is the reference implementation of what the ingest route owes, and the two schema defects reported rather than patched around, the missing character total and the collapsed survival scalar
-    source: docs/design/consent-and-erasure.md:438-461
+    source: docs/design/consent-and-erasure.md:489-503
   - ref: E36
     what: what the consent change does not do, including that zone B is unbuilt, that the existing bridge is not gated by consent.json, and that the audit checks text rather than inference
-    source: docs/design/consent-and-erasure.md:489-513
+    source: docs/design/consent-and-erasure.md:533-555
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
     source: docs/ideas.md:8117-8120
@@ -142,7 +142,7 @@ evidence:
     source: ursa-major/src/disclosure.test.ts:256-310
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
-    source: docs/security/redaction-standard.md:173-181
+    source: docs/security/redaction-standard.md:173-182
 supersedes: []
 ---
 
@@ -266,9 +266,12 @@ would report a leak the moment anyone resolves this repository [E9].
 Leaf values are joined by a run of NUL characters at least one shingle
 wide, so no window can span two values and manufacture a match [E9].
 
-Output: either a `batch.json` whose every string is one of thirty-two
-literals or an ISO date [E7], or an exit status of 1 and a list of
-findings.
+Output: either a `batch.json` whose every string is one of the
+thirty-four literals the two vocabularies and the two fixed strings add
+up to, or an ISO date [E7], or an exit status of 1 and a list of
+findings. Count them rather than reading the number off the comment
+above `isPermittedString`, which says thirty-two and has said so since
+the commit that introduced both vocabularies.
 
 ### 3. Publication: the manifest is the consent, so print it first
 

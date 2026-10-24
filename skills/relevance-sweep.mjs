@@ -11,8 +11,11 @@
 //   node skills/relevance-sweep.mjs                 the queue, least-defended first
 //   node skills/relevance-sweep.mjs <skill>[/<ref>] the dossier for one ref or one skill
 //   node skills/relevance-sweep.mjs --audited       what has been read, and when
+//   node skills/relevance-sweep.mjs --signal        the absent-word ratio of every
+//                                                   ref beside its verdict
 //   node skills/relevance-sweep.mjs --record <scope> bind a verdict to what was read
-//   node skills/relevance-sweep.mjs --stale          exit 1 if any verdict is unbound or stale
+//   node skills/relevance-sweep.mjs --stale          exit 1 if any verdict is
+//                                                   unread, unbound or stale
 //
 // A verdict is only as good as the lines it was read against, so each one is
 // bound to them in skills/relevance.lock.json: three digests per ref, over the
@@ -67,14 +70,33 @@ const STOP = new Set(['that', 'this', 'with', 'from', 'what', 'when', 'which', '
   'thing', 'things', 'whether', 'where', 'about', 'after', 'before', 'under',
   'percent', 'ursa', 'skill', 'claim', 'document'])
 
+// Inline code spans are masked before the sentence split, and only for the
+// split. Without this, the `:` inside a span like `turnsToAcceptance: 1` ends a
+// sentence, and the passage a reader is shown for the ref citing it is the
+// three characters after the colon. Two refs in the library were in that
+// state, `running-an-outcome-record-trial/E22` and
+// `adjudicating-uncertain-spans/E9`, each shown a fragment carrying its tag and
+// nothing else, and a third was segmented in the wrong places. Found by
+// reading E22 under the absent-word rule below, which is the first thing that
+// rule caught. The filler is the same length as the span it replaces, so every
+// offset is still an offset into the real text and the text put in the dossier
+// is the original with its backticks.
+const maskCode = (t) => t.replace(/`[^`\n]*`/g, (m) => '\u0000'.repeat(m.length))
+const SENTENCE_BREAK = /(?<=[.:;])\s+|\n\n+/g
+
 const sentencesCiting = (body, ref) => {
   const out = []
   // Sentence-ish: split on a period or newline that ends a sentence, keep the
   // ones naming this ref. Crude on purpose; a reader is going to read it.
-  for (const s of body.split(/(?<=[.:;])\s+|\n\n+/)) {
-    const re = new RegExp(`\\[(?:E\\d+,\\s*)*${ref}(?:,\\s*E\\d+)*\\]`)
-    if (re.test(s)) out.push(s.replace(/\s+/g, ' ').trim())
+  const masked = maskCode(body)
+  const re = new RegExp(`\\[(?:E\\d+,\\s*)*${ref}(?:,\\s*E\\d+)*\\]`)
+  const keep = (piece) => { if (re.test(piece)) out.push(piece.replace(/\s+/g, ' ').trim()) }
+  let start = 0
+  for (const m of masked.matchAll(SENTENCE_BREAK)) {
+    keep(body.slice(start, m.index))
+    start = m.index + m[0].length
   }
+  keep(body.slice(start))
   return out
 }
 
@@ -173,6 +195,14 @@ for (const entry of readdirSync(skillsDir)) {
       // never reached the list of refs the queue sets apart. Two citations
       // hid there, one of them with no range and no section name at all.
       unranged: blocks.filter((b) => b.from === null).map((b) => b.path),
+      // How many distinct files this ref cites. It is here for the absent-word
+      // report below, where it is the one field that separates a mis-anchored
+      // range from a sound claim about the relation between two citations. A
+      // claim like "there are two capture paths, not one resolver with a flag"
+      // has its evidence in the shape of the citation rather than in the text
+      // of either file, so none of its words can appear in either range and no
+      // widening will ever lower its ratio.
+      files: new Set(blocks.map((b) => b.path)).size,
       missRate: tokens.length ? miss.length / tokens.length : 0,
       miss, tokens,
       density: lineCount ? conjuncts(what) / lineCount : Infinity,
@@ -355,18 +385,94 @@ if (flags.includes('--record')) {
   process.exit(0)
 }
 
+// The ratio at which a one-file ref is a mis-anchor until a reader says
+// otherwise. It is a reading threshold and not a gate, for the reason in the
+// block below.
+const WORDLESS = 0.85
+
+// `--signal` prints the absent-word ratio of every ref beside the verdict a
+// reader gave it. It exists because the ratio was proposed as a third failure
+// class for `--stale` on the strength of 41 refs in one skill, and a threshold
+// argued from one skill is a threshold fitted to it. This flag is the cheapest
+// form of the counter-check: on a library whose every ref has been read and
+// repaired, a ref scoring high today is by construction a ref the proposed
+// gate would fail while a reader says it holds, so the top of this list is the
+// gate's false-positive rate and nothing else. It says nothing about what the
+// gate would catch; only the ranges as they stood before they were corrected
+// can answer that, and those live in git rather than in the tree.
+if (flags.includes('--signal')) {
+  const rows = refs.map((r) => ({
+    key: `${r.entry}/${r.ref}`,
+    verdict: audited.get(`${r.entry}/${r.ref}`)?.verdict ?? 'unread',
+    r,
+  })).sort((a, b) => b.r.missRate - a.r.missRate)
+  console.log(`  ratio  absent   lines  verdict      ref`)
+  for (const { key, verdict, r } of rows) {
+    // Three decimals, not two: adding-a-bound/E12 is 11/13, which prints as
+    // 0.85 at two and sits below the 0.85 line it would be read against.
+    console.log(`  ${r.missRate.toFixed(3)}  ${
+      `${r.miss.length}/${r.tokens.length}`.padStart(6)}  ${
+      String(r.lineCount).padStart(5)}  ${verdict.padEnd(11)}  ${key}${
+      r.unrangeable ? '   (no line range)' : ''}`)
+  }
+  // Grouped by verdict, because the question is whether the ratio separates
+  // them, and a sorted list of 184 rows does not answer that by itself.
+  const by = {}
+  for (const { verdict, r } of rows) (by[verdict] ??= []).push(r.missRate)
+  console.log(`\n  verdict      n    min    med    max`)
+  for (const [v, xs] of Object.entries(by).sort()) {
+    const sorted = [...xs].sort((a, b) => a - b)
+    const med = sorted[Math.floor(sorted.length / 2)]
+    console.log(`  ${v.padEnd(11)}${String(xs.length).padStart(3)}  ${
+      sorted[0].toFixed(3)}  ${med.toFixed(3)}  ${sorted[sorted.length - 1].toFixed(3)}`)
+  }
+  // The reading instruction the measurement earned, printed rather than
+  // enforced. See the comment above this block for why it is not an exit
+  // status. A ref listed here is one of two things and the reader decides
+  // which: a range that holds none of its claim, or a claim about the shape or
+  // the position of the citation, which words cannot carry.
+  const wordless = rows.filter(({ r }) => r.missRate >= WORDLESS && r.files === 1 && !r.unrangeable)
+  if (wordless.length) {
+    console.log(`\n${wordless.length} ref${wordless.length === 1 ? '' : 's'} at or above ${
+      WORDLESS} cite${wordless.length === 1 ? 's' : ''} a single file, which on the only sample`)
+    console.log(`measured was a mis-anchor five times in five. Re-read ${
+      wordless.length === 1 ? 'it' : 'them'} before trusting the verdict, and if the`)
+    console.log(`words are absent because the claim is about position or shape, say so in the note:`)
+    for (const { key, verdict, r } of wordless) {
+      console.log(`  ${r.missRate.toFixed(3)}  ${verdict.padEnd(11)} ${key}`)
+    }
+  }
+  process.exit(0)
+}
+
 // `--stale` is the exit status the reading step never had. The default run
 // reports the same thing in prose and still exits 0, because a queue is not a
 // failure; an unbound or stale verdict is, and a check that cannot fail is a
 // check nobody runs twice.
+//
+// An absent verdict is counted here with the expired ones, as of 2026-10-24.
+// Until then this block computed `unread`, printed the count, and exited on
+// `bad.length` alone, so a ref nobody had ever read did not reach the exit
+// status. That is how a whole skill's 41 refs landed on `main` unread with
+// this gate green, and the only reason the gate was red that day was fifteen
+// stale verdicts in two other skills. The distinction the old code drew, that
+// a queue is not a failure, is right about the default run and wrong here: the
+// default run ranks what is left to read, and `--stale` is asked whether the
+// library's closure still holds. A ref with no verdict at all is the loudest
+// way for it not to hold. `prompts/skill-extract.md` §5q.
 if (flags.includes('--stale')) {
   const states = refs.map(verdictState).filter(Boolean)
   const bad = states.filter((v) => v.status !== 'bound')
+  // Disjoint from `bad` by construction: verdictState returns null for a ref
+  // with no audit row, so an unread ref is never also an unbound one.
   const unread = refs.filter((r) => !audited.has(`${r.entry}/${r.ref}`))
   for (const v of bad) console.log(`${v.status.padEnd(7)} ${v.key}  ${v.why}`)
+  for (const r of unread) {
+    console.log(`${'unread'.padEnd(7)} ${r.entry}/${r.ref}  no verdict in relevance-audit.md`)
+  }
   console.log(`${states.length - bad.length} of ${states.length} verdicts bound to what was read` +
     `, ${unread.length} ref${unread.length === 1 ? '' : 's'} unread`)
-  process.exit(bad.length ? 1 : 0)
+  process.exit(bad.length || unread.length ? 1 : 0)
 }
 
 if (targets.length) {
