@@ -2,6 +2,46 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-10-18 (PM, fortieth pass): apply the ExO seat's two charter-patch sections to prompts/pm-agent.md
+
+**Status:** proposed. **For:** the owner. **Found by:** reading
+`docs/agents/handoff-pm-charter-2026-10-18.md`, written by the exo
+seat's thirteenth window (PR #259, merged this pass) after it stopped
+editing other seats' charter files directly.
+
+**The finding.** The handoff parks two sections as a verbatim diff
+against `prompts/pm-agent.md`: a merge-state instrument
+(`tools/check-merge-queue.sh`, or a `git merge-tree` fallback on GitHub
+Actions where that script does not exist) that restates
+`docs/standards/pm.md` §11.2's existing instruction to check real merge
+state rather than GitHub's cached `mergeable` field, and a duty that a
+retraction or revision stated on a pull request also gets posted to the
+board, restating §15's "post done when you ship" and "ask instead of
+guessing" protocol for the case of a correction. A prior PM pass agreed
+with this content on the board at 02:30:05 UTC ("nothing to retract in
+what you wrote into my charter").
+
+**Why this seat is proposing rather than applying it.** `prompts/pm-agent.md`
+itself says, in its Act section, "never edit anything under ursa-major/,
+ursa-minor/, or prompts/," and in its retrospective section, "Charter
+changes are proposed in the ledger, never self-applied." The handoff
+file agrees: "Nothing here binds the PM... it binds only once the
+receiving seat's own charter justifies the work." This seat's charter
+does not grant that justification, so the patch is filed here instead
+of git-applied.
+
+**First step:** the owner applies the diff in
+`docs/agents/handoff-pm-charter-2026-10-18.md` to `prompts/pm-agent.md`
+(`git apply` from the repository root reproduces it exactly), or asks
+this seat to retype it in its own voice next pass, since the handoff
+file itself says the second form is better for the board-correction
+section. Either way, delete `docs/agents/handoff-pm-charter-2026-10-18.md`
+once applied or declined, per its own status note.
+
+**Cost:** $0.
+
+**Status:** proposed.
+
 ## Ledger entry — 2026-10-18 (skill, relevance sweep slice 3): the six evidence kinds are written down twice and nothing checks that the two agree
 
 **Status:** proposed. **For:** the engineer seat. **Found by:** reading, not
@@ -3037,6 +3077,38 @@ Sources: [claude.com/blog/introducing-citations-api](https://claude.com/blog/int
   `alexandrapaiz/alexandria` if it goes further than the one trial,
   which is itself a scope question for whoever gives this a verdict.
 - Status: proposed
+
+- 2026-10-23 (PM): `chair:alexandria` asked again on the board, seventeen
+  days after the handoff above with no reply logged here — a tracking
+  gap on this seat's part; the charter's own two-week rule
+  (docs/standards/pm.md §2 as vendored, "list it under 'Awaiting your
+  verdict'") should have surfaced this to the owner by 2026-10-20 and
+  did not. Replied to the chair on the board in first person rather
+  than committing a date on this seat's own authority, since the entry
+  above is explicit that committing Ursa's pipeline to a second
+  product's data is a product decision. Posted a timed `ask` to the
+  owner under pm.md §22 recommending the $0 one-record trial only (not
+  the ongoing cross-repo integration against alexandria's
+  `skills/*/evals/results.json`), expiring 2026-10-25 ~18:42 UTC; if
+  neither the owner nor a chair has acted by then, this seat's next
+  pass marks the trial accepted and schedules it as a day-sized item
+  for the engineer.
+
+- 2026-10-23, later the same pass (PM): `chair:alexandria` followed up
+  twelve minutes after the ask above with a note that the harness's
+  first attempt scored nothing (no pre-registered policy on six
+  suites, stale task headings on one, a judge token budget too small
+  for one subject's hidden reasoning), all three now fixed, and that
+  the first real run is live on the host. That run and its results are
+  alexandria's own with-versus-without delta on its nine skills, not
+  the one-record trial this seat already has in front of the owner;
+  the two stay separate until the owner or a chair says otherwise.
+  Replied to the chair on the board rather than changing the pending
+  ask, named that the audit's gameable-rubric finding is alexandria's
+  own skill seat's to fix, and logged the nine-suite results as a
+  future input once they land as alexandria's second pull request. No
+  change to the trial's status or to the owner's clock (still
+  2026-10-25 ~18:42 UTC).
 
 ## Competitive scan — 2026-10-06, second dispatch (engineer's craft scan)
 
@@ -8245,6 +8317,14 @@ proves rather than about Graphiti's engineering quality.
 - Cost: $0
 - Status: built (shipped 2026-10-18 by this seat in `skills/relevance.lock.json`, `skills/relevance-sweep.mjs` and the nudge at the end of `skills/check-evidence.mjs --update`.)
 
+### 2026-10-23 (pm, queue-drain pass after five days dark) — The dispatch wrapper the standard already names does not exist in this repo
+
+- Trigger: writing this run's retro for sprint-2026-10-12, which named `tools/gh-actions.sh` as unresolved for at least two weeks running. The host went dark 2026-10-18 19:29 UTC to 2026-10-23 on a full disk, and the first run back found the same gap unchanged.
+- What: `docs/standards/pm.md` §11.5 names `tools/gh-actions.sh` as `gh` with the dispatch credential chosen automatically, so a run never has to remember which token variable the Claude Code action leaves usable. `ls tools/` in this repo holds only `ledger/` and `stack/`; the wrapper does not exist here. Every pass that has tried a real dispatch since 2026-10-15 has had to re-derive the `DEFAULT_WORKFLOW_TOKEN` substitution by hand instead of calling a tool the standard already documents as existing, and `docs/decisions.md`'s open finding on the token-scope wall is the paper trail of that cost. The `allowed_bots` wall (Incident 13) and the token-scope wall are both closed as of 2026-10-17, so a wrapper would now actually be exercised rather than sitting unused behind a still-blocked path.
+- First step: for the exo centralizer or HQ, since the wrapper is cross-company machinery under pm.md §15 ("a product seat does not edit `.github/workflows`" and its adjacent tooling), not this seat's to write. Ship `tools/gh-actions.sh` as the standard already specifies it, or correct the standard if the wrapper was deliberately dropped for a reason this seat does not have on record.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-23 (skill, eighth and ninth runs) — Authoring-time reading did not make a first-draft citation likelier to be right, it shortened how long a wrong one lives
 
 - Trigger: the standing first step on the seventh run's entry above, which asked the next run to spend itself on a fifth skill under §5o and report whether authoring-time reading actually costs less than a third of the refs needing a second pass later. The eighth run wrote the skill and the reading. This run checked the number it reported.
@@ -8270,6 +8350,54 @@ proves rather than about Graphiti's engineering quality.
 - What: `grep -cE 'seventeen|twenty-two' ursa-major/fixtures/violations/README.md` returns 8, at lines 1, 5, 11, 42, 61, 87, 88 and 120, and line 201 annotates the directory's own gate command as 27 violations, so nine stale lines. Live, `src/invariants.ts` declares 18 codes in `InvariantCode` and the directory holds 24 `.json` files, a base plus 23 counterexamples, against the file's "seventeen bounds" and "one clean base and twenty-two counterexamples". Two of the nine are derived numbers gone stale the same way: line 87's "eighteen of the twenty-two fixtures fire exactly one violation" is 19 of 23 live, and line 120's heading repeats both. The counts above are static reads of the union and the directory rather than gate output, because `ursa-major/node_modules` is absent in this sandbox and `npx tsx` would not run; the two commands that produce the numbers from the gate itself are in step 7 of the skill for whoever has the install. The root README's equivalent sentence is current, and the reason is the whole finding: it prints `BOUND_COUNT` rather than spelling a number in words. This is the second time this defect has been paid for here, since `BOUND_COUNT` exists at all because a README and three design documents said "thirteen" for four days after the fifteenth bound arrived, and the count is shown to a user in the CI run comment.
 - A smaller one in the same read: the doc comment for `checkRecord` says violations come out "in the order the invariants are declared above", which is false. They come out in the order `checkRecord` reaches each check, so `final-spans-in-file.json` emits `FINAL_SPANS_IN_FILE` then `CLAIM_NOT_WIDER` while the union declares them eighth and first. The comment has also drifted about a hundred lines from the function it describes. A fixture author who plans a case's `codes` from that sentence gets refused by the generator, which compares the declared list against the emitted one by position.
 - First step: for the engineer seat, since `ursa-major/` is outside this seat's write surface. Derive the three counts in the directory README the way the root README derives its one, or if that file has to stay hand-written, add it to whatever the bounds digest change already touches so it cannot go stale alone. Separately, move the `checkRecord` doc comment back onto `checkRecord` and fix the ordering sentence, or delete the clause; its other clause, that an empty violation list means the record is self-consistent and not that the labels are right, is true and worth keeping.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-23 (research; ledger entry opened by pm, outside research's write boundary) — Citation discipline: an absence claim needs a grep as well as a pull-request search, and a positive claim now carries its own read depth
+
+- Trigger: five documented instances of the same two failure shapes
+  across four consecutive briefs (2026-10-13, 2026-10-16, 2026-10-18,
+  2026-10-23), the fifth being the 2026-10-18 brief's own absence claim
+  that no brief of this seat had ever cited the post-editing paper,
+  when four files already on `main` cited it, including the lead
+  finding of the 2026-10-05 brief. Research's charter boundary is
+  `docs/research/briefs/` plus one `prompts/` file for a self-review
+  proposal; this ledger sits outside it, so research asked this seat to
+  open the entry once the edit was actually ready rather than write it
+  outside its own boundary.
+- What: three edits to `prompts/research-agent.md`, carried in PR #280
+  (which fully contains PR #277's commits, which fully contain PR
+  #274's, each confirmed by `git merge-base --is-ancestor` rather than
+  assumed). #274 and #277 are now closed as superseded by this pass,
+  since #280 carries the identical charter edit plus the addendum and
+  research's own third-run reply to this seat, and a reader deciding
+  the charter edit only needs to look at one pull request. (A) an
+  absence claim about this organization's own work now requires both a
+  search of open and closed pull requests and a grep of the committed
+  files, because the PR search alone misses work that already merged
+  to `main` in files nobody re-checked. (B) the file's own header
+  premise, that prior briefs are read off open pull requests because
+  `main` holds none of them, is replaced with the true and current
+  reason: the newest brief is routinely unmerged, not that none exist.
+  (C) a positive claim about what a paper contains, when load-bearing
+  for a finding or a skill target, now carries the read depth that
+  supports it — evidenced by three separate corrections (2026-10-13,
+  2026-10-16, 2026-10-18) and the third run's own finding 1, each a
+  claim inverted once the full text was actually opened after being
+  cited at abstract depth.
+- First step: the owner's merge of PR #280. This is a charter edit
+  (`prompts/`), Tier C regardless of how scoped the rest of the diff
+  is: checked fresh against the merge rule this pass (not draft,
+  `CLEAN`/`MERGEABLE`, the one check green, no labels, no comments, no
+  reviews, no claim on the surface from any other seat), and every
+  one of those conditions already held for #277 and #274 before it.
+  None of them changes that a charter file waits on the owner. Posted
+  as an `ask` to the owner on the board this pass with this seat's
+  recommendation (merge), so the 48-hour silence rule (pm.md §22)
+  starts rather than the decision sitting untimed; editing a charter
+  is one of the examples §22 names as covered by silence, and this
+  edit does not touch the research seat's own merge authority or any
+  other reserved-by-name section, only its reading instructions.
 - Cost: $0
 - Status: proposed
 
@@ -8362,6 +8490,21 @@ added at `21944ab` today because the clone is shallow.
 - First step: this seat's, next run, and it is the library's sixth skill rather than more tooling. Write it under §5o, reading each citation as it is written, and under §5p, which now permits its trigger test to stand on a receipt instead of pointing at a step. The near misses still have to come from the five existing skills per §5c, and the area to cut it from is the one the five do not touch: nothing in the library covers consent, erasure or what may be published, which is where `docs/design/consent-and-erasure.md` and the security seat's redaction standard live.
 - Cost: $0
 - Status: built (the shared module, both tools, nine tests, §5p, the index section and the one trigger test that reported the defect while it was live, all in this run's pull request.)
+
+## Ledger entry — 2026-10-23 (pm, fifty-fourth pass, finding handed over by research): comment authorship on a pull request is not evidence that the owner has seen it, and every merge tier that reads it that way is reading nothing
+
+**Status:** proposed, fix withdrawn 2026-10-24 (see the correction below) — the finding about comment authorship still holds; the prescribed replacement does not, and nothing should be carried upstream until a real instrument exists. **For:** the owner, to decide once a working instrument is named. **Found by:** research, on the board at 18:01:24Z, correcting a claim this seat made in its own 17:49:34Z note ("the charter edit and its carrying pull request are both exactly where the owner left them"). Verified independently rather than taken on research's word, below.
+
+**The finding.** Every seat in this company writes through the repository token, and the repository token's comments and commits render under the owner's own GitHub login (`alexandrapaiz`), because that is the account the token is attached to. So a GitHub comment's author field, which a merge-tier check would naturally read as "has she weighed in," carries no information about whether she has: a seat's comment and her own comment are indistinguishable by that field alone. Checked directly rather than trusting research's count: `gh pr view 274 --json comments` shows one comment, author `alexandrapaiz`, body opening "Superseded by #277, which is this seat's second pass of today branched from this head rather than from main" — first person, self-referential, plainly research's own write and not the owner's. `gh pr view 277`, `gh pr view 278`, `gh pr view 280` all show zero comments and zero reviews at the time of this check. Reviews are a different instrument: a review is a GitHub act distinct from a comment, requires an explicit approve/request-changes/comment-on-review action, and (unlike a plain comment) cannot be produced by a token posting as the same login without it actually being an authored review. `gh pr view <n> --json reviews` returning `[]` on all four pull requests checked here is the honest answer to "has she acted on this," where the comment field is not.
+
+**Why this is portable rather than an Ursa-only fact.** The repository-token-shares-the-owner's-login shape is named in `docs/standards/pm.md` §14 and §18 as the mechanism every seat in every company uses to write to GitHub, so the ambiguity exists wherever a company standard or a seat's own charter uses "a comment from the owner" or "no comment from the owner" as a merge-tier signal. Research, who found this while surveying comment authorship across the last 25 pull requests in this repository (3 of 7 carrying a generated footer, 4 not, all 4 of those plainly seat-written once read), proposed the fix is one sentence in a standard rather than a credential change, and declined to write that sentence itself because the fix belongs upstream where every company in the portfolio shares the same shape; this seat is the one with standing to carry a portable finding upstream per `prompts/pm-agent.md` §1c.
+
+**The fix, as written here, was wrong — withdrawn 2026-10-24, before it reached HQ's standard.** Research checked the prescription above against all 282 pull requests this repository has ever held, not the four this entry checked, and both halves fail. The reviews list is empty on every one of the 282, including all 164 that are merged: a field that reads the same on every row cannot tell an owner-acted-on PR from one she has never opened, so "read the reviews list" is not an instrument, it is a constant. Merge state fails the same way for a narrower reason: the merging account is `alexandrapaiz` on 142 of those 164 merges, and this seat's own merges — made under Tier B, by its own judgment, with no owner action behind them — are part of that 142, because a host pass merges with the owner's own GitHub account (`docs/decisions.md`, the 2026-10-17 update onward). So "merge state" mostly measures which credential merged, not who decided to.
+
+**What this leaves — corrected a second time, same pass.** No field on a pull request answers "has she seen this," for the same reason the comment field didn't: every seat and the owner share one identity on this surface. The first version of this paragraph pointed at the board's message history as the surface that does carry the distinction. Research checked that claim too, the same morning, against the whole message store rather than a sample: 322 rows across its roughly fifteen-hour window, 23 distinct author identities, all of them seats or the owner's own chat sessions acting as chairs, zero rows actually authored by the owner herself, and no field on any row that records a message having been read. So the board tells us which seat spoke — a real thing, and the fix to the GitHub-side problem where every seat shares her login — but it does not tell us whether she has seen or acted on anything, which is the question this entry actually needs answered. That is now two surfaces checked and two that fail, for two different reasons: GitHub's token sharing, and the board's lack of a read receipt or owner-authored row in the window available. Nothing is proposed to HQ here, on either surface. The only sentence this seat is confident enough to carry forward is the limitation itself: nothing either seat writes to today records the owner's attention, so a check that needs to know whether she has acted has to ask her, not read anything. Not writing that into a standard this run either, because two failed instruments in one company is evidence the problem is real, not yet evidence of what a working instrument looks like.
+
+**First step:** for the owner, informational only unless she wants it carried: the original comment-authorship finding (§8498) stands and is worth a sentence in `docs/standards/pm.md` on its own — "a comment's author field never indicates the owner specifically, because every seat writes through the same token" — stated as a limitation, not paired with a replacement instrument this entry no longer has.
+**Cost:** $0.
 
 ### 2026-10-23 (engineer, scheduled run) — Thirty of forty-two design documents cite a commit this repository does not have
 
