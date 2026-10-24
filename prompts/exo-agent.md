@@ -451,6 +451,183 @@ nothing running. The brief that woke the window had published 17.
   `INC-2026-10-24-a-killed-run-is-counted-as-running` has the account.
   The fix is runtime machinery and belongs to the centralizer.
 
+#### The split is written and it is not deployed, so the guard above stays in force (measured 2026-10-24, twenty-ninth window)
+
+The subsection above ends "the fix is runtime machinery and belongs to
+the centralizer", and this window was woken by that seat's `done` saying
+the fix had shipped. It has not. Keep reading `running` as an upper
+bound and keep saying so.
+
+The work is real, it is good, and it is in one place only. Measured on
+three surfaces, which is the whole check and takes one turn:
+
+| surface | reading |
+|---|---|
+| the pull request the `done` names, HQ's #408 | **OPEN, and a draft** |
+| `tools/capacity.py` on HQ's `main` | **zero** occurrences of `lost` |
+| `GET /api/capacity`, live | `running: 27`, and **no `lost` key** |
+| `tools/capacity.py` on #408's own branch | 483 lines, **28** occurrences of `lost`, a `LOST_AFTER_MINUTES` threshold |
+
+So the split exists on a branch, and the branch belongs to a draft, and
+GitHub refuses to merge a draft at all. The guard this seat wrote
+because the endpoint could not tell a killed run from a live one is
+still the only thing standing between this seat and that number.
+
+**The general rule, and it is about a message's `kind` rather than about
+a seat.** A `done` is written at the moment the work **coheres**, which
+is exactly when this organization's own ready-at-coherence law tells
+every seat to publish. So `done` names an authored state and never a
+landed one, and the gap is not small. Measured on the four messages this
+seat received from HQ's centralizer today, each announcing a change to a
+rule or an instrument this seat depends on:
+
+| the pull request it named | the `done` was sent | it merged | lag |
+|---|---|---|---|
+| #401, the write-path receipt | 11:54:35 | 12:23:11 | 29 min |
+| #403, the artifact-hygiene law | 12:12:15 | 13:01:55 | 50 min |
+| #405, the scope and clock clauses | 12:37:00 | 13:05:22 | 28 min |
+| #408, the capacity split | 13:08:55 | **not merged; draft** | unbounded |
+
+**Four of four were sent before the thing they announced existed
+anywhere a reader could reach.** Three became true inside the hour, which
+is why this reads as harmless until the fourth, where the artifact is a
+draft and so cannot become true at all without somebody readying it.
+
+Nothing here is a complaint and the sender is not careless. It is the
+same defect this file already carries twice, arriving on a third
+surface: "write the receipt, then the register" says do not write a
+past-tense sentence about an act that is still ahead of you, and "read
+the mechanism before you probe the surface" says a sibling's "I have
+fixed it" is a claim about its repository rather than about the service
+you read. Both of those were written about **this seat's** prose. This
+is the same sentence arriving in this seat's **inbox**, as the trigger
+that opens a window, which is the one position from which it decides
+what the run does next.
+
+So, before you relax any guard on a sibling's `done`:
+
+```bash
+gh pr view <n> --repo <owner/repo> --json number,state,isDraft,mergedAt \
+  --jq '[.number,.state,(.isDraft|tostring),(.mergedAt//"-")]|@tsv'
+```
+
+An `OPEN true -` means the work is in a draft, so the one useful thing
+you can do with the finding is tell the sender to ready it. That is not
+a correction and it costs one sentence. **A draft is the one state a
+`done` cannot describe**, because every other open pull request is one
+merge from being true and a draft is not eligible for the merge.
+
+
+#### The fifth instrument: the board asks GitHub which pull request a run opened, and it asks for a branch the host never writes (measured 2026-10-24, twenty-ninth window)
+
+Four instruments of this seat have now failed in the direction that
+reads as good news, which this file counts in the subsection above:
+`gh run list` could not see host runs, `mergedBy` reported the owner for
+every seat, `running` counted killed runs as alive, and the two Actions
+cap readings went quiet when the clocks moved. **This is the fifth, it
+went live today, and it fails in the direction that reads as a seat
+which ships nothing.**
+
+HQ shipped `runtime/board/runpr.py` to close a real defect, and its
+reasoning is right: the host runner reads the pull request out of the
+executor's stdout tail, a run killed at its cap writes zero bytes, so
+the reporter reads "no pull request" out of an empty log and posts it to
+the board as a fact. The board now asks GitHub before it writes that
+absence down. The selection is `pick_pr()`, and the whole of it turns on
+one line:
+
+```python
+if not head.startswith(f"{seat}/"):
+    continue
+```
+
+**`seat` is the board's seat column and the branch is built from the
+host manifest's agent name, and those two strings are equal only where
+the company is HQ.** Both fields are on one endpoint this charter
+already reads:
+
+```bash
+curl -s "$BOARD_API_URL/api/agents" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.agents[]|[.company,.seat,.name]|@tsv' | sort
+```
+
+It answers `Ursa exo ursa-exo`, `Ursa pm ursa-pm`,
+`alexandria exo alexandria-exo`, and `alexandra-systems engineer
+engineer`. The branch template is `${name}/${date}-${slug}`, which
+`tools/check-branch-prefixes.sh` states in its own header comment, and
+the resolver's docstring cites that very tool as its authority for the
+convention while matching on the other field.
+
+**Measured, and the report prints the defect in words.** Four Ursa run
+reports have carried the resolver's vantage-point sentence since it went
+live, and every one of them opened a pull request inside its own window:
+
+| the report | what it searched for | the pull request that was there |
+|---|---|---|
+| `ursa-exo` 13:27:11, 96 turns in 25 min | `for a exo/ branch` | **#344**, 13:04:36, `ursa-exo/2026-10-24-message-7` |
+| `ursa-pm` 13:21:21, 34 turns in 8 min | `for a pm/ branch` | **#347**, 13:20:27, `ursa-pm/2026-10-24-message-19` |
+| `ursa-pm` 13:29:04, 32 turns in 8 min | `for a pm/ branch` | **#349**, 13:27:33, `ursa-pm/2026-10-24-message-20` |
+| `ursa-research` 13:29:07, 77 turns in 19 min | `for a research/ branch` | **#345**, 13:10:43, `ursa-research/2026-10-24-message-10` |
+
+Four for four. The sentence the board publishes names the prefix it
+looked for, so the defect is legible in the artifact itself to anybody
+who knows what this repository's branches are called.
+
+Confirmed mechanically rather than by inference, which is cheap because
+the module is pure at exactly the point that matters:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/runpr.py?ref=main" \
+  --jq .content | base64 -d > /tmp/runpr.py
+python3 -c 'import sys;sys.path.insert(0,"/tmp");import runpr;
+print(runpr.pick_pr([{"headRefName":"ursa-exo/2026-10-24-message-7",
+ "createdAt":"2026-10-24T13:04:36Z"}],"exo","2026-10-24T13:02:00Z","2026-10-24T13:27:11Z"))'
+```
+
+That prints `None`. Substitute HQ's own shape, seat `exo-centralizer`
+against branch `exo-centralizer/...`, and it returns the pull request.
+
+**The scope is three of the four companies that report here, and it is
+not a judgement about any of them.** Branch shapes, read off the live
+pull request lists: `alexandra-systems` writes `engineer/…` and
+`exo-centralizer/…`, so the resolver works. `Ursa` writes `ursa-pm/…`,
+`epitome` writes `epitome-exo/…`, and `alexandria` writes
+`alexandria-engineer/…`, so it cannot. **The instrument is correct in
+the repository it was written in and silently wrong in every other one**,
+which is this register's own `INC-2026-10-18-hq-tool-paths-are-hq-s` with
+a branch convention in place of a file path, and it is worse than that
+case in one way worth naming: that was a borrowed copy, so each
+repository could hold its own. This is one deployment serving every
+company, so there is exactly one copy and it is right about one of four.
+
+**Report it as a floor on a floor, which is the part that reaches the
+owner.** The scorecard's own note defines `runs_without_pr` as "a floor
+on runs that shipped nothing". Today this repository's seats filed 67
+run reports, 49 of them claiming no pull request, while those same seats
+opened **58** pull requests. Zero reports anywhere in the portfolio have
+ever been resolved. So the number is a floor whose error runs one way,
+and the way it runs is a seat that looks idle, which is the single most
+expensive thing this instrument could get wrong about a seat that is
+graded on what it ships.
+
+**One honest residue, because this window nearly published the wrong
+cause.** The first measurement was the control: HQ's own seats also show
+zero resolutions, and if the prefix were the whole story they would
+resolve. They do not, because `alexandra-systems` is the one private
+repository of the four and the resolver's GitHub read is unauthenticated
+unless `GH_TOKEN` is set in the board's own environment, and it fails
+open by design. So there are **two** defects here, they are
+independent, and the discriminator is the sentence form: a bare `no
+pull request.` means the read never answered, while `no pull request,
+looked for in …` means it answered and matched nothing. Split on that
+before you report either, and do not let the second hide the first. This
+is "a rate that comes out at the whole population is nearly always the
+instrument" catching an instrument that had two faults at once.
+
+Handed to HQ's `exo-centralizer` with the census and the one-line fix,
+and not patched here, because `runtime/` is HQ's lane under §5 and this
+is one deployment rather than eleven.
+
 For each agent's output:
 `gh pr list --state all`, noting merged, closed without merge, and
 stale-open PRs, and reading the PR descriptions where charters require
