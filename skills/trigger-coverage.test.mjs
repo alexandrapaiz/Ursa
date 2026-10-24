@@ -60,9 +60,9 @@ test('an ordinal carrying a letter is a prompt', () => {
   // prompt, which understates the should-fire count and, worse, would hide a
   // sibling near miss numbered the same way.
   const doc = `## Should fire\n\n**3b. "A later prompt, added under the floor rule."**\n`
-  assert.deepEqual(parseTriggerTest(doc).shouldFire, [
-    { id: '3b', text: 'A later prompt, added under the floor rule.' },
-  ])
+  const [prompt] = parseTriggerTest(doc).shouldFire
+  assert.equal(prompt.id, '3b')
+  assert.equal(prompt.text, 'A later prompt, added under the floor rule.')
 })
 
 test('a prompt spanning several lines is joined, not truncated', () => {
@@ -148,6 +148,95 @@ test('coverage is directional: a pair is about one skill testing the other', () 
   assert.equal(bFromA.covered, true)
   assert.equal(aFromB.covered, false)
   assert.equal(aFromB.score, 0)
+})
+
+test('a near miss kept outside the two canonical sections still counts', () => {
+  // running-an-outcome-record-trial's sixth prompt lives under "Added
+  // 2026-10-01, third run: the near miss this test was missing", because the
+  // run that owed it declined to edit a list belonging to a pull request that
+  // was still open. Reading only the "Should not fire" section scores that
+  // boundary untested, which is how the first draft of this tool read the
+  // library: a false finding by the tool built to find false findings.
+  const doc = `## Should fire
+
+**1. "Pick a repo for the third trial."**
+
+Fires.
+
+## Added later: the near miss this test was missing
+
+**6. "The viewer's tiles say 41, 24, 35 and 30 percent. That is 130. What is broken?"**
+
+Should not fire. This is \`quoting-a-number-from-an-outcome-record\`'s trigger.
+`
+  const { shouldFire, nearMisses, unclassified } = parseTriggerTest(doc)
+  assert.deepEqual(shouldFire.map((p) => p.id), ['1'])
+  assert.deepEqual(nearMisses.map((p) => p.id), ['6'])
+  assert.deepEqual(unclassified, [])
+})
+
+test('a prompt outside the sections with no verdict is reported, not guessed', () => {
+  // Guessing either way corrupts a number silently: filed as a near miss it
+  // invents coverage, filed as should-fire it hides a gap.
+  const doc = `## A note on something
+
+**7. "Some prompt nobody said a verdict about."**
+
+Prose that does not say which way it lands.
+`
+  const { shouldFire, nearMisses, unclassified } = parseTriggerTest(doc)
+  assert.deepEqual(shouldFire, [])
+  assert.deepEqual(nearMisses, [])
+  assert.deepEqual(unclassified.map((p) => p.id), ['7'])
+})
+
+test('a boundary declared in prose counts even when the prompt is paraphrased', () => {
+  // The case above, scored. The paraphrase shares few bigrams with the
+  // sibling's trigger, so similarity alone calls the boundary untested; the
+  // reasoning names the sibling, which is the claim the test is making.
+  const library = [
+    {
+      slug: 'quoting-a-number',
+      shouldFire: [{ id: '2', text: "The record's four tiles say 41 percent, 24 percent, 35 percent and 30 percent. That's 130. What's broken?" }],
+      nearMisses: [],
+    },
+    {
+      slug: 'running-a-trial',
+      shouldFire: [],
+      nearMisses: [{
+        id: '6',
+        text: 'The viewer tiles say 41, 24, 35 and 30 percent. That is 130. What is broken?',
+        reasoning: "Should not fire. This is `quoting-a-number`'s trigger.",
+      }],
+    },
+  ]
+  const pair = coverage(library).find((p) => p.skill === 'running-a-trial')
+  assert.equal(pair.covered, true)
+  assert.equal(pair.via, 'declared')
+  assert.equal(pair.declared, '6')
+  assert.ok(pair.score < BIGRAM_DICE_FLOOR, 'the paraphrase should be below the floor, or this test proves nothing')
+})
+
+test('a declaration and a copy are reported as different signals', () => {
+  // §5c asks for the sibling's own trigger prompt. "both" and "similarity"
+  // meet that; "declared" is a real argument about the edge that never put
+  // the sibling's words in front of the description, which is the half that
+  // would catch a false positive. The report keeps them apart so the two
+  // call for different work.
+  const sibling = { slug: 'b', shouldFire: [{ id: '1', text: 'Distill these four records into tuning.json for me.' }], nearMisses: [] }
+  const copier = {
+    slug: 'a',
+    shouldFire: [],
+    nearMisses: [{ id: '4', text: 'Distill these four records into tuning.json for me.', reasoning: "`b`'s own trigger." }],
+  }
+  const arguer = {
+    slug: 'c',
+    shouldFire: [],
+    nearMisses: [{ id: '4', text: 'Something else entirely about release exits.', reasoning: 'Belongs to `b`, not here.' }],
+  }
+  const pairs = coverage([sibling, copier, arguer])
+  assert.equal(pairs.find((p) => p.skill === 'a' && p.sibling === 'b').via, 'both')
+  assert.equal(pairs.find((p) => p.skill === 'c' && p.sibling === 'b').via, 'declared')
 })
 
 test('a skill is never its own sibling', () => {
