@@ -1,0 +1,327 @@
+{
+  "https://linear.app": {
+    "targets": 5,
+    "standalone": 5,
+    "inlineExempt": 0,
+    "shortOf44": 4,
+    "medianStandaloneHit": 32,
+    "extendedInvisibly": 1,
+    "shortest": [
+      "28px \"NewLoops →\"",
+      "32px \"\"",
+      "32px \"Log in\"",
+      "32px \"Sign up\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Log in",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 64,
+        "hitH": 64,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "NewLoops →",
+        "boxH": 24,
+        "hitH": 28,
+        "inline": false,
+        "extended": true
+      }
+    ]
+  },
+  "https://vercel.com": {
+    "targets": 4,
+    "standalone": 4,
+    "inlineExempt": 0,
+    "shortOf44": 3,
+    "medianStandaloneHit": 40,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "34px \"\"",
+      "40px \"Deploy now\"",
+      "40px \"Talk to sales\"",
+      "44px \"\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 44,
+        "hitH": 44,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Deploy now",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Talk to sales",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://elicit.com": {
+    "targets": 2,
+    "standalone": 2,
+    "inlineExempt": 0,
+    "shortOf44": 2,
+    "medianStandaloneHit": 42,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "40px \"\"",
+      "42px \"\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 42,
+        "hitH": 42,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://www.consensus.app": {
+    "targets": 10,
+    "standalone": 10,
+    "inlineExempt": 0,
+    "shortOf44": 10,
+    "medianStandaloneHit": 36,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "32px \"\"",
+      "36px \"\"",
+      "36px \"Sign up\"",
+      "36px \"Sources\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sources",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Deep",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Filter",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Find promising research questi",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Draft a report",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Quick TL;DR",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://claude.com": {
+    "targets": 5,
+    "standalone": 4,
+    "inlineExempt": 1,
+    "shortOf44": 2,
+    "medianStandaloneHit": 44,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "24px \"\"",
+      "28px \"\"",
+      "44px \"Continue with Google\"",
+      "45px \"Continue with email\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 26.2,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 24,
+        "hitH": 24,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Continue with Google",
+        "boxH": 44,
+        "hitH": 44,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Continue with email",
+        "boxH": 44,
+        "hitH": 45,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Privacy Policy",
+        "boxH": 15,
+        "hitH": 16,
+        "inline": true,
+        "extended": false
+      }
+    ]
+  },
+  "https://stripe.com": {
+    "targets": 7,
+    "standalone": 7,
+    "inlineExempt": 0,
+    "shortOf44": 5,
+    "medianStandaloneHit": 34,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "26px \"\"",
+      "34px \"\"",
+      "34px \"\"",
+      "34px \"\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 25,
+        "hitH": 26,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Get started",
+        "boxH": 44,
+        "hitH": 44,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up with Google",
+        "boxH": 44,
+        "hitH": 44,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  }
+}

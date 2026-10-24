@@ -818,6 +818,60 @@ html {
   }
 }
 
+/* ---------- the 44px floor ----------
+
+   A control that is drawn small still has to be hittable. This site sets
+   its quiet controls in mono at 0.7rem, which renders a 17px box, and a
+   17px box is a target you miss with a thumb. Measured on the shipped
+   build at 1440, twelve of the nineteen standalone controls on the site
+   were under 44px tall, the shortest of them the only way to open a
+   generation (`docs/design/reviews/2026-10-24d/data/hit-areas-before.txt`).
+
+   The fix is the one this stylesheet already uses, established for
+   `.mark-link` on 2026-10-12: an absolutely positioned `::after` that is
+   taller than its own control and invisible. Nothing about the drawn box
+   changes, so the type keeps its size and the layout keeps its rhythm,
+   and the thing you can hit is the thing the hand expects rather than the
+   thing the eye measures.
+
+   Two reasons it is written as a calc rather than as a number. The
+   percentage in `inset` resolves against the containing block, which for
+   an absolutely positioned child is this control's own padding box, so
+   `(100% - 44px) / 2` is exactly the overhang each edge needs and it is
+   correct for a 17px box and a 29px one without being told which it is.
+   And it cannot overshoot: once a control is 44px or taller the inset
+   turns positive and the overlay shrinks back inside the box, where it
+   adds nothing, because the control's own box was always hit-tested
+   anyway. So the rule has no upper bound to maintain.
+
+   What it does NOT go on, which is the part that needs saying, because
+   the obvious move is to put it on `.rec-action` and be done:
+
+   - Not on a target that is inline in a sentence. WCAG 2.5.8 exempts
+     those, and the exemption is structural rather than a loophole: at
+     this site's 1.6 line height an overlay reaching 13px past a link's
+     own line box lands on the words above and below it and starts
+     answering their clicks. Eleven of the site's targets are inline
+     links in running prose and all eleven keep their own box.
+   - Not on the document spans in the record viewer. They tile the
+     person's text edge to edge, so every overlay would overlap its
+     neighbours and the topmost one would win. A short `.sp` is reported
+     as a finding and left alone.
+   - Not on the form submit buttons, measured and deliberately: below
+     `sm` their form stacks and the button sits 12px under its input,
+     which is less than the 13.6px this overlay would need, so it would
+     reach over the field's own edge. They want an asymmetric inset
+     chosen per form, which is a bigger change than this one. */
+.rec-hit {
+  position: relative;
+}
+
+.rec-hit::after {
+  content: "";
+  position: absolute;
+  inset: calc((100% - 44px) / 2) 0;
+}
+
 /* ---------- the set's record rows ---------- */
 
 /*
