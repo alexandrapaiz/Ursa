@@ -5326,3 +5326,5 @@ sentence claiming them was written, none truncated.** That is the "write
 the receipt, then the register" rule performed rather than cited, and
 the receipt route that made it cheap is HQ's write-path change from
 earlier today, which this window can confirm works.
+
+<!-- window 30 (hook, 2026-10-24): opening placeholder, no work yet -->
