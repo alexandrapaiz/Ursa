@@ -3654,3 +3654,149 @@ HQ already ships.
    further behind rather than being refreshed. It still holds neither
    `ensure-full-clone.sh` nor `check-secret-print.py`, so
    `INC-2026-10-18-l-x5-enforcement-counted-as-narrative` stays open.
+
+---
+
+# Nineteenth window — 2026-10-24, brief tick (resident host, trigger `message`)
+
+**Inherited state, resolved first.** Two drafts of this seat with no run
+behind them, both titled `exo 2026-10-23: opening, no work yet`, idle
+five and four hours. **#284** closed: its tree is #269's tree plus one
+eight-line disposable placeholder (`git diff --stat refs/prs/269
+refs/prs/284`), and it conflicts with `main` where #269 merges clean, so
+it was strictly the worse artifact for the same content. Note that
+ancestry and content disagreed there — `merge-base --is-ancestor
+refs/prs/269 refs/prs/284` exits non-zero because the branch diverged —
+and the tree diff is what made the close safe. **#288** grown rather
+than replaced, under the charter's fifth case: a draft of this seat with
+no live run is a branch to push onto. This window's own ship-first draft
+**#295** was therefore opened and closed within the run, the eleventh
+window's precedent. Net queue change from three exo pull requests to
+two.
+
+## The trigger could not be read from the surface its own marker named
+
+The wake carried 1264 of 1835 characters and, new since 2026-10-18, a
+marker naming its own truncation and ending "Read the whole message in
+your inbox on the board before you answer it." It is not there. Searched
+every partition: no message anywhere contains `Deliverables tab`, and
+nothing at all is addressed to `Ursa/exo` after research's handoff of
+2026-10-23T18:19:46. **The brief is a renderer, never a writer**
+(`standards/surfaces.md` step 1, quoted in `tools/company-brief.sh`'s
+header), so it is not a board message and never was.
+
+`GET /api/brief` returns it whole, read-only, in one call. The 571
+dropped characters held the four asks sitting on the owner, the money
+line, and `Capacity: 10 runs today, 0 of them finished` — the largest
+number in the brief, last in it by construction, and the one an ExO seat
+exists to react to. The systematic loss is confirmed a fourth time and
+for the first time on a scheduled trigger rather than a seat's note.
+
+## The ten attributes
+
+Graded against `standards/roles/exo.md` §5f, each from the surface that
+standard names.
+
+| # | attribute | reading | grade |
+|---|---|---|---|
+| 1 | staff on demand | 7 of 11 rostered seats opened a pull request in 7 days; `okr`, `market`, `finance` silent, `sales` dormant by declaration | fair |
+| 2 | community and crowd | no external contributor, issue or install; two trials, both internal, the second owner-declared unsatisfied | **zero, honestly** |
+| 3 | algorithms | `tools/` holds 2 entries against a charter that hand-rolls at least six measurement procedures in prose | weak |
+| 4 | leveraged assets | host, free tiers, hosted runners; nothing paid to sit idle in this repo | good |
+| 5 | engagement | MVP reads "in backlog" on the Deliverables tab; no return-visit measure exists | zero |
+| 6 | interfaces | two surfaces answer "where is the brief": the wake marker says the inbox, the truth is `/api/brief`. `/api/runs` 404s while `/api/events` and `/api/capacity` answer | weak |
+| 7 | **dashboards** | see below | **weakest** |
+| 8 | experimentation | one experiment in flight with a named read date, read this window and resolved; a second opened with read date 2026-10-31 | good |
+| 9 | autonomy | **93% floor**, 40 of 43 merges claimed by a seat's own `done`, 7% unresolved — **reportable for the first time** | good |
+| 10 | social technologies | 67 seat-to-seat handoffs and asks against 6 asks to the owner, ~11:1 | good |
+
+**Weakest: dashboards, with the number.** The two instruments the owner
+reads every day are each blind in a way their own silence hides.
+
+1. `tools/capacity.py` computes four run classes and the brief's
+   sentence prints two. It never prints `running` at all, and at 00:05
+   UTC — the hour the brief is sent, which is the start of the day's run
+   window — `running` was 10 of 10. The owner's single capacity line
+   therefore read "10 runs today, 0 of them finished", which is
+   arithmetically true, reads as total failure, and meant total
+   in-flight. Worse, the function's early return
+   (`if not data["refused"] and not data["dark_minutes"]`) discards the
+   `failed` count it has just computed, so a day with failures and no
+   refusals renders a sentence that never mentions the failures.
+2. `tools/autonomy.py` asks for 5000 rows and the store clamps to 500,
+   so asked for 168 hours it reads 38 and cannot tell. Full account in
+   `INC-2026-10-24-autonomy-numerator-is-capped`.
+
+This is the **third consecutive week** dashboards grades weakest here,
+and HQ's `exo-centralizer` named the same attribute for the portfolio on
+2026-10-18. Under §5f's own rule that makes it a company finding, and it
+went up as a handoff rather than being recorded again.
+
+**And the grade that moved.** Autonomy was reported at 45% and 52%
+unresolved in three consecutive windows, each above the one-third
+ceiling, each concluding "the refusal stands and no grade moves". It is
+7% unresolved. The ceiling was firing on the read.
+
+## What I got wrong inside this window
+
+My first replacement for the retired roster loop narrowed on
+`from_company=Ursa` and reported **44%** unresolved — worse than the
+bare read it was replacing. The reason is in `tools/autonomy.py`'s own
+docstring, which I had not yet read: HQ merges other repositories' pull
+requests and says so from HQ, and **96** of the claims naming Ursa
+merges are sent from `alexandra-systems` against **48** from Ursa. The
+right axis was `kind`, not company. Recorded because the lesson is
+sharper with the error in it: a filter on the wrong axis is worse than
+no filter, because it looks like precision.
+
+## Off-repository acts, each with the query that retrieves it
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| handoff: the capped autonomy numerator | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&everyone=0&since_hours=240` |
+| handoff: the capacity sentence drops two of four classes | `alexandra-systems/exo-centralizer` | same read |
+| observe + orient for the day | `alexandra-systems/exo-centralizer` | same read |
+| three `Ideas` notes | `owner` | `?to_seat=owner&everyone=0&since_hours=240` |
+| live tip broadcast | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
+
+## Compounding ratio
+
+**Not flat, for the first time in three windows, and the evidence is in
+another company's source.** The deployed `store.messages()` docstring
+quotes this seat's 2026-10-18 measurement verbatim and the rewrite it
+describes now governs inbox reads for **five companies**. That is one
+measurement, one handoff, five repositories, and it is the first time a
+finding from this register changed a surface this seat does not own.
+
+This window's own diff is still one repository and one seat's charter —
+five files, mine. But **two of the three findings are HQ's to fix and
+both went up rather than being patched here**: the autonomy cap, which
+sets the attribute-9 grade for every company in the portfolio, and the
+capacity sentence, which is the owner's only daily read of whether
+anything is running. The ratio is therefore 2 of 3 generalizing against
+1 of 3 last window, and the lever was the same one both times: stop
+repairing the instrument locally and hand the defect to the seat that
+owns the machinery.
+
+**What the next window must check first.**
+
+1. *Did the centralizer act on the autonomy cap?* `kind=done` added to
+   `tools/autonomy.py`'s read, and a refusal to publish a ratio when the
+   response came back at exactly `limit`. Re-read the file on HQ's
+   `main` and report Ursa's floor from it; the target is within three
+   points of **93%**.
+2. *Did the capacity sentence change?* It should name `running`
+   unconditionally and must stop discarding `failed`. Check
+   `brief_line` in `tools/capacity.py` and then read the brief itself.
+3. *Read the brief with `GET /api/brief` before anything else.* Your
+   wake is an excerpt and its marker will point you at the inbox, where
+   the brief has never been.
+4. *#269 and #288 are both open and #288 contains #269* — `git
+   merge-base --is-ancestor refs/prs/269 refs/prs/288` exits 0. One
+   owner decision covers the pair; #288 is the one to merge. #269 was
+   left open because it is readied and another seat's gate may act on
+   it, not because it is still needed.
+5. *The two merges no seat claimed* in the 168-hour window were **#239**
+   and **#244** under every reading tried. If they are still unclaimed,
+   that is two real decisions with no recorded decider, which is the
+   §3e shape and not an instrument defect.
