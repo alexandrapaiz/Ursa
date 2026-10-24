@@ -704,10 +704,51 @@ So the duty is two numbers and never one:
 grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' \
   docs/standards/pm.md docs/standards/secrets.md \
   | sort -u | while read -r t; do [ -e "$t" ] || echo "BINDING-MISSING: $t"; done
+# but resolve the basename before you call it missing, or a tool this
+# repository has vendored under its own path reads as absent forever
+for t in $(grep -rhoE 'tools/[A-Za-z0-9._/-]+\.(sh|mjs|js|py)' \
+             docs/standards/pm.md docs/standards/secrets.md | sort -u); do
+  [ -e "$t" ] && continue
+  here=$(find tools -name "$(basename "$t")" -type f | head -1)
+  [ -n "$here" ] && echo "VENDORED-ELSEWHERE: $t -> $here" || echo "BINDING-MISSING: $t"
+done
 # context only: instruments named in HQ's narrative register
 grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/lessons.md \
   | sort -u | wc -l
 ```
+
+**And resolve a basename before you call a tool missing (added
+2026-10-24, twenty-seventh window, measured against a merge).** Both
+commands above test the path the standard writes, and the standard is
+HQ's, so the path is HQ's. A tool this repository has deliberately
+vendored under a path of its own reads as absent from it, permanently,
+and the absence is reported as a defect in the very run that it was
+fixed.
+
+This is not hypothetical and the trigger is another seat's filed
+incident. Ursa's engineer vendored HQ's `merge-register.py` byte for
+byte on 2026-10-24 and put it at `tools/registers/merge-register.py`,
+deliberately, with the reason in `tools/registers/registers.json`: a
+borrowed tool carrying its own file list answers about files this
+repository does not have, which is
+`INC-2026-10-18-hq-tool-paths-are-hq-s`. So the path difference is a
+decision, not a mistake.
+
+Measured by merging that branch into a detached copy of `main` and
+running both forms:
+
+| | |
+|---|---|
+| the file, after the merge | `tools/registers/merge-register.py` |
+| exact-path sweep | `RULE-MISSING: tools/merge-register.py` |
+| basename sweep | `VENDORED-ELSEWHERE: -> tools/registers/merge-register.py` |
+
+The exact-path reading is a **false negative about a tool that is
+there**, and it is the mirror of the defect this whole section exists to
+find. The section catches a standard naming something absent. It did not
+catch itself naming something present under another name. Report three
+states and never two: present, vendored elsewhere, and missing. Only the
+third is a finding, and only the third is handed up.
 
 Report the first as the finding, the second as context, and say which
 is which. **"Context" means the tool references are not
@@ -1622,6 +1663,104 @@ git show origin/main:prompts/<acting-seat>-agent.md | grep -ciE '<the clock>'
 
 A zero there means the clock does not exist, whatever your own charter
 says about it.
+
+##### The generalisation is law upstream, and the field it mandates cannot be set by any seat (measured 2026-10-24, twenty-seventh window)
+
+The check above still holds and you should still run it. What changed is
+that it is no longer the fix, and the fix that replaced it does not work
+yet. Keep both halves of that sentence; they point in opposite
+directions and a run that takes only the first will report a solved
+problem.
+
+**What HQ shipped.** This seat handed the finding to the
+`exo-centralizer` and that seat agreed, measured it across all five
+repositories, and made it law in `standards/pm.md` §22 rather than in
+anybody's charter. Its own reasoning is the better half and it is worth
+carrying verbatim in substance: a charter is read at the **start of a
+run**, and a deadline falls at an hour **no run chose**, so a clause in
+a charter reproduces the defect in a new place. Its numbers: a hundred
+and sixteen asks over fourteen days, forty of them discussing a clock in
+their own prose, thirty of those forty addressed to the owner alone. And
+the sentence this seat should have reached itself, since naming is not
+telling: **a duty assigned inside the body of a message sent to somebody
+else has not been delivered**, because a board message has one recipient
+field.
+
+Two clauses became law. A deadline that moves authority is recorded in
+the message's **expiry** field, with the **reference** field at the pull
+request it releases and the **applier** in the recipient field, and
+until all three are set no clock is running. And her silence consents
+only to the change she was shown, so an ask tables every file its merge
+would land.
+
+**And the first clause cannot be obeyed.** Read the board's code rather
+than counting, which is this file's own rule two sections down:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/store.py?ref=main" \
+  --jq .content | base64 -d | grep -n 'expires_at'
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/schema.sql?ref=main" \
+  --jq .content | base64 -d | grep -n -A1 -B1 'expires_at'
+```
+
+`expires_at` is written in exactly one place, computed **server side**,
+under `case when %s = 'claim' then now() + make_interval(hours => %s)`
+with `CLAIM_HOURS = 6`. `post_message()` takes **no parameter for it**,
+`api.py` never mentions the word, and no `update` statement anywhere
+sets it. The schema's own comment reads `-- claims only; default six
+hours`.
+
+Measured on five hundred live rows the same morning:
+
+| kind | rows | with an expiry |
+|---|---|---|
+| `claim` | 6 | **6** |
+| everything else | 494 | **0** |
+| of which `ask` | 40 | 0 |
+
+The split is the `kind` column and nothing else. **So the zero HQ
+measured is the schema, not anyone's discipline**, and under the rule's
+own words that until all three are set no clock is running, the law as
+shipped leaves **every silence clock in the portfolio invalid by
+construction**. That is strictly worse than the defect it replaced: this
+seat reported one clock that could not fire, and the remedy declares
+that no clock exists.
+
+The receipt for this seat's own note making that argument came back with
+`expires_at: null`, which is the finding proving itself on the way out.
+
+**What to do while it is unfixed, and it is not a workaround.** `data`
+is free-form by design and caller-set, and the board's own write guard
+already tells a seat to put identifiers there rather than in prose. So a
+clock is carriable **today**, with no change to the runtime, as
+`data.expires_at`, the applier in `to_seat`, and the pull request in
+`ref`. That was sent to the centralizer as the one-line fix, because the
+real column needs a write-path parameter and a kind other than `claim`,
+which is the runtime's lane and not this seat's.
+
+**The transferable rule, which is this seat's own, turned on itself.**
+`HQ's zero was the instrument`, and the centralizer wrote that very rule
+against a different check of its own **in the same message**: a rate
+that comes out at the whole population is nearly always the instrument.
+It applied the rule to its second check and not to its first. So the
+rule is not "watch HQ"; it is that **the seat holding a rule is the
+worst-placed seat to apply it to that rule**, and a hundred-per-cent
+reading is the one shape that should send you to the mechanism before
+you send it to anybody as a finding.
+
+**What the next window checks first, on this subject.** Whether the
+expiry is settable yet, with one post and one read of the receipt, and
+not by grepping a charter:
+
+```bash
+# does any non-claim message anywhere carry an expiry yet?
+curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '[.messages[]|select(.kind!="claim" and .expires_at!=null)]|length'
+```
+
+A non-zero answer means the clause became obeyable and this section is
+the stale one.
   split by the three buckets of §3e and not by GitHub's actor field.
 
 **Name every other seat's charter your pull request touches, with its
@@ -3024,6 +3163,58 @@ is not. Eleven charters carrying a `wc -c` discipline is the shape HQ's
 for: the sender learns at the moment of authorship, once, for every seat
 in the portfolio. Carry the measurement up; keep the two bullets above
 for your own prose while it is unshipped.
+
+#### The receipt shipped, and the budget it implies is not the limit (measured 2026-10-24, twenty-seventh window, on this window's own two overruns)
+
+The one-place fix above is **shipped**. HQ's centralizer landed it on
+2026-10-24 at 11:54 UTC, and the 201 your own POST returns now carries
+`body_chars`, `body_delivered`, `body_truncated`, `wake_limit` and, when
+something was lost, a sentence addressed to you. Stop carrying the `wc
+-c` discipline as a workaround and read the receipt.
+
+**Then read it against the number you were aiming at, because the two
+are not the same and the gap is not proportional.** The limit is fifteen
+hundred characters. The cut is **not** taken at fifteen hundred. It
+retreats to the last paragraph break inside the limit, then the last
+line break, then the last space, taking the first of those that falls
+above sixty per cent of the limit. So the sender's budget is the last
+blank line at or before the limit, and in this organization's house
+voice a blank line separates thoughts, which means one character over
+the limit costs **a whole thought**.
+
+Measured on this window's own two overruns, an hour apart, which is the
+only evidence in this register taken from the sender's side:
+
+| body | delivered | lost |
+|---|---|---|
+| 1,578 | 1,477 | 101 |
+| 1,508 | 1,303 | **205** |
+
+The second one was eight characters over the limit and lost two hundred
+and five. The first was seventy-eight over and lost a hundred and one.
+**A smaller overrun cost twice as much**, because the penalty is not the
+overrun, it is the distance back to the previous blank line. Nothing in
+the receipt says this, and a sender who reads `wake_limit: 1500` and
+trims to fifteen hundred and eight has not trimmed at all.
+
+So the duty, and it is cheaper than it sounds:
+
+- **Validate before you post, not after.** The validators are readable
+  (`runtime/board/store.py`) and so is the cut (`runtime/board/api.py`,
+  `wake_body`). A local check against both costs one function and
+  refuses your message before the board does.
+- **Keep the whole body at or under the limit, or put a blank line just
+  under it on purpose.** Those are the only two states in which you know
+  what the reader gets.
+- **If `body_truncated` comes back true, post the cut tail as its own
+  short message and say the cut was yours.** This window did that twice
+  and the second one was avoidable: it had the measurement in hand, saw
+  `TRUNCATED` printed by its own validator, and sent anyway because the
+  check was wired as a warning inside an `&&` chain rather than as a
+  gate. **A check whose failure does not stop the act is a comment.**
+  That is the sibling of the `tail` defect in ship-first below, and it
+  cost this window two repair messages on the one surface it was writing
+  a rule about.
 
 ### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
 
