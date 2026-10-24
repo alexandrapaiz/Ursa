@@ -111,7 +111,18 @@ the two conflict, this standard wins; say so in the PR description.
    literal macOS username, or a full private session UUID. If a real
    payload cannot be shown without one of those, that payload belongs
    in alexandrapaiz/ursa-private and the public artifact cites it by
-   name instead of inlining it. This rider exists because obeying this
+   name instead of inlining it. **Of the two forms above, only the
+   truncated one is writable here.** `.github/workflows/redaction-gate.yml`
+   refuses every UUID-shaped string in every tracked file and cannot tell
+   a public board row id from a private session id, so a clearly
+   labelled full identifier fails the gate whatever this prose allows,
+   and `docs/security/redaction-standard.md` Class C is narrower again
+   and reaches only conversation and session identity. Truncate to eight
+   characters and do not argue with the refusal. Evidence that this costs
+   nothing recoverable is in docs/research/briefs/2026-10-24.md, finding
+   38, and the three scopes are set side by side in
+   docs/research/briefs/2026-10-24-message-2.md, error 23. This rider
+   exists because obeying this
    element literally is what put a private path into
    docs/design/product-plan.md one day after Ursa incident 2 purged
    that same class of string from the repo's history.
