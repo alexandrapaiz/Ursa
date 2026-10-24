@@ -37,14 +37,14 @@ git config merge.register.name "Ursa registers: merge an append-only register by
 git config merge.register.driver "node $root/tools/registers/merge-driver.mjs %O %A %B %L %P"
 git config merge.register.recursive binary
 
-echo "Registered merge drivers in $(git rev-parse --git-dir)/config:"
+echo "Registered merge drivers in $(git rev-parse --git-common-dir)/config:"
 echo "  ledger   -> $(git config --get merge.ledger.driver)"
 echo "  register -> $(git config --get merge.register.driver)"
 
 # Branches created before a .gitattributes line landed do not carry it, and git
 # reads merge attributes from the branch being merged into. This per-clone
 # attributes file covers them too, and is never committed.
-attrs="$(git rev-parse --git-dir)/info/attributes"
+attrs="$(git rev-parse --git-common-dir)/info/attributes"
 mkdir -p "$(dirname "$attrs")"
 add_attr() {
   if ! grep -qs "^$1\$" "$attrs"; then
@@ -52,15 +52,13 @@ add_attr() {
     echo "Appended '$1' to $attrs (covers branches older than .gitattributes)."
   fi
 }
-add_attr 'docs/ideas.md merge=ledger'
-# Every enabled register in the table, read from the table so the two cannot
-# disagree about which files are covered.
-while IFS= read -r path; do
-  [ -n "$path" ] && add_attr "$path merge=register"
-done < <(node -e '
-  const t = require("'"$root"'/tools/registers/registers.json");
-  for (const r of t.registers) if (r.enabled === true) console.log(r.path);
-')
+# Derived from `.gitattributes` itself, never retyped. The hardcoded version of
+# these lines named docs/ideas.md only, so a clone that ran it carried the
+# ledger line and missed every register line added after it was written, which
+# is the drift tools/ledger/check-attributes.mjs now refuses.
+while IFS= read -r line; do
+  add_attr "$line"
+done < <(grep -E '^[^#[:space:]]+[[:space:]]+merge=[A-Za-z0-9._-]+$' "$root/.gitattributes" || true)
 
 echo
 echo "Covered registers (enabled in tools/registers/registers.json):"
@@ -70,3 +68,12 @@ node -e '
     console.log("  " + (r.enabled ? "on  " : "off ") + r.path + (r.identifier ? "  identifier: " + r.identifier : ""));
   }
 '
+
+# This script's own post-condition, checked rather than assumed. It claims that
+# every merge attribute this repository declares now resolves to a driver this
+# clone can actually run; the gate is what decides whether that is true. An
+# installer that only echoes its config reports success for a clone where a
+# later-added attribute names a driver it never registered, which is the state
+# `tools/ledger/install-driver.sh` left every caller of `requeue.sh` in.
+echo
+node "$root/tools/ledger/check-attributes.mjs" --clone --repo "$root"

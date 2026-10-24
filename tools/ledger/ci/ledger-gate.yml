@@ -5,6 +5,13 @@ name: ledger-gate
 # keeps the two failure modes it is prone to out of `main`: an entry that does
 # not meet the pm.md §4 contract, and a block that says the same thing twice
 # because an append collision was resolved by hand.
+#
+# It also keeps out a third failure mode, added 2026-10-24: a `.gitattributes`
+# merge attribute that does nothing. `merge=union` is the cheap-looking fix
+# that silently merges two register entries into one and a half at exit 0, and
+# a named driver no committed script registers is the default line merge
+# wearing a convention's clothes. Both arrive as a one-line diff, so both need
+# an exit code rather than a reviewer who happens to remember the measurement.
 
 on:
   push:
@@ -26,6 +33,18 @@ jobs:
       # No `npm ci`: tools/ledger has no dependencies, because the merge driver
       # has to run during a `git merge` in a checkout where nothing is installed.
       - name: Merge driver and checker tests
-        run: node --test tools/ledger/ledger.test.mjs tools/ledger/check.test.mjs
+        run: >-
+          node --test
+          tools/ledger/ledger.test.mjs
+          tools/ledger/check.test.mjs
+          tools/ledger/check-attributes.test.mjs
+          tools/registers/merge-driver.test.mjs
+      # Without --clone, so this passes on a fresh checkout: it asks only
+      # whether the committed declarations are ones some committed script
+      # here can register, and refuses `merge=union` by name. The clone-local
+      # half is a precondition for merging, not a property of the commit, and
+      # the installers check it themselves.
+      - name: Merge attributes resolve to a driver this repository defines
+        run: node tools/ledger/check-attributes.mjs
       - name: Ledger contract
         run: node tools/ledger/check.mjs docs/ideas.md
