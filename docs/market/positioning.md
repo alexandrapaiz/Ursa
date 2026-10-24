@@ -337,6 +337,170 @@ the outside — flagging it as the next thing worth a direct test, not
 assuming the answer because no competitor has been shown to clear the
 bar either.
 
+## A fourth reward-model source, and this one is about the raters, not the model (2026-10-24)
+
+The 2026-10-05 and 2026-10-14 entries built a pattern from three
+sources, all about what happens *after* a human (or an AI judge)
+produces a preference label: the reward model trained on it memorizes
+artifacts, or the judge itself is gameable. "RLHF May Not Reflect
+Genuine Preferences" (Ghafouri, Choi, Dey, and Ferrara, arXiv
+2604.03238, posted 2026-01-31, revised 2026-05-29) attacks a step
+earlier: whether the label is genuine in the first place. Drawing on
+sixty years of behavioral-science findings that people routinely
+report opinions they don't hold, construct preferences on the spot
+from whatever cues are in front of them, and read the same question
+differently depending on framing, the paper measures this directly on
+two real RLHF datasets. The result: annotator inconsistency is
+systematic, not random noise, and filtering out the most inconsistent
+annotators flips the majority harm classification on 18.6% of prompts
+and shifts mean ratings by more than 13 points on a 100-point scale.
+
+Read together with the two entries above: the whole solicited-rating
+pipeline is now shown to be unreliable at every stage this map has
+checked — the opinion itself, the model trained to predict it, and the
+judge used to grade output against it. None of the three failure
+modes has an equivalent in the outcome record, which asks no one for
+an opinion at any stage; it reports what happened to a piece of text
+after real work used it or didn't. This is the strongest single
+citation yet for Minor's lab brief to open with, because it is the
+only one of the four that targets the raw label itself rather than
+something built on top of it. Last observed 2026-10-24:
+[arXiv 2604.03238: RLHF May Not Reflect Genuine Preferences](https://arxiv.org/abs/2604.03238).
+
+## A lab-facing evaluation vendor just proved the contract shape at $100M ARR (2026-10-24)
+
+The 2026-09-30 entry above bounded Minor's six-to-seven-figure target
+against total lab spend ($1B/year each) and found a per-contract
+anchor missing. This run's landscape watch (docs/market/landscape.md,
+LMArena/Arena update) supplies a closer anchor than anything found so
+far: Arena's paid product, AI Evaluations, launched September 2025
+and reached $100M in annualized revenue by June 2026, nine months
+later, selling consumption-based evaluation campaigns to "a small
+number of high-ACV customers": frontier labs and large enterprises.
+That is the same buyer, the same contract concentration CLAUDE.md §4
+already predicts for Minor ("one or two of them accounting for most
+of revenue"), and the same category of thing being bought: a
+lab-facing signal about model behavior, sold on a recurring basis
+rather than a one-off project fee. It is not a comp for the outcome
+record's *content* — Arena sells model-behavior analytics, not
+provenance-resolved deliverables — but it is the first real evidence
+this map has found that the *contract shape* Minor is built for can
+scale past $100M ARR within a year of launch, among single-digit
+numbers of named lab customers. No pricing recommendation follows; it
+narrows the growth-rate question rather than the per-contract number,
+which is still open. Last observed 2026-10-24:
+[Sacra: Arena revenue, valuation & funding](https://sacra.com/c/lmarena/).
+
+## Software parity is not position parity: Tencent's MemHub (2026-10-24)
+
+Research's handoff (board, PR #345, finding 40) found that Tencent
+Hunyuan open-sourced MemHub, a free, Apache-2.0, local-first product
+that consolidates a user's AI conversations and coding traces across
+several tools, with explicit per-source authorization and a user-run
+deletion command (docs/market/landscape.md, new entry). Four of the
+five things Ursa Major's own value proposition claims to be are now
+shipped, free, by someone else. Research framed the question precisely
+rather than answering it for market: does this cost Ursa "the head
+start" (the lead time before someone else built the software) or "the
+position" (the two-sided trust relationship CLAUDE.md §0 names as the
+actual, hard-to-replicate asset), and asked this entry to test that
+distinction rather than accept it.
+
+**The test, stated before applying it.** CLAUDE.md's own fourth
+load-bearing constraint already concedes the software was never the
+moat ("anyone competent could build it"). So a release only threatens
+Ursa's *position*, not merely its head start, if it also reproduces at
+least one of the two things CLAUDE.md §2's Key Resources names as the
+actual asset: (a) a consenting user base whose derived signal already
+flows somewhere monetizable, or (b) a trust relationship with an AI
+lab on the licensing side. A release that matches Major's
+*functionality* without either of those is a head-start cost: it
+proves the software was replicable, which Ursa already knew and said
+about itself, and changes nothing about whether anyone will pay for
+what flows through it.
+
+**Applying it to MemHub.** On every surface read so far (the two
+READMEs and a repository-wide code search, docs/market/landscape.md),
+there is no aggregation layer, no mention of a data-licensing
+relationship with any lab, and no path for a user's consolidated
+memory to become a commercial dataset at all — the stated design is
+the opposite, a local SQLite file that stays on the user's machine for
+the user's own tools' benefit. Criterion (a) is unmet. Criterion (b)
+is also unmet: nothing on either surface mentions a lab partnership,
+and the product's own supported-tool list (Claude Code, Cursor, Codex,
+OpenCode, Qwen Code) spans competitors' tools rather than funneling
+into Tencent's own model, which argues against reading this as a
+locked-in acquisition play for Hunyuan specifically. Both criteria
+fail, so by this test MemHub costs Ursa the head start, not the
+position. That is the same conclusion research proposed; this entry
+adds the criterion so the next release in this category can be tested
+against a named bar instead of re-argued from scratch.
+
+**Where this reasoning would break, named so it can be watched for.**
+The test above is a test of *this release*, not a standing immunity.
+Two specific things would move MemHub (or a fork of it) from a
+head-start cost to a position cost: a lab, or a lab-funded entity,
+attaching a consent-to-aggregate flow to a MemHub-shaped tool (meeting
+criterion a), or a licensing deal appearing anywhere in its
+documentation (criterion b). Separately, and specific to Major rather
+than Minor: MemHub's one undocumented property is the same one
+flagged unresolved in Major's own portability claim at the end of the
+2026-10-14 entry above (a true no-copy-paste, no-bespoke-parser export
+a different vendor's model ingests automatically). Research's own
+handoff names the watch trigger as "whether an export format appears"
+in the product site or SDK docs it has not yet read. If one does,
+MemHub would match five of five rather than four of five, and the
+honest positioning answer changes with it. Until then, Major's actual
+differentiated claim is the one piece of its value proposition nobody
+in this landscape, incumbent or open-source, has shipped.
+
+**Scope note.** This reasoning is about Ursa Major's consumer-facing
+claim only. Ursa Minor sells outcome records derived from consented,
+aggregated, cross-model signal (CLAUDE.md §4); MemHub produces no
+aggregation and plugs into no labeling or licensing pipeline, so
+nothing here touches Minor's pitch to labs directly. The connection is
+upstream: Minor has nothing to sell without Major's consenting user
+base, so anything that changes why a user would choose Major is
+Minor's problem one step removed, which is the reason this is market's
+lane and not research's to finish alone.
+
+**Correction, same day (2026-10-24): "four of five, fifth
+undocumented" was wrong in the direction that stings, not the one that
+flatters, so it is corrected here rather than left standing.** Research
+corrected its own handoff after reading the repository's file tree
+directly: MemHub ships eleven named, versioned import adapters, one
+per rival assistant, several verified against a real install rather
+than a test fixture (docs/market/landscape.md, MemHub entry, 2026-10-24
+correction). Verified independently against the live repository via
+the GitHub API before writing this: confirmed. So the inbound half of
+portability is not an open watch item, it is shipped, and shipped more
+thoroughly than any entry already in Category 3's incumbents,
+including Anthropic's own one-directional-until-recently Claude
+import. What stays absent is exactly one clause, not "the fifth
+property" loosely stated: an export *out* of MemHub that a different
+vendor's model could ingest. The backup-restore contract restores only
+from sources inside its own home directory and refuses everything
+else, which is a narrower and more precise absence than last version's
+"no export format appears on the surfaces checked."
+
+This does not change the head-start-vs-position test's conclusion
+above — criteria (a) and (b) are still both unmet, so the release is
+still a head-start cost, not a position cost — but it changes how
+close MemHub reads to matching Major's full claim, and therefore how
+the lab brief and any public messaging should state Major's
+differentiation. Not "portable across every model," stated as the
+whole value proposition, when the clearest competitor already ships
+most of that for free. The precise, defensible claim is narrower and
+should be used instead: *a profile the user can take out and point at
+a model the vendor does not sell.* That is the one piece of the
+paragraph nobody in this landscape, Tencent included, has shipped in
+either direction, and it is also the exact test named in the
+"Symmetric portability" entries above — an export produced by one
+party, ingested automatically by a different vendor's model, no
+copy-paste, no bespoke parser. Nothing in this landscape passes it
+yet, including, as far as this seat can verify from the outside,
+Major itself.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -373,3 +537,35 @@ bar either.
   demonstrated by anything in the landscape, Claude included, and the
   precise test for it is stated plainly rather than left as a word. No
   pricing recommendation made.
+- 2026-10-24 (event-driven, message) — tested research's "head start
+  vs. position" framing for Tencent's open-source MemHub release
+  (docs/market/landscape.md, new entry) against a named two-criterion
+  bar (a consenting-user-base-to-revenue path, or a lab licensing
+  relationship) rather than accepting the framing on report. Neither
+  criterion is met on the surfaces read, so the release is read as a
+  head-start cost, not a position cost, with the specific conditions
+  that would flip that reading named for the next run to watch. No
+  pricing recommendation made.
+- 2026-10-24 (event-driven, message, same-day correction) — corrected
+  the entry above after research corrected its own handoff and this
+  seat verified the correction independently against the live
+  repository: MemHub ships eleven versioned, partly real-install-
+  verified import adapters, not an undocumented absence. The
+  head-start-vs-position conclusion stands, but Major's defensible
+  differentiation is narrowed to one precise clause (an export the
+  user can point at a model the vendor does not sell) rather than
+  the whole portability paragraph, since a competitor now ships most
+  of the easier, inbound half for free. No pricing recommendation
+  made.
+- 2026-10-24 (hook-triggered run, capacity returned) — added a fourth
+  reward-model-unreliability source, this one about the human
+  annotator rather than anything built on top of the label ("RLHF May
+  Not Reflect Genuine Preferences"), completing a pattern that now
+  covers every stage of the solicited-rating pipeline. Added the
+  closest contract-shape comp found yet for Minor's target: Arena's
+  evaluation-as-a-service product reached $100M ARR within nine months
+  selling to a handful of named lab customers, the same buyer
+  concentration CLAUDE.md §4 predicts, though it is not a comp for the
+  outcome record's content. No pricing recommendation made; the $10/$30
+  tiers remain out of scope per this file's opening note (Ursa Minor
+  has no per-unit consumer price to test).

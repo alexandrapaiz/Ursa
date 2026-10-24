@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 25.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 36.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -46,6 +46,17 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 25.
 | `277611ace7436084` | `6f4f96b` | 2026-10-18 01:55:09 | 272,223 | Rebuild the bundle for the index digest fields and the phone layout |
 | `d16c8760a902a88c` | `2229b68` | 2026-10-18 02:31:38 | 273,540 | The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case |
 | `7e2c2afe6ca35b4c` | `6d9426d` | 2026-10-18 09:21:23 | 276,711 | The published page now names the bounds that produced its records |
+| `e47b70a576ea7172` | `3dff5bf` | 2026-10-23 17:30:13 | 284,363 | Rebuild dist/ursa.cjs, which the inherited branch left stale |
+| `15ae2cf9f77d5cf5` | `f7b7977` | 2026-10-23 17:58:14 | 284,140 | Test the guarantee the design document promised, and rebuild the bundle |
+| `33cc48e31ae5b7ba` | `d4c8969` | 2026-10-23 18:03:22 | 284,165 | Write the design doc and correct the sentence that said the gate held |
+| `071846c411c4a81e` | `ee26ee0` | 2026-10-23 23:56:52 | 287,025 | Report the live twin a revocation did not reach |
+| `a01cbf40fd628733` | `c36afef` | 2026-10-23 23:58:10 | 291,817 | Merge pull request #275 from alexandrapaiz/ursa-engineer/2026-10-23-message |
+| `c6a8204759b2b88d` | `a3aae55` | 2026-10-24 00:04:39 | 287,107 | Rebuild the committed bundle after the CLI wording change |
+| `c34bbf3a221549fa` | `3266c9e` | 2026-10-24 00:07:40 | 294,759 | Merge main, which took #289 and #275 mid-run |
+| `8c3942f7623e2d4c` | `343550f` | 2026-10-24 00:47:10 | 292,256 | Rebuild dist/ursa.cjs against the changed source |
+| `b83d159d35333938` | `9a842b8` | 2026-10-24 17:10:44 | 293,218 | Design doc for the apparatus field, and rebuild the committed bundle |
+| `4919b0a77b208e17` | `88d70f8` | 2026-10-24 17:26:18 | 296,160 | Merge engineer PR 290 (revocation lands on the rule, not the id) into this branch |
+| `6ce10538e0575709` | `d113d00` | 2026-10-24 17:40:43 | 297,711 | Both items from research: name why a span has no candidate, and disclose the paste channel |
 
 ## Reading a row
 
@@ -58,7 +69,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob c7fa67eb1f148079d602f9e003b7686306da84b4 | sha256sum
+git cat-file blob e30abfd9b92290934e72c12f8693f45138c161b6 | sha256sum
 ```
 
 ## What "introduced by" means, exactly

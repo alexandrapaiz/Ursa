@@ -326,6 +326,149 @@
           "subject": "The published page now names the bounds that produced its records"
         }
       ]
+    },
+    {
+      "digest": "e47b70a576ea7172",
+      "sha256": "e47b70a576ea7172b8895bf55ccc21fa52003d64d6ada1e356004e38e46ba416",
+      "blob": "9a50b74548a64835be60ce3ab05962b702bb3752",
+      "bytes": 284363,
+      "introducedBy": [
+        {
+          "commit": "3dff5bf92590468c7b240bff1912330920b9b9ad",
+          "date": "2026-10-23T17:30:13.000Z",
+          "subject": "Rebuild dist/ursa.cjs, which the inherited branch left stale"
+        }
+      ]
+    },
+    {
+      "digest": "15ae2cf9f77d5cf5",
+      "sha256": "15ae2cf9f77d5cf52b39116af9cc0eb0af01b16dcb09e63d106c6a4a3846bcea",
+      "blob": "15a9bef7f12e648306cdb5e148272acb1dd30bc4",
+      "bytes": 284140,
+      "introducedBy": [
+        {
+          "commit": "f7b797757296965d80ac6d6bfcb345ce8ec611e9",
+          "date": "2026-10-23T17:58:14.000Z",
+          "subject": "Test the guarantee the design document promised, and rebuild the bundle"
+        }
+      ]
+    },
+    {
+      "digest": "33cc48e31ae5b7ba",
+      "sha256": "33cc48e31ae5b7ba4fedebcca5999139f5b35adb37ba78bb710fff5b8b19c919",
+      "blob": "48f16588cf7f61eddf5f7cb6d5468e60f0ca7105",
+      "bytes": 284165,
+      "introducedBy": [
+        {
+          "commit": "d4c896901ff97c90af6e810711003ff8c6db059c",
+          "date": "2026-10-23T18:03:22.000Z",
+          "subject": "Write the design doc and correct the sentence that said the gate held"
+        }
+      ]
+    },
+    {
+      "digest": "071846c411c4a81e",
+      "sha256": "071846c411c4a81efb575c8d5d96d2a231438f5fc1ecdcd5ce8524647755859e",
+      "blob": "be3f3cfcec7bfb5b7f69973ddb7a8d5d1ccf21dc",
+      "bytes": 287025,
+      "introducedBy": [
+        {
+          "commit": "ee26ee070a4d5542500ca0bcdfb68d78ed989c28",
+          "date": "2026-10-23T23:56:52.000Z",
+          "subject": "Report the live twin a revocation did not reach"
+        }
+      ]
+    },
+    {
+      "digest": "a01cbf40fd628733",
+      "sha256": "a01cbf40fd62873348c68e14950154ca40a45c99d366b94a5ea6bac1ff8891c6",
+      "blob": "fc3f48063114fc3f20cc1527ae776a2dc9d2341e",
+      "bytes": 291817,
+      "introducedBy": [
+        {
+          "commit": "c36afef57813ceb170787606513e82ec97483cf6",
+          "date": "2026-10-23T23:58:10.000Z",
+          "subject": "Merge pull request #275 from alexandrapaiz/ursa-engineer/2026-10-23-message"
+        }
+      ]
+    },
+    {
+      "digest": "c6a8204759b2b88d",
+      "sha256": "c6a8204759b2b88d957640901b4109bed5dff3a106ab2281d466414b67f89d83",
+      "blob": "ac277050c29cb7ba74cd4e96107cfa6104383598",
+      "bytes": 287107,
+      "introducedBy": [
+        {
+          "commit": "a3aae55cac0e7d0648b86cbd498a1b5be7b79ec1",
+          "date": "2026-10-24T00:04:39.000Z",
+          "subject": "Rebuild the committed bundle after the CLI wording change"
+        }
+      ]
+    },
+    {
+      "digest": "c34bbf3a221549fa",
+      "sha256": "c34bbf3a221549fadcd3e2a9aec823e7ab52ea509d6fc87745b4ae0b52f95e0e",
+      "blob": "0a0689ef7096bb0bc571ecc4f197f53ac7db977c",
+      "bytes": 294759,
+      "introducedBy": [
+        {
+          "commit": "3266c9e3abe3c5bab210cf04664d569605249f2d",
+          "date": "2026-10-24T00:07:40.000Z",
+          "subject": "Merge main, which took #289 and #275 mid-run"
+        }
+      ]
+    },
+    {
+      "digest": "8c3942f7623e2d4c",
+      "sha256": "8c3942f7623e2d4cf6fd82fc93256f16d7d7794a41ab9d1e5744d696eef672e5",
+      "blob": "5deeaef76e0c473872f38eb413300deee2a6b3ff",
+      "bytes": 292256,
+      "introducedBy": [
+        {
+          "commit": "343550fac0d6696caafe0473f05d0b91c260a68d",
+          "date": "2026-10-24T00:47:10.000Z",
+          "subject": "Rebuild dist/ursa.cjs against the changed source"
+        }
+      ]
+    },
+    {
+      "digest": "b83d159d35333938",
+      "sha256": "b83d159d35333938c3ec835f0fe3a8ee40d1a592594ec3c6bc067b54ad0ee6ba",
+      "blob": "89bfb707bccd80161018267105652cd978053615",
+      "bytes": 293218,
+      "introducedBy": [
+        {
+          "commit": "9a842b8f006ef743f3e11ab132b0bb172fddeacf",
+          "date": "2026-10-24T17:10:44.000Z",
+          "subject": "Design doc for the apparatus field, and rebuild the committed bundle"
+        }
+      ]
+    },
+    {
+      "digest": "4919b0a77b208e17",
+      "sha256": "4919b0a77b208e17ec90aeb5552e9012fc32dbe7282d43f6de9c412019bc5852",
+      "blob": "3212ee914f512efa0866aeb83842ca166c768c53",
+      "bytes": 296160,
+      "introducedBy": [
+        {
+          "commit": "88d70f86e4c9301aee1e9e3e2e4b4f5e3526af18",
+          "date": "2026-10-24T17:26:18.000Z",
+          "subject": "Merge engineer PR 290 (revocation lands on the rule, not the id) into this branch"
+        }
+      ]
+    },
+    {
+      "digest": "6ce10538e0575709",
+      "sha256": "6ce10538e0575709b501575c7c140327e15169f871dc38230477c289fb70b0d0",
+      "blob": "e30abfd9b92290934e72c12f8693f45138c161b6",
+      "bytes": 297711,
+      "introducedBy": [
+        {
+          "commit": "d113d00eed2292bbe3d2737cea82616612d58d6f",
+          "date": "2026-10-24T17:40:43.000Z",
+          "subject": "Both items from research: name why a span has no candidate, and disclose the paste channel"
+        }
+      ]
     }
   ]
 }

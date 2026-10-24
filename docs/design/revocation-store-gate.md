@@ -80,6 +80,17 @@ sweep, because silently revoking a second axiom the user did not name is
 its own dark pattern, and it is filed in `docs/ideas.md` under 2026-10-23
 as `revocationTwins`. It is not built here.
 
+**Closed, later the same day.** `revocationTwins` and
+`allRevocationTwins` are in the same module and
+`docs/design/revocation-twins.md` is their design document. They name the
+pair and change nothing, which keeps the decision with the user for the
+reason stated above. The first is wired into `ursa consent revoke-axiom`,
+for revocations made from now on, and the second into `ursa consent
+show`, which is the surface that reaches the records already on disk. The
+paragraph above stands as written, because what it describes is still
+true of the gate itself: the gate is forward-only and no report changes
+that.
+
 ## 3. System diagram
 
 Every node is a file or an exported function that exists today. Every

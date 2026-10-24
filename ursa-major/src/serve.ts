@@ -28,7 +28,7 @@
 // request is an effect and effects belong behind the door that already
 // reasons about who may cause them.
 
-import { createServer } from 'node:http'
+import { createServer, type Server } from 'node:http'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { listRecordIds, loadEpisodes, loadRecord, ursaDir } from './store'
@@ -40,6 +40,55 @@ export const STORE_DIR_NAME = '.ursa'
 
 /** The port `ursa serve` listens on when the caller names none. */
 export const DEFAULT_SERVE_PORT = 7818
+
+/**
+ * Bind an HTTP server to loopback and resolve with the port it actually
+ * got. Rejects, rather than hanging, when the port cannot be bound.
+ *
+ * WHY THIS IS SHARED RATHER THAN WRITTEN AT EACH DOOR. The header of this
+ * file says the store routes live in one place so that the two doors onto
+ * `.ursa/` drift together instead of apart. Listening is the same kind of
+ * behaviour and it had already drifted. `startStoreServer` below passed an
+ * `error` listener to its listen call; `startBridge` in src/bridge/index.ts
+ * passed none, and wrapped the call in `new Promise((r) => server.listen(
+ * port, '127.0.0.1', r))`. Node reports a refused bind by emitting `error`
+ * on the server and never calling the listening callback, so on a taken
+ * port that promise had nothing to settle it: `ursa bridge` hung with no
+ * message, before the line that announces the port it was trying to use.
+ * One function means a third door cannot reintroduce either half.
+ *
+ * WHY THE RESOLVED PORT AND NOT THE REQUESTED ONE IS THE ANSWER. Port 0
+ * asks the kernel for any free port, so the caller learns which one it got
+ * from `server.address()` and nowhere else. Tests want exactly that: a
+ * hardcoded port makes two test files that both bind it unrunnable at the
+ * same time, which is what this helper was extracted to fix.
+ *
+ * @param server a server that has not been listened on yet
+ * @param port the requested port, or 0 to let the kernel choose
+ * @param what how the door names itself in an error a user has to act on
+ * @returns the port the server is accepting connections on
+ */
+export async function listenOnLoopback(server: Server, port: number, what: string): Promise<number> {
+  await new Promise<void>((resolve, reject) => {
+    const onError = (e: NodeJS.ErrnoException) => {
+      // EADDRINUSE is the one failure a user can do something about, and
+      // the raw node message names the address without naming the fix or
+      // the program that wanted it. Every other errno passes through
+      // unchanged, because inventing advice for an unknown cause is worse
+      // than the errno.
+      reject(e.code === 'EADDRINUSE'
+        ? new Error(
+          `${what} cannot start: 127.0.0.1:${port} is already in use. `
+          + `Another ${what} is probably still running. Stop it, or pass `
+          + `--port <number> to bind a different one.`)
+        : e)
+    }
+    server.once('error', onError)
+    server.listen(port, '127.0.0.1', () => { server.removeListener('error', onError); resolve() })
+  })
+  const address = server.address()
+  return typeof address === 'object' && address ? address.port : port
+}
 
 /**
  * One tuning axiom as a reader of the store sees it.
@@ -372,12 +421,7 @@ export async function startStoreServer(opts: StoreServerOptions): Promise<StoreS
     res.end(JSON.stringify({ error: `no route ${req.method} ${req.url}` }))
   })
   const port = opts.port ?? DEFAULT_SERVE_PORT
-  await new Promise<void>((resolve, reject) => {
-    server.once('error', reject)
-    server.listen(port, '127.0.0.1', () => { server.removeListener('error', reject); resolve() })
-  })
-  const address = server.address()
-  const bound = typeof address === 'object' && address ? address.port : port
+  const bound = await listenOnLoopback(server, port, 'the store server')
   const dir = ursaDir(projectPath)
   // Said at startup because a store that does not exist yet is the most
   // likely reason a surface opens empty, and the user should learn that
