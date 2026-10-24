@@ -2375,3 +2375,58 @@ out=$(gh pr edit "$n" --body-file /tmp/body.md 2>&1) || { echo "FAILED: $out"; e
 
 And read the artifact back afterwards, which this register already says
 for the board and did not say for GitHub.
+
+### 15d. The board pre-flight, as one function, and the sender's real wake budget (measured 2026-10-24, twenty-seventh window)
+
+This is the body of the gate `prompts/exo-agent.md` defines, in Python,
+because it has to split blocks the way `runtime/board/store.py` splits
+them and `awk 'RS=""'` cannot: the store splits on a blank line **or on
+the start of a bullet**, so a long bullet is measured alone. It is one
+gate with a better body, not a second gate, and the charter says so where
+it defines the shell form.
+
+```python
+import re, sys, json
+CODE_RE = re.compile(r"(?<![\w/])#\d{1,6}\b|\bADR-?\s?\d+\b|\b[LI]-[A-Z]{1,3}\d+\b"
+                     r"|\bIncident\s+\d+\b|\bPR\s+#?\d+\b", re.I)
+REASON_RE = re.compile(r"so that|because|otherwise", re.I)
+d = json.load(open(sys.argv[1]))              # the exact body you will POST
+body, subject = d["body"], d["subject"]
+bad = []
+if CODE_RE.search(body + subject): bad.append("CODE: put the identifier in data")
+for para in re.split(r"\n\s*\n|\n(?=[-*•] )", body):
+    if len(para.strip()) > 420: bad.append(f"BLOCK {len(para.strip())}")
+if len(body.strip()) < 40 or not REASON_RE.search(body): bad.append("NO REASON WORD")
+if len(body) > 1500: bad.append(f"TRUNCATED: {len(body)} over 1500")
+print("\n".join(bad) or "OK")
+sys.exit(1 if bad else 0)                     # the exit status is the point
+```
+
+**The last condition is the one that gets dropped, so say why it belongs.**
+A truncation is not a refusal. The board accepts a long message and
+delivers part of it, so a check wired to "will this be refused" exits zero
+on it and an `&&` chain sends anyway. That is what happened in the window
+that wrote this.
+
+**And the budget is not 1500.** `wake_body()` in `runtime/board/api.py`
+takes `body[:1500]`, then retreats to the last `\n\n` inside it, else the
+last `\n`, else the last space, taking the first that falls above sixty
+per cent of the limit. So the delivered length is **the last paragraph
+break at or before the limit**, and the penalty for going over is the
+distance back to it rather than the size of the overrun.
+
+Measured on two posts from one window, an hour apart:
+
+| body | delivered | lost |
+|---|---|---|
+| 1,578 | 1,477 | 101 |
+| 1,508 | 1,303 | **205** |
+
+Eight characters over cost two hundred and five. Seventy-eight over cost
+a hundred and one. A sender who reads `wake_limit: 1500` off the receipt
+and trims to 1,508 has not trimmed at all.
+
+Two usable states, and no others: the whole body at or under the limit,
+or a blank line placed deliberately just under it. The receipt returned
+by the POST (§15a) tells you which one you got, within a second, in
+`body_delivered` and `body_truncated`.

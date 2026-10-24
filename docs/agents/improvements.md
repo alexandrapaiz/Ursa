@@ -1067,3 +1067,123 @@ Three rules that give the file teeth, also HQ's:
 - **Next measure.** On the brief of **2026-10-31**, count this seat's
   refused and truncated posts. Baseline this window: 2 refused, 1
   truncated, all three before the blocking form existed.
+
+### The release route this seat escalated became law, and the field it mandates cannot be set
+
+- **Trigger.** HQ's centralizer adopted this seat's charter-freeze
+  finding, measured it across five repositories, and made it law in the
+  silence route: a deadline that moves authority is recorded in a board
+  message's expiry field, with the reference at the pull request and the
+  applier in the recipient field, and until all three are set no clock is
+  running. The field is unsettable. `expires_at` is computed server side
+  only for a `claim`, fixed at six hours, with no parameter on the write
+  path, no mention in the handler, no `update` anywhere, and the schema's
+  own comment reading "claims only".
+- **Change.** The charter's clock section now carries the law, the
+  measurement that defeats it, the carrier that works today
+  (`data.expires_at`, free-form and caller-set), and a one-command check
+  for whether it became obeyable. The correction went to the centralizer
+  while its pull request was still open.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** **Zero of five hundred live rows outside `kind=claim`
+  carry an expiry**, against six of six inside it. So the rule's
+  compliance rate is structurally zero and the portfolio's hundred and
+  sixteen asks were never going to move it. The number to watch is that
+  zero becoming non-zero.
+- **Rule.** A rate that comes out at the whole population is nearly
+  always the instrument, and the seat holding a rule is the worst-placed
+  seat to apply that rule to the rule. The centralizer wrote the first
+  half against a different check of its own in the same message.
+- **Next measure.** On the brief of **2026-10-31**, one read: any
+  non-`claim` message anywhere carrying an expiry. Baseline **0 of 500**.
+
+### The charter-merge metric the clock was waiting on, four days past expiry
+
+- **Trigger.** The silence clock fired at 2026-10-20 12:30 UTC. Experiment
+  one was to read, afterwards, how many pull requests touching
+  `prompts/*-agent.md` had merged.
+- **Change.** None shippable by this seat. The release route it depends on
+  is held by the owner and the generalisation of it is now blocked
+  upstream by the entry above.
+- **Merged.** Not applicable.
+- **Effect.** **Zero.** Fifteen pull requests merged between the clock
+  firing and this window and not one touches a charter. The last charter
+  merge in this repository is 2026-10-18 at 19:02 UTC, five days and
+  seventeen hours earlier. The twenty-fifth window read zero on fourteen
+  merges; it is zero on fifteen. The queue is **not** the cause: twenty-one
+  open against forty-eight merged in seven days, so the depth warning does
+  not fire and one predicate inside a working gate is stuck.
+- **Rule.** The release route has now failed in two distinct ways, and
+  that is an owner decision rather than a number for a seat to keep
+  re-measuring. Say so plainly rather than reporting the zero a fourth
+  time.
+- **Next measure.** On the brief of **2026-10-31**, the same count.
+  Baseline **0 of 15**. Carried **2 weeks**.
+
+### A tool sweep that tests the standard's path cannot see a tool vendored under ours
+
+- **Trigger.** The `L-*` enforcement sweep reported
+  `tools/merge-register.py` as missing. This repository has it, byte for
+  byte, at `tools/registers/merge-register.py`, put there deliberately
+  with the reason filed as `INC-2026-10-18-hq-tool-paths-are-hq-s`.
+- **Change.** Both sweeps in the charter are basename-aware and report
+  three states rather than two: present, vendored elsewhere, missing. Only
+  the third is a finding and only the third is handed up.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** The honest binding count is **3, not 4**. Proven by merging
+  the engineer's branch into a detached copy of `main`: the file is
+  present and the old form calls it missing.
+- **Rule.** A check that resolves an identifier supplied by another
+  organization is measuring that organization's naming, not this
+  repository's capability. Resolve the thing, then the name.
+- **Next measure.** On the brief of **2026-10-31**, the binding count and
+  the vendored-elsewhere count separately. Baseline **3 binding, 1
+  vendored elsewhere**.
+
+### The learning log's recurring blocks sat at entry level, so a shipped merger could not read it
+
+- **Trigger.** Ursa's engineer shipped a register merge driver and carried
+  `docs/agents/learning-log.md` in its table with `enabled: false`, naming
+  the duplicate heading that makes the merger refuse at parse and assigning
+  the repair to this seat.
+- **Change.** Twenty-nine mis-levelled headings demoted to level three. No
+  entry's text altered. Five recurring per-window blocks had been written
+  at the same level as the window entry containing them, so they collided
+  once per window by construction.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** Duplicated level-two headings went from **4 (worst case 6
+  copies) to 0**, with twenty-nine unique entries including this window's.
+  Verified against the merger itself with a distinct append on each side:
+  exit 0, thirty-one entries out, both appends present, nothing blended.
+  Before the repair the merger refused this side by name.
+- **Rule.** A heading is an identifier the moment any tool keys on it, so a
+  sub-section written at the identifier's own level is a collision
+  generator and not a formatting preference.
+- **Next measure.** On the brief of **2026-10-31**, whether
+  `tools/registers/registers.json` has flipped this file to `enabled:
+  true`. Baseline **false, blocked on this seat**.
+
+### A gate in this charter was rebuilt rather than run, and the rebuild did not block
+
+- **Trigger.** The twenty-sixth window shipped a blocking board pre-flight
+  whose first condition is `[ "$n" -le 1500 ]`. The twenty-seventh wrote a
+  second validator against the same four rules, forty lines below it in the
+  file it had just read, and wired the status to the board's refusal
+  conditions only. A truncation is not a refusal, so it exited zero and
+  `validate && curl` sent two messages it had just flagged.
+- **Change.** The charter says, where it defines the pre-flight, to run that
+  function rather than rewrite it, with the one grep that would have found
+  it. `runner-facts.md` §15d carries the Python form as a more accurate body
+  for the same gate rather than as a second gate.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** **2 of 5 messages truncated** this window, both of them
+  before the rule existed, each costing one repair message. The previous
+  window reported 6 of 6 delivered whole under the shell form, which is the
+  comparison that makes the rebuild the cause rather than the gate.
+- **Rule.** Before you write an instrument, grep your own charter for what
+  it does. The duplicate-instrument finding this register already holds is
+  about one repository's distance; this one is about forty lines, and that
+  version is invisible to looking outward because reading the document
+  carefully is what makes you write it again.
+- **Next measure.** On the brief of **2026-10-31**, this seat's truncated
+  posts. Baseline **2 of 5**.

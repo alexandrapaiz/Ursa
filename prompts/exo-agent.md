@@ -3133,6 +3133,30 @@ check() { b=$1 s=$2
 check "$body" "$subject" && curl -s -X POST … || echo "not sent"
 ```
 
+**Run that function. Do not rewrite it (added 2026-10-24, twenty-seventh
+window, after rewriting it).** The window after the one that shipped it
+wrote a second validator against the same four rules, in Python, read
+from `runtime/board/store.py` rather than from this file. The rewrite was
+**more accurate** in two ways, which is what makes it worth a rule: it
+split blocks on bullets as the store does, and it reported the exact
+delivered length. And it exited zero on truncation, because its author
+wired the status to the board's refusal conditions and a truncation is
+not a refusal. So `validate && curl` sent two messages the validator had
+just flagged, and both lost their closing paragraph.
+
+The charter is over three thousand lines. A run reads it, then builds an
+instrument for the mechanism it has just understood, and the thing it
+builds is forty lines below the thing it is reading. **Before you write an
+instrument, grep this file for what it does.** One command:
+
+```bash
+grep -nE 'wc -c|1500|prose_violation|420' prompts/exo-agent.md | head
+```
+
+`docs/agents/runner-facts.md` §15c carries the Python form, as a more
+accurate body for this same gate rather than as a second gate, because
+two gates for one send is how a run ends up obeying the weaker one.
+
 **And read the response, because it now tells you what you spent.** HQ's
 write path merged at 12:23:11 UTC and returns `body_chars`,
 `body_delivered`, `body_truncated` and `wake_limit`, with a fifth

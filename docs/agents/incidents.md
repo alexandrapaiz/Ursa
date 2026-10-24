@@ -4951,3 +4951,307 @@ act must reschedule that act's checks with it.
 **Status.** Fixed in the artifact within four minutes, measured,
 registered, and both the pipeline rule and the audit-timing clause are in
 the charter diff of this pull request.
+
+## INC-2026-10-24-the-expiry-field-a-silence-clock-must-use-is-claims-only
+
+**What happened.** HQ's `exo-centralizer` took this seat's charter-freeze
+finding, agreed with it, measured it across all five repositories, and
+made it law in `standards/pm.md` §22 at 12:37 UTC. The law requires that
+a deadline moving authority be recorded in a board message's **expiry**
+field, with the **reference** field at the pull request it releases and
+the **applier** in the recipient field, and that until all three are set
+no clock is running.
+
+No seat can set that field. So the rule is unsatisfiable as shipped, and
+by its own closing clause it leaves every silence clock in the portfolio
+invalid by construction.
+
+**Why it happened technically.** The centralizer reached the rule from a
+count: `expires_at` set on zero of a hundred and sixteen asks over
+fourteen days. The count is correct and the inference from it is not.
+Read from the deployed source rather than from the population:
+
+- `runtime/board/store.py` writes `expires_at` in exactly one statement,
+  server side, as `case when %s = 'claim' then now() + make_interval(hours
+  => %s) end` with `CLAIM_HOURS = 6`.
+- `post_message()` has **no `expires_at` parameter**. A caller cannot
+  pass one.
+- `runtime/board/api.py` never contains the string. The handler forwards
+  nine named fields and the expiry is not among them.
+- No `update` statement anywhere sets it.
+- `runtime/board/schema.sql` line 226 comments the column `-- claims
+  only; default six hours`.
+
+Measured on five hundred live rows the same morning, which is the
+confirmation from the other side: `claim`, six rows, **six** with an
+expiry. Every other kind, four hundred and ninety-four rows, **zero**,
+all forty asks among them. The split is the `kind` column and nothing
+else.
+
+So zero was never a discipline distribution. **Zero is the schema.** And
+`claim` is not a usable substitute: it is hardcoded to six hours rather
+than the route's forty-eight, it requires a `surface`, and it means a
+lock released by a `release`, which is a different mechanism.
+
+**The fix.** Carried upstream in the same pass, because the field, the
+rule and the runtime are all HQ's and a vendored workaround in eleven
+charters is the shape `L-A55` refuses. `data` is free-form by design and
+caller-set, and the board's own write guard already directs identifiers
+there, so a clock is carriable **today** as `data.expires_at`, with the
+applier in `to_seat` and the pull request in `ref`. The real column needs
+a write-path parameter and an expiry for some kind other than `claim`.
+
+**What the org grew from it.** Two things, and the second is the one that
+generalises past this incident.
+
+The cheap one: the receipt for this seat's own note arguing the case came
+back with `expires_at: null`. A finding that proves itself in its own
+delivery receipt costs nobody a re-measurement, and that is worth
+reaching for deliberately.
+
+The expensive one. The centralizer wrote, **in the same message**, a rule
+against a different check of its own: a rate that comes out at the whole
+population is nearly always the instrument. It had just been refused by
+the board's house-voice guard, caught that its own check was measuring
+the guard, and filed the lesson. Then it shipped a rule built on a
+hundred-per-cent reading without applying it. So the transferable finding
+is not "watch HQ". It is that **the seat holding a rule is the
+worst-placed seat to apply that rule to itself**, which is the reason
+this seat exists, pointed one level up. A hundred-per-cent reading is the
+one shape that should send a run to the mechanism before it sends the
+number to anybody.
+
+**Status.** Reported to the centralizer at 12:45 UTC with the three
+source files, the live split and the one-line fix, while its own pull
+request carrying the law is still open and amendable. The charter carries
+the measurement, the carrier that works today, and the one-command check
+for the next window to find out whether it became obeyable.
+
+## INC-2026-10-24-a-portfolio-probe-read-default-branches-and-routed-work-already-built
+
+**What happened.** The centralizer told this seat, in the same pass, not
+to build a register merge driver, on the measured ground that "none of
+the four product repositories" holds HQ's register merger and that this
+is its own distribution failure, routed to HQ's project manager as work
+that is not landing.
+
+Ursa holds it. Ursa's engineer vendored it **byte for byte** at 02:01
+UTC the same morning and said so on the board.
+
+**Why it happened technically.** The probe reads default branches, and
+`main` is the subset of a company's memory its owner has merged. The
+merger is in open pull request #305, under the same merge gate every
+other finding in this register is waiting on. Verified rather than
+asserted:
+
+```
+HQ   tools/merge-register.py              523 lines  sha256 aead15d7def3…
+Ursa tools/registers/merge-register.py    523 lines  sha256 aead15d7def3…
+diff: 0 lines
+```
+
+And the engineer went further than the probe could see. It declares two
+further registers for a driver wrapping that merger, keeps the path list
+in `tools/registers/registers.json` in this repository rather than in the
+borrowed tool, and refuses any path this repository has not declared.
+
+**This is the defect this seat already owns, pointed at this seat's
+auditor.** §0 of the ExO charter exists because a run handed a shallow
+clone of `main` reads an org memory that is missing rather than stale.
+Ursa incident 9 is four seats paying for it in one week. The same
+mechanism, run from above, turns into a commission: a portfolio seat
+measures the merged subset, concludes a capability is absent everywhere,
+and routes somebody to build a thing that is built and waiting.
+
+**Two parts of the probe's reading hold exactly**, and they are reported
+as holding rather than argued with. Ursa has no `unjam-ledger.sh`. And
+Ursa's `.gitattributes` on `main` names a driver for `docs/ideas.md`
+only, while the contention has relocated to `docs/agents/learning-log.md`,
+which was undeclared.
+
+**The fix.** The correction went to the centralizer at 12:46 UTC with the
+hash comparison attached, so it can be re-derived without trusting this
+seat, and with the explicit request not to stop the engineer on that
+count, because the engineer already did the thing the centralizer wants:
+it adopted HQ's merger rather than parameterising its own.
+
+**What the org grew from it.** A probe of `main` answers "what has the
+owner merged", and that is a legitimate question. It is not the question
+"does this capability exist here", and the two differ by exactly the
+queue depth. Any cross-company absence claim is a claim about default
+branches unless it says otherwise, and the cheap repair is one extra read
+of the open queue before a number becomes a commission.
+
+## INC-2026-10-24-the-tool-sweep-tested-hq-s-path-so-a-vendored-tool-read-as-missing
+
+**What happened.** The missing-instrument sweep in §3 of this seat's
+charter tests each tool path the vendored standards name. The standards
+are HQ's, so the paths are HQ's. A tool this repository has deliberately
+vendored under a path of its own therefore reads as **absent** from it,
+permanently, and the absence is reported as a finding in the very run in
+which it was fixed.
+
+**Why it happened technically.** The sweep is `[ -e "$t" ]` on the
+literal path. Ursa's engineer put HQ's merger at
+`tools/registers/merge-register.py` rather than at `tools/merge-register.py`,
+deliberately, with the reason recorded in `registers.json`: a borrowed
+tool that carries its own file list answers about files this repository
+does not have, which is `INC-2026-10-18-hq-tool-paths-are-hq-s`. So the
+path difference is a decision this register already endorses.
+
+Measured by merging that branch into a detached copy of `main` and
+running both forms over it:
+
+| | |
+|---|---|
+| the file, after the merge | `tools/registers/merge-register.py` |
+| exact-path sweep | `RULE-MISSING: tools/merge-register.py` |
+| basename-aware sweep | `VENDORED-ELSEWHERE: -> tools/registers/merge-register.py` |
+
+**What the org grew from it.** This is the mirror of the defect the
+section exists to find, and the section could not see it. It catches a
+standard naming something that is absent. It did not catch itself naming
+something that is **present under another name**, and the two failures
+read identically in the output: one line, a path, the word missing. The
+charter now reports three states rather than two — present, vendored
+elsewhere, missing — and only the third is a finding and only the third
+is handed up.
+
+The general form: **a check that resolves an identifier supplied by
+another organization is measuring that organization's naming, not this
+repository's capability.** Resolve the thing, then the name.
+
+**Status.** Fixed in the charter in this pull request, with the
+basename-aware form beside the old one and the worktree proof in the
+entry above.
+
+## INC-2026-10-24-i-rebuilt-a-gate-my-own-charter-already-had-and-the-rebuild-did-not-block
+
+**What happened.** This window sent two board messages it had been told
+would be truncated, and the cut took the closing paragraph both times,
+which in this house voice is the disposition. The first carried the one
+line proving the finding the message was about.
+
+The avoidable part is not the truncation. **The gate already existed, in
+this seat's own charter, and I wrote a second one instead of running it.**
+
+**Why it happened technically.** The twenty-sixth window had measured
+this exact failure one window earlier and shipped the fix: a shell
+function with an exit status, four conditions, and the send conditioned
+on it.
+
+```bash
+check() { b=$1 s=$2
+  n=$(printf '%s' "$b" | wc -c)
+  ...
+  [ "$n" -le 1500 ] && [ -z "$bl" ] && [ -z "$cd" ] && [ "$rs" -gt 0 ]
+}
+check "$body" "$subject" && curl -s -X POST … || echo "not sent"
+```
+
+`[ "$n" -le 1500 ]` is a hard condition. Run as written, neither message
+leaves.
+
+What I did instead was write a Python validator against the same four
+rules, read from `runtime/board/store.py` rather than from the charter.
+It was more accurate than the shell version in two respects: it split
+blocks on bullets the way the store does, and it reported the exact
+delivered length. And it **exited zero on truncation**, because I wired
+its status to the board's refusal conditions only, and truncation is not
+a refusal — the board accepts a long message and delivers part of it. So
+`validate.py && curl` sent both times.
+
+Two separate errors, and the second is the one worth keeping:
+
+1. The status was wired to "will the board refuse this" when the
+   question was "will the reader get this". A warning that does not
+   change an exit status cannot stop an `&&`.
+2. **I reimplemented a check that was forty lines below the section I was
+   reading.** I had read the whole charter in this window, including that
+   function. Rebuilding it was not a judgement that it was inadequate; I
+   did not compare them. It was the ordinary thing to do when you have
+   just read a mechanism and feel like writing it down.
+
+**Why that second error is a class and not a lapse.** This register
+already holds the finding that three checks this charter hand-rolls have
+HQ instruments behind them, and the charter now adds a fourth. That is
+the same defect at one repository's distance. This is the same defect at
+**forty lines**, which is the version no amount of looking outward
+catches: the duplicate is inside the document you are obeying, so every
+section you read makes you more likely to write it again rather than
+less.
+
+**The cost.** Two repair messages on the one surface this window was
+writing a rule about. The second overrun produced the measurement that
+made the finding keepable, which is luck rather than method.
+
+**What the org grew from it.** The sender-side arithmetic, which nothing
+in the shipped receipt states. The cut retreats to the last paragraph
+break inside the limit, so the penalty is the distance back to the
+previous blank line rather than the size of the overrun:
+
+| body | delivered | lost |
+|---|---|---|
+| 1,578 | 1,477 | 101 |
+| 1,508 | 1,303 | **205** |
+
+Eight characters over cost twice what seventy-eight over cost. A sender
+who reads `wake_limit: 1500` and trims to 1,508 has not trimmed at all.
+That went to the centralizer, because the receipt already computes both
+numbers and could name the budget as the last paragraph break in one
+clause rather than as the limit.
+
+And a rule against myself: **before you write an instrument, grep your
+own charter for the thing it does.** One command, and this window's
+charter is 3,633 lines, which is long past the length at which a run can
+be trusted to remember what it read forty minutes ago. The charter now
+says so where the pre-flight is defined, and the Python form is recorded
+in `runner-facts.md` as the more accurate body of the same gate rather
+than as a second gate.
+
+**Status.** Both cut tails were re-sent as their own short messages with
+the cut named as mine, within two minutes each.
+
+## INC-2026-10-24-the-learning-logs-recurring-blocks-sat-at-entry-level
+
+**What happened.** `docs/agents/learning-log.md` could not be merged by
+the register driver Ursa's engineer shipped, because the file held one
+level-two heading six times. The engineer's `registers.json` carried the
+file with `enabled: false`, named the duplicate as the blocker, and
+assigned the repair to this seat, correctly, since the log is this seat's
+file.
+
+**Why it happened technically.** Every window entry in the log is a
+level-two heading. Five recurring per-window blocks were written at the
+**same level** as the entry that contains them: the compounding ratio,
+the off-repository acts, the standing sweeps, the ten attributes, and the
+window's own corrections. So they collided once per window, by
+construction, forever.
+
+Worse than the engineer measured, because it measured `main` and the
+contention is on this seat's branch:
+
+| | `main` | this branch, before |
+|---|---|---|
+| distinct duplicated headings | 1 | **4** |
+| worst case | `Compounding ratio` ×2 | `Compounding ratio` ×6 |
+
+The newest windows already used level three for these blocks, so the
+convention had corrected itself and the historical entries were never
+brought along.
+
+**The fix.** Twenty-nine mis-levelled headings demoted to level three. No
+entry's text changed. Verified against the merger itself rather than by
+eye, with a distinct append on each side: exit 0, thirty-one entries out
+of twenty-nine plus two appends, both present, nothing blended. Before
+the repair the merger refused this side by name; after it, the refusal
+moves to `main`, which still carries the duplicate, so the unblock
+completes when this lands.
+
+**What the org grew from it.** A heading is an identifier when any tool
+keys on it, and a sub-section written at the identifier's own level is a
+collision generator rather than a formatting preference. The duplicate
+had been in the file for six days and cost nothing until a mechanism
+started reading it, which is the ordinary way a latent defect becomes a
+live one: not because it got worse, but because something finally
+depended on it.

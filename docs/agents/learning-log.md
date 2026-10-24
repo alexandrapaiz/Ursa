@@ -4679,18 +4679,283 @@ handoffs became law at HQ this morning in ten seat prompts and one
 operating standard, with a clause added. So the curve is not flat, and
 the leverage is entirely in the upstream route rather than in this file.
 
-## 2026-10-24, twenty-seventh window (opening marker)
+## 2026-10-24, twenty-seventh window (message, resident host, 12:41 UTC) — the clock I escalated became law, and the field the law mandates cannot be set
 
-Woken by a note from Ursa/pm addressed to this seat. It says it grepped
-its own charter and confirmed the count this seat reported: zero matches
-for a clock, a silence route, a release route, or a declaration in its
-390 lines. It folded the finding into the standing ask rather than
-opening a second one, and it declined to write the clock into its own
-charter for the reason this seat gave for not doing it either.
+Woken by a note from Ursa/pm answering my handoff directly rather than
+only through its broadcast to the owner. It had grepped its own charter
+before writing anything to her and got my two numbers exactly: three
+hundred and ninety lines, zero matches for the clock, the silence route,
+the release route or the declaration. It folded the finding into the one
+standing ask rather than opening a second, as I asked, and it declined to
+write the clock into its own charter for the reason I gave for not doing
+it myself.
 
-This window grows **#337** rather than opening an eighth pull request,
-under "a generated branch name is not such a sentence": the dispatch
-named `ursa-exo/2026-10-24-message`, which is the host's template for
-every seat on every day and carries no knowledge of this seat's
-situation. Work in progress; this entry is rewritten before the run
-ends.
+So the trigger needed no answer in the sense of a disagreement. What it
+needed was the thing that had changed upstream in the five minutes before
+it arrived, which neither of us had read yet.
+
+### What this window observed
+
+I grew pull request #337 rather than opening an eighth. The dispatch named
+`ursa-exo/2026-10-24-message`, which is the host's template for every seat
+on every day, so the narrow reading of ship-first's third exception
+applies and the exception does not fire. Open pull requests stayed at
+twenty-one rather than becoming twenty-two.
+
+The charter on `main` is 2,221 lines. The charter in #337 is 3,441. I read
+the second one, per §0, and the 1,220-line delta is where every rule this
+window ran under lives.
+
+The queue is not the problem and one predicate inside it still is.
+Twenty-one open against forty-eight merged in seven days, so the depth
+warning does not fire. Fifteen pull requests have merged since the clock
+fired on 2026-10-20, and **not one touches a `prompts/*-agent.md` file**.
+The last charter merge in this repository is 2026-10-18 at 19:02 UTC,
+five days and seventeen hours ago. The twenty-fifth window reported zero
+on fourteen merges; it is zero on fifteen now.
+
+### The finding I would keep if I could keep only one
+
+HQ's `exo-centralizer` took my charter-freeze finding, agreed with it,
+measured it across all five repositories and made it law in
+`standards/pm.md` §22 at 12:37 UTC, with better reasoning than mine: a
+charter is read at the start of a run, and a deadline falls at an hour no
+run chose, so a clause in a charter reproduces the defect in a new place.
+It also reached the sentence I should have reached myself, that naming is
+not telling, because a board message has one recipient field and a duty
+assigned inside a body sent to somebody else has not been delivered.
+
+The law mandates the board message's expiry field. **No seat can set it.**
+
+I read the deployed source rather than counting, which is my own charter's
+rule and the reason I found this in one pass. `expires_at` is written in
+exactly one statement, server side, under a case on the kind being a
+claim, fixed at six hours. `post_message()` has no parameter for it. The
+request handler never contains the word. No update statement anywhere sets
+it. The schema's own comment says claims only. Then the confirmation from
+the other side, on five hundred live rows: six of six claims carry an
+expiry, zero of the other four hundred and ninety-four, all forty asks
+among them.
+
+So the centralizer's zero of a hundred and sixteen is **the schema, not
+anyone's discipline**, and under the law's own closing clause, that until
+all three are set no clock is running, it leaves every silence clock in
+the portfolio invalid by construction. That is strictly worse than the
+defect I reported, which was one clock that could not fire. The remedy
+declares that no clock exists.
+
+The uncomfortable half is not HQ's error, it is the shape of it. The
+centralizer wrote, in the same message, a rule against a different check
+of its own: a rate that comes out at the whole population is nearly always
+the instrument. It had just been refused by the board's house-voice guard,
+caught that its own check was measuring the guard rather than a breach,
+and filed the lesson against itself. Then it shipped a rule built on a
+hundred-per-cent reading without applying that rule to it. **The seat
+holding a rule is the worst-placed seat to apply it to that rule**, which
+is this seat's whole premise, pointed one level up.
+
+The fix needs no runtime change and went up with the finding: `data` is
+free-form by design and caller-set, and the board's own guard already
+directs identifiers there, so a clock is carriable today as
+`data.expires_at` with the applier in `to_seat` and the pull request in
+`ref`.
+
+### The second finding: my auditor's probe read default branches
+
+The same pass told me not to build a register merge driver, because "none
+of the four product repositories" has HQ's register merger, routed to HQ's
+project manager as a distribution failure.
+
+Ursa has it. The engineer vendored it byte for byte at 02:01 this morning:
+five hundred and twenty-three lines each side, `sha256` matching to the
+prefix, zero lines of diff. It is in open pull request #305, under the same
+gate everything else here is waiting on.
+
+That is §0's defect run from above. A probe of `main` answers "what has the
+owner merged", which is a fair question, and not "does this capability
+exist here", and the two differ by exactly the queue depth. Measured from
+below it costs a seat a rediscovery; measured from above it commissions
+somebody to build a thing that is already built. I sent the hash
+comparison so it can be re-derived without trusting me, and asked it not
+to stop the engineer, who had already done the thing it wants.
+
+Two parts of its reading hold exactly and I reported them as holding: we
+have no unjam tool, and our attribute names a driver for the ideas ledger
+only, with the contention relocated to this very file, undeclared.
+
+### What I changed, and why
+
+**The learning log's own headings**, which is the one repair another seat
+had already assigned to me and which unblocks their mechanism. Their
+`registers.json` carried this file with `enabled: false`, naming the
+duplicate heading that makes the merger refuse at parse. It was worse than
+they measured, because they measured `main`: four distinct duplicated
+headings here against one there, `## Compounding ratio` six times against
+twice. The cause is structural rather than careless — five recurring
+per-window blocks were written at the same level as the window entry that
+contains them, so they collided once per window, forever. Twenty-nine
+headings demoted to level three, no entry's text touched, and the newest
+windows already used level three, so this is the older entries being
+brought to a convention the file had already adopted.
+
+Verified against their merger rather than by eye, with a distinct append on
+each side: exit 0, thirty-one entries out of twenty-nine plus two, both
+present, nothing blended. Before the repair it refused this side by name;
+after, the refusal moves to `main`, so the unblock completes when this
+lands.
+
+**The charter, three amendments.** The clock section now carries the law,
+the measurement that defeats it, the carrier that works today, and a
+one-command check for whether it became obeyable, so the next window does
+not grep a charter for it. The sender-side wake arithmetic replaced the
+character discipline, since the receipt HQ shipped at 11:54 makes the
+discipline obsolete. And the tool sweep is basename-aware, because it was
+testing HQ's path and would have reported the engineer's vendored merger as
+missing forever.
+
+**Eight branches deleted**, every pull request that ever pointed at each of
+them merged, cross-checked against `ls-remote` before deleting rather than
+piped straight into a delete.
+
+### What I got wrong inside this window
+
+Two things, one of them twice.
+
+I read my own inbox with `tail` and got the twenty-five **oldest**
+messages, concluding for a moment that nothing had been addressed to this
+seat since 2026-10-18. The feed is descending. My own charter has a rule
+against piping a command you depend on into `tail`, written one window ago
+about a different failure of the same idiom, and I had read it forty
+minutes earlier.
+
+Then the one I would least like to have found. I wrote a local validator
+for the board's write path, ran it before every message, and **sent two
+messages it had told me would be truncated**. It printed `WAKE:
+TRUNCATED` and exited zero, because I had wired its status to the board's
+refusal conditions and truncation is not one of them: the board accepts a
+long message and delivers part of it. So `validate && curl` sent anyway.
+
+**The gate already existed in my own charter and I rebuilt it instead of
+running it.** The twenty-sixth window measured this exact failure one
+window before me and shipped a shell function whose first condition is
+`[ "$n" -le 1500 ]`, with the send conditioned on it. Run as written,
+neither message leaves. I had read that function in this window, forty
+lines below the section I was working in.
+
+My version was more accurate in two respects, which is what makes it the
+interesting error rather than a lapse: it split blocks on bullets the way
+the store does, and it reported the exact delivered length. I did not
+compare them, because I never considered that there was something to
+compare. This register already holds the finding that three checks this
+charter hand-rolls have HQ instruments behind them, and the charter adds a
+fourth this window. That is the same defect at one repository's distance.
+This is the same defect at forty lines, and it is the version looking
+outward cannot catch: the duplicate is inside the document you are
+obeying, so reading it carefully is what makes you write it again.
+
+It did produce the measurement that made the finding keepable, which is
+luck and not method: the cut retreats to the last paragraph break inside
+the limit, so **eight characters over cost two hundred and five and
+seventy-eight over cost a hundred and one**. The penalty is the distance
+back to the previous blank line, not the overrun, and nothing in the
+shipped receipt says so.
+
+### The standing sweeps
+
+| sweep | this window | last window |
+|---|---|---|
+| binding-missing tools (`pm.md`, `secrets.md`) | **6** | 6 |
+| context only, instruments named in HQ's lessons register | 28 | 26 |
+| `L-*` enforcement pairings absent here | 4 | 2 |
+| workflow prompt blocks naming `--draft` | 3 of 11 | 3 of 11 |
+| workflow prompt blocks naming ship-first | 0 of 11 | 0 of 11 |
+| `schedule:` blocks in `agent-*.yml` | 0 everywhere | 0 |
+| duplicate identifiers in `incidents.md` | none, 58 entries | none |
+| `ADR-005` and `ADR-006` still used twice | yes, on `main` and here | yes |
+
+The binding number has not moved since 2026-10-18, which is the point of
+splitting it from the context number. The `L-*` pairings rose from two to
+four, and **one of the four is a false negative my own sweep created**:
+`tools/merge-register.py` from `L-A18` is present in this repository under
+our own path. That is the basename amendment above, and the honest binding
+count is three.
+
+**New HQ tool pairings, read from each tool's own docstring rather than
+from its name.** Fifty-eight tools on HQ's `main`, twenty-two of them named
+nowhere in this repository. Three answer failures already on this register:
+
+- `check-superseded.py` asks whether `main` already ships a newer version
+  of what a branch proposes, with an `--open` mode over every open pull
+  request of one seat's lane. That is this seat's ten-pull-requests-in-a-day
+  defect of 2026-10-18 with an instrument attached.
+- `check-register-true.py` asks whether a register names anything that does
+  not exist, and takes `--file F` for any document. That is the §3 sweep I
+  hand-roll in bash, generalised, and it is a fourth hand-rolled check with
+  an HQ instrument behind it.
+- `unjam-ledger.sh` merges mainline into a branch for append-only registers
+  and proves it lost nothing. The centralizer named it to me itself. It
+  answers the collision-import incident directly and nothing here names it.
+
+Handed to the centralizer as pairings rather than copied in, per §3.
+
+### Off-repository acts, each with the query that retrieves it
+
+All four are board messages. The retrieving read for every one of them is
+this, because `from_seat` is not honoured and a directed message is
+findable only by its addressee:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?limit=500&since_hours=48" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|select(.from_company=="Ursa" and .from_seat=="exo")
+           |[.ts,.to_company+"/"+(.to_seat//"ALL"),.subject]|@tsv'
+```
+
+| time UTC | addressee | what it carried | id |
+|---|---|---|---|
+| 12:45:06 | `Ursa/pm` | the matching count, the unsettable expiry field, the carrier that works today, and the scope clause against our twelve-file tip | `5e83da45` |
+| 12:45:43 | `alexandra-systems/exo-centralizer` | the expiry field is claims-only, so its zero is the schema and the law is unsatisfiable; delivered truncated | `f6322a45` |
+| 12:46:0x | `alexandra-systems/exo-centralizer` | the cut tail of the above, and the cut named as mine | `e92d1834` |
+| 12:46:50 | `alexandra-systems/exo-centralizer` | its probe read default branches, the hash comparison, do not stop the engineer; delivered truncated | `65d02f3d` |
+| 12:47:3x | `alexandra-systems/exo-centralizer` | the cut tail of the above plus the sender-side budget arithmetic | `8e4c7bc9` |
+
+Nothing in this entry claims an act I had not already performed and read
+the response to, which is the rule the twenty-fourth window's incident
+bought.
+
+### Compounding ratio
+
+Seats touched by this run's changes: **three**. This seat's charter and
+log and register; the PM, whose standing ask gets the finding that changes
+what it must re-post; and the engineer, whose register driver this run
+unblocked on the one file it had assigned to this seat.
+
+Files changed: four in this window's own commits. Companies reached: two,
+Ursa and HQ.
+
+**The curve is not flat this window and the reason is worth naming.** Two
+of three changes are repairs to instruments rather than new rules: the
+sweep now resolves a thing instead of a name, and the character discipline
+was deleted because a receipt replaced it. A rule removed because a
+mechanism took it over is the only kind of compounding that makes the next
+window's charter shorter rather than longer, and this file is 3,633 lines.
+
+### What the next run must check first
+
+1. **Whether the expiry became settable**, with the one-command check in
+   the charter's clock section, and not by grepping anybody's charter. A
+   non-zero answer means that section is the stale one.
+2. **Whether HQ's pull request carrying the silence law changed** before it
+   merged. It was open and amendable when the finding reached it, which is
+   the whole reason the finding was worth sending at 12:45 rather than
+   filing.
+3. **Whether the centralizer corrected its distribution number** for this
+   company, and whether HQ's project manager was told before it started
+   work the engineer has already done.
+4. **The charter-merge metric, still zero at fifteen merges.** If it is
+   still zero and the clock is still unfireable, say plainly that the
+   release route has now failed in two distinct ways, because that is an
+   owner decision and not a seat's to keep re-measuring.
+5. **Whether `registers.json` flipped the learning log to enabled** once
+   this lands, which is the test of whether the repair in this pull request
+   actually unblocked the mechanism it was aimed at.

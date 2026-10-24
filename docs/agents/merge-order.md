@@ -1,311 +1,130 @@
-# Merge order — measured 2026-10-24 06:5x UTC, ExO twenty-second window
+# Merge order — measured 2026-10-24, twenty-seventh ExO window
 
-Replaces the previous plan entirely, as this file's convention requires.
-Measured against `origin/main` at `96e0513`.
+Replaces the previous plan. Written by Ursa's ExO seat under
+`prompts/exo-agent.md` §5b. This file is information for the owner. The
+merge is hers; nothing here loosens that.
 
-**The caveat this file has carried since 2026-10-18 now has a cause, and
-it is one flag.** Every number below was taken on a clone that had been
-both unshallowed and widened, because the host hands each run a clone
-that is shallow *and* single-branch. Those were filed as two
-independent defects, in `docs/agents/runner-facts.md` §9 and §10. They
-are not independent. `git clone --depth 1` implies `--single-branch`,
-and one line in the resident runtime passes it:
-`alexandrapaiz/epitome`, `cli/src/lib/runner.js:131`. The full
-measurement, the price of three fixes and the three hands the fix needs
-are `runner-facts.md` §11 and
-`INC-2026-10-24-two-clone-incidents-one-flag`.
-
-Run the bootstrap block at the top of `prompts/exo-agent.md` before you
-re-measure anything here, and do not read a queue-wide failure as a
-queue fact until you have.
+**The instrument is named beside every verdict**, because a conflict
+verdict with no instrument beside it cannot be re-measured by the seat
+holding the branch.
 
 ## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **14** |
-| merged in the last seven days | **46** |
-| age of the oldest open | **6 days** (#269, 2026-10-18 19:16 UTC) |
+| open pull requests | **19** (23 before this window closed four of its own as contained) |
+| merged in the last seven days | **48** |
+| oldest open | **#288**, 2026-10-23 |
 
-Open is well under the week's merges, so the queue is **not** outrunning
-its gate and no bold warning is owed this run. That is the first time in
-this file's history that sentence has been true, and the reason is not
-this seat's: the PM merged forty-six in the week on its own passes.
+**The depth warning does not fire.** Forty-eight merges against nineteen
+open means the owner is absorbing work faster than the org produces it.
+Do not report this queue as stuck. One predicate inside it is stuck and
+that is a different sentence: **zero of the fifteen merges since the
+silence clock expired on 2026-10-20 touches a `prompts/*-agent.md`
+file**, and the last charter merge here is 2026-10-18 at 19:02 UTC.
 
-## What conflicts with `main`, and the instrument that said so
+## Conflicts against `main`
 
-| PR | verdict | behind main | instrument |
-|---|---|---|---|
-| #320 #319 #318 #317 #316 #315 #313 #307 #302 #288 #269 #321 | clean | 0 to 70 | HQ's `check-merge-queue.sh`, fetched from HQ's `main` this run |
-| #305 | **conflict** in `docs/ideas.md` | 7 | same, and GitHub had not computed `mergeable` |
-| #290 | **conflict** in `docs/ideas.md` | 19 | same, and GitHub had not computed `mergeable` |
+Instrument: `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>` on an unshallowed clone, run 2026-10-24 ~12:52 UTC. Five
+of twenty-three conflicted. GitHub's `mergeable` field read `UNKNOWN`
+for twenty-one of twenty-three and is not used here.
 
-Both conflicts are the authoring seat's to rebase under
-`docs/standards/pm.md` §11.3, not the owner's to resolve, and both are
-the engineer's.
+| PR | branch | verdict | conflicting files | instrument |
+|---|---|---|---|---|
+| 290 | `ursa-engineer/2026-10-23-message-3` | CONFLICT | `docs/ideas.md` | `merge-tree` |
+| 305 | `ursa-engineer/2026-10-24-message-2` | CONFLICT | `docs/ideas.md` | `merge-tree` |
+| 316 | `ursa-skill/2026-10-24-message` | CONFLICT | `docs/ideas.md` | `merge-tree` |
+| 320 | `ursa-skill/2026-10-24-message-2` | CONFLICT | `docs/ideas.md` | `merge-tree` |
+| 331 | `ursa-skill/2026-10-24-message-4` | CONFLICT | `docs/ideas.md` | `merge-tree` |
+| all others | | clean | | `merge-tree` |
 
-## What is already contained in something else
+**Every conflict in this queue is one file.** Five of five, and it is
+`docs/ideas.md`, the append-only ideas ledger. Nobody disagreed about
+anything: two seats appended entries to the end and a textual three-way
+merge cannot know that two appends are not a disagreement.
 
-`git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
-exit 0 meaning contained, on a clone that was unshallowed first:
+This repository already declares `docs/ideas.md merge=ledger` in
+`.gitattributes`. The declaration does nothing on the forge, because the
+driver behind the name is registered **per clone** by
+`tools/ledger/install-driver.sh` and the forge's merge button has no
+clone to register it in. HQ holds the instrument that does work on this
+shape, `tools/unjam-ledger.sh`, which merges the mainline into the branch
+and proves it lost nothing. It is named nowhere in this repository. HQ's
+`exo-centralizer` identified that absence as its own distribution failure
+at 12:37 UTC on 2026-10-24 and routed it to HQ's project manager.
 
-- **#269 ⊂ #288 ⊂ #302 ⊂ #307**, one chain, all four this seat's, all
-  four readied and open.
-- **#313 ⊂ #317**, both the PM's.
+## Containment
 
-So fourteen open pull requests are **nine** decisions. Four of this
-seat's chain settle with one merge of its tip, which is what Ursa's PM
-told the owner at 01:48 UTC, naming #302 as that tip. **#307 now
-contains #302**, and this window's own #318 contains #307, so the
-pointer has moved twice since that message. This seat is not closing
-#269, #288 or #302: the PM has named #302 in an open ask to the owner,
-and the standing rule is to post where the decision moves to and leave
-the artifact standing.
+Instrument: `git merge-base --is-ancestor refs/prs/<contained>
+refs/prs/<tip>`, exit 0 meaning contained.
 
-## The landing order, simulated rather than guessed
+All five of this seat's earlier open pull requests are contained in
+**#337**:
 
-Performed in a detached worktree off `origin/main`, merging in sequence.
-The result is the finding of this run's second half, so both runs are
-recorded:
-
-| order | with no merge driver registered | with `install-driver.sh` run |
-|---|---|---|
-| 315 | clean | clean |
-| 316 | **conflict** `docs/ideas.md` | clean |
-| 320 | **conflict** `docs/ideas.md` | clean |
-| 321 | clean | clean |
-| 319 | clean | clean |
-| 314 | clean | clean |
-| 307 | **conflict** `docs/agents/incidents.md` | **conflict** `docs/agents/incidents.md` |
-| 317 | clean | clean |
-| 318 | **conflict** `docs/agents/incidents.md` | **conflict** `docs/agents/incidents.md` |
-| 290 | **conflict** `docs/ideas.md` | clean |
-| 305 | **conflict** `docs/ideas.md` | clean |
-
-**Six of eleven become two of eleven, and the difference is one command
-that no seat's bootstrap runs.** `.gitattributes` declares
-`docs/ideas.md merge=ledger`, and the command behind that name lives in
-`.git/config`, which is per-clone and never committed.
-`tools/ledger/install-driver.sh` writes it and says "run once per
-clone" in its own header. Every seat gets a fresh clone every run and
-nothing runs it, so the driver this organization built on 2026-09-27 has
-never been active in a seat's clone.
-
-The two that remain are both this seat's and both in
-`docs/agents/incidents.md`, which had no `.gitattributes` entry at
-all. The engineer's open #305 adds one, with a second driver for the
-`## `-keyed registers, and it is the right fix. It is also per-clone by
-the same mechanism, and its own design document says so.
-
-So the landing order worth handing the owner is the second column's, and
-its preconditions are two commands rather than none:
-
-1. `bash tools/ledger/install-driver.sh` in the clone doing the merging.
-2. **#305 first**, after its author rebases it, because it is what wires
-   `docs/agents/incidents.md` and until it lands rows 307 and 318
-   conflict by construction.
-
-Then: 315, 316, 320, 321, 319, 314, 317, 290, 305, then this seat's
-chain tip, which absorbs #269, #288, #302 and #307 in one decision.
-
-**Instrument named beside every verdict above**, per this file's own
-rule, because a conflict verdict a seat cannot re-measure is a verdict
-that costs a run (Ursa incidents 17 and 18).
-
-## 2026-10-24 ~11:5x UTC — twenty-fourth window: the queue grew by nine in five hours and the order above still holds
-
-**Re-measured, not inherited.** The section above was written at 06:57
-with fourteen open. There are now **twenty-three**, and four of the
-identifiers it sequenced (314, 315, 319, and the one it called row 307's
-partner) have left the queue, so its list is read for its *reasoning*
-rather than copied.
-
-Instrument, named per this file's rule, on a clone that ran §0's
-bootstrap in full — unshallowed **and** widened, because a single-branch
-refspec reports every branch as deleted (runner-facts §11, §13):
-
-```bash
-git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet && git fetch origin --quiet
-git merge-tree --write-tree origin/main refs/prs/<n> >/dev/null 2>&1   # exit 0 = clean
-git rev-list --count refs/prs/<n>..origin/main                         # how far behind
+```
+#269 is contained in #337      #302 is contained in #337
+#288 is contained in #337      #307 is contained in #337
+#318 is contained in #337
 ```
 
-| | |
-|---|---|
-| open pull requests | **23** (was 14 at 06:57) |
-| conflicting with `main` | **5** — 290, 305, 316, 320, and draft 331 |
-| clean | 18 |
-| drafts | **3**, all other seats': 329, 331, 333 |
-| this seat's drafts | **zero**, which is the point of this window |
+Four were closed by this window with the proof in each closing comment
+and their branches kept. **#288 is deliberately left open**, because the
+project manager presented it to the owner at 00:39 UTC as awaiting her,
+and moving an artifact a seat has promised the owner would not move costs
+more than the queue slot saves.
 
-**This seat's chain is unchanged and is one decision.** 269 → 288 → 302
-→ 307 → **318**, each contained in the next, all five **readied**:
+## The landing order, simulated
 
-```bash
-git merge-base --is-ancestor refs/prs/307 refs/prs/318   # exit 0 = contained
+Instrument: a **detached** scratch worktree at `origin/main`, merging in
+sequence, comparing against `origin/main` and never against `main`.
+
+Eleven of the fourteen clean pull requests merge in sequence with no
+resolution at all:
+
+```
+288  322  325  327  330  333  335  337  338  340  342
 ```
 
-318 merges clean and is 5 commits behind `main`. Merging 318 alone lands
-all five; merging them in order also works, because each is an ancestor
-of the next. The four older ones are deliberately **left standing**
-rather than closed, under the fifth case in the charter's own-open-PRs
-rule: they are readied artifacts sitting in a gate, and a descendant
-costs the queue nothing once the older one merges.
+**Three fail only in sequence, and that is the finding.** #339, #341 and
+#343 are all clean against `main` individually and all three collide once
+#337 lands, on `docs/agents/incidents.md`, because this seat and the
+project manager both append to that register.
 
-**The two preconditions from 06:57 both still apply and neither has
-been met.** `bash tools/ledger/install-driver.sh` is still per-clone and
-still run by nothing, and **#305**, which wires `docs/agents/incidents.md`
-to a `## `-keyed driver, is **still conflicting** and still unrebased —
-12 behind. Until it lands, every pair of this org's windows that appends
-to `docs/agents/incidents.md` collides by construction. That is the
-single highest-leverage merge in the queue and it is blocked on its
-author rebasing, not on a decision.
+So the order matters and the reason is a register rather than a
+disagreement:
 
-**Order worth handing the owner, newest measurement:**
+1. **#305 first.** It carries the register merge driver, and it is one of
+   the five ledger conflicts above, so it needs the ledger resolved by
+   hand or by HQ's unjam tool to land at all.
+2. Then the eleven above, in the order listed.
+3. Then **#339, #341, #343**, which need either the driver registered or
+   one hand resolution of `incidents.md` each.
 
-1. **#305 first**, after its author rebases — it unblocks the register
-   collisions for every later merge.
-2. The clean, unconflicted PM and research rows, which are the bulk:
-   313, 317, 321, 322, 323, 325, 326, 327, 328, 330, 332.
-3. **#318**, which absorbs 269, 288, 302 and 307 in one decision.
-4. 290, 316, 320 after their authors rebase. Draft 331 is not a
-   decision yet and conflicts; its own seat's next window owns it.
+**Tested rather than asserted.** The driver on #305 does resolve the
+collision it is aimed at. Running HQ's vendored `merge-register.py` with
+the identifier pattern from `tools/registers/registers.json` over the
+exact three-way that git refused:
 
-**One number for the drag, because it belongs beside the order.** This
-seat's work feed reports `shipped: 0` across three days against five
-pull requests in review, and the charter copy on `main` is **654 lines
-behind** the copy this window actually ran on — read from `refs/prs/318`
-per §0, because the handed checkout does not carry this seat's own
-rules. Every rule in this window's diff that compounds across
-forty-one seats compounds nothing while it sits here.
-
----
-
-## Re-measured 2026-10-24 12:0x UTC, twenty-fifth window
-
-Against `origin/main`, on a clone confirmed complete first: 1,034 commits,
-`--is-shallow-repository` false, refspec widened per §0.
-
-| | |
-|---|---|
-| open pull requests | **25** (3 drafts, none this seat's) |
-| merged in the last seven days | **47** |
-| oldest open | **5.7 days**, this seat's earliest chain member |
-| this branch against `origin/main` | **CLEAN** (`git merge-tree --write-tree --name-only`) |
-
-**Merges outnumber the open queue, so §5b's depth warning does not
-fire.** The gate is absorbing work faster than the org produces it, and
-the order below is therefore not a rescue plan. It is one predicate
-inside a working gate.
-
-**The one class that is stuck, and it is this window's finding.** Of the
-**fourteen** pull requests that merged since 2026-10-20 12:30 UTC,
-**zero** touch a `prompts/*-agent.md` file. The last charter-touching
-merge in this repository is 2026-10-18, when eight landed. The cause is
-`INC-2026-10-24-authority-clock-written-into-the-asking-seats-charter`:
-the release route that was timed to that instant was recorded only in
-the asking seat's charter, and the acting seat's charter on `main` has
-never contained it. Nothing in this order clears that. The owner does,
-or she delegates it.
-
-### The collision count, which grows with the queue and has an unmerged fix
-
-Measured by diffing every open pull request rather than by inspection:
-
-| register | open pull requests appending to it |
-|---|---|
-| `docs/agents/incidents.md` | **10** — 269, 288, 302, 307, 313, 317, 318, 328, 332, 334 |
-| `docs/agents/learning-log.md` | **5** — 269, 288, 302, 307, 318 |
-
-Five of the ten are this seat's own chain and merge as one decision. The
-other five are four other seats, so **five independent appends to one
-append-only register are in the queue at once**, which is
-`INC-2026-10-24-shared-register-tail-appends-collide` by construction
-and not by accident.
-
-**The fix exists and is not on `main`, so do not record this as closed.**
-Ursa's engineer told this seat on the board at 02:01 that it had adopted
-HQ's register merger and that "your register merges without a human
-now". That is a true claim about its branch. Measured on `origin/main`
-at 12:0x, `.gitattributes` declares exactly one driver and it covers
-`docs/ideas.md` only:
-
-```bash
-git show origin/main:.gitattributes        # one rule, docs/ideas.md merge=ledger
-gh pr view 305 --json state --jq .state    # OPEN
+```
+base 36 entries, ours 53, theirs 36  ->  exit 0, merged 53
 ```
 
-So neither register in the table above has a driver on the default
-branch, and `tools/merge-register.py` is the third name the `L-*`
-enforcement sweep now returns as missing, up from two. This is the
-charter's own rule paying for itself: a sibling seat's "I have fixed it"
-is a claim about its repository, never about the surface you read.
+Every entry identifier from **both** sides is present in the output, and
+a line-level probe of the only edit `theirs` made inside an existing
+entry found it present too. So for this case the resolution is lossless
+and verified on both sides, not inferred from the exit status.
 
-### Landing order
+**The bound on that claim, stated because the next reader will want it.**
+The merger resolves by entry identity and guarantees each output entry is
+byte-for-byte from one input. The case it cannot blend is an edit made
+*inside* an entry by one side only. It did not arise here because this
+seat's branch already carried the project manager's commits. It is the
+case to re-check before trusting the driver on a different pair.
 
-Unchanged in shape from the twenty-second window's plan above, with one
-correction: **#305 first**, ahead of the register-touching crowd, because
-it is the driver every one of those ten appends needs and merging it
-first is the difference between one conflict and nine.
+## What this window did not touch
 
-1. **#305**, the register merge driver.
-2. The non-register, non-charter pull requests, which the gate is
-   already clearing at seven a day.
-3. **#318**, which absorbs 269, 288, 302 and 307 in one decision, and
-   which cannot move until the charter question is answered.
-
-Instrument beside every verdict in this section:
-`git merge-tree --write-tree --name-only origin/main HEAD` for the
-clean/conflict column, `gh pr diff --name-only` for the register
-table, and `gh pr list --state merged` joined to `gh pr diff` for the
-charter-merge count. No verdict here comes from GitHub's cached
-`mergeable` field.
-
----
-
-## Re-measured 2026-10-24 13:17 UTC — twenty-sixth window
-
-**Instrument: `git merge-tree --write-tree --name-only origin/main
-refs/prs/<n>`, on a clone widened and unshallowed per §0, with
-`refs/prs/*` re-fetched immediately before the sweep.** Named per the
-standing rule, because a verdict with no instrument beside it cannot be
-re-measured by the seat holding the branch.
-
-| | |
-|---|---|
-| open | **21** (28 at 12:30; seven merged during this window) |
-| merged, last seven days | **47** |
-| merge cleanly into `main` | **16** |
-| conflict | **5** — #290, #305, #316, #320, #331 |
-| oldest open | #269, 2026-10-18T19:16 |
-
-Open is below the week's merges, so the depth warning does not fire.
-
-### The first reading of this sweep was wrong, and the reason is in this file already
-
-Run before re-fetching `refs/prs/*`, the sweep reported **10 of 21
-conflicting**, including this seat's own pull request. Four of the ten
-(#337, #338, #339, #340) were opened *after* this window fetched the
-refspec, so `refs/prs/<n>` did not exist locally and `merge-tree` exited
-non-zero for **unknown revision** rather than for a conflict.
-
-That is the identical shape §5b records for the shallow clone, where the
-same command exits 128 on `refusing to merge unrelated histories` and
-reads as a queue-wide conflict. The instruction says the command "exits
-non-zero on conflict", and a non-zero exit for any other reason is
-indistinguishable from the thing it was written to detect.
-
-So the sweep now **verifies the ref exists before it judges the merge**,
-and prints `NO REF` rather than counting a conflict:
-
-```bash
-git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet   # immediately before
-git rev-parse -q --verify refs/prs/$n >/dev/null || { echo "NO REF: #$n"; continue; }
-```
-
-**The general point, and it is the third instance this window found.**
-On a host where twenty seats run concurrently, the queue grows *during*
-a sweep of it. A refspec fetched at the start of a run is a snapshot, the
-same way a blob fetched from HQ's `main` is a snapshot
-(`runner-facts.md` §15a). Re-fetch immediately before you measure, and
-say in the reading when you fetched.
+Nothing in `ursa-major/`, `ursa-minor/`, sprints, OKRs, market docs,
+`docs/ideas.md` statuses, `docs/vision.md`, or `docs/standards/`. No
+workflow file. The five ledger conflicts above are other seats' branches
+and were measured, not resolved.
