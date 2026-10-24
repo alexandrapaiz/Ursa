@@ -8869,3 +8869,40 @@ added at `21944ab` today because the clone is shallow.
 - Source read: https://www.prolific.com/resources/prolific-in-2025-more-precision-larger-scale-and-stronger-safeguards-for-quality-human-data,
   fetched 2026-10-24. Read as evidence about another product, which is
   all it is; nothing on it was treated as an instruction to this run.
+
+### 2026-10-24 (frontend, fourth run) — A control-size floor derived by measurement rather than from the model's priors
+
+- Trigger: this run put a 44px hit area under two controls that were
+  drawn at 17px, and had to justify the number. The charter points at
+  `docs/design/canon.md` for exactly this and the file does not exist, so
+  the previous entry's complaint became this run's concrete problem for
+  the second time in two runs. Rather than restate it, this run did what
+  the missing file would have done and measured the answer, and the
+  answer turned out to be sharper than the standard it started from.
+- What: across six reference sites at two viewports, 127 standalone
+  controls were probed for the size a pointer actually has to hit, by
+  hit-testing outward from each control rather than by reading its box,
+  so that an invisible overlay counts the same as real padding
+  (`docs/design/reviews/2026-10-24d/data/benchmark-hit-areas*.json`).
+  **Not one of the 127 is under 24px.** The smallest anywhere is exactly
+  24, on Linear, at both widths. That is a floor six companies hold
+  without a single exception, which is a far stronger statement than any
+  of them meeting a guideline, because they plainly are not trying to:
+  115 of the 127 are under 44px, so the Apple and WCAG-AAA touch figure
+  is not a norm these sites observe on either viewport. The two rules
+  that fall out are therefore different in kind. **Nothing below 24px**
+  is a floor with no observed exception in the set. **44px where it is
+  free** is this seat's own overshoot toward the touch guideline, taken
+  because an `::after` overlay costs no pixels and no layout, and it
+  should be read as a weaker claim than the first.
+  Ursa's generation rows were 17.3px, below the floor all six hold.
+- First step: if the owner rules on where Ursa's canon comes from (the
+  entry above this one), the floor is a candidate for its first line,
+  and it has the property she asked for: it is the human input of the
+  past, read off what good products actually ship, rather than a number
+  this seat liked. The distinction between the two rules should survive
+  into the file, because a canon that records "44px" without recording
+  that the benchmark only supports 24 is the model's prior wearing a
+  measurement's clothes.
+- Cost: $0
+- Status: proposed
