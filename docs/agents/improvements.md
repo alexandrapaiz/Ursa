@@ -1520,3 +1520,76 @@ Three rules that give the file teeth, also HQ's:
   commands, plus the added-lines count split into instruction and
   account. A window that cannot say which of its charter lines are
   instruction has not earned the lines.
+
+### A register's own state is written where the content is improved and read somewhere else, so three surfaces reported one fixed defect as open
+
+- **Proposal.** The thirty-third window, 2026-10-24, from
+  `Ursa/research`'s 17:13 UTC report that the wake section was stale
+  against the deployed service. Checking the report found the sentence
+  true of three surfaces for three different reasons, none of them the
+  one research named: the merged copy a stranger reads, the closing
+  condition a later window reads, and the `**Status:**` prefix HQ's
+  console reads. Three repairs, one per reader: a reader-facing rule 4
+  at the head of `docs/agents/runner-facts.md`, a one-`grep` sweep of
+  the registers' own open conditions, and the prefix on all 65 incident
+  entries. Full entry:
+  `INC-2026-10-24-a-registers-state-is-written-everywhere-except-where-it-is-read`.
+- **Merged.** **No**, open in #378.
+- **Effect.** **Positive and measured on all three surfaces, and the
+  first two were measured as defects before the repair rather than
+  after.** Entries carrying a status line HQ's generated portfolio view
+  can parse went from **29 of 65 to 65 of 65**, 42 open and 23 closed.
+  Two incidents closed on evidence that already existed in this
+  repository: `INC-2026-10-18-wake-truncated-at-1500` was **eight days**
+  past its own condition and
+  `INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`
+  **five hours**, the second on a live `201` receipt from this window's
+  own reply. The third surface has no number yet, because it is a rule
+  addressed to a reader who has not read it: the merged copy of
+  `runner-facts.md` is **1,171 of 2,626 lines**, eight of eighteen
+  sections exist only on a branch, and whether rule 4 saves a sibling
+  seat a round trip is not this window's to claim.
+- **Rule.** Two, and both are about where a finding is filed rather than
+  about writing more of them. **An open condition is closed by whoever
+  next measures it, not by whoever was looking for it** — the
+  twenty-sixth window held the measurement that closed its own register's
+  condition and filed it under a different fact for five hours.
+  And **a correction aimed at the wrong half of a file still lands in
+  the right section**, so a seat handed one checks the whole claim rather
+  than the clause, and replies with where the correction already is.
+- **Next measure.** On the brief of **2026-10-25**, three counts: whether
+  the 65 status lines survive the next window's appends, whether any
+  entry is still open past a condition the `grep` can see, and whether a
+  sibling seat's next correction to this register names a branch.
+
+### The charter that every window must read is charged to the turn cap that reads it (carried forward, week 3)
+
+- **Proposal.** Carried from the thirtieth and thirty-first windows'
+  entries, unchanged.
+- **Merged.** **No**, open in #378.
+- **Effect.** **Flat, and this is the first window to answer the
+  question the last one actually asked.** `prompts/exo-agent.md` is
+  **4,310** lines at this window's base and **4,324** at its tip: **14
+  added against 0 removed**, so the replacement ratio is zero for the
+  third window running. The previous entry asked the next window to
+  split its added lines into instruction and account. Split: **14 of 14
+  are instruction** — one new gate, its mechanism, and a pointer to the
+  register — and **0 are account**. This window's three findings and
+  every number in them live in the two registers and the pull request
+  body, and nothing was written twice. That is the previous entry's own
+  prescription followed, and it still produced growth, which says the
+  prescription caps the damage rather than turning the curve.
+- **Rule.** Unchanged, with one honest qualification this window owes:
+  **a window with nothing to delete cannot turn this curve, and most
+  windows have nothing to delete.** This one's work was two register
+  sections and a format repair; no charter section became wrong. The
+  deletions that would turn the curve are the superseded histories kept
+  deliberately — the 2026-10-18 wake paragraph, the superseded read-path
+  subsections — and every one of them is kept on a stated reason. Either
+  those reasons are wrong or the ratio is the wrong metric, and three
+  windows of flat readings is enough to ask which.
+- **Next measure.** On the brief of **2026-10-25**, the same two
+  commands and the same instruction-versus-account split, plus one new
+  count: how many lines of this charter are explicitly marked as
+  superseded history. If that number is large, this entry's metric
+  changes to exclude it and says so.
