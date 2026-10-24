@@ -380,11 +380,13 @@ export async function main(argv: string[]): Promise<number> {
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
+  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'serve' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
+    console.error('       ursa serve <projectPath> [--port N]')
+    console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model")
     console.error('       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]')
     console.error('       ursa forget <projectPath> --record <recordId>')
     console.error('       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]')
@@ -447,6 +449,25 @@ export async function main(argv: string[]): Promise<number> {
       post: values['no-post'] !== true,
     })
     return result.exitCode
+  }
+  if (cmd === 'serve') {
+    // Deliberately the smallest command in this file. It takes no
+    // passphrase because it encrypts nothing, no sync url because it
+    // pushes nothing, and no session because it reads no chat: the whole
+    // job is to put the store the resolver already wrote behind an
+    // address a local page can fetch. `ursa bridge` is the command that
+    // does the rest, and it serves these same routes by calling the same
+    // route table (`handleStoreRequest` in src/serve.ts).
+    const { startStoreServer } = await import('../serve')
+    const handle = await startStoreServer({
+      projectPath: absPath(project),
+      port: values.port ? Number(values.port) : undefined,
+    })
+    await new Promise<void>((resolve) => {
+      process.on('SIGINT', () => { void handle.stop().then(resolve) })
+      process.on('SIGTERM', () => { void handle.stop().then(resolve) })
+    })
+    return 0
   }
   if (cmd === 'bridge') {
     const passphrase = process.env.URSA_PASSPHRASE ?? (await promptHidden('passphrase (held in memory only): '))

@@ -21,31 +21,31 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 25.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
-| `a4063468ef71edd9` | `0d46fb7` | 2026-10-05 03:39:36 | 74,545 | feat(ursa-major): ursa ci — the resolver's CI launch, and a one-file bundle |
-| `39a79f21578cc98a` | `932b562` | 2026-10-05 03:43:23 | 75,631 | feat(ursa-major): action.yml, the example consumer workflow, and 23 tests |
-| `61b24bb11ec7d243` | `e27bc68` | 2026-10-08 03:05:13 | 166,859 | Reconcile the resolver-Action branch onto main (subsumes #92, #126, #130) |
-| `db8ebdf738fc759a` | `d4a57c4` | 2026-10-08 03:11:34 | 168,111 | The empty-window sentence was asserting a cause it had not checked |
-| `b0db25771d26783b` | `a675288` | 2026-10-10 02:46:19 | 169,567 | The design artifact, the parity test's own failure message, and the README rows |
-| `92bc09fed803237f` | `bdeaeca` | 2026-10-10 02:50:35 | 169,655 | The bound count was thirteen in prose and fifteen in code; derive it |
-| `1b3d13fdd436ff7d` | `f440004` | 2026-10-11 18:26:19 | 172,919 | Engineer 2026-10-11: land the agent-coauthor detection fix (subsumes #159) |
-| `1dd251d21d457c96` | `6a993c6` | 2026-10-12 20:34:23 | 177,322 | Show the resolver to the reader: CI comment line, run output, rebuilt bundle |
-| `14b54a1bbd17b9f4` | `e8ecb80` | 2026-10-13 03:59:53 | 179,913 | Say it where the reader is: the class table, and the span inspector |
-| `c8dd2ce3132a52ce` | `939c6fd` | 2026-10-13 04:00:50 | 180,446 | Character granularity for the formatting-only diff |
-| `fbbbf6ea83aecc96` | `d228e90` | 2026-10-13 04:07:29 | 180,487 | A formatting-only mutation is not a one-shot correction |
-| `e7dd3bfd3576c971` | `8baff5d` | 2026-10-13 18:33:29 | 183,316 | The counts the sixteenth bound moved, and the rebuilt bundle |
-| `bdfe57a5828d8592` | `09ccf74` | 2026-10-14 02:23:23 | 186,613 | The fixture for the new clause, the counts it moved, and the rebuilt bundle |
-| `b1a295d5c6956f08` | `dfcda66` | 2026-10-14 16:08:28 | 187,643 | Rebuild dist/ursa.cjs for the horizon bound |
-| `74e4aaf58b89e266` | `18d15c1` | 2026-10-15 02:03:34 | 192,501 | Rebuild the bundle, and make the viewer assertion one that can fail |
-| `e099f7e4576f4757` | `223a457` | 2026-10-15 15:53:42 | 196,261 | exclusion: the file-level refusal gets the clock the span level got |
-| `71186700e3b07a06` | `f295522` | 2026-10-16 01:43:04 | 201,273 | gate: the counterexample, the unit cases, parity on the bound set, bundle |
-| `d32543070474cc28` | `51ef074` | 2026-10-16 01:45:39 | 201,773 | gate: the bound set on both surfaces a reader sees, and the bundle |
-| `650a289f21602792` | `5881090` | 2026-10-17 14:15:32 | 202,367 | Rebuild the committed bundle over the absorbed source changes |
-| `035e533b20f1097b` | `b34b692` | 2026-10-18 00:47:32 | 255,121 | The Action can write the site, and one workflow publishes it to the stranger's own Pages |
-| `3be06c2173f12c37` | `7c300d5` | 2026-10-18 00:56:34 | 255,382 | publish: consult the consent record, so an erased record cannot reach a public address |
-| `6e57690406db89ed` | `1e0cc3b` | 2026-10-18 01:33:51 | 269,035 | The address in the README, the grammar in the design doc, and a rebuilt bundle |
-| `277611ace7436084` | `ef8eeaf` | 2026-10-18 01:55:09 | 272,223 | Rebuild the bundle for the index digest fields and the phone layout |
-| `d16c8760a902a88c` | `a21f48e` | 2026-10-18 02:31:38 | 273,540 | The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case |
-| `7e2c2afe6ca35b4c` | `2f1f599` | 2026-10-18 09:21:23 | 276,711 | The published page now names the bounds that produced its records |
+| `a4063468ef71edd9` | `cdba481` | 2026-10-05 03:39:36 | 74,545 | feat(ursa-major): ursa ci — the resolver's CI launch, and a one-file bundle |
+| `39a79f21578cc98a` | `93aa83b` | 2026-10-05 03:43:23 | 75,631 | feat(ursa-major): action.yml, the example consumer workflow, and 23 tests |
+| `61b24bb11ec7d243` | `bc004b9` | 2026-10-08 03:05:13 | 166,859 | Reconcile the resolver-Action branch onto main (subsumes #92, #126, #130) |
+| `db8ebdf738fc759a` | `eabc6b7` | 2026-10-08 03:11:34 | 168,111 | The empty-window sentence was asserting a cause it had not checked |
+| `b0db25771d26783b` | `b27dd1a` | 2026-10-10 02:46:19 | 169,567 | The design artifact, the parity test's own failure message, and the README rows |
+| `92bc09fed803237f` | `496f40c` | 2026-10-10 02:50:35 | 169,655 | The bound count was thirteen in prose and fifteen in code; derive it |
+| `1b3d13fdd436ff7d` | `53ac9ce` | 2026-10-11 18:26:19 | 172,919 | Engineer 2026-10-11: land the agent-coauthor detection fix (subsumes #159) |
+| `1dd251d21d457c96` | `d40ba69` | 2026-10-12 20:34:23 | 177,322 | Show the resolver to the reader: CI comment line, run output, rebuilt bundle |
+| `14b54a1bbd17b9f4` | `6b13f00` | 2026-10-13 03:59:53 | 179,913 | Say it where the reader is: the class table, and the span inspector |
+| `c8dd2ce3132a52ce` | `a5b8adf` | 2026-10-13 04:00:50 | 180,446 | Character granularity for the formatting-only diff |
+| `fbbbf6ea83aecc96` | `467ba56` | 2026-10-13 04:07:29 | 180,487 | A formatting-only mutation is not a one-shot correction |
+| `e7dd3bfd3576c971` | `7504209` | 2026-10-13 18:33:29 | 183,316 | The counts the sixteenth bound moved, and the rebuilt bundle |
+| `bdfe57a5828d8592` | `b11a976` | 2026-10-14 02:23:23 | 186,613 | The fixture for the new clause, the counts it moved, and the rebuilt bundle |
+| `b1a295d5c6956f08` | `d0be260` | 2026-10-14 16:08:28 | 187,643 | Rebuild dist/ursa.cjs for the horizon bound |
+| `74e4aaf58b89e266` | `41c1ab0` | 2026-10-15 02:03:34 | 192,501 | Rebuild the bundle, and make the viewer assertion one that can fail |
+| `e099f7e4576f4757` | `9fc6bac` | 2026-10-15 15:53:42 | 196,261 | exclusion: the file-level refusal gets the clock the span level got |
+| `71186700e3b07a06` | `6e2828a` | 2026-10-16 01:43:04 | 201,273 | gate: the counterexample, the unit cases, parity on the bound set, bundle |
+| `d32543070474cc28` | `f2a9048` | 2026-10-16 01:45:39 | 201,773 | gate: the bound set on both surfaces a reader sees, and the bundle |
+| `650a289f21602792` | `43c86e8` | 2026-10-17 14:15:32 | 202,367 | Rebuild the committed bundle over the absorbed source changes |
+| `035e533b20f1097b` | `aff33eb` | 2026-10-18 00:47:32 | 255,121 | The Action can write the site, and one workflow publishes it to the stranger's own Pages |
+| `3be06c2173f12c37` | `c0d0788` | 2026-10-18 00:56:34 | 255,382 | publish: consult the consent record, so an erased record cannot reach a public address |
+| `6e57690406db89ed` | `5f5f8ad` | 2026-10-18 01:33:51 | 269,035 | The address in the README, the grammar in the design doc, and a rebuilt bundle |
+| `277611ace7436084` | `6f4f96b` | 2026-10-18 01:55:09 | 272,223 | Rebuild the bundle for the index digest fields and the phone layout |
+| `d16c8760a902a88c` | `2229b68` | 2026-10-18 02:31:38 | 273,540 | The dogfood, measured: the site this repository produces, what it weighs, and the fifth header case |
+| `7e2c2afe6ca35b4c` | `6d9426d` | 2026-10-18 09:21:23 | 276,711 | The published page now names the bounds that produced its records |
 
 ## Reading a row
 

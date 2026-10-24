@@ -234,7 +234,7 @@ mattered.
       "bytes": 74545,
       "introducedBy": [
         {
-          "commit": "0d46fb79eccd58fe357827458d0f667095884fb5",
+          "commit": "cdba4813f6a73aa8f450f80119899d07dc61c233",
           "date": "2026-10-05T03:39:36.000Z",
           "subject": "feat(ursa-major): ursa ci — the resolver's CI launch, and a one-file bundle"
         }
@@ -247,7 +247,7 @@ mattered.
       "bytes": 166859,
       "introducedBy": [
         {
-          "commit": "e27bc68f84aaa35666c0cc26f268be80682d2528",
+          "commit": "bc004b9a3c82ef5ef72a4cd5347b5229f584df4d",
           "date": "2026-10-08T03:05:13.000Z",
           "subject": "Reconcile the resolver-Action branch onto main (subsumes #92, #126, #130)"
         }
@@ -260,7 +260,7 @@ mattered.
       "bytes": 201773,
       "introducedBy": [
         {
-          "commit": "51ef07424232f896e65d9cfff0f49d555e078c97",
+          "commit": "f2a9048e4c24a742e5ae144399c2c8fce99a58ec",
           "date": "2026-10-16T01:45:39.000Z",
           "subject": "gate: the bound set on both surfaces a reader sees, and the bundle"
         }
@@ -321,7 +321,7 @@ $ npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474cc28
 digest   d32543070474cc28  (sha256 d32543070474cc28bdb8300c63791d28fda0b2d14dc5b588ab99cf363de6814d)
 bytes    201,773
 blob     b9b015688eee7600dc2579b12a93ddfa333569c4   # git cat-file blob b9b015688eee7600dc2579b12a93ddfa333569c4
-commit   51ef07424232f896e65d9cfff0f49d555e078c97
+commit   f2a9048e4c24a742e5ae144399c2c8fce99a58ec
 date     2026-10-16T01:45:39.000Z
 subject  gate: the bound set on both surfaces a reader sees, and the bundle
 ```
@@ -333,7 +333,7 @@ quoted in prose resolves too:
 $ npx tsx tools/make-bundle-digest-index.ts --lookup db8ebdf7
 digest   db8ebdf738fc759a  (sha256 db8ebdf738fc759a33ec1ef4605d73ccf0d100145ede24560d6bcabb6e747617)
 ...
-commit   d4a57c4c6abd1889a9f131eb1e3f58a2caf3857b
+commit   eabc6b7460eac7c8f175983762f3a3124e3b2dae
 date     2026-10-08T03:11:34.000Z
 subject  The empty-window sentence was asserting a cause it had not checked
 ```
@@ -388,7 +388,7 @@ the row that disappears:
 AssertionError:
 -       "digest": "61b24bb11ec7d243",
 -       "blob": "c52bbd4abdab068f2d9e10b7743fb452f0d55adb",
--       "commit": "e27bc68f84aaa35666c0cc26f268be80682d2528",
+-       "commit": "bc004b9a3c82ef5ef72a4cd5347b5229f584df4d",
 -       "subject": "Reconcile the resolver-Action branch onto main (subsumes #92, #126, #130)"
 ```
 

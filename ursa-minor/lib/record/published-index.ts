@@ -404,6 +404,20 @@ function boundPhrases(b: PairingBounds): { distance: string; age: string; interp
   }
 }
 
+/**
+ * What separates one fact from the next in a middot line.
+ *
+ * Exported because the string is a layout contract and not only
+ * punctuation. A line of three facts measured 390px wide broke inside
+ * the third one on a phone, leaving `· 2` at the end of one line and
+ * `interposed generations` at the start of the next, so the reader met
+ * a numeral with no unit attached to it. The view splits on this
+ * constant and refuses to break inside a fact, which it can only do if
+ * it knows where the facts end. Keeping the separator in one place is
+ * what stops the reader and the writer from disagreeing about that.
+ */
+export const FACT_SEPARATOR = ' · '
+
 /** The same bound as a line of three facts, for when there are several. */
 function boundLine(b: PairingBounds): string {
   const d = typeof b.maxPairDistance === 'number' ? `${b.maxPairDistance.toLocaleString()} commits forward` : 'no commit limit'
@@ -412,7 +426,7 @@ function boundLine(b: PairingBounds): string {
     typeof b.maxInterposedGenerations === 'number'
       ? `${b.maxInterposedGenerations.toLocaleString()} interposed generation${b.maxInterposedGenerations === 1 ? '' : 's'}`
       : 'any number of interposed generations'
-  return `${d} · ${h} · ${g}`
+  return [d, h, g].join(FACT_SEPARATOR)
 }
 
 export function pairingCopy(index: PublishedIndex): PairingCopy {
