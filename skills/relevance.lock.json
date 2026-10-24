@@ -349,6 +349,230 @@
     "what": "d683dc80c7fc5235",
     "passages": "f96ffbf032161be6"
   },
+  "auditing-a-detected-correction-loop/E1": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "aedc14d396f5aaed",
+    "what": "3659720a77672e4c",
+    "passages": "2d5638e008fc6813"
+  },
+  "auditing-a-detected-correction-loop/E10": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "972cd17c70e32eeb",
+    "what": "412859cd4999eead",
+    "passages": "dfb7cc7dcb1a20c2"
+  },
+  "auditing-a-detected-correction-loop/E11": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "a0975c37e904a850",
+    "what": "2dac71288883f04e",
+    "passages": "7a9d89767ce485f6"
+  },
+  "auditing-a-detected-correction-loop/E12": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "b79b9d4ddca379e4",
+    "what": "d49c3680a15a9b14",
+    "passages": "7da1fa86bf4542d2"
+  },
+  "auditing-a-detected-correction-loop/E13": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "5c07af4f38cba302",
+    "what": "845ff2a1d9140b00",
+    "passages": "a6f58b9eba6daf84"
+  },
+  "auditing-a-detected-correction-loop/E14": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "7bbfac7022b33b78",
+    "what": "e4801efa773ab181",
+    "passages": "da07421ff4c72d8a"
+  },
+  "auditing-a-detected-correction-loop/E15": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "96c68904fca811ef",
+    "what": "28a37c4cd61bd4ab",
+    "passages": "deaf304577b88dd7"
+  },
+  "auditing-a-detected-correction-loop/E16": {
+    "verdict": "wrong",
+    "read": "2026-10-24",
+    "lines": "c1d6dbf8775064a3",
+    "what": "724806cbe3a863a2",
+    "passages": "704a5f49ceb7359b"
+  },
+  "auditing-a-detected-correction-loop/E17": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "fd3c721412b3ce52",
+    "what": "ed8bbcb5d20a125e",
+    "passages": "81e85a442bb3dd85"
+  },
+  "auditing-a-detected-correction-loop/E18": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "0691be6e2ec40d22",
+    "what": "506ead2d4bc98a04",
+    "passages": "62aa5736062d213c"
+  },
+  "auditing-a-detected-correction-loop/E19": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "15c780a1ff091a51",
+    "what": "29ceb17631a15dd3",
+    "passages": "9cff9ec7535f34dc"
+  },
+  "auditing-a-detected-correction-loop/E2": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "3daf78e14a3b0184",
+    "what": "297fe526ba101cb5",
+    "passages": "2d5638e008fc6813"
+  },
+  "auditing-a-detected-correction-loop/E20": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "3dd521ba53dfdf70",
+    "what": "096d8f9da9f806a5",
+    "passages": "134d10607a4996ff"
+  },
+  "auditing-a-detected-correction-loop/E21": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "292984abebfb9352",
+    "what": "eff3faab151ebd92",
+    "passages": "df6ee129904e9266"
+  },
+  "auditing-a-detected-correction-loop/E22": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "f26787ef64cbbea8",
+    "what": "f64e84b65250c13d",
+    "passages": "34ef6d8c058c3a84"
+  },
+  "auditing-a-detected-correction-loop/E23": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "78d43230f906c3f9",
+    "what": "f0b8d60a52f288dd",
+    "passages": "0c03d0dafda0c3f1"
+  },
+  "auditing-a-detected-correction-loop/E24": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "1e0825ce19fa4ff8",
+    "what": "bf16dc677b50d4c1",
+    "passages": "c611e77d0c5ffb0b"
+  },
+  "auditing-a-detected-correction-loop/E25": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "d0d1a9131878a9b6",
+    "what": "8089d4a872952649",
+    "passages": "1cab66a9ecb62de8"
+  },
+  "auditing-a-detected-correction-loop/E26": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "8a2f4c555c889144",
+    "what": "7e342d295caa1a52",
+    "passages": "54df20a2989a1130"
+  },
+  "auditing-a-detected-correction-loop/E27": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "171c3f36a6bb75b4",
+    "what": "1c6fe8cf6f450d00",
+    "passages": "64c4cf54e26199d0"
+  },
+  "auditing-a-detected-correction-loop/E28": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "6973865edf084b94",
+    "what": "a5c2d986a04951f2",
+    "passages": "d37fbcbe3f581ed9"
+  },
+  "auditing-a-detected-correction-loop/E29": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "6ec23c0ba44c4ee5",
+    "what": "8afa53977662a6e2",
+    "passages": "f52aa5c5c252e6d1"
+  },
+  "auditing-a-detected-correction-loop/E3": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "4e15e38a5ff13462",
+    "what": "e146675dd3d94cae",
+    "passages": "d83c60cef53bc799"
+  },
+  "auditing-a-detected-correction-loop/E30": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "2e2cf1f8984dbc1b",
+    "what": "1943a7cc0c4cbc59",
+    "passages": "dec7ab50a6f5ba92"
+  },
+  "auditing-a-detected-correction-loop/E31": {
+    "verdict": "wrong",
+    "read": "2026-10-24",
+    "lines": "b293d220d047b991",
+    "what": "96a91acc41d74857",
+    "passages": "807c047d53e53ba0"
+  },
+  "auditing-a-detected-correction-loop/E32": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "1d5005cbaeef4bbf",
+    "what": "ec88e15590c3e0fc",
+    "passages": "b7a996802cac8ad7"
+  },
+  "auditing-a-detected-correction-loop/E4": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "02312d1f9ed963a9",
+    "what": "84af74c7a4e41b5a",
+    "passages": "d83c60cef53bc799"
+  },
+  "auditing-a-detected-correction-loop/E5": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "41db6dbeb74d4f67",
+    "what": "66486788c0d35b07",
+    "passages": "05eafb7cbf01e639"
+  },
+  "auditing-a-detected-correction-loop/E6": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "eb2b0829d98e4133",
+    "what": "fa97763fa9e83d3d",
+    "passages": "d8481fb0edd57710"
+  },
+  "auditing-a-detected-correction-loop/E7": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "725b4e06ed42054b",
+    "what": "50bfb2fd24c050a3",
+    "passages": "d8481fb0edd57710"
+  },
+  "auditing-a-detected-correction-loop/E8": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "d535d57526ff3d3d",
+    "what": "b6f68e361b367250",
+    "passages": "16c6f4f8c43efb1e"
+  },
+  "auditing-a-detected-correction-loop/E9": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "bfd5ce17007eb867",
+    "what": "83b287396217e4e0",
+    "passages": "1ba82190a5371321"
+  },
   "clearing-a-record-for-release/E1": {
     "verdict": "supports",
     "read": "2026-10-24",
