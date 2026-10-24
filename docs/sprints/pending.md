@@ -2,6 +2,93 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventieth pass, 2026-10-24 ~06:3x UTC, message (host six-hour pass, §18): inbox cleared, one Tier B merge, five stale own-PRs closed, one ledger fix withdrawn before it reached HQ
+
+1. **Read own seat's open PRs first.** Found five open PM pull requests
+   (#304, #306, #308, #309, #312), each the prior pass's live tip with
+   the one before it as an ancestor (`git merge-base --is-ancestor`,
+   checked for all five rather than assumed). Started this run from
+   #312's tip rather than `main`. Closed all five pointing at this
+   pass's own pull request once its work was ready, so the owner reads
+   one instead of six; each closing comment names the ancestry check.
+
+2. **Inbox: six messages addressed to `pm`/`Ursa`, all now closed.**
+   - The lessons-register re-vendor handoff (exo-centralizer) was
+     already merged by an earlier pass tonight (00:27 UTC) before this
+     pass read it. Confirmed via `gh pr view`, not re-merged.
+   - The skills-evaluation ask (`chair:alexandria`) was already
+     answered by an earlier pass with a timed ask to the owner
+     recommending the one-record trial, expiring 2026-10-25 ~18:42 UTC.
+     Unchanged this pass; the clock still has time left.
+   - Research's note withdrawing the reviews-list/merge-state fix is
+     the one real new item. Checked its own evidence (282 pull requests
+     surveyed, zero reviews including the 164 merged, 142 of those 164
+     merged under the owner's own login including this seat's own Tier
+     B merges) and it holds. Turned the 2026-10-23 ledger entry negative
+     in `docs/ideas.md` rather than deleting it, replied to research on
+     the board, and corrected the board item that still named the
+     withdrawn fix. Nothing carried to HQ: a second wrong instrument is
+     worse than none.
+   - Exo's note (the no-pull-request signature is a constant across
+     twenty-three of twenty-three reports, and the draft-liveness window
+     this seat has been reading is thirty minutes too generous) is
+     informational and self-contained; nothing it asks for is unanswered.
+   - The chair's note that the public history was rewritten and every
+     clone must fetch and reset before pushing: checked against this
+     run's own clone. The fetch and the push both succeeded cleanly, so
+     this clone is already current; nothing to redo.
+   - The chair's note that alexandria's first full skill-eval run is
+     live on the host is informational; logged in `docs/ideas.md`'s
+     existing thread, no reply owed beyond what is already there.
+
+3. **Failed runs, last six hours: none.** `gh run list --status failure
+   --created ">=$(date -u -d '-6 hours' +%FT%TZ)"` returns empty. The
+   Actions side is clean; no new host-run false alarm beyond the three
+   occurrences Incident 19 already carries.
+
+4. **Tier B merge: one merged, the rest named with the reason they wait.**
+   Section 21 is confirmed landed on this repo's vendored standard
+   (`docs/decisions.md`, 2026-10-15 onward), so this pass merged without
+   waiting on anyone where the conditions held clean.
+   - **Merged:** the frontend scroll-lift pull request (`.quiet-link`
+     gets `.cta`'s hover physics) — not a draft, zero comments, one
+     green check, no charter or workflow path in its diff, clean merge.
+   - **Waits on the owner, Tier C (a `prompts/` path in the diff):** the
+     exo charter stack (three pull requests, one containing the other
+     two by ancestry) and both research charter edits. This seat has
+     read every `prompts/` diff as Tier C for eight consecutive days
+     since the un-settled charter-freeze ask (`INC-2026-10-18-tier-c-charter-freeze`,
+     still open, no owner word since), not as a fresh judgment each
+     pass, and this pass is the same reading rather than a new one.
+   - **Waits on the engineer, not the owner:** the register-merge-driver
+     pull request names its own required order — the revocation pull
+     request first, then itself, because they share the same ledger
+     append and a regenerated bundle index. The revocation pull request
+     is correctly held `blocked`: its own suite has one real, reproduced
+     test failure (a provenance bundle index stale by four commits after
+     a mid-run merge), and the fix is mechanical, not a design call. No
+     new commit has landed on it since the block, so neither pull
+     request moved this pass.
+   - **Untouched, drafts in progress:** two exo and research drafts
+     opened in the last hour, still inside their own liveness window.
+     One skill draft is well past it (idle since 02:07, now four hours),
+     handed back to the skill seat on the board rather than touched
+     directly, since finishing or closing it is that seat's call.
+
+5. **Sprint: none open.** `sprint-2026-10-12.md` closed its retro five
+   days late on 2026-10-23 after the disk outage, and no sprint file has
+   opened since. The next Monday ceremony, 2026-10-26, is where this
+   seat opens the next one; today is a message-triggered standup, which
+   does not open a sprint per this charter's own §11.1. Nothing from the
+   closed sprint is still owed: all three of its items shipped before
+   the outage.
+
+6. **Board.** One `note` reply to research, one comment correcting the
+   board item that still named the withdrawn fix, one `handoff` to skill
+   naming its idle draft, one `done` for the frontend merge, and the
+   closing comment on each of the five superseded pull requests. One
+   summary `note` posted to the whole company for this pass, named below.
+
 ## Sixty-eighth pass, 2026-10-24 ~01:5x UTC, message: exo's run failure triaged as Incident 19's third occurrence, PR #285/#293 disposition confirmed unchanged
 
 1. **Owed to nobody: the exo host-window-run failure is a tripwire false
