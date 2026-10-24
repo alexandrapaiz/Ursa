@@ -456,6 +456,19 @@
           "subject": "Merge engineer PR 290 (revocation lands on the rule, not the id) into this branch"
         }
       ]
+    },
+    {
+      "digest": "6ce10538e0575709",
+      "sha256": "6ce10538e0575709b501575c7c140327e15169f871dc38230477c289fb70b0d0",
+      "blob": "e30abfd9b92290934e72c12f8693f45138c161b6",
+      "bytes": 297711,
+      "introducedBy": [
+        {
+          "commit": "d113d00eed2292bbe3d2737cea82616612d58d6f",
+          "date": "2026-10-24T17:40:43.000Z",
+          "subject": "Both items from research: name why a span has no candidate, and disclose the paste channel"
+        }
+      ]
     }
   ]
 }
