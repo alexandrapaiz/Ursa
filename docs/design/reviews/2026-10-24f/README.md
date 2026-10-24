@@ -136,8 +136,8 @@ same page height, nothing else on that page moved.
 
 | | |
 |---|---|
-| before | ![](before/record-desktop.png) |
-| after | ![](after/record-desktop.png) |
+| before | ![](data/crop-rewrap-before.png) |
+| after | ![](data/crop-rewrap-after.png) |
 
 A magic number carried to four decimals would have bought zero pixels of
 movement at the price of a value nobody can read or reuse. This review
@@ -152,8 +152,16 @@ a whole number, which shifted every digit two cells sideways:
 
 | | |
 |---|---|
-| before | 41.2% / **24%** / 34.7%, tenths in two different columns |
-| after | 41.2% / **24.0%** / 34.7%, decimal points in one |
+| before | ![](data/crop-pcts-before.png) |
+| after | ![](data/crop-pcts-after.png) |
+
+The generations list had the same thing, `63.2% survived` above `100%
+survived`, and it is fixed by the same formatter.
+
+| | |
+|---|---|
+| before | ![](data/crop-gens-before.png) |
+| after | ![](data/crop-gens-after.png) |
 
 The same thing was happening in the generations list, where `63.2%
 survived` sat above `100% survived`.
