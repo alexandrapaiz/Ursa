@@ -770,3 +770,120 @@ skill was one file in practice, and they went quietly wrong when the format
 grew a second file. So when §2 gains a third, this section is what has to be
 read again, and `skills/citing-files.mjs` is the one place that answers which
 files count.
+
+## 5q. The fingerprint is owed by the run that writes the citation, and a skill whose guards are red is not shipped
+
+(Added 2026-10-24, thirteenth run, after reading the sixth skill's 41 refs
+and finding ten of them wrong about where they pointed.)
+
+§5g already says a new citation fails until its fingerprint is recorded, and
+says the point is to put the reading step on the author rather than the
+reviewer. That is the right rule and it was not enough, because it does not
+say *when*, and a rule about an author's obligation with no deadline is
+discharged by the next run or by nobody.
+
+**What it cost, measured.** `clearing-a-record-for-release` merged on
+2026-10-23 as PR #281 with all 47 of its cited ranges unfingerprinted and
+all 41 of its refs unread. Its description reported "224 sources, 291
+ranges" and "184 of 184 bound, 0 refs unread". Neither was true of anything
+committed. On `main` the next morning `check-evidence.mjs` exited 1 with 69
+failures and `relevance-sweep --stale` exited 1 with 41 refs unread. Reading
+the 41 found ten ranges that did not hold, and the four worst share one
+cause: they were written against the 2026-10-01 revision of
+`ursa-major/src/consent.cli.ts`, which two commits rewrote on 2026-10-23,
+the same day the skill was written. Each of the four resolves to its claim
+at `14ff4cb` and to nothing on `main`. Three of them had landed on the next
+ref's receipt: E24's range held the dispatcher's usage string, E25's held
+the branch that is E24's evidence, and E26's held the branch that is E25's.
+
+So the deadline matters more than the rule. A fingerprint recorded in the
+same run would have failed on all four immediately, because the lines it
+hashed were already not the lines the author read. A fingerprint deferred to
+the next run records whatever the tree says by then and certifies the error.
+
+1. **Record the fingerprint in the same run that writes the `source:` line**,
+   before the pull request is readied, not as a cleanup the next run inherits.
+   A citation without a fingerprint is not a weaker citation, it is an
+   unverified one, and the gap is where same-day drift lives.
+2. **Neither guard may be red when the skill is proposed for merge.** Both
+   were red here and the skill merged anyway, which is the part no tool
+   caused. A red `check-evidence.mjs` on a brand-new skill reads as "the
+   author has not got to it yet" rather than as "this is wrong", and those
+   are indistinguishable from outside. Treat the first as the second.
+3. **Do not report a guard's output you did not run on what you committed.**
+   The numbers in #281's description are the numbers of a working tree that
+   was never pushed. The cheap defence is to paste the command and its exit
+   status rather than its remembered result.
+
+**The sweep's absent-word column is the signal that fires when no
+fingerprint exists, and it is sharper than it looks.** The dossier's
+`signals:` line reports how many of a `what` field's words are absent from
+the cited range. Across the sixth skill's 41 refs that ratio separates the
+mis-anchored from the sound almost perfectly:
+
+```
+  E35  17/17  1.00   re-pointed      highest among refs that held:
+  E26  13/14  0.93   re-pointed        E21   7/11  0.64  (widened)
+  E25  10/11  0.91   re-pointed        E33   4/10  0.40  (supports)
+  E24   9/10  0.90   re-pointed        E41   6/16  0.38  (widened)
+  E36  11/13  0.85   re-pointed        E40   5/15  0.33  (supports)
+  E23   9/14  0.64   widened           E11   3/13  0.23  (supports)
+```
+
+At a threshold of 0.85 that is five flagged, five genuinely pointing at the
+wrong lines, and nothing flagged that held.
+
+**Corrected 2026-10-24, on the library instead of one skill of it.** The
+paragraph above was measured on 41 refs in the skill that had just failed,
+which is a threshold fitted to the sample that suggested it. Run
+`node skills/relevance-sweep.mjs --signal` to reproduce the wider
+measurement. Against the ranges as they stood before anyone corrected them,
+recovered from git for 136 of the library's 184 refs, the same threshold
+flags seven and two of the seven are sound:
+
+```
+  all refs           at 0.85: 7 flagged, 5 mis-anchored, 2 held
+  refs citing one file         5 flagged, 5 mis-anchored, 0 held   (127 refs)
+```
+
+Both of the two that held cite two files, and the reason generalises rather
+than being a quirk of those two. `running-an-outcome-record-trial/E1` claims
+there are two capture paths with two separate entry points and cites the
+first seven lines of each. Its evidence is the shape of the citation and not
+the text of either file, so none of the claim's words can appear in either
+range and no widening will ever lower its ratio. The same holds for a claim
+about where a line sits rather than what it says, which is
+`adding-a-bound-to-the-record-gate/E12` at 0.846, a comment stranded a
+hundred lines from the function it describes.
+
+So the rule is narrower than the old paragraph said and it is a reading
+instruction rather than a gate. **A ref at or above 0.85 whose sources name
+a single file is mis-anchored until you have read the lines and said
+otherwise. If the words are absent because the claim is about the position
+or the shape of the citation, the audit note has to say so, because nothing
+mechanical will ever defend that ref again.** `--signal` prints exactly
+that list at the end of its report.
+
+**Why it is not a third failure class in `--stale`, which is what the ledger
+first proposed.** It would not catch anything that gate does not already
+catch. Since 2026-10-24 `--stale` fails on any ref with no verdict, so a new
+citation cannot reach a green guard unread, and a range that moves after
+being read comes back stale. The only case left is a reader who read a
+mis-anchored range and blessed it, and firing on that means firing on refs a
+reader has already judged, where E12 and `E22` at 0.909 show the alarm would
+be false. A gate that re-litigates readings and is wrong twice in its first
+four alarms gets suppressed, and then the signal is worth less than it is
+now.
+
+The first thing the rule caught was not a mis-anchor. Reading `E22` under it
+turned up a defect in the sweep itself: the sentence splitter ended a
+sentence at the colon inside an inline code span, so the passage a reader
+was shown for `E22` was `1` and its tag. Fixed, with the three verdicts it
+unsettled re-read. A rule that sends a reader somewhere nobody had a reason
+to look pays for itself in ways that are not on its own ledger.
+
+Ours: the generalisation is that an obligation with no deadline is an
+obligation on whoever is unlucky, and this library has now paid for that
+twice, once at §5o for a verdict that could expire silently and once here
+for a fingerprint that could be owed forever. When a section adds a duty,
+it should say which run discharges it.

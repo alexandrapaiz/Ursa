@@ -395,3 +395,88 @@ test('a sibling file that cites nothing leaves every verdict bound', () => {
   assert.equal(out.status, 0)
   assert.match(out.out, /2 of 2 verdicts bound to what was read/)
 })
+
+test('a ref with no audit row at all fails --stale, and is named', () => {
+  // The failure this assertion is written against happened: PR #281 merged a
+  // skill whose 41 refs had no audit row, and `--stale` exited 1 only because
+  // of fifteen stale verdicts in two unrelated skills. Remove the drift and
+  // the gate was green over a skill nobody had read a line of.
+  //
+  // So the fixture is the library with one ref read and recorded and the other
+  // never read. Before 2026-10-24 this exited 0.
+  const dir = library({ audit: `# audit
+| ref | verdict | read | note |
+|---|---|---|---|
+| \`alpha/E1\` | supports | 2026-10-18 | the constant is right there |
+` })
+  run(dir, ['--record', 'alpha/E1'])
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 1)
+  assert.match(out.out, /unread +alpha\/E2 {2}no verdict in relevance-audit\.md/)
+  assert.match(out.out, /1 of 1 verdicts bound to what was read, 1 ref unread/)
+  // And an unread ref is not also reported as unbound, which would double-count
+  // it and name two repairs where there is one.
+  assert.doesNotMatch(out.out, /unbound +alpha\/E2/)
+})
+
+test('reading the last ref turns --stale green, and only that', () => {
+  // The other half of the gate: it has to be satisfiable. A check that cannot
+  // pass gets suppressed, which is the same end state as one that cannot fail.
+  const dir = bound()
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 0)
+  assert.match(out.out, /2 of 2 verdicts bound to what was read, 0 refs unread/)
+})
+
+test('a colon inside an inline code span does not end a sentence', () => {
+  // The defect this is written against shipped in the library and survived two
+  // readings: the splitter ended a sentence at any `:` followed by a space, so
+  // for a ref cited after a span like `turnsToAcceptance: 1` the passage put in
+  // front of the reader was the three characters after the colon and the tag.
+  // Two of the library's 184 refs were in that state on 2026-10-24.
+  const dir = library()
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'),
+    readFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), 'utf8')
+      .replace('The threshold is 0.6 [E1]',
+        'The gate declares `THRESHOLD: 0.6` and refuses below it [E1]'))
+  const out = run(dir, ['alpha/E1'])
+  assert.match(out, /· The gate declares `THRESHOLD: 0\.6` and refuses below it \[E1\]/)
+  // The sentence is one passage and not two, which is the whole assertion: a
+  // reader shown "0.6` and refuses below it [E1]." can still reach the right
+  // verdict from the range, and does, without ever reading the claim.
+  assert.doesNotMatch(out, /· 0\.6` and refuses/)
+})
+
+test('--signal reports every ref and sets the one-file refs above the line apart', () => {
+  // The flag exists because a threshold was proposed on 41 refs in one skill
+  // and the library has 184 in six. The report is the counter-check, so the
+  // part that has to hold is that it covers every ref and not a queue: a ref
+  // already read is exactly the ref whose high ratio nothing else will mention
+  // again.
+  const dir = library({ audit: `# audit
+| ref | verdict | read | note |
+|---|---|---|---|
+| \`alpha/E1\` | supports | 2026-10-18 | the constant is right there |
+` })
+  // A third ref whose every content word is absent from its range, which is
+  // the case the report is about. Written here rather than into the shared
+  // fixture, because the other tests count that library's refs.
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'),
+    readFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), 'utf8')
+      .replace('supersedes: []', `  - ref: E3
+    what: the resolver is reached through two separate entry points
+    source: src/a.ts:2
+supersedes: []`))
+  const out = run(dir, ['--signal'])
+  assert.match(out, /0\.500\s+1\/2\s+1\s+supports\s+alpha\/E1/)
+  assert.match(out, /1\.000\s+\d+\/\d+\s+1\s+unread\s+alpha\/E3/)
+  // E1 is read and E3 is not, and both are in the report. That is the
+  // difference between this and the default queue, which drops what it has
+  // already read and so can never mention a verdict given to a range holding
+  // none of its claim.
+  assert.match(out, /cites a single file/)
+  assert.match(out, /1\.000\s+unread\s+alpha\/E3/)
+  // And the summary groups by verdict, because a sorted list of 184 rows does
+  // not answer whether the ratio separates the verdicts.
+  assert.match(out, /supports\s+1\s+0\.500/)
+})

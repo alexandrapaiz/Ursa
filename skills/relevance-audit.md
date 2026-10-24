@@ -314,3 +314,224 @@ place for it, and it was in prose that no tool reads. Nine is the number.)
 | `adding-a-bound-to-the-record-gate/E27` | supports | 2026-10-18 | The file header gives the whole reason, including the constraint it rests on. |
 | `adding-a-bound-to-the-record-gate/E28` | supports | 2026-10-18 | The procedure section, and the sentence that the suite reads only committed files and never imports the generator. Overlap: E29 cites line 201 inside this range for the stale violation count, and the two agree, since the drift is in the comment on that line and not in the commands. |
 | `adding-a-bound-to-the-record-gate/E29` | supports | 2026-10-23 | Re-read 2026-10-23 after the citing passage was corrected, and the verdict is unchanged: all three stale spellings the passage now names are inside `README.md:1-11,201`, the heading's "twenty-two records" at line 1, the opening's "seventeen bounds" at line 11, and the "27 violations" annotation at line 201. What changed is the passage, which had said the file was stale "in three places" and understated it: `grep -cE 'seventeen|twenty-two' ursa-major/fixtures/violations/README.md` returns 8, at lines 1, 5, 11, 42, 61, 87, 88 and 120, so nine stale lines counting 201. The spread is a grep and not a range, per §5l, and the range still carries the three the passage attributes to it. Line 4's "twenty-three committed files, one base and twenty-two counterexamples" is the same drift: the directory holds 24 files, a base and 23 counterexamples.
+
+## Re-reads after the drift of 2026-10-24
+
+Twenty-two ranges in two skills drifted when main moved under the library.
+`relocate-anchors.mjs` against `aee4361` relocated twenty of them onto
+identical lines, which keeps their verdicts by construction, and the two
+below needed a reader. Both are the same shape and it is worth naming: the
+mechanical pass searches the path the citation names, so a function that
+moves to another file is never a relocation to it, however little its text
+changed. E31 is this library's first cross-file re-point.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `distilling-a-tuning-record/E12` | widened | 2026-10-24 | The claim holds and is now cited at the two branches it names rather than at one block containing both. `merge.ts:57-64` is the reinforce path, `if (match)` down to `match.evidenceCount = match.evidence.length`; `76-83` is the create path, the `TuningAxiom` literal with `evidenceCount: evidence.length` beside the `evidence` it is the length of. The old `45-62` ended at line 62, so after the file moved it held the reinforce branch's basis check and neither assignment. Overlap: E13 cites `57-66`, the same reinforce branch, for what a revoked or user-edited match does instead, and the two agree. |
+| `distilling-a-tuning-record/E31` | widened | 2026-10-24 | Both the read and the sort left `bridge/index.ts`. `tuningLines` used to open `.ursa/tuning.json` itself and sort by `evidenceCount` on the way out; it now returns `tuningUnits(projectPath)` filtered, and `serve.ts:176-179` is the only reader of the store while `serve.ts:194` is the only sort. So two of the three conjuncts are in a file this ref did not cite, and the third, ciphertext to the sync route, is where it was. Re-pointed to `serve.ts:176-179,194; bridge/index.ts:93-95,147-157`. The passage said the overlay "reads the project's own `.ursa/tuning.json` and nothing else", which sent a reader to the bridge for an open call that is not there; it now says so through the one shared reader, which is what the code's own comment gives as the reason for the move. Shared sentence with E18 on `evidenceCount` being sorted on in both the export and the overlay: E18 carries the export, and E31's half survived the move only because the sort went with the reader. |
+
+## The sixth skill's refs, read 2026-10-24
+
+`clearing-a-record-for-release` merged on 2026-10-23 with all 41 of its refs
+unread. The eleventh run's description reported reading them; the verdicts
+were never committed, so the claim was unverifiable and they are read here
+rather than trusted. The twelfth run planned this and was killed before it
+got to it.
+
+Two of the 41 do not hold. Both are worth naming before the table, because
+they are the two shapes this audit exists to catch and the evidence lock is
+green on both.
+
+**E7 is `wrong`, and it was wrong on arrival rather than drifted.** The
+skill said a `batch.json`'s every string is "one of thirty-two literals or
+an ISO date". `isPermittedString` admits `'0.1.0'`, `'minor-aggregate'`,
+the 10 members of `DOMAIN_BUCKETS` and the 22 of `MODEL_VOCABULARY`, which
+is 34. The source comment the skill was reading says thirty-two too, so the
+skill laundered a number that was never true: `git log -S 'thirty-two
+literals'` and the two vocabularies both land in `14ff4cb`, and the count
+at that commit was already 34. A reader inside E7's range cannot catch this,
+because neither vocabulary is in the range, which is the whole lesson. The
+sentence is rewritten to the counted number and the source's own comment is
+filed for the engineer.
+
+**E1 is `supports`, but its `what` field says "the four places a record
+holds raw text" and the range names three:** `files[].text`,
+`generations[].text`, `conversations[].prompts[].text`, plus the `types.ts`
+comment, which is not a place. E10's range at `publish.ts:37-41` names the
+same three independently. The citing sentence is only the table cell "never
+crosses, under any circumstances", which lines 22-23 carry verbatim, so the
+verdict stands and the `what` field is corrected.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `clearing-a-record-for-release/E1` | supports | 2026-10-24 | The cited cell, "never crosses, under any circumstances", is lines 22-23 verbatim, including "even encrypted". The boundary claim is lines 1-2 and the `survival_stats` SQL is 17-20, field for field as the `what` says. The `what`'s "four places" is three; corrected above and in the frontmatter. |
+| `clearing-a-record-for-release/E2` | supports | 2026-10-24 | All four conjuncts in range: counters-alone "would already be correct" but not checkable by counsel (28-31), re-derivation from outside over the serialized payload (31-33), the two numbered checks (35-44), and "a check that cannot fail proves nothing" with the poisoned payload per check (46-48). The citing sentence is close to a quote of 31-33 and 46-48. |
+| `clearing-a-record-for-release/E3` | supports | 2026-10-24 | "Derived from a file extension and nothing else" (59), `src/clients/northwind/pricing.ts` names a customer (61-62), `other` degrading "to a bucket rather than to a leak" (65-66), and `domainOf` discarding everything before the last dot (97-102). Split with E4 on the trigger test's sentence: E3 carries the path half, E4 the enum half, and E4's range holds the 62-character sentence the load-bearing clause rests on, so the division is right. |
+| `clearing-a-record-for-release/E4` | supports | 2026-10-24 | The 62-character English sentence against "printable, no path punctuation, under 64 characters" (110-112), the enum rather than a pattern (115), classification not normalization with "nothing from the input survives into the output" (149-152), and the accepted cost pointing the right way (118-120). One paraphrase: the skill's "any constraint loose enough to admit the unknown is loose enough to admit prose" is the file's "any regex permissive enough to admit an unknown model's name is permissive enough to admit prose" (112-113), generalized from regex to constraint. The skill flags it as the file's own sentence "written about regular expressions", which keeps the attribution honest, so this is a widening of scope the prose declares rather than a misquote. |
+| `clearing-a-record-for-release/E5` | supports | 2026-10-24 | The three fail-closed places in the stated order (227-231) and each one again in code: scope (240-249), tombstone (257-264), unmatched marker (266-277). The second citing sentence is lines 231-232 verbatim. The `withheld.push` for a rejected model dedupes per record and marker (268-269), which the skill does not claim either way. |
+| `clearing-a-record-for-release/E6` | supports | 2026-10-24 | The floor's constant of five (165-166), "the count is publishable, the rows are not" (313), the generation-weighted mean and why the plan's schema forces it (321-329), and the floor applied at 360. The cited claim is that the one number the quoting skill never sees is an aggregate across contributors, which 318-319 and `contributorCount` at 363 carry. |
+| `clearing-a-record-for-release/E7` | wrong | 2026-10-24 | The count is 34, not thirty-two: `'0.1.0'`, `'minor-aggregate'`, 10 domain buckets and 22 model identifiers, verified by counting both arrays and confirmed unchanged since `14ff4cb`, the commit that introduced both the arrays and the "thirty-two literals" comment. So the source comment was wrong when written and the skill repeated it. Everything else in the ref holds: exact membership plus one date pattern (394), no length-bounded free-form case (395), and that being what makes check 1 strong (395-397). Sentence rewritten to say thirty-four and to attribute the number to the two vocabularies rather than to the comment. |
+| `clearing-a-record-for-release/E8` | supports | 2026-10-24 | "The audit's definition of raw" is line 407 verbatim, and the 2026-10-06 comment (433-438) carries the rest of the claim including "the single most-produced quote in the product was the one string the disclosure audit never read" and the reason, that `oneShotCorrections[].text` is the only signal a label-stage record emits. Both added fields are in range at 439-440. |
+| `clearing-a-record-for-release/E9` | supports | 2026-10-24 | Leaf values and never key names (501-502), "load-bearing rather than tidiness" with the `"contributorCount":1` self-resolution case that makes it concrete (502-506), and the NUL run at least one shingle wide (517-519) with the code at 519-520. The second citing sentence is 517-518 almost verbatim. |
+| `clearing-a-record-for-release/E10` | supports | 2026-10-24 | "This gate is deliberately NOT src/disclosure.ts" (49), the opposite shape with all four reasons, the raw text being the point, the publisher owning the text, their own hosting, no Ursa system involved (52-55), and "reusing `auditBatch()` here would reject every page this module exists to write" (55-57). The claim that the module says so in its own header is true in the strongest sense: the header is the citation. |
+| `clearing-a-record-for-release/E11` | supports | 2026-10-24 | "Must be `true` or nothing is written" (466) and "no default so that no caller acquires it by omission" (468) are both verbatim, and `DisclosureNotAcknowledged` takes the manifest as a readonly field (497-498), so the refusal carries it. |
+| `clearing-a-record-for-release/E12` | supports | 2026-10-24 | The best-evidenced ref in the skill. All four conjuncts verbatim in 19 lines: load-bearing for what the disclosure can honestly claim (247), the git blob already in history with no prompts because a commit carries no conversation (250-254), the session log that was never in the repository (254-256), and the measurement, two records, 143,218 characters, zero prompts, 2026-10-18, against which the sentence would have been false (258-261). |
+| `clearing-a-record-for-release/E13` | supports | 2026-10-24 | Computable and printable "BEFORE a byte is written" (234), the published index's `disclosed` as "the counts the publisher acknowledged" (227-228), and `filePaths` as the one string field with the `northwind/pricing.ts` reason and the clause the skill paraphrases, "can stop a publication for a reason the person could not have reached from a number" (236-240). Three citing passages, each reading a different clause of the same block. |
+| `clearing-a-record-for-release/E14` | supports | 2026-10-24 | Prose with the numbers inline rather than a table, and "that does not survive being a row" (393-395), and the closing lines "Nothing here is aggregated, redacted or withheld: a published record is the record" at 413-414, which the skill quotes almost exactly. The inline numbers are visible in the builder at 402-404 rather than only asserted. |
+| `clearing-a-record-for-release/E15` | supports | 2026-10-24 | The replaced sentence quoted in range, "text that has never been public before, even when the repository is", and why it was false on the only path the Action uses (423-429), and the mixed case returned as lines because collapsing picks a claim "wrong about half the set" (431-434). The code shows both branches and the empty case (440-456), so the mixed set getting both sentences is readable rather than inferred. |
+| `clearing-a-record-for-release/E16` | supports | 2026-10-24 | Carries all four of its citing passages. The four disagreement cases are 512-515 verbatim, backup, stale runner cache, copy between clones, tombstone for a record never here. The counters-can-be-re-run against a page that stays up is 517-519. The ordering claim is doubly in range, the comment at 538-539 and the `isForgotten` guard at 540 placed after the id check and before any read. |
+| `clearing-a-record-for-release/E17` | supports | 2026-10-24 | The id as `basename(projectPath)`-date-sha7 with the worked `northwind-pricing` example (641-645), the path segment a search engine can index and `disclosed.recordIds` listing them (649-651), and warned-not-refused because "a refusal would be this module overruling the person whose data it is" (666-670). The quiet runner case and the loud case are 659-664, which is the part that makes the warning's threshold readable. |
+| `clearing-a-record-for-release/E18` | supports | 2026-10-24 | The two invocations shown as commands (11-12), exit 3 as "the disclosure was shown and not acknowledged" (35), "3 rather than 1: this is not a failure" with the red-run-for-a-correct-dry-run reason (37-39), and the tty argument including "the exact shape of consent this project refuses elsewhere" (14-17). The skill's "refuses everywhere else" for the file's "refuses elsewhere" is the same claim. |
+| `clearing-a-record-for-release/E19` | supports | 2026-10-24 | Three invariants named and each covered by a test (12-13), fail closed over missing, empty, truncated and unparseable (15-20), and the cited half, revocation auditable, as "every transition is appended to the scope's `history` with a timestamp and the action that caused it" and "nothing overwrites a prior state without leaving the prior state behind" (22-25), which is the citing sentence nearly verbatim. Erasure reaching the inference is 27-34 and is the half E34 and E25 carry elsewhere. |
+
+### The stale-revision cluster, and why nothing caught it
+
+Four of the eight refs into `ursa-major/src/consent.cli.ts` were anchored at
+line numbers from a revision of that file which stopped existing on the day
+the skill was written. The check is one command and it is worth recording
+because it names the whole defect at once:
+
+```
+                       at 14ff4cb (2026-10-01, 201 lines)   on main today (237)
+E23 68-104             its claim present                    absent
+E24 119-129            its claim present                    absent
+E25 131-145            its claim present                    absent
+E26 147-171            its claim present                    absent
+```
+
+`consent.cli.ts` was rewritten twice on 2026-10-23, by `68e573f` ("Enforce
+revocation at the store, not through a model-supplied field") and `d4c8969`,
+which together added the `release-blocked` branch and the blocked-statement
+block to `describe`, and pushed everything after line 90 down by about
+fifteen lines. The sixth skill was created the same day against the earlier
+text.
+
+The consequence is not that the claims are false. Every one of the four is
+true and every one of them is somewhere in that file. The consequence is
+that E24's range held the dispatcher's usage string, E25's held the
+`grant`/`revoke` branch which is E24's evidence, and E26's held the
+`revoke-axiom` branch which is E25's. Three refs were each sitting on the
+next one's receipt.
+
+**A fingerprint would have caught all four at write time, and there was no
+fingerprint**, because the eleventh run never ran `check-evidence.mjs
+--update`. That is the same omission that left all 41 refs unread, so one
+skipped command hid two independent failures. The sweep's own mechanical
+signal did fire, loudly, and nobody was reading it: E26 reported 13 of 14
+`what`-words absent from its range, E25 10 of 11, E24 9 of 10, and E35,
+below, 17 of 17. The library had the evidence of its own defect in a
+column nobody had a reason to look at until the verdicts were being written.
+
+A second pair is the same shape in `docs/design/consent-and-erasure.md`:
+E35's range held E36's section and E36's range held E35's two paragraphs.
+There the cause is not a stale revision but the §6c table and the §7 limits
+list being transposed when the two refs were written.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `clearing-a-record-for-release/E20` | supports | 2026-10-24 | "Anything that is not the literal string 'granted' is withheld" (114-116) and "a file we cannot parse is indistinguishable from an attacker's truncation, and the safe reading of both is 'this user has consented to nothing'" (125-127), which is the second citing sentence almost verbatim. Missing file at 131, unparseable at 133-137, JSON null at 138. One precision worth recording for whoever reads this next: the citing sentence lists a JSON array among the inputs that come back withheld, and it is withheld, but not by the line that looks like it does the work. `typeof [] === 'object'`, so line 138 passes an array through; it is `(o.scopes ?? {})` at 140 collapsing to `coerceScope({})` that makes the state `withheld`. The claim holds, by a different line than a reader checking 138 would conclude. |
+| `clearing-a-record-for-release/E21` | widened | 2026-10-24 | Widened `197-240` to `197-247`. The file deletion (217-219) and the tuning strip (225-233) were in range, and the docstring promises at 207 that the tombstone "is also appended to the consent file", but the `saveConsent` that appends it was at 241-246, outside. So the ref asserted its third conjunct and cited only the promise of it. The citing sentence's last clause, "from the git history it was derived from", is not in this range at all and is E19's, at `consent.ts:33-34`; the two refs share that sentence and E21 carries the three mechanisms while E19 carries the reason re-deriving would otherwise bring it back. |
+| `clearing-a-record-for-release/E22` | widened | 2026-10-24 | Widened `1-17` to `1-18`. The range ended mid-sentence, on "and the whole value of this boundary is that it holds when", and the clause that completes the argument, "nobody is watching it", was line 18. The rest holds: `disclose` has no `--audit` flag, the audit always runs, a single finding means the file is not written and the command exits 1 (14-15), and "an opt-in audit is a check that gets skipped on the day it would have mattered" (16-17) is the citing sentence verbatim. |
+| `clearing-a-record-for-release/E23` | widened | 2026-10-24 | Widened `68-104` to `68-119`. Of the five things the citing sentence lists, the range carried three: each scope's state with its last five transitions (72-78), the record count (82), and every active inference with its evidence count (88-89). The other two were past line 104, the erasures with what each removed at 108-113 and the closing sentence that differs by consent state at 115-118. Both are the clauses the sentence ends on, so a reader checking it would have run out of range exactly where the claim got specific. See the cluster note above for why the range stopped there. |
+| `clearing-a-record-for-release/E24` | widened | 2026-10-24 | Re-pointed `119-129` to `134-143`. The old range held `runConsentCommand`'s destructuring and its usage string and not one word of the claim. The claim is a single line, 142: "Anything already sent is outside this file's reach, so revoking here is a stop, not an undo. Deletion of what was sent is a request to the aggregation layer." The new range is the `grant`/`revoke` branch, so the reader also sees that this sentence is the `revoke` arm of a ternary whose `grant` arm is the opposite promise (140-142), which is the part that makes it checkable rather than merely present. The same claim appears a second time in `docs/design/consent-and-erasure.md:538-541`, which names the CLI as where it is said in those words. |
+| `clearing-a-record-for-release/E25` | widened | 2026-10-24 | Re-pointed `131-145` to `146-159`. The old range was the `grant`/`revoke` branch, which is E24's evidence and says nothing about axioms. The claim is line 154, verbatim and entire: "It is kept as a tombstone so a later distillation cannot bring it back, and it is excluded from every export and from the overlay." The new range is the whole `revoke-axiom` branch, so the tombstone claim is readable beside the `revokeAxiom` call that produces it (151). |
+| `clearing-a-record-for-release/E26` | widened | 2026-10-24 | Re-pointed `147-171` to `180-194`. The old range held the `revoke-axiom` and `release-blocked` branches, which is why it reported 13 of 14 `what`-words absent, the loudest mechanical signal in this skill. The `disclose` branch is at 180, and it carries the order the ref claims, in the order it claims: projection (183), every withholding printed (184), the audit over the result (190), and a single finding meaning nothing is written with a return of 1 (191-194). |
+| `clearing-a-record-for-release/E27` | supports | 2026-10-24 | Incident 2's three data classes and the day they were public (13-15), incident 4 as the same three returning through new files because nothing said which fields were dangerous (15-18), the gate's three regular expressions (18-20), and "it does not catch the thing that actually leaked in incident 2, which was ordinary English that the owner had typed" (20-21), which is the second citing sentence verbatim. Field-level rather than pattern-level at 23. |
+| `clearing-a-record-for-release/E28` | supports | 2026-10-24 | All four surfaces enumerated (34-45), the viewer as "a second full copy of the sensitive fields rather than a rendering of the safe ones" (36-37) verbatim, tuning as the fourth surface because an axiom statement can carry the session's words (43-45), and "a viewer that redacts and a JSON file that does not has protected nothing, because both ship together" (48-49) verbatim. Redaction before entry rather than at rendering is 47-48. Three citing passages across both files, each on a different surface, all in range. |
+| `clearing-a-record-for-release/E29` | supports | 2026-10-24 | All five classes with their names in the order the skill lists them (53-78). Class D's "anything credential shaped that a person pasted into a session while working" is 68-69. The second citing sentence rests on the last line of the range, "Their presence is not the owner's to sign off" (78), which is verbatim, and Class E's reason, a repository with more than one contributor containing people who did not consent, is 75-78. |
+| `clearing-a-record-for-release/E30` | supports | 2026-10-24 | Seven citing passages, the most in the skill, and the field table carries every one. `stats.*` in full ships (107), span offsets and classes ship and are "the label" (98), generation fates ship (106), `files[].text` and `files[].spans[].text` and `generations[].text` and `conversations[].prompts[].text` and the signal arrays all private by default (97, 99, 103, 104, 110). The span-text argument is 99 verbatim, "recoverable from offsets, so dropping it loses nothing a buyer needs". The pattern and its reason are 113-117, including "the label is supplied by what survived rather than by the text of what survived", which the skill quotes exactly. The trigger test's claim that the table names the field that leaked is line 103, "This is the incident 2 field". |
+| `clearing-a-record-for-release/E31` | supports | 2026-10-24 | The four clauses in the skill's order (123-135), the per-record sign-off that "does not generalise to the next one" (131-132), and "Retention is not sign off, and neither is the absence of a complaint" (137). The last line ties it to the acceptance verdict, which is the same rule `CLAUDE.md` states, so the range carries the reason and not only the rule. |
+| `clearing-a-record-for-release/E32` | supports | 2026-10-24 | The finding is in range as its own labelled paragraph (164-171): the fixture passing every mechanical class while carrying three Class A fields, a real record of the same shape passing and not being safe, and "the gate's three expressions are blind to the only class that caused incident 2". The trigger test's stronger reading, that a green gate is evidence about paths, slugs and UUIDs and nothing else, follows from 167-168 rather than being stated, which is a fair inference and the only one in this ref. |
+| `clearing-a-record-for-release/E33` | supports | 2026-10-24 | Three lines carrying five conjuncts, and the densest ref in the skill. "No other edge crosses. `.ursa/records/*.json`, `.ursa/tuning.json` and `.ursa/consent.json` have no outbound edge at all" is line 85 verbatim, which is the whole of the citing sentence including the part the skill calls the claim to defend. The edge's payload is described field by field in the same line. |
+| `clearing-a-record-for-release/E34` | widened | 2026-10-24 | Re-pointed `410-436` to `427-438`. The old range opened on sixteen lines of the shingle corpus and the NUL separator, which is E9's claim and not this one, and it closed two lines before the row the fourth citing passage needs. Line 438 is that row: an axiom also grounded in a record the user has not erased survives, "and that is correct". The §6c table carries the rest, "deleted outright, not tombstoned" at 435 and "keeps its statement, loses this evidence, `evidenceCount` recounted" at 436, and "these are different operations and the difference is the design" at 429 verbatim. The third citing passage's "invalid by construction" clause is E19's, at `consent.ts:31-33`, and the two share that sentence with E34 carrying the operation and E19 the type-level reason. |
+| `clearing-a-record-for-release/E35` | widened | 2026-10-24 | Re-pointed `438-461` to `489-503`, the largest miss in the skill and the one its own signals flagged hardest, 17 of 17 `what`-words absent. The old range was the 2026-10-23 revocation-store correction, which is a different subject entirely. Both schema defects are at 489-503: the missing character total, with "for a scalar a lab pays against a contract it is wrong, and the fix is a `sample_chars BIGINT` column" (495-497), and the collapsed survival scalar, with `survivedChars` counting `survived_verbatim` and `survived_mutated` together and `CLAUDE.md` §1's mutation-is-the-correction making that "the most informative thing in the record" (499-503). Both citing sentences are then readable from inside the range. The `what`'s first conjunct, `aggregate()` as the reference implementation of what the ingest route owes, is not here; it is at 535-537, which is E36's new range, and no citing sentence rests on it under E35. |
+| `clearing-a-record-for-release/E36` | widened | 2026-10-24 | Re-pointed `489-513` to `533-555`. The old range was E35's two defect paragraphs plus the §8 tooling table, so the two refs were transposed. The §7 limits list carries all four citing passages: zone B unbuilt with `aggregate()` as "the reference implementation of the floor that route owes, not the route" (535-537), the bridge being end-to-end encrypted and carrying the user's own tuning to the user's own browser so it is not an aggregation edge, "also not gated by `consent.json`, and whether it should be is a question for the owner" (542-548), the floor living in zone B with "`contributorCount` is 1 in every row a device emits" (549-552), and the audit checking text rather than inference with the differential-privacy sentence (553-555). |
+| `clearing-a-record-for-release/E37` | supports | 2026-10-24 | The ledger entry's own heading states the finding (8117), and 8118-8119 carry the argument the skill cites: the sentence is true here only because this repository is public, `publish()` has no idea whether it is, and "the claim 'this text is already public' is a property of the repository's visibility and not of the capture path". The unstated-prints-private rule is 8120, "a disclosure that does not know must not reassure". Note the figure here is 147,539 characters while E12 and E15 carry 143,218 for the same measurement on 2026-10-18; the skill quotes neither number in the passage citing E37, so nothing in the skill turns on the discrepancy, but the two sources disagree and the ledger entry is the later of the two. |
+| `clearing-a-record-for-release/E38` | supports | 2026-10-24 | The heading states both halves (8124) and 8125 carries the mechanism: `ursa forget` erases a record, `loadPublishable` skips a forgotten one, so a record stops being published at the next publish and until then "the page stays live with no record of its existence anywhere on the publisher's machine". The two missing surfaces, the inventory read and the unpublish write, are 8126. Split with E39: this ref carries "nothing lists what is live or takes one record down between publishes" and E39 carries the republish clause, and each range holds its own half. |
+| `clearing-a-record-for-release/E39` | supports | 2026-10-24 | The measured case is in range: two publishes hours apart into one directory left four records' pages, "the two the index names and two from the earlier build, still complete, still self-contained, still openable at their own addresses" (8138), which is the skill's "still complete and still openable" almost verbatim. The consequence the skill rests on is 8139, an erased record's page still sitting at an address that was handed to someone while the index is honest about not naming it. |
+| `clearing-a-record-for-release/E40` | supports | 2026-10-24 | Five poisoned payloads, countable in range as five `it` blocks: a later-added field carrying prose (260), a file path smuggled into a row (269), the 62-character sentence against the old `model` regex (277), a value assembled inside a later-added field (291), and the whole record passed off as a batch (303). The last one's comment says "before this module, transmitting anything meant transmitting the record" (304-305), which is the citing sentence's claim. Worth noting that the skill gets the growth right where its own sources disagree: E2's range says the suite poisons the payload for each of the two checks and E34's old range said four ways, and the skill says it "has grown to five", which is what the test file now holds. |
+| `clearing-a-record-for-release/E41` | widened | 2026-10-24 | Widened `173-181` to `173-182`. The range stopped on "What it gives is the", one line before the clause the citing sentence is about, the field list existing so a seat can see which fields are dangerous "without having to rediscover incident 2" (182). The rest was in range: the standard installs nothing (175), and "Class A has no automated check here and this file does not pretend to give it one" (179-180). |
+
+## The absent-word ratio, measured on the library rather than on one skill
+
+The sixth skill's reading proposed a third failure class for
+`relevance-sweep.mjs --stale`: a ref whose `what` field has 85 percent or more
+of its content words absent from the cited range is a mis-anchor. On that
+skill's 41 refs the threshold flagged five and all five were genuinely
+pointing at the wrong lines. The ledger entry filing it said the number came
+from 41 refs and not 184, and that measuring the rest came first. This is
+that measurement. `node skills/relevance-sweep.mjs --signal` reproduces it.
+
+The ratio has to be measured against the ranges as they stood **before**
+anyone corrected them, because every range in the tree today has been read and
+repaired, so a sound range today says nothing about what the signal would have
+caught. Those ranges are in git. Two commits give them: `c4255ff` for the four
+skills audited on 2026-10-18 and `e1151d1` for the sixth, each the parent of
+the first commit that recorded a verdict for its skill.
+`adding-a-bound-to-the-record-gate` has no such state, because the skill and
+its audit landed in one commit, so its 33 refs cannot be measured this way.
+That leaves 136 of 184 refs, with today's verdicts joined onto the ratios the
+old ranges produce.
+
+```
+                        flagged   mis-anchored   held
+  all 136 refs             7           5           2
+  the 127 citing one file  5           5           0
+```
+
+**The two that held are not noise and they will not go away.** Both cite two
+files, and both make a claim about the relation between the two citations
+rather than about the text of either. `running-an-outcome-record-trial/E1` says
+there are two capture paths with two separate entry points and cites seven
+lines of each. `running-an-outcome-record-trial/E9` says the two paths accept
+different file extensions. A claim of that shape cannot have its words in
+either range, so its ratio is near one no matter how well it is cited, and no
+widening lowers it. The same holds for a claim about where a line sits rather
+than what it says: `adding-a-bound-to-the-record-gate/E12` is at 0.846 for a
+comment stranded a hundred lines from the function it describes.
+
+So the signal is kept as an ordering and a reading instruction, which is what
+it already was, and it is **not** made a failure class. Two reasons, and the
+second is the one that decided it:
+
+1. Restricted to one-file refs it was exact on this sample, five of five with
+   nothing false, but the margin is thin. The highest sound one-file ratio is
+   0.73 and the lowest true positive is 0.85, which is 0.12 of headroom
+   measured once.
+2. It would catch nothing `--stale` does not already catch. Since 2026-10-24
+   that gate fails on a ref with no verdict at all, so a new citation cannot
+   reach a green guard unread, and a range that moves after being read comes
+   back stale. The only case the ratio would add is a reader who read a
+   mis-anchored range and blessed it, and a gate for that fires on refs a
+   reader has already judged, where E12 and `running-an-outcome-record-trial/E22`
+   at 0.909 are both sound and both above the line. Three alarms, two false.
+
+**The rule, then.** A ref at or above 0.85 whose sources name a single file is
+mis-anchored until a reader says otherwise, and if its words are absent
+because the claim is about the position or the shape of the citation, the row
+below has to say so. That is a duty on the note rather than on an exit status.
+`--signal` ends its report with exactly that list. `prompts/skill-extract.md`
+§5q carries the rule for authors and its old paragraph, which said the
+threshold flagged nothing that held, is corrected there.
+
+## Three verdicts re-read after the sentence splitter was fixed, 2026-10-24
+
+The sweep used to end a sentence at any `:` followed by a space, including the
+one inside an inline code span, so the passage it put in front of a reader for
+the ref citing such a sentence was whatever followed the colon. For two refs
+that was three characters and the tag. A third was segmented in the wrong
+places across five passages. Nothing about the ranges changed and the fix
+changes the `passages` digest, so all three came back as stale and are read
+again here against what their sentences actually say.
+
+Worth naming, because it is the argument for the rule in the section above:
+`running-an-outcome-record-trial/E22` is the ref whose absent-word ratio sent
+a reader to it, and the fragment was found on the way. The defect had been in
+the tool since the sweep was written and the two refs it hit were read through
+it, verdict and all, without either reader saying the passage was unreadable.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `running-an-outcome-record-trial/E22` | supports | 2026-10-24 | Re-read against the whole sentence, "This repository's own fixture record is a one-file episode and carries `turnsToAcceptance: 1`", where the reader used to be shown "1` [E22]." and nothing else. Verdict unchanged and the range is exact: `turnsToAcceptance: 1` at 1142 is the number, `generations: 1` at 1138 is the single-generation episode, and `conversationId: "git-4d5e401"` at 1136 is what makes it the git path rather than the session path. The ratio stays above the rule's line at 0.909 and always will, because the claim's load-bearing words are "present rather than absent", which no JSON can contain. That is the note the rule asks for. |
+| `adjudicating-uncertain-spans/E9` | supports | 2026-10-24 | Re-read against the whole sentence, "Loop C in the first trial closed at steps 757 to 758 with no verbal approval at all, and the record declares `acceptanceStatedInChat: false`", where the reader used to be shown "false` [E9]." Verdict unchanged, and the 2026-10-18 note was right about the source: the steps, the absence of verbal approval and `signals.episode.acceptanceStatedInChat: false` are one parenthesis at 102-104, wholly in range. The reader reached the right verdict from the source with the passage unreadable, which is the quiet cost of this defect: it does not produce wrong verdicts, it produces verdicts reached without the sentence they are about. |
+| `quoting-a-number-from-an-outcome-record/E32` | supports | 2026-10-24 | Re-read because three of its five passages moved. Still five, still one per paragraph of the same two doc comments, and the second now reads "It carries `score: 1` like a verbatim match, so a filter written on the score alone will not separate them" rather than beginning after the colon. The 2026-10-18 note describes the five correctly, so the verdict and the fifty-eight-line range stand unchanged. |

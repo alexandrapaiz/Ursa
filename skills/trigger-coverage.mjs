@@ -1,0 +1,333 @@
+// Which sibling boundaries a trigger test actually tests, per
+// prompts/skill-extract.md §5c.
+//
+// §5 asks every skill for two near misses and says the near misses are the
+// load-bearing half, because three prompts that obviously fire prove nothing
+// about a description. §5c then makes the budget grow: once the library holds
+// siblings, "a skill ships one near miss per adjacent skill", and the two in §5
+// are a floor. §5e keeps that budget when the neighbour is across an artifact
+// edge rather than beside it in the same area.
+//
+// Nothing checked it. The library's two guards are about receipts:
+// check-evidence.mjs proves a citation still points where it pointed, and
+// relevance-sweep.mjs proves a reader judged the lines under it. Both are
+// silent about the half of a skill that decides whether it ever runs at all.
+//
+// The failure that argument predicts is not a seat forgetting. It is
+// arithmetic. The budget is one per neighbour, so landing a sixth skill put
+// every one of the five already there one near miss short, in five files none
+// of that run's diff touched, with both guards green and nothing to say so.
+//
+// Measured on the 2026-10-24 library before this run repaired it: of 30
+// ordered pairs, 15 carried the sibling's own trigger prompt, 2 argued the
+// boundary in prose without it, and 13 did neither. The shape of the 15 is the
+// whole argument. Sorted by `created`, §5c coverage is exactly rank by age:
+//
+//   adjudicating-uncertain-spans      2026-09-24   0 of 5
+//   running-an-outcome-record-trial   2026-09-30   1 of 5
+//   quoting-a-number...               2026-10-01   2 of 5
+//   distilling-a-tuning-record        2026-10-05   3 of 5
+//   adding-a-bound-to-the-record-gate 2026-10-18   4 of 5
+//   clearing-a-record-for-release     2026-10-23   5 of 5
+//
+// Six skills, six distinct values, in order, with no ties. Each skill tests
+// the siblings that existed on the day it was written and has added nothing
+// since. So the newest skill looks compliant for the same reason the oldest
+// looks negligent: position in a sequence, not care.
+//
+// One amendment is in the history and it is worth stating, because the first
+// draft of this comment claimed there were none and that was wrong.
+// `running-an-outcome-record-trial` did come back for a sibling: on
+// 2026-10-01 it appended a sixth prompt under its own heading for the quoting
+// skill, and said in the prose that §5c had asked for it. That is the single
+// counterexample in six skills and three weeks, and it is also the one pair
+// this tool got wrong on its first pass, since the prompt was written in the
+// author's own words rather than copied and so scored 0.333. The exception and
+// the measurement error are the same event, which is the argument for reading
+// a declaration as well as a resemblance.
+//
+// What it reads, and why that is enough. §5c does not ask for a near miss
+// *about* the sibling, it asks for "the adjacent skill's own trigger prompt",
+// which is a near-duplicate of a string already in the repository. So coverage
+// is a text question and not a judgement: for each pair, the best similarity
+// between any of the sibling's should-fire prompts and any of this skill's near
+// misses. The two populations separate with a gap wide enough that no threshold
+// in it is a choice -- see the measurement in the header of
+// `BIGRAM_DICE_FLOOR`.
+//
+// Adjacency is every other skill in the library, which is what skills/README.md
+// already asserts in prose for the two newest ("all four others as
+// neighbours", "all five others as neighbours") and what §5e's artifact test
+// produces for the rest: six skills over four artifacts, every pair either
+// sharing an artifact or sitting one edge apart. There is no `neighbours` field
+// in the frontmatter to read, and inventing one to encode a fact the library
+// states uniformly would be a second place for it to be wrong. If a skill ever
+// lands that genuinely has no boundary with another, that is the run that
+// should add the field, and this comment is the argument it has to beat.
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+
+const SKILLS_DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '')
+
+/**
+ * The floor above which one prompt is "the sibling's own trigger prompt".
+ *
+ * Measured over the 30 ordered pairs in the 2026-10-24 library, as word-bigram
+ * Dice between each sibling's should-fire prompts and each skill's near misses,
+ * best match per pair. The result is bimodal with nothing in the middle:
+ *
+ *   15 pairs from 0.655 to 1.000   (9 of them exactly 1.000, verbatim copies)
+ *   ---- a gap 0.547 wide, containing no pair at all ----
+ *   15 pairs from 0.108 down to 0.000   (6 of them 0.000, no shared bigram)
+ *
+ * So this constant is not fitted. Any value in (0.108, 0.655) produces the same
+ * answer on this library, and this one sits near the middle of that interval.
+ * The nine exact copies are what §5c literally asks for; the six between 0.655
+ * and 1.000 are the same prompt with its subject localized, which is still the
+ * sibling's trigger and is why this is a similarity and not an equality test.
+ *
+ * Reproduce with `node skills/trigger-coverage.mjs --pairs`, which prints every
+ * pair's score in this order; the gap is visible as a block of `!` markers.
+ *
+ * The thing to watch, stated so the next run does not have to rediscover it:
+ * the gap is a property of how these tests were written, not a law. A seat that
+ * writes a near miss *inspired by* a sibling rather than copied from it will
+ * land in the gap, and the right response is to read the pair, not to lower the
+ * floor. `--pairs` prints every score for exactly that reading.
+ */
+export const BIGRAM_DICE_FLOOR = 0.6
+
+/** Words, lowercased, punctuation dropped. Code spans and quotes in these
+ *  prompts carry the shared vocabulary, so nothing is stripped but symbols. */
+const words = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean)
+
+/** Adjacent word pairs. Bigrams rather than words because two prompts in this
+ *  library share almost every noun by construction: "record", "span",
+ *  "generation" and "uncertain" are the whole vocabulary of four skills, so a
+ *  unigram measure scores unrelated prompts high and separates nothing. */
+const bigrams = (s) => {
+  const w = words(s)
+  if (w.length < 2) return w
+  return w.slice(0, -1).map((x, i) => `${x} ${w[i + 1]}`)
+}
+
+/** Dice coefficient over bigram multisets: 2|A∩B| / (|A|+|B|), intersection
+ *  counting repeats, so a prompt is not matched by a longer one that merely
+ *  contains it twice. */
+export function similarity(a, b) {
+  const A = bigrams(a)
+  const B = bigrams(b)
+  if (!A.length || !B.length) return 0
+  const left = new Map()
+  for (const g of A) left.set(g, (left.get(g) ?? 0) + 1)
+  let shared = 0
+  for (const g of B) {
+    const n = left.get(g)
+    if (n) { shared++; left.set(g, n - 1) }
+  }
+  return (2 * shared) / (A.length + B.length)
+}
+
+const HEADING = /^##\s+(.*)$/
+/** A numbered prompt: `**4. "…"**`. The ordinal may carry a letter, because
+ *  §5's budget is a floor and a prompt added later is numbered `3b` rather
+ *  than renumbering the near misses under it, which is what the quoting
+ *  skill's fourth should-fire prompt actually is. */
+const PROMPT = /^\*\*(\d+[a-z]?)\.\s*"([\s\S]*?)"\*\*/gm
+
+/** A prompt's own verdict, in the prose under it: "Should not fire.", "Does
+ *  not fire.", "It should not fire". Used only outside the two canonical
+ *  sections, where there is no heading to inherit from. */
+const NEGATIVE_VERDICT = /\b(should|does|would|will|do)\s+not\s+fire\b/i
+
+/**
+ * One trigger test, split into the prompts that must fire and the near misses
+ * that must not.
+ *
+ * Prompts are read wherever they sit, not only under the two canonical
+ * headings, because one test in this library keeps a near miss somewhere else
+ * and says why. `running-an-outcome-record-trial` was written with one
+ * neighbour, gained a second, and appended prompt 6 under its own heading,
+ * "Added 2026-10-01, third run: the near miss this test was missing", rather
+ * than folding it into a list that belonged to a run whose pull request was
+ * still open. Reading only the canonical section scores that boundary
+ * untested, which is a false finding of exactly the kind this tool exists to
+ * prevent, and it is how the first draft of this file read the library.
+ *
+ * So: a prompt under "should fire" fires, a prompt under "should not fire"
+ * does not, and a prompt under any other heading is classified by the verdict
+ * written in its own prose. A prompt outside the canonical sections with no
+ * verdict in its prose is returned in `unclassified` rather than guessed at,
+ * because a near miss silently filed as a should-fire prompt inflates
+ * coverage and a should-fire prompt filed as a near miss invents it.
+ */
+export function parseTriggerTest(text) {
+  const sections = []
+  let current = { heading: '', lines: [] }
+  sections.push(current)
+  for (const line of text.split('\n')) {
+    const h = line.match(HEADING)
+    if (h) { current = { heading: h[1].trim().toLowerCase(), lines: [] }; sections.push(current) }
+    else current.lines.push(line)
+  }
+  const shouldFire = []
+  const nearMisses = []
+  const unclassified = []
+  for (const section of sections) {
+    const body = section.lines.join('\n')
+    const found = [...body.matchAll(PROMPT)]
+    if (!found.length) continue
+    // Both tests are anchored at the start on purpose. The two headings are
+    // disjoint under startsWith, so order does not matter here; under any
+    // looser test for the word "fire" they are not, and every near miss would
+    // be filed as a should-fire prompt.
+    const isNo = section.heading.startsWith('should not fire')
+    const isYes = section.heading.startsWith('should fire')
+    for (const [i, m] of found.entries()) {
+      // The reasoning for this prompt: from the end of it to the next prompt.
+      const from = m.index + m[0].length
+      const to = i + 1 < found.length ? found[i + 1].index : body.length
+      const reasoning = body.slice(from, to)
+      const prompt = { id: m[1], text: m[2].replace(/\s+/g, ' ').trim(), reasoning }
+      if (isNo) { nearMisses.push(prompt); continue }
+      if (isYes) { shouldFire.push(prompt); continue }
+      if (NEGATIVE_VERDICT.test(reasoning)) nearMisses.push(prompt)
+      else unclassified.push({ ...prompt, heading: section.heading })
+    }
+  }
+  return { shouldFire, nearMisses, unclassified }
+}
+
+const isDir = (p) => { try { return statSync(p).isDirectory() } catch { return false } }
+
+/** Every skill directory holding both files §2 requires. */
+export function readLibrary(dir = SKILLS_DIR) {
+  const out = []
+  for (const name of readdirSync(dir).sort()) {
+    const abs = join(dir, name)
+    if (!isDir(abs)) continue
+    let trigger
+    try { trigger = readFileSync(join(abs, 'TRIGGER-TEST.md'), 'utf8') } catch { trigger = null }
+    let skill = true
+    try { statSync(join(abs, 'SKILL.md')) } catch { skill = false }
+    if (!skill) continue
+    out.push({ slug: name, trigger, ...(trigger ? parseTriggerTest(trigger) : { shouldFire: [], nearMisses: [], unclassified: [] }) })
+  }
+  return out
+}
+
+/**
+ * For every ordered pair of skills, whether this skill's near misses test the
+ * boundary with that sibling, by either of two signals.
+ *
+ * **Declared** is the strong one and is checked first: the near miss's own
+ * reasoning names the sibling's slug, which every near miss in this library
+ * does ("`distilling-a-tuning-record`'s own trigger."). An author saying which
+ * boundary a prompt tests is better evidence than any resemblance measure,
+ * because it is the claim the test is actually making.
+ *
+ * **Similarity** is the fallback, for a near miss that is plainly the
+ * sibling's trigger without saying so. It is kept rather than dropped because
+ * a declaration is cheap to write and can be wrong, and a prompt that scores
+ * 1.00 against the sibling's trigger is a fact about the text that no missing
+ * sentence can take away.
+ *
+ * Why both, and this is the correction that produced this function: reading
+ * similarity alone scored `running-an-outcome-record-trial` as not testing its
+ * boundary with the quoting skill. It does test it. Its prompt 6 is that
+ * skill's trigger 2 paraphrased -- same four percentages, same total of 130,
+ * same question -- and its prose says "This is
+ * `quoting-a-number-from-an-outcome-record`'s trigger" outright. Paraphrased,
+ * it scores 0.333, which is in the gap between the two populations and below
+ * any defensible floor. So a floor alone understates coverage by exactly the
+ * tests whose authors wrote in their own words, and lowering the floor to
+ * catch it would have pulled in pairs at 0.059 that share nothing.
+ */
+export function coverage(library, floor = BIGRAM_DICE_FLOOR) {
+  const pairs = []
+  for (const skill of library) {
+    for (const sibling of library) {
+      if (sibling.slug === skill.slug) continue
+      let best = { score: 0, from: null, to: null }
+      let declared = null
+      for (const n of skill.nearMisses) {
+        if (!declared && n.reasoning?.includes(sibling.slug)) declared = n.id
+        for (const f of sibling.shouldFire) {
+          const score = similarity(f.text, n.text)
+          if (score > best.score) best = { score, from: f.id, to: n.id }
+        }
+      }
+      const similar = best.score >= floor
+      pairs.push({
+        skill: skill.slug,
+        sibling: sibling.slug,
+        ...best,
+        declared,
+        covered: Boolean(declared) || similar,
+        via: declared && similar ? 'both' : declared ? 'declared' : similar ? 'similarity' : null,
+      })
+    }
+  }
+  return pairs
+}
+
+const pct = (n, d) => (d === 0 ? '0' : ((100 * n) / d).toFixed(0))
+
+function main(argv) {
+  const showPairs = argv.includes('--pairs')
+  const check = argv.includes('--check')
+  const library = readLibrary()
+  const missingTrigger = library.filter((s) => s.trigger === null)
+  const pairs = coverage(library)
+  const covered = pairs.filter((p) => p.covered)
+  const gaps = pairs.filter((p) => !p.covered)
+
+  if (showPairs) {
+    for (const p of [...pairs].sort((a, b) => b.score - a.score))
+      console.log(`  ${p.score.toFixed(3)}  ${p.covered ? ' ' : '!'} ${(p.via ?? 'untested').padEnd(10)}` +
+        ` ${p.skill} <- ${p.sibling}` +
+        (p.from ? `  (its ${p.from} as our ${p.to})` : '') +
+        (p.via === 'declared' ? `  [declared in near miss ${p.declared}, paraphrased]` : ''))
+    console.log('')
+  }
+
+  for (const s of library) {
+    const mine = pairs.filter((p) => p.skill === s.slug)
+    const got = mine.filter((p) => p.covered)
+    const short = mine.filter((p) => !p.covered)
+    const saidOnly = mine.filter((p) => p.via === 'declared')
+    const flag = short.length ? '!' : saidOnly.length ? '~' : ' '
+    console.log(`${flag} ${s.slug}`)
+    console.log(`    ${s.shouldFire.length} should fire, ${s.nearMisses.length} near misses` +
+      `, ${got.length}/${mine.length} sibling boundaries covered`)
+    if (short.length) console.log(`    untested: ${short.map((p) => p.sibling).join(', ')}`)
+    if (saidOnly.length) console.log(`    argued but not with the sibling's own prompt: ` +
+      saidOnly.map((p) => `${p.sibling} (near miss ${p.declared}, ${p.score.toFixed(2)})`).join(', '))
+    if (s.unclassified?.length) console.log(`    no verdict in its prose: ` +
+      s.unclassified.map((p) => `${p.id} under "${p.heading}"`).join(', '))
+  }
+  console.log('')
+  for (const s of missingTrigger) console.log(`no TRIGGER-TEST.md: ${s.slug}`)
+
+  // Three states, not two, because they call for different work. A boundary
+  // carrying the sibling's own trigger prompt is what §5c asks for. One only
+  // argued in prose is a real argument about the edge that never got the
+  // sibling's words put in front of the description, which is the half of the
+  // test that would actually catch a false positive. One with neither is
+  // untouched.
+  const asked = pairs.filter((p) => p.via === 'both' || p.via === 'similarity')
+  const argued = pairs.filter((p) => p.via === 'declared')
+  console.log(`trigger coverage across ${library.length} skills, ${pairs.length} ordered pairs:`)
+  console.log(`  ${asked.length} carry the sibling's own trigger prompt, which is what §5c asks (${pct(asked.length, pairs.length)}%)`)
+  console.log(`  ${argued.length} argue the boundary in prose without it`)
+  console.log(`  ${gaps.length} untested`)
+  if (gaps.length === 0 && missingTrigger.length === 0) {
+    if (!argued.length) console.log('every skill meets §5c')
+    return 0
+  }
+  console.log('§5c asks one near miss per adjacent skill, and a new skill puts every skill')
+  console.log('already in the library one short; that is the usual cause.')
+  return check ? 1 : 0
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) process.exit(main(process.argv.slice(2)))

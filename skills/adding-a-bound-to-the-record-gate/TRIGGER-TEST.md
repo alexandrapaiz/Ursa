@@ -14,15 +14,24 @@ test argues about where the description's edge falls and not about
 what the code says, and routing through a step keeps one claim in one
 place instead of two.
 
-The budget is four near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has four neighbours: every
+The budget is five near misses rather than two because §5c sets one
+near miss per adjacent skill, and this skill has five neighbours: every
 other skill in the library. §5e is what says that is not a sign the cut
 is wrong, and the note at the end is the argument.
 
 Near miss 4 is `adjudicating-uncertain-spans`' own trigger, near miss 5
 is `running-an-outcome-record-trial`'s, near miss 6 is
-`quoting-a-number-from-an-outcome-record`'s, and near miss 7 is
-`distilling-a-tuning-record`'s.
+`quoting-a-number-from-an-outcome-record`'s, near miss 7 is
+`distilling-a-tuning-record`'s, and near miss 8 is
+`clearing-a-record-for-release`'s.
+
+Near miss 8 was added on 2026-10-24, five days after the rest of this
+file, by the run that first measured §5c coverage across the library
+rather than within one test. `clearing-a-record-for-release` landed on
+2026-10-23 and this file was not amended for it, which is the ordinary
+case and not an unusual lapse: no trigger test in this library had ever
+gained a near miss after the day it was written.
+`skills/trigger-coverage.mjs` is what now says so out loud.
 
 ## Should fire
 
@@ -142,23 +151,64 @@ prompt that *would* fire is "should the gate check tuning.json too",
 because that is a bound-scope question and step 1 is where it gets
 answered.
 
-## Note on the boundary, which is one edge and not four
+**8. "The gate workflow is green on my record, so I'm pasting the
+conversation into the design doc as the example payload. Any reason not
+to?"**
+
+`clearing-a-record-for-release`'s own trigger, and the sharpest near
+miss in this file, because it is the only one that reaches for this
+skill by name rather than by vocabulary. The user has read a green gate
+and is treating it as a warrant. Everything before the comma is this
+skill's own subject matter, correctly described.
+
+The line is that a bound can only catch a record contradicting itself,
+which is step 1's test, so the gate's verdict is about internal
+consistency and carries no claim about who may read the record. Nothing
+in `BOUNDS` mentions a reader, a destination or raw text, and no bound
+could: the gate sees one record's own numbers and a design document is
+not in them. So a green gate is not evidence for the thing the user is
+inferring from it, and the prompt belongs to the skill that owns the
+three exits.
+
+What makes it a near miss rather than an unrelated prompt is that the
+honest answer has to come back through this skill once, to say that the
+gate's silence here is a property of what a bound is and not an
+oversight someone could fix by adding one. The related prompt that
+*would* fire is "add a bound that blocks a record with raw text in it",
+because that is a bound-scope question and step 1 answers it: it would
+be a measurement about a destination rather than a record contradicting
+itself, which is exactly the distinction step 1 exists for.
+
+## Note on the boundary, which is one edge and not five
 
 §5c warns that a skill with three or more neighbours is probably
-describing a topic rather than a piece of work. This skill has four and
+describing a topic rather than a piece of work. This skill has five and
 should not be re-cut, for the reason §5e gives: count artifacts, not
 neighbours.
 
-The four neighbours work on two artifacts, `outcome_record.json` and
-`tuning.json`, and both of those are data a run produced. This skill
-works on `ursa-major/src/invariants.ts` and the committed records under
-`ursa-major/fixtures/violations/`, which are the checker and its
-counterexamples. So all four boundaries above are the same boundary
-counted four times, between the records and the thing that checks
-them, and every near miss fails by sitting on the records side of it.
+Four of the five neighbours work on two artifacts,
+`outcome_record.json` and `tuning.json`, and both of those are data a
+run produced. This skill works on `ursa-major/src/invariants.ts` and
+the committed records under `ursa-major/fixtures/violations/`, which
+are the checker and its counterexamples. So those four boundaries are
+the same boundary counted four times, between the records and the
+thing that checks them, and each of those near misses fails by sitting
+on the records side of it.
+
+The fifth, near miss 8, fails on a different axis and is worth keeping
+separate rather than folded into the count.
+`clearing-a-record-for-release` does not work on an artifact at all; it
+works on a boundary. So that pair is not records-against-checker but
+checker-against-destination, and the two skills do not share an object
+to be confused about. They are adjacent anyway, and the reason is the
+inference in near miss 8: the gate is the most natural thing in the
+system to mistake for a release clearance, because it is the one step
+that already says yes or no about a record. Being the system's loudest
+green light is itself an adjacency.
 
 Ours: the edge is also where the near misses get hardest, which is why
-the budget being four is a feature here rather than a cost. Near miss 6
+the budget being five is a feature here rather than a cost. Near miss 6
 shares every noun this skill's own bounds are written in and is still
-excluded by one sentence of step 1, and that is a stronger piece of
-evidence about the description than any of the three that fire.
+excluded by one sentence of step 1, and near miss 8 shares none of them
+and is excluded by the same sentence. Those two are stronger evidence
+about the description than any of the three that fire.
