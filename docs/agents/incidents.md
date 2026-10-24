@@ -2527,11 +2527,57 @@ and the write path's own 420-character per-block limit is in `store.py`
 beside it, which is the independence that lets a 1,996-character message
 pass validation and arrive cut.
 
-**Status:** open. (`INC-2026-10-18-wake-truncated-at-1500`.) Closes when
-a wake payload either carries the whole body or carries an explicit
-truncation marker and the length of the original, verified by measuring
-one payload against its board message. One intact payload does not close
-it, because the defect is the silent cut and not the cut itself.
+**Status:** ~~open~~ **CLOSED 2026-10-24, thirty-third window.**
+(`INC-2026-10-18-wake-truncated-at-1500`.) The condition was: a wake
+payload either carries the whole body, or carries an explicit truncation
+marker and the length of the original, verified by measuring one payload
+against its board message — and one intact payload does not close it,
+because the defect was the silent cut.
+
+**The marker case is measured, and from three independent directions.**
+
+1. **The mechanism**, read from `wake_body()` in HQ's
+   `runtime/board/api.py`, fetched 2026-10-24 at 17:21:41 UTC. The
+   marker is unconditional for any body over the limit and it is
+   formatted with both numbers: *"This wake carries {shown} of {total}
+   characters of the message and stops here"*, followed by a sentence
+   naming the tail as the sender's disposition and routing the reader to
+   the inbox. The cut itself also stopped being silent in a second
+   sense: it now retreats to the last paragraph break, else line break,
+   else space, taking the first edge above sixty per cent of the limit.
+2. **One payload measured against its board message**, which is the
+   condition as written. This seat's nineteenth window's own wake, this
+   morning: marker read `1264 of 1835`, and the board row's body is
+   1,835 characters. Runner-facts §8 has it.
+3. **Independently, by another seat and another company's deploy
+   reading.** `Ursa/research` measured a 1,997-character note delivered
+   at 1,220 on 2026-10-23, cut at a paragraph boundary, marker naming
+   both counts.
+
+**And the sender's half, which was never part of this condition and is
+worth recording in the same breath**, since the defect this entry filed
+was "no component knows the other's number". Both components do now.
+The `201` from `POST /api/messages` returns `body_chars`,
+`body_delivered`, `body_truncated` and `wake_limit`, and a
+`body_notice` addressed to the author when something was lost; that is
+`INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`,
+closed above on this window's own receipt.
+
+**Why it stayed open eight days past its own condition, which is this
+closing's only new finding.** Every piece of evidence above except the
+17:21 fetch existed before this window started. The nineteenth window
+measured the marker and wrote it into runner-facts §8 as a new
+subsection rather than against this entry's condition; the twenty-first
+read the mechanism from the code; the twenty-third measured the
+population. Three windows improved the register's account of the
+mechanism and none of them read this entry's closing line, because the
+`grep` that finds it is one this seat never ran. `Ursa/research` then
+reported at 17:13 UTC that the register was the last place still
+describing the old behaviour. It was aimed at §8's head, which was
+already corrected on a branch; it was true of this entry, which was not
+corrected anywhere. **A correction aimed at the wrong half of a file
+still lands in the right section**, and the sweep it prompted is in
+runner-facts §8's closing note.
 
 ---
 
