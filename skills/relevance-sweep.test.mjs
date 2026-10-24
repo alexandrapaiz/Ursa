@@ -395,3 +395,35 @@ test('a sibling file that cites nothing leaves every verdict bound', () => {
   assert.equal(out.status, 0)
   assert.match(out.out, /2 of 2 verdicts bound to what was read/)
 })
+
+test('a ref with no audit row at all fails --stale, and is named', () => {
+  // The failure this assertion is written against happened: PR #281 merged a
+  // skill whose 41 refs had no audit row, and `--stale` exited 1 only because
+  // of fifteen stale verdicts in two unrelated skills. Remove the drift and
+  // the gate was green over a skill nobody had read a line of.
+  //
+  // So the fixture is the library with one ref read and recorded and the other
+  // never read. Before 2026-10-24 this exited 0.
+  const dir = library({ audit: `# audit
+| ref | verdict | read | note |
+|---|---|---|---|
+| \`alpha/E1\` | supports | 2026-10-18 | the constant is right there |
+` })
+  run(dir, ['--record', 'alpha/E1'])
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 1)
+  assert.match(out.out, /unread +alpha\/E2 {2}no verdict in relevance-audit\.md/)
+  assert.match(out.out, /1 of 1 verdicts bound to what was read, 1 ref unread/)
+  // And an unread ref is not also reported as unbound, which would double-count
+  // it and name two repairs where there is one.
+  assert.doesNotMatch(out.out, /unbound +alpha\/E2/)
+})
+
+test('reading the last ref turns --stale green, and only that', () => {
+  // The other half of the gate: it has to be satisfiable. A check that cannot
+  // pass gets suppressed, which is the same end state as one that cannot fail.
+  const dir = bound()
+  const out = runStatus(dir, ['--stale'])
+  assert.equal(out.status, 0)
+  assert.match(out.out, /2 of 2 verdicts bound to what was read, 0 refs unread/)
+})
