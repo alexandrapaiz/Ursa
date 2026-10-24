@@ -831,10 +831,56 @@ mis-anchored from the sound almost perfectly:
 ```
 
 At a threshold of 0.85 that is five flagged, five genuinely pointing at the
-wrong lines, and nothing flagged that held. The two refs just under it, E21
-and E23, were both short of their claim as well, so the column is not noisy
-at the top of its range. Read it before writing a verdict, and treat a ref
-above 0.85 as mis-anchored until the lines say otherwise.
+wrong lines, and nothing flagged that held.
+
+**Corrected 2026-10-24, on the library instead of one skill of it.** The
+paragraph above was measured on 41 refs in the skill that had just failed,
+which is a threshold fitted to the sample that suggested it. Run
+`node skills/relevance-sweep.mjs --signal` to reproduce the wider
+measurement. Against the ranges as they stood before anyone corrected them,
+recovered from git for 136 of the library's 184 refs, the same threshold
+flags seven and two of the seven are sound:
+
+```
+  all refs           at 0.85: 7 flagged, 5 mis-anchored, 2 held
+  refs citing one file         5 flagged, 5 mis-anchored, 0 held   (127 refs)
+```
+
+Both of the two that held cite two files, and the reason generalises rather
+than being a quirk of those two. `running-an-outcome-record-trial/E1` claims
+there are two capture paths with two separate entry points and cites the
+first seven lines of each. Its evidence is the shape of the citation and not
+the text of either file, so none of the claim's words can appear in either
+range and no widening will ever lower its ratio. The same holds for a claim
+about where a line sits rather than what it says, which is
+`adding-a-bound-to-the-record-gate/E12` at 0.846, a comment stranded a
+hundred lines from the function it describes.
+
+So the rule is narrower than the old paragraph said and it is a reading
+instruction rather than a gate. **A ref at or above 0.85 whose sources name
+a single file is mis-anchored until you have read the lines and said
+otherwise. If the words are absent because the claim is about the position
+or the shape of the citation, the audit note has to say so, because nothing
+mechanical will ever defend that ref again.** `--signal` prints exactly
+that list at the end of its report.
+
+**Why it is not a third failure class in `--stale`, which is what the ledger
+first proposed.** It would not catch anything that gate does not already
+catch. Since 2026-10-24 `--stale` fails on any ref with no verdict, so a new
+citation cannot reach a green guard unread, and a range that moves after
+being read comes back stale. The only case left is a reader who read a
+mis-anchored range and blessed it, and firing on that means firing on refs a
+reader has already judged, where E12 and `E22` at 0.909 show the alarm would
+be false. A gate that re-litigates readings and is wrong twice in its first
+four alarms gets suppressed, and then the signal is worth less than it is
+now.
+
+The first thing the rule caught was not a mis-anchor. Reading `E22` under it
+turned up a defect in the sweep itself: the sentence splitter ended a
+sentence at the colon inside an inline code span, so the passage a reader
+was shown for `E22` was `1` and its tag. Fixed, with the three verdicts it
+unsettled re-read. A rule that sends a reader somewhere nobody had a reason
+to look pays for itself in ways that are not on its own ledger.
 
 Ours: the generalisation is that an obligation with no deadline is an
 obligation on whoever is unlucky, and this library has now paid for that

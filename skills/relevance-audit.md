@@ -452,6 +452,68 @@ list being transposed when the two refs were written.
 | `clearing-a-record-for-release/E40` | supports | 2026-10-24 | Five poisoned payloads, countable in range as five `it` blocks: a later-added field carrying prose (260), a file path smuggled into a row (269), the 62-character sentence against the old `model` regex (277), a value assembled inside a later-added field (291), and the whole record passed off as a batch (303). The last one's comment says "before this module, transmitting anything meant transmitting the record" (304-305), which is the citing sentence's claim. Worth noting that the skill gets the growth right where its own sources disagree: E2's range says the suite poisons the payload for each of the two checks and E34's old range said four ways, and the skill says it "has grown to five", which is what the test file now holds. |
 | `clearing-a-record-for-release/E41` | widened | 2026-10-24 | Widened `173-181` to `173-182`. The range stopped on "What it gives is the", one line before the clause the citing sentence is about, the field list existing so a seat can see which fields are dangerous "without having to rediscover incident 2" (182). The rest was in range: the standard installs nothing (175), and "Class A has no automated check here and this file does not pretend to give it one" (179-180). |
 
+## The absent-word ratio, measured on the library rather than on one skill
+
+The sixth skill's reading proposed a third failure class for
+`relevance-sweep.mjs --stale`: a ref whose `what` field has 85 percent or more
+of its content words absent from the cited range is a mis-anchor. On that
+skill's 41 refs the threshold flagged five and all five were genuinely
+pointing at the wrong lines. The ledger entry filing it said the number came
+from 41 refs and not 184, and that measuring the rest came first. This is
+that measurement. `node skills/relevance-sweep.mjs --signal` reproduces it.
+
+The ratio has to be measured against the ranges as they stood **before**
+anyone corrected them, because every range in the tree today has been read and
+repaired, so a sound range today says nothing about what the signal would have
+caught. Those ranges are in git. Two commits give them: `c4255ff` for the four
+skills audited on 2026-10-18 and `e1151d1` for the sixth, each the parent of
+the first commit that recorded a verdict for its skill.
+`adding-a-bound-to-the-record-gate` has no such state, because the skill and
+its audit landed in one commit, so its 33 refs cannot be measured this way.
+That leaves 136 of 184 refs, with today's verdicts joined onto the ratios the
+old ranges produce.
+
+```
+                        flagged   mis-anchored   held
+  all 136 refs             7           5           2
+  the 127 citing one file  5           5           0
+```
+
+**The two that held are not noise and they will not go away.** Both cite two
+files, and both make a claim about the relation between the two citations
+rather than about the text of either. `running-an-outcome-record-trial/E1` says
+there are two capture paths with two separate entry points and cites seven
+lines of each. `running-an-outcome-record-trial/E9` says the two paths accept
+different file extensions. A claim of that shape cannot have its words in
+either range, so its ratio is near one no matter how well it is cited, and no
+widening lowers it. The same holds for a claim about where a line sits rather
+than what it says: `adding-a-bound-to-the-record-gate/E12` is at 0.846 for a
+comment stranded a hundred lines from the function it describes.
+
+So the signal is kept as an ordering and a reading instruction, which is what
+it already was, and it is **not** made a failure class. Two reasons, and the
+second is the one that decided it:
+
+1. Restricted to one-file refs it was exact on this sample, five of five with
+   nothing false, but the margin is thin. The highest sound one-file ratio is
+   0.73 and the lowest true positive is 0.85, which is 0.12 of headroom
+   measured once.
+2. It would catch nothing `--stale` does not already catch. Since 2026-10-24
+   that gate fails on a ref with no verdict at all, so a new citation cannot
+   reach a green guard unread, and a range that moves after being read comes
+   back stale. The only case the ratio would add is a reader who read a
+   mis-anchored range and blessed it, and a gate for that fires on refs a
+   reader has already judged, where E12 and `running-an-outcome-record-trial/E22`
+   at 0.909 are both sound and both above the line. Three alarms, two false.
+
+**The rule, then.** A ref at or above 0.85 whose sources name a single file is
+mis-anchored until a reader says otherwise, and if its words are absent
+because the claim is about the position or the shape of the citation, the row
+below has to say so. That is a duty on the note rather than on an exit status.
+`--signal` ends its report with exactly that list. `prompts/skill-extract.md`
+§5q carries the rule for authors and its old paragraph, which said the
+threshold flagged nothing that held, is corrected there.
+
 ## Three verdicts re-read after the sentence splitter was fixed, 2026-10-24
 
 The sweep used to end a sentence at any `:` followed by a space, including the
