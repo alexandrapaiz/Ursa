@@ -2,6 +2,59 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-fourth pass, 2026-10-24 ~11:1x UTC, scheduled (cron) standup — one dead clock pointer found and flagged, nothing else dispatchable
+
+**Which run this is.** Triggered by cron, not by a message or a
+dispatch naming ceremony mode, so today's charter (§0) makes this the
+standup alone: no sprint opened, no retro rewritten, no ledger
+groomed. The seventy-third pass's own pull request (#323, ready, not
+draft, `CLEAN`) was still open when this run started; this branch
+starts from its tip rather than from stale `main`, per "Read your own
+seat's open PRs first."
+
+1. **No run failed since the last check.** `gh run list --limit 30`:
+   every row succeeded (`redaction-gate` only). Nothing to triage.
+
+2. **The board's inbox held one note, from research, correcting this
+   seat's own earlier clock placement.** The pull request the
+   seventy-third pass pointed both silence clocks at (#319) closed
+   nineteen seconds after that pass posted, superseded by a later
+   research pull request (#322) that contains it whole. Checked
+   rather than trusted: `gh pr view 319` confirms `CLOSED`, `gh pr view
+   322` confirms `OPEN`/`MERGEABLE`, and `git merge-base
+   --is-ancestor` on the two branches' heads confirms containment.
+
+3. **The ledger entry (`docs/ideas.md`, "Citation discipline…") still
+   points its "first step" and all five clocks at #319, the closed
+   pull request.** Re-pointing it is ledger grooming, which this
+   charter bars a standup run from doing (§0: "Do not... groom the
+   ledger"). Not fixed this run on purpose, not an oversight. Raised
+   instead: a `note` to research closing the loop (board, ~11:11 UTC)
+   and an `ask` to the owner (board, ~11:11 UTC) naming the gap
+   directly, since clocks (A)/(B)/(C) expire 2026-10-25 ~18:15 UTC and
+   (D)/(E) expire 2026-10-26 ~07:00 UTC — the first of those before
+   the next ceremony (2026-10-26) that would normally groom this. The
+   owner can merge #322 on its own clean/green terms without waiting
+   for the pointer fix; if she does not act first, the next run that
+   is allowed to touch the ledger (the Monday ceremony, or a message
+   pass before then) should re-point it before 2026-10-25 ~18:15 UTC.
+
+4. **Nothing else met a dispatch criterion, and `PM_DISPATCH_ENABLED`
+   is unset in this run's environment regardless.** Full check in
+   `docs/sprints/dispatch-queue.md`, written in full this run. The
+   dead clock pointer above is this seat's own ledger debt, not
+   another seat's, so there is nothing to dispatch for it either.
+
+5. **This seat's own stack is unchanged and not this run's to
+   resolve.** #313/#317/#321/#323 stay exactly as those passes left
+   them, `CLEAN`, not draft, waiting on the owner or a chair to merge.
+   This run adds a fifth pull request on top rather than touching
+   their content.
+
+6. **Sprint: unchanged.** No sprint is open (`sprint-2026-10-12.md`
+   closed 2026-10-23; next ceremony 2026-10-26). Nothing from this run
+   touches it.
+
 ## Seventy-third pass, 2026-10-24 ~07:0x UTC, message: PR #316 and PR #319 reviewed against the merge rule — both Tier C, three clocks on one and a new fourth on the other
 
 **The trigger.** Two events in one wake: a skill pull request named
