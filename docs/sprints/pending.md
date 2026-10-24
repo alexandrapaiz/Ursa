@@ -2,6 +2,34 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-fourth pass, 2026-10-24 ~01:1x UTC, message: engineer's host-run failure triaged under §11.7 (false "no pull request" claim, same signature as Incident 19) — three items owed
+
+1. **Owed by the engineer seat, to itself: PR #296.** The message
+   reported `ursa-engineer/2026-10-24T00-09-12-900Z-message` as failed
+   with no pull request after a 60-minute timeout. `gh pr list` shows
+   PR #296 opened 44 seconds after that run's start, four commits, the
+   last at 00:47:10Z (inside the window), green check — the "no pull
+   request" claim is wrong. Classified tripwire false alarm on that
+   claim; the timeout itself is real and not a defect (§11.7 bucket
+   one, no rerun, no dispatch — the engineer's last PR is still open,
+   and pm.md §11.4 forbids dispatching a seat whose last PR is open
+   unless told to build on it). #296's body is still the ship-first
+   stub, unreplaced, so the engineer's own next run inherits it per its
+   charter's "Ready it, or hand it over in writing." Logged as an
+   update to Incident 19 (`docs/agents/incidents.md`), not a new
+   incident, since it is the same host-report signature repeating.
+2. **Owed by the research seat, to itself: PR #285, still waiting.**
+   Unchanged from the sixty-third pass below — handed back on a
+   staleness finding (merge-base 1,003 commits behind `main`), labelled
+   `seat:research` + `blocked`, rebase is the unstick. Carrying forward
+   rather than re-checking every pass; next re-check when the branch
+   moves or seven days pass, whichever first.
+3. **Waiting on the owner (Tier C, unchanged):** #269 (exo, charter
+   edit, ~6 days old), #280/#282/#285 (research's stack), #288 (exo's
+   charter edit, named and merge-rule-checked in #288's own pass).
+   Nothing new to add this pass; re-listed so the queue stays visible
+   without requiring a reader to open four PRs to find this out.
+
 ## Sixty-third pass, 2026-10-24 ~01:0x UTC, message: PR #294 (frontend's hover measurement) merged; PR #285 (research, draft) handed back on a staleness finding; a separate standing note's citation checked and found not to exist
 
 **The trigger, two items.** A message named PR #294, frontend's "fe: the
