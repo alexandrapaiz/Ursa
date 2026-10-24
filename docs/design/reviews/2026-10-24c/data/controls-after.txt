@@ -1,0 +1,36 @@
+base http://127.0.0.1:4931   viewport 1440x900   2026-10-24T01:56:20.862Z
+
+### /
+tag    class        box w x h       font     pad t/r/b/l       border    transition  | duration | timing      text
+------------------------------------------------------------------------------------------------------------------------------------------------------
+button .cta          162.9 x 47.3   11.52px  14/26.7/14/29.3   1px       border-color,background-color,transform   | 0.16s,0.16s,0.34s | SPRING      "Get Polaris"  [disabled]
+button .cta           57.2 x 28.9   9.92px   6/12/6/12         1px       border-color,background-color,transform   | 0.16s,0.16s,0.34s | SPRING      "copy"
+button .cta           57.2 x 28.9   9.92px   6/12/6/12         1px       border-color,background-color,transform   | 0.16s,0.16s,0.34s | SPRING      "copy"
+button .cta           57.2 x 28.9   9.92px   6/12/6/12         1px       border-color,background-color,transform   | 0.16s,0.16s,0.34s | SPRING      "copy"
+a      .rec-action   541.3 x 42.8   15.2px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "the record viewer"
+a      .rec-action   556.1 x 42.8   15.2px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "a published record"
+       .mark-link   (none on this page)
+
+### /record
+tag    class        box w x h       font     pad t/r/b/l       border    transition  | duration | timing      text
+------------------------------------------------------------------------------------------------------------------------------------------------------
+label  .cta          181.9 x 47.3   11.52px  14/26.7/14/29.3   1px       border-color,background-color,transform   | 0.16s,0.16s,0.34s | SPRING      "Open a record"
+a      .rec-action     114 x 17     12.48px  0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "mini-fixture →"
+a      .rec-action   168.8 x 17     15.2px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "read it at its own address"
+button .rec-action    99.8 x 16.8   11.2px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "read the site"  [disabled]
+button .rec-action    53.7 x 16.8   11.2px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "read it"  [disabled]
+
+### /record/mini-fixture
+tag    class        box w x h       font     pad t/r/b/l       border    transition  | duration | timing      text
+------------------------------------------------------------------------------------------------------------------------------------------------------
+button .rec-action     960 x 17.3   11.52px  0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "01-claude · turn 1 · claud"
+button .rec-action     960 x 17.3   11.52px  0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "02-chatgpt · turn 1 · gpt-"
+a      .rec-action     208 x 18     13.6px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "/records/mini-fixture.json"
+a      .rec-action   138.5 x 17     15.2px   0/0/0/0           none      text-decoration-color,color               | 0.16s,0.16s       | no spring   "a record of your own"
+
+### /this-page-does-not-exist
+tag    class        box w x h       font     pad t/r/b/l       border    transition  | duration | timing      text
+------------------------------------------------------------------------------------------------------------------------------------------------------
+a      .quiet-link   229.6 x 47.3   11.52px  14/26.7/14/29.3   1px       background-color,border-color,transform   | 0.26s,0.26s,0.34s | SPRING      "Back to Ursa Minor"
+a      .mark-link    134.5 x 24     16px     0/0/0/0           none      all                                       | 0s                | no spring   "Ursa Minor"
+

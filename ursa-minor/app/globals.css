@@ -382,24 +382,75 @@ html {
   background-color: rgba(232, 237, 247, 0);
   transition:
     background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 340ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* The lift, added 2026-10-24, and the reason it belongs here rather than
+   being a second opinion about .cta's.
+
+   This control and .cta are the same control. Measured on the shipped build
+   at 1440 (`docs/design/reviews/2026-10-24c/data/controls-before.txt`), the
+   404's "Back to Ursa Minor" and the home page's "Get Polaris" come back at
+   the same height 47.3px, the same font-size 11.52px, the same 1px border
+   and the same padding 14/26.7/14/29.3, asymmetric tracking correction and
+   all. Only their widths differ, because one label is longer. They are one
+   box wearing two class names, and until today one of them lifted a pixel
+   and sprang and the other did not move at all.
+
+   Benchmarked 2026-10-24 for exactly this question. Six sites, every link
+   and button drawn as a box, grouped by rendered shape rather than by class:
+   Linear, Vercel, Elicit, Consensus, claude.com, Stripe. Thirteen groups of
+   two or more same-shaped controls, and not one gives its members a
+   different motion character. Vercel's "Deploy now" and "Talk to sales",
+   claude.com's "Try Claude" and "Contact sales", Elicit's "Try now" and
+   "Learn more" are primary and secondary pairs that share one transition
+   each. Stripe is the only group that splits at all, and both halves still
+   run 0.3s on the same cubic-bezier(0.25,1,0.5,1); only the property list
+   differs. Hierarchy is drawn in colour everywhere, never in physics.
+   Capture in `docs/design/reviews/2026-10-24c/data/`.
+
+   So nothing new is invented here. This is .cta's own spring, the same
+   --spring-lift and the same 340ms, on the one other control shaped like
+   it. The colour treatment above is untouched: the wash still arrives in
+   160ms and still takes 260ms to leave, which is this control's own
+   asymmetry and has nothing to do with the transform.
+
+   The durations are spelled out in every state below rather than left to
+   the one-value shorthand. With three properties declared, a bare
+   `transition-duration: 160ms` applies 160ms to all three and quietly
+   collapses the spring into an ease. */
+@supports (transition-timing-function: linear(0, 1)) {
+  .quiet-link {
+    transition-property: background-color, border-color, transform;
+    transition-duration: 260ms, 260ms, 340ms;
+    transition-timing-function:
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      var(--spring-lift);
+  }
 }
 
 @media (hover: hover) {
   .quiet-link:hover {
     background-color: rgba(232, 237, 247, 0.06);
     border-color: rgba(168, 199, 250, 0.75);
-    transition-duration: 160ms;
+    transform: translateY(-1px);
+    transition-duration: 160ms, 160ms, 340ms;
   }
 }
 
 /* keyboard parity */
 /* the wash and border only; the ring itself comes from the site-wide
-   :focus-visible rule above */
+   :focus-visible rule above. No lift on focus, because .cta has none
+   either: a ring already says focused, and a control that rises when you
+   tab to it is saying it twice. The duration list is still spelled out, so
+   that focusing a control that is also hovered does not shorten the spring
+   from under it. */
 .quiet-link:focus-visible {
   background-color: rgba(232, 237, 247, 0.06);
   border-color: rgba(168, 199, 250, 0.75);
-  transition-duration: 160ms;
+  transition-duration: 160ms, 160ms, 340ms;
 }
 
 /* the press, and the only feedback a tap gets.
@@ -419,23 +470,56 @@ html {
    touch visitor, who gets neither of the other two, tapped the only live
    link on the site and saw nothing happen until the page changed.
 
-   Translated rather than copied: no scale, because the lift and settle
-   idiom already belongs to .cta and this is a text-sized control. The press
-   is the same starlight wash taken deeper and the border taken to full
-   --polar, arriving in 90ms, which is .cta's own press timing. Nothing new
-   enters the palette. */
+   The press is the same starlight wash taken deeper and the border taken to
+   full --polar, arriving in 90ms, which is .cta's own press timing. Nothing
+   new enters the palette.
+
+   Amended 2026-10-24. This block used to end "no scale, because the lift and
+   settle idiom already belongs to .cta and this is a text-sized control".
+   The first half stands and is why there is still no scale here. The second
+   half was wrong about its own subject: measured, .quiet-link is not a
+   text-sized control, it is the same 47.3px bordered box .cta is. The
+   text-sized control on this site is .rec-action, which has no border, no
+   padding and a 17px box, and which the sentence was presumably describing.
+   The lift now applies, for the reason recorded above the @supports block.
+
+   The press drops the lift to 0 in 90ms along with the colours, which is
+   .cta's behaviour exactly: the press beating the lift is what makes it
+   read as physical rather than as an animation. */
 .quiet-link:active {
   background-color: rgba(232, 237, 247, 0.11);
   border-color: var(--polar);
+  transform: translateY(0);
   transition-duration: 90ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* The transform leaves the property list entirely here, which is how .cta's
+     own reduced-motion block does it, rather than staying declared and being
+     neutralised by the `transform: none` below.
+
+     Both are wanted, and the first one is the one that is easy to skip. With
+     only `transform: none`, a reader asking this stylesheet what it animates
+     under reduced motion is still told "a spring on the transform", and the
+     promise is kept by two other declarations some distance away. Dropping
+     the property means the answer is no spring, from the one place that is
+     asked. The `transform: none` then stops the control moving even if a
+     later edit puts the property back. */
+  .quiet-link {
+    transition:
+      background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
   .quiet-link,
   .quiet-link:hover,
   .quiet-link:focus-visible,
   .quiet-link:active {
     transition-duration: 1ms;
+  }
+  /* the lift is removed outright rather than shortened, matching .cta */
+  .quiet-link:hover,
+  .quiet-link:active {
+    transform: none;
   }
 }
 
