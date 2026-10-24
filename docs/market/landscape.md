@@ -268,6 +268,34 @@ this category — a credentialed expert paid to grade or generate on
 request, not a person's own real work observed after the fact. New
 entry, added this run. Last observed 2026-09-30: [Handshake: Introducing Handshake AI](https://joinhandshake.com/blog/our-team/introducing-handshake-ai/), [Annotation Academy: What is Handshake AI](https://annotation.academy/glossary/what-is-handshake-ai-and-how-does-it-work).
 
+### Halluminate
+
+What it is: a data research lab (fewer than 10 people, YC S25) building
+reinforcement-learning "environments" and benchmarks for knowledge
+work beyond coding, starting with finance — a "gym" is a Docker
+container seeding real starting files (Excel, PowerPoint, raw data), a
+task such as building an LBO model, and a verifier that scores the
+result and feeds a reward signal back into post-training. New entry,
+added this run after a $30M Series A (led by Oak HC/FT, announced
+2026-10-01, bringing total funding to $38.5M, with individual
+participation from researchers at Anthropic, OpenAI, and Meta)
+surfaced it. Who it serves: already working with four of the top five
+closed-source US labs, per Y Combinator's own announcement. Pricing: not public; venture-backed, not yet a
+disclosed per-contract or per-environment rate. Strengths: a second,
+independently funded vendor (after Mercor's Deeptune acquisition,
+tracked in this entry's 2026-10-14 update) confirms "build the task
+and the verifier" is a real, fundable sub-category now, not one
+company's experiment. Weakness against Ursa, stated precisely: a gym
+is still a constructed task with a built-in verifier the model is
+scored against, closer to CLAUDE.md §1's "verifier" language than
+Category 1's solicited-rating vendors, but still not a real
+deliverable joined backward to its own generation history — nobody
+"had a real LBO to build and happened to use this environment for it."
+The reward comes from a simulation of work, not a record of work that
+actually happened. Worth tracking whether this sub-category's
+environments ever ingest real completed deliverables rather than
+seeding constructed ones. Last observed 2026-10-24: [Oak HC/FT: why we led Halluminate's $30M Series A](https://www.oakhcft.com/blog-post/the-internet-has-run-out-of-things-to-teach-why-we-led-halluminates-30-million-series-a), [Y Combinator on X: Halluminate](https://x.com/ycombinator/status/2105682350814470399).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -298,6 +326,39 @@ June 2026, eight months after launching its commercial product — the
 fastest revenue ramp observed in any category this map covers. Its
 Fall 2026 Academic Partnerships cycle opens with proposals due October
 30, 2026. Last observed 2026-09-30: [TechCrunch: Arena is now a $100M business](https://techcrunch.com/2026/06/29/arena-the-ai-leaderboard-everyone-uses-is-now-a-100m-business/).
+
+Update 2026-10-24: a $200M Series B (co-led by Lightspeed and Khosla,
+announced 2026-10-08) nearly doubled the valuation this entry tracked
+in January, from $1.7B to $3.1B, and the revenue behind it is
+concentrated among "a small number of high-ACV customers": frontier
+labs and large enterprises paying consumption-based for evaluation
+campaigns, not a broad self-serve base. Same day, Arena shipped the
+Alignment Index: 27 models scored across 90,000 sampled real-world
+agent sessions on three failure signals (Unauthorized Action, False
+Attribution, Deceptive Completion), each defined by a written rubric
+and applied by an LLM judge, with definitions stated as inspired by
+language already in OpenAI's and Anthropic's own system cards. The one
+reported finding worth carrying into positioning.md: misalignment rate
+roughly doubles when conversation length doubles, a trajectory effect
+rather than a single-turn one. A trade-press review (Forkast) flagged that Arena has not disclosed its scoring weights or
+any confidence interval, and that no scored lab has publicly
+contested its own ranking yet, so the index is new, unaudited, and
+unconfirmed by the vendors it scores.
+
+Read against CLAUDE.md §1: this is the single most well-funded
+competitor in this entire map moving its raw material from
+curated/self-selected prompts toward real agent sessions, which is a
+market vote that "what actually happened" beats "what a rater
+compared." It still does not close Ursa Minor's own gap. The label is
+an LLM judge applying a written rubric to a sampled session for a
+safety/compliance proxy, not a record of whether a real deliverable
+built from that session's output survived contact with a real task.
+Closer raw material, same grader structure. Last observed 2026-10-24:
+[Arena blog: LMArena is now Arena](https://arena.ai/blog/lmarena-is-now-arena),
+[Arena on X: Alignment Index methodology](https://x.com/arena/status/2108226499560214777),
+[Arena on X: Series B announcement](https://x.com/arena/status/2108227730114580501),
+[Forkast: Beyond the Elo — Assessing the Arena Alignment Index](https://forkast.news/beyond-the-elo-assessing-the-arena-alignment-index/),
+[Sacra: Arena revenue, valuation & funding](https://sacra.com/c/lmarena/).
 
 ### Artificial Analysis
 
@@ -638,6 +699,24 @@ standard. Read plainly: every entry in this category, including this
 week's new one, is still solving portability for one vendor's benefit
 at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
 
+Update 2026-10-24: a Hacker News thread surfaced a "Universal Memory
+Protocol" (UMP), an open-source attempt (github.com/edihasaj/universal-memory-protocol)
+at exactly the thing the 2026-10-05 note above said nobody was
+building: one record format and six operations (recall, remember,
+get, revise, forget, feedback) meant to let any agent or store read
+and extend the same user-owned memory file. Checked rather than taken
+at its self-declared "Stable v1.0" word: 31 stars, 2 forks, 45
+commits, one visible adapter (wrapping a project called Recall), and
+no named product or company outside the repository implementing it.
+This does not overturn the 2026-10-05 conclusion, it sharpens it: an
+attempt now exists, but by the same test the earlier note applied to
+Cognee and ByteRover's formats (does a competing product read this
+back without the format's own author writing the adapter), UMP has
+not cleared that bar either, and has far less visible traction than
+either of those two. Worth a one-line recheck at the next monthly
+pass, not a promotion to its own entry yet. Last observed 2026-10-24:
+[GitHub: edihasaj/universal-memory-protocol](https://github.com/edihasaj/universal-memory-protocol), [Hacker News: Universal Memory Protocol](https://news.ycombinator.com/item?id=48428796).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -694,3 +773,17 @@ at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Perman
   outbound/export direction specifically (the backup-restore contract
   refuses any source outside its own home directory). Positioning
   correction in docs/market/positioning.md.
+- 2026-10-24 (hook-triggered run, capacity returned) — added
+  Halluminate (Category 1, now 16 entries), a second
+  independently-funded "build the task and the verifier" vendor after
+  Mercor's Deeptune acquisition, confirming that move is a sub-category
+  rather than one company's pivot. Dated update to LMArena/Arena: a
+  $200M Series B nearly doubled its valuation to $3.1B and it shipped
+  an Alignment Index built from 90,000 real sampled agent sessions
+  graded by an LLM judge against a written rubric — real raw material,
+  same grader-supplied label CLAUDE.md §1 contrasts the outcome record
+  against. Dated note added to the Category 3 cross-cutting entry: an
+  open-source "Universal Memory Protocol" exists but has not cleared
+  the adoption bar the 2026-10-05 note already applied to two more
+  established attempts. No new Category 3 entry; the monthly full-map
+  pass is due around 2026-10-26.
