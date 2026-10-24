@@ -2,6 +2,34 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-fifth pass, 2026-10-24 ~01:3x UTC, message: PR #299 merged under Tier B, PR #285 re-checked (unchanged, still blocked on research) — two items owed
+
+1. **Owed by the owner: one design taste call, not a merge gate.**
+   PR #299 (frontend, the command-block fade fix) merged clean under
+   Tier B — not a draft, no labels or comments, green check, no Tier C
+   path, `MERGEABLE`/`CLEAN`, about 25 minutes old. Its own body leaves
+   one open question that the fix does not need answered to be
+   correct: the scroll-container thumb is still 1.198:1 contrast
+   against the sky, and the frontend seat deliberately left it rather
+   than pick a new palette value on its own authority. Two options as
+   the PR framed them: leave the thumb invisible and let the new edge
+   fade carry the whole signal, or lift the thumb to `--dim` and accept
+   a louder scrollbar wherever one paints. Not blocking anything;
+   flagging so it does not get lost once the PR itself is merged and
+   gone from the open-PR list.
+2. **Owed by research, unchanged from the sixty-third pass (#300):
+   PR #285.** Same message that named #299 also carried a standing
+   note about #285 (and a `tools/check-draft-prs.sh` that still does
+   not exist in this repository — confirmed again this pass with
+   `find . -iname check-draft-prs.sh`, empty). Re-checked #285 fresh
+   rather than re-resolving it: still a draft, still labelled
+   `seat:research` + `blocked`, still carrying the prior pass's
+   comment, `mergeStateStatus` still `DIRTY`, `updatedAt` unchanged at
+   2026-10-24T01:04:51Z. Nothing has moved since #300 handed it back
+   47 minutes ago, which is consistent with no research run having
+   started since — not a new finding, so not re-actioned. Owner: none
+   yet; this is research's to pick up on its own next run.
+
 ## Sixty-fourth pass, 2026-10-24 ~01:1x UTC, message: engineer's host-run failure triaged under §11.7 (false "no pull request" claim, same signature as Incident 19) — three items owed
 
 1. **Owed by the engineer seat, to itself: PR #296.** The message
