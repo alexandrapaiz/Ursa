@@ -4559,3 +4559,122 @@ it is in front of the two seats that can act on it.
   notes.** Its trigger was a message dispatch, not the brief's tick, and
   the Orient and Decide phases belong to that tick. The last grade sent
   to the centralizer was 01:32 today: dashboards weakest a fourth week.
+
+## 2026-10-24 — twenty-sixth window (message, resident host, 12:16:44 UTC)
+
+**Inherited.** Five open pull requests of this seat, #318 the readied tip
+containing the other four, named in Ursa PM's live note to the owner and
+held under the charter freeze. No orphaned draft: the previous window
+readied its own. Built on #318's head as a descendant rather than pushing
+onto it, under the fifth case of the open-PRs rule, because the sibling
+was readied and the gate should be able to act on it. Opened #337 draft
+at 12:18, readied it at 12:22 after the first finding was committed.
+
+**What this window observed.**
+
+- The capacity reading counts a run the host kills as `running` for the
+  rest of the day. 165 logs, 144 trailered, 21 not, **8 of the 21 dead**.
+  Cohort ended by one runtime restart at 07:08:05. Endpoint said 23
+  running; the brief that woke this window said 17; the process table
+  said 13. `runner-facts.md` §14,
+  `INC-2026-10-24-a-killed-run-is-counted-as-running`.
+- **This seat's own 06:59:15 window is one of the eight dead runs.**
+- Queue: 28 open, 47 merged in seven days, oldest #269 at six days. Depth
+  warning does not fire. **14 merges since the charter clock expired,
+  zero touching `prompts/*-agent.md`** — the fourth consecutive window to
+  report zero.
+- Binding missing tools: **6** (unchanged across six re-vendors, which is
+  the point of the split). Context count in `lessons.md`: **27**, up from
+  20 on 2026-10-18, confirming the volume prediction.
+- The `L-*` enforcement sweep now prints **3** names, up from 2. The new
+  one is `tools/merge-register.py` from **L-A18**, and it is **already
+  answered** by Ursa engineer's #305 and #327, which register the
+  incidents merge driver with a vendor-drift check. So the sweep's
+  finding count is **1**, `tools/check-secret-print.py`, not 3. Checking
+  whether the org had already fixed it cost one command and removed two
+  thirds of a finding.
+- Workflow prompt sweep: 11 workflows, 3 mention `--draft`, 0 mention
+  ship-first, 0 `schedule:` blocks. Unchanged, dormant surface, not a
+  live defect.
+
+**What this window changed, and why.**
+
+1. `runner-facts.md` §14 — the killed-run class, mechanism read from HQ's
+   `tools/capacity.py` rather than inferred, with the mtime bands that
+   make the repair a threshold.
+2. `runner-facts.md` §15 — three facts measured against wrong
+   conclusions this window nearly published: a fetched blob can age
+   inside one run; the only merged mentions of a live route are in the
+   file §3 tells seats to discount; a pipe to `tail` launders exit
+   status.
+3. Charter §2 — **when you replace a blind instrument, ask what the
+   replacement cannot see before you publish a number from it.** `gh run
+   list` could not see runs that happened; capacity cannot see runs that
+   stopped. Four instruments of this seat now fail towards good news.
+4. Charter ship-first — HQ's added clause adopted whole, plus the body
+   audit rescheduled with the ready, plus the no-`tail` rule. **A rule
+   that reschedules an act must reschedule that act's checks with it.**
+5. Charter board gates — a **fourth** gate found, and the three-command
+   pre-flight replaced with one that has an exit status.
+
+**What this window got wrong, in order.**
+
+- Readied #337 with its placeholder title and plan body for four
+  minutes, because `gh pr edit` was rejected for a stray flag and the
+  failure went through `| tail -2`, which exits 0.
+  `INC-2026-10-24-a-pipe-to-tail-readied-a-placeholder`. Caught by the
+  body audit, which printed five zeros.
+- Sent the centralizer a 1705-character handoff after a pre-flight that
+  printed 1705, because the pre-flight prints and does not block. The
+  cut took the orient paragraph. Resent it whole.
+- Nearly published that the host serves a board deployed from somewhere
+  other than HQ's `main`, on the strength of a blob fetched one minute
+  before HQ merged the change. One `gh pr view` disproved it.
+
+**Off-repository acts, each with the query that retrieves it.** All five
+posted and the response read before this entry was written, per "write
+the receipt, then the register".
+
+| addressee | what | retrieve with |
+|---|---|---|
+| broadcast | tip `337`, contains 269/288/302/307/318 | `?from_company=Ursa&from_seat=exo&since_hours=6` |
+| `alexandra-systems/exo-centralizer` | both `done`s acknowledged, write-path receipt passed | `?to_seat=exo-centralizer&everyone=0&since_hours=6` |
+| `alexandra-systems/exo-centralizer` | the `lost`-class handoff, truncated at 1424 | same |
+| `alexandra-systems/exo-centralizer` | the cut orient resent, plus the pre-flight defect | same |
+| `Ursa/research` | reproduction, credit, and the work route it could not find | `?to_seat=research&everyone=0&since_hours=6` |
+| `Ursa/pm` | acknowledgment, the two queue numbers, freeze routed upstream | `?to_seat=pm&everyone=0&since_hours=6` |
+| `owner` | `Ideas`, three of them | `?to_seat=owner&everyone=0&since_hours=6` |
+
+**The week's experiment, decided this window, read 2026-10-31.**
+Hypothesis: the charter freeze holds at zero not because the owner
+declines charter changes but because every charter branch now arrives
+carrying ten thousand lines of other seats' registers, so there is no
+charter decision she can make without also deciding eleven other things.
+Change: from the next window, this seat opens charter edits on a branch
+containing **only** `prompts/*-agent.md`, and carries register work on a
+second branch. Metric, which exists already and has been read four times:
+pull requests touching `prompts/*-agent.md` merged in the preceding seven
+days, currently **0 of 14**. Cost: one extra identifier per window, which
+the fifth-case rule already says is the right price.
+
+**What the next window must check first.**
+
+1. Whether HQ split the `running` class. If it did, re-measure the eight
+   and confirm they moved to `lost`. If it did not, report the day's
+   count again rather than the mechanism, because the mechanism is
+   registered.
+2. The experiment above. Did the charter-only branch merge? That is the
+   only number that matters next window.
+3. Whether `GET /api/work` classifies from the same trailer. Named as an
+   open edge in §14 and not established here.
+4. `tools/check-secret-print.py` is still absent and this repository
+   still has **no `.claude/` directory**, so L-X5's enforcement does not
+   exist here. That is the one survivor of the enforcement sweep.
+
+**Compounding ratio, reported as §24 requires.** Files touched by this
+window: 4. Seats whose charter changed: **1**, this seat's own. Rules
+handed upstream to bind every seat in the portfolio: **2** (the `lost`
+class, and the pre-flight that blocks). One of last window's two upstream
+handoffs became law at HQ this morning in ten seat prompts and one
+operating standard, with a clause added. So the curve is not flat, and
+the leverage is entirely in the upstream route rather than in this file.
