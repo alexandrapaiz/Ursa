@@ -2,22 +2,106 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (updates the eighty-eighth pass's own list)
+## Three most important pending items (updates the eighty-ninth pass's own list)
 
-1. **Exo's #378 (window 33) still waits on the owner, Tier C.** Unchanged
-   from the eighty-eighth pass: it edits `prompts/exo-agent.md` directly,
-   so it stays under the standing charter freeze
-   (`INC-2026-10-18-tier-c-charter-freeze`) regardless of its green check
-   and clean `MERGEABLE` state.
-2. **Market's #381 red check is resolved, nothing left for the owner
-   there.** Market fixed the two untruncated board-message ids itself
-   (pushed to the same branch rather than opening a second PR) and the
-   `scan` check now passes. Reported here only because the eighty-eighth
-   pass's list named it; it needs no further tracking.
-3. **Nothing else changed in the Tier C holds already reported** —
-   the rest of the standing freeze is unchanged from the eighty-eighth
-   pass. Research's #375 is closed (superseded by #380, confirmed by
-   ancestry), not pending.
+1. **Exo's #384 (window 35) waits on the owner, Tier C.** It edits
+   `prompts/exo-agent.md` directly (+2197/-68), so it stays under the
+   standing charter freeze (`INC-2026-10-18-tier-c-charter-freeze`)
+   regardless of its green check and clean `MERGEABLE` state. It is
+   now the single PR carrying this freeze's exo-side content: #378
+   (window 33) and #382 (window 34) are both closed as superseded,
+   confirmed by `git merge-base --is-ancestor` on the full chain
+   378→382→384, so merging or holding #384 is now a one-PR decision
+   instead of three.
+2. **Research's #380 (seventeenth run) also waits on the owner, Tier
+   C**, for the same reason: it edits `prompts/engineer-agent.md`
+   (+12/-1) and `prompts/research-agent.md` (+190/-16) directly. Green
+   check, clean merge, nothing else blocking it.
+3. **Engineer's #379 merged this pass under Tier B** (span-matcher
+   token-DF-cutoff fix). Its own report named #368 and #290 as
+   subsumed by ancestry; both were confirmed by `merge-base
+   --is-ancestor` and GitHub auto-closed them as merged once #379
+   landed, which is the queue moving rather than three separate owner
+   decisions.
+
+## Ninetieth pass, 2026-10-24 ~18:0x UTC, message: review #380/#382/#379/#384 against the merge rule, triage engineer's exit-1 run, answer two board notes
+
+**The trigger.** Four events: PR #380 (research, 17th run), PR #382
+(exo, window 34), PR #379 (engineer) and PR #384 (exo, window 35), each
+to review against the merge rule; the engineer host-window run that
+produced #379 reported exit 1 with its own log unable to show the PR;
+and two board notes addressed to this seat, from research and from
+exo.
+
+**Read this seat's own open PRs first.** Found #385 (eighty-ninth
+pass) and, beneath it, #383 (eighty-eighth pass) — both open, not yet
+merged, touching the same three files this pass needed
+(`docs/sprints/pending.md`, `docs/sprints/dispatch-queue.md`,
+`docs/agents/incidents.md`). Branched from #385's tip rather than from
+`main`; `git merge-base --is-ancestor refs/pull/383/head
+refs/pull/385/head` confirms 383 is already inside 385, so this is a
+two-deep stack, not two separate pieces of work to combine by hand.
+
+**The merge-rule reviews.**
+
+- **#379 (engineer): Tier B, merged.** Diff is `docs/design/`,
+  `docs/ideas.md`, `docs/provenance/`, `docs/runs/`, `ursa-major/src/`
+  and the rebuilt bundle — no Tier C path. Not a draft, no labels, no
+  comments since its last push, green check, `MERGEABLE`/`CLEAN`,
+  opened today. All six Tier B conditions held, so this pass merged it
+  (`fa2b2d8`) rather than only recommending it. #368 and #290, which
+  its own report named as subsumed, were confirmed by ancestry and
+  GitHub auto-closed them as merged the moment #379 landed.
+- **#380 (research): Tier C, handed back.** Edits
+  `prompts/engineer-agent.md` and `prompts/research-agent.md` directly.
+  Same charter-freeze reasoning as #378/#384. Commented on the PR
+  rather than silently skipping it.
+- **#382 (exo, window 34) and #378 (exo, window 33): closed as
+  superseded by #384.** Exo's own note claimed #384 contains both by
+  merge; verified independently rather than taken on trust (`git
+  merge-base --is-ancestor` on 378→382 and 382→384, both exit 0, chain
+  confirmed end to end 378→384). This seat's own eighty-eighth-pass
+  verdict on #378 (Tier C, charter freeze) carries forward unchanged to
+  #384, which is exactly what exo's note said and what this pass
+  checked rather than accepted.
+- **#384 (exo, window 35): Tier C, handed back.** Edits
+  `prompts/exo-agent.md` directly (+2197/-68). Green check, clean
+  merge. One non-blocking note left on the PR: a one-line file,
+  `.exo-window-35-scratch`, is committed at the repo root and reads
+  like debug litter rather than an intentional artifact — flagged for
+  exo's next window, not a hold on the owner's merge.
+
+**The failed-run triage (§11.7).** The engineer run
+(`ursa-engineer/2026-10-24T17-24-34-225Z-message`, `board.runs` id
+`5438f490-5cdd-4d10-8716-ea6c69daff70`, 121 turns, 28 minutes, exit 1)
+is a **fifth occurrence of Incident 19** — same shape as the four
+before it: the PR (#379) exists, is substantively complete (full
+standup report, not a stub), and its last commit lands three minutes
+before the run's own reported end. One thing new this time: the
+board's run record already carries `pr_url` resolved "from the branch"
+by `runtime/board/runpr.py`, meaning HQ's own tooling is already
+compensating for half of this gap (the branch of the two: finding the
+PR when the log can't). Filed as an update to Incident 19, not a new
+incident; no rerun; no fresh note to `chair:asc-host` (the open note
+under the first occurrence already carries the question).
+
+**The two board notes, answered.** Research's note said its
+seventeenth run (#380) contains its fifteenth (#370) by merge and left
+the close to this seat's judgment. Checked rather than taken: #370 is
+already `CLOSED` on GitHub (closed in an earlier pass, one of the
+"eleven closes" the note references), so there was nothing left to do
+there — confirmed, not re-closed. Exo's note said this seat's prior
+three claims hold under a new identifier (#384, not #378) because its
+own board pointer went stale for four minutes; the ancestry chain
+378→382→384 above is this seat's own independent confirmation of that,
+not a restatement of exo's claim. Both replies posted to the board in
+first person, per pm.md §15.
+
+**docs/sprints/pending.md, dispatch-queue.md and the board.** This
+section; `dispatch-queue.md` replaced in full per §11.6, nothing fired
+(`PM_DISPATCH_ENABLED` unset); a `done` note posted to the Ursa board
+for the merge and the four closes, and a `note` reply to each of
+research and exo.
 
 ## Eighty-ninth pass, 2026-10-24 ~17:5x UTC, message: triage the exo host-window run reported failed with no pull request — fourth occurrence of the same tripwire, not a defect
 

@@ -3536,4 +3536,38 @@ than a fresh ask to `chair:asc-host`, naming PR #378 against the run's
 own id, for the same reason occurrences two and three did not repeat
 the HQ question: the open note under the first occurrence already asks
 it. No rerun; nothing is missing.
-occurrence either.
+
+**Update, 2026-10-24, a fifth occurrence (engineer, second time), and the
+host-side fix is partly already here.** A message named a host window
+run of engineer (`ursa-engineer/2026-10-24T17-24-34-225Z-message`,
+`board.runs` id `5438f490-5cdd-4d10-8716-ea6c69daff70`, started
+17:24:34.225Z, 121 turns, exited 1 after 28 minutes) whose own log
+could not show its pull request, and asked for the same §11.7 triage.
+This occurrence is shaped slightly differently from the first four: the
+board record itself already carries `pr_url`
+`https://github.com/alexandrapaiz/Ursa/pull/379`, resolved "from the
+branch" by `runtime/board/runpr.py` rather than from the run's own
+self-report, which the report field says in so many words. So HQ's own
+tooling is already compensating for the gap this incident is open
+about, at least for the branch-to-PR half of it; it is the run's exit
+code and log, not the PR link, that is still wrong here.
+
+`gh api repos/alexandrapaiz/Ursa/pulls/379/commits` shows the run's own
+commits running from 16:50:24Z (the ship-first placeholder for this
+window) through a final commit at 17:49:56Z — "Three ledger entries,
+the Letta craft scan, and this run's note" — three minutes before the
+board's own `ended_at` of 17:52:42.266Z, and the PR's body is the full
+standup report (which sprint item, what woke it, which of this seat's
+other open PRs it subsumes with `merge-base --is-ancestor` verified for
+each, the finding, what shipped), not the ship-first stub. The PR's
+check is green and it merged clean (this pass, as #379, Tier B).
+Nothing about the commit history or the PR content reads as a crash;
+it reads as a normal run that finished with turns to spare before its
+agent process's own exit code went wrong, same as all four prior
+occurrences. **Classification: tripwire false alarm, not a defect**
+(pm.md §11.7 bucket one — the run's PR exists and is substantively
+complete). No rerun. Not reported as a new Ursa-side defect. No fresh
+note to `chair:asc-host`: same reasoning as occurrences two through
+four — the open note under the first occurrence already carries the
+general question, and this one adds a data point (the board already
+resolves the branch where the log can't) rather than a new question.
