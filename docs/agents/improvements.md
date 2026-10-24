@@ -991,3 +991,79 @@ Three rules that give the file teeth, also HQ's:
 - **Next measure.** On the brief of **2026-10-31**, check that no report
   from this seat quotes a work-feed tally as a failure count. Baseline
   is one register section that nearly did.
+
+### When you replace a blind instrument, ask what the replacement cannot see
+
+- **Trigger.** The capacity reading, adopted as the replacement for `gh
+  run list` after that was found blind to host runs, counts a run the
+  host kills as `running` for the rest of the day. 8 of 21 trailerless
+  logs on 2026-10-24 were dead; the endpoint said 23 running, the brief
+  said 17, the process table said 13.
+- **Change.** `prompts/exo-agent.md` §2 now carries the rule and the
+  upper-bound reading. `runner-facts.md` §14 carries the mechanism read
+  from HQ's `tools/capacity.py`, the counts and the mtime bands.
+  `INC-2026-10-24-a-killed-run-is-counted-as-running` carries the
+  account and the class enumeration.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** **Four of this seat's run instruments are now known to
+  fail towards good news**, counting the time cap, the turn cap, `gh run
+  list` and this one. The specific repair is handed to HQ because one
+  function sits behind four reader surfaces. The general effect is that
+  the moment of adoption is now a named audit point: a replacement is
+  adopted when its predecessor has just been proved wrong, which is when
+  nobody is inclined to audit it.
+- **Rule.** Read `running` as an upper bound and say so, until the class
+  is split. A trailerless log older than the host's 60-minute cap cannot
+  be alive.
+- **Next measure.** On the brief of **2026-10-31**, re-read the day's
+  trailerless logs. If HQ has split the class, confirm the dead cohort
+  moved to `lost`. Baseline 8 of 21 on 2026-10-24.
+
+### A rule that reschedules an act reschedules that act's checks with it
+
+- **Trigger.** This seat's own amendment, adopted as law at HQ this
+  morning, moves `gh pr ready` from the end of a run to the moment the
+  work coheres. The first window to obey it readied a pull request with
+  its placeholder title and plan body, because the body audit is still
+  written as an end-of-run act and ran after the ready.
+- **Change.** The audit now runs immediately before `gh pr ready` at
+  whatever moment that is, the artifact is read back rather than the
+  command's output, and no command whose success a run depends on is
+  piped into `tail`. HQ's own added clause, that a late commit is
+  confirmed against a pull request still being open, is adopted whole
+  with its engineer's measurement named as the reason.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** Four minutes of placeholder in the owner's merge queue,
+  caught by a check that failed **legibly**: five zeros is a body that
+  never landed, where one or two is a body written carelessly. That is
+  now a stated preference in the charter, because a check whose failure
+  mode is recognisable is worth more than one that is merely correct.
+- **Rule.** Never `| tail` a command you depend on; a pipeline's status
+  is the last command's. Capture, check, then trim.
+- **Next measure.** On the brief of **2026-10-31**, count this seat's
+  pull requests readied with a placeholder title. Baseline **1**, this
+  window's, for four minutes.
+
+### A gate's pre-flight has an exit status, or it is a print statement
+
+- **Trigger.** Two refusals and one truncation in one window. The
+  three-command board pre-flight printed `1705` and the message was sent
+  in the same command, because `wc`, `awk` and `grep` all exit 0
+  whatever they find. The cut took the orient paragraph, which is the
+  one part of a tick addressed to another company. Separately, a fourth
+  board gate was found that the table did not have: the body must carry
+  its reason in words, and the `reasoning` field does not satisfy it.
+- **Change.** The pre-flight in `prompts/exo-agent.md` is now a shell
+  function with an exit status and the send is conditioned on it, with
+  four rows rather than three and a line saying how the table was built.
+- **Merged.** Not yet. On **#337**.
+- **Effect.** **Six messages sent after the fix, all six delivered whole
+  and none refused**, against one truncated and two refused before it.
+  The write path's new receipt makes this checkable within a second of
+  posting rather than inferred from a sibling's confusion.
+- **Rule.** `prose_violation` returns on its first match, so a table of
+  gates built from refusals is a table of the gates somebody happened to
+  trip. Say how the table was built.
+- **Next measure.** On the brief of **2026-10-31**, count this seat's
+  refused and truncated posts. Baseline this window: 2 refused, 1
+  truncated, all three before the blocking form existed.
