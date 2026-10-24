@@ -156,6 +156,39 @@
   --line: #141b2b;
   /* display face: the light grotesque the hero is set in */
   --font-sans: "Helvetica Neue", -apple-system, "Segoe UI", Arial, sans-serif;
+
+  /* The house spring, measured 2026-10-24 rather than invented.
+     docs/design/reviews/2026-10-24 has the full account; the short form:
+
+     Two earlier runs of the frontend seat tried to describe the hover feel
+     the owner named on Elicit by reading its computed CSS at rest, and both
+     concluded there is no spring in it. There is not. The spring is handed
+     to the browser through the Web Animations API, which has no spring
+     either, so a motion library solves it first and ships the solution as a
+     `linear()` easing of a few dozen points. Read off their own animation
+     engine, Elicit's is 400ms, damping ratio 0.80, peaking 1.51 percent past
+     its target at 236ms, and ringing exactly zero times.
+
+     That is the correction worth having. "Bouncy" there is one and a half
+     percent of overshoot, not a bounce, and the property it is applied to
+     is background colour, where an overshoot of that size cannot be seen at
+     all. So what carries the feel is not the size of the spring. It is that
+     the motion arrives, goes a hair past, and settles, instead of stopping
+     dead on its mark.
+
+     Ours is the same physics re-solved at our own tempo instead of theirs:
+     damping ratio 0.80 kept exactly, duration 340ms so that it first
+     reaches its target at 163ms, which is the 160ms this file already uses
+     everywhere. Overshoot 1.50 percent, peak at 207ms, no ring. Regenerate
+     or audit it with:
+
+       node docs/design/review-kit/make-spring.mjs \
+         --damping 0.8 --duration 340 --wnT 8.88 --points 24
+
+     The same generator, given Elicit's own numbers, reproduces Elicit's own
+     40 points to within 0.008, which is how this value was checked against
+     something real before it was used. */
+  --spring-lift: linear(0 0%, 0.0606 4.3478%, 0.1964 8.6957%, 0.3579 13.0435%, 0.5155 17.3913%, 0.6537 21.7391%, 0.7662 26.087%, 0.8526 30.4348%, 0.9153 34.7826%, 0.9585 39.1304%, 0.9863 43.4783%, 1.0028 47.8261%, 1.0114 52.1739%, 1.0148 56.5217%, 1.015 60.8696%, 1.0134 65.2174%, 1.0111 69.5652%, 1.0087 73.913%, 1.0064 78.2609%, 1.0045 82.6087%, 1.0029 86.9565%, 1.0018 91.3043%, 1.001 95.6522%, 1 100%);
 }
 
 ::selection {
@@ -264,13 +297,45 @@ html {
    lift here is one pixel and the press beats the hover.
 
    Colour stays inside the existing palette: the border walks up to --polar
-   and the fill is --polar at 8%. Nothing new is introduced. */
+   and the fill is --polar at 8%. Nothing new is introduced.
+
+   Amended 2026-10-24. "Never bouncy" above, and the "Elicit (200ms on
+   transform)" it rests on, were both read off Elicit's stylesheet at rest,
+   and a stylesheet at rest cannot see a spring that is handed to the
+   animation engine already solved. Asked directly, that engine says 400ms,
+   damping ratio 0.80, 1.51 percent of overshoot, no ring. So Elicit is
+   bouncy, by one and a half percent, and the earlier reading was not wrong
+   about the pixels so much as blind to the mechanism.
+
+   One pixel of lift stands: Elicit's own geometric motion is also one
+   pixel. What changes is that the pixel now springs. The spring goes on
+   the transform and not on the colour, which is the other half of the
+   finding, because Elicit puts its spring on background colour where an
+   overshoot of 1.5 percent is invisible. Here the overshoot lands on the
+   only channel that can show it. */
 
 .cta {
   transition:
     border-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
     background-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
     transform 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Guarded, because `linear()` is recent. A browser without it never enters
+   this block and keeps the 160ms ease-out above, which is the behaviour
+   that shipped before today. The guard has to be @supports rather than two
+   declarations in a row: a var() that fails to substitute invalidates the
+   whole property at computed-value time instead of falling back to the
+   declaration before it. */
+@supports (transition-timing-function: linear(0, 1)) {
+  .cta {
+    transition-property: border-color, background-color, transform;
+    transition-duration: 160ms, 160ms, 340ms;
+    transition-timing-function:
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      var(--spring-lift);
+  }
 }
 
 /* Tailwind v4 already gates hover: behind (hover: hover); this rule is plain
