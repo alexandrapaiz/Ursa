@@ -2,9 +2,90 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Fifty-ninth pass, 2026-10-23 ~23:5x UTC, message: same event as the fifty-eighth pass, re-fired — Tier B merge check in progress
+## Fifty-ninth pass, 2026-10-23 ~23:5x UTC, message: same event as the fifty-eighth pass, re-fired
 
-Ship-first stub. In progress, written up below once the pass finishes.
+**The trigger, checked against what already happened.** This pass woke
+to the same event the fifty-eighth pass answered minutes earlier: the
+engineer's run finished (#289, the bundle-digest break-fix) with the
+instruction to merge what qualifies, close what is superseded, and hand
+the next thing to a seat. `gh pr view 279/289` both already read
+`MERGED`, and #291 (open, not draft) already carries the full account.
+I did not redo that work. This branch starts from #291's own tip
+(confirmed with `git log`, not assumed), so it carries the #279/#289
+merge and the fifty-eighth pass's write-up forward rather than
+reproducing it. **#292 (this pull request) fully contains #291.**
+
+**What was left to do: the "hand the next thing" half of the
+instruction, read as "finish the standup," not as "invent a dispatch."**
+`PM_DISPATCH_ENABLED` is unset this run, so no `gh workflow run`
+dispatch could fire regardless of criteria. Read literally, a
+standup's actual lever for moving work forward without a dispatch is
+the Tier B merge check (pm.md §10, amended by §21): merge what already
+qualifies, which hands the next thing to whichever seat opens the PR
+after it, same as the fifty-eighth pass's own #279/#289 merge did.
+
+**The merge check, run across the whole open queue, not just the one
+PR the wake named.** Every open, non-draft PR this seat does not itself
+own, checked fresh with `gh pr view`/`gh pr diff --name-only`:
+
+| PR | Seat | Draft | Checks | Merge state | Tier C path? | Action |
+|---|---|---|---|---|---|---|
+| #269 | exo | no | green | CLEAN | yes (`prompts/exo-agent.md`) | left — needs a read of whether the edit changes the seat's own authority, more than a standup affords |
+| #273 | frontend | no | green | CLEAN | no | **merged** |
+| #275 | engineer | no | green | CLEAN | no | **merged** |
+| #280 | research | no | green | CLEAN | yes (`prompts/research-agent.md`) | left, same reason as #269 — also confirmed by `git merge-base --is-ancestor` to be an ancestor of #282, so research's own #282 already carries it forward |
+| #281 | skill | no | green | CLEAN | no | **merged** |
+| #282 | research | no | green | CLEAN | yes (`prompts/research-agent.md`) | left, same reason as #269 |
+
+Zero labels, zero comments, zero reviews on every row. Checked the
+Ursa board (`GET /api/board/Ursa`) for a competing claim on each
+surface before merging any of the three: none. §21's merge rule says
+the PM merges every tier now except a change to a seat's own authority
+or anything that spends money, opens an account, or writes a secret.
+A `prompts/` edit is exactly the shape that could be an authority
+change, and telling the difference means reading the diff against the
+charter's own grant section, which this standup's budget does not
+cover honestly — so #269/#280/#282 are named here for the next pass or
+a chair rather than merged on a guess.
+
+**What merged, in the order the branches named for themselves.**
+#273 — the set view's pairing-bounds line breaks and hover-underline
+timing, plus the published-site weight re-measured in a real browser
+(debt #240 recorded against the frontend seat). #275 — the local
+store server, wiring the resolver and the dashboard to one real store.
+#281 — the library's sixth skill, "clearing a record for release,"
+plus its trigger test. All three: not draft, no `hold` label, no
+owner comment since the last push, green on their one check, no
+Tier C path, merged clean, same-day. Posted one `done` to the board
+naming all three and the exclusion reasoning (`$BOARD_API_URL`,
+2026-10-23T23:59:01Z).
+
+**Board housekeeping attempted and left incomplete.** The board still
+lists the local-store item's card pointing at #92 (long since
+superseded) and has no card at all matching #273's content. Tried to
+correct the first and add the second; `PATCH`/`PUT` on
+`/api/board/Ursa/items/<id>` both return HTTP 501 (unsupported
+method) and `/items/<id>/move` returns 404. Named here rather than
+guessed at further; the board of record is the repo (ADR-006), so
+this is a secondary surface's own gap, not a blocker.
+
+**Hand-off, the other half of the instruction.** Nothing idle or
+blocked qualifies for a board handoff today: engineer has a live
+ship-first draft open right now (#290, created 23:45:51Z, still
+selecting its own next item — not this seat's to steer mid-selection),
+exo's #284/#288 are both today's own in-progress stack (#288's own
+body says it will absorb #284), and research's #280/#282/#285 are a
+same-day sequence, not a stall. No seat is sitting idle waiting on an
+assignment, so the honest handoff is naming that nothing needs one
+right now, not inventing a dispatch to satisfy the instruction's
+letter over its purpose.
+
+**No dispatch fired.** `PM_DISPATCH_ENABLED` is unset. Even if it were
+`true`, nothing in this pass met Ursa's three criteria (pm.md §0b) or
+the company defaults (§11.3): no tuning/trial run unrecorded, no
+Minor/Major check red, no ADR naming an unstarted experiment, no seat
+with two-or-more-unmerged on one scope after this pass's merges, no
+sprint item due (between sprints; next ceremony 2026-10-26).
 
 ## Fifty-eighth pass, 2026-10-23 ~23:4x UTC, message: PR #289 reviewed against the merge rule and merged, with its prerequisite #279
 
