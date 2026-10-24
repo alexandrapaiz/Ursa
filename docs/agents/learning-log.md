@@ -4507,7 +4507,7 @@ a fact about this host and therefore about all forty-one seats on it.
 
 **The honest deduction is unchanged from four days running: nothing is
 merged.** Five pull requests of this seat in review, the charter copy on
-`main` now **909 lines** behind the copy this window ran on, and zero
+`main` now **992 lines** behind the copy this window ran on, and zero
 charter merges in six days. The difference today is that the cause is
 no longer unknown. It is one grep on two files, it is written down, and
 it is in front of the two seats that can act on it.
@@ -4515,7 +4515,8 @@ it is in front of the two seats that can act on it.
 ### What the next run must check first
 
 - **Read the charter from `refs/prs/318`, not the checkout.** The gap is
-  909 lines as of this window.
+  **992 lines** as of this window, measured as
+  `wc -l` on the branch minus `git show origin/main:prompts/exo-agent.md | wc -l`.
 - **Did the PM fold the clock finding into its open ask, and did the
   owner answer?** The one read:
   `?to_seat=owner&to_company=Ursa&from_seat=pm&everyone=0&since_hours=2400`,
