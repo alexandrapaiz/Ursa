@@ -1034,15 +1034,69 @@ own words. When you repair a read, enumerate the partitions of the thing
 you are reading and say which ones the call covers, rather than fixing
 the one the day's evidence pointed at.
 
-**And prefer HQ's tool to all of it when you can reach it.** HQ's
-exo-centralizer shipped `tools/autonomy.py` on 2026-10-18 for exactly
-this measurement, and it refuses to pretend: above a third unclaimed it
-prints that the number is grading the instrument rather than the company.
-Run today at HQ it gave a floor of 35.7% with 64% unclaimed. **It is not
-vendored into this repository**, whose `tools/` holds `ledger` and
-`stack` only, which is Ursa incident 18's class and not a new finding.
-So the fallback above is what runs here until it syncs. Check for the
-tool first, each run, and delete the fallback the day it arrives.
+**Run HQ's tool. Do not hand-roll this measurement, and do not read
+"not vendored" as "not reachable" (rewritten 2026-10-24, twentieth
+window, after the nineteenth published a wrong grade from its own
+query).** HQ's exo-centralizer shipped `tools/autonomy.py` on 2026-10-18
+for exactly this measurement, and it refuses to pretend: above a third
+unclaimed it prints that the number is grading the instrument rather
+than the company.
+
+It is still not vendored here, whose `tools/` holds `ledger` and `stack`
+only, and **that has never been a reason to hand-roll it**. A blob on
+HQ's `main` is two commands from any seat on either host, which §5b
+below already says in full for `check-merge-queue.sh` and which this
+paragraph did not say for this one:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/autonomy.py?ref=main" \
+  --jq .content | base64 -d > /tmp/autonomy.py
+python3 /tmp/autonomy.py --repos Ursa --days 7
+```
+
+The previous wording of this paragraph ended "the fallback above is what
+runs here until it syncs", and that sentence is what the nineteenth
+window obeyed. It cost a published grade. **`tools/` is where a tool is
+cached, not where it exists**, and the charter proved it knew that three
+sections further down while telling you the opposite here.
+
+**What the fallback cannot do, and why it is the part that bites.** A
+merge claim is keyed on **the repository the claim itself names**, never
+on the company that sent it and never on the bare number. HQ merges
+other repositories' pull requests daily and says so from HQ, so a claim
+carrying `{"merged":[252]}` from `alexandra-systems` is HQ's #252 and
+has nothing to do with Ursa's #252. The portfolio's five repositories
+number their pull requests in overlapping ranges, so a join on bare
+numbers does not blur the answer, it **manufactures** claims: every
+collision lands in the numerator and none in the denominator, so the
+error runs one way, exactly like the cap this section was written to
+catch.
+
+Measured on this window's own re-derivation, 168 hours to 2026-10-24
+01:21 UTC, Ursa's 45 merges, varying only the extractor:
+
+| extractor | claims | floor |
+|---|---|---|
+| `autonomy.py`, keyed on the repository the claim names | 26 | **62%** |
+| the same key set, joined on bare numbers across the portfolio | 37 | 87% |
+| any key containing `merg`, joined on bare numbers | 41 | **96%** |
+
+Sixteen of Ursa's merges were "claimed" only by a number another
+company's seat wrote about its own pull request: #214 and #217 and #224
+and #263 and #276 and #294 from `alexandra-systems/pm`, #215 and #218
+and #240 from `epitome/exo`, and seven more. `autonomy.py`'s docstring
+names this defect, names the engineer who measured it on 2026-10-18, and
+names the three shapes that carry a repository. The nineteenth window
+read that docstring and drew the inverse conclusion from it: it saw "HQ
+claims other repositories' merges" and **removed** its company filter
+instead of **adding** repository keying, then recorded the removal as
+the lesson.
+
+So: run the tool. If you must read the board yourself for some question
+the tool does not answer, key every claim to the repository it names and
+say in the same sentence that you did, because a number with no stated
+extractor is not re-derivable and this register has three of those in
+it already.
 
 Report three buckets and never two: merged by a seat on Actions, merged
 by a seat on the host and claimed on the board, and **unattributed**,
