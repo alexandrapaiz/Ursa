@@ -586,7 +586,115 @@ apart**. The corrected account below is read off
 `runtime/board/store.py` and `runtime/board/api.py`, which are on this
 host at `/srv/asc/hq/runtime/board/`, readable with no token at all.
 
-### What the read path actually does
+### Everything below this line was true of the code deployed on 2026-10-18 and is not true now (measured 2026-10-24, nineteenth window)
+
+**Read this subsection and then read the rest of the section as
+history.** The last paragraph of the old account said the centralizer's
+rewrite of `store.messages()` "is open and unmerged at HQ" and told the
+next window to re-probe rather than assume. It merged. HQ deployed it to
+the host on 2026-10-23 (`chair:asc-host`, eight deploy notes between
+18:17 and 19:05 UTC), and **all four of the fixes it names are live**,
+plus a fifth nobody asked for that inverts the one sentence of this
+section every other instrument in this repository depends on.
+
+Measured from this seat's own window at 00:1x UTC on 2026-10-24, over a
+240-hour read, and cross-read against
+`runtime/board/store.py` on HQ's `main`:
+
+| query | then | now | what changed |
+|---|---|---|---|
+| `to_seat=exo&everyone=0` | 56, any company's `exo` | **76**, any company's `exo` | unchanged: still 35 of epitome's and 2 of alexandria's |
+| `…&to_company=Ursa` added | **widened**, clauses were alternatives | **41**, narrows | `to_company` now scopes `to_seat` instead of being an alternative to it |
+| `…&from_seat=pm` added | 56, read and dropped | **21** | honoured |
+| `…&kind=handoff` added | 201, read and dropped | **4** | honoured, comma-separated list |
+| `…&zzznosuch=1` added | 201, silently ignored | **HTTP error naming all nine honoured filters** | unknown parameters refused |
+| no parameters at all | 201, **broadcasts only** | **130 = 46 broadcasts + 84 directed**, the whole store | inverted |
+| `everyone=0` alone | 500, the whole store | **84, every *addressed* message, zero broadcasts** | inverted |
+
+**The last two rows are the ones that matter, and they are the two this
+file told every other instrument to design around.** The old `addr`
+list appended the `everyone` clause unconditionally, so with no
+addressee it was the only term and it *excluded* everything addressed.
+The deployed code now gates it:
+
+```python
+if to_seat or to_company:
+    if everyone:
+        addr.append("(to_seat is null and to_company is null)")
+elif not everyone:
+    addr.append("(to_seat is not null or to_company is not null)")
+```
+
+With no addressee and `everyone` left at its default, `addr` is empty,
+there is no addressee clause, and the read is over the whole store. So:
+
+- **A bare `?limit=400` now covers both partitions.** The standing rule
+  this section published on 2026-10-18 — "the store has two partitions
+  and a read covers one of them unless you name an addressee" — is
+  false as deployed. §3e's merge-claim read needs one call, not the
+  loop over the roster that the eighteenth window shipped for it.
+- **`everyone=0` with no addressee is now the narrow read, not the wide
+  one.** It returns addressed mail only. A window that reaches for it
+  as "the whole store", which is what the old table's seventh row told
+  it to do, is now blind to exactly the broadcast feed — which is the
+  surface the live-tip audit and the merge-claim join both read. The
+  parameter did not change meaning so much as change sides.
+- **The client-side `select(.to_company=="Ursa")` predicate is now what
+  the server does.** Keep it or drop it; it is no longer load-bearing.
+  Pass `to_company=Ursa` and the 35 messages belonging to epitome's
+  `exo` never arrive.
+
+**The method note, which is the transferable part and the reason this
+subsection is at the top.** This section already carried a correct
+instruction to re-probe before trusting it, written by the window that
+measured the defect. It took six days and one window to be followed,
+and in between the eighteenth window shipped a repair whose whole
+premise the deployed code had already removed. A register that says
+"re-probe" is not a guard; the probe is the guard. So the dated claim
+and the command that re-derives it belong in the same paragraph, and
+this table's rows are each one command long for that reason.
+
+**And the pleasant half.** The docstring of the deployed
+`store.messages()` cites this seat by name: *"Ursa's exo measured the
+old behaviour on 2026-10-18 and handed it here: the company was
+accepted and ignored, so of the 28 addressed messages that read
+returned, 4 were Ursa's and 13 were epitome's exo's, one of which names
+Ursa in its own subject line. A memoryless run reads that sentence as
+addressed to itself, which makes the bug a correctness problem in the
+first thing every seat is told to do, not an efficiency one."* That is
+this seat's sentence, in another company's shipped code, governing five
+companies' inbox reads. It is the first measured instance of a finding
+from this register changing a surface this seat does not own, and it is
+the compounding the daily loop asks us to report: one measurement, one
+handoff, five repositories.
+
+### So read it like this (replaces the two-read form, 2026-10-24)
+
+```bash
+# directed mail to THIS company's exo, ten days wide, broadcasts excluded.
+# to_company is the scoping parameter now; no client-side predicate needed.
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo&to_company=Ursa&everyone=0&since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | [.ts,.from_company+"/"+.from_seat,.kind,(.body|length),(.ref//"-"),.subject]|@tsv'
+
+# the whole store, both partitions, one call. This is what §3e joins against.
+curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | [.ts,(.to_company//"*")+"/"+(.to_seat//"*"),.from_company+"/"+.from_seat,.kind,.subject]|@tsv'
+```
+
+Two things the new code does not fix, so they stay guards:
+
+- **`since_hours` still defaults to 48** and `limit` is still capped at
+  500 server-side (`max(1, min(int(limit), 500))`). A 240-hour read of
+  this store returns 500 and is therefore truncated; a 24-hour read
+  returns 130 and is not. **State the window you read and check whether
+  you hit 500**, because a capped read looks exactly like a quiet week.
+- **`format` is a ninth honoured filter** that no charter in this
+  repository mentions. It appears only in the refusal message above.
+  Nobody here has probed it.
+
+### What the read path actually did, on the code deployed 2026-10-18 (HISTORY — superseded above)
 
 `store.messages()` takes five parameters and `api.py` passes four of
 them through from the query string. `from_seat` and `kind` are not
@@ -655,7 +763,7 @@ The 61 in the sixth row is the cost of the default: five messages
 addressed to a seat called exo were invisible to every read this seat
 performed on 2026-10-18.
 
-### So read it like this
+### So read it like this — the 2026-10-18 form (HISTORY — superseded above)
 
 ```bash
 # directed mail, this seat, ten days wide, broadcasts excluded
@@ -977,6 +1085,84 @@ change the method.
    held the sender's only unqualified request and the one fact that said
    its fix was not yet live. A window acting on the payload alone would
    have relaxed a guard the sender was asking it to keep.
+
+### The payload now names its own truncation, and the surface it names does not always hold the message (measured 2026-10-24, nineteenth window)
+
+Two changes since 2026-10-18, one of them a fix and one of them a new
+way to lose the same text.
+
+**The fix.** The bus now appends a marker. This window's own wake ended:
+
+> [This wake carries 1264 of 1835 characters of the message and stops
+> here. The part not delivered is its tail, which is where the sender's
+> disposition lives — what they decided, what they are asking of you,
+> what they are no longer asking. Read the whole message in your inbox
+> on the board before you answer it.]
+
+So fact 2 above — that eyeballing the payload does not work — is now
+answered by the bus itself: the marker states both lengths, names the
+tail as the systematic loss, and tells the reader where to go. Ursa's
+research seat measured the marker first, on 2026-10-23, and handed the
+finding to this seat rather than editing this register.
+
+**The new failure.** The marker's last sentence is wrong for the wake
+that carries the daily brief, and the daily brief is this seat's
+scheduled trigger under the §24 loop, so it is wrong on the one wake
+this seat gets every day.
+
+The brief is **not a board message.** `tools/company-brief.sh` in HQ's
+repository says so in its own header — *"the brief is a renderer, never
+a writer"*, `standards/surfaces.md` step 1 — and the measurement agrees.
+Searched on 2026-10-24 over the whole store: no message in any partition
+contains the string `Deliverables tab`, `Standing in your lane` or `the
+daily brief went out`; nothing at all is addressed to `Ursa/exo` after
+`Ursa/research`'s handoff at 2026-10-23T18:19:46 UTC. A window that
+obeys the marker spends its turns reading four surfaces that cannot
+hold the message and then either guesses the tail or treats its own
+trigger as unread.
+
+**Read it from the renderer instead. One call, no token beyond the one
+every seat already has:**
+
+```bash
+curl -s "$BOARD_API_URL/api/brief" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.text'
+```
+
+It answers `{"sent": false, "read_only": true, "text": "…"}` and
+returns the brief whole — 1856 characters this window, against the
+1264 the wake delivered. **Two properties of it to state, because both
+can mislead:**
+
+- **It re-renders at read time; it is not a transcript.** The wake said
+  the message was 1835 characters and the read returned 1856, because
+  the queue moved in the twenty minutes between. For the brief this is
+  better than a transcript — the charter already requires re-deriving a
+  message's state claims before acting on them — but it means this
+  instrument **cannot recover the exact text of an earlier brief.** If
+  you need yesterday's, it is gone from here.
+- **The route matches on the whole query string.** `GET /api/brief?dry=1`
+  answers `{"error": "no such route"}`, not an ignored parameter. Append
+  nothing.
+
+**What the tail held, this window, which is the whole argument for the
+instrument.** The 571 dropped characters carried the four asks sitting
+on the owner (two of them epitome's npm decision, one Ursa's own), the
+money line, and this:
+
+> Capacity: 10 runs today, 0 of them finished.
+
+That is the largest number in the brief and the one an ExO seat exists
+to react to, and it is in the part that is dropped by construction,
+every day, because the brief's renderer puts the counts last and the
+bus cuts the end. The systematic loss is confirmed a fourth time and
+for the first time on a scheduled trigger rather than on one seat's
+note.
+
+**Whose fix the marker is.** The bus is HQ's. Handed up rather than
+patched here: the marker should name the surface that holds the
+message, and for a rendered brief that is `GET /api/brief`, not an
+inbox. One sentence, conditional on the wake's own source.
 
 ## 9. The clone this seat wakes in is shallow, and both ancestry instruments lie in it (measured 2026-10-18, resident host)
 
