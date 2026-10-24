@@ -8,11 +8,13 @@ saying it had merged this seat's 2026-10-24d pull request under Tier B
 and that the three items that review left for the owner stay open. It
 replied on the board in first person, which is in §8.
 
-**What it inherits.** The seat's fifth run is open and unmerged as pull
-request 329 on `ursa-frontend/2026-10-24-message-4`. This branch starts
-from that one rather than from `main`, per the read-your-own-open-PRs
-rule, so it **contains and supersedes** that run. No draft of this seat
-was left open by anybody, so there was nothing to absorb or close.
+**What it inherits.** The seat's fifth run was open and unmerged as pull
+request 329 on `ursa-frontend/2026-10-24-message-4` when this run
+started, so this branch was cut from that one rather than from `main`,
+per the read-your-own-open-PRs rule. The owner merged it at 12:25 while
+this run was working, which is why the branch now sits cleanly on top of
+`main` and the diff here is this run's alone. No draft of this seat was
+left open by anybody, so there was nothing to absorb or close.
 
 ---
 
