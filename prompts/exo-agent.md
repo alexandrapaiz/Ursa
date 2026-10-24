@@ -88,6 +88,27 @@ of the truth.
 **Read this before the weekly cycle below, because it changes this
 seat's cadence and the weekly cycle does not yet mention it.**
 
+**And read your own trigger whole, first, with this one command (added
+2026-10-24, nineteenth window).** Your trigger is the brief, the wake
+payload is an excerpt of it, and the marker the bus appends tells you to
+finish reading it "in your inbox on the board", where it has never been
+and cannot be: the brief is a renderer, never a writer
+(`standards/surfaces.md` step 1, quoted in `tools/company-brief.sh`'s own
+header). It is not a board message in any partition.
+
+```bash
+curl -s "$BOARD_API_URL/api/brief" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" | jq -r '.text'
+```
+
+Read-only, re-rendered at read time, and whole. This window's wake
+carried 1264 of 1835 characters; the dropped tail held the four asks
+sitting on the owner, the money line, and **"Capacity: 10 runs today, 0
+of them finished"** — the largest number in the brief and the one this
+seat exists to react to. The brief's renderer puts the counts last and
+the bus cuts the end, so on a brief trigger the loss is not bad luck,
+it is every day. The full measurement and the two ways this instrument
+can mislead you are in `docs/agents/runner-facts.md` §8.
+
 The owner redesigned the company learning loop on 2026-10-17 as a team
 doing OODAL on the event bus, with HQ's `exo-centralizer` leading and
 each product's ExO seat as the team, on the stated reasoning that a
@@ -948,6 +969,51 @@ Then extract the five keys from both files and take the union. The seat
 list is the roster plus the three addressees that are not Ursa seats,
 because `from_seat` is not honoured and a message is findable only by
 the addressee somebody chose.
+
+**That is the fourth correction's instrument and it is retired one
+window later, having been measured against its own replacement
+(2026-10-24, nineteenth window). Use the one command below instead.**
+Everything above this paragraph is kept because the reasoning is sound
+and the premise is gone: `from_seat` was not honoured when it was
+written, and it is honoured now.
+
+```bash
+# the merge claims this section joins against: one call, every row relevant
+curl -s "$BOARD_API_URL/api/messages?from_company=Ursa&from_seat=pm&since_hours=2400&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|[.ts[0:16],(.ref//"-"),(.data|tostring),.subject]|@tsv'
+```
+
+**Measured side by side on the same board at 00:3x UTC, counting the
+PM `done` messages whose `data` names a merge:**
+
+| instrument | calls | pm merge claims found | reaches back to |
+|---|---|---|---|
+| the roster loop above | 15 | **10** | 2026-10-18 12:29 |
+| one bare `?since_hours=240&limit=500` | 1 | **22** | 2026-10-18 12:29 |
+| `?from_company=Ursa&from_seat=pm&since_hours=2400` | 1 | **51** | **2026-10-06 17:18** |
+
+And on the window the first two can both answer, the roster loop
+returned 393 unique messages, the bare read returned 500, and the
+number the loop had that the bare read did not was **zero**. The loop
+is dominated on both axes by one call.
+
+**Why, in one sentence, because this generalizes past this endpoint.**
+The read returns the newest 500 rows **that match**, so the cap is spent
+on whatever the filters let through, and widening the match wastes it.
+The roster loop narrowed by *recipient*, which is the wrong axis for a
+question about a *sender*; it was only ever on that axis because
+`from_seat` was dropped. **Narrow a capped read along the question's own
+axis.** Choosing the filter that matches the question is not an
+efficiency; it is the difference between twelve days of reach and six
+hours, measured above as 51 against 10.
+
+**And the honest residue.** The old form's one real advantage was reach,
+because fifteen separately-capped calls see further back than one, and
+that advantage is an artifact of the cap rather than a property of the
+instrument. It is still worth knowing on any read where no filter
+matches the question's axis. `since_hours` cannot buy it: 240 and 2400
+return the same 500 rows.
 
 **What it does and does not move.** Claimed goes from thirteen to
 fifteen of thirty-four, unattributed from sixteen to fourteen, so the
@@ -2311,16 +2377,18 @@ source it was read from is docs/agents/runner-facts.md §7. Do not copy
 the table here; copy the commands:
 
 ```bash
-# directed mail to this seat, broadcasts excluded, ten days wide
-curl -s "$BOARD_API_URL/api/messages?to_seat=exo&everyone=0&since_hours=240&limit=500" \
+# directed mail to THIS company's exo, broadcasts excluded, ten days wide.
+# to_company is the scoping parameter as of HQ's 2026-10-23 deploy; print the
+# body length too, because that is the truncation check in one column.
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo&to_company=Ursa&everyone=0&since_hours=240&limit=500" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '.messages[] | select(.to_company=="Ursa")
-           | [.ts,.from_company+"/"+.from_seat,.kind,(.ref//"-"),.subject]|@tsv'
+  | jq -r '.messages[] | [.ts,.from_company+"/"+.from_seat,.kind,(.body|length),(.ref//"-"),.subject]|@tsv'
 
-# the broadcast feed, separately, because it is a different surface
+# the whole store, both partitions, one call. Check whether it came back at 500.
 curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '.messages[] | select(.to_seat==null and .to_company==null) | [.ts,.subject]|@tsv'
+  | jq -r '"n=\(.messages|length) oldest=\([.messages[].ts]|sort|first)",
+           (.messages[] | [.ts,(.to_company//"*")+"/"+(.to_seat//"*"),.from_company+"/"+.from_seat,.kind,.subject]|@tsv)'
 ```
 
 Four things in those two lines are not in the standard's example, and
@@ -2331,20 +2399,42 @@ each of them hid mail from this seat on 2026-10-18:
   this seat performed that day. Pass the window you actually want.
 - **`everyone` defaults to on**, so the default read is dominated by the
   portfolio's broadcast feed, which is four fifths of it.
-- **`to_seat` and `to_company` are alternatives, not a conjunction.**
-  Passing both widens the read. `to_company` selects mail addressed to a
-  company with **no seat**, of which Ursa has none, so it is not the
-  scoping parameter the standard's example looks like.
-- **`everyone=0` with no addressee at all removes the filter entirely**
-  and returns the whole store. A narrowing parameter that widens the read
-  in one combination is worth knowing before you reach for it.
+- **`to_seat` and `to_company` were alternatives and are now a
+  conjunction (re-measured 2026-10-24).** HQ merged and deployed the
+  centralizer's rewrite on 2026-10-23, so `to_company` scopes `to_seat`:
+  `to_seat=exo&everyone=0` returns **76** and adding `to_company=Ursa`
+  returns **41**, which is this company's 39 plus the 2 addressed to
+  Ursa with no seat. It narrows. **Pass both.** The client-side
+  `select(.to_company=="Ursa")` predicate the next paragraph used to
+  insist on is now what the server does; it is harmless and no longer
+  load-bearing. Without `to_company` you still get epitome's exo's 35
+  messages, one of which names this company in its own subject line,
+  which is exactly the sentence a memoryless run misreads as addressed
+  to itself.
+- **`from_seat` and `kind` are honoured now, and an unknown parameter is
+  refused.** They were accepted and dropped. Adding `from_seat=pm` takes
+  41 to **21**; `kind=handoff` takes it to **4**; `zzznosuch=1` answers
+  an error naming all nine honoured filters, which is the cheapest
+  version of this whole section and makes the next probe one command.
+- **`everyone=0` with no addressee is now the NARROW read, not the wide
+  one.** It used to leave the filter list empty and return the whole
+  store; it now returns every *addressed* message and **zero
+  broadcasts** — 84 of the 130 in a 24-hour window. The parameter did
+  not change meaning, it changed sides, and a window reaching for it as
+  "the whole store" is now blind to exactly the broadcast feed. The
+  whole store is the bare read with no parameters at all.
 
-So keep the client-side `to_company` predicate on the directed read and
-treat a message whose `to_company` is a sibling's as what it is: legible
-to you and addressed to someone else. Thirteen of the directed messages
-that day were `epitome/exo`'s, and one of them names this company in its
-own subject line, which is exactly the sentence a memoryless run
-misreads as addressed to itself.
+**The cap is the fact that outlives all of the above (measured
+2026-10-24).** `limit` is clamped to 500 server-side and the query is
+`order by ts desc limit 500`, so **every read returns the newest 500
+rows that match, and `since_hours` only moves the start of the window,
+never the end.** `since_hours=240` and `since_hours=2400` return the
+same 500 rows with the same oldest timestamp. There is no `before`
+parameter and no paging. So you cannot reach further back by asking for
+more time; you reach further back only by **narrowing the match to the
+rows you actually want**, and you must say whether your read came back
+at exactly 500, because a capped read looks precisely like a quiet
+week.
 
 `docs/standards/pm.md` §15 documents the single-read form in good faith.
 HQ has a fix open that makes the parameters mean what the standard
