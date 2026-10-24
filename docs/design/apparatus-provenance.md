@@ -67,14 +67,17 @@ Measured over this repository's own history, 1,090 commits resolved by
 
 | Quantity | Value | What it is |
 |---|---|---|
-| Records resolved | 12 | outcome records written to `.ursa/records/` |
-| Generations | 14 | model calls, or in this corpus commit blobs standing in for them |
-| `SourcePointer` instances | 7,525 | objects carrying `conversationId`, `generationIndex`, `start`, `end` |
-| Mean pointers per generation | 537.5 | 7,525 ÷ 14 |
+| Records resolved | 16 | outcome records written to `.ursa/records/` |
+| Generations | 20 | model calls, or in this corpus commit blobs standing in for them |
+| `SourcePointer` instances | 10,715 | objects carrying `conversationId`, `generationIndex`, `start`, `end` |
+| Mean pointers per generation | 535.8 | 10,715 ÷ 20 |
 | Worst single record | 2,161 | pointers per generation in `…2026-10-15-a894415.json` |
 
-So the proposed field would have stored the client and the cap **7,525
-times to describe 14 calls**. The cost is not the bytes. It is that 7,525
+The committed fixture `fixtures/real/ursa-main-4d5e401.json` is the small
+end of the same ratio: 19 pointers over 1 generation.
+
+So the proposed field would have stored the client and the cap **10,715
+times to describe 20 calls**. The cost is not the bytes. It is that 10,715
 independently-writable copies of one fact can disagree, and nothing in
 the record is able to adjudicate between them: there is no rule that
 could say which of two conflicting `maxOutputTokens` values on two spans
@@ -127,6 +130,10 @@ over the same history will find any, because they were never in git.
 So a bare `maxOutputTokens?: number` would be absent on **100% of the
 records this build can produce from a repository**, while reading exactly
 like a transcript-backed generation whose call genuinely had no cap set.
+That is not a projection: after this change, all 20 generations over this
+repository's own history carry `observability: 'unobservable'` with
+`reason: 'git-blob-generation'`, and the measurement in §7 prints the
+tally.
 Those are different claims. One says "no limit was in force"; the other
 says "this ingest path cannot see a limit, and never could."
 

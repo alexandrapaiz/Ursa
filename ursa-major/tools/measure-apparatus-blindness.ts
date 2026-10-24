@@ -20,10 +20,13 @@
 // Measured on this repository's own history on 2026-10-24, resolved with
 //   npx tsx src/bin/ursa.ts run <repo> --max-pair-distance 400 \
 //     --max-pair-age-hours 720 --limit 60 --min-chars 200
-// over 1,090 commits: 12 records, 14 generations, 7,525 SourcePointer
-// instances. 537.5 pointers per generation on average and 2,161 in the
+// over 1,090 commits: 16 records, 20 generations, 10,715 SourcePointer
+// instances. 535.8 pointers per generation on average and 2,161 in the
 // largest single record, so the proposed field would have written one
-// constant 7,525 times to describe 14 calls.
+// constant 10,715 times to describe 20 calls. All 20 generations came
+// back `unobservable` / `git-blob-generation`, which is the other half
+// of the finding: on the only launches that produce records today, there
+// is no apparatus to record.
 
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
