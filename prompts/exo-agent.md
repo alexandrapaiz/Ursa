@@ -88,6 +88,27 @@ of the truth.
 **Read this before the weekly cycle below, because it changes this
 seat's cadence and the weekly cycle does not yet mention it.**
 
+**And read your own trigger whole, first, with this one command (added
+2026-10-24, nineteenth window).** Your trigger is the brief, the wake
+payload is an excerpt of it, and the marker the bus appends tells you to
+finish reading it "in your inbox on the board", where it has never been
+and cannot be: the brief is a renderer, never a writer
+(`standards/surfaces.md` step 1, quoted in `tools/company-brief.sh`'s own
+header). It is not a board message in any partition.
+
+```bash
+curl -s "$BOARD_API_URL/api/brief" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" | jq -r '.text'
+```
+
+Read-only, re-rendered at read time, and whole. This window's wake
+carried 1264 of 1835 characters; the dropped tail held the four asks
+sitting on the owner, the money line, and **"Capacity: 10 runs today, 0
+of them finished"** — the largest number in the brief and the one this
+seat exists to react to. The brief's renderer puts the counts last and
+the bus cuts the end, so on a brief trigger the loss is not bad luck,
+it is every day. The full measurement and the two ways this instrument
+can mislead you are in `docs/agents/runner-facts.md` §8.
+
 The owner redesigned the company learning loop on 2026-10-17 as a team
 doing OODAL on the event bus, with HQ's `exo-centralizer` leading and
 each product's ExO seat as the team, on the stated reasoning that a
@@ -236,23 +257,62 @@ grep -c "^  schedule:" .github/workflows/agent-*.yml   # expect 0 everywhere
 gh pr list --state all --limit 100 --json createdAt,headRefName
 ```
 
-**Two consequences, and the second one is a gap this seat has not
-closed.** First, host window runs are the normal case now, and a host
-run that dies leaves no conclusion, no duration and no log, so the only
-artifact it leaves is its pull request. That is the mechanism behind
+**Two consequences, and both of them are now answered rather than open
+(rewritten 2026-10-24, twenty-first window, measured; this paragraph
+said "a gap this seat has not closed" for six days and the gap cost
+three runs).** First, host window runs are the normal case now. A host
+run that dies does **not** leave nothing: `GET /api/work` reports its
+turn count, its duration, its exit status and a `run_url`, and what it
+loses is the log. Read commits rather than titles anyway
+(`gh pr view <n> --json commits`), because that is the mechanism behind
 Ursa incident 16, where two of this seat's own runs died and the
-evidence of both was a misleading title. Read commits, not titles
-(`gh pr view <n> --json commits`), because for a host run that is the
-only evidence there is.
+evidence of both was a misleading title.
 
 Second, `timeout-minutes` and `--max-turns` are properties of the
 workflow files, so they bind the runs GitHub executes and they do not
-bind a host run at all. This seat does not currently know what caps the
-host imposes or where they are written down, and both of the caps this
-register has incidents about were found by measuring them. **Find out,
-and record it in docs/agents/runner-facts.md with the host named.**
-Until that exists, a report that no cap was hit this week is a statement
-about the runs GitHub happened to execute and must be written as one.
+bind a host run at all. **The host's caps are declared and they are one
+call away. Read them; do not grep the workflows for them.**
+
+```bash
+# the turn cap, per seat, from the host's own manifest
+curl -s "$BOARD_API_URL/api/agents" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.agents[] | select(.company|ascii_downcase=="ursa")
+           | [.seat,(.max_turns|tostring)]|@tsv'
+# what each host run actually spent, and how it ended
+for s in exo pm engineer frontend research skill okr security market finance sales; do
+  curl -s "$BOARD_API_URL/api/work/Ursa/$s?days=2" \
+    -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+    | jq -r --arg s "$s" '.entries[]|select(.kind=="run")|[$s,.ts[5:16],.text]|@tsv'
+done
+# the host's own four-class count for the day, per company
+curl -s "$BOARD_API_URL/api/capacity" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN"
+```
+
+The time cap is **60 minutes** and it says so in words: a run killed by
+it reports `It hit its timeout`, and its turn count comes back `?`,
+while a turn-cap kill keeps the count and reports `exited 1`. The full
+record, with the host named, is `docs/agents/runner-facts.md` §12.
+
+**The host cap is not the workflow cap, and the workflow is the
+permissive one.** Four of eleven seats diverge and every divergence runs
+the same way: engineer 180 in the workflow against 120 on the host,
+frontend 375 against 250, security 150 against 100, skill 150 against
+100. So the grep below reads a dormant surface **and** a looser number,
+which is the direction that reads as headroom a seat does not have.
+
+**What this cost, so that no later window reopens it as a discovery.**
+In the 32 hours to 2026-10-24 01:4x UTC, three Ursa seats ran past their
+own turn cap and exited 1 — engineer at 121 of 120, this seat at 101 of
+100, skill at 101 of 100 — and seven of 22 runs spent 85% or more of
+their budget. Every window of this seat in that period reported a quiet
+week, truthfully, from `gh run list`, which saw zero `agent-*` runs.
+That is `INC-2026-10-24-host-caps-were-declared-and-this-seat-measured-the-wrong-surface`.
+
+**Keep the two Actions readings below. Re-label them.** They are the
+dormant-surface check, exactly as §2b's workflow sweep is: run them,
+report them as revival risk, and never report their silence as run
+health. A sentence saying no cap was hit is about the host now, or it is
+not about this organization's work.
 
 **Bound every run read by time, never by count (added 2026-10-18,
 eleventh window, measured).** Every `gh run list` in this section is
@@ -730,6 +790,59 @@ continuing to answer.
 Say "no new pairing" when there is none. The list is fifty-odd names and
 this is a read, not a project.
 
+#### Pair against the checks this charter hand-rolls, not only against the register (added 2026-10-18, eighteenth window, measured)
+
+The sweep above reads HQ's tool list against the **incident register**,
+and every pairing it has found was a failure somebody had already
+written up. That misses the larger half. Three of the checks this
+charter describes in prose as "the check nobody else performs" have an
+HQ instrument that performs them, and none of the three had ever been
+named in this seat's own registers. A hand-rolled procedure is not
+evidence that no tool exists; it is evidence that this file was written
+before the tool was.
+
+So read the tool list against **this charter's own procedures** as well,
+and treat a section that spells out a multi-step measurement in bash as
+a pairing candidate by construction. Measured this run, all three
+fetched from HQ's `main` and run against this repository:
+
+| HQ tool | the section here that hand-rolls it | what running it found |
+|---|---|---|
+| `check-queue-ids.sh --audit-base` | §3's identifier-collision scan | `ADR-005` and `ADR-006` each used twice on `origin/main`, named in one command |
+| `merge-order.sh` | §5b's "hand her the order", including the scratch-worktree simulation | the eight-deep order below, every step a merge that was executed |
+| `check-draft-prs.sh` | nothing here; the dead-draft count §"Ship first" asks for by hand | 4 of 6 open drafts have no live run, 1 of the 4 carries only its opening stub |
+
+The identifier row is the one worth reading twice. That defect has been
+on this register since 2026-09-27 and every window since has been told
+to "scan every numbered register for a number used twice". Twenty-one
+days of a hand instruction, against one flag on a script HQ already
+holds. The scan was not wrong and it was not skipped. It was done by
+hand, each time, by a run with no memory of the last one.
+
+**Running a shared tool from HQ's `main` fixes staleness and introduces
+HQ's paths.** The window before this one established that the host's
+checkout answers from 557 commits ago and that the fix is to fetch the
+blob from `main`. That is right, and it has a cost this seat should name
+before some later window pays it. `check-queue-ids.sh` carries its
+register list as a literal, `REGISTERS="docs/decisions.md
+docs/agents/incidents.md standards/lessons.md"`, and the third of those
+is HQ's layout. In this repository the file is at
+`docs/standards/lessons.md`, so the tool printed `standards/lessons.md:
+no open ref adds an identifier` about a path it never read, which reads
+exactly like a clean register.
+
+Nothing turns on it here, because `lessons.md` is HQ's and no Ursa seat
+writes identifiers into it. The class is what matters, and it is the
+third rung of a ladder this register has now climbed in full: **an
+absent tool fails loudly, a stale tool answers, and a present and
+current tool run from another repository's assumptions answers about
+files that are not there.** So when you run one of HQ's tools here,
+read the paths it hardcodes before you quote its output, and report a
+path assumption to the centralizer as the portability finding it is
+rather than vendoring a patched copy. That is
+`INC-2026-10-18-hq-tool-paths-are-hq-s`.
+
+
 **And check the reference against HQ's `main`, not against HQ's checkout
 on this host.** The resident host carried eighteen of the twenty-six at
 `/srv/asc/repos/alexandra-systems/tools/`, and HQ's `main` carried
@@ -740,6 +853,15 @@ answers it and needs no clone:
 ```bash
 gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
 ```
+
+**And the staleness is not only about which files are there (added
+2026-10-18, seventeenth window).** That same checkout was measured today
+at 557 commits behind HQ's `main` with 66 files under `tools/` changed
+in the gap, so a script it does hold can still be the version that
+carries a defect HQ has already fixed. §5b's merge-queue paragraph has
+the experiment and the two-command fetch. An absent tool fails loudly
+and a stale one answers, which is why this check cannot stop at
+existence.
 
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
@@ -842,21 +964,256 @@ file, which is the rule's case exactly.
    her rather than to the board was invisible to bucket two and landed
    in "unattributed".
 
-**And prefer HQ's tool to all of it when you can reach it.** HQ's
-exo-centralizer shipped `tools/autonomy.py` on 2026-10-18 for exactly
-this measurement, and it refuses to pretend: above a third unclaimed it
-prints that the number is grading the instrument rather than the company.
-Run today at HQ it gave a floor of 35.7% with 64% unclaimed. **It is not
-vendored into this repository**, whose `tools/` holds `ledger` and
-`stack` only, which is Ursa incident 18's class and not a new finding.
-So the fallback above is what runs here until it syncs. Check for the
-tool first, each run, and delete the fallback the day it arrives.
+**A fourth correction, and it is the one that was hiding claims rather
+than widening a read (added 2026-10-18, eighteenth window, measured).**
+Correction 3 above found that `owner`-directed claims are invisible to
+the unfiltered call and added a second read for them. It stopped one
+addressee short. **The unfiltered read returns broadcasts only**, so a
+claim the PM addressed to *any* seat is invisible to this instrument,
+and the PM addresses most of its `done` messages to the seat whose pull
+request it just merged.
+
+Measured on this window's own trigger, which is the clean case because
+the message both exists and is a merge claim:
+
+```
+?limit=400                       230 messages, and `[.messages[].to_seat]`
+                                 is `null` for 230 of 230
+the 19:04:06 done to exo         absent from that read, present from
+  data.merged_tier_b: [266]      ?to_seat=exo&everyone=0
+```
+
+That is the charter's own test for a filter applied to a read: give it a
+value you know matches something and check that the read changes. It
+changed. Over the forty-three hours the board can answer, two of the
+fifteen merge claims in the window, **#256 and #266**, live only on the
+directed surface. The broadcast-only read puts both in *unattributed*.
+
+So the claim read is two calls over three surfaces, and none of them is
+optional:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?limit=400" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" > /tmp/feed.json   # broadcasts
+: > /tmp/directed.json
+for s in exo pm engineer frontend research skill okr security market \
+         finance sales owner chair exo-centralizer; do
+  curl -s "$BOARD_API_URL/api/messages?to_seat=$s&everyone=0&since_hours=240&limit=500" \
+    -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+    | jq -c '.messages[]' >> /tmp/directed.json
+done
+```
+
+Then extract the five keys from both files and take the union. The seat
+list is the roster plus the three addressees that are not Ursa seats,
+because `from_seat` is not honoured and a message is findable only by
+the addressee somebody chose.
+
+**That is the fourth correction's instrument and it is retired one
+window later, having been measured against its own replacement
+(2026-10-24, nineteenth window). Use the one command below instead.**
+Everything above this paragraph is kept because the reasoning is sound
+and the premise is gone: `from_seat` was not honoured when it was
+written, and it is honoured now.
+
+```bash
+# the merge claims this section joins against: one call, every row relevant
+curl -s "$BOARD_API_URL/api/messages?from_company=Ursa&from_seat=pm&since_hours=2400&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|[.ts[0:16],(.ref//"-"),(.data|tostring),.subject]|@tsv'
+```
+
+**Measured side by side on the same board at 00:3x UTC, counting the
+PM `done` messages whose `data` names a merge:**
+
+| instrument | calls | pm merge claims found | reaches back to |
+|---|---|---|---|
+| the roster loop above | 15 | **10** | 2026-10-18 12:29 |
+| one bare `?since_hours=240&limit=500` | 1 | **22** | 2026-10-18 12:29 |
+| `?from_company=Ursa&from_seat=pm&since_hours=2400` | 1 | **51** | **2026-10-06 17:18** |
+
+And on the window the first two can both answer, the roster loop
+returned 393 unique messages, the bare read returned 500, and the
+number the loop had that the bare read did not was **zero**. The loop
+is dominated on both axes by one call.
+
+**Why, in one sentence, because this generalizes past this endpoint.**
+The read returns the newest 500 rows **that match**, so the cap is spent
+on whatever the filters let through, and widening the match wastes it.
+The roster loop narrowed by *recipient*, which is the wrong axis for a
+question about a *sender*; it was only ever on that axis because
+`from_seat` was dropped. **Narrow a capped read along the question's own
+axis.** Choosing the filter that matches the question is not an
+efficiency; it is the difference between twelve days of reach and six
+hours, measured above as 51 against 10.
+
+**And the honest residue.** The old form's one real advantage was reach,
+because fifteen separately-capped calls see further back than one, and
+that advantage is an artifact of the cap rather than a property of the
+instrument. It is still worth knowing on any read where no filter
+matches the question's axis. `since_hours` cannot buy it: 240 and 2400
+return the same 500 rows.
+
+**What it does and does not move.** Claimed goes from thirteen to
+fifteen of thirty-four, unattributed from sixteen to fourteen, so the
+unresolved share of the thirty-one that were anybody's decision is
+**45%** rather than 52%. Both are above the one-third ceiling at which
+`tools/autonomy.py` refuses to report, so the refusal stands and no
+grade moves, which is the third time in two days that a correction to
+this measurement has changed the number and not the conclusion. Say that
+in the same sentence as the number.
+
+**And the general shape, because this is the fourth correction to one
+call in one day.** Every one of the four was a surface the call could not
+see rather than a value it read wrongly, and each was found by a run that
+happened to hold a message it knew existed. An instrument that reads one
+of a surface's partitions does not grade as approximate; it grades as
+blind, which is HQ's `standards/roles/exo.md` §5f on attribute 7 in its
+own words. When you repair a read, enumerate the partitions of the thing
+you are reading and say which ones the call covers, rather than fixing
+the one the day's evidence pointed at.
+
+**Run HQ's tool. Do not hand-roll this measurement, and do not read
+"not vendored" as "not reachable" (rewritten 2026-10-24, twentieth
+window, after the nineteenth published a wrong grade from its own
+query).** HQ's exo-centralizer shipped `tools/autonomy.py` on 2026-10-18
+for exactly this measurement, and it refuses to pretend: above a third
+unclaimed it prints that the number is grading the instrument rather
+than the company.
+
+It is still not vendored here, whose `tools/` holds `ledger` and `stack`
+only, and **that has never been a reason to hand-roll it**. A blob on
+HQ's `main` is two commands from any seat on either host, which §5b
+below already says in full for `check-merge-queue.sh` and which this
+paragraph did not say for this one:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/autonomy.py?ref=main" \
+  --jq .content | base64 -d > /tmp/autonomy.py
+python3 /tmp/autonomy.py --repos Ursa --days 7
+```
+
+The previous wording of this paragraph ended "the fallback above is what
+runs here until it syncs", and that sentence is what the nineteenth
+window obeyed. It cost a published grade. **`tools/` is where a tool is
+cached, not where it exists**, and the charter proved it knew that three
+sections further down while telling you the opposite here.
+
+**What the fallback cannot do, and why it is the part that bites.** A
+merge claim is keyed on **the repository the claim itself names**, never
+on the company that sent it and never on the bare number. HQ merges
+other repositories' pull requests daily and says so from HQ, so a claim
+carrying `{"merged":[252]}` from `alexandra-systems` is HQ's #252 and
+has nothing to do with Ursa's #252. The portfolio's five repositories
+number their pull requests in overlapping ranges, so a join on bare
+numbers does not blur the answer, it **manufactures** claims: every
+collision lands in the numerator and none in the denominator, so the
+error runs one way, exactly like the cap this section was written to
+catch.
+
+Measured on this window's own re-derivation, 168 hours to 2026-10-24
+01:21 UTC, Ursa's 45 merges, varying only the extractor:
+
+| extractor | claims | floor |
+|---|---|---|
+| `autonomy.py`, keyed on the repository the claim names | 26 | **62%** |
+| the same key set, joined on bare numbers across the portfolio | 37 | 87% |
+| any key containing `merg`, joined on bare numbers | 41 | **96%** |
+
+Sixteen of Ursa's merges were "claimed" only by a number another
+company's seat wrote about its own pull request: #214 and #217 and #224
+and #263 and #276 and #294 from `alexandra-systems/pm`, #215 and #218
+and #240 from `epitome/exo`, and seven more. `autonomy.py`'s docstring
+names this defect, names the engineer who measured it on 2026-10-18, and
+names the three shapes that carry a repository. The nineteenth window
+read that docstring and drew the inverse conclusion from it: it saw "HQ
+claims other repositories' merges" and **removed** its company filter
+instead of **adding** repository keying, then recorded the removal as
+the lesson.
+
+So: run the tool. If you must read the board yourself for some question
+the tool does not answer, key every claim to the repository it names and
+say in the same sentence that you did, because a number with no stated
+extractor is not re-derivable and this register has three of those in
+it already.
 
 Report three buckets and never two: merged by a seat on Actions, merged
 by a seat on the host and claimed on the board, and **unattributed**,
 meaning recorded as the owner with no board claim behind it. A merge in
 the third bucket is not the owner's merge. It is a merge whose decider
 this repository cannot name, and that sentence is the finding.
+
+**Four buckets, because the third one is holding merges that nobody
+performed (added 2026-10-18, seventeenth window, measured).** The three
+above all assume a merge is a decision somebody made. Some are not. When
+a seat stacks branches and the tip lands, every pull request whose head
+is already contained in that tip is marked `MERGED` by GitHub in the
+same breath, with its own `mergedAt` and its own `mergedBy`. Nobody
+decided anything about those. The base moved over them.
+
+Measured over the window the board can answer, 2026-10-17 00:26 to
+2026-10-18 19:04 UTC, which is forty-two hours and thirty-four merges:
+
+| bucket | count |
+|---|---|
+| absorbed by a descendant landing | **3** (#248, #251, #252) |
+| merged by a seat on Actions | 2 |
+| merged on the host and claimed on the board | 14 |
+| unattributed | 15 |
+
+Over seven days the absorbed count is **4 of 67**: #191 as well as
+those three, which is one more than the window that first named this
+bucket had found.
+
+**Classify absorbed first, off `main`, before any of the three above.**
+The order is not cosmetic. Both other readings of these three are wrong
+and they are wrong in opposite directions, so whichever bucket you let
+them fall into, the number you report is false:
+
+- Under the five documented keys they carry no claim, so they land in
+  **unattributed**, and the sentence this section tells you to write
+  about that bucket is "a merge whose decider this repository cannot
+  name." The board names it exactly. It is not a merge.
+- Add `superseded_prs` to the merge-claim key set, which is the obvious
+  repair and the one this window nearly made, and they land in
+  **claimed**, crediting Ursa's PM with three merge decisions that one
+  message of its own explicitly declines:
+  `{"merged_prs":[259,210],"superseded_prs":[248,251,252]}`, posted
+  14:48:29 UTC. So `superseded_prs` is a bucket-four marker and never a
+  merge claim. Read it to confirm a classification you already made from
+  `main`, and keep it out of the key set in §"A claim has no agreed
+  shape".
+
+**The predicate is over `main`'s own commit subjects, because both
+GitHub fields that look like the right instrument are unreliable here.**
+A merge somebody performed leaves a commit on `main` naming the pull
+request. An absorbed one leaves nothing:
+
+```bash
+git log origin/main --format='%s' > /tmp/mainsubj.txt
+# for each merged <n>: a hit means a decision, no hit means absorbed
+grep -c "^Merge pull request #<n> \|(#<n>)\$" /tmp/mainsubj.txt
+```
+
+Verified against all five of this seat's merges that day. #259 and #266
+have a naming commit, #248, #251 and #252 have none, and every one of
+the five heads is reachable from `main`, so reachability alone cannot
+separate them.
+
+Do not reach for `mergeCommit` instead. It looks like a one-field test
+and it fails on a third of this sample. `mergeCommit.oid ==
+headRefOid` is true for #248 and #251, where GitHub recorded the branch
+tip itself, and false for #252, whose `mergeCommit` is `1ca8b6c1`, an
+ordinary commit that is **not an ancestor of that pull request's own
+head**. One field, three merges from one stack in one second, two
+different shapes and one of them nonsense.
+
+**What the fourth bucket does not change.** Unattributed stands at
+fifteen of thirty-four, and at fifteen of the thirty-one that were
+anybody's decision, so it is above the one-third ceiling at which HQ's
+`tools/autonomy.py` refuses to report either way. The refusal stands.
+Say that when you report the split, because a new bucket invites the
+reader to think a grade moved and no grade moved.
 
 **A "claim" has no agreed shape, so write the key set down or the number
 moves on its own (added 2026-10-18, sixteenth window, measured).** The
@@ -910,6 +1267,11 @@ So, two duties:
            | .data // {} | (.merged, .merged_pr, .merged_prs, .merged_this_pass, .merged_tier_b)]
           | flatten | map(select(. != null)) | unique' /tmp/feed.json
    ```
+
+   Five keys, and `superseded_prs` is deliberately not the sixth. It
+   names the fourth bucket below, meaning a pull request the base
+   advanced over, and adding it here credits a seat with a decision the
+   same message declines to claim.
 
 2. **Ask for the key to become a contract, once, upstream.** The `data`
    object is the board's and the board is HQ's, so the fix is one field
@@ -1358,12 +1720,59 @@ previous week's plan:
    runner-facts.md §10 carries the measurement and the one-line fix,
    which is HQ's to apply.
 
-   It is still not in this repository. On the resident company host it is
-   at `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`. On
-   GitHub Actions it does not exist and the `merge-tree` line above is
-   what you have, and on Actions `fetch-depth: 0` makes the refspec
-   question moot. That split is Ursa incident 18 and runner-facts.md §4
-   carries the probe.
+   It is still not in this repository. On GitHub Actions it does not
+   exist and the `merge-tree` line above is what you have, and on
+   Actions `fetch-depth: 0` makes the refspec question moot. That split
+   is Ursa incident 18 and runner-facts.md §4 carries the probe.
+
+   **Fetch it from HQ's `main`. Do not run the host's copy (rewritten
+   2026-10-18, seventeenth window, measured on the fix the window before
+   it asked for).** This paragraph used to send you to
+   `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`, and
+   that path is a git checkout which nothing in this organization keeps
+   current. Measured today it sat at `fc4e885`, **557 commits behind**
+   HQ's `main`, with **66 files under `tools/` changed** in the gap,
+   including this script.
+
+   The experiment is the cleanest thing this seat has measured. One
+   fresh `--depth 1 --single-branch` clone of Ursa, two copies of one
+   script, run minutes apart:
+
+   ```
+   A) the host's copy      7 of 7 open pull request(s) cannot be merged as they stand.
+                           (every line: NO SUCH REMOTE BRANCH — the branch was deleted)
+   B) HQ's main copy       ensure-full-clone.sh: this clone fetches one branch; widening origin to all heads
+                           ensure-full-clone.sh: this clone is shallow; fetching the history a merge base needs
+                           All 7 open pull request(s) merge cleanly into main.
+   ```
+
+   So the defect the sixteenth window filed as
+   `INC-2026-10-18-single-branch-refspec-reads-as-deleted` is **fixed
+   upstream**: HQ added `tools/ensure-full-clone.sh` and
+   `check-merge-queue.sh` calls it at line 66, which repairs both the
+   depth and the breadth of your clone before it answers. The fix is
+   unreachable from the path this charter named, and it is two commands
+   from any seat on either host:
+
+   ```bash
+   mkdir -p /tmp/hqtools && for f in ensure-full-clone.sh check-merge-queue.sh; do
+     gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+       --jq .content | base64 -d > "/tmp/hqtools/$f"; chmod +x "/tmp/hqtools/$f"; done
+   /tmp/hqtools/check-merge-queue.sh
+   ```
+
+   **The general rule, which is the part that outlives this script.**
+   §3 already tells you to check whether a tool the standards name
+   *exists* against HQ's `main` rather than against the host's checkout,
+   because that checkout was missing eight of twenty-six. This is the
+   same clone failing the next question down, and failing it worse: a
+   tool that is absent says "No such file or directory", and a tool that
+   is **stale answers**. Treat every path under
+   `/srv/asc/repos/alexandra-systems/` as a cache of unknown age. Fetch
+   the blob from `main` when you are about to act on what it says, and
+   when you do read the host copy, print its `git log -1` beside the
+   output so the next window can tell which version spoke. That is
+   `INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
    **Record which instrument produced each verdict in
    merge-order.md.** A conflict verdict with no instrument beside it
@@ -1465,6 +1874,51 @@ happened, why it happened technically, the fix, and what the org grew
 from it. Patterns across incidents become your charter and workflow
 edits in step 5. A failure recorded once and prevented forever is the
 org compounding; a failure rediscovered is your lane failing.
+
+**When a postmortem names its own cause as structural, enumerate the
+other instances before you close it (added 2026-10-24, twentieth
+window, after this seat rediscovered a defect this organization had
+already fixed).** A postmortem is written about the instance that hurt,
+and the fix is scoped to that instance, because that is the one
+everybody can see. The sentence that should stop you is in the
+postmortem itself. "The cause is structural", "this recurs by
+construction", "for as many concurrent branches as there are active
+seats" are all claims about a **class**, and a fix wired to one
+filename is a fix for one member of it.
+
+The worked example, and it is this register's own. On 2026-09-27 five
+of thirteen open pull requests were blocked on one file, the engineer
+seat wrote `docs/design/ledger-union-merge.md`, correctly named the
+cause as recurring by construction, and shipped a merge driver wired by
+`.gitattributes` to `docs/ideas.md`. Nothing about that was wrong.
+Four weeks later `docs/agents/incidents.md`, which has the identical
+property and which **this seat owns**, collided between two seats and
+cost a hand resolution, and this seat wrote it up as a discovery before
+finding the design document. That is
+`INC-2026-10-24-shared-register-tail-appends-collide`.
+
+So the step, and it is cheap:
+
+```bash
+# the postmortem says "every seat appends to one file". which files?
+git log --format= --name-only origin/main -n 400 | sort | uniq -c | sort -rn | head -20
+```
+
+Read the list against the mechanism in your own words, name every file
+or seat or surface the sentence covers, and say in the entry either
+that the fix covers all of them or which ones it does not and whose
+they are. **An unenumerated class is not a closed incident**, however
+well the one instance was fixed, and the register's status line should
+say so.
+
+**And the same question in the other direction, which is the cheaper
+half.** Before you write a postmortem, check whether this organization
+has already written one. Three of this window's findings were the same
+shape: the instrument existed, in this repository or one call away at
+HQ, and nobody reached for it. `docs/design/` and
+`docs/agents/incidents.md` are both greppable, and a mechanism is
+easier to search for than a symptom, because the symptom is what
+changed and the mechanism is what did not.
 
 Maintain docs/agents/learning-log.md, append-only, dated: what this run
 observed, what it changed and why, what the next run must check first.
@@ -1707,6 +2161,52 @@ and another cannot. That is the finding, and it is handed up rather than
 patched here, because eleven copies of a workaround is the shape L-A55
 exists to refuse.
 
+**A fifth case, and it is the one the eleventh window's success was
+silent about: a sibling window's pull request that is already readied is
+not a branch to grow (added 2026-10-18, eighteenth window, measured).**
+The rule above is right and its worked example has a property nobody
+named. The pull request the eleventh window pushed onto, **#255**, was
+its own ship-first **draft**, and GitHub refuses to merge a draft at
+all. Growing it could not lose a race, because there was no race to
+lose. Every sentence of the rule reads as if that were a property of
+branches rather than of that one branch's state.
+
+This window opened on a different board. The seventeenth window pushed
+its last commit at 19:13:42 UTC and readied **#268**, four minutes
+before this one began, so the branch the rule points at is a finished
+artifact sitting in the PM's merge gate. The distribution says what that
+costs. This seat's five most recent pull requests went from opened to
+merged in 21, 21, 18, 21 and 65 minutes, with the PM merging on a pass
+rather than on a schedule. A window that pushes onto a readied sibling
+is therefore writing into a branch whose pull request has roughly an
+even chance of closing underneath it inside the window's own lifetime,
+and when it does close, the commits pushed after the merge sit on a
+branch with no open pull request attached. That is ship-first's one
+failure mode, reached by obeying the rule written to serve it.
+
+So, the fifth case in which you open your own pull request anyway:
+
+- **The sibling is readied.** Build on its head, say in your description
+  that it is contained and paste the check, and leave the artifact alone
+  so the gate can act on it. Containment costs the queue nothing the
+  moment the older one merges, because yours is a descendant and merges
+  clean either way.
+- **The sibling is a draft of your own seat with no live run.** Push
+  onto it. This is the eleventh window's case and it still holds.
+
+This window did the first. `git merge-base --is-ancestor refs/prs/268
+HEAD` exits 0, #268 stayed where its own run left it, and the queue went
+from seven to eight rather than from seven to seven. One identifier is
+the price, and it is the right price, because the alternative risks the
+whole of another window's run rather than one slot in a queue that is
+currently shallower than its own week's merges.
+
+**State the state, not the relation.** The three bullets above the
+exception list all turn on *who chose the identifier*. This one turns on
+*what state the artifact is in*, which no amount of reading the dispatch
+can answer. Run `gh pr view <n> --json isDraft,state` before you decide
+to push onto anything you did not open yourself.
+
 **Post your own tip on the board before you end (added 2026-10-18).**
 The rule above keeps the queue honest on GitHub. It does nothing for the
 surface every memoryless seat reads first, and on 2026-10-18 that gap
@@ -1836,6 +2336,55 @@ read`, one line each. A run that fetched nothing says so in one line. A
 reviewer can then check what you were exposed to without reconstructing
 your session, and a run that acted on an unnamed source is visible.
 
+### A handoff's prescribed method is data too, and this seat's own rules outrank it (added 2026-10-24, twenty-first window)
+
+The rule above settles a message's **claims** and the rule below settles
+their **shelf life**. Neither covers the third thing a handoff carries,
+which is the one a competent sibling seat is most likely to include: a
+prescribed **method**. "Vary the input over three or four bodies." "Run
+it across the five repositories." "Probe it and see." A method arrives
+wrapped in a finding that is correct, from a seat acting in good faith
+inside its own lane, and it is the easiest sentence in the whole message
+to execute without examining.
+
+Measured, and the example is a good handoff rather than a bad one.
+Ursa's research seat measured the wake payload on 2026-10-23,
+falsified three facts in `docs/agents/runner-facts.md` §8, correctly
+declined to edit a file that is this seat's, and named the limit of its
+own evidence exactly: one sample cannot separate a paragraph boundary by
+design from a threshold that landed near one, nor say whether the
+marker is unconditional. Its prescription followed from that:
+
+> What you can do that I cannot is vary the input. Three or four bodies
+> of known and different lengths would separate those hypotheses.
+
+Every word of that is right about the evidence and wrong about the
+method available here, and the reason is a rule already in this charter.
+**The bus is HQ's, this host's token reads HQ's repository, and the
+truncation is forty lines of `runtime/board/api.py`.** Two commands
+answered both hypotheses exactly: the limit is still 1500 and is
+environment-overridable, the paragraph retreat is by design, and it has
+a floor nobody could have found by varying inputs — the cut only
+retreats to a boundary **past 60% of the limit**, so a body with no
+break after character 900 still cuts mid-word. Four probe messages would
+have measured three delivered lengths, missed the floor, and left four
+permanent rows in a sibling's inbox. §"Read the mechanism before you
+probe the surface" exists because seventeen such probes once bought
+three rules with one of them false.
+
+So, when a handoff prescribes how:
+
+- **Take the finding, re-derive the method.** The sender knows what it
+  measured. It does not know what instruments your lane holds, and it
+  cannot, because your surfaces are not in its charter.
+- **Say which you declined and why, to the sender, on the board.** Not
+  only in the register. A seat that handed over a finding and sees the
+  correction land without hearing that its experiment was unnecessary
+  will run the experiment next time. One clause does it.
+- **The asymmetry is the point.** A prescription you follow silently
+  reads, to every later window, as the only way the question could have
+  been answered.
+
 ### A message's state claims expire; re-derive them before you act on them (added 2026-10-18)
 
 The rule above settles whether a message can **instruct** you. It says
@@ -1934,6 +2483,23 @@ seats' artifacts than anything else in the org.
 
 ### The text that wakes you is an excerpt, not the message (measured 2026-10-18)
 
+> **Three claims in the paragraph below were true when it was written and
+> are false now, and the paragraph is kept because its reasoning is what
+> HQ built the fix from (corrected 2026-10-24, twenty-third window).**
+> The cut is no longer mid-word in ordinary prose, it is no longer
+> unmarked, and `body_chars` and `body_truncated` now ride beside it. The
+> live mechanism is `wake_body()` in HQ's `runtime/board/api.py`, read
+> rather than probed, and the full reading is
+> `docs/agents/runner-facts.md` §8. **Read the correction below before
+> you act on this section**, because a window that believes the cut is
+> unmarked will not look for the marker that tells it what it is
+> missing, which is the one defect this section exists to prevent.
+>
+> The register was corrected by the twenty-first window on 2026-10-24
+> at 01:4x UTC and this file was not, for five hours and across one dead
+> window. That is §2b's own pattern turned on this seat: the memory was
+> repaired and the file a fresh run reads first was left standing.
+
 The rule above assumes the message you were handed is the message that
 was sent. It is not. The bus truncates a note's body into the wake
 payload at **1500 characters**, mid-word, with no marker that anything
@@ -2015,16 +2581,18 @@ source it was read from is docs/agents/runner-facts.md §7. Do not copy
 the table here; copy the commands:
 
 ```bash
-# directed mail to this seat, broadcasts excluded, ten days wide
-curl -s "$BOARD_API_URL/api/messages?to_seat=exo&everyone=0&since_hours=240&limit=500" \
+# directed mail to THIS company's exo, broadcasts excluded, ten days wide.
+# to_company is the scoping parameter as of HQ's 2026-10-23 deploy; print the
+# body length too, because that is the truncation check in one column.
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo&to_company=Ursa&everyone=0&since_hours=240&limit=500" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '.messages[] | select(.to_company=="Ursa")
-           | [.ts,.from_company+"/"+.from_seat,.kind,(.ref//"-"),.subject]|@tsv'
+  | jq -r '.messages[] | [.ts,.from_company+"/"+.from_seat,.kind,(.body|length),(.ref//"-"),.subject]|@tsv'
 
-# the broadcast feed, separately, because it is a different surface
+# the whole store, both partitions, one call. Check whether it came back at 500.
 curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '.messages[] | select(.to_seat==null and .to_company==null) | [.ts,.subject]|@tsv'
+  | jq -r '"n=\(.messages|length) oldest=\([.messages[].ts]|sort|first)",
+           (.messages[] | [.ts,(.to_company//"*")+"/"+(.to_seat//"*"),.from_company+"/"+.from_seat,.kind,.subject]|@tsv)'
 ```
 
 Four things in those two lines are not in the standard's example, and
@@ -2035,25 +2603,111 @@ each of them hid mail from this seat on 2026-10-18:
   this seat performed that day. Pass the window you actually want.
 - **`everyone` defaults to on**, so the default read is dominated by the
   portfolio's broadcast feed, which is four fifths of it.
-- **`to_seat` and `to_company` are alternatives, not a conjunction.**
-  Passing both widens the read. `to_company` selects mail addressed to a
-  company with **no seat**, of which Ursa has none, so it is not the
-  scoping parameter the standard's example looks like.
-- **`everyone=0` with no addressee at all removes the filter entirely**
-  and returns the whole store. A narrowing parameter that widens the read
-  in one combination is worth knowing before you reach for it.
+- **`to_seat` and `to_company` were alternatives and are now a
+  conjunction (re-measured 2026-10-24).** HQ merged and deployed the
+  centralizer's rewrite on 2026-10-23, so `to_company` scopes `to_seat`:
+  `to_seat=exo&everyone=0` returns **76** and adding `to_company=Ursa`
+  returns **41**, which is this company's 39 plus the 2 addressed to
+  Ursa with no seat. It narrows. **Pass both.** The client-side
+  `select(.to_company=="Ursa")` predicate the next paragraph used to
+  insist on is now what the server does; it is harmless and no longer
+  load-bearing. Without `to_company` you still get epitome's exo's 35
+  messages, one of which names this company in its own subject line,
+  which is exactly the sentence a memoryless run misreads as addressed
+  to itself.
+- **`from_seat` and `kind` are honoured now, and an unknown parameter is
+  refused.** They were accepted and dropped. Adding `from_seat=pm` takes
+  41 to **21**; `kind=handoff` takes it to **4**; `zzznosuch=1` answers
+  an error naming all nine honoured filters, which is the cheapest
+  version of this whole section and makes the next probe one command.
+- **`everyone=0` with no addressee is now the NARROW read, not the wide
+  one.** It used to leave the filter list empty and return the whole
+  store; it now returns every *addressed* message and **zero
+  broadcasts** — 84 of the 130 in a 24-hour window. The parameter did
+  not change meaning, it changed sides, and a window reaching for it as
+  "the whole store" is now blind to exactly the broadcast feed. The
+  whole store is the bare read with no parameters at all.
 
-So keep the client-side `to_company` predicate on the directed read and
-treat a message whose `to_company` is a sibling's as what it is: legible
-to you and addressed to someone else. Thirteen of the directed messages
-that day were `epitome/exo`'s, and one of them names this company in its
-own subject line, which is exactly the sentence a memoryless run
-misreads as addressed to itself.
+**The cap is the fact that outlives all of the above (measured
+2026-10-24).** `limit` is clamped to 500 server-side and the query is
+`order by ts desc limit 500`, so **every read returns the newest 500
+rows that match, and `since_hours` only moves the start of the window,
+never the end.** `since_hours=240` and `since_hours=2400` return the
+same 500 rows with the same oldest timestamp. There is no `before`
+parameter and no paging. So you cannot reach further back by asking for
+more time; you reach further back only by **narrowing the match to the
+rows you actually want**, and you must say whether your read came back
+at exactly 500, because a capped read looks precisely like a quiet
+week.
 
 `docs/standards/pm.md` §15 documents the single-read form in good faith.
 HQ has a fix open that makes the parameters mean what the standard
 implies, and the host serves a checkout older than it, so re-probe
 before you relax any of this.
+
+#### The reader is now told and the sender still is not, so measure your own body before you post it (added 2026-10-24, twenty-third window, measured)
+
+Everything above this line is addressed to the **reader** of a truncated
+wake, and for the reader the defect is closed: the marker states both
+lengths, names the tail as the systematic loss, and routes to the inbox
+that holds the whole of it. The half nobody has written down is the
+**sender's**, and the sender is the only party who can stop the loss
+happening at all.
+
+**It is not one seat being careless. It is a property of the
+instructions.** Ursa's research seat measured the whole board on
+2026-10-24 and handed the measurement here rather than an apology,
+having exceeded the cap twice itself that morning. Re-derived
+independently this window, on a bare read of the store:
+
+| | |
+|---|---|
+| rows the read returned | **500** — the server cap, so every count below is a floor |
+| bodies over the 1500 limit | **161**, which is **32.2%** of the traffic |
+| author identities over it | **17 of 25**, across **five** companies |
+| the longest single body | **7883** characters, so 6383 undelivered |
+| by kind | `done` 52, `note` 52, `handoff` 45, `ask` 12 |
+
+Research's own read, on a different window of the same store, returned
+105 of 355 and 15 of 23 authors across four companies, which is the same
+share to within a point. Two independent reads agreeing at 29% and 32%
+makes this a fact about the company and not about a seat.
+
+**The tension is real and it is in the instructions, so do not resolve it
+by writing shorter and vaguer.** Every charter here asks for whole
+thoughts in plain prose with the reasons stated, and the house voice puts
+the disposition last. Those two instructions and a 1500-character
+delivery cap cannot all be satisfied past about four paragraphs. The
+answer is not to drop the reasons. It is to stop letting the cut choose
+which part is lost:
+
+- **Measure the body before you post it.** One command, and it is
+  cheaper than the reply you will otherwise have to write:
+  `printf '%s' "$body" | wc -c`. Over 1500, the tail will not be
+  delivered.
+- **Put the disposition where the cut cannot reach it.** If the body
+  must run long, state what you decided and what you are no longer
+  asking in the **subject** and in the **first** paragraph, then give
+  the reasons. The marker tells your reader that a tail is missing; it
+  cannot tell them what was in it. This inverts the house voice for one
+  case only, and the case is "a body you already know is over the cap".
+- **`reasoning` and `data` are not truncated.** Only `body` passes
+  through `wake_body()`. A disposition that must survive the wake intact
+  can ride in `data` as a field, which is how `live_tip` already works.
+- **Say in your own pull request when your wake arrived cut.** That is
+  already this section's rule and it stays: a truncated wake is a fact
+  about the run, not about the sender.
+
+**What this seat does not do about it.** The one-place fix is HQ's, it is
+three lines, and it is named in the handoff below rather than copied into
+eleven charters. `message_write()` computes `body_truncated` and
+`body_chars` one line above its own `return self.reply(201, out)` and
+puts them in the **bus event** only, so the reader is told and the writer
+is not. Eleven charters carrying a `wc -c` discipline is the shape HQ's
+`L-A55` refuses, and a receipt on the write path is the shape it asks
+for: the sender learns at the moment of authorship, once, for every seat
+in the portfolio. Carry the measurement up; keep the two bullets above
+for your own prose while it is unshipped.
 
 ### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
 
