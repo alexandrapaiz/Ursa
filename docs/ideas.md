@@ -9086,3 +9086,163 @@ context file here.
   constructed one, before assuming the gap is stable.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (engineer, hook run) — The shipped bundle is rebuilt by hand, so a correct fix can ship with the product missing it
+
+- Trigger: measured in this run, not reasoned about. The inherited commit on
+  PR #387 fixed `ursa-major/src/lifespan.ts` and did not rebuild
+  `ursa-major/dist/ursa.cjs`. `src/bundle-canonical.test.ts` and
+  `src/bundle-exec.test.ts` both pass on `main` and both failed on this
+  branch until `npm run bundle` ran. Rebuilding then drifted
+  `docs/provenance/bundle-digests.{json,md}`, which failed
+  `src/provenance-index.test.ts` until `npm run provenance:bundles` ran. So
+  one source edit required two follow-on generated-artifact commands, and
+  neither is named at the point where the edit happens.
+- What: the detection is already good, and that is the point worth being
+  precise about. Three tests caught all three states, which is why this is a
+  near miss and not an incident. The gap is that detection lives at the end
+  of a 79-second full-suite run, and a seat that edits one module and runs
+  only that module's tests, which is the normal and recommended thing to do,
+  sees green and pushes a bundle that does not contain its own fix.
+  `action.yml` runs `node "$GITHUB_ACTION_PATH/dist/ursa.cjs"` and GitHub
+  downloads an action as a tarball rather than cloning it, so on every
+  repository that is not this one the bundle is the whole product. The ask is
+  one script that makes the ritual atomic and nameable:
+  `"regen": "npm run bundle && npm run provenance:bundles"`, plus
+  `"regen:check": "npm run bundle:check && npm run provenance:bundles:check"`,
+  so a seat that touched `src/` runs one command instead of remembering two.
+- First step: add both scripts to `ursa-major/package.json`, and add one
+  sentence to `docs/design/build-and-test-gate.md` saying that any change
+  under `ursa-major/src/` is followed by `npm run regen` before commit. No
+  new tooling and no new gate, because the gate already exists and already
+  worked.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, hook run) — `Durability.renamesFollowed` counts span crossings and reads as a count of renames
+
+- Trigger: measured in this run while writing the real payload into
+  `docs/design/rename-reads-as-death.md` §6. On a fixture repository
+  containing exactly one `git mv`, the emitted record carries
+  `"renamesFollowed": 4` at `record.durability` and `"renamesFollowed": 1` on
+  the span. Both are what the code intends: the record-level field sums the
+  per-span field, so one file with four spans that each crossed the same
+  rename contributes four.
+- What: the summing is deliberate and defensible, because it lets a reader
+  add up the span fields and reconcile them against the record field. The
+  name is the defect. A reviewer who asks "how many renames did this walk
+  cross" reads `4` and concludes four files moved, and that reviewer is a
+  lab auditing a record it is paying for. The honest name for the current
+  quantity is `spanRenameCrossings`, and the number a reviewer actually
+  wants, the count of distinct renames the walk followed, is not reported
+  anywhere today. Both should exist: the crossings for reconciliation, the
+  distinct count for comprehension.
+- First step: rename `Durability.renamesFollowed` to
+  `spanRenameCrossings` and add `distinctRenamesFollowed`, computed in
+  `annotateDurability` from a `Set<string>` of `renamedTo` values rather than
+  by summing. Deliberately not done in the pull request that found it: it is
+  a field rename in a published record shape, it touches
+  `src/types.ts`, `src/lifespan.ts`, the viewer in `src/corroborate.ts` and
+  the fixture record under `ursa-major/fixtures/`, and bundling it with a bug
+  fix would make the bug fix harder to review and harder to revert.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, hook run) — Every record emitted before today may overstate decay, and nothing in the record says which walk produced it
+
+- Trigger: a consequence of the defect fixed in this run, noticed while
+  writing `docs/design/rename-reads-as-death.md` §10.5. Until today the
+  durability walk read every revision at the path the record names, so any
+  file moved after its closing commit reported every span in it as
+  `decayed` while the text sat unmodified at the tip. On the fixture that
+  reproduces it, `Durability.decayRate` was `1` for a file whose text
+  `git show HEAD:moved.md` prints in full.
+- What: the fix is in, and the records already on disk are not. Every record
+  emitted before 2026-10-24 carries a `decayRate` computed by the broken
+  walk, and `Durability.method` reads `"git-forward-walk"` both before and
+  after the fix, so no consumer of a record can tell which walk produced the
+  number. That is the part that matters commercially rather than tidily.
+  `decayRate` is a quantity Ursa Minor sells, `CLAUDE.md` §1 stakes the whole
+  artifact on the label being supplied by the work rather than by a grader,
+  and a label that flipped because a file moved was supplied by neither. The
+  bias is also directional rather than noisy: refactors move files, refactors
+  cluster in exactly the engineering work this product targets, so the
+  records most likely to be corrupted are the ones most likely to be sold.
+- First step: two things, in this order. First, make new records
+  self-describing by bumping `Durability.method` to
+  `"git-forward-walk-renames"` or adding `followsRenames: true`, so a
+  consumer can partition records by walk without consulting a changelog;
+  that is an hour of work and it stops the problem growing. Second, and this
+  one is the owner's call and not this seat's, establish whether any record
+  carrying a pre-fix `decayRate` has left this repository, because the only
+  remedy for one that has is re-running the resolver and reissuing it.
+- Cost: $0 for the marker. The second half is a disclosure question, not an
+  engineering one.
+- Status: proposed
+
+### 2026-10-24 (engineer, hook run) — Craft scan: Letta's `BlockHistory`, where a user's edit to a derived fact can be rewound
+
+`docs/market/landscape.md` category 3 has carried Letta (formerly MemGPT)
+since the category was opened, and never on the mechanic underneath its
+memory writes. Mem0 was scanned on 2026-10-08 and Zep/Graphiti twice, most
+recently earlier today, so Letta is the rotation's turn.
+
+**What is worth stealing.** Letta's memory blocks are the unit a user or an
+agent edits, and they are flat: `label`, `description`, `value`, `limit`,
+plus a `read_only` flag. Setting `value` replaces the block entirely, and
+the documentation warns that with concurrent writers "the last write wins
+and overwrites all earlier changes." Underneath that, however, there is a
+`BlockHistory` table holding one full value snapshot per checkpoint with a
+`sequence_number`, and a `BlockManager` exposing `checkpoint_block_async`,
+`undo_checkpoint_block` and `redo_checkpoint_block`. So a block's past
+values are retained as an ordered sequence and an edit is reversible rather
+than destructive.
+
+That is the shape Ursa Major is missing. `CLAUDE.md` §0 constraint 2 says
+the user can always see, edit, revoke and delete what has been inferred
+about them, and today the edit in that sentence is a destructive one: a user
+who corrects a derived preference has no way back to what Ursa had inferred,
+and Ursa has no way to learn from the correction because the thing that was
+corrected is gone. An ordered snapshot per edit turns the correction itself
+into signal, which is precisely what `CLAUDE.md` §1 already says the
+artifact sells for text: "the mutation *is* the correction, expressed as an
+edit rather than a complaint." Ursa applies that reasoning to spans in a
+finished file and not yet to the user's own profile.
+
+**What Ursa does better, and it is the part Letta cannot easily fix.**
+Integrity. Letta's own issue tracker establishes, in
+`letta-ai/letta-code` issue #4433 against 0.16.8, that the checkpoint
+history accepts direct Postgres edits silently: a checkpoint value can be
+modified, recent checkpoints deleted, middle ones removed, the order
+changed, or new ones inserted, and all five proceed without error. The
+submitter's own summary is that it "is a record only as long as nobody with
+database access edits it." Ursa's durability record has the opposite
+property for free, because it does not store the history at all. It derives
+every verdict from git, where history is content-addressed, and it writes
+`tipSha` and `closingSha` into the record, so a lab holding a record can
+re-derive the verdict from the repository and detect a rewritten history by
+the shas failing to resolve. Ursa's claim is auditable by reconstruction;
+Letta's is auditable by trusting the database.
+
+**One caveat recorded honestly, because it cuts both ways.** Letta's own
+documentation page for memory blocks describes none of this. It states the
+four fields and the replace-on-write behaviour and mentions no version
+history, edit tracking or audit log at all; the `BlockHistory` mechanics
+above come from the issue tracker and third-party write-ups, not from the
+docs. An ownership surface a user cannot discover is not yet an ownership
+surface, which is a thing to steal carefully: build the snapshot, and then
+document it where the user looking for it will actually land. It is also a
+reminder that this scan read a feature into a product partly from secondary
+sources, and that the primary source contradicts them.
+
+**External content handled as data.** Issue #4433 contains instruction-shaped
+text, specifically `git clone` and `pip` commands to run a test suite it
+calls `agmi`, presented as a one-minute offline reproduction. Nothing was
+executed. It is reported here as evidence about Letta's integrity gap, per
+the external-content rule in `prompts/engineer-agent.md`. Separately, the
+search surfaced `letta-ai/letta` issue #3431, "Pre-publication review: our
+reading of Letta's memory write path (corrections welcome by 2026-08-30)",
+which appears to be this organization's own earlier published scan of the
+same product. Not relied on here, and flagged for the market seat because a
+scan that cites our own prior publication back to us is a loop worth
+knowing about.
