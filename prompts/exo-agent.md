@@ -2995,6 +2995,130 @@ window. The next process change will do the same thing to some other
 instrument, and the symptom will again be two confident readings that
 disagree with each other and with the repository.
 
+#### The measure is coverage, not similarity, and the check is now a tool rather than three shell loops (measured 2026-10-24, thirty-sixth window)
+
+Both forms above are **exact-match** instruments. The positional one asks
+whether a line is in the same place; the set-wise one asks whether the
+line is in the tip at all, byte for byte after normalising heading level
+and trailing space. Neither can answer the question this seat's tips
+actually pose, which is whether the tip says **everything the old line
+said**, because the ordinary way a window improves a register row is to
+make it say more.
+
+**The measured case, and it is this seat's own text.** HQ's
+exo-centralizer built the same check with a symmetric similarity ratio,
+pointed it at these branches before publishing it, and found three
+defects in its own fix inside a minute each. The third is the one that
+matters here. It reported the attribute table's `dashboards` row as gone
+from `docs/agents/learning-log.md`, because the newer branch had grown
+that row a forty-word reason; every character of the old line was
+present in the new one and the symmetric score was **0.264**. The
+set-wise form in this charter has the identical defect and had already
+printed it:
+
+```
+| 7 | **dashboards** | see below | **weakest** |            # #288, reported absent
+| 7 | **dashboards** | see below. Both instruments this seat   # #362, what was there
+  reported were fixed and deployed inside this window, so the
+  grade is weakest on four weeks of history rather than on a
+  live defect | **weakest** |
+```
+
+That was the **only** line the set-wise form flagged on the register
+this seat keeps its memory in, so the instrument's single finding on its
+most expensive file was a line the tip had deliberately improved.
+
+**So the measure is coverage, and it is a separate rule from any tool
+that computes it.** Coverage is **matched characters over the length of
+the old line** — asymmetric on purpose, because a containment check asks
+only "is the old text still here" and a tip line is allowed to be
+arbitrarily longer. The row above scores **1.00** under coverage and
+near zero under any symmetric ratio. Any check you write about whether
+older work survived in newer work takes this form, whatever the
+artifacts are.
+
+**And one class sits above the line, because a count is unreadable
+without it.** A file every window replaces wholesale is reported as
+`replaced` and its lines are not enumerated. `docs/agents/merge-order.md`
+is rewritten from scratch by this charter's own instruction each window,
+so ninety-two deliberately rewritten lines of it buried the one register
+row a reader had to check. The centralizer's second defect and its fix;
+adopted here.
+
+**The tool.** `tools/stack/absent-text.py`, which prints four classes —
+`exact`, `extended`, `rewritten`, `absent` — plus the `replaced` file
+class, exits 1 when anything is `rewritten` or `absent`, and prints the
+nearest line in the tip beside each one so the reading duty below costs
+no further commands:
+
+```bash
+python3 tools/stack/absent-text.py refs/prs/<old> refs/prs/<tip> --quiet
+python3 tools/stack/absent-text.py refs/prs/<old> refs/prs/<tip>   # with the lines
+```
+
+**The three instruments on one pair, which is the whole argument.**
+Measured on `#288` against `#362`, the pair the subsection above
+tabulated, so the first two columns are reproductions of its own numbers
+and the third is new:
+
+| file | positional | set-wise | coverage |
+|---|---|---|---|
+| `docs/agents/learning-log.md` | 23 | 1 | **0 to read** (1 `extended`) |
+| `docs/agents/merge-order.md` | 87 | 76 | **not enumerated** (`replaced`) |
+| `prompts/exo-agent.md` | 33 | 33 | **32 to read** (24 `rewritten`, 8 `absent`) |
+| the other three | 0 | 0 | 0 |
+
+The charter's 33 barely moves, and that is the tool working rather than
+failing: those are genuinely rewritten paragraphs and the duty to read
+them stands. What coverage removes is the false alarm on the two files
+where the alarm was false, and it removes them for a stated reason
+instead of by a threshold nobody can defend.
+
+**`exact` is never inferred from a score.** A line scoring 1.00 that is
+not in the tip verbatim is `extended`, not `exact`, and the first
+version of this tool called it `exact` and so hid the one class it was
+built to name. `exact` is assigned by set membership only.
+
+**Where it has already paid, on its first real run.** Against `#384`,
+`#374`, `#378` and `#382` all exit 0 with nothing printed, which is the
+degenerate case: all three are ancestors, so there is no content
+question to ask and the tool says so cheaply. `#337` is not an ancestor,
+and the comparison surfaced `docs/prfaq/mvp-public-address.md` as
+**missing in the tip** — 123 lines of the PM seat's MVP PR/FAQ draft,
+written on 2026-10-18, on no open pull request and not on `main`. Both
+branches that ever carried it, `#225` and `#272`, were closed unmerged
+on 2026-10-23. It is recoverable, because
+`origin/ursa-pm/2026-10-18-message` still exists, which is §5b's
+"never delete the branch of a pull request you closed" earning its keep.
+No ancestry or conflict instrument in this charter could have seen it,
+because the file is not this seat's and conflicts on nothing.
+
+**The correction to this seat's own handoff, measured by the seat that
+received it (2026-10-24).** This section's parent subsection was handed
+upstream with the suggestion that other chains would show the same
+shape. They do not, and the right answer is better than the one offered:
+
+- **The fresh-root split is this seat's alone.** All **120** same-lane
+  open pairs across the portfolio's five repositories share history.
+  Zero have none. So "contains the content of, without containing the
+  history of" is, for now, a property of how *this* seat answers the
+  scope clause and not a portfolio shape. Do not generalise it again.
+- **The non-ancestor column is the one that generalises, and it is
+  three quarters of the portfolio.** **89 of 120** same-lane open pairs
+  are not ancestors of each other, so most stacks anywhere already
+  cannot be settled by `--is-ancestor`, fresh root or not. That is who
+  the content instrument is for.
+- **The sharpest case is not here.** Alexandria is **47 of 48**,
+  because its seats branch off the default rather than stacking, so
+  every containment question in that repository is already a content
+  question and nobody had noticed.
+
+The lesson to carry is narrower than the measurement: **when you hand a
+finding upstream, hand the measurement and let the recipient find the
+scope.** This seat offered a mechanism and a guess at its reach; the
+guess was wrong in both directions at once, too broad on the shape and
+far too narrow on the need.
+
 **While an owner ask names one of your pull requests, grow it instead of
 stacking past it (added 2026-10-18).** The retirement duty above cannot
 reach the case it most needs to, because its own first exception keeps
