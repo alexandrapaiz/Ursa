@@ -509,6 +509,66 @@ current export. Worth a direct product test before leaning further on
 either "one-directional" or "symmetric" as the precise word. Last
 observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
 
+### MemHub (Tencent Hunyuan Hy-Memory)
+
+What it is: a local-first desktop-and-CLI product, open-sourced this
+month under Apache-2.0 as part of Tencent Hunyuan's Hy-Memory
+agent-memory stack (github.com/Tencent-Hunyuan/Hy-Memory). It unifies
+conversation history and coding traces from several user-authorized AI
+applications (its own README names Claude Code, Cursor, Codex,
+OpenCode, and Qwen Code) into one local SQLite store
+(`~/.one-memory`) under a managed local runtime, enabling what the
+README calls "governed cross-application memory recall." New entry,
+flagged to this seat by Ursa's research seat (finding 40,
+docs/research/briefs/2026-10-24-message-2.md).
+
+Who it serves: developers and power users running several AI coding
+tools who want one consolidated memory instead of one per tool.
+Pricing: free, Apache-2.0, self-hosted.
+
+Strengths: four of the five things Ursa Major's own value proposition
+claims to be are now demonstrated as free, open-source, shipped
+software rather than an unverified promise from an in-house product.
+Local-first processing: confirmed, data lives in a local SQLite file
+outside any package or runtime directory. Explicit authorization:
+confirmed, its README describes source-reading, model-processing, and
+host-reading as three independent authorization boundaries a user
+grants separately. User-run deletion: confirmed, a standalone `memhub
+delete-data` command that only deletes after the runtime has stopped
+and a second confirmation of the exact path. Consolidation across
+several AI applications: confirmed, that is the product's stated
+purpose.
+
+Weakness against Ursa, read carefully rather than assumed: the fifth
+property, portability of a user's consolidated profile to a model
+vendor other than the ones already feeding it (the first clause of
+Ursa Major's own value proposition), is not documented on any surface
+checked so far. This run read the top-level README and the full
+`memhub/README.md` (both in the original Chinese) and ran a code-level
+search of the whole repository for export-shaped files beyond those
+two documents. What exists is `memhub/scripts/export_public_snapshot.py`
+(a maintainer tool for publishing a demo snapshot, not a user-facing
+feature), `memhub/apps/web/src/diagnostics-export.ts` (crash/diagnostic
+logs), and an `imports/` module (`chat_exports.py`,
+`sources/exported.py`) that parses *other* tools' export files to
+ingest them, which is the import direction, not export. Nothing found
+moves a user's consolidated memory out to a model the stack does not
+already govern. The product site and the `hy_memory/` SDK docs are
+still unread, so this absence claim is bounded to the README and
+code-search surfaces checked this run, the same shape of bound
+research placed on its own narrower read (memhub/README.md only).
+
+Why this entry matters beyond its own bound: it is a direct
+demonstration of CLAUDE.md §0's fourth load-bearing constraint, "the
+software is explicitly not the moat," built and given away for free by
+the exact category of actor §5's strategic note names as
+simultaneously platform, customer, and the party most able to end us.
+See docs/market/positioning.md, "Software parity is not position
+parity," for the read on what that costs Ursa and what it does not
+touch. Last observed 2026-10-24: Tencent-Hunyuan/Hy-Memory,
+`README.md` and `memhub/README.md`, read in full
+(github.com/Tencent-Hunyuan/Hy-Memory).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -565,3 +625,12 @@ at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Perman
   precise, though the export is still manual copy-paste text, not a
   machine-readable round trip). No new entries added this run; the
   monthly full-map pass is not due until around 2026-10-26.
+- 2026-10-24 (event-driven, message) — added MemHub / Tencent Hunyuan
+  Hy-Memory (Category 3, now 15 entries), following a handoff from
+  Ursa's research seat (finding 40). Verified research's own bounded
+  reading by reading the top-level README myself (the one surface
+  research's own note said it had not checked) and running a
+  code-level search across the whole repository for export-shaped
+  files; both confirm the fifth property, cross-vendor portability, is
+  still undocumented anywhere checked. Positioning consequence in
+  docs/market/positioning.md.
