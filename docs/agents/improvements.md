@@ -1925,13 +1925,23 @@ Three rules that give the file teeth, also HQ's:
   subsection written to keep that guard in force down to the rule that
   outlives its instance.
 - **Merged.** **No**, open in this window's pull request.
-- **Effect.** `prompts/exo-agent.md` is **4,580 lines**, +2,427/-68
-  against `origin/main`, and **this window's own delta is +30/-29, a
-  replacement ratio of 0.97.** The length did not move. Every previous
-  window of this seat that reported a ratio reported a zero, because it
-  had nothing spent to delete; this is the first non-trivial one, and
-  the reason is that something this file guarded against got fixed
-  upstream.
+- **Effect, and the first number this entry published was stale by the
+  end of the run, so both readings are here.** At the moment of the
+  retirement the file was **4,580 lines** with this window's own delta
+  at **+30/-29**, a replacement ratio of 0.97, and the entry said the
+  length did not move. **At the end of the run it is 4,634 lines,
+  +85/-30 against this seat's previous tip, so the file grew by 55
+  lines net and the ratio is 0.35.** The growth is two later
+  amendments, the companion-sweep fix and the Learn-step ordering rule,
+  each of which carries a measurement that was not available when the
+  retirement was written.
+  **Report the end-of-run number, not the number at the moment you
+  deleted something.** A replacement ratio taken immediately after a
+  deletion is the most flattering instant in the window, and this entry
+  published it before correcting itself in the same commit range. The
+  honest summary: the retirement was real, it was the first non-trivial
+  deletion this seat has made, and it was outweighed by the same run's
+  additions.
 - **Rule.** **The cheapest way to shorten this file is to watch for the
   defects it guards against being fixed elsewhere.** A guard is written
   when a defect is live and nothing in the loop re-reads it when the
@@ -1940,7 +1950,8 @@ Three rules that give the file teeth, also HQ's:
   this window could delete anything is that it checked.
 - **Next measure.** On the brief of **2026-10-31**, `wc -l
   prompts/exo-agent.md` on this seat's tip. The effect is positive if it
-  is **at or below 4,580**.
+  is **at or below 4,634**, which is this window's closing length and
+  not its mid-run one.
 
 ### Experiment for the week: does a lost cohort precede the dark minutes?
 
@@ -1971,9 +1982,10 @@ Three rules that give the file teeth, also HQ's:
 
 ### The compounding ratio, reported flat
 
-- **Files this window's changes touch: 6.** `prompts/exo-agent.md`,
-  four of this seat's registers, and one deletion of a stray scratch
-  file at the repository root.
+- **Files this window's changes touch: 7.** `prompts/exo-agent.md`,
+  five of this seat's registers (`incidents`, `improvements`,
+  `learning-log`, `merge-order`, `runner-facts`), and one deletion of a
+  stray scratch file at the repository root.
 - **Seats: 1.** This seat's own. No other seat's charter is in the diff.
 - **So the curve is flat on the measure HQ asks for**, and saying so is
   the duty. The two pieces that can reach more than one seat left this
