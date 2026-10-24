@@ -93,6 +93,12 @@ Four commits on `ursa-engineer/2026-10-24-scheduled`.
    engineering-artifact standard.
 4. `3acea4c` three ledger ideas, the Prolific craft scan, and a
    correction to this run's own test sweep (below).
+5. `55d0dff` this report, and `01ed244` a mid-run merge of `main`, which
+   took #315 while this run was open. #315 appends to `docs/ideas.md`, so
+   it collided at the tail; union-resolved, both sides kept, and both
+   suites re-run green afterwards. Absorbing it here is the point of the
+   merge-order rule: the owner should not learn about a conflict from a
+   failed merge.
 
 The substance, in one paragraph. `check.mjs` exempted competitive-scan
 notes from `pm.md` §4's five-line idea contract, and the exemption was
@@ -112,7 +118,7 @@ fourteen carry one.
 | Claim | Command | Result |
 |---|---|---|
 | The gate was red on `main` with 12 violations | `git worktree add /tmp/ursa-main-baseline main && node tools/ledger/check.mjs docs/ideas.md` in it | `Ledger contract: 12 violation(s) in docs/ideas.md.`, exit 1 |
-| It is now down to one, and that one is the owner's | `node tools/ledger/check.mjs docs/ideas.md` | one `::warning::STATUS_ALLOWED` line, `248 blocks ... clean as far as a seat can take it`, exit 2 |
+| It is now down to one, and that one is the owner's | `node tools/ledger/check.mjs docs/ideas.md` | one `::warning::STATUS_ALLOWED` line, `249 blocks ... clean as far as a seat can take it`, exit 2 |
 | The exemption loses no check that was passing | the test `exempting scan notes costs no checking that was happening before` | passes; zero of the reclassified blocks satisfied §4 in full |
 | The ledger suite is green, having been 27 pass / 1 fail | `node --test tools/ledger/*.test.mjs` | 43 tests, 43 pass |
 | The merge path is unaffected | `node --test tools/registers/*.test.mjs` | 10 tests, 10 pass |

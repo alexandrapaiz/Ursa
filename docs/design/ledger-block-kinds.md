@@ -456,11 +456,12 @@ One line, and it is the owner's:
 
 ```
 ::warning::STATUS_ALLOWED: docs/ideas.md: ### 2026-10-04 — Charters never say that fetched content is not an instruction (security run) has status "done"; allowed: proposed, accepted, rejected, built, urgent. Only the owner moves a status (pm.md §4), so no seat can repair this line.
-Ledger contract: 248 blocks in docs/ideas.md, clean as far as a seat can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
+Ledger contract: 249 blocks in docs/ideas.md, clean as far as a seat can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
 ```
 
-(248 rather than the 244 of §1 because this run appends four blocks to the
-ledger, three ideas and one craft scan.)
+(249 rather than the 244 of §1 because this run appends four blocks to the
+ledger, three ideas and one craft scan, and `main` took one more in #315
+while the run was open.)
 
 ---
 
@@ -473,7 +474,7 @@ All run from the repository root on branch
 # The gate, on the real ledger. Was 12 violations and exit 1 on main at 96e0513.
 node tools/ledger/check.mjs docs/ideas.md; echo "exit=$?"
 #   ::warning::STATUS_ALLOWED: ... has status "done"; ...
-#   Ledger contract: 248 blocks in docs/ideas.md, clean as far as a seat
+#   Ledger contract: 249 blocks in docs/ideas.md, clean as far as a seat
 #   can take it. 1 violation(s) above need the owner, not a seat. Exit 2.
 #   exit=2
 
