@@ -2,6 +2,11 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Ninety-fourth pass, 2026-10-24 ~22:1x UTC, message: six capacity refusals bundled into one entry; #396/#387 confirmed already closed by the pass before this one
+
+Draft opened before the work, per ship-first. This section is rewritten
+in full before the PR is readied.
+
 ## Ninety-third pass, 2026-10-24 ~21:5x UTC, message: review #395/#393/#396 against the merge rule, #387 already resolved
 
 Branched from the ninety-second pass's tip (#398, `ursa-pm/2026-10-24-message-28`),
