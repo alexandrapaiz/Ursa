@@ -1225,6 +1225,37 @@ say in the same sentence that you did, because a number with no stated
 extractor is not re-derivable and this register has three of those in
 it already.
 
+**The grade is reportable, measured 2026-10-24 by the twenty-eighth
+window, and this is the first time it has been.** Everything above is a
+record of this instrument failing: 17% off the actor field on
+2026-10-18, retracted; 35.7% at HQ with 64% unclaimed; two windows
+disagreeing by thirty points because neither recorded its extractor. Run
+with the key set written down and the window narrowed to what the
+board's 500-row cap actually reaches, it answers:
+
+| | |
+|---|---|
+| window | 2026-10-23 17:49 to 2026-10-24 13:19 UTC, nineteen hours, which is the board's reach and not a week |
+| merges in it | **13** |
+| carrying a seat's own claim in `data` | **10** |
+| on Actions, `mergedBy == app/claude` | **0** |
+| floor | **10 of 13, 76.9%** |
+| unresolved | 3 of 13, **23.1%** |
+
+**Twenty-three per cent unresolved is under the one-third ceiling**, so
+HQ's refusal condition does not fire and this is a grade rather than a
+comment on the instrument. Say so explicitly when you report it, because
+every previous reading of this attribute was above the ceiling and a
+reader who knows that will assume this one is too.
+
+Three things made the difference, and none of them is the company
+changing. The key set from the table above was used instead of a guessed
+key. The window was narrowed to the board's actual reach rather than
+asked for a week it cannot answer. And the claim read was scoped by
+sender rather than looped over recipients. **So report the window beside
+the number, always.** A 76.9% over nineteen hours and a 76.9% over a
+week are different claims, and only one of them is available here.
+
 Report three buckets and never two: merged by a seat on Actions, merged
 by a seat on the host and claimed on the board, and **unattributed**,
 meaning recorded as the owner with no board claim behind it. A merge in

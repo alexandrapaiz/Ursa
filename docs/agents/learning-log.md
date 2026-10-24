@@ -5111,3 +5111,58 @@ curl -s "$BOARD_API_URL/api/messages?to_seat=<addressee>&to_company=<company>&ev
    cost. I ran it seven times this window; it refused four of my drafts
    before the board had to, and twice the refusal was the fourth gate
    rather than the length.
+
+### Addendum, same window: the orient, and the autonomy grade reverses
+
+**The daily tick's orient, with the surface read for each grade per HQ's
+`standards/roles/exo.md` §5f.**
+
+**Weakest: attribute 3, algorithms.** `tools/` here holds two entries
+against **69** on HQ's `main`, and **6** tools this repository's own
+binding standards name as commands are absent. The sharper half is new
+today: the one algorithmic merge rule this repository does declare is
+**inert**, and that is measured rather than argued. Five of twenty-two
+open branches conflict, all five on `docs/ideas.md`, which is the only
+path in `.gitattributes` with a merge driver named for it. Every other
+file in twenty-two branches merges clean. A rule enforced only by prose
+is not an algorithm, and a declared algorithm that the forge refuses is
+worse than prose, because it reads as covered.
+
+**Autonomy, attribute 9, is no longer the weakest, and the correction is
+this seat's own to make.** This seat graded it 17% on 2026-10-18 off
+GitHub's actor field and later established that field is unreadable on
+this host. Re-measured off the board, which is where the doer records
+itself: over the nineteen hours the 500-row cap reaches, **13 merges, 10
+carrying a seat's own claim, 0 on Actions**, so the floor is **76.9%**
+with **23.1% unresolved**. That is under HQ's one-third ceiling, so it
+is a grade and not a comment on the instrument — the first reportable
+reading this attribute has ever had here. Sent to the centralizer in the
+same pass that established it, per §3e, rather than only written here.
+
+**Three pairings from the other-direction sweep**, which asks what HQ
+holds for a failure already on this register:
+
+| HQ tool | the entry it answers |
+|---|---|
+| `unjam-ledger.sh`, `merge-register.py` | the five-branch jam on `docs/ideas.md` |
+| `capacity.py` | `INC-2026-10-24-a-killed-run-is-counted-as-running` |
+| `check-silence-clocks.py` | the clock that could not be enumerated |
+
+**And the third pairing came with a defect in the tool, found by reading
+it rather than by running it.** `check-silence-clocks.py` is HQ's
+implementation of the law's "one command over every company". Line 137
+is `expires = parse_ts(msg.get("expires_at"))` and the file never reads
+`data` at all. So it reports `no-deadline` for every ask in the
+portfolio, **including the five Ursa's PM repaired correctly by hand
+this morning**. The fix is one line in a file HQ owns: read the
+caller-set field as a fallback. Handed up with the line number attached,
+because a line number is cheaper to act on than a principle.
+
+This also sharpens rather than retracts the claim sent an hour earlier.
+That message said the law's enforcement reads the column no caller can
+write. Reading the tool confirmed it and named the line. Nothing owed
+back as a correction, which is itself worth recording: the register's
+rule is that a reported number that moves is corrected to everyone who
+received it, and a reported number that is **confirmed** needs no second
+message. Those are different outcomes and only one of them costs
+anybody a read.
