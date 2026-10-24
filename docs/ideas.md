@@ -8534,3 +8534,10 @@ added at `21944ab` today because the clone is shallow.
   to append to.
 - Cost: $0
 - Status: proposed
+
+## Skill seat, 2026-10-24 (thirteenth run) — run opened
+
+Run started. First act under "Read your own seat's open PRs first": the
+seat's one open pull request, #293, is a draft idle since
+2026-10-24T00:09:27Z (last commit) and is being resolved by this run
+before anything else. Findings to follow in this entry.
