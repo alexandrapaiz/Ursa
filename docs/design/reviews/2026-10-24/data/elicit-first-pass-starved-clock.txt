@@ -1,0 +1,45 @@
+# https://elicit.com/
+sampled 2026-10-24T00:22:00.840Z at 1440x900, 900ms per phase
+
+## [7] <a> "Sign in"  69x36
+   declared: all / 0s / ease
+   leave bg.a             0.15 ->       0  peak       0 @ 569.3ms  overshoot      0%  crossings 0  settle 417.2ms  cadence 135.9ms
+         CURVE   out-quad (house curve) over 116ms, starting 161ms after the pointer (rms 0); then in-out-cubic over 96ms (rms 0)
+
+## [9] <a> "Try now"  220x54
+   declared: all / 0s / ease
+   leave bg.r                8 ->       2  peak       2 @ 864.6ms  overshoot      0%  crossings 0  settle 641.9ms  cadence 205.4ms
+         CURVE   out-quad (house curve) over 156ms, starting 454ms after the pointer (rms 0); then out-cubic over 184ms (rms 0)
+   leave bg.g               61 ->      99  peak      99 @ 864.6ms  overshoot      0%  crossings 0  settle 641.9ms  cadence 205.4ms
+         CURVE   ease over 160ms, starting 438ms after the pointer (rms 0); then out-quad (house curve) over 136ms (rms 0)
+   leave bg.b               68 ->     112  peak     112 @ 864.6ms  overshoot      0%  crossings 0  settle 641.9ms  cadence 205.4ms
+         CURVE   ease-out over 124ms, starting 450ms after the pointer (rms 0.0001); then out-quart over 216ms (rms 0.0001)
+
+## [15] <a> "Learn more"  141x34
+   declared: all / 0s / ease
+   enter bg.a                0 ->       1  peak       1 @ 564.5ms  overshoot      0%  crossings 0  settle 269.3ms  cadence 172.5ms
+         CURVE   ease-in over 260ms, starting 92ms after the pointer (rms 0.0001); then in-out-cubic over 392ms (rms 0.0001)
+   leave bg.a                1 ->       0  peak       0 @ 546.1ms  overshoot      0%  crossings 0  settle 464.2ms  cadence 124ms
+         CURVE   ease-in over 84ms, starting 307ms after the pointer (rms 0); then in-out-cubic over 108ms (rms 0)
+
+## [18] <a> "Learn more"  141x34
+   declared: all / 0s / ease
+   enter bg.a                0 ->       1  peak       1 @ 709.2ms  overshoot      0%  crossings 0  settle 515.5ms  cadence 124.4ms
+         CURVE   in-out-cubic over 304ms, starting 221ms after the pointer (rms 0); then linear over 256ms (rms 0.0001)
+   leave bg.a                1 ->       0  peak       0 @ 584.8ms  overshoot      0%  crossings 0  settle 501.6ms  cadence 82.5ms
+         CURVE   linear over 364ms, starting 51ms after the pointer (rms 0.0013); then ease-out over 404ms (rms 0.0015)
+
+## [21] <a> "Learn more"  141x34
+   declared: all / 0s / ease
+   enter bg.a                0 ->       1  peak       1 @ 431.7ms  overshoot      0%  crossings 0  settle 344.8ms  cadence 98.1ms
+         CURVE   in-out-cubic over 204ms, starting 134ms after the pointer (rms 0.0226); then ease-in over 156ms (rms 0.0439)
+   leave bg.a                1 ->       0  peak       0 @ 387.3ms  overshoot      0%  crossings 0  settle 319.6ms  cadence 81.3ms
+         CURVE   ease over 164ms, starting 105ms after the pointer (rms 0.0004); then ease-out over 148ms (rms 0.0022)
+
+## [24] <a> "Learn more"  141x34
+   declared: all / 0s / ease
+   enter bg.a                0 ->       1  peak       1 @ 839.8ms  overshoot      0%  crossings 0  settle 600.4ms  cadence 180.5ms
+         CURVE   linear over 196ms, starting 338ms after the pointer (rms 0); then out-cubic over 272ms (rms 0)
+   leave bg.a                1 ->       0  peak       0 @ 788.7ms  overshoot      0%  crossings 0  settle 665.3ms  cadence 123.4ms
+         CURVE   ease-out over 300ms, starting 308ms after the pointer (rms 0); then out-cubic over 388ms (rms 0)
+

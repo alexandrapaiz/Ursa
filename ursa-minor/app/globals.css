@@ -156,6 +156,39 @@
   --line: #141b2b;
   /* display face: the light grotesque the hero is set in */
   --font-sans: "Helvetica Neue", -apple-system, "Segoe UI", Arial, sans-serif;
+
+  /* The house spring, measured 2026-10-24 rather than invented.
+     docs/design/reviews/2026-10-24 has the full account; the short form:
+
+     Two earlier runs of the frontend seat tried to describe the hover feel
+     the owner named on Elicit by reading its computed CSS at rest, and both
+     concluded there is no spring in it. There is not. The spring is handed
+     to the browser through the Web Animations API, which has no spring
+     either, so a motion library solves it first and ships the solution as a
+     `linear()` easing of a few dozen points. Read off their own animation
+     engine, Elicit's is 400ms, damping ratio 0.80, peaking 1.51 percent past
+     its target at 236ms, and ringing exactly zero times.
+
+     That is the correction worth having. "Bouncy" there is one and a half
+     percent of overshoot, not a bounce, and the property it is applied to
+     is background colour, where an overshoot of that size cannot be seen at
+     all. So what carries the feel is not the size of the spring. It is that
+     the motion arrives, goes a hair past, and settles, instead of stopping
+     dead on its mark.
+
+     Ours is the same physics re-solved at our own tempo instead of theirs:
+     damping ratio 0.80 kept exactly, duration 340ms so that it first
+     reaches its target at 163ms, which is the 160ms this file already uses
+     everywhere. Overshoot 1.50 percent, peak at 207ms, no ring. Regenerate
+     or audit it with:
+
+       node docs/design/review-kit/make-spring.mjs \
+         --damping 0.8 --duration 340 --wnT 8.88 --points 24
+
+     The same generator, given Elicit's own numbers, reproduces Elicit's own
+     40 points to within 0.008, which is how this value was checked against
+     something real before it was used. */
+  --spring-lift: linear(0 0%, 0.0606 4.3478%, 0.1964 8.6957%, 0.3579 13.0435%, 0.5155 17.3913%, 0.6537 21.7391%, 0.7662 26.087%, 0.8526 30.4348%, 0.9153 34.7826%, 0.9585 39.1304%, 0.9863 43.4783%, 1.0028 47.8261%, 1.0114 52.1739%, 1.0148 56.5217%, 1.015 60.8696%, 1.0134 65.2174%, 1.0111 69.5652%, 1.0087 73.913%, 1.0064 78.2609%, 1.0045 82.6087%, 1.0029 86.9565%, 1.0018 91.3043%, 1.001 95.6522%, 1 100%);
 }
 
 ::selection {
@@ -264,13 +297,45 @@ html {
    lift here is one pixel and the press beats the hover.
 
    Colour stays inside the existing palette: the border walks up to --polar
-   and the fill is --polar at 8%. Nothing new is introduced. */
+   and the fill is --polar at 8%. Nothing new is introduced.
+
+   Amended 2026-10-24. "Never bouncy" above, and the "Elicit (200ms on
+   transform)" it rests on, were both read off Elicit's stylesheet at rest,
+   and a stylesheet at rest cannot see a spring that is handed to the
+   animation engine already solved. Asked directly, that engine says 400ms,
+   damping ratio 0.80, 1.51 percent of overshoot, no ring. So Elicit is
+   bouncy, by one and a half percent, and the earlier reading was not wrong
+   about the pixels so much as blind to the mechanism.
+
+   One pixel of lift stands: Elicit's own geometric motion is also one
+   pixel. What changes is that the pixel now springs. The spring goes on
+   the transform and not on the colour, which is the other half of the
+   finding, because Elicit puts its spring on background colour where an
+   overshoot of 1.5 percent is invisible. Here the overshoot lands on the
+   only channel that can show it. */
 
 .cta {
   transition:
     border-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
     background-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
     transform 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Guarded, because `linear()` is recent. A browser without it never enters
+   this block and keeps the 160ms ease-out above, which is the behaviour
+   that shipped before today. The guard has to be @supports rather than two
+   declarations in a row: a var() that fails to substitute invalidates the
+   whole property at computed-value time instead of falling back to the
+   declaration before it. */
+@supports (transition-timing-function: linear(0, 1)) {
+  .cta {
+    transition-property: border-color, background-color, transform;
+    transition-duration: 160ms, 160ms, 340ms;
+    transition-timing-function:
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      var(--spring-lift);
+  }
 }
 
 /* Tailwind v4 already gates hover: behind (hover: hover); this rule is plain
@@ -582,15 +647,50 @@ html {
   white-space: pre;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  /* The one indicator that the line continues past the edge. A thin
-     track in --line is the same hairline every other edge on this site
-     is drawn with, so it says "there is more" without adding a device.
-     It is not a complete answer: iOS paints overlay scrollbars and shows
-     nothing until a finger moves. The copy control carries the whole
-     command regardless of what is visible, which is why clipping is
-     survivable here and would not be in prose. */
+  /* The thin track was described here, until 2026-10-24, as "the one
+     indicator that the line continues past the edge". Measured on that
+     date, it is not an indicator at all. It reserves no width
+     (offsetHeight 44 against clientHeight 44, so the browser overlays it
+     rather than laying it out) and its thumb is --line on --night, which
+     is a contrast ratio of 1.198 to 1. It is kept because it costs
+     nothing and helps on a platform that paints a classic scrollbar.
+     The thing that actually says "there is more" is the fade below. */
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
+
+  /* The cut, before the fade: the Action's curl line ended at
+     "raw.githubusercontent.com/alexandrapaiz/Ursa/main/u" on a 1440
+     desktop, which is a line that looks finished. 536px of it were
+     hidden there, 455 at 820, 737 at 390 and 807 at 320, so this was
+     never only a phone problem. A reader cannot tell a clipped line from
+     a short one when the clip is clean, and a clean clip is what a
+     scroll container gives you.
+
+     So the edge is faded instead of sliced. Two reasons it is a mask and
+     not an overlay. The page's background is not a colour here, it is
+     the WebGL sky in PixelSky painted fixed behind everything, so an
+     opaque gradient in --night would read as a dark patch over a sky
+     that is visible either side of it. And a mask fades the glyph
+     itself, which is the thing that was lying about being complete.
+
+     The width of the fade is driven from the component, in --fade-l and
+     --fade-r, as the distance left to scroll on that side clamped to
+     32px, which is two of this card's 16px padding step and about four
+     and a half characters at this type size. Driving it from the
+     distance rather than from a boolean means the fade shrinks to
+     nothing over the last 32px instead of popping off at the end, and it
+     means both values are 0 whenever the line fits, so a command that
+     does not scroll is not faded for no reason. Before hydration both
+     are 0 and this rule paints exactly what shipped before it. */
+  --fade-l: 0px;
+  --fade-r: 0px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
 }
 
 /* The share bar. 1px gaps in --night rather than margins, so the
