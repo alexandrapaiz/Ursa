@@ -1,0 +1,57 @@
+{
+  "indexVersion": "0.4.0",
+  "publishedAt": "2026-10-18T09:33:50.724Z",
+  "repository": "someone/their-repo",
+  "recordSchemaVersions": [
+    "0.1.0"
+  ],
+  "pairing": [],
+  "records": [
+    {
+      "id": "their-repo-2026-10-18-a1b2c3d",
+      "generatedAt": "2026-10-18T02:10:36.073Z",
+      "finished": true,
+      "artifactKind": "chat",
+      "finalChars": 314,
+      "coveredChars": 308,
+      "charsByClass": {
+        "survived_verbatim": 127,
+        "survived_mutated": 74,
+        "no_generation_provenance": 107
+      },
+      "spansByClass": {
+        "survived_verbatim": 2,
+        "survived_mutated": 1,
+        "no_generation_provenance": 2
+      },
+      "generatedChars": 309,
+      "generatedDeletedChars": 92,
+      "resolvedBy": null,
+      "html": "records/their-repo-2026-10-18-a1b2c3d.html",
+      "json": "records/their-repo-2026-10-18-a1b2c3d.json",
+      "address": "pages/someone/their-repo/their-repo-2026-10-18-a1b2c3d",
+      "bytes": 7558,
+      "sha256": "46f5e4328aa60b84e077e8cd8b67bfc0f0c1e7398f9b679cfd7a1270912a9b30"
+    }
+  ],
+  "disclosed": {
+    "records": 2,
+    "recordIds": [
+      "their-repo-2026-10-17-9f8e7d6",
+      "their-repo-2026-10-18-a1b2c3d"
+    ],
+    "adapters": [
+      "paste"
+    ],
+    "finalFiles": 1,
+    "filePaths": [
+      "final.md"
+    ],
+    "finalChars": 628,
+    "generations": 4,
+    "generationChars": 618,
+    "conversations": 4,
+    "prompts": 4,
+    "promptChars": 130
+  }
+}

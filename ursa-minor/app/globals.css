@@ -633,3 +633,51 @@ html {
     transition-duration: 1ms;
   }
 }
+
+/* ---------- the set's record rows ---------- */
+
+/*
+ * The whole block is the control and the id is its link text, so the
+ * underline has to answer the block's hover rather than the span's own.
+ * Before this it was a Tailwind `group-hover:underline`, which is an
+ * instant on and off: at 80ms into a hover the line was already drawn at
+ * full strength (`docs/design/reviews/2026-10-23/before/`), while every
+ * other interactive thing on the page eases over 160ms. The primary
+ * control of the set view was the one piece of it that snapped.
+ *
+ * The curve and the duration are `.rec-action`'s, which are in turn the
+ * ones Linear uses on nearly everything it transitions: 160ms on
+ * cubic-bezier(0.25, 0.46, 0.45, 0.94), read off its own computed styles
+ * on 2026-10-23. The underline is present and transparent rather than
+ * absent, which is what lets it fade instead of appearing, and what
+ * keeps the row from moving by a pixel when it lights up.
+ *
+ * `:active` carries the same state so a touch, where there is no hover
+ * at all, still shows the row answering the finger.
+ */
+.rec-row-id {
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition:
+    text-decoration-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (hover: hover) {
+  .rec-row:hover:not(:disabled) .rec-row-id {
+    text-decoration-color: var(--polar);
+  }
+}
+
+.rec-row:focus-visible .rec-row-id,
+.rec-row:active:not(:disabled) .rec-row-id {
+  text-decoration-color: var(--polar);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-row-id {
+    transition-duration: 1ms;
+  }
+}

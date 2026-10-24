@@ -1916,6 +1916,11 @@ function saveEpisodes(projectRoot, episodes) {
   (0, import_node_fs2.writeFileSync)(path, JSON.stringify(episodes, null, 2) + "\n");
   return path;
 }
+function loadEpisodes(projectRoot) {
+  const path = (0, import_node_path3.join)(ursaDir(projectRoot), "episodes.json");
+  if (!(0, import_node_fs2.existsSync)(path)) return [];
+  return JSON.parse((0, import_node_fs2.readFileSync)(path, "utf8"));
+}
 function listRecordIds(projectRoot) {
   const dir = (0, import_node_path3.join)(ursaDir(projectRoot), "records");
   if (!(0, import_node_fs2.existsSync)(dir)) return [];
@@ -1946,12 +1951,12 @@ function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date(
   const axioms = [];
   for (const axiom of tuning.axioms) {
     const kept = axiom.evidence.filter((e) => e.recordId !== recordId);
-    const dropped = axiom.evidence.length - kept.length;
-    if (dropped === 0) {
+    const dropped2 = axiom.evidence.length - kept.length;
+    if (dropped2 === 0) {
       axioms.push(axiom);
       continue;
     }
-    evidenceStripped += dropped;
+    evidenceStripped += dropped2;
     if (kept.length === 0) {
       axiomsDeleted.push(axiom.id);
       continue;
@@ -1963,12 +1968,31 @@ function forgetRecordInTuning(tuning, recordId, now = (/* @__PURE__ */ new Date(
     (a) => a.contradicts.some((c) => deleted.has(c)) ? { ...a, contradicts: a.contradicts.filter((c) => !deleted.has(c)) } : a
   );
   const sources = tuning.sources.filter((s) => s.recordId !== recordId);
+  const { blocked, dropped } = blockedForgotten(tuning.blockedByRevocation ?? [], recordId, now);
   return {
-    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned },
+    tuning: { ...tuning, updatedAt: now, sources, axioms: cleaned, blockedByRevocation: blocked },
     axiomsDeleted,
     evidenceStripped,
-    sourcesRemoved: tuning.sources.length - sources.length
+    sourcesRemoved: tuning.sources.length - sources.length,
+    blockedDropped: dropped
   };
+}
+function blockedForgotten(entries, recordId, now) {
+  const blocked = [];
+  let dropped = 0;
+  for (const w of entries) {
+    const kept = w.evidence.filter((e) => e.recordId !== recordId);
+    if (kept.length === w.evidence.length) {
+      blocked.push(w);
+      continue;
+    }
+    if (kept.length === 0) {
+      dropped++;
+      continue;
+    }
+    blocked.push({ ...w, evidence: kept, lastBlocked: now });
+  }
+  return { blocked, dropped };
 }
 function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toISOString()) {
   if (!(0, import_node_fs3.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
@@ -1988,6 +2012,41 @@ function revokeAxiom(tuningPath, unitId, now = (/* @__PURE__ */ new Date()).toIS
   };
   (0, import_node_fs3.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
   return updated;
+}
+function releaseBlocked(tuningPath, index, now = (/* @__PURE__ */ new Date()).toISOString()) {
+  if (!(0, import_node_fs3.existsSync)(tuningPath)) throw new Error(`No tuning record at ${tuningPath}`);
+  const tuning = JSON.parse((0, import_node_fs3.readFileSync)(tuningPath, "utf8"));
+  const blocked = tuning.blockedByRevocation ?? [];
+  const entry = blocked[index - 1];
+  if (!entry) {
+    throw new Error(
+      `No blocked statement ${index} in ${tuningPath} (${blocked.length} blocked by a revocation; run \`ursa consent show\` to list them)`
+    );
+  }
+  const taken = new Set(tuning.axioms.map((a) => a.id));
+  let n2 = tuning.axioms.length + 1;
+  while (taken.has(`ax-${String(n2).padStart(3, "0")}`)) n2++;
+  const released = {
+    id: `ax-${String(n2).padStart(3, "0")}`,
+    statement: entry.statement,
+    domain: entry.domain,
+    polarity: entry.polarity,
+    basis: entry.basis,
+    evidenceCount: entry.evidence.length,
+    evidence: entry.evidence,
+    contradicts: [],
+    firstSeen: entry.firstBlocked,
+    lastSeen: now,
+    status: "user-edited"
+  };
+  const updated = {
+    ...tuning,
+    updatedAt: now,
+    axioms: [...tuning.axioms, released],
+    blockedByRevocation: blocked.filter((_, i) => i !== index - 1)
+  };
+  (0, import_node_fs3.writeFileSync)(tuningPath, JSON.stringify(updated, null, 2) + "\n");
+  return { tuning: updated, released };
 }
 var import_node_fs3;
 var init_revoke = __esm({
@@ -2077,6 +2136,7 @@ function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOS
   let axiomsDeleted = [];
   let evidenceStripped = 0;
   let sourcesRemoved = 0;
+  let blockedDropped = 0;
   const tPath = tuningPathFor(projectRoot);
   if ((0, import_node_fs4.existsSync)(tPath)) {
     const tuning = JSON.parse((0, import_node_fs4.readFileSync)(tPath, "utf8"));
@@ -2085,11 +2145,12 @@ function forget(projectRoot, recordId, now = (/* @__PURE__ */ new Date()).toISOS
     axiomsDeleted = result.axiomsDeleted;
     evidenceStripped = result.evidenceStripped;
     sourcesRemoved = result.sourcesRemoved;
+    blockedDropped = result.blockedDropped;
   }
   const tombstone = {
     recordId,
     forgottenAt: now,
-    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved }
+    removed: { recordFile: hadFile, axiomsDeleted, evidenceStripped, sourcesRemoved, blockedDropped }
   };
   const consent = loadConsent(projectRoot);
   saveConsent(projectRoot, {
@@ -3647,6 +3708,16 @@ function describe(consent, projectRoot, io) {
     for (const a of active) {
       io.out(`      ${a.id}  ${a.polarity}: ${a.statement}  (${a.domain}, x${a.evidenceCount})`);
     }
+    const blocked = tuning.blockedByRevocation ?? [];
+    if (blocked.length > 0) {
+      io.out("");
+      io.out(`  ${blocked.length} statement${blocked.length === 1 ? "" : "s"} held back, because a later distillation restated something you revoked:`);
+      for (const [i, b] of blocked.entries()) {
+        io.out(`      ${i + 1}.  ${b.polarity}: ${b.statement}`);
+        io.out(`          restates ${b.blockedBy}, sharing ${Math.round(b.score * 100)}% of its words, produced ${b.occurrences} time${b.occurrences === 1 ? "" : "s"}, last on ${b.lastBlocked}`);
+      }
+      io.out("  Nothing in that list reaches any model. If one of them is genuinely a new rule rather than the old one reworded, `ursa consent release-blocked <project> --index <n>` makes it an inference you own.");
+    }
   } else {
     io.out("  No inferences yet. Nothing has been derived about you.");
   }
@@ -3663,7 +3734,7 @@ function describe(consent, projectRoot, io) {
 async function runConsentCommand(argv, io = stdio) {
   const [sub, project, ...rest] = argv;
   if (!sub || !project) {
-    io.err("Usage: ursa consent show|grant|revoke|disclose|revoke-axiom <project> [options]");
+    io.err("Usage: ursa consent show|grant|revoke|disclose|revoke-axiom|release-blocked <project> [options]");
     return 2;
   }
   const projectRoot = (0, import_node_path6.resolve)(project);
@@ -3698,6 +3769,23 @@ async function runConsentCommand(argv, io = stdio) {
       return 1;
     }
   }
+  if (sub === "release-blocked") {
+    const raw = flag(rest, "index");
+    const index = Number(raw);
+    if (!raw || !Number.isInteger(index) || index < 1) {
+      io.err("release-blocked needs --index <n>, the number `ursa consent show` prints beside the statement, for example --index 1");
+      return 2;
+    }
+    try {
+      const { released } = releaseBlocked(tuningPathFor(projectRoot), index);
+      io.out(`Released "${released.statement}" as ${released.id}.`);
+      io.out("It is yours now rather than the distillation's, so no later pass can reword it, and the revocation it resembled is still in force.");
+      return 0;
+    } catch (e) {
+      io.err(e.message);
+      return 1;
+    }
+  }
   if (sub === "disclose") {
     const consent = loadConsent(projectRoot);
     const records = loadRecords(projectRoot);
@@ -3723,7 +3811,7 @@ async function runConsentCommand(argv, io = stdio) {
     }
     return 0;
   }
-  io.err(`Unknown subcommand "${sub}". Try show, grant, revoke, disclose or revoke-axiom.`);
+  io.err(`Unknown subcommand "${sub}". Try show, grant, revoke, disclose, revoke-axiom or release-blocked.`);
   return 2;
 }
 async function runForgetCommand(argv, io = stdio) {
@@ -3746,6 +3834,9 @@ async function runForgetCommand(argv, io = stdio) {
   }
   if (t.removed.evidenceStripped > 0) {
     io.out(`  ${t.removed.evidenceStripped} evidence entr${t.removed.evidenceStripped === 1 ? "y" : "ies"} stripped from inferences that still rest on other records.`);
+  }
+  if ((t.removed.blockedDropped ?? 0) > 0) {
+    io.out(`  ${t.removed.blockedDropped} held-back statement${t.removed.blockedDropped === 1 ? "" : "s"} dropped, because this record was the only evidence behind ${t.removed.blockedDropped === 1 ? "it" : "them"} too.`);
   }
   if (t.removed.sourcesRemoved > 0) io.out("  It is no longer listed as a source of your tuning.");
   io.out("  Its id is tombstoned, so `ursa run` will not rebuild it from the git history it came from.");
@@ -5296,6 +5387,7 @@ function buildDistillPrompt(record, tuning) {
   if (!s) throw new Error("Record has no signals block; nothing to distill from");
   const existing = tuning.axioms.filter((a) => a.status !== "revoked").map((a) => ({ id: a.id, statement: a.statement, domain: a.domain, polarity: a.polarity }));
   const revoked = tuning.axioms.filter((a) => a.status === "revoked").map((a) => ({ id: a.id, statement: a.statement }));
+  const alreadyBlocked = (tuning.blockedByRevocation ?? []).map((w) => w.statement);
   const prompts = record.conversations.flatMap(
     (c) => (c.prompts ?? []).map((p) => ({ step: p.step, text: p.text }))
   );
@@ -5345,6 +5437,7 @@ function buildDistillPrompt(record, tuning) {
     BEGIN_EVIDENCE,
     `EXISTING AXIOMS: ${JSON.stringify(existing)}`,
     `REVOKED AXIOMS (do not resurrect): ${JSON.stringify(revoked)}`,
+    `ALREADY BLOCKED AS RESTATEMENTS OF THOSE (do not emit again): ${JSON.stringify(alreadyBlocked)}`,
     "",
     `EPISODE: ${JSON.stringify(s.episode)}`,
     `CORRECTION LOOPS: ${JSON.stringify(s.correctionLoops)}`,
@@ -5416,6 +5509,112 @@ var init_distill = __esm({
   }
 });
 
+// src/tuning/revocation.ts
+function foldSuffix(token) {
+  if (token.length <= 3) return token;
+  return token.replace(/ies$/, "y").replace(/(ing|ed|es|s)$/, "");
+}
+function contentTokens(statement) {
+  const out = /* @__PURE__ */ new Set();
+  for (const t of tokens(normalize(statement).norm)) {
+    if (STATEMENT_STOPWORDS.has(t)) continue;
+    out.add(foldSuffix(t));
+  }
+  return [...out];
+}
+function revocationSimilarity(a, b) {
+  const at = contentTokens(a);
+  const bt = contentTokens(b);
+  if (at.length === 0 || bt.length === 0) return 0;
+  return Math.max(containment(at, new Set(bt)), containment(bt, new Set(at)));
+}
+function findRevocationBlock(statement, tombstones, live = []) {
+  let best = null;
+  for (const t of tombstones) {
+    const score = revocationSimilarity(statement, t.statement);
+    if (!best || score > best.score) best = { blockedBy: t.id, score };
+  }
+  if (!best || best.score < THETA_REVOKED) return null;
+  for (const a of live) {
+    if (revocationSimilarity(statement, a.statement) >= best.score) return null;
+  }
+  return { blockedBy: best.blockedBy, score: Math.round(best.score * 1e3) / 1e3 };
+}
+var STATEMENT_STOPWORDS, THETA_REVOKED;
+var init_revocation = __esm({
+  "src/tuning/revocation.ts"() {
+    "use strict";
+    init_normalize();
+    init_match();
+    STATEMENT_STOPWORDS = /* @__PURE__ */ new Set([
+      "a",
+      "an",
+      "the",
+      "and",
+      "or",
+      "of",
+      "to",
+      "in",
+      "on",
+      "at",
+      "for",
+      "with",
+      "from",
+      "by",
+      "as",
+      "is",
+      "are",
+      "be",
+      "been",
+      "it",
+      "its",
+      "this",
+      "that",
+      "these",
+      "those",
+      "there",
+      "do",
+      "dont",
+      "does",
+      "did",
+      "should",
+      "must",
+      "can",
+      "may",
+      "will",
+      "would",
+      "no",
+      "not",
+      "never",
+      "any",
+      "all",
+      "every",
+      "each",
+      "ever",
+      "avoid",
+      "prefer",
+      "keep",
+      "use",
+      "using",
+      "make",
+      "put",
+      "add",
+      "always",
+      "under",
+      "over",
+      "less",
+      "more",
+      "than",
+      "then",
+      "so",
+      "if",
+      "when",
+      "while"
+    ]);
+    THETA_REVOKED = 0.55;
+  }
+});
+
 // src/tuning/merge.ts
 function axiomId(existing) {
   let n2 = existing.length + 1;
@@ -5429,7 +5628,8 @@ function emptyTuning(owner) {
     owner,
     updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
     sources: [],
-    axioms: []
+    axioms: [],
+    blockedByRevocation: []
   };
 }
 function mergeDistill(tuning, output, record, model, now = (/* @__PURE__ */ new Date()).toISOString()) {
@@ -5437,6 +5637,12 @@ function mergeDistill(tuning, output, record, model, now = (/* @__PURE__ */ new 
   const axioms = tuning.axioms.map((a) => ({ ...a, evidence: [...a.evidence], contradicts: [...a.contradicts] }));
   const byId = new Map(axioms.map((a) => [a.id, a]));
   const newIdsByStatement = /* @__PURE__ */ new Map();
+  const tombstones = axioms.filter((a) => a.status === "revoked");
+  const live = axioms.filter((a) => a.status !== "revoked");
+  const blocked = (tuning.blockedByRevocation ?? []).map((w) => ({
+    ...w,
+    evidence: [...w.evidence]
+  }));
   for (const d of output.axioms) {
     const evidence = d.evidence.map((e) => ({ ...e, recordId }));
     const match = d.matchesExisting ? byId.get(d.matchesExisting) : void 0;
@@ -5452,6 +5658,11 @@ function mergeDistill(tuning, output, record, model, now = (/* @__PURE__ */ new 
       match.evidenceCount = match.evidence.length;
       match.lastSeen = now;
     } else {
+      const block = findRevocationBlock(d.statement, tombstones, live);
+      if (block) {
+        parkBlocked(blocked, d, evidence, block, now);
+        continue;
+      }
       const id = axiomId(axioms);
       const created = {
         id,
@@ -5488,12 +5699,38 @@ function mergeDistill(tuning, output, record, model, now = (/* @__PURE__ */ new 
     ...tuning,
     updatedAt: now,
     sources: [...tuning.sources, { recordId, distilledAt: now, method: "rlaif-claude", model }],
-    axioms
+    axioms,
+    blockedByRevocation: blocked
   };
+}
+function parkBlocked(blocked, d, evidence, block, now) {
+  const key = normalize(d.statement).norm;
+  const existing = blocked.find((w) => normalize(w.statement).norm === key);
+  if (existing) {
+    existing.evidence.push(...evidence);
+    existing.occurrences += 1;
+    existing.lastBlocked = now;
+    existing.score = Math.max(existing.score, block.score);
+    return;
+  }
+  blocked.push({
+    statement: d.statement,
+    domain: d.domain,
+    polarity: d.polarity,
+    basis: d.basis,
+    evidence,
+    blockedBy: block.blockedBy,
+    score: block.score,
+    occurrences: 1,
+    firstBlocked: now,
+    lastBlocked: now
+  });
 }
 var init_merge = __esm({
   "src/tuning/merge.ts"() {
     "use strict";
+    init_normalize();
+    init_revocation();
   }
 });
 
@@ -6041,6 +6278,179 @@ var init_run = __esm({
   }
 });
 
+// src/serve.ts
+var serve_exports = {};
+__export(serve_exports, {
+  DEFAULT_SERVE_PORT: () => DEFAULT_SERVE_PORT,
+  STORE_DIR_NAME: () => STORE_DIR_NAME,
+  allowedOrigin: () => allowedOrigin,
+  handleStoreRequest: () => handleStoreRequest,
+  recordSummary: () => recordSummary,
+  startStoreServer: () => startStoreServer,
+  storePayload: () => storePayload,
+  tuningUnits: () => tuningUnits
+});
+function tuningUnits(projectPath) {
+  const path = (0, import_node_path10.join)(ursaDir(projectPath), "tuning.json");
+  if (!(0, import_node_fs10.existsSync)(path)) return [];
+  const record = JSON.parse((0, import_node_fs10.readFileSync)(path, "utf8"));
+  return record.axioms.map((a) => ({
+    id: a.id,
+    statement: a.statement,
+    domain: a.domain,
+    polarity: a.polarity,
+    basis: a.basis,
+    evidenceCount: a.evidenceCount,
+    tension: a.contradicts.length > 0,
+    contradicts: a.contradicts,
+    status: a.status,
+    firstSeen: a.firstSeen,
+    lastSeen: a.lastSeen
+  })).sort((a, b) => b.evidenceCount - a.evidenceCount);
+}
+function recordSummary(record, distilled) {
+  const byClass = record.stats.byClass;
+  return {
+    id: record.task.id,
+    artifactKind: record.artifact.kind,
+    generatedAt: record.task.generatedAt,
+    finished: record.task.finished,
+    accepted: record.signals?.episode.accepted ?? null,
+    finalChars: record.stats.finalChars,
+    coveredChars: record.stats.coveredChars,
+    charsByClass: {
+      survived_verbatim: byClass.survived_verbatim?.chars ?? 0,
+      survived_mutated: byClass.survived_mutated?.chars ?? 0,
+      no_generation_provenance: byClass.no_generation_provenance?.chars ?? 0
+    },
+    humanDeletedChars: record.stats.generated.humanDeletedChars,
+    distilled,
+    resolvedBy: record.task.resolvedBy ?? null
+  };
+}
+function storePayload(projectPath) {
+  const dir = ursaDir(projectPath);
+  const exists = (0, import_node_fs10.existsSync)(dir);
+  const ids = listRecordIds(projectPath);
+  const distilledIds = new Set(loadEpisodes(projectPath).filter((e) => e.distilled).map((e) => e.id));
+  const records = [];
+  for (const id of ids) {
+    const record = loadRecord(projectPath, id);
+    if (record) records.push(recordSummary(record, distilledIds.has(id)));
+  }
+  return {
+    schemaVersion: "0.1.0",
+    project: (0, import_node_path10.basename)(projectPath),
+    store: STORE_DIR_NAME,
+    storeExists: exists,
+    readAt: (/* @__PURE__ */ new Date()).toISOString(),
+    recordCount: records.length,
+    records,
+    tuning: tuningUnits(projectPath)
+  };
+}
+function handleStoreRequest(projectPath, method, url) {
+  if (method !== "GET" || !url) return null;
+  const path = url.split("?")[0];
+  if (path === "/health") {
+    return {
+      status: 200,
+      body: {
+        project: (0, import_node_path10.basename)(projectPath),
+        ok: true,
+        store: STORE_DIR_NAME,
+        storeExists: (0, import_node_fs10.existsSync)(ursaDir(projectPath)),
+        recordCount: listRecordIds(projectPath).length
+      }
+    };
+  }
+  if (path === "/store") {
+    return { status: 200, body: storePayload(projectPath) };
+  }
+  if (path === "/records") {
+    return { status: 200, body: { project: (0, import_node_path10.basename)(projectPath), ids: listRecordIds(projectPath) } };
+  }
+  if (path === "/tuning") {
+    return { status: 200, body: { project: (0, import_node_path10.basename)(projectPath), units: tuningUnits(projectPath) } };
+  }
+  if (path.startsWith("/records/")) {
+    const id = decodeURIComponent(path.slice("/records/".length));
+    const record = loadRecord(projectPath, id);
+    if (!record) return { status: 404, body: { error: `no record ${id}` } };
+    return { status: 200, body: record };
+  }
+  return null;
+}
+function allowedOrigin(origin, extra = []) {
+  if (!origin) return null;
+  if (LOOPBACK_ORIGIN.test(origin) || extra.includes(origin)) return origin;
+  return null;
+}
+async function startStoreServer(opts) {
+  const log = opts.log ?? ((l) => console.log(l));
+  const projectPath = opts.projectPath;
+  const server = (0, import_node_http.createServer)((req, res) => {
+    const origin = allowedOrigin(req.headers.origin, opts.allowOrigins ?? []);
+    const cors = origin ? { "access-control-allow-origin": origin, "access-control-allow-methods": "GET, OPTIONS" } : {};
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, cors);
+      res.end();
+      return;
+    }
+    const reply = handleStoreRequest(projectPath, req.method, req.url);
+    if (reply) {
+      res.writeHead(reply.status, { ...cors, "content-type": "application/json" });
+      res.end(JSON.stringify(reply.body));
+      return;
+    }
+    if (req.method === "GET" && (req.url === "/" || req.url?.split("?")[0] === "/")) {
+      res.writeHead(200, { ...cors, "content-type": "application/json" });
+      res.end(JSON.stringify({
+        server: "ursa-store",
+        project: (0, import_node_path10.basename)(projectPath),
+        store: STORE_DIR_NAME,
+        routes: ["/health", "/store", "/records", "/records/<id>", "/tuning"]
+      }));
+      return;
+    }
+    res.writeHead(404, { ...cors, "content-type": "application/json" });
+    res.end(JSON.stringify({ error: `no route ${req.method} ${req.url}` }));
+  });
+  const port = opts.port ?? DEFAULT_SERVE_PORT;
+  await new Promise((resolve2, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", () => {
+      server.removeListener("error", reject);
+      resolve2();
+    });
+  });
+  const address = server.address();
+  const bound = typeof address === "object" && address ? address.port : port;
+  const dir = ursaDir(projectPath);
+  const state = (0, import_node_fs10.existsSync)(dir) && (0, import_node_fs10.statSync)(dir).isDirectory() ? `${listRecordIds(projectPath).length} record(s) in ${STORE_DIR_NAME}/` : `no ${STORE_DIR_NAME}/ yet: run \`ursa run ${projectPath}\` and reload, nothing here is cached`;
+  log(`store server up: ${(0, import_node_path10.basename)(projectPath)} on http://127.0.0.1:${bound} \u2014 ${state}`);
+  return {
+    port: bound,
+    url: `http://127.0.0.1:${bound}`,
+    stop: () => new Promise((resolve2) => {
+      server.close(() => resolve2());
+    })
+  };
+}
+var import_node_http, import_node_fs10, import_node_path10, STORE_DIR_NAME, DEFAULT_SERVE_PORT, LOOPBACK_ORIGIN;
+var init_serve = __esm({
+  "src/serve.ts"() {
+    "use strict";
+    import_node_http = require("node:http");
+    import_node_fs10 = require("node:fs");
+    import_node_path10 = require("node:path");
+    init_store();
+    STORE_DIR_NAME = ".ursa";
+    DEFAULT_SERVE_PORT = 7818;
+    LOOPBACK_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+  }
+});
+
 // ursa-stub:ursa:bridge-stub
 var ursa_bridge_stub_exports = {};
 __export(ursa_bridge_stub_exports, {
@@ -6058,7 +6468,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path10 = require("node:path");
+var import_node_path11 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -6461,11 +6871,13 @@ async function main(argv) {
     }
   });
   const [cmd, project] = positionals;
-  if (cmd !== "run" && cmd !== "bridge" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
+  if (cmd !== "run" && cmd !== "bridge" && cmd !== "serve" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
     console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
     console.error("       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]");
+    console.error("       ursa serve <projectPath> [--port N]");
+    console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model");
     console.error("       ursa consent show|grant|revoke|disclose|revoke-axiom <projectPath> [options]");
     console.error("       ursa forget <projectPath> --record <recordId>");
     console.error("       ursa ci <projectPath> --repo owner/name --event <eventPath> [--run-url URL] [--min-chars N] [--agent-identity <name-or-email-substring>] [--no-post]");
@@ -6478,7 +6890,7 @@ async function main(argv) {
   if (cmd === "address") {
     const { runAddress: runAddress2 } = await Promise.resolve().then(() => (init_address_cli(), address_cli_exports));
     return runAddress2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       recordId: values.record ?? null,
       // `GITHUB_REPOSITORY` is read here for the same reason `publish`
       // reads it: on a runner it is the one fact about the repository
@@ -6490,7 +6902,7 @@ async function main(argv) {
   if (cmd === "publish") {
     const { runPublish: runPublish2 } = await Promise.resolve().then(() => (init_publish_cli(), publish_cli_exports));
     return runPublish2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       outDir: values.out,
       repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
       acknowledged: values.yes === true
@@ -6514,7 +6926,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       eventPath,
       repo,
       token,
@@ -6535,6 +6947,22 @@ async function main(argv) {
     });
     return result.exitCode;
   }
+  if (cmd === "serve") {
+    const { startStoreServer: startStoreServer2 } = await Promise.resolve().then(() => (init_serve(), serve_exports));
+    const handle = await startStoreServer2({
+      projectPath: (0, import_node_path11.resolve)(project),
+      port: values.port ? Number(values.port) : void 0
+    });
+    await new Promise((resolve2) => {
+      process.on("SIGINT", () => {
+        void handle.stop().then(resolve2);
+      });
+      process.on("SIGTERM", () => {
+        void handle.stop().then(resolve2);
+      });
+    });
+    return 0;
+  }
   if (cmd === "bridge") {
     const passphrase = process.env.URSA_PASSPHRASE ?? await promptHidden("passphrase (held in memory only): ");
     if (!passphrase) {
@@ -6543,7 +6971,7 @@ async function main(argv) {
     }
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path10.resolve)(project),
+      projectPath: (0, import_node_path11.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -6561,7 +6989,7 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path10.resolve)(project);
+  const projectPath = (0, import_node_path11.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
   let declaration2 = UNDECLARED;

@@ -194,6 +194,12 @@ describe('forget on disk', () => {
     expect(existsSync(recordFile)).toBe(false)
     expect(t.removed).toEqual({
       recordFile: true, axiomsDeleted: ['ax-001'], evidenceStripped: 2, sourcesRemoved: 1,
+      // Erasure now sweeps `tuning.blockedByRevocation` as well, and this
+      // fixture has nothing in it to sweep. The count is reported even
+      // when it is zero so a reader of a tombstone can tell "no held
+      // statement rested on this record" from "this tombstone predates
+      // the revocation gate", where the field is absent.
+      blockedDropped: 0,
     })
     const after = JSON.parse(readFileSync(tuningPathFor(root), 'utf8')) as TuningRecord
     expect(after.axioms.map((a) => a.id)).toEqual(['ax-002'])
