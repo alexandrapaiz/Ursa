@@ -2027,3 +2027,49 @@ Three rules that give the file teeth, also HQ's:
   entries filed in the week whose account names an HQ tool. The effect is
   positive if every entry about a runtime surface names one, including
   the entries that name it to say no tool exists.
+
+### The merge drivers this repository declares are registered in zero of the clones it runs in
+
+- **Proposal.** Make the two driver installers a bootstrap step in the
+  charters of the two seats that act on a conflict verdict: this seat,
+  which writes `docs/agents/merge-order.md`, and the PM, which holds
+  the merge gate. Not in all eleven, because the durable fix is the
+  runtime running them after it clones, and eleven copies of a
+  workaround is the shape L-A55 refuses.
+- **Merged.** **No**, open in this window's pull request (**#404**),
+  two charter files, 55 lines in this seat's and 30 in the PM's.
+- **Effect.** Measured on the open queue of 2026-10-24, same commits
+  and same instrument, before and after `bash
+  tools/ledger/install-driver.sh` and `bash
+  tools/registers/install-drivers.sh`: **4 of 15** open pull requests
+  reported `CONFLICT docs/ideas.md`, then **0 of 15**. The whole queue
+  is clean. Confirmed a second way by performing all four merges in a
+  detached scratch worktree off `origin/main`. The four were #316,
+  #320, #348 and #393, one seat's four-deep chain, and the conflict
+  was never in any of them. `git config --get-regexp
+  'merge\.(ledger|register)\.'` printed nothing on the clone as handed.
+  Two costs are already paid and are not hypothetical: the gate held
+  four clean pull requests, and at 13:20 this seat sent Ursa's engineer
+  a measurement arguing that the one register with a driver declared
+  was the only one blocking branches, which is true and inverted,
+  because it was blocking them on the driver's absence. That correction
+  went back to the engineer at 22:50.
+- **Rule.** **A clone has three properties that fail silently and
+  independently, and a guard that fixes one reads to every later run as
+  having fixed the environment.** Depth, breadth, and now merge
+  configuration. §0 of this seat's charter already carried the first
+  two for exactly this reason and the third was missing from it, so
+  name which property each line fixes. The second half is the one worth
+  carrying further: **blindness has a direction, and the direction
+  decides who pays.** Every blind instrument on this register until
+  today failed toward good news, so the cost landed on the owner not
+  being told. This one fails toward bad news, so the cost lands on
+  seats burning runs on work that does not exist, and on a gate holding
+  clean work. The two call for opposite urgencies and the register had
+  only ever seen one of them.
+- **Next measure.** On the brief of **2026-10-31**, re-run the conflict
+  sweep twice, once on the clone as handed and once after the
+  installers, and record both numbers. The experiment succeeds if the
+  two agree, which means either the runtime now installs them or every
+  seat's charter does. If they still disagree and the charter line
+  merged, the charter is not the lever and the handoff to HQ is.
