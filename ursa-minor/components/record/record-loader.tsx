@@ -141,7 +141,7 @@ export function RecordLoader() {
             measure and nothing is clipped at any width. */}
         <form
           onSubmit={onUrl}
-          className="flex w-full min-w-0 flex-col items-start gap-3 sm:flex-1 sm:flex-row sm:items-baseline sm:gap-5"
+          className="flex w-full min-w-0 flex-col items-start gap-4 sm:flex-1 sm:flex-row sm:items-baseline sm:gap-5"
         >
           <input
             type="url"
@@ -149,12 +149,12 @@ export function RecordLoader() {
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://somewhere/your-record.json"
             aria-label="the address of a published record"
-            className="w-full min-w-0 border-b border-[var(--line)] sm:flex-1 bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
+            className="rec-field w-full min-w-0 border-b border-[var(--line)] sm:flex-1 bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
           />
           <button
             type="submit"
             disabled={busy || !url}
-            className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+            className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
           >
             {busy ? "reading…" : "read it"}
           </button>

@@ -187,19 +187,19 @@ export function PublishedSite() {
         .
       </p>
 
-      <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5">
+      <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-baseline sm:gap-5">
         <input
           type="url"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder="https://you.github.io/your-repo/"
           aria-label="the address of a published site"
-          className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
+          className="rec-field w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
         />
         <button
           type="submit"
           disabled={busy || !address}
-          className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
         >
           {busy ? "reading…" : "read the site"}
         </button>

@@ -857,11 +857,19 @@ html {
      person's text edge to edge, so every overlay would overlap its
      neighbours and the topmost one would win. A short `.sp` is reported
      as a finding and left alone.
-   - Not on the form submit buttons, measured and deliberately: below
-     `sm` their form stacks and the button sits 12px under its input,
-     which is less than the 13.6px this overlay would need, so it would
-     reach over the field's own edge. They want an asymmetric inset
-     chosen per form, which is a bigger change than this one. */
+   - Not on the document spans, as above.
+
+   It DOES now go on the three form submit buttons, which the 2026-10-24d
+   version of this comment left out and predicted would need "an
+   asymmetric inset chosen per form". They did not. The obstacle was
+   real: below `sm` each form stacks and the button sat 12px under its
+   field, less than the 13.6px this overlay reaches, so it crossed the
+   field's own bottom edge. But the 12px was the thing to fix. Those
+   three gaps are now 16px (`gap-4`), which clears the overlay by 2.4px
+   and costs four pixels on a phone, and the symmetric rule is then
+   correct for all three forms. A gap that cannot hold two adjacent
+   targets apart is a spacing bug, not a reason for three bespoke
+   insets. */
 .rec-hit {
   position: relative;
 }
@@ -870,6 +878,52 @@ html {
   content: "";
   position: absolute;
   inset: calc((100% - 44px) / 2) 0;
+}
+
+/* ---------- the 44px floor, part two: the fields ----------
+
+   The three address fields are the one place on this site where the
+   overlay above cannot reach. An `<input>` is a replaced element and
+   renders no `::after`, so a field only gets a bigger target by having a
+   bigger box, and a bigger box is layout. Measured on the shipped build:
+   26.3px at 390 and 27.2px above `sm`, which is one line box, 8px of
+   padding and a hairline
+   (`docs/design/reviews/2026-10-24e/data/forms-before.txt`).
+
+   Where the new height goes is a design decision rather than a free
+   one. A field here is drawn as its text and the rule beneath it, and
+   the 8px between those two is what makes them read as one object. Put
+   the height below the text and the rule drifts away from it, which is
+   the one change that would be visible. So all of it goes above, into
+   space that was already empty.
+
+   The negative margin is what keeps this from moving anything else.
+   Padding grows the border box, and the border box is what gets
+   hit-tested; the margin box is what flex layout stacks and what
+   baseline alignment measures its offsets from. Cancel one against the
+   other and there is a 44px box to hit inside a 27px box of layout, so
+   the text, the rule, the button beside it, the form's own height and
+   the height of the page all stay exactly where they were. Nothing is
+   drawn in the new band either: the field has no background, no top
+   border and no side borders, and focus only recolours the bottom one.
+
+   `1lh` does the arithmetic instead of a number, for the reason the calc
+   above does. The field is 11.52px/17.28px type at 390 and
+   12.16px/18.24px above `sm`, so the padding it wants differs between
+   the two viewports, and one rule that reads the field's own line box is
+   right at both without being told which. The `0.5rem` and the `1px`
+   are the `pb-2` and the `border-b` the markup carries; they are the
+   coupling in this rule, and a field wearing this class has to keep
+   both.
+
+   Where `lh` is unsupported both declarations are invalid together, both
+   fall back to 0, and the field keeps the box it has today. That is the
+   right failure for this: a target that is too small, which is the
+   status quo, rather than a field with its rule shoved 17px off its
+   text. */
+.rec-field {
+  padding-top: calc(44px - 1lh - 0.5rem - 1px);
+  margin-top: calc(-44px + 1lh + 0.5rem + 1px);
 }
 
 /* ---------- the set's record rows ---------- */

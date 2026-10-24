@@ -146,7 +146,7 @@ export function RecordAtAddress({ initial }: { initial: string }) {
           e.preventDefault();
           void read(typed, false);
         }}
-        className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5"
+        className="mt-8 flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-baseline sm:gap-5"
       >
         {/* The filled example the placeholder used to carry,
             `pages/you/your-repo/your-repo-2026-10-18-abc1234`, needs 336px of
@@ -167,12 +167,12 @@ export function RecordAtAddress({ initial }: { initial: string }) {
           aria-label="a record address"
           spellCheck={false}
           autoCapitalize="off"
-          className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
+          className="rec-field w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
         />
         <button
           type="submit"
           disabled={busy || !typed}
-          className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
         >
           {busy ? "reading…" : "read the record"}
         </button>

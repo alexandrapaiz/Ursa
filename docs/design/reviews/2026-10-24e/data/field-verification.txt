@@ -1,0 +1,120 @@
+=== 4. every target on the site, before against after ===
+  ok    phone/home: same number of targets                             got 6  want 6
+  ok    phone/set: same number of targets                              got 8  want 8
+  ok    phone/record: same number of targets                           got 10  want 10
+  ok    phone/address: same number of targets                          got 5  want 5
+  ok    phone/404: same number of targets                              got 2  want 2
+  ok    tablet/home: same number of targets                            got 6  want 6
+  ok    tablet/set: same number of targets                             got 8  want 8
+  ok    tablet/record: same number of targets                          got 10  want 10
+  ok    tablet/address: same number of targets                         got 5  want 5
+  ok    tablet/404: same number of targets                             got 2  want 2
+  ok    desktop/home: same number of targets                           got 6  want 6
+  ok    desktop/set: same number of targets                            got 8  want 8
+  ok    desktop/record: same number of targets                         got 10  want 10
+  ok    desktop/address: same number of targets                        got 5  want 5
+  ok    desktop/404: same number of targets                            got 2  want 2
+  ok    no target anywhere lost hit area                               got 0  want 0
+  ok    exactly 9 drawn boxes changed (3 fields x 3 viewports)         got 9  want 9
+  -> 18 hit areas grew, 72 unchanged, 0 shrank; 84 drawn boxes identical, 9 fields to 44px
+
+=== phone 390x844 · set /record ===
+  ok    set: 2 field(s) wearing .rec-field                             got 2  want 2
+  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 0: press on its own rule focused it, not the button      got true  want true
+  ok    field 1: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 1: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 1: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 1: press on its own rule focused it, not the button      got true  want true
+  ok    set: 2 submit button(s) wearing .rec-hit                       got 2  want 2
+  ok    button 0: enabled once its field has a value                   got true  want true
+  ok    button 0: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+  ok    button 0: its overlay sits clear of the field above (stacked)  got false  want false
+  ok    button 1: enabled once its field has a value                   got true  want true
+  ok    button 1: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 1: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 1: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+  ok    button 1: its overlay sits clear of the field above (stacked)  got false  want false
+
+=== phone 390x844 · address /record/at ===
+  ok    address: 1 field(s) wearing .rec-field                         got 1  want 1
+  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 0: press on its own rule focused it, not the button      got true  want true
+  ok    address: 1 submit button(s) wearing .rec-hit                   got 1  want 1
+  ok    button 0: enabled once its field has a value                   got true  want true
+  ok    button 0: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+  ok    button 0: its overlay sits clear of the field above (stacked)  got false  want false
+
+=== tablet 820x1180 · set /record ===
+  ok    set: 2 field(s) wearing .rec-field                             got 2  want 2
+  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 0: press on its own rule focused it, not the button      got true  want true
+  ok    field 1: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 1: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 1: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 1: press on its own rule focused it, not the button      got true  want true
+  ok    set: 2 submit button(s) wearing .rec-hit                       got 2  want 2
+  ok    button 0: enabled once its field has a value                   got true  want true
+  ok    button 0: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+  ok    button 1: enabled once its field has a value                   got true  want true
+  ok    button 1: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 1: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 1: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+
+=== tablet 820x1180 · address /record/at ===
+  ok    address: 1 field(s) wearing .rec-field                         got 1  want 1
+  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 0: press on its own rule focused it, not the button      got true  want true
+  ok    address: 1 submit button(s) wearing .rec-hit                   got 1  want 1
+  ok    button 0: enabled once its field has a value                   got true  want true
+  ok    button 0: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+
+=== desktop 1440x900 · set /record ===
+  ok    set: 2 field(s) wearing .rec-field                             got 2  want 2
+  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 0: press on its own rule focused it, not the button      got true  want true
+  ok    field 1: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 1: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 1: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 1: press on its own rule focused it, not the button      got true  want true
+  ok    set: 2 submit button(s) wearing .rec-hit                       got 2  want 2
+  ok    button 0: enabled once its field has a value                   got true  want true
+  ok    button 0: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+  ok    button 1: enabled once its field has a value                   got true  want true
+  ok    button 1: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 1: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 1: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+
+=== desktop 1440x900 · address /record/at ===
+  ok    address: 1 field(s) wearing .rec-field                         got 1  want 1
+  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
+  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
+  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 0: press on its own rule focused it, not the button      got true  want true
+  ok    address: 1 submit button(s) wearing .rec-hit                   got 1  want 1
+  ok    button 0: enabled once its field has a value                   got true  want true
+  ok    button 0: box short enough to need the overlay                 got 16.8  want < 44
+  ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
+  ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
+
+=== 104 checks, 104 pass, 0 fail ===
