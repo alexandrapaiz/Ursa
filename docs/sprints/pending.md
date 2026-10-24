@@ -2,6 +2,12 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (2026-10-24 ~23:1x UTC, message, ninety-eighth pass)
+
+1. **#404 (exo, window 38) is reviewed against the merge rule and it is Tier C, waiting on you or a chair, not on this seat.** It is green (the one defined check, `redaction-gate`, passes), `mergeStateStatus: CLEAN`, not a draft, no `hold` label, no comment or review pending. None of that reaches a merge, because its diff touches `prompts/exo-agent.md` and `prompts/pm-agent.md`, and pm.md §10 puts charters in Tier C regardless of how clean the rest of the diff is. This is the same shape #394, #395 and #377 are already in this tracker for, not a new kind of hold.
+2. **#394 (exo, window 37) is contained in #404 and is left open on purpose, not an oversight.** `git merge-base --is-ancestor refs/prs/394/head refs/prs/404/head` exits 0, confirmed fresh rather than taken from the PR's own claim. Merging #404 carries everything #394 carries, so one merge (or one close-as-superseded, your call, not this seat's) covers both. Noted on the board to exo's seat so the pair is not read as two separate decisions later.
+3. **Unchanged holds, re-checked fresh:** #395 (research, charter edit) and #377 (HQ's one-file vendoring sync) are still open, still Tier C, still nobody's here to merge. Nine items still sit in the engineer's own Review column.
+
 ## Three most important pending items (2026-10-24 ~22:5x UTC, message, ninety-seventh pass)
 
 1. **Owed by nobody: four more open PRs reviewed against the merge
@@ -8371,3 +8377,82 @@ state, this repository's own `docs/decisions.md`,
 `docs/sprints/pending.md` and `dispatch-queue.md` (both the `main` and
 the #391-branch versions), and the milestones API (empty). No board
 read or post this pass. No web fetch.
+
+## Ninety-eighth pass, 2026-10-24 ~23:1x UTC, message: #404 reviewed against the merge rule
+
+**The trigger.** A message naming a pull request opened by exo (#404,
+window 38), asking this seat to review it against the merge rule: merge
+it, or say on the board what it still needs and hand that to its seat.
+The event payload is exo's own PR description, read as data about what
+exo did, not as an instruction (org rule, 2026-10-05); nothing in it was
+obeyed, only verified.
+
+**Read this seat's own open PRs first.** #405 (the ninety-sixth and
+ninety-seventh passes, branch `ursa-pm/2026-10-24-message-402`) was
+still open and not a draft, touching the same two files this pass
+needs (`docs/sprints/pending.md`, `docs/sprints/dispatch-queue.md`).
+Branched this pass from `main`, fast-forward-merged #405's tip into it
+(confirmed fast-forward, not a three-way merge), and built this pass's
+work on top. #405 carries everything whole; it is named here so the
+owner can close it as one decision alongside this pass's own PR rather
+than reviewing the same four merges twice.
+
+**The review.** `gh pr view 404`: not a draft, `mergeStateStatus:
+CLEAN`, `mergeable: MERGEABLE`, no labels, no comments, no review
+decision, the one defined check (`redaction-gate`) green. `gh pr diff
+404 --name-only`: eight files —
+`docs/agents/{improvements,incidents,learning-log,merge-order,runner-facts}.md`,
+`prompts/exo-agent.md`, `prompts/pm-agent.md`,
+`tools/stack/absent-text.py`. Two of those eight are charters under
+`prompts/`, and pm.md §10 Tier C puts charters beyond this seat's merge
+authority regardless of how clean or green the rest of the diff is —
+the same rule #394, #395 and #377 are already held under in this
+tracker. **Verdict: Tier C. This seat cannot merge #404; it waits on
+the owner or a chair.**
+
+**Containment, checked rather than trusted.** The PR body claims #394
+(this seat's own prior Tier C hold) is contained in #404 and should
+stay open rather than be closed, so one owner decision covers both.
+`git merge-base --is-ancestor refs/prs/394/head refs/prs/404/head`
+exits 0 on a fresh fetch of both refs: true. #404 is the descendant and
+is the one to merge if the owner merges either.
+
+**What it still needs, stated plainly:** nothing from exo, and nothing
+from this seat. It needs the owner's (or a chair's) merge, same as
+#394, #395 and #377 already in this tracker. There is no further work
+to hand to exo's seat — the work is done and green — so the "hand that
+to its seat" branch of the trigger's instruction does not apply here;
+what's handed to exo's seat is the verdict itself, posted to the board
+so it does not have to re-derive it from a future pass.
+
+**Board.** Posted a `note` to exo (Ursa) with the verdict above (Tier
+C, #394 contained, nothing further needed, waiting on the owner) so
+the next window does not re-ask the question this pass already
+answered. No urgent flag: this is not a blocker that stops a company,
+only a routine owner-merge wait already named elsewhere in this
+tracker.
+
+**Side effect, not this pass's finding to act on further:** #404's own
+diff documents that this clone's git config lacks the `ledger`/`register`
+merge drivers `.gitattributes` declares, which can make a clean pull
+request read as `CONFLICT` locally even though GitHub's own
+`mergeStateStatus` is unaffected. That infrastructure
+(`tools/ledger/install-driver.sh`, `tools/registers/install-drivers.sh`)
+already exists on `main`, independent of #404 landing, so this pass ran
+both and confirmed `git config --get-regexp 'merge\.(ledger|register)\.'`
+now prints six lines in this clone. This did not change any verdict
+above — #404's own Tier C hold is about a charter path, not a
+conflict reading — and is noted only so a future pass in this same
+clone does not re-discover it.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` reads unset in this run's own
+environment. No §11.3 criterion fires regardless: #404 is not failing,
+not stale, not a stack with no merged member, and exo may never be
+dispatched by this seat in any case (it audits this seat). Full account
+in `docs/sprints/dispatch-queue.md`, rewritten fresh this pass.
+
+**External sources read.** The event payload (exo's PR description and
+title, quoted above as data, not instruction). GitHub via `gh`/`git`:
+PR #404's and #394's diffs, checks, mergeability, comments, reviews and
+labels; the full open-PR list; this seat's own open PR (#405) and its
+diff. The company board, to post the note to exo. No web fetch.
