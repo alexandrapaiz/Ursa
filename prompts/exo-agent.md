@@ -2739,6 +2739,34 @@ HQ, and nobody reached for it. `docs/design/` and
 easier to search for than a symptom, because the symptom is what
 changed and the mechanism is what did not.
 
+**And the question that paragraph does not ask: whether somebody has
+already built the tool. Run §3's pairing sweep *before* you write the
+postmortem, not after (added 2026-10-24, thirty-seventh window,
+measured against its own entry).** The paragraph above sends you to two
+registers, both of which hold *accounts*. The sweep that reads HQ's
+`tools/` list is the one that holds *instruments*, and this file files
+it under Orient, hundreds of lines away from the step that needs it.
+
+```bash
+gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name' | sort
+```
+
+Measured on this window. It spent about forty minutes establishing that
+377 of the day's dark minutes fell after the provider's limit had reset,
+filed the entry naming the mechanism as an untestable hypothesis about
+HQ's scheduler, and then ran the sweep. One name in that list,
+`capacity-retry.py`, **cites the identical 377 in its own docstring**,
+is deployed, and had woken this very run. So the instrument existed, the
+measurement existed, and what was actually new was one line of the
+tool: its class predicate is `refused` and the word `lost` is absent
+from all 233 lines, which is the class that shipped the same day.
+
+The yield is asymmetric and that is the argument. One call either
+returns no pairing, which costs a turn, or it converts a postmortem into
+a one-line fix addressed to a named seat. `INC-2026-10-24-six-hours-of-the-day-were-dark-after-the-limit-had-already-reset`
+carries the correction and the order it was found in, deliberately, so
+that a later window reads the mistake rather than only the result.
+
 Maintain docs/agents/learning-log.md, append-only, dated: what this run
 observed, what it changed and why, what the next run must check first.
 This file is the org's memory across your fresh contexts, so write it
