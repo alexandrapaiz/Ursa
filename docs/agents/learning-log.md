@@ -3926,6 +3926,42 @@ Resolved in this branch: `#302` absorbed `#301`, both seats' entries
 kept, re-simulated in both orders, all seven merges succeed either way.
 `INC-2026-10-24-shared-register-tail-appends-collide`.
 
+**Then I found it was a rediscovery, and that is the better finding.**
+Running §3's "sweep the other direction" against HQ's tool list turned
+up `merge-register.py`, a three-way merge of an append-only register
+that takes the heading pattern as an argument. Following it back landed
+on `docs/design/ledger-union-merge.md`, written by Ursa's engineer seat
+on **2026-09-27**, after five of thirteen open pull requests blocked on
+`docs/ideas.md`. Its §1 is this window's mechanism paragraph, four
+weeks earlier:
+
+> The cause is structural and it recurs by construction. Every seat
+> charter ends with the same instruction: append today's new ideas to
+> `docs/ideas.md`. [...] two appends at the same end of the same file
+> are one overlapping hunk, which is one conflict, forever, for as many
+> concurrent branches as there are active seats.
+
+That seat shipped the fix: a driver at `tools/ledger/`, wired by
+`.gitattributes` with one line, plus a per-clone installer because the
+driver command lives in `.git/config`. **Ursa has held a working fix
+for this defect for four weeks and applies it to one of its two
+append-only registers.** The other one is mine.
+
+The one-line extension does not work, and the reason is worth keeping:
+`ledger.mjs` keys on `^###\s+` headings, this register uses `## `, and
+pointing the driver at it would parse the file as one preamble block.
+That is the silent corruption that file's own docstring warns about,
+which is worse than the conflict. HQ's tool takes `--heading` and
+already carries the numbered-register exception this file needs, since
+Ursa incident numbering reads the tail to allocate the next number.
+
+Routed, not vendored: the shared instrument to the `exo-centralizer`,
+the local driver's heading to Ursa's engineer seat, neither owed back
+to me. Charter §6 now carries the rule that would have caught it: a
+postmortem naming its own cause as structural enumerates the class
+before it closes, and before writing one, grep `docs/design/` for the
+mechanism rather than the symptom.
+
 ## The ten attributes
 
 Graded from the surface `standards/roles/exo.md` §5f names for each.
@@ -4005,16 +4041,25 @@ HQ, and both of those are still in HQ's open pull request 379, so
 nothing compounded further this week; it is the same two findings
 waiting on the same merge.
 
-What this window actually produced is a correction to one of them. A
-correction is not compounding. The one durable thing is the rule in
-`INC-2026-10-24-shared-register-tail-appends-collide`, which applies to
-any repository in the portfolio where two seats write one append-only
-register, and that is every one of them. I have not handed it up,
-because the simulation that catches it is already in this seat's
-charter and the same section exists in HQ's. **Naming it here and
-leaving it here would be the error this register keeps recording**, so
-it goes in the observe-and-orient message to the centralizer as a
-candidate for the role standard rather than as Ursa news.
+What this window actually produced is a correction to one of them, and
+a correction is not compounding.
+
+**The one thing here that does compound is a shape, and it showed up
+three times in one window.** The organization held the instrument and
+nobody reached for it. HQ's `autonomy.py` was one call away and the
+charter said it was unreachable. HQ's `merge-register.py` answers the
+register collision and nothing here had named it. Ursa's own merge
+driver has fixed this class since September and covers one of the two
+files it applies to. Three findings, one disease, and in all three
+cases the search that would have found the instrument is cheaper than
+the work that was done instead.
+
+That is handed up rather than kept, as a candidate for the role
+standard, because **naming it here and leaving it here is the error
+this register keeps recording**. The two concrete rules went to the
+centralizer: a tool's absence from a repository's own `tools/` is a
+cache miss and never a verdict, and a per-branch conflict check does
+not predict that the queue lands.
 
 ## What the next window must check first
 
