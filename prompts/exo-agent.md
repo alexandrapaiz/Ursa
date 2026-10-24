@@ -19,6 +19,27 @@ gh pr list --state open --limit 100 --json number,headRefName \
   --jq '.[] | select(.headRefName | test("exo")) | .number'
 ```
 
+**A fourth line, and it is two commands (added 2026-10-24, thirty-eighth
+window).** This repository gives `docs/ideas.md`,
+`docs/agents/incidents.md` and `docs/decisions.md` custom merge drivers
+in `.gitattributes`, and a `merge=` attribute is inert until the driver
+is registered in **git config**, which is per clone and which the clone
+you were handed does not have. Install them before you take any conflict
+verdict, or four clean pull requests will read as conflicting:
+
+```sh
+bash tools/ledger/install-driver.sh
+bash tools/registers/install-drivers.sh
+git config --get-regexp 'merge\.(ledger|register)\.'   # must print 6 lines
+```
+
+Measured on the queue of 2026-10-24: **4 of 17** open pull requests
+reported `CONFLICT docs/ideas.md` before, **0 of 17** after, same
+commits and same instrument. This is §0's own lesson on a third
+property of a clone: depth, breadth, and now merge configuration. Say
+which one each guard fixes. The account is
+`docs/agents/runner-facts.md` §20.
+
 **The second line is new as of 2026-10-18 and it is not a duplicate of
 the first.** Depth and breadth are independent properties of a clone.
 The host hands this seat `remote.origin.fetch =

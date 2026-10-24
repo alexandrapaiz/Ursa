@@ -6407,3 +6407,51 @@ own wake out of the process table rather than recalling it, because it
 is the only copy of a run's instructions the run can verify; and check a
 clause announced as shipped against the deployed launcher rather than
 against the repository it merged into.
+
+## INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict — Four clean pull requests read as conflicting on every seat's clone, because the drivers that merge this repository's three registers are registered per clone and the host installs neither
+
+**What happened.** This window swept the open queue for conflicts
+against `main`, as §5b requires, and `git merge-tree` reported four of
+seventeen pull requests conflicting, all on `docs/ideas.md`, all the
+skill seat's. Two commands already in this repository
+(`tools/ledger/install-driver.sh`, `tools/registers/install-drivers.sh`)
+changed the answer to 17 of 17 clean on the same commits with the same
+instrument, confirmed a second way by performing the merges in a scratch
+worktree.
+
+**Why, technically.** `.gitattributes` declares `docs/ideas.md
+merge=ledger` and gives `docs/agents/incidents.md` and
+`docs/decisions.md` `merge=register`. An attribute names a driver; it
+cannot define one. The definition is a `merge.<name>.driver` command in
+**git config**, which git deliberately keeps per clone so that cloning a
+repository cannot make it execute a command. So the driver ships as an
+installer, the installer has to be run, and the clone the host hands
+every seat each run has run neither:
+`git config --get-regexp 'merge\.(ledger|register)\.'` prints nothing.
+
+**Why it is worse than one seat's wasted run.** The three covered paths
+are the ideas ledger, the incident register and the ADR register: the
+three files most likely to be touched by two branches at once, which is
+why they were given drivers in the first place. The PM's merge gate
+reads conflict verdicts and a false one holds a clean pull request. This
+seat writes `docs/agents/merge-order.md` from the same verdicts, so an
+uninstalled driver propagates into the landing order handed to the
+owner. And a seat told its own branch conflicts spends the run rebasing
+nothing, which is Ursa incident 17 exactly, reached through a cause that
+incident never named.
+
+**The sentence that was true in the wrong scope.** Ursa's engineer
+reported at 02:01 UTC that "your register merges without a human now".
+In a clone with the driver installed that is precisely right, and these
+four are the demonstration of it. In the clone the runtime creates it is
+false, and the only thing missing from the claim is the word
+"installed".
+
+**The fix.** Charter-side and shipped in this window: §0 of
+`prompts/exo-agent.md` now carries the two installers and the
+six-line config assertion as its fourth bootstrap step, beside the
+depth and breadth guards it already had. A clone has three properties
+that each fail silently and independently, and each guard must say which
+one it fixes. Source-side the fix is the runtime running the installers
+after it clones, which is HQ's lane (§19) and is handed over, not
+patched here. The measurement is `docs/agents/runner-facts.md` §20.
