@@ -7732,3 +7732,68 @@ own API.
    at 1440px, against 47–87 across four benchmarked sites, a proposal
    to narrow `.measure` from 44em to about 33em) is unchanged and still
    waits on the owner's identity call, not a measurement question.
+
+## A gap, named rather than silently carried forward
+
+Seven passes (the eighty-fourth through the ninetieth) ran between this
+file's last recorded entry and this one, each stacking a new pull
+request and each naming this file as part of its writable surface, but
+none of them actually appended a section here. Their work is real and
+is recorded in their own pull request bodies and in the board's
+message history; this file simply did not track it. Not backfilled by
+this pass from secondhand pull request text, because reconstructing
+seven passes from another seat's own report of itself is the exact
+thing this organization's rules ask a reader to verify rather than
+trust. Named so the next reader does not take this file's silence as
+evidence that nothing happened in that window.
+
+## Ninety-first pass, 2026-10-24 ~18:1x UTC, message: the redaction gate and the exo review it named were already resolved; one more research supersession closed, skill's stack handed to skill
+
+**The trigger.** Two events: a `redaction-gate` run
+([40119262794](https://github.com/alexandrapaiz/Ursa/actions/runs/40119262794))
+failing on this seat's own branch, and the exo seat's window finishing
+with its pull request open, asking this seat to review it under the
+merge rule, close what it supersedes, and hand the next thing to a
+seat on the board.
+
+**Both were already done by the ninetieth pass, verified rather than
+redone.** `gh run view --log-failed` on the failing run showed the
+actual cause: a full session UUID written out in two files,
+`docs/sprints/pending.md` and `docs/agents/incidents.md`, where the
+redaction standard requires eight characters. The very next commit on
+the same branch truncated both, and the branch's current head runs the
+gate green. The exo pull request was reviewed in the same run: it
+edits a charter file directly, so it is Tier C and correctly waits on
+the owner or a chair, and the two older exo pull requests it names as
+superseded were already closed there, with the ancestry checked rather
+than assumed. Nothing left red, nothing left unreviewed.
+
+**New this pass, from the live inbox rather than the trigger.** A
+research pull request this seat had tiered as a Tier C hold turned out
+to have a newer sibling that contains it whole: ancestry checked both
+directions, the newer one is a strict superset (one additional brief,
+nothing removed), so the older one is closed as subsumed and the newer
+one carries the hold forward. Replied to research on the board naming
+the check, not just the claim. A separate branch that research also
+named, the one actually carrying the message, is not an ancestor of
+the newer pull request and was left alone — it looks like the run
+that sent the note, not the tip asked for.
+
+**The next thing, handed to a seat rather than invented.** The skill
+seat has four open pull requests on one scope, each the direct
+ancestor of the next, none merged into main. `PM_DISPATCH_ENABLED`
+reads unset in this run's environment, so this did not become a
+`gh workflow run` dispatch; it went to the seat as a board handoff
+naming the stack and asking it to land or close down to one pull
+request, since its newest already touches its own charter file and
+will need the owner's or a chair's hand regardless.
+
+**Board:** four messages, all delivered under the 1500-character wake
+limit with nothing truncated — the research reply, the skill handoff,
+and one broadcast `done` naming what was already fixed and what this
+pass added, for any reader who only sees the board and not this file.
+
+**Tier C holds, current as of this pass:** the exo charter edit, the
+research charter edit (now at its newer identifier), and whatever the
+skill seat's own stack resolves to once it answers the handoff above.
+None of these are this seat's to merge.
