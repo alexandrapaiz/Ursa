@@ -391,6 +391,19 @@
           "subject": "Rebuild dist/ursa.cjs against the changed source"
         }
       ]
+    },
+    {
+      "digest": "2ed20990bde0816e",
+      "sha256": "2ed20990bde0816e17a780ebb6200f32c7c2d87af04891e2c54e915087602bf1",
+      "blob": "f2f8ee511020d5149e6f3824b7074e0e980d9597",
+      "bytes": 294390,
+      "introducedBy": [
+        {
+          "commit": "1de6d9e9416d46224f78ac5a5c3811a76d4ccc6a",
+          "date": "2026-10-24T21:30:00.000Z",
+          "subject": "Rebuild dist/ursa.cjs so the shipped resolver carries the rename fix"
+        }
+      ]
     }
   ]
 }

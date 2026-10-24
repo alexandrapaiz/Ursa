@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 30.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 31.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -51,6 +51,7 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 30.
 | `33cc48e31ae5b7ba` | `d4c8969` | 2026-10-23 18:03:22 | 284,165 | Write the design doc and correct the sentence that said the gate held |
 | `a01cbf40fd628733` | `c36afef` | 2026-10-23 23:58:10 | 291,817 | Merge pull request #275 from alexandrapaiz/ursa-engineer/2026-10-23-message |
 | `8c3942f7623e2d4c` | `343550f` | 2026-10-24 00:47:10 | 292,256 | Rebuild dist/ursa.cjs against the changed source |
+| `2ed20990bde0816e` | `1de6d9e` | 2026-10-24 21:30:00 | 294,390 | Rebuild dist/ursa.cjs so the shipped resolver carries the rename fix |
 
 ## Reading a row
 
@@ -63,7 +64,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob 5deeaef76e0c473872f38eb413300deee2a6b3ff | sha256sum
+git cat-file blob f2f8ee511020d5149e6f3824b7074e0e980d9597 | sha256sum
 ```
 
 ## What "introduced by" means, exactly

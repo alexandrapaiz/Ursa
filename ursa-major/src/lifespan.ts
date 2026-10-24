@@ -208,10 +208,13 @@ export function headSha(repoPath: string): string | null {
  * died at the move. Not "false continuity": total destruction, of text
  * sitting unmodified at the tip under another name.
  *
- * Measured on a three-commit repository with one `git mv` in it
- * (`docs/design/rename-reads-as-death.md` §1): `unitsTraced` 6,
- * `unitsSurviving` 0, `decayedChars` 488, `fate` `decayed`, `liveAtTip`
- * false, and the text present at HEAD in full.
+ * Measured on a three-commit repository with one `git mv` in it, which is
+ * `repoWithRename()` in lifespan.test.ts and §1 of
+ * `docs/design/rename-reads-as-death.md`: `unitsTraced` 4,
+ * `unitsSurviving` 0, `decayedChars` 338, `fate` `decayed`, `liveAtTip`
+ * false, `Durability.decayRate` 1, and the text present at HEAD in full.
+ * The walk reported that every character the user kept was gone, about a
+ * file whose text `git show HEAD:moved.md` can print.
  *
  * Following the rename does not assert that the content continued. The
  * presence test is `spanPresent`, which reads the blob and asks whether the
