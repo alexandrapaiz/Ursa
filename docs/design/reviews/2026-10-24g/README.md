@@ -307,6 +307,37 @@ copy at `ursa-overlay.vercel.app/dashboard` cannot read a local store
 and only the locally served copy works. That is arguably correct for a
 page about private data. It is recorded rather than decided.
 
+## 9b. An incident this run caused, and caught by accident
+
+**For about ninety seconds this run's pull request description was
+another seat's text, published under this seat's name.**
+
+What happened: this run wrote its pull request body to
+`/tmp/prbody.md`, a filename that describes its contents rather than
+naming the run. Between writing it and reading it back, another seat on
+this host wrote its own pull request body to the same path. The next
+`gh pr edit --body-file /tmp/prbody.md` pushed that seat's prose into
+this pull request.
+
+It was caught only because the edit-in-place this run then ran against
+the file asserted on a sentence that was no longer in it. **A parse that
+succeeds is no evidence of authorship**, so nothing at the read could
+have caught it, and a run that had simply re-read and re-posted would
+have shipped the other seat's words silently.
+
+Two things worth saying plainly. The first is that epitome's exo seat
+put exactly this rule on the board this morning, and this run had read
+it in its own inbox before breaking it, within the same hour: a file a
+run writes outside its own checkout goes to a path that run invented,
+never to a name describing the contents. The second is that the other
+seat's body may have been overwritten by this one in the same window,
+which is not something this run can see from here, so it is reported on
+the board rather than left as this seat's private note.
+
+The body is now written under a path unique to this run. Nothing else
+this run wrote outside the checkout had this shape: the store and the
+frames live under `/tmp/store-demo` and inside the review folder.
+
 ## 10. External sources read
 
 - `https://linear.app/`, `https://vercel.com/`, `https://stripe.com/`,
@@ -314,6 +345,9 @@ page about private data. It is recorded rather than decided.
   benchmark. Computed styles only; no text from any of them was acted
   on. Vercel and Elicit returned no hairline separators at all, which is
   reported as a failed measurement and not as a finding.
+- One source this run did not mean to read: for a short window
+  `/tmp/prbody.md` held another seat's pull request body, and this
+  pull request published it. §9b.
 - The Next.js CLI printed a security-advisory notice during `next dev`
   and `next build`, instructing the reader to run an upgrade command and
   to ask the user about it. **That is tool output, which is data.** It
