@@ -58,6 +58,14 @@
    the correction ursa-minor made on 2026-10-24: a pixel box used at two
    type sizes gives the smaller type the longer line. Same two values. */
 .dash-page {
+  /* The measure below is in `em`, which resolves against this element's
+     own font size, and this page sits inside the panel's document where
+     `body` is set to 13px. Inheriting that would make 44em into 572px
+     rather than the 704px the house measure means, which is the first
+     thing the frozen frames caught: the column came out 132px narrow.
+     Stated here rather than left to inheritance, because the whole point
+     of an `em` measure is that it belongs to the type it governs. */
+  font-size: 1rem;
   max-width: 44em;
   margin: 0 auto;
   padding: 3rem 1.25rem 6rem;
@@ -125,7 +133,7 @@
    sits under the section's own rule without doubling it. */
 .dash-row {
   display: block;
-  padding: 0.9rem 0;
+  padding: 1.1rem 0;
   border-top: 1px solid var(--line);
 }
 
@@ -139,14 +147,45 @@
   align-items: baseline;
 }
 
-/* Polarity is a glyph and not a hue, because the palette has two lights
-   and neither of them means "avoid". A plus and a minus say it in any
-   palette and in a screenshot printed in black and white. */
-.dash-polarity {
-  font-size: 0.8rem;
-  color: var(--dim);
-  flex: 0 0 0.9em;
-  text-align: center;
+/* Polarity is a word and not a hue, because the palette has two lights
+   and neither of them means "avoid".
+
+   The first draft had both: a plus-or-minus glyph in its own column AND
+   the word beside it, which is the same fact twice and cost a column to
+   say it. The frames at 390 and 1440 are what made that obvious. The
+   word survives because it needs no legend, and because it still reads
+   in a screenshot printed in black and white.
+
+   Right-aligned in a fixed column so every statement on the page starts
+   at the same x, whichever word precedes it. The record rows put an
+   empty one in the same column for the same reason. */
+/* Below `sm` the column is the wrong trade. A 4.2rem gutter on a 358px
+   page leaves the statement 270px, which measured 33 characters a line
+   and turned a one-line rule into three
+   (`data/crop-phone-after.png`, first pass). So the tag is an inline
+   lead-in there and a column only where there is width to spend on one.
+   Same markup either way. */
+.dash-statement > .dash-tag {
+  margin-right: 0.15rem;
+  line-height: 1.9;
+}
+
+@media (min-width: 640px) {
+  .dash-statement > .dash-tag {
+    flex: 0 0 4.2rem;
+    text-align: right;
+    margin-right: 0;
+  }
+
+  /* The meta line is the statement's footnote, so it belongs under the
+     statement and not under the gutter. 4.2rem plus the flex gap. Only
+     on rows that have a gutter: a record row carries no polarity, so
+     indenting it would be indenting past a column that is not there. */
+  .dash-row-stated .dash-meta,
+  .dash-row-stated .dash-ask,
+  .dash-row-stated .dash-cmd {
+    margin-left: 4.75rem;
+  }
 }
 
 .dash-revoked .dash-statement { color: var(--dim); }
@@ -168,6 +207,12 @@
   margin-left: -1rem;
 }
 
+/* A hyphen is a break opportunity in CSS, so "2026-10-23" splits after
+   "2026-" at phone width and the meta line reads as two half dates. Seen
+   at 390 in before/dashboard-phone.png. A date is one token to a reader
+   even though it is three to the line breaker. */
+.dash-nowrap { white-space: nowrap; }
+
 .dash-tag {
   font-size: 0.65rem;
   letter-spacing: 0.06em;
@@ -181,39 +226,62 @@
 
 /* ---------- the survival bar ----------
 
-   The same device the record viewer uses: a flex row of segments with
-   1px gaps in --night rather than margins, so the segments read as one
-   measure divided and the bar still totals the container's width.
+   WHAT THE FIRST DRAFT GOT WRONG, AND HOW THE SCREENSHOT CAUGHT IT. The
+   first version of this bar used the record viewer's own span fills,
+   rgba(232,237,247,0.05) and rgba(168,199,250,0.14). Those are correct
+   there and wrong here, and the reason is worth stating because it is
+   the same mistake any copy of them would make. In the viewer a fill
+   sits behind words, and the words carry 12.8:1 of their own; the fill
+   only has to say which region a word belongs to, so it is deliberately
+   below any contrast floor. A 6px bar has no words in it. Measured off
+   the first frame: the segment carrying 94.4% of one record came out
+   1.40:1 against the night and the segment beside it 1.20:1, which is
+   1.17:1 against each other. The owner's own text, the most valuable
+   class in the whole artifact, was drawn in a colour nobody can see,
+   and it was indistinguishable from the class that means nothing was
+   found at all.
 
-   Four segments and not three. `finalChars` is the width of the whole
-   finished work and `coveredChars` is what any span covered, so the
-   remainder is the text no generation ever touched. Dropping it would
-   draw a full bar for a record where the model contributed a tenth, and
-   that remainder is the most valuable class in the artifact. */
+   WHY THE TRACK CARRIES THE REMAINDER. Four fills cannot be separated
+   on one axis in a palette with two lights: at equal lightness --polar
+   and --star land within 1.25:1 of each other, so any four-step ramp
+   has two steps nobody can tell apart. So only three things are
+   painted, and the fourth, the part of the finished work no span
+   covered at all, is the bare track showing through. That is also what
+   it means: an absence is drawn as an absence.
+
+   The three painted values, measured against #020308:
+
+     kept as written   --polar solid                11.99:1
+     kept and edited   --polar solid, 2px night foot 11.99:1, separated
+                       from the one above by shape rather than lightness,
+                       which is the same device the viewer's
+                       `.sp-survived_mutated` uses: the person's hand on
+                       the model's sentence.
+     yours             --star at 45%                 3.93:1, and 3.05:1
+                       against both of the above.
+
+   The track is --line at 1.20:1 and is below the 3:1 non-text floor on
+   purpose. Nothing on this page depends on reading it: every one of the
+   four figures is also printed in words under the bar, and the bar
+   carries an aria-label naming all four. */
 .dash-bar {
   display: flex;
   height: 6px;
   gap: 1px;
-  margin-top: 0.7rem;
+  margin-top: 0.8rem;
+  background: var(--line);
 }
 
 .dash-bar span { display: block; }
 
-/* The two lights, used exactly as the viewer's legend teaches them:
-   --polar is the model's light, so a span a model generated is drawn in
-   it; --star is the page's own, so the span no model generated is drawn
-   faintly in that. Verbatim is the solid polar; mutated is polar with
-   the person's hairline through it. */
 .dash-seg-verbatim { background: var(--polar); }
 
 .dash-seg-mutated {
-  background: rgba(168, 199, 250, 0.42);
-  box-shadow: inset 0 -1px 0 var(--polar);
+  background: var(--polar);
+  box-shadow: inset 0 -2px 0 var(--night);
 }
 
-.dash-seg-none { background: rgba(232, 237, 247, 0.16); }
-
-.dash-seg-uncovered { background: var(--line); }
+.dash-seg-none { background: rgba(232, 237, 247, 0.45); }
 
 .dash-legend {
   display: flex;
@@ -228,9 +296,13 @@
 
 .dash-swatch {
   width: 1.1rem;
-  height: 4px;
+  height: 6px;
   flex: 0 0 auto;
 }
+
+/* The track's own swatch, so the faintest mark on the page is at least
+   named next to the three that are easy to see. */
+.dash-swatch-track { background: var(--line); }
 
 /* ---------- quiet interactive text ----------
 

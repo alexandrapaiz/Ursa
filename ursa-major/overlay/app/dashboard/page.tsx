@@ -113,21 +113,27 @@ function resolver(r: ResolverIdentity | null): string {
   return String(r.basis)
 }
 
+/** Characters in the finished work that no span covered at all. */
+function uncovered(r: RecordSummary): number {
+  return Math.max(0, r.finalChars - r.coveredChars)
+}
+
 /**
- * The survival bar's four segments.
+ * The three painted segments. The fourth quantity, `uncovered`, is the
+ * bare track they are laid on, so it needs no fill and gets none: the
+ * bar's width is always the whole finished work, and what is painted is
+ * what some span accounted for. The stylesheet's note says why four
+ * fills cannot be told apart in this palette.
  *
- * Four and not three: `finalChars` is the whole finished work and
- * `coveredChars` is what any span covered, so the remainder is text no
- * generation was ever joined to. A three-segment bar would draw full
- * width for a record the model barely touched.
+ * `flexGrow` is the character count and `flexBasis` is 0, so the
+ * segments divide the track in exact proportion to the figures printed
+ * under them.
  */
 function segments(r: RecordSummary) {
-  const uncovered = Math.max(0, r.finalChars - r.coveredChars)
   return [
     { key: 'verbatim', cls: 'dash-seg-verbatim', chars: r.charsByClass.survived_verbatim },
     { key: 'mutated', cls: 'dash-seg-mutated', chars: r.charsByClass.survived_mutated },
     { key: 'none', cls: 'dash-seg-none', chars: r.charsByClass.no_generation_provenance },
-    { key: 'uncovered', cls: 'dash-seg-uncovered', chars: uncovered },
   ].filter((s) => s.chars > 0)
 }
 
@@ -271,23 +277,21 @@ export default function Dashboard() {
           ) : (
             <div style={{ marginTop: '1.25rem' }}>
               {active.map((u) => (
-                <article key={u.id} className={`dash-row${inTension.has(u.id) ? ' dash-tension' : ''}`}>
+                <article key={u.id} className={`dash-row dash-row-stated${inTension.has(u.id) ? ' dash-tension' : ''}`}>
                   <p className="dash-statement">
-                    <span className="dash-polarity dash-mono" aria-hidden="true">
-                      {u.polarity === 'prefer' ? '+' : '−'}
-                    </span>
-                    <span className="dash-statement-text">
-                      <span className="dash-tag" style={{ marginRight: '0.5rem' }}>
-                        {u.polarity}
-                      </span>
-                      {u.statement}
-                    </span>
+                    <span className="dash-tag">{u.polarity}</span>
+                    <span className="dash-statement-text">{u.statement}</span>
                   </p>
                   <p className="dash-meta dash-mono">
                     {u.domain} · {u.basis} · evidence ×{n(u.evidenceCount)} ·{' '}
-                    {day(u.firstSeen) === day(u.lastSeen)
-                      ? day(u.firstSeen)
-                      : `${day(u.firstSeen)} to ${day(u.lastSeen)}`}
+                    {day(u.firstSeen) === day(u.lastSeen) ? (
+                      <span className="dash-nowrap">{day(u.firstSeen)}</span>
+                    ) : (
+                      <>
+                        <span className="dash-nowrap">{day(u.firstSeen)}</span> to{' '}
+                        <span className="dash-nowrap">{day(u.lastSeen)}</span>
+                      </>
+                    )}
                     {u.status === 'user-edited' ? ' · edited by you' : ''}
                     {inTension.has(u.id) ? <span className="dash-tag-mark"> · in tension</span> : ''}
                     {' · '}
@@ -329,7 +333,7 @@ export default function Dashboard() {
           <section className="dash-section">
             <h2>Two things that cannot both be you</h2>
             {pairs.map(([a, b]) => (
-              <article key={`${a.id}|${b.id}`} className="dash-row">
+              <article key={`${a.id}|${b.id}`} className="dash-row dash-row-stated">
                 <p className="dash-ask">
                   These two contradict each other. Ursa has not picked between
                   them and will not average them, because the average is a
@@ -338,9 +342,7 @@ export default function Dashboard() {
                 {[a, b].map((u) => (
                   <div key={u.id} style={{ marginTop: '0.9rem' }}>
                     <p className="dash-statement">
-                      <span className="dash-polarity dash-mono" aria-hidden="true">
-                        {u.polarity === 'prefer' ? '+' : '−'}
-                      </span>
+                      <span className="dash-tag">{u.polarity}</span>
                       <span className="dash-statement-text">{u.statement}</span>
                     </p>
                     <p className="dash-meta dash-mono">
@@ -373,15 +375,14 @@ export default function Dashboard() {
             </p>
             <div style={{ marginTop: '1.25rem' }}>
               {revoked.map((u) => (
-                <article key={u.id} className="dash-row dash-revoked">
+                <article key={u.id} className="dash-row dash-row-stated dash-revoked">
                   <p className="dash-statement">
-                    <span className="dash-polarity dash-mono" aria-hidden="true">
-                      {u.polarity === 'prefer' ? '+' : '−'}
-                    </span>
+                    <span className="dash-tag">{u.polarity}</span>
                     <span className="dash-statement-text">{u.statement}</span>
                   </p>
                   <p className="dash-meta dash-mono">
-                    {u.domain} · withdrawn · last seen {day(u.lastSeen)}
+                    {u.domain} · withdrawn · last seen{' '}
+                    <span className="dash-nowrap">{day(u.lastSeen)}</span>
                   </p>
                 </article>
               ))}
@@ -405,18 +406,19 @@ export default function Dashboard() {
                 <span><i className="dash-swatch dash-seg-verbatim" /> kept as written</span>
                 <span><i className="dash-swatch dash-seg-mutated" /> kept and edited</span>
                 <span><i className="dash-swatch dash-seg-none" /> yours, no generation behind it</span>
-                <span><i className="dash-swatch dash-seg-uncovered" /> covered by no span</span>
+                <span><i className="dash-swatch dash-swatch-track" /> covered by no span</span>
               </div>
               <div style={{ marginTop: '1.25rem' }}>
                 {payload.records.map((r) => {
                   const segs = segments(r)
                   return (
                     <article key={r.id} className="dash-row">
-                      <p className="dash-statement dash-mono" style={{ fontSize: '0.8rem' }}>
-                        <span className="dash-statement-text">{r.id}</span>
+                      <p className="dash-mono" style={{ fontSize: '0.8rem', lineHeight: 1.55 }}>
+                        {r.id}
                       </p>
                       <p className="dash-meta dash-mono">
-                        {day(r.generatedAt)} · {r.artifactKind} ·{' '}
+                        <span className="dash-nowrap">{day(r.generatedAt)}</span> ·{' '}
+                        {r.artifactKind} ·{' '}
                         {r.accepted === true
                           ? 'you declared it satisfied'
                           : r.accepted === false
@@ -426,6 +428,14 @@ export default function Dashboard() {
                         {r.distilled ? ' · read by the interpretation pass' : ''}
                         {' · '}
                         {resolver(r.resolvedBy)}
+                        {' · '}
+                        <button
+                          className="dash-action dash-hit dash-mono"
+                          aria-expanded={openForget === r.id}
+                          onClick={() => setOpenForget(openForget === r.id ? null : r.id)}
+                        >
+                          forget this
+                        </button>
                       </p>
                       <div
                         className="dash-bar"
@@ -439,13 +449,19 @@ export default function Dashboard() {
                         )} kept and edited, ${pct(
                           r.charsByClass.no_generation_provenance,
                           r.finalChars,
-                        )} with no generation behind it`}
+                        )} yours with no generation behind it, ${pct(
+                          uncovered(r),
+                          r.finalChars,
+                        )} covered by no span`}
                       >
                         {segs.map((s) => (
                           <span
                             key={s.key}
                             className={s.cls}
-                            style={{ flexGrow: s.chars, flexBasis: 0 }}
+                            // Percent of the whole finished work, not of
+                            // what was covered: a record the model barely
+                            // touched has to draw a nearly empty bar.
+                            style={{ width: `${(s.chars / Math.max(1, r.finalChars)) * 100}%` }}
                           />
                         ))}
                       </div>
@@ -454,15 +470,15 @@ export default function Dashboard() {
                         {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written ·{' '}
                         {pct(r.charsByClass.survived_mutated, r.finalChars)} edited ·{' '}
                         {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours ·{' '}
-                        {n(r.humanDeletedChars)} generated chars you threw away
-                        {' · '}
-                        <button
-                          className="dash-action dash-hit dash-mono"
-                          aria-expanded={openForget === r.id}
-                          onClick={() => setOpenForget(openForget === r.id ? null : r.id)}
-                        >
-                          forget this
-                        </button>
+                        {pct(uncovered(r), r.finalChars)} no span
+                      </p>
+                      {/* A separate line because it has a separate whole.
+                          Everything above is a share of the finished work;
+                          this is a count of generated text that never
+                          reached it, so putting them in one sentence
+                          invites the reader to add them up. */}
+                      <p className="dash-meta dash-mono">
+                        and {n(r.humanDeletedChars)} generated characters you saw and did not keep
                       </p>
                       {openForget === r.id && (
                         <>
