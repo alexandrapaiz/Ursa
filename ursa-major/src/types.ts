@@ -352,6 +352,20 @@ export interface SpanLifespan {
   basis: 'verbatim' | 'token-containment' | null
   /** why `untested`, when it is untested */
   skipped: 'too-short' | 'no-later-revisions' | null
+  /**
+   * How many renames the forward walk crossed while tracing this span's
+   * file. Absent, never 0, when it crossed none — a record written before
+   * the walk could follow a rename at all (before 2026-10-24) is then
+   * indistinguishable from one whose file never moved, which is honest:
+   * the older record cannot say.
+   */
+  renamesFollowed?: number
+  /**
+   * The path this span's file occupied where the walk stopped, set only
+   * alongside `renamesFollowed`. `FinalFile.path` stays the path the
+   * episode classified the span at; this is where the same text lives now.
+   */
+  renamedTo?: string
 }
 
 export interface Durability {
@@ -385,6 +399,14 @@ export interface Durability {
   /** median seconds a span that lost something stayed wholly intact; null when none did */
   medianIntactSeconds: number | null
   maxRevisionsWalked: number
+  /**
+   * Renames the walk followed across every file in this record. Absent,
+   * never 0, when it followed none, for the same reason as
+   * `SpanLifespan.renamesFollowed`. A non-zero value is the one signal a
+   * reviewer needs to know that a `decayRate` in this record was taken
+   * across a file that moved.
+   */
+  renamesFollowed?: number
   minTraceableLen: number
 }
 
