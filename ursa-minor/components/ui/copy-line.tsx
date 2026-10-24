@@ -27,8 +27,51 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export function CopyLine({ command, label }: { command: string; label?: string }) {
   const [state, setState] = useState<"idle" | "copied" | "refused">("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pre = useRef<HTMLPreElement>(null);
 
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
+
+  /* The command scrolls sideways, and until 2026-10-24 nothing told a
+     reader so. `.rec-cmd` fades whichever edge still has content behind
+     it; the widths come from here, because only the element knows how
+     far it has left to go. See the note on `.rec-cmd` in globals.css for
+     why it is a mask rather than a gradient over the top.
+
+     Measured rather than listened for on a timer: `scroll` fires per
+     frame on a trackpad, so the read is deferred to the next animation
+     frame and coalesced. A ResizeObserver covers the viewport changing
+     and the card reflowing at `sm`; `document.fonts.ready` covers the
+     monospace face landing after first paint, which changes scrollWidth
+     without resizing anything. */
+  useEffect(() => {
+    const el = pre.current;
+    if (!el) return;
+
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const max = el.scrollWidth - el.clientWidth;
+      const x = el.scrollLeft;
+      const clamp = (n: number) => `${Math.max(0, Math.min(32, n))}px`;
+      // Both are 0 when the line fits, which is what makes the fade
+      // absent rather than decorative.
+      el.style.setProperty("--fade-l", clamp(x));
+      el.style.setProperty("--fade-r", clamp(max - x));
+    };
+    const schedule = () => void (frame ||= requestAnimationFrame(measure));
+
+    measure();
+    el.addEventListener("scroll", schedule, { passive: true });
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+    void document.fonts?.ready.then(schedule);
+
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      el.removeEventListener("scroll", schedule);
+      ro.disconnect();
+    };
+  }, [command]);
 
   const copy = useCallback(async () => {
     if (timer.current) clearTimeout(timer.current);
@@ -54,7 +97,10 @@ export function CopyLine({ command, label }: { command: string; label?: string }
           one element on the page that has a fixed length and cannot be
           reflowed. */}
       <div className="flex flex-col items-start gap-3 border border-[var(--line)] p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-5">
-        <pre className="rec-cmd w-full min-w-0 sm:flex-1 font-mono text-[0.72rem] leading-[1.8] text-[var(--star)] sm:text-[0.76rem]">
+        <pre
+          ref={pre}
+          className="rec-cmd w-full min-w-0 sm:flex-1 font-mono text-[0.72rem] leading-[1.8] text-[var(--star)] sm:text-[0.76rem]"
+        >
           {command}
         </pre>
         <button

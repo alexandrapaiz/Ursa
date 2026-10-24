@@ -1,0 +1,109 @@
+[
+  {
+    "url": "https://nextjs.org/docs/app/getting-started/installation",
+    "found": [
+      {
+        "tag": "pre",
+        "cls": "vF3MAa_pre",
+        "client": 714,
+        "scroll": 1216,
+        "hidden": 502,
+        "gutterPx": 0,
+        "maskImage": "none",
+        "webkitMask": "none",
+        "scrollbarWidth": "thin",
+        "scrollbarColor": "rgb(168, 168, 168) rgba(0, 0, 0, 0)",
+        "paddingRight": "0px",
+        "afterContent": "none",
+        "afterBg": "none",
+        "afterW": "auto",
+        "parentAfterBg": "none",
+        "overflowX": "auto"
+      },
+      {
+        "tag": "code",
+        "cls": "font-mono grid text-left !text-[13px] leading-[20px] break-n",
+        "client": 714,
+        "scroll": 1216,
+        "hidden": 502,
+        "gutterPx": 0,
+        "maskImage": "none",
+        "webkitMask": "none",
+        "scrollbarWidth": "auto",
+        "scrollbarColor": "rgb(168, 168, 168) rgba(0, 0, 0, 0)",
+        "paddingRight": "0px",
+        "afterContent": "none",
+        "afterBg": "none",
+        "afterW": "auto",
+        "parentAfterBg": "none",
+        "overflowX": "visible"
+      },
+      {
+        "tag": "pre",
+        "cls": "vF3MAa_pre",
+        "client": 714,
+        "scroll": 848,
+        "hidden": 134,
+        "gutterPx": 0,
+        "maskImage": "none",
+        "webkitMask": "none",
+        "scrollbarWidth": "thin",
+        "scrollbarColor": "rgb(168, 168, 168) rgba(0, 0, 0, 0)",
+        "paddingRight": "0px",
+        "afterContent": "none",
+        "afterBg": "none",
+        "afterW": "auto",
+        "parentAfterBg": "none",
+        "overflowX": "auto"
+      },
+      {
+        "tag": "code",
+        "cls": "font-mono grid text-left !text-[13px] leading-[20px] break-n",
+        "client": 714,
+        "scroll": 848,
+        "hidden": 134,
+        "gutterPx": 0,
+        "maskImage": "none",
+        "webkitMask": "none",
+        "scrollbarWidth": "auto",
+        "scrollbarColor": "rgb(168, 168, 168) rgba(0, 0, 0, 0)",
+        "paddingRight": "0px",
+        "afterContent": "none",
+        "afterBg": "none",
+        "afterW": "auto",
+        "parentAfterBg": "none",
+        "overflowX": "visible"
+      }
+    ],
+    "title": "Installation"
+  },
+  {
+    "url": "https://linear.app/docs",
+    "found": [],
+    "title": "Linear Docs"
+  },
+  {
+    "url": "https://docs.stripe.com/payments/quickstart",
+    "found": [
+      {
+        "tag": "pre",
+        "cls": "",
+        "client": 807,
+        "scroll": 2674,
+        "hidden": 1867,
+        "gutterPx": 0,
+        "maskImage": "none",
+        "webkitMask": "none",
+        "scrollbarWidth": "thin",
+        "scrollbarColor": "rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)",
+        "paddingRight": "0px",
+        "afterContent": "none",
+        "afterBg": "none",
+        "afterW": "auto",
+        "parentAfterBg": "none",
+        "overflowX": "auto"
+      }
+    ],
+    "title": "Build a custom checkout page | Stripe Documentation"
+  }
+]

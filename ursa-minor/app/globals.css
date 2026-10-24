@@ -647,15 +647,50 @@ html {
   white-space: pre;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  /* The one indicator that the line continues past the edge. A thin
-     track in --line is the same hairline every other edge on this site
-     is drawn with, so it says "there is more" without adding a device.
-     It is not a complete answer: iOS paints overlay scrollbars and shows
-     nothing until a finger moves. The copy control carries the whole
-     command regardless of what is visible, which is why clipping is
-     survivable here and would not be in prose. */
+  /* The thin track was described here, until 2026-10-24, as "the one
+     indicator that the line continues past the edge". Measured on that
+     date, it is not an indicator at all. It reserves no width
+     (offsetHeight 44 against clientHeight 44, so the browser overlays it
+     rather than laying it out) and its thumb is --line on --night, which
+     is a contrast ratio of 1.198 to 1. It is kept because it costs
+     nothing and helps on a platform that paints a classic scrollbar.
+     The thing that actually says "there is more" is the fade below. */
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
+
+  /* The cut, before the fade: the Action's curl line ended at
+     "raw.githubusercontent.com/alexandrapaiz/Ursa/main/u" on a 1440
+     desktop, which is a line that looks finished. 536px of it were
+     hidden there, 455 at 820, 737 at 390 and 807 at 320, so this was
+     never only a phone problem. A reader cannot tell a clipped line from
+     a short one when the clip is clean, and a clean clip is what a
+     scroll container gives you.
+
+     So the edge is faded instead of sliced. Two reasons it is a mask and
+     not an overlay. The page's background is not a colour here, it is
+     the WebGL sky in PixelSky painted fixed behind everything, so an
+     opaque gradient in --night would read as a dark patch over a sky
+     that is visible either side of it. And a mask fades the glyph
+     itself, which is the thing that was lying about being complete.
+
+     The width of the fade is driven from the component, in --fade-l and
+     --fade-r, as the distance left to scroll on that side clamped to
+     32px, which is two of this card's 16px padding step and about four
+     and a half characters at this type size. Driving it from the
+     distance rather than from a boolean means the fade shrinks to
+     nothing over the last 32px instead of popping off at the end, and it
+     means both values are 0 whenever the line fits, so a command that
+     does not scroll is not faded for no reason. Before hydration both
+     are 0 and this rule paints exactly what shipped before it. */
+  --fade-l: 0px;
+  --fade-r: 0px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
 }
 
 /* The share bar. 1px gaps in --night rather than margins, so the
