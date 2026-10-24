@@ -144,6 +144,15 @@ evidence:
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
     source: docs/security/redaction-standard.md:173-182
+  - ref: E42
+    what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself
+    source: ursa-major/src/consent.cli.ts:214
+  - ref: E43
+    what: the paste channel's unreachability is permanent rather than unbuilt, because enforcing a revocation across a delegated channel needs deny state and a receipt from the gateway holding the delegation and this gateway is a text field in software Ursa does not run, and a user who reads her tuning through the MCP server instead does not have the limitation
+    source: docs/design/consent-and-erasure.md:583-604
+  - ref: E44
+    what: both revoke-axiom and consent show report the axioms that still say nearly the same thing as the revoked one and were deliberately left alone, show covering revocations already made and revoke-axiom covering the one just made
+    source: ursa-major/src/consent.cli.ts:215-229, ursa-major/src/consent.cli.ts:108-126
 supersedes: []
 ---
 
@@ -397,7 +406,7 @@ implementation detail [E34].
 | The user is saying | Command | What happens |
 |---|---|---|
 | stop disclosing anything at all | `ursa consent revoke --scope minor-aggregate` | the scope goes back to withheld [E24], and the transition is appended to the history [E19] |
-| this inference about me is wrong | `ursa consent revoke-axiom --axiom ax-003` | the axiom is kept as a tombstone so a later distillation cannot revive it, and it leaves every export and the overlay [E25] |
+| this inference about me is wrong | `ursa consent revoke-axiom --axiom ax-003` | the axiom is kept as a tombstone so a later distillation cannot revive it, and every export and overlay from then on leaves it out [E25], while a block already pasted elsewhere keeps working [E42] and any near-duplicate axiom keeps saying the same thing [E44] |
 | erase this piece of my work | `ursa forget --record <id>` | the record file goes, evidence is stripped, and an axiom grounded only in this record is deleted outright rather than tombstoned [E34] |
 
 The third row's asymmetry is the one to understand before explaining it
@@ -413,6 +422,30 @@ Say the limit out loud rather than letting the command imply otherwise.
 Revoking a scope reaches nothing already handed over, so it is a stop
 and not an undo, and deletion of what was sent is a request to the
 aggregation layer [E24].
+
+Revoking an axiom has two limits of its own, and the command now prints
+both rather than leaving them for a release note. The first is the
+paste channel. `ursa tuning export` renders a block the user pastes
+into somebody else's settings field, and revoking an axiom changes
+every render from that moment on while changing nothing about the copy
+already pasted, which keeps instructing that model until she replaces
+it by hand [E42]. The second is the near-duplicate. An axiom written
+before the store checked for duplicates can be the same rule twice
+under two ids, so withdrawing one id leaves the other one working, and
+both `revoke-axiom` and `consent show` now list the twins and say
+plainly that nothing in the list was changed for her [E44].
+
+Treat the first of those as permanent when you write the clause, not as
+a gap waiting on a build. Enforcing a revocation across a delegated
+channel requires the gateway holding the delegation to install deny
+state and return a receipt saying it did, and this channel's gateway is
+a text field inside software Ursa does not run and cannot enumerate, so
+it can neither emit a receipt nor be listed [E43]. The same sentence
+carries the way out, which is a delivery channel with a gateway Ursa
+can address: a user who reads her tuning through the MCP server rather
+than a block copied once does not have this limitation [E43]. Output:
+the clause names which delivery channel the revocation was enforced on,
+because "revoked" is true of the store and not of every copy.
 
 ### 7. Write down the clause, because the next reader cannot re-derive it
 
