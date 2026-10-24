@@ -10,14 +10,16 @@ description: >
   generation are actually ancestor and descendant, and for settling a
   span the descent check demoted as rival, where the score was high and
   the ancestry was not. Does not fire for producing a record in the
-  first place, for labelling generations, or for reading a record's
-  summary statistics.
-version: 0.4.0
+  first place, for labelling generations, for reading a record's
+  summary statistics, for turning a record's labels into tuning axioms,
+  for adding or changing a bound in the record gate, or for deciding
+  what may leave the machine.
+version: 0.5.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-24
-revised: 2026-10-18
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -90,6 +92,15 @@ reason, and the verdicts are in a file next to the record.
 It does not fire for producing the record, for reading its summary,
 or for labelling generations. Generation fates are derived rather than
 adjudicated, so they move on their own once span verdicts change [E11].
+
+Three more exits were named in 0.5.0, and they are downstream rather
+than upstream. A span verdict is this skill's output, and three other
+skills take that output as an input: `distilling-a-tuning-record` turns
+verdicts into axioms about a person, `adding-a-bound-to-the-record-gate`
+turns a property of a record into a universal rule in the gate, and
+`clearing-a-record-for-release` rules on what may leave the machine.
+None of those is a span-by-span decision, and this skill's procedure
+produces no axiom, no bound and no release verdict.
 
 ## The procedure
 

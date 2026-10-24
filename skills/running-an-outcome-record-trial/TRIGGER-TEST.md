@@ -1,14 +1,25 @@
 # Trigger test — running-an-outcome-record-trial
 
-Five prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Two are near misses that should not.
+Nine prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Six are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails, the description
 is what changes, not the test.
 
-There are now two skills about outcome records, so this test carries a
-second job beyond activation. It has to show the boundary between this
-skill and `adjudicating-uncertain-spans`, which is what near miss 4
-exists for.
+The library now holds six skills, so this test carries a second job
+beyond activation: §5c asks one near miss per adjacent skill, and every
+other skill in the library is adjacent to this one. Near misses 4 and 5
+are this seat's own wording from the days when this skill had one
+neighbour. Near miss 6 was appended on 2026-10-01 for the quoting
+skill and rewritten on 2026-10-24, for the reason stated under it.
+Near misses 7, 8 and 9 were added on 2026-10-24 and each carries one
+sibling's own trigger prompt verbatim.
+
+The measurement that found the gap is `node skills/trigger-coverage.mjs`,
+which scored this skill at one of five sibling boundaries carrying the
+sibling's own prompt. The description's exclusion clause was widened in
+the same commit as near misses 7, 8 and 9, because two of the three
+failed against the absence of a hook rather than against a stated
+exclusion.
 
 ## Should fire
 
@@ -90,22 +101,119 @@ that fails on contact with a real trial, and the skill's own Limits
 section says the procedure is untested for that reason. The trigger test
 and `validated: false` are answering two different questions.
 
-## Added 2026-10-01, third run: the near miss this test was missing
+## Added 2026-10-01, third run; rewritten 2026-10-24
 
 `prompts/skill-extract.md` §5c now asks for one near miss per adjacent
 skill, and this test was written when this skill had one neighbour. It
-now has two, so a sixth prompt is owed. It is appended rather than
-folded into the list above, because the list above belongs to the run
-that wrote it and that run's pull request is still open.
+now has five, so this prompt was owed and four more are owed below it.
+It is kept under its own heading rather than folded into the list above,
+because the heading is the record of when this boundary was noticed.
+Two consequences of keeping it there, both of them mechanical: every
+prompt under a non-canonical heading has to state "should not fire" in
+its own prose, because that is where `skills/trigger-coverage.mjs` reads
+a verdict when there is no canonical heading to inherit from, and a
+prompt that states nothing is reported as unclassified rather than
+guessed at. The three prompts added below this one were written without
+that sentence on the first pass and the tool said so, which is the first
+time one of this library's guards has caught a defect in the same run
+that introduced it.
 
-**6. "The viewer's tiles say 41, 24, 35 and 30 percent. That is 130.
-What is broken?"**
+**6. "The record's four tiles say 41 percent, 24 percent, 35 percent
+and 30 percent. That's 130. What's broken?"**
 
 Should not fire. This is `quoting-a-number-from-an-outcome-record`'s
-trigger. The record already exists, no subject is being chosen and no
-capture path is in question, so nothing in this skill's procedure
+own trigger. The record already exists, no subject is being chosen and
+no capture path is in question, so nothing in this skill's procedure
 applies. The answer is a denominator fact about the tiles, not a fact
 about how the trial was run.
+
+Rewritten on 2026-10-24, and the rewrite is one sentence of a
+measurement worth keeping. The 2026-10-01 version of this prompt said
+the same thing in this seat's own words: same four percentages, same
+total of 130, same question, "the viewer's tiles" for "the record's four
+tiles". `skills/trigger-coverage.mjs` scored that paraphrase at 0.333
+against the sibling's trigger, below any defensible floor, and credited
+the pair only because the prose names the sibling outright. A paraphrase
+tests this test's author. The sibling's own words test the description,
+which is the half §5c is asking for, so the sibling's words are now what
+is in the file.
+
+## Added 2026-10-24, seventeenth run: the three siblings this test never had
+
+Three skills landed after this file was written, on 2026-10-05,
+2026-10-18 and 2026-10-23, and none of them was added at the time. Two
+of the three failed, and both failed the same way near miss 7 of the
+distilling skill's test failed: the answer was already no, but only
+because no clause pointed either way.
+
+**7. "The gate workflow is green on my record, so I'm pasting the
+conversation into the design doc as the example payload. Any reason not
+to?"**
+
+Should not fire. `clearing-a-record-for-release`'s own trigger, and
+the one of the three that did not fail. The old description already excluded "redacting a
+record so it can be published", and near miss 4's prose already said
+that clause covers a publication request. So the no was stated before
+2026-10-24 and the only change is that the clause now says "or
+otherwise deciding what may leave the machine", which covers a design
+document as well as a published viewer.
+
+Close for a real reason. This skill's own step 4 reasons about what a
+record can carry, and a record on the git path carries no user words at
+all, which is a fact about disclosure dressed as a fact about capture.
+So a reader with that step in mind can think this skill rules on
+exposure. It does not. It rules on what a trial can be expected to
+produce, before the record exists; the release skill rules on what may
+leave, after it does, and it owns the distinction this prompt turns on,
+which is that a design document and a disclosure batch are different
+exits under opposite rules about raw text.
+
+**8. "Add a bound that a record's verbatim-survived character count
+never exceeds its generated character count. It is obviously true and
+the gate should catch it."**
+
+Should not fire. `adding-a-bound-to-the-record-gate`'s own trigger,
+and the first failure. Close because this skill's whole last step is about not
+over-reading a record's numbers, and a bound is a statement about a
+record's numbers. The shared vocabulary is complete: record, generated,
+survived, character count.
+
+The line is the quantifier, and the old description missed it by one
+word. It excluded "changing the resolver's code", and a bound is not
+resolver code. It lives in `invariants.ts`, which the gate runs over
+every record, and this skill's procedure never opens that file. A trial
+reasons about one subject and asks what its numbers may mean; a bound
+asserts something about every record there will ever be and is held
+against a committed counterexample. The exclusion clause now names gate
+work, so a reader who notices the overlap finds the answer rather than
+inferring it.
+
+**9. "`ursa run` just produced four records for the site project.
+Distill them into tuning.json so I can paste the block into ChatGPT."**
+
+Should not fire. `distilling-a-tuning-record`'s own trigger, the
+second failure, and the sharpest prompt in this file. It opens with this skill's own command,
+reports a successful trial outcome, and the number four is a corpus
+fact of exactly the kind step 1 reasons about. Three of this skill's
+four fire conditions concern a record that exists, and a record exists
+here.
+
+The line is where this skill stops, and it stops at the record. Its
+fourth fire condition is "a record exists and someone is about to quote
+a number out of it", and an axiom is not a number quoted out of a
+record; it is a claim about a person, written into a different file, by
+a pass this skill's procedure does not contain. A reader who fires this
+skill here gets correct advice about capture paths, which is true and
+useless, exactly as near miss 2 of this test warns in the other
+direction.
+
+Worth stating as the weakness of this pair: the overlap is real and not
+only lexical. The distilling skill's second step reaches the same
+conclusion this skill's step 4 does, that a commit-pair record carries
+no user words, and both skills cite it. So the two skills share a fact
+and differ in what they do with it. That is why the exclusion had to be
+written rather than left to the vocabulary, and the clause now names
+"turning a record into tuning axioms".
 
 ## Ours: a collision this skill's fire-prompt 3 has with the new sibling
 

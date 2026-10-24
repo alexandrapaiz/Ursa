@@ -535,3 +535,28 @@ it, verdict and all, without either reader saying the passage was unreadable.
 | `running-an-outcome-record-trial/E22` | supports | 2026-10-24 | Re-read against the whole sentence, "This repository's own fixture record is a one-file episode and carries `turnsToAcceptance: 1`", where the reader used to be shown "1` [E22]." and nothing else. Verdict unchanged and the range is exact: `turnsToAcceptance: 1` at 1142 is the number, `generations: 1` at 1138 is the single-generation episode, and `conversationId: "git-4d5e401"` at 1136 is what makes it the git path rather than the session path. The ratio stays above the rule's line at 0.909 and always will, because the claim's load-bearing words are "present rather than absent", which no JSON can contain. That is the note the rule asks for. |
 | `adjudicating-uncertain-spans/E9` | supports | 2026-10-24 | Re-read against the whole sentence, "Loop C in the first trial closed at steps 757 to 758 with no verbal approval at all, and the record declares `acceptanceStatedInChat: false`", where the reader used to be shown "false` [E9]." Verdict unchanged, and the 2026-10-18 note was right about the source: the steps, the absence of verbal approval and `signals.episode.acceptanceStatedInChat: false` are one parenthesis at 102-104, wholly in range. The reader reached the right verdict from the source with the passage unreadable, which is the quiet cost of this defect: it does not produce wrong verdicts, it produces verdicts reached without the sentence they are about. |
 | `quoting-a-number-from-an-outcome-record/E32` | supports | 2026-10-24 | Re-read because three of its five passages moved. Still five, still one per paragraph of the same two doc comments, and the second now reads "It carries `score: 1` like a verbatim match, so a filter written on the score alone will not separate them" rather than beginning after the colon. The 2026-10-18 note describes the five correctly, so the verdict and the fifty-eight-line range stand unchanged. |
+
+## One verdict re-read after a description was widened, 2026-10-24
+
+The seventeenth run widened two skills' descriptions and the `Not this`
+bullets under them, so that every sibling boundary §5c asks for is named
+rather than left to the absence of a hook. One of those bullets is the only
+passage citing `running-an-outcome-record-trial/E18`, so the `passages`
+digest changed and the verdict came back stale. The range did not move.
+
+Worth naming, because the re-read changed the skill rather than the lock.
+The widened bullet first read "A record needs to become publishable, or
+anything out of a record is about to leave the machine", with `[E18]` still
+on the sign-off clause. E18 is the incident register's permanent rule, and
+that rule is about shipping public: raw records are private-repo material by
+default and nothing generated from one ships public without the redaction
+pass and the per-record sign-off. It says nothing about an exit that is not
+public, such as pasting a payload into an internal design document, which is
+exactly the exit `clearing-a-record-for-release` was written for. So the
+widened sentence would have had E18 carrying a claim one step broader than
+its source. The bullet was narrowed back to the public exit, and the wider
+question is now attributed to the sibling skill rather than to the evidence.
+
+| ref | verdict | read | note |
+|---|---|---|---|
+| `running-an-outcome-record-trial/E18` | supports | 2026-10-24 | Re-read against the rewritten bullet, "Nothing generated from a record ships public before the security seat's redaction pass and the owner's per-record sign-off", which is the source's own sentence with the parenthetical gate reference dropped. Verdict unchanged and the range is exact: `incidents.md:204-210` carries the two-repo shape, "raw records and transcripts are private-repo material by default", and both halves of the gate, the security seat's pass and the owner's per-record sign-off. The passage that went in front of the reader before this run claimed a wider rule than those seven lines state, and the fix was to the passage. |

@@ -10,13 +10,15 @@ description: >
   that cannot be used, and for judging what a trial's deletion and
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
-  code, or for redacting a record so it can be published.
-version: 0.4.1
+  code, for adding or changing a bound in the record gate, for turning a
+  record into tuning axioms, or for redacting a record or otherwise
+  deciding what may leave the machine.
+version: 0.5.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-30
-revised: 2026-10-18
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -118,9 +120,17 @@ Not this:
   adjudicating. That is `skills/adjudicating-uncertain-spans`.
 - The resolver's matching, segmentation or signal code needs changing.
   That is the engineer's work, not a trial.
-- A record needs to become publishable. That is a redaction pass, which
-  is the security seat's standard and the owner's per-record sign-off
-  [E18].
+- A record needs to become publishable. Nothing generated from a record
+  ships public before the security seat's redaction pass and the owner's
+  per-record sign-off [E18]. The wider question of what may leave the
+  machine at all, including exits that are not public, is
+  `skills/clearing-a-record-for-release`, which owns three of them and
+  governs them by different rules.
+- A property of a record should become a rule the gate enforces on every
+  record. A trial reasons about one subject; a bound is a claim about all
+  of them. That is `skills/adding-a-bound-to-the-record-gate`.
+- A record exists and is about to become tuning axioms. This skill stops
+  at the record. That is `skills/distilling-a-tuning-record`.
 
 ## The procedure
 
