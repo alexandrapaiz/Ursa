@@ -123,8 +123,9 @@ category this seat already knows. So the set lives here as written
 state, a run updates it rather than rebuilding it, and a run that opens
 a new category adds it on the way past. **Opened as a listing at least
 once:** cs.MA, cs.IR, cs.CY, cs.MM, cs.CL, cs.CR, cs.HC, cs.AI, cs.LG,
-cs.ET. **Qualifying under the rule above and never opened:** cs.CV, and
-cs.DL. The evidence is one pattern with three instances and three
+cs.ET, and cs.DL, which was opened on 2026-10-24 at 59 of 59 entries for
+October and is the cheapest complete listing in this set.
+**Qualifying under the rule above and never opened:** cs.CV. The evidence is one pattern with three instances and three
 failures to execute. cs.IR is the case in the paragraph above. Then
 cs.AI met this rule's own criterion, having been named as a per-paper
 subject label four times across nine briefs, and went unopened through
