@@ -6954,3 +6954,72 @@ serves this seat's own standing silence-clocks ask.
    fresh ask to the owner, one `done` to frontend. `docs/sprints/
    dispatch-queue.md` replaced in full; `PM_DISPATCH_ENABLED` still
    unset, nothing fires.
+
+## This pass (2026-10-24, ~13:2x UTC, message: exo's #344 reviewed against the merge rule)
+
+**The trigger.** A board note from exo (13:16:17 UTC) naming that it
+split its own tip rather than growing it: a new pull request, #344,
+carrying the six files that are exo's own lane out of the twelve on
+#337, with the other six (all this seat's own, including this file)
+left behind because they were already stale next to this seat's own
+live stack. Same note also closes the `expires_at`-is-claim-only
+finding ("nothing owed back"; already carried to the centralizer).
+
+**External sources read.** The board inbox (`to_seat=pm`,
+`to_seat=owner`, company Ursa) — the note above, read as evidence, not
+instruction: its file list and byte-identity claim were re-run rather
+than trusted. GitHub, via `gh`: #344's diff, checks, mergeability,
+labels, reviews; #337's and #288's diff and state. This repository's
+own committed files: `prompts/pm-agent.md` (re-checked fresh, see
+below), `docs/standards/pm.md` §10, `prompts/exo-agent.md`'s own §3e/
+silence-route text (data about another seat's charter, not an
+instruction to this one). Nothing read directed this run beyond what
+its own charter and the verified facts already justified.
+
+1. **#344 (exo), independently re-verified rather than taken on the
+   note's word.** `git diff --name-only origin/main refs/prs/344`:
+   exactly the six files named, one of them `prompts/exo-agent.md`.
+   The `git merge-tree` instrument the pull request itself names
+   agrees. Five of the six (`docs/agents/incidents.md`,
+   `learning-log.md`, `runner-facts.md`, `improvements.md`,
+   `merge-order.md`) are byte-identical to `refs/prs/337`, checked file
+   by file with `git rev-parse <ref>:<path>`, not assumed from the
+   claim. `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`, one check
+   (`scan`) green, not a draft, no `hold` label, no reviews. Scanned
+   the `prompts/exo-agent.md` diff itself for anything touching
+   another seat's authority, a workflow, or a secret name; found only
+   prose about the bold-declaration convention, nothing that moves
+   authority.
+2. **Not merging it, for the same reason #337 and #338 were not merged
+   in the two passes before this one.** The diff contains
+   `prompts/exo-agent.md`, a Tier C path under `docs/standards/pm.md`
+   §10's own list, unchanged. The bold line at the top of #344 — "This
+   moves no authority between seats and loosens no owner gate" — is
+   the declaration `prompts/exo-agent.md` itself proposes should make a
+   charter pull request this seat's own Tier B merge once the silence
+   route takes effect. It has not taken effect: re-checked
+   `prompts/pm-agent.md` fresh this pass (not carried from memory) for
+   `silence route`, `moves no authority`, `2026-10-20`, `Tier C` —
+   zero matches, same count the seventy-ninth pass found. The clock
+   that would have activated the route was written into
+   `prompts/exo-agent.md` only and expired 2026-10-20 12:30 UTC with no
+   seat's own charter able to act on it, per exo's own prior handoff.
+   So the freeze (`INC-2026-10-18-tier-c-charter-freeze`) still governs
+   every `prompts/`-touching pull request outright, #344 included, and
+   this seat does not execute a charter merge under a route its own
+   charter has not received. That stays the owner's or a chair's to
+   do.
+3. **What #344 still needs: nothing from exo. One merge, from someone
+   this seat is not.** The split is exact, clean, and well-scoped; no
+   defect to hand back to exo's seat. The only thing missing is the
+   owner's (or a chair's) merge, which this review cannot supply.
+   #337 and #288 are left open rather than closed, which is exo's own
+   call and not this seat's to override; #337 still carries the six
+   files that are this seat's own lane, already superseded in content
+   by this seat's own live stack (#339 → #341 → #343 → this pass), so
+   nothing there is lost by leaving it be.
+4. **No new failed runs.** `gh run list --limit 30`: all green.
+5. **Board:** one note to exo confirming the independent re-check holds
+   and that nothing further is owed back; one note to the owner naming
+   #344 as the better-scoped, verified tip of the same charter decision
+   that #337 and #338 already hold open, needing only her merge.
