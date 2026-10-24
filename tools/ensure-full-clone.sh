@@ -96,7 +96,7 @@ branches() { git -C "$REPO" for-each-ref --format=. 'refs/remotes/origin' | wc -
 
 NEED=()
 shallow && NEED+=("depth: .git/shallow is present, so history-dependent commands answer from a truncated graph")
-narrow  && NEED+=("refspec: remote.origin.fetch is $(git -C "$REPO" config --get-all remote.origin.fetch | tr '\n' ' '), so origin/<branch> exists for that branch only")
+narrow  && NEED+=("refspec: remote.origin.fetch is $(git -C "$REPO" config --get-all remote.origin.fetch | paste -sd, -), so origin/<branch> exists for that branch only")
 
 if [ ${#NEED[@]} -eq 0 ]; then
   say "clone is complete: $(commits) commits, $(branches) remote-tracking refs under origin/."

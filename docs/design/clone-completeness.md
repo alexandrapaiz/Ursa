@@ -309,8 +309,9 @@ type BranchResult =
   | 'tool_failure';
 
 type IntegrationReport = {
-  base: string;                 // the 40-char sha of origin/main at run time
-  order: string;                // prose rationale for the merge order used
+  generatedAt: string;          // ISO 8601 UTC, from `date -u +%Y-%m-%dT%H:%M:%SZ`
+  baseSha: string;              // the 40-char sha of origin/main at run time
+  orderRationale: string;       // prose reason for the merge order used
   branches: Array<{
     pr: number;
     branch: string;
@@ -401,7 +402,8 @@ discussion and otherwise verbatim:
 
 ```json
 {
-  "base": "1b15771f3e93813b45639e0335d0fda4024ef115",
+  "generatedAt": "2026-10-24T16:58:03Z",
+  "baseSha": "1b15771f3e93813b45639e0335d0fda4024ef115",
   "branches": [
     { "pr": 290, "branch": "ursa-engineer/2026-10-23-message-3", "result": "merged", "conflictedFiles": [] },
     { "pr": 305, "branch": "ursa-engineer/2026-10-24-message-2", "result": "merged", "conflictedFiles": [] },
@@ -526,13 +528,19 @@ over what else was considered.
 | **bash** | 5.2.21(1) aarch64-unknown-linux-gnu | The language of `ensure-full-clone.sh`, `integrate.sh` and `reproduce-collision.sh`. | The repair must run *before* anything else in a checkout, including before `npm install`, and it must be callable from the two existing shell callers without a dependency step. A Node version would be the nicer program and would need `node_modules` to be a precondition of fixing a precondition. Chosen for the dependency order, not for the ergonomics. |
 | **node:test** (Node.js built-in test runner) | Node v22.23.2 | Runs both suites: 18 tests for the repair, 8 for the classification. | Matches `tools/ledger/*.test.mjs`, which is already zero-dependency on purpose because a merge driver has to run during a merge in a bare clone with no `node_modules`. Vitest is already in `ursa-major/` and was not used here: adding a `tools/` dependency on it would make running the gate require an install, which is the same dependency-order problem as above. |
 | **`git worktree`** | part of git 2.43.0 | `integrate.sh` merges into a scratch worktree under `/tmp/ursa-stack-XXXXXX` so the checkout it is run from is never written to. | A second full `git clone` per run would cost a fresh network fetch of a 2,818-commit history to answer a question about refs already present locally. Unchanged by this work; named because the diagram's `$WORKTREE` node is it. |
-| **`file://` transport** | part of git 2.43.0 | Both test suites build a local bare repository and clone it with `--depth 1 --single-branch` over `file://`, which reproduces both faults with no network. | `--depth` is ignored for a plain local-path clone, which hard-links objects instead; `file://` forces the real transport and therefore the real shallow behaviour. A network fixture against GitHub would make the suite slow, flaky and unusable in a sandbox. The equality of the fixture's clone shape with a seat's is asserted in the first test rather than assumed. |
+| **`file://` transport** | part of git 2.43.0 | Both test suites build a local bare repository and clone it with `--depth 1 --single-branch` over `file://`, which reproduces both faults with no network. | A plain local-path clone silently discards the flag, in git's own words: `warning: --depth is ignored in local clones; use file:// instead.` Measured: the local-path clone of a four-commit fixture reports `shallow=false commits=4`, the `file://` clone of the same bare repository reports `shallow=true commits=1`. So `file://` is what makes the fixture a real shallow clone rather than a full one wearing the flag. A network fixture against GitHub would make the suite slow, flaky and unusable in a sandbox. The equality of the fixture's clone shape with a seat's is asserted in the first test rather than assumed. |
 | **python3** | 3.12.3 | Only inside `reproduce-collision.sh`, for the register entry-splitting already there. | Pre-existing. Not introduced by this change and not removed by it, since rewriting that parser was not this run's unit of work. |
 | **gh** (GitHub CLI) | 2.101.0 | `integrate.sh` makes exactly one call, `gh pr list --state open`, to learn which pull requests are open. | Already a declared dependency of that script (`command -v gh` at line 53). The test suite stubs it with a three-line shell script first on `PATH` rather than mocking a library, because one call with a fixed output shape is cheaper to stub than to abstract. |
 
-No new paid service, account, or domain. Steady-state cost stays $0: the one
-new ongoing cost is `git fetch --unshallow`, which took **2.3 seconds** for
-2,818 commits in this run and is bounded by the repository's own size.
+No new paid service, account, or domain. Steady-state cost stays $0. The one
+new ongoing cost is the repair itself, timed end to end on a freshly made
+seat-shaped clone of this repository rather than estimated: **5.7 seconds**
+for both halves, taking the clone from 1 commit and 2 remote-tracking refs to
+roughly 2,600 commits and 154 refs. The `--unshallow` fetch alone was 4.8
+seconds in a separate measurement of the same shape. It is bounded by the
+repository's size, it runs once per caller, and `--check` costs two `git
+config`/`rev-parse` reads and no network at all, which is why the gate form
+is the one safe to call often.
 
 ---
 
