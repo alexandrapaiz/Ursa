@@ -400,7 +400,7 @@ html {
 
    Benchmarked 2026-10-24 for exactly this question. Six sites, every link
    and button drawn as a box, grouped by rendered shape rather than by class:
-   Linear, Vercel, Elicit, Consensus, claude.com, Stripe. Eleven groups of
+   Linear, Vercel, Elicit, Consensus, claude.com, Stripe. Thirteen groups of
    two or more same-shaped controls, and not one gives its members a
    different motion character. Vercel's "Deploy now" and "Talk to sales",
    claude.com's "Try Claude" and "Contact sales", Elicit's "Try now" and
@@ -408,7 +408,7 @@ html {
    each. Stripe is the only group that splits at all, and both halves still
    run 0.3s on the same cubic-bezier(0.25,1,0.5,1); only the property list
    differs. Hierarchy is drawn in colour everywhere, never in physics.
-   Capture in `data/benchmark-control-families*.json`.
+   Capture in `docs/design/reviews/2026-10-24c/data/`.
 
    So nothing new is invented here. This is .cta's own spring, the same
    --spring-lift and the same 340ms, on the one other control shaped like
