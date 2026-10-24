@@ -34,6 +34,19 @@ vocabulary, so each ships a `TRIGGER-TEST.md` whose near misses include
 its siblings' triggers. Read those before adding another skill in this
 area.
 
+As of 2026-10-24 every skill in the library does, for every other skill
+in the library, which `node skills/trigger-coverage.mjs` measures and
+the section below describes. Closing the last nine of those boundaries
+turned up the limit of the artifact test: two of
+`adjudicating-uncertain-spans`' five neighbours name no file in common
+with it at all, and the boundary with them still had to be written down,
+because what they share is the *shape of the judgment* rather than the
+object, and a reader matches on shape. A rule about every record and a
+departure from the machine are both things a span-adjudication skill can
+plausibly be asked to rule on. So §5e is an argument against re-cutting a
+skill with many neighbours, and not a licence to skip a near miss for a
+neighbour it says does not overlap.
+
 They sit in order along one pipeline. The trial skill chooses what to
 resolve and runs it, the adjudication skill settles the labels the
 resolver could not, and the quoting skill decides what the resulting
@@ -104,6 +117,45 @@ proved. When a fingerprint fails, re-point the anchor and then re-read
 the claim against the new lines, since the second does not follow from
 the first, and record the fingerprint in the same commit so the lock
 diff shows a person decided. `prompts/skill-extract.md` §5g is the rule.
+
+## Whether a skill ever fires
+
+```
+node skills/trigger-coverage.mjs           report
+node skills/trigger-coverage.mjs --pairs   every ordered pair's score
+node skills/trigger-coverage.mjs --check    exit 1 if any boundary is untested
+```
+
+The other two guards are about receipts. This one is about the half of a
+skill that decides whether it runs at all, which nothing checked until
+2026-10-24. `prompts/skill-extract.md` §5c asks every skill for one near
+miss per adjacent skill, and adjacency here is every other skill in the
+library, so the tool reads all 30 ordered pairs and asks whether this
+skill's near misses carry that sibling's own trigger prompt.
+
+The failure it exists to catch is arithmetic rather than carelessness.
+The budget is one near miss per neighbour, so landing a sixth skill put
+all five already in the library one short, in five files that run's diff
+never touched, with both receipt guards green and nothing to say so. When
+it was first run the library scored 15 of 30, and the 15 were exactly
+rank by age: the oldest skill covered none of its five boundaries and the
+newest covered all five, six skills and six distinct values in order with
+no ties. The newest looked compliant for the same reason the oldest
+looked negligent, which is position in a sequence.
+
+It is green as of 2026-10-24, at 30 of 30, and that is the state to keep
+it in. Two mechanics a run adding the seventh skill will meet:
+
+- A near miss has to carry the sibling's **own** prompt, not a
+  paraphrase. A paraphrase tests the test's author; the sibling's words
+  test the description, which is the half that would actually catch a
+  false positive. The tool credits a paraphrase whose prose names the
+  sibling, and reports it separately as argued-without-the-prompt.
+- A prompt kept outside the two canonical headings has to say "should
+  not fire" in its own prose, because that is where the tool reads a
+  verdict when there is no heading to inherit from. A prompt that says
+  nothing is reported as unclassified rather than guessed at, since a
+  near miss filed as a should-fire prompt inflates coverage.
 
 ## When main moves under the library
 
