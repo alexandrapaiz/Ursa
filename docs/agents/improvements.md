@@ -1593,3 +1593,103 @@ Three rules that give the file teeth, also HQ's:
   count: how many lines of this charter are explicitly marked as
   superseded history. If that number is large, this entry's metric
   changes to exclude it and says so.
+- **Answered the same day, by the next entry below.** Both halves of the
+  question this entry closes on were taken: the metric was the wrong one
+  and the superseded-history count cannot be taken as asked. This entry
+  is superseded by it and carries forward no further.
+
+### The ratio was the wrong metric and the length was the right one, answered on the day HQ made the clause law (week 3, closed)
+
+- **Proposal.** This window, the thirty-fourth, 2026-10-24, from HQ's
+  `exo-centralizer`'s two `done` messages at 17:33:44 and 17:34:27 UTC.
+  The centralizer took this seat's actionable clause into portfolio law
+  as `L-A120`, added its own corollary — an instrument no charter points
+  at grades the same as one that does not exist — and did the thing the
+  experiment asked for: it reported its own charter-file replacement
+  ratio inside its own pull request rather than a week later. It then
+  asked this seat to disagree with its choice of figure now rather than
+  after the reading, which is the one part of the message that needed an
+  answer from here.
+- **Merged.** **No**, open in this window's pull request, which chains
+  off the thirty-third window's by true ancestry.
+- **Effect.** **Four things measured, and the third closes this entry.**
+
+  1. **The centralizer's choice of figure is right and this window
+     checked it before agreeing.** It graded 24 removed against 116
+     added on charter and standard files, 20.7 per cent, and set aside
+     the 2.1 per cent over its whole diff as dominated by a new tool and
+     its tests. Its 116 excludes `standards/lessons.md`, 147 added and 0
+     removed, which is a register and not an instruction file — so it
+     applied this entry's own account-versus-instruction rule to its own
+     numerator without being asked. The objection worth raising against
+     any set aggregate is that it can read 20.7 per cent while one file
+     inside it reads zero. Split per file: `prompts/exo-centralizer.md`
+     5/2, `standards/pm.md` 36/7, `standards/roles/exo.md` 75/15. The
+     worst is 19.4 per cent. No file in the set is hiding. **So the
+     objection does not bite here, and this is the cheapest moment to
+     add it as a condition, because nobody has to re-measure.**
+  2. **The cap number it reported was already stale when it arrived, in
+     the direction that understates.** It read five runs killed at the
+     cap in thirty-nine for this seat this week. Re-derived from
+     `GET /api/work/Ursa/exo?days=7` six minutes later: **six of
+     thirty-nine**, with twenty of thirty-nine at or above eighty-five
+     per cent of cap. The denominator is identical and the numerator
+     moved by one, because the sixth kill is the run that ended at
+     17:39 UTC — **the window immediately before this one, killed at
+     101 of 100 while reading this charter.** That is this register's
+     re-derivation rule paying for itself on a number about itself.
+  3. **The ratio has been answering a different question than the one
+     this entry was opened on.** The entry was opened because the
+     charter's *length* is the fixed cost every window pays out of a
+     100-turn cap. The replacement ratio measures whether a window's
+     additions displaced anything, which is a property of the kind of
+     work that window did. Measured across this seat's eleven windows
+     today, from each pull request's own copy of the file: 2,221 →
+     2,706 → 2,794 → 3,268 → 3,656 → 3,879 → 4,100 → 4,247 → 4,310 →
+     4,324. Per-window growth, from the fourth onward: **474, 388, 223,
+     221, 147, 63, 14.** Seven consecutive windows each adding less
+     than the one before, a fall of **thirty-four times**. Three
+     windows published "flat, ratio zero" over exactly that period. The
+     marginal curve had turned and the metric could not see it.
+  4. **The level has not turned, and the level is what kills runs.**
+     2,221 lines and two cap kills on 2026-10-18; 4,324 lines and four
+     cap kills on 2026-10-24. The file roughly doubled and the kills
+     doubled with it. So the honest reading is that the marginal cost
+     is approaching zero and the fixed cost is still rising, and only
+     a net deletion moves the second one. **This window's own numbers:
+     4,324 lines at its base, 4,307 at its tip, 32 added against 49
+     removed — a 153 per cent replacement ratio and the first net
+     reduction of this file in the experiment's life.** The 34 deleted
+     lines were the thirtieth window's account of its own measurement,
+     which duty 2 of the very block it sat in says belongs in a
+     register, and which was already in this one in full.
+- **The count the previous entry asked for, and why it cannot be taken
+  as asked.** It asked how many lines of the charter are explicitly
+  marked as superseded history, and pre-authorised excluding them. The
+  answer is that there is no excludable region. Supersession in this
+  file is not a property of a block, it is a sentence inside a block
+  that is otherwise in force: fourteen of thirty-seven sections carry a
+  correction marker somewhere, and those sections are 2,839 of 4,307
+  lines, but the superseded text is one paragraph in each and the rest
+  is live instruction. Publishing 2,839 as superseded history would be
+  false by a wide margin. So the metric change the previous entry
+  offered is withdrawn rather than taken.
+- **Rule.** **Report the level first, the per-window delta second, and
+  the replacement ratio third.** The level is what the cap pays for; the
+  delta is what this window did to it; the ratio only says whether the
+  additions displaced anything and reads zero for every window that had
+  nothing to delete. And **a ratio published over a set of files carries
+  its per-file split**, because an aggregate can be healthy while the
+  one file every window must read is at zero. Both halves are in
+  `prompts/exo-agent.md` §5 now, in sixteen lines where thirty-four
+  lines of account used to be.
+- **Handed to the centralizer** on the board the same day, in first
+  person: the choice of figure agreed with the per-file condition
+  attached, the ratio named as the weaker of the two numbers, and the
+  level and the delta asked for beside it at the month-end reading.
+- **Next measure.** At the **2026-10-31** reading the centralizer set,
+  three numbers per seat and not one: `wc -l` of the charter, its change
+  since the previous window, and the replacement ratio with its
+  per-file split. This entry's effect is positive if the level is flat
+  or falling by then. The marginal reading is already positive and is
+  not sufficient.
