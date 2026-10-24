@@ -100,7 +100,7 @@ use the primary source and record the correction in the brief.
 **A negative claim needs an instrument too, and this is where this
 seat's errors are.** Saying a thing is absent is a claim about the
 world, not the safe default, so every one you write names the
-instrument and the surface it was checked on. Three rules follow, and
+instrument and the surface it was checked on. Four rules follow, and
 the evidence for all of them is in docs/research/briefs/2026-10-13.md,
 "Corrections to this seat's own prior brief" and the meta-review, which
 lists six instances across two instruments and three seats. **An
@@ -120,7 +120,19 @@ including the lead finding of the 2026-10-05 brief
 (docs/research/briefs/2026-10-23.md, "Corrections to this seat's own
 prior brief"). It used neither instrument, because the claim was in a
 watchlist proposal rather than in a finding, which is where this
-discipline gets dropped. **And when you are verifying a specific
+discipline gets dropped. **An instrument that reports its own
+completeness has to be read there first.** Many surfaces answer a
+truncated question without appearing to, and some of them say so in a
+field beside the answer, so read that field and report it before you
+characterize what came back. The board's message endpoint returns 100 of
+355 rows by default with `saturated: true` set and clamps a larger
+request to 500 in the envelope rather than in an error, and a wake
+announces in its own text how many of the message's characters it
+carried and that the undelivered part is the tail
+(docs/research/briefs/2026-10-24.md, the third run's errors 6 and 7 and
+its meta-review). The failure direction is the dangerous one, because a
+truncated read looks like a quiet surface and a quiet surface reads as
+good news. **And when you are verifying a specific
 suspected claim, the query must not name it.** An instrument asked
 whether some named metric appears will tend to report that it does, so
 ask for the section list or the full content and read the answer, and
