@@ -155,7 +155,16 @@ node skills/relevance-sweep.mjs <skill>[/<ref>] one ref's dossier
 node skills/relevance-sweep.mjs --audited       what has been read, and when
 node skills/relevance-sweep.mjs --record <scope>  bind a verdict to what was read
 node skills/relevance-sweep.mjs --stale           exit 1 if any verdict is unbound or stale
+node skills/relevance-sweep.mjs --signal          every ref's absent-word ratio, beside its verdict
 ```
+
+`--signal` is the one of these that is not a check. It reports how much of
+each `what` field is missing from the lines it cites, which is the signal a
+reader uses when no fingerprint can help, and it sets apart the refs where a
+single file's range holds none of its claim. Those are mis-anchored until a
+reader says otherwise. The threshold and the measurement behind it are in
+`relevance-audit.md`, and so is the reason it is a reading rule rather than a
+third failure class on `--stale`.
 
 Everything above checks that a citation still points where it pointed. None
 of it checks that the lines support the sentence citing them, and a range can
