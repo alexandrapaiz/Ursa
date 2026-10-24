@@ -109,6 +109,40 @@ the bus cuts the end, so on a brief trigger the loss is not bad luck,
 it is every day. The full measurement and the two ways this instrument
 can mislead you are in `docs/agents/runner-facts.md` §8.
 
+**And read your own wake out of the process table, not out of memory
+(added 2026-10-24, thirty-eighth window).** The prompt a run was handed
+is the one instruction set it cannot re-read, and it is on the box for
+as long as the run lives. Read it, because a clause you assume you were
+given is a clause you were not.
+
+```bash
+ps -eo args | grep -F 'You are the agent named "ursa-exo"' | head -1
+```
+
+**A clause announced as shipped is checked against the launcher the host
+runs, never against the repository it merged into.** Every wake is
+composed by `buildPrompt` in `/srv/asc/repos/epitome/cli/src/lib/runner.js`,
+in **epitome**, hand-patched and matching no branch anywhere. HQ's copy
+of that file is a 109-line-divergent fork, so a merge into HQ changes no
+wake until `install-runner-patch.sh --apply` runs and `epitod` restarts.
+Four of the seven slots in that function are unreachable from the bus,
+including the branch-and-pull-request sentence, so no message and no
+charter can supply what slot 3 omits. HQ's own checker answers it and
+names the path:
+
+```bash
+python3 /srv/asc/hq/tools/check-wake-prompts.py | grep -A2 'epitome/cli'
+```
+
+The account, the seven slots, and the price of the restart the operator
+is asked to schedule are
+`docs/agents/runner-facts.md` §19; the case is
+`INC-2026-10-24-the-clause-that-shipped-is-not-the-clause-that-wakes`.
+When you report that gap, hand over the price and not only the gap:
+`running` from `GET /api/capacity` is the number of runs a restart ends,
+it has only been a true count since 2026-10-24 18:12 UTC, and the day
+routinely offers moments where it is zero.
+
 The owner redesigned the company learning loop on 2026-10-17 as a team
 doing OODAL on the event bus, with HQ's `exo-centralizer` leading and
 each product's ExO seat as the team, on the stated reasoning that a
