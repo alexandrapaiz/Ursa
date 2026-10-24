@@ -887,3 +887,65 @@ obligation on whoever is unlucky, and this library has now paid for that
 twice, once at §5o for a verdict that could expire silently and once here
 for a fingerprint that could be owed forever. When a section adds a duty,
 it should say which run discharges it.
+
+## 5r. The near miss carries the sibling's own words, and a §5c debt falls on the run that creates it
+
+(Added 2026-10-24, seventeenth run, amending §5c and §5e.)
+
+§5c asks for "the adjacent skill's own trigger prompt" and nothing in
+this file ever said who owes it or how to tell whether it is there.
+`skills/trigger-coverage.mjs` now reads all of it, and the first run of
+it found the rule was being broken in a way no seat could have noticed:
+of 30 ordered pairs, 15 carried the sibling's own prompt, and the 15
+were exactly rank by age. Six skills, six distinct coverage values, in
+order, with no ties. Every skill tested the siblings that existed on the
+day it was written and none had come back.
+
+Three rules follow, and the third is the one with teeth.
+
+**The prompt is copied, not paraphrased.** A near miss written in the
+author's own words about the sibling tests the author. The sibling's own
+words test the description, which is the half of §5 that would actually
+catch a false positive. One test in this library paraphrased a sibling's
+trigger, correctly, and the paraphrase scored 0.333 against the original,
+which is below any defensible floor. Say which boundary a near miss
+tests in its prose as well, because a declaration is cheap and an
+author's claim about what a test does is better evidence than any
+resemblance measure. Both, not either.
+
+**A prompt outside the two canonical headings states its own verdict.**
+`TRIGGER-TEST.md` may keep a prompt under its own heading, and there is
+a good reason to: the heading records when a boundary was noticed. The
+cost is that nothing above it says whether it fires, so the prompt's own
+prose has to say "should not fire". Three prompts written in this run
+were missing that sentence and the tool reported them as unclassified
+rather than guessing, which is the correct behaviour and also the
+cheapest possible way to learn this.
+
+**The run that lands a skill owes a near miss to every skill already in
+the library, in their files, in the same pull request.** This is the
+teeth, and it is §5q's rule applied to triggers: an obligation with no
+owner is an obligation on whoever is unlucky. A new skill does not
+create a debt for its own `TRIGGER-TEST.md`; it creates N debts in N
+files the run's diff would otherwise never touch, and both receipt
+guards stay green while they go unpaid. Run
+`node skills/trigger-coverage.mjs --check` before readying the pull
+request. It exits 1 on an untested boundary and prints "every skill
+meets §5c" when there is none.
+
+**One amendment to §5e.** §5e says to count artifacts rather than
+neighbours, and that stands as an argument against re-cutting a skill
+whose many boundaries are one edge counted many times. It is not a
+licence to skip a near miss for a neighbour the artifact test says does
+not overlap. `adjudicating-uncertain-spans` has two neighbours sharing
+no file with it at all, the record gate and the release ruling, and the
+boundary with both of them had to be written down anyway: what is shared
+is the *shape of the judgment*, a rule asserted more confidently than
+its evidence carries, and a reader matches on shape. Those two were also
+the two near misses that failed, because an exclusion list built from
+artifacts cannot name a neighbour that has none.
+
+Ours: the budget is per neighbour and the test for whether a boundary is
+real is not the same as the test for whether it needs writing down. The
+artifact test answers the first. Only reading the sibling's trigger
+against this description answers the second.
