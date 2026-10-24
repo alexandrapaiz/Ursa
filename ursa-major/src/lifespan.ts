@@ -76,6 +76,27 @@ export interface FileRevision {
 }
 
 /**
+ * One rename the walk actually crossed, as opposed to one that exists in
+ * the history. The distinction matters because `traceFile` stops walking
+ * the moment every unit of every span is dead, so a rename later than that
+ * commit was never looked at and must not be counted.
+ *
+ * The three fields together are the rename's identity, which is what makes
+ * the record-level `distinctRenamesFollowed` a count and not a sum: two
+ * files that moved in one commit are two crossings with different path
+ * pairs, and one file whose four spans all crossed the same move is one
+ * crossing reported four times.
+ */
+export interface RenameCrossing {
+  /** the commit that performed the rename */
+  sha: string
+  /** the path the file left */
+  from: string
+  /** the path it took in that commit's tree */
+  to: string
+}
+
+/**
  * The first commit in `sha..HEAD` at which `path` stopped existing,
  * or null if it never did. `--diff-filter=D` with a pathspec and no
  * rename detection is what makes this cheap: git reports a rename-away
@@ -227,8 +248,9 @@ export function headSha(repoPath: string): string | null {
  * *that* a rename happened. Instead the rename is resolved explicitly, with
  * `firstVanish` and `renameTarget` above, and recorded on the revision
  * (`FileRevision.renamedFrom`) and on the record (`SpanLifespan.renamedTo`,
- * `Durability.renamesFollowed`), because a walk that silently crosses a
- * rename is a walk a reviewer cannot audit.
+ * `Durability.spanRenameCrossings` and `Durability.distinctRenamesFollowed`),
+ * because a walk that silently crosses a rename is a walk a reviewer cannot
+ * audit.
  */
 export function revisionsAfter(
   repoPath: string,
@@ -341,6 +363,13 @@ export function traceFile(
   spans: FinalSpan[],
   closedAt: string,
   revisions: FileRevision[],
+  /**
+   * Out-parameter: every rename this walk crossed is appended here, in the
+   * order crossed. Optional because the per-span and per-file numbers do
+   * not need it; `annotateDurability` passes one array across all files so
+   * it can count distinct renames instead of summing per-span counts.
+   */
+  crossings?: RenameCrossing[],
 ): FinalSpan[] {
   // The path the record knows, which decides how the span's own text is cut
   // into units. A rename that also changes the extension does not change
@@ -390,7 +419,13 @@ export function traceFile(
   for (const rev of revisions) {
     if (remaining === 0) break
     const text = blobAt(repoPath, rev.sha, rev.path)
-    if (rev.renamedFrom) renamesFollowed++
+    if (rev.renamedFrom) {
+      renamesFollowed++
+      // Appended here and not in the loop header, so a rename in a revision
+      // the walk never reached — the loop breaks above once every unit is
+      // dead — is never claimed as crossed.
+      crossings?.push({ sha: rev.sha, from: rev.renamedFrom, to: rev.path })
+    }
     lastPath = rev.path
     // A null blob means this revision deleted the file. That is a real
     // death for every unit in it, not a reason to skip the revision.
@@ -486,9 +521,13 @@ export function annotateDurability(
   maxRevisions = MAX_REVISIONS,
 ): OutcomeRecord {
   const tip = headSha(repoPath)
+  // One array across every file in the record, so a rename is identified
+  // once globally. Collected by traceFile, which appends only the renames
+  // its own walk actually reached.
+  const crossings: RenameCrossing[] = []
   for (const file of record.files) {
     const revisions = revisionsAfter(repoPath, closingSha, file.path, maxRevisions)
-    traceFile(repoPath, file.path, file.spans, closedAt, revisions)
+    traceFile(repoPath, file.path, file.spans, closedAt, revisions, crossings)
   }
 
   let testedSpans = 0, durableSpans = 0, erodedSpans = 0, decayedSpans = 0
@@ -496,14 +535,17 @@ export function annotateDurability(
   let baseDurable = 0, baseDecayed = 0
   // Summed over spans rather than over files, so it is the count a reader
   // of the span records can reconcile against; a file whose three spans
-  // each crossed one rename contributes three.
-  let renames = 0
+  // each crossed one rename contributes three. Reported as
+  // `spanRenameCrossings`, because that is what it is: the name
+  // `renamesFollowed` on this quantity told a reviewer that three files
+  // had moved when one had.
+  let spanCrossings = 0
   const lifetimes: number[] = []
 
   for (const file of record.files) {
     for (const span of file.spans) {
       const life = span.lifespan
-      if (life?.renamesFollowed) renames += life.renamesFollowed
+      if (life?.renamesFollowed) spanCrossings += life.renamesFollowed
       if (!life || life.fate === 'untested') continue
       if (SURVIVING.has(span.class)) {
         testedSpans++
@@ -523,6 +565,16 @@ export function annotateDurability(
     }
   }
 
+  // A rename counted once, keyed on the commit that performed it and the
+  // path pair it moved. traceFile appends one entry per revision it crosses,
+  // so `crossings.length` is already per-file rather than per-span; the Set
+  // is what makes the number safe when two walks reach the same rename,
+  // which happens when a record lists the same path in two FinalFile
+  // entries. Summing the per-span field, which is what the old
+  // `renamesFollowed` did, cannot be rescued that way: it multiplies one
+  // move by the number of spans sitting in the file that moved.
+  const distinctRenames = new Set(crossings.map((c) => `${c.sha}\u0000${c.from}\u0000${c.to}`)).size
+
   const baseTotal = baseDurable + baseDecayed
   const total = durableChars + decayedChars
   record.durability = {
@@ -540,7 +592,11 @@ export function annotateDurability(
     medianIntactSeconds: median(lifetimes),
     maxRevisionsWalked: maxRevisions,
     minTraceableLen: MIN_TRACEABLE_LEN,
-    ...(renames > 0 ? { renamesFollowed: renames } : {}),
+    // Both absent rather than 0 when the walk crossed nothing, so a record
+    // from before the walk could follow a rename stays indistinguishable
+    // from one whose files never moved. See the field comments in types.ts.
+    ...(spanCrossings > 0 ? { spanRenameCrossings: spanCrossings } : {}),
+    ...(distinctRenames > 0 ? { distinctRenamesFollowed: distinctRenames } : {}),
   }
   return record
 }
