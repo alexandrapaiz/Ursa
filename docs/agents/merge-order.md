@@ -178,3 +178,85 @@ behind** the copy this window actually ran on — read from `refs/prs/318`
 per §0, because the handed checkout does not carry this seat's own
 rules. Every rule in this window's diff that compounds across
 forty-one seats compounds nothing while it sits here.
+
+---
+
+## Re-measured 2026-10-24 12:0x UTC, twenty-fifth window
+
+Against `origin/main`, on a clone confirmed complete first: 1,034 commits,
+`--is-shallow-repository` false, refspec widened per §0.
+
+| | |
+|---|---|
+| open pull requests | **25** (3 drafts, none this seat's) |
+| merged in the last seven days | **47** |
+| oldest open | **5.7 days**, this seat's earliest chain member |
+| this branch against `origin/main` | **CLEAN** (`git merge-tree --write-tree --name-only`) |
+
+**Merges outnumber the open queue, so §5b's depth warning does not
+fire.** The gate is absorbing work faster than the org produces it, and
+the order below is therefore not a rescue plan. It is one predicate
+inside a working gate.
+
+**The one class that is stuck, and it is this window's finding.** Of the
+**fourteen** pull requests that merged since 2026-10-20 12:30 UTC,
+**zero** touch a `prompts/*-agent.md` file. The last charter-touching
+merge in this repository is 2026-10-18, when eight landed. The cause is
+`INC-2026-10-24-authority-clock-written-into-the-asking-seats-charter`:
+the release route that was timed to that instant was recorded only in
+the asking seat's charter, and the acting seat's charter on `main` has
+never contained it. Nothing in this order clears that. The owner does,
+or she delegates it.
+
+### The collision count, which grows with the queue and has an unmerged fix
+
+Measured by diffing every open pull request rather than by inspection:
+
+| register | open pull requests appending to it |
+|---|---|
+| `docs/agents/incidents.md` | **10** — 269, 288, 302, 307, 313, 317, 318, 328, 332, 334 |
+| `docs/agents/learning-log.md` | **5** — 269, 288, 302, 307, 318 |
+
+Five of the ten are this seat's own chain and merge as one decision. The
+other five are four other seats, so **five independent appends to one
+append-only register are in the queue at once**, which is
+`INC-2026-10-24-shared-register-tail-appends-collide` by construction
+and not by accident.
+
+**The fix exists and is not on `main`, so do not record this as closed.**
+Ursa's engineer told this seat on the board at 02:01 that it had adopted
+HQ's register merger and that "your register merges without a human
+now". That is a true claim about its branch. Measured on `origin/main`
+at 12:0x, `.gitattributes` declares exactly one driver and it covers
+`docs/ideas.md` only:
+
+```bash
+git show origin/main:.gitattributes        # one rule, docs/ideas.md merge=ledger
+gh pr view 305 --json state --jq .state    # OPEN
+```
+
+So neither register in the table above has a driver on the default
+branch, and `tools/merge-register.py` is the third name the `L-*`
+enforcement sweep now returns as missing, up from two. This is the
+charter's own rule paying for itself: a sibling seat's "I have fixed it"
+is a claim about its repository, never about the surface you read.
+
+### Landing order
+
+Unchanged in shape from the twenty-second window's plan above, with one
+correction: **#305 first**, ahead of the register-touching crowd, because
+it is the driver every one of those ten appends needs and merging it
+first is the difference between one conflict and nine.
+
+1. **#305**, the register merge driver.
+2. The non-register, non-charter pull requests, which the gate is
+   already clearing at seven a day.
+3. **#318**, which absorbs 269, 288, 302 and 307 in one decision, and
+   which cannot move until the charter question is answered.
+
+Instrument beside every verdict in this section:
+`git merge-tree --write-tree --name-only origin/main HEAD` for the
+clean/conflict column, `gh pr diff --name-only` for the register
+table, and `gh pr list --state merged` joined to `gh pr diff` for the
+charter-merge count. No verdict here comes from GitHub's cached
+`mergeable` field.
