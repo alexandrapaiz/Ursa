@@ -3949,3 +3949,73 @@ on which this seat published an autonomy grade it had to retract.
 **Status:** fixed here. The grade Ursa publishes this window is **62%
 floor with 38% unresolved**, which is above HQ's one-third blind
 threshold, so **this window publishes no autonomy grade** and says why.
+
+## INC-2026-10-24-shared-register-tail-appends-collide — Two seats appending to one append-only register conflict by construction, and every conflict instrument this organization runs reports both branches clean
+
+**What happened.** On 2026-10-24 the PM's `#301` and this seat's `#302`
+both appended an entry to the tail of `docs/agents/incidents.md`. Run
+against `main`, both are clean: `git merge-tree` exits 0 on each,
+GitHub reports both `MERGEABLE`, and HQ's `check-merge-queue.sh`
+reported all fourteen open pull requests clean except one, in the same
+minute. Run in sequence, **whichever of the two lands second
+conflicts**, in either order.
+
+The ExO charter's §5b requires the landing order to be verified by
+actually performing the merges in a scratch worktree, "because an order
+that has not been simulated is a guess." That step has been in the
+charter since 2026-10-04. This is the first time it has caught
+anything.
+
+**Why it is structural and not bad luck.** An append-only register has
+exactly one write position, its last line. Two appends to one file's
+last line is the single edit shape git cannot resolve. So any two seats
+that both write `docs/agents/incidents.md` on the same day collide, with
+probability one, and the collision is invisible until the second merge
+is attempted. The register's value comes from being append-only and
+shared, which is the same property that guarantees the conflict.
+
+**Why no instrument sees it.** Every conflict check in this
+organization answers "does this branch merge into `main`". None answers
+"does this branch merge into `main` after the rest of the queue has".
+Those are different questions whenever two open branches touch one file,
+and the first is the only one anybody runs, because it is the one that
+has a cheap per-branch command. A queue of N branches has N answers to
+the first question and one answer to the second, and the second is the
+one the owner acts on.
+
+**What it costs, and why it has been invisible.** Nothing visible, which
+is the point. The cost lands on the owner as a merge that fails after
+she clicks, on a file she did not change, with no warning from any
+report she was given. It has almost certainly happened before and been
+absorbed as ordinary friction, because a conflict discovered at merge
+time looks like the normal cost of a queue rather than like a defect in
+the instruments that were supposed to predict it.
+
+**Fix, in two parts.**
+
+1. **Shipped here.** `#302` absorbed `#301` and resolved the register,
+   keeping both seats' entries. Re-simulated in both orders afterwards:
+   all seven merges in the plan succeed either way. The conflicted
+   branch was this seat's to rebase under `docs/standards/pm.md` §11.3,
+   being the newer of the two.
+2. **Standing.** The simulation in §5b is not optional and is not a
+   formality, and this entry is the evidence. Run it every window, and
+   when it fails, **name the file rather than the pair**, because the
+   pair is this week's accident and the file is the recurring cause.
+
+**What the org grew from it.** A conflict instrument inherits the
+question it was built to answer, and this one was built to answer
+"is this branch rebased". **A clean verdict from every per-branch check
+is not a prediction that the queue lands**, and a report that presents
+it as one is making a claim it never measured. Say "thirteen of fourteen
+merge into `main`" and then say separately whether the order was
+simulated, because those are two findings and this register has spent
+three weeks publishing the first as though it were both.
+
+**Filed with** `INC-2026-10-18-hq-tool-paths-are-hq-s` and Ursa incident
+17, the other two occasions on which a conflict verdict was true about
+what it measured and false about what it was read to mean.
+
+**Status:** fixed here for this pair. The general case recurs on any day
+two seats write the register, and the simulation is the only thing that
+catches it.
