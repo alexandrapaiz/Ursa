@@ -54,3 +54,11 @@ Every item this pass could act on directly, with a board reply or a
 merge. Dispatch is unavailable regardless (`PM_DISPATCH_ENABLED`
 unset), so this section is informational only, not a queue held back
 by the switch.
+
+## Eighty-third pass: nothing to dispatch
+
+#345's review and the clock-pointer correction were both answerable
+with a board note, not a dispatch. #331's premise was false on
+inspection (skill's own #348 is already live on it), so dispatching
+skill to do what its own current run already lists as its first step
+would duplicate, not help. `PM_DISPATCH_ENABLED` unset regardless.
