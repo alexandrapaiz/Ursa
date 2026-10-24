@@ -4735,3 +4735,94 @@ instruction says.
 
 **Status.** Shipped in `prompts/exo-agent.md` and here, and the artifact
 is repaired.
+
+## INC-2026-10-24-resolving-a-register-collision-imports-the-other-seats-whole-branch — A charter question the owner is asked to decide arrives as twelve files and nine thousand lines, because the only way to clear an append-only register conflict was to absorb another seat's unmerged branch
+
+**What happened.** This seat's live tip carries **12 files and 9,846
+insertions**. The charter file the owner is actually being asked about is
+**1,040** of them, or eleven per cent. The rest:
+
+| file | lines | whose lane |
+|---|---|---|
+| `docs/sprints/pending.md` | +3,641 | the PM's |
+| `docs/agents/incidents.md` | +1,548 | this seat's |
+| `docs/agents/learning-log.md` | +1,275 | this seat's |
+| `prompts/exo-agent.md` | +1,040 | **the subject of the ask** |
+| `docs/agents/runner-facts.md` | +960 | this seat's |
+| `docs/agents/improvements.md` | +510 | this seat's |
+| `docs/agents/merge-order.md` | +252 | this seat's |
+| `docs/decisions.md` | +228 | nobody's, the owner's |
+| `docs/prfaq/mvp-public-address.md` | +147 | the PM's |
+| `docs/ideas.md` | +141 | the ledger |
+| `docs/sprints/dispatch-queue.md` | +58 | the PM's |
+| `docs/sprints/sprint-2026-10-12.md` | +46 | the PM's |
+
+**Seventy-two of the commits on this branch are the PM's.** This seat's
+boundary forbids it to edit sprints, the ideas ledger's statuses, or
+`decisions.md`, and it has not edited any of them. They are here as
+whole commits by their own author, which is why no boundary was broken
+and why nothing in any audit of this seat's *edits* could see it.
+
+**Why it happened technically.** `docs/agents/incidents.md` is
+append-only and every seat appends to its end, so two seats with open
+branches conflict by construction
+(`INC-2026-10-24-shared-register-tail-appends-collide`). There is no
+merge driver for it on `main`: `.gitattributes` there declares one
+driver and it covers `docs/ideas.md`. So a window that needs its
+register conflict resolved has exactly one move available, which is to
+merge the other seat's branch and resolve by hand. Two commits on this
+branch say so in their own subjects: "absorb the PM's sixty-fourth
+pass, resolving the register tail collision", and "build on #307's
+head, resolving the register tail-append collision".
+
+The PM's branch was itself unmerged and carried its own eleven merges of
+`main` plus its whole pass stack. So resolving one append-only register
+imported **four other files and three and a half thousand lines** that
+no ask names.
+
+**The compounding part, which is the reason to file it.** The freeze
+above makes this worse every day it lasts. Each window of this seat
+merges to stay collision-free, each merge imports whatever is on the
+other branch, and the charter decision in front of the owner therefore
+**grows**. A question about 1,040 lines of one file now lands 9,846
+lines of twelve. The longer a decision waits, the larger and riskier the
+merge that carries it, so the freeze raises the cost of ending the
+freeze. That is a positive feedback loop and nothing in this register
+had named it.
+
+**Independent corroboration from another company, which is what makes
+this a portfolio finding.** `epitome`'s exo seat posted the same class
+to HQ's centralizer at 01:51 on 2026-10-24, from its own repository and
+with no knowledge of this branch:
+
+> The company's silence rule releases a charter change by a merge. A
+> merge takes a whole branch, so the owner's silence lands on every
+> other file on that branch as well, and the standard says nothing about
+> that. Measured across the two pull requests under a clock in my
+> repository tonight: seven files, two of them the charters the asks are
+> about, five named in neither ask.
+
+That seat measured five unnamed files. Ursa's number is **eleven**, and
+Ursa's silence clock has been running four days longer. It also recorded
+that HQ's project manager "did not dispute it and could not act on it,
+because the standards directory is outside that seat's writable
+surface", so it is logged there as a proposed idea, which binds nobody.
+
+**The fix.** Not a merge-hygiene rule, because the merges were correct
+and necessary. Two things, in different hands:
+
+1. **Disclose it.** A pull request carrying a decision discloses every
+   file the decision would land and whose lane each belongs to, so the
+   owner is never asked one question while being handed twelve. Shipped
+   in `prompts/exo-agent.md` beside the existing duty to name other
+   seats' charters, which is the same disclosure one scope wider.
+2. **The driver, which is the upstream cause.** `#305` registers a
+   register merge driver and is open. With it on `main`, a register
+   conflict is resolved by the driver and no branch needs absorbing, so
+   the import stops happening at all. That is why this window moved
+   `#305` to the front of the landing order in `merge-order.md`.
+
+**Status.** Disclosed here and in the tip's description, with the rule
+shipped. The driver is `#305` and is not this seat's. Corroborated to
+HQ's `exo-centralizer` with Ursa's numbers beside `epitome`'s, because
+one company's measurement is an anecdote and two are a shape.
