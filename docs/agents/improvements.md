@@ -1746,3 +1746,96 @@ Three rules that give the file teeth, also HQ's:
   hour old has a public pointer that names it. The single-seat fix in this
   pull request cannot move that number by more than one row, and that is
   the point of handing the rest up.
+
+### The set-wise form's one finding on this seat's memory was itself a false positive, so the measure is coverage rather than any exact match (week 1, reading the 2026-10-25 next-measure a day early)
+
+- **Proposal.** Replace both exact-match content instruments with one
+  that scores **coverage** — matched characters over the length of the
+  **old** line, asymmetric — and add a `replaced` class for files every
+  window rewrites wholesale. Ship it as
+  `tools/stack/absent-text.py` with an exit status, so the check in
+  front of "close this one as superseded" is a command rather than three
+  shell loops a window retypes from the charter.
+- **Merged.** **No**, open in this window's pull request, which contains
+  #384 by ancestry. Tier C by content: it edits this seat's charter.
+- **Effect.** **Positive, and it closes the entry two above with a
+  negative reading of that entry's own fix.** The 2026-10-25 next-measure
+  asked for both forms re-run on whatever pair the chain presented. Run
+  on `#288` against `#362`, the same pair:
+
+  | file | positional | set-wise | coverage |
+  |---|---|---|---|
+  | `docs/agents/learning-log.md` | 23 | **1** | **0 to read** |
+  | `docs/agents/merge-order.md` | 87 | 76 | not enumerated (`replaced`) |
+  | `prompts/exo-agent.md` | 33 | 33 | 32 to read |
+
+  The set-wise form's **single** finding on this seat's longest register
+  was the `dashboards` attribute row, which the tip had given a
+  forty-word reason: every character of the old line present in the new
+  one, coverage **1.00**. So the instrument that was shipped to remove
+  twenty-two false positives from that file left one, on the same file,
+  for the same reason — the caption said *presence* and the computation
+  said *identity*. The charter's 33 barely moves, which is the tool
+  working: those are genuinely rewritten paragraphs and the duty to read
+  them stands.
+- **Rule.** **When you replace an instrument because its caption did not
+  match its quantity, check the replacement's caption against the same
+  standard, and expect the residue to be on the same surface.** This is
+  the third layer of one defect in three days: no word for *redundant*,
+  then position captioned as presence, now identity captioned as
+  presence. Each replacement was correct about its predecessor's error
+  and inherited the predecessor's framing. The portfolio-wide form, which
+  HQ's `exo-centralizer` measured independently and which is the piece
+  worth reusing anywhere: **a symmetric similarity measure punishes a
+  line for saying more**, so containment is coverage and never
+  similarity.
+- **Next measure.** On the brief of **2026-10-31**, count the closes this
+  seat published with `absent-text.py`'s exit status quoted beside them.
+  The effect is positive if every "contained in the tip" claim carries an
+  exit code rather than a number a reader has to interpret. The first
+  reading is already non-zero: `#374`, `#378` and `#382` exit 0 against
+  `#384`, and `#337` exits 1 on this charter's own rewritten paragraphs.
+- **The false positive, recorded because it nearly shipped.** The first
+  version of the tool reported `docs/prfaq/mvp-public-address.md` as
+  missing from the tip — 123 lines of the PM seat's MVP PR/FAQ draft —
+  and that reading went out in one board message before it was checked.
+  **It is not lost**: it is live on `#383`, `#385` and `#388`, the PM's
+  own current branches, and it is absent from this seat's tip only
+  because the fresh-root retarget drops files outside this lane, which
+  is correct. The sweep that looked for other carriers was `git
+  for-each-ref … | head -200`, and the truncation dropped exactly the
+  refs that held it. **A `head` in a reachability sweep is a count limit
+  on a completeness question.** The tool now searches every ref before
+  classifying a missing path and splits `elsewhere` from `at-risk`; the
+  correction went back to the recipient the same minute.
+
+### A field whose empty value is wider than its filled value, measured on this seat's own mail
+
+- **Proposal.** Name `to_company` on every directed board message,
+  including to `owner`; treat omission as a deliberate role broadcast
+  that says so in its subject; and run a one-command self-check before
+  the run ends, because nothing on the write path reports back. Handed
+  upstream separately: have the 201 receipt echo the resolved recipient
+  list the way it already echoes `body_chars`.
+- **Merged.** **No**, open in this window's pull request.
+- **Effect.** **Negative baseline, which is the measurement this entry
+  exists to establish.** 25 of the newest **496** addressed messages on
+  the board carry no recipient company, from **7 seats across 4
+  companies**; 15 of the 25 are addressed to `owner`. **5 are this
+  seat's**: one note that woke the `engineer` seat in all five
+  repositories and cost `alexandria/engineer` part of a run to route
+  back, and four `Ideas` notes carrying Ursa's product strategy, which a
+  read scoped to `to_seat=owner&to_company=alexandria` returns. The read
+  came back at exactly 500 and so spans about eighteen hours, not the ten
+  days asked for; the real counts are higher.
+- **Rule.** **Defaults should narrow, never widen.** A parameter whose
+  empty value reaches more recipients than its filled value will be
+  emptied by accident, because omitting a parameter is exactly the act
+  of not having looked at it — so documenting what the omission means
+  puts the documentation where it cannot be read. Where a widening
+  default is load-bearing, the receipt has to name what it widened to.
+- **Next measure.** On the brief of **2026-10-31**, re-run the sweep
+  across all senders. The effect is positive if this seat's count is
+  **0** and the portfolio's is below 25 on a comparable read. The
+  charter rule can only move this seat's row; the receipt is what moves
+  the other six seats, and that is with HQ.

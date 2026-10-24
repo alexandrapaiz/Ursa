@@ -64,6 +64,22 @@ one register row a reader actually had to check under ninety-two deliberately
 rewritten lines. A file counts as replaced when fewer than --replaced of its
 old lines are exact or extended in the tip.
 
+AND ONE CLASS BELOW THE LINE, added within the hour by the measurement that
+nearly went out wrong. A file in the old branch and absent from the tip is
+only at risk if it is absent from EVERYWHERE. This seat answers the scope
+clause by copying its own lane onto a fresh root and dropping files that
+belong to other seats, so `missing in tip` is the *expected* reading for any
+file outside the lane, and on the first real run it named 123 lines of
+another seat's draft. That draft is live on three open pull requests. So a
+missing path is looked for on every other ref before it is called a risk,
+and the honest classes are:
+
+  elsewhere  missing from the tip and present on some other ref, which is
+             named. Not a risk, and for this seat usually just a file that
+             is not its lane.
+  at-risk    missing from the tip and present on NO other ref. This is the
+             one that earns an exit code.
+
 Nothing here decides anything. A non-zero exit means a human reads lines, in
 the order this prints them, which is the order the charter already requires:
 a count is not evidence, only the sentence tells you which you have.
@@ -157,6 +173,24 @@ def build_index(tip_lines):
     return index
 
 
+def refs_carrying(path, globs):
+    """Every ref in `globs` whose tree has `path`.
+
+    Deliberately unbounded. The first version of this check was a shell loop
+    over `git for-each-ref ... | head -200`, and the truncation dropped the
+    three open pull requests that actually carry the file, so the answer to a
+    completeness question was decided by a count limit. The charter's own rule
+    is "bound a read by time, never by count"; this is the same defect with no
+    bound at all in its place.
+    """
+    out = []
+    refs = git("for-each-ref", "--format=%(refname)", *globs).stdout.splitlines()
+    for ref in refs:
+        if git("cat-file", "-e", f"{ref}:{path}").returncode == 0:
+            out.append(ref)
+    return out
+
+
 def classify(cov, cover, rewritten):
     """`exact` is never returned here, and that is deliberate.
 
@@ -189,6 +223,10 @@ def main(argv=None):
                    help="a file with fewer than this fraction of its lines exact-or-extended is reported as replaced wholesale (default 0.25)")
     p.add_argument("--topk", type=int, default=12,
                    help="candidate tip lines scored per old line, after the word prefilter")
+    p.add_argument("--refs", nargs="*",
+                   default=["refs/prs", "refs/remotes/origin", "refs/heads"],
+                   help="ref namespaces searched for a path missing from the tip, before "
+                        "calling it at risk (default: refs/prs refs/remotes/origin refs/heads)")
     p.add_argument("--json", dest="json_out", default=None)
     p.add_argument("--quiet", action="store_true",
                    help="print the per-file summary only, not the lines")
@@ -219,9 +257,18 @@ def main(argv=None):
         old_lines = lines_of(show(a.old, path))
         tip_blob = show(a.tip, path)
         if tip_blob is None:
-            report["files"][path] = {"class": "missing-in-tip", "old_lines": len(old_lines)}
-            print(f"{path}: MISSING IN TIP ({len(old_lines)} lines of text)")
-            exit_code = 1
+            carriers = [r for r in refs_carrying(path, a.refs) if r not in (a.tip,)]
+            if carriers:
+                report["files"][path] = {"class": "elsewhere", "old_lines": len(old_lines),
+                                         "carried_by": carriers}
+                print(f"{path}: missing from the tip, present on {len(carriers)} other ref(s) "
+                      f"-- not at risk (e.g. {', '.join(carriers[:3])})")
+            else:
+                report["files"][path] = {"class": "at-risk", "old_lines": len(old_lines),
+                                         "carried_by": []}
+                print(f"{path}: AT RISK -- {len(old_lines)} lines of text, in no other ref "
+                      f"matching {' '.join(a.refs)}")
+                exit_code = 1
             continue
         tip_lines = lines_of(tip_blob)
         tip_set = set(tip_lines)

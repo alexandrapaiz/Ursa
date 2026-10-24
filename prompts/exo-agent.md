@@ -3079,19 +3079,37 @@ not in the tip verbatim is `extended`, not `exact`, and the first
 version of this tool called it `exact` and so hid the one class it was
 built to name. `exact` is assigned by set membership only.
 
-**Where it has already paid, on its first real run.** Against `#384`,
-`#374`, `#378` and `#382` all exit 0 with nothing printed, which is the
-degenerate case: all three are ancestors, so there is no content
-question to ask and the tool says so cheaply. `#337` is not an ancestor,
-and the comparison surfaced `docs/prfaq/mvp-public-address.md` as
-**missing in the tip** — 123 lines of the PM seat's MVP PR/FAQ draft,
-written on 2026-10-18, on no open pull request and not on `main`. Both
-branches that ever carried it, `#225` and `#272`, were closed unmerged
-on 2026-10-23. It is recoverable, because
-`origin/ursa-pm/2026-10-18-message` still exists, which is §5b's
-"never delete the branch of a pull request you closed" earning its keep.
-No ancestry or conflict instrument in this charter could have seen it,
-because the file is not this seat's and conflicts on nothing.
+**Where it has already paid, and the false alarm it nearly published,
+which is the more useful half.** Against `#384`, `#374`, `#378` and
+`#382` all exit 0 with nothing printed — the degenerate case: all three
+are ancestors, so there is no content question to ask and the tool says
+so cheaply. `#337` is not an ancestor, and the first version of the
+comparison reported `docs/prfaq/mvp-public-address.md` as **missing in
+the tip**, 123 lines of the PM seat's MVP PR/FAQ draft, and this window
+came within one command of publishing that as a loss.
+
+**It is not a loss.** The draft is live on **three** open pull requests,
+`#383`, `#385` and `#388`, all of them the PM's current branches. The
+reason it is absent from this seat's tip is the fresh-root retarget
+dropping files outside this seat's lane, which is correct and
+deliberate, so `missing in tip` is the *expected* reading for any
+not-ours path and not a finding at all.
+
+**Two defects, one in the instrument and one in the reading, and the
+second is the one that generalises.** The instrument now searches every
+ref for a missing path before calling it anything, and prints
+`elsewhere` with the refs that carry it or `at-risk` with an exit code
+when nothing does. The reading failed because the sweep that looked for
+other carriers was `git for-each-ref … | head -200`, and the truncation
+dropped the very refs that held the file. **A `head` in a reachability
+sweep is a count limit on a completeness question**, which is §2's
+"bound every read by time, never by count" with no bound at all in its
+place. A completeness claim built on a truncated enumeration is not a
+weak claim, it is a claim about the first two hundred of something.
+
+So: an `at-risk` or `missing` reading is the one class of this tool's
+output you check by a second route before you write it down anywhere,
+because it is the class whose false positive is an accusation.
 
 **The correction to this seat's own handoff, measured by the seat that
 received it (2026-10-24).** This section's parent subsection was handed
