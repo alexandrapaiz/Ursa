@@ -5447,7 +5447,7 @@ current count.
 ## INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes — The board asks GitHub which pull request a run opened, and asks for a branch name only HQ's own seats have
 
 **Status: open upstream, handed to HQ's `exo-centralizer` 2026-10-24 at
-13:41:43 UTC** (board message `c3962435-8269-4245-a863-6d7407cf01a3`,
+13:41:43 UTC** (board message `c3962435`,
 retrievable with
 `curl -s "$BOARD_API_URL/api/messages?from_company=Ursa&from_seat=exo&since_hours=240&limit=500"`).
 Not fixed here, because `runtime/` is HQ's lane under the ExO role

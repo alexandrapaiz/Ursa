@@ -67,12 +67,43 @@ Every other open pull request is contained in one of these. Instrument:
 Nine decisions, thirty-six pull requests. **#358 and #364 alone carry
 sixteen of them.**
 
-## Order, and the one dependency in it
+## Order, and the dependency this file got wrong an hour ago
 
-The nine are independent of each other: all thirty-six merge clean
-against `main`, so no pair has to land in a given order to avoid a
-conflict. Two notes on sequence anyway, both about cost rather than
-correctness.
+**Correction, and it is to a sentence written in this window.** The
+first draft of this section said the nine tips are independent of each
+other, on the ground that all thirty-six merge clean against `main`.
+That inference is false, and Ursa's PM measured it at 16:33:57 UTC
+while this window was still running. **Clean against `main`
+individually does not mean clean against each other**, because `main`
+moves as each one lands and the second is then merged against a base
+that already holds the first.
+
+Re-derived here rather than accepted, by performing the merges in a
+detached scratch worktree, which is what §5b has always required and
+what the first draft of this section skipped:
+
+```bash
+git worktree add -q --detach /tmp/wt origin/main
+cd /tmp/wt && git merge --no-edit refs/prs/337   # clean
+            && git merge --no-edit refs/prs/362   # CONFLICT, six files
+```
+
+The six: `prompts/exo-agent.md`, `docs/agents/incidents.md`,
+`docs/agents/learning-log.md`, `docs/agents/runner-facts.md`,
+`docs/agents/improvements.md` and `docs/agents/merge-order.md`. The PM
+said six files and the simulation says six files. Both of this seat's
+chains append to the same five registers, so they collide by
+construction and the engineer's register driver does not cover four of
+the five, which is the open class named at the foot of this file.
+
+**So the per-pull-request conflict table above answers a different
+question from the order below it, and only the simulation answers the
+order.** That is the trap: "zero conflicts with `main`" is true, it is
+published in a table, and it invites exactly the sentence this
+correction retracts. An order that has not been simulated is a guess,
+and this file published one for about an hour.
+
+Two notes on sequence, both now measured rather than reasoned.
 
 1. **#361 before the register-heavy tips.** It carries
    `tools/registers/`, whose driver makes `docs/agents/incidents.md`
@@ -80,10 +111,17 @@ correctness.
    one mechanical reason the remaining branches would ever collide, and
    the twenty-ninth window verified it by performing the merge rather
    than by reading the claim.
-2. **#337 before #362**, if the charter freeze lifts. They are this
-   seat's two chains and they are not contained in one another. #362 is
-   the newer and carries the larger diff; #337 carries files #362 does
-   not.
+2. **#337 and #362 cannot both land unattended**, which is the
+   corrected finding. They are this seat's two chains, neither contains
+   the other, and the second to land needs a hand resolution on six
+   register files. The cheapest disposition is to merge **#362** and
+   close #337 against it, because #362 is the newer, carries the larger
+   diff and holds every charter finding of the last four windows, while
+   #337's unique contribution is the sprint and decision files it
+   imported from another seat's branch to clear a register collision
+   that the engineer's driver has since fixed. That is a
+   recommendation to the owner and not an act: this seat does not close
+   a pull request the PM has named in an open ask.
 
 ## The one class the queue cannot tell you about
 

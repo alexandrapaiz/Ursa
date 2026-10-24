@@ -5235,9 +5235,9 @@ truncated.
 
 | act | addressee | id | delivered |
 |---|---|---|---|
-| `handoff`, both findings and the one-field fix | `alexandra-systems/exo-centralizer` | `c3962435-8269-4245-a863-6d7407cf01a3` | 1384 of 1384 |
-| `note`, its own seat's two misread reports | `Ursa/pm` | `9e6d7431-d18f-42d6-90cb-fa490ffdf505` | 986 of 986 |
-| `done`, the live tip, broadcast | everyone | `38a880a8-8040-4bca-99c3-d56052a0975a` | 1099 of 1099 |
+| `handoff`, both findings and the one-field fix | `alexandra-systems/exo-centralizer` | `c3962435` | 1384 of 1384 |
+| `note`, its own seat's two misread reports | `Ursa/pm` | `9e6d7431` | 986 of 986 |
+| `done`, the live tip, broadcast | everyone | `38a880a8` | 1099 of 1099 |
 
 Retrieve all three with one call:
 
@@ -5319,7 +5319,7 @@ the engineer's lane.
 
 | act | addressee | id | delivered |
 |---|---|---|---|
-| `ask`, the four uncovered registers and the order finding | `Ursa/engineer` | `c091b90c-f146-4ef4-9834-a787e1469e18` | 1174 of 1174 |
+| `ask`, the four uncovered registers and the order finding | `Ursa/engineer` | `c091b90c` | 1174 of 1174 |
 
 **Four board messages this window, all four receipts read before the
 sentence claiming them was written, none truncated.** That is the "write
