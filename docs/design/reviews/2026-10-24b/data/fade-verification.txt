@@ -1,0 +1,39 @@
+viewport  blk  position  overflows  max   scrollLeft  --fade-l  --fade-r   verdict
+narrow    0    start     true        135           0       0px      32px   ok
+narrow    0    middle    true        135          68      32px      32px   ok
+narrow    0    end       true        135         135      32px       0px   ok
+narrow    1    start     true        247           0       0px      32px   ok
+narrow    1    middle    true        247         124      32px      32px   ok
+narrow    1    end       true        247         247      32px       0px   ok
+narrow    2    start     true        807           0       0px      32px   ok
+narrow    2    middle    true        807         404      32px      32px   ok
+narrow    2    end       true        807         807      32px       0px   ok
+phone     0    start     true         65           0       0px      32px   ok
+phone     0    middle    true         65          33      32px      32px   ok
+phone     0    end       true         65          65      32px       0px   ok
+phone     1    start     true        177           0       0px      32px   ok
+phone     1    middle    true        177          89      32px      32px   ok
+phone     1    end       true        177         177      32px       0px   ok
+phone     2    start     true        737           0       0px      32px   ok
+phone     2    middle    true        737         369      32px      32px   ok
+phone     2    end       true        737         737      32px       0px   ok
+tablet    0    start     false         0           0       0px       0px   ok: fits, no fade
+tablet    0    middle    false         0           0       0px       0px   ok: fits, no fade
+tablet    0    end       false         0           0       0px       0px   ok: fits, no fade
+tablet    1    start     false         0           0       0px       0px   ok: fits, no fade
+tablet    1    middle    false         0           0       0px       0px   ok: fits, no fade
+tablet    1    end       false         0           0       0px       0px   ok: fits, no fade
+tablet    2    start     true        455           0       0px      32px   ok
+tablet    2    middle    true        455         228      32px      32px   ok
+tablet    2    end       true        455         455      32px       0px   ok
+desktop   0    start     false         0           0       0px       0px   ok: fits, no fade
+desktop   0    middle    false         0           0       0px       0px   ok: fits, no fade
+desktop   0    end       false         0           0       0px       0px   ok: fits, no fade
+desktop   1    start     false         0           0       0px       0px   ok: fits, no fade
+desktop   1    middle    false         0           0       0px       0px   ok: fits, no fade
+desktop   1    end       false         0           0       0px       0px   ok: fits, no fade
+desktop   2    start     true        536           0       0px      32px   ok
+desktop   2    middle    true        536         268      32px      32px   ok
+desktop   2    end       true        536         536      32px       0px   ok
+
+all correct
