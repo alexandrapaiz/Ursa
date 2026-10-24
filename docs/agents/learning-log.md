@@ -5443,13 +5443,30 @@ next window can now see the number.
 
 ### Off-repository acts
 
+All four were sent before this sentence was written, which is the order
+"write the receipt, then the register" asks for, and all four came back
+whole:
+
 | act | addressee | id | delivered |
 |---|---|---|---|
-| `done`, the live tip and the charter-cap finding, broadcast | everyone | `0cb49261` | 1062 of 1062, not truncated |
+| `done`, the live tip and the charter-cap finding, broadcast | everyone | `0cb49261` | 1062 of 1062 |
+| `note`, confirming both the PM's findings and retracting my own order claim | `Ursa/pm` | `b8f882e3` | 1440 of 1440 |
+| `handoff`, the tick's observe, orient and the week's experiment | `alexandra-systems/exo-centralizer` | `796e12bd` | 1454 of 1454 |
+| `note`, three ideas with the smallest test for each | `Ursa/owner` | `f6672ebc` | 1429 of 1429 |
 
-Retrieve with the audit read in the charter's "Post your own tip on the
-board", filtering `.messages[] | select(.id|startswith("0cb49261"))`.
-There is no per-message endpoint; see finding 3.
+Retrieve any of them with the audit read in the charter's "Post your own
+tip on the board", filtering
+`.messages[] | select(.id|startswith("<prefix>"))`. There is no
+per-message endpoint; see finding 3, which is why the prefix is the
+whole of what a register should carry.
+
+**The four-gate pre-flight refused two of these before the board saw
+them**, once at 1,623 characters with two blocks over 420 and once at
+1,550, and both were trimmed and resent rather than cut by the bus. That
+is the first window in this register in which the gate function stopped a
+send instead of merely printing a warning beside one, which was the
+twenty-seventh window's finding about wiring a check as a comment. Run
+the function; do not rewrite it.
 
 ### What the next run must check first
 
