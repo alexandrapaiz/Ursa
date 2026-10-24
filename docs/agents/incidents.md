@@ -2182,6 +2182,8 @@ charters, so this went to `alexandra-systems/exo-centralizer` on the
 board with the probe attached. Attribute 7's own text predicted this
 shape: "its silence is indistinguishable from good news".
 
+**Status:** open. The measurement is this seat's and it is made; the fix is the standard's sentence about attribute 9, which is HQ's and was handed to its `exo-centralizer` on the board.
+
 ## INC-2026-10-18-branch-name-reuse — The charter's own housekeeping line would have deleted fifty-four commits of a live pull request, because two pull requests share one branch name
 
 **What happened.** Nothing, this time, and that is the only reason this
@@ -2250,6 +2252,8 @@ register now has two instances of the same shape: Ursa incident 5 on
 citation numbers, and this one on branch names. Both were found by
 scanning for a key used twice, which §3 of this charter already requires
 for numbered registers and did not require for branches. It does now.
+
+**Status:** closed. The deletion predicate was narrowed in the charter in the same pass, and the duty now keys on a pull request's merge rather than on a branch name.
 
 ## INC-2026-10-18-hold-raced-the-close — A hold published on the board at 12:52:10 was obeyed by nobody, because the run it bound closed the artifact sixty-one seconds later
 
@@ -2332,6 +2336,8 @@ converged on the same answer, #245 as the live tip, from both sides and
 within minutes. The failure is in the sequencing of two correct acts,
 which is why this entry exists and why no artifact was moved to settle
 it.
+
+**Status:** closed. No artifact was moved to settle it, both seats' acts were correct, and the re-read-at-the-act rule is in the charter.
 
 ## INC-2026-10-18-tip-pointer-written-by-strangers — Seven of this seat's eight windows posted nothing to the board, so every pointer to its own work was written from `gh pr list` by another seat, after the fact
 
@@ -2433,6 +2439,8 @@ derived, late, by a seat that did not own the branch; this one was
 posted by the window that moved the tip and acted on before the run
 ended. That is the whole claim of the fix, measured once.
 
+**Status:** closed. The fix was measured once, on this seat's own broadcast at 13:18:59 UTC and the PM's close forty-four seconds later.
+
 ## INC-2026-10-18-wake-truncated-at-1500 — The sentence releasing a seat from a duty is the sentence the bus cuts, because the payload stops at 1500 characters and this org puts its disposition last
 
 **What happened.** This seat's ninth window of 2026-10-18 was woken by a
@@ -2527,7 +2535,7 @@ and the write path's own 420-character per-block limit is in `store.py`
 beside it, which is the independence that lets a 1,996-character message
 pass validation and arrive cut.
 
-**Status:** ~~open~~ **CLOSED 2026-10-24, thirty-third window.**
+**Status:** closed 2026-10-24, thirty-third window.
 (`INC-2026-10-18-wake-truncated-at-1500`.) The condition was: a wake
 payload either carries the whole body, or carries an explicit truncation
 marker and the length of the original, verified by measuring one payload
@@ -2811,6 +2819,8 @@ the day. A benign failure that an instrument cannot see is a warning
 about the instrument, delivered cheaply, and this register's job is to
 spend it before the same blindness covers something that matters.
 
+**Status:** closed. The phrasing rule shipped, nothing needed rerunning, and the defect was the blindness rather than the day.
+
 ## INC-2026-10-18-rules-inferred-from-refusals — Four of this register's board rules were stricter than the code that enforces them, because every one was inferred from an error message instead of read from the validator
 
 ### What happened
@@ -2949,6 +2959,8 @@ load-bearing.
 
 ### Status
 
+**Status:** open. Fixed for the write path, open for the read path, in this section's own words.
+
 Fixed for the write path, which is deployed and now documented against
 its source. **Open** for the read path, which is correct in HQ's branch
 and unmerged, so the client-side company filter stays in every charter
@@ -3038,6 +3050,8 @@ that fires. The audit is that check.
 
 ### Status
 
+**Status:** closed. This section's own word is "Fixed"; the recurrence to watch is named below it and is a standing audit rather than an open condition.
+
 Fixed. The one recurrence to watch is the general case rather than this
 number: any figure this seat reports outside Ursa. The next window runs
 the §3e audit and reports two counts, numbers reported and corrections
@@ -3123,6 +3137,8 @@ something else, and it reports in the same units, which is what makes it
 dangerous.
 
 ### Status
+
+**Status:** open. Fixed locally, open upstream, in this section's own words.
 
 Fixed locally in the charter. **Open** upstream: the standard still says
 `prompts/`, and until it does not, a PM obeying the text will hold a
@@ -3364,7 +3380,7 @@ depth, it says so, and it has been doing more than it says for every
 window since, which is why the breadth defect survived two windows that
 both ran the block correctly and then measured the queue.
 
-**Status: closed 2026-10-18 by the seventeenth window, on evidence
+**Status:** closed 2026-10-18 by the seventeenth window, **on evidence
 rather than on report.** (`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.)
 The charter and the runner fact were fixed in the sixteenth window's
 pull request, #266. The closing condition above was the fetch fix
@@ -3702,7 +3718,7 @@ the same thing about attribute 7 and says it harder: an instrument that
 covers one of two surfaces does not grade as partial, it grades as
 blind, because its silence is indistinguishable from good news.
 
-**Status:** fixed here. The upstream half is the ask already open with
+**Status:** open — fixed here, upstream half outstanding. The upstream half is the ask already open with
 `alexandra-systems/exo-centralizer` to make the merge-claim key a
 contract in `docs/standards/pm.md` §15, sent 18:57:56 UTC; this entry
 adds that the surface needs naming there too, since a contract on the
@@ -3785,7 +3801,7 @@ This one turns on a state no dispatch can report, so the charter now
 names the command: `gh pr view <n> --json isDraft,state` before pushing
 onto anything you did not open.
 
-**Status:** fixed here. One identifier is the cost and the queue is
+**Status:** closed — fixed here. One identifier is the cost and the queue is
 currently eight open against sixty-seven merges in seven days, so the
 slot is affordable and the race was not.
 
@@ -3872,6 +3888,8 @@ the question.
 fourth mechanism this is, and with
 `INC-2026-10-18-rules-inferred-from-refusals`, because the one-third
 ceiling is a refusal and three windows read it as a fact about Ursa.
+
+**Status:** open. **Verdict defaulted by the thirty-third window**: the filing window stated none, and the general rule it points at is a property of the board's read cap that no Ursa change can close. A later reader should settle it.
 
 ## INC-2026-10-24-autonomy-claims-joined-across-repositories — The window that found the autonomy numerator was capped replaced it with a numerator that invents claims, and published the result as this seat's first reportable grade
 
@@ -3992,7 +4010,7 @@ this is the other half of, and with
 `INC-2026-10-18-host-token-is-the-owner`, which is the previous occasion
 on which this seat published an autonomy grade it had to retract.
 
-**Status:** fixed here, and the number moved once more before the
+**Status:** closed — fixed here, and the number moved once more before the
 window ended. HQ merged their pull request 379 at **01:24:32 UTC**,
 seven minutes after this seat fetched the tool, so the 62% above was
 measured against the pre-merge copy. Run against the merged tool and
@@ -4227,7 +4245,7 @@ report a host run, and the divergence table. `prompts/exo-agent.md` §2's
 cap paragraphs now read the host first and name the Actions reading as
 the dormant-surface check it is.
 
-**Status: the instance is fixed and the class is enumerated.** Per the
+**Status:** closed — **the instance is fixed and the class is enumerated.** Per the
 rule added to §6 on 2026-10-24, the class here is "every instrument in
 this charter that reads a GitHub Actions surface". Enumerated, the
 members are: failed-run triage (fixed 2026-10-18), run duration against
@@ -4284,7 +4302,7 @@ resolves `@me` to the owner for every seat (§1c of
 logic it cannot attribute a pull request to a seat at all. That is a
 hypothesis and it is labelled one.
 
-**Status: measured, handed to HQ, not fixed here.** The launcher is
+**Status:** open — **measured, handed to HQ, not fixed here.** The launcher is
 HQ's under §15 of `docs/standards/pm.md`. Handed to
 `alexandra-systems/exo-centralizer` this window with the 23-of-23 count
 and the `#302` counter-example. `docs/agents/runner-facts.md` §12
@@ -4421,7 +4439,7 @@ third, and prefer the question "what produced this artifact" over "what
 repairs this symptom". The first has an answer in somebody's source
 tree. The second has one answer per symptom, forever.
 
-**Status.** The measurement and the exact edit are shipped here and in
+**Status:** open. The measurement and the exact edit are shipped here and in
 runner-facts §11. Handed to HQ's `exo-centralizer` on the board on
 2026-10-24 with the measurement attached, and answered to research on
 the board in the same pass. The fix itself is **open against three
@@ -4502,9 +4520,10 @@ asked for. Also: when a register is corrected, the charter that quotes
 it is part of the same fix. §2b has said this about workflow blocks
 since 2026-09-30 and it is true of this seat's own two files.
 
-**Status.** Shipped here, in `prompts/exo-agent.md` and in runner-facts
-§8. Answered to research in the same pass with the declined method and
-its reason. The two code fixes are **HQ's and open**.
+**Status:** closed 2026-10-24, thirty-third window, on the live receipt
+in the closing note below. Shipped here, in `prompts/exo-agent.md` and in
+runner-facts §8. Answered to research in the same pass with the declined
+method and its reason. Both of HQ's code fixes have since shipped.
 
 > **Correction, 2026-10-24, twenty-fourth window.** The sentence above
 > said "Handed to HQ's `exo-centralizer` on the board with the census and
@@ -4645,7 +4664,7 @@ work. It measured, declined, and wrote to the seat whose call it was.
 That is §3e inverted in the healthy direction — a duty landing on the
 seat that owns it rather than on whoever is present.
 
-**Status.** Shipped here, in `prompts/exo-agent.md`, in
+**Status:** closed. Shipped here, in `prompts/exo-agent.md`, in
 `docs/agents/improvements.md` and in runner-facts §8. The artifact was
 readied at 11:36 UTC, the board pointer broadcast at 11:38, and the
 unsent handoff delivered at 11:4x. The resolve-when-it-stands rule is
@@ -4737,7 +4756,7 @@ can. The general test is now in the charter: before relying on a clock,
 ask which seat acts when it fires, and grep that seat's charter on `main`
 for it. A zero means the clock does not exist.
 
-**Status.** Shipped in `prompts/exo-agent.md` and here. Five further
+**Status:** open. Shipped in `prompts/exo-agent.md` and here. Five further
 clocks are in the same state as of today, three of them firing
 2026-10-25 around 18:15 UTC, and the PM found that half independently
 and told the owner at 11:32:55 that the entry holding them "lives only
@@ -4803,8 +4822,8 @@ already owes in the same breath, because the window after you cannot see
 the rule it is violating while it is doing exactly what the newest
 instruction says.
 
-**Status.** Shipped in `prompts/exo-agent.md` and here, and the artifact
-is repaired.
+**Status:** closed. Shipped in `prompts/exo-agent.md` and here, and the
+artifact is repaired.
 
 ## INC-2026-10-24-resolving-a-register-collision-imports-the-other-seats-whole-branch — A charter question the owner is asked to decide arrives as twelve files and nine thousand lines, because the only way to clear an append-only register conflict was to absorb another seat's unmerged branch
 
@@ -4892,7 +4911,7 @@ and necessary. Two things, in different hands:
    the import stops happening at all. That is why this window moved
    `#305` to the front of the landing order in `merge-order.md`.
 
-**Status.** Disclosed here and in the tip's description, with the rule
+**Status:** open. Disclosed here and in the tip's description, with the rule
 shipped. The driver is `#305` and is not this seat's. Corroborated to
 HQ's `exo-centralizer` with Ursa's numbers beside `epitome`'s, because
 one company's measurement is an anecdote and two are a shape.
@@ -4969,7 +4988,7 @@ in two days that seat has handed this one a runtime finding rather than
 acting on it. Re-derived independently this window; all of research's
 numbers agree with this seat's.
 
-**Status.** Measured, registered, handed up. Not fixed here, by design.
+**Status:** open. Measured, registered, handed up. Not fixed here, by design.
 
 ## INC-2026-10-24-a-pipe-to-tail-readied-a-placeholder — A pull request was readied with its opening title and plan body because a failed edit's exit status was laundered by a pipe
 
@@ -5018,7 +5037,7 @@ last minute of a run to the middle of it, and nothing in the amendment
 said to run the audit at the new moment too.** A rule that reschedules an
 act must reschedule that act's checks with it.
 
-**Status.** Fixed in the artifact within four minutes, measured,
+**Status:** closed. Fixed in the artifact within four minutes, measured,
 registered, and both the pipeline rule and the audit-timing clause are in
 the charter diff of this pull request.
 
@@ -5091,7 +5110,7 @@ this seat exists, pointed one level up. A hundred-per-cent reading is the
 one shape that should send a run to the mechanism before it sends the
 number to anybody.
 
-**Status.** Reported to the centralizer at 12:45 UTC with the three
+**Status:** open. Reported to the centralizer at 12:45 UTC with the three
 source files, the live split and the one-line fix, while its own pull
 request carrying the law is still open and amendable. The charter carries
 the measurement, the carrier that works today, and the one-command check
@@ -5152,6 +5171,8 @@ queue depth. Any cross-company absence claim is a claim about default
 branches unless it says otherwise, and the cheap repair is one extra read
 of the open queue before a number becomes a commission.
 
+**Status:** open. Reported to the centralizer with the request not to stop the engineer on that count; the repair is one extra read of the open queue and it is not yet a rule anywhere.
+
 ## INC-2026-10-24-the-tool-sweep-tested-hq-s-path-so-a-vendored-tool-read-as-missing
 
 **What happened.** The missing-instrument sweep in §3 of this seat's
@@ -5191,7 +5212,7 @@ The general form: **a check that resolves an identifier supplied by
 another organization is measuring that organization's naming, not this
 repository's capability.** Resolve the thing, then the name.
 
-**Status.** Fixed in the charter in this pull request, with the
+**Status:** closed. Fixed in the charter in this pull request, with the
 basename-aware form beside the old one and the worktree proof in the
 entry above.
 
@@ -5279,7 +5300,7 @@ says so where the pre-flight is defined, and the Python form is recorded
 in `runner-facts.md` as the more accurate body of the same gate rather
 than as a second gate.
 
-**Status.** Both cut tails were re-sent as their own short messages with
+**Status:** closed. Both cut tails were re-sent as their own short messages with
 the cut named as mine, within two minutes each.
 
 ## INC-2026-10-24-the-learning-logs-recurring-blocks-sat-at-entry-level
@@ -5325,6 +5346,8 @@ had been in the file for six days and cost nothing until a mechanism
 started reading it, which is the ordinary way a latent defect becomes a
 live one: not because it got worse, but because something finally
 depended on it.
+
+**Status:** open. The entry's own words: the unblock completes when this lands, and `main` still carries the duplicate.
 
 ## INC-2026-10-24-a-stop-addressed-to-the-seat-that-is-not-building-it — A clause making "naming is not telling" law was followed, one paragraph later, by its own author assigning a duty inside a message sent to somebody else
 
@@ -5388,6 +5411,8 @@ A stop addressed to the seat that is not building the thing. The check is
 one question asked before relying on anything: who has to act, and did
 the act reach them.
 
+**Status:** open. **Verdict defaulted by the thirty-third window**: the filing window stated none. The check it names — who has to act, and did the act reach them — is written in prose here and is in no charter.
+
 ## INC-2026-10-24-a-release-verification-that-does-not-say-which-diff — The scope clause's file-list check has two readings, and the wrong one reports the product being deleted by a charter pull request
 
 **What happened.** The scope clause that became law on 2026-10-24 says a
@@ -5437,6 +5462,8 @@ as the organization's audit seat deleting the product's stylesheet,
 which nobody would merge and nobody should. When a verification's wrong
 reading produces an accusation rather than a discrepancy, the ambiguity
 is urgent rather than tidy.
+
+**Status:** open. **Verdict defaulted by the thirty-third window**: the filing window stated none, and its own last sentence calls the ambiguity urgent rather than tidy.
 
 ## INC-2026-10-24-the-caller-set-clock-key-forked-fifteen-ways-the-day-the-law-shipped — The expiry field a silence clock must use is still claims-only, so the portfolio invented fifteen names for the workaround instead
 
@@ -5514,10 +5541,12 @@ the second fork lands under a rule that is already law. Escalate a
 missing contract with its compounding cost attached, not only with its
 current count.
 
+**Status:** open. **Verdict defaulted by the thirty-third window**: the filing window stated none. The missing contract it escalates is HQ's and unanswered, which is the entry's whole point.
+
 ## INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes — The board asks GitHub which pull request a run opened, and asks for a branch name only HQ's own seats have
 
-**Status: open upstream, handed to HQ's `exo-centralizer` 2026-10-24 at
-13:41:43 UTC** (board message `c3962435`,
+**Status:** open — **upstream, handed to HQ's `exo-centralizer` 2026-10-24
+at 13:41:43 UTC** (board message `c3962435`,
 retrievable with
 `curl -s "$BOARD_API_URL/api/messages?from_company=Ursa&from_seat=exo&since_hours=240&limit=500"`).
 Not fixed here, because `runtime/` is HQ's lane under the ExO role
@@ -5602,8 +5631,8 @@ board already holds the field.
 
 ## INC-2026-10-24-a-done-is-not-a-landing — Four of four `done` messages announcing a shipped rule arrived before the rule existed anywhere a reader could reach
 
-**Status: rule written into `prompts/exo-agent.md` §2 this window. No
-upstream ask, because nobody did anything wrong.**
+**Status:** closed — **rule written into `prompts/exo-agent.md` §2 this
+window. No upstream ask, because nobody did anything wrong.**
 
 **What happened.** This window was woken by a `done` from HQ's
 `exo-centralizer` whose subject said a capacity split was shipped.
@@ -5702,8 +5731,8 @@ Time and turns were the two. The third is the length of the instructions
 themselves, and it is the only one of the three that this seat both
 pays for and authors.
 
-**Status: the instrument and the discipline shipped; the curve has not
-turned.** This window's own ratio is 82 added against 16 removed, which
+**Status:** open — **the instrument and the discipline shipped; the curve
+has not turned.** This window's own ratio is 82 added against 16 removed, which
 is 19.5 per cent against yesterday's 2.6, so it is better and still
 positive growth. The entry stays open until a window of this seat
 reports a net reduction. An unenumerated class is not a closed incident
@@ -5786,7 +5815,7 @@ The truth was neither, and the shape of the error was not a wrong
 measurement anywhere. It was a vocabulary that did not include the
 answer.
 
-**Status: the instrument and the words shipped.** The entry stays open
+**Status:** open — **the instrument and the words shipped.** The entry stays open
 until a window of this seat reports the per-file comparison beside a
 containment claim, since the previous three windows all had the
 instrument available and none of them reached for it.
