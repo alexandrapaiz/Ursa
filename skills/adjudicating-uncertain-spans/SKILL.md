@@ -25,16 +25,16 @@ evidence_scheme: repo
 evidence:
   - ref: E1
     what: the span classes and the generation fates the record uses
-    source: ursa-major/src/types.ts:5-13,37
+    source: ursa-major/src/types.ts:7-15,39
   - ref: E2
     what: the two thresholds, 0.35 and 0.6, and the combined score they apply to
     source: ursa-major/src/match.ts:6,8,49-52
   - ref: E3
     what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
-    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:390-391
+    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:429-430
   - ref: E4
     what: trivial is a different flag with a different cause, set on short raw-exact matches only, kept when the normalized-only demotion fires and dropped when the descent check demotes the span
-    source: ursa-major/src/resolve.ts:232-248,256-263,311-320,371-390, ursa-major/src/match.ts:10, ursa-major/src/types.ts:393
+    source: ursa-major/src/resolve.ts:241-257,265-272,320-329,380-399, ursa-major/src/match.ts:10, ursa-major/src/types.ts:508
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3
@@ -55,7 +55,7 @@ evidence:
     source: docs/okrs/2026-q4.md:13-18 (O1 KR1.1)
   - ref: E11
     what: a generation's fate is derived from claim overlap rather than adjudicated directly and survivalRate follows from it, over four fates since not_generated was added on 2026-10-14, and the not_generated characters are subtracted from the gross deleted figure rather than asserted to be by a comment
-    source: ursa-major/src/resolve.ts:471-515, ursa-major/src/types.ts:10-37, ursa-major/src/stats.ts:115-121
+    source: ursa-major/src/resolve.ts:533-577, ursa-major/src/types.ts:12-39, ursa-major/src/stats.ts:119-125
   - ref: E12
     what: raw records carry verbatim user prompts and absolute local paths, and were moved to a private repo for that reason
     source: ursa-major/trial/README.md:64-72 ("Where the records live"); docs/agents/incidents.md:179-187 (Incident 2)
@@ -70,13 +70,13 @@ evidence:
     source: ursa-major/src/viewer.ts:89,310-311,323-325
   - ref: E16
     what: a second branch sets uncertain, where an above-threshold match whose descent is corroborated as rival is demoted to no_generation_provenance with the candidate and a descent field kept
-    source: ursa-major/src/resolve.ts:330,415-431
+    source: ursa-major/src/resolve.ts:339,448-464
   - ref: E17
     what: uncertain is deliberately not set on an unverified descent verdict, because uncertainSpans is KR1.1's metric and widening it would move the number without any span changing
-    source: ursa-major/src/resolve.ts:438-443
+    source: ursa-major/src/resolve.ts:471-476
   - ref: E18
     what: uncertainSpans and trivialSpans are two independent reads of the two flags over every span, so a span whose demotion dropped the trivial flag lands in the uncertain count and not in the trivial one
-    source: ursa-major/src/stats.ts:36-37,41-53, ursa-major/src/types.ts:532-533
+    source: ursa-major/src/stats.ts:36-37,43-55, ursa-major/src/types.ts:662-663
 supersedes: []
 ---
 

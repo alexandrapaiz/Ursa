@@ -87,10 +87,10 @@ evidence:
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:170,192-200
+    source: ursa-major/src/resolve-episode.ts:170,205-213
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
-    source: ursa-major/src/parse.ts:13,51,75,107, ursa-major/src/types.ts:476-477
+    source: ursa-major/src/parse.ts:14,57,81,113, ursa-major/src/types.ts:606-607
   - ref: E24
     what: an episode id is the project slug, the generated commit date, and the first seven characters of the generated commit sha
     source: ursa-major/src/episodes.ts:60-64
@@ -114,7 +114,7 @@ evidence:
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md:20-26 (O1 KR1.2)
   - ref: E31
     what: the overlay reads the project's own tuning.json through serve.ts's tuningUnits, the one reader, which sorts by evidenceCount; the bridge drops revoked axioms and pushes only ciphertext to the sync route
-    source: ursa-major/src/serve.ts:176-179,194; ursa-major/src/bridge/index.ts:93-95,147-157
+    source: ursa-major/src/serve.ts:225-228,243; ursa-major/src/bridge/index.ts:93-95,197-207
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9

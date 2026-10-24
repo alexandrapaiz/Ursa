@@ -58,13 +58,13 @@ evidence:
     source: ursa-major/src/loops.ts:323-325
   - ref: E11
     what: recurrences is documented as the repetitions after the initial ask, the failure count, and a one-length promptSteps is documented as a one-shot rather than a loop
-    source: ursa-major/src/types.ts:693-696
+    source: ursa-major/src/types.ts:853-856
   - ref: E12
     what: the answering window runs from the theme's last prompt up to the next correction, and closedStep is the earliest generation in it with surviving characters
     source: ursa-major/src/loops.ts:262-270
   - ref: E13
     what: the four resolutions and the branch that picks each, with accepted requiring an acceptance prompt at or after closedStep and no later than the next correction
-    source: ursa-major/src/loops.ts:288-296, ursa-major/src/types.ts:700-701
+    source: ursa-major/src/loops.ts:288-296, ursa-major/src/types.ts:860-861
   - ref: E14
     what: a one-member theme becomes a one-shot correction, and one that no surviving generation answered is only a counter in notes
     source: ursa-major/src/loops.ts:272-285,350-354
@@ -73,7 +73,7 @@ evidence:
     source: ursa-major/src/loops.ts:298-315
   - ref: E16
     what: the regression signal is documented as prompts reporting previously-accepted state broken, in the comment over CorrectionLoop.regressionSteps, while RegressionEvent itself carries the step the user reported it at, an uncommented brokenState string and her verbatim words
-    source: ursa-major/src/types.ts:697-698,729-736
+    source: ursa-major/src/types.ts:857-858,889-896
   - ref: E17
     what: the regression cue vocabulary, written to separate a previously-working state reported broken from "it was never right yet"
     source: ursa-major/src/loops.ts:64-66
@@ -91,7 +91,7 @@ evidence:
     source: ursa-major/src/loops.ts:375-404
   - ref: E22
     what: every signal excerpt is addressed as data precisely enough that the gate re-reads it and asserts the quote is really there
-    source: ursa-major/src/types.ts:646-657
+    source: ursa-major/src/types.ts:806-817
   - ref: E23
     what: episode.steps is the generation count at the label stage and the highest step observed across generations and prompts at the trace stage
     source: ursa-major/src/signals.ts:115,146, ursa-major/src/loops.ts:205-209
@@ -115,7 +115,7 @@ evidence:
     source: CLAUDE.md:72-77
   - ref: E30
     what: clustering runs inside one conversation at a time, and step ordinals are per-conversation
-    source: ursa-major/src/loops.ts:217-221, ursa-major/src/types.ts:687-688
+    source: ursa-major/src/loops.ts:217-221, ursa-major/src/types.ts:847-848
   - ref: E31
     what: a prompt matching an acceptance cue whose remaining content comes to at most one term is typed as an acceptance, which the comment above calls a prompt made entirely of acceptance words, and only corrections are clustered
     source: ursa-major/src/loops.ts:55-62,114-120,221

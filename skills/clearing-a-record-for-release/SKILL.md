@@ -92,13 +92,13 @@ evidence:
     source: ursa-major/src/consent.cli.ts:68-119
   - ref: E24
     what: revoking a scope is a stop and not an undo, and deletion of what was already sent is a request to the aggregation layer
-    source: ursa-major/src/consent.cli.ts:134-143
+    source: ursa-major/src/consent.cli.ts:172-181
   - ref: E25
     what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay
     source: ursa-major/src/consent.cli.ts:146-159
   - ref: E26
     what: the order disclose runs in, project then report the withholdings then audit, and that a single finding means nothing is written and the command exits 1
-    source: ursa-major/src/consent.cli.ts:180-194
+    source: ursa-major/src/consent.cli.ts:255-269
   - ref: E27
     what: the redaction standard is field-level rather than pattern-level, because the workflow gate catches three regular expressions and not the ordinary English that actually leaked
     source: docs/security/redaction-standard.md:11-27
@@ -125,19 +125,19 @@ evidence:
     source: docs/design/consent-and-erasure.md:427-438
   - ref: E35
     what: aggregate() is the reference implementation of what the ingest route owes, and the two schema defects reported rather than patched around, the missing character total and the collapsed survival scalar
-    source: docs/design/consent-and-erasure.md:489-503
+    source: docs/design/consent-and-erasure.md:505-519
   - ref: E36
     what: what the consent change does not do, including that zone B is unbuilt, that the existing bridge is not gated by consent.json, and that the audit checks text rather than inference
-    source: docs/design/consent-and-erasure.md:533-555
+    source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:8117-8120
+    source: docs/ideas.md:8119-8122
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:8124-8127
+    source: docs/ideas.md:8126-8129
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:8137-8140
+    source: docs/ideas.md:8139-8142
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310

@@ -39,7 +39,7 @@ evidence:
     source: ursa-major/src/pairfinder.ts:343-349
   - ref: E6
     what: the git path records zero user turns, so it carries no user words, and its turnIndex counts files inside one commit pair rather than conversational turns, which is what turnsToAcceptance then takes a maximum over
-    source: ursa-major/src/resolve-episode.ts:122-134,192-200; ursa-major/src/stats.ts:128,136-138
+    source: ursa-major/src/resolve-episode.ts:123-135,205-213; ursa-major/src/stats.ts:132,140-142
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
     source: ursa-major/src/resolve-episode.ts:133,196; ursa-major/src/episodes.ts:25
@@ -48,13 +48,13 @@ evidence:
     source: ursa-major/src/bin/ursa.ts:492-493; ursa-major/src/bin/ursa.ts:515; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
-    source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
+    source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:34-37
   - ref: E10
     what: both paths cap file size, at different limits, and only the session path says so on stderr
-    source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:38
+    source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:39
   - ref: E11
     what: path-filter narrows which generations are kept at parse time, before any matching happens
-    source: ursa-major/src/cli.ts:117-119,133; ursa-major/src/parse.ts:71-72
+    source: ursa-major/src/cli.ts:117-119,133; ursa-major/src/parse.ts:77-78
   - ref: E12
     what: prose segments by sentence and code by line, and the choice is made from the file extension alone
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
@@ -78,7 +78,7 @@ evidence:
     source: docs/agents/incidents.md:204-210
   - ref: E19
     what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
-    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:13,62-63; ursa-major/src/parse.ts:75,103-108,131-141,161
+    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:14,68-69; ursa-major/src/parse.ts:81,109-114,131-141,177
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
     source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52

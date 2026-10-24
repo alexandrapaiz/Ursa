@@ -25,13 +25,13 @@ evidence_scheme: repo
 evidence:
   - ref: E1
     what: there are three span classes over the final work and four generation fates, and generated_deleted and not_generated are both fates rather than span classes
-    source: ursa-major/src/types.ts:5-8,10-37
+    source: ursa-major/src/types.ts:7-10,12-39
   - ref: E2
     what: byClass covers only the three span classes, and each class carries two percentages, pct over coveredChars and pctOfFinal over finalChars
-    source: ursa-major/src/stats.ts:8-12,66-67
+    source: ursa-major/src/stats.ts:8-12,70-71
   - ref: E3
     what: the schema says coveredChars excludes text no span covers, and reports it separately from finalChars
-    source: ursa-major/src/types.ts:526-531
+    source: ursa-major/src/types.ts:656-661
   - ref: E4
     what: in code mode a span is a trimmed non-empty line, so indentation and blank lines are never covered by any span
     source: ursa-major/src/segment.ts:21-33
@@ -40,7 +40,7 @@ evidence:
     source: ursa-major/src/segment.ts:13-15
   - ref: E6
     what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again, and survivalRate divides by the same generated-chars denominator per generation and per conversation
-    source: ursa-major/src/stats.ts:88-91,115-122,126-135,159-165, ursa-major/src/resolve.ts:515
+    source: ursa-major/src/stats.ts:92-95,119-126,130-139,165-171, ursa-major/src/resolve.ts:577
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
     source: ursa-major/src/viewer.ts:234-266,277-286
@@ -49,13 +49,13 @@ evidence:
     source: ursa-major/src/resolve.ts:432-459, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short raw-exact match is labelled survived_verbatim with score 1 and flagged trivial so it sits inside that category's chars, unless the descent check demotes it, which drops the trivial flag
-    source: ursa-major/src/resolve.ts:371-384,224-263, ursa-major/src/match.ts:9-10
+    source: ursa-major/src/resolve.ts:380-393,233-272, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
     source: ursa-major/src/resolve.ts:448-458
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
-    source: ursa-major/src/types.ts:532-533, ursa-major/src/stats.ts:36-37,52-53
+    source: ursa-major/src/types.ts:662-663, ursa-major/src/stats.ts:36-37,54-55
   - ref: E12
     what: CLAUDE.md lists all four classifications under one heading and calls no_generation_provenance the most valuable
     source: CLAUDE.md:65-70 (section 1, span classifications)
@@ -64,22 +64,22 @@ evidence:
     source: docs/okrs/2026-q4.md:13-18 (O1 KR1.1)
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
-    source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:128,136-138
+    source: ursa-major/src/types.ts:793-794, ursa-major/src/stats.ts:132,140-142
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
-    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:570,580
+    source: ursa-major/src/cli.ts:184, ursa-major/src/viewer.ts:570,580
   - ref: E16
     what: CLAUDE.md lists turns to acceptance as trajectory metadata wrapped around the record
     source: CLAUDE.md:72-74 (section 1, trajectory metadata)
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
-    source: ursa-major/src/stats.ts:45-57,148-153
+    source: ursa-major/src/stats.ts:45-57,154-159
   - ref: E18
     what: path-filter drops generations at parse time, before any denominator is computed
-    source: ursa-major/src/parse.ts:130, ursa-major/src/cli.ts:58,119
+    source: ursa-major/src/parse.ts:146, ursa-major/src/cli.ts:58,119
   - ref: E19
     what: the record carries a finished flag, set false by --abandoned, and the viewer shows it as a chip
-    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:523, ursa-major/src/viewer.ts:180
+    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:585, ursa-major/src/viewer.ts:180
   - ref: E20
     what: the CLI prints finalChars and coveredChars on one line, and gives every class both an of-final and an of-classified column
     source: ursa-major/src/cli.ts:167-173
@@ -118,7 +118,7 @@ evidence:
     source: docs/vision.md:33-35 (section 0b, principle 4)
   - ref: E32
     what: survived_verbatim means byte-identical as of 2026-10-13, and a formatting-only match is now survived_mutated with normalizedOnly set and score 1, which 26 of 770 verbatim claims over ten records of this repository were
-    source: ursa-major/src/types.ts:357-388, ursa-major/src/resolve.ts:266-290, ursa-major/src/resolver.test.ts:168
+    source: ursa-major/src/types.ts:396-427, ursa-major/src/resolve.ts:275-299, ursa-major/src/resolver.test.ts:168
 supersedes: []
 ---
 
