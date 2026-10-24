@@ -42,7 +42,7 @@ evidence:
     source: ursa-major/src/resolve-episode.ts:133,196; ursa-major/src/episodes.ts:25
   - ref: E8
     what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:492-493; ursa-major/src/bin/ursa.ts:494; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
+    source: ursa-major/src/bin/ursa.ts:492-493; ursa-major/src/bin/ursa.ts:515; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36

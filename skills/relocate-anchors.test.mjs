@@ -191,3 +191,124 @@ test('a wrong old-ref is reported as a wrong old-ref, not relocated anyway', () 
   assert.match(out, /do not match the recorded fingerprint/)
   assert.match(out, /0 relocated/)
 })
+
+test('a chain, where one range relocates onto the key another is vacating', () => {
+  // Measured on 2026-10-24. E8 of running-an-outcome-record-trial cited
+  // ursa.ts:494 and :515; main inserted 21 lines above both; 494's
+  // destination was 515, which the lock still held under the other range's
+  // fingerprint. The collision test ran inside the classification loop, so it
+  // fired against an occupant that the same loop was about to move out, and a
+  // pure relocation was filed as text that changed. One of three ranges in
+  // that batch's reader queue was this artifact, and the read it cost found
+  // the two fingerprints identical.
+  //
+  // The second half is the write: delete every old key before writing any new
+  // one, or the vacating range's delete erases what the arriving one wrote and
+  // the surviving fingerprint depends on iteration order.
+  const dir = mkdtempSync(join(tmpdir(), 'relocate-chain-'))
+  const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
+  git('init', '-q', '-b', 'main')
+  git('config', 'user.email', 'test@example.invalid')
+  git('config', 'user.name', 'test')
+  mkdirSync(join(dir, 'src'), { recursive: true })
+  mkdirSync(join(dir, 'skills', 'fixture'), { recursive: true })
+  for (const f of ['relocate-anchors.mjs', 'source-line.mjs'])
+    copyFileSync(new URL(f, import.meta.url).pathname, join(dir, 'skills', f))
+
+  // One ref, two cited lines, two apart. Inserting two lines above both sends
+  // line 1 to 3, which is where line 3 is now.
+  const old = ['first cited', 'filler', 'second cited']
+  writeFileSync(join(dir, 'src', 'f.ts'), old.join('\n') + '\n')
+  writeFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
+    what: two lines of one claim, two apart
+    source: src/f.ts:1; src/f.ts:3
+`, 'A claim [E1].'))
+  const lock = {
+    'fixture/E1/src/f.ts:1': fingerprint(old, 1, 1),
+    'fixture/E1/src/f.ts:3': fingerprint(old, 3, 3),
+  }
+  assert.notEqual(lock['fixture/E1/src/f.ts:1'], lock['fixture/E1/src/f.ts:3'])
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'old')
+  const oldRef = git('rev-parse', 'HEAD').trim()
+
+  writeFileSync(join(dir, 'src', 'f.ts'),
+    ['inserted', 'inserted', 'first cited', 'filler', 'second cited'].join('\n') + '\n')
+
+  // A dry run exits 1 while anything is drifted, so the status is not the
+  // assertion here; --write exits 0 once nothing is left for a person.
+  const run = (...extra) => {
+    try {
+      return execFileSync(process.execPath,
+        [join(dir, 'skills', 'relocate-anchors.mjs'), oldRef, ...extra],
+        { cwd: dir, encoding: 'utf8' })
+    } catch (e) {
+      assert.equal(e.status, 1, e.stderr)
+      return e.stdout
+    }
+  }
+
+  const dry = run()
+  assert.match(dry, /2 relocated, text unchanged/)
+  assert.match(dry, /0 text changed, needs a person/)
+  assert.match(dry, /src\/f\.ts:1 -> 3/)
+  assert.match(dry, /src\/f\.ts:3 -> 5/)
+
+  run('--write')
+  assert.match(readFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), 'utf8'),
+    /source: src\/f\.ts:3; src\/f\.ts:5\n/)
+  const after = JSON.parse(readFileSync(join(dir, 'skills', 'evidence.lock.json'), 'utf8'))
+  // Both keys present with the right values. The ordering bug dropped one of
+  // the two entirely, which check-evidence then reported as a citation with no
+  // recorded fingerprint, the same state an unread new ref is in.
+  assert.deepEqual(Object.keys(after).sort(), ['fixture/E1/src/f.ts:3', 'fixture/E1/src/f.ts:5'])
+  assert.equal(after['fixture/E1/src/f.ts:3'], lock['fixture/E1/src/f.ts:1'])
+  assert.equal(after['fixture/E1/src/f.ts:5'], lock['fixture/E1/src/f.ts:3'])
+})
+
+test('two ranges of one ref relocating onto the same key still needs a person', () => {
+  // The vacancy rule must not swallow a genuine conflict. Two cited lines whose
+  // text became identical have one destination between them, and no vacancy
+  // explains that, so it goes to a reader rather than silently losing one.
+  const dir = mkdtempSync(join(tmpdir(), 'relocate-conflict-'))
+  const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
+  git('init', '-q', '-b', 'main')
+  git('config', 'user.email', 'test@example.invalid')
+  git('config', 'user.name', 'test')
+  mkdirSync(join(dir, 'src'), { recursive: true })
+  mkdirSync(join(dir, 'skills', 'fixture'), { recursive: true })
+  for (const f of ['relocate-anchors.mjs', 'source-line.mjs'])
+    copyFileSync(new URL(f, import.meta.url).pathname, join(dir, 'skills', f))
+
+  const old = ['alpha', 'beta']
+  writeFileSync(join(dir, 'src', 'f.ts'), old.join('\n') + '\n')
+  writeFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
+    what: two lines that become one
+    source: src/f.ts:1; src/f.ts:2
+`, 'A claim [E1].'))
+  const lock = {
+    'fixture/E1/src/f.ts:1': fingerprint(old, 1, 1),
+    'fixture/E1/src/f.ts:2': fingerprint(old, 2, 2),
+  }
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'old')
+  const oldRef = git('rev-parse', 'HEAD').trim()
+
+  // `beta` is gone and `alpha` moved to 2. So E1's line 1 relocates to 2,
+  // which E1's line 2 occupies and is not vacating, because its own text is
+  // nowhere to be found.
+  writeFileSync(join(dir, 'src', 'f.ts'), ['header', 'alpha'].join('\n') + '\n')
+
+  let out = ''
+  try {
+    out = execFileSync(process.execPath,
+      [join(dir, 'skills', 'relocate-anchors.mjs'), oldRef], { cwd: dir, encoding: 'utf8' })
+  } catch (e) { assert.equal(e.status, 1); out = e.stdout }
+  assert.match(out, /0 relocated/)
+  assert.match(out, /2 text changed, needs a person/)
+  assert.match(out, /would collide with another citation's fingerprint/)
+})
