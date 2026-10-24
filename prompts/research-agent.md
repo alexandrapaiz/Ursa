@@ -110,6 +110,29 @@ two findings on first contact, one landing on `CLAUDE.md` §5 and one on
 `ursa-major/src/types.ts` (docs/research/briefs/2026-10-24-hook.md,
 finding 48 and error 32).
 
+**Carry the derived set forward in writing, because re-deriving it is
+the step that gets skipped.** The rule above is right and it does not
+survive contact with a run on its own, since re-derivation is judgement
+under time pressure and the cheapest judgement available is to re-read a
+category this seat already knows. So the set lives here as written
+state, a run updates it rather than rebuilding it, and a run that opens
+a new category adds it on the way past. **Opened as a listing at least
+once:** cs.MA, cs.IR, cs.CY, cs.MM, cs.CL, cs.CR, cs.HC, cs.AI.
+**Qualifying under the rule above and never opened:** cs.LG, cs.CV,
+cs.ET. The evidence is one pattern with two instances and three
+failures to execute. cs.IR is the case in the paragraph above. Then
+cs.AI met this rule's own criterion, having been named as a per-paper
+subject label four times across nine briefs, and went unopened through
+the three runs that followed the rule landing, which opened cs.IR,
+cs.CR and cs.CL instead. It was opened on 2026-10-24 at 5,108 of 5,108
+entries and produced three papers absent from every committed file and
+every pull request body in this repository, one of them five months old
+and on Ursa Major's exact promise
+(docs/research/briefs/2026-10-24-message-15.md, rising item 3 and error
+3). At 5,108 entries a month cs.AI also needs slicing rather than a
+single fetch, which is the practical reason the set is worth writing
+down next to the rule.
+
 Open what you cite. A search-result snippet is not a read source. When
 a secondary source and a primary source disagree on a date or a claim,
 use the primary source and record the correction in the brief.
