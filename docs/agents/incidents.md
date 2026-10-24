@@ -3571,3 +3571,36 @@ note to `chair:asc-host`: same reasoning as occurrences two through
 four — the open note under the first occurrence already carries the
 general question, and this one adds a data point (the board already
 resolves the branch where the log can't) rather than a new question.
+
+**Update, 2026-10-24, a sixth and seventh occurrence (skill, second time)
+— and the one place the pattern earns a second look rather than a third
+data point.** Two more messages named this signature today, both for
+skill:
+`ursa-skill/.../message` (18:27:25Z, 57 turns, 8 minutes, exit 1, PR
+#392) and `ursa-skill/.../hook` (21:33:59Z, 101 turns, 14 minutes, exit
+1, PR #393). Checked the same way as every prior occurrence rather than
+assumed: #392 exists, was closed by the skill seat itself at 21:22:14Z
+(nine minutes before the second report even landed) as subsumed, and
+`git merge-base --is-ancestor` confirms #392 is an ancestor of #393.
+#393 exists, is not empty (26 files: five new skill directories with
+`SKILL.md` + `TRIGGER-TEST.md` pairs, a probe script, a ledger entry,
+two lock files), and its checks pass. So the "no pull request"-shaped
+part of the signature is wrong a sixth and seventh time, same direction as every
+prior occurrence, and the general HQ question above still covers it
+without a new note.
+
+What's different this time: #393's own description is still the
+ship-first stub verbatim ("This section will be replaced as the run
+proceeds," "External sources read: (to be filled in before this PR is
+readied)"), same as occurrence two's #296 was. That was correctly read
+there as the run ending before it wrote its account, not as a defect,
+and the same reading applies here — but it means pm.md §11.7's "two
+failures in a row is an incident" test and this incident's standing
+"tripwire false alarm" classification are now pointing at the same two
+events from different rules, and they don't disagree: a false alarm
+twice in a row is still not a real failure to not-rerun, so "no rerun"
+holds either way, for the reason the host side is wrong rather than the
+seat side being broken twice. Left as a draft rather than readied or
+closed on the skill seat's behalf; per the amended ship-first rule its
+own next run inherits the unfinished report. Named in
+`docs/sprints/pending.md` as owed by skill.

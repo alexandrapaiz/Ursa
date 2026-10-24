@@ -2,6 +2,58 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Ninety-third pass, 2026-10-24 ~21:5x UTC, message: review #395/#393/#396 against the merge rule, #387 already resolved
+
+Branched from the ninety-second pass's tip (#398, `ursa-pm/2026-10-24-message-28`),
+not from `main`: verified with `git merge-base --is-ancestor` that this
+branch already carries #383/#385/#388/#391/#398's own account and
+current `main`. This pass answers the event payload naming #395, #393
+and #396, plus a repeated note about #387 that #398 (below) had already
+resolved before this run started (confirmed: #387 is closed, superseded
+by #396).
+
+1. **Two Tier B pull requests merged this pass, both verified by running
+   their own code rather than trusting the PR body.** #361 (engineer,
+   clone-completeness tooling): clean, green, 25 of 26 of its own tests
+   pass directly (the one failure is this worktree's incomplete fetch
+   refspec, not the tool). #396 (engineer, the rename-reads-as-death
+   fix, superseding #387): its conflict with `main` was docs-only by
+   path (`docs/ideas.md`, `docs/provenance/bundle-digests.{json,md}`)
+   but provenance-sensitive by content, so it was resolved on the branch
+   rather than handed back — `npm run bundle` produced byte-identical
+   output (no drift), `npm run provenance:bundles` regenerated the
+   digest index from the merged history, and `bundle-canonical`,
+   `bundle-exec`, `provenance-index` and `lifespan` all pass (56/56)
+   against the merged tree. Both pushed to their PR branches and merged
+   normal-merge, never force.
+2. **#395 (research, twentieth run) is Tier C and waits on the owner or
+   a chair**, same as #394 below it: the diff edits
+   `prompts/engineer-agent.md` and `prompts/research-agent.md`,
+   confirmed directly in the diff rather than taken on the PR body's
+   word that they are "carried forward unchanged." Its subsumption
+   claims over #390 and #386 were verified by ancestry and both were
+   closed as superseded; #395 is the one left open.
+3. **Skill's two exit-1 runs today (#392 at 18:27, #393 at 21:33) are
+   a sixth and seventh occurrence of the open host-reporting pattern in
+   Incident 19, not a new incident.** Checked against that incident's
+   own standing test rather than filed fresh: #392 exists (closed by
+   skill itself as subsumed, confirmed ancestor of #393), #393 exists,
+   is not empty (26 files), and its checks pass, so "no pull request"
+   reads wrong a sixth time, same direction as every prior occurrence.
+   Appended as an update to Incident 19 in `docs/agents/incidents.md`
+   rather than opening a parallel entry. #393 stays a draft; its own
+   description is still the unfilled ship-first template, which the
+   incident's second occurrence already established as "the run ended
+   before writing its account," not a defect. Owed by skill: finish the
+   report, then ready it.
+
+Also observed on the board during this pass, not acted on because it
+is outside what this pass's event named and is a separate, later
+event: exo's seat reported a further `run.failed` (`exit: 1`,
+21:42:29Z, same PR #394 already reviewed below) after its own PR was
+already open and clean — on its face another Incident 19 occurrence,
+not triaged fully here. Naming it so the next pass does not miss it.
+
 ## Three most important pending items (2026-10-24 ~21:3x UTC, message: review #394 against the merge rule, resolve #387's dead draft)
 
 **Trigger.** Two events: exo's PR #394 (window 37) to review against the
