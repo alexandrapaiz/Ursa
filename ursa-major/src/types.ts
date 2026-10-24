@@ -2,6 +2,8 @@
 // A finished piece of work joined backward to every model generation that fed it,
 // each span classified by what happened to it. Schema first; everything else serves it.
 
+import type { Apparatus } from './apparatus'
+
 export type SpanClass =
   | 'survived_verbatim'
   | 'survived_mutated'
@@ -101,6 +103,20 @@ export type SegmentMode = 'prose' | 'code'
 
 export interface SourcePointer {
   conversationId: string
+  /**
+   * Who signed the generation, which on the git launches is not a model
+   * name. `src/resolve-episode.ts` sets this from `episode.agentMarker`,
+   * and `src/pairfinder.ts` builds that from a commit's `Co-Authored-By`
+   * trailer, a declared agent identity, or an author name — so its value
+   * in `fixtures/real/ursa-main-4d5e401.json` is `claude[bot]`, a GitHub
+   * App. Only the transcript path (`parseClaudeSession` in src/parse.ts)
+   * puts a real model id here, read from the call's own `message.model`.
+   *
+   * It says nothing about the apparatus, and a cross-vendor comparison
+   * keyed on it alone cannot separate a model difference from a client or
+   * output-cap difference. Join `conversationId` to the record's
+   * `generations[]` and read `apparatus` for that. See src/apparatus.ts.
+   */
   model: string
   /** ordinal of the assistant turn within its conversation (1-based) */
   turnIndex: number
@@ -427,6 +443,21 @@ export interface RawGeneration {
   filePath?: string
   timestamp?: string
   text: string
+  /**
+   * The client that made this call and the output limit it set, with the
+   * provenance of both. See src/apparatus.ts for why this is a field and
+   * not a note, and why it is here rather than on `SourcePointer`.
+   *
+   * Absent and `{ observability: 'unobservable' }` are different claims,
+   * the same way absent and present differ for `task.resolvedBy` above.
+   * Absent means a build older than 2026-10-24 wrote this generation and
+   * nothing asked. `'unobservable'` means the ingest path was asked and
+   * answered that it structurally cannot see an apparatus, so a rerun
+   * over the same input will say the same thing. Every ingest path in
+   * `src/` sets this; a generation reaching the resolver without it came
+   * from outside this tree.
+   */
+  apparatus?: Apparatus
 }
 
 export interface GenerationRecord extends RawGeneration {
