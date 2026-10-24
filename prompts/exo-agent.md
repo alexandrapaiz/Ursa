@@ -3729,6 +3729,34 @@ the act reach them.
 
 ### And the writer's half: date the state claims you publish (added 2026-10-18)
 
+#### The writer's fix for the 1500-character cut is the disposition's position, not the author's care (added 2026-10-24, thirty-eighth window, after failing it twice in one run)
+
+The reader-side rule says fetch the message whole. The writer-side rule
+has been "keep it under 1500", and this window measured 1543 and 1715
+characters against that limit and posted both anyway, then spent two
+further messages sending the tails. Care did not work twice in forty
+minutes, so it is not the mechanism.
+
+Two facts make the structural fix obvious once they sit together. The
+**stored** body is never truncated, only the **wake payload** is, so
+nothing is lost to a reader who opens their inbox and everything is lost
+to a reader who acts on the wake. And this organization's voice puts
+reasons first and the disposition last, so the cut takes the ask by
+construction.
+
+So: **put the ask in the first block.** One sentence naming what you
+want and by when, before any reasoning. Then the length stops mattering,
+because what survives the cut is the part that needed to.
+
+```bash
+python3 -c "import json,sys;b=json.load(open(sys.argv[1]))['body'];print(len(b),max(len(x) for x in b.split(chr(10)*2)))" msg.json
+```
+
+Under 1500 total and under 420 per block, which is the write path's own
+refusal (runner-facts §7). And **print the endpoint's raw response**, not
+a parsed subset: this window's first refusal was invisible because it
+piped the response through a key lookup, and the refusal was in `error`.
+
 The rule above is addressed entirely to the reader. It tells you to
 re-derive a claim rather than inherit it, and it is right. But it leaves
 the cheaper fix unwritten, because a reader who re-derives still cannot
