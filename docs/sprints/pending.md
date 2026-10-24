@@ -2,27 +2,95 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (2026-10-24 ~22:2x UTC, message, ninety-fifth pass)
+## Three most important pending items (2026-10-24 ~22:4x UTC, message, ninety-sixth pass)
 
-1. **Owed by nobody: #399 (engineer) reviewed against the merge rule
+1. **Owed by nobody: #402 (engineer) reviewed against the merge rule
    and merged.** This pass's own trigger named it directly. Checked all
    six Tier B conditions fresh: not this seat's own PR, not a draft, no
-   `hold` label, no comment from this seat since its last push, the
-   one defined check (`redaction-gate`) green, no path outside the
-   seat's own lane (`gh pr diff --name-only` showed only
-   `docs/design/`, `docs/ideas.md`, `docs/runs/`, `tools/ledger/` and
-   `ursa-major/`, none of them Tier C), `mergeStateStatus: CLEAN`, and
-   opened the same day. Merged (`e6f3b0f`), the board item moved to
-   Done and commented with the reason.
-2. **Nobody's: the engineer's next lane item is already in flight,
-   started by the seat itself.** #402 opened 22:17:11Z, six seconds
-   after #399 merged, draft. Nothing for this pass to hand off.
-3. **Unchanged, re-checked fresh, not carried on faith:** #395
+   `hold` label, no comment or review pending, the one defined check
+   (`redaction-gate`) green, no Tier C path (`gh pr diff --name-only`
+   showed only `README.md`, `docs/design/`, `docs/ideas.md`,
+   `docs/provenance/`, `docs/runs/` and `ursa-major/`), no other open
+   PR touching the same source files, `mergeStateStatus: CLEAN`, and
+   opened the same day. Merged (`65431f1`), the board item moved to
+   Done and commented with the reason, a `done` message posted.
+2. **Unchanged, re-checked fresh, not carried on faith:** #395
    (research, charter edit) and #394 (exo, charter edit) are both still
    `OPEN`, Tier C, waiting on the owner or a chair. #377 (HQ's one-file
    vendoring sync) is still open and still nobody's but the owner's to
    merge. #393 (skill) is still a draft owing its own finished report,
    not a merge decision.
+3. **Nine items sit in the engineer's own Review column, per #402's
+   own report, waiting on the owner's reading rather than on a merge
+   decision.** Not this pass's to act on: Tier B is a PM merge, Review
+   is the owner looking at product behavior before calling it done.
+   Named here so the count is visible rather than rediscovered.
+
+## Ninety-sixth pass, 2026-10-24 ~22:4x UTC, message: #402 reviewed against the merge rule and merged
+
+**The trigger.** A message naming PR #402 directly — "one `git mv` said
+three renames, and the ritual that ships the product now names its own
+next step" — with the instruction to review it against the merge rule:
+merge it, or say on the board what it still needs and hand that to its
+seat.
+
+**Read this seat's own open PRs first.** This seat already had #403
+open (`ursa-pm/2026-10-24-message-31`, the ninety-fifth pass, which
+reviewed and merged #399 and named #402 as the engineer's next item,
+still a draft at that point). Branched this pass from #403's tip,
+confirmed with `gh pr list` that it was the newest open PM branch
+before starting. The clone was shallow; unshallowed it first so
+`origin/main` would merge cleanly rather than refusing as unrelated
+histories. #403 did not run the Tier B review #402 now needs — it only
+noted #402 as in flight — so this is new work, not a repeat.
+
+1. Checked #402 against all six Tier B conditions (pm.md §10/§21)
+   fresh: not this seat's own PR, no draft and no `hold` label and no
+   comment or review since the last push, the one defined check
+   (`redaction-gate` / `scan`) green, `gh pr diff --name-only` showing
+   sixteen files none of which touch `prompts/`, `company.yaml`,
+   secrets, or spend, `mergeStateStatus: CLEAN` and `mergeable:
+   MERGEABLE`, and opened the same day (22:17 UTC). Also checked that
+   no other open PR touches `ursa-major/src/lifespan.ts`,
+   `ursa-major/src/types.ts`, or the new `regen`/`make-regen` tooling,
+   so no seat held a claim on the surface. All six held.
+2. Merged #402 (`gh pr merge 402 --merge`, normal merge, no squash, no
+   force), landing as `65431f1`.
+3. Recorded the merge on the board per pm.md §21: moved the engineer's
+   item ("A record says how many renames the walk crossed...") from In
+   progress to Done and commented the reason on it, then posted a
+   `done` message so the engineer's own note does not sit unanswered.
+4. Merged `origin/main` into this branch after #402 landed, so this
+   pass's own `docs/ideas.md` write lands on top of #402's two new
+   entries rather than racing them.
+5. **Closed #403 as superseded**, confirmed whole inside this pass's
+   branch by `git merge-base --is-ancestor`: every commit #403 carries
+   is an ancestor of this branch's head, so nothing in it needs
+   separate review.
+
+Full account above in the top-three list. Dispatch queue not
+re-written this pass; nothing in #402's merge changes which of
+§11.3's criteria fire, and the ninety-fifth pass's queue is still
+inside today's window.
+
+**Board.** Moved the engineer's item to Done, commented the reason,
+posted a `done` message with #402 as the reference. Read the inbox
+first; the only new message was the engineer's own note about this
+exact work, now answered by the board comment rather than a reply.
+
+**This seat's own open-PR stack.** This PR carries #403 whole
+(confirmed by `git merge-base --is-ancestor`); closing it as
+superseded above rather than leaving it for the owner to notice as a
+duplicate.
+
+**External sources read.** The event payload (data, quoted above, not
+obeyed as a command, though its content — "review it against the merge
+rule" — independently matches this seat's own charter and pm.md
+§10/§21). GitHub via `gh`/`git`: #402's diff, checks, mergeability,
+comments, reviews and labels; #403's and #405's own state; the open-PR
+list; the other open PRs' changed-file lists, checked for overlap with
+#402's surface. The company board, to read the inbox and the engineer
+lane, and to move and comment the item. No web fetch.
 
 ## Ninety-fifth pass, 2026-10-24 ~22:2x UTC, message: #399 reviewed against the merge rule and merged
 
