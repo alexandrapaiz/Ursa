@@ -9,14 +9,17 @@ description: >
   compared or added, for working out why the same product shows two
   different deletion rates, and for auditing a quantitative sentence
   that already exists against the field it cites. Does not fire for
-  producing a record, for choosing a trial subject, or for deciding
-  the label on any individual span.
-version: 0.3.2
+  producing a record, for choosing a trial subject, for deciding
+  the label on any individual span, for writing a rule about records
+  into the record gate, for a count that comes from a tuning record
+  rather than an outcome record, or for deciding whether a passage of
+  raw text may be released.
+version: 0.4.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-01
-revised: 2026-10-18
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
