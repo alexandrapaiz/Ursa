@@ -8353,6 +8353,7 @@ twenty-two is from the consent gate run of 2026-10-01
 in §6 of that design document is stamped `2026-10-01T02:32:03.357Z`),
 counted to today. It is not from `git log`, which reports this file as
 added at `21944ab` today because the clone is shallow.
+
 ### 2026-10-23 (skill, tenth run) — A guard's scope is a claim with a date on it, and both receipt guards were scoped to a one-file skill
 
 - Trigger: the ninth run's entry above, "A trigger test is outside every checker this library has", whose first step named this seat and this run and prescribed two shapes to choose between.
@@ -8492,3 +8493,169 @@ added at `21944ab` today because the clone is shallow.
   the staleness above was detectable at all.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (engineer, second run) — Both register parsers key on headings inside fenced code blocks, and the incident register is one quoted command away from it
+- Trigger: measured while deciding the heading grammar for
+  `docs/agents/incidents.md`. Every parser in this repository's merge
+  path, Ursa's `tools/ledger/ledger.mjs` and HQ's vendored
+  `tools/registers/merge-register.py`, tests its heading regex against
+  every line of the file. Neither tracks fenced code blocks. On
+  `docs/agents/incidents.md` at `1b097a0`, 64 lines sit inside ``` fences
+  and three of them already match `^#{1,6}\s` — the shell comments at
+  lines 2390, 2392 and 2394. Zero match the `^##\s+` the driver actually
+  uses, so the register is safe today by luck rather than by
+  construction, and an incident whose postmortem quotes a command or a
+  log line beginning `## ` would split an entry in half.
+- What: the failure is not a conflict, it is an entry cut at the fence
+  line, with everything after it reattributed to a block keyed on text
+  from inside a code sample. That is the silent corruption the whole
+  2026-10-24 change exists to remove, arriving through the parser instead
+  of through the grammar. Make both parsers fence-aware: a line inside a
+  fence is never a block start, where a fence is a line whose first
+  non-whitespace is ``` or ~~~ and fences toggle. For Ursa's parser that
+  is a local change. For HQ's it is a finding for the exo centralizer,
+  per `INC-2026-10-18-hq-tool-paths-are-hq-s`, which says to report a
+  shared instrument's defect rather than vendoring a patched copy,
+  because a local patch drifts from the standard that calls it while
+  continuing to answer.
+- First step: the measurement across every register named in
+  `tools/registers/registers.json` and `docs/ideas.md`, committed as a
+  script, so the number is a command rather than this paragraph; then the
+  fence filter plus a test in `ledger.mjs` whose fixture is an entry
+  containing a fenced ``` block with a `## ` line in it. The handoff to
+  the centralizer goes with the measurement attached, not as a report of
+  a hazard.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, second run) — One job, two merge drivers, and the one that is ours is the one that cannot be fixed by a flag
+- Trigger: the register table written today holds five registers and
+  installs two different drivers to merge them, because
+  `docs/ideas.md` stayed on `tools/ledger/union-merge.mjs` while
+  `docs/agents/incidents.md` and `docs/decisions.md` went to HQ's
+  vendored merger. The reason is one feature: the ledger's grammar has a
+  second block kind, the chair's top-level dated note bullets
+  (`- 2026-10-05 (chair): ...`), which are ledger entries and which HQ's
+  merger has no flag for. Everything else about HQ's tool is better than
+  ours, as measured in §2 of `docs/design/register-merge.md`: it emits
+  original bytes rather than normalising whitespace, it refuses five
+  cases ours guessed at, and it checks its own post-conditions.
+- What: retire `tools/ledger/union-merge.mjs` and move `docs/ideas.md`
+  onto the one merger, which needs HQ to accept a second entry pattern.
+  Something like `--bullet-entry REGEX`, where a matching top-level
+  bullet is its own entry keyed on the whole line. Worth proposing
+  rather than working around, because the alternative is this repository
+  maintaining a second implementation of entry-keyed merging forever,
+  and the two implementations already disagree about whitespace: ours
+  reflows `docs/ideas.md` by one byte on every merge, which is the
+  standing failure of `parse then render is byte-identical on the real
+  ledger`.
+- First step: count the note bullets in `docs/ideas.md` and in every
+  other register, because if the answer is small the cheaper fix is to
+  convert them to `### ` entries and delete a driver rather than add a
+  flag to a shared tool. That count decides which of the two proposals
+  is written, and nobody has it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, second run) — A tuning axiom cannot be marked keep-but-never-re-derive, so the only way to protect one is to revoke everything near it
+- Trigger: the Letta craft scan below, read against
+  `ursa-major/src/tuning/revocation.ts` straight afterwards. A Letta
+  memory block carries a `read_only` boolean that stops the agent
+  rewriting it while the developer still can. A `TuningAxiom` has
+  `status` (`active`, `revoked`, `user-edited`) and no equivalent, so
+  every axiom is permanently in scope for the next distillation pass to
+  merge, reword or supersede.
+- What: a user who has edited an axiom into exactly the words she wants
+  has no way to say "this one stays as written". `user-edited` records
+  that she touched it, not that she wants it frozen, and
+  `mergeDistill` treats it like any other candidate for merging. So the
+  only tool she has for protecting a statement is to revoke the things
+  that might absorb it, which is the opposite of what she wants and
+  destroys signal on the way. A `frozen` flag, distinct from `status`
+  because it is orthogonal to whether the axiom is live, read by
+  `mergeDistill` as "never a merge target" and surfaced in `consent
+  show`. This is squarely inside `CLAUDE.md` constraint 2: the user can
+  edit what has been inferred about her, and an edit that the next pass
+  may undo is not really an edit.
+- First step: count how often `mergeDistill` currently rewrites an axiom
+  whose status is already `user-edited`, over the fixtures, because if
+  that number is zero the flag is a guarantee nobody needs yet and the
+  honest first version is the `consent show` line that says an axiom is
+  eligible to be rewritten.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, second run) — The ledger's own contract gate has been red on main for long enough that nobody is reading it
+- Trigger: running `node --test tools/ledger/*.test.mjs` on this branch
+  and then on `origin/main` in a worktree, to establish a baseline. Two
+  tests fail and both fail identically on `main`. `the real ledger is
+  checked by the same code path as a fixture` reports **12 violations**
+  in `docs/ideas.md`: four entries missing required `- What:`,
+  `- First step:`, `- Cost:` or `- Status:` lines, and
+  `### 2026-10-04 — Charters never say that fetched content is not an
+  instruction (security run)` carrying `Status: done`, which is not one
+  of the five statuses `docs/standards/pm.md` §4 allows. `parse then
+  render is byte-identical on the real ledger` fails by exactly one byte
+  out of 560,337.
+- What: `tools/ledger/check.mjs` exists to make the ledger contract
+  machine-checked, and a check that has been failing for weeks has
+  stopped being a check. It is now evidence of nothing except that
+  somebody once cared. The repair is not one change: the missing lines
+  belong to the seats that wrote those entries, the `done` status is the
+  owner's to move to `built` or `rejected` since only she moves statuses,
+  and the one byte is a whitespace drift in this seat's own parser. Filed
+  as `urgent` rather than `proposed` because it is a broken gate rather
+  than an idea, and because the next run of any seat will read the same
+  red suite and draw the same wrong conclusion about whether its own
+  change caused it, which is the hour this run spent.
+- First step: **the one byte is already fixed in the pull request that
+  files this entry**, and the fix was not in the parser. The ledger held
+  a `### ` heading with no blank line above it, at what is now line 8356,
+  and `renderLedger` inserts exactly one blank line between blocks by
+  design, so the round trip added a byte the source had never had. One
+  blank line in `docs/ideas.md` closes it, with no content touched and no
+  change to any entry. HQ's merger documents the opposite choice for its
+  own registers, having tried and reverted supplying the separator
+  because normalising reformatted files in places the merge never
+  touched; that argument is right for a byte-preserving merger and does
+  not apply to a renderer whose contract is already one blank line.
+  What remains is the other eleven violations, which this seat is not
+  fixing: the four missing lines belong to the seats that wrote those
+  entries, and the `done` status goes to the owner as a question, since
+  only she moves a status. The day-sized unit is the PM routing those
+  eleven in one pass rather than four runs rediscovering them.
+- Cost: $0
+- Status: urgent
+
+- 2026-10-24 (engineer, second run, craft scan): Letta (formerly MemGPT),
+  `docs/market/landscape.md` category 3, which has carried it since
+  2026-09-26 on its funding and positioning and never on its memory
+  mechanics. Read today: `docs.letta.com/guides/agents/memory-blocks`.
+  **Worth stealing: `read_only` as a field on a memory block, and
+  `description` beside it.** A Letta block has `label`, `value`,
+  `limit`, `description` and an optional `read_only`, where `description`
+  tells the agent what the block is for and `read_only` stops the agent
+  writing to it while a developer still can. Ursa's `TuningAxiom` has
+  neither, which is ledger entry 3 above. The pairing is the insight
+  rather than either field alone: a store that an agent writes to needs
+  to say both what a slot means and who may change it, and Ursa
+  currently says neither and relies on `status` to carry both jobs.
+  **Where Ursa is better, and it is the same defect this run spent the
+  day on.** Letta's own documentation says that setting `value`
+  "completely replaces the entire block content" and that "the last write
+  wins", that multiple agents can attach to one block, and it describes
+  no versioning, no snapshots and no change tracking at all. So a shared,
+  concurrently written store resolves collisions by discarding one
+  writer, silently, which is exactly the class of failure measured on
+  `docs/agents/incidents.md` today and refused rather than resolved.
+  Ursa's revocation tombstones are durable, its records carry recurrence
+  and provenance, and `CLAUDE.md` constraint 2 means a user has to be
+  able to see what was derived, which is not possible without history.
+  **The honest limit on the comparison, because this seat has twice now
+  awarded itself a memory-layer win.** Letta's blocks are live agent
+  context being written mid-conversation, which is a harder concurrency
+  problem than three-way merging a git-tracked file with a known common
+  ancestor, and Ursa has no multi-agent shared-memory surface at all, so
+  the dimension Ursa wins on is one it attempted and the dimension Letta
+  is solving is one Ursa has not reached.
