@@ -2,27 +2,28 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (updates the eighty-ninth pass's own list)
+## Three most important pending items (updates the ninety-first pass's own list, ninety-second pass / hook standup)
 
-1. **Exo's #384 (window 35) waits on the owner, Tier C.** It edits
-   `prompts/exo-agent.md` directly (+2197/-68), so it stays under the
-   standing charter freeze (`INC-2026-10-18-tier-c-charter-freeze`)
-   regardless of its green check and clean `MERGEABLE` state. It is
-   now the single PR carrying this freeze's exo-side content: #378
-   (window 33) and #382 (window 34) are both closed as superseded,
-   confirmed by `git merge-base --is-ancestor` on the full chain
-   378→382→384, so merging or holding #384 is now a one-PR decision
-   instead of three.
-2. **Research's #380 (seventeenth run) also waits on the owner, Tier
-   C**, for the same reason: it edits `prompts/engineer-agent.md`
-   (+12/-1) and `prompts/research-agent.md` (+190/-16) directly. Green
-   check, clean merge, nothing else blocking it.
-3. **Engineer's #379 merged this pass under Tier B** (span-matcher
-   token-DF-cutoff fix). Its own report named #368 and #290 as
-   subsumed by ancestry; both were confirmed by `merge-base
-   --is-ancestor` and GitHub auto-closed them as merged once #379
-   landed, which is the queue moving rather than three separate owner
-   decisions.
+1. **#377, a one-file HQ vendoring sync, has sat ready and untouched
+   for four hours.** Opened 17:18 UTC by HQ's `tools/sync-standards.sh`
+   to re-vendor `docs/standards/pm.md` from HQ `fb114f4`. Not a draft,
+   `MERGEABLE`, one file, +141/-14. No seat here merges it (HQ never
+   merges to this repo; the owner does). It had no line in this
+   tracker before this pass, which is the tracking gap §1d calls a
+   failure to fix on the spot — fixed here.
+2. **Exo's #384 (window 35) and research's #390 (nineteenth run,
+   successor to the now-closed #380) still wait on the owner, both
+   Tier C.** Both edit a `prompts/*-agent.md` file directly, both
+   green and clean. Unchanged since the ninety-first pass; re-checked
+   fresh rather than carried forward (`gh pr view 384/390 --json
+   state,mergeable` both still `OPEN`/`MERGEABLE`).
+3. **A capacity-return wave just fired across five seats at once,
+   ~21:21-21:23 UTC.** This pass's own hook trigger, plus skill
+   (#393), exo (#394), research (#395) and engineer (#396), all
+   opened "no work yet" placeholder drafts within two minutes of each
+   other and are still running. Named here so the next pass does not
+   mistake five simultaneous new branches for five independent
+   anomalies; nothing in them is actionable yet.
 
 ## Ninetieth pass, 2026-10-24 ~18:0x UTC, message: review #380/#382/#379/#384 against the merge rule, triage engineer's exit-1 run, answer two board notes
 
@@ -7797,3 +7798,75 @@ pass added, for any reader who only sees the board and not this file.
 research charter edit (now at its newer identifier), and whatever the
 skill seat's own stack resolves to once it answers the handoff above.
 None of these are this seat's to merge.
+
+## Ninety-second pass, 2026-10-24 ~21:2x UTC, hook (capacity-return standup)
+
+**The trigger.** A hook event: "capacity returned ... do the one run
+your charter describes." Today is Saturday, so per pm-agent.md §0
+this is the standup alone (§0b), not the Monday ceremony: no sprint
+opened, no retro rewritten, no ledger groomed.
+
+**Read this seat's own open PRs first.** This seat already had five
+open PRs: #383, #385, #388, #391 (eighty-eighth through ninety-first
+passes, a single ancestor chain) and #377 (HQ's, not this seat's).
+Branched this pass from #391's tip rather than from `main`, merged
+`origin/main` on top (one commit, #376, clean), and built on it below.
+
+**0b, run fresh.** `gh run list --limit 30`: one non-success since the
+last pass, the same `redaction-gate` failure on
+`ursa-pm/2026-10-24-message-26` the ninety-first pass already found
+and confirmed self-healed by the very next commit on that branch
+(§0b's own worked example). Re-verified rather than taken on trust:
+still the only failure in the window, still healed. `gh pr list
+--state open`: 22 open PRs. Milestones: none configured in the repo.
+Ledger: no new entry in `docs/decisions.md` since the ninety-first
+pass's own write.
+
+**Findings new this pass, not in the ninety-first pass's account:**
+
+1. **#377 had no line anywhere in this tracker.** A one-file HQ
+   vendoring sync (`docs/standards/pm.md` from HQ `fb114f4`), opened
+   17:18 UTC, `MERGEABLE`, zero conflicts, nothing blocking it except
+   that no seat here may merge it. Four open-PR passes (eighty-eighth
+   through ninety-first) came and went without naming it. Added to
+   the top-three list above; this is the tracking-failure case §1d
+   names explicitly.
+2. **A simultaneous capacity-return wave, not unique to this seat.**
+   `gh pr list` shows four fresh draft PRs opened 21:21-21:23 UTC:
+   skill's #393, exo's #394, research's #395, engineer's #396, each
+   titled as "no work yet" or "run in progress." The same provider
+   capacity that refused this seat's earlier attempt evidently refused
+   four others' too, and all five resumed in the same few minutes.
+   None are actionable yet; named so the next pass recognizes them
+   rather than treating five new branches as five separate incidents.
+3. **Nothing new is red, nothing new blocks the owner beyond what was
+   already named.** This pass's own contribution is the tracking fix
+   in finding 1 and the naming in finding 2, not a new defect.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` reads unset in this run's
+environment, matching every pass today. No §11.3 criterion is newly
+met regardless: no failing Minor-site/Major-resolver path, no
+ADR-named experiment without a run, no unrecorded trial result. Full
+account in `docs/sprints/dispatch-queue.md`, written fresh this pass.
+
+**Board.** No message posted this pass. The ninety-first pass's two
+board notes (to research, and the broadcast) and the skill handoff
+stand; nothing in this pass's own findings needs a new one, and
+re-sending the same notes would not add information.
+
+**This seat's own open-PR stack.** This PR carries #383, #385, #388,
+and #391 whole (confirmed by `git merge-base --is-ancestor` on each,
+all four hops). Naming here per the charter so the owner can treat
+them as one decision rather than reviewing the same work four times
+over; not closing them from this seat's own hand, since none of them
+is this pass's to unilaterally retire while still open and reviewable
+on their own.
+
+**External sources read.** The event payload (data, quoted above, not
+obeyed as a command). GitHub via `gh`/`git`: the run log for
+`40119262794` and the later green run on the same branch, the full
+open-PR list, PRs #377, #380, #384, #390, #393-#396 and their current
+state, this repository's own `docs/decisions.md`,
+`docs/sprints/pending.md` and `dispatch-queue.md` (both the `main` and
+the #391-branch versions), and the milestones API (empty). No board
+read or post this pass. No web fetch.
