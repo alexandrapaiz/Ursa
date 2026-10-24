@@ -1,103 +1,82 @@
-# Merge order
+# Merge order — measured 2026-10-24, thirty-eighth exo window
 
-Replaced every window by the ExO seat, per `prompts/exo-agent.md` §5b.
-Measured 2026-10-24, window 37, at 21:3x UTC.
+Replaces the previous week's plan. Measuring the queue and naming the
+order is information for the owner. Merging is hers alone
+(`prompts/exo-agent.md` §5b).
 
 ## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **24** |
-| merged in the last seven days | **56** |
-| age of the oldest open | **14 h** (2026-10-24T06:32:38Z) |
+| Open pull requests | **15** |
+| Merged in the last 7 days | **59** |
+| Age of the oldest open | **under one day** (oldest created 2026-10-24 06:32 UTC) |
 
-Open does **not** outnumber the week's merges, so the depth warning does
-not fire. Fifty-six merges against twenty-four open is the healthiest
-ratio this register has recorded, and the oldest thing in the queue was
-opened this morning. The gate is absorbing faster than the organization
-produces.
+The queue is not outrunning the gate. Open is 15 against 59 merges in
+seven days, and nothing in it has reached a day old. This is the first
+reading in this file's history where the depth paragraph of §5b does
+not fire, and it is reported plainly rather than in bold for that
+reason.
 
-## Clone state, before any verdict below was taken
+## Conflicts against `main`
 
-Both merge drivers registered first, because a named driver resolves
-per clone and a fresh clone has the declaration without the driver:
+**Instrument: `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>`, run on an unshallowed clone with the repository's three
+merge drivers installed.** Both qualifications are load-bearing and the
+second one is new this run.
 
-```
-$ bash tools/ledger/install-driver.sh && bash tools/registers/install-drivers.sh
-$ git config --get-regexp 'merge\..*\.driver'
-merge.ledger.driver    node …/tools/ledger/union-merge.mjs %O %A %B %L %P
-merge.register.driver  node …/tools/registers/merge-driver.mjs %O %A %B %L %P
-```
+**0 of 15 conflict.** Every open pull request merges clean.
 
-The register driver is on `main` now, so the engineer's branch no longer
-has to go first, which it did in the previous two windows' plans.
+Before `tools/ledger/install-driver.sh` and
+`tools/registers/install-drivers.sh` were run in this clone, the same
+command on the same commits reported **four** conflicts — #316, #320,
+#348 and #393, all on `docs/ideas.md`. All four were artifacts of the
+clone, not of the branches. A `merge=` attribute in `.gitattributes` is
+inert until the driver is registered in git config, which is per clone,
+and the clone the host hands a seat has none. Confirmed a second way by
+performing all four merges in a detached scratch worktree off
+`origin/main`: clean. The account is
+`docs/agents/runner-facts.md` §20 and the case is
+`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`.
 
-## Conflicts: none
+So the driver state belongs beside the instrument in every row of this
+file from now on, for the same reason the instrument itself does: a
+verdict the seat holding the branch cannot reproduce is not a
+measurement.
 
-| pull requests | instrument | verdict |
+## Containment, and the order that follows from it
+
+**Instrument: `git merge-base --is-ancestor refs/prs/<contained>
+refs/prs/<tip>`, exit 0 meaning contained.** Stated contained-first so
+the direction cannot invert.
+
+| chain | contained | tip to merge |
 |---|---|---|
-| all 24 open | `git merge-tree --write-tree --name-only origin/main refs/prs/<n>` | **24 of 24 clean** |
+| skill | 316 ⊂ 320 ⊂ 348 ⊂ 393 | **#393** |
+| frontend | 342 ⊂ 360 | **#360** |
+| pm | 403 ⊂ 405 | **#405** |
+| exo | 394 ⊂ 404 | **#404** (see the note below) |
 
-The clone was unshallowed and its refspec widened before this ran
-(§0), so no `NO SUCH REMOTE BRANCH` reading is in this table.
+**Nine of the fifteen are in four chains, so four merges close nine
+pull requests.** The remaining six stand alone: #369, #373, #381
+(market), #377 (distribution), #395 (research), #402 (engineer).
 
-## Containment: 24 pull requests are 11 decisions
+Suggested landing order, each tip verified clean against `origin/main`
+above and each a descendant of everything it closes, so order between
+the chains does not matter for correctness:
 
-Measured with `git merge-base --is-ancestor refs/prs/<contained>
-refs/prs/<tip>`, exit 0 meaning contained. **Thirteen of the
-twenty-four are already contained in another**, so eleven merges close
-the whole queue.
+1. **#393** — closes 316, 320, 348 as well. Largest single reduction.
+2. **#360** — closes 342 as well.
+3. **#405** — closes 403 as well.
+4. **#404** — closes 394 as well. **This is this seat's own pull
+   request and this seat does not merge it.**
+5. Then the six singletons in any order: #402, #395, #377, #381, #373,
+   #369.
 
-| seat | chain, oldest first | tip | state |
-|---|---|---|---|
-| pm | 383 ⊂ 385 ⊂ 388 ⊂ 391 ⊂ 397 | **397** | draft, live run |
-| skill | 316 ⊂ 320 ⊂ 348 ⊂ 393 | **393** | draft, live run |
-| research | 386 ⊂ 390 ⊂ 395 | **395** | draft, live run |
-| exo | 384 ⊂ 389 ⊂ 394 | **394** | ready |
-| engineer | 387 ⊂ 396 | **396** | draft, live run |
-| frontend | 342 ⊂ 360 | **360** | ready |
-| engineer | — | **361** | ready |
-| distribution | — | **377** | ready |
-| market | — | **369**, **373**, **381** | ready |
-
-**Market is the one seat whose three open pull requests contain none of
-each other.** That is not a defect on its face, three independent pieces
-of work is a legitimate shape, but it is the only seat in the queue for
-which the count and the decision count are equal, and it is worth the
-PM's eye.
-
-## The order, simulated rather than guessed
-
-Performed in sequence in a detached scratch worktree off `origin/main`,
-with both drivers registered. Every step is a merge that was executed:
-
-```
-377  MERGED CLEAN   distribution, the vendored pm.md re-vendor
-361  MERGED CLEAN   engineer
-360  MERGED CLEAN   frontend
-369  MERGED CLEAN   market
-373  MERGED CLEAN   market
-381  MERGED CLEAN   market
-394  MERGED CLEAN   exo, this window's tip
-```
-
-Seven of seven, no conflict at any step. The four draft tips (393, 395,
-396, 397) are excluded because they belong to runs that were still live
-when this was measured and GitHub refuses to merge a draft at all. They
-enter the order at whatever position their own runs ready them in; none
-of them conflicts with `main` as it stands.
-
-## What is held, and by what
-
-**`394` is Tier C and waits on the owner.** It edits
-`prompts/exo-agent.md` directly. Ursa's PM has confirmed the same
-reading twice today, most recently at 18:08:31 UTC against `384`, and
-its own charter still carries no copy of the silence-route release that
-would let it merge a charter pull request on its own. That is the one
-predicate in an otherwise working gate, and it is recorded in
-`prompts/exo-agent.md` §5 rather than re-filed here.
-
-**`384` and `389` stay open deliberately.** Both are contained in `394`
-and both sit inside an open ask to the owner about their own diff's
-contents, so the own-PRs rule's first exception keeps them standing and
-this register names the tip instead: **the decision moves to 394**.
+**On #394 and #404.** #394 is this seat's thirty-seventh window, readied
+by its own run, and #404 is the thirty-eighth window built on its head.
+#394 is contained in #404 and #394 has been **left open deliberately**:
+the charter's fifth case says a readied sibling is not a branch to grow
+and is not a pull request to close out from under the merge gate. One
+owner decision covers the pair and **#404 is the one to merge**, because
+it is the descendant and it carries everything #394 carries.
