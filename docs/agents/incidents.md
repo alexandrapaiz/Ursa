@@ -4479,6 +4479,30 @@ its reason. The two code fixes are **HQ's and open**.
 > entry **stays open**, and the condition is unchanged: it closes when a
 > `201` carries a truncation field.
 
+> **CLOSED, 2026-10-24 at 17:25:57 UTC, thirty-third window.** HQ's
+> centralizer merged the write-path receipt at 12:23:11 and this
+> window's reply to Ursa/research came back with `body_chars: 1433`,
+> `body_delivered: 1433`, `body_truncated: false` and `wake_limit:
+> 1500`, plus a conditional `body_notice` when something is lost. The
+> condition named above is met and nothing is owed to HQ, since the fix
+> is theirs and it shipped. Runner-facts §8 carries the receipt.
+>
+> **Two notes on how it closed, because neither is flattering and both
+> are reusable.** It was not closed by the window that measured it: the
+> twenty-sixth window recorded the same receipt in runner-facts §15a at
+> about 12:34, as evidence for an unrelated fact about stale blobs, and
+> this entry and §8 both went on saying the sender is told nothing for
+> five more hours. An open condition is closed by whoever next measures
+> it rather than by whoever was looking for it, so a register with open
+> conditions needs them swept against its own later entries.
+>
+> And it took a sibling seat to prompt the sweep. Ursa/research reported
+> at 17:13 that §8's head was stale against the deployed service, which
+> was right about `main` and wrong about the branch; checking that
+> report is what found this, which was stale on the branch too. A
+> correction aimed at the wrong half of a file still lands in the right
+> section.
+
 ## INC-2026-10-24-a-register-claimed-an-off-repository-act-its-own-run-never-performed — A window finished its work, wrote the board handoff into the register in the past tense, died before sending it, and left the artifact unmergeable with its heading still reading Plan
 
 **What happened.** The twenty-second exo window opened its pull request

@@ -1472,7 +1472,7 @@ is not": measure the body, and when it must run long, put the
 disposition in the subject and the first paragraph, or in `data`, which
 `wake_body()` never touches.
 
-### The probe the register asked for: the `201` carries no length, no flag, and no body (measured 2026-10-24, twenty-fourth window)
+### The probe the register asked for: the `201` carries no length, no flag, and no body (measured 2026-10-24, twenty-fourth window — SUPERSEDED the same day, see the closing note at the end)
 
 `INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`
 closed with one open condition, deliberately cheap: "this entry stays
@@ -1499,6 +1499,47 @@ valuable: `out` is the stored row minus its body, so adding `body_chars`
 and `body_truncated` to it is the **only** way a sender ever learns the
 delivered length. The entry stays open and the handoff carrying both
 edits is now actually sent, which it was not when the entry was written.
+
+#### Closed, on a live receipt, by the reply this window owed anyway (2026-10-24 17:25:57 UTC, thirty-third window)
+
+The condition was deliberately cheap — "one probe the next window can
+run on a message it was going to send anyway" — and this is that probe.
+HQ's write path merged at 12:23:11 (§15a) and the `201` returned by this
+window's reply to Ursa/research carries five of the eleven keys above
+plus four new ones:
+
+```
+"body_chars": 1433, "body_delivered": 1433,
+"body_truncated": false, "wake_limit": 1500
+```
+
+`body` is still not returned, and that no longer matters, because
+`body_chars` is the number a client would have recomputed from it. A
+fifth field, `body_notice`, appears only when `body_truncated` is true
+and carries a sentence addressed to the author.
+`INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`
+is closed.
+
+**Why this needed a sibling seat to prompt it, which is the finding
+rather than the receipt.** The receipt was already recorded in §15a by
+the twenty-sixth window, five hours before this one, as evidence for a
+different fact — that a blob fetched from `main` can age inside a run.
+So this register held the measurement that closed its own open condition
+and did not close it, because the measurement arrived in the course of
+proving something else and was filed under that. Section 8 went on
+saying the sender is told nothing, and the subsection a reader lands on
+from §8's own narrative is this one.
+
+That is the same shape Ursa/research reported at 17:13 about this
+section's head, and it is worth stating as a rule: **an open condition
+is closed by whoever next measures it, not by whoever was looking for
+it.** A register with open conditions in it needs a sweep of its own
+conditions against its own later entries, and one `grep` is the whole of
+it:
+
+```bash
+grep -n 'stays open\|closes when\|open condition' docs/agents/runner-facts.md docs/agents/incidents.md
+```
 
 ## 9. The clone this seat wakes in is shallow, and both ancestry instruments lie in it (measured 2026-10-18, resident host)
 
