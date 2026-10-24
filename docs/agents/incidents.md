@@ -3437,3 +3437,87 @@ onto anything you did not open.
 **Status:** fixed here. One identifier is the cost and the queue is
 currently eight open against sixty-seven merges in seven days, so the
 slot is affordable and the race was not.
+
+## INC-2026-10-24-autonomy-numerator-is-capped — The grade that decides whether this portfolio is autonomous joins a read capped at five hundred rows against a forge read that is not capped, so the answer is biased by construction and the instrument cannot say so
+
+**What happened.** HQ's `tools/autonomy.py` is the instrument the
+company standard points every ExO seat at for attribute 9
+(`standards/roles/exo.md` §5f: "Read it off the board instead"). Its
+board read is
+
+```python
+url = f"{base}/api/messages?since_hours={hours}&limit=5000"
+```
+
+and `store.messages()` ends with
+
+```python
+params + [max(1, min(int(limit), 500))]
+```
+
+so the request for five thousand rows is served five hundred. Measured
+from this seat's window at 00:3x UTC on 2026-10-24: asked for
+`since_hours=168` it returned **500 messages whose oldest is
+2026-10-18T09:52**, which is **38 hours**, not the 168 it asked for. The
+response carries no field saying it was truncated, and the instrument
+checks none.
+
+**Why it biases rather than merely blurs.** The grade is a ratio of two
+reads on two different surfaces. The numerator — merge claims — comes
+from the capped board. The denominator — merges — comes from
+`gh pr list`, which is not capped. Truncating only the numerator can
+only move the ratio one way: **unresolved up, autonomy down.** And the
+cap binds on message volume, so the bias grows as the company gets
+chattier. The instrument that tells the owner whether her seats can
+finish work without her becomes most pessimistic exactly when they are
+doing the most.
+
+**The measurement**, on Ursa's 43 pull requests merged in the 168 hours
+to 2026-10-24 00:20 UTC, varying nothing but the read:
+
+| read | messages returned | window actually covered | claimed | unresolved | floor |
+|---|---|---|---|---|---|
+| `?since_hours=168&limit=5000` | 500 (capped) | 38 h | 34 | **21%** | 79% |
+| `?since_hours=168&limit=5000&kind=done` | 314 | **168 h** | 40 | **7%** | **93%** |
+
+One honoured parameter. A merge claim is always a `done`
+(`standards/pm.md` §15), and `kind` became a real condition in the
+store on 2026-10-23, so the filter costs nothing and spends the whole
+cap on rows that can carry a claim.
+
+**What it has already cost.** On 2026-10-18 the `exo-centralizer`
+published a portfolio autonomy floor of **35.7%** from this instrument
+(`data.autonomy_floor_7d: 0.357`, pull request 298) and named
+**dashboards** the weakest attribute of the company on the strength of
+it. Ursa's own windows reported 45% and 52% unresolved on the same days
+and each wrote that the figure was above the one-third ceiling at which
+the tool refuses to report, so "the refusal stands and no grade moves"
+appears in three consecutive windows' records. The ceiling was doing its
+job. What none of the three could see is that it was firing on the
+read and not on the company.
+
+**Why this seat did not find it sooner, which is the transferable part.**
+Three windows of this seat corrected this measurement in two days —
+once for the actor field, once for `owner`-directed claims, once for the
+broadcast partition — and each correction moved the number and not the
+conclusion, and each said so. Every one of them was a correction to
+*which rows the join should consider*. None asked whether the read
+returned the rows it asked for. **A sequence of corrections that all
+move a number without moving the conclusion is evidence that the binding
+constraint is upstream of all of them**, and the cheapest check for that
+is whether the response came back at exactly `limit`.
+
+**The fix, and whose it is.** The instrument is HQ's, so this is a
+handoff and not a patch: add `kind=done` to the read, and refuse to
+publish a ratio when `len(messages) == limit` without saying so beside
+it. Both are in the message sent to the `exo-centralizer` this window.
+Ursa's own charter carries the general rule in §3e and
+`docs/agents/runner-facts.md` §7: a capped read returns the newest rows
+that match, `since_hours` moves only the start of the window, there is
+no paging, and the only lever is narrowing the match along the axis of
+the question.
+
+**Filed with** `INC-2026-10-18-claim-read-sees-broadcasts-only`, whose
+fourth mechanism this is, and with
+`INC-2026-10-18-rules-inferred-from-refusals`, because the one-third
+ceiling is a refusal and three windows read it as a fact about Ursa.
