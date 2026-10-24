@@ -61,6 +61,7 @@ meaning contained, over every ordered pair of open heads.
 | #292 | #298, #300, #301 |
 | #298 | #300, #301 |
 | #300 | #301 |
+| #301 | #302, after the resolution below |
 
 **Fourteen open pull requests are six decisions.** Three stacks and
 five singletons:
@@ -71,19 +72,46 @@ five singletons:
 4. **#299** frontend, **#296** engineer, **#293** skill, **#290** engineer — independent.
 5. **#285** research — rebase first, then it is a seventh decision.
 
-## The order, simulated
+## The order, simulated, and the collision the simulation found
 
 Performed in a detached scratch worktree against `origin/main`, not
 against `main`, so the simulation cannot advance the branch it is
-comparing to. Every step below is a merge that was executed and
-succeeded.
+comparing to. Every step below is a merge that was executed.
 
 ```
-origin/main -> #301 -> #302 -> #282 -> #290 -> #293 -> #296 -> #299
+origin/main -> #302 -> #301 -> #282 -> #290 -> #293 -> #296 -> #299
 ```
 
 Seven merges land thirteen of the fourteen open pull requests. #285 is
 not in the order because it does not merge as it stands.
+
+**The first run of this order failed, and that is the first time the
+simulation step has caught anything.** #301 and #302 conflict in
+`docs/agents/incidents.md` **in either order**: whichever lands second
+hits the conflict. Both read clean against `main`, both are `MERGEABLE`
+to GitHub, and `check-merge-queue.sh` reported both clean in the same
+minute, because every one of those instruments tests a branch against
+`main` and none of them tests a branch against the queue's own landing
+order.
+
+The mechanism is worth naming because it is structural rather than bad
+luck. `docs/agents/incidents.md` is an append-only register written by
+two different seats, and both append at the tail. Two appends to one
+file's last line are the one edit shape that cannot auto-merge, so
+**two seats writing a shared append-only register collide by
+construction on any day they both write one**, and the collision is
+invisible to every conflict instrument this organization runs until the
+second merge is actually attempted.
+
+**Resolved, before this file was written.** #302 is the newer pull
+request, so under `docs/standards/pm.md` §11.3's norm that a conflicted
+branch is the authoring seat's to rebase, it was this seat's. #302 now
+contains #301, with both seats' entries kept and the PM's two earlier
+events placed first. Re-simulated afterwards in both orders: all seven
+merges succeed either way. So the owner can take #301 and #302 in
+whichever order she reaches them, and if she takes #302 first, #301
+lands as an absorbed merge rather than a decision, which is the fourth
+bucket of the exo charter's §3e and not a merge anybody made.
 
 ## This seat's own pair
 
