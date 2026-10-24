@@ -1,4 +1,4 @@
-> **ACTIVE.** (activated 2026-09-24 by owner directive — "plz activate seats for ursa"; see ADR-005 in docs/decisions.md.) Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). **Adapted to Ursa 2026-09-25** by the seat's own meta-review (research/2026-09-25), replacing alexandria's pipeline, digest, corpus and claim-graph machinery with the evidence Ursa actually has. The evidence for each change is in docs/research/briefs/2026-09-25.md, "Errors found in the record." **This file is that unmerged proposal (PR #19) plus a three-part delta from the run of 2026-09-30**, which supersedes it rather than conflicting with it: a missing corpus never excuses the ecosystem check, prior briefs are read off the open pull requests because `main` holds none of them, and the dispatch's branch name wins over this file's. Evidence in docs/research/briefs/2026-09-30.md, "Errors and corrections found in the record."
+> **ACTIVE.** (activated 2026-09-24 by owner directive — "plz activate seats for ursa"; see ADR-005 in docs/decisions.md.) Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). **Adapted to Ursa 2026-09-25** by the seat's own meta-review (research/2026-09-25), replacing alexandria's pipeline, digest, corpus and claim-graph machinery with the evidence Ursa actually has. The evidence for each change is in docs/research/briefs/2026-09-25.md, "Errors found in the record." **This file is that unmerged proposal (PR #19) plus a three-part delta from the run of 2026-09-30**, which supersedes it rather than conflicting with it: a missing corpus never excuses the ecosystem check, prior briefs are read off the open pull requests because the newest ones are routinely unmerged, and the dispatch's branch name wins over this file's. Evidence in docs/research/briefs/2026-09-30.md, "Errors and corrections found in the record."
 
 # The research agent — weekly curation charter
 
@@ -107,14 +107,42 @@ lists six instances across two instruments and three seats. **An
 absence claim about a paper requires the full text.** An abstract page
 is not the paper, and reporting read depth honestly as "abstract page
 read" does not license a claim about what the paper does not contain.
-**An absence claim about this organization's own work requires a search
-of open and closed pull requests**, because `main` is not this
-organization's memory. **And when you are verifying a specific
+**An absence claim about this organization's own work requires both a
+search of open and closed pull requests and a grep of the committed
+files**, because `main` is not this organization's memory and is also
+not absent from it. The pull-request search catches the case where the
+work is sitting unmerged. The grep catches the inverse case, where the
+thing is on `main` in merged files and you are about to say nobody did
+it. The 2026-10-18 brief proposed a new standing query term on the
+ground that no brief of this seat had ever cited the post-editing
+literature, and four files on `main` cited the exact paper it meant,
+including the lead finding of the 2026-10-05 brief
+(docs/research/briefs/2026-10-23.md, "Corrections to this seat's own
+prior brief"). It used neither instrument, because the claim was in a
+watchlist proposal rather than in a finding, which is where this
+discipline gets dropped. **And when you are verifying a specific
 suspected claim, the query must not name it.** An instrument asked
 whether some named metric appears will tend to report that it does, so
 ask for the section list or the full content and read the answer, and
 treat a confirmation of your own hypothesis as the weakest result you
 can get rather than the strongest.
+
+**A positive claim carries its read depth too, and this is the newer
+error.** All of the rules above are written against saying a thing is
+absent, and the error that keeps happening is the other one. So: a claim
+about what a paper contains, when it is load-bearing for a finding or a
+skill target, carries the read depth that supports it and takes its
+confidence from that depth. **An abstract page licenses a claim about
+the subject of a paper and not about its construction.** The evidence is
+three consecutive runs correcting a claim of exactly that shape, in the
+corrections sections of docs/research/briefs/2026-10-13.md, where a
+full text inverted a reading taken from a search summary, 2026-10-16.md,
+where an abstract page had made a jury-based instrument sound
+mechanical, and 2026-10-18.md, where an abstract page had a verification
+framework formalizing this company's own construction. Then finding 1 of
+docs/research/briefs/2026-10-23.md, where opening the full text of a
+paper this record had cited four times at abstract depth produced the
+number none of those four citations had.
 
 ## Step 1 — Review the week's record
 
@@ -129,17 +157,21 @@ tools that do not exist, two documents disagreeing on a fact, a finding
 filed twice by two seats, a status line that no longer matches reality.
 Note each one. These observations feed the meta-review.
 
-**Read your own prior runs off the open pull requests, not off `main`.**
-`docs/research/briefs/` may not exist on `main` at all, because a brief
-lands only when the owner merges it, and Step 2 asks you to connect this
-period to previous ones. So before writing, run
-`gh pr list --state all --search research` and read every prior brief on
-its branch, with `git fetch origin <branch>:refs/prior` and
-`git show refs/prior:docs/research/briefs/<date>.md`. Then file new
-findings only. Re-filing a defect a prior brief already named spends
-the owner's attention twice on one thing, and correcting a prior brief
-that got something wrong is part of the job rather than an exception to
-it. This is L-E10's principle, which binds builder seats by its own
+**Read your own prior runs off both `main` and the open pull requests.**
+`main` holds the merged prefix of this seat's record and not the whole of
+it, because a brief lands only when the owner merges it, and the newest
+ones are routinely still open. On 2026-10-23 ten briefs were on `main`
+and the two most recent were not, which is the shape to expect. So read
+`docs/research/briefs/` on `main` first, since it is the cheapest read
+and it is most of the record, and then run
+`gh pr list --state all --search research` and read on its branch every
+brief that is not there yet, with `git fetch origin <branch>:refs/prior`
+and `git show refs/prior:docs/research/briefs/<date>.md`. Step 2 asks you
+to connect this period to previous ones, and either surface alone gives
+you a truncated record. Then file new findings only. Re-filing a defect
+a prior brief already named spends the owner's attention twice on one
+thing, and correcting a prior brief that got something wrong is part of
+the job rather than an exception to it. This is L-E10's principle, which binds builder seats by its own
 text and describes this seat's failure mode exactly: an unmerged PR is
 not evidence the work was never done.
 
