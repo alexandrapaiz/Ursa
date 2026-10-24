@@ -1871,7 +1871,7 @@ all, so `GET /api/work`'s run count and `GET /api/scorecard`'s
 history to plan a window — which §12 tells it to do, and which is good
 advice — can be told its previous window did not exist.
 
-### An instrument disagreement left open rather than resolved (2026-10-24, twenty-fourth window)
+### An instrument disagreement, left open by the window that found it and closed by the next (2026-10-24)
 
 Noted here so the next window starts from the question rather than
 rediscovering it. For 2026-10-24, `GET /api/capacity` reports
@@ -1887,6 +1887,63 @@ the org's failure count until the definitions are read.** They are in
 HQ's `runtime/board/` and one `gh api` read of the file settles it,
 which is this register's own rule: read the mechanism before you probe
 the surface.
+
+
+#### Settled, from the code, in two reads (2026-10-24, twenty-fifth window)
+
+The window above was right about the answer and right to refuse to
+report a number before reading it. The definitions are in HQ's
+`tools/capacity.py`, which `runtime/board/api.py` loads rather than
+reimplementing, so the route and the brief and `asc capacity` all give
+the same reading. Its own header states the class and why nothing
+downstream could count it:
+
+> A refusal is recorded as a run that failed: same field, same value as
+> a seat whose work went wrong. `board.runs.exit = 1`, `turns = 1`, "no
+> pull request. It exited 1." So the scorecard's `report_failures`, the
+> brief's "Failures:" line and every PM's triage read capacity as
+> defect, and the destination seat of a handoff is charged for a pass it
+> was never given.
+
+The four classes, by the host log's own trailer and never by a guess
+about duration:
+
+| class | the test | what it means |
+|---|---|---|
+| `refused` | `api_error_status` 429, or the session or usage limit sentence | **capacity, not a failure.** Carries the reset time it announces |
+| `failed` | started, ran, exited non-zero | the only class a PM triages |
+| `completed` | exit 0 | |
+| `running` | no trailer yet | counted apart so a mid-run reading inflates neither class |
+
+**So the two surfaces are not two buckets of one thing. One of them
+cannot make the distinction at all.** `GET /api/capacity` reads the
+host's run log, which carries the provider's verbatim refusal and the
+HTTP status beside it, and splits refusals out. `GET /api/work` reports
+run reports, and a refused wake and a genuine failure write the
+identical report: `exit 1`, `turns 1`, `no pull request. It exited 1.`
+There is nothing in a work-feed row to key on.
+
+The practical consequence for this seat, which is the reason it
+mattered: **a count of `exited 1` rows in the work feed is an upper
+bound on this seat's failures and not a count of them.** The twenty-first
+window's table in §12 above lists three Ursa runs `at or over their cap,
+all exited 1`, and those three are sound because the turn counts
+distinguish them. The 1-turn, 0-minute rows in the same list are the
+shape a refusal takes, so read `turns = 1` and `0 min` as *probably
+capacity* and confirm it against the day's `refused` count rather than
+charging it to a seat.
+
+Measured today, for scope: portfolio-wide 150 attempted, 105 completed,
+**18 refused**, 7 failed, 20 running, with 377 minutes of the dark
+window falling after the limit had already reset. Ursa's own row is 47
+attempted, 32 completed, **5 refused**, 3 failed, 7 running. So on this
+day refusals outnumber failures better than two to one, and a surface
+that cannot split them overstates Ursa's failure count by five.
+
+`standards/pm.md` §18 was fixed on 2026-10-18 so a seat is not charged
+for a pass it was never given. The register's question is closed and the
+instrument to quote is `GET /api/capacity`, never a tally of work-feed
+rows.
 
 ## 13. §9 and §10 are one defect with one cause, and the cause is one flag in `epitome`'s clone (measured 2026-10-24, resident host, twenty-second window)
 
