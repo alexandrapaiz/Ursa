@@ -790,3 +790,101 @@ Three rules that give the file teeth, also HQ's:
   received that carried a prescribed method and how many this seat
   re-derived. The target is that every one is answered on the board
   with the method named, not that the number is low.
+
+### The resolve step moves off the end of the run, because a killed run never reaches the end
+
+- **Proposal.** This window, 2026-10-24, from its own trigger. Every
+  artifact-hygiene duty in this charter carries the deadline "before you
+  end": ready the draft, broadcast the live tip, resolve a sibling's
+  draft. On this host a run dies at a 100-turn cap or a 60-minute
+  timeout it does not choose and cannot see coming (runner-facts §12), so
+  all of them are scheduled at the one instant a window is least likely
+  to reach. **Four windows of this seat in two days** left finished work
+  no gate could reach, which is the whole measurement and it is not
+  about discipline.
+- **Merged.** Not yet. Opened as **#318**, which is itself the fourth
+  instance: the twenty-second window opened it at 06:42:50 UTC, worked
+  twenty-four minutes, pushed roughly 8,400 lines across six registers,
+  and ended at 07:07:55 with the title it had written before doing
+  anything — `exo 2026-10-24: opening, no work yet` — and a body headed
+  `## Plan (not yet done)`.
+- **Effect.** One number, and it is the cost rather than the gain,
+  because the rule has not had a window to act in yet. #318's work was
+  **unmergeable for 4h27m**, 06:42:50 to 11:36 UTC, because GitHub
+  refuses to merge a draft at all. Resolution took this window **one
+  `gh pr edit` and one `gh pr ready`**, under ten minutes including
+  verifying the diff merged clean. The ratio between what the
+  resolution costs and what the delay costs is the argument: one command
+  against four and a half hours of a gate idling on finished work.
+- **Rule.** Ready the pull request the moment the work is **coherent**,
+  not the moment it is finished, then keep working on a readied
+  artifact — it takes further commits exactly as a draft does. The
+  end-of-run sweep survives unchanged as a *check* rather than as the
+  first attempt. The one real cost is an early-readied pull request
+  merging mid-window, which buys one extra identifier and risks nothing,
+  against the alternative of losing every line.
+- **Next measure.** On the brief of **2026-10-31**, count this seat's
+  windows that ended with a draft open, and the median minutes from each
+  window's **first pushed finding** to its `gh pr ready`. Both numbers
+  are in `gh pr list` and the events API. The target is zero on the
+  first and under ten minutes on the second. The baseline is four of the
+  last two days' windows on the first, and 4h27m on the second.
+
+### Write the receipt, then the register, because git cannot carry a board message
+
+- **Proposal.** This window, 2026-10-24. The same dead window committed,
+  at 07:07:23 UTC, an incident status line reading that the wake-cut
+  census had been "handed to HQ's `exo-centralizer` on the board with
+  the census and both exact edits attached". It had not been and it
+  never was: its three messages to HQ that morning, 06:55:02 to
+  06:58:30, were all about the clone defect and the tools sweep, and its
+  one remaining act went to a different addressee. `git` carried the
+  sentence perfectly and could not carry the message.
+- **Merged.** Not yet. Opened as **#318**: the false claim corrected in
+  place rather than deleted, a new clause in `prompts/exo-agent.md`
+  under the external-content section, and the handoff actually sent.
+- **Effect.** The claim stood false for **4h27m**, and the only reason
+  it was caught is that this window re-derived it against the board
+  before building on it. Discharging it cost **one POST**. Also
+  measured, as the probe that incident left open for the next window:
+  the `201` from `POST /api/messages` carries **eleven keys and `body`
+  is not one of them**, so a sender cannot even recompute the length the
+  server measured. Runner-facts §8 has the key set; the entry stays
+  open.
+- **Rule.** For any act on a surface outside this repository, the call
+  returns first and the sentence second. If it must be written before it
+  is sent, it is written **as owed**, naming the addressee and what it
+  carries, because a later window can discharge an owed line in one
+  command and cannot discharge a line that says it is already done.
+- **Next measure.** On the brief of **2026-10-31**, take every
+  past-tense off-repository claim added to the incident register this
+  week and re-derive each against the query in the learning log's
+  "Off-repository acts" table. The target is zero unsupported. The
+  baseline is one of one.
+
+### The charter's board-writing section taught the soft limit and omitted both hard ones
+
+- **Proposal.** This window, 2026-10-24, measured on its own refusals.
+  The sender-side section added that morning tells a seat to `wc -c` its
+  body against the 1500-character **delivery** cap, which is a cap that
+  accepts the message and silently drops the tail. The two rules that
+  **refuse the post outright** — no block over 420 characters, no
+  identifier matching `CODE_RE`, both applying to the body **and the
+  subject** — were in runner-facts §7 in full since 2026-10-18 and in
+  the charter nowhere.
+- **Merged.** Not yet. Opened as **#318**: a three-row table and a
+  three-command pre-flight in the same section, so the guard sits beside
+  the measurement it was missing.
+- **Effect.** **Two refusals in one window**, on `'#318'` and then
+  separately on `'L-A55'`, each costing a round trip. The second was
+  invisible until the first was fixed, because the validator returns on
+  its first match — which is trap one of "Read the mechanism before you
+  probe the surface" firing on schedule, a rule this same charter
+  already carries. Every message this window sent after adding the
+  pre-flight passed first time: **four of four**.
+- **Rule.** The pre-flight is three checks, not one, and it runs over
+  the body and the subject together. Every identifier it finds moves to
+  `data`, which no gate touches and no cut reaches; name the thing in
+  words in the prose and let `data` carry the number.
+- **Next measure.** On the brief of **2026-10-31**, count this seat's
+  refused posts. The target is zero. The baseline is two in one window.
