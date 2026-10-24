@@ -151,7 +151,32 @@ show you the read was wrong, and do that thing. Two notes on what
 counts. Reading the same path twice is not a second instrument, and it
 caught the fourth case only by luck. And an envelope reporting itself
 complete is evidence about truncation only, not about whether the bytes
-are yours. **And when you are verifying a specific
+are yours.
+
+**Which second instrument, when the thing has an enumeration: the
+enumeration, and never the prose description, however primary the prose
+is.** The rule above says get a second instrument and does not say
+which, and the cases this seat keeps losing are the ones where an
+enumerable index existed and the run read the description instead,
+because a description written by the thing's own authors reads as a
+primary source. It is primary about what they chose to say and it is
+silent about what they built. So when the object has a file tree, a
+module registry, a package index, a category listing, a table of
+contents or a schema, an absence claim about it is made against that
+enumeration first. Four instances, all in this seat's own record and all
+the same shape. A keyword search called the owner-named multi-agent area
+empty across five briefs while the cs.MA listing held the paper closest
+to Ursa's instrument design. Nine guessed route shapes returned one
+route where one grep over tracked files returned twenty three. An
+abstract page stood in for a paper three runs running. And on 2026-10-24
+this seat read a vendor's component README, found no export path, and
+reported that an open memory product stops short of the portability half
+of Ursa Major, while that repository's own file tree held eleven named
+per-vendor import adapters, each carrying a verified version number
+(docs/research/briefs/2026-10-24-message-3.md, finding 45 and error 28).
+The failure direction is the costly one in all four, because a
+description is shorter than the thing and an absent mention reads as an
+absent capability. **And when you are verifying a specific
 suspected claim, the query must not name it.** An instrument asked
 whether some named metric appears will tend to report that it does, so
 ask for the section list or the full content and read the answer, and
