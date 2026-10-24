@@ -8,126 +8,143 @@ Every verdict below names the instrument that produced it, because a
 conflict verdict with no instrument beside it cannot be re-measured by
 the seat holding the branch.
 
-## Measured 2026-10-24, 16:4x UTC, thirtieth exo window
+## Measured 2026-10-24, 17:0x UTC, thirty-first exo window
 
 | | |
 |---|---|
-| open pull requests | **36** |
-| merged in the last seven days | **49** |
-| oldest open | **#288**, 2026-10-23T19:08:59Z, about twenty-one hours |
-| open that are contained in another open one | **27 of 36** |
-| merges that would close all thirty-six | **9** |
+| open pull requests | **25** |
+| of those, drafts | **5** |
+| merged in the last seven days | **54** |
+| oldest open | **#288**, 2026-10-23T19:08:59Z, about twenty-two hours |
+| open that are contained in another open one | **16 of 25** |
+| merges that would close all twenty-five | **9** |
 | open that conflict with `main` | **none** |
 
 Open does not outnumber the week's merges, so the depth warning does not
-fire. The gate is absorbing faster than the org produces. **The number
-that matters is the containment, not the depth: nine merges close
-thirty-six pull requests.**
+fire, and it is not close: fifty-four against twenty-five. The queue
+fell from thirty-six to twenty-five in twenty minutes while the number
+of decisions in it stayed at nine, which is the gate absorbing stacks
+rather than the org slowing down.
 
-The queue grew from thirty-one to thirty-six in three hours while the
-number of decisions in it fell from eleven to nine, which is the shape
-to expect from seats that stack. A count of open pull requests is not a
-count of things anyone has to read.
-
-## No conflicts, and the instrument is the reason
+## No conflicts with `main`, and the instrument is the reason
 
 Instrument: `git merge-tree --write-tree --name-only origin/main
 refs/prs/<n>`, run on an unshallowed clone with a widened refspec (§0),
 **after** `bash tools/ledger/install-driver.sh`.
 
-All thirty-six exit 0. That last step is load-bearing rather than
+All twenty-five exit 0. That last step is load-bearing rather than
 hygienic, and the twenty-ninth window is why: `main` declares
 `docs/ideas.md merge=ledger` in `.gitattributes`, a named merge driver
 is registered **per clone**, so a fresh host clone holds the declaration
 without the driver and git falls back to line hunks with no warning.
 Every `docs/ideas.md` conflict verdict published from a fresh clone is a
-claim about the clone. It is the fourth member of the family of
-instruments that answer wrongly from the clone the host hands a run,
-after shallow depth, the single-branch refspec, and the stale copy of
-HQ's tools.
+claim about the clone. This window installed the driver before measuring
+and confirms the file's absence from every conflict list below.
 
 ## The nine tips, and nothing else needs a decision
 
 Every other open pull request is contained in one of these. Instrument:
 `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`, exit
-0 meaning contained, run over every pair of the thirty-six open heads.
+0 meaning contained, run over every ordered pair of the twenty-five open
+heads.
 
 | tip | seat | what it closes with it |
 |---|---|---|
 | **#290** | engineer | nothing, it stands alone |
 | **#337** | exo | #288 |
-| **#358** | research | #322, #325, #330, #333, #335, #338, #340, #345, #351, #355 |
 | **#359** | skill | #316, #320, #348 |
 | **#360** | frontend | #342 |
-| **#361** | engineer | #305, #327, #346 |
-| **#362** | exo | #344, #350 |
-| **#363** | market | #357 |
-| **#364** | pm | #339, #341, #343, #347, #349, #353 |
+| **#361** | engineer | nothing, it stands alone |
+| **#362** | exo | #344 |
+| **#366** | research | #322, #325, #330, #333, #335, #338, #340, #345, #351, #358 |
+| **#367** | pm | nothing, it stands alone |
+| **#368** | engineer | nothing, it stands alone |
 
-Nine decisions, thirty-six pull requests. **#358 and #364 alone carry
-sixteen of them.**
+Nine decisions, twenty-five pull requests. **#366 alone carries ten of
+them.**
 
-## Order, and the dependency this file got wrong an hour ago
+#362 closes one rather than two because this window closed **#350**
+itself, with the containment proof pasted into its closing comment. That
+also removed the queue's only red check; see below.
 
-**Correction, and it is to a sentence written in this window.** The
-first draft of this section said the nine tips are independent of each
-other, on the ground that all thirty-six merge clean against `main`.
-That inference is false, and Ursa's PM measured it at 16:33:57 UTC
-while this window was still running. **Clean against `main`
-individually does not mean clean against each other**, because `main`
-moves as each one lands and the second is then merged against a base
-that already holds the first.
+## Order, and the one pair that still needs a hand
 
-Re-derived here rather than accepted, by performing the merges in a
-detached scratch worktree, which is what §5b has always required and
-what the first draft of this section skipped:
+The simulation, because an order that has not been simulated is a guess.
+Performed in a detached scratch worktree against `origin/main`, then
+discarded:
 
 ```bash
 git worktree add -q --detach /tmp/wt origin/main
-cd /tmp/wt && git merge --no-edit refs/prs/337   # clean
-            && git merge --no-edit refs/prs/362   # CONFLICT, six files
+cd /tmp/wt && git merge --no-edit refs/prs/<each tip in turn>
 ```
-
-The six: `prompts/exo-agent.md`, `docs/agents/incidents.md`,
-`docs/agents/learning-log.md`, `docs/agents/runner-facts.md`,
-`docs/agents/improvements.md` and `docs/agents/merge-order.md`. The PM
-said six files and the simulation says six files. Both of this seat's
-chains append to the same five registers, so they collide by
-construction and the engineer's register driver does not cover four of
-the five, which is the open class named at the foot of this file.
-
-**So the per-pull-request conflict table above answers a different
-question from the order below it, and only the simulation answers the
-order.** That is the trap: "zero conflicts with `main`" is true, it is
-published in a table, and it invites exactly the sentence this
-correction retracts. An order that has not been simulated is a guess,
-and this file published one for about an hour.
-
-Two notes on sequence, both now measured rather than reasoned.
 
 1. **#361 before the register-heavy tips.** It carries
    `tools/registers/`, whose driver makes `docs/agents/incidents.md`
    merge between two seats with no human. Landing it first removes the
-   one mechanical reason the remaining branches would ever collide, and
-   the twenty-ninth window verified it by performing the merge rather
-   than by reading the claim.
-2. **#337 and #362 cannot both land unattended**, which is the
-   corrected finding. They are this seat's two chains, neither contains
-   the other, and the second to land needs a hand resolution on six
-   register files. The cheapest disposition is to merge **#362** and
-   close #337 against it, because #362 is the newer, carries the larger
-   diff and holds every charter finding of the last four windows, while
-   #337's unique contribution is the sprint and decision files it
-   imported from another seat's branch to clear a register collision
-   that the engineer's driver has since fixed. That is a
-   recommendation to the owner and not an act: this seat does not close
-   a pull request the PM has named in an open ask.
+   one mechanical reason the remaining branches would ever collide.
+2. **#337 and #362 still cannot both land unattended, and the reason to
+   prefer one is now measured rather than argued.** They are this seat's
+   two chains and neither contains the other. `merge-tree` between them
+   names six files: this seat's charter and all five of its registers.
+   That verdict is correct and the previous two windows and the PM all
+   reproduced it.
+
+   **What none of them measured is that #362 is an in-lane superset of
+   #337.** Instrument, and it is the third one, because neither of the
+   two above can return this:
+
+   ```bash
+   base=$(git merge-base refs/prs/337 refs/prs/362)
+   for f in $(git diff --name-only "$base" refs/prs/337); do
+     n=$(diff <(git show refs/prs/337:"$f") <(git show refs/prs/362:"$f") 2>/dev/null | grep -c '^<')
+     [ "$n" = 0 ] || echo "$f: $n line(s) in 337 absent from 362"
+   done
+   ```
+
+   Lines present in #337's six own-lane files and absent from #362:
+   **zero of substance.** Four of the six return 0 exactly. The charter
+   returns 16 and `runner-facts.md` returns 2, and all eighteen are text
+   #362 deliberately rewrote, being a future-tense paragraph about a
+   clock that expired on 2026-10-20 and one restated runner-facts
+   sentence. `merge-order.md`, this file, returns 120, and this charter
+   instructs every window to replace it, so a line absent from the newer
+   copy is the file working as specified.
+
+   So the six-file conflict is **avoidable rather than resolvable**. The
+   cheapest disposition is unchanged and its justification is now
+   stronger: merge **#362**, close #337 against it, and nothing of this
+   seat's is lost. #337's unique content is the sprint and decision
+   files it imported from another seat's branch, which is exactly what
+   HQ's scope clause says an ask must not land unseen, and which the
+   twenty-eighth window dropped on purpose.
+
+   This stays a recommendation and not an act. This seat does not close
+   a pull request the PM has named in a live note to the owner, and the
+   PM's notes name #288, #337 and #344.
+
+**Why the conflict count was never going to settle this.** This seat's
+output is six append-only registers plus its charter, so any two of its
+non-ancestor branches appended to the same six tails from a shared base
+and `merge-tree` returns six whatever the divergence is. Six is the size
+of the file set. The full account is
+`INC-2026-10-24-neither-contains-the-other-on-a-pair-where-one-was-redundant`.
+
+## Red checks
+
+**None open.** The dispatch that opened this window named a failed
+`redaction-gate` run on this seat's branch, run `40111614477` on
+`213f9f87`. That commit is an intermediate push; the thirtieth window
+truncated the five full board identifiers in `6cc0018` and this
+branch's tip replays clean. The live red was **#350**, which carried the
+same five untruncated identifiers and never got the fix, and closing it
+as contained in #362 is what cleared it.
 
 ## The one class the queue cannot tell you about
 
-Six days with **zero** merges of any `prompts/*-agent.md` file. The gate
-is working and one predicate inside it is stuck, which is
+Six days with **zero** merges of any `prompts/*-agent.md` file,
+measured with the glob and not the directory, since
+`prompts/skill-extract.md` is not a charter. The gate is working and one
+predicate inside it is stuck, which is
 `INC-2026-10-18-tier-c-charter-freeze` and the expired silence clock
-recorded with it. Nothing in the order above changes that, and five of
-the nine tips touch no charter at all, so the freeze is not what is
-holding the queue.
+recorded with it. Four of the nine tips touch no charter at all, so the
+freeze is not what is holding the queue.
