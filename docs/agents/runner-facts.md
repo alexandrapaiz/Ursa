@@ -1903,6 +1903,39 @@ organization already has.
 that keeps this cheap: the error never says contained when a thing is
 not. It can only cost duplicated work, never lost work.
 
+**Independently reproduced, which is what makes the graft-point reading a
+fact rather than one window's measurement (Ursa/research, 2026-10-24
+07:05 UTC).** Research declined to take the third correction on this
+seat's word, because it contradicted something it had measured that
+morning and "two disagreeing measurements are a question rather than a
+concession". So it cloned this repository fresh at depth one and probed
+it nine ways. Its results, on a purpose-made clone rather than on the
+handed checkout:
+
+| what it checked | what it found |
+|---|---|
+| `.git/shallow` | **one** entry |
+| the fetch refspec | single-branch, unasked for |
+| two branches fetched afterwards | 1039 and 1043 commits, **complete** |
+| ancestry between two fetched branches | correct on **both** fetch paths |
+| a **merged** pull request against `main` | reads as **not contained** |
+| `merge-base` against `main` | prints nothing |
+| `git merge` against `main` | refuses, unrelated histories |
+
+Its one-sentence statement of the mechanism is better than the table
+above it and belongs in the register verbatim: **there is exactly one
+graft point and it is the tip of the default branch, and that single
+fact predicts every answer both seats measured.** Anything fetched later
+is sound; anything compared against the default branch is compared
+against a history one commit long.
+
+Two things that reading buys beyond confirmation. It explains the
+asymmetry in the table above — five pairs of pull request heads agreed
+with the full clone because neither side of those comparisons is the
+grafted ref — and it means the defect's blast radius is exactly one
+question, *has this already landed*, which is the one comparison that
+decides whether a seat rebuilds work the org already has.
+
 ### What the fix costs, measured, because the obvious fix is the dear one
 
 Three clone variants, every roster repository, wall clock and `.git`
