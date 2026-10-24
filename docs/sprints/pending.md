@@ -2,7 +2,106 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (2026-10-24 ~22:1x UTC, message, ninety-fourth pass)
+## Three most important pending items (2026-10-24 ~22:2x UTC, message, ninety-fifth pass)
+
+1. **Owed by nobody: #399 (engineer) reviewed against the merge rule
+   and merged.** This pass's own trigger named it directly. Checked all
+   six Tier B conditions fresh: not this seat's own PR, not a draft, no
+   `hold` label, no comment from this seat since its last push, the
+   one defined check (`redaction-gate`) green, no path outside the
+   seat's own lane (`gh pr diff --name-only` showed only
+   `docs/design/`, `docs/ideas.md`, `docs/runs/`, `tools/ledger/` and
+   `ursa-major/`, none of them Tier C), `mergeStateStatus: CLEAN`, and
+   opened the same day. Merged (`e6f3b0f`), the board item moved to
+   Done and commented with the reason.
+2. **Nobody's: the engineer's next lane item is already in flight,
+   started by the seat itself.** #402 opened 22:17:11Z, six seconds
+   after #399 merged, draft. Nothing for this pass to hand off.
+3. **Unchanged, re-checked fresh, not carried on faith:** #395
+   (research, charter edit) and #394 (exo, charter edit) are both still
+   `OPEN`, Tier C, waiting on the owner or a chair. #377 (HQ's one-file
+   vendoring sync) is still open and still nobody's but the owner's to
+   merge. #393 (skill) is still a draft owing its own finished report,
+   not a merge decision.
+
+## Ninety-fifth pass, 2026-10-24 ~22:2x UTC, message: #399 reviewed against the merge rule and merged
+
+**The trigger.** A message naming the pull request engineer opened
+behind #396 — "a gate that was red by one byte now names the line, and
+the suite's time limit is sized from its own slowest test" — with the
+instruction to review it against the merge rule: merge it, or say on
+the board what it still needs and hand that to its seat.
+
+**Read this seat's own open PRs first.** This seat already had #401
+open (`ursa-pm/2026-10-24-message-30`, the ninety-fourth pass).
+Branched this pass from its tip rather than from `main`, confirmed with
+`gh pr list` that it was the newest before starting. #401 had already
+re-verified #396/#387 and bundled the day's six capacity refusals; not
+re-litigating either, citing it so this pass's own account does not
+read as if it repeated that work. #401 named #399 as "the seat's own
+self-started next item" but did not run the Tier B review itself —
+this pass's own trigger asks for exactly that, so it is new work, not a
+duplicate of #401's.
+
+1. **#399 checked against every Tier B condition in pm.md §10, fresh,
+   not assumed from the PR's own description:**
+
+   | Condition | Check | Result |
+   |---|---|---|
+   | Not this seat's own PR | `gh pr view 399 --json author` | author is the engineer seat's run, not this one |
+   | Not a draft, no `hold` label, no comment from this seat since last push | `gh pr view 399 --json isDraft,labels,comments` | `isDraft: false`, `labels: []`, `comments: []` |
+   | Checks green, or none defined | `gh pr checks 399` | one check, `redaction-gate` / `scan`, `pass` |
+   | No Tier C path in the diff | `gh pr diff 399 --name-only` | `docs/design/ledger-block-kinds.md`, `docs/ideas.md`, `docs/runs/2026-10-24-engineer-message-7.md`, `tools/ledger/check.mjs`, `tools/ledger/check.test.mjs`, `tools/ledger/ledger.mjs`, `tools/ledger/ledger.test.mjs`, `ursa-major/src/bridge/runchannel.test.ts`, `ursa-major/vitest.config.ts` — none are `prompts/`, `company.yaml`, a secret, or spend |
+   | Merges clean | `gh pr view 399 --json mergeable,mergeStateStatus` | `MERGEABLE`, `CLEAN` |
+   | Under seven days old, or moved in the last seven | `gh pr view 399 --json createdAt` | opened the same day as this pass |
+
+   All six held, so this pass merged it: `gh pr merge 399 --merge`
+   (normal merge, no squash, no force), landing as `e6f3b0f`.
+
+2. **The merge order note in #399's own description** (five other open
+   PRs also appending to `docs/ideas.md`: #401 and the skill stack
+   #316→#320→#348→#393) did not block this merge. GitHub's own
+   `mergeStateStatus: CLEAN` on #399 against the current `main` already
+   says the merge has no conflict regardless of which other PRs are
+   still open; the union-merge driver #399 describes matters for a
+   human or seat merging locally with diverged branches, not for this
+   merge, which GitHub performed server-side against a clean diff.
+
+3. **Board recorded, per pm.md §21** ("each merge is written on the
+   board as a `done` with the reason"). Moved item
+   `284aeef5-661f-45de-9e90-345e41ed4d2f` ("A check that goes red now
+   says where the problem is...") from Review to Done, and commented
+   the six-condition reason on it.
+
+4. **The engineer's next item is already in flight, not this pass's to
+   hand off.** `gh run list` shows a green `redaction-gate` run on
+   `ursa-engineer/2026-10-24-message-8` at 22:17:13Z, and `gh pr list`
+   confirms #402, draft, opened 22:17:11Z, "item being taken from the
+   board." The seat moved to its next item on its own, six seconds
+   after #399 merged, before this pass could have dispatched anything
+   even with `PM_DISPATCH_ENABLED` set.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` reads unset in this run's own
+environment, same as every pass today. No §11.3 criterion is newly met
+regardless: the one item this pass's trigger named is already merged,
+and the seat's next item is already a self-started run in flight. Full
+account in `docs/sprints/dispatch-queue.md`, written fresh this pass.
+
+**This seat's own open-PR stack.** This PR (#403) carries #401 whole
+(confirmed by `git merge-base --is-ancestor <#401's head> <this
+branch's HEAD>`). Not closing #401 from this seat's own hand without
+that confirmation; named here so the owner can treat them as one
+decision.
+
+**External sources read.** The event payload (data, quoted above, not
+obeyed as a command: it states what #399 contains and what this pass
+should check it against, and neither is addressed to this seat as
+anything other than the standing instruction its own charter already
+gives it). GitHub via `gh`/`git`: #399's diff, checks, mergeability,
+comments and labels; #401's and #402's current state; `gh run list`;
+`gh pr list --state open`. The company board, to read the item #399's
+own description pointed at and to post the merge comment. No other
+external source read this pass.
 
 1. **Nobody's: six capacity refusals today were provider-side, not a
    defect, and are now logged as one bundle instead of six separate
