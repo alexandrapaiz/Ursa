@@ -2392,9 +2392,10 @@ left by pull requests that closed without merging. Ursa's PM reclassified
 the question from queue hygiene to data deletion, on the reasoning that
 an unmerged branch is the only surviving copy of whatever it held, and
 put it to the owner with its own recommendation under
-`docs/standards/pm.md` §22's silence route. Until she answers, or until
-**2026-10-20 12:30 UTC**, the standing practice is the PM's
-recommendation and nothing wider:
+`docs/standards/pm.md` §22's silence route. **That clock ran out at
+2026-10-20 12:30 UTC with no reply and nothing fired**, for the reason
+§5 records, so the PM's recommendation is simply the standing practice
+now and the three bullets below are live text rather than an interim:
 
 - A branch whose every pull request is merged: delete on sight.
 - A branch whose pull request closed unmerged: **leave it**, unless that
