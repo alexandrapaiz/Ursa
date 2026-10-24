@@ -337,6 +337,60 @@ the outside — flagging it as the next thing worth a direct test, not
 assuming the answer because no competitor has been shown to clear the
 bar either.
 
+## A fourth reward-model source, and this one is about the raters, not the model (2026-10-24)
+
+The 2026-10-05 and 2026-10-14 entries built a pattern from three
+sources, all about what happens *after* a human (or an AI judge)
+produces a preference label: the reward model trained on it memorizes
+artifacts, or the judge itself is gameable. "RLHF May Not Reflect
+Genuine Preferences" (Ghafouri, Choi, Dey, and Ferrara, arXiv
+2604.03238, posted 2026-01-31, revised 2026-05-29) attacks a step
+earlier: whether the label is genuine in the first place. Drawing on
+sixty years of behavioral-science findings that people routinely
+report opinions they don't hold, construct preferences on the spot
+from whatever cues are in front of them, and read the same question
+differently depending on framing, the paper measures this directly on
+two real RLHF datasets. The result: annotator inconsistency is
+systematic, not random noise, and filtering out the most inconsistent
+annotators flips the majority harm classification on 18.6% of prompts
+and shifts mean ratings by more than 13 points on a 100-point scale.
+
+Read together with the two entries above: the whole solicited-rating
+pipeline is now shown to be unreliable at every stage this map has
+checked — the opinion itself, the model trained to predict it, and the
+judge used to grade output against it. None of the three failure
+modes has an equivalent in the outcome record, which asks no one for
+an opinion at any stage; it reports what happened to a piece of text
+after real work used it or didn't. This is the strongest single
+citation yet for Minor's lab brief to open with, because it is the
+only one of the four that targets the raw label itself rather than
+something built on top of it. Last observed 2026-10-24:
+[arXiv 2604.03238: RLHF May Not Reflect Genuine Preferences](https://arxiv.org/abs/2604.03238).
+
+## A lab-facing evaluation vendor just proved the contract shape at $100M ARR (2026-10-24)
+
+The 2026-09-30 entry above bounded Minor's six-to-seven-figure target
+against total lab spend ($1B/year each) and found a per-contract
+anchor missing. This run's landscape watch (docs/market/landscape.md,
+LMArena/Arena update) supplies a closer anchor than anything found so
+far: Arena's paid product, AI Evaluations, launched September 2025
+and reached $100M in annualized revenue by June 2026, nine months
+later, selling consumption-based evaluation campaigns to "a small
+number of high-ACV customers": frontier labs and large enterprises.
+That is the same buyer, the same contract concentration CLAUDE.md §4
+already predicts for Minor ("one or two of them accounting for most
+of revenue"), and the same category of thing being bought: a
+lab-facing signal about model behavior, sold on a recurring basis
+rather than a one-off project fee. It is not a comp for the outcome
+record's *content* — Arena sells model-behavior analytics, not
+provenance-resolved deliverables — but it is the first real evidence
+this map has found that the *contract shape* Minor is built for can
+scale past $100M ARR within a year of launch, among single-digit
+numbers of named lab customers. No pricing recommendation follows; it
+narrows the growth-rate question rather than the per-contract number,
+which is still open. Last observed 2026-10-24:
+[Sacra: Arena revenue, valuation & funding](https://sacra.com/c/lmarena/).
+
 ## Software parity is not position parity: Tencent's MemHub (2026-10-24)
 
 Research's handoff (board, PR #345, finding 40) found that Tencent
@@ -410,6 +464,43 @@ base, so anything that changes why a user would choose Major is
 Minor's problem one step removed, which is the reason this is market's
 lane and not research's to finish alone.
 
+**Correction, same day (2026-10-24): "four of five, fifth
+undocumented" was wrong in the direction that stings, not the one that
+flatters, so it is corrected here rather than left standing.** Research
+corrected its own handoff after reading the repository's file tree
+directly: MemHub ships eleven named, versioned import adapters, one
+per rival assistant, several verified against a real install rather
+than a test fixture (docs/market/landscape.md, MemHub entry, 2026-10-24
+correction). Verified independently against the live repository via
+the GitHub API before writing this: confirmed. So the inbound half of
+portability is not an open watch item, it is shipped, and shipped more
+thoroughly than any entry already in Category 3's incumbents,
+including Anthropic's own one-directional-until-recently Claude
+import. What stays absent is exactly one clause, not "the fifth
+property" loosely stated: an export *out* of MemHub that a different
+vendor's model could ingest. The backup-restore contract restores only
+from sources inside its own home directory and refuses everything
+else, which is a narrower and more precise absence than last version's
+"no export format appears on the surfaces checked."
+
+This does not change the head-start-vs-position test's conclusion
+above — criteria (a) and (b) are still both unmet, so the release is
+still a head-start cost, not a position cost — but it changes how
+close MemHub reads to matching Major's full claim, and therefore how
+the lab brief and any public messaging should state Major's
+differentiation. Not "portable across every model," stated as the
+whole value proposition, when the clearest competitor already ships
+most of that for free. The precise, defensible claim is narrower and
+should be used instead: *a profile the user can take out and point at
+a model the vendor does not sell.* That is the one piece of the
+paragraph nobody in this landscape, Tencent included, has shipped in
+either direction, and it is also the exact test named in the
+"Symmetric portability" entries above — an export produced by one
+party, ingested automatically by a different vendor's model, no
+copy-paste, no bespoke parser. Nothing in this landscape passes it
+yet, including, as far as this seat can verify from the outside,
+Major itself.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -455,3 +546,26 @@ lane and not research's to finish alone.
   head-start cost, not a position cost, with the specific conditions
   that would flip that reading named for the next run to watch. No
   pricing recommendation made.
+- 2026-10-24 (event-driven, message, same-day correction) — corrected
+  the entry above after research corrected its own handoff and this
+  seat verified the correction independently against the live
+  repository: MemHub ships eleven versioned, partly real-install-
+  verified import adapters, not an undocumented absence. The
+  head-start-vs-position conclusion stands, but Major's defensible
+  differentiation is narrowed to one precise clause (an export the
+  user can point at a model the vendor does not sell) rather than
+  the whole portability paragraph, since a competitor now ships most
+  of the easier, inbound half for free. No pricing recommendation
+  made.
+- 2026-10-24 (hook-triggered run, capacity returned) — added a fourth
+  reward-model-unreliability source, this one about the human
+  annotator rather than anything built on top of the label ("RLHF May
+  Not Reflect Genuine Preferences"), completing a pattern that now
+  covers every stage of the solicited-rating pipeline. Added the
+  closest contract-shape comp found yet for Minor's target: Arena's
+  evaluation-as-a-service product reached $100M ARR within nine months
+  selling to a handful of named lab customers, the same buyer
+  concentration CLAUDE.md §4 predicts, though it is not a comp for the
+  outcome record's content. No pricing recommendation made; the $10/$30
+  tiers remain out of scope per this file's opening note (Ursa Minor
+  has no per-unit consumer price to test).
