@@ -2952,3 +2952,79 @@ collide.
 So the restart's cost is not "N runs lost", it is "N runs delayed by
 about ninety minutes", where N is `running` at the instant chosen and
 the day routinely offers N=0.
+
+## 20. This repository's three register merge drivers are registered per clone, and the clone the host hands a seat has none of them, so every seat measures false conflicts on the three busiest files (measured 2026-10-24, resident host, thirty-eighth window)
+
+**The measurement, in one pass over the whole open queue.** Seventeen
+open pull requests. `git merge-tree --write-tree --name-only
+origin/main refs/prs/<n>` on the clone as handed:
+
+```
+393 CONFLICT  docs/ideas.md
+348 CONFLICT  docs/ideas.md
+320 CONFLICT  docs/ideas.md
+316 CONFLICT  docs/ideas.md
+```
+
+Then two commands, both of which are in this repository already:
+
+```bash
+bash tools/ledger/install-driver.sh      # docs/ideas.md -> ledger
+bash tools/registers/install-drivers.sh  # incidents.md, decisions.md -> register
+```
+
+Re-measured in the same minute, same commits, same instrument:
+**316, 320, 348 and 393 all CLEAN, and the whole queue is 17 of 17
+clean.** Confirmed a second way, by performing the merges in a detached
+scratch worktree off `origin/main`: all four merge with no conflict.
+
+**Why the clone has none.** `.gitattributes` declares the three paths
+and names the grammar for each, but a `merge=<name>` attribute is inert
+without a `merge.<name>.driver` entry in git config, and git config is
+per clone by design — it is the mechanism that stops a repository from
+executing a command of its own choosing on checkout. So the driver
+cannot ship in the repository, only its installer can, and the installer
+has to be run. On the clone this window was handed:
+
+```bash
+git config --get-regexp 'merge\.(ledger|register)\.'   # prints nothing
+```
+
+**Who this hits, and it is not one seat.** The three covered paths are
+`docs/ideas.md`, `docs/agents/incidents.md` and `docs/decisions.md`:
+the ideas ledger every product seat appends to, the incident register
+this seat appends to every run, and the ADR register. They are the three
+files in this repository most likely to be touched by two branches at
+once, which is exactly why they were given drivers. Every seat wakes in
+a fresh clone with the drivers absent, so:
+
+- a seat that measures its own branch against `main` is told it
+  conflicts when it does not, and spends the run rebasing nothing
+  (Ursa incident 17's defect, with a new cause);
+- the PM's merge gate reads conflict verdicts, and a false one holds a
+  clean pull request;
+- this seat writes `docs/agents/merge-order.md` from these verdicts, so
+  an uninstalled driver propagates into the order handed to the owner.
+
+**The engineer's sentence was true and its scope was the clone.** Ursa's
+engineer reported on 2026-10-24 at 02:01 that "your register merges
+without a human now", and in a clone with the driver installed that is
+exactly right — the four above are the proof of it. In the clone the
+host creates it is false, and nothing in either statement is wrong
+except the unstated word "installed".
+
+**So the order is: install, then measure.** Run both installers before
+any conflict verdict, and record in `merge-order.md` that the driver was
+installed when the verdict was taken, beside the instrument. A conflict
+verdict from a clone with no driver is a claim about the clone, which is
+§10's rule arriving on a second surface: there, the refspec was narrow
+and the queue read as deleted; here, the driver is absent and four clean
+branches read as conflicting. Both times the instrument was fine and the
+environment was not.
+
+**Not this seat's to fix at the source.** The clone step belongs to the
+runtime (`epito`, §19), so the durable fix is the runtime running the
+installers after it clones, or the installers being idempotent enough to
+be run from each charter's first turns. The second is already true: both
+scripts re-register without complaint. The handoff is HQ's; the charter
+line is this seat's and is in `prompts/exo-agent.md` §0.
