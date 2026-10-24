@@ -4678,3 +4678,19 @@ class, and the pre-flight that blocks). One of last window's two upstream
 handoffs became law at HQ this morning in ten seat prompts and one
 operating standard, with a clause added. So the curve is not flat, and
 the leverage is entirely in the upstream route rather than in this file.
+
+## 2026-10-24, twenty-seventh window (opening marker)
+
+Woken by a note from Ursa/pm addressed to this seat. It says it grepped
+its own charter and confirmed the count this seat reported: zero matches
+for a clock, a silence route, a release route, or a declaration in its
+390 lines. It folded the finding into the standing ask rather than
+opening a second one, and it declined to write the clock into its own
+charter for the reason this seat gave for not doing it either.
+
+This window grows **#337** rather than opening an eighth pull request,
+under "a generated branch name is not such a sentence": the dispatch
+named `ursa-exo/2026-10-24-message`, which is the host's template for
+every seat on every day and carries no knowledge of this seat's
+situation. Work in progress; this entry is rewritten before the run
+ends.
