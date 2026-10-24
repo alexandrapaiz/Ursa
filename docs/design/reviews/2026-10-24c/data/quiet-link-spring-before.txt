@@ -1,0 +1,14 @@
+declared on the element:
+  property background-color, border-color
+  duration 0.26s, 0.26s
+  timing   cubic-bezier(0.25, 0.46, 0.45, 0.94), cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+transform scrubbed across the whole transition:
+     0ms  none
+     5ms  none
+    10ms  none
+    15ms  none
+    20ms  none
+    25ms  none
+    30ms  none
+    35ms  none

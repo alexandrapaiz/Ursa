@@ -494,6 +494,22 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* The transform leaves the property list entirely here, which is how .cta's
+     own reduced-motion block does it, rather than staying declared and being
+     neutralised by the `transform: none` below.
+
+     Both are wanted, and the first one is the one that is easy to skip. With
+     only `transform: none`, a reader asking this stylesheet what it animates
+     under reduced motion is still told "a spring on the transform", and the
+     promise is kept by two other declarations some distance away. Dropping
+     the property means the answer is no spring, from the one place that is
+     asked. The `transform: none` then stops the control moving even if a
+     later edit puts the property back. */
+  .quiet-link {
+    transition:
+      background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
   .quiet-link,
   .quiet-link:hover,
   .quiet-link:focus-visible,
