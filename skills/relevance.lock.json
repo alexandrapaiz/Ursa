@@ -349,6 +349,293 @@
     "what": "d683dc80c7fc5235",
     "passages": "bd0474d06d1bac70"
   },
+  "clearing-a-record-for-release/E1": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "c3c181b4335afe24",
+    "what": "240ef087f5efe795",
+    "passages": "2aea36c571d73656"
+  },
+  "clearing-a-record-for-release/E10": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "92fd40c940c48b3d",
+    "what": "95d9295bf3246a7f",
+    "passages": "97dc5b00cd92f6d6"
+  },
+  "clearing-a-record-for-release/E11": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "61bead658abb1684",
+    "what": "5ed97e81a34a6ada",
+    "passages": "d00aa7cb75f3dd1c"
+  },
+  "clearing-a-record-for-release/E12": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "4c29a27a10fe664b",
+    "what": "bcf1aec76e0b4876",
+    "passages": "01e7a0883ce5d5cf"
+  },
+  "clearing-a-record-for-release/E13": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "2a32506822fce22c",
+    "what": "26bfe99f15980ae5",
+    "passages": "19a52c482b4e5336"
+  },
+  "clearing-a-record-for-release/E14": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "4ac06f31ccbde117",
+    "what": "4cf454a0eff351fa",
+    "passages": "d6b6dcf81d3204f1"
+  },
+  "clearing-a-record-for-release/E15": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "7fecf8f2e9b4a695",
+    "what": "dd2d71a89e0c0919",
+    "passages": "8a6998838d1e47b2"
+  },
+  "clearing-a-record-for-release/E16": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "b1672322f5481b3d",
+    "what": "1293f921ef37ba4a",
+    "passages": "42ac5ce17de90efb"
+  },
+  "clearing-a-record-for-release/E17": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "8e3bd57aedbce08c",
+    "what": "a98473bc95f19abe",
+    "passages": "b56cb2296b6b968b"
+  },
+  "clearing-a-record-for-release/E18": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "6acc3a6db225ea72",
+    "what": "3d0853ce2a7d30ad",
+    "passages": "c268fd9dde003e1d"
+  },
+  "clearing-a-record-for-release/E19": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "8cc12992a166cce6",
+    "what": "d626509331d3bf42",
+    "passages": "71a9441544fdb41f"
+  },
+  "clearing-a-record-for-release/E2": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "e01f65ad26e1869c",
+    "what": "7376ebce63099dd8",
+    "passages": "99f056797ce8f994"
+  },
+  "clearing-a-record-for-release/E20": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "5ea829208f083508",
+    "what": "7fcd4984e0c72200",
+    "passages": "b0b49afba9689fe0"
+  },
+  "clearing-a-record-for-release/E21": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "7dcdbb5992cb7e4b",
+    "what": "57f82da162b0031e",
+    "passages": "265487f72def2609"
+  },
+  "clearing-a-record-for-release/E22": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "2657c820e4a29132",
+    "what": "f4878403b41c8fbb",
+    "passages": "b0b51fc62fc1e526"
+  },
+  "clearing-a-record-for-release/E23": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "0b52ac8510a07464",
+    "what": "9c1ba82e03dc6b47",
+    "passages": "3f0e5a7b9ade4f6c"
+  },
+  "clearing-a-record-for-release/E24": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "d3e003319f6beffc",
+    "what": "2a3b8855cc27e010",
+    "passages": "fe3d6e4a3552f8f6"
+  },
+  "clearing-a-record-for-release/E25": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "1bb6d255b4ee9d26",
+    "what": "10c5b1a2c76e4d4b",
+    "passages": "fa2daab15d557c93"
+  },
+  "clearing-a-record-for-release/E26": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "5cbcfdb093a73e37",
+    "what": "d3807c54a55b2f2e",
+    "passages": "37811a503fcc031c"
+  },
+  "clearing-a-record-for-release/E27": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "ed32ab4f890dddfc",
+    "what": "d3300263b2ab2f1b",
+    "passages": "c2fb9df3ebd4dbd4"
+  },
+  "clearing-a-record-for-release/E28": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "62d3a4a5dffc0c35",
+    "what": "7be97c6483ff0e46",
+    "passages": "dd2df9152a038ce0"
+  },
+  "clearing-a-record-for-release/E29": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "003d45dddfd974da",
+    "what": "039451f0fba6ff3a",
+    "passages": "817375580e5f0ce0"
+  },
+  "clearing-a-record-for-release/E3": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "3875c643e18d00a9",
+    "what": "3d2c266fcd796018",
+    "passages": "79af970c7c02b7f4"
+  },
+  "clearing-a-record-for-release/E30": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "4b71f48d50a4d35d",
+    "what": "6efff85abe3b4d9d",
+    "passages": "810aa02e045820e3"
+  },
+  "clearing-a-record-for-release/E31": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "0406135838a9f1bf",
+    "what": "e495aca86f895ac2",
+    "passages": "3282fb8b67b66e70"
+  },
+  "clearing-a-record-for-release/E32": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "db3bd0dee1709104",
+    "what": "f1871c4948f5eacd",
+    "passages": "8ef9ab23055e12f6"
+  },
+  "clearing-a-record-for-release/E33": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "a3fcb00785e26f1e",
+    "what": "95fe3ead55716cff",
+    "passages": "a60d2d3ae358816b"
+  },
+  "clearing-a-record-for-release/E34": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "6ec1b39a2b4c495a",
+    "what": "ea1251b13fbf27c5",
+    "passages": "be55645ada86ffb0"
+  },
+  "clearing-a-record-for-release/E35": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "67f84c62f0e975fb",
+    "what": "9aae2ecf15c1f489",
+    "passages": "014c21a4f9e78c63"
+  },
+  "clearing-a-record-for-release/E36": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "8a42501176265219",
+    "what": "e864ea045deba28e",
+    "passages": "0667c969d63e3a21"
+  },
+  "clearing-a-record-for-release/E37": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "a1158613c9eed0c7",
+    "what": "3216958caa75f75f",
+    "passages": "d47c98f9e0e16c15"
+  },
+  "clearing-a-record-for-release/E38": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "5072b5c7ef7b7689",
+    "what": "fb8e9aa807bfcd50",
+    "passages": "970f3f90e0f90871"
+  },
+  "clearing-a-record-for-release/E39": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "4a19aeaece2eaf67",
+    "what": "ff62e34986420a38",
+    "passages": "970f3f90e0f90871"
+  },
+  "clearing-a-record-for-release/E4": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "27b25b2485c5a3d8",
+    "what": "36f6b6fb6d932a2a",
+    "passages": "a61afc9a58ffe351"
+  },
+  "clearing-a-record-for-release/E40": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "bce7dba6abe1bbca",
+    "what": "cf17235fad11aa4d",
+    "passages": "94b5bc681c00c2d5"
+  },
+  "clearing-a-record-for-release/E41": {
+    "verdict": "widened",
+    "read": "2026-10-24",
+    "lines": "5332bdd08c1dbbc5",
+    "what": "d0a56b718554c003",
+    "passages": "4922a488b19dabcc"
+  },
+  "clearing-a-record-for-release/E5": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "04e011bfad873018",
+    "what": "a95d3f2c6360c058",
+    "passages": "29bf5add717fa776"
+  },
+  "clearing-a-record-for-release/E6": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "3836bb939da7d56b",
+    "what": "80bfd91eaa384843",
+    "passages": "718e8cad966677f9"
+  },
+  "clearing-a-record-for-release/E7": {
+    "verdict": "wrong",
+    "read": "2026-10-24",
+    "lines": "b57cb9020db24dc6",
+    "what": "dfac2e6f61026fea",
+    "passages": "51b335e4cb7df5b4"
+  },
+  "clearing-a-record-for-release/E8": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "af78ccd720af9c21",
+    "what": "331de3266836e5af",
+    "passages": "063c40cc79dff53f"
+  },
+  "clearing-a-record-for-release/E9": {
+    "verdict": "supports",
+    "read": "2026-10-24",
+    "lines": "fe46cdbf0a40fdb1",
+    "what": "fda834d83dc7c9bf",
+    "passages": "cca0301654ade448"
+  },
   "distilling-a-tuning-record/E1": {
     "verdict": "supports",
     "read": "2026-10-18",
@@ -372,8 +659,8 @@
   },
   "distilling-a-tuning-record/E12": {
     "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "1f8d1af3607b9a4b",
+    "read": "2026-10-24",
+    "lines": "c5a84274c6d754bc",
     "what": "f286d5ac20eeb638",
     "passages": "12794635924bf240"
   },
@@ -519,10 +806,10 @@
   },
   "distilling-a-tuning-record/E31": {
     "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "ce29dbdd09b7d200",
-    "what": "32c7fdf789b913e0",
-    "passages": "dde13b52a67c6903"
+    "read": "2026-10-24",
+    "lines": "0df30eeb2b10145b",
+    "what": "8d88801923f0fcc0",
+    "passages": "043d08831a5eb566"
   },
   "distilling-a-tuning-record/E32": {
     "verdict": "supports",

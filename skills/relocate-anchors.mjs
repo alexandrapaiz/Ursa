@@ -202,11 +202,37 @@ function main(argv) {
       gone('the text is where the citation says it is, so the drift is not a move'); continue
     }
     const newKey = `${r.entry}/${r.ref}/${r.path}:${part}`
-    if (newKey in lock && lock[newKey] !== expected) {
-      gone(`relocating onto ${part} would collide with another citation's fingerprint`); continue
-    }
     moved.push({ ...r, newPart: part, newKey, fp: expected })
   }
+
+  // Collisions are resolved after the loop, not inside it, because a key the
+  // lock still holds may belong to a range that is itself relocating away in
+  // this same batch. On 2026-10-24 that was a third of the reader's queue: E8
+  // of running-an-outcome-record-trial cited ursa.ts:494 and :515, main moved
+  // both down 21 lines, and 494's destination was 515, which the lock still
+  // held under a fingerprint that was about to vacate it. Deciding inside the
+  // loop meant deciding before the occupant had been classified, so a pure
+  // relocation was reported as text that changed and cost a read that found
+  // the two fingerprints identical.
+  const vacating = new Set(moved.map((m) => m.key))
+  const landing = new Map()
+  for (const m of moved) landing.set(m.newKey, (landing.get(m.newKey) ?? 0) + 1)
+  const survived = []
+  for (const m of moved) {
+    // Two citations of one ref relocating onto the same key is a real conflict
+    // and no vacancy explains it, so it goes to a person either way.
+    if (landing.get(m.newKey) > 1) {
+      needsAPerson.push({ ...m, kind: 'gone', why: `another range of this ref also relocates onto ${m.newPart}` })
+      continue
+    }
+    if (m.newKey in lock && lock[m.newKey] !== m.fp && !vacating.has(m.newKey)) {
+      needsAPerson.push({ ...m, kind: 'gone', why: `relocating onto ${m.newPart} would collide with another citation's fingerprint` })
+      continue
+    }
+    survived.push(m)
+  }
+  moved.length = 0
+  moved.push(...survived)
 
   const drifted = moved.length + needsAPerson.length
   console.log(`relocate-anchors: ${ranges.length} cited ranges, ${settled} settled, ${drifted} drifted`)
@@ -260,10 +286,12 @@ function main(argv) {
   // The fingerprint moves with the citation and does not change value. Drop
   // the old key so the lock does not accumulate orphans the checker then has
   // to mention.
-  for (const m of moved) {
-    delete lock[m.key]
-    lock[m.newKey] = m.fp
-  }
+  // Every old key goes before any new one is written. A chain, where one
+  // range relocates onto the key another is vacating, would otherwise have
+  // the vacating range's delete erase the fingerprint the arriving one just
+  // wrote, and which of the two survived would depend on iteration order.
+  for (const m of moved) delete lock[m.key]
+  for (const m of moved) lock[m.newKey] = m.fp
   writeFileSync(lockPath, JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
 
   console.log(`\nWrote ${byEntry.size} skill file${byEntry.size === 1 ? '' : 's'} and carried ${moved.length} fingerprint${moved.length === 1 ? '' : 's'} across in skills/evidence.lock.json.`)
