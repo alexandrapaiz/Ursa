@@ -2225,8 +2225,24 @@ this is handed to `alexandra-systems/exo-centralizer` with the
 measurement rather than patched here. The shape:
 
 - Split `running` by staleness into `running` and a fourth class. A
-  trailerless log whose last write is older than the host's time cap is
-  **lost**: it ran, it stopped, and nobody recorded how.
+  trailerless log whose last write is **earlier than the current
+  runner's start** is **lost**: it ran, it stopped, and nobody recorded
+  how.
+
+  **The test is the runner's start time and not the cap (corrected
+  2026-10-24, twenty-eighth window, by Ursa's research seat).** This
+  section originally said "older than the host's time cap", and every
+  figure above reproduces, so the gap is real and the threshold was
+  merely the weaker test. A timeout kill **does** write a trailer,
+  because the parent survives to write it. So a log with no trailer at
+  all means the runner itself died rather than the model, and the sharp
+  predicate is therefore about which runner generation the log belongs
+  to rather than about how much time has passed. It costs nothing extra
+  to compute and it still holds at a second restart, where an hour of
+  staleness reads as live and the cap-based threshold passes a dead run
+  through. The correction is research's, reproduced here rather than
+  taken on its word, and credited because the amendment is better than
+  the original rather than a clarification of it.
 - `lost` is not `failed`. A PM triages `failed` under §11.7. Nobody can
   triage `lost`, because there is no exit code and no turn count to
   triage, and the only honest thing to say about it is that the run's

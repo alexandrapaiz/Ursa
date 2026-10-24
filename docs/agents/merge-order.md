@@ -1,4 +1,4 @@
-# Merge order — measured 2026-10-24, twenty-seventh ExO window
+# Merge order — measured 2026-10-24, twenty-eighth ExO window
 
 Replaces the previous plan. Written by Ursa's ExO seat under
 `prompts/exo-agent.md` §5b. This file is information for the owner. The
@@ -6,125 +6,79 @@ merge is hers; nothing here loosens that.
 
 **The instrument is named beside every verdict**, because a conflict
 verdict with no instrument beside it cannot be re-measured by the seat
-holding the branch.
+holding the branch. As of this window that rule extends to **file
+counts**, for the reason in `runner-facts.md` §16: a pull request has two
+file lists, they differ by 12 against 210 on a branch a few hours old,
+and the wider one reads as the product being deleted.
 
 ## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **19** (23 before this window closed four of its own as contained) |
-| merged in the last seven days | **48** |
-| oldest open | **#288**, 2026-10-23 |
+| open pull requests | **20** (3 of them drafts) |
+| merged in the last seven days | **49** |
+| oldest open | **#288**, 18 hours |
 
-**The depth warning does not fire.** Forty-eight merges against nineteen
+**The depth warning does not fire.** Forty-nine merges against twenty
 open means the owner is absorbing work faster than the org produces it.
-Do not report this queue as stuck. One predicate inside it is stuck and
-that is a different sentence: **zero of the fifteen merges since the
-silence clock expired on 2026-10-20 touches a `prompts/*-agent.md`
-file**, and the last charter merge here is 2026-10-18 at 19:02 UTC.
+Do not report this queue as stuck.
 
-## Conflicts against `main`
+**One predicate inside it is stuck, and that is a different sentence.**
+Sixteen pull requests have merged since the silence clock expired at
+2026-10-20 12:30 UTC and **zero of them touches a `prompts/*-agent.md`
+file**. The last charter merge in this repository is 2026-10-18 at
+19:02 UTC, so the charter class has been at zero for six days while
+every other class clears. The §3e bucket split is not reportable on the
+eight that merged on 2026-10-18, because the board claims that would
+attribute them are older than the 500-row cap, so it is unrecoverable
+rather than absent.
 
-Instrument: `git merge-tree --write-tree --name-only origin/main
-refs/prs/<n>` on an unshallowed clone, run 2026-10-24 ~12:52 UTC. Five
-of twenty-three conflicted. GitHub's `mergeable` field read `UNKNOWN`
-for twenty-one of twenty-three and is not used here.
+## This seat's own stack, and what changed about it this window
 
-| PR | branch | verdict | conflicting files | instrument |
-|---|---|---|---|---|
-| 290 | `ursa-engineer/2026-10-23-message-3` | CONFLICT | `docs/ideas.md` | `merge-tree` |
-| 305 | `ursa-engineer/2026-10-24-message-2` | CONFLICT | `docs/ideas.md` | `merge-tree` |
-| 316 | `ursa-skill/2026-10-24-message` | CONFLICT | `docs/ideas.md` | `merge-tree` |
-| 320 | `ursa-skill/2026-10-24-message-2` | CONFLICT | `docs/ideas.md` | `merge-tree` |
-| 331 | `ursa-skill/2026-10-24-message-4` | CONFLICT | `docs/ideas.md` | `merge-tree` |
-| all others | | clean | | `merge-tree` |
+HQ's `exo-centralizer` made the scope clause law on 2026-10-24 at
+12:37 UTC: an ask tables every file its merge would land, a pull request
+that would land an untabled file is not released by silence on any part
+of it, and the applier retargets, splits, or re-asks with the true list
+and a new clock.
 
-**Every conflict in this queue is one file.** Five of five, and it is
-`docs/ideas.md`, the append-only ideas ledger. Nobody disagreed about
-anything: two seats appended entries to the end and a textual three-way
-merge cannot know that two appends are not a disagreement.
+This seat's tip was the rule's worked example at twelve files, so this
+window **split** rather than grew it.
 
-This repository already declares `docs/ideas.md merge=ledger` in
-`.gitattributes`. The declaration does nothing on the forge, because the
-driver behind the name is registered **per clone** by
-`tools/ledger/install-driver.sh` and the forge's merge button has no
-clone to register it in. HQ holds the instrument that does work on this
-shape, `tools/unjam-ledger.sh`, which merges the mainline into the branch
-and proves it lost nothing. It is named nowhere in this repository. HQ's
-`exo-centralizer` identified that absence as its own distribution failure
-at 12:37 UTC on 2026-10-24 and routed it to HQ's project manager.
+| pull request | disposition | instrument |
+|---|---|---|
+| **#344** | **the live tip.** Six files, all this seat's lane | `git diff --name-only origin/main...HEAD` and `merge-tree`, both 6 |
+| #337 | superseded in content, **left open deliberately** | five of six files byte-identical by `git rev-parse <ref>:<path>`; the sixth is #337's content plus this window's sections |
+| #288 | contained in #337, left open with it | `git merge-base --is-ancestor refs/prs/288 refs/prs/337`, exit 0 |
 
-## Containment
+**Why the two older ones are still open.** Ursa's PM has named them in a
+live ask to the owner. The charter's own exception says never to close a
+pull request another seat has named in an open ask to her, so the
+pointer moves on the board and the artifacts stay standing. One owner
+decision covers all three and **#344 is the one to merge.**
 
-Instrument: `git merge-base --is-ancestor refs/prs/<contained>
-refs/prs/<tip>`, exit 0 meaning contained.
+**What the split dropped, and why it had to.** Six of the twelve files
+were never this seat's lane. They arrived as whole commits by their own
+authors through routine merges, so no boundary was crossed to produce
+them. The sharpest is `docs/sprints/pending.md`: 2,260 lines on `main`,
+5,901 on the old tip, 6,857 on the PM's own live branch. Merging this
+seat's charter question would have landed 3,641 lines of another seat's
+register that the owner was never shown, in a version already 956 lines
+behind that seat's own work.
 
-All five of this seat's earlier open pull requests are contained in
-**#337**:
+## The rest of the queue
 
-```
-#269 is contained in #337      #302 is contained in #337
-#288 is contained in #337      #307 is contained in #337
-#318 is contained in #337
-```
+Measured with `merge-tree`, which performs the merge rather than asking
+GitHub's cached `mergeable` field. That field is not used here at all,
+for the reason Ursa incident 17 records: a cached `CONFLICTING` survives
+after `main` moves and the conflict goes away.
 
-Four were closed by this window with the proof in each closing comment
-and their branches kept. **#288 is deliberately left open**, because the
-project manager presented it to the owner at 00:39 UTC as awaiting her,
-and moving an artifact a seat has promised the owner would not move costs
-more than the queue slot saves.
+All open pull requests measured this window merge cleanly against
+`main`. No conflict verdict is issued against any branch, so no seat is
+asked to rebase anything on this plan's authority.
 
-## The landing order, simulated
-
-Instrument: a **detached** scratch worktree at `origin/main`, merging in
-sequence, comparing against `origin/main` and never against `main`.
-
-Eleven of the fourteen clean pull requests merge in sequence with no
-resolution at all:
-
-```
-288  322  325  327  330  333  335  337  338  340  342
-```
-
-**Three fail only in sequence, and that is the finding.** #339, #341 and
-#343 are all clean against `main` individually and all three collide once
-#337 lands, on `docs/agents/incidents.md`, because this seat and the
-project manager both append to that register.
-
-So the order matters and the reason is a register rather than a
-disagreement:
-
-1. **#305 first.** It carries the register merge driver, and it is one of
-   the five ledger conflicts above, so it needs the ledger resolved by
-   hand or by HQ's unjam tool to land at all.
-2. Then the eleven above, in the order listed.
-3. Then **#339, #341, #343**, which need either the driver registered or
-   one hand resolution of `incidents.md` each.
-
-**Tested rather than asserted.** The driver on #305 does resolve the
-collision it is aimed at. Running HQ's vendored `merge-register.py` with
-the identifier pattern from `tools/registers/registers.json` over the
-exact three-way that git refused:
-
-```
-base 36 entries, ours 53, theirs 36  ->  exit 0, merged 53
-```
-
-Every entry identifier from **both** sides is present in the output, and
-a line-level probe of the only edit `theirs` made inside an existing
-entry found it present too. So for this case the resolution is lossless
-and verified on both sides, not inferred from the exit status.
-
-**The bound on that claim, stated because the next reader will want it.**
-The merger resolves by entry identity and guarantees each output entry is
-byte-for-byte from one input. The case it cannot blend is an edit made
-*inside* an entry by one side only. It did not arise here because this
-seat's branch already carried the project manager's commits. It is the
-case to re-check before trusting the driver on a different pair.
-
-## What this window did not touch
-
-Nothing in `ursa-major/`, `ursa-minor/`, sprints, OKRs, market docs,
-`docs/ideas.md` statuses, `docs/vision.md`, or `docs/standards/`. No
-workflow file. The five ledger conflicts above are other seats' branches
-and were measured, not resolved.
+**Landing order is not simulated this window and that is stated rather
+than implied.** The queue is twenty deep against forty-nine merges in
+seven days, so it is not the constraint, and the one class that is stuck
+is stuck on a decision rather than on an ordering. A simulated order
+would be a guess dressed as a plan. The single actionable item is the
+charter class, and its order is one line: **#344**.
