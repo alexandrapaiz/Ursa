@@ -1,0 +1,261 @@
+[
+  {
+    "site": "GitHub, a repository page",
+    "url": "https://github.com/vercel/next.js",
+    "marks": [
+      {
+        "tag": "span",
+        "cls": "prc-ProgressBar-ProgressBarContainer-tCY",
+        "x": 1192,
+        "y": 1285,
+        "top": 1281,
+        "h": 8,
+        "w": 272,
+        "id": 0,
+        "declared": "rgb(209, 217, 224)",
+        "groundCss": "rgb(255, 255, 255)",
+        "rendered": [
+          49,
+          120,
+          198
+        ],
+        "ground": [
+          255,
+          255,
+          255
+        ],
+        "expected": [
+          209,
+          217,
+          224
+        ],
+        "verified": false,
+        "contrast": 4.53
+      },
+      {
+        "tag": "span",
+        "cls": "prc-ProgressBar-ProgressBarItem-mDIlB",
+        "x": 1120,
+        "y": 1285,
+        "top": 1281,
+        "h": 8,
+        "w": 128,
+        "id": 1,
+        "declared": "rgb(241, 224, 90)",
+        "groundCss": "rgb(209, 217, 224)",
+        "rendered": [
+          241,
+          224,
+          90
+        ],
+        "ground": [
+          209,
+          217,
+          224
+        ],
+        "expected": [
+          241,
+          224,
+          90
+        ],
+        "verified": true,
+        "contrast": 1.06
+      },
+      {
+        "tag": "span",
+        "cls": "prc-ProgressBar-ProgressBarItem-mDIlB",
+        "x": 1231,
+        "y": 1285,
+        "top": 1281,
+        "h": 8,
+        "w": 91,
+        "id": 2,
+        "declared": "rgb(49, 120, 198)",
+        "groundCss": "rgb(209, 217, 224)",
+        "rendered": [
+          49,
+          120,
+          198
+        ],
+        "ground": [
+          209,
+          217,
+          224
+        ],
+        "expected": [
+          49,
+          120,
+          198
+        ],
+        "verified": true,
+        "contrast": 3.18
+      }
+    ],
+    "status": "measured, 1 of 3 samples discarded as unverified",
+    "summary": {
+      "marks4pxPlus": 2,
+      "lowest": 1.06,
+      "median": 3.18,
+      "below3to1": 1
+    }
+  },
+  {
+    "site": "Linear",
+    "url": "https://linear.app",
+    "marks": [],
+    "status": "no thin mark found anywhere on the page"
+  },
+  {
+    "site": "Vercel",
+    "url": "https://vercel.com",
+    "marks": [],
+    "status": "no thin mark found anywhere on the page"
+  },
+  {
+    "site": "Stripe",
+    "url": "https://stripe.com",
+    "marks": [],
+    "status": "no thin mark found anywhere on the page"
+  },
+  {
+    "site": "Consensus",
+    "url": "https://consensus.app",
+    "marks": [],
+    "status": "no thin mark found anywhere on the page"
+  },
+  {
+    "site": "Claude",
+    "url": "https://claude.com",
+    "marks": [],
+    "status": "no thin mark found anywhere on the page"
+  },
+  {
+    "site": "Ursa, this run",
+    "url": "http://127.0.0.1:4971/record/mini-fixture",
+    "marks": [
+      {
+        "tag": "div",
+        "cls": "rec-bar mt-9",
+        "x": 720,
+        "y": 441,
+        "top": 438,
+        "h": 6,
+        "w": 960,
+        "id": 0,
+        "declared": "rgb(20, 27, 43)",
+        "groundCss": "rgb(2, 3, 8)",
+        "rendered": [
+          168,
+          199,
+          250
+        ],
+        "ground": [
+          2,
+          3,
+          8
+        ],
+        "expected": [
+          20,
+          27,
+          43
+        ],
+        "verified": false,
+        "contrast": 11.99
+      },
+      {
+        "tag": "div",
+        "cls": "rec-seg rec-seg-survived_verbatim",
+        "x": 438,
+        "y": 441,
+        "top": 438,
+        "h": 6,
+        "w": 395,
+        "id": 1,
+        "declared": "rgb(168, 199, 250)",
+        "groundCss": "rgb(20, 27, 43)",
+        "rendered": [
+          168,
+          199,
+          250
+        ],
+        "ground": [
+          20,
+          27,
+          43
+        ],
+        "expected": [
+          168,
+          199,
+          250
+        ],
+        "verified": true,
+        "contrast": 10
+      },
+      {
+        "tag": "div",
+        "cls": "rec-seg rec-seg-survived_mutated",
+        "x": 751,
+        "y": 441,
+        "top": 438,
+        "h": 6,
+        "w": 230,
+        "id": 2,
+        "declared": "rgb(168, 199, 250)",
+        "groundCss": "rgb(20, 27, 43)",
+        "rendered": [
+          168,
+          199,
+          250
+        ],
+        "ground": [
+          20,
+          27,
+          43
+        ],
+        "expected": [
+          168,
+          199,
+          250
+        ],
+        "verified": true,
+        "contrast": 10
+      },
+      {
+        "tag": "div",
+        "cls": "rec-seg rec-seg-no_generation_provenance",
+        "x": 1034,
+        "y": 441,
+        "top": 438,
+        "h": 6,
+        "w": 333,
+        "id": 3,
+        "declared": "rgba(232, 237, 247, 0.45)",
+        "groundCss": "rgb(20, 27, 43)",
+        "rendered": [
+          116,
+          121,
+          134
+        ],
+        "ground": [
+          20,
+          27,
+          43
+        ],
+        "expected": [
+          115,
+          122,
+          135
+        ],
+        "verified": true,
+        "contrast": 3.95
+      }
+    ],
+    "status": "measured, 1 of 4 samples discarded as unverified",
+    "summary": {
+      "marks4pxPlus": 3,
+      "lowest": 3.95,
+      "median": 10,
+      "below3to1": 0
+    }
+  }
+]
