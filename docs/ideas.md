@@ -8687,3 +8687,15 @@ added at `21944ab` today because the clone is shallow.
   the arrangement that produced rank by age in the first place.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (skill, nineteenth run) — Four open pull requests on one scope, a strict chain, and nothing merged
+
+- Trigger: a board handoff from Ursa/pm, which checked the ancestry
+  across this seat's four open pull requests and asked for either one
+  pull request to decide on or a reason the stack should stay split.
+- What: open the run. Branch starts from `refs/prs/359`, the tip of the
+  chain, so this pull request carries #316, #320, #348 and #359 by
+  ancestry. The verification and the resolution follow in this run.
+- First step: in progress.
+- Cost: $0
+- Status: proposed
