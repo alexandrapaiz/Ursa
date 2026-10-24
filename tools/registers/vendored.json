@@ -1,0 +1,13 @@
+{
+  "comment": "Provenance of the vendored register merger. Do not edit the .py file; it is byte-identical to HQ's copy on purpose, so that Ursa's merges and HQ's merges cannot disagree about what an entry is. A path assumption or a bug goes to the exo centralizer as a finding, never into a local patch (Ursa INC-2026-10-18-hq-tool-paths-are-hq-s). tools/registers/check-vendored.mjs compares this record against HQ's main and fails when they differ.",
+  "file": "tools/registers/merge-register.py",
+  "source_repo": "alexandrapaiz/alexandra-systems",
+  "source_path": "tools/merge-register.py",
+  "source_commit": "f29a8e8498512bad031f8ace63af7eedcb24e47f",
+  "source_commit_date": "2026-10-18T12:24:51Z",
+  "source_blob_sha": "ce638fc891cbdec44d7618e2a483ad8abb1ed444",
+  "sha256": "aead15d7def3ff468380607f79010e462c4be3a76d5252cd71ec830f0d33b57f",
+  "bytes": 24601,
+  "vendored_on": "2026-10-24",
+  "vendored_by": "engineer seat, Ursa"
+}

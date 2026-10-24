@@ -15,7 +15,16 @@ push=0
 if [ "${1:-}" = "--push" ]; then push=1; shift; fi
 
 root="$(git rev-parse --show-toplevel)"
-bash "$root/tools/ledger/install-driver.sh" >/dev/null
+# Every driver, not just the ledger one, and the installer fails if any
+# attribute this repository declares is still unregistered afterwards. A
+# requeue run with an unregistered driver merges the file it was meant to
+# protect with the default line merge and reports it as clean.
+if ! bash "$root/tools/registers/install-drivers.sh" >/dev/null; then
+  echo "Refusing to requeue: a merge attribute this repository declares is not" >&2
+  echo "registered in this clone, so the merge below would silently use git's" >&2
+  echo "default line merge on a register. Fix the gate's complaint first." >&2
+  exit 2
+fi
 git -C "$root" fetch --quiet origin
 
 if [ "$#" -gt 0 ]; then

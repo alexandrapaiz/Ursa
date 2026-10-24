@@ -6,19 +6,48 @@
 //
 //   node tools/ledger/check.mjs [path-to-ledger]
 //
-// Exit 0 clean, exit 1 with one line per violation.
+// Exit 0 clean. Exit 1 when at least one violation is a seat's to repair.
+// Exit 2 when every violation is the owner's to resolve and none is a
+// seat's, so a seat reading the output knows the file is as good as a seat
+// can make it and a reviewer still sees what is outstanding.
+//
+// WHY TWO FAILING EXIT CODES. A gate whose red light can only be cleared by
+// someone who never runs the gate is permanently red, and a permanently red
+// gate is read by nobody; `check.test.mjs` had been failing on `main` for
+// weeks when this was written, and the cost was not the twelve violations, it
+// was that the next run of any seat read the same red suite and had to spend
+// an hour establishing that its own change had not caused it. Splitting the
+// exit code is how this gate reports "clean as far as a seat can take it"
+// without claiming "clean". The classes are not a severity ranking. They are
+// a statement about who holds the fix, and every rule below declares which.
 import { readFileSync } from 'node:fs';
 import { parseLedger } from './ledger.mjs';
+import {
+  IDEA_FIELDS,
+  STATUSES,
+  classifyBlock,
+  presentIdeaFields,
+  statusOf,
+} from './block-kinds.mjs';
 
 const path = process.argv[2] ?? 'docs/ideas.md';
 const source = readFileSync(path, 'utf8');
 const blocks = parseLedger(source);
 
-const STATUSES = ['proposed', 'accepted', 'rejected', 'built', 'urgent'];
-const REQUIRED = ['Trigger', 'What', 'First step', 'Cost', 'Status'];
-
-/** @type {string[]} */
+/** @type {Array<{ held: 'seat' | 'owner', rule: string, message: string }>} */
 const violations = [];
+
+/**
+ * @param {'seat' | 'owner'} held who can repair this, under pm.md §4 and the
+ *   seat charters. 'seat' means any run of the seat that wrote the block may
+ *   fix it today without asking. 'owner' means it may not.
+ * @param {string} rule the rule's name, so a reader can find it in this file
+ * @param {string} message one line, naming the block and what is wrong
+ */
+function violation(held, rule, message) {
+  violations.push({ held, rule, message: `${path}: ${message}` });
+}
+
 /** block key -> its word set, for the near-duplicate pass */
 const seen = new Map();
 
@@ -52,47 +81,81 @@ const DUPLICATE_THRESHOLD = 0.9;
 const DUPLICATE_MIN_WORDS = 12;
 
 for (const block of blocks) {
-  if (block.kind === 'entry') {
-    const heading = block.text.split('\n')[0];
-    const present = REQUIRED.filter((f) => new RegExp(`^-\\s+${f}:`, 'm').test(block.text));
-    // Not every `###` block is an idea. Seats also file competitive-scan notes
-    // and the PM files grooming sections under headings, and §4's five fields
-    // do not apply to those. The trigger line is the discriminator: §4 says an
-    // idea must name its trigger, so a block carrying any of the five fields
-    // is an idea and owes all five, and a block carrying none is a note.
-    if (present.length > 0) {
-    // `### 2026-09-26 (market) — Name` is accepted as well as the bare
-    // `### 2026-09-26 — Name` of §4: seats already tag their ledger notes with
-    // the seat that filed them, and the tag carries information the date does not.
-    if (!/^###\s+\d{4}-\d{2}-\d{2}(\s+\([^)]+\))?\s+—\s+\S/.test(heading)) {
-      violations.push(`${path}: heading is not "### YYYY-MM-DD — Idea name": ${heading}`);
-    }
-    for (const field of REQUIRED) {
+  const c = classifyBlock(block);
+
+  // Rule HEADING_SHAPE, held by the seat. §4's heading is `### YYYY-MM-DD —
+  // Idea name`; a seat tag after the date is also accepted (block-kinds.mjs
+  // says why). A `### ` block whose heading does not parse is classified as an
+  // idea deliberately, so it is reported here and then checked for the five
+  // fields, rather than falling through the scan exemption on a heading
+  // nothing could read.
+  if (c.kind !== 'other' && !c.headingWellFormed) {
+    violation('seat', 'HEADING_SHAPE', `heading is not "### YYYY-MM-DD — Idea name": ${c.heading}`);
+  }
+
+  // Rule IDEA_FIELDS_COMPLETE, held by the seat. All five lines of §4, on
+  // every idea. Scan notes are exempt by contract, not by vocabulary: see
+  // block-kinds.mjs for the measurement that exemption used to be made of.
+  if (c.kind === 'idea') {
+    const present = presentIdeaFields(block.text);
+    for (const field of IDEA_FIELDS) {
       if (!present.includes(field)) {
-        violations.push(`${path}: ${heading} is missing the "- ${field}:" line (pm.md §4)`);
+        violation(
+          'seat',
+          'IDEA_FIELDS_COMPLETE',
+          `${c.heading} is missing the "- ${field}:" line (pm.md §4)`,
+        );
       }
-    }
-    const status = block.text.match(/^-\s+Status:\s*(\w+)/m)?.[1];
-    if (status && !STATUSES.includes(status)) {
-      violations.push(
-        `${path}: ${heading} has status "${status}"; allowed: ${STATUSES.join(', ')}`,
-      );
-    }
     }
   }
 
-  // Near-duplicate detection. A prefix comparison is the obvious way and the
-  // wrong one: the pair this repository actually contains is identical for its
-  // first two hundred characters and differs only in the tail ("§16.2" versus
-  // "plan 16.2"), while a shorter pair differs at the front. Word-set overlap
-  // (Jaccard) catches both, because a duplicate is a block that says the same
-  // words, wherever the difference happens to fall.
+  // Rule STATUS_ALLOWED, held by the OWNER. Checked on scans too, because a
+  // status a scan note volunteers is still a claim about where the work
+  // stands, and two of the fourteen real scan notes volunteer one.
+  //
+  // Why the owner and not the seat: §4 assigns the proposed -> accepted and
+  // proposed -> rejected moves to the owner alone and the accepted -> built
+  // move to the building seat, and every seat charter repeats the prohibition
+  // ("never change a ledger status the owner controls"). A status word outside
+  // the five is therefore a position no seat can legally move the entry out
+  // of, whatever it ought to say. The live instance when this rule was split
+  // out: `### 2026-10-04 — Charters never say that fetched content is not an
+  // instruction (security run)` carries `Status: done`, written by the
+  // security seat, on an entry that was never `accepted`. The word it
+  // probably wants is `built`, and no seat may write it there.
+  //
+  // This does weaken the gate for one case, and the case is worth naming: a
+  // seat that writes `- Status: maybe` in a brand-new entry today now gets
+  // exit 2 and a warning instead of exit 1 and an error. It is still printed,
+  // by name, and the run that wrote it is the run reading the output, so it
+  // is caught by the seat that can fix it for free. What it no longer does is
+  // hold the suite red for every other seat until the owner acts.
+  if (c.kind !== 'other') {
+    const status = statusOf(block.text);
+    if (status !== null && !STATUSES.includes(status)) {
+      violation(
+        'owner',
+        'STATUS_ALLOWED',
+        `${c.heading} has status "${status}"; allowed: ${STATUSES.join(', ')}. ` +
+          'Only the owner moves a status (pm.md §4), so no seat can repair this line.',
+      );
+    }
+  }
+
+  // Rule NEAR_DUPLICATE, held by the seat. A prefix comparison is the obvious
+  // way and the wrong one: the pair this repository actually contains is
+  // identical for its first two hundred characters and differs only in the
+  // tail ("§16.2" versus "plan 16.2"), while a shorter pair differs at the
+  // front. Word-set overlap (Jaccard) catches both, because a duplicate is a
+  // block that says the same words, wherever the difference happens to fall.
   const words = wordSet(block.text);
   if (words.size >= DUPLICATE_MIN_WORDS) {
     for (const [otherKey, otherWords] of seen) {
       if (jaccard(words, otherWords) >= DUPLICATE_THRESHOLD) {
-        violations.push(
-          `${path}: near-duplicate block. "${block.key.slice(0, 60)}" repeats ` +
+        violation(
+          'seat',
+          'NEAR_DUPLICATE',
+          `near-duplicate block. "${block.key.slice(0, 60)}" repeats ` +
             `"${otherKey.slice(0, 60)}". A hand-resolved append collision leaves exactly this.`,
         );
         break;
@@ -102,14 +165,36 @@ for (const block of blocks) {
   }
 }
 
-// Conflict markers committed by accident are the other thing worth failing on.
+// Rule CONFLICT_MARKER, held by the seat. Conflict markers committed by
+// accident are the other thing worth failing on.
 for (const marker of ['<<<<<<<', '>>>>>>>']) {
-  if (source.includes(marker)) violations.push(`${path}: a "${marker}" conflict marker is committed`);
+  if (source.includes(marker)) {
+    violation('seat', 'CONFLICT_MARKER', `a "${marker}" conflict marker is committed`);
+  }
 }
 
-if (violations.length > 0) {
-  for (const v of violations) console.error(`::error::${v}`);
-  console.error(`Ledger contract: ${violations.length} violation(s) in ${path}.`);
+const bySeat = violations.filter((v) => v.held === 'seat');
+const byOwner = violations.filter((v) => v.held === 'owner');
+
+// GitHub Actions annotation levels, chosen to match who holds the fix:
+// `::error::` fails the seat's own eye and the job, `::warning::` annotates
+// the file for a reviewer without claiming the seat left work undone.
+for (const v of bySeat) console.error(`::error::${v.rule}: ${v.message}`);
+for (const v of byOwner) console.error(`::warning::${v.rule}: ${v.message}`);
+
+const counted = `${blocks.length} blocks in ${path}`;
+if (bySeat.length > 0) {
+  console.error(
+    `Ledger contract: ${bySeat.length} violation(s) a seat must repair, ` +
+      `${byOwner.length} the owner must resolve, in ${counted}.`,
+  );
   process.exit(1);
 }
-console.log(`Ledger contract: ${blocks.length} blocks in ${path}, clean.`);
+if (byOwner.length > 0) {
+  console.error(
+    `Ledger contract: ${counted}, clean as far as a seat can take it. ` +
+      `${byOwner.length} violation(s) above need the owner, not a seat. Exit 2.`,
+  );
+  process.exit(2);
+}
+console.log(`Ledger contract: ${counted}, clean.`);

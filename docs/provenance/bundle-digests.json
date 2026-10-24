@@ -326,6 +326,71 @@
           "subject": "The published page now names the bounds that produced its records"
         }
       ]
+    },
+    {
+      "digest": "e47b70a576ea7172",
+      "sha256": "e47b70a576ea7172b8895bf55ccc21fa52003d64d6ada1e356004e38e46ba416",
+      "blob": "9a50b74548a64835be60ce3ab05962b702bb3752",
+      "bytes": 284363,
+      "introducedBy": [
+        {
+          "commit": "3dff5bf92590468c7b240bff1912330920b9b9ad",
+          "date": "2026-10-23T17:30:13.000Z",
+          "subject": "Rebuild dist/ursa.cjs, which the inherited branch left stale"
+        }
+      ]
+    },
+    {
+      "digest": "15ae2cf9f77d5cf5",
+      "sha256": "15ae2cf9f77d5cf52b39116af9cc0eb0af01b16dcb09e63d106c6a4a3846bcea",
+      "blob": "15a9bef7f12e648306cdb5e148272acb1dd30bc4",
+      "bytes": 284140,
+      "introducedBy": [
+        {
+          "commit": "f7b797757296965d80ac6d6bfcb345ce8ec611e9",
+          "date": "2026-10-23T17:58:14.000Z",
+          "subject": "Test the guarantee the design document promised, and rebuild the bundle"
+        }
+      ]
+    },
+    {
+      "digest": "33cc48e31ae5b7ba",
+      "sha256": "33cc48e31ae5b7ba4fedebcca5999139f5b35adb37ba78bb710fff5b8b19c919",
+      "blob": "48f16588cf7f61eddf5f7cb6d5468e60f0ca7105",
+      "bytes": 284165,
+      "introducedBy": [
+        {
+          "commit": "d4c896901ff97c90af6e810711003ff8c6db059c",
+          "date": "2026-10-23T18:03:22.000Z",
+          "subject": "Write the design doc and correct the sentence that said the gate held"
+        }
+      ]
+    },
+    {
+      "digest": "a01cbf40fd628733",
+      "sha256": "a01cbf40fd62873348c68e14950154ca40a45c99d366b94a5ea6bac1ff8891c6",
+      "blob": "fc3f48063114fc3f20cc1527ae776a2dc9d2341e",
+      "bytes": 291817,
+      "introducedBy": [
+        {
+          "commit": "c36afef57813ceb170787606513e82ec97483cf6",
+          "date": "2026-10-23T23:58:10.000Z",
+          "subject": "Merge pull request #275 from alexandrapaiz/ursa-engineer/2026-10-23-message"
+        }
+      ]
+    },
+    {
+      "digest": "8c3942f7623e2d4c",
+      "sha256": "8c3942f7623e2d4cf6fd82fc93256f16d7d7794a41ab9d1e5744d696eef672e5",
+      "blob": "5deeaef76e0c473872f38eb413300deee2a6b3ff",
+      "bytes": 292256,
+      "introducedBy": [
+        {
+          "commit": "343550fac0d6696caafe0473f05d0b91c260a68d",
+          "date": "2026-10-24T00:47:10.000Z",
+          "subject": "Rebuild dist/ursa.cjs against the changed source"
+        }
+      ]
     }
   ]
 }
