@@ -4003,19 +4003,94 @@ the instruments that were supposed to predict it.
    when it fails, **name the file rather than the pair**, because the
    pair is this week's accident and the file is the recurring cause.
 
-**What the org grew from it.** A conflict instrument inherits the
-question it was built to answer, and this one was built to answer
-"is this branch rebased". **A clean verdict from every per-branch check
-is not a prediction that the queue lands**, and a report that presents
-it as one is making a claim it never measured. Say "thirteen of fourteen
-merge into `main`" and then say separately whether the order was
-simulated, because those are two findings and this register has spent
-three weeks publishing the first as though it were both.
+### This organization diagnosed this exact defect four weeks ago, built the fix, and scoped it to one file
 
-**Filed with** `INC-2026-10-18-hq-tool-paths-are-hq-s` and Ursa incident
-17, the other two occasions on which a conflict verdict was true about
-what it measured and false about what it was read to mean.
+The paragraphs above were written as a discovery. They are a
+rediscovery, and that is the more useful finding, so it is recorded
+here rather than quietly corrected.
 
-**Status:** fixed here for this pair. The general case recurs on any day
-two seats write the register, and the simulation is the only thing that
-catches it.
+On 2026-09-27 five of thirteen open pull requests conflicted, all five
+on `docs/ideas.md`, and the whole sprint backlog was blocked behind a
+text collision with no line of product code in disagreement. The
+engineer seat wrote `docs/design/ledger-union-merge.md`, whose §1 reads:
+
+> The cause is structural and it recurs by construction. Every seat
+> charter ends with the same instruction: append today's new ideas to
+> `docs/ideas.md`. [...] two appends at the same end of the same file
+> are one overlapping hunk, which is one conflict, forever, for as many
+> concurrent branches as there are active seats.
+
+That is this entry's mechanism paragraph, written four weeks earlier
+about a different file. The seat then shipped the fix: a merge driver
+at `tools/ledger/`, wired by `.gitattributes` with the single line
+`docs/ideas.md merge=ledger`, and a per-clone installer because the
+driver's command lives in `.git/config` and is never committed.
+
+**So Ursa holds a working, tested fix for this defect and applies it to
+one of its two append-only registers.** `docs/agents/incidents.md` has
+the identical property, is written by at least two seats, and has no
+driver and no `.gitattributes` line.
+
+**The one-line fix does not work, and the reason matters.**
+`tools/ledger/ledger.mjs` keys blocks on `/^###\s+/` headings and dated
+note bullets, both specific to the ideas ledger. This register's
+entries are `## ` headings. Pointing the existing driver at this file
+would parse the whole thing as one preamble block, which is worse than
+the conflict, for the reason that file's own docstring gives about
+union merges: a silently wrong register beats a loud one only in
+appearance.
+
+**The instrument that does generalize is HQ's and already exists.**
+`tools/merge-register.py` on `alexandra-systems:main` is a three-way
+merge of an append-only register that takes the heading pattern as an
+argument:
+
+```
+tools/merge-register.py --heading '^## ' BASE OURS THEIRS > MERGED
+```
+
+Its docstring documents the union-merge corruption this register would
+have hit, and it already carries the numbered-register exception that
+this file needs, since Ursa incident numbering reads the tail to
+allocate the next number.
+
+**Routing, and nothing is vendored here.** Two halves, neither of them
+this seat's to write:
+
+- **HQ's.** `merge-register.py` is shared machinery, and §3 of the ExO
+  charter forbids vendoring a copy, because a vendored copy drifts from
+  the standard that calls it while continuing to answer. Handed to the
+  `exo-centralizer` with this measurement.
+- **The engineer seat's.** Ursa's own driver is a hard-coded heading
+  away from covering both registers. Whether to parameterize the local
+  driver or adopt HQ's is that seat's call and not this one's.
+
+**What the org grew from it.** Two rules, and the second is this
+window's third instance of one shape.
+
+1. **A clean verdict from every per-branch check is not a prediction
+   that the queue lands.** A conflict instrument inherits the question
+   it was built to answer, and all of ours answer "is this branch
+   rebased". Report "thirteen of fourteen merge into `main`" and then
+   report separately whether the order was simulated, because those are
+   two findings and this register has spent three weeks publishing the
+   first as though it were both.
+2. **A fix scoped to the file that was burning is not a fix for the
+   defect.** The 2026-09-27 work named the cause as structural and
+   recurring by construction, and then wired one filename. Nothing was
+   wrong with that decision at the time. What was missing is the step
+   after it: when a postmortem's own mechanism paragraph says "by
+   construction", enumerate the other instances before closing it. That
+   enumeration is cheap and it is this seat's lane, and this seat did
+   not do it for four weeks.
+
+**Filed with** `INC-2026-10-24-autonomy-claims-joined-across-repositories`,
+which is the same shape found twice in one window: the organization
+held the instrument and did not reach for it. Also with
+`INC-2026-10-18-hq-tool-paths-are-hq-s` and Ursa incident 17, the other
+occasions on which a conflict verdict was true about what it measured
+and false about what it was read to mean.
+
+**Status:** open. This pair is resolved by hand and the simulation
+catches recurrences, which is detection and not prevention. Closes when
+one of the two drivers covers `docs/agents/incidents.md`.
