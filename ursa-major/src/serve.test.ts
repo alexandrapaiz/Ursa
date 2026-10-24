@@ -17,7 +17,8 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { main } from './bin/ursa'
 import { listRecordIds, saveEpisodes } from './store'
-import { startStoreServer, storePayload, tuningUnits, type StoreServerHandle } from './serve'
+import { createServer } from 'node:http'
+import { listenOnLoopback, startStoreServer, storePayload, tuningUnits, type StoreServerHandle } from './serve'
 import type { TuningRecord } from './tuning/types'
 
 // Author identity through the environment, not `git config`: GIT_AUTHOR_NAME
@@ -329,5 +330,73 @@ describe('the store payload read directly, without a socket', () => {
     const project = await projectWithOneRecord()
     projects.push(project)
     expect(tuningUnits(project)).toEqual([])
+  })
+})
+
+// The listen path itself, because for one of the two doors it used to be
+// the failure mode rather than the happy path.
+//
+// `startBridge` in src/bridge/index.ts wrapped `server.listen` in
+// `new Promise((r) => server.listen(port, '127.0.0.1', r))`. Node reports
+// a refused bind by emitting `error` on the server and never invoking the
+// listening callback, so with no `error` listener that promise never
+// settled: `ursa bridge` on a taken port printed nothing and waited
+// forever, with the log line naming the port still ahead of it. These
+// tests hold the shared helper that both doors now call.
+describe('binding a local door to a port', () => {
+  const servers: ReturnType<typeof createServer>[] = []
+  const open = () => { const s = createServer(() => {}); servers.push(s); return s }
+  afterEach(async () => {
+    while (servers.length) await new Promise<void>((r) => servers.pop()!.close(() => r()))
+  })
+
+  it('reports the port the kernel chose when asked for port 0', async () => {
+    const bound = await listenOnLoopback(open(), 0, 'the store server')
+    // The requested value is not the answer: 0 is never a real port, so a
+    // caller that trusted its own argument could not address the server.
+    expect(bound).not.toBe(0)
+    expect(bound).toBeGreaterThan(0)
+    expect(bound).toBeLessThan(65_536)
+  })
+
+  it('reports the port it was asked for when that port is free', async () => {
+    const first = await listenOnLoopback(open(), 0, 'the store server')
+    await new Promise<void>((r) => servers.pop()!.close(() => r()))
+    expect(await listenOnLoopback(open(), first, 'the store server')).toBe(first)
+  })
+
+  it('rejects on a taken port rather than hanging, and says which port and what to do', async () => {
+    const taken = await listenOnLoopback(open(), 0, 'the bridge')
+    // The assertion that matters is that this settles at all. Before the
+    // fix the equivalent call never resolved and never rejected, which is
+    // why the symptom was a 5s test timeout with no error attached.
+    await expect(listenOnLoopback(open(), taken, 'the bridge')).rejects.toThrow(
+      new RegExp(`the bridge cannot start: 127\\.0\\.0\\.1:${taken} is already in use`))
+    await expect(listenOnLoopback(open(), taken, 'the bridge')).rejects.toThrow(/--port <number>/)
+  })
+
+  it('names the door that failed, so two doors on one machine are told apart', async () => {
+    const taken = await listenOnLoopback(open(), 0, 'the store server')
+    await expect(listenOnLoopback(open(), taken, 'the store server')).rejects.toThrow(
+      /the store server cannot start/)
+  })
+
+  it('passes an errno it has no advice for through unchanged', async () => {
+    // Port 1 is privileged, so an unprivileged process gets EACCES rather
+    // than EADDRINUSE. Inventing advice for a cause the helper did not
+    // diagnose would be worse than the errno, so the raw error is the
+    // contract here.
+    // Guarded rather than asserted outright, because a suite running as
+    // root may legitimately bind port 1 and a test that fails only for
+    // root would be a worse defect than the one it is protecting.
+    const outcome: { bound: number } | { error: Error } =
+      await listenOnLoopback(open(), 1, 'the bridge')
+        .then((bound) => ({ bound }), (error: Error) => ({ error }))
+    if ('error' in outcome) {
+      expect(outcome.error.message).not.toContain('is already in use')
+      expect(outcome.error.message).toContain('EACCES')
+    } else {
+      expect(outcome.bound).toBe(1)
+    }
   })
 })
