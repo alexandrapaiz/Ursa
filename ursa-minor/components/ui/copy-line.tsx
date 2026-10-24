@@ -23,6 +23,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * The press beats the hover, the same 90ms against 160ms as the home
  * page's one control, because the whole site's interaction grammar is
  * that rule and a second one here would read as a different product.
+ *
+ * The control is a 29px box and takes `.rec-hit` to be hittable at 44,
+ * which costs 7.6px of overhang at each edge. Both edges have room at
+ * every width: the card's own padding is 16px below `sm` and 20px above
+ * it, and where the control stacks under the command the gap there is
+ * 12px. So the overlay never reaches the command's scrolling box.
  */
 export function CopyLine({ command, label }: { command: string; label?: string }) {
   const [state, setState] = useState<"idle" | "copied" | "refused">("idle");
@@ -106,7 +112,7 @@ export function CopyLine({ command, label }: { command: string; label?: string }
         <button
           type="button"
           onClick={() => void copy()}
-          className="cta shrink-0 border border-[rgba(168,199,250,0.4)] px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-[var(--polar)]"
+          className="cta rec-hit shrink-0 border border-[rgba(168,199,250,0.4)] px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-[var(--polar)]"
         >
           {state === "copied" ? "copied" : state === "refused" ? "select it" : "copy"}
         </button>
