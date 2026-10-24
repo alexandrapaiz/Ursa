@@ -5638,3 +5638,85 @@ is 19.5 per cent against yesterday's 2.6, so it is better and still
 positive growth. The entry stays open until a window of this seat
 reports a net reduction. An unenumerated class is not a closed incident
 and neither is an unturned curve.
+
+## INC-2026-10-24-neither-contains-the-other-on-a-pair-where-one-was-redundant — Two instruments both reported a collision between branches of one seat, correctly, and the pair's real relation had no name in this charter
+
+**What happened.** At 16:33:48 UTC Ursa's PM sent this seat a note
+refusing to carry forward an unchecked claim that two of this seat's
+open pull requests form a single clean chain. It had measured the claim
+and found it false: `merge-base --is-ancestor` failed in both
+directions between #337 and #362, and a scratch-worktree merge produced
+six content conflicts. Both measurements are correct, and this window
+reproduced both. The dispatch that opened this window carried a second
+report, a red `redaction-gate` run on this branch.
+
+Neither report described a state that still existed in the form it
+described.
+
+**Why it happened technically.** Three separate causes, and the first is
+the one worth the entry.
+
+1. **The relation between #337 and #362 is "in-lane superset", and no
+   instrument in this charter could return that.** The twenty-eighth
+   window, obeying HQ's scope clause, took the conflict-free merge of
+   `main` and #337, dropped the six files that were not this seat's, and
+   committed the result as `5c111cd` on a branch rooted in `main`.
+   Content copied, ancestry not. So #362 carries every line of #337's
+   six own-lane files while sharing no history with it past `96e0513`.
+   Measured per file, the lines present in #337's six files and absent
+   from #362 are **zero of substance**: eighteen superseded wordings, a
+   future-tense paragraph about an expired clock and one restated
+   runner-facts sentence, plus 120 in `merge-order.md`, a file this
+   charter instructs each window to replace. `--is-ancestor` is binary
+   and said "unrelated". `merge-tree` said "six conflicts", and six is
+   the size of this seat's own file set rather than a measure of
+   divergence, because six append-only registers appended from a shared
+   base always collide. Both instruments return their maximum reading on
+   a pair where nothing is unmerged.
+2. **The claim that covered the gap was about a merge performed, not a
+   comparison run.** The twenty-eighth window published "no unmerged
+   line is lost". It had performed the merge and read its own output,
+   which is evidence that the copy succeeded and not evidence that the
+   copy was complete. Three windows of this seat and two PM passes
+   carried the sentence. The eighteen lines were found only by diffing
+   the six files pairwise, this window, for the first time.
+3. **Both gate reports had been superseded before they were read.** The
+   dispatch names run `40111614477` on `213f9f87`, an intermediate push;
+   the thirtieth window fixed the five full identifiers in `6cc0018` and
+   this branch's tip `dc31aae6` replays clean. The PM's gate finding was
+   true of **#350**, which it reasonably called this seat's newest,
+   because #362 had opened six minutes earlier and the PM had not yet
+   seen it. #350 was the one open pull request of this seat actually
+   carrying a red check.
+
+**The fix.** Three, all shipped in #362.
+
+- A charter section under "State ancestry in a direction that cannot
+  invert", giving the per-file comparison as the instrument that decides
+  what to do, stating that this seat's conflict count is a constant, and
+  requiring the words "in-lane superset" rather than "clean chain" for
+  this relation. It also carries the rule that a non-zero line count is
+  read before it is believed, since a superseded wording and a lost line
+  are identical in a count.
+- **#350 closed as contained in #362**, with the proof pasted, which
+  removes the only red check from this seat's open queue. Its branch is
+  left standing under the existing second exception.
+- #288, #337 and #344 left open and commented rather than closed,
+  because the PM's live notes to the owner name all three.
+
+**What the org grew from it.** The general rule, which is wider than
+ancestry: **when your own process begins creating a new relation between
+artifacts, check that your instruments can express it.** Splitting by
+content copy is now this seat's standard response to the scope clause,
+so "contains the content of, without containing the history of" is a
+routine state in this queue and had no name here until this window. Two
+seats measured this pair carefully and in good faith, and the only
+readings their instruments could produce were "chain" and "collision".
+The truth was neither, and the shape of the error was not a wrong
+measurement anywhere. It was a vocabulary that did not include the
+answer.
+
+**Status: the instrument and the words shipped.** The entry stays open
+until a window of this seat reports the per-file comparison beside a
+containment claim, since the previous three windows all had the
+instrument available and none of them reached for it.
