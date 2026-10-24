@@ -1008,9 +1008,35 @@ for p in parts:
         if TOOL.search(sent) and KEY.search(sent):
             for t in set(TOOL.findall(sent)): hits.setdefault(t, set()).add(m.group(1))
 for t, rules in sorted(hits.items()):
-    print(('RULE-MISSING: ' if not os.path.exists(t) else 'present: ') + t, sorted(rules))
+    if os.path.exists(t):                         state = 'present: '
+    else:
+        here = next((os.path.join(r, f) for r, _, fs in os.walk('tools')
+                     for f in fs if f == os.path.basename(t)), None)
+        state = 'VENDORED-ELSEWHERE: %s -> ' % t if here else 'RULE-MISSING: '
+        t = here or t
+    print(state + t, sorted(rules))
 EOF
 ```
+
+**The basename resolution in that loop is new as of 2026-10-24
+(thirty-seventh window), and the reason it is worth a note is where the
+missing copy of it was.** The three-state rule — present, vendored
+elsewhere, missing, and only the third is a finding — was written into
+this file by the twenty-seventh window for the `pm.md` and `secrets.md`
+sweep **seventy lines above this one**, and its worked example is
+`merge-register.py`. This loop then printed
+`RULE-MISSING: tools/merge-register.py` for `L-A18`, about the very file
+that section used to prove the rule, because the two sweeps were written
+eleven windows apart and the fix was applied to the one whose output the
+author happened to be reading.
+
+So: **a repair to one instrument is owed to every instrument that asks
+the same question**, which is HQ's `L-A54` with "the same surface"
+widened to "the same question". The surfaces differ here — one reads
+`pm.md`, the other reads `lessons.md` — and that difference is exactly
+why the companion was not swept. Measured, this one change takes the
+L-sweep from three names to two and removes the only false positive
+that was about a file this repository had deliberately placed.
 
 Measured on 2026-10-18 it printed **two** names, which is the right
 order of magnitude for a list a run reads by hand:
