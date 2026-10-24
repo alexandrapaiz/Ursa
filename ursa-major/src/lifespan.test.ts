@@ -316,3 +316,167 @@ describe('the run summary tells the user the difference', () => {
     expect(renderRunSummary([record], [ep])).not.toMatch(/gone by the latest commit/)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Renames. Added 2026-10-24 as the regression guard for the defect described
+// in docs/design/rename-reads-as-death.md: a path-limited log still returns
+// the commit that renamed the path away, because git reports a rename-away as
+// a deletion of the old path, so the walk read a blob that was not there and
+// called unmodified text decayed.
+//
+// Every assertion below that mentions a fate is checked against the pre-fix
+// module as well, in the PR description's evidence section. The four that
+// matter inverted.
+// ---------------------------------------------------------------------------
+
+/**
+ * Three commits and one `git mv`, which is the smallest history that shows
+ * the defect:
+ *
+ *   1  agent writes MOVED (notes.md)                     <- generatedSha
+ *   2  human retitles it, keeps the prose, adds HUMAN     <- finalSha
+ *   3  human runs `git mv notes.md docs/notes.md`, no content change
+ *
+ * At commit 3 every character the agent wrote is still in the tree, under a
+ * different name. The correct reading is `durable`.
+ *
+ * `-q` and the explicit `user.email`/`user.name` match repoWithAfterlife
+ * above; the author identity still comes from the environment, per the note
+ * at the top of this file.
+ */
+function repoWithRename(opts: { gutOnMove?: boolean; moveBack?: boolean } = {}): string {
+  const dir = mkdtempSync(join(tmpdir(), 'ursa-rename-'))
+  sh(dir, ['init', '-q', '-b', 'main'])
+  sh(dir, ['config', 'user.email', 'human@example.com'])
+  sh(dir, ['config', 'user.name', 'Human Owner'])
+
+  writeFileSync(join(dir, 'notes.md'), `# Notes\n\n${KEPT}\n`)
+  sh(dir, ['add', '.'])
+  sh(dir, ['commit', '-q', '-m', 'Write the notes\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+
+  writeFileSync(join(dir, 'notes.md'), `# Resolver notes\n\n${KEPT}\n\n${HUMAN}\n`)
+  sh(dir, ['add', '.'])
+  sh(dir, ['commit', '-q', '-m', 'Retitle it, and say who owns a verdict'])
+
+  sh(dir, ['mv', 'notes.md', 'moved.md'])
+  if (opts.gutOnMove) {
+    // The move and the gutting in one commit. Following the rename must not
+    // rescue this: the presence test reads the blob at the new path and the
+    // agent's text is not in it.
+    writeFileSync(join(dir, 'moved.md'), `# Resolver notes\n\n${HUMAN}\n`)
+    sh(dir, ['add', '-A'])
+  }
+  sh(dir, ['commit', '-q', '-m', opts.gutOnMove ? 'Move it and rewrite it' : 'Move it into place'])
+
+  if (opts.moveBack) {
+    sh(dir, ['mv', 'moved.md', 'notes.md'])
+    sh(dir, ['commit', '-q', '-a', '-m', 'Move it back'])
+  }
+  return dir
+}
+
+describe('revisionsAfter follows a rename', () => {
+  it('reads the renaming revision at the destination path, and says it renamed', () => {
+    const repo = repoWithRename()
+    const { ep } = annotated(repo)
+    const revs = revisionsAfter(repo, ep.finalSha, 'notes.md')
+    expect(revs).toHaveLength(1)
+    expect(revs[0].subject).toBe('Move it into place')
+    // The two fields the fix adds. `path` is where the content is readable
+    // in this revision's tree; the record still calls the file notes.md.
+    expect(revs[0].path).toBe('moved.md')
+    expect(revs[0].renamedFrom).toBe('notes.md')
+  })
+
+  it('still reports the plain case with the record path and no rename marker', () => {
+    const repo = repoWithAfterlife()
+    const { ep } = annotated(repo)
+    const revs = revisionsAfter(repo, ep.finalSha, 'basis.md')
+    expect(revs.map((r) => r.path)).toEqual(['basis.md'])
+    expect(revs[0].renamedFrom).toBeUndefined()
+  })
+
+  it('terminates on a rename cycle rather than looping forever', () => {
+    // a -> b -> a inside one range is legal git. Without the `seen` guard in
+    // revisionsAfter this test does not fail, it hangs, so the assertion is
+    // only that control returns at all and the revisions are sane.
+    const repo = repoWithRename({ moveBack: true })
+    const { ep } = annotated(repo)
+    const revs = revisionsAfter(repo, ep.finalSha, 'notes.md')
+    expect(revs.length).toBeGreaterThanOrEqual(1)
+    expect(revs.length).toBeLessThanOrEqual(2)
+    expect(revs[0].renamedFrom).toBe('notes.md')
+  })
+
+  it('honours the revision limit while following, so one rename cannot overrun it', () => {
+    const repo = repoWithRename({ moveBack: true })
+    const { ep } = annotated(repo)
+    expect(revisionsAfter(repo, ep.finalSha, 'notes.md', 1)).toHaveLength(1)
+  })
+})
+
+describe('annotateDurability across a rename', () => {
+  it('text moved to a new path without being edited is durable, not decayed', () => {
+    const repo = repoWithRename()
+    const { record } = annotated(repo)
+    const moved = mainSpan(record, 'notes.md')
+    expect(moved.class).toMatch(/^survived_/)
+    // The four assertions that invert against the pre-fix module. Before the
+    // fix: fate 'decayed', liveAtTip false, unitsSurviving 0, decayedChars
+    // greater than 0 — for text sitting unmodified at the tip.
+    expect(moved.lifespan!.fate).toBe('durable')
+    expect(moved.lifespan!.liveAtTip).toBe(true)
+    expect(moved.lifespan!.unitsSurviving).toBe(moved.lifespan!.unitsTraced)
+    expect(moved.lifespan!.decayedChars).toBe(0)
+    expect(moved.lifespan!.diedAtSha).toBeNull()
+  })
+
+  it('records that it crossed a rename, and where the text went', () => {
+    const repo = repoWithRename()
+    const { record } = annotated(repo)
+    const moved = mainSpan(record, 'notes.md')
+    expect(moved.lifespan!.renamesFollowed).toBe(1)
+    expect(moved.lifespan!.renamedTo).toBe('moved.md')
+    // The record keeps calling the file by the path the episode classified
+    // it at; the destination is carried alongside, not substituted in.
+    expect(record.files.map((f) => f.path)).toContain('notes.md')
+  })
+
+  it('leaves both rename fields absent when no rename was crossed', () => {
+    const repo = repoWithAfterlife()
+    const { record } = annotated(repo)
+    const kept = mainSpan(record, 'notes.md')
+    // Absent, never 0 and never the original path: a record written before
+    // the walk could follow a rename must stay indistinguishable from one
+    // whose file never moved, because the older record cannot say.
+    expect(kept.lifespan!.renamesFollowed).toBeUndefined()
+    expect(kept.lifespan!.renamedTo).toBeUndefined()
+    expect(record.durability!.renamesFollowed).toBeUndefined()
+  })
+
+  it('a commit that moved the file and gutted it still reports death', () => {
+    // The guard against the fix overcorrecting into false continuity. The
+    // rename buys the right place to look, nothing more: spanPresent reads
+    // the blob at the destination and the agent's text is not in it.
+    const repo = repoWithRename({ gutOnMove: true })
+    const { record } = annotated(repo)
+    const moved = mainSpan(record, 'notes.md')
+    expect(moved.lifespan!.fate).toBe('decayed')
+    expect(moved.lifespan!.liveAtTip).toBe(false)
+    expect(moved.lifespan!.unitsSurviving).toBe(0)
+    expect(sh(repo, ['log', '-1', '--format=%s', moved.lifespan!.diedAtSha!]).trim())
+      .toBe('Move it and rewrite it')
+    // ...and it is still honest about having crossed the rename to find out.
+    expect(moved.lifespan!.renamesFollowed).toBe(1)
+  })
+
+  it('rolls the count up onto the record, summed over spans', () => {
+    const repo = repoWithRename()
+    const { record } = annotated(repo)
+    const perSpan = record.files
+      .flatMap((f) => f.spans)
+      .reduce((n, s) => n + (s.lifespan?.renamesFollowed ?? 0), 0)
+    expect(record.durability!.renamesFollowed).toBe(perSpan)
+    expect(record.durability!.renamesFollowed).toBeGreaterThan(0)
+  })
+})
