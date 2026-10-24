@@ -69,7 +69,7 @@ duplicate of #401's.
 
 3. **Board recorded, per pm.md §21** ("each merge is written on the
    board as a `done` with the reason"). Moved item
-   `284aeef5-661f-45de-9e90-345e41ed4d2f` ("A check that goes red now
+   `284aeef5` ("A check that goes red now
    says where the problem is...") from Review to Done, and commented
    the six-condition reason on it.
 
