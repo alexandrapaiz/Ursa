@@ -503,3 +503,309 @@ willing to use the named variable instead of the ambient one once it had
 a real value and a real reason to try. Recommending the standing handoff
 close once the centralizer confirms this holds on another Actions seat,
 not just the PM's own workflow.
+
+## Finding — eight of Ursa's charters still name the bare role as their branch prefix, not the registered seat name (recorded 2026-10-18, PM message pass)
+
+`alexandra-systems/exo-centralizer` handed this seat a list of eight
+Ursa charters whose branch-naming line names the bare role rather than
+the company-qualified seat name the runtime actually dispatches onto,
+measured with a new HQ instrument (`tools/check-branch-prefixes.sh`,
+landed on `alexandra-systems#233`) that reads every seat's manifest and
+diffs it against the charter the manifest points at. Not taken on the
+centralizer's word: grepped all eight files on this branch directly and
+found exactly the lines it named, no more and no fewer.
+
+| File | Line | Reads today | Should read |
+|---|---|---|---|
+| `prompts/engineer-agent.md` | 64 | `engineer/YYYY-MM-DD-slug` | `ursa-engineer/YYYY-MM-DD-slug` |
+| `prompts/finance-agent.md` | 66 | `fin/YYYY-MM` | `ursa-finance/YYYY-MM` |
+| `prompts/market-agent.md` | 75 | `market/YYYY-MM-DD` | `ursa-market/YYYY-MM-DD` |
+| `prompts/okr-agent.md` | 93 | `okr/YYYY-MM` | `ursa-okr/YYYY-MM` |
+| `prompts/pm-agent.md` | 20 | `pm/sprint-YYYY-MM-DD` | `ursa-pm/sprint-YYYY-MM-DD` |
+| `prompts/pm-agent.md` | 76 | `pm/standup-YYYY-MM-DD` | `ursa-pm/standup-YYYY-MM-DD` |
+| `prompts/pm-agent.md` | 206 | `pm/sprint-YYYY-MM-DD` | `ursa-pm/sprint-YYYY-MM-DD` |
+| `prompts/sales-agent.md` | 59 | `sales/YYYY-MM-DD` | `ursa-sales/YYYY-MM-DD` |
+| `prompts/security-agent.md` | 64 | `sec/YYYY-MM-DD` | `ursa-security/YYYY-MM-DD` |
+| `prompts/skill-agent.md` | 48 | `skill/YYYY-MM-DD-slug` | `ursa-skill/YYYY-MM-DD-slug` |
+
+This is not cosmetic: the centralizer found a second, related defect in
+`tools/no-ship-tripwire.sh`, the check that credits a self-merged pull
+request back to the run that opened it by matching the branch against
+the seat's declared prefix as a fallback. A charter that names a prefix
+no branch ever carries makes that fallback match nothing, so a run that
+shipped by self-merge can be reported as having shipped nothing. The
+centralizer has already fixed the tripwire's own separate bug (it was
+stripping the first character of an unquoted prefix) on its own pull
+request; this finding is the charter half of the same mismatch, and it
+is still open.
+
+This seat is not making the edit itself. `docs/standards/pm.md` §9 and
+this seat's own charter both reserve a charter's text to the owner's
+merge; a seat proposes in the ledger and does not write `prompts/`
+directly, which is why this table exists instead of a diff. Pull
+request 234 (exo) already touches `prompts/pm-agent.md` on this branch,
+but for an unrelated reason, restoring a dropped merge-state clause in
+section 0b, not any of the three lines above, so applying this finding
+does not collide with it. Logged in `docs/sprints/pending.md` as an
+owner-action alongside #234, so one pass through the owner's queue can
+take both.
+
+## Finding — the manifest handoff was wrong, the correction was right, and the file the correction named still isn't here (recorded 2026-10-18, PM message pass)
+
+`alexandra-systems/exo-centralizer` opened a handoff saying
+`company.yaml` declares a schedule for ten seats whose workflows carry
+no live cron, and asked this seat to run the vendored checker and mark
+those seats `dispatch-only`. By the time this pass read its inbox, the
+same sender had already posted two corrections withdrawing it: the
+ten seats' clocks are real and moved to the host on 2026-10-17 (HQ
+decision 056, the same line now commented into every `agent-*.yml`
+`on:` block), the checker is what's stale, and an edit to
+`company.yaml` would have turned a true declaration false to quiet a
+check about to be fixed elsewhere. This seat read the inbox before
+acting and made no edit; full account in `docs/sprints/pending.md`'s
+sixteenth pass.
+
+One claim in the correction does not hold up under this seat's own
+checkout, though: it names the stale tool as `tools/check-manifest.sh`,
+"vendored in your own repository." It isn't. `find . -iname
+'check-manifest*'` and a full-tree grep for `company.yaml` across every
+`.py`/`.mjs`/`.sh` file both return nothing — no script in this
+repository reads `company.yaml` at all, under that name or any other.
+Two explanations fit equally from here: the vendoring step that was
+supposed to land the checker here never ran, or the checker lives
+somewhere this seat hasn't looked and the correction's own path is
+wrong. Either way, nothing in this checkout can run the check the first
+handoff asked for, and the next seat that hears "the vendored checker
+says X" about `company.yaml` should confirm the file exists before
+trusting the sentence, the same way this one did.
+
+Nothing for the owner here: no edit was made, none is proposed, and
+the open question (which file, if any, is supposed to be here) belongs
+to HQ's distribution lane, already named as a gap in the correction
+itself.
+
+**Closed, 2026-10-18, eighteenth pass.** `alexandra-systems/exo-centralizer`
+has now withdrawn the checker-path claim entirely rather than
+relocating it a second time: the tool is `tools/check-manifest.sh` in
+its own repository only, a code search of all four product
+repositories found it in none of them, and the thirty-five findings
+the original handoff cited were one HQ-side read of four manifests
+from its own repository, not four separate obligations on the product
+seats. The open question this entry left, which file, if any, is
+supposed to be here, is answered: none is, and none is owed. This seat
+re-ran its own search on this branch's current tip rather than accept
+the correction on its third telling, and it still finds nothing.
+Nothing further for the owner or for HQ's distribution lane.
+
+## Finding — the charter freeze is real, the fix is checkable, and I am asking rather than deciding it alone (recorded 2026-10-18, PM twenty-third pass)
+
+`Ursa/exo` handed this seat `INC-2026-10-18-tier-c-charter-freeze`: one
+pull request touching `prompts/` has merged here since 2026-10-01 (#151,
+the owner, 2026-10-10) against 52 merges company-wide in the last seven
+days. The cause is that `docs/standards/pm.md` §10's own amendment
+banner, and §21 after it, say no tier waits for the owner except a
+change to a seat's own authority, while §10's Tier C list, eleven lines
+below the banner, still names all of `prompts/` by name. I have been
+reading the list rather than the banner since at least the eleventh
+pass today (`6e7eb83`, "reconfirm #231 as Tier C"), and every pass before
+that one reads the same way going back through this file's own history.
+That reading was defensible against the text each pass had in front of
+it. Exo is right that the banner and §21 are the newer, more specific,
+and more explicit text, and that a reading which lets the Tier C list
+silently override its own amendment is the error, not a judgment call
+between two equally live rules.
+
+Exo's proposed fix is checkable by reading one line: a `prompts/` pull
+request that declares in bold, truthfully, that it moves no authority
+between seats and loosens no owner gate is Tier B; one that cannot make
+that declaration honestly is Tier C. I am not self-adopting it this
+pass. Eight days of consistent practice by this seat, unprompted by any
+owner correction despite the board carrying it every pass, is itself
+evidence worth more than my own fresh read of two sections, and a seat
+changing how it is allowed to touch its own charter is exactly the case
+this standard means to keep careful. So I am posting it to the owner as
+an `ask` with my recommendation (adopt it) under §22's silence route:
+it takes effect 48 hours from this pass absent her word, and until then
+every open `prompts/` pull request — #242 (draft, exo's own, subsumes
+#167/#231/#234), #210 (research), #199 (skill, also `CONFLICTING`) —
+stays Tier C exactly as every prior pass has treated it. The actual fix
+to §10's text is HQ's ADR, not mine to write into the vendored standard;
+what is mine is whether Ursa's own practice follows the banner or the
+list in the meantime, and I am asking rather than flipping it alone.
+
+The same handoff asks who may delete the 58 remote branches behind
+closed-unmerged pull requests. I am naming this, in the same ask, as
+data deletion rather than queue hygiene: a branch with no merged PR
+behind it is the only remaining copy of whatever work it held, deleting
+it is not reversible from this seat's side, and §21 keeps "deletes
+data" on the owner's list without putting it on §22's never-silence
+list either. I recommend a default rather than a one-by-one review —
+a branch stays unless its closed PR's own closing comment already names
+why nothing in it is needed, in which case I delete it on sight the way
+this seat already does for merged branches — and the same 48-hour clock
+applies.
+
+## Finding — three of exo's own pull requests closed as superseded, confirmed on an unshallowed clone; the fourth stays with the owner's standing ask (recorded 2026-10-18, PM twenty-fourth pass)
+
+This pass was dispatched twice over the same event: review `Ursa#242`
+against the merge rule, and separately, read exo's run-finished report,
+merge what is mine, close what is superseded, hand the next thing to a
+seat. Both describe the handoff the twenty-third pass above already
+answered. Checked fresh rather than re-answered: the owner's `ask`
+(board, 12:29:59Z) is still open and unanswered, and nothing this pass
+found changes either of its two questions, so it was not resent.
+
+Two things had moved since that pass's own check, both verified rather
+than taken on the newer PR's word. First, this checkout was shallow and
+narrowed to `+refs/heads/main:refs/remotes/origin/main`, the exact
+shape `docs/agents/runner-facts.md` §3 (landed in `#242`'s own diff)
+describes, and it produced a real `fatal: refusing to merge unrelated
+histories` on a straightforward ancestry check before it was fixed.
+Widened `remote.origin.fetch` and ran `git fetch --unshallow` before
+trusting any check below. Second, `#242` had been readied since the
+last pass (no longer a draft, `CLEAN`), and exo had opened a fifth
+window, `#243`, draft, claiming to subsume `#231`, `#234` and `#242`
+(and `#167` through them). On the now-complete clone, `git merge-base
+--is-ancestor` confirms `#242`'s tip is already an ancestor of `#243`'s
+current tip, even mid-run — true, but not a reason to act on `#243`
+itself, since it is still being written.
+
+`#242`'s own claim to subsume `#167`, `#231` and `#234` was checked the
+same way, not trusted: all three branch tips are confirmed strict
+ancestors of `#242`'s tip. Closed all three (`gh pr close`, each with a
+comment naming the ancestry check and pointing at `#242`), since every
+commit they carried survives there regardless of what happens to `#242`
+next. `#242` itself was not closed: it is not superseded by anything
+merged, only by a draft still in progress, and it is the specific PR
+the owner's standing ask is about. Posted one `note` to `exo`/`Ursa`
+naming the three closures and that the fourth stays put.
+
+The "hand the next thing to a seat" half of the dispatch had one real,
+previously-unactioned candidate: `skill`'s `#199` has not moved (no new
+commit) since 2026-10-15 despite HQ's own MBA advisory calling it the
+highest-leverage unmerged pull request in the portfolio, and a search
+of the board's visible history found no prior message actually
+addressed to `skill`/`Ursa` about it — only comments on the PR itself.
+Verified the conflict for real on the unshallowed clone (`git
+merge-tree`: exactly one conflict, `docs/ideas.md`) rather than trust
+GitHub's own cached `UNKNOWN` field, and sent a `handoff` naming it,
+plus the fact that this seat cannot merge the result even once clean,
+since the diff also edits `prompts/skill-extract.md` directly.
+
+## Finding — five days dark, disk full, nothing lost from the closed sprint (recorded 2026-10-23, PM fiftieth pass)
+
+**What happened.** The host's root disk filled around 2026-10-18
+19:29 UTC — Langfuse writing eighteen gigabytes of one error every
+ninety minutes, per the chair's board recovery note — and stayed down
+through the afternoon of 2026-10-23. No run of any seat, scheduled or
+message-triggered, fired anywhere in this company for roughly five
+days. This seat's first run back was woken by a `chair:hq-console`
+handoff addressed to `pm`/`Ursa`.
+
+**What it cost.** The Monday 2026-10-19 ceremony (retro, grooming,
+next sprint) did not run; this pass wrote that retro five days late
+and closed the sprint's GitHub milestone. All three of
+`sprint-2026-10-12.md`'s items had already shipped before the outage
+started (verified against `main`: the byte-identical fix, the
+`RESOLVER_IDENTIFIED` bound, `docs/security/redaction-standard.md`),
+so no planned sprint work was lost — only the ceremony that should
+have closed it on time, and five days of every seat's own standup
+cadence and open-draft progress. Four pull requests from the evening
+of 2026-10-18 (two research/skill drafts with real content and stale
+report bodies, one engineer draft with substantial unreported code,
+one exo charter edit) sat untouched for the same five days; none of
+them regressed, they simply did not move.
+
+**What did not hold up to a direct check.** The triggering handoff
+described "dozens of pull requests from Saturday" open in this
+company. `gh pr list --state open` found nine, every one dated
+2026-10-18 (a Sunday), none from Saturday the 17th. Recorded here
+because the handoff is HQ's own account and this file's standing rule
+is to check rather than take an instruction's framing on its word,
+the same way this seat has treated every other agent's self-report.
+The discrepancy may describe the wider alexandra-systems portfolio
+rather than Ursa alone; this entry speaks only for what this repo's
+own queue actually held.
+
+**Owner:** Alexandra, informed via the board reply to this handoff.
+**Status:** closed — the outage is the host's and HQ's to prevent
+recurring (Langfuse is stopped pending a disk budget per the chair's
+own note), not a defect in anything this seat's charter governs.
+
+## Finding — a silence clock this seat proposed for itself expired with nothing able to act on it, because it was never written into the file this seat reads (recorded 2026-10-24, PM seventy-eighth pass)
+
+**What happened.** An earlier pass proposed, under the company silence
+rule (pm.md §22), a "release route" that would let this seat act on a
+charter-touching merge after 48 hours of the owner's silence. The
+proposal's clock expired on 2026-10-20 ~12:30 UTC. The exo seat found,
+and this seat independently confirmed, that the proposal was never
+merged into `prompts/pm-agent.md` on `main`: `grep` for clock, silence
+route, release route, or declaration returns zero matches in this
+charter's 390 lines. A fresh PM session reads only its own charter, so
+a clock that lives in a board message or a ledger entry and nowhere in
+that file is a clock this seat has no way to know exists, let alone
+act on.
+
+**Why it did not cost anything this time.** Every charter-touching
+pull request has been waiting on the owner outright since the Tier C
+freeze opened on 2026-10-18 regardless of this clock, so nothing this
+seat should have merged went unmerged because the clock misfired.
+
+**Why it matters anyway.** The silence rule is a company standard
+(§22), not an Ursa-specific mechanism, so the same gap — a clock
+whose consequence is never written into the file the acting seat
+actually reads — can recur anywhere the rule is used. This seat is not
+fixing it here: writing the release route into its own charter would
+hand itself a merge the owner currently holds, which is exactly the
+kind of self-widened authority its own boundaries forbid even where a
+clock says it could. The exo seat is sending the general version of
+this finding to headquarters, since the silence rule's design is
+theirs.
+
+**Owner:** Alexandra, asked via the board (folded into the standing
+silence-clocks ask rather than opened as a second one).
+**Status:** open — waiting on the owner's merge of the pull request
+the original ask already named; this finding does not change what she
+needs to decide, only adds context for why the clock itself was never
+going to fire.
+
+## Finding — this seat named seven of its own pull requests as superseded and did not close one of them, for six days (recorded 2026-10-24, PM seventy-eighth pass)
+
+**What happened.** Pull requests `#313`, `#317`, `#321`, `#323`,
+`#326`, `#328`, `#332` and `#334` were seven consecutive passes of
+this seat's own standing report, each one the whole ancestor of the
+next. Every pass from the second one onward said, in its own
+description, that it "subsumed" the pull request before it. None of
+them actually closed it. The result, by the time this pass started,
+was eight open pull requests carrying the same work eight times, with
+no way for a reader of the open-PR list to tell that seven of them
+were dead weight without checking ancestry by hand.
+
+**The fix, this pass.** Closed all eight once this pass's own branch
+was confirmed (`git merge-base --is-ancestor`, checked against each
+one individually) to contain every one of them whole. This is the
+first pass in the chain that did the closing instead of only naming
+it.
+
+**Why it happened.** Nothing in this seat's charter tells it to close
+its own predecessor once a new one is open; "ship first" says to open
+a new pull request and build on the old one's tip, and the charter's
+language about subsumption ("say in your pull request which of your
+earlier pull requests this one subsumes, so the owner can close them
+as one decision") puts the closing action in the owner's hands, not
+this seat's. That is a defensible reading on a single pass. Run 78
+times in one day without anyone doing the closing, it produces exactly
+the open-PR sprawl this finding describes.
+
+**What this seat is doing about it going forward.** Closing a
+strictly-superseded pull request of this seat's own, once ancestry is
+confirmed rather than assumed, is not a merge and not a judgment call;
+treating it as routine housekeeping from this pass onward rather than
+waiting for the owner to do it eight PRs at a time.
+
+**Owner:** Alexandra, informed via this pull request's own description
+rather than a separate ask, since no decision is needed — the eight
+pull requests are closed, not merged, and nothing on `main` changed by
+closing them.
+**Status:** closed — the eight pull requests this finding names are
+closed as of this pass.
