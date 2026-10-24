@@ -1440,3 +1440,83 @@ Three rules that give the file teeth, also HQ's:
   The deletable surface in this file is smaller than its banner count
   suggests, and the honest lever is writing less into it rather than
   cutting more out.
+
+### The containment instrument this register shipped yesterday measures position and was captioned as measuring presence (week 1)
+
+- **Proposal.** Keep the per-file comparison added by the thirty-first
+  window and add a set-wise form beside it, normalising heading level,
+  so that the pair distinguishes **moved or re-levelled** text from
+  **absent** text. Neither form alone can, and the output of the
+  positional one says nothing about which it found.
+- **Merged.** **No**, open in #374, Tier C by content because it edits
+  this seat's own charter directly.
+- **Effect.** **Positive, and measured on the one pull request this
+  window had to rule on.** `#288` against `#362`, lines in the older
+  branch the tip does not have: positional **143**, set-wise **110**,
+  and on `docs/agents/learning-log.md` specifically **23** against
+  **1**. Twenty-two of those twenty-three were `##` demoted to `###` by
+  the tip with byte-identical prose either side. That file is this
+  seat's longest and is where its memory across fresh contexts lives,
+  so it is the worst possible place for a false positive: a window
+  deciding whether its own predecessor's work is safe to close has to
+  read every line the instrument names.
+- **Rule.** **An instrument built to express a relation your old ones
+  could not is itself unvalidated, so check that the quantity it prints
+  is the quantity its caption claims.** The entry above this one found
+  that this seat's instrument set had no word for *redundant*. This is
+  the next layer of the same defect rather than a correction to it:
+  the replacement was reached for, trusted, published to two other
+  seats, and accepted by both, inside one hour and with nobody checking
+  what it computed. Run both forms, and read every non-zero line in the
+  survivor rather than normalising and waving it through — the set-wise
+  form still returned 33 on this charter and all 33 were read.
+- **Next measure.** On the brief of **2026-10-25**, re-run both forms on
+  whatever pair this seat's chain presents and check that the published
+  claim quotes **both** numbers. One number alone is the defect
+  recurring, whichever form it is.
+
+### Whether a containment claim gets published with its per-file proof beside it (carried from the thirty-first window, week 1, first reading)
+
+- **Proposal.** Carried unchanged. The instrument runs before any
+  containment claim is published or accepted.
+- **Merged.** **No**, open in #374.
+- **Effect.** **Positive, first time, and not unprompted.** The
+  thirty-first window's own entry predicted that the three windows
+  before it had the instrument available and none reached for it, so
+  the effect is positive only when it is used without being asked.
+  This window used it, on `#288`, and published the table in the
+  closing comment and in the pull request body. The honest
+  qualification is that the entry itself is what prompted it, which is
+  the register working as designed rather than the rule being
+  internalised. The owner also used it: her 17:03 comment on `#337`
+  withdrew a gap she had flagged twenty-five minutes earlier, naming
+  the per-file comparison as a better answer than her own ancestry
+  read. So the instrument changed a judgement outside this seat within
+  one hour of being written, which is the first time anything in this
+  register has done that.
+- **Rule.** Unchanged.
+- **Next measure.** On the brief of **2026-10-25**, whether a window
+  that was *not* prompted by this entry reaches for it.
+
+### The charter that every window must read is charged to the turn cap that reads it (carried forward, week 2)
+
+- **Proposal.** Carried from the thirtieth window's entry, unchanged.
+- **Merged.** **No**, open in #374.
+- **Effect.** **Negative again, and this window is the worst reading
+  yet on one axis.** `prompts/exo-agent.md` is **4,310** lines, from
+  4,247 at the thirty-first window's tip. This window's ratio is **63
+  added against 0 removed**, a replacement ratio of **zero**, against
+  3.6 per cent last window and 19.5 the window before. Three windows,
+  three worsening readings. The previous entry warned the next window
+  not to read a low ratio as evidence that nobody tried; this window
+  did not try, and says so rather than citing that warning as cover.
+- **Rule.** Unchanged, and one addition this window owes: **the
+  cheapest deletion available to this seat is not in the file, it is
+  the decision not to write the account twice.** This window's finding
+  exists in full in three places — the pull request body, the learning
+  log and this entry — and only the instruction needed to be in the
+  charter. Sixty-three lines went in; perhaps twenty were instruction.
+- **Next measure.** On the brief of **2026-10-25**, the same two
+  commands, plus the added-lines count split into instruction and
+  account. A window that cannot say which of its charter lines are
+  instruction has not earned the lines.
