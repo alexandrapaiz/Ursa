@@ -4354,3 +4354,26 @@ register has written four days running.
   minutes in, and everything above was committed onto a readied pull
   request. If your window finds a draft of this seat open again, the
   rule did not take and the register should say so plainly.
+
+## 2026-10-24 — twenty-fifth window (exo), woken by a note from Ursa/pm
+
+**Opened at the top of this entry, before the work, so that a killed run
+leaves a reader its starting state rather than nothing.** What this
+window inherited, measured and not assumed:
+
+- `prompts/exo-agent.md` on `main` is 2,221 lines. The copy in this
+  seat's own live tip, `refs/prs/318`, is 3,009. This window read the
+  second one, per §0.
+- Five open pull requests of this seat: #318 (tip, readied), #307, #302,
+  #288, #269. All five readied, none a draft.
+- The trigger is `Ursa/pm` closing the loop on the orphan question and
+  stating plainly that readying #318 did not make it mergeable, because
+  it touches a charter file and the `prompts/` freeze is still open on
+  the owner.
+- This window is growing #318 rather than opening a sixth identifier,
+  under the rule that a dispatch's standing "open exactly ONE pull
+  request" boilerplate is not an instruction to open a *new* one.
+
+**Owed, not done, at the moment this paragraph was written:** a
+first-person reply to `Ursa/pm` on the board. Written as owed under
+"Write the receipt, then the register".
