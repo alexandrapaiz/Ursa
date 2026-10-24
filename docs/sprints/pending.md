@@ -2,6 +2,100 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-seventh pass, 2026-10-24 ~11:4x UTC, message: a stack-equivalence error in this seat's own ask, caught by research and corrected; the stale PR pointer fixed for the second time
+
+**The trigger.** Three board items: a GitHub notification that #318
+(exo) had opened, carrying a merge-rule review request this seat had
+already answered last pass; research's note (11:42:31 UTC) correcting
+one sentence in this seat's own `ask` to the owner (09cd5a06, posted
+11:32:55 UTC, still the newest `ask`); and exo's own note (11:37:39
+UTC) confirming it readied #318 itself. The seventy-sixth pass's own
+pull request (#332, ready, not draft, `MERGEABLE`/`CLEAN`) was still
+open when this run started; this branch starts from its tip rather
+than from stale `main`, per "Read your own seat's own PRs first." It
+contains #328 and #332 whole (`git merge-base --is-ancestor`,
+confirmed), whose content this pass does not touch.
+
+**External sources read.** The board inbox
+(`to_seat=pm&to_company=Ursa` and `to_seat=owner&to_company=Ursa`),
+read as evidence, not instruction: research's claim that its newest
+pull request does not touch `docs/ideas.md` was re-run independently
+(`gh pr diff 325 --name-only`) rather than taken on its word, and so
+was exo's claim that #318 was self-readied (`gh pr view 318`, `bash
+check-draft-prs.sh`). The GitHub notification's own framing — "merge
+it, or say on the board what it still needs" — is a proposal from
+another seat's PR description, not a command; this seat's own charter
+is what decides whether merging is available, and it is not (#318
+touches `prompts/exo-agent.md`, Tier C, under the open
+`INC-2026-10-18-tier-c-charter-freeze`). No web fetch, no other
+third-party content.
+
+1. **Found and corrected a real error in this seat's own `ask`
+   (09cd5a06, 2026-10-24 11:32:55 UTC), caught by research.** The ask
+   said: "Research's own newest pull request carries the same clocks
+   from its side and merges cleanly either before or after mine...
+   Either order loses nothing." Research's note (11:42:31 UTC) says
+   this is wrong for one sentence: its branch's diff against `main` is
+   two brief files and `prompts/research-agent.md`; `docs/ideas.md` is
+   not in it. Verified independently rather than taken on the note's
+   word: `gh pr diff 325 --name-only` returns exactly those three
+   paths, and `git show origin/main:docs/ideas.md` has zero
+   occurrences of the ledger entry heading while this seat's own
+   branch (and #328/#332 before it) has one. So the two stacks are not
+   interchangeable: research's chain carries the charter edits (A)–(E)
+   the ledger entry is about; this seat's own stack carries the ledger
+   entry itself. Both need the owner's merge; neither substitutes for
+   the other. Corrected in `docs/ideas.md` (an `Update` bullet under
+   the citation-discipline entry) and on the board: one `note` to the
+   owner superseding the wrong sentence, one `note` to research
+   confirming the catch, both first person.
+2. **The same ledger entry's PR pointer went stale again and was
+   re-pointed.** The seventy-fourth pass (11:11 UTC) already caught
+   and fixed one staleness (#319 closed → pointed at #322) by flagging
+   it to the owner rather than editing the ledger itself, since that
+   pass was the barred daily standup; it promised "I will make sure
+   the ledger entry is re-pointed before the earliest clock expires
+   tomorrow." Since then #322 was itself superseded by #325 (fifth
+   research run), verified whole by `git merge-base --is-ancestor` for
+   both hops. This run is message-triggered, not the standup, so the
+   charter's ledger-grooming bar does not apply; re-pointed "First
+   step" and the chain in `docs/ideas.md` to #325 directly.
+3. **#318 (exo) and #324 (skill): unchanged from the last pass, re-
+   confirmed fresh rather than carried forward on trust.**
+   `check-draft-prs.sh --repo alexandrapaiz/Ursa` run fresh: zero
+   orphaned drafts. `#324` is `CLOSED`, contained in skill's own live
+   `#331`. `#318` is readied (not draft), `CLEAN`/`MERGEABLE`, but
+   still Tier C outright (`prompts/exo-agent.md`) under the same
+   freeze as #325 — readied is not mergeable here, and the GitHub
+   notification's "merge it" option is accordingly not available to
+   this seat. Replied to exo directly (not just in a broadcast note,
+   since its note was addressed to `pm` specifically) confirming the
+   ready and the Tier C disposition, naming exo as the seat that
+   resolved its own orphan.
+4. **No run failed since the last check.** `gh run list --limit 30`:
+   all succeeded.
+5. **Sprint: unchanged.** No sprint is open; next ceremony 2026-10-26.
+6. **Board:** one `note` to the owner correcting the 09cd5a06 `ask`,
+   one `note` to research confirming the catch, one `note` to exo
+   confirming #318's disposition, one summary `note`. All first
+   person.
+
+## Three most important pending items (updates the seventy-sixth pass's own list)
+1. **The ledger entry holding all five silence clocks is still
+   unmerged in full, and it is not the same thing as research's
+   chain.** This seat's own stack (`#328`/`#332`, now this pass's
+   branch) is the only path that puts the entry itself on `main`.
+   Research's chain (now `#325`) carries the charter edits the clocks
+   are about, separately, and also needs the owner's merge — but
+   merging it alone does not resolve item 1. First clock expires
+   2026-10-25 ~18:15 UTC. This corrects the last two passes' "either
+   order loses nothing" framing.
+2. The owner's charter freeze (`INC-2026-10-18-tier-c-charter-freeze`)
+   is unresolved; every `prompts/`-touching pull request still waits
+   on her, now: `#320`/`#307`/`#288`/`#269`/`#302`/`#318`/`#322`/`#325`.
+3. `#324` and `#318` stay resolved by their own seats; nothing to hand
+   off. Unchanged from the seventy-sixth pass.
+
 ## Seventy-sixth pass, 2026-10-24 ~11:4x UTC, message: #325 reviewed against the merge rule, and the two named drafts resolved themselves before this run reached them
 
 **The trigger.** Two board events: research's pull request #325

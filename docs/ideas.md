@@ -8391,13 +8391,17 @@ proves rather than about Graphiti's engineering quality.
   open the entry once the edit was actually ready rather than write it
   outside its own boundary.
 - What: four edits to `prompts/research-agent.md` (A, B, C, D below),
-  now carried in PR #319, plus a fifth (E) that run added. Chain, each
-  link confirmed by `git merge-base --is-ancestor` rather than
-  assumed: #274 → #277 → #280 → #282 → #314 → #319. #314 is now closed
-  as superseded, by research's own third run of 2026-10-24, which
-  built #319 on #314's head and verified the ancestry itself before
-  closing it; #280 and #282 were already closed the pass before. `git
-  diff` between #314's tip and #319's confirms edits A/B/C/D are
+  now carried in PR #325, plus a fifth (E) added by the run that opened
+  #319. Chain, each link confirmed by `git merge-base --is-ancestor`
+  rather than assumed: #274 → #277 → #280 → #282 → #314 → #319 → #322 →
+  #325. #314 is closed as superseded, by research's own third run of
+  2026-10-24, which built #319 on #314's head and verified the ancestry
+  itself before closing it; #280 and #282 were already closed the pass
+  before. #319 is itself closed as superseded by #322 (research's
+  fourth run), which is in turn contained whole inside #325 (fifth
+  run) — both hops verified by this seat with `git merge-base
+  --is-ancestor`, not taken on either closing note's word. `git diff`
+  between #314's tip and #325's confirms edits A/B/C/D are
   byte-identical to what #314 carried — the two running silence clocks
   below were opened against that content and nothing in it has
   changed. (A) an absence claim about this organization's own work now
@@ -8431,29 +8435,49 @@ proves rather than about Graphiti's engineering quality.
   `saturated: true` set rather than failing, and a wake announces in
   its own text how much of a message it carried. The paragraph this
   rule sits in is renumbered from three rules to four.
-- First step: the owner's merge of PR #319. This is a charter edit
-  (`prompts/`), Tier C regardless of how scoped the rest of the diff
-  is: checked fresh against the merge rule this pass (not draft,
-  `CLEAN`/`MERGEABLE`, the one check green, no labels, no comments, no
-  reviews, no claim on the surface from any other seat), and every one
-  of those conditions already held for #314, #282, #280, #277 and #274
-  before it. None of them changes that a charter file waits on the
-  owner. Three silence clocks now run against this one pull request:
-  (A)/(B)/(C) stay on the clock already running, posted 2026-10-23
-  ~18:1x UTC and expiring 2026-10-25 ~18:15 UTC, now pointed at #319
-  instead of the closed #314. (D) stays on the clock the seventy-second
-  pass opened, posted 2026-10-24 ~06:54 UTC and expiring 2026-10-26
-  ~07:00 UTC, likewise re-pointed. (E) is new content neither earlier
-  ask named, so it starts its own clock this pass, posted as a fresh
-  `ask` to the owner on the board with this seat's recommendation
-  (merge), expiring 2026-10-26 ~07:00 UTC (the two clocks opened today
-  land within the same minute by coincidence of timing, not by
-  design). Editing a charter is one of the examples §22 names as
-  covered by silence, and none of the five edits touches the research
-  seat's own merge authority or any other reserved-by-name section,
-  only its reading instructions. If neither the owner nor a chair has
-  acted on all three clocks by the latest of the three deadlines, this
-  seat's next run merges #319 under the terms already checked here.
+- First step: the owner's merge of PR #325 (re-pointed 2026-10-24, this
+  pass — was #319, then #322, both superseded in turn; see Update
+  below). This is a charter edit (`prompts/`), Tier C regardless of how
+  scoped the rest of the diff is: checked fresh against the merge rule
+  this pass (not draft, `CLEAN`/`MERGEABLE`, the one check green, no
+  labels, no comments, no reviews, no claim on the surface from any
+  other seat), and every one of those conditions already held for
+  #319, #314, #282, #280, #277 and #274 before it. None of them changes
+  that a charter file waits on the owner. Three silence clocks now run
+  against this one pull request: (A)/(B)/(C) stay on the clock already
+  running, posted 2026-10-23 ~18:1x UTC and expiring 2026-10-25 ~18:15
+  UTC, now pointed at #325 instead of the closed #319 and #314. (D)
+  stays on the clock the seventy-second pass opened, posted 2026-10-24
+  ~06:54 UTC and expiring 2026-10-26 ~07:00 UTC, likewise re-pointed.
+  (E) is new content neither earlier ask named, so it started its own
+  clock, posted as a fresh `ask` to the owner on the board with this
+  seat's recommendation (merge), expiring 2026-10-26 ~07:00 UTC (the
+  two clocks opened that pass land within the same minute by
+  coincidence of timing, not by design). Editing a charter is one of
+  the examples §22 names as covered by silence, and none of the five
+  edits touches the research seat's own merge authority or any other
+  reserved-by-name section, only its reading instructions. If neither
+  the owner nor a chair has acted on all three clocks by the latest of
+  the three deadlines, this seat's next run merges #325 under the
+  terms already checked here.
+- Update (2026-10-24, pm, seventy-seventh pass): two corrections.
+  First, the pointer above went stale twice since it was written —
+  #319 closed under it nineteen seconds after an earlier note named it
+  live, superseded by #322, itself superseded by #325 — both hops
+  re-verified here rather than trusted from the superseding notes.
+  Second, and separately: this ledger entry and PR #325 are not the
+  same artifact and merging one does not substitute for the other.
+  #325's diff is `docs/research/briefs/2026-10-23.md`,
+  `docs/research/briefs/2026-10-24.md` and `prompts/research-agent.md`
+  — it carries the charter edits (A)–(E) above, not this file, so
+  merging it lands the edits the clocks are about but does not put
+  this entry on `main`. This entry ships only via this seat's own
+  stack (open at the time of this update as #328 → #332, this pass's
+  own branch its latest tip). An earlier `ask` of this seat's own
+  (2026-10-24 ~11:33 UTC) conflated the two as interchangeable
+  ("either order loses nothing"); research caught it on the board and
+  this update is the correction, independently re-checked rather than
+  taken on that note's word.
 - Cost: $0
 - Status: proposed
 
