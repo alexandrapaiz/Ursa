@@ -105,7 +105,21 @@ const settleCadence = await page.evaluate(() => new Promise((resolve) => {
   }
   requestAnimationFrame(tick)
 }))
+// Which renderer produced those frames, because it decides what the
+// number means. A sandbox with no GPU gives chromium SwiftShader, Google's
+// CPU rasteriser, and a page with a WebGL layer then runs at a tenth of
+// its real speed. A frame-rate number taken there is a fact about the
+// host. Recorded in the output so no later run can read it as a fact
+// about the product.
+const renderer = await page.evaluate(() => {
+  const c = document.createElement('canvas')
+  const g = c.getContext('webgl') || c.getContext('experimental-webgl')
+  const dbg = g && g.getExtension('WEBGL_debug_renderer_info')
+  return dbg ? g.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : (g ? 'webgl, renderer undisclosed' : 'no webgl')
+})
+const software = /swiftshader|llvmpipe|software/i.test(renderer)
 process.stderr.write(`frame clock settled at ${settleCadence.toFixed(1)}ms/frame\n`)
+process.stderr.write(`renderer: ${renderer}${software ? '  <-- SOFTWARE: frame rates here are the host, not the product' : ''}\n`)
 
 // A frame sampler that lives on the page and records whatever it is
 // pointed at. `performance.now()` rather than frame counting, because a
@@ -261,7 +275,7 @@ for (const c of candidates.slice(0, MAX)) {
 writeFileSync(OUT, JSON.stringify({
   url: URL_, selector: SELECTOR, viewport: [WIDTH, HEIGHT],
   sampledAt: new Date().toISOString(), phaseMs: PHASE_MS,
-  frameClockMs: +settleCadence.toFixed(2), results,
+  frameClockMs: +settleCadence.toFixed(2), renderer, softwareRenderer: software, results,
 }, null, 1))
 console.log(`${results.length} elements sampled into ${OUT}`)
 await browser.close()

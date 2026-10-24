@@ -148,11 +148,22 @@ export function RecordAtAddress({ initial }: { initial: string }) {
         }}
         className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5"
       >
+        {/* The filled example the placeholder used to carry,
+            `pages/you/your-repo/your-repo-2026-10-18-abc1234`, needs 336px of
+            its own monospace, and the field is 326px wide at a 390 viewport
+            and 256px at 320. So a phone silently cut two characters off it
+            and a smaller phone cut twelve, leaving `...your-repo-2026-1`. A
+            placeholder cannot scroll and gives no sign that it was trimmed,
+            so the reader's only example of the format was a malformed
+            address with nothing saying so, on the page whose whole argument
+            is that an address is exact. The schematic below is the one this
+            same component already prints in AddressForms, so the two now
+            agree, and at 32 characters it fits the narrowest field. */}
         <input
           type="text"
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
-          placeholder="pages/you/your-repo/your-repo-2026-10-18-abc1234"
+          placeholder="pages/<owner>/<repo>/<record-id>"
           aria-label="a record address"
           spellCheck={false}
           autoCapitalize="off"

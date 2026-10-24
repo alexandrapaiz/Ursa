@@ -190,14 +190,25 @@ function analyse(frames, key) {
     const scored = Object.entries(CURVES)
       .map(([name, c]) => ({ name, ...scoreCurve(c) }))
       .sort((a, b) => a.rms - b.rms)
-    out.monotonic = { bestFit: scored[0], runnerUp: scored[1] }
+    const inside = pts.filter(([t]) => t >= t0 && t <= t0 + scored[0].durationMs).length
+    out.monotonic = { bestFit: scored[0], runnerUp: scored[1], samplesInDuration: inside }
+    // A curve fitted to four points is a curve drawn through four points.
+    // Eight is the floor at which out-quad and out-cubic become separable
+    // at all, and below it the honest answer is that the capture cannot
+    // say. An earlier pass of this seat reported `ease-in over 260ms` off
+    // three samples of a starved frame clock; this is the guard against
+    // doing it again.
+    if (inside < 8) out.monotonic.unresolved = `only ${inside} samples inside the fitted window at ${out.cadenceMs}ms/frame`
   }
   return out
 }
 
 // ---- report --------------------------------------------------------------
 console.log(`# ${data.url}`)
-console.log(`sampled ${data.sampledAt} at ${data.viewport.join('x')}, ${data.phaseMs}ms per phase\n`)
+console.log(`sampled ${data.sampledAt} at ${data.viewport.join('x')}, ${data.phaseMs}ms per phase`)
+if (data.renderer) console.log(`renderer ${data.renderer}`)
+if (data.frameClockMs) console.log(`frame clock ${data.frameClockMs}ms${data.softwareRenderer ? '  (SOFTWARE RENDERER: frame rates are the host, not the product)' : ''}`)
+console.log('')
 
 for (const r of data.results) {
   if (ONLY != null && r.i !== ONLY) continue
@@ -232,9 +243,11 @@ for (const r of data.results) {
     const head = `   ${phase.padEnd(5)} ${a.key.padEnd(13)} ${String(a.from).padStart(7)} -> ${String(a.to).padStart(7)}  peak ${String(a.peak).padStart(7)} @${String(a.tPeakMs).padStart(6)}ms  overshoot ${String(a.overshootPct).padStart(6)}%  crossings ${a.crossings}  settle ${String(a.settleMs).padStart(5)}ms  cadence ${a.cadenceMs}ms`
     console.log(head)
     if (a.spring) console.log(`         SPRING  zeta ${a.spring.dampingRatio}  f ${a.spring.naturalFreqHz}Hz  period ${a.spring.periodMs}ms  stiffness ${a.spring.stiffness}  damping ${a.spring.damping}`)
-    if (a.monotonic) {
+    if (a.monotonic?.unresolved) {
+      console.log(`         CURVE   UNRESOLVED: ${a.monotonic.unresolved}`)
+    } else if (a.monotonic) {
       const b = a.monotonic.bestFit, r = a.monotonic.runnerUp
-      console.log(`         CURVE   ${b.name} over ${b.durationMs}ms, starting ${b.startMs}ms after the pointer (rms ${b.rms}); then ${r.name} over ${r.durationMs}ms (rms ${r.rms})`)
+      console.log(`         CURVE   ${b.name} over ${b.durationMs}ms, starting ${b.startMs}ms after the pointer (rms ${b.rms}, ${a.monotonic.samplesInDuration} samples); then ${r.name} over ${r.durationMs}ms (rms ${r.rms})`)
     }
   }
   console.log('')
