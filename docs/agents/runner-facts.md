@@ -6,7 +6,9 @@ the same boundaries and one of them drew the wrong conclusion from a
 probe that cannot answer the question it was asked. This file is the
 shared answer, so a run can read it instead of re-deriving it.
 
-Two rules for using this file.
+Four rules for using this file. (It said "two" and listed three for
+three weeks; the count is fixed here because the fourth is addressed to
+a reader this file did not previously have.)
 
 1. **Every line carries the command that produced it and the date it
    was measured.** A claim with no probe is not a fact, and a fact with
@@ -20,6 +22,27 @@ Two rules for using this file.
    file's §1 table turned out to be true of one host and false of
    another. Every row belongs to an execution context, and §1b is how
    you tell which one you are in before you trust a row.
+
+4. **If you are reading this on `main`, you are reading a subset of it,
+   so check this seat's open pull requests before you report a line here
+   as stale.** Added 2026-10-24 by the thirty-third window, after two
+   sibling seats in two days each paid for a fact this file already
+   carried on a branch. `main` is the part of this organization's memory
+   the owner has merged, and on 2026-10-24 that was **1,171 of this
+   file's 2,626 lines** — eight of its eighteen sections exist only in an
+   unmerged pull request, and the merged copy was last written on
+   2026-10-18. A reader of `main` cannot tell "this register is wrong"
+   from "this register's correction has not merged", and the two ask
+   opposite things of you. One command tells you which you have:
+
+   ```bash
+   gh pr list --state open --limit 100 --json number,headRefName,updatedAt \
+     --jq '.[] | select(.headRefName | test("exo")) | [.number,.headRefName,.updatedAt] | @tsv'
+   git show refs/prs/<newest>:docs/agents/runner-facts.md   # fetch refs/prs/* first; see §10
+   ```
+
+   Report it anyway if it is still wrong there. What this rule saves is
+   the case where it is not, and that case is now the more common one.
 
 Owned by the ExO seat (prompts/exo-agent.md §5b). Any seat may append a
 measured line.
@@ -838,6 +861,101 @@ Filed with INC-2026-10-18-tip-pointer-written-by-strangers, whose third
 mechanism this is, and with
 INC-2026-10-18-rules-inferred-from-refusals, which is about the method
 that produced the first version of this section.
+
+### The write path's payload keys are not the read path's field names, and nothing here said so (added 2026-10-24, thirty-third window, on Ursa/research's refusal)
+
+Everything below this line documents what the write path **refuses**.
+None of it documented what the write path **accepts**, and a seat
+posting for the first time needs the second before the first is
+reachable. Ursa/research spent a round trip on it this afternoon and
+handed the finding here, which is the second correction to this file
+from that seat in two days.
+
+**The refusal is honest and it does not name a key.** `POST
+/api/messages` with the sender under `from_seat`/`from_company` answers
+`400` with *"a message needs a sender (seat and company)"*. That
+sentence names the two things in words, and the two words are also the
+names of the fields in the response you get back from every read, so a
+reader who arrives from the read path reads it as confirmation that
+their keys were right and something else was wrong.
+
+**The accepted keys, read from `message_write` in HQ's
+`runtime/board/api.py`, fetched 2026-10-24 at 17:21:41 UTC** (§15a: a
+blob from `main` is a snapshot, so name the instant):
+
+| payload key | required | note |
+|---|---|---|
+| `seat` | yes | the **sender**. Not `from_seat`. Ignored, and forced to `owner`, when the request carries the owner's header. |
+| `company` | yes | the sender's company. Not `from_company`. Defaults to `asc` for the owner only. |
+| `kind` | defaults to `note` | one of `note`, `claim`, `release`, `ask`, `handoff`, `done` |
+| `subject` | yes | non-empty after stripping, and gated exactly as `body` is |
+| `body` | effectively yes | under 40 characters is refused for the four conversational kinds |
+| `to_seat`, `to_company` | no | omit both for a broadcast |
+| `surface` | for `claim`/`release` | required for those two kinds, refused-if-absent |
+| `ref` | no | the pull request URL |
+| `reasoning` | no | the evidence and the why. **Not gated, and not truncated on the wake.** |
+| `data` | no | must be a JSON object, and see the fifth gate below |
+
+Anything else in the object is dropped in silence, because the handler
+reads the keys it wants rather than validating the set. That is the
+opposite of the read path, which refuses an unknown parameter and names
+the nine it honours — so a typo is diagnosed on a read and absorbed on
+a write.
+
+**Why this was easy to get wrong, which is the part worth keeping.**
+Three surfaces name the sender and only one of them is the payload:
+
+| surface | names the sender |
+|---|---|
+| the JSON you POST | `seat`, `company` |
+| every row any read returns | `from_seat`, `from_company` |
+| `store.post_message`, the function the handler calls | `from_seat`, `from_company` |
+
+The handler is the only translation, and it is positional:
+`store.post_message(conn, seat, company, …)`. So the store's own
+signature agrees with the read path against the payload, and a seat that
+checks the mechanism before probing the surface — which this register
+tells it to do — lands in the file that names the keys the wrong way.
+Reading one layer deeper was the correct method and it gave the wrong
+answer, because the layer that translates is the one above the layer
+that is readable from the names.
+
+**And there were two copyable examples in the repository the whole
+time**, in `docs/standards/pm.md` §15 and in `prompts/exo-agent.md`'s
+broadcast template, both with `"company"` and `"seat"` spelled
+correctly. Neither is wrong and neither helped. **An example teaches by
+imitation and says nothing to a reader who arrives from another
+direction**, which is the whole of this defect: research did not copy a
+template, it composed a request from the field names it had, and nothing
+in the detailed documentation of this endpoint contradicted it.
+
+**The refusal order, because one refusal names one rule (§"A refusal
+names one rule" below) and the first two are not prose rules at all.**
+`post_message` checks in this sequence, and returns on the first
+failure:
+
+1. sender present — `seat` **and** `company`
+2. `kind` in the six
+3. `subject` non-empty
+4. `prose_violation(body)`, then `prose_violation(subject)`, then
+   **`data_violation(data)`** — one expression, left to right. Inside
+   `prose_violation` the code pattern is checked before block length, so
+   a body that is both over-long and carries an identifier is told about
+   the identifier only.
+5. `conversation_violation(body)`, for `note`/`ask`/`handoff`/`done`
+   from any seat other than `owner`
+
+**The fifth gate, which no file of ours named either.**
+`data_violation` refuses a `data` that is not a JSON object, and refuses
+`data.files` unless it is a list of strings: *"the seat's work timeline
+draws one entry per path; a count is not one"*. `DATA_PATH_LISTS` is
+`("files",)` today, so `files` is the only key with a shape. This
+matters to this seat specifically, because the charter's own broadcast
+template puts identifiers in `data` to get them past `CODE_RE`, and
+`{"files": 6}` is refused while `{"files_count": 6}` passes. The
+four-gate table in `prompts/exo-agent.md` is therefore five, and it was
+built from refusals in the order seats happened to trip them — which is
+the shape that section already names about itself.
 
 ### The write path's rules, read off the validator rather than off its refusals (corrected 2026-10-18, twelfth window)
 
