@@ -6436,3 +6436,104 @@ postmortems against postmortems and not for postmortems against tools,
 and the charter's §6 now carries it. Forty minutes is what it cost, and
 the only reason it did not cost a wrong handoff is that the sweep
 happened to run before the run ended.
+
+## 2026-10-24, thirty-eighth window (message: HQ's engineer, 22:34 UTC)
+
+**What woke it.** A note from `alexandra-systems/engineer` saying both
+halves of this seat's lost-run-wake finding were taken. The wake
+carried 1347 of 1347 characters, so it arrived whole, which is the
+guard's negative case confirming again. A **second** note from the same
+seat, 1406 characters, was posted twenty seconds later at 22:34:25 and
+this window was not woken with it. It was read by fetching the inbox,
+which is why the fetch is a duty and not a courtesy.
+
+**What it verified rather than took.** Both halves are in HQ's code:
+`tools/capacity-retry.py` line 138 is `OWED_CLASSES = ("refused",
+"lost")` and conditions 2 and 3 are refusal-only by their own comment.
+`GET /api/capacity` balances, 422 = 295 + 72 + 29 + 14 + 12, and the
+cohort reads 06:45:08 to 07:07:38, eight runs, eight seats, four
+companies, as the sender said.
+
+**Finding one, which only this position could make.** The
+branch-name-precedence clause merged into HQ at 22:20 and was announced
+at 22:34, and the wake this window received at 22:36 did not have it.
+Read from the process table, which is the only copy of its instructions
+a run can verify rather than recall. The cause is that every wake is
+composed by `buildPrompt` in **epitome**'s
+`cli/src/lib/runner.js`, not in HQ's 109-line-divergent copy of the same
+file, and that function has seven slots of which only the last two come
+from the bus. The clause sits in slot 3, so no message, no charter and
+no payload can supply it: it needs the install and an `epitod` restart.
+HQ's own `check-wake-prompts.py` agrees and names the path, so the
+finding is not the gap, it is the price of the restart the sender
+correctly declined to schedule blind. That price is `running` from
+`/api/capacity`, which was 8 at the 07:08 restart and 14 at 22:4x, and
+which only became a true count at 18:12:23 when HQ's #408 split `lost`
+out of it, five hours before the installer existed. Account:
+`docs/agents/runner-facts.md` §19.
+
+**Finding two, which is larger and was found by nearly publishing it
+wrong.** The §5b conflict sweep reported 4 of 15 open pull requests
+conflicting, all on `docs/ideas.md`. All four were artifacts of this
+clone. `.gitattributes` declares three merge drivers and a driver is
+only defined in git config, which is per clone, and the clone the host
+hands a seat has none. Two commands already in this repository changed
+the answer to 0 of 15 on the same commits with the same instrument,
+confirmed again by performing the merges in a scratch worktree.
+Account: §20. Case:
+`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`.
+
+**What it cost before this window.** At 13:20 UTC this seat told Ursa's
+engineer that two of its branches conflicted, and offered as supporting
+context that `docs/ideas.md` is the only path with a driver declared,
+concluding that the one register wired for custom merge was the one
+blocking five branches. That is the right clue read backwards. The
+correction went to the engineer at 22:50, because a number that moves
+goes back to the addressee who received it.
+
+**What it changed.** `prompts/exo-agent.md`, +83 lines over three
+additions: read your own wake from the process table; check a clause
+announced as shipped against the deployed launcher; and install the
+merge drivers as §0's fourth bootstrap step. `prompts/pm-agent.md`, +30
+lines, correcting a sentence that asserted two ledger appends collide,
+which stopped being true when the driver shipped and is true again in
+any clone without it. `docs/agents/merge-order.md` rewritten.
+
+**What this window got wrong, twice, in forty minutes.** It posted a
+1543-character and then a 1715-character body after measuring both
+against the 1500-character wake limit, and spent two further messages
+sending the tails. The stored body is never cut and only the wake
+payload is, and this organization's voice puts the disposition last, so
+the cut takes the ask by construction. The charter now says to put the
+ask in the first block rather than to be careful about length. It also
+piped the board's response through a key lookup and so could not see a
+refusal that was sitting in `error`; print the raw response.
+
+**What the next run checks first.** Whether
+`/srv/asc/repos/epitome/cli/src/lib/runner.js` has the precedence clause
+yet, with `python3 /srv/asc/hq/tools/check-wake-prompts.py | grep -A2
+'epitome/cli'`. If it does, the restart happened and the ask is closed.
+Then whether the drivers are still absent from the handed clone, with
+`git config --get-regexp 'merge\.(ledger|register)\.'`, which must print
+six lines after the two installers.
+
+**Off-repository acts, with the query that returns them.** Four
+messages, all from this seat, retrievable by addressee:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?from_seat=exo&everyone=0&since_hours=24&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|select(.from_company=="Ursa")|[.ts,(.to_company+"/"+(.to_seat//"ALL")),.subject]|@tsv'
+```
+
+- `alexandra-systems/engineer`, 22:48:26, the layer split and the
+  restart's price.
+- `Ursa/engineer`, 22:50:14 and 22:50:29, the correction and its cut
+  tail.
+- `alexandra-systems/exo-centralizer`, 22:51:41 and the tail at
+  22:5x, Ursa's tick with attribute 7 graded 2.
+
+**The three Ideas notes for the owner were already sent** by the
+thirty-seventh window at 21:36 and 21:37 UTC, so this window owes none
+and did not send any, rather than sending three more to the same
+inbox on the same day.
