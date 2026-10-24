@@ -1,106 +1,103 @@
-# Merge order — Ursa
+# Merge order
 
-Written each run by the exo seat (`prompts/exo-agent.md` §5b). Replaces
-the previous plan rather than appending to it. **Measuring the queue and
-naming the order is information for the owner; merging is hers alone.**
+Replaced every window by the ExO seat, per `prompts/exo-agent.md` §5b.
+Measured 2026-10-24, window 37, at 21:3x UTC.
 
-Every verdict below names the instrument that produced it, because a
-conflict verdict with no instrument beside it cannot be re-measured by
-the seat holding the branch.
+## The three numbers
 
-## Measured 2026-10-24, 18:2x–18:3x UTC, thirty-sixth exo window
+| | |
+|---|---|
+| open pull requests | **24** |
+| merged in the last seven days | **56** |
+| age of the oldest open | **14 h** (2026-10-24T06:32:38Z) |
 
-Clone state when these were measured, because both of this file's
-instruments lie otherwise (runner-facts §9 and §10):
-`--is-shallow-repository` answers `false`, `remote.origin.fetch` is the
-full `+refs/heads/*` glob, and `refs/prs/*` was re-fetched immediately
-before the reads.
+Open does **not** outnumber the week's merges, so the depth warning does
+not fire. Fifty-six merges against twenty-four open is the healthiest
+ratio this register has recorded, and the oldest thing in the queue was
+opened this morning. The gate is absorbing faster than the organization
+produces.
 
-**Both merge drivers installed in this clone before anything was
-measured**, because a named driver is registered per clone and a fresh
-clone has the declaration without the command, so a conflict verdict on
-`docs/ideas.md`, `docs/agents/incidents.md` or `docs/decisions.md` from
-an uninstalled clone is a claim about the clone:
+## Clone state, before any verdict below was taken
+
+Both merge drivers registered first, because a named driver resolves
+per clone and a fresh clone has the declaration without the driver:
 
 ```
 $ bash tools/ledger/install-driver.sh && bash tools/registers/install-drivers.sh
 $ git config --get-regexp 'merge\..*\.driver'
-merge.ledger.driver   node .../tools/ledger/union-merge.mjs %O %A %B %L %P
-merge.register.driver node .../tools/registers/merge-driver.mjs %O %A %B %L %P
+merge.ledger.driver    node …/tools/ledger/union-merge.mjs %O %A %B %L %P
+merge.register.driver  node …/tools/registers/merge-driver.mjs %O %A %B %L %P
 ```
 
-| | |
-|---|---|
-| open pull requests | **21** |
-| merged in the last seven days | **61** |
-| oldest open | **#316**, 2026-10-24 06:32 UTC, about 12 hours |
-| open drafts | **4**, all of them live runs (#392, #390, #387, #359) |
+The register driver is on `main` now, so the engineer's branch no longer
+has to go first, which it did in the previous two windows' plans.
 
-**The depth warning does not fire, and the trend is the right way.**
-Twenty-one open against sixty-one merged in seven days — the owner is
-absorbing work nearly three times as fast as the org produces it, and
-both numbers moved favourably since the thirty-fifth window three
-quarters of an hour ago (23 open, 54 merged). The queue is not the
-constraint. The one class of file that is — anything under `prompts/` —
-is held by the Tier C rule and not by depth.
+## Conflicts: none
 
-## Conflicts with `main`: none
-
-Instrument: `git merge-tree --write-tree --name-only origin/main
-refs/prs/<n>`, run over every open pull request in this clone, with both
-drivers installed. **21 of 21 clean.** `gh pr list --json mergeable` was
-not used and is not usable here; it returns `UNKNOWN` for most of a
-large queue and a stale `CONFLICTING` after `main` moves.
-
-| pull requests | verdict | instrument |
+| pull requests | instrument | verdict |
 |---|---|---|
-| 316, 320, 342, 348, 359, 360, 361, 369, 373, 377, 381, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392 | clean against `main` | `merge-tree --write-tree` |
+| all 24 open | `git merge-tree --write-tree --name-only origin/main refs/prs/<n>` | **24 of 24 clean** |
 
-No landing order is forced by conflicts this window. That is the first
-time in this file's history that the table has no rows to order.
+The clone was unshallowed and its refspec widened before this ran
+(§0), so no `NO SUCH REMOTE BRANCH` reading is in this table.
 
-## This seat's own chain
+## Containment: 24 pull requests are 11 decisions
 
-| | |
-|---|---|
-| live tip | **#389** (window 36) |
-| contains | **#384** by ancestry, `merge-base --is-ancestor` exit 0 |
-| left open on purpose | **#384**, because the PM published a tier-C verdict naming it and reported it to the owner in the same minute |
+Measured with `git merge-base --is-ancestor refs/prs/<contained>
+refs/prs/<tip>`, exit 0 meaning contained. **Thirteen of the
+twenty-four are already contained in another**, so eleven merges close
+the whole queue.
 
-One owner decision covers #384 and #389; **#389 is the one to merge**,
-and both pull requests say so. A second identifier exists because the
-dispatch opening every window of this seat requires exactly one new
-pull request, which is the charter's third exception and is always true
-on this host.
+| seat | chain, oldest first | tip | state |
+|---|---|---|---|
+| pm | 383 ⊂ 385 ⊂ 388 ⊂ 391 ⊂ 397 | **397** | draft, live run |
+| skill | 316 ⊂ 320 ⊂ 348 ⊂ 393 | **393** | draft, live run |
+| research | 386 ⊂ 390 ⊂ 395 | **395** | draft, live run |
+| exo | 384 ⊂ 389 ⊂ 394 | **394** | ready |
+| engineer | 387 ⊂ 396 | **396** | draft, live run |
+| frontend | 342 ⊂ 360 | **360** | ready |
+| engineer | — | **361** | ready |
+| distribution | — | **377** | ready |
+| market | — | **369**, **373**, **381** | ready |
 
-**New this window: the containment instrument has an exit status.**
-`tools/stack/absent-text.py <old> <tip>` scores coverage — matched
-characters over the length of the old line — and exits 0 when nothing in
-the old branch is `rewritten`, `absent` or `at-risk` in the tip. Readings
-taken this window, which is how any future close in this lane should be
-justified:
+**Market is the one seat whose three open pull requests contain none of
+each other.** That is not a defect on its face, three independent pieces
+of work is a legitimate shape, but it is the only seat in the queue for
+which the count and the decision count are equal, and it is worth the
+PM's eye.
 
-| pair | reading | instrument |
-|---|---|---|
-| #374 → #389 | exit 0, nothing to read | `absent-text.py` (ancestor, degenerate) |
-| #378 → #389 | exit 0, nothing to read | `absent-text.py` (ancestor, degenerate) |
-| #382 → #389 | exit 0, nothing to read | `absent-text.py` (ancestor, degenerate) |
-| #288 → #389 | charter paragraphs rewritten, all read; `merge-order.md` `replaced` and not enumerated | `absent-text.py` |
-| #337 → #389 | out-of-lane files `elsewhere`, carried by 73 other refs; in-lane text held | `absent-text.py` |
+## The order, simulated rather than guessed
 
-**Do not read `merge-tree`'s conflict count as divergence between two
-branches of this seat.** It returns the size of this seat's file set, so
-six is what it returns when nothing is unmerged and six is what it
-returns when everything is.
+Performed in sequence in a detached scratch worktree off `origin/main`,
+with both drivers registered. Every step is a merge that was executed:
 
-## Standing, unchanged from the previous plan
+```
+377  MERGED CLEAN   distribution, the vendored pm.md re-vendor
+361  MERGED CLEAN   engineer
+360  MERGED CLEAN   frontend
+369  MERGED CLEAN   market
+373  MERGED CLEAN   market
+381  MERGED CLEAN   market
+394  MERGED CLEAN   exo, this window's tip
+```
 
-- **Anything under `prompts/` is Tier C**: the owner merges it, not the
-  PM (`docs/standards/pm.md` §10, and the §21 amendment reserving a
-  change to a seat's own authority). #389 edits this seat's charter, so
-  it waits on her.
-- **Never delete the branch of a pull request closed as superseded.**
-  "Contained in the tip" is only as durable as the tip, and the tip is
-  unmerged by definition. That rule earned its keep again this window:
-  the only reason a 123-line draft of the PM seat's could be checked at
-  all is that the branches carrying it still exist.
+Seven of seven, no conflict at any step. The four draft tips (393, 395,
+396, 397) are excluded because they belong to runs that were still live
+when this was measured and GitHub refuses to merge a draft at all. They
+enter the order at whatever position their own runs ready them in; none
+of them conflicts with `main` as it stands.
+
+## What is held, and by what
+
+**`394` is Tier C and waits on the owner.** It edits
+`prompts/exo-agent.md` directly. Ursa's PM has confirmed the same
+reading twice today, most recently at 18:08:31 UTC against `384`, and
+its own charter still carries no copy of the silence-route release that
+would let it merge a charter pull request on its own. That is the one
+predicate in an otherwise working gate, and it is recorded in
+`prompts/exo-agent.md` §5 rather than re-filed here.
+
+**`384` and `389` stay open deliberately.** Both are contained in `394`
+and both sit inside an open ask to the owner about their own diff's
+contents, so the own-PRs rule's first exception keeps them standing and
+this register names the tip instead: **the decision moves to 394**.
