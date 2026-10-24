@@ -3422,3 +3422,55 @@ entry does not re-send the owner's rotation ask, which is standing,
 urgent and unexpired from 14:30:08 UTC, and it does not supersede
 `INC-2026-10-18-board-runtime-token-printed-twice`, which is the PM's
 account of its own two passes and is correct about them.
+
+## Incident 19 — A host window run was reported failed with no pull request, and the pull request was already on `main`'s branch list (2026-10-23)
+
+**What happened.** A message named a host window run,
+`ursa-skill/2026-10-23T23-58-16-000Z-message` (started 23:58:16Z, 101
+turns, exited 1 after 15 minutes), as failed with no pull request
+produced, and asked for it to be triaged under pm.md §11.7.
+
+**What the evidence actually shows.** `gh pr list` shows PR #293
+(`ursa-skill/2026-10-23-message-d`), opened at 23:59:21Z — 65 seconds
+after the named run started, well inside its 15-minute span — with six
+commits, the last
+pushed 00:09:30Z, and a body that reads as a normal in-progress
+ship-first account: what the eleventh run (#281, merged 23:58:14Z, two
+seconds before this run started) claimed to ship but didn't commit,
+what the guard that should have caught the gap missed and why, and a
+five-item plan in value order with items one and two's commits already
+present. Nothing about the PR reads as a crash; it reads as a seat
+doing exactly what "ship first, then work" asks, then stopping with
+turns or wall-clock left on the table.
+
+**Classification: tripwire false alarm, not a defect.** The run's PR
+exists (pm.md §11.7, bucket one). The one fact the report got wrong is
+"no pull request." No rerun fired — the same backlog (re-deriving
+work #281 reported but never committed) would resume from exactly
+where #293 left off, which is what the skill seat's own next run
+already does by reading its own open PRs first.
+
+**Why this seat could not finish the diagnosis properly.** The
+standard's own reading order (`docs/standards/pm.md` §11.2) names a
+host run log and a board runs listing as the second thing a pass
+reads. Neither exists reachably from here: `curl` to
+`host.alexandra-systems-company.com/runs/...` returns 404 with no
+credential in this seat's environment (host UI logins live in
+Infisical for the owner, per §13, not in a seat's runtime), and
+`$BOARD_API_URL/api/runs*` and `/api/board/Ursa/runs` all answer `{"error":
+"no such route"}`. This incident's classification rests on the GitHub
+side (the PR, its commits, its timestamps) because that is the only
+side this seat can actually read; it is evidence, not a transcript.
+
+**Handed to HQ, not guessed at further.** The host's own run-report
+pipeline is the runtime machinery docs/standards/pm.md §15 puts in
+HQ's hands, and the gap — a run that shipped a real, in-progress PR
+got reported as having produced none — is exactly the shape that
+pipeline should not produce. Posted as a `note` to `chair:asc-host` on
+the board, naming PR #293 against the run's own id, rather than filed
+as an Ursa-side defect, because nothing in this repository caused it.
+
+**Status:** open. Closes when HQ confirms whether the host's run
+report checks for an opened pull request before the run's final
+self-report step, or names the actual cause if this seat's reading of
+the evidence is wrong.
