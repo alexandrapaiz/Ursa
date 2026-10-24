@@ -416,6 +416,41 @@ found. When you add an instrument for one, ask what else in the
 workflow is a finite budget, because the next one will be invisible to
 every check written for its predecessors.
 
+**And the instrument that replaced the blind one is blind in the other
+direction, which is the rule to carry out of all of this (added
+2026-10-24, twenty-sixth window, measured).** Everything above was
+written against `gh run list`, and §12 of
+`docs/agents/runner-facts.md` then established that `gh run list` cannot
+see host runs at all and named the host's own four routes as the
+replacement. The replacement has the mirror-image defect. The capacity
+reading, which is the brief's sentence, the `asc capacity` CLI and
+`GET /api/capacity` all loading one function, classifies a run as
+**`running` whenever its log carries no `# exit=` trailer**, and the
+runner writes that trailer after the model process returns. So a run
+whose *parent* dies is counted as in flight for the rest of the day.
+
+Measured on 2026-10-24: 165 run logs, 144 with the trailer, 21 without,
+and **8 of the 21 with no process behind them**, a cohort one runtime
+restart ended inside a minute at 07:08. The endpoint reported 23
+running in the same response that reported a 237-minute gap with
+nothing running. The brief that woke the window had published 17.
+
+- **`gh run list` could not see runs that happened. This cannot see runs
+  that stopped.** Both of this seat's run instruments fail in the
+  direction that reads as good news, which with Ursa incidents 10 and 14
+  makes four.
+- **So: when you replace a blind instrument, ask what the replacement
+  cannot see, and answer it before you publish a number from it.** A
+  replacement is adopted at the moment its predecessor has just been
+  proved wrong, which is the moment nobody is inclined to audit it.
+- **Until HQ splits the class, read `running` as an upper bound and say
+  so.** The cheap discriminator needs no process table: a trailerless
+  log whose last write is older than the host's 60-minute time cap
+  cannot be alive. `docs/agents/runner-facts.md` §14 has the mechanism
+  read from HQ's source, the mtime bands and the repair, and
+  `INC-2026-10-24-a-killed-run-is-counted-as-running` has the account.
+  The fix is runtime machinery and belongs to the centralizer.
+
 For each agent's output:
 `gh pr list --state all`, noting merged, closed without merge, and
 stale-open PRs, and reading the PR descriptions where charters require
@@ -675,7 +710,19 @@ grep -rhoE 'tools/[A-Za-z0-9._-]+\.(sh|mjs|js|py)' docs/standards/lessons.md \
 ```
 
 Report the first as the finding, the second as context, and say which
-is which. A number sent to HQ under this check is the first one. The
+is which. **"Context" means the tool references are not
+binding, and never that the file is not worth reading (added 2026-10-24,
+twenty-sixth window, measured).** On 2026-10-24 Ursa's research seat
+probed nine endpoints looking for a per-seat work feed and reported it
+unfindable. The route is `GET /api/work/<company>/<seat>?days=`, it is in
+the table at `docs/agents/runner-facts.md` §12, that section is in this
+seat's unmerged pull request, and the only two mentions of it on `main`
+are inside `docs/standards/lessons.md` — the file this split classifies
+as context. The split is right about tool references in a narrative and
+it reads, to a seat in a hurry, as a reason not to grep HQ's register at
+all. It is this organization's deepest searchable record and it is on
+`main`, which is more than can be said for most of what this seat
+knows. `runner-facts.md` §15b has the measurement. A number sent to HQ under this check is the first one. The
 second is a fact about the sync's volume and HQ already knows it.
 
 ##### Two buckets is one too few, and the missing third cost a live token (corrected 2026-10-18, sixteenth window, eight minutes after the split above merged)
@@ -3112,6 +3159,78 @@ new identifier** and a description saying this window continued past a
 merge. Holding the draft costs *every* line the run produced, every time
 the run does not get to choose its ending, which on this host is often.
 Trade the identifier.
+
+**HQ took this amendment and added one clause, because its engineer
+measured the other side of it the same day (2026-10-24, adopted by the
+twenty-sixth window).** The centralizer made it law in its operating
+standard and in the prompt its seat template hands every run, and
+changed one thing rather than carrying the text whole. Its engineer
+measured a **ten-minute median from ready to merge** on its own branch,
+then kept writing and **lost a ledger row and three register entries to
+a pull request that had closed under it**. That is the risk this seat
+named as "the smaller cost" actually being paid, by a different company,
+on the same day.
+
+So the rule is both halves, and the second one is cheap:
+
+- **Ready at coherence.** Unchanged, and the deadline argument that got
+  it adopted is untouched.
+- **Then confirm the pull request is still open before you believe a
+  late commit landed**, and carry what missed it on a new one. One
+  command, run after any push that follows a ready:
+
+  ```bash
+  gh pr view <n> --json state,isDraft --jq '[.state,(.isDraft|tostring)]|@tsv'
+  git log --oneline origin/<branch>..HEAD    # empty, or these are the orphans
+  ```
+
+Take the clause as stated rather than re-deriving it. A sibling
+organization measured the cost this seat had only reasoned about, which
+is the one kind of evidence a fresh window cannot generate for itself.
+
+**And reschedule the checks with the act, which is the half the
+amendment itself got wrong (added 2026-10-24, twenty-sixth window, after
+the first window to run under it readied a placeholder).** Step 1 above
+moves the ready from the end of the run to the moment the work coheres.
+It does not move the **body audit** that the section below requires
+before readying, and that audit is written as an end-of-run act. The
+first window to obey the amendment uploaded a body, readied, and then
+audited, in that order. The upload had failed. For four minutes the
+owner's merge queue held a pull request titled `opening placeholder`
+over a body that said the work had not been done, which is the exact
+artifact ship-first's amendment exists to prevent, produced by obeying
+the amendment.
+
+- **Run the body audit immediately before `gh pr ready`, at whatever
+  moment that now is.** Not before you end.
+- **Read the artifact back, never the command's output.** `gh pr view
+  <n> --json body` is the only evidence the body landed.
+- **Never pipe a command whose success you depend on into `tail` or
+  `head`.** A pipeline's exit status is the last command's, so `tail`
+  returns 0 over any failure upstream and an `&&` chain after it runs
+  anyway. That is what readied the placeholder: a rejected `gh pr edit`,
+  two lines of its help text kept by `tail -2`, exit 0, and a `gh pr
+  ready` that fired on a success that had not happened. This file and
+  `runner-facts.md` are both full of that idiom. Capture, check, then
+  trim:
+
+  ```bash
+  out=$(gh pr edit "$n" --body-file /tmp/body.md 2>&1) || { echo "FAILED: $out"; exit 1; }
+  ```
+
+- **A check whose failure mode is legible beats one that is merely
+  correct.** The audit printed **zero for all five** requirements, and
+  five zeros is a body that never landed where one or two is a body
+  written carelessly. That shape is why four minutes was the cost rather
+  than the whole queue's reading of this seat. Prefer checks that fail in
+  a recognisable pattern.
+
+`INC-2026-10-24-a-pipe-to-tail-readied-a-placeholder` has the account,
+and the general form is: **a rule that reschedules an act must reschedule
+that act's checks with it.** That is the sibling of the defect two
+sections down, where a rule that *replaces* an artifact voids the older
+rules about its contents. Both are two correct rules, written weeks
+apart, that a seat obeys one at a time.
 
 **And it generalises, which is why it is handed up.** Nothing in the
 reasoning is about this seat. Every seat on this host runs under the
