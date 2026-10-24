@@ -299,6 +299,18 @@ assume you have to combine them by hand. This is HQ's L-E10 in
 docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
 
+**Run `git fetch --unshallow` before either of those commands, because
+the checkout you are handed is one commit deep and both of them lie in
+it.** Measured on 2026-10-24: `main` at depth 1, the ancestry check
+answering NO for two branches that share a base, and `git merge`
+refusing with "refusing to merge unrelated histories" until the history
+was fetched, after which it was 1022 commits and the merge went through.
+Both failures point the same way, toward writing a second version of
+work you already have, which is the outcome this section exists to
+prevent. The real fix is a fetch depth in a workflow this seat does not
+write, so it is filed in docs/research/briefs/2026-10-24.md, error 1,
+with the route to HQ named.
+
 **Why this is first and not housekeeping.** `main` is not this
 organization's memory. It is the subset of its memory that the owner has
 merged, and in the week to 2026-10-04 that subset grew by five pull
