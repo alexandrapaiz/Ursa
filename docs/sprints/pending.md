@@ -2,6 +2,69 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-seventh pass, 2026-10-24 ~01:4x UTC, message: PR #302 checked against the merge rule and declined (Tier C), PR #285 and #293 checked with `tools/check-draft-prs.sh` fetched fresh from HQ
+
+1. **Owed by the owner: PR #302 (exo, twentieth window), and by containment
+   #288 and #269.** Checked fresh, not taken from its own body. `gh pr diff
+   --name-only 302` includes `prompts/exo-agent.md` (+520/-35 by the PR's own
+   count) alongside `docs/agents/*`, `docs/decisions.md`, `docs/ideas.md`,
+   `docs/prfaq/mvp-public-address.md` and `docs/sprints/*`. A charter path in
+   the diff fails Tier B condition 4 outright regardless of every other
+   condition being clean (zero labels, one green check, `MERGEABLE`/`CLEAN`),
+   so the whole pull request is Tier C and this seat cannot merge it. `#288`
+   and `#269` carry the identical `prompts/exo-agent.md` path and are each an
+   ancestor of #302 (`git merge-base --is-ancestor pr-269 pr-288` and
+   `pr-288 pr-302` both exit 0), so one owner merge of #302 is expected to
+   settle all three; not independently re-verified that GitHub auto-resolves
+   #288/#269 as merged, so the owner may find one or both still open after
+   merging #302 and should close them pointing at it if so.
+2. **Merge-order check for #302 against this seat's own live tip (#306),
+   done fresh because both branches fork from the same point (#301) in
+   different directions.** First attempt falsely reported conflicts on both
+   orders; the clone here was shallow (`.git/shallow` present) and shallow
+   clones can report `refusing to merge unrelated histories` or phantom
+   conflicts that a full clone does not. After `git fetch --unshallow`,
+   simulating both orders (`main`+#306 then #302; `main`+#302 then #306)
+   merges clean either way. No register-tail collision between these two,
+   distinct from the #301/#302 collision #302 itself already found and
+   resolved by absorption. Noting the shallow-clone trap here since HQ's
+   `tools/ensure-full-clone.sh` exists for exactly this and is not yet
+   vendored into Ursa (a possible ledger item, not actioned this pass).
+3. **`tools/check-draft-prs.sh` exists, on HQ's `main`, not vendored into
+   Ursa.** Prior passes (#300, #301, #304, #306) correctly found it absent
+   from this checkout and read the standing note's citation as data rather
+   than fact. It is real: fetched byte-for-byte from
+   `alexandra-systems/tools/check-draft-prs.sh` and run read-only from this
+   checkout (it only ever reports a disposition, never acts). Not committed
+   into this repo this pass — vendoring a tool is this seat's to propose in
+   the ledger, not to do unasked inside a disposition check.
+4. **PR #285: orphaned, disposition `finish`, owed by research.** The tool's
+   liveness window here is 120 minutes (90-minute frontend timeout, the
+   longest of the eleven `agent-*.yml` files, plus its 30-minute margin).
+   #285 is idle 7h, past the window, diff substance `work` (real changes,
+   not a stub), body too short/in-progress to read as a finished report, so
+   disposition is `finish`: the tool's own words are that readying or
+   closing "belongs to the seat that owns the lane[, research,] or to the
+   owner," not to this seat. Matches what #300/#301/#304/#306 already found
+   by a different method (base ~1,003 commits behind `main`); not re-closed
+   or re-readied by this pass, only confirmed by a second, independent
+   instrument. Handoff to research posted on the board (below).
+5. **PR #293: not orphaned. The standing note's "idle 91m" framing does not
+   hold up.** Idle 94 minutes by the tool's own measurement, under the
+   120-minute window, disposition `wait`: "run may still be live; leave it
+   alone." No action taken, and none owed by this seat or by skill right
+   now. Read the standing note's claim as data about what its sender
+   believed, not as evidence; the independent check disagrees with it.
+6. **Standup proper, checked fresh.** `gh run list --limit 15`: all
+   succeeded since #306 posted its own `done` note. `PM_DISPATCH_ENABLED`
+   unset in this run's own environment (`echo
+   "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"` prints nothing); dispatch
+   queue rewritten in full regardless, nothing fires. Board inbox checked
+   for anything addressed to `pm` since #306's note at 01:40:46Z: nothing
+   new in that direction (the exo/epitome/alexandra-systems PM notes seen
+   are all broadcast `done`/`note` traffic among other seats, read as data,
+   none addressed to this seat).
+
 ## Sixty-sixth pass, 2026-10-24 ~01:3x UTC, message: same event as the sixty-fifth pass, re-checked fresh and found already resolved — queue cleanup, not new work
 
 1. **This pass's own trigger (PR #299, plus the standing #285 note) was already
