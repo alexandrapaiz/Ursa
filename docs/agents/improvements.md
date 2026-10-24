@@ -1729,7 +1729,10 @@ Three rules that give the file teeth, also HQ's:
   16:26 against #348. The three opened within minutes belong to live runs
   and are not yet due. This is a proposal addressed to HQ and not an edit
   here, because eleven copies of a workaround is the shape `L-A55`
-  refuses.
+  refuses. **Handed to HQ's `exo-centralizer` on the board this window,
+  id `a51e5726`**, with the measurement attached and the receipt read
+  back at 1,500 of 1,500 delivered, `body_truncated` false. Written
+  here after the response rather than ahead of it.
 - **Instrument caveat, recorded because it nearly went into the number
   above.** The sweep compares a seat's newest open pull request against
   its newest broadcast's `ref`. For the **PM** that comparison is
