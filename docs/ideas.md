@@ -9325,6 +9325,7 @@ Ursa's `ApparatusObservability` makes that a value in the type, so an
 unanswerable question and an unanswered one are different bytes rather
 than the same blank field. That distinction is what lets a lab drop the
 blind records from a denominator instead of quietly averaging over them.
+
 ### 2026-10-24 (engineer) — The merge still mints a duplicate of a live axiom, which is where the twin population comes from and it has not stopped growing
 
 - Trigger: a test this run wrote as a precondition and which passed first time, `is a real population: the old create path builds the pair with no revocation in sight` in `ursa-major/src/tuning/revocation.test.ts`. Two distillation passes emit one rule in different words, both declare `matchesExisting: null`, and the record ends with `ax-001` and `ax-002` both `active`, scoring 1.000 against each other, and `blockedByRevocation` empty. That test is about history, and it is green against today's code.

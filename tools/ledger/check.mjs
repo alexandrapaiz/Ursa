@@ -21,7 +21,7 @@
 // without claiming "clean". The classes are not a severity ranking. They are
 // a statement about who holds the fix, and every rule below declares which.
 import { readFileSync } from 'node:fs';
-import { parseLedger } from './ledger.mjs';
+import { blockStartKind, parseLedger } from './ledger.mjs';
 import {
   IDEA_FIELDS,
   STATUSES,
@@ -162,6 +162,54 @@ for (const block of blocks) {
       }
     }
     seen.set(block.key, words);
+  }
+}
+
+// Rule BLOCK_SEPARATION, held by the seat. Exactly one blank line above every
+// block start after the first.
+//
+// WHY THIS RULE EXISTS AS A RULE AND NOT AS A BYTE COUNT. `renderLedger`'s
+// contract is one blank line between blocks, so a source that separates two
+// blocks by nought or by two does not survive its own round trip, and
+// `ledger.test.mjs`'s `parse then render is byte-identical on the real ledger`
+// goes red. That assertion compares two 630,000-character strings, so what it
+// prints is `'   wire dom'... 633582 more characters` against `633581`: the
+// file is wrong by one byte and the gate cannot say which byte. The entry
+// `2026-10-24 (engineer, second run) — The ledger's own contract gate has been
+// red on main for long enough that nobody is reading it` is an hour spent
+// finding one missing blank line, and the same drift reappeared the same day
+// at a different line, written by an append that had no way to know.
+//
+// So the byte assertion stays as the invariant and this rule is the
+// diagnosis: it names the line number, the heading, and which direction the
+// spacing is wrong in, which is the thing a seat can act on in one edit.
+// Measured against docs/ideas.md when written: 1 violation, at line 9328, and
+// it is exactly the byte the round-trip assertion was failing on. No other
+// line in 9,549 matched in either direction, so the rule is not a style
+// preference being retrofitted onto a file that disagrees with it.
+{
+  const lines = source.replace(/\r\n/g, '\n').split('\n');
+  for (let i = 1; i < lines.length; i += 1) {
+    if (blockStartKind(lines[i]) === null) continue;
+    const blank = (n) => n >= 0 && lines[n].trim() === '';
+    const heading = lines[i].trim().slice(0, 70);
+    if (!blank(i - 1)) {
+      violation(
+        'seat',
+        'BLOCK_SEPARATION',
+        `line ${i + 1}: "${heading}" opens a block with no blank line above it. ` +
+          'renderLedger writes exactly one, so this file does not survive its own round trip ' +
+          'and ledger.test.mjs reports a one-byte difference it cannot locate. Insert one blank line.',
+      );
+    } else if (blank(i - 2)) {
+      violation(
+        'seat',
+        'BLOCK_SEPARATION',
+        `line ${i + 1}: "${heading}" has more than one blank line above it. ` +
+          'renderLedger collapses them to one, so this file does not survive its own round trip. ' +
+          'Delete the extra blank line(s).',
+      );
+    }
   }
 }
 
