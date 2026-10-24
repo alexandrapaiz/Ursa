@@ -2,6 +2,115 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Eighty-fifth pass, 2026-10-24 ~16:4x UTC, message: two Tier B merges against the engineer and market chains, a real docs/ideas.md conflict resolved by hand, both named draft dispositions already resolved by their own seats
+
+**The trigger.** A dispatch bundle naming three open pull requests to
+check against the merge rule — engineer's #346, market's #357, exo's
+#362 — plus a standing note about three draft pull requests (#356,
+#355, #357) with no live run behind them. Checked each claim against
+live GitHub state rather than carrying it forward; several had already
+moved.
+
+**Findings, in the order acted on.**
+
+1. **#346 (engineer) was Tier B, green, and genuinely safe — verified,
+   not assumed.** Not a draft, no hold label, `redaction-gate/scan`
+   green, diff clean of any Tier C path (no `prompts/`, no
+   `.github/workflows/`). Before merging, ran the actual test suite at
+   its tip rather than trusting the one configured check, because
+   #290 below shows exactly how a green scan can hide a failing build:
+   `npm ci && npm test` inside `ursa-major/` at commit `0f171aa`'s
+   sibling tip reported **821 passed, 4 skipped, 0 failed**, and
+   `npm run provenance:bundles:check` confirmed the bundle index
+   matches history. Merged under Tier B. #305 and #327, both ancestors
+   of #346's branch, were marked `MERGED` by GitHub automatically once
+   their commits landed — no separate close needed.
+2. **#357 (market) was superseded by #363 (market's own hook run),
+   which contained it whole** (`git merge-base --is-ancestor` confirmed).
+   Reviewed #363 instead: not a draft, green, diff limited to
+   `docs/market/` and `docs/ideas.md`, no Tier C path. GitHub reported
+   `CONFLICTING` once #346 landed first (both touch `docs/ideas.md`'s
+   tail). This is the docs-only append conflict the charter's "Act"
+   section lets the PM resolve directly: checked out #363's branch,
+   merged `origin/main`, found one real conflict in `docs/ideas.md`
+   (both sides appended new entries at the same point), resolved by
+   keeping both blocks — main's already-landed engineer entries first,
+   then market's new entries after, no content dropped — pushed the
+   resolution to the PR's own branch, and merged once GitHub
+   recomputed it clean. #357 was marked `MERGED` automatically.
+3. **#362 (exo) is Tier C and red, not mine either way.** Diff touches
+   `prompts/exo-agent.md` (Tier C by itself), and its one check
+   (`redaction-gate/scan`) fails live: full, untruncated conversation
+   UUIDs in `docs/agents/learning-log.md` and `docs/agents/incidents.md`,
+   the same unhealed defect the eighty-fourth pass already reported for
+   #350 — #362 is built on #350's head, so it inherited the problem
+   rather than introducing a new one. Not acted on; named here and
+   left for exo's own fix.
+4. **Two of the three named drafts were already resolved by their own
+   seats before this pass started, and the third no longer needed PM
+   action.** #356 (frontend) was closed by frontend's own later hook
+   run ("#356 absorbed") before this pass began. #355 (research) was
+   closed by research's own later hook run, pointing to #358 as the
+   strict superset, also before this pass began. #357 is covered under
+   finding 2 above. The standing note that named them was already
+   stale by the time it reached this seat — the seats it names are not
+   idle; each produced the resolving commit on its own within the same
+   hour. Nothing to dispatch.
+5. **The two tool scripts the standing note and pm.md §11.2 both name
+   do not exist in this repository.** `tools/check-draft-prs.sh` and
+   `tools/check-merge-queue.sh` — `find . -iname` for both returns
+   nothing. Every check in this pass that those scripts would have
+   done (`gh pr view --json mergeable`, ancestry via
+   `git merge-base --is-ancestor`, the docs-only conflict resolution)
+   was done by hand instead. This is a real gap, not a workaround to
+   paper over: §11.2 has pointed PM standups at
+   `tools/check-merge-queue.sh` since it was written, and the standing
+   note handed this pass a command that fails on first run. Flagged
+   for whichever seat owns `tools/`, not built here (this seat's
+   writable surface is `docs/sprints/` and ledger grooming, not
+   `tools/`).
+6. **The shallow-clone ancestry trap the engineer's own #361 is mid-way
+   through documenting is real, and this pass hit it too.** A fresh
+   clone here was `--depth 1`; `git merge-base --is-ancestor` against
+   freshly-fetched PR refs returned correct answers in this pass's
+   testing (not the uniform "no" #361's title describes), but only
+   after `git fetch --unshallow` was run as a precaution before trusting
+   any ancestry conclusion. Recorded so the next pass does not assume
+   the earlier pass's checks were run against full history unless it
+   says so.
+7. **This seat's own open pull requests, resolved before this one
+   needed to stand alone.** #339, #341, #343, #347, #349, #353 and
+   #364 — the entire chain of today's earlier passes — were all
+   confirmed (`git merge-base --is-ancestor`, each one individually)
+   to be whole ancestors of this pass's branch once #364's tip was
+   merged in. Closed all seven as subsumed, per the routine-housekeeping
+   practice this seat recorded for itself after the seventy-eighth
+   pass (below): closing a strictly-superseded pull request of this
+   seat's own, once ancestry is confirmed, is not a merge and not a
+   judgment call.
+
+## Top three for the owner, this pass
+
+1. **Nothing new needs the owner's merge from this pass** — the two
+   Tier B merges (#346, #363) are done, and the Tier C holds (#362,
+   and the still-open #337/#288 exo fork, #358's research chain, #290's
+   test failure, #361's in-progress work) are unchanged from the
+   eighty-fourth pass's report, not re-litigated here.
+2. **`tools/check-draft-prs.sh` and `tools/check-merge-queue.sh` do
+   not exist**, despite being named as if they do by both the company
+   standard (§11.2) and a dispatch note handed to this seat. Worth a
+   ledger entry for whoever owns `tools/` — not blocking today's work,
+   since the checks were done by hand, but it will keep costing a
+   manual redo every pass until it is built or the references are
+   corrected.
+3. **The exo fork between #337/#288 and the #344/#350/#362 line is
+   still live and still not this seat's to resolve** — #362's own
+   description confirms it now contains #344 and #350 (good, one fewer
+   divergent branch than the eighty-fourth pass found), but #337/#288
+   remains a separate, uncontained line on the same six files. One
+   owner or chair decision — pick a branch, close the other — would
+   clear it.
+
 ## Eighty-fourth pass, 2026-10-24 ~16:3x UTC, hook: capacity returned — exo's two PRs conflict with each other, not a clean chain; exo's #350 fails the redaction gate live; a board ask with no landed commit behind it
 
 **The trigger.** A hook event ("capacity returned... do the one run

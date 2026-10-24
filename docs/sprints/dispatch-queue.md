@@ -1,3 +1,63 @@
+# Dispatch queue — 2026-10-24, ~16:4x UTC, message (eighty-fifth pass)
+
+`PM_DISPATCH_ENABLED` is unset in this run's own environment (`echo
+"PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"` prints nothing), so nothing
+fires below regardless of what qualifies. Written in full per pm.md §0b.
+
+## This run's inbox
+
+A dispatch bundle naming three pull requests to review against the
+merge rule (#346, #357, #362) plus a standing note about three draft
+pull requests with no live run behind them (#356, #355, #357). Full
+account of what was found and done with each is in
+`docs/sprints/pending.md`'s eighty-fifth-pass entry; this file covers
+only what was considered for dispatch and why nothing fired.
+
+## Failed-run triage this run (§11.7)
+
+`gh run list --limit 30` shows exo's `redaction-gate` failing again,
+this time on `ursa-exo/2026-10-24-hook` (#362, 16:36:34Z) at the same
+`scan` step the eighty-fourth pass already diagnosed for #350: full,
+untruncated conversation UUIDs in `docs/agents/learning-log.md` and
+`docs/agents/incidents.md`. Read the log past the failing commit per
+§0b rather than re-diagnosing from zero: this is the same unhealed
+cause, not a new one, and #362 is built on #350's head so it inherited
+it. Same disposition as before — exo's own fix, exo is excluded from
+dispatch outright (boundary list), named in pending.md and not acted
+on.
+
+## Candidates considered, none fired
+
+1. **The three named drafts (#356, #355, #357).** Checked live rather
+   than assuming the note's "idle 2h" / "no live run behind it" still
+   held: all three had already moved. #356 closed by frontend's own
+   later run. #355 closed by research's own later run, pointing to
+   #358. #357 merged (as its superseding #363) this pass under Tier B.
+   No dispatch row applies to a draft a seat has already resolved on
+   its own.
+2. **#362's Tier C status and live redaction-gate failure.** Not a
+   Minor-site or Major-resolver path, so it matches neither of this
+   seat's two failure-shaped dispatch rows, and exo is excluded from
+   dispatch under any criterion regardless. Named in pending.md, not
+   fired.
+3. **The exo fork (#337/#288 vs. the #344/#350/#362 line).** Still no
+   dispatch row covers "two of a seat's own open PRs conflict with
+   each other" in a way this seat can act on for exo specifically
+   (exo is excluded from dispatch outright). Named for the owner or a
+   chair, not fired.
+4. **No ADR or ruling merged since the last pass names a seat with no
+   run following it.** Checked `docs/decisions.md` on the current
+   branch tip; nothing new since the eighty-fourth pass's own read.
+5. **No milestone due within three days.** `gh api
+   repos/alexandrapaiz/Ursa/milestones` returns an empty list.
+
+## Dispatched by the PM
+
+None this run. `PM_DISPATCH_ENABLED` is unset, and even if it were
+enabled, nothing above met a firing criterion this seat can act on.
+
+---
+
 # Dispatch queue — 2026-10-24, ~16:3x UTC, hook (eighty-fourth pass)
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment (`echo
