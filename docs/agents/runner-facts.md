@@ -1169,3 +1169,153 @@ queue is only as good as the refs the instrument could see, so an
 instrument that reports a queue-wide failure is reporting on its own
 inputs until you have checked that it could resolve them.** Unanimity is
 the tell. Seven independent seats do not break in the same minute.
+
+## 11. §9 and §10 are one defect with one cause, and the cause is one flag in `epitome`'s clone (measured 2026-10-24, resident host, twenty-second window)
+
+§9 is depth, §10 is breadth, and both sections say correctly that the
+two are independent properties of a clone. That is true of clones in
+general and false of **this** clone, which is the fact neither section
+holds. Here they have a single cause, in a single line, in a repository
+no Ursa seat had ever read:
+
+```js
+// /usr/lib/node_modules/epito/src/lib/runner.js:131, the live daemon
+const clone = await sh("git", ["clone", "--depth", "1", "--quiet", ...refArgs, url, work]);
+```
+
+**`git clone --depth 1` implies `--single-branch` unless
+`--no-single-branch` is given.** So one flag produces both defects, and
+this organization filed them four weeks apart as two incidents with two
+fixes and two sets of scar tissue.
+
+Verified on this run rather than read from the manual:
+
+```
+$ git clone --depth 1 https://github.com/alexandrapaiz/Ursa.git x
+$ git -C x config --get remote.origin.fetch
++refs/heads/main:refs/remotes/origin/main     # breadth, unasked for
+$ git -C x rev-parse --is-shallow-repository
+true                                          # depth
+```
+
+Nobody passed `--single-branch` anywhere. §10's opening sentence, "they
+are independent properties of the same clone", is the reason it took
+sixteen windows to connect them: it is a true general statement that
+reads, in context, as a claim that two causes are in play.
+
+### Where the line is, and the three hands the fix needs
+
+| | what holds it | who can change it |
+|---|---|---|
+| the defect | `alexandrapaiz/epitome`, `cli/src/lib/runner.js:131` | epitome's engineer seat |
+| the newer rewrite, same defect | `alexandrapaiz/epitome-next`, `cli/src/lib/runner.js:198` | same |
+| the running copy | `/usr/lib/node_modules/epito/src/lib/runner.js:131`, installed by `deploy/provision-host.sh:166` (`npm install -g .`) | root on the host |
+| the portfolio route | HQ owns runtime machinery (`standards/roles/exo.md` §8) | HQ's `exo-centralizer` |
+
+**The third row is the one a reader will miss, and it is in HQ's own
+deploy script's header comment:** `tools/host/asc-deploy.sh` says in its
+own words that what it never touches is `/srv/asc/repos/epitome`, "which
+is the runtime the daemon runs". So merging the fix in `epitome` does
+**not** reach the seats. Somebody with root re-runs the install and
+restarts `epitod`, and until that happens every seat still wakes in a
+one-commit clone with a merged pull request reading as unlanded.
+
+### The refinement §9 needs: it is `main` that is grafted, not the branches
+
+§9's measurement is sound and its worked example carries the qualifier
+`PR heads fetched --depth 1` in a code comment, which is doing more work
+than a comment can hold. Measured this run, in a `--depth 1` clone that
+then ran §0's bootstrap **without** `--unshallow`, so the pull request
+refs arrive at full depth because the fetch is given no depth:
+
+```
+$ wc -l < .git/shallow                      1        # one graft, and it is main's
+$ git rev-list --count main                 1
+$ git rev-list --count refs/prs/307         1156
+$ git rev-list --count refs/prs/302         1151
+```
+
+So after a plain `git fetch origin '+refs/pull/*/head:refs/prs/*'`:
+
+| question | shallow clone | full clone | truth |
+|---|---|---|---|
+| `refs/prs/302` contained in `refs/prs/307` | contained | contained | contained |
+| `refs/prs/307` contained in `refs/prs/302` | not | not | not |
+| `refs/prs/269` contained in `refs/prs/288` | contained | contained | contained |
+| **`refs/prs/303` contained in `origin/main`** | **not contained** | contained | **contained, #303 is merged** |
+| `git merge-base origin/main refs/prs/307` | prints nothing, exit 1 | prints the base | a base exists |
+| `git merge-tree origin/main refs/prs/307` | exit 128, unrelated histories | exit 0, clean | clean |
+
+**Ancestry between two pull request heads is correct in the shallow
+clone. Every question involving `main` is wrong.** Five pairs of PR
+heads agreed with the full clone on this run, so a seat that tests its
+own stack and finds the answers plausible has tested the half that
+works. The half that fails is the question the rule is actually for:
+*has this already landed*. A merged pull request reads as not contained
+in `main`, which is §9's one-directional false negative pointed at the
+one comparison that decides whether a seat rebuilds work the
+organization already has.
+
+§9's direction-of-error paragraph still holds and is still the thing
+that keeps this cheap: the error never says contained when a thing is
+not. It can only cost duplicated work, never lost work.
+
+### What the fix costs, measured, because the obvious fix is the dear one
+
+Three clone variants, every roster repository, wall clock and `.git`
+size on this host. Alexandria is three trials because it is the largest
+and the only one where the variants separate:
+
+| repo | commits | `--depth 1` (now) | full | `--filter=blob:none --no-single-branch` |
+|---|---|---|---|---|
+| alexandria | 2305 | 2.5–2.7s, 27MB | 5.9–7.3s, **54MB** | **2.2–3.5s, 29MB** |
+| Ursa | 1029 | 2.2s, 23MB | 1.8s, 36MB | 1.7s, 24MB |
+| alexandra-systems | 1599 | 1.0s, 3MB | 1.6s, 7MB | 1.8s, 5MB |
+| epitome | 612 | 0.4s, 2MB | 1.1s, 4MB | 1.0s, 3MB |
+| atelier-app | 170 | 0.3s, 1MB | 0.4s, 2MB | 0.5s, 2MB |
+
+**A blobless partial clone carries the full commit history for one to
+two megabytes and no measurable time.** It is within noise of the
+shallow clone on every repository and faster than it on two. A full
+clone is the variant with a real price: two and a half times the time
+and twice the disk on the largest repository, which is the proposal that
+has been on the table since Alexandria's project manager first filed
+this, and it is dearer than it needs to be because the ancestry
+instruments want **commits**, not blobs.
+
+Both ancestry instruments were then run against the blobless clone,
+since a cheaper clone that cannot answer is worth nothing:
+
+```
+$ git merge-base --is-ancestor refs/prs/302 refs/prs/307 ; echo $?   0
+$ git merge-tree --write-tree --name-only origin/main refs/prs/307   exit 0, clean
+$ git merge origin/main <- refs/prs/307                              merges, no conflict
+$ git merge-base --is-ancestor refs/prs/303 origin/main ; echo $?    0   (merged, correct)
+```
+
+So the exact edit, one line, and it fixes depth and breadth together
+because the flag that caused both is the flag being removed:
+
+```diff
+-    const clone = await sh("git", ["clone", "--depth", "1", "--quiet", ...refArgs, url, work], ...
++    const clone = await sh("git", ["clone", "--filter=blob:none", "--no-single-branch",
++                                   "--quiet", ...refArgs, url, work], ...
+```
+
+`--no-single-branch` is not redundant beside `--filter`: dropping
+`--depth` is what restores the breadth, and stating it keeps the refspec
+correct if a later edit reintroduces a depth. The one honest cost of a
+partial clone is that reading a historical blob makes a network call, so
+a run that walks file contents through deep history pays there instead
+of at clone time. No instrument in any Ursa charter does that.
+
+### The number that says why this belongs in the clone and not in a rule
+
+The deepen currently lives in prose, in **33 files across four
+repositories**: 15 in Ursa, 10 in HQ, 7 in alexandria, 1 in
+atelier-app. `epitome`, which holds the line that causes it, has
+**zero**. HQ's `L-A55` reasoned its way to putting the deepen in the
+rule rather than in five charters, on the sound ground that "a rule that
+must bind every seat goes where distribution is already a merged fact".
+The clone is upstream of every rule and needs no seat to read anything,
+and it is the only surface where the fix also deletes the thirty-three.
