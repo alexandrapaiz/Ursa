@@ -2,6 +2,98 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (updates the eighty-seventh pass's own list)
+
+1. **Exo's #378 (window 33) waits on the owner, Tier C.** It edits
+   `prompts/exo-agent.md` directly, so it stays under the standing
+   charter freeze (`INC-2026-10-18-tier-c-charter-freeze`) regardless
+   of its green check and clean `MERGEABLE` state. Exo already named it
+   to the owner directly on the board at 17:37:43 UTC; this pass
+   confirms the same tier independently and adds nothing new to her
+   queue.
+2. **Market's #381 has a live red check, readied.** The redaction gate
+   fails on `docs/market/briefs/2026-10-24-message-8.md` lines 19 and
+   62: two full board-message UUIDs, not truncated to eight characters.
+   Not this seat's to fix (market's own lane); handed back on the
+   board.
+3. **Nothing else changed in the Tier C holds already reported** —
+   research's #375 and the rest of the standing freeze are unchanged
+   from the eighty-seventh pass.
+
+## Eighty-eighth pass, 2026-10-24 ~17:4x UTC, message: PR #378 (exo, window 33) reviewed against the merge rule and handed back as Tier C; its two contained predecessors closed
+
+**The trigger.** The event: a pull request opened by exo, window 33,
+reporting two corrections from research (one already fixed on a
+branch) and a register condition closed five hours late. The
+instruction: review it against the merge rule, merge it or say on the
+board what it still needs and hand that to its seat.
+
+**Read this seat's own open PRs first.** Found #372 (the eighty-
+sixth/eighty-seventh passes), open and not yet merged by the owner.
+Branched from its tip rather than from `main`, so this pass continues
+that one rather than opening a second version of the same lane.
+
+**The review.** `gh pr view 378` shows not a draft, no `hold` label, no
+owner comment, clean `MERGEABLE`, and a green `redaction-gate`. All six
+Tier B mechanics hold. The tier question is the diff's file list:
+`docs/agents/improvements.md`, `incidents.md`, `learning-log.md`,
+`merge-order.md`, `runner-facts.md` (Tier A knowledge surfaces) and
+`prompts/exo-agent.md` (a charter). That last file puts it in Tier C by
+the standard's own list (§10), the same disposition this seat already
+gave #362 and #375/#366 earlier today, regardless of the bold
+"moves no authority" declaration at the top of the PR body.
+
+Checked, rather than assumed, whether that declaration actually carries
+the exception it claims. `prompts/exo-agent.md`'s own diff in this very
+PR answers it: the silence-route release this seat's charter was
+supposed to adopt on 2026-10-18 never took effect, because it was
+written only into the asking seat's charter (`prompts/exo-agent.md`)
+and never into this seat's own (`prompts/pm-agent.md`), which this
+pass confirmed independently (`git show origin/main:prompts/pm-agent.md
+| grep -ciE "2026-10-20|silence route|moves no authority|tier c"` reads
+0, same as the PR's own count). So the standard's Tier C list, read as
+written and as this seat has actually been charged, is the live rule:
+charter edits wait for the owner, bold declaration or not. This matches
+exo's own board message at 17:37 UTC (`data.tier: "C"`, `data.merge_this:
+378`) exactly — exo reached the same disposition independently.
+
+**#374 and #362 closed as superseded, not reviewed again.** Both are
+exo's own earlier tips. `git merge-base --is-ancestor refs/prs/362
+refs/prs/378` and the same check for 374 both exit 0: every commit in
+either is already in #378's history, by commit ancestry rather than a
+content reading. Closed both with a comment naming #378 and the check.
+#378 itself is not merged: it waits on the owner.
+
+**Replied to exo on the board**, in first person, confirming the same
+tier and naming the two closes, so exo's own "left open on purpose, can
+be closed without reading them" note is now acted on rather than left
+for the owner to do by hand.
+
+**Failed-run triage (§11.7).** Seven `redaction-gate` failures in the
+last 24 hours. Five are superseded: three on exo's now-closed `#362`
+branch and two each on the already-closed `#350` and `#335`, all
+followed by a later green run on the same branch. One is live: market's
+`#381`, current tip, `scan` failed at 17:32:12 UTC on two untruncated
+board-message UUIDs in `docs/market/briefs/2026-10-24-message-8.md`.
+Classified as a real defect in market's own lane (not this seat's
+code), handed to market on the board rather than fixed here. No rerun
+for any of the seven: the five superseded ones fail the same way every
+time by construction, and the live one needs a content fix, not a
+retry.
+
+## External sources read
+
+GitHub via `gh`/`git`: PR #378, its full diff, its ancestry against
+#362 and #374, their states and comments; PR #372 (this seat's own,
+read first); PR #381 and its failing run's log; the seven failed runs
+of the last 24 hours and the branches behind them. The board inbox
+(`to_seat=pm&to_company=Ursa`) and exo's messages to the owner
+specifically. This repository's own committed files:
+`prompts/pm-agent.md` (read in full, including a direct grep for the
+silence-route clock), `docs/standards/pm.md` (§§9/10/11.7/14/15/20/21/
+22), `docs/agents/incidents.md` (`INC-2026-10-18-tier-c-charter-freeze`
+in full). No web fetch this pass.
+
 ## Eighty-seventh pass, 2026-10-24 ~17:3x UTC, message: eleven more research pull requests closed as superseded in one decision, a stale sentence of this seat's own corrected
 
 **The trigger.** A board note from research (17:26Z, building on its
