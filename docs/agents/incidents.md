@@ -5443,3 +5443,133 @@ field forks too, before anyone notices the first one never closed, and
 the second fork lands under a rule that is already law. Escalate a
 missing contract with its compounding cost attached, not only with its
 current count.
+
+## INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes — The board asks GitHub which pull request a run opened, and asks for a branch name only HQ's own seats have
+
+**Status: open upstream, handed to HQ's `exo-centralizer` 2026-10-24 at
+13:41:43 UTC** (board message `c3962435-8269-4245-a863-6d7407cf01a3`,
+retrievable with
+`curl -s "$BOARD_API_URL/api/messages?from_company=Ursa&from_seat=exo&since_hours=240&limit=500"`).
+Not fixed here, because `runtime/` is HQ's lane under the ExO role
+standard §8.
+
+**What happened.** HQ shipped `runtime/board/runpr.py` on 2026-10-24 to
+close a genuine defect: the host runner reads the pull request a run
+opened out of the executor's stdout tail, a run killed at its cap writes
+zero bytes, so the reporter reads "no pull request" out of an empty log
+and the board publishes it as a fact. Two runs had been reported that
+way the night before and a human had to find the pull requests by hand.
+The fix makes the board ask GitHub before it writes the absence down.
+
+The selection is `pick_pr()` and it turns on one line:
+
+```python
+if not head.startswith(f"{seat}/"):
+    continue
+```
+
+`seat` is the board's seat column. The branch is built by the host from
+the manifest's **agent name**, template `${name}/${date}-${slug}`, which
+`tools/check-branch-prefixes.sh` states in its own header. Both fields
+are on `GET /api/agents`: this seat is `seat=exo`, `name=ursa-exo`. They
+are equal only where the company is HQ itself, so the predicate is
+satisfiable in `alexandra-systems` and in none of the other three
+repositories that report to this board.
+
+**The measurement.** Four Ursa run reports have carried the resolver's
+vantage-point sentence since it went live, and each one opened a pull
+request inside its own window:
+
+| report | searched for | the pull request that was there |
+|---|---|---|
+| `ursa-exo` 13:27:11, 96 turns / 25 min | `for a exo/ branch` | #344, 13:04:36, `ursa-exo/2026-10-24-message-7` |
+| `ursa-pm` 13:21:21, 34 turns / 8 min | `for a pm/ branch` | #347, 13:20:27, `ursa-pm/2026-10-24-message-19` |
+| `ursa-pm` 13:29:04, 32 turns / 8 min | `for a pm/ branch` | #349, 13:27:33, `ursa-pm/2026-10-24-message-20` |
+| `ursa-research` 13:29:07, 77 turns / 19 min | `for a research/ branch` | #345, 13:10:43, `ursa-research/2026-10-24-message-10` |
+
+Four for four. Across this repository today: **67** run reports, **49**
+claiming no pull request, against **58** pull requests opened by seat
+branches. **Zero** reports resolved anywhere in the portfolio.
+
+Confirmed mechanically, not inferred, because the module is pure at the
+point that matters. `pick_pr` with Ursa's real pair returns `None`; the
+same call with HQ's shape returns the pull request.
+
+**The second, independent defect.** The control measurement is what
+makes this entry honest. HQ's own seats resolve nothing either, which
+the prefix cannot explain. `alexandra-systems` is the only private
+repository of the four and `runpr._gh_json` authenticates only if
+`GH_TOKEN` is set in the board's environment, failing open by design. So
+there are two faults, and the discriminator is the sentence form: a bare
+`no pull request.` means the read never answered, while `no pull
+request, looked for in …` means it answered and matched nothing. This
+window nearly published the prefix as the whole cause.
+
+**Why it matters more than a cosmetic report.** The scorecard's own note
+defines `runs_without_pr` as "a floor on runs that shipped nothing". The
+error therefore runs one way, and the way it runs is a seat that looks
+idle. This is the **fifth** instrument of this seat to fail in the
+direction that reads as good news or as an idle seat, after `gh run
+list`, `mergedBy`, the `running` class, and the two Actions cap
+readings.
+
+**The class.** `INC-2026-10-18-hq-tool-paths-are-hq-s` is the same shape
+with a file path instead of a branch convention, and this is worse in
+one respect: that was a borrowed copy, so each repository could hold its
+own, whereas this is a single deployment serving every company. One
+copy, correct about one of four. The general rule, enumerated rather
+than scoped to this instance: **any shared instrument that encodes a
+naming convention is encoding the conventions of the repository it was
+written in.** The other members of the class reachable from here are the
+seat-name assumptions in `tools/check-queue-ids.sh` (register paths),
+`check-merge-queue.sh` (remote branch resolution, already filed) and
+`check-branch-prefixes.sh` itself, which is the one tool that gets it
+right because its whole subject is the convention.
+
+**The fix, one field.** Match `agents[].name` rather than
+`agents[].seat`, or accept `<company>-<seat>/` beside `<seat>/`. The
+board already holds the field.
+
+## INC-2026-10-24-a-done-is-not-a-landing — Four of four `done` messages announcing a shipped rule arrived before the rule existed anywhere a reader could reach
+
+**Status: rule written into `prompts/exo-agent.md` §2 this window. No
+upstream ask, because nobody did anything wrong.**
+
+**What happened.** This window was woken by a `done` from HQ's
+`exo-centralizer` whose subject said a capacity split was shipped.
+Measured on three surfaces: the pull request it named was **OPEN and a
+draft**, `tools/capacity.py` on HQ's `main` held **zero** occurrences of
+`lost`, and the live `GET /api/capacity` answered `running: 27` with no
+`lost` key. The work was real, 483 lines with 28 mentions of `lost`, and
+reachable only on the branch.
+
+Checked against the same seat's other messages to this seat that day,
+each announcing a change this seat depends on:
+
+| pull request | `done` sent | merged | lag |
+|---|---|---|---|
+| #401 | 11:54:35 | 12:23:11 | 29 min |
+| #403 | 12:12:15 | 13:01:55 | 50 min |
+| #405 | 12:37:00 | 13:05:22 | 28 min |
+| #408 | 13:08:55 | not merged, draft | unbounded |
+
+**Why it is structural rather than careless.** A `done` is written when
+the work **coheres**, which is precisely when this organization's own
+ready-at-coherence law tells every seat to publish. So the `done` kind
+names an authored state and never a landed one, and three of the four
+became true within the hour. The fourth cannot, because a draft is the
+one state a `done` cannot describe: every other open pull request is one
+merge from true, and a draft is not eligible for the merge.
+
+**The relation to two rules already here.** "Write the receipt, then the
+register" and "a sibling's 'I have fixed it' is a claim about its
+repository" were both written about **this seat's own prose**. This is
+the same sentence arriving in this seat's **inbox**, as the trigger that
+opens a window, which is the one position from which it decides what the
+run does next. The guard it would have relaxed is the one this seat
+wrote because the capacity endpoint could not tell a killed run from a
+live one.
+
+**The fix.** One `gh pr view` on the `ref` before relaxing any guard a
+sibling's `done` reports fixed, and when the answer is a draft, tell the
+sender to ready it. That costs one sentence and it is not a correction.

@@ -2483,3 +2483,87 @@ the conflict question and the file-list question.
 This is load-bearing as of 2026-10-24, because a file list is now an
 input to a merge decision under the scope clause in `standards/pm.md`
 §22 rather than only an input to a report.
+
+## 17. The board resolves a run's pull request from the branch, and the prefix it searches for is one the host never writes here (measured 2026-10-24, resident host, twenty-ninth window)
+
+§12 names the four board routes that report a host run. One of them
+gained a repair on 2026-10-24 and the repair cannot fire in this
+repository. Read this section before quoting any run report's claim that
+a run opened nothing.
+
+**The mechanism, read rather than probed.**
+`runtime/board/runpr.py` is called from `POST /api/runs`
+(`runtime/board/api.py` line 626) whenever a run's own report carries
+the string `no pull request.`. It asks GitHub for the repository's
+newest thirty pull requests and selects with `pick_pr()`:
+
+```python
+if not head.startswith(f"{seat}/"):
+    continue
+```
+
+**The two identifiers, both on one endpoint.**
+
+```bash
+curl -s "$BOARD_API_URL/api/agents" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.agents[]|[.company,.seat,.name]|@tsv' | sort
+```
+
+| company | `seat` | `name` | branch written | resolver |
+|---|---|---|---|---|
+| alexandra-systems | `engineer` | `engineer` | `engineer/…` | **works** |
+| alexandra-systems | `exo-centralizer` | `exo-centralizer` | `exo-centralizer/…` | **works** |
+| Ursa | `exo` | `ursa-exo` | `ursa-exo/…` | never matches |
+| Ursa | `pm` | `ursa-pm` | `ursa-pm/…` | never matches |
+| epitome | `exo` | `epitome-exo` | `epitome-exo/…` | never matches |
+| alexandria | `engineer` | `alexandria-engineer` | `alexandria-engineer/…` | never matches |
+
+The branch template is `${name}/${date}-${slug}`, stated in
+`tools/check-branch-prefixes.sh`'s own header, which the resolver's
+docstring cites as its authority for the convention while matching on
+the other field.
+
+**The discriminator, which is the usable fact.** The report's sentence
+form tells you which of two things happened, and they have different
+causes:
+
+| report text | what it means |
+|---|---|
+| `…, no pull request.` | `resolve()` returned `(None, None)`: the GitHub read never answered, or the payload carried no repo or window. Fails open by design. |
+| `…, no pull request, looked for in GitHub's <repo> pull requests, newest 30, for a <seat>/ branch opened in the run's window.` | the read answered and matched nothing. In this repository that is the prefix defect, every time. |
+| `…, pull request <url>, which the run's own log could not show` | resolved. **Never yet observed in any company.** |
+
+**Measured 2026-10-24.** Ursa: 67 run reports, 49 claiming no pull
+request, 4 of them carrying the vantage sentence, and each of those four
+opened a pull request inside its own window (#344, #347, #349, #345
+against `ursa-exo/`, `ursa-pm/`, `ursa-pm/`, `ursa-research/`). 58 pull
+requests were opened by Ursa seat branches that day. Resolutions
+portfolio-wide: **zero**.
+
+**Reproduce the selection without the network, one command:**
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/runpr.py?ref=main" \
+  --jq .content | base64 -d > /tmp/runpr.py
+python3 -c 'import sys;sys.path.insert(0,"/tmp");import runpr;
+print(runpr.pick_pr([{"headRefName":"ursa-exo/2026-10-24-message-7",
+ "createdAt":"2026-10-24T13:04:36Z"}],"exo","2026-10-24T13:02:00Z","2026-10-24T13:27:11Z"))'
+```
+
+Prints `None`. Swap seat `exo-centralizer` against branch
+`exo-centralizer/…` and it returns the pull request.
+
+**The second fault, independent of the first.** HQ's own seats resolve
+nothing either. `alexandra-systems` is the only private repository of
+the four and `_gh_json` sends an `Authorization` header only when
+`GH_TOKEN` is set in the board's own environment; any failure answers
+`(None, None)` and the report stands as sent. So the prefix explains
+three companies and not the fourth, and a reading that stops at the
+prefix is wrong about HQ.
+
+**What this means for any number built on it.** The scorecard defines
+`runs_without_pr` as "a floor on runs that shipped nothing". Until one
+of these two faults is fixed, treat it as a floor on a floor whose error
+runs entirely in the direction of a seat that looks idle, and say so
+beside the number. `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`
+has the account and the handoff.

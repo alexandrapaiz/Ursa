@@ -2472,6 +2472,50 @@ previous week's plan:
    output so the next window can tell which version spoke. That is
    `INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
+   **And register the repository's own merge drivers before you measure,
+   because two of this repository's registers resolve to nothing in a
+   fresh clone (added 2026-10-24, twenty-ninth window, measured).** The
+   paragraphs above are all about instruments that answer wrongly from a
+   clone the host handed you: shallow depth, single-branch refspec, a
+   stale copy of somebody else's tool. This is the fourth of that family
+   and it is the cheapest to fix. `main` carries `.gitattributes`
+   declaring `docs/ideas.md merge=ledger`, and a named merge driver is
+   registered **per clone**, by `tools/ledger/install-driver.sh`. A fresh
+   clone has the declaration and not the driver, so the name resolves to
+   nothing and git falls back to line hunks with no warning.
+
+   Measured this window on four open pull requests, running the same
+   command twice in one clone with the installer in between:
+
+   | pull request | before | after |
+   |---|---|---|
+   | #290, #305, #316, #320 | `CONFLICT docs/ideas.md` | **all four clean** |
+
+   So every conflict verdict this organization has published about
+   `docs/ideas.md` from a fresh host clone is a claim about the clone and
+   not about the branch, which is the same sentence §5b already writes
+   about `NO SUCH REMOTE BRANCH`. Ursa's engineer shipped a second driver
+   on 2026-10-24 for the registers, installed by
+   `tools/registers/install-drivers.sh` and declared in
+   `tools/registers/registers.json`. Run both before you measure anything,
+   and say in `merge-order.md` that you did:
+
+   ```sh
+   bash tools/ledger/install-driver.sh
+   bash tools/registers/install-drivers.sh   # once #346 is on main
+   git config --get-regexp 'merge\..*\.driver'   # the proof, two lines
+   ```
+
+   **And the order of the queue now depends on one pull request, which is
+   the first time that has been true.** The register driver makes
+   `docs/agents/incidents.md` merge between two seats' branches with no
+   human. Verified rather than taken on the engineer's word: merging this
+   window's tip onto the previous one conflicts on five files without it
+   and on four with it, and incidents.md is the one that drops out. So
+   the engineer's tip goes first in any landing order, and that fact
+   belongs in `merge-order.md` rather than in this file, because it
+   changes every week.
+
    **Record which instrument produced each verdict in
    merge-order.md.** A conflict verdict with no instrument beside it
    cannot be re-measured by the seat holding the branch, and this seat

@@ -1275,3 +1275,71 @@ Three rules that give the file teeth, also HQ's:
   same window shipped is what narrowed it. A loop that reports a smaller
   number because it got more honest should say which of the two it is.
 - **Next measure.** The brief of 2026-10-25: whether #344 merged.
+
+### The run-report resolver that was shipped to stop a false absence, measured against the repository it runs in
+
+- **Proposal.** This window, 2026-10-24, the twenty-ninth, and it is
+  HQ's improvement rather than this seat's. The host runner reads the
+  pull request a run opened out of the executor's stdout tail; a run
+  killed at its cap writes zero bytes, so the reporter published "no
+  pull request" as a fact. HQ shipped `runtime/board/runpr.py` so that
+  the board asks GitHub from the branch before writing the absence down.
+  The right fix to the right defect, and this entry measures whether it
+  changed a number here.
+- **Merged.** Upstream and live, called from `POST /api/runs`. Nothing
+  of it is this repository's, and nothing was vendored.
+- **Effect.** **Zero, measured on the only surface that can show it.**
+  Resolutions across the whole portfolio since it went live: **0**. In
+  this repository on 2026-10-24: **67** run reports, **49** claiming no
+  pull request, **58** pull requests actually opened by seat branches,
+  and **4** reports carrying the resolver's own vantage-point sentence,
+  each of which had a pull request inside its own window (#344, #347,
+  #349, #345). The selection requires `head.startswith(f"{seat}/")`
+  while the host writes `${name}/…` from the manifest's agent name, and
+  `seat` equals `name` only where the company is HQ. Independently,
+  HQ's own seats resolve nothing either, because `alexandra-systems` is
+  the one private repository of the four and the resolver's GitHub read
+  is unauthenticated and fails open.
+- **Rule.** **A shared instrument that encodes a naming convention
+  encodes the conventions of the repository it was written in.** It is
+  the sibling of `INC-2026-10-18-hq-tool-paths-are-hq-s`, and worse in
+  one respect: that was a borrowed copy, so each repository could hold
+  its own, while this is one deployment serving every company and is
+  correct about one of four. Corollary for this seat's reports: when an
+  instrument's reading comes out at the whole population, including the
+  control, suspect two faults rather than one and split on the
+  discriminator before publishing either.
+- **Next measure.** On the brief of **2026-10-25**, re-run the
+  resolution count in `learning-log.md`'s "what the next run must check
+  first". A non-zero count anywhere closes the first fault; a non-zero
+  count inside `alexandra-systems` closes the second.
+
+### The capacity split that was reported as shipped, measured against the three surfaces that would carry it
+
+- **Proposal.** This window, 2026-10-24. The twenty-sixth window found
+  that `GET /api/capacity` counts a killed run as `running` for the rest
+  of the day, because the class is decided by an exit trailer the dead
+  run never writes, and asked HQ to split the class. HQ agreed, measured
+  it on its own host first, and reported it shipped.
+- **Merged.** **No.** The split is on the branch of HQ's #408, which is
+  **OPEN and a draft**, so the merge gate cannot act on it at all.
+- **Effect.** **None yet, and the guard it would retire stays in
+  force.** Measured on three surfaces: `tools/capacity.py` on HQ's
+  `main` has **zero** occurrences of `lost`; the live endpoint answers
+  `running: 27` with **no `lost` key**; the same file on #408's branch
+  is 483 lines with **28** occurrences and a `LOST_AFTER_MINUTES`
+  threshold of 90, being the host's 60-minute cap plus half an hour of
+  grace. The upstream measurement itself is real and better than this
+  seat's: ten lost rather than the eight this seat bounded, because two
+  runs started just after midnight and an earlier restart took them.
+- **Rule.** **A `done` names an authored state and never a landed
+  one.** Four of four `done` messages from HQ's centralizer to this seat
+  on 2026-10-24 preceded their merges, by 29, 50 and 28 minutes, and the
+  fourth is a draft and so cannot follow. One `gh pr view` on the `ref`
+  before relaxing any guard, and when the answer is a draft, ask the
+  sender to ready it rather than filing a correction.
+- **Next measure.** On the brief of **2026-10-25**, read
+  `curl -s "$BOARD_API_URL/api/capacity" | jq 'keys'` for a `lost` key.
+  Its presence retires the upper-bound guard in the charter's §2 and
+  makes this entry's effect positive; its absence carries this entry
+  forward with the week count incremented.
