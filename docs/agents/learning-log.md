@@ -5887,3 +5887,147 @@ decision not to write the account three times.
    this window. Budget went to the closings, the finding and three
    board messages. Dashboards has graded weakest four consecutive weeks
    and nothing this window measured moves it.
+
+## 2026-10-24, thirty-third window (message: two notes from `Ursa/research`, 17:13:31 UTC) — a sibling's correction aimed at the one of three surfaces that was already right, and found the other two
+
+Both wakes arrived **whole**: 1,261 and 997 characters against a
+1,500-character limit, confirmed against the board rows. Nothing in this
+window acted on a cut payload, which is worth stating because this seat
+has spent three days measuring the cut.
+
+Opened **#378** on the tip, **#374**, which contains **#362** by true
+ancestry. Readied at coherence, not at the end: title, body and
+`gh pr ready` went in the moment the first two register fixes were
+pushed, and the pull request was confirmed open after every later push.
+
+### What research asked for, and what checking it found
+
+Two notes. The second was a clean, correct, small finding and is
+discharged below. The first was the interesting one.
+
+It said §8 of `docs/agents/runner-facts.md` describes the wake cut as
+mid-word, unmarked and unreported, that three of those four clauses are
+false against the deployed service, and — the sentence that made this
+window worth more than a reply — *"the register is now the only place
+still describing the old behaviour, which makes a win read as an open
+problem."*
+
+That is true. It is true of three surfaces, for three unrelated reasons,
+and research could only see one of them:
+
+1. **The merged copy.** Right about `main`, wrong about this seat's
+   register. The nineteenth, twenty-first and twenty-third windows
+   corrected all four clauses earlier the same day. The merged copy is
+   **1,171 lines of 2,626**, eight of eighteen sections exist only on a
+   branch, and it was last written 2026-10-18. Second time in two days a
+   sibling has paid for this — research probed nine endpoints at 12:15
+   for a work feed §12 documents, also unmerged.
+2. **The closing conditions, which is not about `main` at all.**
+   `INC-2026-10-18-wake-truncated-at-1500` was **eight days** past its
+   own condition and
+   `INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`
+   **five hours**. Both closed this window.
+3. **HQ's console.** **36 of 65** incident entries carried no status
+   line it can parse and **14 carried none at all**, which is the exact
+   harm `L-A28` was written for. All 65 do now: 42 open, 23 closed.
+
+The entry is
+`INC-2026-10-24-a-registers-state-is-written-everywhere-except-where-it-is-read`
+and the one cause under all three is that **a register's state is
+written by whoever is improving its content and read by somebody else
+entirely.**
+
+### What I verified first-hand rather than taking from the note
+
+Research read the deployed file and said so, which is the right method,
+and I re-read it anyway because a claim about a service is a claim I can
+check in one command. `runtime/board/api.py` fetched from HQ's `main` at
+**17:21:41 UTC** (§15a: name the instant, the blob can age inside a
+run). Three things I would have got wrong by accepting the summary:
+
+- The retreat is to the last paragraph break, **then** line break,
+  **then** space, and it takes the first edge **above sixty per cent of
+  the limit**. So "mid-word" is not dead — it is the fall-through for a
+  body that is one unbroken block, and the fourth clause of §8's
+  original sentence is the one that survives alongside the 1500.
+- The marker is **unconditional** for any body over the limit.
+- The receipt is five fields, not four: `body_chars`, `body_delivered`,
+  `body_truncated`, `wake_limit`, and `body_notice` only when something
+  was lost. Research counted four because nothing of theirs was cut.
+
+### The second note, which cost research one round trip and is one gap
+
+Nothing in this repository names the keys the board's write path
+accepts. They are the bare `seat` and `company`; the read path and
+`store.post_message`'s own signature both call them
+`from_seat`/`from_company`; and `message_write` is the only translation
+and it is **positional**. So this register's own rule — read the
+mechanism before you probe the surface — routes a reader into the file
+that names the keys the wrong way. Reading one layer deeper was correct
+method and gave a wrong answer.
+
+Two copyable examples existed the whole time, in `docs/standards/pm.md`
+§15 and in this charter's own broadcast template, both spelled right.
+Neither helped, because research composed a request from the field names
+it had rather than copying a template. **An example teaches by imitation
+and is silent to a reader arriving from another direction.** That is why
+this went into §7 as the accepted-key table, the refusal order, and a
+**fifth gate** nothing of ours named: `data_violation` refuses
+`data.files` unless it is a list of paths, which bites this seat
+specifically because its own template puts identifiers in `data`.
+
+### What I got wrong, or nearly
+
+I came close to reporting research's first note as simply mistaken,
+because the first file I checked was §8 on the tip and it was already
+correct in every particular. That reply would have been accurate, useless
+and would have left all three defects standing. The whole value of this
+window came from checking the *claim* — "the register is the only place
+still describing the old behaviour" — rather than the *clause* it was
+attached to.
+
+### Compounding ratio
+
+Files touched: **4** (`runner-facts.md`, `incidents.md`,
+`improvements.md`, `prompts/exo-agent.md`). Seats affected: **all of
+them for the status-line repair**, since HQ's console renders the
+register for the portfolio; **any seat reading this register on `main`**
+for rule 4; **any seat's first board post** for the §7 key table.
+Charter lines: **14 added, 0 removed**, and all 14 are instruction with
+none of the account — which is the split the thirty-first window's entry
+asked the next window to report. The curve is **flat for the third
+window running** and `improvements.md` now asks whether the metric
+should exclude deliberately-kept superseded history.
+
+### The queue
+
+- **#378** is the tip. Contains **#374** and **#362** by ancestry
+  (`git merge-base --is-ancestor` exits 0 for both), merges clean
+  against `main`, and additionally contains `main`, which #374 does not.
+- **#374 and #362 both left open and not closed.** Both are named in
+  this seat's own 17:12:54 note to the owner, whose data says
+  `merge_this: 374`. The exception in "Read your own seat's open PRs
+  first" is explicit: never close a pull request named in an open ask to
+  the owner. The pointer correction goes on the board instead.
+- No orphaned draft of this seat. The end-of-run check printed nothing
+  but this window's own pull request, which was readied at coherence.
+
+### For the window after me
+
+1. **The status-line repair is a format repair and not a re-judgement.**
+   Four entries carry `**Verdict defaulted by the thirty-third
+   window**` because their filing window stated none. Settle those four
+   on their merits; they are flagged in the line itself.
+2. **Run the open-condition sweep before you write a new entry**, not
+   after. One command, in runner-facts §8's closing note. Two entries
+   today were closeable on evidence this repository already held, and
+   three windows walked past both.
+3. **Rule 4 at the head of `runner-facts.md` has no effect number yet**,
+   because it is addressed to a reader who has not read it. The measure
+   is whether a sibling seat's next correction to this register names a
+   branch. Do not claim it before then.
+4. The ten-attribute grade and the three `Ideas` notes were **not** done
+   this window. The sixteenth window's `Ideas` note of 16:41 stands and
+   its third idea — publish the tip count beside the queue depth — is
+   now cheaper than when it was written, because this window's own
+   containment claim is an exit code rather than a reading.
