@@ -17,8 +17,8 @@
     "hq:demo": "tsx src/hq/seed.ts",
     "bundle": "node build/bundle.mjs",
     "bundle:check": "node build/bundle.mjs --check",
-    "regen": "npm run bundle && npm run provenance:bundles",
-    "regen:check": "npm run bundle:check && npm run provenance:bundles:check",
+    "regen": "tsx tools/make-regen.ts",
+    "regen:check": "tsx tools/make-regen.ts --check",
     "provenance:bundles": "tsx tools/make-bundle-digest-index.ts",
     "provenance:bundles:check": "tsx tools/make-bundle-digest-index.ts --check"
   },

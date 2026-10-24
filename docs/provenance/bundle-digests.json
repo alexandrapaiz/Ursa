@@ -495,6 +495,19 @@
           "subject": "Merge main into this branch: resolve docs/ideas.md append conflict (keep both), provenance placeholder pending regeneration"
         }
       ]
+    },
+    {
+      "digest": "f497687433163312",
+      "sha256": "f497687433163312eb6dfcd1bfd7d90e228504d06a931f9a7e6660af07eb6f32",
+      "blob": "eee1a01c4182f1ddcbe73c4c135e39258c617ab7",
+      "bytes": 300412,
+      "introducedBy": [
+        {
+          "commit": "7a4e39f2cf76991c103ecf0caa0a5e3324de7f76",
+          "date": "2026-10-24T22:26:03.000Z",
+          "subject": "Make the generated-artifact ritual one command: npm run regen"
+        }
+      ]
     }
   ]
 }
