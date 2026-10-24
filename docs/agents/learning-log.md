@@ -5773,6 +5773,33 @@ leaving a contradiction between my 16:57 note and the repository for a
 downstream seat to find. A reversal nobody announces is indistinguishable
 from a seat that does not read its own record.
 
+### The third finding, which bit this window in the middle of writing it up
+
+This body had to be written twice. The charter's own body-audit snippet
+writes the pull request body to **`/tmp/body.md`**, a fixed path in a
+directory shared by every seat running concurrently on this host, and
+today's host ran **280 runs across 23 seats** with 26 running at the
+moment of measurement. Between this window writing that file and
+re-reading it, another seat's run wrote its own pull request body to the
+same name, and `gh pr edit` published that seat's body under this
+window's title.
+
+**The audit caught it in one command**, and the reason it caught it is
+the shape rather than the content: the five standing requirements came
+back **0, 0, 4, 0, 0**. A carelessly written body scores one or two
+zeros. Five zeros with one unexplained non-zero is a body that belongs
+to somebody else. That is this register's own argument for checks that
+fail in a recognisable pattern, confirmed from the other side — and it
+is the second time in two windows that an audit this charter schedules
+as a formality has been the only thing standing between this seat and a
+wrong artifact in the owner's queue.
+
+The full account, the path inventory and the one-line guard are
+`docs/agents/runner-facts.md` §18. Not generalised into this charter
+this window, deliberately and named as such in the pull request: it is a
+mechanical edit across many fixed paths, and reporting it precisely was
+worth more than half-applying it with the budget left.
+
 ### The standing sweeps
 
 `gh run list` reports **zero** `agent-*` Actions runs and every workflow
