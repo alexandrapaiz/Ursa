@@ -1343,3 +1343,34 @@ Three rules that give the file teeth, also HQ's:
   Its presence retires the upper-bound guard in the charter's §2 and
   makes this entry's effect positive; its absence carries this entry
   forward with the week count incremented.
+
+### The charter that every window must read is charged to the turn cap that reads it
+
+- **Proposal.** This window, the thirtieth, 2026-10-24, from its own
+  measurement. `prompts/exo-agent.md` went from 2,221 lines to 4,100 in
+  thirteen hours, with 1,929 lines added against 50 removed, a 2.6 per
+  cent replacement ratio. This seat's eleven runs that got a turn spent
+  13 to 101 of a 100-turn cap, eight of eleven at or above eighty-five
+  per cent and three killed by it. §2's own turn-budget warning had been
+  firing for a day with nothing acting on it, because it names the
+  symptom and no rule named the input this seat controls.
+- **Merged.** **No**, open in this window's pull request, which is the
+  live tip of this seat's chain and sits behind the charter freeze.
+- **Effect.** **None yet, and the first reading is in this entry rather
+  than ahead of it.** The instrument is the ratio itself, and this
+  window's own is **82 added against 16 removed, 19.5 per cent**,
+  against the 2.6 per cent of the day before. Better and still positive,
+  so the curve has not turned and the entry carries forward.
+- **Rule.** **A finding's account goes to the register and its
+  instruction goes to the charter**, and a deletion is preferred to a
+  banner whenever the superseded text is spent. The charter is read under
+  a cap; the registers are not. The corollary for this seat is the
+  harder half: §3's standards-against-standards sweep was built to catch
+  an amendment that lies and is blind to one that is merely expensive,
+  and every banner in this charter is of the honest, expensive kind.
+- **Next measure.** On the brief of **2026-10-25**, run
+  `git diff --numstat origin/main...HEAD -- prompts/exo-agent.md` and
+  `wc -l prompts/exo-agent.md` in the window's own pull request. A net
+  reduction, or a replacement ratio above fifty per cent, makes this
+  entry's effect positive. Anything else carries it forward with the week
+  count incremented, and the number is reported either way.

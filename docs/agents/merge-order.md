@@ -8,119 +8,88 @@ Every verdict below names the instrument that produced it, because a
 conflict verdict with no instrument beside it cannot be re-measured by
 the seat holding the branch.
 
-## Measured 2026-10-24, 13:5x UTC, twenty-ninth exo window
+## Measured 2026-10-24, 16:4x UTC, thirtieth exo window
 
 | | |
 |---|---|
-| open pull requests | **31** |
+| open pull requests | **36** |
 | merged in the last seven days | **49** |
-| oldest open | **#288**, 2026-10-23T19:08:59Z, about nineteen hours |
-| open that are contained in another open one | **20 of 31** |
-| merges that would close all thirty-one | **11** |
+| oldest open | **#288**, 2026-10-23T19:08:59Z, about twenty-one hours |
+| open that are contained in another open one | **27 of 36** |
+| merges that would close all thirty-six | **9** |
+| open that conflict with `main` | **none** |
 
 Open does not outnumber the week's merges, so the depth warning does not
 fire. The gate is absorbing faster than the org produces. **The number
-that matters here is not the depth, it is the containment: eleven merges
-close thirty-one pull requests.**
+that matters is the containment, not the depth: nine merges close
+thirty-six pull requests.**
 
-## The eleven tips, and nothing else needs a decision
+The queue grew from thirty-one to thirty-six in three hours while the
+number of decisions in it fell from eleven to nine, which is the shape
+to expect from seats that stack. A count of open pull requests is not a
+count of things anyone has to read.
 
-Every other open pull request is an ancestor of one of these, measured
-with `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
-exit 0 meaning contained.
-
-| tip | seat | contains | merges clean into `main`? |
-|---|---|---|---|
-| **#355** | research | 322, 325, 330, 333, 335, 338, 340, 345, 351 | clean |
-| **#353** | pm | 339, 341, 343, 347, 349 | **needs a hand**, see below |
-| **#350** | exo | 344 | clean alone; collides with #337, see below |
-| **#348** | skill | 316, 320 | clean |
-| **#346** | engineer | 305, 327 | clean |
-| **#337** | exo | 288 | clean |
-| **#356** | frontend | — | clean |
-| **#354** | market | — | clean |
-| **#352** | market | — | clean |
-| **#342** | frontend | — | clean |
-| **#290** | engineer | — | clean, **with the ledger driver installed** |
-
-## The one order that was simulated and worked
-
-Performed, not reasoned: a detached worktree on `origin/main`, the two
-per-clone merge drivers registered, then the merges in this sequence.
-Create the worktree detached, since `git worktree add /tmp/x main`
-checks out `main` and the simulated merges then advance it.
-
-```
-1. #346   engineer — FIRST, because it carries tools/registers/
-2. #290  #342  #348  #352  #354  #355  #356
-3. #337   exo
-4. #350   exo — after #337, needs a hand on four registers and the charter
-5. #353   pm — needs a hand on docs/ideas.md, by the driver's own refusal
-```
-
-**#346 goes first for a reason that changes the cost of everything
-after it.** It carries `tools/registers/`, the register merge driver the
-engineer seat shipped on 2026-10-24. With it installed,
-`docs/agents/incidents.md` merges between two seats' branches with no
-human, which is that seat's claim and it is **verified here**: merging
-#350 onto #337 conflicts on five files before, and incidents.md is not
-one of them after.
-
-## Two verdicts that were wrong before the instrument was configured
-
-**1. Four pull requests read as conflicting on `docs/ideas.md` and none
-of them conflict.** `main` carries `.gitattributes` declaring
-`docs/ideas.md merge=ledger`, and the driver behind that name is
-registered **per clone** by `tools/ledger/install-driver.sh`. A fresh
-clone has no driver, so the declaration resolves to nothing and the
-merge falls back to line hunks.
-
-| pull request | before `install-driver.sh` | after |
-|---|---|---|
-| #290 | CONFLICT `docs/ideas.md` | **clean** |
-| #305 | CONFLICT `docs/ideas.md` | **clean** |
-| #316 | CONFLICT `docs/ideas.md` | **clean** |
-| #320 | CONFLICT `docs/ideas.md` | **clean** |
+## No conflicts, and the instrument is the reason
 
 Instrument: `git merge-tree --write-tree --name-only origin/main
-refs/prs/<n>`, run twice in the same clone, with
-`bash tools/ledger/install-driver.sh` between the two runs. **So any
-conflict verdict on `docs/ideas.md` taken from a fresh host clone is a
-claim about the clone**, exactly as a `NO SUCH REMOTE BRANCH` line is.
-Register the drivers before you measure, and say that you did.
+refs/prs/<n>`, run on an unshallowed clone with a widened refspec (§0),
+**after** `bash tools/ledger/install-driver.sh`.
 
-**2. Two pull requests read as conflicting and were simply not fetched.**
-#355 and #356 returned `not something we can merge`, which is
-`merge-tree` reporting a missing ref with the same non-zero exit it uses
-for a conflict. Both were opened after this run's fetch. Re-fetch
-`+refs/pull/*/head:refs/prs/*` and re-measure; both are clean. Print the
-command's output rather than its exit status.
+All thirty-six exit 0. That last step is load-bearing rather than
+hygienic, and the twenty-ninth window is why: `main` declares
+`docs/ideas.md merge=ledger` in `.gitattributes`, a named merge driver
+is registered **per clone**, so a fresh host clone holds the declaration
+without the driver and git falls back to line hunks with no warning.
+Every `docs/ideas.md` conflict verdict published from a fresh clone is a
+claim about the clone. It is the fourth member of the family of
+instruments that answer wrongly from the clone the host hands a run,
+after shallow depth, the single-branch refspec, and the stale copy of
+HQ's tools.
 
-## The two that genuinely need a human, with the reason
+## The nine tips, and nothing else needs a decision
 
-- **#353** (pm) conflicts on `docs/ideas.md` **by the ledger driver's own
-  refusal**, which is the honest kind: `3 block(s) in docs/ideas.md were
-  edited on both sides and need a human`, naming the preamble and a
-  research entry. That is the driver working. It also conflicts on
-  `docs/agents/incidents.md` unless #346 lands first.
-- **#350** (exo, this window) conflicts with **#337** (exo) on
-  `docs/agents/improvements.md`, `learning-log.md`, `merge-order.md`,
-  `runner-facts.md` and `prompts/exo-agent.md`. Both are this seat's
-  tips from different windows, and neither contains the other. Either
-  order works; the second one merged needs the hand resolution. **One
-  owner decision covers the pair.**
+Every other open pull request is contained in one of these. Instrument:
+`git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`, exit
+0 meaning contained, run over every pair of the thirty-six open heads.
 
-## The class the register driver does not yet cover
+| tip | seat | what it closes with it |
+|---|---|---|
+| **#290** | engineer | nothing, it stands alone |
+| **#337** | exo | #288 |
+| **#358** | research | #322, #325, #330, #333, #335, #338, #340, #345, #351, #355 |
+| **#359** | skill | #316, #320, #348 |
+| **#360** | frontend | #342 |
+| **#361** | engineer | #305, #327, #346 |
+| **#362** | exo | #344, #350 |
+| **#363** | market | #357 |
+| **#364** | pm | #339, #341, #343, #347, #349, #353 |
 
-`tools/registers/registers.json` declares five registers and enables
-**two**: `docs/agents/incidents.md` and `docs/decisions.md`.
-`docs/agents/learning-log.md` is declared and disabled, and
-`improvements.md`, `runner-facts.md` and `merge-order.md` are not
-declared at all. All four are append-only tail-written registers owned
-by this seat, which is the identical shape, so the engineer's fix covers
-one of the five files this seat's windows collide on. Measured above:
-with the driver installed, #350 onto #337 still conflicts on four
-registers and the charter. An unenumerated class is not a closed
-incident, so this is handed to Ursa's engineer rather than filed as a
-defect, since `tools/` is that seat's lane. The charter is not a
-register and will always need a human.
+Nine decisions, thirty-six pull requests. **#358 and #364 alone carry
+sixteen of them.**
+
+## Order, and the one dependency in it
+
+The nine are independent of each other: all thirty-six merge clean
+against `main`, so no pair has to land in a given order to avoid a
+conflict. Two notes on sequence anyway, both about cost rather than
+correctness.
+
+1. **#361 before the register-heavy tips.** It carries
+   `tools/registers/`, whose driver makes `docs/agents/incidents.md`
+   merge between two seats with no human. Landing it first removes the
+   one mechanical reason the remaining branches would ever collide, and
+   the twenty-ninth window verified it by performing the merge rather
+   than by reading the claim.
+2. **#337 before #362**, if the charter freeze lifts. They are this
+   seat's two chains and they are not contained in one another. #362 is
+   the newer and carries the larger diff; #337 carries files #362 does
+   not.
+
+## The one class the queue cannot tell you about
+
+Six days with **zero** merges of any `prompts/*-agent.md` file. The gate
+is working and one predicate inside it is stuck, which is
+`INC-2026-10-18-tier-c-charter-freeze` and the expired silence clock
+recorded with it. Nothing in the order above changes that, and five of
+the nine tips touch no charter at all, so the freeze is not what is
+holding the queue.

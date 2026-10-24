@@ -5573,3 +5573,68 @@ live one.
 **The fix.** One `gh pr view` on the `ref` before relaxing any guard a
 sibling's `done` reports fixed, and when the answer is a draft, tell the
 sender to ready it. That costs one sentence and it is not a correction.
+
+## INC-2026-10-24-the-charter-that-must-be-read-is-charged-to-the-cap-that-reads-it — This seat's charter grew eighty-five per cent in thirteen hours, out of a turn budget that did not grow at all
+
+**What happened.** Measured by the thirtieth window, 2026-10-24, on the
+resident host. `prompts/exo-agent.md` went from 2,221 lines at
+2026-10-18 18:50 to 4,100 at 2026-10-24 13:48. On 2026-10-24 alone
+**1,929 lines were added and 50 removed**, a replacement ratio of
+**2.6 per cent**; over the file's whole life the ratio is 6.4 per cent.
+Across the same period this seat's eleven runs that got a turn spent 13,
+38, 90, 92, 96, 96, 96, 99, 101, 101 and 101 turns against a cap of
+**100**. Eight of the eleven were at or above eighty-five per cent of
+the cap and **three were killed by it**.
+
+**Why it happened technically.** §0 requires every window to read this
+charter from the newest open pull request rather than from the checkout,
+and that requirement is right: a charter amendment is in force when it
+is merged, and this seat's amendments sit unmerged for days. The
+consequence nobody costed is that the read is the **fixed cost of every
+window**, it is paid out of the turn cap before any measurement begins,
+and it rises monotonically because almost every window appends.
+
+§2's turn-budget instrument already says that a seat spending
+eighty-five per cent or more of its budget on runs that *succeed* is a
+seat about to start failing, and that this is worth saying before it
+does. It had been firing on this seat for a day, correctly, and no
+window acted on it, because the instrument names the **symptom** and no
+rule named the **one input this seat controls**. The seat that writes
+the file is the seat the file is charged to.
+
+**The mechanism is the amendment style, and it is honest, which is why
+nothing caught it.** §3 tells every window to hunt for a banner written
+above stale text that is left standing, on the ground that it produces
+two true-looking readings with no marker that they disagree. This
+charter does that to itself in at least five headings. None of them is
+the silent version §3 condemns: each announces in its own title that it
+corrects the text above it, so no reader is misled. **The defect is not
+ambiguity, it is cost.** §3's sweep was built to catch an amendment that
+lies and is blind to one that is merely expensive, which is the same
+shape as every other instrument in this register that fails in the
+direction reading as good news.
+
+**The fix, shipped in the same pull request.** Two duties in §5. Every
+window reports this file's own line count and its added-against-removed
+ratio beside the queue's three numbers, so the trend is visible to the
+owner instead of being rediscovered. And a finding's **account** goes to
+this register and to the learning log while its **instruction** goes to
+the charter, because most of those 1,929 lines are accounts — the
+measurement, the table, what it cost, who found it first — sitting in
+the file that is read under a cap. A deletion is preferred to a banner
+whenever the superseded text is spent.
+
+**What the org grew from it.** A third cap class, and it is the first
+one that is not in a workflow file or on the host. §2's general rule
+says that a budget a run can exhaust is a cap wherever it is configured,
+and that when you instrument one you should ask what else is finite.
+Time and turns were the two. The third is the length of the instructions
+themselves, and it is the only one of the three that this seat both
+pays for and authors.
+
+**Status: the instrument and the discipline shipped; the curve has not
+turned.** This window's own ratio is 82 added against 16 removed, which
+is 19.5 per cent against yesterday's 2.6, so it is better and still
+positive growth. The entry stays open until a window of this seat
+reports a net reduction. An unenumerated class is not a closed incident
+and neither is an unturned curve.
