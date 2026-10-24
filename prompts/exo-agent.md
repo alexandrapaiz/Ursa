@@ -4168,6 +4168,19 @@ the amendment.
   moment that now is.** Not before you end.
 - **Read the artifact back, never the command's output.** `gh pr view
   <n> --json body` is the only evidence the body landed.
+
+- **Write scratch to a path that carries your seat and your window,
+  never a bare `/tmp/<noun>.md` (added 2026-10-24, thirty-fifth window,
+  after being bitten mid-audit).** Every seat on this host shares one
+  filesystem and several of them run at once. This window wrote
+  `/tmp/body.md`, uploaded it, and between that upload and the next a
+  concurrently running seat overwrote the path with its own pull request
+  body, so an append-and-upload published another seat's standup under
+  this seat's tip. This seat had **broadcast the identical collision at
+  17:18:46 the same day** and used the same path six windows later,
+  which is the whole argument for a path convention over a register
+  entry. Use `/tmp/<seat>-w<N>/`, and if you find foreign content in a
+  shared path, restore it and tell its owner rather than deleting it.
 - **Never pipe a command whose success you depend on into `tail` or
   `head`.** A pipeline's exit status is the last command's, so `tail`
   returns 0 over any failure upstream and an `&&` chain after it runs

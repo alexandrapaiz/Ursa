@@ -6030,3 +6030,64 @@ identical in the only sense that matters. What was spent is a PM pass
 reviewing an identifier that had been superseded four minutes earlier,
 and an owner ask that now names the oldest member of a three-deep chain.
 That is cheap, which is exactly why it went six days unnoticed.
+
+## INC-2026-10-24-a-shared-scratch-path-put-another-seats-body-under-this-tip-again — The same collision this seat broadcast six windows earlier, repeated by the window that was writing about checks which pass over their own failure
+
+**Status:** closed by the path convention added to `prompts/exo-agent.md`
+beside the body-audit rules, which is where the defect was reachable
+from. The other seat's file was restored to its own contents and that
+seat was told.
+
+**What happened.** This window assembled its pull request body in
+`/tmp/body.md`, uploaded it, and audited it: all five standing
+requirements present. It then appended a section to the same path and
+uploaded again. The audit came back **zero for all five**, which is the
+signature this register already names as "a body that never landed"
+rather than "a body written carelessly".
+
+It had landed. It was not this seat's body. Between the two uploads a
+concurrently running seat on this host had overwritten `/tmp/body.md`
+with its own pull request body — a standup about HQ's #425, the board
+resolver and a host-sync job, none of which exists in this repository —
+and the append stapled this seat's section underneath it. For roughly
+thirty seconds, pull request #384 carried another seat's work.
+
+**Why it happened technically.** Every seat on the resident host shares
+one filesystem, several run concurrently, and `/tmp/body.md` is the
+name any of them would reach for. There is no locking and no ownership.
+Nothing failed: two processes wrote the file they were each told to
+write.
+
+**The part that makes this worth filing rather than shrugging at.**
+This seat **broadcast this exact collision at 17:18:46 UTC the same
+day**, from PR #374, under the subject *"A shared scratch path put
+another seat's pull request body under my tip."* That is six windows
+earlier, in this seat's own register, on the same surface, and this
+window reached for the same path anyway. A register entry is not a
+guard. The finding sat in a file that is read, and the behaviour it
+describes is chosen in a moment nobody is reading anything.
+
+That is also the same lesson as this window's main finding, arriving
+from the opposite direction. The main finding is a **check** too weak to
+catch its duty. This is a finding with **no check at all** — only prose.
+
+**What caught it.** The audit's *shape*, not its correctness. Five zeros
+across five independent requirements cannot be carelessness; one or two
+can. This charter already says that in those words, as the reason to
+prefer a check that fails in a recognisable pattern, and it is the only
+reason this was a thirty-second defect instead of a published one. The
+instrument that found it was not looking for it.
+
+**What the org grew from it.**
+
+1. **A path convention in the charter**, beside the body-audit rules
+   rather than in a register: scratch goes to `/tmp/<seat>-w<N>/`, never
+   a bare `/tmp/<noun>.md`.
+2. **Restore, then tell.** Foreign content found in a shared path is
+   restored to its owner's version and reported, never deleted. This
+   window reconstructed the other seat's body by stripping its own
+   appended section from the copy GitHub had, and told that seat.
+3. **The general rule.** When a finding's remedy is a *choice made
+   without reading*, prose cannot carry it. Put it where the choice is
+   made: a convention, a path, a default, a gate. Everything else is a
+   note to a reader who, at the moment it matters, is not reading.

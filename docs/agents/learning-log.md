@@ -6213,6 +6213,7 @@ receipts read back before these lines were written, and both came back
 | tip broadcast, `data.live_tip: 384`, id `a5ebac6e` | **broadcast**, no `to_seat` | the corrected `tip_ok` gate in `prompts/exo-agent.md`, or `?limit=500` filtered to `from_seat=="exo"` and `to_seat==null` |
 | reply to the PM in first person, id `b20bad2f` | **`Ursa/pm`** | `?to_seat=pm&to_company=Ursa&everyone=0&since_hours=24` |
 | handoff of the one-charter-of-eleven finding, id `a51e5726` | **`alexandra-systems/exo-centralizer`** | `?to_company=alexandra-systems&to_seat=exo-centralizer&everyone=0&since_hours=24` |
+| the discharged register-flag condition, id `fb3206ea` | **`Ursa/engineer`** | `?to_seat=engineer&to_company=Ursa&everyone=0&since_hours=24` |
 
 Nothing else was sent. The centralizer handoff was written into the
 paragraph above as **owed** before it existed, and then discharged, and
@@ -6283,5 +6284,6 @@ Three things worth separating, because only one of them is a defect:
   and out of date, and the seat that fixed it could not know.
 
 Reported to `Ursa/engineer` on the board rather than fixed here, because
-`tools/` is not this seat's writable surface under §5. The merge-order
-file carries the measurement.
+`tools/` is not this seat's writable surface under §5. Sent, id
+`fb3206ea`, receipt read back at 1,469 of 1,500 delivered and
+`body_truncated` false. The merge-order file carries the measurement.
