@@ -6490,21 +6490,41 @@ init_segment();
 var MAX_REVISIONS = 50;
 var MIN_TRACEABLE_LEN = 24;
 var MAX_BLOB_CHARS = 3e5;
-function git2(repoPath, args) {
-  return (0, import_node_child_process3.execFileSync)("git", ["-C", repoPath, ...args], {
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "ignore"]
-  });
-}
-function headSha(repoPath) {
+function firstVanish(repoPath, sha, path) {
+  let out;
   try {
-    return git2(repoPath, ["rev-parse", "HEAD"]).trim();
+    out = git2(repoPath, [
+      "log",
+      "--reverse",
+      "--topo-order",
+      "--diff-filter=D",
+      "--pretty=format:%H",
+      `${sha}..HEAD`,
+      "--",
+      path
+    ]);
   } catch {
     return null;
   }
+  const first = out.split("\n").find(Boolean);
+  return first ? first.trim() : null;
 }
-function revisionsAfter(repoPath, sha, path, limit = MAX_REVISIONS) {
+function renameTarget(repoPath, sha, path) {
+  let out;
+  try {
+    out = git2(repoPath, ["diff-tree", "-r", "-M", "--name-status", "--no-commit-id", "-z", sha]);
+  } catch {
+    return null;
+  }
+  const f = out.split("\0");
+  for (let i = 0; i < f.length; i++) {
+    if (!/^R\d*$/.test(f[i])) continue;
+    if (f[i + 1] === path && f[i + 2]) return f[i + 2];
+    i += 2;
+  }
+  return null;
+}
+function logOnePath(repoPath, sha, path, limit) {
   let out;
   try {
     out = git2(repoPath, [
@@ -6525,6 +6545,48 @@ function revisionsAfter(repoPath, sha, path, limit = MAX_REVISIONS) {
     const [revSha, at, author, ...rest] = line.split("	");
     return { sha: revSha, at, author, subject: rest.join("	") };
   });
+}
+function git2(repoPath, args) {
+  return (0, import_node_child_process3.execFileSync)("git", ["-C", repoPath, ...args], {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "ignore"]
+  });
+}
+function headSha(repoPath) {
+  try {
+    return git2(repoPath, ["rev-parse", "HEAD"]).trim();
+  } catch {
+    return null;
+  }
+}
+function revisionsAfter(repoPath, sha, path, limit = MAX_REVISIONS) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set([path]);
+  let currentPath = path;
+  let from = sha;
+  while (out.length < limit) {
+    const batch = logOnePath(repoPath, from, currentPath, limit - out.length);
+    if (batch.length === 0) break;
+    const vanishedAt = firstVanish(repoPath, from, currentPath);
+    const movedTo = vanishedAt ? renameTarget(repoPath, vanishedAt, currentPath) : null;
+    let followed = false;
+    for (const rev of batch) {
+      if (out.length >= limit) break;
+      if (movedTo && rev.sha === vanishedAt) {
+        out.push({ ...rev, path: movedTo, renamedFrom: currentPath });
+        currentPath = movedTo;
+        from = rev.sha;
+        followed = true;
+        break;
+      }
+      out.push({ ...rev, path: currentPath });
+    }
+    if (!followed) break;
+    if (seen.has(currentPath)) break;
+    seen.add(currentPath);
+  }
+  return out;
 }
 function blobAt2(repoPath, sha, path) {
   try {
@@ -6567,9 +6629,13 @@ function traceFile(repoPath, path, spans, closedAt, revisions) {
   }
   if (revisions.length === 0) return spans;
   let remaining = live.length;
+  let renamesFollowed = 0;
+  let lastPath = path;
   for (const rev of revisions) {
     if (remaining === 0) break;
-    const text = blobAt2(repoPath, rev.sha, path);
+    const text = blobAt2(repoPath, rev.sha, rev.path);
+    if (rev.renamedFrom) renamesFollowed++;
+    lastPath = rev.path;
     const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? "" : normalize(text).norm;
     const fileTokens = new Set(tokens(fileNorm));
     const revMs = Date.parse(rev.at);
@@ -6610,6 +6676,12 @@ function traceFile(repoPath, path, spans, closedAt, revisions) {
     }
     life.fate = lost.length === 0 ? "durable" : lost.length === units.length ? "decayed" : "eroded";
   }
+  if (renamesFollowed > 0) {
+    for (const span of spans) {
+      span.lifespan.renamesFollowed = renamesFollowed;
+      span.lifespan.renamedTo = lastPath;
+    }
+  }
   return spans;
 }
 function median(values) {
@@ -6628,10 +6700,12 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
   let testedSpans = 0, durableSpans = 0, erodedSpans = 0, decayedSpans = 0;
   let durableChars = 0, decayedChars = 0;
   let baseDurable = 0, baseDecayed = 0;
+  let renames = 0;
   const lifetimes = [];
   for (const file of record.files) {
     for (const span of file.spans) {
       const life = span.lifespan;
+      if (life?.renamesFollowed) renames += life.renamesFollowed;
       if (!life || life.fate === "untested") continue;
       if (SURVIVING.has(span.class)) {
         testedSpans++;
@@ -6663,7 +6737,8 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
     baselineDecayRate: baseTotal === 0 ? null : baseDecayed / baseTotal,
     medianIntactSeconds: median(lifetimes),
     maxRevisionsWalked: maxRevisions,
-    minTraceableLen: MIN_TRACEABLE_LEN
+    minTraceableLen: MIN_TRACEABLE_LEN,
+    ...renames > 0 ? { renamesFollowed: renames } : {}
   };
   return record;
 }
