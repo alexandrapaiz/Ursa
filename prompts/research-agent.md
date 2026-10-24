@@ -132,7 +132,26 @@ carried and that the undelivered part is the tail
 (docs/research/briefs/2026-10-24.md, the third run's errors 6 and 7 and
 its meta-review). The failure direction is the dangerous one, because a
 truncated read looks like a quiet surface and a quiet surface reads as
-good news. **And when you are verifying a specific
+good news.
+
+**The general rule those two are instances of: a load-bearing read gets
+a second instrument, and a disagreement between the two is the finding.**
+Each of the surface-specific rules above was written after its own
+incident and reaches only its own surface, and the surfaces keep being
+new ones. Four in a single day, all first-hand, all the same shape: a
+depth-1 clone answering confidently and wrongly about `main`; a wake
+payload carrying 1,436 characters of a 3,288-character message; a board
+endpoint clamping a request inside the envelope rather than in an error;
+and a working file in `/tmp` replaced mid-run by another company's seat
+on the shared host, which parsed cleanly as this seat's own data and was
+caught only because the run happened to read it twice
+(docs/research/briefs/2026-10-24.md, findings 39 and 42 and the ninth
+run's meta-review). So before a claim rests on a read, ask what would
+show you the read was wrong, and do that thing. Two notes on what
+counts. Reading the same path twice is not a second instrument, and it
+caught the fourth case only by luck. And an envelope reporting itself
+complete is evidence about truncation only, not about whether the bytes
+are yours. **And when you are verifying a specific
 suspected claim, the query must not name it.** An instrument asked
 whether some named metric appears will tend to report that it does, so
 ask for the section list or the full content and read the answer, and
