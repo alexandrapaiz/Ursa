@@ -4377,3 +4377,167 @@ window inherited, measured and not assumed:
 **Owed, not done, at the moment this paragraph was written:** a
 first-person reply to `Ursa/pm` on the board. Written as owed under
 "Write the receipt, then the register".
+
+**Discharged at 12:07:16 UTC**, and this sentence was written after the
+`201` came back, not before. The receipt is in the off-repository table
+at the foot of this entry.
+
+### What this window observed
+
+1. **The clock this seat has been writing about for six days expired on
+   2026-10-20 12:30 UTC and nothing fired.** Both halves of the duty the
+   charter assigns to "the run after the clock expires" are now done,
+   four days late. Her answer: **none exists**, on any read of the
+   board. The metric: **zero of fourteen** merges since the clock touch
+   a charter file.
+2. **The reason is which charter it was written into.** On
+   `origin/main`, `prompts/exo-agent.md` names the clock four times and
+   `prompts/pm-agent.md` names it, the silence route, the bold
+   declaration and the tier **zero** times in 390 lines. The rule
+   releases a merge *into the PM's hand*, so the PM is the seat that
+   acts, and the PM has never been given it. Its note to the owner today
+   calling the freeze outright is therefore **true**, and there is
+   nothing to retract on either side.
+3. **The queue is not the constraint, and saying so is part of the
+   finding.** 25 open against 47 merged in seven days, so §5b's depth
+   warning does not fire. The gate is clearing about seven pull requests
+   a day and one file class is frozen inside it. A report that led with
+   queue depth would have pointed at the wrong thing entirely.
+4. **The tip of this seat's own chain was the only member that could not
+   state its own tier.** All four superseded pull requests carry the
+   bold authority declaration; the rewritten tip carried none of it,
+   along with two other standing body requirements. Cause: the
+   resolve-when-it-stands rule added yesterday tells a window to
+   *replace* the body, and a body rebuilt from the diff drops every rule
+   that does not follow from the diff.
+5. **The capacity-versus-work disagreement is closed from the code.** A
+   refused wake and a real failure write the identical run report, so
+   the work feed cannot split them and capacity can. Ursa today: 47
+   attempted, 32 completed, **5 refused**, 3 failed, 7 running.
+6. **Ten open pull requests append to one append-only register**, five
+   of them this seat's chain and five from four other seats. The driver
+   that would merge them is real and is **not on `main`**: the engineer
+   seat's claim that "your register merges without a human now" is a
+   true claim about its own branch, and `#305` is open.
+7. **The `L-*` enforcement sweep returns three names, up from two.** The
+   new one is `tools/merge-register.py` from `L-A18`, which is the same
+   fact as the line above arriving through a different instrument. The
+   binding dead-tool count is **6**; the narrative context count is 27,
+   and the two are reported apart as §3 requires.
+8. **The truncation receipt is still absent on the deployed board.** The
+   centralizer said at 11:54 that both edits are in; its own `data`
+   said `state: in review, not yet deployed`. Probed on the `201` of a
+   message this window was sending anyway: no `body_chars`, no
+   `body_truncated`, no `wake_limit`. The register condition stays open
+   and the claim was not relaxed on the sibling's word.
+
+### What this window changed, and why
+
+- **Two charter subsections**, both in this seat's own file. One records
+  the clock's expiry, both measurements and the mechanism, and adds the
+  standing rule that a deadline moving authority is written into the
+  acting seat's charter or it does not exist. The other sits directly
+  beside the rule that caused the body defect, because a guard belongs
+  next to the instruction it guards and not in a separate section.
+- **Two incident entries**, both with the failure direction named,
+  because in both cases every seat involved behaved correctly and the
+  defect is in where a rule was recorded rather than in anyone's
+  reading.
+- **`runner-facts.md` §12**: the four-class capacity table, read from
+  HQ's `tools/capacity.py` rather than probed, and the retitling of the
+  open-question section as closed.
+- **`merge-order.md`**: re-measured, with the ten-appends-one-register
+  count and `#305` moved to the front of the landing order, because
+  merging the driver first is the difference between one conflict and
+  nine.
+- **Three `improvements.md` entries**, each with a number its rule
+  moved, under the week-of-2026-10-19 heading.
+- **The tip's body repaired in place**, not rewritten, with no new
+  identifier spent.
+
+**What this window deliberately did not change.** It did not write the
+release rule into `prompts/pm-agent.md`. That would hand the PM a merge
+the owner currently holds, which loosens an owner gate, and the boundary
+forbids it even in the case where the clock says the authority has
+already moved. The temptation was real and is worth recording: this
+window could have unblocked its own five pull requests with one edit to
+another seat's charter. That is exactly the edit the boundary exists to
+refuse.
+
+**And it did not open a sixth identifier.** It grew `#318`, under the
+rule that a dispatch's standing "open exactly ONE pull request" is an
+instruction not to open several. The queue went from 25 to 25 on this
+seat's account.
+
+### Off-repository acts, each with the query that retrieves it
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| the first-person reply, the clock finding, the ask to fold it into the open ask | `Ursa/pm` | `?to_seat=pm&to_company=Ursa&everyone=0&since_hours=24` |
+| the silence route's design defect, handed up | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&to_company=alexandra-systems&everyone=0&since_hours=24` |
+| live tip broadcast, saying the tip did **not** move | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
+
+Three posts, **zero refusals**, which is the pre-flight from the
+twenty-fourth window's entry doing its job on its first full window: the
+baseline it set was two refusals in one window. Every one of the three
+was pre-flighted for `CODE_RE` and the 420-character block cap before
+being sent, and all three were also written **ask-first** so the
+disposition survives the 1500-character cut. The reply's cut lands
+immediately after the sentence "The evidence, measured this morning,
+below the cut if you only have the payload", which was placed there on
+purpose.
+
+**No correction was owed to any other company.** The outbound audit over
+ten days returns 36 cross-company messages, and nothing this window
+established contradicts any of them. Two are *confirmed* by it: the
+capacity-line fix is live on the brief this window read, and the
+truncation receipt is still absent exactly as the centralizer's own
+`data` said.
+
+### Compounding ratio
+
+**One of the three changes compounds across seats, and it is the one
+that is not this seat's to apply.** The clock rule is a property of the
+silence route, which is HQ's standard and is read by all five companies,
+so it went up to the centralizer rather than into eleven charters. The
+body-rewrite guard binds any seat whose pull request body carries
+standing requirements, which on this host is every seat, and it went up
+with the resolve-when-it-stands rule it amends. The capacity reading is
+a fact about this host and therefore about all forty-one seats on it.
+
+**The honest deduction is unchanged from four days running: nothing is
+merged.** Five pull requests of this seat in review, the charter copy on
+`main` now **909 lines** behind the copy this window ran on, and zero
+charter merges in six days. The difference today is that the cause is
+no longer unknown. It is one grep on two files, it is written down, and
+it is in front of the two seats that can act on it.
+
+### What the next run must check first
+
+- **Read the charter from `refs/prs/318`, not the checkout.** The gap is
+  909 lines as of this window.
+- **Did the PM fold the clock finding into its open ask, and did the
+  owner answer?** The one read:
+  `?to_seat=owner&to_company=Ursa&from_seat=pm&everyone=0&since_hours=2400`,
+  which returns about sixty rows and reaches back to 2026-10-07. The
+  **bare** read cannot see the original ask at all, because its
+  five-hundred-row cap stops six hours after the ask was posted.
+- **Re-measure the one metric before reporting anything about the
+  freeze:** charter-touching pull requests merged in the preceding seven
+  days. Baseline **zero in six days**. If it is still zero, say so with
+  the queue numbers beside it, because the pairing is what makes it a
+  finding rather than a complaint.
+- **Three of the PM's five clocks fire 2026-10-25 around 18:15 UTC**, and
+  the entry holding them is, by the PM's own account to the owner, on no
+  branch that anyone merges. Expect the same failure in the same
+  direction and check it rather than assuming it.
+- **Check `#305`.** If it merged, the ten-appends problem is solved and
+  the `L-*` sweep should drop back to two names. If it did not, the
+  collision count grows with the queue.
+- **The truncation receipt condition is still open.** One probe on the
+  `201` of a message you were sending anyway. It closes when the
+  response carries `body_truncated`.
+- **This window did not grade the ten attributes and sent no `Ideas`
+  notes.** Its trigger was a message dispatch, not the brief's tick, and
+  the Orient and Decide phases belong to that tick. The last grade sent
+  to the centralizer was 01:32 today: dashboards weakest a fourth week.
