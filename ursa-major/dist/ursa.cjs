@@ -2732,6 +2732,8 @@ function computeStats(files, generations, conversations, exclusions = []) {
   let finalChars = 0;
   let uncertainSpans = 0;
   let trivialSpans = 0;
+  let blindSpans = 0;
+  let suppressedTokenSpans = 0;
   const byModelChars = /* @__PURE__ */ new Map();
   const byConvChars = /* @__PURE__ */ new Map();
   const perFile = files.map((f) => {
@@ -2747,6 +2749,8 @@ function computeStats(files, generations, conversations, exclusions = []) {
       fileByClass[s.class] += chars;
       if (s.uncertain) uncertainSpans++;
       if (s.trivial) trivialSpans++;
+      if (s.noCandidate === "df_cutoff_suppressed") blindSpans++;
+      if (s.tokenSuppression) suppressedTokenSpans++;
       if (s.source) {
         byModelChars.set(s.source.model, (byModelChars.get(s.source.model) ?? 0) + chars);
         byConvChars.set(s.source.conversationId, (byConvChars.get(s.source.conversationId) ?? 0) + chars);
@@ -2806,6 +2810,8 @@ function computeStats(files, generations, conversations, exclusions = []) {
     byClass,
     uncertainSpans,
     trivialSpans,
+    blindSpans,
+    suppressedTokenSpans,
     byModel: Object.fromEntries(
       [...byModelChars.entries()].map(([m, chars]) => [
         m,
@@ -2879,6 +2885,7 @@ function resolve(input) {
       }
     });
   }
+  const corpusSegments = preps.reduce((n2, p) => n2 + p.sentences.length, 0);
   const verbatimClaims = /* @__PURE__ */ new Map();
   const mutatedClaims = /* @__PURE__ */ new Map();
   const notGeneratedClaims = /* @__PURE__ */ new Map();
@@ -2984,13 +2991,21 @@ function resolve(input) {
           span = normalizedOnlyMutation(base, p, g.start, g.end, f.path, true);
         }
       }
+      let suppression = null;
+      let noCandidate = null;
       if (!span && sNorm.length > 0) {
         const sTokens = tokens(sNorm);
+        const distinct = new Set(sTokens);
+        let suppressed = 0;
         const seen = /* @__PURE__ */ new Set();
         const candidates = [];
-        for (const t of new Set(sTokens)) {
+        for (const t of distinct) {
           const bucket = tokenIndex.get(t);
-          if (!bucket || bucket.length > MAX_TOKEN_DF) continue;
+          if (!bucket) continue;
+          if (bucket.length > MAX_TOKEN_DF) {
+            suppressed++;
+            continue;
+          }
           for (const cand of bucket) {
             const key = cand.p.gen.generationIndex + ":" + cand.sIdx;
             if (seen.has(key)) continue;
@@ -2998,6 +3013,9 @@ function resolve(input) {
             const sent = cand.p.sentences[cand.sIdx];
             candidates.push({ p: cand.p, sent, cont: containment(sTokens, sent.tokenSet) });
           }
+        }
+        if (suppressed > 0) {
+          suppression = { distinct: distinct.size, suppressed, cutoff: MAX_TOKEN_DF, corpusSegments };
         }
         candidates.sort((a, b) => b.cont - a.cont);
         let best = null;
@@ -3038,9 +3056,22 @@ function resolve(input) {
             uncertain: true,
             candidate: { score: r33(best.score), text: best.sent.text, source: srcPtr(best.p, best.sent.start, best.sent.end) }
           };
+        } else if (best) {
+          noCandidate = "scored_below_floor";
+        } else if (distinct.size === 0) {
+          noCandidate = "empty_after_normalization";
+        } else if (suppressed > 0) {
+          noCandidate = "df_cutoff_suppressed";
+        } else {
+          noCandidate = "absent_from_corpus";
         }
+      } else if (!span) {
+        noCandidate = "empty_after_normalization";
       }
-      spans.push(span ?? { ...base, class: "no_generation_provenance" });
+      const resolved = span ?? { ...base, class: "no_generation_provenance" };
+      if (noCandidate && !resolved.candidate) resolved.noCandidate = noCandidate;
+      if (suppression) resolved.tokenSuppression = suppression;
+      spans.push(resolved);
     }
     return {
       path: f.path,
@@ -3940,7 +3971,8 @@ async function runConsentCommand(argv, io = stdio) {
       const tuning = revokeAxiom(tPath, axiom);
       const target = tuning.axioms.find((a) => a.id === axiom);
       io.out(`Revoked ${axiom}: "${target.statement}"`);
-      io.out("It is kept as a tombstone so a later distillation cannot bring it back, and it is excluded from every export and from the overlay.");
+      io.out("It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.");
+      io.out("A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.");
       const twins = revocationTwins(tuning, axiom);
       if (twins.length > 0) {
         io.out("");

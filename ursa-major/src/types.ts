@@ -294,6 +294,29 @@ export interface DiffPart {
 // that came afterwards did to it. See lifespan.ts for how it is measured.
 // ---------------------------------------------------------------------------
 
+/**
+ * Why a `no_generation_provenance` span carries no candidate. See the
+ * `noCandidate` field on Span for what each value means and why the third
+ * one is a defect report rather than a measurement of the work.
+ */
+export type NoCandidateReason =
+  | 'scored_below_floor'
+  | 'absent_from_corpus'
+  | 'df_cutoff_suppressed'
+  | 'empty_after_normalization'
+
+/** See the `tokenSuppression` field on Span. */
+export interface TokenSuppression {
+  /** distinct tokens in the span's normalized text */
+  distinct: number
+  /** of those, how many were skipped for exceeding `cutoff` */
+  suppressed: number
+  /** `MAX_TOKEN_DF` as it stood when this record was resolved */
+  cutoff: number
+  /** generation segments in the token index this record was resolved against */
+  corpusSegments: number
+}
+
 export interface SpanLifespan {
   /** revisions of this span's file, after the closing commit, that were examined */
   revisionsChecked: number
@@ -405,6 +428,82 @@ export interface FinalSpan {
   /** below-threshold best match existed; surfaced for human adjudication */
   uncertain?: boolean
   candidate?: { score: number; text: string; source: SourcePointer }
+  /**
+   * Why the fuzzy pass had nothing better to offer, on a
+   * `no_generation_provenance` span. Added 2026-10-24.
+   *
+   * WHY THIS IS A FIELD AND NOT A COMMENT. Three different things produce
+   * the same bare `no_generation_provenance` label, and before this field
+   * existed nothing downstream could tell them apart:
+   *
+   *   `scored_below_floor` — candidates were seeded and the best of them
+   *     scored under THETA_LOW. The matcher looked and found nothing close.
+   *   `absent_from_corpus` — every distinct token of the span appears in no
+   *     generation segment at all. The matcher looked, and the vocabulary
+   *     genuinely is not in the corpus. This is the honest form of the
+   *     label: the model was never in the running.
+   *   `df_cutoff_suppressed` — at least one distinct token of the span IS
+   *     in the corpus, and every token that is was skipped because its
+   *     document frequency exceeded `MAX_TOKEN_DF` in src/match.ts. The
+   *     matcher did not look. **This is the one that is not a finding
+   *     about the work; it is a finding about the matcher.**
+   *   `empty_after_normalization` — the span normalizes to the empty
+   *     string, so the fuzzy pass never ran on it.
+   *
+   * WHY IT MATTERS MORE AS THE DATASET GROWS, which is the opposite of how
+   * every other figure in this record behaves. `MAX_TOKEN_DF` is an
+   * absolute count of generation segments, and the number of generation
+   * segments grows every time anyone runs the tool. So the set of tokens
+   * the matcher refuses to seed on grows monotonically with the corpus,
+   * and `df_cutoff_suppressed` grows with it. Ursa's research seat
+   * measured the shape against a proxy corpus of this repository's own
+   * prose (docs/research/briefs/2026-10-24-message-14.md, finding 52):
+   * 0.00 per cent of substantive spans at 1,000 generation segments,
+   * 0.03 at 10,000, 0.33 at 50,000, 1.10 at 87,333. The corpus is a proxy
+   * and the percentages do not transfer; the monotone shape does, because
+   * it follows from the arithmetic rather than from the corpus.
+   *
+   * Both of this project's trials sit at the scale where the figure is
+   * zero, so neither owner verdict is affected by it and no trial could
+   * have caught it. It arrives with growth.
+   *
+   * WHY THE DIRECTION IS THE WORST AVAILABLE ONE. Every span the cutoff
+   * blinds moves out of `survived_mutated`, which CLAUDE.md §1 says IS the
+   * correction expressed as an edit, and into
+   * `no_generation_provenance`, which the same section calls the most
+   * valuable category. Silently inflating the category Ursa Minor sells
+   * hardest, by more as the dataset gets bigger, is the one error this
+   * record must not make without saying so.
+   *
+   * WHAT THIS FIELD IS NOT. It does not change any label and it does not
+   * retune anything. Whether `MAX_TOKEN_DF` should be relative to corpus
+   * size is a recall-against-cost decision the owner has not made, and the
+   * cutoff exists for a real reason: without it the fuzzy pass scores
+   * every final segment against every generation segment. This field makes
+   * the blindness countable so that decision can be made on a number.
+   */
+  noCandidate?: NoCandidateReason
+  /**
+   * Distinct tokens of this span that the fuzzy pass skipped because their
+   * document frequency exceeded `MAX_TOKEN_DF`, out of the span's distinct
+   * token count. Added 2026-10-24, alongside `noCandidate`.
+   *
+   * Present whenever `suppressed > 0`, INCLUDING on spans that were
+   * labelled successfully, because partial suppression is the common case
+   * and the interesting one: a span whose ten distinct tokens include nine
+   * suppressed ones was scored, but it was scored on a candidate set
+   * seeded by a single token. Its score is therefore a weaker statement
+   * than the same score on an unsuppressed span, and nothing else in the
+   * record says so.
+   *
+   * `cutoff` is the `MAX_TOKEN_DF` in force when the record was resolved
+   * and `corpusSegments` is the number of generation segments indexed,
+   * both stored because the field is only interpretable against them: the
+   * same span resolved against a larger corpus yields a larger
+   * `suppressed`, and a reader comparing two records needs to know which
+   * of the two numbers moved.
+   */
+  tokenSuppression?: TokenSuppression
   /** matched by exact equality of a very short segment — weak evidence */
   trivial?: boolean
   /**
@@ -562,6 +661,36 @@ export interface Stats {
   byClass: Record<SpanClass, ClassStat>
   uncertainSpans: number
   trivialSpans: number
+  /**
+   * Spans the fuzzy pass never scored, because every distinct token of
+   * theirs that exists in the corpus at all was over `MAX_TOKEN_DF`. They
+   * are labelled `no_generation_provenance` and carry
+   * `noCandidate: 'df_cutoff_suppressed'`. Added 2026-10-24.
+   *
+   * This is the one figure in `Stats` that is a statement about the
+   * matcher rather than about the work, and it is here rather than only on
+   * the spans because it is the number the decision about `MAX_TOKEN_DF`
+   * needs and nobody has: an absolute cutoff on a count that grows with
+   * the corpus can only bite more often as the corpus grows, so this
+   * number rising between two records of the same project is the signal,
+   * not the level in any one record.
+   *
+   * OPTIONAL, and read as zero when absent, on the same grounds as
+   * `generated.notGeneratedChars` above: every record written before
+   * 2026-10-24 omits it, and for those records zero is wrong but
+   * unknowable, so a reader must distinguish "no blind spans" from "this
+   * record predates the count" and a required field with a default would
+   * take that distinction away.
+   */
+  blindSpans?: number
+  /**
+   * Spans carrying a `tokenSuppression` record, meaning at least one
+   * distinct token of theirs was skipped for exceeding the cutoff. A
+   * superset of `blindSpans`: most of these were scored anyway, on a
+   * candidate set seeded by their remaining tokens. Added 2026-10-24,
+   * optional on the same grounds.
+   */
+  suppressedTokenSpans?: number
   byModel: Record<string, { chars: number; pctOfCovered: number }>
   generated: {
     /** sum of every generation's `totalChars` — segment characters only */

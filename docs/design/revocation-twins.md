@@ -380,7 +380,8 @@ What the two commands print against exactly this file, verbatim:
 ```
 $ npx tsx src/bin/ursa.ts consent revoke-axiom ~/Desktop/ursa-minor-site --axiom ax-001
 Revoked ax-001: "keep entrance motion under 8px of travel"
-It is kept as a tombstone so a later distillation cannot bring it back, and it is excluded from every export and from the overlay.
+It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.
+A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.
 
 One inference you still hold says nearly the same thing, and revoking this one did not touch it:
       ax-002  sharing 100% of its words: "entrance motion should travel less than 8px"

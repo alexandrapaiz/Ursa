@@ -552,6 +552,26 @@ describe('what the user is told, and what is not done for her', () => {
     expect(after.axioms.find((a) => a.id === 'ax-001')!.status).toBe('revoked')
   })
 
+  it('tells her at the moment of revocation what it cannot reach, which is the block she already pasted', async () => {
+    // Added 2026-10-24. The first sentence this command printed was a
+    // claim about every export, made by a command that can only govern
+    // the ones it renders from here on. A block already pasted into
+    // another vendor's instructions field has no gateway Ursa can
+    // address, so that copy keeps instructing until she replaces it, and
+    // this is the one moment she believes the revocation is finished and
+    // cannot check. §10.6 of docs/design/consent-and-erasure.md says why
+    // it is permanent rather than unbuilt.
+    const { io, lines } = capture()
+    expect(await runConsentCommand(['revoke-axiom', projectWith(twinned()), '--axiom', 'ax-001'], io)).toBe(0)
+    const printed = lines.join('\n')
+    // The forward-looking claim is scoped to renders that have not happened.
+    expect(printed).toContain('every export and every overlay from here on leaves it out')
+    expect(printed).not.toContain('excluded from every export')
+    // And the thing it cannot reach is named, with the action that ends it.
+    expect(printed).toContain('already pasted into another product is outside what this can reach')
+    expect(printed).toContain('ursa tuning export')
+  })
+
   it('says nothing extra when the revocation took full effect', async () => {
     const t = mergeDistill(
       emptyTuning('t'),

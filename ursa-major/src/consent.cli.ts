@@ -189,7 +189,29 @@ export async function runConsentCommand(argv: string[], io: CliIo = stdio): Prom
       const tuning = revokeAxiom(tPath, axiom)
       const target = tuning.axioms.find((a) => a.id === axiom)!
       io.out(`Revoked ${axiom}: "${target.statement}"`)
-      io.out('It is kept as a tombstone so a later distillation cannot bring it back, and it is excluded from every export and from the overlay.')
+      io.out('It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.')
+      // The sentence above was the whole message until 2026-10-24, and it
+      // was a claim about effect prevention made by a command that can
+      // only prevent effects inside this directory. Ursa's research seat
+      // mapped the three delivery channels onto the revocation contract
+      // in arXiv:2610.15991, which requires a receipt from every gateway
+      // holding the delegated authority before a revocation counts as
+      // enforced (finding 54,
+      // docs/research/briefs/2026-10-24-message-14.md). The local store
+      // reaches that bar. The paste channel cannot: its gateway is a text
+      // field inside another vendor's product, so it can neither emit a
+      // receipt nor be enumerated, and that is permanent rather than
+      // unbuilt. It is also exactly why the channel works at all, since
+      // it asks the vendor for nothing.
+      //
+      // So the honest thing is not a clause on the sentence above. It is a
+      // second sentence that says what this command cannot reach and what
+      // the user has to do herself, printed here because this is the one
+      // moment she believes the revocation is finished and the one moment
+      // she cannot check. See §10.6 of docs/design/consent-and-erasure.md
+      // for why it is a permanent property of the system rather than a
+      // deferred item.
+      io.out('A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else\'s settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.')
       // The twin report. A revocation she believes happened and which
       // only half happened is the worst outcome this command has, and
       // before today nothing told her: the gate in `tuning/revocation.ts`
