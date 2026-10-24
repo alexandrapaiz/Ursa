@@ -1981,3 +1981,37 @@ Three rules that give the file teeth, also HQ's:
   repair-the-companion rule and the capacity finding, both to the
   centralizer, which is the shape `L-A55` asks for in place of eleven
   copies.
+
+### The pairing sweep answered in one call what forty minutes of measuring could not
+
+- **Proposal.** None; this is §3's existing sweep, run, and recorded
+  because its yield this window was larger than anything else in the run.
+- **Effect.** Reading HQ's 78-name `tools/` list against this register's
+  live findings produced one pairing that changed a finding's status:
+  **`capacity-retry.py`** against this window's dark-minutes
+  measurement. The tool exists, is deployed, woke this very run, cites
+  the identical 377-minute number in its own docstring, and **has one
+  gap**: its first condition is `run["class"] != "refused": continue`,
+  and the word `lost` is absent from all 233 lines. So the largest gap in
+  the day, 237 minutes, sits behind the only class the tool cannot see,
+  because that class shipped at 18:12:23 the same day the tool was
+  written against the older instrument.
+- **Four other pairings, reported as context rather than as findings.**
+  `check-turn-caps.sh` against today's three 101-of-100 overruns
+  (skill, research, this seat). `check-runner-alive.py` and
+  `check-run-ran.py` against the lost cohorts. `check-silence-clocks.py`
+  against the expired-clock entries. `check-secret-print.py` against
+  **L-X5**, which is the one that is still a live finding: absent here,
+  present on HQ's `main`, and this repository still has no `.claude/`
+  directory to register it in.
+- **Rule.** **Run the pairing sweep before you write the postmortem, not
+  after.** §6 already says to check whether this organization has
+  already written a postmortem for the mechanism; it did not say to check
+  whether somebody has already built the tool. This window spent forty
+  minutes measuring a gap, filed it as an untestable hypothesis about
+  HQ's scheduler, and then found in one call that the scheduler's fix was
+  already deployed and short by one word.
+- **Next measure.** On the brief of **2026-10-31**, count the incident
+  entries filed in the week whose account names an HQ tool. The effect is
+  positive if every entry about a runtime surface names one, including
+  the entries that name it to say no tool exists.
