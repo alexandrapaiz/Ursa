@@ -54,7 +54,7 @@ evidence:
     source: ursa-major/src/tuning/distill.ts:154-166,172
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
-    source: ursa-major/src/tuning/merge.ts:45-62
+    source: ursa-major/src/tuning/merge.ts:57-64,76-83
   - ref: E13
     what: a matched revoked axiom gains nothing, and a user-edited statement is sovereign so only evidence accrues to it
     source: ursa-major/src/tuning/merge.ts:57-66
@@ -110,8 +110,8 @@ evidence:
     what: today's correction signals are hand annotations, and KR1.2 is what retires manual annotation
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md:20-26 (O1 KR1.2)
   - ref: E31
-    what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
-    source: ursa-major/src/bridge/index.ts:82-98,147-157
+    what: the overlay reads the project's own tuning.json through serve.ts's tuningUnits, the one reader, which sorts by evidenceCount; the bridge drops revoked axioms and pushes only ciphertext to the sync route
+    source: ursa-major/src/serve.ts:176-179,194; ursa-major/src/bridge/index.ts:93-95,147-157
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
@@ -211,7 +211,8 @@ allowed to teach.
 one.** `--tuning` is a path like any other, and storage is per-project
 by decision, with cross-project aggregation named as an explicit later
 command rather than an implicit default [E26, E27]. The overlay reads
-the project's own `.ursa/tuning.json` and nothing else [E31]. Output:
+the project's own `.ursa/tuning.json` and nothing else, through the one
+shared reader rather than opening the file itself [E31]. Output:
 the store path, recorded somewhere outside your shell history, because
 the confidence numbers in step 8 mean nothing except relative to one
 store.

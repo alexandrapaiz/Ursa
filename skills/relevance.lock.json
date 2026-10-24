@@ -372,8 +372,8 @@
   },
   "distilling-a-tuning-record/E12": {
     "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "1f8d1af3607b9a4b",
+    "read": "2026-10-24",
+    "lines": "c5a84274c6d754bc",
     "what": "f286d5ac20eeb638",
     "passages": "12794635924bf240"
   },
@@ -519,10 +519,10 @@
   },
   "distilling-a-tuning-record/E31": {
     "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "ce29dbdd09b7d200",
-    "what": "32c7fdf789b913e0",
-    "passages": "dde13b52a67c6903"
+    "read": "2026-10-24",
+    "lines": "0df30eeb2b10145b",
+    "what": "8d88801923f0fcc0",
+    "passages": "043d08831a5eb566"
   },
   "distilling-a-tuning-record/E32": {
     "verdict": "supports",
