@@ -144,7 +144,11 @@ export function parseTriggerTest(text) {
     return s ? s.lines.join('\n') : ''
   }
   const prompts = (t) => [...t.matchAll(PROMPT)].map((m) => ({ id: m[1], text: m[2].replace(/\s+/g, ' ').trim() }))
-  // "should not fire" has to be tested before "should fire", since it contains it.
+  // Both predicates are anchored at the start on purpose. The two headings are
+  // disjoint under startsWith, so order does not matter here; under any looser
+  // test for the word "fire" they are not, and `find` returning the first
+  // match would file every near miss as a should-fire prompt and report a test
+  // with no near misses at all as fully covered.
   const no = body((h) => h.startsWith('should not fire'))
   const yes = body((h) => h.startsWith('should fire'))
   return { shouldFire: prompts(yes), nearMisses: prompts(no) }
