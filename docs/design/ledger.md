@@ -255,13 +255,102 @@ which place each belongs to. The rule generalises past percentages: any
 figure that lives in a column is formatted to a fixed shape, and any
 figure that lives in a sentence is formatted to be read aloud.
 
+## L8 — A fill made for text is the wrong fill for a bar
+
+**measured**, 2026-10-24 (sixth run). `reviews/2026-10-24g/README.md`
+§3.1, `data/bar-pixels.txt`.
+
+This site's span fills are deliberately below every contrast floor:
+1.13:1 and 1.05:1, because a word sits on them and the word carries
+12.8:1 of its own. Reusing them for a 6px bar, which has no words in it,
+drew the 94.4% of a record that is the owner's own text at **1.40:1**,
+and at **1.17:1 against the class beside it**.
+
+The rule: a fill that is a background for type and a fill that is a mark
+in its own right are two different decisions, even when they mean the
+same thing. Any value copied from the `.sp-*` block into something
+without glyphs on it has to be re-measured before it is believed.
+
+## L9 — Four fills do not fit in a two-light palette
+
+**measured**, 2026-10-24 (sixth run).
+
+At equal lightness `--polar` and `--star` land within **1.25:1** of each
+other, so a four-step ramp built from them always has two steps nobody
+can tell apart. Every attempt at four in that review's working set had
+one pair under 1.3:1.
+
+The way out is not a fifth colour. It is to paint three things and let
+the fourth be the **bare track**, which works here because the fourth
+quantity is an absence: the part of a finished work no span covered at
+all. A surface that needs four *present* categories in this palette has
+a real problem and should say so rather than inventing a hue.
+
+## L10 — The 44px overlay takes nothing from a neighbour on this page
+
+**measured**, 2026-10-24 (sixth run). `reviews/2026-10-24g/data/overlap.txt`.
+
+L3 left a caution that an overlay lifting an inline control to 44px
+reaches over the words above and below it and starts swallowing their
+clicks. Asked of the dashboard rather than reasoned about: 60 controls
+at three viewports, each a 17.9px box answering a 44px target, so the
+overlay reaches 13.0px in each direction. At every probe point inside
+that reach, `elementFromPoint` returns prose. **Presses taken from
+another control: 0 of 60, at all three viewports.**
+
+So the caution is real and conditional, not a reason to drop the floor.
+The condition is control density: it bites where two controls sit within
+26px of each other vertically, and this page has no such pair. A page
+that does has to measure before it keeps the symmetric inset.
+
+## L11 — A timeout is not a wait
+
+**this seat's judgement**, 2026-10-24 (sixth run).
+
+The kit settled a fixed 400ms after `networkidle` before each shutter,
+which is right for a page whose content is in its HTML and wrong for one
+that fetches after hydration. The dashboard photographed its own loading
+state at 400ms. At 1500ms two viewports of three were correct and the
+third was still racing, which is the signature of a timeout tuned until
+it usually works.
+
+`shoot.mjs` and `measure-hit-areas.mjs` now take `--until <selector>` and
+gate the shutter on content. The second of those had been reporting
+`0 targets seen` rather than failing, which is the worse shape: a
+measurement that returns a confident number for a page it never saw.
+
 ---
 
 ## Open, and not this seat's to close
 
-**Where Ursa's canon comes from.** Eight consecutive reviews have
+**Where Ursa's canon comes from.** Nine consecutive reviews have
 recorded that `canon.md`, `ban-list.md` and `tuning.md` do not exist
-here. L1, L4 and L10 are the kind of measured material canon is made of,
-and this seat is deliberately not promoting them. A ruling from the
-owner is the unblocker, and it is smaller than writing a file: it is
+here. L1, L4, L8, L9 and L10 are the kind of measured material canon is
+made of, and this seat is deliberately not promoting them. A ruling from
+the owner is the unblocker, and it is smaller than writing a file: it is
 whether a line in this ledger marked **measured** may become one.
+
+As of 2026-10-24 this is no longer sitting between two seats: Ursa's
+project manager opened the question with the owner directly, naming this
+seat's reasoning for not writing the files itself rather than restating
+it. Nothing here changes until she answers; the count above is kept so
+the cost of waiting stays visible.
+
+**Ursa Major has two web surfaces and two identities.** Measured on
+2026-10-24 (`reviews/2026-10-24g/README.md` §7): the capture panel is
+drawn at 6px radii in two Google faces with three hues the rest of Ursa
+does not have, and the record viewer is square hairlines, Helvetica, two
+lights on one night. Three of the panel's tokens are near-copies of
+house tokens under different names. Neither has a contrast problem, so
+this is drift and not a defect. It is left open rather than fixed
+because the panel's three hues carry satisfied, unsatisfied and tension,
+which is meaning the two-light palette currently cannot say, and
+choosing which identity wins is the owner's.
+
+**Editing an inference has no door.** `ursa consent revoke-axiom` and
+`ursa forget` exist; nothing anywhere lets the owner reword an axiom,
+and `user-edited` is written by one function that releases a held
+statement rather than by any edit. `CLAUDE.md` calls "see, edit, revoke
+and delete" load-bearing. Named here by the seat that found it while
+building the first surface that would offer one, and routed to the
+engineer rather than designed around.
