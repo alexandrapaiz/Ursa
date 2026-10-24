@@ -2928,6 +2928,69 @@ from the newer copy is the point of the file rather than a loss. A
 superseded wording and a lost line are indistinguishable in a count.
 Only the sentence tells you which you have.
 
+**The instrument is positional, so it cannot come back empty on a seat
+that reformats its own registers (measured 2026-10-24, thirty-second
+window, on the third branch of this chain).** `diff | grep -c '^<'`
+counts lines the tip does not have **at the same place**, which is not
+the question the sentence above asks. It is asking whether the text is
+gone. Re-level one heading and every line under it until the next
+anchor realigns is reported as absent, and this seat re-levels headings
+routinely, because each window appends a section and the levels get
+normalised when the file grows a layer.
+
+Measured on `#288` against `#362`, which is the pair this window had to
+rule on:
+
+| file | positional | set-wise, heading level normalised |
+|---|---|---|
+| `docs/agents/learning-log.md` | 23 | **1** |
+| `docs/agents/merge-order.md` | 87 | 76 |
+| `prompts/exo-agent.md` | 33 | 33 |
+| the other three | 0 | 0 |
+
+Twenty-two of the learning log's twenty-three were `##` demoted to
+`###` by the tip, with byte-identical prose either side. The instrument
+reported them as text at risk, and the register this seat keeps its own
+memory in is the one file where a false positive costs the most reading,
+because it is the longest.
+
+So run the set-wise form as well. It is three lines, it answers "is this
+text anywhere in the tip" rather than "is it in the same place", and the
+two readings together are more informative than either, because a line
+that is positional-only is a move or a re-level and a line that fails
+both is a candidate loss:
+
+```bash
+norm() { sed -E 's/^#+[[:space:]]*//; s/[[:space:]]+$//' | grep -v '^$' | sort -u; }
+base=$(git merge-base refs/prs/<old> refs/prs/<tip>)
+for f in $(git diff --name-only "$base" refs/prs/<old>); do
+  n=$(comm -23 <(git show refs/prs/<old>:"$f" | norm) \
+               <(git show refs/prs/<tip>:"$f" | norm) | wc -l)
+  [ "$n" = 0 ] || echo "$f: $n line(s) of text in <old> found nowhere in <tip>"
+done
+```
+
+**Normalising is not the same as excusing, and keep the reading duty
+above either way.** The set-wise form still returned 33 on this
+charter, and all 33 were read before the branch was closed rather than
+waved through: three paragraphs the tip had replaced with measured
+answers it did not have when they were written. A smaller number is
+still a number to read. What normalising buys is that the number you
+read is **the one worth reading** — one line instead of twenty-three,
+on the file where this seat's memory lives.
+
+**And the general shape, which is why this is an amendment and not a
+fix.** The window above found that its instruments had no word for
+`redundant`. This one is the next layer of the same defect: the
+instrument it reached for to settle that question measures **position**
+and was read as measuring **presence**, and nothing in its output says
+which. An instrument built in a hurry to answer a relation your old
+ones could not express is itself unvalidated, and the first thing to
+check about it is whether the quantity it prints is the quantity its
+caption claims. That is this register's "a number that cannot vary with
+the quantity it is read as measuring", pointed at a replacement
+instrument rather than at the one it replaced.
+
 **Report it as an in-lane superset, never as a clean chain.** The claim
 the twenty-eighth window published was "no unmerged line is lost", which
 is a claim about a merge it had performed rather than a comparison it
