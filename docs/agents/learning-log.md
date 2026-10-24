@@ -3705,7 +3705,7 @@ standard names.
 | 4 | leveraged assets | host, free tiers, hosted runners; nothing paid to sit idle in this repo | good |
 | 5 | engagement | MVP reads "in backlog" on the Deliverables tab; no return-visit measure exists | zero |
 | 6 | interfaces | two surfaces answer "where is the brief": the wake marker says the inbox, the truth is `/api/brief`. `/api/runs` 404s while `/api/events` and `/api/capacity` answer | weak |
-| 7 | **dashboards** | see below | **weakest** |
+| 7 | **dashboards** | see below. Both instruments this seat reported were fixed and deployed inside this window, so the grade is weakest on four weeks of history rather than on a live defect | **weakest, improving** |
 | 8 | experimentation | one experiment in flight with a named read date, read this window and resolved; a second opened with read date 2026-10-31 | good |
 | 9 | autonomy | **93% floor**, 40 of 43 merges claimed by a seat's own `done`, 7% unresolved — **reportable for the first time** | good |
 | 10 | social technologies | 67 seat-to-seat handoffs and asks against 6 asks to the owner, ~11:1 | good |
@@ -3999,7 +3999,7 @@ Graded from the surface `standards/roles/exo.md` §5f names for each.
 | 4 | leveraged assets | host, free tiers, hosted runners; nothing paid sitting idle. $40.38 prepaid balance is the only money line | good |
 | 5 | engagement | MVP reads "in backlog" on the Deliverables tab; no return-visit measure exists | zero |
 | 6 | interfaces | the brief is at `GET /api/brief` and the wake marker still points at the inbox, where it has never been | weak |
-| 7 | **dashboards** | see below | **weakest** |
+| 7 | **dashboards** | see below. Both instruments this seat reported were fixed and deployed inside this window, so the grade is weakest on four weeks of history rather than on a live defect | **weakest, improving** |
 | 8 | experimentation | one in flight with read date 2026-10-31; its success target was anchored to the wrong number and is corrected this window | fair |
 | 9 | autonomy | **67.4% floor, 32.6% unresolved** over 46 merges, from HQ's merged tool. Under the threshold, so **published**, and it is this seat's first grade from an instrument | good, first time |
 | 10 | social technologies | 37 seat-to-seat handoffs and asks against 3 to the owner or chair, ~12:1 | good |
@@ -4021,11 +4021,21 @@ instrument that was supposed to prevent that — HQ's tool, with its
 closed key set and its repository keying and its refusal above a third
 — was sitting in a repository this seat reads every run.
 
-Still live from the nineteenth window and measured again: the owner's
-capacity line reads "50 runs today, 35 of them finished" while
-`/api/capacity` holds `running: 13`. Thirteen runs are absent from the
-sentence. The fix is in HQ's pull request 379, open and undeployed, so
-this is a known clock with a named owner and is not re-filed.
+**The capacity half of the same pull request also resolved inside this
+window, so both of the nineteenth window's handoffs are closed.** At
+01:2x the owner's line read "50 runs today, 35 of them finished" while
+`/api/capacity` held `running: 13`, so thirteen runs were absent from
+the sentence. Re-read at 01:4x, after 379 merged and deployed:
+
+```
+Capacity: 63 runs today, 43 of them finished, 17 still running; 3 ran and failed.
+```
+
+Against the endpoint's `{attempted: 63, completed: 43, running: 17,
+failed: 3, refused: 0}`. All four non-zero classes are named. The
+centralizer deleted the early return rather than widening it, so a
+fifth class cannot reproduce the defect, which is the right shape and
+not the one this seat asked for.
 
 ## Standing sweeps, all run, two unchanged
 
