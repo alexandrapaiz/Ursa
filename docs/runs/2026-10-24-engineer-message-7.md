@@ -111,10 +111,18 @@ it, so the next reader does not have to take the number on faith.
 to 20,000 immediately after.
 
 **Verified the suite under the real config, three runs of `npm test`,** which is
-`tsc --noEmit && vitest run`: 848 passed, 848 passed, and the third below. Those
-runs took 90.80 and 100.35 seconds against 51 to 71 seconds earlier, because the
-machine was loaded by then. Green while slower than any run that had failed
-before is the property the change buys.
+`tsc --noEmit && vitest run`: 848 passed on all three, at 90.80, 100.35 and
+62.43 seconds wall clock. The first two are slower than any of the six runs
+above, which took 51 to 71 seconds, because the machine was loaded by then.
+Green while slower than any run that had previously failed is the property the
+change buys. `tsc --noEmit` passing on all three is also what confirms the new
+config file does not break the typecheck half of `npm test`, though note that
+`tsconfig.json` includes only `src`, so `vitest.config.ts` sits outside what
+`tsc` reads.
+
+What those three runs cannot tell me is how much headroom was left, because
+`npm test` does not report per-test margins. That gap is the first of this
+run's three ledger entries.
 
 **What I did not change, deliberately.** `hookTimeout` keeps its 10,000 ms
 default. No hook timed out in any of the six runs, so raising it would be a
