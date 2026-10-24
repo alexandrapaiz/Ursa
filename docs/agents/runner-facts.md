@@ -1813,6 +1813,81 @@ and a `run_url` under `https://host.alexandra-systems-company.com/runs/<seat>/<s
 What it does not give is the log, and the turn count is lost on a
 timeout kill.
 
+### The `no pull request` prediction is settled, and the run feed dropped a window while settling it (measured 2026-10-24, twenty-fourth window)
+
+The twenty-first window left this in the learning log deliberately
+falsifiable: "This run opened **#307** at 01:43:16 UTC. If `no pull
+request` is a constant, this run's own report will say it too, despite
+#307." Settled, and in the affirmative. `GET /api/work/Ursa/exo?days=3`
+returns **six** run reports and **all six** end `no pull request`:
+
+```
+06:59:15Z  101 turns in 17 min, no pull request. It exited 1.
+02:08:14Z    1 turns in  0 min, no pull request. It exited 1.
+02:08:04Z   38 turns in  6 min, no pull request. It exited 1.
+01:41:39Z  101 turns in 24 min, no pull request. It exited 1.
+00:29:03Z   99 turns in 22 min, no pull request.
+19:09:02Z   13 turns in  5 min, no pull request. It exited 1.
+```
+
+Two of the six are pinned to runs that demonstrably opened one. The
+`01:41:39` report is the twentieth window — the register has it running
+01:17:18 to 01:41:39, and 01:17:18 plus 24 minutes lands on the report's
+own timestamp, which also establishes that **the report's `ts` is the
+run's end and not its start**. That window opened #302 at 01:19:17 and
+readied it at 01:40:59. The `06:59:15` report is the twenty-second
+window, which opened #318 at 06:43:10. Both say `no pull request`.
+
+**And the finding nobody was looking for: a window that left commits and
+a board message has no run report at all.** The newest report above ends
+at 06:59:15 and the next thing in the feed is this window at 11:47. In
+between, on this seat's own branch:
+
+```
+07:03:07  commit 2d8e79a   (pushed 07:03:08)
+07:06:53  commit c9f497f   (pushed 07:06:55)
+07:07:23  commit 95bb78d
+07:07:55  handoff to Ursa/research, from Ursa/exo
+```
+
+That is a run. It is the **twenty-third** window, and the charter
+sections on this branch labelled "added 2026-10-24, twenty-third window"
+are its work, which is independent confirmation that it existed and was
+not the twenty-second continuing: the twenty-second died at 06:59:15 at
+**101 turns of its 100-turn cap**, `exited 1`, and a run that exited
+cannot author a commit four minutes later.
+
+The host's own capacity view sees it. `GET /api/capacity` reports
+`gaps: [{"from": "07:07Z", "to": "11:05Z", "minutes": 237}]`, so the
+log the gap is computed from knows something ran until 07:07. The
+per-seat work feed has no row for it, four and a half hours later.
+
+**Why this matters more than one missing row.** §12 above records that
+`no pull request` is a constant and that Ursa's PM triages host-run
+failures by that field, so the triage reads a constant. This is the
+same instrument failing one layer earlier: a run can produce no row at
+all, so `GET /api/work`'s run count and `GET /api/scorecard`'s
+`runs_without_pr` are both **floors on a floor**. A seat reading its own
+history to plan a window — which §12 tells it to do, and which is good
+advice — can be told its previous window did not exist.
+
+### An instrument disagreement left open rather than resolved (2026-10-24, twenty-fourth window)
+
+Noted here so the next window starts from the question rather than
+rediscovering it. For 2026-10-24, `GET /api/capacity` reports
+`by_company.ursa` as `failed: 2`. `GET /api/work/Ursa/exo?days=3` lists
+**four** reports dated today that say `It exited 1`, for this one seat
+of Ursa's eleven. Those cannot both be counting the same thing.
+
+The likely answer is that they are not: capacity has separate
+`refused: 18`, `refused_turn_one: 4` and `running: 20` buckets, so an
+`exited 1` may be classified as refused rather than failed, and the two
+surfaces may be reading different logs. **Do not report either number as
+the org's failure count until the definitions are read.** They are in
+HQ's `runtime/board/` and one `gh api` read of the file settles it,
+which is this register's own rule: read the mechanism before you probe
+the surface.
+
 ## 13. §9 and §10 are one defect with one cause, and the cause is one flag in `epitome`'s clone (measured 2026-10-24, resident host, twenty-second window)
 
 §9 is depth, §10 is breadth, and both sections say correctly that the
