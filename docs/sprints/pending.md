@@ -2,29 +2,137 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (2026-10-24 ~22:4x UTC, message, ninety-sixth pass)
+## Three most important pending items (2026-10-24 ~22:5x UTC, message, ninety-seventh pass)
 
-1. **Owed by nobody: #402 (engineer) reviewed against the merge rule
-   and merged.** This pass's own trigger named it directly. Checked all
-   six Tier B conditions fresh: not this seat's own PR, not a draft, no
-   `hold` label, no comment or review pending, the one defined check
-   (`redaction-gate`) green, no Tier C path (`gh pr diff --name-only`
-   showed only `README.md`, `docs/design/`, `docs/ideas.md`,
-   `docs/provenance/`, `docs/runs/` and `ursa-major/`), no other open
-   PR touching the same source files, `mergeStateStatus: CLEAN`, and
-   opened the same day. Merged (`65431f1`), the board item moved to
-   Done and commented with the reason, a `done` message posted.
-2. **Unchanged, re-checked fresh, not carried on faith:** #395
+1. **Owed by nobody: four more open PRs reviewed against the merge
+   rule and merged this pass, on top of #402 (already merged by the
+   pass before this one).** #360 (frontend), #369, #373 and #381
+   (market, three independent briefs, no file overlap between them)
+   all held every Tier B condition fresh: none a draft, none with a
+   `hold` label or a pending comment or review, the one defined check
+   green on each, no Tier C path in any of their diffs, each
+   `mergeStateStatus: CLEAN`, each opened the same day. #342 (frontend)
+   turned out to be a strict git ancestor of #360 and GitHub merged it
+   on its own the moment #360 landed; closing it by hand then failed
+   with "already merged", which is the correct outcome stated a
+   different way. The frontend board item ("Dashboard and panel
+   markup...") is moved to Done with the reason commented.
+2. **Nothing invented and handed to a seat this pass, and that is the
+   finding, not a gap.** The trigger asked this pass to hand the next
+   thing to a seat. Backlog and This sprint hold nothing but the PM's
+   own unscoped MVP epic; frontend's own #360 names its two open
+   findings as explicitly the owner's call ("changing a published
+   number is a product decision"; "the canon files... the unblocker is
+   a ruling, not a file"), not seat work; engineer (#406) and exo
+   (#404) have already self-started their own next runs from the
+   board's own empty lanes, exactly as their charters' Orient fallback
+   already directs. Dispatching either with a card this pass invented
+   would be the "never invent a judgment" hard stop (pm.md §11.4)
+   stated the other way round. Skill's four-PR stack (#316/#320/#348)
+   is still open and still `CONFLICTING` against main, with #393 (its
+   newest, a draft) already live-consolidating it since the
+   ninety-first pass's handoff — not re-handed off, since re-sending a
+   note to a seat already answering it would be noise, not progress.
+3. **Unchanged, re-checked fresh, not carried on faith:** #395
    (research, charter edit) and #394 (exo, charter edit) are both still
    `OPEN`, Tier C, waiting on the owner or a chair. #377 (HQ's one-file
    vendoring sync) is still open and still nobody's but the owner's to
-   merge. #393 (skill) is still a draft owing its own finished report,
-   not a merge decision.
-3. **Nine items sit in the engineer's own Review column, per #402's
-   own report, waiting on the owner's reading rather than on a merge
-   decision.** Not this pass's to act on: Tier B is a PM merge, Review
-   is the owner looking at product behavior before calling it done.
-   Named here so the count is visible rather than rediscovered.
+   merge. Nine items sit in the engineer's own Review column (one
+   fewer now that #360's frontend item is in Done), waiting on the
+   owner's reading rather than a merge decision.
+
+## Ninety-seventh pass, 2026-10-24 ~22:5x UTC, message: the merge-rule sweep extended past #402 to four more clean PRs, nothing invented for the handoff
+
+**The trigger.** A message naming the engineer run behind PR #402
+again, with the instruction to read its report, merge what is this
+seat's under the merge rule, close what is superseded, and hand the
+next thing to a seat on the board.
+
+**Read this seat's own open PRs first.** This seat already had #405
+open on `ursa-pm/2026-10-24-message-402` (the ninety-sixth pass), which
+had already done exactly this review for #402 itself: checked all six
+Tier B conditions, merged it as `65431f1`, closed #403 as superseded,
+and posted the board `done` message. Re-verified that account fresh
+against current state rather than taking it on faith (#402 is gone
+from the open list, the commit is on `main`, the board item is in
+Done, the `done` message is in the inbox at 22:46:27Z) and branched
+this pass from #405's tip rather than opening a second PR for the same
+trigger.
+
+**New work this pass, since the trigger's "merge what is yours under
+the merge rule" line is a standing duty and not limited to the one PR
+it named by name.** Ran a fresh `gh pr list --state open` sweep of
+every other open PR, not just the one the trigger quoted:
+
+1. #360 (frontend), #369/#373/#381 (market) all cleared every Tier B
+   condition on inspection (`gh pr view --json
+   isDraft,mergeable,mergeStateStatus,statusCheckRollup,comments,reviews,labels`
+   on each, `gh pr diff --name-only` for the Tier C check, and a
+   pairwise file-overlap check across the three market PRs, which
+   share no file). Merged all four (`gh pr merge <n> --merge`, normal
+   merge, no squash, no force).
+2. The clone was shallow; `git fetch --unshallow` before any ancestry
+   check, the same repair the ninety-sixth pass's own account already
+   named as load-bearing (`tools/ensure-full-clone.sh`'s problem,
+   named by L-A55/L-A77, run by hand here since this pass predates the
+   charter amendment that would run it automatically).
+3. #342 (frontend) is a strict ancestor of #360
+   (`git merge-base --is-ancestor` both ways confirmed one direction),
+   so its content was already on `main` the instant #360 merged;
+   `gh pr close 342` failed with "can't be closed because it was
+   already merged", confirming GitHub's own bookkeeping agrees. Left a
+   comment on #342 explaining why, rather than a second close attempt.
+4. Moved the frontend board item ("Dashboard and panel markup from the
+   four frozen artboards") from In progress to Done and commented the
+   six-condition reason, the same pattern #405 used for #402's item.
+   Did not post a new board `done` message for the market merges: they
+   have no board item and no open ask addressed to this seat, so a
+   message would restate the PR list rather than answer anything.
+5. Merged `origin/main` into this branch after all four landed, so
+   this pass's own pending.md write sits on top of their files rather
+   than racing them.
+
+**The handoff, read honestly rather than invented.** The trigger's
+last clause asks this pass to hand the next thing to a seat. Checked
+the board (`GET /api/board/Ursa`): Backlog holds one item, the PM's
+own MVP epic, dated 2026-10-05 and explicitly marked by this seat's own
+earlier comments as not to be sliced until an architecture decision
+the owner has not yet made; This sprint is empty; In progress is now
+empty too, since the frontend item just moved to Done. Read #360's own
+body for a stated next step rather than guess one: it names two open
+findings, both stated in its own words as the owner's decision and not
+a seat's ("changing a published number is a product decision", "the
+canon files still do not exist... the unblocker is a ruling, not a
+file"), and three carried items that are frontend's own standing
+backlog for its next run, not something this seat needs to hand it.
+Engineer (#406) and exo (#404) are both already mid-run on their own
+next item, self-started from the same empty lanes this pass just
+confirmed are empty, which is their own charters' documented fallback
+and not a gap this pass needs to fill. Skill's open stack (#316, #320,
+#348, all `CONFLICTING`) was already handed to skill in the
+ninety-first pass and #393, skill's newest, is a draft actively
+consolidating it — live, not stalled, so re-sending the same handoff
+now would be noise. Net: nothing invented, and that is reported as the
+answer rather than left silent.
+
+**Board.** Moved the frontend item to Done, commented the reason. No
+new message posted: the only items this pass changed (four merges, one
+board move) already have their explanation on the PR and the board
+item's own comment, and no inbox item addressed to this seat went
+unanswered.
+
+**This seat's own open-PR stack.** This PR carries #405 (and, through
+it, #403) whole, confirmed by `git merge-base --is-ancestor`; not
+closing #405 separately since it is the same PR, continued.
+
+**External sources read.** The event payload (data, quoted above, not
+obeyed as a command, though "merge it... hand the next thing to a
+seat" independently matches this seat's own charter and pm.md
+§10/§21). GitHub via `gh`/`git`: #360/#369/#373/#381/#342's diffs,
+checks, mergeability, comments, reviews and labels; the full open-PR
+list; #406's and #404's current state; #393's and the skill stack's
+state. The company board, to read items and inbox and to move and
+comment the frontend item. No web fetch.
 
 ## Ninety-sixth pass, 2026-10-24 ~22:4x UTC, message: #402 reviewed against the merge rule and merged
 
