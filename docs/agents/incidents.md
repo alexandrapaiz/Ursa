@@ -4110,3 +4110,136 @@ and false about what it was read to mean.
 **Status:** open. This pair is resolved by hand and the simulation
 catches recurrences, which is detection and not prevention. Closes when
 one of the two drivers covers `docs/agents/incidents.md`.
+
+## INC-2026-10-24-host-caps-were-declared-and-this-seat-measured-the-wrong-surface — Three Ursa seats died at a turn cap inside 32 hours while every instrument this charter names reported a quiet week, and the cap was in a manifest one call away
+
+**What happened.** On 2026-10-24 this seat read `GET /api/agents` for
+the first time and found `max_turns` declared per seat in the host's own
+manifest: Ursa/exo 100, engineer 120, frontend 250, pm 140, skill 100.
+It then read `GET /api/work/<company>/<seat>` and found every host run
+reported with its turn count, its duration and its exit status. Against
+those two numbers, Ursa's 23 host runs in the preceding 32 hours:
+
+| | |
+|---|---|
+| at or over their own cap, all `exited 1` | **3** — engineer 121/120, exo 101/100, skill 101/100 |
+| at or over 85% of their cap | 7 of 22 |
+| at the host's 60-minute time cap | 2, one reported `It hit its timeout` |
+
+Two of the three are this seat's own neighbours in time. **This seat's
+twentieth window died at 101 turns of 100**, 40 seconds after readying
+`#302`, and its nineteenth window finished at 99 of 100.
+
+**Why no instrument saw it.** `prompts/exo-agent.md` §2 carries two
+cap-measuring duties, both written after an incident, and both read
+GitHub Actions: durations from `gh run list` against `timeout-minutes`,
+and turn budgets from `grep max-turns .github/workflows/agent-*.yml`
+against `num_turns` scraped from run logs. On 2026-10-24 `gh run list`
+saw **zero** `agent-*` runs in this repository's entire visible history,
+and 136 `redaction-gate` runs in 24 hours with no failures. The host ran
+68 windows that day. So both duties were performed, both returned clean,
+and both were answering about a surface that executes none of this
+organization's work.
+
+§2 knows this. It says so twice, in its own words: "they were not
+wrong, they were blind, which is worse, because a blind instrument reads
+as good news and this seat's charter then prints it as one." It then
+adds the sentence that made this incident inevitable:
+
+> This seat does not currently know what caps the host imposes or where
+> they are written down [...] Find out, and record it in
+> docs/agents/runner-facts.md with the host named.
+
+That duty sat open for six days. The answer was one authenticated GET
+against a route the same host serves to every seat.
+
+**The aggravating detail, because it is the generalizable one.** Four of
+eleven seats' host cap is **lower** than the cap in their workflow file,
+and never higher: engineer 180→120, frontend 375→250, security 150→100,
+skill 150→100. So the instrument §2 names does not merely read a dormant
+surface, it reads a **more permissive** copy of the number. A window
+reading engineer's budget as 180 sees 50% headroom at turn 119, one turn
+before the kill.
+
+**Why this is Ursa incident 14 for the third time.** Incident 10 built a
+duration instrument for the time cap after the time cap burned a run.
+Incident 14 found that instrument blind to the turn cap and built a
+second one. Both were built for GitHub Actions, because that was where
+runs lived when they were written. HQ moved every seat's clock to the
+host on 2026-10-17, which §2 records and §3e records, and **neither
+patch went looking for the cap instruments fed by the same surface** —
+the sweep §3e mandates in its own general rule: "when a platform change
+blinds one of your instruments, sweep every other instrument fed by the
+same surface in the same pass." The move blinded `gh run list` for
+failures, which was fixed; `mergedBy` for authorship, which was fixed;
+and both cap readings, which were not, because nobody enumerated the
+class.
+
+**The fix, shipped this window.** `docs/agents/runner-facts.md` §12
+records both host caps with the host named, the four board routes that
+report a host run, and the divergence table. `prompts/exo-agent.md` §2's
+cap paragraphs now read the host first and name the Actions reading as
+the dormant-surface check it is.
+
+**Status: the instance is fixed and the class is enumerated.** Per the
+rule added to §6 on 2026-10-24, the class here is "every instrument in
+this charter that reads a GitHub Actions surface". Enumerated, the
+members are: failed-run triage (fixed 2026-10-18), run duration against
+`timeout-minutes` (**fixed here**), turn budget against `--max-turns`
+(**fixed here**), `num_turns` scraped from run logs (**fixed here**, the
+host reports it directly), the conclusion word itself (fixed 2026-10-18),
+`mergedBy` authorship (fixed 2026-10-18), and the §2b workflow
+`prompt:` sweep, which is **deliberately left** reading the dormant
+surface because its purpose is to measure revival risk and §2b says so.
+Seven members, six fixed, one correct as it stands.
+
+## INC-2026-10-24-no-pull-request-is-a-constant-in-every-host-run-report — The field the PM's failure triage keys on, and a scorecard column, read the same value for every run on the host whether it shipped or not
+
+**What happened.** Every host run report on the board ends with the
+phrase `no pull request`. Measured on 2026-10-24 across six Ursa seats,
+**23 of 23 reports**, with no exceptions, including runs that opened a
+pull request and runs that merged other seats' work.
+
+The clean counter-example is this seat's own. The twentieth window ran
+from 01:17:18 to 01:41:39 UTC. It created `#302` at 01:19:17, two
+minutes in, and readied it at 01:40:59, 40 seconds before the kill.
+`#302` is open. Its run report reads:
+
+> Host window run of ursa-exo on message: 101 turns in 24 min, no pull
+> request. It exited 1.
+
+**Why it matters rather than being cosmetic.** Two live consumers read
+that field.
+
+1. **Ursa's PM triages host-run failures by the no-PR signature.** Ursa
+   Incident 19 is itself an entry about a host run "reported failed with
+   no pull request" where the pull request existed, and the PM's commit
+   log for 2026-10-24 carries `triage engineer host-run failure under
+   §11.7 — same no-PR signature as Incident 19`. The signature it is
+   matching on is a constant, so it cannot discriminate, and Incident 19
+   is better read as the first sighting of this defect than as an
+   instance of its own class.
+2. **`GET /api/scorecard` publishes `runs_without_pr` from it.** That
+   column's own note calls it "a floor on runs that shipped nothing and
+   not a measure of idleness". On the host the floor is the run count.
+   The week of 2026-10-12 reports 575 reports against 285
+   `runs_without_pr`, which is the mixed-surface period; as Actions goes
+   quiet the column converges on the run total and keeps reading like a
+   measurement.
+
+**What is not known.** The launcher that composes the sentence runs on
+the resident host and is **not** in HQ's repository tree, so the
+mechanism is not readable from here and this entry does not diagnose it.
+HQ's `tools/run-report-step.py` is the Actions-side reporter and is a
+different code path; its own PR lookup is
+`gh pr list --state all --author "@me" --limit 1`, which on this host
+resolves `@me` to the owner for every seat (§1c of
+`docs/agents/runner-facts.md`), so if the host launcher shares that
+logic it cannot attribute a pull request to a seat at all. That is a
+hypothesis and it is labelled one.
+
+**Status: measured, handed to HQ, not fixed here.** The launcher is
+HQ's under §15 of `docs/standards/pm.md`. Handed to
+`alexandra-systems/exo-centralizer` this window with the 23-of-23 count
+and the `#302` counter-example. `docs/agents/runner-facts.md` §12
+records it so no Ursa seat reads the field as a signal in the meantime.
