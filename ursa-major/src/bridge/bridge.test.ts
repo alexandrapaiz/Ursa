@@ -7,16 +7,21 @@
 
 import { execFileSync } from 'node:child_process'
 import { createServer } from 'node:http'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { main } from '../bin/ursa'
 import { listRecordIds } from '../store'
 import { startBridge, type BridgeHandle } from './index'
+import { listenOnLoopback } from '../serve'
 
-const PORT = 7831
-const SYNC_PORT = 7832
+// Both servers in this file bind port 0, so the kernel picks a free port
+// and the test reads back which one it got. A hardcoded port made this
+// file and src/bridge/runchannel.test.ts unable to run at the same time:
+// both bound 127.0.0.1:7831, vitest runs files in parallel, and the
+// loser's startBridge hung until the 5s test timeout killed it. Measured
+// before the fix: five of five runs of the two files together failed.
 
 // Author identity is set through the environment, not `git config`.
 // GIT_AUTHOR_NAME outranks a repository's user.name and every agent
@@ -74,10 +79,17 @@ function fakeSync() {
     req.on('data', (c: Buffer) => chunks.push(c))
     req.on('end', () => { pushed.push(new Uint8Array(Buffer.concat(chunks))); res.writeHead(200); res.end('ok') })
   })
+  // `url` is a getter rather than a field because the port is not known
+  // until `listen()` has resolved, and the bridge is handed this url after
+  // that point.
   return {
     pushed,
-    url: `http://127.0.0.1:${SYNC_PORT}`,
-    listen: () => new Promise<void>((r) => server.listen(SYNC_PORT, '127.0.0.1', r)),
+    get url() {
+      const a = server.address()
+      if (typeof a !== 'object' || a === null) throw new Error('fake sync is not listening yet')
+      return `http://127.0.0.1:${a.port}`
+    },
+    listen: () => listenOnLoopback(server, 0, 'the fake sync route').then(() => undefined),
     close: () => new Promise<void>((r) => { server.close(() => r()) }),
   }
 }
@@ -105,7 +117,7 @@ describe('the bridge, one tick', () => {
       passphrase: 'a-passphrase-held-in-memory-only',
       syncUrl: sync.url,
       session: sessionFile,
-      port: PORT,
+      port: 0,
       intervalMs: 3_600_000, // the constructor's own first tick is the one under test
       runner: () => '{"accepted": true, "step": 1, "quote": "yesss finallyyy!! lol"}',
       log: () => {},
@@ -113,19 +125,19 @@ describe('the bridge, one tick', () => {
 
     // the record on disk now carries the verdict the chat stated
     const id = listRecordIds(project)[0]
-    const served = await fetch(`http://127.0.0.1:${PORT}/records/${id}`).then((r) => r.json())
+    const served = await fetch(`${handle.url}/records/${id}`).then((r) => r.json())
     expect(served.signals.episode.accepted).toBe(true)
     expect(served.signals.episode.acceptanceStatedInChat).toBe(true)
     expect(served.signals.episode.acceptanceBasis).toContain('yesss finallyyy!! lol')
 
     // and the payload the page reads names it
-    const payload = await fetch(`http://127.0.0.1:${PORT}/payload`).then((r) => r.json())
+    const payload = await fetch(`${handle.url}/payload`).then((r) => r.json())
     expect(payload.verdict.accepted).toBe(true)
     expect(payload.verdict.quote).toBe('yesss finallyyy!! lol')
     expect(payload.declaredRecords).toEqual([id])
     expect(payload.userTurns).toBe(2)
 
-    const index = await fetch(`http://127.0.0.1:${PORT}/records`).then((r) => r.json())
+    const index = await fetch(`${handle.url}/records`).then((r) => r.json())
     expect(index.ids).toEqual([id])
 
     // the sync route saw ciphertext, never the record
@@ -147,16 +159,16 @@ describe('the bridge, one tick', () => {
       passphrase: 'a-passphrase-held-in-memory-only',
       syncUrl: sync.url,
       session: sessionFile,
-      port: PORT,
+      port: 0,
       intervalMs: 3_600_000,
       runner: () => '{"accepted": true, "step": 1, "quote": "this is perfect, ship it"}',
       log: () => {},
     })
 
     const id = listRecordIds(project)[0]
-    const served = await fetch(`http://127.0.0.1:${PORT}/records/${id}`).then((r) => r.json())
+    const served = await fetch(`${handle.url}/records/${id}`).then((r) => r.json())
     expect(served.signals.episode.accepted).toBeNull()
-    const payload = await fetch(`http://127.0.0.1:${PORT}/payload`).then((r) => r.json())
+    const payload = await fetch(`${handle.url}/payload`).then((r) => r.json())
     expect(payload.declaredRecords).toEqual([])
   })
 
@@ -169,13 +181,63 @@ describe('the bridge, one tick', () => {
       passphrase: 'a-passphrase-held-in-memory-only',
       syncUrl: sync.url,
       session: join(project, 'no-session.jsonl'),
-      port: PORT,
+      port: 0,
       intervalMs: 3_600_000,
       runner: () => '{"accepted": null, "step": null, "quote": null}',
       log: () => {},
     })
 
-    const res = await fetch(`http://127.0.0.1:${PORT}/records/${encodeURIComponent('../../../../etc/passwd')}`)
+    const res = await fetch(`${handle.url}/records/${encodeURIComponent('../../../../etc/passwd')}`)
     expect(res.status).toBe(404)
+  })
+})
+
+// The bridge's own door, not the helper underneath it. The helper is
+// tested directly in src/serve.test.ts; what is asserted here is that
+// `startBridge` actually routes through it, because the defect was that
+// the bridge had its own listen call and the store server had the good one.
+describe('the port the bridge is on', () => {
+  const dirs: string[] = []
+  const extra: BridgeHandle[] = []
+
+  /** The cheapest bridge that still binds a port: no session, no records. */
+  async function bare(port: number): Promise<BridgeHandle> {
+    const projectPath = mkdtempSync(join(tmpdir(), 'ursa-bridge-port-'))
+    dirs.push(projectPath)
+    mkdirSync(join(projectPath, '.ursa'), { recursive: true })
+    writeFileSync(join(projectPath, '.ursa', 'tuning.json'), JSON.stringify({ axioms: [] }))
+    const h = await startBridge({
+      projectPath,
+      passphrase: 'a-passphrase-held-in-memory-only',
+      syncUrl: 'http://127.0.0.1:9', // unreachable on purpose; the tick only logs
+      port,
+      intervalMs: 10 ** 9,
+      runner: () => '{"accepted":null,"step":null,"quote":null}',
+      log: () => {},
+    })
+    extra.push(h)
+    return h
+  }
+
+  afterEach(async () => {
+    while (extra.length) await extra.pop()!.stop()
+    while (dirs.length) rmSync(dirs.pop()!, { recursive: true, force: true })
+  })
+
+  it('reports the port it bound and a url that addresses it', async () => {
+    const h = await bare(0)
+    expect(h.port).toBeGreaterThan(0)
+    expect(h.url).toBe(`http://127.0.0.1:${h.port}`)
+    // and the url is live, which is the part a page depends on
+    expect(await fetch(`${h.url}/health`).then((r) => r.status)).toBe(200)
+  })
+
+  it('fails with a message when its port is taken, instead of waiting forever', async () => {
+    const first = await bare(0)
+    // Before the fix this call never settled. The test would have reported
+    // "Test timed out in 5000ms" with no error object, which is exactly how
+    // the defect presented in the suite for both bridge test files.
+    await expect(bare(first.port)).rejects.toThrow(
+      new RegExp(`the bridge cannot start: 127\\.0\\.0\\.1:${first.port} is already in use`))
   })
 })
