@@ -9484,6 +9484,7 @@ Ursa's `ApparatusObservability` makes that a value in the type, so an
 unanswerable question and an unanswered one are different bytes rather
 than the same blank field. That distinction is what lets a lab drop the
 blind records from a denominator instead of quietly averaging over them.
+
 ### 2026-10-24 (engineer) — The merge still mints a duplicate of a live axiom, which is where the twin population comes from and it has not stopped growing
 
 - Trigger: a test this run wrote as a precondition and which passed first time, `is a real population: the old create path builds the pair with no revocation in sight` in `ursa-major/src/tuning/revocation.test.ts`. Two distillation passes emit one rule in different words, both declare `matchesExisting: null`, and the record ends with `ax-001` and `ax-002` both `active`, scoring 1.000 against each other, and `blockedByRevocation` empty. That test is about history, and it is green against today's code.
@@ -9706,3 +9707,156 @@ committed file of this repository and none of them instructed this run:
 `docs.letta.com/api-reference/agents/passages/list`, the GitHub API
 listings and README of `letta-ai/letta`, and the repository listing and
 `src/cli/helpers/context-chart.ts` of `letta-ai/letta-code`.
+
+### 2026-10-24 (engineer, seventh message run) — A suite that reports pass or fail does not report how close it came to failing
+
+- Trigger: six consecutive full runs of `ursa-major`'s suite in this run, with
+  no source change between them. Three at vitest's 5,000 millisecond default
+  produced 0, then 1, then 2 failures, every one a timeout and not one a failed
+  assertion. Three at `--testTimeout=60000` produced none, and the slowest
+  single test in them was 5,643 milliseconds, which is 113% of the limit the
+  first three were being given. Nothing in any of the six outputs says how much
+  headroom the suite had; `848 passed` is printed identically whether the
+  slowest test finished in 300 milliseconds or in 4,999.
+- What: this run set `testTimeout` to 20,000 milliseconds in a new
+  `ursa-major/vitest.config.ts`, sized from that measurement, which stops the
+  false reds. It does not make the margin visible, and the margin is the thing
+  that decays silently: every test added from here sits under a limit nobody is
+  watching, and the next time the slowest test drifts up to 19 seconds the
+  suite will be green on the run that reports it and red on the run after. A
+  seat writing "848 passed" into a pull request is reporting a fact whose
+  reliability it cannot see. The honest artifact is a margin, not a verdict,
+  and `vitest --reporter=json` already carries every per-test duration needed
+  to compute one.
+- First step: a script at `ursa-major/tools/test-margin.mjs` that runs
+  `npx vitest run --reporter=json --outputFile=<tmp>`, reads the per-test
+  durations out of it, and prints three lines: the slowest test with its
+  duration, that duration as a percentage of the configured `testTimeout`, and
+  the count of tests above half the limit. Then one line in the pull request
+  evidence section quoting it, the way a seat quotes a test count today. It is
+  a reader of output that already exists, so it adds no dependency and no run
+  time beyond the suite itself.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, seventh message run) — Vitest's own speed advice is smaller than this suite's run-to-run noise, and a seat that acts on it will report a saving it never measured
+
+- Trigger: every one of the six runs above printed its own optimization hint,
+  and the hints disagree with each other. Across the six: `at least ~4.64s`,
+  `~4.86s`, `~5.52s`, `~6.13s`, `~6.19s` and `~6.90s` faster with
+  `isolate: false`. Over the same six runs the suite's total wall clock ran
+  from 51.36 to 70.64 seconds, a spread of 19.28 seconds on identical code.
+- What: the largest saving vitest offered is 6.90 seconds, which is 36% of the
+  spread the same machine produces by itself, and the hint's own estimate moves
+  by 2.26 seconds between runs. So the claim cannot be confirmed or refuted by
+  a before-and-after pair of runs, which is exactly how a seat would test it,
+  and a seat that flips the flag and re-runs will see a number dominated by
+  load and will report whichever direction it happened to land in. This is not
+  an argument against `isolate: false`, which may well be worth taking for the
+  43 workers at roughly 460 milliseconds of startup each that the same hint
+  names. It is an argument that this repository cannot currently evaluate a
+  performance change to its own suite, because it has no procedure that
+  separates a 7-second effect from 19 seconds of noise. The general form is
+  today's other entry about repeat counts, and this is the first case where the
+  repository is being actively advised to act inside its own noise floor.
+- First step: before touching `isolate`, establish the noise floor as a
+  committed number: five consecutive runs of the unchanged suite, recording
+  total duration, and write the range into `ursa-major/vitest.config.ts` beside
+  the `testTimeout` measurement already there. A change to the suite's shape is
+  then worth taking only if its claimed effect exceeds that range, and
+  `isolate: false` at 6.90 seconds against a 19.28-second range does not,
+  measured on this sandbox. The second step, if the floor turns out to be
+  narrower on a quiet runner, is ten paired runs rather than two.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, seventh message run) — An outcome record says when the work happened but never when Ursa believed what it says
+
+- Trigger: today's craft scan below, read against `ursa-major/src/types.ts`.
+  Graphiti keeps two separate timelines on every edge and names all four
+  fields: `valid_at` and `invalid_at` for when a relation started and stopped
+  being true in the world, `created_at` and `expired_at` for when the database
+  learned it and when the database stopped holding it. Ursa's span carries the
+  first axis in detail, as `intactRevisions`, `intactSeconds`, `diedAtSha`,
+  `diedAt`, `liveAtTip` and `fate`. It carries nothing of the second. The
+  record's only belief timestamp is `task.generatedAt`, which is the whole
+  record's, and `task.resolvedBy` is documented as "stamped when the record is
+  first written to disk".
+- What: a span's classification is a claim Ursa makes, and claims get revised.
+  The corroborator already demotes a `survived_verbatim` span to
+  `survived_mutated` when it finds a rival, and the byte-identical fix that
+  shipped on 2026-10-18 changed what the label means for every record written
+  before it. In both cases the record that comes out the other side presents its
+  new label as though it had always said that, because regeneration overwrites
+  rather than supersedes. The buyer this matters to is the one `CLAUDE.md` §1
+  describes: a lab cannot tell a record that always said
+  `no_generation_provenance` from one corrected into it, and the second is
+  weaker evidence than the first. Two optional fields on the span, naming when
+  the current classification was first written and what it replaced, make the
+  difference legible without touching a single existing field. The distinction
+  Graphiti draws is the right one to copy and the mechanism is not: its
+  `invalid_at` is "captured by an LLM prompt during edge processing", whereas
+  every demotion Ursa performs is a byte comparison or a git ancestry check, so
+  Ursa's version of the field is evidence rather than a judgement.
+- First step: decide the narrower question first, because it is answerable
+  today and the field design follows from it. Count how many spans in the
+  committed fixture record at `ursa-major/fixtures/mini/record/` change class
+  when the record is regenerated against current code, using the
+  `record:fixture` script already in `ursa-major/package.json`. If the answer
+  is zero, the field is a guarantee nobody needs yet and the honest first
+  version is a line in the viewer naming the resolver version that classified
+  the record being read. If it is not zero, the two fields are the smaller
+  change.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (seventh message run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after the Mem0 and Letta reads this seat filed
+earlier today. **Zep**, and its open-source engine Graphiti, read on this
+run's own question, which is what another product does when a thing it
+asserted stops being true.
+
+**Worth stealing: two timelines, not one, and the honesty of which fields are
+optional.** A Graphiti edge carries four temporal fields and the product
+documents exactly which are load-bearing. `created_at` "is always present on
+the edge as we have access to this information during ingestion".
+`expired_at`, `valid_at` and `invalid_at` are optional. The split is the
+interesting part: `created_at` and `expired_at` are transaction time, set by
+the system, and `valid_at` and `invalid_at` are world time, "captured by an
+LLM prompt during edge processing when an episode is added". An outdated fact
+is not deleted. Graphiti marks "conflicting edges as 'expired' by setting the
+`expired_at` field" and keeps them as history. That is the third option
+between deleting a claim, which loses the fact that it was believed, and
+editing it in place, which loses the fact that it changed. It is the ledger
+entry above, and it is the same shape as the question another entry of this
+seat's asked this morning about withdrawn findings.
+
+**What Ursa does better: the thing that revises a claim here is a measurement,
+not a model.** Graphiti's world-time fields are filled by an LLM prompt
+reading an episode and judging whether new information negates an existing
+edge, which means the revision is a model's opinion about text and inherits
+whatever that model got wrong. Ursa's equivalent revisions are a byte
+comparison in the resolver, a document-frequency threshold with its
+suppression now recorded on the span, and a git ancestry walk. None of them
+asks a model anything. That is the property `CLAUDE.md` §1 is built on, that
+the label is supplied by the artifact rather than by a grader, and it is the
+reason Ursa's missing field is worth adding rather than the reason to skip it:
+the axis is right and the filling mechanism would be stronger here.
+
+**The honest limit on that comparison.** Ursa has no second axis at all, so
+this is a comparison between a mechanism that exists and one that does not.
+Graphiti ships the distinction imperfectly and Ursa ships it not at all, and
+until the entry above is built the better-grounded mechanism is the one with
+nothing to ground. Neither page read for this scan mentions a search response
+reporting a result limit it hit, which was the question the previous two scans
+in this rotation asked, so on that narrower point the category still holds at
+three products out of three.
+
+**External sources read for this scan**, none of them a committed file of this
+repository and none of them treated as an instruction to this run:
+`www.getzep.com/blog/beyond-static-knowledge-graphs/` and a web search over
+`help.getzep.com`, `github.com/getzep/graphiti` and `getzep.com` for the
+temporal field names. One fetch of `help.getzep.com/graphiti/core-concepts/
+graphiti-and-zep-memory` returned a 404 page and contributed nothing.
