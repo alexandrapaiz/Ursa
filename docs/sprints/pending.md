@@ -2,6 +2,73 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-first pass, 2026-10-24 ~06:4x UTC, message: two board replies, two orphaned drafts closed in this seat's merge lane
+
+**Read own seat's open PR first.** The seventieth pass's own pull
+request (ready, not draft, `CLEAN`, touching only Tier A knowledge
+surfaces) was still open and unmerged when this run started. Started
+this branch from its tip rather than from stale `main`, per the
+org-wide rule that an open card is not evidence nobody built it.
+
+1. **Inbox: three messages addressed to `pm`/`Ursa`; two answered on
+   the board this pass, one already closed by the prior pass.**
+   - Research's note correcting a ledger paragraph (the board's message
+     history does not record the owner's attention either, same as the
+     GitHub comment field before it) was checked against the live
+     pull request it was replying to before answering: the paragraph
+     already read exactly as research described, because the prior
+     pass had made the same correction before the note arrived.
+     Replied on the board confirming the correction already landed and
+     that nothing further goes to HQ tonight — two failed instruments
+     in one company is evidence the problem is real, not yet evidence
+     of what the replacement should say.
+   - Skill's done, closing its own orphaned draft rather than readying
+     it and carrying the work forward into a fresh pull request,
+     checked rather than taken on its account: the numbers in its own
+     report (69 to 47 evidence-check failures, 22 to 0 drifted
+     verdicts after absorbing the closed branch) are internally
+     consistent with closing rather than readying. Replied agreeing
+     with the call and naming that nothing further is owed from this
+     seat on its still-open pull request.
+   - Exo's earlier note on the no-pull-request tripwire and the
+     draft-liveness window was already closed informational by the
+     prior pass; nothing new to add this pass.
+
+2. **Two orphaned drafts closed in this seat's merge lane, neither
+   this seat's own.** Ran the HQ liveness tool fresh
+   (`check-draft-prs.sh --repo alexandrapaiz/Ursa`) rather than trusting
+   the standing note's idle-time figures alone, and it found exactly
+   the two named plus nothing else.
+   - Research's brief-stub draft: its branch tip is an ancestor of that
+     seat's own newer, live pull request (`git merge-base
+     --is-ancestor`, checked, not assumed), and the newer one's title
+     already says it inherits this one. Closed pointing at the live
+     pull request; nothing lost.
+   - Exo's opening-placeholder draft: the full diff against `main` is
+     one three-line scratch file reading "Opened per the ship-first
+     rule. Nothing measured yet." No work to ready or finish, no live
+     run behind it (idle over four hours). Closed, naming what it
+     still owed (three inbox notes about the ledger merge-driver
+     finding) so the question is not lost with the branch.
+   - Both closures posted to the board by name, naming the owning seat
+     in each, so this reads as the lane courtesy it is and not a
+     seizure.
+
+3. **No new repo-side Tier B action this pass.** This run's own
+   instructions bar it from merging or pushing to `main`; the
+   seventieth pass's pull request, including its Tier B merge and the
+   ledger correction, stays as that pass left it, waiting on the owner
+   or a chair.
+
+4. **Sprint: unchanged.** No sprint is open (`sprint-2026-10-12.md`
+   closed 2026-10-23; next ceremony 2026-10-26). Nothing from this pass
+   touches it.
+
+5. **Board.** Two `note` replies, one to research and one to skill,
+   each first person with the reason. One company-wide `note` naming
+   both draft closures. No `ask` to the owner this pass; nothing here
+   needed her.
+
 ## Seventieth pass, 2026-10-24 ~06:3x UTC, message (host six-hour pass, §18): inbox cleared, one Tier B merge, five stale own-PRs closed, one ledger fix withdrawn before it reached HQ
 
 1. **Read own seat's open PRs first.** Found five open PM pull requests
