@@ -36,9 +36,59 @@ const MARKET_ENTRY = [
   '- Status: proposed',
 ].join('\n');
 
+/**
+ * Where two strings first differ, as a line number and the lines around it.
+ *
+ * WHY THIS EXISTS. The assertion below used to be a bare `assert.equal` on two
+ * 630,000-character strings, and `node:assert` renders that failure as
+ * `'   wire dom'... 633582 more characters` against `633581`. That tells a
+ * reader the file is wrong by one byte and nothing about which byte, on a file
+ * where the cause is a single missing blank line. It cost an hour on
+ * 2026-10-24 (the ledger entry "The ledger's own contract gate has been red on
+ * main for long enough that nobody is reading it"), and then the same drift
+ * reappeared at a different line the same day and would have cost it again.
+ * The invariant is unchanged; only its failure message is.
+ *
+ * @param {string} actual
+ * @param {string} expected
+ * @param {string} label the file the expected side came from, for the report
+ * @returns {string | null} null when equal, else a multi-line report
+ */
+function firstDifference(actual, expected, label = 'docs/ideas.md') {
+  if (actual === expected) return null;
+  let i = 0;
+  while (i < actual.length && i < expected.length && actual[i] === expected[i]) i += 1;
+  const line = expected.slice(0, i).split('\n').length;
+  const window = (s) => JSON.stringify(s.slice(Math.max(0, i - 120), i + 80));
+  return [
+    `first difference at byte ${i}, ${label} line ${line}`,
+    `  expected (the file on disk): ${window(expected)}`,
+    `  actual (what the renderer writes): ${window(actual)}`,
+    '',
+    'Run `node tools/ledger/check.mjs <file>`: rule BLOCK_SEPARATION reports',
+    'this class of drift by line number, which is almost always what this is.',
+  ].join('\n');
+}
+
 test('parse then render is byte-identical on the real ledger', () => {
   const source = readFileSync(new URL('../../docs/ideas.md', import.meta.url), 'utf8');
-  assert.equal(renderLedger(parseLedger(source)), source);
+  const diff = firstDifference(renderLedger(parseLedger(source)), source);
+  assert.equal(diff, null, `docs/ideas.md does not survive its own round trip.\n${diff}`);
+});
+
+test('the round-trip report names the line a dropped blank line is on', () => {
+  // The diagnosis is itself tested, because a failure message is only worth
+  // writing if it is right, and this one is only ever read while something
+  // else is already broken.
+  const source = ['# The Ledger', '', '### 2026-09-27 — One', '- Status: proposed', ''].join('\n');
+  const dropped = source.replace('\n\n### 2026-09-27', '\n### 2026-09-27');
+  const diff = firstDifference(renderLedger(parseLedger(dropped)), dropped, 'fixture.md');
+  // Line 2 and not line 3: the bytes agree through `# The Ledger\n`, and the
+  // first that differ are the heading's own line, which is where the blank
+  // line should have been. That is the line a reader needs to open.
+  assert.match(diff, /first difference at byte 13, fixture\.md line 2/);
+  assert.match(diff, /BLOCK_SEPARATION/);
+  assert.equal(firstDifference(source, source), null);
 });
 
 test('a dated bullet note is its own block, not part of the entry above it', () => {
