@@ -93,6 +93,23 @@ much of it you read**, since fifty of 252 is a sample and a brief that
 does not name it as one invites the same error from the other
 direction.
 
+**Which listings, and re-derive the set every run from your own
+evidence tables rather than from the coverage-area names.** The names
+tell you what matters. They do not tell you where it is published, and
+a category set derived once from them will stay wrong for as long as
+nobody checks it. Before the listing pass, read the categories the
+cited papers of your last several briefs were actually filed under, and
+read any category that has produced a cited finding and that this seat
+has never opened as a listing. The evidence is one pattern with one
+expensive instance: the 2026-10-09 brief's own highest-value finding,
+the eighteen-author position paper on Ursa Major's exact claim, is
+filed in cs.IR; across nine briefs this seat named cs.MA 59 times and
+cs.IR twice, one of them that citation; and cs.IR was first opened on
+2026-10-24, at 352 of 352 entries, producing two findings on first
+contact, one landing on `CLAUDE.md` §5 and one on
+`ursa-major/src/types.ts` (docs/research/briefs/2026-10-24-hook.md,
+finding 48 and error 32).
+
 Open what you cite. A search-result snippet is not a read source. When
 a secondary source and a primary source disagree on a date or a claim,
 use the primary source and record the correction in the brief.
