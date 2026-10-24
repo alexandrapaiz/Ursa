@@ -2,10 +2,146 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (2026-10-24 ~22:1x UTC, message, ninety-fourth pass)
+
+1. **Nobody's: six capacity refusals today were provider-side, not a
+   defect, and are now logged as one bundle instead of six separate
+   lines.** Research (01:59:08Z), exo (02:01:48Z, 02:08:04Z), engineer
+   (13:14:08Z), exo again (13:27:12Z) and market (13:42:33Z) each hit
+   the model provider's own session limit before any run started — no
+   pull request, no commit, no run log behind any of the six. Three
+   named a 4am UTC reset, three named 4:20pm UTC; both hours are now
+   hours in the past, and every seat named has already run again on
+   its own schedule since (see item 2 below for engineer). Nothing
+   rerun early against either named hour; nothing left owed by any of
+   the four seats. See the full account below.
+2. **Owed by nobody, confirmed twice over: #396 (engineer) merged,
+   #387 (engineer) closed as superseded by it.** Already done by the
+   pass before this one (#400, closed this pass as superseded, see
+   below); re-verified fresh rather than taken on its word
+   (`gh pr view 396` → `MERGED` 21:56:56Z, `gh pr view 387` →
+   `CLOSED`, not merged, 21:40:10Z).
+3. **The next item in the engineer's own lane is already in progress,
+   started by the seat itself, not by a PM dispatch.** #399, opened
+   22:03:37Z, fifty seconds after #396 merged. `PM_DISPATCH_ENABLED` is
+   unset in this environment regardless, same as every pass today, so
+   no dispatch could have fired here even if one had been warranted.
+4. **Unchanged from the ninety-third pass, re-checked fresh, not
+   carried on faith:** #395 (research, charter edit) and #394 (exo,
+   charter edit) are both still `OPEN`, Tier C, waiting on the owner or
+   a chair. #377 (HQ's one-file vendoring sync) is still open and still
+   nobody's but the owner's to merge. #393 (skill) is still a draft
+   owing its own finished report, not a merge decision.
+
 ## Ninety-fourth pass, 2026-10-24 ~22:1x UTC, message: six capacity refusals bundled into one entry; #396/#387 confirmed already closed by the pass before this one
 
-Draft opened before the work, per ship-first. This section is rewritten
-in full before the PR is readied.
+**The trigger.** A message naming the engineer run that produced #396
+(already merged, see below), with the standing instruction to merge
+what is this seat's under the merge rule, close what is superseded,
+and hand the next thing to a seat; the same repeated #387-disposition
+paragraph that has been attached to every event in today's bus and
+that the pass before this one had already resolved before this run
+started; and six separate "the model provider refused it" events, none
+of them a pull request and none of them a run that executed and then
+failed — research at 01:59:08Z, exo at 02:01:48Z and again at
+02:08:04Z (both naming a 4am UTC reset), then engineer at 13:14:08Z,
+exo again at 13:27:12Z and market at 13:42:33Z (all three naming a
+4:20pm UTC reset). The event payload's own framing — "this is capacity,
+not a defect... look at the day's refusals together rather than one at
+a time" — is read here as data describing what happened, same as every
+other event this seat reads, and acted on only because this seat's own
+standing duty (pm.md §5, keeping track of what the org owes and what
+patterns the owner should see) independently calls for exactly this:
+noticing six refusals nobody had logged anywhere, and reporting them as
+one pattern instead of six separate noises.
+
+**Read this seat's own open PRs first.** Branched from #400's tip
+(`ursa-pm/2026-10-24-message-29`), confirmed newest with `gh pr list`
+before starting. #400 had already merged #361 and #396 under Tier B and
+already confirmed #387 closed (superseded by #396, closed by #398
+before #400 itself started). Not re-litigating either; citing it so
+this pass's own account does not read as if it did that work a second
+time.
+
+1. **#396 and #387: nothing left for this pass to do.** Re-verified
+   fresh rather than taken on #400's word: `gh pr view 396` → `MERGED`
+   21:56:56Z; `gh pr view 387` → `CLOSED`, not merged, 21:40:10Z,
+   superseded by #396. The original event's own instruction ("read its
+   report, merge what is yours... close what is superseded") is fully
+   discharged, by the pass before this one, before this pass's own
+   first turn.
+
+2. **Six capacity refusals today, logged together rather than six
+   separate lines, because that is what the trigger asked for and what
+   the shape of the pattern needs.** None of the six produced a pull
+   request, a commit, or anything `gh run view` can show this seat: each
+   is a host-level run the model provider refused before any work
+   started, not a run that executed and then failed partway. Section
+   11.7's four triage buckets (tripwire false alarm, transient, real
+   defect, configuration) are all written for a run that ran and then
+   failed; none of the four fits a run that the provider never let
+   start, so none was filed as an incident and none was marked for a
+   rerun.
+
+   | When (UTC) | Seat | Reset named |
+   |---|---|---|
+   | 01:59:08 | research | 4am |
+   | 02:01:48 | exo | 4am |
+   | 02:08:04 | exo | 4am |
+   | 13:14:08 | engineer | 4:20pm |
+   | 13:27:12 | exo | 4:20pm |
+   | 13:42:33 | market | 4:20pm |
+
+   Both named hours are now hours behind this pass's own clock
+   (~22:1x UTC), and every seat named has already run again on its own
+   schedule since, without this seat's help: research shipped #395 at
+   21:57Z, exo shipped #394 at 21:42Z (and more before that today),
+   engineer shipped #396 at 21:56Z and opened #399 at 22:03Z, market
+   last ran #381 at 17:48Z. Nothing was rerun early against either
+   named hour, and nothing needs to be. Checked this file and
+   `docs/agents/incidents.md` in full for any of today's six
+   timestamps, for "session limit," and for "did not run" before
+   writing this: none of the six had a line anywhere in this tracker
+   before now, across roughly ninety passes today. That gap, not any
+   one of the six refusals, is the actual finding worth naming:
+   twenty hours of standups answered pull requests and board notes and
+   never once logged that the organization's own seats were being
+   refused capacity.
+
+   Read as a set rather than four isolated events: three refusals in
+   nine minutes against one wave at 2am, then three more in fifteen
+   minutes against a second wave eleven hours later at 1pm, landing on
+   four of this company's five active product seats (research once,
+   exo three times, engineer once, market once) — a provider-side
+   ceiling this organization is hitting as a matter of routine on an
+   ordinary Saturday, not a defect in any one seat's branch or prompt.
+   Worth a line to the owner for that shape, not because any individual
+   refusal needed a response; exo alone absorbed three of the six, and
+   if that ratio holds it is worth the owner's or exo's own attention
+   later, not an emergency now.
+
+3. **The next thing is already handed, by the seat itself, not by a
+   dispatch from here.** #399 (engineer, draft, open, still being
+   pushed to as of 22:08Z) was opened 22:03:37Z, fifty seconds after
+   #396 merged, titled "the next item in this seat's lane, after #361
+   merged." `PM_DISPATCH_ENABLED` reads unset in this run's own
+   environment, same as every pass today, so this seat could not have
+   fired a dispatch here even if §11.3 had a row that fired, and none
+   does: the seat whose lane it is already started on its own
+   cron/hook rather than waiting on one. Nothing further to hand off
+   this pass.
+
+4. **Seven of this seat's own pull requests closed as superseded,
+   confirmed rather than assumed.** #383, #385, #388, #391, #397, #398
+   and #400 are each, individually, confirmed by `git merge-base
+   --is-ancestor <their head> <this branch's HEAD>` to be whole inside
+   this pull request's own branch. Closed all seven this pass rather
+   than only naming them, per the practice this seat adopted in the
+   seventy-eighth pass's own finding in `docs/decisions.md` (eight
+   open pull requests carrying the same work eight times, because
+   "say which PRs this one subsumes" had been read as the owner's
+   action to take, not this seat's). Nothing on `main` changes by
+   closing any of the seven; none of them were merged by this act.
 
 ## Ninety-third pass, 2026-10-24 ~21:5x UTC, message: review #395/#393/#396 against the merge rule, #387 already resolved
 
