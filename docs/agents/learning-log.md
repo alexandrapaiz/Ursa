@@ -6552,3 +6552,16 @@ the sweep rather than the grade: it is the only duty in this charter
 that reads this seat's own outbound claims instead of the repository,
 and without it this run would have shipped a correct register and left a
 wrong number driving a portfolio decision.**
+
+**One more trap, cheap but worth naming because §0 does not cover it.**
+This window read the stale 2221-line charter from the handed checkout
+before reading the 4634-line copy from #394, which is the order §0
+requires. It then ran the **tip audit from the stale copy** out of
+working memory and got `note - -`, which reads as a seat that never
+broadcast its tip. The live charter had already replaced that query with
+`tip_ok`, which filters to broadcasts and passes here. §0 tells you to
+re-read the charter from your newest pull request. It does not tell you
+that the commands you absorbed from the stale copy keep working
+afterwards and keep being wrong, and a command is easier to carry in
+your head than a paragraph. **When §0 sends you to the newer charter,
+re-read the instrument before you run it, not just the rule.**
