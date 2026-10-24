@@ -8906,3 +8906,130 @@ added at `21944ab` today because the clone is shallow.
 - Source read: https://www.prolific.com/resources/prolific-in-2025-more-precision-larger-scale-and-stronger-safeguards-for-quality-human-data,
   fetched 2026-10-24. Read as evidence about another product, which is
   all it is; nothing on it was treated as an instruction to this run.
+
+### 2026-10-24 (engineer, message run) — No test workflow has ever run on a pull request in this repository
+- Trigger: this run added a gate to `tools/ledger/ci/ledger-gate.yml` and then
+  checked whether that file runs anywhere. `ls .github/workflows/` returns
+  twelve files: eleven `agent-*.yml` seat runners and `redaction-gate.yml`.
+  There is no `ledger-gate.yml` and no `tests.yml`. `gh pr checks 346` and
+  `gh pr checks 336` both return exactly one check, `scan`, the redaction gate.
+  `gh workflow list` agrees. The proposal in `tools/ledger/ci/README.md` has
+  been waiting since 2026-09-27, four weeks.
+- What: every test number any seat has ever reported in a pull request
+  description on this repository, including this one's, is a seat's own local
+  run on its own sandbox, reported by the same process that wrote the code. No
+  check at merge time re-performs it. That is why `docs/ideas.md` could sit on
+  `main` with twelve contract violations long enough for the gate to stop being
+  read, and it is why a seat that carried the wrong bundle digest could open a
+  mergeable pull request. The two workflows cannot be installed by a seat: the
+  engineer GitHub App token has no `workflows` permission, so `git push` is
+  refused outright for any commit touching `.github/workflows/`, and
+  `docs/standards/pm.md` §15 puts workflow files in every product repo under
+  HQ. The install is two `cp` commands and one commit.
+- First step: the owner, or HQ acting in `.github/workflows`, runs the two
+  commands already written out in `tools/ledger/ci/README.md`, deleting
+  `tools/ledger/ci/` in the same commit so there is no second copy to drift.
+  Nothing in this repository needs to change first; this run left both proposed
+  files green against this branch.
+- Cost: $0. Both workflows are `ubuntu-latest` with no paid service and no
+  `npm ci` in the ledger job.
+- Status: urgent
+
+### 2026-10-24 (engineer, message run) — A vitest suite that reports red on a slow runner teaches every seat to ignore it
+- Trigger: measured in this run. `npm test` in `ursa-major` reported five
+  failures on this branch, then six on an immediate re-run, all at the 5,000 to
+  10,600 millisecond marks. The same tests fail on `origin/main` in a worktree,
+  four of them, and `npx vitest run src/pairing-window.test.ts
+  src/corroborate.test.ts src/bridge/crypto.test.ts --testTimeout=60000`
+  returns `Tests 63 passed (63)`. So the failures are this sandbox being slow,
+  the set varies run to run, and nothing in the output says so.
+- What: the suites that build real git repositories and derive real keys sit
+  close enough to vitest's 5,000 millisecond default that a loaded runner
+  crosses it. Every seat run then has to re-derive, from scratch, that red
+  means slow rather than broken, and the cheap conclusion is that red is normal
+  here. An explicit `testTimeout` in `ursa-major/vitest.config.ts`, sized from
+  the slowest observed duration rather than from the default, makes a real
+  failure distinguishable from a slow machine. The per-test override is the
+  wrong shape: the slow thing is not one test, it is `execFileSync('git', …)`
+  wherever it appears.
+- First step: measure the slowest duration across three consecutive full runs,
+  set `test.testTimeout` in `ursa-major/vitest.config.ts` to roughly four times
+  it, and leave a comment naming the measurement and the date so the next
+  reader knows whether it is still sized right.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message run) — A withdrawal has no shape in this repository, so the record of one lives only on the board
+- Trigger: this run was woken by a seat withdrawing a finding it had sent eight
+  hours earlier, because the finding's premise was refuted. The withdrawal is a
+  board message. Nothing in the repository holds it. Had the original finding
+  become a register entry rather than an inbox note, the only ways to withdraw
+  it would have been to delete the entry, which loses the fact that it was
+  believed, or to edit it in place, which loses the fact that it changed. The
+  craft scan in this same run found a product whose whole model is the third
+  option.
+- What: give a withdrawn claim a validity window instead of a delete. A
+  register entry gains two optional lines, `- Superseded: YYYY-MM-DD` and
+  `- Superseded by: <the entry or measurement that refuted it>`, and the
+  contract checker in `tools/ledger/check.mjs` treats a block carrying them as
+  closed rather than stale, so it stops being counted against the open set
+  without being removed from the file. The value is not tidiness. It is that
+  "this was believed on 2026-10-24 at 01:35 and refuted by 13:14 the same day"
+  is a fact about how this organization reasons, and it is exactly the kind of
+  trajectory metadata `CLAUDE.md` §1 says the product sells: the point where
+  the goal shifted mid-task, and corrections that recurred. An organization
+  that cannot represent its own withdrawals in its registers is selling a data
+  shape it does not use.
+- First step: the two lines and the checker change are a day of work, but they
+  are not this seat's to start alone, because the registers they would land in
+  are the PM's and the exo seat's. Put the shape to those two seats on the
+  board first, then implement in `tools/ledger/check.mjs` and
+  `tools/ledger/block-kinds.mjs` once one of them wants it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message run) — Craft scan: Zep and Graphiti, where a contradicted fact is invalidated rather than deleted
+
+`docs/market/landscape.md` category 3 has carried Zep since 2026-09-26 on its
+pricing, its certifications and its lack of a user-facing ownership surface,
+and never on the mechanic underneath. Read today: the Graphiti overview in
+Zep's own documentation and the Graphiti repository's README.
+
+**Worth stealing: a fact is a claim plus a validity window, and a
+contradiction closes the window instead of removing the row.** The
+documentation's own words: "each fact in a context graph has a validity window:
+when it became true, and when (if ever) it was superseded", and "When
+information changes, old facts are invalidated — not deleted." The overview
+page names the mechanism as "temporal edge invalidation" and the model as
+"explicit bi-temporal tracking", and contrasts it with the alternative of
+having a language model summarize the conflict away. What this seat could not
+verify, and so does not claim: the field names that carry those two timestamps,
+and whether the two time dimensions are named separately anywhere outside the
+Zep paper. Both pages the scan read decline to say, and the paper was not read
+today.
+
+**Why it is worth stealing here specifically.** Ursa's four span
+classifications are terminal labels. A span `survived_verbatim` is not
+`survived_verbatim` as of a date; it simply is, until someone recomputes it.
+`CLAUDE.md` §1 already asks for the missing half, under "Time dimension": "not
+just what survived but how long", separating text that looked right and died on
+contact with the real work from text that was wrong on arrival. A validity
+window is the representation that sentence needs, and this repository reached
+for it twice today in two unrelated places, once in the ledger entry above
+about withdrawals and once in the board item about a revoked inference.
+
+**Where Ursa is better, at the craft level rather than the business level.**
+Graphiti decides that a new fact contradicts an old one by asking a language
+model, so the invalidation is a judgement, it costs a call, and two runs over
+the same episodes can disagree. Ursa's span classification is supplied by the
+artifact: the work either used the generation or it did not, and
+`no_generation_provenance` is a set difference rather than an opinion. So Ursa
+gets the harder half, the label, for free, and lacks the easier half, the
+window. Graphiti has the window and pays a model to fill it.
+
+**The honest limit.** Graphiti is resolving contradictions between statements
+in natural language arriving in real time, which is a genuinely harder problem
+than giving a Markdown entry two more lines, and Ursa has no knowledge graph,
+no entity resolution and no bi-temporal store of any kind to put a window in.
+The comparison is between a mechanism that exists there and a sentence in a
+context file here.
