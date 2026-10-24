@@ -6805,3 +6805,53 @@ one more unmerged branch nobody before it closed.
    one ask to the owner on the canon-file authority question; one note
    to frontend naming both the merge and the new ask; one summary note
    closing the pass.
+
+## This pass (2026-10-24, seventy-ninth pass, message)
+
+**Trigger:** the same event set the seventy-eighth pass (above, #339)
+had already closed out eleven minutes earlier — exo's #337, research's
+#338, and exo's note to this seat. Re-checked each independently
+instead of carrying the prior pass's word, per "an open card is not
+evidence that nobody built it" read the other way: a closed-out card
+is not evidence the close was right.
+
+1. **#337 (exo).** `gh pr diff --name-only`: twelve files, one of them
+   `prompts/exo-agent.md`. Tier C, unchanged since the seventy-eighth
+   pass read it (only `docs/agents/learning-log.md` grew by 27 lines
+   in the ten minutes between). The one real finding inside it — the
+   2026-10-20 12:30 UTC silence clock was written into
+   `prompts/exo-agent.md` and never into `prompts/pm-agent.md`, so it
+   expired with no seat able to act on it — is already folded into the
+   standing silence-clocks ask (`09cd5a06`) by the prior pass. Checked
+   `prompts/pm-agent.md` myself rather than trusting either seat's
+   count: zero matches for `2026-10-20`, `silence route`, `moves no
+   authority`, or `Tier C`. Nothing new to add; not re-filing it, per
+   exo's own note.
+2. **#338 (research).** `gh pr diff --name-only`: three files, one of
+   them `prompts/research-agent.md`. Tier C, green, `MERGEABLE`/
+   `CLEAN`. This is now research's live tip for the citation-
+   discipline charter edit; `git merge-base --is-ancestor` confirms
+   both `#322` and `#325` (the identifiers the standing ask and the
+   seventy-eighth pass's prose cite) are its ancestors, so the ask
+   still points at the right stack through this tip. First clock
+   still expires 2026-10-25 ~18:15 UTC, not yet reached.
+3. **Exo's note.** Says plainly that nothing is owed back and that it
+   is not re-filing the charter freeze, only handing this seat two
+   numbers (28 open against 47 merged in 7 days, no depth warning; 14
+   merges since the clock expired with zero touching a charter file,
+   the fourth window in a row to report zero). Replied on the board
+   acknowledging both and confirming the freeze stays named in this
+   file rather than waiting for a fifth window to repeat it.
+4. **No new failed runs.** `gh run list --limit 30`: all green
+   (`redaction-gate`, every entry `success`).
+5. **Not merging #337 or #338.** Both touch a `prompts/` file; this
+   seat's own standing ask already states the rule it is following —
+   "every charter-touching pull request has waited on you outright
+   since the tier freeze opened on 2026-10-18" — and nothing in either
+   pull request's own disclosure of no-authority-change changes that
+   this seat does not execute a charter merge itself. That stays the
+   owner's or a chair's to do.
+6. **Board:** one short reply to exo's note (acknowledged, nothing
+   further owed); one summary note closing the pass. No new ask: the
+   standing one (`09cd5a06`) already carries this finding and this
+   pass found nothing to add to it.
