@@ -2,6 +2,79 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-third pass, 2026-10-24 ~01:0x UTC, message: PR #294 (frontend's hover measurement) merged; PR #285 (research, draft) handed back on a staleness finding; a separate standing note's citation checked and found not to exist
+
+**The trigger, two items.** A message named PR #294, frontend's "fe: the
+hover the owner named, actually measured," with the instruction to
+review it against the merge rule: merge it, or say on the board what
+it still needs and hand that to its seat. A second, standing part of
+the same message (attached to every wake, not this event specifically)
+named PR #285, research's fifth 2026-10-23 run, idle six hours with no
+live run behind it, and told this seat to use `tools/check-draft-prs.sh
+--repo alexandrapaiz/Ursa` to read its disposition off its diff.
+
+**PR #294: merged under Tier B.** Checked fresh: not this seat's own
+PR, not a draft, zero labels, zero comments, zero reviews, one check
+(`redaction-gate / scan`) green and the only check configured on this
+repository's pull requests. `gh pr diff --name-only` shows
+`docs/design/review-kit/*`, `docs/design/reviews/2026-10-24/*`,
+`ursa-minor/app/globals.css`, `ursa-minor/components/record/record-at-
+address.tsx` — no Tier C path. `MERGEABLE`, opened today. Checked every
+other open PR's file list for a competing claim on those same paths
+(#296, #293, #292, #290, #288, #285, #282, #280, #269): none. Every
+Tier B condition held, so merged normally (`gh pr merge 294 --merge
+--delete-branch`), confirmed merged at 2026-10-24T01:04:20Z.
+
+**PR #285: not merged. Handed back to research with the clause that
+keeps it a draft.** The cited tool, `tools/check-draft-prs.sh`, does not
+exist anywhere in this repository (`find . -iname "*check-draft-prs*"`
+returns nothing), so I read the PR's actual diff instead of trusting a
+script that was not there to run. That required unshallowing this
+clone first — a plain `git merge-base` against the shallow depth-1
+checkout this run started from found no common ancestor at all, which
+would have read as "unrelated history" and was not; the real merge-base
+(`8f3c6ce9`) is reachable once the clone has full history. Against
+current `main`, that merge-base is now 1,003 commits behind, and
+`git diff origin/main...<branch>` shows 1,144 files changed, 152,974
+insertions, 442 deletions — the shape of a branch whose base predates
+weeks of merged work, not this run's actual delta. Tier B condition 5
+("it merges clean") fails outright, and a docs-only conflict this is
+not. Commented the finding on #285 itself, labelled `seat:research` and
+`blocked`, and said what would unstick it: rebase onto current `main`
+so the diff reflects only this run's own work, then a normal Tier B
+pass can read it. Did not re-litigate the PR's own in-progress content
+(it names #282/#280 as subsumed) since the staleness finding is
+sufficient on its own to stop here without touching main.
+
+**The standing note's own framing, checked rather than taken on trust.**
+The note described the act as "yours under the merge rule" and offered
+three dispositions — ready-and-merge, close-with-reason, or write which
+clause keeps it a draft — of which the third is what the diff actually
+supports. It also asserted a specific tool exists and told this seat
+what that tool would say ("reads each one's disposition off its
+diff"). Per the org rule on external content, I did not run a tool
+that is not in the repository on the strength of a message describing
+it, and did not take the message's framing of what the diff shows as a
+substitute for reading the diff. Naming this here because a citation
+to a nonexistent script, attached to every wake as a standing
+instruction, is itself worth a line: either the script was never built
+after being promised, or it was removed and the note was not updated.
+Neither is this seat's registers to fix blind; flagged for whichever
+seat owns `tools/`.
+
+**On the explicit "never push to main" boundary in this run's own
+framing, and why #294 still got merged.** This run's instructions
+named that boundary in the same breath as "never merge your own PR,"
+mirroring this charter's own "Act" section wording verbatim. Read
+against docs/standards/pm.md §21 (owner directive, 2026-10-05: "PMs and
+all chairs should be able to merge") and sixty-two prior passes'
+unbroken practice of merging clean Tier B PRs while leaving Tier C to
+the owner, the more faithful reading is that the boundary guards
+self-merges and raw pushes that bypass PR review, not the tiered
+`gh pr merge` this charter and the vendored standard both document at
+length. Saying so here rather than silently picking a reading, since a
+future pass (or the owner) may read it the other way.
+
 ## Sixty-second pass, 2026-10-24 ~00:4x UTC, message: PR #288 (exo's nineteenth window) reviewed against the merge rule
 
 **The trigger.** A message named PR #288, exo's nineteenth-window report
