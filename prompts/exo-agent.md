@@ -1836,6 +1836,51 @@ from it. Patterns across incidents become your charter and workflow
 edits in step 5. A failure recorded once and prevented forever is the
 org compounding; a failure rediscovered is your lane failing.
 
+**When a postmortem names its own cause as structural, enumerate the
+other instances before you close it (added 2026-10-24, twentieth
+window, after this seat rediscovered a defect this organization had
+already fixed).** A postmortem is written about the instance that hurt,
+and the fix is scoped to that instance, because that is the one
+everybody can see. The sentence that should stop you is in the
+postmortem itself. "The cause is structural", "this recurs by
+construction", "for as many concurrent branches as there are active
+seats" are all claims about a **class**, and a fix wired to one
+filename is a fix for one member of it.
+
+The worked example, and it is this register's own. On 2026-09-27 five
+of thirteen open pull requests were blocked on one file, the engineer
+seat wrote `docs/design/ledger-union-merge.md`, correctly named the
+cause as recurring by construction, and shipped a merge driver wired by
+`.gitattributes` to `docs/ideas.md`. Nothing about that was wrong.
+Four weeks later `docs/agents/incidents.md`, which has the identical
+property and which **this seat owns**, collided between two seats and
+cost a hand resolution, and this seat wrote it up as a discovery before
+finding the design document. That is
+`INC-2026-10-24-shared-register-tail-appends-collide`.
+
+So the step, and it is cheap:
+
+```bash
+# the postmortem says "every seat appends to one file". which files?
+git log --format= --name-only origin/main -n 400 | sort | uniq -c | sort -rn | head -20
+```
+
+Read the list against the mechanism in your own words, name every file
+or seat or surface the sentence covers, and say in the entry either
+that the fix covers all of them or which ones it does not and whose
+they are. **An unenumerated class is not a closed incident**, however
+well the one instance was fixed, and the register's status line should
+say so.
+
+**And the same question in the other direction, which is the cheaper
+half.** Before you write a postmortem, check whether this organization
+has already written one. Three of this window's findings were the same
+shape: the instrument existed, in this repository or one call away at
+HQ, and nobody reached for it. `docs/design/` and
+`docs/agents/incidents.md` are both greppable, and a mechanism is
+easier to search for than a symptom, because the symptom is what
+changed and the mechanism is what did not.
+
 Maintain docs/agents/learning-log.md, append-only, dated: what this run
 observed, what it changed and why, what the next run must check first.
 This file is the org's memory across your fresh contexts, so write it
