@@ -12,7 +12,7 @@ its own README. This file is that gap closed.
 
 **What this file is not.** It is not canon. `canon.md`, `ban-list.md`
 and `tuning.md` are named in the charter as law and none of them exists
-in Ursa, which seven consecutive reviews have now recorded. The seat
+in Ursa, which eight consecutive reviews have now recorded. The seat
 cannot write canon alone, because the whole point of canon is that its
 authority comes from Apple's measurement system and the owner's
 accumulated tuning rather than from a model's priors. A ledger is
@@ -117,7 +117,13 @@ recorded as a proposal to the owner, not decided here
 **reference**, the list the charter's step 3 defers to this file for.
 
 Named in the charter: **Elicit, Consensus, Linear, Vercel.** Added by
-measurement since: **Stripe, Claude, Figma, GitHub.** Used as a low bar
+measurement since: **Stripe, Claude, Figma, GitHub.**
+
+Elicit has now failed to load inside 45 seconds on three consecutive
+runs, and Vercel's home page carries no paragraph long enough to measure
+a line on. Both are still named by the charter, so neither is dropped;
+what a run owes them is a row saying it got nothing, which is not the
+same as a zero. Used as a low bar
 rather than a benchmark, and labelled as such wherever it appears:
 **Hacker News.**
 
@@ -143,6 +149,11 @@ ever establishing the noise floor. Any run reporting a pixel count must
 either control it by shooting the same build twice or restrict the claim
 to the thirteen deterministic frames.
 
+**Closed by L8, 2026-10-24 (sixth run).** Re-measured there as six
+frames and not three, and the harness now freezes them. The count above
+stands as the floor that used to exist; a run shooting with the kit's
+default no longer has one.
+
 ## L7 — Review scripts may use what the host has; the site may not
 
 **this seat's judgement**, 2026-10-24 (fifth run).
@@ -153,12 +164,104 @@ reaches for Playwright, or for the PIL already installed on the host, is
 not adding anything to `ursa-minor/package.json` and does not need a
 proposal. A script that would require adding one does.
 
+## L8 — A review frame that differs from itself, and what it takes to stop it
+
+**measured**, 2026-10-24 (sixth run).
+`reviews/2026-10-24f/data/noise-live.txt`, `README.md` §1 and §2.
+
+Six of the fifteen frames, not three: `home` and the 404 page at all
+three viewports, differing from themselves by 4,921 to 19,140 pixels
+between two shoots of one build. All nine `/record*` frames are
+bit-identical. L6 named the right pages and counted the wrong unit.
+
+Two independent causes, and **fixing either one alone still draws a
+different frame**:
+
+- the clock, because the shader twinkles on the `requestAnimationFrame`
+  timestamp and Polaris pulses on `sin(t * 1.1)`;
+- the randomness, because the starfield is one `Math.random()` texel per
+  shader pixel.
+
+**`prefers-reduced-motion` fixes only the first**, which is the trap
+worth writing down, because emulating it is the obvious reach. The
+reduced path stops the loop and draws at a fixed `t`, and its sky is
+still a different sky on every load.
+
+Pinning the rAF timestamp and seeding `Math.random` in the harness, plus
+`animations: 'disabled'` at the shutter for the declarative keyframe
+that drives the scroll cue, takes all fifteen to **bit-identical across
+two shoots**. The site is untouched and `u_motion` stays 1, so the frame
+photographed is a real frame of the live animation.
+
+## L9 — The measure is a property of the type, not of the column
+
+**measured and judged**, 2026-10-24 (sixth run).
+`reviews/2026-10-24f/data/measure-before.txt`, `README.md` §3.
+
+A prose box set in pixels and used at two type sizes gives the smaller
+type the longer line. Counted character by character at 1440: the
+0.85rem paragraph on `/record/at` ran to **113 characters** while the
+0.95rem paragraphs above it ran to 96, and on the home page the closing
+note ran to 98 against its neighbours' 85. **The small print had the
+longest line on the page**, which is the exact opposite of what a
+smaller size is for.
+
+In `em` the box is the type's own, so every size lands on the same count
+and a size added later lands there without anyone choosing a width for
+it. `.measure` and `.measure-narrow` in `globals.css`.
+
+The counting method is part of the entry. A `Range` walked one character
+at a time, watching the top of each character's rect for a line break,
+rather than the usual `width / (0.5 * font-size)`, which is a guess
+about a font's average advance and is wrong by ten per cent or more on
+any particular sentence.
+
+## L10 — How long a line is, on the sites this seat benchmarks against
+
+**measured**, 2026-10-24 (sixth run), 1440x900.
+`reviews/2026-10-24f/data/benchmark-measure.json`.
+
+Median line, in characters: **Linear 47, Stripe 60, GitHub 82,
+Consensus 87.** Ursa sits at **95** after this run and 96 before it, so
+it is longer than every site here that yielded a body measure. Three
+returned no measurement rather than a number and are recorded that way,
+per L5.
+
+Claude's longest line is 109 characters, and it is 12px type in a 1312px
+box: the same drift L9 names. **A defect shipped by a frontier lab is
+still a defect**, and this seat is not taking it as cover.
+
+**Not acted on.** Narrowing Ursa's measure into the 45 to 75 the
+typographic canon holds moves drawn pixels on every page and changes how
+generous the page feels, which is an identity decision. It is a proposal
+to the owner (`reviews/2026-10-24f/README.md` §9.1), and L9's rule was
+written to fix the drift while leaving the width exactly where she can
+see it.
+
+## L11 — A column and a sentence are not formatted by the same rule
+
+**this seat's judgement**, 2026-10-24 (sixth run).
+`reviews/2026-10-24f/README.md` §5.
+
+In prose the shorter string wins, because "30.0% thrown away" reads as a
+machine talking. In a right-aligned stack of figures it loses, because
+dropping the decimal shifts every digit sideways. `/record/mini-fixture`
+set its shares in a monospace face with `tabular-nums` and right
+alignment, which is paying for vertical alignment three times, and then
+printed `24%` under `41.2%`.
+
+So there are two formatters, `pct` and `pctFixed`, and the name says
+which place each belongs to. The rule generalises past percentages: any
+figure that lives in a column is formatted to a fixed shape, and any
+figure that lives in a sentence is formatted to be read aloud.
+
 ---
 
 ## Open, and not this seat's to close
 
-**Where Ursa's canon comes from.** Seven consecutive reviews have
+**Where Ursa's canon comes from.** Eight consecutive reviews have
 recorded that `canon.md`, `ban-list.md` and `tuning.md` do not exist
-here. L1 and L4 are the kind of measured material canon is made of, and
-this seat is deliberately not promoting them. A ruling from the owner is
-the unblocker.
+here. L1, L4 and L10 are the kind of measured material canon is made of,
+and this seat is deliberately not promoting them. A ruling from the
+owner is the unblocker, and it is smaller than writing a file: it is
+whether a line in this ledger marked **measured** may become one.

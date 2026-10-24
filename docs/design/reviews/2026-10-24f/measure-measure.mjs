@@ -15,6 +15,8 @@
 // counters and single-line captions without having to name them.
 
 import { writeFileSync } from 'node:fs'
+import { argv } from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { launch, VIEWPORTS } from '../../review-kit/lib/browser.mjs'
 import { freezeContext } from '../../review-kit/lib/freeze.mjs'
 
@@ -65,6 +67,12 @@ export const COUNT_LINES = () => {
   return out
 }
 
+// bench-measure.mjs imports COUNT_LINES from here, and a module that
+// photographs a site as a side effect of being imported is a trap. Only
+// run when this file is the entry point.
+if (fileURLToPath(import.meta.url) === argv[1]) await main()
+
+async function main() {
 const browser = await launch()
 const rows = []
 for (const [vname, w, h] of VIEWPORTS) {
@@ -91,3 +99,4 @@ const summary = VIEWPORTS.map(([v]) => {
 const text = `${rows.map(line).join('\n')}\n\n${summary}\n`
 writeFileSync(OUT, text)
 console.log(summary)
+}
