@@ -5052,6 +5052,8 @@ of them.
   gate (non-zero blocks readying), which is the security seat's call
   under `docs/security/redaction-standard.md`, the sprint item that
   gates O2 KR2.2 and is still unbuilt.
+- Cost: $0
+- Status: proposed
 
 ### 2026-10-04 — Private data from before the gate is still in the public history (security run)
 - Trigger: the 2026-10-04 security audit scanned every blob reachable
@@ -8353,6 +8355,7 @@ twenty-two is from the consent gate run of 2026-10-01
 in §6 of that design document is stamped `2026-10-01T02:32:03.357Z`),
 counted to today. It is not from `git log`, which reports this file as
 added at `21944ab` today because the clone is shallow.
+
 ### 2026-10-23 (skill, tenth run) — A guard's scope is a claim with a date on it, and both receipt guards were scoped to a one-file skill
 
 - Trigger: the ninth run's entry above, "A trigger test is outside every checker this library has", whose first step named this seat and this run and prescribed two shapes to choose between.
@@ -8571,3 +8574,462 @@ added at `21944ab` today because the clone is shallow.
   measurement's clothes.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (engineer, second run) — Both register parsers key on headings inside fenced code blocks, and the incident register is one quoted command away from it
+- Trigger: measured while deciding the heading grammar for
+  `docs/agents/incidents.md`. Every parser in this repository's merge
+  path, Ursa's `tools/ledger/ledger.mjs` and HQ's vendored
+  `tools/registers/merge-register.py`, tests its heading regex against
+  every line of the file. Neither tracks fenced code blocks. On
+  `docs/agents/incidents.md` at `1b097a0`, 64 lines sit inside ``` fences
+  and three of them already match `^#{1,6}\s` — the shell comments at
+  lines 2390, 2392 and 2394. Zero match the `^##\s+` the driver actually
+  uses, so the register is safe today by luck rather than by
+  construction, and an incident whose postmortem quotes a command or a
+  log line beginning `## ` would split an entry in half.
+- What: the failure is not a conflict, it is an entry cut at the fence
+  line, with everything after it reattributed to a block keyed on text
+  from inside a code sample. That is the silent corruption the whole
+  2026-10-24 change exists to remove, arriving through the parser instead
+  of through the grammar. Make both parsers fence-aware: a line inside a
+  fence is never a block start, where a fence is a line whose first
+  non-whitespace is ``` or ~~~ and fences toggle. For Ursa's parser that
+  is a local change. For HQ's it is a finding for the exo centralizer,
+  per `INC-2026-10-18-hq-tool-paths-are-hq-s`, which says to report a
+  shared instrument's defect rather than vendoring a patched copy,
+  because a local patch drifts from the standard that calls it while
+  continuing to answer.
+- First step: the measurement across every register named in
+  `tools/registers/registers.json` and `docs/ideas.md`, committed as a
+  script, so the number is a command rather than this paragraph; then the
+  fence filter plus a test in `ledger.mjs` whose fixture is an entry
+  containing a fenced ``` block with a `## ` line in it. The handoff to
+  the centralizer goes with the measurement attached, not as a report of
+  a hazard.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, second run) — One job, two merge drivers, and the one that is ours is the one that cannot be fixed by a flag
+- Trigger: the register table written today holds five registers and
+  installs two different drivers to merge them, because
+  `docs/ideas.md` stayed on `tools/ledger/union-merge.mjs` while
+  `docs/agents/incidents.md` and `docs/decisions.md` went to HQ's
+  vendored merger. The reason is one feature: the ledger's grammar has a
+  second block kind, the chair's top-level dated note bullets
+  (`- 2026-10-05 (chair): ...`), which are ledger entries and which HQ's
+  merger has no flag for. Everything else about HQ's tool is better than
+  ours, as measured in §2 of `docs/design/register-merge.md`: it emits
+  original bytes rather than normalising whitespace, it refuses five
+  cases ours guessed at, and it checks its own post-conditions.
+- What: retire `tools/ledger/union-merge.mjs` and move `docs/ideas.md`
+  onto the one merger, which needs HQ to accept a second entry pattern.
+  Something like `--bullet-entry REGEX`, where a matching top-level
+  bullet is its own entry keyed on the whole line. Worth proposing
+  rather than working around, because the alternative is this repository
+  maintaining a second implementation of entry-keyed merging forever,
+  and the two implementations already disagree about whitespace: ours
+  reflows `docs/ideas.md` by one byte on every merge, which is the
+  standing failure of `parse then render is byte-identical on the real
+  ledger`.
+- First step: count the note bullets in `docs/ideas.md` and in every
+  other register, because if the answer is small the cheaper fix is to
+  convert them to `### ` entries and delete a driver rather than add a
+  flag to a shared tool. That count decides which of the two proposals
+  is written, and nobody has it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, second run) — A tuning axiom cannot be marked keep-but-never-re-derive, so the only way to protect one is to revoke everything near it
+- Trigger: the Letta craft scan below, read against
+  `ursa-major/src/tuning/revocation.ts` straight afterwards. A Letta
+  memory block carries a `read_only` boolean that stops the agent
+  rewriting it while the developer still can. A `TuningAxiom` has
+  `status` (`active`, `revoked`, `user-edited`) and no equivalent, so
+  every axiom is permanently in scope for the next distillation pass to
+  merge, reword or supersede.
+- What: a user who has edited an axiom into exactly the words she wants
+  has no way to say "this one stays as written". `user-edited` records
+  that she touched it, not that she wants it frozen, and
+  `mergeDistill` treats it like any other candidate for merging. So the
+  only tool she has for protecting a statement is to revoke the things
+  that might absorb it, which is the opposite of what she wants and
+  destroys signal on the way. A `frozen` flag, distinct from `status`
+  because it is orthogonal to whether the axiom is live, read by
+  `mergeDistill` as "never a merge target" and surfaced in `consent
+  show`. This is squarely inside `CLAUDE.md` constraint 2: the user can
+  edit what has been inferred about her, and an edit that the next pass
+  may undo is not really an edit.
+- First step: count how often `mergeDistill` currently rewrites an axiom
+  whose status is already `user-edited`, over the fixtures, because if
+  that number is zero the flag is a guarantee nobody needs yet and the
+  honest first version is the `consent show` line that says an axiom is
+  eligible to be rewritten.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, second run) — The ledger's own contract gate has been red on main for long enough that nobody is reading it
+- Trigger: running `node --test tools/ledger/*.test.mjs` on this branch
+  and then on `origin/main` in a worktree, to establish a baseline. Two
+  tests fail and both fail identically on `main`. `the real ledger is
+  checked by the same code path as a fixture` reports **12 violations**
+  in `docs/ideas.md`: four entries missing required `- What:`,
+  `- First step:`, `- Cost:` or `- Status:` lines, and
+  `### 2026-10-04 — Charters never say that fetched content is not an
+  instruction (security run)` carrying `Status: done`, which is not one
+  of the five statuses `docs/standards/pm.md` §4 allows. `parse then
+  render is byte-identical on the real ledger` fails by exactly one byte
+  out of 560,337.
+- What: `tools/ledger/check.mjs` exists to make the ledger contract
+  machine-checked, and a check that has been failing for weeks has
+  stopped being a check. It is now evidence of nothing except that
+  somebody once cared. The repair is not one change: the missing lines
+  belong to the seats that wrote those entries, the `done` status is the
+  owner's to move to `built` or `rejected` since only she moves statuses,
+  and the one byte is a whitespace drift in this seat's own parser. Filed
+  as `urgent` rather than `proposed` because it is a broken gate rather
+  than an idea, and because the next run of any seat will read the same
+  red suite and draw the same wrong conclusion about whether its own
+  change caused it, which is the hour this run spent.
+- First step: **the one byte is already fixed in the pull request that
+  files this entry**, and the fix was not in the parser. The ledger held
+  a `### ` heading with no blank line above it, at what is now line 8356,
+  and `renderLedger` inserts exactly one blank line between blocks by
+  design, so the round trip added a byte the source had never had. One
+  blank line in `docs/ideas.md` closes it, with no content touched and no
+  change to any entry. HQ's merger documents the opposite choice for its
+  own registers, having tried and reverted supplying the separator
+  because normalising reformatted files in places the merge never
+  touched; that argument is right for a byte-preserving merger and does
+  not apply to a renderer whose contract is already one blank line.
+  What remains is the other eleven violations, which this seat is not
+  fixing: the four missing lines belong to the seats that wrote those
+  entries, and the `done` status goes to the owner as a question, since
+  only she moves a status. The day-sized unit is the PM routing those
+  eleven in one pass rather than four runs rediscovering them.
+- Cost: $0
+- Status: urgent
+
+- 2026-10-24 (engineer, second run, craft scan): Letta (formerly MemGPT),
+  `docs/market/landscape.md` category 3, which has carried it since
+  2026-09-26 on its funding and positioning and never on its memory
+  mechanics. Read today: `docs.letta.com/guides/agents/memory-blocks`.
+  **Worth stealing: `read_only` as a field on a memory block, and
+  `description` beside it.** A Letta block has `label`, `value`,
+  `limit`, `description` and an optional `read_only`, where `description`
+  tells the agent what the block is for and `read_only` stops the agent
+  writing to it while a developer still can. Ursa's `TuningAxiom` has
+  neither, which is ledger entry 3 above. The pairing is the insight
+  rather than either field alone: a store that an agent writes to needs
+  to say both what a slot means and who may change it, and Ursa
+  currently says neither and relies on `status` to carry both jobs.
+  **Where Ursa is better, and it is the same defect this run spent the
+  day on.** Letta's own documentation says that setting `value`
+  "completely replaces the entire block content" and that "the last write
+  wins", that multiple agents can attach to one block, and it describes
+  no versioning, no snapshots and no change tracking at all. So a shared,
+  concurrently written store resolves collisions by discarding one
+  writer, silently, which is exactly the class of failure measured on
+  `docs/agents/incidents.md` today and refused rather than resolved.
+  Ursa's revocation tombstones are durable, its records carry recurrence
+  and provenance, and `CLAUDE.md` constraint 2 means a user has to be
+  able to see what was derived, which is not possible without history.
+  **The honest limit on the comparison, because this seat has twice now
+  awarded itself a memory-layer win.** Letta's blocks are live agent
+  context being written mid-conversation, which is a harder concurrency
+  problem than three-way merging a git-tracked file with a known common
+  ancestor, and Ursa has no multi-agent shared-memory surface at all, so
+  the dimension Ursa wins on is one it attempted and the dimension Letta
+  is solving is one Ursa has not reached.
+
+### 2026-10-24 (engineer, scheduled run) — A gate that has been wrong should carry its own error rate, because this one was wrong three times out of four and nothing recorded it
+- Trigger: two measurements from today's run, side by side. The ledger
+  contract gate in `tools/ledger/check.mjs` reported twelve violations on
+  `main`, and nine of the twelve turned out to be the gate applying
+  `docs/standards/pm.md` §4's five-line idea contract to competitive-scan
+  notes, which the standard never gave that contract to. That is a 75%
+  false-positive rate on a live gate, sustained for weeks, and no artifact
+  in this repository recorded it: the only number anywhere was "12
+  violation(s)", which reads as twelve defects in the file. Against that,
+  today's craft scan below: Prolific publishes the pass rate of its own
+  participant gate, 55%, as a headline figure in its own marketing, so a
+  buyer can see how often that gate fires before trusting what it blocks.
+- What: give each rule in `check.mjs` a committed history, so the gate
+  reports on itself and not only on the file. The rules already have names
+  as of today (`HEADING_SHAPE`, `IDEA_FIELDS_COMPLETE`, `STATUS_ALLOWED`,
+  `NEAR_DUPLICATE`, `CONFLICT_MARKER`), which is the precondition this
+  needs. Add `tools/ledger/rule-history.json`, one row per rule carrying
+  the date the rule was introduced, the number of blocks it fires on
+  today, and a list of dated judgements in which a firing was found to be
+  the rule's defect rather than the file's, each naming the pull request
+  that established it. `node tools/ledger/check.mjs --history` prints the
+  table. The part with teeth is the test: the suite asserts each rule's
+  stated fire count equals the count it actually produces against
+  `docs/ideas.md`, so a rule whose behaviour drifts cannot leave a stale
+  number behind, and a rule that starts firing on thirty blocks announces
+  itself instead of being averaged into a total. This is cheap because it
+  is bookkeeping over a structure that now exists; it was impossible last
+  week because violations were anonymous strings.
+- First step: the JSON file with today's five rules, today's fire counts
+  (`IDEA_FIELDS_COMPLETE` 0, `STATUS_ALLOWED` 1, the other three 0), and
+  the one judgement this run established (`IDEA_FIELDS_COMPLETE`,
+  2026-10-24, nine firings judged the rule's own defect, with the pull
+  request and `docs/design/ledger-block-kinds.md` §1 as the evidence),
+  plus the count assertion in `tools/ledger/check.test.mjs`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, scheduled run) — Eight of the fourteen craft scans in the ledger name nothing they read, and all eight are this seat's
+- Trigger: deciding whether the new `scan` contract should require a
+  source line, and measuring the file before deciding rather than after.
+  Of the fourteen competitive-scan notes in `docs/ideas.md`, exactly one
+  carries a bare `- Source:` line, three carry any `- Source...` field,
+  and six either carry a URL anywhere in the block or say in prose that
+  the run fetched nothing. The other eight name no provenance at all.
+  Attributed with `git log -S` on each heading: every one of the eight
+  landed in an engineer run's ledger-and-craft-scan commit, so this is
+  not a finding about other seats.
+- What: the org rule of 2026-10-05 in `prompts/engineer-agent.md`
+  requires every run to name the external sources it read, under a
+  heading in the pull request. A craft scan is the one artifact in this
+  repository whose entire content is a read of something outside it, and
+  eight of them cannot be checked against anything: a reader cannot tell
+  whether `### 2026-10-13 — Craft scan: Graphiti (Zep's memory engine)`
+  was written from Zep's documentation or from the model's recollection
+  of it, and those are different grades of evidence that the charter's
+  own rule exists to keep apart. The 2026-10-23 npm-and-PyPI note shows
+  the honest form, stating in its first line that the run fetched nothing
+  and that anything in it driving a decision should be re-read against
+  the live specification first. The deliberate non-decision, recorded so
+  the next run does not relitigate it: a `SCAN_NAMES_ITS_SOURCE` rule was
+  considered for today and declined, because shipping it now means
+  shipping a grandfather clause alongside it, and
+  `docs/design/ledger-block-kinds.md` §2 rejects exactly that mechanism
+  three paragraphs earlier. The rule goes in after the eight are filled,
+  not before, or it is a suppression list with a rule attached.
+- First step: this seat writes the missing line into the eight notes it
+  wrote, one run, no content touched other than an added
+  `- Source read:` line naming the page or stating that the run worked
+  from the model's own knowledge. The second unit, after that, is the
+  rule and its test. Both are day-sized and the order is not optional.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, scheduled run) — The owner-held half of a gate's output has nowhere to go, because the seat that finds it may not write to the tracker
+- Trigger: today's change split `check.mjs`'s exit code by who holds the
+  repair, and immediately produced a routing problem it cannot solve. The
+  gate now exits 2 on exactly one violation, `Status: done` on the
+  2026-10-04 security entry, which `pm.md` §4 reserves to the owner. The
+  only place that fact is written down is this run's stderr and this
+  run's pull request description. The tracker it belongs in is
+  `docs/sprints/pending.md`, whose §5 purpose is "what waits on an
+  owner-only action, each line dated", and this seat's charter forbids
+  editing anything under `docs/sprints/`. So the correct destination is
+  the one surface the finder cannot reach.
+- What: `node tools/ledger/check.mjs --owner-queue` emits the owner-held
+  violations as a Markdown fragment in the shape `pending.md` already
+  uses, one dated line per violation naming the rule, the block and the
+  move only the owner can make. The PM's run pastes it, or a later
+  version of the PM's own tooling reads it. This generalizes past the
+  ledger: every gate in this repository that finds something only the
+  owner can resolve has the same gap, and the pattern is a gate that
+  emits its owner-held findings in the tracker's own format rather than
+  in prose a human has to retype. It is explicitly not a seat writing to
+  `pending.md` through a side door: the output goes to stdout, a seat
+  quotes it in its pull request, and the PM remains the only writer.
+- First step: the `--owner-queue` flag over the `Violation` records
+  `check.mjs` already builds, one test asserting the fragment for the
+  real ledger's single owner-held violation, and one line in this run's
+  pull request showing the fragment so the next PM pass can paste it
+  without running anything.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, scheduled run) — Craft scan: Prolific, and a quality gate that publishes how often it rejects
+- Trigger: the daily craft scan, rotating onto Category 1 of
+  `docs/market/landscape.md`, the preference-data vendors. No craft scan
+  had ever reached Category 1: the fourteen notes before this one cover
+  evaluation products (Arena twice, LangSmith twice), memory layers
+  (Mem0 twice, Letta, Graphiti, ByteRover), and engineering tooling
+  (Vercel, Obsidian Sync, coverage.py, CodeRabbit, npm and PyPI
+  provenance), which means the category holding Ursa Minor's actual
+  competitors had been scanned by nobody. Prolific was picked out of the
+  seven in it because the landscape file's own note says its
+  verification rigor is "closer in spirit to Ursa's own consent
+  architecture than most peers", so it is the one where a craft read can
+  disagree with the positioning.
+- The product: a participant marketplace, originally for academic
+  research and now heavily into AI evaluation, RLHF and red-teaming,
+  with a vetted identity-checked pool. Its onboarding is a gate, and the
+  page read today states its terms precisely: "Each participant now
+  completes over 50 identity and behavioral checks to join the pool (55%
+  pass rate)", "Stronger ongoing verification that now includes periodic
+  video selfie checks", "Real-time behavioral monitoring flags
+  suspicious patterns", and a customer-facing authenticity tool that
+  "detects AI-generated content with 98.7% precision".
+- One thing worth stealing: the gate publishes its own firing rate, in
+  the marketing, as a headline. 55% pass means 45% rejected, and a buyer
+  reads that number before deciding what a Prolific response is worth.
+  Ursa's gates report on the artifact and never on themselves. Today's
+  measurement is the cost of that asymmetry: `check.mjs` said "12
+  violation(s)" for weeks, nine of which were its own defect, and the
+  output gave no reader any way to suspect the ratio. The stealable move
+  is not more precision in the message, it is publishing the
+  denominator: how many blocks a rule fires on, and how often a firing
+  was later judged to be the rule's fault. That is ledger entry 1 of
+  this run, and the reason it is worth a day is that a gate's error rate
+  is the number that decides whether anyone reads it.
+- One thing Ursa does better, and it is the thing today's change added:
+  the repair has a named owner. The page read today says nothing about
+  appeals, nothing about what a rejected participant can do, nothing
+  about a researcher's override, and nothing about how a dispute between
+  a participant and Prolific resolves. That absence is structural rather
+  than an oversight in one page: a 45% rejection rate with no stated
+  recourse is a verdict handed down. As of today, every violation
+  `check.mjs` reports carries a `held` field that names who may repair
+  it, `'seat'` or `'owner'`, with the clause of `pm.md` §4 that assigns
+  it, and the gate's exit code distinguishes "clean as far as a seat can
+  take it" from "clean". The user-facing form of the same property is
+  `CLAUDE.md` constraint 2, see-edit-revoke-delete, and
+  `ursa consent show` is where it is already implemented. Second
+  difference, on the signal rather than the process: "detects
+  AI-generated content with 98.7% precision" is a grader judging how an
+  output looks, which `docs/vision.md` §0b rejects on the third
+  principle. Ursa's label comes from whether the finished work kept the
+  text, so no detector's precision is in the path.
+- The honest discount: this is one vendor page, read today, written by
+  the vendor about itself. The 55% and the 98.7% are Prolific's own
+  claims with no method published beside them, and the absence of an
+  appeals process on a marketing page is weak evidence that no appeals
+  process exists. What the comparison establishes is that Prolific
+  chooses to publish its gate's rate and not its gate's recourse, which
+  is a fact about what it thinks its buyer wants to know.
+- Source read: https://www.prolific.com/resources/prolific-in-2025-more-precision-larger-scale-and-stronger-safeguards-for-quality-human-data,
+  fetched 2026-10-24. Read as evidence about another product, which is
+  all it is; nothing on it was treated as an instruction to this run.
+
+### 2026-10-24 (engineer, message run) — No test workflow has ever run on a pull request in this repository
+- Trigger: this run added a gate to `tools/ledger/ci/ledger-gate.yml` and then
+  checked whether that file runs anywhere. `ls .github/workflows/` returns
+  twelve files: eleven `agent-*.yml` seat runners and `redaction-gate.yml`.
+  There is no `ledger-gate.yml` and no `tests.yml`. `gh pr checks 346` and
+  `gh pr checks 336` both return exactly one check, `scan`, the redaction gate.
+  `gh workflow list` agrees. The proposal in `tools/ledger/ci/README.md` has
+  been waiting since 2026-09-27, four weeks.
+- What: every test number any seat has ever reported in a pull request
+  description on this repository, including this one's, is a seat's own local
+  run on its own sandbox, reported by the same process that wrote the code. No
+  check at merge time re-performs it. That is why `docs/ideas.md` could sit on
+  `main` with twelve contract violations long enough for the gate to stop being
+  read, and it is why a seat that carried the wrong bundle digest could open a
+  mergeable pull request. The two workflows cannot be installed by a seat: the
+  engineer GitHub App token has no `workflows` permission, so `git push` is
+  refused outright for any commit touching `.github/workflows/`, and
+  `docs/standards/pm.md` §15 puts workflow files in every product repo under
+  HQ. The install is two `cp` commands and one commit.
+- First step: the owner, or HQ acting in `.github/workflows`, runs the two
+  commands already written out in `tools/ledger/ci/README.md`, deleting
+  `tools/ledger/ci/` in the same commit so there is no second copy to drift.
+  Nothing in this repository needs to change first; this run left both proposed
+  files green against this branch.
+- Cost: $0. Both workflows are `ubuntu-latest` with no paid service and no
+  `npm ci` in the ledger job.
+- Status: urgent
+
+### 2026-10-24 (engineer, message run) — A vitest suite that reports red on a slow runner teaches every seat to ignore it
+- Trigger: measured in this run. `npm test` in `ursa-major` reported five
+  failures on this branch, then six on an immediate re-run, all at the 5,000 to
+  10,600 millisecond marks. The same tests fail on `origin/main` in a worktree,
+  four of them, and `npx vitest run src/pairing-window.test.ts
+  src/corroborate.test.ts src/bridge/crypto.test.ts --testTimeout=60000`
+  returns `Tests 63 passed (63)`. So the failures are this sandbox being slow,
+  the set varies run to run, and nothing in the output says so.
+- What: the suites that build real git repositories and derive real keys sit
+  close enough to vitest's 5,000 millisecond default that a loaded runner
+  crosses it. Every seat run then has to re-derive, from scratch, that red
+  means slow rather than broken, and the cheap conclusion is that red is normal
+  here. An explicit `testTimeout` in `ursa-major/vitest.config.ts`, sized from
+  the slowest observed duration rather than from the default, makes a real
+  failure distinguishable from a slow machine. The per-test override is the
+  wrong shape: the slow thing is not one test, it is `execFileSync('git', …)`
+  wherever it appears.
+- First step: measure the slowest duration across three consecutive full runs,
+  set `test.testTimeout` in `ursa-major/vitest.config.ts` to roughly four times
+  it, and leave a comment naming the measurement and the date so the next
+  reader knows whether it is still sized right.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message run) — A withdrawal has no shape in this repository, so the record of one lives only on the board
+- Trigger: this run was woken by a seat withdrawing a finding it had sent eight
+  hours earlier, because the finding's premise was refuted. The withdrawal is a
+  board message. Nothing in the repository holds it. Had the original finding
+  become a register entry rather than an inbox note, the only ways to withdraw
+  it would have been to delete the entry, which loses the fact that it was
+  believed, or to edit it in place, which loses the fact that it changed. The
+  craft scan in this same run found a product whose whole model is the third
+  option.
+- What: give a withdrawn claim a validity window instead of a delete. A
+  register entry gains two optional lines, `- Superseded: YYYY-MM-DD` and
+  `- Superseded by: <the entry or measurement that refuted it>`, and the
+  contract checker in `tools/ledger/check.mjs` treats a block carrying them as
+  closed rather than stale, so it stops being counted against the open set
+  without being removed from the file. The value is not tidiness. It is that
+  "this was believed on 2026-10-24 at 01:35 and refuted by 13:14 the same day"
+  is a fact about how this organization reasons, and it is exactly the kind of
+  trajectory metadata `CLAUDE.md` §1 says the product sells: the point where
+  the goal shifted mid-task, and corrections that recurred. An organization
+  that cannot represent its own withdrawals in its registers is selling a data
+  shape it does not use.
+- First step: the two lines and the checker change are a day of work, but they
+  are not this seat's to start alone, because the registers they would land in
+  are the PM's and the exo seat's. Put the shape to those two seats on the
+  board first, then implement in `tools/ledger/check.mjs` and
+  `tools/ledger/block-kinds.mjs` once one of them wants it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message run) — Craft scan: Zep and Graphiti, where a contradicted fact is invalidated rather than deleted
+
+`docs/market/landscape.md` category 3 has carried Zep since 2026-09-26 on its
+pricing, its certifications and its lack of a user-facing ownership surface,
+and never on the mechanic underneath. Read today: the Graphiti overview in
+Zep's own documentation and the Graphiti repository's README.
+
+**Worth stealing: a fact is a claim plus a validity window, and a
+contradiction closes the window instead of removing the row.** The
+documentation's own words: "each fact in a context graph has a validity window:
+when it became true, and when (if ever) it was superseded", and "When
+information changes, old facts are invalidated — not deleted." The overview
+page names the mechanism as "temporal edge invalidation" and the model as
+"explicit bi-temporal tracking", and contrasts it with the alternative of
+having a language model summarize the conflict away. What this seat could not
+verify, and so does not claim: the field names that carry those two timestamps,
+and whether the two time dimensions are named separately anywhere outside the
+Zep paper. Both pages the scan read decline to say, and the paper was not read
+today.
+
+**Why it is worth stealing here specifically.** Ursa's four span
+classifications are terminal labels. A span `survived_verbatim` is not
+`survived_verbatim` as of a date; it simply is, until someone recomputes it.
+`CLAUDE.md` §1 already asks for the missing half, under "Time dimension": "not
+just what survived but how long", separating text that looked right and died on
+contact with the real work from text that was wrong on arrival. A validity
+window is the representation that sentence needs, and this repository reached
+for it twice today in two unrelated places, once in the ledger entry above
+about withdrawals and once in the board item about a revoked inference.
+
+**Where Ursa is better, at the craft level rather than the business level.**
+Graphiti decides that a new fact contradicts an old one by asking a language
+model, so the invalidation is a judgement, it costs a call, and two runs over
+the same episodes can disagree. Ursa's span classification is supplied by the
+artifact: the work either used the generation or it did not, and
+`no_generation_provenance` is a set difference rather than an opinion. So Ursa
+gets the harder half, the label, for free, and lacks the easier half, the
+window. Graphiti has the window and pays a model to fill it.
+
+**The honest limit.** Graphiti is resolving contradictions between statements
+in natural language arriving in real time, which is a genuinely harder problem
+than giving a Markdown entry two more lines, and Ursa has no knowledge graph,
+no entity resolution and no bi-temporal store of any kind to put a window in.
+The comparison is between a mechanism that exists there and a sentence in a
+context file here.

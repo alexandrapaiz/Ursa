@@ -1,0 +1,42 @@
+{
+  "comment": "Ursa's own register table. The algorithm lives in the vendored merge-register.py; the paths and flags live here, in this repository, because a borrowed tool that carries its own file list answers about files this repository does not have (Ursa INC-2026-10-18-hq-tool-paths-are-hq-s). tools/registers/merge-driver.mjs reads this file, matches git's %P against `path`, and refuses by name when the path is not declared.",
+  "registers": [
+    {
+      "path": "docs/agents/incidents.md",
+      "enabled": true,
+      "heading": "^## ",
+      "identifier": "^## (Incident [0-9]+[a-z]?|INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+)",
+      "why": "Two seats append to its tail: the PM's pass and the exo seat's window. They collided on 2026-10-24 between PR #301 and PR #302 and cost a hand resolution. Entries 1 through 18 are numbers and everything from 2026-10-18 is an INC- slug, so the identifier pattern has to admit both forms; the register's own header freezes the old numbers and forbids allocating 19.",
+      "why_identifier": "Measured, not assumed. With --heading alone, two branches that both append `## Incident 19 — <different title>` merge to exit 0 and publish two entries answering to one citable name. With --identifier the same merge is refused by name. The slug case behaves identically: two seats filing `INC-2026-10-24-dup-slug` with different titles are refused instead of both landing."
+    },
+    {
+      "path": "docs/decisions.md",
+      "enabled": true,
+      "heading": "^## ",
+      "identifier": "^## (ADR-[0-9]+)",
+      "why": "The PM, the chair and the exo seat all append ADRs and Findings here, and both PRs in the 2026-10-24 collision touched it as well. Numbered rather than dated, and the number is allocated by reading the tail, which is the case the --identifier exception exists for.",
+      "why_identifier": "This register already holds ADR-005 and ADR-006 twice each on `main` (exo found it on 2026-10-18 and it is still open). The merger tolerates a duplicate that predates the merge, by design, and refuses one the merge itself would mint, so enabling this guards the file from getting worse without demanding that the existing repair happen first. Verified on the real file: two appends of ADR-007 and ADR-008 over today's `main` exit 0 and keep 13 entries."
+    },
+    {
+      "path": "docs/agents/learning-log.md",
+      "enabled": false,
+      "heading": "^## ",
+      "identifier": null,
+      "why": "Blocked by the file, not by this change, and this entry exists so the block is visible rather than rediscovered. The log holds `## Compounding ratio` twice, so the merger refuses at parse with `ours already contains '## Compounding ratio' twice; fix that side first` before it reaches any merge question. That refusal is correct: two entries under one heading cannot be told apart from a disagreement. The file is the exo seat's, so the repair is theirs; this flips to true once the heading is unique."
+    },
+    {
+      "path": "docs/ideas.md",
+      "enabled": false,
+      "heading": "^### ",
+      "identifier": null,
+      "why": "Already covered by the older driver, tools/ledger/union-merge.mjs, which is kept rather than replaced today. Its grammar carries a second block kind this merger has no flag for: the chair's top-level dated note bullets (`- 2026-10-05 (chair): ...`), which are entries in the ledger and would be swallowed into whichever entry precedes them here. Moving the ledger across is a separate change with its own risk, and it is ledger entry 2 of this run rather than a line in this table."
+    },
+    {
+      "path": "docs/standards/lessons.md",
+      "enabled": false,
+      "heading": "^## ",
+      "identifier": null,
+      "why": "Deliberately excluded even though HQ's own lessons file names it as needing this. It is vendored from HQ and no Ursa seat appends to it, so every change to it arrives as a whole-file sync. An entry-keyed merge of a vendored sync would resolve by keeping both sides' entries, which is exactly how a stale local copy survives a sync that was supposed to replace it."
+    }
+  ]
+}

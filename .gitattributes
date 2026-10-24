@@ -2,3 +2,12 @@
 # entry identity, not by line hunks. The driver behind this name is registered
 # per clone by tools/ledger/install-driver.sh; see docs/design/ledger-union-merge.md.
 docs/ideas.md merge=ledger
+
+# The same property, two more files, a different grammar. These registers key
+# entries on `## ` headings and carry citable identifiers, so they get the
+# `register` driver instead: tools/registers/merge-driver.mjs, wrapping HQ's
+# vendored entry merger. The grammars are not interchangeable and the driver
+# refuses any path tools/registers/registers.json does not declare. See
+# docs/design/register-merge.md.
+docs/agents/incidents.md merge=register
+docs/decisions.md merge=register
