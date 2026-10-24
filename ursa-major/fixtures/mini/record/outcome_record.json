@@ -18,7 +18,8 @@
           "start": 0,
           "end": 27,
           "text": "# Field Notes on Provenance",
-          "class": "no_generation_provenance"
+          "class": "no_generation_provenance",
+          "noCandidate": "scored_below_floor"
         },
         {
           "start": 29,
@@ -84,7 +85,8 @@
           "start": 175,
           "end": 255,
           "text": "I wrote this closing sentence entirely on my own, without any model in the loop.",
-          "class": "no_generation_provenance"
+          "class": "no_generation_provenance",
+          "noCandidate": "scored_below_floor"
         },
         {
           "start": 256,
@@ -145,6 +147,10 @@
       "turnIndex": 1,
       "kind": "assistant_text",
       "text": "The resolver joins finished work back to every generation that fed it. Provenance is established by the artifact, and no human grader is involved at any point. This throwaway filler sentence about unrelated marketing copy should never survive anywhere.",
+      "apparatus": {
+        "observability": "declared",
+        "client": "claude.ai"
+      },
       "generationIndex": 0,
       "spans": [
         {
@@ -181,6 +187,10 @@
       "turnIndex": 1,
       "kind": "assistant_text",
       "text": "Outcome records give labs a verifier for open-ended work.",
+      "apparatus": {
+        "observability": "declared",
+        "client": "chatgpt.com"
+      },
       "generationIndex": 1,
       "spans": [
         {
@@ -222,6 +232,8 @@
     },
     "uncertainSpans": 0,
     "trivialSpans": 0,
+    "blindSpans": 0,
+    "suppressedTokenSpans": 0,
     "byModel": {
       "claude-opus-5": {
         "chars": 144,
@@ -238,6 +250,7 @@
       "separatorChars": 2,
       "verbatimClaimedChars": 127,
       "survivedChars": 215,
+      "notGeneratedChars": 0,
       "deletedChars": 92,
       "deletedPct": 0.3,
       "humanDeletedChars": 92,
@@ -279,7 +292,7 @@
   },
   "signals": {
     "method": "auto-detected",
-    "annotatedAt": "2026-10-07T18:06:43.086Z",
+    "annotatedAt": "2026-10-24T17:44:00.199Z",
     "episode": {
       "steps": 1,
       "generations": 2,

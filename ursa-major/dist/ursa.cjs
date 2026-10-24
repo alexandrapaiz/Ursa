@@ -2202,6 +2202,16 @@ var init_launch = __esm({
   }
 });
 
+// src/apparatus.ts
+function unobservableApparatus(reason) {
+  return { observability: "unobservable", reason };
+}
+var init_apparatus = __esm({
+  "src/apparatus.ts"() {
+    "use strict";
+  }
+});
+
 // node_modules/diff/libesm/diff/base.js
 var Diff;
 var init_base = __esm({
@@ -2722,6 +2732,8 @@ function computeStats(files, generations, conversations, exclusions = []) {
   let finalChars = 0;
   let uncertainSpans = 0;
   let trivialSpans = 0;
+  let blindSpans = 0;
+  let suppressedTokenSpans = 0;
   const byModelChars = /* @__PURE__ */ new Map();
   const byConvChars = /* @__PURE__ */ new Map();
   const perFile = files.map((f) => {
@@ -2737,6 +2749,8 @@ function computeStats(files, generations, conversations, exclusions = []) {
       fileByClass[s.class] += chars;
       if (s.uncertain) uncertainSpans++;
       if (s.trivial) trivialSpans++;
+      if (s.noCandidate === "df_cutoff_suppressed") blindSpans++;
+      if (s.tokenSuppression) suppressedTokenSpans++;
       if (s.source) {
         byModelChars.set(s.source.model, (byModelChars.get(s.source.model) ?? 0) + chars);
         byConvChars.set(s.source.conversationId, (byConvChars.get(s.source.conversationId) ?? 0) + chars);
@@ -2796,6 +2810,8 @@ function computeStats(files, generations, conversations, exclusions = []) {
     byClass,
     uncertainSpans,
     trivialSpans,
+    blindSpans,
+    suppressedTokenSpans,
     byModel: Object.fromEntries(
       [...byModelChars.entries()].map(([m, chars]) => [
         m,
@@ -2869,6 +2885,7 @@ function resolve(input) {
       }
     });
   }
+  const corpusSegments = preps.reduce((n2, p) => n2 + p.sentences.length, 0);
   const verbatimClaims = /* @__PURE__ */ new Map();
   const mutatedClaims = /* @__PURE__ */ new Map();
   const notGeneratedClaims = /* @__PURE__ */ new Map();
@@ -2974,13 +2991,21 @@ function resolve(input) {
           span = normalizedOnlyMutation(base, p, g.start, g.end, f.path, true);
         }
       }
+      let suppression = null;
+      let noCandidate = null;
       if (!span && sNorm.length > 0) {
         const sTokens = tokens(sNorm);
+        const distinct = new Set(sTokens);
+        let suppressed = 0;
         const seen = /* @__PURE__ */ new Set();
         const candidates = [];
-        for (const t of new Set(sTokens)) {
+        for (const t of distinct) {
           const bucket = tokenIndex.get(t);
-          if (!bucket || bucket.length > MAX_TOKEN_DF) continue;
+          if (!bucket) continue;
+          if (bucket.length > MAX_TOKEN_DF) {
+            suppressed++;
+            continue;
+          }
           for (const cand of bucket) {
             const key = cand.p.gen.generationIndex + ":" + cand.sIdx;
             if (seen.has(key)) continue;
@@ -2988,6 +3013,9 @@ function resolve(input) {
             const sent = cand.p.sentences[cand.sIdx];
             candidates.push({ p: cand.p, sent, cont: containment(sTokens, sent.tokenSet) });
           }
+        }
+        if (suppressed > 0) {
+          suppression = { distinct: distinct.size, suppressed, cutoff: MAX_TOKEN_DF, corpusSegments };
         }
         candidates.sort((a, b) => b.cont - a.cont);
         let best = null;
@@ -3028,9 +3056,22 @@ function resolve(input) {
             uncertain: true,
             candidate: { score: r33(best.score), text: best.sent.text, source: srcPtr(best.p, best.sent.start, best.sent.end) }
           };
+        } else if (best) {
+          noCandidate = "scored_below_floor";
+        } else if (distinct.size === 0) {
+          noCandidate = "empty_after_normalization";
+        } else if (suppressed > 0) {
+          noCandidate = "df_cutoff_suppressed";
+        } else {
+          noCandidate = "absent_from_corpus";
         }
+      } else if (!span) {
+        noCandidate = "empty_after_normalization";
       }
-      spans.push(span ?? { ...base, class: "no_generation_provenance" });
+      const resolved = span ?? { ...base, class: "no_generation_provenance" };
+      if (noCandidate && !resolved.candidate) resolved.noCandidate = noCandidate;
+      if (suppression) resolved.tokenSuppression = suppression;
+      spans.push(resolved);
     }
     return {
       path: f.path,
@@ -3308,7 +3349,19 @@ function resolveEpisode(projectPath, ep, commits) {
       kind: "write",
       filePath: path,
       timestamp: ep.openedAt,
-      text: genText
+      text: genText,
+      // A commit is not a model call. `genText` is the whole blob of this
+      // path at the agent's commit, so there is no client in it, no
+      // output limit, and no stop reason, and no future run over the same
+      // history will find any. Said out loud rather than left undefined,
+      // because undefined would read as "nobody asked" and the honest
+      // claim is "this path cannot know" (src/apparatus.ts).
+      //
+      // It also means the mid-sentence footprint arXiv 2610.00253
+      // counted is undetectable here: a source file ends where it ends
+      // whatever cap was in force, so `endsMidSentence` is deliberately
+      // not called on this path.
+      apparatus: unobservableApparatus("git-blob-generation")
     });
   }
   if (files.length === 0 || generations.length === 0) {
@@ -3367,6 +3420,7 @@ var init_resolve_episode = __esm({
   "src/resolve-episode.ts"() {
     "use strict";
     import_node_path5 = require("node:path");
+    init_apparatus();
     init_pairfinder();
     init_resolve();
     init_deploy();
@@ -3662,6 +3716,145 @@ var init_disclosure = __esm({
   }
 });
 
+// src/tuning/revocation.ts
+function foldSuffix(token) {
+  if (token.length <= 3) return token;
+  return token.replace(/ies$/, "y").replace(/(ing|ed|es|s)$/, "");
+}
+function contentTokens(statement) {
+  const out = /* @__PURE__ */ new Set();
+  for (const t of tokens(normalize(statement).norm)) {
+    if (STATEMENT_STOPWORDS.has(t)) continue;
+    out.add(foldSuffix(t));
+  }
+  return [...out];
+}
+function revocationSimilarity(a, b) {
+  const at = contentTokens(a);
+  const bt = contentTokens(b);
+  if (at.length === 0 || bt.length === 0) return 0;
+  return Math.max(containment(at, new Set(bt)), containment(bt, new Set(at)));
+}
+function findRevocationBlock(statement, tombstones, live = []) {
+  let best = null;
+  for (const t of tombstones) {
+    const score = revocationSimilarity(statement, t.statement);
+    if (!best || score > best.score) best = { blockedBy: t.id, score };
+  }
+  if (!best || best.score < THETA_REVOKED) return null;
+  for (const a of live) {
+    if (revocationSimilarity(statement, a.statement) >= best.score) return null;
+  }
+  return { blockedBy: best.blockedBy, score: Math.round(best.score * 1e3) / 1e3 };
+}
+function revocationTwins(tuning, unitId) {
+  const revoked = tuning.axioms.find((a) => a.id === unitId);
+  if (!revoked) {
+    throw new Error(
+      `No axiom ${unitId} in this tuning record (present: ${tuning.axioms.map((a) => a.id).join(", ") || "none"})`
+    );
+  }
+  const twins = [];
+  for (const a of tuning.axioms) {
+    if (a.id === unitId) continue;
+    if (a.status === "revoked") continue;
+    const score = revocationSimilarity(revoked.statement, a.statement);
+    if (score < THETA_REVOKED) continue;
+    twins.push({
+      id: a.id,
+      statement: a.statement,
+      score: Math.round(score * 1e3) / 1e3,
+      status: a.status
+    });
+  }
+  twins.sort((x, y) => y.score - x.score || x.id.localeCompare(y.id));
+  return twins;
+}
+function allRevocationTwins(tuning) {
+  const pairs = [];
+  for (const a of tuning.axioms) {
+    if (a.status !== "revoked") continue;
+    const twins = revocationTwins(tuning, a.id);
+    if (twins.length === 0) continue;
+    pairs.push({ revoked: { id: a.id, statement: a.statement }, twins });
+  }
+  return pairs;
+}
+var STATEMENT_STOPWORDS, THETA_REVOKED;
+var init_revocation = __esm({
+  "src/tuning/revocation.ts"() {
+    "use strict";
+    init_normalize();
+    init_match();
+    STATEMENT_STOPWORDS = /* @__PURE__ */ new Set([
+      "a",
+      "an",
+      "the",
+      "and",
+      "or",
+      "of",
+      "to",
+      "in",
+      "on",
+      "at",
+      "for",
+      "with",
+      "from",
+      "by",
+      "as",
+      "is",
+      "are",
+      "be",
+      "been",
+      "it",
+      "its",
+      "this",
+      "that",
+      "these",
+      "those",
+      "there",
+      "do",
+      "dont",
+      "does",
+      "did",
+      "should",
+      "must",
+      "can",
+      "may",
+      "will",
+      "would",
+      "no",
+      "not",
+      "never",
+      "any",
+      "all",
+      "every",
+      "each",
+      "ever",
+      "avoid",
+      "prefer",
+      "keep",
+      "use",
+      "using",
+      "make",
+      "put",
+      "add",
+      "always",
+      "under",
+      "over",
+      "less",
+      "more",
+      "than",
+      "then",
+      "so",
+      "if",
+      "when",
+      "while"
+    ]);
+    THETA_REVOKED = 0.55;
+  }
+});
+
 // src/consent.cli.ts
 var consent_cli_exports = {};
 __export(consent_cli_exports, {
@@ -3686,6 +3879,12 @@ function scopeFrom(argv, io) {
   }
   return raw;
 }
+function printTwin(t, io, indent = "      ") {
+  io.out(`${indent}${t.id}  sharing ${Math.round(t.score * 100)}% of its words: "${t.statement}"`);
+  if (t.status === "user-edited") {
+    io.out(`${indent}    You wrote or released this one yourself, so no distillation pass put it there.`);
+  }
+}
 function describe(consent, projectRoot, io) {
   io.out(`Consent for ${projectRoot}`);
   io.out("");
@@ -3707,6 +3906,16 @@ function describe(consent, projectRoot, io) {
     io.out(`  ${tuning.axioms.length} inferences, ${active.length} active and ${tuning.axioms.length - active.length} revoked.`);
     for (const a of active) {
       io.out(`      ${a.id}  ${a.polarity}: ${a.statement}  (${a.domain}, x${a.evidenceCount})`);
+    }
+    const pairs = allRevocationTwins(tuning);
+    if (pairs.length > 0) {
+      io.out("");
+      io.out(pairs.length === 1 ? "  One thing you revoked is still being said by an inference you hold:" : `  ${pairs.length} things you revoked are still being said by inferences you hold:`);
+      for (const p of pairs) {
+        io.out(`      ${p.revoked.id}, which you revoked: "${p.revoked.statement}"`);
+        for (const t of p.twins) printTwin(t, io, "          still active: ");
+      }
+      io.out(`  This happens because an inference written before the store checked for it could be the same rule twice under two ids, and withdrawing one id leaves the other one working. Withdraw the rest with \`ursa consent revoke-axiom ${projectRoot} --axiom <id>\`, or leave them. Nothing above was changed for you.`);
     }
     const blocked = tuning.blockedByRevocation ?? [];
     if (blocked.length > 0) {
@@ -3762,7 +3971,16 @@ async function runConsentCommand(argv, io = stdio) {
       const tuning = revokeAxiom(tPath, axiom);
       const target = tuning.axioms.find((a) => a.id === axiom);
       io.out(`Revoked ${axiom}: "${target.statement}"`);
-      io.out("It is kept as a tombstone so a later distillation cannot bring it back, and it is excluded from every export and from the overlay.");
+      io.out("It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.");
+      io.out("A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.");
+      const twins = revocationTwins(tuning, axiom);
+      if (twins.length > 0) {
+        io.out("");
+        io.out(twins.length === 1 ? "One inference you still hold says nearly the same thing, and revoking this one did not touch it:" : `${twins.length} inferences you still hold say nearly the same thing, and revoking this one did not touch them:`);
+        for (const t of twins) printTwin(t, io);
+        io.out("");
+        io.out(`Those are still active, so they still reach every model. Withdraw one too with \`ursa consent revoke-axiom ${project} --axiom ${twins[0].id}\`, or leave it where it is. Nothing in that list was changed for you, because which of them you actually meant is yours to say and not ours to guess.`);
+      }
       return 0;
     } catch (e) {
       io.err(e.message);
@@ -3852,6 +4070,7 @@ var init_consent_cli = __esm({
     init_consent();
     init_disclosure();
     init_revoke();
+    init_revocation();
     stdio = { out: (l) => console.log(l), err: (l) => console.error(l) };
   }
 });
@@ -5506,112 +5725,6 @@ var init_distill = __esm({
       }
       return envelope.result;
     };
-  }
-});
-
-// src/tuning/revocation.ts
-function foldSuffix(token) {
-  if (token.length <= 3) return token;
-  return token.replace(/ies$/, "y").replace(/(ing|ed|es|s)$/, "");
-}
-function contentTokens(statement) {
-  const out = /* @__PURE__ */ new Set();
-  for (const t of tokens(normalize(statement).norm)) {
-    if (STATEMENT_STOPWORDS.has(t)) continue;
-    out.add(foldSuffix(t));
-  }
-  return [...out];
-}
-function revocationSimilarity(a, b) {
-  const at = contentTokens(a);
-  const bt = contentTokens(b);
-  if (at.length === 0 || bt.length === 0) return 0;
-  return Math.max(containment(at, new Set(bt)), containment(bt, new Set(at)));
-}
-function findRevocationBlock(statement, tombstones, live = []) {
-  let best = null;
-  for (const t of tombstones) {
-    const score = revocationSimilarity(statement, t.statement);
-    if (!best || score > best.score) best = { blockedBy: t.id, score };
-  }
-  if (!best || best.score < THETA_REVOKED) return null;
-  for (const a of live) {
-    if (revocationSimilarity(statement, a.statement) >= best.score) return null;
-  }
-  return { blockedBy: best.blockedBy, score: Math.round(best.score * 1e3) / 1e3 };
-}
-var STATEMENT_STOPWORDS, THETA_REVOKED;
-var init_revocation = __esm({
-  "src/tuning/revocation.ts"() {
-    "use strict";
-    init_normalize();
-    init_match();
-    STATEMENT_STOPWORDS = /* @__PURE__ */ new Set([
-      "a",
-      "an",
-      "the",
-      "and",
-      "or",
-      "of",
-      "to",
-      "in",
-      "on",
-      "at",
-      "for",
-      "with",
-      "from",
-      "by",
-      "as",
-      "is",
-      "are",
-      "be",
-      "been",
-      "it",
-      "its",
-      "this",
-      "that",
-      "these",
-      "those",
-      "there",
-      "do",
-      "dont",
-      "does",
-      "did",
-      "should",
-      "must",
-      "can",
-      "may",
-      "will",
-      "would",
-      "no",
-      "not",
-      "never",
-      "any",
-      "all",
-      "every",
-      "each",
-      "ever",
-      "avoid",
-      "prefer",
-      "keep",
-      "use",
-      "using",
-      "make",
-      "put",
-      "add",
-      "always",
-      "under",
-      "over",
-      "less",
-      "more",
-      "than",
-      "then",
-      "so",
-      "if",
-      "when",
-      "while"
-    ]);
-    THETA_REVOKED = 0.55;
   }
 });
 

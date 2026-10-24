@@ -21,6 +21,7 @@
 // eight test files and src/adapters/cli.ts that import it from there.
 
 import { extname } from 'node:path'
+import { unobservableApparatus } from './apparatus'
 import { blobAt, listCommits, type CommitInfo } from './pairfinder'
 import { resolve } from './resolve'
 import { detectDeploy, type DeployDetection } from './deploy'
@@ -136,6 +137,18 @@ export function resolveEpisode(
       filePath: path,
       timestamp: ep.openedAt,
       text: genText,
+      // A commit is not a model call. `genText` is the whole blob of this
+      // path at the agent's commit, so there is no client in it, no
+      // output limit, and no stop reason, and no future run over the same
+      // history will find any. Said out loud rather than left undefined,
+      // because undefined would read as "nobody asked" and the honest
+      // claim is "this path cannot know" (src/apparatus.ts).
+      //
+      // It also means the mid-sentence footprint arXiv 2610.00253
+      // counted is undetectable here: a source file ends where it ends
+      // whatever cap was in force, so `endsMidSentence` is deliberately
+      // not called on this path.
+      apparatus: unobservableApparatus('git-blob-generation'),
     })
   }
   // An episode whose every resolvable path was an import used to resolve to
