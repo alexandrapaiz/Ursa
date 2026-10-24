@@ -19,10 +19,13 @@ import { renderTuningBlock } from './export'
 import { emptyTuning, mergeDistill } from './merge'
 import {
   THETA_REVOKED,
+  allRevocationTwins,
   contentTokens,
   findRevocationBlock,
   revocationSimilarity,
+  revocationTwins,
 } from './revocation'
+import { runConsentCommand, type CliIo } from '../consent.cli'
 import { forgetRecordInTuning, releaseBlocked, revokeAxiom } from './revoke'
 import type { DistillOutput, DistilledAxiom, TuningRecord } from './types'
 
@@ -344,5 +347,261 @@ describe('the scorer, on the statements this repository actually contains', () =
 
   it('returns null from the gate when there is nothing to compare against', () => {
     expect(findRevocationBlock('anything at all', [])).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The backward-looking half. The gate above runs inside a distillation
+// pass, so these cases are about the pairs that were already axioms when
+// it shipped, which is every pair in every record that exists today.
+
+/** Capture a CLI run's two streams the way `consent.e2e.test.ts` does. */
+function capture(): { io: CliIo; lines: string[]; errs: string[] } {
+  const lines: string[] = []
+  const errs: string[] = []
+  return { io: { out: (l) => lines.push(l), err: (l) => errs.push(l) }, lines, errs }
+}
+
+/** A project root carrying one tuning record and nothing else. */
+function projectWith(tuning: TuningRecord): string {
+  const dir = mkdtempSync(join(tmpdir(), 'ursa-twins-'))
+  mkdirSync(join(dir, '.ursa'), { recursive: true })
+  writeFileSync(join(dir, '.ursa', 'tuning.json'), JSON.stringify(tuning, null, 2) + '\n')
+  return dir
+}
+
+/**
+ * The pair the old create path produced, built by the old create path.
+ *
+ * Nothing is hand-assembled here on purpose. Two distillation passes
+ * emit the same rule in different words, both declare `matchesExisting:
+ * null`, and no revocation exists yet so the gate has no tombstone to
+ * score against and cannot fire. Two active axioms is the result, and
+ * that is the population this report is about rather than a shape
+ * invented for the test.
+ */
+function twinned(): TuningRecord {
+  const t1 = mergeDistill(
+    emptyTuning('t'),
+    out(axiom('keep entrance motion under 8px of travel')),
+    record('r1'),
+    'sonnet',
+    'T1'
+  )
+  const t2 = mergeDistill(
+    t1,
+    out(axiom('entrance motion should travel less than 8px', { matchesExisting: null })),
+    record('r2'),
+    'sonnet',
+    'T2'
+  )
+  return t2
+}
+
+describe('the pairs the gate cannot see, because they were axioms before it existed', () => {
+  it('is a real population: the old create path builds the pair with no revocation in sight', () => {
+    const t = twinned()
+    expect(t.axioms).toHaveLength(2)
+    expect(t.axioms.map((a) => a.id)).toEqual(['ax-001', 'ax-002'])
+    expect(t.axioms.every((a) => a.status === 'active')).toBe(true)
+    // Nothing was blocked, because the gate scores against tombstones
+    // and there are none yet. This is the hole, stated as an assertion.
+    expect(t.blockedByRevocation).toHaveLength(0)
+    // And the two statements are close enough that the gate WOULD have
+    // blocked the second one if the first had been revoked first.
+    expect(revocationSimilarity(t.axioms[0].statement, t.axioms[1].statement))
+      .toBeGreaterThanOrEqual(THETA_REVOKED)
+  })
+
+  it('names the live twin of a revoked axiom, closest first', () => {
+    const t = { ...twinned() }
+    t.axioms = t.axioms.map((a) => (a.id === 'ax-001' ? { ...a, status: 'revoked' as const } : a))
+    const twins = revocationTwins(t, 'ax-001')
+    expect(twins).toHaveLength(1)
+    expect(twins[0].id).toBe('ax-002')
+    expect(twins[0].statement).toBe('entrance motion should travel less than 8px')
+    expect(twins[0].score).toBeGreaterThanOrEqual(THETA_REVOKED)
+    expect(twins[0].status).toBe('active')
+  })
+
+  it('does not report the revoked axiom as a twin of itself, nor another tombstone', () => {
+    const t = twinned()
+    const bothRevoked = {
+      ...t,
+      axioms: t.axioms.map((a) => ({ ...a, status: 'revoked' as const })),
+    }
+    // ax-001 scores 1.0 against itself and above the threshold against
+    // ax-002, and neither is a live disclosure, so the report is empty.
+    expect(revocationTwins(bothRevoked, 'ax-001')).toEqual([])
+    expect(allRevocationTwins(bothRevoked)).toEqual([])
+  })
+
+  it('reports nothing when the revocation did fully take effect', () => {
+    const t = mergeDistill(
+      emptyTuning('t'),
+      out(axiom('keep entrance motion under 8px of travel'), axiom('write dates as 7 Mar 2026, never 03/07/26')),
+      record('r1'),
+      'sonnet',
+      'T1'
+    )
+    const revoked = {
+      ...t,
+      axioms: t.axioms.map((a) => (a.id === 'ax-001' ? { ...a, status: 'revoked' as const } : a)),
+    }
+    expect(revocationTwins(revoked, 'ax-001')).toEqual([])
+    expect(allRevocationTwins(revoked)).toEqual([])
+  })
+
+  it('throws on an unknown id rather than answering "nothing else says this"', () => {
+    expect(() => revocationTwins(twinned(), 'ax-404')).toThrow(/No axiom ax-404/)
+    expect(() => revocationTwins(twinned(), 'ax-404')).toThrow(/ax-001, ax-002/)
+  })
+
+  it('says when the twin is one the user put there herself', () => {
+    const t = twinned()
+    const mixed = {
+      ...t,
+      axioms: t.axioms.map((a) =>
+        a.id === 'ax-001' ? { ...a, status: 'revoked' as const } : { ...a, status: 'user-edited' as const }
+      ),
+    }
+    expect(revocationTwins(mixed, 'ax-001')[0].status).toBe('user-edited')
+  })
+
+  it('orders several twins by closeness, and breaks a tie by id', () => {
+    // Three live candidates against the revoked `keep entrance motion
+    // under 8px of travel`, whose content tokens are {entrance, motion,
+    // 8px, travel}. The scores are asserted below rather than left
+    // implicit, because the ordering case is only meaningful if two of
+    // them really do tie and one really is further away:
+    //   ax-002  entrance, motion, travel, slowly      3 of 4 both ways, 0.75
+    //   ax-003  entrance, motion, travel, 8px         every token, 1.0
+    //   ax-004  entrance, motion                      wholly contained, 1.0
+    const t = mergeDistill(
+      emptyTuning('t'),
+      out(
+        axiom('keep entrance motion under 8px of travel'),
+        axiom('entrance motion should travel slowly'),
+        axiom('entrance motion should travel less than 8px'),
+        axiom('no entrance motion at all')
+      ),
+      record('r1'),
+      'sonnet',
+      'T1'
+    )
+    const revoked = {
+      ...t,
+      axioms: t.axioms.map((a) => (a.id === 'ax-001' ? { ...a, status: 'revoked' as const } : a)),
+    }
+    const twins = revocationTwins(revoked, 'ax-001')
+    expect(twins.map((x) => [x.id, x.score])).toEqual([
+      ['ax-003', 1],
+      ['ax-004', 1],
+      ['ax-002', 0.75],
+    ])
+  })
+
+  it('lists one entry per tombstone that still has a live twin, and omits the rest', () => {
+    const t = mergeDistill(
+      emptyTuning('t'),
+      out(
+        axiom('keep entrance motion under 8px of travel'),
+        axiom('entrance motion should travel less than 8px'),
+        axiom('write dates as 7 Mar 2026, never 03/07/26')
+      ),
+      record('r1'),
+      'sonnet',
+      'T1'
+    )
+    const revoked = {
+      ...t,
+      axioms: t.axioms.map((a) =>
+        a.id === 'ax-001' || a.id === 'ax-003' ? { ...a, status: 'revoked' as const } : a
+      ),
+    }
+    const pairs = allRevocationTwins(revoked)
+    expect(pairs).toHaveLength(1)
+    expect(pairs[0].revoked.id).toBe('ax-001')
+    expect(pairs[0].twins.map((x) => x.id)).toEqual(['ax-002'])
+  })
+})
+
+describe('what the user is told, and what is not done for her', () => {
+  it('names the twin when she revokes one of a pair, and changes nothing about it', async () => {
+    const root = projectWith(twinned())
+    const tPath = join(root, '.ursa', 'tuning.json')
+    const before = JSON.parse(readFileSync(tPath, 'utf8')) as TuningRecord
+    const { io, lines } = capture()
+
+    expect(await runConsentCommand(['revoke-axiom', root, '--axiom', 'ax-001'], io)).toBe(0)
+
+    const printed = lines.join('\n')
+    expect(printed).toContain('Revoked ax-001')
+    expect(printed).toContain('ax-002')
+    expect(printed).toContain('entrance motion should travel less than 8px')
+    expect(printed).toContain('--axiom ax-002')
+
+    // The assertion the ledger entry asked for: the twin is named in the
+    // output and NOT touched in the file. Revoking a second axiom she
+    // did not name would be this product deciding what she meant.
+    const after = JSON.parse(readFileSync(tPath, 'utf8')) as TuningRecord
+    const twinBefore = before.axioms.find((a) => a.id === 'ax-002')!
+    const twinAfter = after.axioms.find((a) => a.id === 'ax-002')!
+    expect(twinAfter).toEqual(twinBefore)
+    expect(twinAfter.status).toBe('active')
+    expect(after.axioms.find((a) => a.id === 'ax-001')!.status).toBe('revoked')
+  })
+
+  it('says nothing extra when the revocation took full effect', async () => {
+    const t = mergeDistill(
+      emptyTuning('t'),
+      out(axiom('keep entrance motion under 8px of travel'), axiom('write dates as 7 Mar 2026, never 03/07/26')),
+      record('r1'),
+      'sonnet',
+      'T1'
+    )
+    const { io, lines } = capture()
+    expect(await runConsentCommand(['revoke-axiom', projectWith(t), '--axiom', 'ax-001'], io)).toBe(0)
+    const printed = lines.join('\n')
+    expect(printed).toContain('Revoked ax-001')
+    expect(printed).not.toContain('nearly the same thing')
+    expect(printed).not.toContain('ax-002')
+  })
+
+  it('tells her about a pair that was already on disk, without her revoking anything again', async () => {
+    // The population the entry names: she revoked ax-001 at some point
+    // before this report existed, the twin kept exporting, and nothing
+    // ever said so. `consent show` is where she finds out.
+    const t = twinned()
+    const root = projectWith({
+      ...t,
+      axioms: t.axioms.map((a) => (a.id === 'ax-001' ? { ...a, status: 'revoked' as const } : a)),
+    })
+    const { io, lines } = capture()
+
+    expect(await runConsentCommand(['show', root], io)).toBe(0)
+
+    const printed = lines.join('\n')
+    expect(printed).toContain('still being said by an inference you hold')
+    expect(printed).toContain('ax-001, which you revoked')
+    expect(printed).toContain('ax-002')
+    expect(printed).toContain('Nothing above was changed for you.')
+  })
+
+  it('leaves `consent show` silent about twins when every revocation took effect', async () => {
+    const t = mergeDistill(
+      emptyTuning('t'),
+      out(axiom('keep entrance motion under 8px of travel'), axiom('write dates as 7 Mar 2026, never 03/07/26')),
+      record('r1'),
+      'sonnet',
+      'T1'
+    )
+    const root = projectWith({
+      ...t,
+      axioms: t.axioms.map((a) => (a.id === 'ax-001' ? { ...a, status: 'revoked' as const } : a)),
+    })
+    const { io, lines } = capture()
+    expect(await runConsentCommand(['show', root], io)).toBe(0)
+    expect(lines.join('\n')).not.toContain('still being said')
   })
 })
