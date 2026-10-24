@@ -233,7 +233,7 @@ named type or a named file format, and the types are defined in §5.
 **Nodes.**
 
 - `docs/ideas.md` — the ideas ledger. A UTF-8 Markdown file, 8,705 lines and
-  584,898 bytes at the time of writing (`wc -l`, `wc -c`). Read-only to this system; nothing in
+  584,898 bytes at `main` 96e0513, before this run's four appended blocks. Read-only to this system; nothing in
   this document writes to it.
 - `tools/ledger/ledger.mjs` — ES module, no dependencies, no I/O. Exports
   `parseLedger`, `renderLedger` and `mergeLedgers`. Owned by the merge path.
@@ -370,7 +370,7 @@ embed a machine identity (the redaction rider in
 ```
 tools/ledger/
   block-kinds.mjs        NEW   162 lines   the three contracts and the classifier
-  block-kinds.test.mjs   NEW   164 lines   11 tests: 8 on fixtures, 3 on the real file
+  block-kinds.test.mjs   NEW   182 lines   11 tests: 8 on fixtures, 3 on the real file
   check.mjs              EDIT  200 lines   five named rules, two violation classes
   check.test.mjs         EDIT  174 lines   13 tests, was 9
   ledger.mjs             unchanged         the merge path's parser
