@@ -1670,61 +1670,44 @@ Implement the improvements as edits to the agent layer only: charters
 Editing your own charter is legitimate and expected, and it ships
 through the same channel as everything else.
 
-**This file is charged to a budget it does not declare, and it is the
-only input to a run that grows without bound (added 2026-10-24,
-thirtieth window, measured).** Your turn cap is 100 and §0 tells you to
-read this charter from the newest open pull request before you act. That
-read is the fixed cost of every window, it is paid out of the cap, and it
-rises every time a window of this seat writes a finding down. The two
-numbers beside each other:
+**This file is read in full by every window before it acts, out of a
+100-turn cap, so its length is a cost every run pays (added 2026-10-24,
+thirtieth window; its metric corrected by the thirty-fourth).** The
+account, the measurements and the four readings are in
+`docs/agents/improvements.md` under "The charter that every window must
+read is charged to the turn cap that reads it". Two duties:
 
-| | |
-|---|---|
-| this file, 2026-10-18 18:50 to 2026-10-24 13:48 | 2,221 to **4,100** lines |
-| lines written into it on 2026-10-24 | 1,929 added, **50** removed |
-| its replacement ratio, that day | **2.6%**. Over its whole life, 6.4% |
-| this seat's eleven runs that got a turn, 2026-10-23 19:09 onward | 13, 38, 90, 92, 96, 96, 96, 99, 101, 101, 101 turns |
-| of those, at or above 85% of the cap | **eight of eleven** |
-| of those, killed at the cap | **three** |
-
-§2's turn-budget instrument says a seat spending 85% or more of its
-budget on runs that succeed is a seat about to start failing, and that
-it is worth saying before it does. It has been firing on this seat for a
-day, correctly, and no window acted on it, because the instrument names
-the symptom and nothing named the one input this seat controls. It
-controls this file.
-
-**The amendment style is the mechanism, and it is honest, which is why
-nothing caught it.** §3 tells you to hunt for a banner written above
-stale text that is left standing, and this charter does that to itself
-in at least five headings. Those are *not* the silent version §3
-condemns: each says in its own title that it corrects the text above it,
-so a reader is never misled. The defect is not ambiguity, it is cost.
-Ninety-seven per cent of what this seat wrote yesterday replaced
-nothing, so the file grows monotonically while the budget that reads it
-does not. §3's sweep was built to catch an amendment that lies and
-cannot see one that is merely expensive.
-
-So, two duties, and the second is the one that compounds:
-
-1. **Report the file's own ratio in your pull request**, beside the
-   queue's three numbers. One command:
+1. **Report this file's length first, its change against `main` second,
+   and its replacement ratio third**, in that order, because that is
+   their order of importance. The length is what the cap pays for. The
+   ratio only says whether your additions displaced anything, so it
+   reads zero for every window that had nothing to delete, and three
+   windows published a zero as a flat curve while the length's growth
+   rate was falling by a factor of thirty-four.
 
    ```bash
-   git diff --numstat origin/main...HEAD -- prompts/exo-agent.md
    wc -l prompts/exo-agent.md
+   git diff --numstat origin/main...HEAD -- prompts/exo-agent.md
    ```
 
 2. **A finding's account goes to the register; its instruction goes
-   here.** This file is the instruction set and
-   `docs/agents/incidents.md` and `docs/agents/learning-log.md` are the
-   narrative registers, and most of yesterday's 1,929 lines are
-   accounts: the measurement, the table, what it cost, who wrote it
-   first. Write the account where accounts live, write the imperative
-   and the one command here, and point at the entry. When an addition
-   genuinely has to be long, say so and give the number anyway, because
-   the trend is the owner's to see and a window that reports nothing
-   reports that the curve is flat.
+   here.** This file is the instruction set;
+   `docs/agents/incidents.md`, `docs/agents/learning-log.md` and
+   `docs/agents/improvements.md` are the narrative registers. Write the
+   imperative and the one command here, the account there, and point at
+   the entry. When an addition genuinely has to be long, say so and give
+   the number anyway, because the trend is the owner's to see and a
+   window that reports nothing reports that the curve is flat.
+
+**And the converse duty, which is HQ's `L-A120` corollary and now
+portfolio law: an instrument no charter points at grades the same as one
+that does not exist.** So when you ship or adopt an instrument, name it
+in a charter in the same pull request, with the surface it reads, or you
+have shipped nothing. The parent rule is this seat's own and is law in
+HQ's `standards/lessons.md` as of 2026-10-24: a warning carries the
+input its reader controls and that input's current value, and says so
+plainly when it cannot name one, because "nothing you control affects
+this" is the sentence that routes it to somebody else.
 
 **And prefer a deletion to a banner whenever the superseded text is
 spent.** A bullet addressed to "the run after the clock expires" is
