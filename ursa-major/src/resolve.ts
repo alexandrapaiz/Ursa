@@ -32,8 +32,8 @@ import {
 } from './match'
 import type {
   Artifact, ConversationMeta, DeletionAttribution, DescentEvidence, Exclusion, FinalFile,
-  FinalSpan, GenerationFate, GenerationRecord, OutcomeRecord, RawGeneration, SourcePointer,
-  SegmentMode,
+  FinalSpan, GenerationFate, GenerationRecord, NoCandidateReason, OutcomeRecord, RawGeneration,
+  SourcePointer, SegmentMode, TokenSuppression,
 } from './types'
 import { computeStats } from './stats'
 
@@ -151,6 +151,15 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       }
     })
   }
+
+  /**
+   * How many generation segments that index was built over. Stored on every
+   * span that reports token suppression, because `MAX_TOKEN_DF` is an
+   * absolute count against this number and a suppression figure read
+   * without it cannot be compared between two records. See the
+   * `tokenSuppression` field in src/types.ts.
+   */
+  const corpusSegments = preps.reduce((n, p) => n + p.sentences.length, 0)
 
   const verbatimClaims = new Map<number, Claim[]>()
   const mutatedClaims = new Map<number, Claim[]>()
@@ -391,13 +400,34 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       }
 
       // Pass 2 — fuzzy
+      //
+      // Two facts about the seeding are recorded alongside whatever label
+      // this pass produces, because the pass is capable of producing the
+      // same bare `no_generation_provenance` for three different reasons
+      // and, until 2026-10-24, said which one only in this comment.
+      // `suppression` counts the distinct tokens the document-frequency
+      // cutoff refused to seed on; `noCandidate` names the reason when the
+      // pass ends with nothing to attach. See the fields of the same names
+      // in src/types.ts for why the third reason is a defect report.
+      let suppression: TokenSuppression | null = null
+      let noCandidate: NoCandidateReason | null = null
       if (!span && sNorm.length > 0) {
         const sTokens = tokens(sNorm)
+        const distinct = new Set(sTokens)
+        let suppressed = 0
         const seen = new Set<string>()
         const candidates: Array<{ p: GenPrep; sent: GenSentence; cont: number }> = []
-        for (const t of new Set(sTokens)) {
+        for (const t of distinct) {
           const bucket = tokenIndex.get(t)
-          if (!bucket || bucket.length > MAX_TOKEN_DF) continue
+          // No bucket: this token is in no generation segment, so there is
+          // nothing to seed from and the matcher is not blind to anything.
+          // Over the cutoff: the token IS in the corpus and the matcher is
+          // declining to look at it, which is the case worth counting.
+          if (!bucket) continue
+          if (bucket.length > MAX_TOKEN_DF) {
+            suppressed++
+            continue
+          }
           for (const cand of bucket) {
             const key = cand.p.gen.generationIndex + ':' + cand.sIdx
             if (seen.has(key)) continue
@@ -405,6 +435,9 @@ export function resolve(input: ResolveInput): OutcomeRecord {
             const sent = cand.p.sentences[cand.sIdx]
             candidates.push({ p: cand.p, sent, cont: containment(sTokens, sent.tokenSet) })
           }
+        }
+        if (suppressed > 0) {
+          suppression = { distinct: distinct.size, suppressed, cutoff: MAX_TOKEN_DF, corpusSegments }
         }
         candidates.sort((a, b) => b.cont - a.cont)
         let best: { p: GenPrep; sent: GenSentence; score: number } | null = null
@@ -452,10 +485,39 @@ export function resolve(input: ResolveInput): OutcomeRecord {
             uncertain: true,
             candidate: { score: r3(best.score), text: best.sent.text, source: srcPtr(best.p, best.sent.start, best.sent.end) },
           }
+        } else if (best) {
+          // Candidates were seeded and the best of them scored under the
+          // floor. The matcher looked.
+          noCandidate = 'scored_below_floor'
+        } else if (distinct.size === 0) {
+          noCandidate = 'empty_after_normalization'
+        } else if (suppressed > 0) {
+          // Every distinct token that exists in the corpus at all was over
+          // the cutoff, so the candidate set was empty before scoring
+          // began. The matcher did not look. This span's
+          // `no_generation_provenance` is a statement about MAX_TOKEN_DF
+          // and not about the work.
+          noCandidate = 'df_cutoff_suppressed'
+        } else {
+          // No distinct token of this span appears in any generation
+          // segment. The model was never in the running, which is the
+          // honest form of this label and the one CLAUDE.md §1 calls the
+          // most valuable category.
+          noCandidate = 'absent_from_corpus'
         }
+      } else if (!span) {
+        noCandidate = 'empty_after_normalization'
       }
 
-      spans.push(span ?? { ...base, class: 'no_generation_provenance' })
+      const resolved: FinalSpan = span ?? { ...base, class: 'no_generation_provenance' }
+      // `noCandidate` is set only where there is no candidate to read
+      // instead, so it never competes with the `candidate` field for a
+      // reader's attention; `tokenSuppression` rides along on labelled
+      // spans too, because a score seeded by one token out of ten is a
+      // weaker statement than the same score seeded by all ten.
+      if (noCandidate && !resolved.candidate) resolved.noCandidate = noCandidate
+      if (suppression) resolved.tokenSuppression = suppression
+      spans.push(resolved)
     }
 
     return {

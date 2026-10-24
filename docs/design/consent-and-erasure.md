@@ -461,6 +461,22 @@ this table used to assert without testing: a re-distill after a
 revocation does not revive the statement even when the model declares no
 match.
 
+**The half of that correction which lands on records that already
+exist, 2026-10-23.** The gate above runs inside one distillation pass,
+so it decides about statements arriving after a revocation and about
+nothing else. Every tuning record written before it existed came through
+the old create path, which means a record may already hold the same rule
+twice under two ids, and revoking one of that pair leaves the other
+`active` and exporting. The repair is a report rather than a sweep,
+because withdrawing a second inference the user did not name would be
+this product deciding what she meant: `revocationTwins` and
+`allRevocationTwins` in `ursa-major/src/tuning/revocation.ts` name the
+twin, print the command that would withdraw it, and write nothing.
+`ursa consent revoke-axiom` reports at the moment of revocation and
+`ursa consent show` reports the pairs already on disk, which is the
+surface that reaches the existing population. Design document:
+`docs/design/revocation-twins.md`.
+
 A tombstone is the wrong answer for erasure, because a tombstone preserves
 the statement derived from the thing being erased. `tuning/types.ts` already
 settles it: "An axiom without evidence is invalid by construction."
@@ -553,3 +569,37 @@ Named so nobody reads the §2 diagram as a finished system.
    user's writing crosses. It does not prove that a sufficiently rich set of
    scalars reveals nothing, which is a differential-privacy question and a
    different piece of work.
+6. **A tuning block the user already pasted is permanently out of reach, and
+   that is a property of the channel rather than a gap in the build.**
+   `ursa tuning export` renders the active axioms into a markdown block
+   (`src/tuning/export.ts`, `renderTuningBlock`) and the user pastes it into
+   another vendor's instructions field: a `CLAUDE.md`, ChatGPT's custom
+   instructions, a system prompt. Revoking an axiom afterwards changes every
+   render from that moment on, because `src/tuning/revocation.ts` drops
+   revoked axioms before `renderTuningBlock` sees them. It changes nothing
+   about the copy already sitting in the vendor's settings, which keeps
+   instructing that model until the user replaces it by hand.
+
+   The reason this is permanent is worth stating rather than leaving as an
+   implied backlog item. Enforcing a revocation across a delegated channel
+   requires the gateway holding the delegation to install deny state and
+   return a receipt saying it did, which is stage C4 of the six-stage
+   contract in arXiv:2610.15991 and the stage before effect prevention. This
+   channel's gateway is a text field inside software Ursa does not run and
+   cannot enumerate. It cannot emit a receipt and there is no list of the
+   places a user pasted a block, so the channel reaches issuer commit and
+   stops there. It is also the best delivery route the product has, for the
+   same reason: it works without asking any vendor for anything.
+
+   So the two properties are the same property, and the product keeps both by
+   saying so. `ursa consent revoke-axiom` prints what it cannot reach and
+   what the user has to do herself, at the moment she would otherwise believe
+   the revocation was finished (`src/consent.cli.ts`, `revoke-axiom`). What
+   would change this is a delivery channel with a gateway Ursa can address,
+   such as an MCP server the model reads the tuning from on every turn rather
+   than a block copied once. `src/mcp/server.ts` already serves
+   `renderTuningBlock` over exactly such a surface, so the honest statement is
+   that this limitation belongs to the paste channel and not to the product,
+   and that a user who reads her tuning through the MCP server does not have
+   it. Routed by Ursa's research seat, finding 54 of
+   `docs/research/briefs/2026-10-24-message-14.md`.

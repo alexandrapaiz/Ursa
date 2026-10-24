@@ -174,3 +174,131 @@ export function findRevocationBlock(
   }
   return { blockedBy: best.blockedBy, score: Math.round(best.score * 1000) / 1000 }
 }
+
+// ---------------------------------------------------------------------------
+// The backward-looking half: pairs that already exist.
+//
+// `findRevocationBlock` above runs inside one distillation pass, so it
+// decides about statements arriving after a revocation and about nothing
+// else. Everything written before the gate existed came through the old
+// create path, where a model that reworded an axiom and left
+// `matchesExisting` null got a second active axiom with a different id
+// and nearly the same words. Revoking one of a pair like that revokes
+// one id. The twin stays live, keeps its own evidence, and keeps
+// flowing to `renderTuningBlock`, the dashboard overlay and the MCP
+// read, so the user watches her revocation take effect on the thing she
+// clicked and not on the thing she meant.
+//
+// The gate cannot see this case by construction: it is called on a
+// candidate from a distillation pass, and the twin is already in
+// `axioms`.
+//
+// So this half is a report and not a sweep, and that is a product
+// decision rather than a mechanical one. Revoking a second axiom the
+// user did not name, on a lexical score, would be this product deciding
+// what she meant and then acting on it without telling her, which is the
+// dark pattern `CLAUDE.md` load-bearing constraint 2 exists to forbid.
+// What these functions do instead is name the twin, say how close it is,
+// and leave the decision where it started.
+
+/** A live axiom that restates a revoked one. */
+export interface RevocationTwin {
+  /** id of the still-live axiom */
+  id: string
+  statement: string
+  /** `revocationSimilarity` against the revoked axiom's statement, three decimals */
+  score: number
+  /**
+   * The live axiom's own status, carried because the two values mean
+   * different things to the person reading the report. An `active` twin
+   * was written by a distillation pass, which is the defect this report
+   * exists for. A `user-edited` twin is one she wrote or released
+   * herself, so naming it is still correct (it is still exporting) but
+   * calling it the model's duplicate would be false.
+   */
+  status: 'active' | 'user-edited'
+}
+
+/** One revoked axiom and the live axioms that still say what it said. */
+export interface TwinPair {
+  revoked: { id: string; statement: string }
+  twins: RevocationTwin[]
+}
+
+/**
+ * The live axioms that restate a given revoked one, closest first.
+ *
+ * `unitId` is the axiom the user revoked. Throws on an unknown id rather
+ * than returning an empty list, for the same reason `revokeAxiom`
+ * throws: an empty list here reads as "nothing else says this", and
+ * returning that answer about an axiom that does not exist would be the
+ * one wrong answer this function can give.
+ *
+ * Scored with `revocationSimilarity` at `THETA_REVOKED`, deliberately
+ * the same score and the same threshold the gate uses, so a pair the
+ * gate would have blocked today is exactly the pair this report names
+ * about yesterday. The asymmetry argument for a low threshold is
+ * stronger here than it is at the gate, not weaker: at the gate an
+ * over-block parks a statement the user has to go find, while an
+ * over-report costs her one glance at a named id whose statement is
+ * printed next to it, and nothing at all is changed on disk either way.
+ *
+ * Revoked axioms are not candidates. A tombstone is already excluded
+ * from every export, so a second tombstone saying the same thing is not
+ * a live disclosure and naming it would be noise.
+ */
+export function revocationTwins(
+  tuning: { axioms: TuningAxiom[] },
+  unitId: string
+): RevocationTwin[] {
+  const revoked = tuning.axioms.find((a) => a.id === unitId)
+  if (!revoked) {
+    throw new Error(
+      `No axiom ${unitId} in this tuning record (present: ${tuning.axioms.map((a) => a.id).join(', ') || 'none'})`
+    )
+  }
+  const twins: RevocationTwin[] = []
+  for (const a of tuning.axioms) {
+    if (a.id === unitId) continue
+    if (a.status === 'revoked') continue
+    const score = revocationSimilarity(revoked.statement, a.statement)
+    if (score < THETA_REVOKED) continue
+    twins.push({
+      id: a.id,
+      statement: a.statement,
+      score: Math.round(score * 1000) / 1000,
+      status: a.status,
+    })
+  }
+  // Closest first, then by id, so the same record always reports the
+  // same order and a test can assert on it.
+  twins.sort((x, y) => y.score - x.score || x.id.localeCompare(y.id))
+  return twins
+}
+
+/**
+ * Every revoked axiom in a record that still has a live twin.
+ *
+ * This is the function that reaches the population the ledger entry
+ * names. A report fired at the moment of revocation only helps
+ * revocations made from today on, and every tuning record that exists
+ * right now was built by the old create path, so the pairs that already
+ * exist are in the fixtures in this repository and on any user's disk.
+ * `ursa consent show` calls this, which means the next time she looks at
+ * what has been inferred about her she is told, without having to revoke
+ * anything again to find out.
+ *
+ * Tombstones with no live twin are omitted rather than listed empty: the
+ * useful report is the short list of revocations that did not fully take
+ * effect, and padding it with the ones that did would bury it.
+ */
+export function allRevocationTwins(tuning: { axioms: TuningAxiom[] }): TwinPair[] {
+  const pairs: TwinPair[] = []
+  for (const a of tuning.axioms) {
+    if (a.status !== 'revoked') continue
+    const twins = revocationTwins(tuning, a.id)
+    if (twins.length === 0) continue
+    pairs.push({ revoked: { id: a.id, statement: a.statement }, twins })
+  }
+  return pairs
+}
