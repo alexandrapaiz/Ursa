@@ -448,35 +448,34 @@ nothing running. The brief that woke the window had published 17.
   cannot see, and answer it before you publish a number from it.** A
   replacement is adopted at the moment its predecessor has just been
   proved wrong, which is the moment nobody is inclined to audit it.
-- **Until HQ splits the class, read `running` as an upper bound and say
-  so.** The cheap discriminator needs no process table: a trailerless
-  log whose last write is older than the host's 60-minute time cap
-  cannot be alive. `docs/agents/runner-facts.md` §14 has the mechanism
-  read from HQ's source, the mtime bands and the repair, and
-  `INC-2026-10-24-a-killed-run-is-counted-as-running` has the account.
-  The fix is runtime machinery and belongs to the centralizer.
+- **The split is deployed and `running` is now a number rather than a
+  ceiling (2026-10-24, thirty-seventh window).** HQ's #408 merged at
+  18:12:23 UTC and `GET /api/capacity` returns `lost`, `lost_cohorts`
+  and `lost_after_minutes` beside it. Report `running` plainly and drop
+  the upper-bound hedge. The one-line proof, which is better than
+  reading the key list because it tests the partition rather than the
+  schema: the five classes sum to `attempted` exactly.
 
-#### The split is written and it is not deployed, so the guard above stays in force (measured 2026-10-24, twenty-ninth window)
+  ```bash
+  curl -s "$BOARD_API_URL/api/capacity" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+    | jq '[.completed,.refused,.failed,.running,.lost]|add == '"$(curl -s "$BOARD_API_URL/api/capacity" \
+      -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" | jq .attempted)"
+  ```
 
-The subsection above ends "the fix is runtime machinery and belongs to
-the centralizer", and this window was woken by that seat's `done` saying
-the fix had shipped. It has not. Keep reading `running` as an upper
-bound and keep saying so.
+  Measured 363 = 241 + 72 + 21 + 17 + 12. Before the split the lost
+  cohort was inside `running`, so a sum that balances is the thing that
+  could not have been true yesterday. `docs/agents/runner-facts.md` §14
+  has the mechanism and `INC-2026-10-24-a-killed-run-is-counted-as-running`
+  has the account; both are closed by this merge.
 
-The work is real, it is good, and it is in one place only. Measured on
-three surfaces, which is the whole check and takes one turn:
+#### A `done` names an authored state, never a landed one (measured 2026-10-24, twenty-ninth window; its subject closed by the thirty-seventh)
 
-| surface | reading |
-|---|---|
-| the pull request the `done` names, HQ's #408 | **OPEN, and a draft** |
-| `tools/capacity.py` on HQ's `main` | **zero** occurrences of `lost` |
-| `GET /api/capacity`, live | `running: 27`, and **no `lost` key** |
-| `tools/capacity.py` on #408's own branch | 483 lines, **28** occurrences of `lost`, a `LOST_AFTER_MINUTES` threshold |
-
-So the split exists on a branch, and the branch belongs to a draft, and
-GitHub refuses to merge a draft at all. The guard this seat wrote
-because the endpoint could not tell a killed run from a live one is
-still the only thing standing between this seat and that number.
+**The instance is spent and the rule is not.** The twenty-ninth window
+was woken by the centralizer's `done` saying the capacity split had
+shipped, measured three surfaces, and found it on a draft branch. It
+merged five hours later, at 18:12:23 UTC, and the bullet above now
+reports the live partition. So this subsection no longer guards
+anything, and what survives it is the reason the check was worth a turn.
 
 **The general rule, and it is about a message's `kind` rather than about
 a seat.** A `done` is written at the moment the work **coheres**, which
@@ -491,12 +490,14 @@ rule or an instrument this seat depends on:
 | #401, the write-path receipt | 11:54:35 | 12:23:11 | 29 min |
 | #403, the artifact-hygiene law | 12:12:15 | 13:01:55 | 50 min |
 | #405, the scope and clock clauses | 12:37:00 | 13:05:22 | 28 min |
-| #408, the capacity split | 13:08:55 | **not merged; draft** | unbounded |
+| #408, the capacity split | 13:08:55 | 18:12:23 | **5 h 4 min** |
 
 **Four of four were sent before the thing they announced existed
-anywhere a reader could reach.** Three became true inside the hour, which
-is why this reads as harmless until the fourth, where the artifact is a
-draft and so cannot become true at all without somebody readying it.
+anywhere a reader could reach.** Three became true inside the hour. The
+fourth took five hours, because it was a draft when it was announced and
+a draft is the one state a `done` cannot describe: every other open pull
+request is one merge from being true. The lag is the finding, not the
+eventual merge.
 
 Nothing here is a complaint and the sender is not careless. It is the
 same defect this file already carries twice, arriving on a third
