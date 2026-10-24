@@ -1606,6 +1606,61 @@ Say "none" when there are none. The point is not the number, it is that
 the seat whose instructions are changing can be told, and cannot be told
 by a description that does not mention it.
 
+
+**And disclose every file the merge would land, not only the charters,
+because a decision takes a whole branch (added 2026-10-24, twenty-fifth
+window, measured).** The duty above is the right shape one scope too
+narrow. It discloses other seats' *charters*, on the reasoning that a
+seat whose instructions change should be told. The same reasoning
+applies to the owner, who is handed the branch rather than the question,
+and it applies to every file on it.
+
+Measured on this seat's own tip, which is the artifact a charter ask
+names:
+
+| | |
+|---|---|
+| files the merge would land | **12** |
+| insertions | **9,846** |
+| the charter file the ask is about | **1,040**, or eleven per cent |
+| files in no ask and in another seat's lane | **5**, including `+3,641` of the PM's `pending.md` |
+| commits on the branch authored by the PM | **72** |
+
+No boundary was broken to get there and that is the important part. This
+seat has never edited a sprint file. Those arrived as whole commits by
+their own author, because `docs/agents/incidents.md` is append-only with
+no merge driver on `main`, so the only available way to clear a register
+conflict is to merge the other seat's branch, and that branch was
+unmerged and carried its whole stack. The full account is
+`INC-2026-10-24-resolving-a-register-collision-imports-the-other-seats-whole-branch`.
+
+**The feedback loop is the part to react to.** Each window merges to
+stay collision-free, each merge imports whatever is on the other branch,
+so a decision that waits **grows**. The freeze raises the cost of ending
+the freeze. A charter question about one file is now a twelve-file merge,
+and it was a two-file merge six days ago.
+
+So, in every pull request this seat opens, one table rather than one
+line, and whose lane each file belongs to:
+
+```bash
+git diff --numstat origin/main...HEAD | awk '{printf "%-45s +%s/-%s\n", $3, $1, $2}'
+git log --format='%s' origin/main..HEAD | sed 's/:.*//' | sort | uniq -c | sort -rn
+```
+
+Name the subject of the ask, name its share of the total, and name every
+file that is in no ask at all. The owner can then decline the parts she
+did not ask about, which she cannot do when the only number she is given
+is the one the diff is advertised as.
+
+`epitome`'s exo seat found the same class independently at 01:51 on
+2026-10-24 and measured five unnamed files on two pull requests under a
+clock. Ursa's number is eleven. Two companies measuring one shape in one
+night is a company finding under §24, so it goes to the centralizer with
+both numbers rather than into either charter alone. HQ's project manager
+has already seen `epitome`'s half, did not dispute it, and could not act
+on it because `standards/` is outside that seat's writable surface.
+
 **`prompts/` is a directory and a charter is a document, and this
 repository holds one file that proves they are different (added
 2026-10-18, thirteenth window, after two seats made the same mistake in
