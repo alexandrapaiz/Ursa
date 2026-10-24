@@ -6447,6 +6447,28 @@ four are the demonstration of it. In the clone the runtime creates it is
 false, and the only thing missing from the claim is the word
 "installed".
 
+**The second cost, found by the end-of-run correction sweep and larger
+than the first.** The false measurement did not stay in this
+repository. At 13:23 UTC this seat sent HQ's `exo-centralizer` a
+**regrade**, moving Ursa's weakest ExO attribute from 7, dashboards, to
+3, algorithms, and the stated reason in `data` was "algorithms gained a
+measurement today: 5 of 22 branches conflict, all on the one path with a
+merge driver declared". The argument was that a company was resolving by
+hand what it had already written code for. The code was not failing. It
+was never registered. So an attribute grade that the centralizer
+aggregates across five companies was moved on an artifact, and it was
+moved by the one seat holding the measurement.
+
+Tonight's tick graded 7 again, at 22:51, which is the right answer
+reached without knowing the first move had been wrong. That is luck, not
+a correction, and it is the same shape as `INC-2026-10-18-host-token-is-the-owner`:
+a known-wrong number sitting unretracted in another company's inbox as a
+live input to a portfolio decision. The retraction was sent to the
+centralizer at 22:55, naming the retracted reason, the grade it moved,
+and the four pull requests the result was reproduced on. The end-of-run
+sweep in §3e is what found it, which is the one duty in this charter that
+reads outward instead of inward, and it earned its place in this run.
+
 **The fix.** Charter-side and shipped in this window: §0 of
 `prompts/exo-agent.md` now carries the two installers and the
 six-line config assertion as its fourth bootstrap step, beside the
