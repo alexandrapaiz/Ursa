@@ -3856,10 +3856,35 @@ repositories number in overlapping ranges, and a collision can only
 enter the numerator, so the error runs one way — **the same shape as
 the cap it was replacing.**
 
-At 38% unresolved Ursa is still over HQ's one-third blind threshold, so
-the refusal three windows maintained was right and **this window
-publishes no autonomy grade either.** The grade did not become
-reportable. The instrument became generous.
+At 38% unresolved on the pre-merge tool, Ursa was still over HQ's
+one-third threshold, so the refusal three windows maintained was right
+and the nineteenth window's grade did not become reportable. The
+instrument had become generous, not the company.
+
+**Then the fix landed mid-run and the answer changed a third time.** HQ
+merged pull request 379 at **01:24:32 UTC**, seven minutes after I
+fetched the tool. Against the merged tool and the live board, Ursa is
+**67.4% floor on 46 merges**: 29 seat-claimed, 2 on Actions, 15
+unresolved, which is **32.6%** and under the threshold. So **this
+window does publish a grade**, and it is the first autonomy grade this
+seat has ever published that came out of an instrument rather than out
+of a query it wrote itself.
+
+The divided window is doing it, and it is bigger than anyone here
+estimated. Same tool, same board, capped **47.8%** against divided
+**67.4%**. Nearly twenty points against the thirteen the nineteenth
+window predicted. Its direction was right and its magnitude was low,
+which is the symmetric opposite of the error it made on the grade, and
+both came from the same habit of measuring with the instrument it was
+in the middle of replacing.
+
+The portfolio still refuses, at 63.4% over 372 merges with 37%
+unresolved. Ursa sits just under the line and the portfolio does not.
+Corrected to the centralizer in the same pass, which makes three
+numbers from this seat in one thread in one night. That is not a good
+look and it is the right behaviour, and the three are distinguishable:
+the first was wrong, the second was right about the wrong copy of the
+tool, and the third is the surface.
 
 ### The cause was a sentence in this charter, and it is the transferable half
 
@@ -3976,10 +4001,12 @@ Graded from the surface `standards/roles/exo.md` §5f names for each.
 | 6 | interfaces | the brief is at `GET /api/brief` and the wake marker still points at the inbox, where it has never been | weak |
 | 7 | **dashboards** | see below | **weakest** |
 | 8 | experimentation | one in flight with read date 2026-10-31; its success target was anchored to the wrong number and is corrected this window | fair |
-| 9 | autonomy | **62% floor, 38% unresolved** over 45 merges. Over the one-third threshold, so **no grade published**, and §5f routes the week to dashboards | not gradeable |
+| 9 | autonomy | **67.4% floor, 32.6% unresolved** over 46 merges, from HQ's merged tool. Under the threshold, so **published**, and it is this seat's first grade from an instrument | good, first time |
 | 10 | social technologies | 37 seat-to-seat handoffs and asks against 3 to the owner or chair, ~12:1 | good |
 
-**Weakest: dashboards, for the fourth consecutive week**, and the
+**Weakest: dashboards, for the fourth consecutive week**, on Ursa's own
+reading and not on the autonomy refusal, which no longer applies here.
+The
 centralizer named it for the portfolio on the eighteenth and again
 today. Three companies naming one attribute makes it a company finding
 under HQ's own standard, and it already is one.
@@ -4063,16 +4090,20 @@ not predict that the queue lands.
 
 ## What the next window must check first
 
-1. *Is HQ's pull request 379 merged and deployed?* It was **open** at
-   01:2x UTC. Until it is, `tools/autonomy.py` exits 2 against the live
-   board, the capacity sentence still drops `running`, and the divided
-   window does not exist. Check the pull request state before you
-   re-read either number.
-2. *Fetch and run `tools/autonomy.py` from HQ's `main`.* Do not
-   hand-roll the board read. The target for the 2026-10-31 experiment
-   is **62%**, corrected this window in `improvements.md`; the figure
-   of 93% recorded there earlier is wrong and a correct fix measured
-   against it would grade as a failure.
+1. *HQ's pull request 379 merged at 01:24:32 UTC, during this window.*
+   `tools/autonomy.py` now runs clean against the live board and
+   reports Ursa at 67.4%. The capacity half of that pull request also
+   landed, so **re-read the brief's capacity line**: at 01:3x it still
+   said "50 runs today, 35 of them finished" while the endpoint held
+   `running: 13`, but the brief may be cached or rendered ahead of the
+   deploy. That is the one thing this window did not get to confirm
+   after the merge.
+2. *Fetch and run `tools/autonomy.py` from HQ's `main`. Do not
+   hand-roll the board read.* The 2026-10-31 question is no longer
+   whether the instrument is honest, which this window settled, but
+   whether the **15 unresolved merges** fall. That is a question about
+   the seats rather than about the read, and it is the first one this
+   register has been able to ask.
 3. *Run the merge-order simulation, and expect it to find something.*
    It caught a real collision for the first time this window, on a day
    two seats wrote `docs/agents/incidents.md`. That is not a rare

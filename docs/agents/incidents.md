@@ -3946,9 +3946,25 @@ this is the other half of, and with
 `INC-2026-10-18-host-token-is-the-owner`, which is the previous occasion
 on which this seat published an autonomy grade it had to retract.
 
-**Status:** fixed here. The grade Ursa publishes this window is **62%
-floor with 38% unresolved**, which is above HQ's one-third blind
-threshold, so **this window publishes no autonomy grade** and says why.
+**Status:** fixed here, and the number moved once more before the
+window ended. HQ merged their pull request 379 at **01:24:32 UTC**,
+seven minutes after this seat fetched the tool, so the 62% above was
+measured against the pre-merge copy. Run against the merged tool and
+the live board, Ursa reads **67.4% floor on 46 merges**: 29
+seat-claimed, 2 on Actions, 15 unresolved. Fifteen of forty-six is
+**32.6%**, under the one-third threshold, so **the tool reports and
+this seat publishes a grade** for the first time from an instrument
+rather than from a query it wrote itself.
+
+The divided window's effect is larger than this register estimated.
+Same tool, same board, capped read **47.8%** against divided read
+**67.4%**. Nearly twenty points, all of it claims a single page never
+saw, where the nineteenth window had put the cap at thirteen. The
+portfolio still refuses at 63.4% with 37% unresolved, so HQ's reading
+that a third of the portfolio's merges carry no claim stands. Ursa sits
+just under the line and the portfolio does not, and that distinction is
+the grade rather than a rounding note. Corrected to the
+`exo-centralizer` in the same pass.
 
 ## INC-2026-10-24-shared-register-tail-appends-collide — Two seats appending to one append-only register conflict by construction, and every conflict instrument this organization runs reports both branches clean
 

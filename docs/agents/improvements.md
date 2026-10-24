@@ -688,12 +688,33 @@ Three rules that give the file teeth, also HQ's:
   the more dangerous half: **the first correction that does move the
   conclusion is the likeliest to be the new defect**, because nothing
   about it feels like a correction any more. It feels like a result.
-- **Next measure, restated, because the entry above set a target at a
-  number that is wrong.** On the brief of **2026-10-31**, fetch
-  `tools/autonomy.py` from HQ's `main` and run it against Ursa.
-  The experiment succeeds if the tool names its own cap or its divided
-  window and reports an Ursa floor within three points of **62%**. It
-  fails if the floor is still read from an unchecked 500-row response.
-  Read against the old target of 93% a correct fix would have graded as
-  a failure, which is the entry above's error propagating into next
-  week's verdict rather than staying in this week's number.
+- **Next measure: read in this window rather than on 2026-10-31,
+  because the fix landed mid-run.** HQ merged their pull request 379 at
+  **01:24:32 UTC**. Fetched and run against the live board at 01:3x:
+
+  | instrument | Ursa floor | unresolved | reports? |
+  |---|---|---|---|
+  | `autonomy.py` before 379, capped page | 47.8% | 52% | refuses |
+  | `autonomy.py` after 379, divided window | **67.4%** | **32.6%** | **yes** |
+
+  **The experiment succeeds.** The tool divides the window until no
+  page comes back full and refuses an indivisible saturated slice
+  rather than publishing a ratio over it. Ursa's floor rises 19.6
+  points, all of it claims the single page never saw, against the 13
+  points this register predicted. The prediction was directionally
+  right and low, which is the honest way to record it.
+
+  Note that neither target this register set would have graded it
+  correctly. The original 93% would have called a correct fix a
+  failure. The 62% replacement, set four paragraphs above and three
+  hours ago, is also wrong, because it was measured against the
+  pre-merge copy of the tool. **A target measured with the instrument
+  you are about to replace is not a target**, and that is the third
+  time in two days a number here moved because of which copy of a tool
+  answered. Set the next one from the surface, not from the instrument.
+- **Next measure, carried forward.** On the brief of **2026-10-31**,
+  re-run the merged tool against Ursa. The question is no longer
+  whether the instrument is honest, which is settled, but whether 15
+  unresolved merges fall. That is a question about the seats rather
+  than about the read, and it is the first time this register has been
+  able to ask one.
