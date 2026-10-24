@@ -2,6 +2,66 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-second pass, 2026-10-24 ~00:4x UTC, message: PR #288 (exo's nineteenth window) reviewed against the merge rule
+
+**The trigger.** A message named PR #288, exo's nineteenth-window report
+("the autonomy grade was reading its own query, and three charter guards
+are scar tissue around a defect HQ already fixed"), with the instruction
+to review it against the merge rule: merge it, or say on the board what
+it still needs and hand that to its seat.
+
+**Checked fresh, not reused from the sixty-first pass's read, because
+the sixty-first pass found it a draft and this one does not.** `gh pr
+view 288` now shows `isDraft: false`, pushed last at 2026-10-24T00:27:18Z.
+Zero labels, zero comments, `MERGEABLE`. One check configured and green
+(`redaction-gate / scan`); no other workflow in this repository triggers
+on `pull_request`, so one green check is the whole CI surface, the same
+shape #290's own review in the sixtieth pass established. No board claim
+on any of its six files or on `ursa-exo/2026-10-23-message-2`.
+
+**`gh pr diff --name-only` shows a Tier C path: `prompts/exo-agent.md`.**
+That alone settles it under §10 regardless of what the edit says —
+"Charters (`prompts/`)... these wait, and the merge-or-close rule
+escalates them rather than bypassing her" — and §21's amendment carves
+out exactly this case: every tier merges without the owner now **except
+a change to a seat's own authority**, which a charter edit is by
+definition. Not merged. This is the same classification four earlier
+passes gave #265, #266, #268 and #269, and the sixty-first pass gave
+#269 again alongside #280/#282: a product seat editing `prompts/` is
+Tier C outright, not contingent on reading the diff for how big the
+change is.
+
+**Read the diff anyway, because the PM's board note should tell the
+owner what she is being asked to approve, not just the tier.** The
+412 added / 26 removed lines in `prompts/exo-agent.md` read as exo
+replacing two stale board-read workarounds (a two-call directed-plus-
+broadcast read, and a `to_company` caveat) with a single
+`from_company=Ursa&from_seat=pm` call, on the PR's own claim that HQ's
+2026-10-23 board fix retired the bugs those workarounds existed to
+dodge. The PR keeps the retired sections in place with a note on why,
+rather than deleting history silently. Nothing in the diff touches a
+tier, a dispatch stop, a seat's writable surface, or another seat's
+authority — it reads as exo tightening its own instrument, which is
+inside what the exo charter already lets exo do to itself (§16, "Learn:
+...write what held into the standard"). This seat is not the one who
+rules on whether the HQ board-fix claim is accurate; that is the
+owner's read, or exo-centralizer's.
+
+**Ancestry and closure claims in the PR body, spot-checked rather than
+taken on trust:** `git merge-base --is-ancestor refs/prs/269 refs/prs/288`
+exits 0, confirming #269 is contained in #288. #284 and #295 are both
+`CLOSED` on GitHub, confirming the branch-consolidation claims. All
+three checked out true.
+
+**Handed back to the owner, not to exo's seat.** Nothing here is a
+defect in exo's work for exo to fix — the PR is green, scoped to exo's
+own charter and registers, and its claims check out. The only thing it
+needs is the merge only she can make. Joins #269/#280/#282 in the Tier
+C queue already standing in this file. Posted one `note` to `owner` on
+the board naming the tier and the one open question (the HQ board-fix
+claim) for her to weigh before merging, not a `done`, since nothing
+shipped on this seat's own authority.
+
 ## Sixty-first pass, 2026-10-24 ~00:3x UTC, message: skill seat's host-run failure triaged, PR #297 (lessons.md re-vendor) reviewed and merged
 
 **The trigger, two events.** A message named the skill seat's host
