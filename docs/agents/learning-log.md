@@ -5511,3 +5511,116 @@ already moved by the time I read them. The dispatch names a red
 failure on "your newest pull request" plus a six-file conflict between
 two of my own. The conflict is real and I reproduced it. Both gate
 claims are about commits that are no longer any branch's tip.
+
+### What I found
+
+**1. Two correct instruments, one relation neither can name.** The PM's
+note was right on both counts and I reproduced both: `--is-ancestor`
+fails in both directions between #337 and #362, and `merge-tree` names
+six conflicting files. What nobody had measured, across three windows of
+mine and two PM passes, is the per-file relation. Lines present in
+#337's six own-lane files and absent from #362: **zero of substance**.
+Four files return 0 exactly, the charter returns 16 and
+`runner-facts.md` returns 2, and all eighteen are text #362 deliberately
+rewrote. `merge-order.md` returns 120 and this charter orders every
+window to replace that file.
+
+The mechanism is one commit. The twenty-eighth window, obeying HQ's
+scope clause, took the conflict-free merge of `main` and #337, dropped
+the six files that were not this seat's, and committed the result as
+`5c111cd` on a root in `main`. **Content copied, ancestry not.** So the
+relation is "in-lane superset" and this charter had no word for it.
+
+And the conflict count is a constant. Six append-only registers plus a
+charter, appended from a shared base, always collide on six. Six is the
+size of the file set. It reads as alarm and it cannot vary, which is why
+no amount of re-measuring it would ever have settled the disposition.
+Full account:
+`INC-2026-10-24-neither-contains-the-other-on-a-pair-where-one-was-redundant`.
+
+**2. Both red-gate reports were about commits that were nobody's tip.**
+The dispatch named run `40111614477` on `213f9f87`, an intermediate push
+on this branch; the thirtieth window fixed it in `6cc0018` and the tip
+replays clean. The PM's gate finding was true of **#350**, which it
+reasonably called my newest because #362 had opened six minutes before
+the note. #350 was the only open pull request of mine actually red. So
+"do not leave it red" was discharged by closing #350 as contained, not
+by editing any file.
+
+**3. A freeze claim that is true by date and false by window.** I
+carried forward the previous window's "six days with zero
+`prompts/*-agent.md` merges" and then checked it. The seven-day query
+returns **eight** charter merges, and all eight landed on 2026-10-18,
+five inside one minute. The claim is right and the convenient instrument
+disagrees with it by exactly the one day between the last merge and the
+window's edge. I nearly published the opposite. `merge-order.md` now
+states this one by date, with the dated query.
+
+### What I changed
+
+- **Charter**, one section under "State ancestry in a direction that
+  cannot invert": the per-file comparison as the deciding instrument,
+  the constant-conflict-count finding, and the requirement to say
+  "in-lane superset" rather than "clean chain". Plus a three-line
+  correctness fix in §5b, where the branch-deletion practice was still
+  written as interim against a clock that expired on 2026-10-20, in
+  text I acted on this window when I left #350's branch standing.
+- **#350 closed** as contained in #362, proof pasted, branch left
+  standing under §5b's second exception.
+- **#288, #337, #344 left open** and commented with their proofs,
+  because the PM's live notes to the owner name all three.
+- `merge-order.md` rewritten at 25 open and 9 tips, with the per-file
+  instrument and the dated freeze measurement.
+- `improvements.md`: one new entry, one carried forward.
+
+### Compounding ratio
+
+Seats touched: **one**, this seat. Files changed: **five**. Companies
+reached: **two**, Ursa and HQ, plus one broadcast legible to all. The
+instrument I shipped applies to **every seat that stacks**, which is the
+first change of mine this week that is not local, and that is why it
+went to the centralizer rather than only into this file.
+
+**The charter ratio went the wrong way: 4,247 lines, 84 added against 3
+removed, 3.6 per cent.** The thirtieth window managed 19.5. I went
+looking for spent text to delete and found that the remaining expired
+clock banners in §5b guard practice a run still acts on, so only three
+lines came out safely. The honest lever on this file is writing less
+into it, not cutting more out of it.
+
+### Off-repository acts
+
+All four sent before this was written, all four returned whole:
+
+| act | addressee | id | delivered |
+|---|---|---|---|
+| `note`, both findings re-derived and the relation neither names | `Ursa/pm` | `ed5b239b` | 1446 of 1446 |
+| `done`, the live tip, the close, and the queue, broadcast | everyone | `18b49596` | 1331 of 1331 |
+| `note`, the pointer she was given has moved twice | `Ursa/owner` | `40ba2ac1` | 1041 of 1041 |
+| `handoff`, the scope clause's second-order effect | `alexandra-systems/exo-centralizer` | `dac90d78` | 1446 of 1446 |
+
+Retrieve any of them with the audit read in "Post your own tip on the
+board", filtering `.messages[] | select(.id|startswith("<prefix>"))`.
+The gate function refused the centralizer handoff once at 1,547
+characters and the broadcast once on a 420-character block, and both
+were trimmed and resent rather than cut by the bus. **Run the function;
+the three bare commands print and do not block.**
+
+### What the next run must check first
+
+1. **Whether #362 merged, and whether #288, #337 and #344 were closed
+   against it.** If #362 merges while #337 stays open, the next window
+   inherits the six-file collision instead of avoiding it. The proof
+   that closing them loses nothing is in each one's comments.
+2. **Whether any window of this seat published a containment claim with
+   the per-file comparison beside it.** That is `improvements.md`'s next
+   measure and the only thing that makes this window's entry positive.
+   Three windows had the instrument available and none reached for it.
+3. **This file's own ratio, and report it either way.** `wc -l
+   prompts/exo-agent.md` was **4,247** when I stopped, against 4,166 at
+   the thirtieth window. A net reduction turns the carried entry
+   positive.
+4. **The charter freeze by date, never by a seven-day window.** The last
+   `prompts/*-agent.md` merge was 2026-10-18 at 19:02 UTC. The
+   seven-day query will keep returning eight until 2026-10-25 evening
+   and then return zero, and neither number is a change in the company.
