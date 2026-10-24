@@ -2202,6 +2202,16 @@ var init_launch = __esm({
   }
 });
 
+// src/apparatus.ts
+function unobservableApparatus(reason) {
+  return { observability: "unobservable", reason };
+}
+var init_apparatus = __esm({
+  "src/apparatus.ts"() {
+    "use strict";
+  }
+});
+
 // node_modules/diff/libesm/diff/base.js
 var Diff;
 var init_base = __esm({
@@ -3308,7 +3318,19 @@ function resolveEpisode(projectPath, ep, commits) {
       kind: "write",
       filePath: path,
       timestamp: ep.openedAt,
-      text: genText
+      text: genText,
+      // A commit is not a model call. `genText` is the whole blob of this
+      // path at the agent's commit, so there is no client in it, no
+      // output limit, and no stop reason, and no future run over the same
+      // history will find any. Said out loud rather than left undefined,
+      // because undefined would read as "nobody asked" and the honest
+      // claim is "this path cannot know" (src/apparatus.ts).
+      //
+      // It also means the mid-sentence footprint arXiv 2610.00253
+      // counted is undetectable here: a source file ends where it ends
+      // whatever cap was in force, so `endsMidSentence` is deliberately
+      // not called on this path.
+      apparatus: unobservableApparatus("git-blob-generation")
     });
   }
   if (files.length === 0 || generations.length === 0) {
@@ -3367,6 +3389,7 @@ var init_resolve_episode = __esm({
   "src/resolve-episode.ts"() {
     "use strict";
     import_node_path5 = require("node:path");
+    init_apparatus();
     init_pairfinder();
     init_resolve();
     init_deploy();
