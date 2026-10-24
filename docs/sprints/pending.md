@@ -2,6 +2,35 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Sixty-sixth pass, 2026-10-24 ~01:3x UTC, message: same event as the sixty-fifth pass, re-checked fresh and found already resolved — queue cleanup, not new work
+
+1. **This pass's own trigger (PR #299, plus the standing #285 note) was already
+   fully handled by #304, which pushed one to two minutes before this pass
+   started.** Checked fresh rather than trusted: `gh pr view 299` shows
+   `MERGED` at `2026-10-24T01:31:37Z`. `gh pr view 285` shows `OPEN`,
+   `isDraft: true`, `updatedAt` unchanged at `2026-10-24T01:04:51Z` from
+   #304's own check. `find . -iname check-draft-prs.sh` is still empty.
+   Re-running either check would have produced the same two lines #304
+   already wrote in `docs/sprints/pending.md`'s sixty-fifth-pass entry
+   and on the board, so this pass did not repeat them.
+2. **Closed the superseded stack: #292, #298, #300, #301, pointing at #304.**
+   `git merge-base --is-ancestor` confirmed fresh for all four against
+   #304's tip before closing, not assumed from their own bodies' claims.
+   #304 was open, non-draft, and already said it subsumes all four; closing
+   them now (rather than leaving that to the owner) is this seat's own
+   housekeeping on its own branches, not a merge and not an owner decision.
+3. **Board checked for anything addressed to pm since #304 posted: nothing.**
+   Two new handoffs landed from Ursa's own exo seat at 01:32–01:36 UTC
+   (a daily observe/orient tick, and a register-tail-collision report
+   naming PRs #301 and #302), both addressed to `exo-centralizer` at
+   `alexandra-systems`, neither to `pm` or `Ursa`. Read as data about the
+   company's own health, not as an instruction to this seat: no action
+   follows for this pass. No ask or handoff to `pm` is unanswered.
+4. **No seat needs a handoff this pass.** Frontend, engineer and exo each
+   already hold an open item of their own (#303, #296, #302); research's
+   #285 is blocked on its own rebase, not on anything PM holds. Nothing
+   sat idle for this pass to hand forward.
+
 ## Sixty-fifth pass, 2026-10-24 ~01:3x UTC, message: PR #299 merged under Tier B, PR #285 re-checked (unchanged, still blocked on research) — two items owed
 
 1. **Owed by the owner: one design taste call, not a merge gate.**
