@@ -205,3 +205,37 @@ which is likely once the corpus is near five, the trial skill should
 run first and this one should run on its output. That ordering is not
 encoded anywhere yet and is a ledger entry rather than a solved
 problem.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**9. "The signals block says one loop with two recurrences, but I count
+three places she complains about the constellation being dark. Which
+one is right?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 1, and it should
+not fire here. The pull is strong and it is the description's "checking
+whether two records' numbers can be compared or added" that pulls,
+because a disputed recurrence count is exactly a comparability
+question. The reason it lands on the sibling is the half of this
+skill's trigger the prompt does not have: nothing is about to be
+written into something a reader will trust. There is no methods doc, no
+brief and no buyer. There is a reader trying to work out what a field
+counts.
+
+This skill's step 8 is the near relative and the tell. "Read the
+field's definition, not its label" is the same move the sibling makes
+on `recurrences`, and this skill demonstrates it on
+`turnsToAcceptance`, which is a `stats` field. The exclusion added for
+this boundary names the object rather than the move: a trajectory entry
+the detector emitted is not a statistic the resolver counted. Once a
+recurrence count is going into the lab brief, both fire, and the order
+is sibling first, because this skill cannot rule on a sentence whose
+subject has not been established.

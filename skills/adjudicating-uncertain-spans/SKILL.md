@@ -12,9 +12,10 @@ description: >
   the ancestry was not. Does not fire for producing a record in the
   first place, for labelling generations, for reading a record's
   summary statistics, for turning a record's labels into tuning axioms,
-  for adding or changing a bound in the record gate, or for deciding
-  what may leave the machine.
-version: 0.5.0
+  for adding or changing a bound in the record gate, for auditing a
+  trajectory signal such as a correction loop or a regression event, or
+  for deciding what may leave the machine.
+version: 0.5.1
 status: draft
 validated: false
 owner_seat: skill

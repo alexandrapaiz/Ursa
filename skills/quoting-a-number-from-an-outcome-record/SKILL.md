@@ -12,9 +12,10 @@ description: >
   producing a record, for choosing a trial subject, for deciding
   the label on any individual span, for writing a rule about records
   into the record gate, for a count that comes from a tuning record
-  rather than an outcome record, or for deciding whether a passage of
-  raw text may be released.
-version: 0.4.0
+  rather than an outcome record, for a trajectory entry the detector
+  emitted rather than a statistic the resolver counted, or for deciding
+  whether a passage of raw text may be released.
+version: 0.4.1
 status: draft
 validated: false
 owner_seat: skill

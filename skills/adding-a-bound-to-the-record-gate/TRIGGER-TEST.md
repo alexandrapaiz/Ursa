@@ -212,3 +212,37 @@ shares every noun this skill's own bounds are written in and is still
 excluded by one sentence of step 1, and near miss 8 shares none of them
 and is excluded by the same sentence. Those two are stronger evidence
 about the description than any of the three that fire.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**9. "She says 'you broke what already worked' at step 1 of the
+transcript and the record's `regressions` array is empty. Detector
+bug, or am I reading the record wrong?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 2, and it should
+not fire here. It arrives in this skill's vocabulary, since "the record
+says one thing and the transcript says another" is what a bound exists
+to catch, and a reader holding this skill will reach for a new
+invariant.
+
+The directional rule in this file's note settles it, and this prompt is
+a clean worked example of it. A bound can only catch a record
+contradicting itself. The empty `regressions` array contradicts
+nothing: it is consistent with the loop's own `promptSteps`, with the
+cue list and with the detector's filter, and the problem is that a
+reader expects the field to mean something it does not. No committed
+counterexample could express that, because there is no record shape
+that violates it.
+
+So the prompt is the sibling's, and if the audit that follows concludes
+a rule about every record should exist, the proposal crosses to this
+skill then, as a proposal, under step 1's bound-or-measurement test.
+Arriving here first produces an invariant nobody can write.

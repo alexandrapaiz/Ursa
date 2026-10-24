@@ -240,3 +240,36 @@ the budget of one near miss per neighbour is right even where the
 artifact test already says there is no overlap, and §5e's test should be
 read as an argument against re-cutting a skill rather than as a licence
 to skip a near miss.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**11. "She says 'you broke what already worked' at step 1 of the
+transcript and the record's `regressions` array is empty. Detector
+bug, or am I reading the record wrong?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 2, and it should
+not fire here. The shape is this skill's shape almost exactly: a label
+the resolver produced is in doubt, the user's own words are the
+evidence, and somebody has to settle it by reading. That is why the
+boundary needed writing down rather than being left to §5e.
+
+The object is what separates them. This skill rules on a span, meaning
+a stretch of the finished work and whether it descends from a
+generation. A regression event is not a span and has no descent; it is
+an entry derived from the user's prompts. The exclusion added for this
+boundary names trajectory signals for that reason.
+
+The two do meet on one record and the meeting runs in this direction,
+which is worth knowing: adjudicating a span changes which generations
+have surviving characters, and that is the input the sibling's
+`closedStep` is computed from. So an adjudication pass can move a
+loop's resolution, and the sibling is downstream of this skill rather
+than beside it.

@@ -350,32 +350,32 @@
     "passages": "f96ffbf032161be6"
   },
   "auditing-a-detected-correction-loop/E1": {
-    "verdict": "supports",
+    "verdict": "widened",
     "read": "2026-10-24",
     "lines": "aedc14d396f5aaed",
     "what": "3659720a77672e4c",
-    "passages": "2d5638e008fc6813"
+    "passages": "cc1c8f48d012016c"
   },
   "auditing-a-detected-correction-loop/E10": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "972cd17c70e32eeb",
     "what": "412859cd4999eead",
-    "passages": "dfb7cc7dcb1a20c2"
+    "passages": "6eb84851e06b7c16"
   },
   "auditing-a-detected-correction-loop/E11": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "a0975c37e904a850",
     "what": "2dac71288883f04e",
-    "passages": "7a9d89767ce485f6"
+    "passages": "40df27fb1d10b14f"
   },
   "auditing-a-detected-correction-loop/E12": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "b79b9d4ddca379e4",
     "what": "d49c3680a15a9b14",
-    "passages": "7da1fa86bf4542d2"
+    "passages": "126850601c4bec81"
   },
   "auditing-a-detected-correction-loop/E13": {
     "verdict": "widened",
@@ -389,14 +389,14 @@
     "read": "2026-10-24",
     "lines": "7bbfac7022b33b78",
     "what": "e4801efa773ab181",
-    "passages": "da07421ff4c72d8a"
+    "passages": "d2542dd8b25f0009"
   },
   "auditing-a-detected-correction-loop/E15": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "96c68904fca811ef",
     "what": "28a37c4cd61bd4ab",
-    "passages": "deaf304577b88dd7"
+    "passages": "7b9d586b4fa66a65"
   },
   "auditing-a-detected-correction-loop/E16": {
     "verdict": "wrong",
@@ -438,21 +438,21 @@
     "read": "2026-10-24",
     "lines": "3dd521ba53dfdf70",
     "what": "096d8f9da9f806a5",
-    "passages": "134d10607a4996ff"
+    "passages": "bd20d17e854d6de9"
   },
   "auditing-a-detected-correction-loop/E21": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "292984abebfb9352",
     "what": "eff3faab151ebd92",
-    "passages": "df6ee129904e9266"
+    "passages": "71ec3d556d0224cb"
   },
   "auditing-a-detected-correction-loop/E22": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "f26787ef64cbbea8",
     "what": "f64e84b65250c13d",
-    "passages": "34ef6d8c058c3a84"
+    "passages": "ca4e68393dc32664"
   },
   "auditing-a-detected-correction-loop/E23": {
     "verdict": "supports",
@@ -462,18 +462,18 @@
     "passages": "0c03d0dafda0c3f1"
   },
   "auditing-a-detected-correction-loop/E24": {
-    "verdict": "supports",
+    "verdict": "widened",
     "read": "2026-10-24",
     "lines": "1e0825ce19fa4ff8",
     "what": "bf16dc677b50d4c1",
-    "passages": "c611e77d0c5ffb0b"
+    "passages": "a4fcc6d6a403dfb7"
   },
   "auditing-a-detected-correction-loop/E25": {
     "verdict": "supports",
     "read": "2026-10-24",
     "lines": "d0d1a9131878a9b6",
     "what": "8089d4a872952649",
-    "passages": "1cab66a9ecb62de8"
+    "passages": "53f70afaa89e1c0b"
   },
   "auditing-a-detected-correction-loop/E26": {
     "verdict": "supports",
@@ -494,7 +494,7 @@
     "read": "2026-10-24",
     "lines": "6973865edf084b94",
     "what": "a5c2d986a04951f2",
-    "passages": "d37fbcbe3f581ed9"
+    "passages": "add7373c65331617"
   },
   "auditing-a-detected-correction-loop/E29": {
     "verdict": "supports",
@@ -508,7 +508,7 @@
     "read": "2026-10-24",
     "lines": "4e15e38a5ff13462",
     "what": "e146675dd3d94cae",
-    "passages": "d83c60cef53bc799"
+    "passages": "ba02de7f33c2f6f6"
   },
   "auditing-a-detected-correction-loop/E30": {
     "verdict": "supports",
@@ -529,7 +529,7 @@
     "read": "2026-10-24",
     "lines": "1d5005cbaeef4bbf",
     "what": "ec88e15590c3e0fc",
-    "passages": "b7a996802cac8ad7"
+    "passages": "45bd5b30d56f2c11"
   },
   "auditing-a-detected-correction-loop/E4": {
     "verdict": "supports",
@@ -571,7 +571,7 @@
     "read": "2026-10-24",
     "lines": "bfd5ce17007eb867",
     "what": "83b287396217e4e0",
-    "passages": "1ba82190a5371321"
+    "passages": "59d0ddc80e6dccd7"
   },
   "clearing-a-record-for-release/E1": {
     "verdict": "supports",

@@ -10,9 +10,11 @@ description: >
   and for deciding what may leave the machine with a tuning block.
   Does not fire for producing an outcome record, for settling the
   label on an individual span, for quoting a statistic out of a
-  record, for adding or rewording a bound in the record gate, or for
-  clearing anything other than a tuning block for release.
-version: 0.4.0
+  record, for auditing the signals block a record carries rather than
+  the axioms distilled from it, for adding or rewording a bound in the
+  record gate, or for clearing anything other than a tuning block for
+  release.
+version: 0.4.1
 status: draft
 validated: false
 owner_seat: skill

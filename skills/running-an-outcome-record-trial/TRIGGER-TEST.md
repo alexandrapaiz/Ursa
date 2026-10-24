@@ -230,3 +230,37 @@ description, which belongs to the run that wrote it and to a pull
 request the owner has not merged. The ledger entry asks for the ruling
 and `skills/README.md` carries the interim order, which puts this skill
 first because it owns the path fact the quoting skill cites as evidence.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**10. "I have the detector's output for task-001 next to the hand-written
+`trajectory.md`. KR1.2 wants 3 of the 4 annotated loops recovered with
+no hand annotation. How do I score it?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 3, and it should
+not fire here. This is the closest of this file's near misses, because
+"reading the record it produces without over-reading it" is in this
+skill's own description and scoring a detector against a hand
+annotation is unmistakably a reading-without-over-reading problem. The
+exclusion added for this boundary is what holds the line.
+
+Where the line sits: this skill owns everything up to and including the
+record existing, which is the subject, the capture path, the invocation
+and the first read of what came out. KR1.2's validation is a comparison
+of two trajectory descriptions of a record that already exists, one
+emitted and one hand-written, and nothing about it turns on how the
+record was captured.
+
+One fact from this skill does belong in the sibling's answer, which is
+why the boundary is a handoff rather than a wall: the capture path
+decides whether there are any loops to score at all, since the git path
+produces no chat trace and therefore an empty loop array. A reader who
+chose the wrong path has a trial problem, and that is this skill's.

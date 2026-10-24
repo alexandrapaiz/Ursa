@@ -11,9 +11,10 @@ description: >
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
   code, for adding or changing a bound in the record gate, for turning a
-  record into tuning axioms, or for redacting a record or otherwise
+  record into tuning axioms, for auditing the trajectory signals a
+  finished record carries, or for redacting a record or otherwise
   deciding what may leave the machine.
-version: 0.5.0
+version: 0.5.1
 status: draft
 validated: false
 owner_seat: skill

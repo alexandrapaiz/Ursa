@@ -10,14 +10,15 @@ description: >
   violation a run printed and deciding whether the bound or the
   resolver is wrong, and for any edit that moves the bound count or
   the bounds digest. Does not fire for choosing a span's label, for
-  deciding what a record statistic may be said to mean, for running a
-  trial, or for turning a record into tuning axioms.
-version: 0.1.1
+  deciding what a record statistic may be said to mean, for auditing a
+  trajectory signal the detector emitted, for running a trial, or for
+  turning a record into tuning axioms.
+version: 0.1.2
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-18
-revised: 2026-10-23
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1

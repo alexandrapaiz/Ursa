@@ -10,14 +10,15 @@ description: >
   three exits a release is taking and what that exit demands, and for
   honouring an erasure or a revocation so that it reaches everything
   already derived. Does not fire for choosing a span's label, for
-  deciding what a record statistic is a share of, for running a trial,
-  for distilling axioms, or for adding a bound to the record gate.
-version: 0.1.0
+  deciding what a record statistic is a share of, for auditing the
+  trajectory signals a record carries, for running a trial, for
+  distilling axioms, or for adding a bound to the record gate.
+version: 0.1.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-23
-revised: 2026-10-23
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1

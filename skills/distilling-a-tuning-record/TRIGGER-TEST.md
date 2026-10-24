@@ -190,3 +190,32 @@ first version of this note, and this test is still the evidence for it:
 `tuning.json` appears in no other skill's inputs or outputs, and that
 single fact is what makes five neighbours a position in a pipeline
 rather than a topic.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**9. "The signals block says one loop with two recurrences, but I count
+three places she complains about the constellation being dark. Which
+one is right?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 1, and it should
+not fire here. This skill runs downstream of the signals block and
+reads from it, so the vocabulary is shared completely: a confidence
+count on an axiom is built out of recurrences, and a disputed
+recurrence count therefore changes what an axiom may claim.
+
+Downstream is the whole of the edge. Nothing in this prompt is about an
+axiom, a confidence count, a tuning store or an export; it is about
+what one field of one record means. The exclusion added for this
+boundary says so by naming the artifact, which is §5e's test: the
+signals block is not `tuning.json`. The direction when a prompt spans
+both is signals-side first, for the same reason the record-side
+ordering in this file's other near misses runs that way. An axiom
+cannot be judged against a number whose definition is still open.
