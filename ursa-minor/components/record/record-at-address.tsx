@@ -146,7 +146,7 @@ export function RecordAtAddress({ initial }: { initial: string }) {
           e.preventDefault();
           void read(typed, false);
         }}
-        className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5"
+        className="mt-8 flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-baseline sm:gap-5"
       >
         {/* The filled example the placeholder used to carry,
             `pages/you/your-repo/your-repo-2026-10-18-abc1234`, needs 336px of
@@ -159,20 +159,28 @@ export function RecordAtAddress({ initial }: { initial: string }) {
             is that an address is exact. The schematic below is the one this
             same component already prints in AddressForms, so the two now
             agree, and at 32 characters it fits the narrowest field. */}
-        <input
-          type="text"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder="pages/<owner>/<repo>/<record-id>"
-          aria-label="a record address"
-          spellCheck={false}
-          autoCapitalize="off"
-          className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
-        />
+        {/* The label is the target and the field is the drawing. It
+            carries the overlay that makes this a 44px press (`.rec-field`
+            in globals.css) and forwards the press to the field inside it,
+            which keeps its own box and so keeps its own focus ring. The
+            sizing lives out here for the same reason: the thing the row
+            lays out is the target. */}
+        <label className="rec-field w-full min-w-0 sm:flex-1">
+          <input
+            type="text"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder="pages/<owner>/<repo>/<record-id>"
+            aria-label="a record address"
+            spellCheck={false}
+            autoCapitalize="off"
+            className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
+          />
+        </label>
         <button
           type="submit"
           disabled={busy || !typed}
-          className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
         >
           {busy ? "reading…" : "read the record"}
         </button>

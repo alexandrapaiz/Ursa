@@ -857,11 +857,19 @@ html {
      person's text edge to edge, so every overlay would overlap its
      neighbours and the topmost one would win. A short `.sp` is reported
      as a finding and left alone.
-   - Not on the form submit buttons, measured and deliberately: below
-     `sm` their form stacks and the button sits 12px under its input,
-     which is less than the 13.6px this overlay would need, so it would
-     reach over the field's own edge. They want an asymmetric inset
-     chosen per form, which is a bigger change than this one. */
+   - Not on the document spans, as above.
+
+   It DOES now go on the three form submit buttons, which the 2026-10-24d
+   version of this comment left out and predicted would need "an
+   asymmetric inset chosen per form". They did not. The obstacle was
+   real: below `sm` each form stacks and the button sat 12px under its
+   field, less than the 13.6px this overlay reaches, so it crossed the
+   field's own bottom edge. But the 12px was the thing to fix. Those
+   three gaps are now 16px (`gap-4`), which clears the overlay by 2.4px
+   and costs four pixels on a phone, and the symmetric rule is then
+   correct for all three forms. A gap that cannot hold two adjacent
+   targets apart is a spacing bug, not a reason for three bespoke
+   insets. */
 .rec-hit {
   position: relative;
 }
@@ -870,6 +878,64 @@ html {
   content: "";
   position: absolute;
   inset: calc((100% - 44px) / 2) 0;
+}
+
+/* ---------- the 44px floor, part two: the fields ----------
+
+   The three address fields are the one place on this site where the
+   overlay above cannot be put on the control itself. An `<input>` is a
+   replaced element and renders no `::after`, so there is nothing to hang
+   an overlay from. Measured on the shipped build: 26.3px at 390 and
+   27.2px above `sm`, which is one line box, 8px of padding and a
+   hairline (`docs/design/reviews/2026-10-24e/data/forms-before.txt`).
+
+   The first attempt at this gave the field the height for real, as
+   padding, and cancelled the layout cost with a negative margin of the
+   same size. It measured perfectly and it was wrong, and the screenshot
+   is the only reason anyone found out
+   (`docs/design/reviews/2026-10-24e/` §3). This site draws a
+   `:focus-visible` ring, and a ring traces the border box. Growing the
+   border box grew the ring: tab into the field and you got a 44px
+   rectangle with the text sitting at the bottom of it and 17px of empty
+   box above, and on a phone the top of that rectangle came within 6px of
+   the "Open a record" button's own border, so the two read as two boxes
+   colliding. Measured 0px of difference at rest and about 2% of the
+   frame once focused.
+
+   So the rule is the one `.rec-hit` already encodes, stated plainly:
+   **the ring belongs to what you see, and the hit area belongs to what
+   you press.** Padding conflates them, because one box was being asked
+   to be both. A wrapping `<label>` separates them again. The label is
+   the target and carries the overlay; the field keeps its own 27px box
+   and therefore its own ring, exactly as drawn today. A label forwards
+   its activation to the control it wraps, so a press anywhere in the
+   overlay puts the caret in the field, which is native behaviour and
+   works the same under a finger as under a mouse.
+
+   The inset is asymmetric where `.rec-hit`'s is centred, and that is the
+   design decision in this rule rather than an optimisation. A field here
+   is drawn as its text and the rule beneath it, and the rule is the
+   bottom of the field. Slack added below it would reach past the field's
+   own edge toward the button underneath; all of it goes above, into
+   space that was already empty. So the hit area ends exactly at the rule
+   and the field still owns its own bottom edge.
+
+   `100%` resolves against the label's padding box, which is the field's
+   own height, so one rule is right for the 26.3px box at 390 and the
+   27.2px box above `sm` without being told which. As with `.rec-hit` it
+   cannot overshoot: once a field is 44px or taller the inset turns
+   positive and the overlay shrinks back inside the box. Nothing about
+   layout changes, because an absolutely positioned overlay is not in
+   flow, and nothing drawn changes, because the overlay has no paint. */
+.rec-field {
+  position: relative;
+  display: flex;
+}
+
+.rec-field::after {
+  content: "";
+  position: absolute;
+  inset: calc(100% - 44px) 0 0;
 }
 
 /* ---------- the set's record rows ---------- */

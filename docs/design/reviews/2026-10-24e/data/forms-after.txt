@@ -1,0 +1,75 @@
+
+=== phone 390x844 · set /record · form[0] ===
+  form      top 1786 bottom 1845.1 h 59.1  mt 32px dir column align flex-start gap-y 16px gap-x 16px
+  parent    section dir row align normal gap-y normal gap-x normal mt 0px h 387.4
+  above     p.mt-7 max-w-2xl text-[0.95rem] leading-[1 bottom 1754  -> gap to form 32px
+  input     326x44 top 1768.3 bottom 1812.3  pt 17.7344px pb 8px border-b 1px font 11.52px/17.28px border-box  NEEDS +0
+  button    "read the site" 99.8x16.8 top 1828.3 bottom 1845.1  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance 16px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== phone 390x844 · set /record · form[1] ===
+  form      top 2244.8 bottom 2303.8 h 59.1  mt 0px dir column align flex-start gap-y 16px gap-x 16px
+  parent    div dir column align flex-start gap-y 24px gap-x 24px mt 32px h 130.3
+  above     label.cta tracked-label inline-block shrink-0  bottom 2220.8  -> gap to form 24px
+  input     326x44 top 2227 bottom 2271  pt 17.7344px pb 8px border-b 1px font 11.52px/17.28px border-box  NEEDS +0
+  button    "read it" 53.7x16.8 top 2287 bottom 2303.8  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance 16px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== phone 390x844 · address /record/at · form[0] ===
+  form      top 541.1 bottom 600.2 h 59.1  mt 32px dir column align flex-start gap-y 16px gap-x 16px
+  parent    main dir row align normal gap-y normal gap-x normal mt 0px h 1632.5
+  above     p.mt-8 max-w-2xl text-[0.95rem] leading-[1 bottom 509.1  -> gap to form 32px
+  below     div.mt-11 top 644.2  -> gap from form 44px
+  input     326x44 top 523.4 bottom 567.4  pt 17.7344px pb 8px border-b 1px font 11.52px/17.28px border-box  NEEDS +0
+  button    "read the record" 115.1x16.8 top 583.4 bottom 600.2  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance 16px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== tablet 820x1180 · set /record · form[0] ===
+  form      top 1367 bottom 1394.2 h 27.2  mt 32px dir row align baseline gap-y 20px gap-x 20px
+  parent    section dir row align normal gap-y normal gap-x normal mt 0px h 278.1
+  above     p.mt-7 max-w-2xl text-[0.95rem] leading-[1 bottom 1335  -> gap to form 32px
+  input     569.1x44 top 1350.2 bottom 1394.2  pt 16.7656px pb 8px border-b 1px font 12.16px/18.24px border-box  NEEDS +0
+  button    "read the site" 99.8x16.8 top 1368 bottom 1384.8  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance -26.2px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== tablet 820x1180 · set /record · form[1] ===
+  form      top 1655.1 bottom 1682.3 h 27.2  mt 0px dir row align baseline gap-y 20px gap-x 20px
+  parent    div dir row align center gap-y 24px gap-x 32px mt 32px h 47.3
+  above     label.cta tracked-label inline-block shrink-0  bottom 1692.3  -> gap to form -37.2px
+  input     401.2x44 top 1638.3 bottom 1682.3  pt 16.7656px pb 8px border-b 1px font 12.16px/18.24px border-box  NEEDS +0
+  button    "read it" 53.7x16.8 top 1656.1 bottom 1672.9  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance -26.2px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== tablet 820x1180 · address /record/at · form[0] ===
+  form      top 412.7 bottom 439.9 h 27.2  mt 32px dir row align baseline gap-y 20px gap-x 20px
+  parent    main dir row align normal gap-y normal gap-x normal mt 0px h 1200.2
+  above     p.mt-8 max-w-2xl text-[0.95rem] leading-[1 bottom 380.7  -> gap to form 32px
+  below     div.mt-11 top 483.9  -> gap from form 44px
+  input     553.7x44 top 395.9 bottom 439.9  pt 16.7656px pb 8px border-b 1px font 12.16px/18.24px border-box  NEEDS +0
+  button    "read the record" 115.1x16.8 top 413.7 bottom 430.5  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance -26.2px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== desktop 1440x900 · set /record · form[0] ===
+  form      top 1350.3 bottom 1377.5 h 27.2  mt 32px dir row align baseline gap-y 20px gap-x 20px
+  parent    section dir row align normal gap-y normal gap-x normal mt 0px h 278.1
+  above     p.mt-7 max-w-2xl text-[0.95rem] leading-[1 bottom 1318.3  -> gap to form 32px
+  input     840.3x44 top 1333.5 bottom 1377.5  pt 16.7656px pb 8px border-b 1px font 12.16px/18.24px border-box  NEEDS +0
+  button    "read the site" 99.8x16.8 top 1351.3 bottom 1368.1  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance -26.2px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== desktop 1440x900 · set /record · form[1] ===
+  form      top 1638.4 bottom 1665.6 h 27.2  mt 0px dir row align baseline gap-y 20px gap-x 20px
+  parent    div dir row align center gap-y 24px gap-x 32px mt 32px h 47.3
+  above     label.cta tracked-label inline-block shrink-0  bottom 1675.7  -> gap to form -37.3px
+  input     672.3x44 top 1621.6 bottom 1665.6  pt 16.7656px pb 8px border-b 1px font 12.16px/18.24px border-box  NEEDS +0
+  button    "read it" 53.7x16.8 top 1639.4 bottom 1656.2  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance -26.2px  (a 44px overlay on the button reaches 13.6px above its box)
+
+=== desktop 1440x900 · address /record/at · form[0] ===
+  form      top 444 bottom 471.2 h 27.2  mt 32px dir row align baseline gap-y 20px gap-x 20px
+  parent    main dir row align normal gap-y normal gap-x normal mt 0px h 1136.8
+  above     p.mt-8 max-w-2xl text-[0.95rem] leading-[1 bottom 412  -> gap to form 32px
+  below     div.mt-11 top 515.2  -> gap from form 44px
+  input     824.9x44 top 427.2 bottom 471.2  pt 16.7656px pb 8px border-b 1px font 12.16px/18.24px border-box  NEEDS +0
+  button    "read the record" 115.1x16.8 top 445 bottom 461.8  pt 0px pb 0px font 11.2px/16.8px  NEEDS +27.2
+  input->button vertical distance -26.2px  (a 44px overlay on the button reaches 13.6px above its box)
