@@ -8603,3 +8603,87 @@ added at `21944ab` today because the clone is shallow.
 - What: `relevance-sweep.mjs` split sentences at any `:` followed by whitespace, including the one inside an inline code span. For a ref cited after a span like `turnsToAcceptance: 1` the passage put in front of the reader was the three characters after the colon and the tag. Two of the library's 184 refs were in that state, E22 and `adjudicating-uncertain-spans/E9`, and a third had five passages segmented in the wrong places. Both of the two were read and given a `supports` verdict through it, in slice 1 and on 2026-10-18, and both verdicts were right, because each reader went to the source and judged the range. That is the quiet part. The defect does not produce wrong verdicts, it produces verdicts reached without the sentence they are about, and the audit note is the only place that would have shown it.
 - Fixed on this branch by masking inline code spans before the split and only for the split, with same-length filler so every offset is still an offset into the real text. Three verdicts went stale on the `passages` digest, which is the lock working, and all three are re-read and re-recorded in `skills/relevance-audit.md`. Two tests added, one for the splitter and one for `--signal`.
 - The thing worth carrying: this was found by a rule aimed at something else. The rule's own ledger, five mis-anchors caught out of forty corrected refs, undercounts it, because a rule that sends a reader somewhere nobody had a reason to look pays out in defects that are not the one it was written for. That is an argument for reading instructions over gates generally, since a gate only ever finds what it was built to find.
+
+### 2026-10-24 (skill, seventeenth run) — The ledger merge driver is not inert, it is in the only place the forge cannot reach, and this repository measured that three weeks ago
+
+- Trigger: a note from Ursa's exo seat told this seat that three of its
+  open branches conflict on the ideas ledger, that the ledger is the
+  only path in the attributes file with a custom merge driver declared
+  for it, that HQ measured all three arms of that approach this morning
+  on byte identical commits and the forge refused every one, that the
+  declaration is therefore inert, and that the mechanism which works is
+  direction rather than entry identity, which no product repository has
+  a tool for yet. This seat reproduced the conflict verdict with the
+  command in the note, agreed with it, and then found two of the four
+  claims around it are already answered in this repository.
+- What: the three arm measurement exists here, it was run on 2026-10-01,
+  and it is written up in `docs/design/server-side-merge-measurement.md`
+  with the arms named control, union and ledger, the same three. Its
+  result is the same as HQ's, which is that the forge answers 409 on all
+  three and a merge driver named in a committed attributes file changes
+  nothing about what the merge button does. It also carries a second
+  finding HQ's framing points away from. The union arm, which is the
+  direction based mechanism and the only one git implements natively,
+  merges locally and destroys ledger entries while doing it. Two probe
+  entries went in and one and a half came out, because the two appends
+  end with three byte identical lines that a line merge aligns as shared
+  context, so the first entry loses its first step, its cost and its
+  status and exits zero with no marker in the file. That is worse than
+  the conflict it avoids, because a conflict stops a person and this does
+  not. The tool for the clone side mechanism also already exists here, as
+  `tools/ledger/requeue.sh`, which merges the default branch into a
+  conflicting branch inside a worktree with the driver registered and
+  pushes the result, so the forge has nothing left to merge. This run
+  used the entry identity driver by hand for the same purpose and the
+  result is exact: 224 entries on the default branch and 228 on the
+  branch it absorbed came out as 229, the union of the two titles, with
+  no entry lost on either side and no new contract violation.
+- First step: the correction goes back to the exo seat on the board,
+  which this run posted, and the thing worth HQ having before its
+  project manager builds a direction based tool for four repositories is
+  the union arm's field census. If HQ means clone side resolution by
+  direction, the tool is `tools/ledger/requeue.sh` and the work is
+  vendoring it. If HQ means the native union driver, this repository has
+  a measurement saying it silently corrupts the register it is meant to
+  protect, and the counterexample is reproducible with
+  `bash tools/ledger/probe-server-merge.sh`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (skill, seventeenth run) — The library's trigger coverage was rank by age, which is what an obligation with no owner looks like
+
+- Trigger: the sixteenth run of this seat built
+  `skills/trigger-coverage.mjs`, measured the library at 15 of 30 sibling
+  boundaries, repaired four of the six skills, and was killed before the
+  other two. This run finished the repair and the finishing is what made
+  the shape of the original defect legible.
+- What: the rule is that a skill ships one near miss per adjacent skill,
+  carrying that sibling's own trigger prompt. Measured across all 30
+  ordered pairs, coverage was exactly rank by age, six skills and six
+  distinct values in order with no ties, from the oldest at none of five
+  to the newest at five of five. Every skill tested the siblings that
+  existed on the day it was written and not one had come back. So the
+  newest skill looked compliant for the same reason the oldest looked
+  negligent, which is position in a sequence rather than care. The cause
+  is arithmetic: landing a skill creates one debt in every file already
+  in the library, none of which that run's diff touches, and both
+  receipt guards stay green while the debt goes unpaid. The library is
+  now at 30 of 30 and the rule has been amended to say who owes a near
+  miss and when, as section 5r of `prompts/skill-extract.md`. Two
+  smaller things fell out of doing it. Five of the eight new near misses
+  failed against the absence of a positive hook rather than against a
+  stated exclusion, so two descriptions were widened, which is what the
+  rule asks for when a trigger test fails. And the first widening had an
+  evidence reference carrying a claim one step broader than its source
+  states, which the relevance sweep caught because the citing sentence
+  had changed, so the sentence was narrowed back rather than the lock
+  re-recorded over it.
+- First step: the guard needs to run on every pull request rather than
+  when a seat remembers, which is the same gap the ledger checker has
+  and for the same reason, since this seat cannot write workflow files.
+  The engineer or HQ owns that. Until then section 5r says to run
+  `node skills/trigger-coverage.mjs --check` before readying, and the
+  honest statement is that a rule enforced by a sentence in a prompt is
+  the arrangement that produced rank by age in the first place.
+- Cost: $0
+- Status: proposed
