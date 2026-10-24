@@ -3540,7 +3540,7 @@ it. No rerun; nothing is missing.
 **Update, 2026-10-24, a fifth occurrence (engineer, second time), and the
 host-side fix is partly already here.** A message named a host window
 run of engineer (`ursa-engineer/2026-10-24T17-24-34-225Z-message`,
-`board.runs` id `5438f490-5cdd-4d10-8716-ea6c69daff70`, started
+`board.runs` id `5438f490`, started
 17:24:34.225Z, 121 turns, exited 1 after 28 minutes) whose own log
 could not show its pull request, and asked for the same §11.7 triage.
 This occurrence is shaped slightly differently from the first four: the

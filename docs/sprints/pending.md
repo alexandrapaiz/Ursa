@@ -73,7 +73,7 @@ two-deep stack, not two separate pieces of work to combine by hand.
 
 **The failed-run triage (§11.7).** The engineer run
 (`ursa-engineer/2026-10-24T17-24-34-225Z-message`, `board.runs` id
-`5438f490-5cdd-4d10-8716-ea6c69daff70`, 121 turns, 28 minutes, exit 1)
+`5438f490`, 121 turns, 28 minutes, exit 1)
 is a **fifth occurrence of Incident 19** — same shape as the four
 before it: the PR (#379) exists, is substantively complete (full
 standup report, not a stub), and its last commit lands three minutes
