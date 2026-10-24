@@ -183,6 +183,18 @@ probe point inside that reach the thing underneath is prose, never
 another control. **Presses this page's controls take from another
 control: 0, at all three viewports** (`data/overlap.txt`).
 
+**The controls answer like the rest of the house.** Scrubbed rather than
+screenshotted, so the number is not a fact about this sandbox's renderer
+(`data/hover-curve.txt`): `.dash-action` declares 160ms on
+`cubic-bezier(0.25, 0.46, 0.45, 0.94)` on both `text-decoration-color`
+and `color`, and reads back as reaching full `--polar` at exactly 160ms,
+with the underline present-and-transparent at rest so it fades in rather
+than appearing and the line never moves by a pixel. That is
+`.rec-action`'s own timing, which is in turn the one Linear uses on
+nearly everything. `:active` carries the same state, so the control
+answers a finger where there is no hover at all, and
+`prefers-reduced-motion` collapses it to 1ms.
+
 **The hairline is the right hairline**, which is the one thing here with
 a benchmark. Measured at 1440 on three design-led products:
 
