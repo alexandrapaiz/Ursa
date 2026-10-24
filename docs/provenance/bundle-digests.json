@@ -367,6 +367,19 @@
       ]
     },
     {
+      "digest": "071846c411c4a81e",
+      "sha256": "071846c411c4a81efb575c8d5d96d2a231438f5fc1ecdcd5ce8524647755859e",
+      "blob": "be3f3cfcec7bfb5b7f69973ddb7a8d5d1ccf21dc",
+      "bytes": 287025,
+      "introducedBy": [
+        {
+          "commit": "ee26ee070a4d5542500ca0bcdfb68d78ed989c28",
+          "date": "2026-10-23T23:56:52.000Z",
+          "subject": "Report the live twin a revocation did not reach"
+        }
+      ]
+    },
+    {
       "digest": "a01cbf40fd628733",
       "sha256": "a01cbf40fd62873348c68e14950154ca40a45c99d366b94a5ea6bac1ff8891c6",
       "blob": "fc3f48063114fc3f20cc1527ae776a2dc9d2341e",
@@ -376,6 +389,32 @@
           "commit": "c36afef57813ceb170787606513e82ec97483cf6",
           "date": "2026-10-23T23:58:10.000Z",
           "subject": "Merge pull request #275 from alexandrapaiz/ursa-engineer/2026-10-23-message"
+        }
+      ]
+    },
+    {
+      "digest": "c6a8204759b2b88d",
+      "sha256": "c6a8204759b2b88d957640901b4109bed5dff3a106ab2281d466414b67f89d83",
+      "blob": "ac277050c29cb7ba74cd4e96107cfa6104383598",
+      "bytes": 287107,
+      "introducedBy": [
+        {
+          "commit": "a3aae55cac0e7d0648b86cbd498a1b5be7b79ec1",
+          "date": "2026-10-24T00:04:39.000Z",
+          "subject": "Rebuild the committed bundle after the CLI wording change"
+        }
+      ]
+    },
+    {
+      "digest": "c34bbf3a221549fa",
+      "sha256": "c34bbf3a221549fadcd3e2a9aec823e7ab52ea509d6fc87745b4ae0b52f95e0e",
+      "blob": "0a0689ef7096bb0bc571ecc4f197f53ac7db977c",
+      "bytes": 294759,
+      "introducedBy": [
+        {
+          "commit": "3266c9e3abe3c5bab210cf04664d569605249f2d",
+          "date": "2026-10-24T00:07:40.000Z",
+          "subject": "Merge main, which took #289 and #275 mid-run"
         }
       ]
     },
@@ -393,6 +432,45 @@
       ]
     },
     {
+      "digest": "b83d159d35333938",
+      "sha256": "b83d159d35333938c3ec835f0fe3a8ee40d1a592594ec3c6bc067b54ad0ee6ba",
+      "blob": "89bfb707bccd80161018267105652cd978053615",
+      "bytes": 293218,
+      "introducedBy": [
+        {
+          "commit": "9a842b8f006ef743f3e11ab132b0bb172fddeacf",
+          "date": "2026-10-24T17:10:44.000Z",
+          "subject": "Design doc for the apparatus field, and rebuild the committed bundle"
+        }
+      ]
+    },
+    {
+      "digest": "4919b0a77b208e17",
+      "sha256": "4919b0a77b208e17ec90aeb5552e9012fc32dbe7282d43f6de9c412019bc5852",
+      "blob": "3212ee914f512efa0866aeb83842ca166c768c53",
+      "bytes": 296160,
+      "introducedBy": [
+        {
+          "commit": "88d70f86e4c9301aee1e9e3e2e4b4f5e3526af18",
+          "date": "2026-10-24T17:26:18.000Z",
+          "subject": "Merge engineer PR 290 (revocation lands on the rule, not the id) into this branch"
+        }
+      ]
+    },
+    {
+      "digest": "6ce10538e0575709",
+      "sha256": "6ce10538e0575709b501575c7c140327e15169f871dc38230477c289fb70b0d0",
+      "blob": "e30abfd9b92290934e72c12f8693f45138c161b6",
+      "bytes": 297711,
+      "introducedBy": [
+        {
+          "commit": "d113d00eed2292bbe3d2737cea82616612d58d6f",
+          "date": "2026-10-24T17:40:43.000Z",
+          "subject": "Both items from research: name why a span has no candidate, and disclose the paste channel"
+        }
+      ]
+    },
+    {
       "digest": "2ed20990bde0816e",
       "sha256": "2ed20990bde0816e17a780ebb6200f32c7c2d87af04891e2c54e915087602bf1",
       "blob": "f2f8ee511020d5149e6f3824b7074e0e980d9597",
@@ -402,6 +480,19 @@
           "commit": "1de6d9e9416d46224f78ac5a5c3811a76d4ccc6a",
           "date": "2026-10-24T21:30:00.000Z",
           "subject": "Rebuild dist/ursa.cjs so the shipped resolver carries the rename fix"
+        }
+      ]
+    },
+    {
+      "digest": "e9afa05466e58e97",
+      "sha256": "e9afa05466e58e97590d36238f13ae8ffbef61b19f7fdf7bc2801912fef1bf41",
+      "blob": "c49d0bb5a81aefee2972527d91f51ff5e373847e",
+      "bytes": 299845,
+      "introducedBy": [
+        {
+          "commit": "386e27829392705328998cd781eff7ac210faa88",
+          "date": "2026-10-24T21:46:21.000Z",
+          "subject": "Merge main into this branch: resolve docs/ideas.md append conflict (keep both), provenance placeholder pending regeneration"
         }
       ]
     }
