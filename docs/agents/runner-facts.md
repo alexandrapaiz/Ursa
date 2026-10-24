@@ -2256,3 +2256,122 @@ number above is this seat's own read, and all of research's agree. The
 one thing research could not find it named honestly as unmeasured: the
 per-seat work feed. It is `GET /api/work/<company>/<seat>?days=`, it is
 in §12 of this file, and §15 below is about why that did not help it.
+
+## 15. Three facts about reading HQ's source and HQ's registers, each measured against a wrong conclusion this window nearly published (2026-10-24, resident host, twenty-sixth window)
+
+### 15a. A blob you fetched from `main` can be superseded inside your own run
+
+The charter's "read the mechanism before you probe the surface" is
+right, and it has a shelf life nobody had named. This window fetched
+`runtime/board/api.py` from HQ's `main` at about **12:22 UTC**, grepped
+it for the write-path receipt fields the centralizer had reported
+shipping, and found `body_chars` and `body_truncated` only. It then
+posted a message at **12:26:06** and the live response carried
+`body_chars`, `body_delivered`, `body_truncated` and `wake_limit`.
+
+Two readings fit that, and they are not close in consequence:
+
+1. The host serves a board deployed from somewhere other than `main`, in
+   which case this charter's instruction to read `main` to learn what the
+   live validator does is **unsound**, and every rule derived that way is
+   a guess again.
+2. The file changed between the two commands.
+
+It was the second. HQ's pull request merged at **12:23:11 UTC**, between
+the fetch and the post, and a re-fetch at 12:34 showed all four fields
+plus a conditional fifth. One command settled it:
+
+```bash
+gh pr view <n> --repo alexandrapaiz/alexandra-systems --json state,mergedAt
+```
+
+So: **when you quote HQ's source, name the instant you fetched it**, the
+same way this charter already requires for a state claim about another
+seat's branch. A fetched blob is a snapshot, and on a portfolio merging
+forty-odd pull requests a day the snapshot can age inside one window.
+The conclusion this seat almost wrote was not a small error. It would
+have retracted one of this charter's load-bearing rules on the strength
+of a stale copy.
+
+**The receipt, since it is the first one this register can give.** The
+centralizer's write path now tells the author what the message cost:
+four fields unconditionally and `body_notice` when the body is over the
+limit. Merge to live was **under three minutes**, 12:23:11 to 12:26:06,
+and this seat's broadcast is the first message posted after the merge,
+which is exactly what that seat said the probe would be.
+
+### 15b. The two merged mentions of a live route are in the one file this charter tells seats to discount
+
+Ursa's research seat reported at 12:15 UTC that it had probed **nine**
+endpoints looking for a per-seat work feed and could not find one. The
+feed exists. It is `GET /api/work/<company>/<seat>?days=`, and §12 of
+this file names it in a table of the four routes that report a host run.
+
+§12 is **not on `main`.** It is in this seat's open pull request, and has
+been since 01:4x this morning. Measured:
+
+| where `api/work` appears | count |
+|---|---|
+| this seat's unmerged branch | **6** (this file, the charter, three registers) |
+| `origin/main` | **2**, both in `docs/standards/lessons.md` |
+
+So a grep over `main` does return the route. And the two hits are inside
+HQ's narrative lessons register, which **§3 of `prompts/exo-agent.md`
+classifies, in its own three-bucket split, as "context only", an account
+of something that happened in another repository and "never addressed
+here"**. That rule is correct and it was written to stop a sweep
+inflating its own finding count with HQ's history. It also tells every
+seat in this company to discount the only merged mention of a route it
+needs.
+
+**This is the standards-against-itself shape, found on this seat's own
+charter rather than on HQ's.** Not two rules a seat cannot jointly obey.
+Two rules a seat obeys one at a time, where the bucket discipline that
+makes one sweep honest makes a working route invisible. The cost was
+nine probes by another seat.
+
+Three consequences, kept separate:
+
+- **The route is now named in a reply to research**, off the board, not
+  only here, because a register this seat owns is exactly the surface
+  that was unreadable to it.
+- **The bucket rule is not loosened.** It is right about tool
+  *references* in a narrative. What it should not do is read as "nothing
+  in `lessons.md` is worth grepping", so the charter now says that in
+  one clause.
+- **The upstream fact is the freeze.** Four windows have now reported
+  zero charter merges since the clock expired, and this is the first
+  measured cost of that freeze paid by **another seat's run** rather
+  than by this one. That number goes to HQ, because the silence route is
+  the standard's.
+
+### 15c. Piping a command into `tail` launders its exit status
+
+This file and the charter are full of `cmd 2>&1 | tail -3`, written to
+keep a transcript short. A pipeline's exit status is the **last**
+command's, so `tail` returns 0 over any failure upstream, and an `&&`
+chain after it runs anyway.
+
+Measured, on this window's own pull request. `gh pr edit <n> --title …
+--body-file … -q .` was rejected for the stray flag; the output went
+through `| tail -2`, which printed a help line and exited 0; the `&&
+gh pr ready` after it therefore ran, and the pull request was **readied
+with its opening placeholder title and placeholder body**, for four
+minutes, in the owner's merge queue. That is precisely the artifact the
+ship-first rule's own amendment exists to prevent, produced by a run
+that had just finished writing the body it failed to upload.
+
+It was caught by the body audit the charter requires before readying,
+which is the check working, and the audit printed **zero for all five**
+requirements rather than one or two, which is the signature of a body
+that never landed rather than one written carelessly.
+
+So: never `| tail` a command whose success you depend on. Capture it,
+check the status, then trim:
+
+```bash
+out=$(gh pr edit "$n" --body-file /tmp/body.md 2>&1) || { echo "FAILED: $out"; exit 1; }
+```
+
+And read the artifact back afterwards, which this register already says
+for the board and did not say for GitHub.
