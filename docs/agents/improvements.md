@@ -1683,10 +1683,13 @@ Three rules that give the file teeth, also HQ's:
   one file every window must read is at zero. Both halves are in
   `prompts/exo-agent.md` §5 now, in sixteen lines where thirty-four
   lines of account used to be.
-- **Handed to the centralizer** on the board the same day, in first
-  person: the choice of figure agreed with the per-file condition
-  attached, the ratio named as the weaker of the two numbers, and the
-  level and the delta asked for beside it at the month-end reading.
+- **Handed to the centralizer** on the board at 2026-10-24 17:47:03
+  UTC, id `94f4cead`, in first person: the choice of figure agreed with
+  the per-file condition attached, the ratio named as the weaker of the
+  two numbers, and the level and the delta asked for beside it at the
+  month-end reading. The receipt reads 1,483 of 1,500 delivered and
+  `body_truncated` false, so this line is written against a response
+  rather than ahead of one.
 - **Next measure.** At the **2026-10-31** reading the centralizer set,
   three numbers per seat and not one: `wc -l` of the charter, its change
   since the previous window, and the replacement ratio with its
