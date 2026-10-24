@@ -2567,3 +2567,60 @@ of these two faults is fixed, treat it as a floor on a floor whose error
 runs entirely in the direction of a seat that looks idle, and say so
 beside the number. `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`
 has the account and the handoff.
+
+## 18. `/tmp` is shared between every seat running concurrently on this host, and one charter-named path there is uploaded to GitHub (measured 2026-10-24, resident host, thirty-second window, on its own pull request)
+
+**Measured by being bitten, mid-run, not by probing.** This window wrote
+its pull request body to `/tmp/body.md`, which is the path this seat's
+charter names in its own body-audit snippet. Between the write and the
+`gh pr edit` that uploaded it, **another seat's run wrote its own pull
+request body to the same path**, and the upload sent that seat's body to
+this window's pull request. The overwritten content was identifiable:
+it opened `Woken by three notes, nine minutes apart` and referenced
+`#282`, which is not in this seat's chain, and it ended with a
+`reread.sh --self-test` line this repository's exo lane does not use.
+
+**The host runs many seats at once and the number is on the board.**
+`GET /api/capacity` for 2026-10-24 reports **280 runs attempted across
+23 seats**, with `running: 26` at the moment of this measurement and
+overlapping windows listed explicitly. So concurrency is the normal
+state here, not an edge case, and any fixed path under `/tmp` is a
+shared mutable name.
+
+**The paths currently named in `prompts/exo-agent.md`**, with the risk
+each carries:
+
+| path | direction | risk |
+|---|---|---|
+| `/tmp/body.md` | written here, **uploaded to GitHub** | **a sibling's artifact published under this seat's title** |
+| `/tmp/hq-exo.md` | written here, read here | a sibling's copy of a different role standard read as this one |
+| `/tmp/autonomy.py`, `/tmp/runpr.py` | fetched from HQ, executed | a sibling's version of the same file, usually harmless |
+| `/tmp/a.txt`, `/tmp/b.txt`, `/tmp/uniq.txt` | scratch | wrong comparison, silently |
+
+The read-only ones mostly fail toward reading a sibling's copy of the
+same upstream file, which is why this has not surfaced before. The
+write-then-upload one does not fail that way.
+
+**What caught it was the audit, run as a check rather than skipped as a
+formality.** The five standing body requirements came back **0, 0, 4, 0,
+0**. A body written carelessly scores one or two zeros; **five zeros, or
+a pattern with one unexplained non-zero, is a body that is not yours.**
+That is this register's own "prefer checks that fail in a recognisable
+pattern", confirmed from the other side by a window that would otherwise
+have left a sibling's pull request body in the owner's merge queue under
+its own title.
+
+**The guard, for any seat, and it is one line.** Make the path unique to
+the run, and never reuse a name the charter prints:
+
+```sh
+B=/tmp/$(basename "$PWD")-$$-body.md     # or mktemp
+out=$(gh pr edit "$n" --body-file "$B" 2>&1) || { echo "FAILED: $out"; exit 1; }
+gh pr view "$n" --json body --jq .body > "${B%.md}-check.md"   # read the artifact back
+```
+
+**Not generalised into the charter this window**, deliberately: replacing
+every fixed `/tmp` path is a mechanical edit across many lines, and the
+window that found the defect spent its remaining budget reporting it
+rather than half-applying the fix. The next window inherits a named,
+measured, single-command change.
