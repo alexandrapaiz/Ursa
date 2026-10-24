@@ -6144,3 +6144,100 @@ every window since the rule was written, and this is the ninth.**
    merge-base --is-ancestor refs/prs/378 refs/prs/382` exits 0, and the
    per-file diff between them is two files. One owner decision covers
    the pair.
+
+## 2026-10-24, thirty-fifth window (message: a `note` from `Ursa/pm`, 17:44:40 UTC) — all three of its checks hold, and the reason it checked the wrong identifier is a command in my own charter
+
+**The wake arrived intact.** Body 1,052 characters against a 1,500
+limit, confirmed against the board rather than assumed, so nothing in
+this entry rests on a truncated excerpt.
+
+**What I observed.** The PM reviewed my live tip against the merge rule
+and reached Tier C independently. I re-derived all three of its claims
+from first-hand reads rather than taking them, which is the courtesy it
+extended to me:
+
+1. *The silence route is in my charter and not in the PM's.* `git show
+   origin/main:prompts/pm-agent.md` is 390 lines and returns **0** for
+   the clock, the silence route, the bold declaration and the phrase
+   Tier C together. The same grep on my own file returns **4**. This is
+   the twenty-fifth window's finding, confirmed by the seat it is about,
+   from the other side.
+2. *So Tier C governs and the tip waits on the owner.* Holds. §10 of the
+   vendored standard still names all of `prompts/`, and the §21
+   amendment reserves the owner's merge for a change to a seat's own
+   authority. The release the PM proposed itself was never delivered to
+   the only seat that could act on it.
+3. *It closed the two the tip contains.* Holds. `merge-base
+   --is-ancestor` exits 0 for #362 and #374 into #378, both closed at
+   17:40:51 and 17:40:54, and both closing comments quote the check in
+   the direction that cannot invert.
+
+Nothing was owed back and I have not re-filed the known clock.
+
+**What I changed, and why.** The PM's verdict is attached to **#378**,
+which my own seat superseded with **#382** at 17:40:00, four minutes and
+forty seconds before the note. The PM could not have known. Its first
+sentence says it acted on my board pointer, which is exactly what my
+charter asks a reader of the board to do, and my board pointer was
+stale.
+
+The cause is in my charter. On 2026-10-18 the eleventh window wrote the
+broadcast duty correctly — one broadcast, no `to_seat`, identifier in
+`data.live_tip` — and put an audit underneath it that filters on neither
+and tells the reader to compare `ref`. A **directed** message with the
+right `ref` and no `live_tip` passes an audit written for the exact
+failure of directing instead of broadcasting. That is what happened at
+17:47:03, and the old audit run verbatim this morning printed it as a
+pass.
+
+The audit is now a gate with an exit status, filtered to broadcasts,
+reading `live_tip`, printing `MISSING` rather than a dash so the failure
+is legible, and scheduled at the instant a tip moves rather than only at
+the ends of a run. The general rule beside it: **read a command back
+against each clause of the duty it serves, and name any clause it does
+not test.** Account in
+`INC-2026-10-24-the-tip-audit-cannot-see-a-directed-message`.
+
+This is the third instance of one pattern filed in this register today,
+and the narrowest. The other two are correct rules written weeks apart.
+This is one rule and its own check, authored in one breath by one
+window, and §3's standards sweep cannot find it because the check
+contradicts nothing — it passes.
+
+**Off-repository acts, each with the query that retrieves it.** Both
+receipts read back before these lines were written, and both came back
+`body_truncated: false`.
+
+| act | addressee | retrieved by |
+|---|---|---|
+| tip broadcast, `data.live_tip: 384`, id `a5ebac6e` | **broadcast**, no `to_seat` | the corrected `tip_ok` gate in `prompts/exo-agent.md`, or `?limit=500` filtered to `from_seat=="exo"` and `to_seat==null` |
+| reply to the PM in first person, id `b20bad2f` | **`Ursa/pm`** | `?to_seat=pm&to_company=Ursa&everyone=0&since_hours=24` |
+
+Nothing else was sent. The handoff to HQ's centralizer named in the
+improvements entry is **owed, not performed**, at the moment this
+paragraph was written; if a later window finds no such message, it was
+never sent and the carried finding is still undelivered.
+
+**What the next window must check first.**
+
+1. *Was the centralizer handoff ever sent?* Query
+   `?from_seat=exo&to_company=alexandra-systems&since_hours=48` and look
+   for the one-charter-of-eleven finding. If it is absent, deliver it;
+   the measurement is in `docs/agents/improvements.md` under this
+   window's entry and needs no re-derivation.
+2. *Run the corrected `tip_ok` gate before anything else.* It is in the
+   charter under the broadcast duty. If it returns non-zero, the board is
+   lying about this seat right now and one broadcast fixes it.
+3. *The chain is three deep and one owner decision covers it.* #378 ⊂
+   #382 ⊂ #384. **Do not close #378**: the PM has named it in a live ask
+   to the owner, and the first retirement exception forbids moving an
+   artifact another seat has promised her would stay put. #382 is mine
+   and is contained; it is closable only once the ask moves.
+4. *The level still has not turned.* 4,350 lines, +52/−9 this window.
+   Nine lines of spent text removed is the whole of the deletion
+   available to this window, and the five honest banners remain the
+   candidates.
+5. *The stale-pointer sweep is a carried finding, not a fixed one.* Two
+   of the two Ursa seats with an artifact over an hour old had a stale
+   public pointer. Re-run it, and remember the PM row is meaningless by
+   construction.

@@ -1696,3 +1696,50 @@ Three rules that give the file teeth, also HQ's:
   per-file split. This entry's effect is positive if the level is flat
   or falling by then. The marginal reading is already positive and is
   not sufficient.
+
+### A duty and its own check, authored together, where the check tests a proper subset of the duty
+
+- **Proposal.** The tip-broadcast duty of 2026-10-18 says one broadcast,
+  no `to_seat`, identifier in `data.live_tip`. The audit written under it
+  in the same subsection filters on neither, and the sentence beneath
+  tells the reader to compare `ref`. Replace it with a gate that filters
+  to broadcasts, reads `live_tip`, prints `MISSING` rather than a dash,
+  and returns an exit status, and attach the general rule: read a command
+  back against each clause of the duty it serves and name any clause it
+  does not test.
+- **Merged.** **No**, open in this window's pull request. It supersedes
+  #378 and #382, which carry the same charter with the defect in it.
+- **Effect.** **One, measured on the defect's own surface, and it is the
+  first reading rather than a trend.** Before: this seat's newest
+  broadcast named **378** while its live tip was **382**, a gap open from
+  17:40:00 and still open when this window began at 17:5x. The old audit,
+  run verbatim, printed the directed 17:47:03 message and read as a pass.
+  After: the corrected gate returns 0 against **384**, and the board's
+  newest broadcast from this seat carries `live_tip: 384`. The cost the
+  gap had already produced is one PM pass: a merge-rule verdict published
+  at 17:44:40 against a superseded identifier, correct in substance and
+  attached to the wrong number.
+- **Carried finding, not yet an improvement.** The duty itself is in
+  **one charter out of eleven** in this company. `grep -c live_tip` over
+  `prompts/*.md` returns 9 for this seat and **0 for every other seat**,
+  and 0 in both of HQ's standards. Measured across the seats with an open
+  pull request: of the two whose newest artifact is more than an hour old,
+  **both** have a stale public pointer — frontend's newest open is #360
+  at 16:26 while its newest broadcast names #342, and skill's is #359 at
+  16:26 against #348. The three opened within minutes belong to live runs
+  and are not yet due. This is a proposal addressed to HQ and not an edit
+  here, because eleven copies of a workaround is the shape `L-A55`
+  refuses.
+- **Instrument caveat, recorded because it nearly went into the number
+  above.** The sweep compares a seat's newest open pull request against
+  its newest broadcast's `ref`. For the **PM** that comparison is
+  meaningless by construction: its broadcasts point at other seats'
+  artifacts, which is its job, so its newest names #378 and not its own
+  #385. One row of five was a false positive from a caption that did not
+  match its quantity, which is this register's own rule turned on an
+  instrument built two minutes earlier.
+- **Next measure.** At the **2026-10-31** reading, re-run the sweep. The
+  effect is positive if every Ursa seat whose newest artifact is over an
+  hour old has a public pointer that names it. The single-seat fix in this
+  pull request cannot move that number by more than one row, and that is
+  the point of handing the rest up.
