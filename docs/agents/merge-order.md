@@ -1,99 +1,94 @@
-# Merge order — measured 2026-10-18 19:2x UTC, ExO eighteenth window
+# Merge order — 2026-10-24 01:3x UTC
 
-Replaces the previous plan entirely, as this file's convention requires.
-Measured against `origin/main` at `a9f82054`.
+Written by the ExO seat's twentieth window, replacing the previous
+week's plan. The owner merges. This file is information for that
+decision and nothing else.
 
-**Read the caveat first.** Every number below was taken on a clone that
-had been both **unshallowed** and **widened**. The host hands each run a
-clone that is shallow *and* single-branch, and those are independent
-defects, so run the bootstrap block at the top of `prompts/exo-agent.md`,
-all four lines of it, before you believe any instrument here.
-`docs/agents/runner-facts.md` §9 has the shallow measurement and §10 the
-refspec one.
-
-**The instrument changed this window and the answer did not.** The
-previous plan was built by hand with `git merge-tree` per pull request
-and `merge-base --is-ancestor` per pair. This one is HQ's
-`tools/merge-order.sh`, fetched from HQ's `main` and run here, which
-performs the same three stages and adds the sequence simulation this
-charter used to ask a window to build in a scratch worktree. Both
-instruments are named per row below, because a verdict with no
-instrument beside it cannot be re-measured by the seat holding the
-branch.
-
-## The three numbers, and the fourth that matters more
+## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **8** |
-| merged in the last seven days | **67** |
-| age of the oldest open | **19 hours** (#225, 2026-10-18 00:26 UTC) |
-| **of the 8, pull requests the owner can actually act on** | **2** (#225 and #268) |
+| open pull requests | **14** |
+| merged in the last seven days | **45** |
+| age of the oldest open | **6 days** (the exo seat's eighteenth window) |
 
-Open does not outnumber the week's merges, so §5b's bold depth warning
-does not fire, and this is the second consecutive window in which it has
-not. That is worth one plain sentence to the owner: three runs in
-October reported seventeen, thirty-seven and fifty-two open against a
-handful of merges, and the depth number has turned around.
+**The queue is not deep.** Open is 14 against 45 merges in seven days,
+so the gate is absorbing more than three times what the queue holds.
+This is the fourth consecutive window in which the depth rule did not
+fire, and it is worth saying plainly after the weeks in which it did:
+the organization is no longer producing faster than its merge gate.
 
-**The number she can act on is two, not eight.** Six of the eight are
-drafts, and GitHub refuses to merge a draft at all. HQ's
-`tools/check-draft-prs.sh`, run here this window, splits them by whether
-a run is still behind them:
+Five of the fourteen are drafts. One of the five, the research seat's
+fifth run, is idle seven hours with no live run behind it, which HQ's
+`check-draft-prs.sh` classes as orphaned mid-work. It is that seat's to
+ready or close and the PM has already handed it back on a staleness
+finding, so it is named here and not re-reported.
 
-| | |
+## Conflicts, by instrument
+
+Instrument: `tools/check-merge-queue.sh`, fetched from
+`alexandra-systems:main` this window and not read from the host's
+checkout, which the register measures as a cache of unknown age. The
+clone was widened and unshallowed first, per §0 of the exo charter.
+
+**13 of 14 merge cleanly.** One conflicts.
+
+| pull request | verdict | behind main | instrument |
+|---|---|---|---|
+| #302 #301 #300 #299 #298 #296 #293 #292 #290 #288 #282 #280 #269 | clean | 0 to 58 | `check-merge-queue.sh` |
+| #285 research, fifth run | **CONFLICT**, 35 files | **1003** | `check-merge-queue.sh` |
+
+#285's distance is the finding rather than its conflict. Every other
+branch in the queue is between 0 and 58 commits behind. The chair
+posted on 2026-10-23 at 18:32 that the public history was rewritten that
+day to remove private data, and told every seat to fetch and reset
+before any push. #285 predates that rewrite and is the only open branch
+that does. So its conflict is not drift between two seats' work, it is
+one branch still rooted in the history that was replaced, and rebasing
+it onto the current `main` is the whole of the fix. That is the
+authoring seat's under `docs/standards/pm.md` §11.3, not the owner's.
+
+## Containment, so the order is shorter than the count
+
+Measured with `git merge-base --is-ancestor <contained> <tip>`, exit 0
+meaning contained, over every ordered pair of open heads.
+
+| contained | tip |
 |---|---|
-| drafts with a plausibly live run | 2 (#269 this window, #264 idle 40m) |
-| **drafts orphaned, no live run** | **4** (#263 idle 4h, #241 idle 9h, #240 idle 9h, #236 idle 16h) |
-| of those, carrying only the opening stub | 1 (#241) |
+| #269 | #288, #302 |
+| #288 | #302 |
+| #280 | #282 |
+| #292 | #298, #300, #301 |
+| #298 | #300, #301 |
+| #300 | #301 |
 
-Each of the four needs its owning seat to ready it or close it. None of
-them is this seat's, so none is resolved here; they are reported to the
-PM on the board, which is the surface those seats' next runs read.
-`#241` is the Ursa incident 16 shape again from a different seat: an
-identifier in the owner's queue whose whole content is the commit that
-opened it.
+**Fourteen open pull requests are six decisions.** Three stacks and
+five singletons:
 
-## Merge in this order, every step a merge that was executed
+1. **#302** — the exo seat. Contains #288 and #269. One merge closes three.
+2. **#301** — the PM seat. Contains #300, #298 and #292. One merge closes four.
+3. **#282** — the research seat. Contains #280. One merge closes two.
+4. **#299** frontend, **#296** engineer, **#293** skill, **#290** engineer — independent.
+5. **#285** research — rebase first, then it is a seventh decision.
 
-| # | PR | seat | verdict | instrument |
-|---|---|---|---|---|
-| 1 | #225 | ursa-pm | clean, behind main by 0 | `merge-order.sh`, `check-merge-queue.sh` |
-| 2 | #236 | ursa-frontend | clean, behind main by 232 | `merge-order.sh`, `check-merge-queue.sh` |
-| 3 | #240 | ursa-frontend | clean, behind main by 224 | `merge-order.sh`, `check-merge-queue.sh` |
-| 4 | #241 | ursa-engineer | clean, behind main by 213 | `merge-order.sh`, `check-merge-queue.sh` |
-| 5 | #263 | ursa-research | clean, behind main by 39 | `merge-order.sh`, `check-merge-queue.sh` |
-| 6 | #264 | ursa-skill | clean, behind main by 20 | `merge-order.sh`, `check-merge-queue.sh` |
-| 7 | #268 | ursa-exo | clean, behind main by 0 | `merge-order.sh`, `check-merge-queue.sh` |
-| 8 | #269 | ursa-exo | clean, behind main by 0 | `merge-order.sh`, `check-merge-queue.sh` |
+## The order, simulated
 
-**8 of 8 mergeable now; 0 need a rebase before she can act.** Both
-instruments agree on all eight, which is the first window in this file's
-history where nothing in the queue conflicts with anything.
+Performed in a detached scratch worktree against `origin/main`, not
+against `main`, so the simulation cannot advance the branch it is
+comparing to. Every step below is a merge that was executed and
+succeeded.
 
-**The one containment in the queue.** `refs/prs/268` is contained in
-`refs/prs/269`, proved by `git merge-base --is-ancestor refs/prs/268
-refs/prs/269`, exit 0. One owner decision covers the pair. Merging #269
-alone lands both; merging #268 first is also fine and leaves #269 as
-this window's delta. #268 was deliberately left open rather than grown,
-for the reason in
-`INC-2026-10-18-readied-sibling-is-not-a-branch-to-grow`.
-
-## Branch deletion
-
-The predicate is over pull requests and never over names
-(`INC-2026-10-18-branch-name-reuse`). Run, read, then delete:
-
-```bash
-git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort > /tmp/br.txt
-gh pr list --state all --limit 400 --json headRefName,state,mergedAt \
-  | jq -r 'group_by(.headRefName)[] | select(all(.[]; .mergedAt != null)) | .[0].headRefName' \
-  | sort -u > /tmp/alldone.txt
-comm -12 /tmp/br.txt /tmp/alldone.txt
+```
+origin/main -> #301 -> #302 -> #282 -> #290 -> #293 -> #296 -> #299
 ```
 
-The wider question — who may delete the branch of a pull request that
-closed **unmerged** — is with the owner on the silence route and expires
-**2026-10-20 12:30 UTC**. Until then: delete a branch whose every pull
-request merged, leave one whose pull request closed unmerged, never
-touch one with an open pull request.
+Seven merges land thirteen of the fourteen open pull requests. #285 is
+not in the order because it does not merge as it stands.
+
+## This seat's own pair
+
+#302 contains #288, which contains #269. One owner decision covers all
+three and **#302 is the one to merge.** #288 and #269 are both readied
+and were left open rather than closed, because both are sitting in the
+PM's merge gate and closing an artifact another seat's gate may be
+acting on costs more than the queue slot saves.
