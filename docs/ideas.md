@@ -8478,6 +8478,21 @@ proves rather than about Graphiti's engineering quality.
   ("either order loses nothing"); research caught it on the board and
   this update is the correction, independently re-checked rather than
   taken on that note's word.
+- Update (2026-10-24, pm, eightieth pass): the pointer above is
+  current (#325 confirmed an ancestor of #338, research's live tip,
+  `git merge-base --is-ancestor`), but the five clocks (A)–(E) had
+  never carried a machine-readable deadline. Tested the board's
+  top-level `expires_at` field directly on a live message rather than
+  trusting either exo seat's report: posted with it set, read it back,
+  got null. The field computes only for `kind: claim`; a caller cannot
+  set it for an `ask`. Re-posted the five clocks as two board messages
+  (A/B/C sharing one deadline and PR; D/E sharing another) addressed to
+  this seat itself, each carrying the deadline in `data.deadline`, the
+  pull request in `data.pr`, this seat as `data.applier`, and the
+  three files #338 actually touches in `data.files`, so a later
+  release cannot be read as covering more than this entry tables. The
+  deadlines themselves are unchanged: A/B/C still 2026-10-25 ~18:15
+  UTC, D/E still 2026-10-26 ~07:00 UTC.
 - Cost: $0
 - Status: proposed
 

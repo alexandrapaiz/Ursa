@@ -1,4 +1,4 @@
-# Dispatch queue — 2026-10-24, ~12:2x UTC, message (seventy-eighth pass, the six-hour pass)
+# Dispatch queue — 2026-10-24, ~13:0x UTC, message (eightieth pass)
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment (`echo
 "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"` prints nothing), so
@@ -7,72 +7,50 @@ pm.md §0b.
 
 ## This run's inbox
 
-Read `to_seat=pm` on the board first. Three items addressed to this
-seat since the seventy-seventh pass closed: research's note confirming
-the ledger-pointer correction holds; exo's handoff naming a dead
-silence clock in this seat's own charter; frontend's note on the
-now-merged hit-area fix and the still-open canon-authority question.
-All three answered on the board this pass (see the PR description for
-the full account); none needed a dispatch, because each resolved with
-a board reply or a direct merge, not a seat run.
+Four items triggered this pass: the exo centralizer's note that the
+board's expiry field is claim-only and this seat's clocks were never
+fireable; Ursa's own exo confirming the same finding from the board's
+code and naming the practical fix; frontend's PR #336 with a request
+to review it against the merge rule; and frontend's `done` for that
+same run, corrected eleven minutes later to say its predecessor (#329)
+had already merged.
 
-## One Tier B merge this pass: #329 (frontend)
+All four answered on the board this pass. #336 reviewed and merged
+under Tier B (below). The clock finding acted on directly: five board
+messages re-posted with the deadline in `data.deadline`, the pull
+request in `data.pr` and this seat named as `data.applier`, because
+the top-level `expires_at` field proved, on this seat's own test
+against a live message, to be dropped silently for anything that is
+not a claim. The owner told once, plainly, that none of it needs her.
+Full account in the PR description.
 
-`gh pr diff --name-only`: zero `prompts/` paths. Not a draft, no
-`hold` label, no owner comment since its last push (`updatedAt`
-12:13:58Z, no comments). One check, `scan`, green. `mergeStateStatus:
-CLEAN`. Created today, well under seven days. All six Tier B
-conditions held, so merged as a normal merge (`gh pr merge 329
---merge`), not squashed, not forced. This was the base of frontend's
-own small stack; `#336` (its draft continuation) is unaffected and
-still frontend's to ready or close.
+## One Tier B merge this pass: #336 (frontend)
 
-## The redaction-gate failure: self-healed, not dispatched
+`gh pr diff --name-only` against the live base: `ursa-minor/` component
+and style files plus `docs/design/`, zero `prompts/` paths. Not a
+draft, no `hold` label, no comments, no reviews. One check, `scan`,
+green. `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`. Opened today.
+All six Tier B conditions held, so merged as a normal merge (`gh pr
+merge 336 --merge`), not squashed, not forced.
 
-`gh run list --status failure --created ">=6 hours ago"` returned one
-hit: `redaction-gate` on `ursa-research/2026-10-24-message-7` (`#335`,
-run 40093217387), failed on two untruncated UUIDs in
-`docs/research/briefs/2026-10-24.md`. Before classifying, read the
-branch's log past the failing commit per this seat's own charter note
-on tripwire false alarms: `ursa-research/2026-10-24-message-8` (`#338`,
-still draft, built directly on `#335`) already removes both UUIDs in
-its very next two commits, and its own `scan` check is green. Real
-defect, correctly caught by the gate, already fixed by the owning
-seat's own in-flight next run before this pass reached it. No rerun
-(same input on `#335` would fail the same way), no incident filed (the
-fix is not a gap in the gate or the charter, and research's own `#338`
-already carries the narrative), no dispatch (the seat is already
-running).
+## This seat's own open pull requests: built on, not duplicated
 
-## Ursa's three dispatch criteria, checked fresh
+#339 (seventy-eighth pass) and #341 (seventy-ninth pass) were both
+still open when this run started. Per "read your own seat's open PRs
+first," this branch starts from #341's tip rather than from stale
+`main`, carries both whole (`git merge-base --is-ancestor`, confirmed),
+and this pass's own PR (#343) says so and names what it subsumes.
+Neither #339 nor #341 is closed by this pass; the owner (or a chair)
+closes the chain as one decision when she merges the newest tip, per
+the standing instruction in "read your own open PRs first."
 
-1. **A tuning or trial run left results unrecorded in the ledger for a
-   day.** No tuning or trial run started or finished today. Nothing to
-   dispatch.
-2. **The Minor site or Major resolver has a failing check on an open
-   PR.** `gh run list --limit 30`: all succeeded except the redaction-
-   gate hit above, already triaged as self-healed. No Minor/Major
-   check is red.
-3. **An ADR names an experiment and no run has started it within two
-   days.** No new ADR since the last check; unchanged.
+## No failed runs this pass
 
-## Company-default criteria (pm.md §11.3), checked fresh
+`gh run list --limit 30`: nothing non-success.
 
-| Observed | Fires? |
-|---|---|
-| A seat run failed in the last 24h, diagnosable | One (`redaction-gate`), triaged above as self-healed. Nothing to dispatch. |
-| A seat's open draft has failing CI, or a review comment unanswered >24h | None found (`#331`, `#336`, `#337`, `#338` are all fresh drafts from this morning, none stale). |
-| A sprint item due this week, owning seat hasn't run | Between sprints: no retrospective for `sprint-2026-10-12.md` is on `main` yet (an earlier pass's closure, `333a86d`, sits in an unmerged branch, not on `main`); next ceremony 2026-10-26. Flagged below, not a dispatch target. |
-| A seat has two or more open PRs on one scope, none merged | This seat's own stack, unchanged — waiting on the owner or a chair, not a dispatch target (it is this seat's own queue). Every other seat's multi-PR stack this pass found (exo, research, skill, engineer) is either Tier C and waiting on the owner, or mid-resolution on its own live branch; none is idle. |
-| A ruling or ADR merged since the last run names a seat, no run followed | No ADR merged since the last check. |
-| A milestone due within three days with open items | No open milestone (`gh api repos/.../milestones` returns empty). |
-| An owner-merge PR older than seven days | Oldest open PR today is `#269` (2026-10-18), already named in earlier passes, still moving within its own seven-day window. |
+## Nothing to dispatch
 
-## Dispatch: nothing fires
-
-No criterion fires, and `PM_DISPATCH_ENABLED` is unset regardless.
-
-## Failed-run triage this run (§11.7)
-
-One failure, classified above: real defect, self-healed by the owning
-seat's own next commit, no rerun, no incident, no dispatch.
+Every item this pass could act on directly, with a board reply or a
+merge. Dispatch is unavailable regardless (`PM_DISPATCH_ENABLED`
+unset), so this section is informational only, not a queue held back
+by the switch.

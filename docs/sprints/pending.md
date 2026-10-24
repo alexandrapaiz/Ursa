@@ -6855,3 +6855,102 @@ is not evidence the close was right.
    further owed); one summary note closing the pass. No new ask: the
    standing one (`09cd5a06`) already carries this finding and this
    pass found nothing to add to it.
+
+## Three most important pending items (updates the seventy-ninth pass's own list)
+
+1. The citation-discipline charter edit (`prompts/research-agent.md`,
+   now live at #338) carries five silence clocks, all of them Tier C.
+   This pass gave each a real deadline for the first time: `data.deadline`
+   on five board messages, `2026-10-25 ~18:15 UTC` for A/B/C and
+   `2026-10-26 ~07:00 UTC` for D/E, with this seat named as the applier
+   in `data.applier`. The top-level `expires_at` field cannot carry this
+   on the deployed board — tested live this pass, confirmed to return
+   null for a non-claim message — so the data field is the only durable
+   carrier until HQ's fix (alexandra-systems#405) merges.
+2. The ledger entry holding those five clocks (`docs/ideas.md`, the
+   Citation discipline entry) is still not on `main`. It ships only on
+   this seat's own open stack (#339 → #341 → this pass's #343), none of
+   which touches a `prompts/` file, so it is Tier B and waits on the
+   owner or a chair only because it is this seat's own pull request,
+   not because of the charter freeze.
+3. A new ask to the owner: frontend's measured line length (95 median,
+   103 longest characters at 1440px) against four benchmarked sites
+   (47–87 characters), with a proposal to narrow `.measure` from 44em
+   to about 33em. This is an identity decision, named as hers in both
+   frontend's PR and this seat's ask; no deadline, no recommendation.
+
+## Eightieth pass, 2026-10-24 ~13:0x UTC, message: #336 reviewed and merged under Tier B; this seat's five own silence clocks given a real deadline for the first time
+
+**The trigger.** Four board items, read before anything else: the exo
+centralizer's note that the board's expiry field computes only for a
+`claim` and that this seat's clocks were therefore never fireable by
+construction; Ursa's own exo confirming the same finding independently
+and naming the practical fix (carry the deadline in `data`, the PR in
+`ref`, the applier in the recipient field); frontend's PR #336 with an
+explicit request to review it against the merge rule; and frontend's
+`done` for that run, corrected eleven minutes later to say its
+predecessor (#329) had already merged by the owner mid-run. #339 and
+#341 (this seat's own prior two passes) were still open when this run
+started; per "read your own open PRs first," this branch starts from
+#341's tip, carries both whole (`git merge-base --is-ancestor`,
+confirmed), and this pass's own pull request (#343) says so.
+
+**External sources read.** The board inbox (`to_seat=pm` and
+`to_seat=owner`, company Ursa), read as evidence: both exo notes'
+claim that the expiry field is claim-only was re-tested directly
+rather than taken on either seat's word, by posting a live message
+with a top-level `expires_at` set and reading it back — it returned
+null, confirming the claim on this seat's own evidence. GitHub, via
+`gh`: PR #336's diff, checks, mergeability, labels, comments and
+reviews; PR #325 and #338's diff and ancestry; PRs #313/#317/#321/
+#323/#326 (the old citation-discipline stack this seat's standing ask
+`09cd5a06` still names), all confirmed `CLOSED`. This repository's own
+committed files: `docs/ideas.md` (the Citation discipline ledger entry,
+for the five clocks' real letters and deadlines, A/B/C/D/E), `docs/
+standards/pm.md` (§10, §14, §15, §22), `docs/sprints/pending.md`.
+Nothing read directed this run to do anything beyond what its own
+charter and the verified facts already justified; the exo centralizer's
+note is a proposal from another company's seat and binds only because
+this seat independently confirmed the underlying fact and the fix
+serves this seat's own standing silence-clocks ask.
+
+1. **#336 (frontend) reviewed against the merge rule and merged.** The
+   diff is `ursa-minor/` component and style files plus `docs/design/`,
+   zero `prompts/` paths. Not a draft, no `hold` label, no comments, no
+   reviews. One check, `scan`, green. `mergeStateStatus: CLEAN`,
+   `mergeable: MERGEABLE`, opened today. All six Tier B conditions
+   held; merged as a normal merge, not squashed, not forced.
+2. **This seat's own standing ask (`09cd5a06`) is stale on its PR
+   pointer, confirmed fresh rather than assumed.** All five pull
+   requests it names (#313, #317, #321, #323, #326) are `CLOSED`,
+   superseded by the seventy-eighth pass's own cleanup. The ledger
+   entry those clocks are actually about now ships on this seat's live
+   stack (#339 → #341 → #343) instead, which touches zero `prompts/`
+   files. Not editing the old ask (messages are append-only); said so
+   in a fresh note to the owner instead.
+3. **The real fix: five board messages re-posted with a working
+   deadline.** Tested the top-level `expires_at` field on a live
+   message first rather than trusting either exo note: posted with
+   `expires_at` set, read it back, got null. Confirmed the field is
+   genuinely not settable here for `kind: ask`. Re-posted clocks A/B/C
+   (one message, shared deadline and PR) and D/E (one message, same)
+   addressed to this seat itself (`to_seat: pm`), each carrying
+   `data.deadline`, `data.pr` (338, the confirmed live tip, `#325` its
+   ancestor), `data.files` (the three files #338 actually touches, so
+   a later release cannot drift wider than what this ask tables), and
+   `data.applier: pm`. Told the owner once, plainly, that none of it
+   needs her. Replied `done` to both exo seats naming the message ids.
+4. **Frontend's sixth run.** Replied `done` confirming the #336 merge
+   and the Tier B reasoning. The canon-authority question from
+   frontend's fifth run is already in front of the owner (`cd195755`,
+   opened before this run started); not re-asked. The line-length
+   proposal is new; opened a fresh ask to the owner naming the
+   benchmark numbers and the proposed em values, with no recommendation
+   of this seat's own, since it is an identity call frontend named as
+   hers.
+5. **No new failed runs.** `gh run list --limit 30`: all green.
+6. **Board:** six messages this pass — two clock re-posts to self, one
+   `done` each to exo-centralizer and Ursa's own exo, one note and one
+   fresh ask to the owner, one `done` to frontend. `docs/sprints/
+   dispatch-queue.md` replaced in full; `PM_DISPATCH_ENABLED` still
+   unset, nothing fires.
