@@ -2,6 +2,79 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-third pass, 2026-10-24 ~07:0x UTC, message: PR #316 and PR #319 reviewed against the merge rule — both Tier C, three clocks on one and a new fourth on the other
+
+**The trigger.** Two events in one wake: a skill pull request named
+directly and a note from research confirming a ledger paragraph plus a
+"done" reporting its own newest pull request shipped. Both asked this
+seat to check the named pull request against the merge rule: merge it,
+or say on the board what it still needs and hand that to its seat.
+The seventy-second pass's own pull request (#321, ready, not draft,
+`CLEAN`, Tier A/C-adjacent content only) was still open when this run
+started; started this branch from its tip rather than from stale
+`main`, per "Read your own seat's open PRs first."
+
+1. **The research pull request named in the inbox had already closed
+   by the time this pass started.** Research's third run of today
+   built a newer pull request on top of the one its own note and the
+   event both pointed at, verified the ancestry itself, and closed the
+   older one. Checked rather than trusted: `gh pr view` confirms the
+   older one is `CLOSED` and `git merge-base --is-ancestor` on the two
+   branches' heads confirms the newer one contains it whole. Reviewed
+   the newer, surviving pull request instead of the one named, since a
+   review of a closed pull request answers nothing.
+
+2. **Both pull requests are clean and both still wait on the owner,
+   for the same reason.** `gh pr view` fresh on each: neither is a
+   draft, both are `CLEAN`/`MERGEABLE`, each has one green check, and
+   neither carries a label, a comment or a review. Both touch a
+   `prompts/` charter file, and this company has read every
+   charter-touching diff the same way since the tier contradiction
+   opened (`INC-2026-10-18-tier-c-charter-freeze`, still open): Tier C
+   outright, regardless of how scoped or clean the rest of the diff
+   is. Neither pull request gives a reason to break that run of
+   precedent.
+
+3. **The research pull request's charter diff carries one new
+   paragraph beyond what the two already-running clocks cover.**
+   `git diff` between the closed predecessor's tip and the survivor's
+   tip, scoped to `prompts/research-agent.md`, shows exactly one new
+   hunk: a rule to read an instrument's own completeness field before
+   characterizing what it returned, renumbering the file's own count
+   of rules from three to four. The ledger entry in `docs/ideas.md`
+   ("Citation discipline…") is updated to point at the survivor in
+   place of the one it closed into, carrying its two existing clocks
+   forward unchanged (expiring 2026-10-25 ~18:15 UTC and 2026-10-26
+   ~07:00 UTC) and opening a third for the new paragraph, expiring
+   2026-10-26 ~07:00 UTC as well — the same minute as the second by
+   coincidence of timing, not by design.
+
+4. **The skill pull request's charter diff is one new section, added
+   once, with no earlier clock to carry forward.** It is not a chain
+   of edits accumulated across several runs the way the research
+   charter's edits are, and no earlier ask named any part of it, so it
+   opens its own clock this pass rather than riding on another
+   pull request's deadline: expiring 2026-10-26 ~07:00 UTC.
+
+5. **Board.** Two `ask` messages to the owner, one per pull request,
+   each naming its clock or clocks and recommending merge. Two `note`
+   replies, one to research closing the loop on its two notes and its
+   `done` without further edits to the paragraph itself, one to skill
+   saying plainly that nothing further is owed from that seat and the
+   only thing between its pull request and `main` is the same
+   charter-path gate every other seat's charter edit sits behind
+   tonight.
+
+6. **No new repo-side Tier B action this pass.** This run's own
+   instructions bar it from merging or pushing to `main`. The
+   seventy-second, seventy-first and seventieth passes' pull requests
+   stay exactly as those passes left them, waiting on the owner or a
+   chair.
+
+7. **Sprint: unchanged.** No sprint is open (`sprint-2026-10-12.md`
+   closed 2026-10-23; next ceremony 2026-10-26). Nothing from this
+   pass touches it.
+
 ## Seventy-second pass, 2026-10-24 ~07:0x UTC, message: PR #314 reviewed against the merge rule — Tier C, one running clock carried forward, one new clock opened
 
 **The trigger.** The event named PR #314 directly (research's second
