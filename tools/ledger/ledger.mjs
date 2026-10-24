@@ -110,6 +110,39 @@ function mergeBlock(base, ours, theirs, markerSize) {
 }
 
 /**
+ * Keys a side holds more than once, in first-seen order.
+ *
+ * This is the precondition the merge depends on and it used to be assumed.
+ * `index()` builds a Map, so a repeated key silently kept only the last block
+ * carrying it, while the `for (const b of ourBlocks)` loop below still visited
+ * every one of them. The result was that one block's text was emitted once per
+ * duplicate and the others were dropped: a merge that grew the file and lost
+ * content at the same time.
+ *
+ * Measured on 2026-10-24, which is why this exists. Pointed at
+ * `docs/agents/incidents.md` -- a register whose entries are `## ` headings,
+ * so this grammar keys on the `### What happened` sub-headings inside them --
+ * the parser found 36 blocks of which 7 keys repeated, and merging two clean
+ * appends produced 75 `## ` entries and 372,901 bytes from inputs of 183,353
+ * and 209,366. No conflict, no error, a plausible-looking file.
+ *
+ * HQ's `tools/merge-register.py` refuses this case by design, for the reason
+ * its own source gives: a key held twice cannot be told apart from a
+ * disagreement. So this refuses too, rather than guessing.
+ * @param {Block[]} blocks
+ * @returns {string[]}
+ */
+function duplicateKeys(blocks) {
+  const seen = new Set();
+  const dups = [];
+  for (const b of blocks) {
+    if (seen.has(b.key) && !dups.includes(b.key)) dups.push(b.key);
+    seen.add(b.key);
+  }
+  return dups;
+}
+
+/**
  * Merge two ledgers against their common ancestor, by block identity.
  *
  * Ordering rule: our block order is preserved; a block only they added is
@@ -124,12 +157,45 @@ function mergeBlock(base, ours, theirs, markerSize) {
  * @param {string} ours current-branch contents
  * @param {string} theirs other-branch contents
  * @param {number} markerSize git's conflict marker length (7 by default)
- * @returns {{ merged: string, conflicts: string[], added: string[], removed: string[] }}
+ * @returns {{ merged: string, conflicts: string[], added: string[], removed: string[], refusal: string | null }}
+ *   `refusal` is non-null when this function declined to merge at all. The
+ *   caller must then treat `merged` as meaningless and hand the file to a
+ *   human; `union-merge.mjs` writes git's own line-based merge instead.
  */
 export function mergeLedgers(base, ours, theirs, markerSize = 7) {
   const baseBlocks = parseLedger(base);
   const ourBlocks = parseLedger(ours);
   const theirBlocks = parseLedger(theirs);
+
+  // Refuse before merging, not after. Both of these mean the file is not the
+  // kind of file this grammar describes, and merging it anyway is the silent
+  // corruption this module's own header warns about.
+  const empty = { merged: ours, conflicts: [], added: [], removed: [] };
+  for (const [side, blocks] of [['ours', ourBlocks], ['theirs', theirBlocks]]) {
+    const dups = duplicateKeys(blocks);
+    if (dups.length > 0) {
+      return {
+        ...empty,
+        refusal:
+          `${side} holds ${dups.length} block key(s) more than once, so an edited block cannot be ` +
+          `told apart from a disagreement: ${dups.slice(0, 5).map((k) => JSON.stringify(k)).join(', ')}` +
+          `${dups.length > 5 ? `, and ${dups.length - 5} more` : ''}. ` +
+          'Either this file is not the ideas ledger, or two blocks share a heading and one needs renaming.',
+      };
+    }
+  }
+  for (const [side, blocks] of [['ours', ourBlocks], ['theirs', theirBlocks]]) {
+    if (!blocks.some((b) => b.kind !== 'preamble')) {
+      return {
+        ...empty,
+        refusal:
+          `${side} parses to no entries at all under this grammar (\`### \` headings and top-level ` +
+          'dated note bullets), only a preamble. Merging it would treat the whole file as one block ' +
+          'and resolve a real disagreement by picking a side. This is almost always a driver pointed ' +
+          'at the wrong file: see tools/registers/registers.json for the registers with other grammars.',
+      };
+    }
+  }
   const B = index(baseBlocks);
   const O = index(ourBlocks);
   const T = index(theirBlocks);
@@ -180,5 +246,5 @@ export function mergeLedgers(base, ours, theirs, markerSize = 7) {
     added.push(key);
   }
 
-  return { merged: renderLedger(out), conflicts, added, removed };
+  return { merged: renderLedger(out), conflicts, added, removed, refusal: null };
 }

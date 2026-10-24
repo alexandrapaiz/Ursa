@@ -1,0 +1,27 @@
+{
+  "comment": "Every merge driver this repository declares in .gitattributes, and the committed script that registers it in a clone. tools/ledger/check-attributes.mjs reads this file and refuses a declaration it cannot trace to an installer here, because a declared driver nobody can register is the default line merge wearing a convention's clothes (docs/standards/lessons.md, L-A49). The refused table is the same rule pointed the other way: a driver whose behaviour is measured and wrong is named here so the one-line fix is an exit code instead of a review comment.",
+  "drivers": {
+    "ledger": {
+      "installer": "tools/registers/install-drivers.sh",
+      "config_key": "merge.ledger.driver",
+      "command": "tools/ledger/union-merge.mjs",
+      "merges": "docs/ideas.md, whose entries key on `### ` headings and whose second block kind is the chair's top-level dated note bullets",
+      "why": "Ursa's own driver, kept rather than replaced because the vendored merger has no flag for that second block kind."
+    },
+    "register": {
+      "installer": "tools/registers/install-drivers.sh",
+      "config_key": "merge.register.driver",
+      "command": "tools/registers/merge-driver.mjs",
+      "merges": "the `## `-keyed registers listed with `enabled: true` in tools/registers/registers.json",
+      "why": "Wraps HQ's vendored tools/registers/merge-register.py, which carries the numbered-identifier exception the incident and decision registers need.",
+      "table": {
+        "path": "tools/registers/registers.json",
+        "comment": "Agreement check: every path declared `merge=register` must be enabled in this table, and every enabled path in this table must be declared. A path the attributes send to the driver but the table does not declare is refused by the driver at merge time; a path the table enables but the attributes do not declare never reaches the driver at all. Both states are silent today."
+      }
+    }
+  },
+  "builtin_allowed": ["text", "binary"],
+  "refused": {
+    "union": "git's built-in union driver concatenates both sides' LINES, so two appended register entries whose trailing lines are byte-identical (`- Cost: $0`, `- Status: proposed`) have those lines aligned as shared context. Measured on this repository's own fixture: two entries in, one heading plus the other entry's body out, exit 0, zero conflict markers, still valid Markdown. The surviving half is attributed to the wrong entry, which is worse than losing it. A conflict stops a human; this does not. See docs/standards/lessons.md L-A49 and docs/design/server-side-merge-measurement.md."
+  }
+}
