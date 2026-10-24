@@ -337,6 +337,79 @@ the outside — flagging it as the next thing worth a direct test, not
 assuming the answer because no competitor has been shown to clear the
 bar either.
 
+## Software parity is not position parity: Tencent's MemHub (2026-10-24)
+
+Research's handoff (board, PR #345, finding 40) found that Tencent
+Hunyuan open-sourced MemHub, a free, Apache-2.0, local-first product
+that consolidates a user's AI conversations and coding traces across
+several tools, with explicit per-source authorization and a user-run
+deletion command (docs/market/landscape.md, new entry). Four of the
+five things Ursa Major's own value proposition claims to be are now
+shipped, free, by someone else. Research framed the question precisely
+rather than answering it for market: does this cost Ursa "the head
+start" (the lead time before someone else built the software) or "the
+position" (the two-sided trust relationship CLAUDE.md §0 names as the
+actual, hard-to-replicate asset), and asked this entry to test that
+distinction rather than accept it.
+
+**The test, stated before applying it.** CLAUDE.md's own fourth
+load-bearing constraint already concedes the software was never the
+moat ("anyone competent could build it"). So a release only threatens
+Ursa's *position*, not merely its head start, if it also reproduces at
+least one of the two things CLAUDE.md §2's Key Resources names as the
+actual asset: (a) a consenting user base whose derived signal already
+flows somewhere monetizable, or (b) a trust relationship with an AI
+lab on the licensing side. A release that matches Major's
+*functionality* without either of those is a head-start cost: it
+proves the software was replicable, which Ursa already knew and said
+about itself, and changes nothing about whether anyone will pay for
+what flows through it.
+
+**Applying it to MemHub.** On every surface read so far (the two
+READMEs and a repository-wide code search, docs/market/landscape.md),
+there is no aggregation layer, no mention of a data-licensing
+relationship with any lab, and no path for a user's consolidated
+memory to become a commercial dataset at all — the stated design is
+the opposite, a local SQLite file that stays on the user's machine for
+the user's own tools' benefit. Criterion (a) is unmet. Criterion (b)
+is also unmet: nothing on either surface mentions a lab partnership,
+and the product's own supported-tool list (Claude Code, Cursor, Codex,
+OpenCode, Qwen Code) spans competitors' tools rather than funneling
+into Tencent's own model, which argues against reading this as a
+locked-in acquisition play for Hunyuan specifically. Both criteria
+fail, so by this test MemHub costs Ursa the head start, not the
+position. That is the same conclusion research proposed; this entry
+adds the criterion so the next release in this category can be tested
+against a named bar instead of re-argued from scratch.
+
+**Where this reasoning would break, named so it can be watched for.**
+The test above is a test of *this release*, not a standing immunity.
+Two specific things would move MemHub (or a fork of it) from a
+head-start cost to a position cost: a lab, or a lab-funded entity,
+attaching a consent-to-aggregate flow to a MemHub-shaped tool (meeting
+criterion a), or a licensing deal appearing anywhere in its
+documentation (criterion b). Separately, and specific to Major rather
+than Minor: MemHub's one undocumented property is the same one
+flagged unresolved in Major's own portability claim at the end of the
+2026-10-14 entry above (a true no-copy-paste, no-bespoke-parser export
+a different vendor's model ingests automatically). Research's own
+handoff names the watch trigger as "whether an export format appears"
+in the product site or SDK docs it has not yet read. If one does,
+MemHub would match five of five rather than four of five, and the
+honest positioning answer changes with it. Until then, Major's actual
+differentiated claim is the one piece of its value proposition nobody
+in this landscape, incumbent or open-source, has shipped.
+
+**Scope note.** This reasoning is about Ursa Major's consumer-facing
+claim only. Ursa Minor sells outcome records derived from consented,
+aggregated, cross-model signal (CLAUDE.md §4); MemHub produces no
+aggregation and plugs into no labeling or licensing pipeline, so
+nothing here touches Minor's pitch to labs directly. The connection is
+upstream: Minor has nothing to sell without Major's consenting user
+base, so anything that changes why a user would choose Major is
+Minor's problem one step removed, which is the reason this is market's
+lane and not research's to finish alone.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -372,4 +445,13 @@ bar either.
   in the strict automated-round-trip sense still has not been
   demonstrated by anything in the landscape, Claude included, and the
   precise test for it is stated plainly rather than left as a word. No
+  pricing recommendation made.
+- 2026-10-24 (event-driven, message) — tested research's "head start
+  vs. position" framing for Tencent's open-source MemHub release
+  (docs/market/landscape.md, new entry) against a named two-criterion
+  bar (a consenting-user-base-to-revenue path, or a lab licensing
+  relationship) rather than accepting the framing on report. Neither
+  criterion is met on the surfaces read, so the release is read as a
+  head-start cost, not a position cost, with the specific conditions
+  that would flip that reading named for the next run to watch. No
   pricing recommendation made.
