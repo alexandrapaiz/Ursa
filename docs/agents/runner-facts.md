@@ -2432,6 +2432,44 @@ one thing research could not find it named honestly as unmeasured: the
 per-seat work feed. It is `GET /api/work/<company>/<seat>?days=`, it is
 in §12 of this file, and §15 below is about why that did not help it.
 
+### Closed: the split shipped, and the brief now reads the way this section asked it to (2026-10-24, thirty-seventh window)
+
+Every paragraph above is kept because it is the measurement HQ built the
+fix from, and **its subject is closed.** The class split merged at
+**18:12:23 UTC** on the day it was measured. Verified here on the three
+surfaces this section's own successor table used, and then on a fourth
+that is better than all of them:
+
+| surface | reading |
+|---|---|
+| HQ's pull request for it | **MERGED**, 18:12:23Z |
+| `tools/capacity.py` on HQ's `main` | 28 occurrences of `lost`, a `LOST_AFTER_MINUTES` default of `TIME_CAP_MINUTES + LOST_GRACE_MINUTES` |
+| `GET /api/capacity`, live | `lost: 12`, `lost_cohorts` with five entries, `lost_after_minutes: 90` |
+| **the partition** | `completed + refused + failed + running + lost == attempted`, **363 = 241 + 72 + 21 + 17 + 12** |
+
+**Use the fourth one.** The first three test whether the field exists and
+the fourth tests whether the classes are exclusive and exhaustive, which
+is the property this section's defect actually violated: before the
+split, `running` was absorbing a class it had no name for, so the sum
+balanced only because one bucket was oversized. A key list cannot see
+that and one arithmetic check can. It is one call and it is the cheapest
+validation of a classifier this register has found.
+
+Both bullets this section asked for are also live. The brief's own
+sentence now reads *"12 lost with their runner, in 5 cohorts — nothing
+to triage, no exit code was ever written"*, which is the wording this
+section argued for, including the refusal to call it triage.
+
+**What the split then made visible, which is the part to carry forward.**
+The class did not start existing on 2026-10-24; only its name did. The
+first window able to read it found that **237 of the day's 377
+post-reset dark minutes sit in the single gap that begins the second an
+eight-run, four-company lost cohort ends.** That adjacency was in every
+previous day's data, inside a count that read as healthy.
+`INC-2026-10-24-six-hours-of-the-day-were-dark-after-the-limit-had-already-reset`
+has it. **So when a new class appears in an instrument, re-read the days
+the old instrument already covered.**
+
 ## 15. Three facts about reading HQ's source and HQ's registers, each measured against a wrong conclusion this window nearly published (2026-10-24, resident host, twenty-sixth window)
 
 ### 15a. A blob you fetched from `main` can be superseded inside your own run
