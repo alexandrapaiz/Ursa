@@ -9195,3 +9195,66 @@ Ursa's `ApparatusObservability` makes that a value in the type, so an
 unanswerable question and an unanswered one are different bytes rather
 than the same blank field. That distinction is what lets a lab drop the
 blind records from a denominator instead of quietly averaging over them.
+### 2026-10-24 (engineer) — The merge still mints a duplicate of a live axiom, which is where the twin population comes from and it has not stopped growing
+
+- Trigger: a test this run wrote as a precondition and which passed first time, `is a real population: the old create path builds the pair with no revocation in sight` in `ursa-major/src/tuning/revocation.test.ts`. Two distillation passes emit one rule in different words, both declare `matchesExisting: null`, and the record ends with `ax-001` and `ax-002` both `active`, scoring 1.000 against each other, and `blockedByRevocation` empty. That test is about history, and it is green against today's code.
+- What: `findRevocationBlock` scores a candidate against tombstones only. A candidate that duplicates an axiom the user still holds is compared against nothing, exactly as before 2026-10-23, because the gate was built to protect revocations and a duplicate of a live axiom revokes nothing. So the pair the twin report names is still being minted, one pass at a time, and the report this run shipped is a cleanup for a tap that is still running. The cost is not only the revocation case. A duplicate inflates nothing in `evidenceCount` (each twin counts its own evidence separately), which means recurrence across records, the one confidence signal `tuning/types.ts` says is never a model's self-report, is split across two ids and reads lower than the evidence supports on both. The rule the user has demonstrated twice looks like two rules she demonstrated once.
+- The decision this needs, which is why it is a ledger entry and not a fix: a candidate scoring at or above a threshold against a live axiom is either merged into it (one id, evidence appended, `evidenceCount` recounted) or left alone and flagged. Merging is what `matchesExisting` was supposed to do and what the arithmetic wants. It is also the first place in this product where code would overwrite the model's judgment about identity in a direction that changes what the user sees, rather than withholding something, so the owner should decide whether a lexical score may do that silently.
+- First step: measurement before behaviour, and it is cheap because the function exists. A script under `ursa-major/tools/` that runs `revocationSimilarity` over every pair of live axioms in every tuning record in `ursa-major/fixtures/`, printing the pairs at or above `THETA_REVOKED` and the count. That number is how many duplicates this product has actually produced, and nobody has it. It also decides whether this is urgent or theoretical, which no argument in this entry can.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer) — The twin report cannot tell a pair she has already decided about from one she has never seen
+
+- Trigger: wiring `allRevocationTwins` into `ursa consent show` and then reading its output against what `releaseBlocked` does. A released statement becomes an axiom with `status: 'user-edited'`, live and exporting, and the gate deliberately lets it stay (`findRevocationBlock` passes a candidate whose closest live axiom is at least as close as the tombstone). So after a release, the tombstone it resembled and the statement she released are a twin pair by this report's own definition.
+- What: that pair is reported on every `ursa consent show`, forever. It is not a false positive, because the two statements really do say nearly the same thing and one really is still exporting. It is worse than a false positive: it is a true statement about a decision she already made, repeated indefinitely, which is how a consent surface teaches its user to skim. The mitigation shipped today is one line of wording, `You wrote or released this one yourself, so no distillation pass put it there`, and that is a label on the noise rather than the absence of it. The missing concept is adjudication. A pair she has looked at and kept is a different object from a pair she has never been shown, and nothing in `TuningRecord` can hold that difference.
+- Why not just suppress `user-edited` twins: because that throws away the case this report exists for. A `user-edited` axiom is also what she gets when she edits a statement by hand, and a hand-edited axiom that happens to restate something she later revoked is exactly a twin she has never been shown. Status is not adjudication and using it as a proxy would make the report wrong in the direction that matters.
+- First step: the smallest honest shape, which is a list and not a flag. An optional `acknowledgedTwins?: Array<{ revoked: string; twin: string; at: string }>` on `TuningRecord`, written only by a new `ursa consent keep-twin <project> --revoked ax-001 --twin ax-002`, read only by `allRevocationTwins` to omit that pair, with the pairs she has acknowledged still printed by `consent show` under a heading that says she decided this and when. Omitting it from the report is not the same as hiding it, and a consent surface that can hide a pair on her instruction has to be able to show her what she hid.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer) — Erasure takes one record id and nothing else, so wanting out entirely is a loop the user writes
+
+- Trigger: today's craft scan of Mem0's delete API, read against `runForgetCommand` in `ursa-major/src/consent.cli.ts` immediately after.
+- What: `ursa forget <project> --record <recordId>` is the only erasure verb this product has, and `--record` takes exactly one id. There is no scope. A user who wants every record from a project gone enumerates them, which means reading `.ursa/records/` herself and writing a shell loop, and a user who wants every inference in one domain gone cannot express that at all. `CLAUDE.md` load-bearing constraint 2 ends in the word `delete`, and the shape of the command makes the easy deletion the small one and the complete deletion the one that takes a loop and a correct list. The failure mode is not that the guarantee is false. It is that a user who asks for everything and gets 19 of 20 records has no way to tell, because nothing counts what she asked for against what went.
+- The thing worth copying, precisely: Mem0's delete endpoint takes filters rather than ids (`user_id`, `agent_id`, `app_id`, `run_id`, `metadata`), it refuses a call with no filter at all, and `*` is how a caller says "all of this category" out loud. Two properties in one design. Erasure is scoped rather than enumerated, and the scope of everything has to be spelled rather than reached by omitting an argument. Ursa already has the second half for the wrong reason: `forget` refuses a call with no `--record` because it has no other mode, not because a broad default was closed on purpose.
+- First step: `--scope`, one value, and a dry run. `ursa forget <project> --scope all --dry-run` prints the record ids it would erase, the inferences that would be deleted outright and the evidence entries that would be stripped, and exits 0 without writing. The same command without `--dry-run` does it and prints the same three counts as what happened. One flag, one value, and the count printed twice so she can compare, before any further scope value is designed.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers. **Mem0**, which the landscape has carried since
+2026-09-26 on its pricing and funding and never on its mechanics. Read
+on exactly this run's question, which is what another memory product
+does when one stored statement contradicts or duplicates another.
+
+**Worth stealing: erasure takes a scope, and the scope of everything is
+spelled out rather than reached by leaving an argument off.** Mem0's
+delete endpoint accepts no memory id at all. It takes filters
+(`user_id`, `agent_id`, `app_id`, `run_id`, `metadata`, `org_id`,
+`project_id`), `*` matches everything in a category, and wiping a
+project means setting all four primary filters to `*` deliberately. The
+docs also say plainly that the API now requires at least one filter and
+that omitting them used to delete everything, which is a prior unsafe
+default published in the API reference a caller actually reads rather
+than buried in a changelog. Ursa's `ursa forget` takes one `--record`
+and has no scope, so it is accidentally safe rather than deliberately
+so, and the complete deletion is the one that costs the user a shell
+loop. Filed as the third ledger entry above.
+
+**What Ursa does better: the duplicate is a defect here and the storage
+model there.** Mem0's documented core principle is additive, "New
+memories are added without overwriting or deleting existing memories",
+and its delete API has no duplicate detection of any kind, so a
+superseded memory and the one that supersedes it coexist by design and
+deleting either leaves the other. The twin pair this run spent the day
+on is Mem0's steady state. Ursa treats it as a failure of the revocation
+guarantee, names the pair, prints the command that ends it, and leaves
+the decision with the user. The qualification worth stating, because the
+previous scan's entry made the same point about LangMem and this seat
+should not keep awarding itself the comparison: Ursa only stopped
+producing the pair against tombstones. Against live axioms it still
+produces it, today, which is the first ledger entry above and is the
+honest limit on this paragraph.

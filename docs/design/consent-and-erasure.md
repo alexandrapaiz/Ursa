@@ -461,6 +461,22 @@ this table used to assert without testing: a re-distill after a
 revocation does not revive the statement even when the model declares no
 match.
 
+**The half of that correction which lands on records that already
+exist, 2026-10-23.** The gate above runs inside one distillation pass,
+so it decides about statements arriving after a revocation and about
+nothing else. Every tuning record written before it existed came through
+the old create path, which means a record may already hold the same rule
+twice under two ids, and revoking one of that pair leaves the other
+`active` and exporting. The repair is a report rather than a sweep,
+because withdrawing a second inference the user did not name would be
+this product deciding what she meant: `revocationTwins` and
+`allRevocationTwins` in `ursa-major/src/tuning/revocation.ts` name the
+twin, print the command that would withdraw it, and write nothing.
+`ursa consent revoke-axiom` reports at the moment of revocation and
+`ursa consent show` reports the pairs already on disk, which is the
+surface that reaches the existing population. Design document:
+`docs/design/revocation-twins.md`.
+
 A tombstone is the wrong answer for erasure, because a tombstone preserves
 the statement derived from the thing being erased. `tuning/types.ts` already
 settles it: "An axiom without evidence is invalid by construction."
