@@ -1,16 +1,28 @@
 # Trigger test — distilling-a-tuning-record
 
-Six prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Three are near misses that should not.
+Eight prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Five are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes, not the test. The budget is three near misses rather
+is what changes, not the test. The budget is five near misses rather
 than two because §5c sets one near miss per adjacent skill, and this
-skill has three neighbours: every skill now in the library.
+skill has five neighbours: every other skill in the library.
 
 Near miss 4 is `quoting-a-number-from-an-outcome-record`'s own trigger,
-near miss 5 is `running-an-outcome-record-trial`'s, and near miss 6 is
-`adjudicating-uncertain-spans`'. All three fail for one reason, which
-is the subject of the note at the end.
+near miss 5 is `running-an-outcome-record-trial`'s, near miss 6 is
+`adjudicating-uncertain-spans`', near miss 7 is
+`adding-a-bound-to-the-record-gate`'s, and near miss 8 is
+`clearing-a-record-for-release`'s. The first three fail for one reason,
+which is the subject of the note at the end; the last two do not, and
+the note says why.
+
+Near misses 7 and 8 were added on 2026-10-24, and the description's
+exclusion clause was widened in the same commit to name the work they
+ask for. Both siblings landed after this file was written, on 2026-10-18
+and 2026-10-23, and neither was added at the time. Under §5 the test
+failing means the description changes, and these two failed in the
+weaker way: not against a stated exclusion but against the absence of a
+positive hook, which is a description that happens to be right rather
+than one that says where its edge is.
 
 ## Should fire
 
@@ -89,20 +101,92 @@ it. If it fired here the user would get a procedure for auditing axiom
 evidence against record steps, which is the same shape of work on the
 wrong object.
 
-## Note on the boundary, which is one edge and not three
+**7. "Add a bound that a record's verbatim-survived character count
+never exceeds its generated character count. It is obviously true and
+the gate should catch it."**
+
+`adding-a-bound-to-the-record-gate`'s own trigger. Close for a reason
+none of the first three share, and it is not vocabulary: both skills
+judge whether a proposed *rule* is well-founded. This skill's step on
+axiom evidence asks whether a rule about the person is grounded in what
+the record shows; that skill's first step asks whether a rule about the
+record is a bound or a measurement. The judgment has the same shape and
+the same failure mode, a rule asserted more confidently than its
+evidence carries.
+
+The line is the object the rule is about. An axiom is a claim about a
+person, written by a model and held against the evidence pointers in
+`tuning.json`. A bound is a claim about one record's internal
+consistency, written by a person into `invariants.ts` and held against
+a committed counterexample. Nothing in this skill's procedure reads
+`invariants.ts` and no step can add or change a bound.
+
+Worth stating because it is the honest weakness of this pair: before
+2026-10-24 this prompt was excluded only by the absence of a hook. The
+description's `Use when` requires a record about to become axioms or an
+axiom about to be trusted, and a character-count bound is neither, so
+the answer was already no. But a reader looking for the edge would not
+have found it written down, and the exclusion clause now names gate
+work so that the no is stated rather than inferred.
+
+**8. "The gate workflow is green on my record, so I'm pasting the
+conversation into the design doc as the example payload. Any reason not
+to?"**
+
+`clearing-a-record-for-release`'s own trigger, and the closest call in
+this file, because this skill's description genuinely does fire "for
+deciding what may leave the machine with a tuning block". A release
+clause already lives here. So the two skills are not separated by
+subject matter at all: both of them answer what may leave.
+
+The line is what is leaving, and it is mechanical rather than a matter
+of degree. This skill rules on a tuning block, meaning the axioms and
+whatever travels with them. What is leaving in this prompt is raw
+conversation text out of an outcome record, which no tuning block
+contains and no axiom quotes except as the user's own words. So the
+object is on the other side of the handoff and the ruling belongs to
+the skill that owns the three exits, which also knows the thing this
+one does not: that pasting into a design document is a different exit
+from a disclosure batch and is governed by opposite rules about raw
+text.
+
+The related prompt that *would* fire is the same sentence with "the
+tuning block" in place of "the conversation", and the difference
+between those two prompts is the whole boundary.
+
+## Note on the boundaries, which are two edges and not five
 
 §5c of `prompts/skill-extract.md` warns that a skill with three or more
 neighbours is probably describing a topic rather than a piece of work,
-and says the signal means re-cut the skills. This skill has three
-neighbours and should not be re-cut, because the three boundaries are
-the same boundary counted three times. Every existing skill works on
+and says the signal means re-cut the skills. This skill has five
+neighbours and should not be re-cut, for the reason §5e gives: count
+artifacts, not neighbours.
+
+Three of the five near misses are one edge counted three times.
+`adjudicating-uncertain-spans`, `quoting-a-number-from-an-outcome-record`
+and `running-an-outcome-record-trial` all work on
 `outcome_record.json`. This one works on `tuning.json`. The handoff
 from the record to the tuning store is a single edge in the pipeline,
-and all three near misses above fail by sitting on the record side of
+and near misses 4, 5 and 6 all fail by sitting on the record side of
 it.
 
+Near misses 7 and 8 are a second edge, and that is the part this file
+did not know until 2026-10-24. `adding-a-bound-to-the-record-gate`
+works on the checker rather than on any record, and
+`clearing-a-record-for-release` works on a boundary rather than on an
+artifact, so neither of them sits on the record side of anything.
+Against the gate the shared object is a *rule* and the question is what
+the rule is about. Against the release skill the shared object is a
+*departure* and the question is what is departing. Two edges, two
+different tests, which is why the budget of five is not five copies of
+one argument.
+
 Ours: counting neighbours is the wrong test once a library covers two
-artifacts. The test that distinguishes a topic from a piece of work is
-whether the skill's inputs and outputs name the same file as its
-neighbours'. That is proposed as §5e in `prompts/skill-extract.md` this
-run, and this test is the evidence for it.
+artifacts, and still the wrong test once it covers four. The test that
+distinguishes a topic from a piece of work is whether the skill's
+inputs and outputs name the same file as its neighbours'. That was
+proposed as §5e in `prompts/skill-extract.md` by the run that wrote the
+first version of this note, and this test is still the evidence for it:
+`tuning.json` appears in no other skill's inputs or outputs, and that
+single fact is what makes five neighbours a position in a pipeline
+rather than a topic.

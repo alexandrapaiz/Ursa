@@ -9,14 +9,15 @@ description: >
   on a rule, for choosing which tuning store a record accrues into,
   and for deciding what may leave the machine with a tuning block.
   Does not fire for producing an outcome record, for settling the
-  label on an individual span, or for quoting a statistic out of a
-  record.
-version: 0.3.3
+  label on an individual span, for quoting a statistic out of a
+  record, for adding or rewording a bound in the record gate, or for
+  clearing anything other than a tuning block for release.
+version: 0.4.0
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-05
-revised: 2026-10-18
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
