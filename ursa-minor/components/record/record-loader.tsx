@@ -108,7 +108,7 @@ export function RecordLoader() {
       <h2 className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
         <span className="text-[var(--polar)]">✦</span> Read your own
       </h2>
-      <p className="mt-7 max-w-xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+      <p className="mt-7 measure-narrow text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
         A run writes your record to{" "}
         <span className="font-mono text-[0.85rem] text-[var(--star)]">
           .ursa/records/&lt;id&gt;.json
@@ -170,7 +170,7 @@ export function RecordLoader() {
       </div>
 
       {error ? (
-        <p role="alert" className="mt-6 max-w-xl text-[0.85rem] leading-[1.6] text-[var(--star)]">
+        <p role="alert" className="mt-6 measure-narrow text-[0.85rem] leading-[1.6] text-[var(--star)]">
           {error}
         </p>
       ) : null}

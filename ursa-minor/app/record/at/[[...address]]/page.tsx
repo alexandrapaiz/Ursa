@@ -64,7 +64,7 @@ export default async function RecordAtAddressPage({
         <h1 className="mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
           The address says where the bytes are. Nothing of ours is in between.
         </h1>
-        <p className="mt-8 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+        <p className="mt-8 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
           A record id is a directory name, a date and a short commit, which is unique on the machine
           that made it and namespaced by nothing outside it. Rather than run a service that resolves
           ids to locations, and so hold a register of who published what, an Ursa record address
@@ -77,7 +77,7 @@ export default async function RecordAtAddressPage({
           <h2 className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> What an address cannot do
           </h2>
-          <p className="mt-7 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+          <p className="mt-7 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
             It cannot prove the record is the one that was published. A digest is stated by a site&rsquo;s
             index, and an address names a record and no index, so this page shows the digest of what
             arrived and says plainly that it checked nothing.{" "}

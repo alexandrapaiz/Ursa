@@ -193,7 +193,7 @@ export function RecordAtAddress({ initial }: { initial: string }) {
           host and the path walking off the right edge. Breaking inside
           the word is the only thing that holds at that measure. */}
       {error ? (
-        <p role="alert" className="mt-7 max-w-2xl break-words text-[0.85rem] leading-[1.7] text-[var(--star)]">
+        <p role="alert" className="mt-7 measure break-words text-[0.85rem] leading-[1.7] text-[var(--star)]">
           {error}
         </p>
       ) : null}
@@ -241,7 +241,7 @@ function AddressForms() {
           </li>
         ))}
       </ul>
-      <p className="mt-8 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+      <p className="mt-8 measure text-[0.85rem] leading-[1.6] text-[var(--dim)]">
         Your own records print their address when you ask the resolver for it, and a published site
         states one for every record in its index. If what you have is a site rather than a single
         record,{" "}
@@ -288,7 +288,7 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       {/* The integrity line sits above the record rather than under it,
           because it governs how everything below should be read. */}
       <div className="mt-6 border-l border-[var(--line)] pl-5">
-        <p className="max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{copy.line}</p>
+        <p className="measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">{copy.line}</p>
         {digest ? (
           <p className="mt-3 [overflow-wrap:anywhere] font-mono text-[0.66rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
             sha256 {digest}
@@ -297,7 +297,7 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       </div>
 
       {address.scheme === "git" ? (
-        <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">
+        <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">
           A committed record is served as plain text, so the page the resolver writes beside it
           arrives at a browser as source code rather than as a page. On this form of address, this
           viewer is not the nicer way to read the record; it is the only one.
@@ -305,11 +305,11 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       ) : null}
 
       {permanence ? (
-        <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{permanence}</p>
+        <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">{permanence}</p>
       ) : null}
 
       {fromPath ? (
-        <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">
+        <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">
           You opened this by its address, so whoever serves this page saw which record you asked
           for, and not one byte of it: the record itself went straight from{" "}
           {recordAddressHost(address)} to your browser. Pasting an address into the field above

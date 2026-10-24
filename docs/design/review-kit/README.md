@@ -14,7 +14,9 @@ cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromiu
 | file | what it does |
 |---|---|
 | `lib/browser.mjs` | Launches chromium. On a host with no root it fetches the shared libraries chromium needs with `apt-get download` and `dpkg-deb -x`, which need no privilege, and retries. |
-| `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. |
+| `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. |
+| `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. |
+| `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
 | `hover.mjs` | Hovers an element and scrubs its transition to an exact millisecond, or `--curve` to sweep the whole thing. Host-independent, which is the point. |
 | `sample-motion.mjs` | Captures a hover three ways: a frame series, the inline style writes a library makes, and the browser's own animation engine. |
 | `fit-motion.mjs` | Characterises a capture. Fits start time and duration as free parameters, names the curve, and says `UNRESOLVED` rather than guessing when the capture is too sparse. |
@@ -35,6 +37,13 @@ forces a style recalculation per frame, which on a heavy page halves the
 frame rate and makes every motion look slower than it is. Use
 `--writes-only` when the page is busy, and check `cadenceMs` in the
 output before believing a fit.
+
+**A pixel count from a `--live` frame is a fact about the starfield.** Two
+`--live` shoots of one build differ by 4,921 to 19,140 pixels on the home
+page and the 404 page, and by 0 on every `/record*` frame. Four reviews
+reported frame differences before anyone established that floor. The
+freeze is on by default now, and `measurements.txt` says in its first line
+which mode produced the set.
 
 **A frame rate measured in a sandbox is a fact about the sandbox.** With
 no GPU, chromium falls back to SwiftShader and rasterises on the CPU, and

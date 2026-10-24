@@ -42,7 +42,7 @@ export default async function RecordPage({ params }: { params: Promise<{ id: str
         <h1 className="mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leading-[1.3] tracking-[-0.015em] text-[var(--star)]">
           {record.task.id}
         </h1>
-        <p className="mt-6 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+        <p className="mt-6 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
           The finished work, joined backward to every model generation that fed it. Nobody graded
           any of this. The work either used what a model wrote or it did not, and that is the whole
           label.
@@ -54,7 +54,7 @@ export default async function RecordPage({ params }: { params: Promise<{ id: str
           <h2 className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
             <span className="text-[var(--polar)]">✦</span> Check it yourself
           </h2>
-          <p className="mt-7 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+          <p className="mt-7 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
             Nothing above needs to be taken on this page&rsquo;s word. The record is served as the
             bytes it was built from at{" "}
             <a

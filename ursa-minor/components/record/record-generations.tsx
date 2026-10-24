@@ -1,7 +1,7 @@
 "use client";
 
 import { FATE_COPY, type OutcomeRecord } from "@/lib/record/types";
-import { elicitingPrompts, pct } from "@/lib/record/provenance";
+import { elicitingPrompts, pctFixed } from "@/lib/record/provenance";
 import RecordDocument from "./record-document";
 
 /**
@@ -68,7 +68,7 @@ export function RecordGenerations({
                   {gen.filePath ? ` · ${gen.filePath}` : ""}
                 </span>
                 <span className="text-[var(--dim)]">
-                  {conv ? `${pct(conv.survivalRate)} survived` : `${gen.text.length} chars`}
+                  {conv ? `${pctFixed(conv.survivalRate)} survived` : `${gen.text.length} chars`}
                   <span className="pl-3 text-[var(--star)]">{open ? "−" : "+"}</span>
                 </span>
               </button>

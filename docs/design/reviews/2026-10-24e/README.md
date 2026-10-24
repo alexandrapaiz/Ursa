@@ -309,7 +309,7 @@ node probe-forms.mjs      data/forms-after.txt
 node measure-hit-areas.mjs data/hit-areas-after.txt data/hit-areas-after.json
 node verify-fields.mjs    data/field-verification.txt   # the 119 checks
 node crop-forms.mjs       after                         # the 3x pairs in §2
-python3 diff-frames.py    before after data/frame-diff.txt
+python3 ../../review-kit/diff-frames.py before after data/frame-diff.txt
 node bench-fields.mjs     data/benchmark-fields.json https://stripe.com
 ```
 
@@ -320,7 +320,9 @@ against the built one before every measurement, and the before build was
 additionally confirmed by the absence of `rec-field` from the served
 CSS.
 
-`diff-frames.py` is written against PIL, which is on the host already,
+`diff-frames.py` was written in this directory and the next run moved it
+into `docs/design/review-kit/`, which is why the line above reaches for it
+there. It is written against PIL, which is on the host already,
 rather than against an npm image library. The charter wants a ledger
 proposal before a dependency and a review script is not a reason to add
 one to the site.
