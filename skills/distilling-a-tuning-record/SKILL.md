@@ -87,7 +87,7 @@ evidence:
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:170,205-213
+    source: ursa-major/src/resolve-episode.ts:183,205-213
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
     source: ursa-major/src/parse.ts:14,57,81,113, ursa-major/src/types.ts:606-607

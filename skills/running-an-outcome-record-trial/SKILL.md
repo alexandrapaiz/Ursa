@@ -42,7 +42,7 @@ evidence:
     source: ursa-major/src/resolve-episode.ts:123-135,205-213; ursa-major/src/stats.ts:132,140-142
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
-    source: ursa-major/src/resolve-episode.ts:133,196; ursa-major/src/episodes.ts:25
+    source: ursa-major/src/resolve-episode.ts:134,209; ursa-major/src/episodes.ts:25
   - ref: E8
     what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
     source: ursa-major/src/bin/ursa.ts:492-493; ursa-major/src/bin/ursa.ts:515; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
@@ -78,7 +78,7 @@ evidence:
     source: docs/agents/incidents.md:204-210
   - ref: E19
     what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
-    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:14,68-69; ursa-major/src/parse.ts:81,109-114,131-141,177
+    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:14,68-69; ursa-major/src/parse.ts:81,109-114,147-157,177
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
     source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52

@@ -89,13 +89,13 @@ evidence:
     source: ursa-major/src/consent.cli.ts:1-18
   - ref: E23
     what: what `ursa consent show` prints, including the active and revoked inference counts, the erasures with what each removed, and the closing sentence that differs by consent state
-    source: ursa-major/src/consent.cli.ts:68-119
+    source: ursa-major/src/consent.cli.ts:86-157
   - ref: E24
     what: revoking a scope is a stop and not an undo, and deletion of what was already sent is a request to the aggregation layer
     source: ursa-major/src/consent.cli.ts:172-181
   - ref: E25
     what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay
-    source: ursa-major/src/consent.cli.ts:146-159
+    source: ursa-major/src/consent.cli.ts:184-192
   - ref: E26
     what: the order disclose runs in, project then report the withholdings then audit, and that a single finding means nothing is written and the command exits 1
     source: ursa-major/src/consent.cli.ts:255-269

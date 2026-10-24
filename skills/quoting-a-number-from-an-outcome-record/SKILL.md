@@ -46,13 +46,13 @@ evidence:
     source: ursa-major/src/viewer.ts:234-266,277-286
   - ref: E8
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:432-459, ursa-major/src/match.ts:7-8
+    source: ursa-major/src/resolve.ts:465-520, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short raw-exact match is labelled survived_verbatim with score 1 and flagged trivial so it sits inside that category's chars, unless the descent check demotes it, which drops the trivial flag
     source: ursa-major/src/resolve.ts:380-393,233-272, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
-    source: ursa-major/src/resolve.ts:448-458
+    source: ursa-major/src/resolve.ts:481-512
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
     source: ursa-major/src/types.ts:662-663, ursa-major/src/stats.ts:36-37,54-55
@@ -73,7 +73,7 @@ evidence:
     source: CLAUDE.md:72-74 (section 1, trajectory metadata)
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
-    source: ursa-major/src/stats.ts:45-57,154-159
+    source: ursa-major/src/stats.ts:47-61,154-159
   - ref: E18
     what: path-filter drops generations at parse time, before any denominator is computed
     source: ursa-major/src/parse.ts:146, ursa-major/src/cli.ts:58,119
@@ -82,7 +82,7 @@ evidence:
     source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:585, ursa-major/src/viewer.ts:180
   - ref: E20
     what: the CLI prints finalChars and coveredChars on one line, and gives every class both an of-final and an of-classified column
-    source: ursa-major/src/cli.ts:167-173
+    source: ursa-major/src/cli.ts:167-172
   - ref: E21
     what: the methods document's own limit, n=1 demonstrates label types rather than statistics and every quantitative claim is an existence proof
     source: docs/beyond-preference-pairs.md:157-160

@@ -31,7 +31,7 @@ evidence:
     source: ursa-major/src/match.ts:6,8,49-52
   - ref: E3
     what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
-    source: ursa-major/src/resolve.ts:448-455, ursa-major/src/types.ts:429-430
+    source: ursa-major/src/resolve.ts:481-487, ursa-major/src/types.ts:429-430
   - ref: E4
     what: trivial is a different flag with a different cause, set on short raw-exact matches only, kept when the normalized-only demotion fires and dropped when the descent check demotes the span
     source: ursa-major/src/resolve.ts:241-257,265-272,320-329,380-399, ursa-major/src/match.ts:10, ursa-major/src/types.ts:508
