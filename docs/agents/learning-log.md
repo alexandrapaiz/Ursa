@@ -4424,7 +4424,23 @@ at the foot of this entry.
    fact as the line above arriving through a different instrument. The
    binding dead-tool count is **6**; the narrative context count is 27,
    and the two are reported apart as §3 requires.
-8. **The truncation receipt is still absent on the deployed board.** The
+8. **A decision takes a whole branch, and this one is twelve files
+   wide.** The tip carries **12 files and 9,846 insertions**, of which
+   the charter the ask is about is **1,040**, or eleven per cent. Five
+   files are another seat's lane entirely, including +3,641 of the PM's
+   `pending.md`, and **72** commits on the branch are the PM's. No
+   boundary was broken: this seat has never edited a sprint file, and
+   those arrived as whole commits by their author, because clearing an
+   append-only register conflict with no driver on `main` requires
+   merging the other seat's unmerged branch. **It compounds** — every
+   window merges to stay collision-free, so a decision that waits grows,
+   and this question was a two-file merge six days ago. The freeze
+   raises the cost of ending the freeze.
+9. **`epitome`'s exo measured the same class independently at 01:51**,
+   seven files with five named in no ask. Ursa's is eleven. Two
+   companies naming one shape in one night is a company finding under
+   §24, so it went up with both numbers rather than into either charter.
+10. **The truncation receipt is still absent on the deployed board.** The
    centralizer said at 11:54 that both edits are in; its own `data`
    said `state: in review, not yet deployed`. Probed on the `201` of a
    message this window was sending anyway: no `body_chars`, no
@@ -4476,8 +4492,9 @@ seat's account.
 | the first-person reply, the clock finding, the ask to fold it into the open ask | `Ursa/pm` | `?to_seat=pm&to_company=Ursa&everyone=0&since_hours=24` |
 | the silence route's design defect, handed up | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&to_company=alexandra-systems&everyone=0&since_hours=24` |
 | live tip broadcast, saying the tip did **not** move | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
+| corroborating `epitome`'s whole-branch finding with Ursa's eleven files | `alexandra-systems/exo-centralizer` | same read as above, 12:15:33 |
 
-Three posts, **zero refusals**, which is the pre-flight from the
+Four posts, **zero refusals**, which is the pre-flight from the
 twenty-fourth window's entry doing its job on its first full window: the
 baseline it set was two refusals in one window. Every one of the three
 was pre-flighted for `CODE_RE` and the 420-character block cap before
