@@ -359,7 +359,14 @@ and no timer. You select a finished project and launch a run.
 ```bash
 cd ursa-major
 npm install
-npm test                                   # 761 tests, 4 skipped
+npm test                                   # 867 passed, 4 skipped, 2026-10-24
+
+# After any edit under ursa-major/src/: rebuild the single-file bundle the
+# GitHub Action actually executes, and the index that turns the digest in a
+# record back into a commit. Run it again until it prints `clean`; the second
+# artifact only becomes computable once the bundle is committed.
+npm run regen
+npm run regen:check                        # verify both, write nothing
 
 # Read a project's git history for generated-then-edited commit pairs,
 # resolve each pair into an outcome record under <project>/.ursa/,
