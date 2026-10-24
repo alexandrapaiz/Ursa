@@ -3,7 +3,10 @@
 // in a checkout where nothing has been installed, so its tests run the same way.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { parseLedger, renderLedger, mergeLedgers } from './ledger.mjs';
 
 const BASE = [
@@ -148,4 +151,123 @@ test('a body edit does not vanish when the other side renames that heading', () 
   assert.equal(conflicts.length, 1, 'the rename and the edit are a real disagreement');
   assert.match(merged, /- Status: accepted \(owner-directed\)/, 'our edit is still in the file');
   assert.match(merged, /<<<<<<< ours/);
+});
+
+// --- Refusals, added 2026-10-24 -------------------------------------------
+// This driver used to merge any file it was handed. The exo seat asked whether
+// it could be pointed at docs/agents/incidents.md, a register whose entries are
+// `## ` headings; the answer measured below is that doing so corrupts the file
+// without saying so, which is worse than the conflict it would replace. These
+// tests pin the refusal that now stands in the way.
+
+test('a side holding one block key twice is refused rather than merged', () => {
+  // The mechanism, isolated. `index()` keeps only the last block under a
+  // repeated key while the emit loop still visits every one, so the merge
+  // duplicates one block and drops the others.
+  const base = ['# L', '', '### 2026-09-18 — a', '- Status: proposed', ''].join('\n');
+  const dup = [
+    '# L',
+    '',
+    '### 2026-09-18 — a',
+    '- Status: proposed',
+    '',
+    '### 2026-09-18 — a',
+    '- Status: proposed',
+    '- a second block under the same heading',
+    '',
+  ].join('\n');
+  const r = mergeLedgers(base, dup, base, 7);
+  assert.ok(r.refusal, 'it must refuse');
+  assert.match(r.refusal, /more than once/);
+  assert.match(r.refusal, /2026-09-18 — a/);
+  assert.equal(r.merged, dup, 'and leave our side untouched for the caller to fall back on');
+});
+
+test('the duplicate refusal names the side that holds the duplicate', () => {
+  const base = ['# L', '', '### 2026-09-18 — a', '- Status: proposed', ''].join('\n');
+  const dup = [base.replace(/\n$/, ''), '', '### 2026-09-18 — a', '- again', ''].join('\n');
+  assert.match(mergeLedgers(base, dup, base, 7).refusal, /^ours holds/);
+  assert.match(mergeLedgers(base, base, dup, 7).refusal, /^theirs holds/);
+});
+
+test('a file that parses to no entries at all is refused, not resolved by picking a side', () => {
+  // A driver pointed at a file with no `### ` heading and no dated note bullet
+  // sees one preamble block. Merging that is choosing a side for the whole
+  // file, which is how a real disagreement disappears.
+  const base = '# Some document\n\nA paragraph.\n';
+  const r = mergeLedgers(base, `${base}\nOur sentence.\n`, `${base}\nTheir sentence.\n`, 7);
+  assert.ok(r.refusal, 'it must refuse');
+  assert.match(r.refusal, /no entries at all/);
+  assert.match(r.refusal, /tools\/registers\/registers\.json/, 'and point at where the other grammars are');
+});
+
+test('the real incidents register is refused by this grammar, with its duplicate keys named', () => {
+  // The measurement the exo seat's note asked about, as an assertion against
+  // the real file rather than a fixture. Before this refusal existed, merging
+  // two clean appends to this register produced 75 `## ` entries out of two
+  // sides holding at most 42, and 372,901 bytes out of 183,353 and 209,366.
+  const register = readFileSync(new URL('../../docs/agents/incidents.md', import.meta.url), 'utf8');
+  const blocks = parseLedger(register);
+  assert.ok(blocks.length > 1, 'this grammar does see blocks in it, which is the trap');
+  const keys = blocks.map((b) => b.key);
+  assert.notEqual(new Set(keys).size, keys.length, 'and they are not unique');
+
+  const ours = `${register}\n## INC-2026-10-24-ours — a\n\n**Status:** open.\n`;
+  const theirs = `${register}\n## INC-2026-10-24-theirs — b\n\n**Status:** open.\n`;
+  const r = mergeLedgers(register, ours, theirs, 7);
+  assert.ok(r.refusal, 'the real file must be refused');
+  assert.match(r.refusal, /more than once/);
+  assert.match(r.refusal, /what happened/i, 'the sub-heading it wrongly keyed on is named');
+});
+
+test('the ideas ledger itself still merges two concurrent appends with no refusal', () => {
+  // The guard must not cost the thing it guards. Asserted on the real ledger.
+  const ledger = readFileSync(new URL('../../docs/ideas.md', import.meta.url), 'utf8');
+  const ours = `${ledger}\n### 2026-10-24 — ours\n- Trigger: t\n- Status: proposed\n`;
+  const theirs = `${ledger}\n### 2026-10-24 — theirs\n- Trigger: t\n- Status: proposed\n`;
+  const r = mergeLedgers(ledger, ours, theirs, 7);
+  assert.equal(r.refusal, null);
+  assert.equal(r.conflicts.length, 0);
+  assert.ok(r.merged.includes('### 2026-10-24 — ours'));
+  assert.ok(r.merged.includes('### 2026-10-24 — theirs'));
+});
+
+test('a clean merge still reports refusal: null, so a caller can test one field', () => {
+  const base = ['# L', '', '### 2026-09-18 — a', '- Status: proposed', ''].join('\n');
+  const r = mergeLedgers(base, base, base, 7);
+  assert.equal(r.refusal, null);
+});
+
+test('union-merge.mjs turns a refusal into a conflicted file and a non-zero exit', () => {
+  // The driver, not the function. git takes %A as the working-tree copy
+  // whatever the exit status, so a driver that refuses and leaves our version
+  // in place hands back a file that reads clean. This asserts the fallback.
+  const dir = mkdtempSync(join(tmpdir(), 'ursa-ledger-driver-'));
+  const base = '# Some document\n\nA paragraph.\n';
+  const o = join(dir, 'o');
+  const a = join(dir, 'a');
+  const b = join(dir, 'b');
+  writeFileSync(o, base);
+  writeFileSync(a, `${base}\nOur sentence.\n`);
+  writeFileSync(b, `${base}\nTheir sentence.\n`);
+
+  let status = 0;
+  let stderr = '';
+  try {
+    execFileSync('node', [join(import.meta.dirname, 'union-merge.mjs'), o, a, b, '7', 'docs/not-a-ledger.md'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (err) {
+    status = err.status;
+    stderr = err.stderr ?? '';
+  }
+  const left = readFileSync(a, 'utf8');
+  rmSync(dir, { recursive: true, force: true });
+
+  assert.equal(status, 1, 'git must be told this needs a human');
+  assert.match(stderr, /refusing to merge docs\/not-a-ledger\.md/);
+  assert.match(stderr, /no entries at all/);
+  assert.ok(left.includes('<<<<<<<'), 'the working-tree copy carries conflict markers');
+  assert.ok(left.includes('Our sentence.') && left.includes('Their sentence.'), 'both sides survive for the human');
 });

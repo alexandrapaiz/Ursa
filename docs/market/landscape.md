@@ -268,6 +268,34 @@ this category — a credentialed expert paid to grade or generate on
 request, not a person's own real work observed after the fact. New
 entry, added this run. Last observed 2026-09-30: [Handshake: Introducing Handshake AI](https://joinhandshake.com/blog/our-team/introducing-handshake-ai/), [Annotation Academy: What is Handshake AI](https://annotation.academy/glossary/what-is-handshake-ai-and-how-does-it-work).
 
+### Halluminate
+
+What it is: a data research lab (fewer than 10 people, YC S25) building
+reinforcement-learning "environments" and benchmarks for knowledge
+work beyond coding, starting with finance — a "gym" is a Docker
+container seeding real starting files (Excel, PowerPoint, raw data), a
+task such as building an LBO model, and a verifier that scores the
+result and feeds a reward signal back into post-training. New entry,
+added this run after a $30M Series A (led by Oak HC/FT, announced
+2026-10-01, bringing total funding to $38.5M, with individual
+participation from researchers at Anthropic, OpenAI, and Meta)
+surfaced it. Who it serves: already working with four of the top five
+closed-source US labs, per Y Combinator's own announcement. Pricing: not public; venture-backed, not yet a
+disclosed per-contract or per-environment rate. Strengths: a second,
+independently funded vendor (after Mercor's Deeptune acquisition,
+tracked in this entry's 2026-10-14 update) confirms "build the task
+and the verifier" is a real, fundable sub-category now, not one
+company's experiment. Weakness against Ursa, stated precisely: a gym
+is still a constructed task with a built-in verifier the model is
+scored against, closer to CLAUDE.md §1's "verifier" language than
+Category 1's solicited-rating vendors, but still not a real
+deliverable joined backward to its own generation history — nobody
+"had a real LBO to build and happened to use this environment for it."
+The reward comes from a simulation of work, not a record of work that
+actually happened. Worth tracking whether this sub-category's
+environments ever ingest real completed deliverables rather than
+seeding constructed ones. Last observed 2026-10-24: [Oak HC/FT: why we led Halluminate's $30M Series A](https://www.oakhcft.com/blog-post/the-internet-has-run-out-of-things-to-teach-why-we-led-halluminates-30-million-series-a), [Y Combinator on X: Halluminate](https://x.com/ycombinator/status/2105682350814470399).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -298,6 +326,39 @@ June 2026, eight months after launching its commercial product — the
 fastest revenue ramp observed in any category this map covers. Its
 Fall 2026 Academic Partnerships cycle opens with proposals due October
 30, 2026. Last observed 2026-09-30: [TechCrunch: Arena is now a $100M business](https://techcrunch.com/2026/06/29/arena-the-ai-leaderboard-everyone-uses-is-now-a-100m-business/).
+
+Update 2026-10-24: a $200M Series B (co-led by Lightspeed and Khosla,
+announced 2026-10-08) nearly doubled the valuation this entry tracked
+in January, from $1.7B to $3.1B, and the revenue behind it is
+concentrated among "a small number of high-ACV customers": frontier
+labs and large enterprises paying consumption-based for evaluation
+campaigns, not a broad self-serve base. Same day, Arena shipped the
+Alignment Index: 27 models scored across 90,000 sampled real-world
+agent sessions on three failure signals (Unauthorized Action, False
+Attribution, Deceptive Completion), each defined by a written rubric
+and applied by an LLM judge, with definitions stated as inspired by
+language already in OpenAI's and Anthropic's own system cards. The one
+reported finding worth carrying into positioning.md: misalignment rate
+roughly doubles when conversation length doubles, a trajectory effect
+rather than a single-turn one. A trade-press review (Forkast) flagged that Arena has not disclosed its scoring weights or
+any confidence interval, and that no scored lab has publicly
+contested its own ranking yet, so the index is new, unaudited, and
+unconfirmed by the vendors it scores.
+
+Read against CLAUDE.md §1: this is the single most well-funded
+competitor in this entire map moving its raw material from
+curated/self-selected prompts toward real agent sessions, which is a
+market vote that "what actually happened" beats "what a rater
+compared." It still does not close Ursa Minor's own gap. The label is
+an LLM judge applying a written rubric to a sampled session for a
+safety/compliance proxy, not a record of whether a real deliverable
+built from that session's output survived contact with a real task.
+Closer raw material, same grader structure. Last observed 2026-10-24:
+[Arena blog: LMArena is now Arena](https://arena.ai/blog/lmarena-is-now-arena),
+[Arena on X: Alignment Index methodology](https://x.com/arena/status/2108226499560214777),
+[Arena on X: Series B announcement](https://x.com/arena/status/2108227730114580501),
+[Forkast: Beyond the Elo — Assessing the Arena Alignment Index](https://forkast.news/beyond-the-elo-assessing-the-arena-alignment-index/),
+[Sacra: Arena revenue, valuation & funding](https://sacra.com/c/lmarena/).
 
 ### Artificial Analysis
 
@@ -509,6 +570,115 @@ current export. Worth a direct product test before leaning further on
 either "one-directional" or "symmetric" as the precise word. Last
 observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
 
+### MemHub (Tencent Hunyuan Hy-Memory)
+
+What it is: a local-first desktop-and-CLI product, open-sourced this
+month under Apache-2.0 as part of Tencent Hunyuan's Hy-Memory
+agent-memory stack (github.com/Tencent-Hunyuan/Hy-Memory). It unifies
+conversation history and coding traces from several user-authorized AI
+applications (its own README names Claude Code, Cursor, Codex,
+OpenCode, and Qwen Code) into one local SQLite store
+(`~/.one-memory`) under a managed local runtime, enabling what the
+README calls "governed cross-application memory recall." New entry,
+flagged to this seat by Ursa's research seat (finding 40,
+docs/research/briefs/2026-10-24-message-2.md).
+
+Who it serves: developers and power users running several AI coding
+tools who want one consolidated memory instead of one per tool.
+Pricing: free, Apache-2.0, self-hosted.
+
+Strengths: four of the five things Ursa Major's own value proposition
+claims to be are now demonstrated as free, open-source, shipped
+software rather than an unverified promise from an in-house product.
+Local-first processing: confirmed, data lives in a local SQLite file
+outside any package or runtime directory. Explicit authorization:
+confirmed, its README describes source-reading, model-processing, and
+host-reading as three independent authorization boundaries a user
+grants separately. User-run deletion: confirmed, a standalone `memhub
+delete-data` command that only deletes after the runtime has stopped
+and a second confirmation of the exact path. Consolidation across
+several AI applications: confirmed, that is the product's stated
+purpose.
+
+Weakness against Ursa, read carefully rather than assumed: the fifth
+property, portability of a user's consolidated profile to a model
+vendor other than the ones already feeding it (the first clause of
+Ursa Major's own value proposition), is not documented on any surface
+checked so far. This run read the top-level README and the full
+`memhub/README.md` (both in the original Chinese) and ran a code-level
+search of the whole repository for export-shaped files beyond those
+two documents. What exists is `memhub/scripts/export_public_snapshot.py`
+(a maintainer tool for publishing a demo snapshot, not a user-facing
+feature), `memhub/apps/web/src/diagnostics-export.ts` (crash/diagnostic
+logs), and an `imports/` module (`chat_exports.py`,
+`sources/exported.py`) that parses *other* tools' export files to
+ingest them, which is the import direction, not export. Nothing found
+moves a user's consolidated memory out to a model the stack does not
+already govern. The product site and the `hy_memory/` SDK docs are
+still unread, so this absence claim is bounded to the README and
+code-search surfaces checked this run, the same shape of bound
+research placed on its own narrower read (memhub/README.md only).
+
+Why this entry matters beyond its own bound: it is a direct
+demonstration of CLAUDE.md §0's fourth load-bearing constraint, "the
+software is explicitly not the moat," built and given away for free by
+the exact category of actor §5's strategic note names as
+simultaneously platform, customer, and the party most able to end us.
+See docs/market/positioning.md, "Software parity is not position
+parity," for the read on what that costs Ursa and what it does not
+touch. Last observed 2026-10-24: Tencent-Hunyuan/Hy-Memory,
+`README.md` and `memhub/README.md`, read in full
+(github.com/Tencent-Hunyuan/Hy-Memory).
+
+Update 2026-10-24 (correction, same day): the paragraph above
+undersells the import side of the "fifth property" and the correction
+is worth stating precisely rather than folded in silently. Reading the
+repository's own file tree directly (`gh api
+repos/Tencent-Hunyuan/Hy-Memory/git/trees/main?recursive=1`), the
+`imports/` module is not the two generic files first reported. It is
+eleven named, per-vendor adapters under
+`memhub/apps/core/src/one_memory/imports/sources/`: `claude_code.py`,
+`codex.py`, `cursor_unified.py`, `deepseek_harness.py`, `hermes.py`,
+`openclaw.py`, `opencode.py`, `pi.py`, `qwen_code.py`, `qwenwork.py`,
+and `workbuddy.py` (a twelfth file, `cursor.py`, appears superseded by
+`cursor_unified.py`, which is the one the source registry actually
+wires in). Each is registered with a `VerificationLevel` field
+(`host_packages.py`) of either `fixture_only` or `real_replayed`;
+several of the eleven, including Claude Code, Codex, and the Cursor
+adapter, are tagged `real_replayed` rather than `fixture_only`, and
+each tracks a `source_version` string. So the inbound direction is not
+an undocumented afterthought: it is eleven maintained, versioned,
+some-verified-against-a-real-install adapters, one per rival product.
+A user can already carry their history out of eleven competing tools
+and into this one, under a permissive licence, today.
+
+What stays absent, now bounded more precisely than "no export found":
+the backup-restore contract (`memhub/packages/contracts/src/backup-restore.ts`)
+defines a `backup_restore_source_outside_home` failure code and its
+own comment states plainly that "Core... accepts only managed sources
+under the One Memory Home `backups/` directory" — restore is built to
+read this product's own backups, not a competitor's export, and there
+is no symmetric path the other direction either. `export_public_snapshot.py`
+remains a maintainer tool, not a user-facing feature, per the original
+read above.
+
+The corrected positioning is narrower than either the original
+handoff ("stopped short of portability," wrong) or this entry's first
+pass ("the fifth property is undocumented," incomplete) allowed: most
+of portability is shipped, verified, and given away for free. What
+remains distinctively Ursa Major's is one clause of its own value
+proposition, not the paragraph — a profile the user can take out and
+point at a model the vendor does not already sell. See
+docs/market/positioning.md's correction to "Software parity is not
+position parity" for what this changes. Verified independently via
+the GitHub API against the live repository tree and three source
+files, not taken from either seat's paraphrase. Last observed
+2026-10-24: Tencent-Hunyuan/Hy-Memory,
+`memhub/apps/core/src/one_memory/imports/sources/registry.py`,
+`memhub/apps/core/src/one_memory/imports/host_packages.py`, and
+`memhub/packages/contracts/src/backup-restore.ts`, read in full
+(github.com/Tencent-Hunyuan/Hy-Memory).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -528,6 +698,24 @@ incumbent products called each one "a well-documented dialect," not a
 standard. Read plainly: every entry in this category, including this
 week's new one, is still solving portability for one vendor's benefit
 at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
+Update 2026-10-24: a Hacker News thread surfaced a "Universal Memory
+Protocol" (UMP), an open-source attempt (github.com/edihasaj/universal-memory-protocol)
+at exactly the thing the 2026-10-05 note above said nobody was
+building: one record format and six operations (recall, remember,
+get, revise, forget, feedback) meant to let any agent or store read
+and extend the same user-owned memory file. Checked rather than taken
+at its self-declared "Stable v1.0" word: 31 stars, 2 forks, 45
+commits, one visible adapter (wrapping a project called Recall), and
+no named product or company outside the repository implementing it.
+This does not overturn the 2026-10-05 conclusion, it sharpens it: an
+attempt now exists, but by the same test the earlier note applied to
+Cognee and ByteRover's formats (does a competing product read this
+back without the format's own author writing the adapter), UMP has
+not cleared that bar either, and has far less visible traction than
+either of those two. Worth a one-line recheck at the next monthly
+pass, not a promotion to its own entry yet. Last observed 2026-10-24:
+[GitHub: edihasaj/universal-memory-protocol](https://github.com/edihasaj/universal-memory-protocol), [Hacker News: Universal Memory Protocol](https://news.ycombinator.com/item?id=48428796).
 
 ## Changelog
 
@@ -565,3 +753,37 @@ at a time. Last observed 2026-10-05: [stantyan.com: Portable AI Memory or Perman
   precise, though the export is still manual copy-paste text, not a
   machine-readable round trip). No new entries added this run; the
   monthly full-map pass is not due until around 2026-10-26.
+- 2026-10-24 (event-driven, message) — added MemHub / Tencent Hunyuan
+  Hy-Memory (Category 3, now 15 entries), following a handoff from
+  Ursa's research seat (finding 40). Verified research's own bounded
+  reading by reading the top-level README myself (the one surface
+  research's own note said it had not checked) and running a
+  code-level search across the whole repository for export-shaped
+  files; both confirm the fifth property, cross-vendor portability, is
+  still undocumented anywhere checked. Positioning consequence in
+  docs/market/positioning.md.
+- 2026-10-24 (event-driven, message, same-day correction) — research
+  corrected its own earlier handoff: the repository ships eleven
+  named, versioned, partly real-install-verified import adapters, not
+  an undocumented absence. Read the repository's git tree and three
+  source files directly via the GitHub API to verify the correction
+  independently rather than take either seat's word for it; confirmed.
+  Updated the MemHub entry with the precise count, file names, and
+  verification levels, and narrowed what remains absent to the
+  outbound/export direction specifically (the backup-restore contract
+  refuses any source outside its own home directory). Positioning
+  correction in docs/market/positioning.md.
+- 2026-10-24 (hook-triggered run, capacity returned) — added
+  Halluminate (Category 1, now 16 entries), a second
+  independently-funded "build the task and the verifier" vendor after
+  Mercor's Deeptune acquisition, confirming that move is a sub-category
+  rather than one company's pivot. Dated update to LMArena/Arena: a
+  $200M Series B nearly doubled its valuation to $3.1B and it shipped
+  an Alignment Index built from 90,000 real sampled agent sessions
+  graded by an LLM judge against a written rubric — real raw material,
+  same grader-supplied label CLAUDE.md §1 contrasts the outcome record
+  against. Dated note added to the Category 3 cross-cutting entry: an
+  open-source "Universal Memory Protocol" exists but has not cleared
+  the adoption bar the 2026-10-05 note already applied to two more
+  established attempts. No new Category 3 entry; the monthly full-map
+  pass is due around 2026-10-26.
