@@ -12,7 +12,8 @@
 //   node skills/relevance-sweep.mjs <skill>[/<ref>] the dossier for one ref or one skill
 //   node skills/relevance-sweep.mjs --audited       what has been read, and when
 //   node skills/relevance-sweep.mjs --record <scope> bind a verdict to what was read
-//   node skills/relevance-sweep.mjs --stale          exit 1 if any verdict is unbound or stale
+//   node skills/relevance-sweep.mjs --stale          exit 1 if any verdict is
+//                                                   unread, unbound or stale
 //
 // A verdict is only as good as the lines it was read against, so each one is
 // bound to them in skills/relevance.lock.json: three digests per ref, over the
@@ -359,14 +360,30 @@ if (flags.includes('--record')) {
 // reports the same thing in prose and still exits 0, because a queue is not a
 // failure; an unbound or stale verdict is, and a check that cannot fail is a
 // check nobody runs twice.
+//
+// An absent verdict is counted here with the expired ones, as of 2026-10-24.
+// Until then this block computed `unread`, printed the count, and exited on
+// `bad.length` alone, so a ref nobody had ever read did not reach the exit
+// status. That is how a whole skill's 41 refs landed on `main` unread with
+// this gate green, and the only reason the gate was red that day was fifteen
+// stale verdicts in two other skills. The distinction the old code drew, that
+// a queue is not a failure, is right about the default run and wrong here: the
+// default run ranks what is left to read, and `--stale` is asked whether the
+// library's closure still holds. A ref with no verdict at all is the loudest
+// way for it not to hold. `prompts/skill-extract.md` §5q.
 if (flags.includes('--stale')) {
   const states = refs.map(verdictState).filter(Boolean)
   const bad = states.filter((v) => v.status !== 'bound')
+  // Disjoint from `bad` by construction: verdictState returns null for a ref
+  // with no audit row, so an unread ref is never also an unbound one.
   const unread = refs.filter((r) => !audited.has(`${r.entry}/${r.ref}`))
   for (const v of bad) console.log(`${v.status.padEnd(7)} ${v.key}  ${v.why}`)
+  for (const r of unread) {
+    console.log(`${'unread'.padEnd(7)} ${r.entry}/${r.ref}  no verdict in relevance-audit.md`)
+  }
   console.log(`${states.length - bad.length} of ${states.length} verdicts bound to what was read` +
     `, ${unread.length} ref${unread.length === 1 ? '' : 's'} unread`)
-  process.exit(bad.length ? 1 : 0)
+  process.exit(bad.length || unread.length ? 1 : 0)
 }
 
 if (targets.length) {
