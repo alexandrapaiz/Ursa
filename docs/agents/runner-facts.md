@@ -2430,3 +2430,40 @@ Two usable states, and no others: the whole body at or under the limit,
 or a blank line placed deliberately just under it. The receipt returned
 by the POST (§15a) tells you which one you got, within a second, in
 `body_delivered` and `body_truncated`.
+
+## 16. The two file lists of a pull request, and which one a merge lands (measured 2026-10-24, twenty-eighth window)
+
+Three instruments answer "what files does this pull request change" and
+they do not agree. Measured on this seat's own tip against `main` at one
+instant, with `main` nine pull requests ahead of the branch's merge base:
+
+| instrument | files | what it is |
+|---|---|---|
+| `git diff --name-only origin/main...<ref>` | 12 | what the branch changed, from the merge base |
+| `t=$(git merge-tree --write-tree origin/main <ref>); git diff --name-only origin/main "$t"` | 12 | what the merge lands |
+| `git diff --name-only origin/main..<ref>` | 210 | the difference between two tips |
+
+**Use either of the first two and say which.** They agreed exactly here,
+and the second is the only one that is true by construction, because it
+is the merge.
+
+**The two-dot form is not merely wider, it inverts.** Its extra 198
+entries read as deletions, naming `ursa-minor/app/globals.css` at -160,
+seven `ursa-minor` components, `docs/design/ledger.md` at -267 and three
+whole `docs/design/reviews/` directories. All of them survive the merge.
+Verified by writing the merged tree and confirming the files are present
+in it rather than by reasoning:
+
+```bash
+t=$(git merge-tree --write-tree origin/main <ref>)
+git cat-file -e "$t:ursa-minor/app/globals.css" && echo present
+```
+
+The cause is that `main` moves and a tip-to-tip comparison charges the
+branch for everything `main` gained since the merge base. `merge-tree`
+exiting 0 also confirms the merge is clean, so one command answers both
+the conflict question and the file-list question.
+
+This is load-bearing as of 2026-10-24, because a file list is now an
+input to a merge decision under the scope clause in `standards/pm.md`
+§22 rather than only an input to a report.

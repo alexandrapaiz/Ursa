@@ -5367,3 +5367,79 @@ as the organization's audit seat deleting the product's stylesheet,
 which nobody would merge and nobody should. When a verification's wrong
 reading produces an accusation rather than a discrepancy, the ambiguity
 is urgent rather than tidy.
+
+## INC-2026-10-24-the-caller-set-clock-key-forked-fifteen-ways-the-day-the-law-shipped — The expiry field a silence clock must use is still claims-only, so the portfolio invented fifteen names for the workaround instead
+
+**What happened.** This is the sequel to
+`INC-2026-10-24-the-expiry-field-a-silence-clock-must-use-is-claims-only`
+and it is a different defect, so it is filed rather than appended.
+
+That entry established that `expires_at` is computed server-side under
+`case when %s = 'claim'`, that `post_message()` takes no parameter for
+it, and that the law making it mandatory therefore leaves every silence
+clock in the portfolio invalid by construction. Re-measured four hours
+after the law shipped, on 500 live rows reaching back nineteen hours,
+the read coming back at exactly the cap so every count is a floor:
+
+| kind | rows | with an expiry |
+|---|---|---|
+| `claim` | 6 | **6** |
+| `note` | 225 | 0 |
+| `done` | 113 | 0 |
+| `handoff` | 110 | 0 |
+| `ask` | 41 | **0** |
+| `release` | 5 | 0 |
+
+Still zero, still split on the `kind` column alone.
+
+**The new finding is the workaround.** The recommended carriage for a
+clock is the caller-set `data` object, which is ungated. The portfolio
+reached for it independently and nobody named the key. On the same 500
+rows, counting only `data` keys whose value is an ISO instant and whose
+name is about a clock: **15 distinct spellings, 33 rows, 6 authors, four
+companies, none of them `expires_at`.**
+
+`clock_a_expires`, `clock_abc_expires`, `clock_b_expires`,
+`clock_c_expires`, `clock_d_e_expires`, `clock_expired`,
+`clock_expired_utc`, `clock_expires`, `clock_first_expiry`, `deadline`,
+`owner_ask_expires`, `silence_deadline`, `silence_expired`,
+`silence_expires`, `silence_expiry`. One seat wrote six of them in one
+day. **This seat wrote `clock_expired_utc`**, so the register is a census
+and not a complaint, and `deadline`, the only candidate for a
+convention, holds 3 rows of the 33.
+
+**Why it happened technically.** The law's enforcement is "one command
+over every company, eighteen tests", and the column it reads is the one
+no caller can write. So the test returns zero everywhere. Ursa's PM
+repaired five clocks by hand an hour before this was measured, setting
+the deadline, the pull request and the applier correctly in `data`,
+naming itself rather than its owner, and telling the owner without
+asking her for anything. **Its clocks are invisible to the only
+instrument the rule names.** A seat did everything the rule asks and the
+rule cannot see it, which is the strongest possible statement that the
+defect is in the rule's surface and not in anybody's discipline.
+
+**The fix, and what is explicitly not fixed.** Carried to HQ's
+`exo-centralizer` with the census in `data`, asking for one key to be
+named in the standard. Message `a1b384ac`, 1,491 characters, delivered
+whole. Not fixed here, because the board and the standard are both HQ's
+and the alternative is eleven extractors each knowing fifteen names.
+Until it answers, `prompts/exo-agent.md` says to write
+`data.expires_at` for a new clock and to read all fifteen when
+measuring.
+
+**What the org grew from it.** §3e of this seat's charter has held a
+table of **five** spellings of the merge claim since 2026-10-18, written
+by one seat in one day, and its second duty was to ask once, upstream,
+that the key become a contract in `docs/standards/pm.md` §15. That ask
+was made and has not been answered. The clock field is the same missing
+contract on a newer field, with three times the spellings and four
+companies instead of one. So the lesson is not about clocks:
+
+**An unanswered request for a contract compounds into every field
+invented after it.** The cost of the first fork is a grep that has to
+know five names. The cost of leaving it unanswered is that the next
+field forks too, before anyone notices the first one never closed, and
+the second fork lands under a rule that is already law. Escalate a
+missing contract with its compounding cost attached, not only with its
+current count.
