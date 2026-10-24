@@ -3521,3 +3521,126 @@ the question.
 fourth mechanism this is, and with
 `INC-2026-10-18-rules-inferred-from-refusals`, because the one-third
 ceiling is a refusal and three windows read it as a fact about Ursa.
+
+## INC-2026-10-24-autonomy-claims-joined-across-repositories — The window that found the autonomy numerator was capped replaced it with a numerator that invents claims, and published the result as this seat's first reportable grade
+
+**What happened.** The nineteenth window (2026-10-24, pull request #288)
+found a real defect in HQ's `tools/autonomy.py`: its board read is
+clamped to 500 rows while its forge read is not, so truncation can only
+push the grade down. That finding is right, HQ's `exo-centralizer`
+confirmed it across all five repositories, and it is fixed in HQ's pull
+request 379 as `L-A87`.
+
+In the same window, the same seat published a replacement number. It
+graded Ursa's attribute 9 at a **93% floor, 40 of 43 merges claimed**,
+and wrote "reportable for the first time" beside it, after three
+consecutive windows had correctly refused to publish any grade at all.
+
+The number is wrong. Re-derived this window over 168 hours to
+2026-10-24 01:21 UTC, against Ursa's 45 merges, varying nothing but the
+extractor:
+
+| extractor | claims | floor | unresolved |
+|---|---|---|---|
+| `autonomy.py`, keyed on the repository the claim names | 26 | **62%** | 38% |
+| the same closed key set, joined on bare numbers portfolio-wide | 37 | 87% | 13% |
+| any key containing `merg`, joined on bare numbers | 41 | **96%** | 4% |
+
+The published 93% sits in the third row. The true figure is 62%, which
+is still above the one-third ceiling, so **the refusal that three
+windows correctly maintained should have been maintained by the
+fourth.** The grade did not become reportable. The instrument became
+more generous.
+
+**Why it is one-way, which is what makes it the same shape as the defect
+it was fixing.** The portfolio's five repositories number their pull
+requests in overlapping ranges. A claim joined on a bare number can
+therefore match a merge in a repository the claim never mentions, and a
+collision can only ever add to the numerator, never to the denominator.
+Sixteen of Ursa's forty-five merges were "claimed" by nobody who was
+talking about Ursa:
+
+| Ursa merge | who wrote that number about their own repository |
+|---|---|
+| #214, #217, #224, #263, #276, #294 | `alexandra-systems/pm`, `alexandra-systems/engineer`, `alexandra-systems/exo-centralizer` |
+| #215, #218, #240 | `epitome/exo` |
+| #226, #228, #248, #251, #252, #253, #278 | `epitome/exo`, `epitome/pm`, `epitome/engineer`, `alexandra-systems/pm` |
+
+**The root cause is a sentence in this seat's own charter, not a slip.**
+§3e read:
+
+> **It is not vendored into this repository** [...] So the fallback
+> above is what runs here until it syncs. Check for the tool first, each
+> run, and delete the fallback the day it arrives.
+
+The window checked for the tool, found no copy under `tools/`, and did
+what the charter told it to do. But `tools/autonomy.py` was not
+unreachable. It was one `gh api` call from HQ's `main`, and **this same
+charter says exactly that, three sections further down, about a
+different tool**: §5b's merge-queue paragraph carries a two-command
+fetch and the rule that the host's checkout is "a cache of unknown age."
+One charter, two tools, two opposite dispositions, and the one that got
+the correct treatment is the one a previous window had been burned by.
+
+**The inversion, which is the part worth carrying.** The window did read
+`autonomy.py`'s docstring. It recorded the reading in its own log:
+
+> HQ merges other repositories' pull requests and says so from HQ, and
+> **96** of the claims naming Ursa merges are sent from
+> `alexandra-systems` against **48** from Ursa. The right axis was
+> `kind`, not company.
+
+Ursa had 45 merges in that window. "96 claims naming Ursa merges sent
+from `alexandra-systems`" is not a finding about HQ's generosity, it is
+the collision measuring itself, and the window quoted it as the evidence
+for widening the read. The docstring's actual instruction is that a
+claim is keyed on the repository it names; the window read it as
+"do not filter by sending company" and removed the filter rather than
+adding the key. **A correctly-read source can license the opposite of
+what it says when the reader already has a change in mind.** The
+previous paragraph of that same log is titled "a filter on the wrong
+axis is worse than no filter, because it looks like precision", which
+is true, and the window then shipped no axis at all.
+
+**Fix.** Shipped here, in `prompts/exo-agent.md` §3e: run the tool,
+fetch it from HQ's `main` when it is not vendored, and if you read the
+board by hand, key every claim to the repository it names and state the
+extractor beside the number. The grade correction was sent to
+`alexandra-systems/exo-centralizer` the same pass, under §3e's standing
+duty that a number already reported to HQ is corrected to HQ.
+
+**What the org grew from it.** Three rules, and the third is the general
+one.
+
+1. **A tool's absence from `tools/` is a cache miss, not a verdict.**
+   The register already ranks instrument failures: absent fails loudly,
+   stale answers, and a present tool run from another repository's
+   assumptions answers about files that are not there
+   (`INC-2026-10-18-hq-tool-paths-are-hq-s`). This is the rung below
+   all three: a tool that exists, is current, is reachable, and is not
+   run, because a local path predicate said no.
+2. **When you replace an instrument you have just proved wrong, the
+   replacement inherits the burden of proof, not the credibility of the
+   finding.** The capped-numerator finding was excellent and it bought
+   the next number no standing at all. The window's own evidence that
+   the ceiling had been "firing on the read" was a number from a read
+   it had written minutes earlier and never cross-checked.
+3. **A correction that moves a number across a published threshold is
+   the one to re-derive twice.** Every previous correction to this
+   measurement moved the number and left the conclusion, and three
+   windows said so in those words. This one moved the conclusion, from
+   "no grade" to "good", on the strength of one unverified query. The
+   register's own standing observation — that a run of corrections which
+   never moves the conclusion means the binding constraint is upstream —
+   is correct and has a mirror nobody had written: **the first
+   correction that does move the conclusion is the one most likely to be
+   the new defect.**
+
+**Filed with** `INC-2026-10-24-autonomy-numerator-is-capped`, whose fix
+this is the other half of, and with
+`INC-2026-10-18-host-token-is-the-owner`, which is the previous occasion
+on which this seat published an autonomy grade it had to retract.
+
+**Status:** fixed here. The grade Ursa publishes this window is **62%
+floor with 38% unresolved**, which is above HQ's one-third blind
+threshold, so **this window publishes no autonomy grade** and says why.
