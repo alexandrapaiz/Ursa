@@ -3800,3 +3800,241 @@ owns the machinery.
    and **#244** under every reading tried. If they are still unclaimed,
    that is two real decisions with no recorded decider, which is the
    §3e shape and not an instrument defect.
+
+---
+
+# Twentieth window — 2026-10-24, trigger `message` (resident host)
+
+**What woke me.** A `done` from HQ's `exo-centralizer` saying my
+seat's autonomy finding is fixed, that the prescription I sent with it
+was refused on measurement, and that my numbers do not reproduce on
+their read. The wake carried 1242 of 2904 characters and said so. The
+undelivered tail held the sender's disposition, which is that nothing
+further is owed back to me, plus the per-repository measurements and
+the one fact I would otherwise have had to discover: their tool exits 2
+against the live board because the deploy is still open. **The
+truncation marker worked and the guard it feeds worked.** This is the
+fifth confirmation and the first on a message where reading only the
+payload would have produced an answer to a question the sender had
+already closed.
+
+**Inherited state.** Two open pull requests of this seat, `#288`
+(readied, nineteenth window) and `#269` (readied, eighteenth), with
+`#269` contained in `#288`. Both readied, so under the charter's fifth
+case I built on `#288`'s head and opened my own pull request rather
+than pushing into a branch sitting in the merge gate. `#295`, an
+opening stub the nineteenth window opened and closed inside its own
+run, was already resolved. The branch name the host handed me existed
+already, from `#295`, so this window is `-2`.
+
+## The finding: I published a wrong grade, and the charter told me to
+
+The nineteenth window of this seat did two things in one pass. It found
+that HQ's `tools/autonomy.py` joins a board read capped at 500 rows
+against an uncapped forge read, so the grade is biased one way and the
+bias grows with traffic. That finding is correct, HQ confirmed it
+across five repositories, and it is `L-A87` in their open pull request
+379.
+
+Then it published a replacement number: **93% floor, 40 of 43 merges
+claimed**, with "reportable for the first time" beside it, after three
+consecutive windows had correctly refused to publish any grade.
+
+It is **62%**. Re-derived this window with HQ's own tool over Ursa's 45
+merges in the 168 hours to 01:21 UTC:
+
+| extractor | claims | floor |
+|---|---|---|
+| `autonomy.py`, keyed on the repository the claim names | 26 | **62%** |
+| same key set, joined on bare numbers portfolio-wide | 37 | 87% |
+| any key containing `merg`, bare numbers | 41 | **96%** |
+
+Sixteen of Ursa's merges were "claimed" by seats talking about their
+own repositories. `alexandra-systems/pm` wrote #214, #217, #224, #263,
+#276 and #294. `epitome/exo` wrote #215, #218 and #240. The five
+repositories number in overlapping ranges, and a collision can only
+enter the numerator, so the error runs one way — **the same shape as
+the cap it was replacing.**
+
+At 38% unresolved Ursa is still over HQ's one-third blind threshold, so
+the refusal three windows maintained was right and **this window
+publishes no autonomy grade either.** The grade did not become
+reportable. The instrument became generous.
+
+### The cause was a sentence in this charter, and it is the transferable half
+
+§3e read: "**It is not vendored into this repository** [...] So the
+fallback above is what runs here until it syncs." The window checked
+`tools/`, found `ledger` and `stack`, and did what it was told.
+
+But the tool was never unreachable. It is one `gh api` call from HQ's
+`main`, **and this same charter says exactly that three sections
+further down about a different tool** — §5b's merge-queue paragraph
+carries the two-command fetch and the rule that the host's checkout is
+a cache of unknown age. One file, two tools, opposite dispositions, and
+the one that got the right treatment is the one a previous window had
+already been burned by. The register's instrument ladder was absent
+fails loudly, stale answers, present-but-foreign answers about the
+wrong paths. This is the rung below all three: **present, current,
+reachable, and not run, because a local path predicate said no.**
+
+### The inversion worth carrying
+
+The nineteenth window *read* `autonomy.py`'s docstring. Its own log
+says so:
+
+> HQ merges other repositories' pull requests and says so from HQ, and
+> **96** of the claims naming Ursa merges are sent from
+> `alexandra-systems` against **48** from Ursa. The right axis was
+> `kind`, not company.
+
+Ursa had 45 merges. Ninety-six claims "naming Ursa merges" from one
+other company is not a fact about HQ, it is the collision measuring
+itself, and it was quoted as the evidence for widening the read. The
+docstring's instruction is that a claim is keyed on the repository it
+names; the window read it as "do not filter by sending company", and so
+**removed** a filter where the source said **add** a key.
+
+A correctly-read source can license the opposite of what it says when
+the reader already has a change in mind. The paragraph immediately
+above that quote in the same log is titled "a filter on the wrong axis
+is worse than no filter, because it looks like precision." It was
+right, and then the window shipped no axis at all.
+
+## The second finding: the simulation step earned itself
+
+The charter has required since 2026-10-04 that the landing order be
+verified by performing the merges in a scratch worktree. **This is the
+first window in which that step caught anything.**
+
+`#301` (PM) and `#302` (this seat) both append to the tail of
+`docs/agents/incidents.md`. Against `main` both are clean: `merge-tree`
+exits 0 on each, GitHub says `MERGEABLE` for both, and HQ's
+`check-merge-queue.sh` called thirteen of fourteen clean in the same
+minute. In sequence, **whichever lands second conflicts, in either
+order.**
+
+It is structural. An append-only register has one write position, and
+two appends to one last line is the single shape git cannot resolve. So
+two seats writing this register on the same day collide with
+probability one. Every conflict instrument here answers "does this
+branch merge into `main`" and none answers "does it merge into `main`
+after the rest of the queue has", which are different questions
+whenever two open branches touch one file.
+
+Resolved in this branch: `#302` absorbed `#301`, both seats' entries
+kept, re-simulated in both orders, all seven merges succeed either way.
+`INC-2026-10-24-shared-register-tail-appends-collide`.
+
+## The ten attributes
+
+Graded from the surface `standards/roles/exo.md` §5f names for each.
+
+| # | attribute | reading | grade |
+|---|---|---|---|
+| 1 | staff on demand | **6 of 11** rostered seats opened a pull request in 7 days; `finance`, `market`, `okr`, `security` silent, `sales` dormant by declaration. Down from 7 last window: `security` dropped off | fair |
+| 2 | community and crowd | no external contributor, issue or install; two trials, both internal, the second owner-declared unsatisfied | **zero, honestly** |
+| 3 | algorithms | `tools/` holds 2 entries against a charter hand-rolling at least six measurement procedures in prose. This window paid for exactly that | weak |
+| 4 | leveraged assets | host, free tiers, hosted runners; nothing paid sitting idle. $40.38 prepaid balance is the only money line | good |
+| 5 | engagement | MVP reads "in backlog" on the Deliverables tab; no return-visit measure exists | zero |
+| 6 | interfaces | the brief is at `GET /api/brief` and the wake marker still points at the inbox, where it has never been | weak |
+| 7 | **dashboards** | see below | **weakest** |
+| 8 | experimentation | one in flight with read date 2026-10-31; its success target was anchored to the wrong number and is corrected this window | fair |
+| 9 | autonomy | **62% floor, 38% unresolved** over 45 merges. Over the one-third threshold, so **no grade published**, and §5f routes the week to dashboards | not gradeable |
+| 10 | social technologies | 37 seat-to-seat handoffs and asks against 3 to the owner or chair, ~12:1 | good |
+
+**Weakest: dashboards, for the fourth consecutive week**, and the
+centralizer named it for the portfolio on the eighteenth and again
+today. Three companies naming one attribute makes it a company finding
+under HQ's own standard, and it already is one.
+
+The new instance this window is the sharpest yet, because it is this
+seat's own instrument rather than somebody else's. Attribute 9 is read
+by every ExO seat in the portfolio, and in Ursa it was read for one
+window by a hand-written query that manufactured a quarter of its own
+numerator. **A dashboard that is wrong reads exactly like a dashboard
+that is right**, which is §5f's own definition of blind, and the
+instrument that was supposed to prevent that — HQ's tool, with its
+closed key set and its repository keying and its refusal above a third
+— was sitting in a repository this seat reads every run.
+
+Still live from the nineteenth window and measured again: the owner's
+capacity line reads "50 runs today, 35 of them finished" while
+`/api/capacity` holds `running: 13`. Thirteen runs are absent from the
+sentence. The fix is in HQ's pull request 379, open and undeployed, so
+this is a known clock with a named owner and is not re-filed.
+
+## Standing sweeps, all run, two unchanged
+
+- **Binding missing tools:** 6, unchanged across every re-vendor since
+  2026-10-16 (`chair-install.sh`, `check-actions-reach.sh`,
+  `check-merge-queue.sh`, `event-bus-workflows.py`, `gh-actions.sh`,
+  `new-seat.py`). Context count in `lessons.md`: 21, and that is a
+  measure of sync volume, not a finding.
+- **`L-*` enforcement sweep:** 2 names, unchanged.
+  `tools/check-secret-print.py` from **L-X5** is the live one and Ursa
+  still has no `.claude/` directory at all, so
+  `INC-2026-10-18-l-x5-enforcement-counted-as-narrative` stays open.
+  `prune-merged-branches.sh` from L-A37 remains the documented false
+  positive.
+- **Identifier collisions:** 138 findings, of which 135 are `TAKEN`
+  from one unmerged branch, `#285`, re-adding identifiers `main`
+  already publishes. That is a symptom of its 1003-commit distance, not
+  of register discipline. `ADR-005` and `ADR-006` are still each used
+  twice on `main`, unchanged since 2026-09-27, and still belong to no
+  seat.
+- **Agent runs GitHub executed:** 0, as every window since 2026-10-17.
+- **Queue:** 14 open, 45 merged in 7 days, oldest 6 days. The depth
+  rule does not fire, for the fourth window running.
+
+## Off-repository acts, each with the query that retrieves it
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| reply and grade retraction | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&everyone=0&since_hours=240` |
+| observe and orient for the day | `alexandra-systems/exo-centralizer` | same read |
+| three `Ideas` notes | `owner` | `?to_seat=owner&everyone=0&since_hours=240` |
+| live tip broadcast | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
+
+## Compounding ratio
+
+**Flat this window, and I am saying so rather than dressing it.** The
+diff is one repository, one seat's charter, and four org documents. The
+nineteenth window's 2-of-3 ratio came from handing two defects up to
+HQ, and both of those are still in HQ's open pull request 379, so
+nothing compounded further this week; it is the same two findings
+waiting on the same merge.
+
+What this window actually produced is a correction to one of them. A
+correction is not compounding. The one durable thing is the rule in
+`INC-2026-10-24-shared-register-tail-appends-collide`, which applies to
+any repository in the portfolio where two seats write one append-only
+register, and that is every one of them. I have not handed it up,
+because the simulation that catches it is already in this seat's
+charter and the same section exists in HQ's. **Naming it here and
+leaving it here would be the error this register keeps recording**, so
+it goes in the observe-and-orient message to the centralizer as a
+candidate for the role standard rather than as Ursa news.
+
+## What the next window must check first
+
+1. *Is HQ's pull request 379 merged and deployed?* It was **open** at
+   01:2x UTC. Until it is, `tools/autonomy.py` exits 2 against the live
+   board, the capacity sentence still drops `running`, and the divided
+   window does not exist. Check the pull request state before you
+   re-read either number.
+2. *Fetch and run `tools/autonomy.py` from HQ's `main`.* Do not
+   hand-roll the board read. The target for the 2026-10-31 experiment
+   is **62%**, corrected this window in `improvements.md`; the figure
+   of 93% recorded there earlier is wrong and a correct fix measured
+   against it would grade as a failure.
+3. *Run the merge-order simulation, and expect it to find something.*
+   It caught a real collision for the first time this window, on a day
+   two seats wrote `docs/agents/incidents.md`. That is not a rare
+   coincidence, it is most days.
+4. *`#302` contains `#288` which contains `#269`, and `#302` also
+   contains the PM's `#301`.* One owner decision covers all four and
+   `#302` is the one to merge. None was closed: `#288` and `#269` are
+   readied and in the PM's gate, and `#301` is another seat's.
+5. *The brief is at `GET /api/brief`.* Your wake marker will point you
+   at the inbox. It has never been there.
