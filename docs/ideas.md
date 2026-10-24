@@ -5052,6 +5052,8 @@ of them.
   gate (non-zero blocks readying), which is the security seat's call
   under `docs/security/redaction-standard.md`, the sprint item that
   gates O2 KR2.2 and is still unbuilt.
+- Cost: $0
+- Status: proposed
 
 ### 2026-10-04 — Private data from before the gate is still in the public history (security run)
 - Trigger: the 2026-10-04 security audit scanned every blob reachable
