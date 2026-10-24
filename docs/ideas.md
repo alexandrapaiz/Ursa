@@ -9086,3 +9086,112 @@ context file here.
   constructed one, before assuming the gap is stable.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (engineer, message-triggered run) — `SourcePointer.model` is a git identity on the only path that produces records, and the record never says so
+
+- Trigger: looking for where to put the apparatus field research asked
+  for (board note, 2026-10-24) meant reading what the field beside it
+  actually holds. `src/resolve-episode.ts:133` sets
+  `SourcePointer.model` from `episode.agentMarker`, and
+  `src/pairfinder.ts:566-577` builds that from a declared agent identity,
+  a `Co-Authored-By` trailer, or an author name. Resolving this
+  repository's own history yields four distinct values: three that happen
+  to name a model, because this org's commit convention puts one in the
+  trailer, and `claude[bot]`, which is a GitHub App and names no model at
+  all.
+- What: the field is not one kind of thing. On one corpus it is
+  sometimes a model id and sometimes a bot identity, and which one
+  depends on whether a commit came from a seat or from an Action. A lab
+  grouping records by `model` to compare vendors would read
+  `claude[bot]` as a vendor. This run documented the field in place
+  (`src/types.ts`) rather than changing it, because changing what
+  `model` means rewrites every record on disk and that is a product
+  decision rather than an engineering one. The options are: keep it and
+  rename it to `signedBy`, which is what it is; or split it into
+  `signedBy` plus a `modelId` that only the transcript path can fill,
+  and let the git path leave `modelId` absent the way it now leaves the
+  apparatus unobservable.
+- First step: the owner rules on whether `model` is renamed or split.
+  Either way the change is mechanical and the migration question is the
+  real one, since records on disk carry the old field name.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message-triggered run) — The apparatus claim has no invariant, and adding one means regenerating twenty-three fixtures
+
+- Trigger: this run added `apparatus` to every generation
+  (`src/apparatus.ts`, `docs/design/apparatus-provenance.md`) and
+  deliberately did not gate it. The natural bound is structural: an
+  `unobservable` apparatus must carry a `reason` and no apparatus facts,
+  and an `observed` one must carry no `reason`. Nothing checks that
+  today, so a hand-edited or third-party record can claim `observed`
+  while carrying a `reason`, which is a record lying about the
+  provenance of its own provenance.
+- What: the bound itself is about fifteen lines. The cost is everything
+  around it, and it is a cost this repository imposes on purpose:
+  `src/invariants.violations.test.ts:157` asserts that the set of codes
+  tripped across `fixtures/violations/` equals `BOUND_CODES` exactly, so
+  a new bound requires a new violation fixture that trips it. Adding one
+  changes `BOUND_COUNT` and the gate's `boundsDigest`, which means
+  regenerating all twenty-three fixtures through
+  `npm run fixtures:violations` and updating two tests that assert on the
+  count (`src/launch-parity.test.ts:518`, `src/ci/gate-wiring.test.ts:98`).
+  That is the right slice boundary rather than an obstacle: landing
+  twenty-three regenerated fixtures in the same diff as a schema change
+  makes neither reviewable.
+- First step: write the violation fixture case in
+  `tools/make-violation-fixtures.ts` (the `Case` list at its tail is the
+  whole surface), then add the bound and regenerate. One day.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, message-triggered run) — The committed bundle survives a two-branch merge correctly, and nothing in the repo says why it is allowed to
+
+- Trigger: this run and open pull request 290 both regenerate
+  `ursa-major/dist/ursa.cjs`, whose bytes are the resolver's identity
+  (`resolverIdentity()` hashes it into `task.resolvedBy.digest`). Git
+  auto-merges that file with no conflict, which looked like silent
+  corruption of the one artifact whose bytes are a published claim, so
+  this run tested it: the auto-merged file hashes to `4919b0a7…`, which
+  matches neither side nor `main`, and a clean `npm run bundle` from the
+  merged sources produces `4919b0a7…` byte-for-byte. The merge is
+  correct. The reason is that esbuild emits each source module as its own
+  contiguous block, so two changes in different modules are
+  non-overlapping hunks.
+- What: it is correct by a property of esbuild's output layout that
+  nothing in this repository states, tests, or depends on deliberately,
+  and the failure mode if it ever stops holding is the worst available:
+  a committed resolver that no source tree generates, stamped into the
+  `resolvedBy.digest` of every record the Action writes, with no conflict
+  to warn anyone. The property holds only while two branches touch
+  different modules. Two branches editing the same function in
+  `src/resolve.ts` would produce overlapping hunks in the bundle, and
+  then the text merge is a guess.
+- First step: a test in `src/bundle-canonical.test.ts` that asserts the
+  committed bundle equals a rebuild — which already exists — plus a
+  pre-merge check the owner can run, or a `.gitattributes` entry marking
+  `ursa-major/dist/ursa.cjs` as requiring rebuild-on-merge rather than
+  text merge. The cheapest honest version is `merge=binary` on that path,
+  which turns the silent guess into a conflict the resolver's own build
+  step resolves.
+- Cost: $0
+- Status: proposed
+
+**Competitive scan, 2026-10-24 (engineer's craft scan).** arXiv's
+information-retrieval and computation-and-language listings, via the
+paper research surfaced (2610.00253) and its framing of stored-response
+reuse. **Worth stealing:** the paper's design of recording the harness
+configuration *alongside* each stored response rather than once per
+experiment, so a response can be re-analysed years later by someone who
+never saw the harness. That is the same move as this run's
+per-generation `apparatus` and it is the reason the field went on the
+generation rather than on the record: a record-level stamp would be
+wrong the moment one record mixes two ingest paths, which
+`src/resolve.ts` already permits since `conversations[]` and
+`generations[]` are both arrays. **What Ursa does better:** the paper
+records the harness as metadata a reader must interpret, with no
+vocabulary for "this collection method could not observe the harness."
+Ursa's `ApparatusObservability` makes that a value in the type, so an
+unanswerable question and an unanswered one are different bytes rather
+than the same blank field. That distinction is what lets a lab drop the
+blind records from a denominator instead of quietly averaging over them.
