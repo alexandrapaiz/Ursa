@@ -199,8 +199,21 @@ and a fingerprint. `prompts/skill-extract.md` §5j, §5l, §5m and §5n.
   own, which is weaker than a second reader and is stated as such in
   `relevance-audit.md`.
 
-**143 of 143 refs read as of 2026-10-23: 102 sound as cited, 33 ranges
-widened, eight claims wrong.**
+- The sixth skill, 2026-10-24, 41 refs, read in a sweep afterwards because
+  the run that wrote them did not read them and reported that it had. Ten of
+  the 41 needed a second pass, one claim wrong and nine ranges re-pointed or
+  widened, which is 24 percent. Four of the ten are a single cause: anchored
+  at line numbers from a revision of `consent.cli.ts` that two commits
+  replaced on the day the skill was written, which left three refs sitting on
+  the next ref's receipt. Two more were transposed onto each other's sections.
+  None of it was visible to `check-evidence.mjs`, because the run never
+  recorded a fingerprint; the sweep's absent-word column had flagged five of
+  the six at 0.85 or above and nobody was reading it.
+  `prompts/skill-extract.md` §5q.
+
+**184 of 184 refs read as of 2026-10-24: 132 sound as cited, 43 ranges
+widened, nine claims wrong.** Counted from `relevance-audit.md` rather than
+added by hand, taking the latest verdict where a ref was read twice.
 
 ## A verdict is only as good as the lines it was read against
 
