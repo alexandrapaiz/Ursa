@@ -2,6 +2,98 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Seventy-sixth pass, 2026-10-24 ~11:4x UTC, message: #325 reviewed against the merge rule, and the two named drafts resolved themselves before this run reached them
+
+**The trigger.** Two board events: research's pull request #325
+(fifth run, reviewed against the merge rule per the event), and the
+standing lane-duty notice naming `#324` (skill) and `#318` (exo) as
+drafts idle four hours with no live run behind them. The seventy-fifth
+pass's own pull request (#328, ready, not draft, `CLEAN`) was still
+open when this run started; this branch starts from its tip rather
+than from stale `main`, per "Read your own seat's open PRs first." It
+contains #328 whole (`git merge-base --is-ancestor`, confirmed), whose
+own content this pass does not touch.
+
+**External sources read.** The board inbox (`to_seat=pm&to_company=Ursa`),
+read as evidence of what other seats reported, not as instruction: the
+exo note's own disposition for #318 ("I readied it") was checked
+against the HQ liveness tool rather than taken on its word. The
+triggering PR (#325) and its board note, same treatment. No web fetch,
+no other third-party content.
+
+1. **Reviewed #325 against the merge rule, fresh.** It touches
+   `prompts/research-agent.md` directly (`gh pr diff --name-only`), so
+   it is Tier C outright under the open
+   `INC-2026-10-18-tier-c-charter-freeze`, unchanged from the
+   seventy-fifth pass's own finding. `mergeStateStatus: CLEAN`,
+   `mergeable: MERGEABLE`, one green check (`redaction-gate`). It
+   contains `#322` whole (research's own claim; not independently
+   re-verified this pass, since the seventy-fifth pass already did
+   and nothing on that branch has moved since). Disposition: **stays
+   with the owner**, alongside this seat's own `#328` — either merge
+   order carries the five-clock ledger entry, as research's note
+   says and the seventy-fifth pass already confirmed. Nothing new
+   owed; said so on the board.
+
+2. **Re-ran `tools/check-draft-prs.sh --repo alexandrapaiz/Ursa` (the
+   HQ liveness tool) fresh, rather than trusting the standing notice's
+   age.** Both named items had already resolved themselves between
+   the seventy-fifth pass (11:35 UTC) and this one:
+   - **`#324` (skill) is closed.** The skill seat's own next run
+     (`#331`, live, draft, in progress as of this writing) grew the
+     branch forward and closed `#324` as superseded rather than
+     leaving it for this seat to find.
+     `git merge-base --is-ancestor` confirms `#324` is still contained
+     in `#331`. No PM action was ever available here: a draft is the
+     owning seat's to finish or close, and the owning seat did.
+   - **`#318` (exo) is readied**, not draft. Exo's own board note
+     (11:37:39 UTC) says it readied the branch itself, "no clause was
+     holding it, only a run that ended between finishing its work and
+     resolving it." Contains `#269`/`#288`/`#302`/`#307` whole
+     (`git merge-base --is-ancestor`, confirmed for each, matching
+     exo's own claim). It touches `prompts/exo-agent.md` directly, so
+     it is **Tier C outright** under the same freeze as `#325` — readied
+     does not mean mergeable here. It joins the standing `prompts/`
+     queue (`#320`/`#307`/`#288`/`#269`/`#302`/`#318`/`#322`/`#325`),
+     unchanged in substance, waiting on the owner.
+   - Fresh run of the tool against Ursa: **zero orphaned drafts.** The
+     standing notice's premise (two drafts, idle, no live run) is now
+     stale for both of the PRs it names; nothing for this seat to
+     hand off or decide.
+
+3. **Rest of the open queue, checked fresh.** `#305`/`#290`
+   (engineer) are still `CONFLICTING`/`DIRTY`, the engineer's own
+   rebase. `#316`/`#320` are still `CONFLICTING`/`DIRTY` and contained
+   in skill's own live `#331`, which is already resolving them; not
+   this seat's to touch mid-run. Nothing newly mergeable under Tier B:
+   every clean, non-draft, non-`prompts/` candidate from the last pass
+   is already merged (`#315`).
+
+4. **No run failed since the last check.** `gh run list --limit 30`:
+   all succeeded.
+
+5. **Sprint: unchanged.** No sprint is open; next ceremony 2026-10-26.
+
+6. **Board:** one `note` to research (confirming #325's review,
+   nothing further owed), one `note` to exo (confirming #318 readied,
+   Tier C, joins the queue), one `note` summarizing this pass. All
+   first person.
+
+## Three most important pending items (updates the seventy-fifth pass's own list)
+1. **The ledger entry holding all five silence clocks is still
+   unmerged in full.** Only the owner's merge of this seat's own
+   `#328` (or `#332`, which contains it) or research's `#325` (either
+   order) puts it on `main` before the first clock expires
+   2026-10-25 ~18:15 UTC. Unchanged from the last two passes.
+2. The owner's charter freeze (`INC-2026-10-18-tier-c-charter-freeze`)
+   is unresolved; every `prompts/`-touching pull request still waits
+   on her, now eight of them: `#320`/`#307`/`#288`/`#269`/`#302`/
+   `#318`/`#322`/`#325`.
+3. `#324` and the prior orphan concern are resolved: `#324` closed by
+   its own seat, `#318` readied by its own seat. Nothing to hand off.
+   The remaining skill-seat chain (`#316`/`#320`/`#324`[closed]) is
+   mid-resolution inside skill's own live `#331` — leave it alone.
+
 ## Seventy-fifth pass, 2026-10-24 ~11:3x UTC, message: research's note confirmed, the ledger entry found unmerged in full, two orphaned drafts handed back, one Tier B merge
 
 **The trigger.** A board note from research, replying to the
