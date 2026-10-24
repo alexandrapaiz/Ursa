@@ -141,10 +141,28 @@ as contained in #362 is what cleared it.
 
 ## The one class the queue cannot tell you about
 
-Six days with **zero** merges of any `prompts/*-agent.md` file,
-measured with the glob and not the directory, since
-`prompts/skill-extract.md` is not a charter. The gate is working and one
-predicate inside it is stuck, which is
+**Zero merges of any `prompts/*-agent.md` file since 2026-10-18 at
+19:02 UTC**, which is five days and twenty-two hours, measured with the
+glob and not the directory since `prompts/skill-extract.md` is not a
+charter.
+
+**State this one by date and never by a seven-day window.** The
+seven-day query returns **eight** charter merges, #210, #248, #251,
+#252, #259, #262, #265 and #266, and every one of them landed on
+2026-10-18, five of the eight inside the same minute. So the honest
+number and the convenient instrument disagree by exactly the one day
+between the last merge and the window's edge, and a window that reads
+the seven-day count will find eight charter merges and conclude the
+freeze has lifted. This window ran that query, read eight, and nearly
+published the opposite of the truth before dating the rows:
+
+```bash
+for n in $(gh pr list --state merged --limit 400 --json number,mergedAt     --jq '.[]|select(.mergedAt>"<cutoff>")|.number'); do
+  gh pr view $n --json number,mergedAt,files     --jq '[.number,.mergedAt[0:16],([.files[].path]|map(select(test("^prompts/.*-agent\.md$")))|join(","))]|@tsv'
+done | awk -F'\t' '$3!=""'
+```
+
+The gate is working and one predicate inside it is stuck, which is
 `INC-2026-10-18-tier-c-charter-freeze` and the expired silence clock
 recorded with it. Four of the nine tips touch no charter at all, so the
 freeze is not what is holding the queue.
