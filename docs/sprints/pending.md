@@ -2,23 +2,57 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (updates the eighty-seventh pass's own list)
+## Three most important pending items (updates the eighty-eighth pass's own list)
 
-1. **Exo's #378 (window 33) waits on the owner, Tier C.** It edits
-   `prompts/exo-agent.md` directly, so it stays under the standing
-   charter freeze (`INC-2026-10-18-tier-c-charter-freeze`) regardless
-   of its green check and clean `MERGEABLE` state. Exo already named it
-   to the owner directly on the board at 17:37:43 UTC; this pass
-   confirms the same tier independently and adds nothing new to her
-   queue.
-2. **Market's #381 has a live red check, readied.** The redaction gate
-   fails on `docs/market/briefs/2026-10-24-message-8.md` lines 19 and
-   62: two full board-message UUIDs, not truncated to eight characters.
-   Not this seat's to fix (market's own lane); handed back on the
-   board.
+1. **Exo's #378 (window 33) still waits on the owner, Tier C.** Unchanged
+   from the eighty-eighth pass: it edits `prompts/exo-agent.md` directly,
+   so it stays under the standing charter freeze
+   (`INC-2026-10-18-tier-c-charter-freeze`) regardless of its green check
+   and clean `MERGEABLE` state.
+2. **Market's #381 red check is resolved, nothing left for the owner
+   there.** Market fixed the two untruncated board-message ids itself
+   (pushed to the same branch rather than opening a second PR) and the
+   `scan` check now passes. Reported here only because the eighty-eighth
+   pass's list named it; it needs no further tracking.
 3. **Nothing else changed in the Tier C holds already reported** —
-   research's #375 and the rest of the standing freeze are unchanged
-   from the eighty-seventh pass.
+   the rest of the standing freeze is unchanged from the eighty-eighth
+   pass. Research's #375 is closed (superseded by #380, confirmed by
+   ancestry), not pending.
+
+## Eighty-ninth pass, 2026-10-24 ~17:5x UTC, message: triage the exo host-window run reported failed with no pull request — fourth occurrence of the same tripwire, not a defect
+
+**The trigger.** The event: a host window run of exo
+(`ursa-exo/2026-10-24T17-19-32-118Z-message`) reported failed — 101
+turns, 20 minutes, exit 1, no branch, no pull request — with the
+instruction to triage it under the failed-runs rule (pm.md §11.7) and
+say on the board what was done.
+
+**Read this seat's own open PRs first.** Found #383 (the eighty-eighth
+pass), open and not yet merged by the owner. Branched from its tip
+rather than from `main`.
+
+**The triage.** `docs/agents/incidents.md` already carries Incident 19
+for exactly this shape, three prior occurrences (skill, engineer, exo)
+all of which turned out to be the host's own report being wrong, not a
+real defect. This is a fourth occurrence, and the clearest yet:
+`gh api repos/alexandrapaiz/Ursa/pulls/378/commits` shows the branch
+the report says never opened was opened 48 seconds into the window and
+took eighteen commits over the next sixteen minutes, and the board's
+message feed has exo posting its own `done` for that same pull request
+a minute and a half before the run's exit code landed. Filed as an
+update to Incident 19, not a new incident. No rerun — nothing is
+missing, and PR #378 is already reviewed (eighty-eighth pass, above).
+
+**One other item closed in passing.** Research's #375 (sixteenth run)
+closed as superseded by #380 (seventeenth run): `git merge-base
+--is-ancestor refs/pull/375/head refs/pull/380/head` exits 0. Research
+had already said as much on the board without asking for the close;
+this pass verified the ancestry itself before acting on it.
+
+**docs/sprints/pending.md and the board.** This section, and a `note`
+posted to the Ursa board (not `chair:asc-host`, since the open note
+under Incident 19's first occurrence already carries the standing
+question to HQ and a fifth repeat would add nothing).
 
 ## Eighty-eighth pass, 2026-10-24 ~17:4x UTC, message: PR #378 (exo, window 33) reviewed against the merge rule and handed back as Tier C; its two contained predecessors closed
 

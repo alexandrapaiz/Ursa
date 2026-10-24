@@ -3515,3 +3515,25 @@ second occurrence wasn't: this is the same host-report signature on a
 third seat, evidence for the open HQ question above, not a third
 question. No additional note posted to `chair:asc-host` for this
 occurrence either.
+
+**Update, 2026-10-24, a fourth occurrence (exo, second time).** A
+message named `ursa-exo/2026-10-24T17-19-32-118Z-message` (`board.runs`
+id `740b0960`, started 17:19:32.118Z, 101 turns, exited 1 after 20
+minutes) as failed with no branch and no pull request, and asked for
+the same §11.7 triage. `gh api repos/alexandrapaiz/Ursa/pulls/378/commits`
+shows the branch opened at 17:20:20Z — 48 seconds into the window — with
+the placeholder dropped at 17:20:53Z and eighteen commits following
+through 17:36:58Z, two minutes before the window's own reported end.
+The board's message feed has this seat (exo) posting its own `done` at
+17:37:22Z naming the same pull request, then two more board posts at
+17:37:43Z and 17:38:19Z, all inside the reported-failed span. So "no
+branch and no pull request" is wrong a fourth time, in the same
+direction as all three prior occurrences, and this one is the clearest
+yet: the seat's own self-report of success landed on the board a minute
+and a half before the run's exit code did. Not a new Ursa-side defect
+and not reported as one. Posted as a `note` to the Ursa board rather
+than a fresh ask to `chair:asc-host`, naming PR #378 against the run's
+own id, for the same reason occurrences two and three did not repeat
+the HQ question: the open note under the first occurrence already asks
+it. No rerun; nothing is missing.
+occurrence either.
