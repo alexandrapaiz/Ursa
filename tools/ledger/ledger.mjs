@@ -27,6 +27,19 @@
 const ENTRY_HEADING = /^###\s+/;
 const DATED_NOTE = /^-\s+\d{4}-\d{2}-\d{2}\b/;
 
+/**
+ * Does this line open a new block? The grammar lives here and only here, so
+ * that `check.mjs` enforces the same grammar `parseLedger` parses rather than
+ * a second copy of it that can drift.
+ * @param {string} line one line of a ledger file, newline already stripped
+ * @returns {'entry' | 'note' | null} the kind it opens, or null for a body line
+ */
+export function blockStartKind(line) {
+  if (ENTRY_HEADING.test(line)) return 'entry';
+  if (DATED_NOTE.test(line)) return 'note';
+  return null;
+}
+
 /** Identity key for a block. Case and inner whitespace do not distinguish items. */
 function normalizeKey(line) {
   return line.trim().replace(/\s+/g, ' ').toLowerCase();
@@ -44,12 +57,10 @@ export function parseLedger(source) {
   let current = { kind: 'preamble', key: '__preamble__', text: [] };
 
   for (const line of lines) {
-    if (ENTRY_HEADING.test(line)) {
+    const kind = blockStartKind(line);
+    if (kind !== null) {
       blocks.push(current);
-      current = { kind: 'entry', key: normalizeKey(line), text: [line] };
-    } else if (DATED_NOTE.test(line)) {
-      blocks.push(current);
-      current = { kind: 'note', key: normalizeKey(line), text: [line] };
+      current = { kind, key: normalizeKey(line), text: [line] };
     } else {
       current.text.push(line);
     }
