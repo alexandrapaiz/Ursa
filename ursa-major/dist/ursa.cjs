@@ -2194,6 +2194,24 @@ function gateRecords(records) {
 ${formatViolations(violations)}`
   };
 }
+function newDroppedUnits(minChars) {
+  return { unresolvable: 0, belowMinChars: 0, minChars, largestBelowFloor: 0 };
+}
+function keepRecord(record, minChars, dropped) {
+  if (!record) {
+    dropped.unresolvable++;
+    return false;
+  }
+  if (!clearsSizeFloor(record, minChars)) {
+    dropped.belowMinChars++;
+    dropped.largestBelowFloor = Math.max(
+      dropped.largestBelowFloor,
+      record.stats.generated.totalChars
+    );
+    return false;
+  }
+  return true;
+}
 var init_launch = __esm({
   "src/launch.ts"() {
     "use strict";
@@ -6214,7 +6232,7 @@ async function runCi(opts) {
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
   const recordPaths = [];
-  const dropped = { unresolvable: 0, belowMinChars: 0, minChars };
+  const dropped = newDroppedUnits(minChars);
   const erased = erasedEpisodeIds(opts.projectPath, episodes.map((e) => e.id));
   let suppressed = 0;
   for (const episode of episodes) {
@@ -6223,14 +6241,7 @@ async function runCi(opts) {
       continue;
     }
     const record = resolveEpisode(opts.projectPath, episode);
-    if (!record) {
-      dropped.unresolvable++;
-      continue;
-    }
-    if (!clearsSizeFloor(record, minChars)) {
-      dropped.belowMinChars++;
-      continue;
-    }
+    if (!keepRecord(record, minChars, dropped)) continue;
     const signals = deriveSignals(record, declaration2);
     signals.notes = [...signals.notes ?? [], `CI launch: ${window.note}`];
     record.signals = signals;
@@ -6872,7 +6883,7 @@ init_resolver_identity();
 init_launch();
 init_resolve_episode();
 init_resolve_episode();
-function renderRunSummary(records, episodes, diagnostics) {
+function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
   const lines = [];
   let verbatim = 0, mutated = 0, written = 0, traced = 0, claimed = 0;
   let humanDeleted = 0, mergeDeleted = 0, unknownDeleted = 0;
@@ -6887,8 +6898,37 @@ function renderRunSummary(records, episodes, diagnostics) {
     unknownDeleted += r.stats.generated.unknownDeletedChars;
   }
   lines.push(`${episodes.length} work unit${episodes.length === 1 ? "" : "s"} found, ${records.length} resolved into record${records.length === 1 ? "" : "s"}.`);
-  lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`);
-  lines.push(`That's the part worth noticing: not what got written, what got kept.`);
+  if (records.length > 0) {
+    lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`);
+    lines.push(`That's the part worth noticing: not what got written, what got kept.`);
+  }
+  if (droppedUnits) {
+    const d = droppedUnits;
+    const unrecorded = d.unresolvable + d.belowMinChars;
+    if (unrecorded > 0) {
+      const one = unrecorded === 1;
+      lines.push("");
+      lines.push(
+        `${unrecorded} work unit${one ? " was" : "s were"} found and not recorded, and this is which bound dropped ${one ? "it" : "them"}.`
+      );
+      if (d.belowMinChars > 0) {
+        const floorOne = d.belowMinChars === 1;
+        const remedy = d.largestBelowFloor > 0 ? ` ${floorOne ? "It generated" : "The largest of them generated"} ${d.largestBelowFloor.toLocaleString()}, so --min-chars ${d.largestBelowFloor} is the lowest floor that would have recorded ${floorOne ? "it" : "any of them"}.` : ` ${floorOne ? "It generated no" : "None of them generated any"} text a span could be taken from, so no floor would record ${floorOne ? "it" : "them"}.`;
+        lines.push(
+          `${d.belowMinChars} carried fewer than ${d.minChars.toLocaleString()} generated characters, which is the --min-chars floor, because a survival figure taken over that little text would be noise.${remedy}`
+        );
+      }
+      if (d.unresolvable > 0) {
+        const unOne = d.unresolvable === 1;
+        lines.push(
+          `${d.unresolvable} resolved to nothing this run could stand behind, meaning no file in ${unOne ? "it" : "them"} had a readable version at both commits of the pair and nothing arrived whole from elsewhere either, so there was no refusal to state instead.`
+        );
+        lines.push(
+          `No flag changes that one. The usual causes are a generated file your edit deleted outright, a commit this clone does not have the blobs for, and a file over the ${MAX_BLOB_CHARS2.toLocaleString()}-character ceiling the resolver reads up to. If the clone is shallow, run git fetch and ursa run again.`
+        );
+      }
+    }
+  }
   if (written > 0) {
     lines.push(`${written.toLocaleString()} chars were generated to get there, and ${claimed.toLocaleString()} of them reached the finished work unedited.`);
   }
@@ -7215,6 +7255,7 @@ async function main(argv) {
   }));
   const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id));
   let suppressed = 0;
+  const dropped = newDroppedUnits(minChars);
   const records = [];
   for (const ep of episodes) {
     if (erased.has(ep.id)) {
@@ -7222,8 +7263,7 @@ async function main(argv) {
       continue;
     }
     const record = resolveEpisode(projectPath, ep, commits);
-    if (!record) continue;
-    if (!clearsSizeFloor(record, minChars)) continue;
+    if (!keepRecord(record, minChars, dropped)) continue;
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt);
     record.signals = deriveSignals(record, declaration2);
     stampPairingBounds(record, diagnostics.bounds);
@@ -7234,7 +7274,7 @@ async function main(argv) {
   if (records.length === 0 && suppressed > 0) {
     console.log(`${episodes.length} work unit${episodes.length === 1 ? "" : "s"} found, and ${suppressed === episodes.length ? "every one of them is" : `${suppressed} of them are`} erased. Nothing was rebuilt.`);
   } else {
-    console.log(renderRunSummary(records, episodes, diagnostics));
+    console.log(renderRunSummary(records, episodes, diagnostics, dropped));
     if (suppressed > 0) {
       console.log(`
 ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`);

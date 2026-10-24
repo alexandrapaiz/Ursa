@@ -46,7 +46,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
-import { clearsSizeFloor } from './launch'
+import { clearsSizeFloor, keepRecord, newDroppedUnits } from './launch'
 import { findCommitPairsWithDiagnostics, resolvePairingBounds } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
@@ -234,6 +234,13 @@ async function bothLaunches(
   ciExitCode: number
   localExitCode: number
   ciComment: string
+  /**
+   * What the local launch printed. Captured rather than discarded since
+   * 2026-10-24, because drift 6 is a divergence in what the two launches
+   * SAY about the same history, which a comparison of records cannot see:
+   * both launches wrote nothing, correctly, and only one of them said why.
+   */
+  localOutput: string
 }> {
   const head = git(repo, ['rev-parse', 'HEAD'])
   const base = git(repo, ['rev-parse', baseRef])
@@ -257,7 +264,8 @@ async function bothLaunches(
 
   const realLog = console.log
   const realError = console.error
-  console.log = () => {}
+  const printed: string[] = []
+  console.log = (...a: unknown[]) => { printed.push(a.map(String).join(' ')) }
   console.error = () => {}
   let localExitCode: number
   try {
@@ -278,8 +286,102 @@ async function bothLaunches(
   return {
     ci, local: recordsOnDisk(repo), ciExitCode: ciResult.exitCode, localExitCode,
     ciComment: ciResult.comment ?? '',
+    localOutput: printed.join('\n'),
   }
 }
+
+describe('both launches say which bound dropped a work unit', () => {
+  // Drift 6, found 2026-10-24. Every other entry in this file is a drift
+  // where the local launch was ahead; this is the one where the runner
+  // was. `src/ci/run.ts` has counted `unresolvable` and `belowMinChars`
+  // since 2026-10-08 and puts them in the pull-request comment, and
+  // `src/bin/ursa.ts` counted neither, so the launch a person types was
+  // the only one that could not say which flag to move.
+  //
+  // The tally is now in `src/launch.ts` and the wording is not, which is
+  // deliberate: a terminal and a markdown comment are different surfaces.
+  // So what this block pins is the two things that would actually break a
+  // reader. The two launches must agree on the NUMBER of units dropped
+  // and on WHICH reason dropped them, and both must name the same flag.
+  it('agrees on the count and the reason, and both name --min-chars', async () => {
+    const repo = editedFixture()
+    // A floor no fixture clears, so the drop is certain and is the floor
+    // rather than anything about the history.
+    const { ci, local, ciComment, localOutput } = await bothLaunches(repo, 100_000)
+
+    // Both wrote nothing, which is the state in which the two launches
+    // used to be indistinguishable and are now not.
+    expect([...ci.keys()]).toEqual([])
+    expect([...local.keys()]).toEqual([])
+
+    // One unit found on both sides, none recorded on either.
+    expect(ciComment).toContain('1 work unit was found, and it did not become a record.')
+    expect(localOutput).toContain('1 work unit found, 0 resolved into records.')
+    expect(localOutput).toContain('1 work unit was found and not recorded')
+
+    // The same reason, named by both, with the same floor in it.
+    expect(ciComment).toContain('carried fewer than 100000 generated characters')
+    expect(localOutput).toContain('carried fewer than 100,000 generated characters')
+    expect(ciComment).toContain('`--min-chars` floor')
+    expect(localOutput).toContain('--min-chars floor')
+
+    // And neither blames the other reason. A launch that reported both
+    // for one unit would be printing arithmetic that cannot be true,
+    // which is the defect the abandoned-generations line was fixed for.
+    expect(ciComment).not.toContain('resolved to nothing')
+    expect(localOutput).not.toContain('resolved to nothing')
+  })
+
+  it('states the drop rule once, where both launches read it', () => {
+    const tiny = {
+      stats: { generated: { totalChars: 12 } }, exclusions: [],
+    } as unknown as OutcomeRecord
+    const big = {
+      stats: { generated: { totalChars: 4_096 } }, exclusions: [],
+    } as unknown as OutcomeRecord
+
+    const d = newDroppedUnits(200)
+    expect(keepRecord(null, 200, d)).toBe(false)
+    expect(keepRecord(tiny, 200, d)).toBe(false)
+    expect(keepRecord(big, 200, d)).toBe(true)
+    expect(d).toEqual({
+      unresolvable: 1,
+      belowMinChars: 1,
+      minChars: 200,
+      // The biggest generation side the floor rejected, which is what the
+      // local launch turns into `--min-chars 12`. `big` cleared the floor
+      // and must not appear here.
+      largestBelowFloor: 12,
+    })
+  })
+
+  it('keeps the largest rejected generation, not the last one', () => {
+    // The remedy sentence names one number for a set of dropped units, so
+    // it has to be the one that unblocks at least one of them. Taking the
+    // last would make the advice wrong whenever the units arrive in
+    // descending size, which is a plausible order and not a rare one.
+    const of = (chars: number) => ({
+      stats: { generated: { totalChars: chars } }, exclusions: [],
+    } as unknown as OutcomeRecord)
+    const d = newDroppedUnits(500)
+    for (const chars of [410, 120, 7]) keepRecord(of(chars), 500, d)
+    expect(d.belowMinChars).toBe(3)
+    expect(d.largestBelowFloor).toBe(410)
+  })
+
+  it('the exemption still wins: a refusal-only record is not counted as dropped', () => {
+    // `clearsSizeFloor` exempts a record with no generation side, and that
+    // exemption has to survive being moved behind `keepRecord`, or drift 1
+    // comes back counted instead of silent.
+    const refusalOnly = {
+      stats: { generated: { totalChars: 0 } },
+      exclusions: [{ path: 'vendor.md' }],
+    } as unknown as OutcomeRecord
+    const d = newDroppedUnits(200)
+    expect(keepRecord(refusalOnly, 200, d)).toBe(true)
+    expect(d).toEqual({ unresolvable: 0, belowMinChars: 0, minChars: 200, largestBelowFloor: 0 })
+  })
+})
 
 describe('both launches read the same declaration of who is an agent', () => {
   // The fourth drift, found on 2026-10-11 while landing `--agent-identity`
