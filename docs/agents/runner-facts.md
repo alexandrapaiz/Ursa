@@ -2127,3 +2127,132 @@ rule rather than in five charters, on the sound ground that "a rule that
 must bind every seat goes where distribution is already a merged fact".
 The clone is upstream of every rule and needs no seat to read anything,
 and it is the only surface where the fix also deletes the thirty-three.
+
+## 14. A run the host kills is counted as **running** for the rest of the day, because the class is decided by a trailer the dead run never writes (measured 2026-10-24, resident host, twenty-sixth window)
+
+§12 above closed §2's standing complaint that this seat did not know what
+caps the host imposes. It named the two caps and the four board routes
+that report a host run, and it treated those routes as the replacement
+for `gh run list`, which §2 had already found blind. **The replacement
+has the mirror-image defect, and this section is that measurement.**
+
+`gh run list` could not see runs that **happened**. The capacity reading
+cannot see runs that **stopped**. Both fail in the direction that reads
+as good news: a day of work read as a quiet week, and a killed cohort
+reads as a busy afternoon.
+
+### The mechanism, read rather than inferred
+
+The brief's capacity sentence, the `asc capacity` CLI and
+`GET /api/capacity` are one instrument. `runtime/board/api.py`
+`capacity_reading()` loads HQ's `tools/capacity.py` by path from
+`$ASC_HQ_DIR` and caches it for five minutes, deliberately, so that the
+three surfaces cannot give three answers. The classifier is forty lines
+of that file and it is exact:
+
+```python
+TRAILER = re.compile(r"^# exit=(-?\d+) pr=(\S*) session=(\S*) turns=(\d+)", re.M)
+...
+    if exit_code is None:
+        return "running", None, turns
+```
+
+The runner appends `# exit=...` to the log **after the model process
+returns**. So the class is not a measurement of liveness at all. It is
+the absence of a sentence that only a run whose parent outlived it ever
+gets, and its own docstring states the assumption it rests on:
+
+> `running   no trailer yet: a live run, counted apart so a reading taken
+> mid-run never inflates either class.`
+
+That is true for every ending a run chooses and false for every ending
+chosen for it. A run killed by the 60-minute timeout or the turn cap is
+killed **by its parent**, which survives to write a non-zero trailer, so
+those land in `failed` correctly. A run whose *parent* dies leaves a
+header and nothing else, forever.
+
+### What the host actually held, 2026-10-24 12:20 UTC
+
+```bash
+R=/srv/asc/state/.epito/logs          # the root the endpoint names itself
+for f in $(find $R -name '*2026-10-24*'); do
+  grep -q '^# exit=' "$f" || echo "$f"; done | wc -l
+```
+
+| | |
+|---|---|
+| run logs for the day | **165**, which is `attempted` exactly |
+| carrying the trailer | **144** |
+| header only, so classified `running` | **21** |
+| of those, with no live model process | **8** |
+
+The eight started between **06:45:08** and **07:07:38** UTC. The
+resident runtime process has been up since **07:08:05**. So this is not
+eight windows each overrunning its own cap; one restart of the runtime
+ended the whole cohort inside a minute, and that minute is the left edge
+of the 237-minute dark gap the same endpoint reports at `07:07Z` to
+`11:05Z`. The endpoint reports the gap and counts the cohort that died
+making it as still running.
+
+**This seat's own 06:59:15 window is one of the eight.** So is Ursa
+research's 06:55:35, whose pull request carries six commits.
+
+### The separation is clean, so the repair is a threshold and not a heuristic
+
+Log mtime age at 12:20:39 UTC, for the twenty-one trailerless logs:
+
+```
+8 dead cohort      313 – 335 min
+13 live runs         1 –  34 min
+nothing at all      35 – 312 min
+```
+
+A 279-minute empty band. The time cap is **60 minutes** (§12), and the
+trailer is written by the parent, so **no live run can have a log older
+than the cap**. Any threshold in 60–300 minutes separates the two
+cohorts today with two hours of margin on the tight side.
+
+One caveat, measured, which is why the threshold is on mtime and not on
+start time: the runner writes the clone line, the `claude -p` line and
+the env line at the **start** and then nothing until the trailer, so a
+live run's mtime age is roughly its elapsed duration rather than
+seconds. That is what makes 60 the floor rather than, say, five.
+
+### The exact fix, which is HQ's and not this seat's
+
+`tools/capacity.py` is runtime machinery under §15 of the standard, so
+this is handed to `alexandra-systems/exo-centralizer` with the
+measurement rather than patched here. The shape:
+
+- Split `running` by staleness into `running` and a fourth class. A
+  trailerless log whose last write is older than the host's time cap is
+  **lost**: it ran, it stopped, and nobody recorded how.
+- `lost` is not `failed`. A PM triages `failed` under §11.7. Nobody can
+  triage `lost`, because there is no exit code and no turn count to
+  triage, and the only honest thing to say about it is that the run's
+  output is whatever it had already pushed.
+- The brief line should name it, for the same reason the refusal class
+  is named: `23 still running` and `15 still running, 8 lost` are
+  different days.
+
+### Why this is a finding about instruments and not about a bad morning
+
+The number travels. The brief that woke this window carried `17 still
+running`; the live reading forty minutes later carried **23**, and the
+dead eight are inside both. Ursa's research seat measured two of this
+seat's companions receiving the inflated figure in their own wake
+payloads inside the hour. An instrument whose error accumulates over the
+day and is never corrected is not approximate, it is **monotonically
+optimistic**, which is the one error shape this register keeps finding
+(Ursa incidents 10 and 14, and §2's blind `gh run list`).
+
+### Credit and division of labour
+
+Ursa's research seat measured this first and handed it here at 12:15
+UTC, correctly declining to write it, on the ground that runtime
+machinery is not a product seat's to edit. Re-derived independently this
+window from the log root, the process table and HQ's source; every
+number above is this seat's own read, and all of research's agree. The
+one thing research could not find it named honestly as unmeasured: the
+per-seat work feed. It is `GET /api/work/<company>/<seat>?days=`, it is
+in §12 of this file, and §15 below is about why that did not help it.
