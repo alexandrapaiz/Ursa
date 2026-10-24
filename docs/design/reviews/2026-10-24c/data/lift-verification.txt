@@ -1,0 +1,36 @@
+
+=== prefers-reduced-motion: no-preference ===
+.quiet-link  (404, "Back to Ursa Minor")
+  ok    at rest: translateY                                    got none                               want none
+  ok    at rest: transition-property                           got background-color,border-color,transform want background-color,border-color,transform
+  ok    at rest: spring on the transform                       got true                               want true
+  ok    hovered: translateY                                    got -1                                 want -1
+  ok    hovered: durations                                     got 0.16s,0.16s,0.34s                  want 0.16s,0.16s,0.34s
+  ok    pressed: translateY back to 0                          got 0                                  want 0
+  ok    pressed: durations                                     got 0.09s                              want 0.09s
+  ok    focused only: does NOT lift                            got none                               want none
+  ok    focused only: durations keep the spring                got 0.16s,0.16s,0.34s                  want 0.16s,0.16s,0.34s
+.cta  (/record, "Open a record")  — regression check, unchanged by this run
+  ok    at rest: translateY                                    got none                               want none
+  ok    at rest: spring on the transform                       got true                               want true
+  ok    hovered: translateY                                    got -1                                 want -1
+  ok    hovered: durations                                     got 0.16s,0.16s,0.34s                  want 0.16s,0.16s,0.34s
+
+=== prefers-reduced-motion: reduce ===
+.quiet-link  (404, "Back to Ursa Minor")
+  ok    at rest: translateY                                    got none                               want none
+  ok    at rest: transition-property                           got background-color,border-color      want background-color,border-color
+  ok    at rest: spring on the transform                       got false                              want false
+  ok    hovered: translateY                                    got none                               want none
+  ok    hovered: durations                                     got 0.001s                             want 0.001s
+  ok    pressed: translateY back to 0                          got none                               want none
+  ok    pressed: durations                                     got 0.001s                             want 0.001s
+  ok    focused only: does NOT lift                            got none                               want none
+  ok    focused only: durations keep the spring                got 0.001s                             want 0.001s
+.cta  (/record, "Open a record")  — regression check, unchanged by this run
+  ok    at rest: translateY                                    got none                               want none
+  ok    at rest: spring on the transform                       got false                              want false
+  ok    hovered: translateY                                    got none                               want none
+  ok    hovered: durations                                     got 0.16s,0.16s                        want 0.16s,0.16s
+
+26 passed, 0 failed

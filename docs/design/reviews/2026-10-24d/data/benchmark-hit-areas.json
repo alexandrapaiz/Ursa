@@ -1,0 +1,770 @@
+{
+  "https://linear.app": {
+    "targets": 31,
+    "standalone": 31,
+    "inlineExempt": 0,
+    "shortOf44": 31,
+    "medianStandaloneHit": 28,
+    "extendedInvisibly": 1,
+    "shortest": [
+      "24px \"Workspace\"",
+      "24px \"Favorites\"",
+      "28px \"Linear\"",
+      "28px \"\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Product",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Resources",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Customers",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Pricing",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Now",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Contact",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Log in",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "NewLoops →",
+        "boxH": 25,
+        "hitH": 31,
+        "inline": false,
+        "extended": true
+      },
+      {
+        "label": "Linear",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Pulse",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Inbox",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "My issues",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Reviews",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Workspace",
+        "boxH": 24,
+        "hitH": 24,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Initiatives",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Projects",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "More",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Favorites",
+        "boxH": 24,
+        "hitH": 24,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 28,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://vercel.com": {
+    "targets": 10,
+    "standalone": 10,
+    "inlineExempt": 0,
+    "shortOf44": 10,
+    "medianStandaloneHit": 32,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "32px \"Products\"",
+      "32px \"Resources\"",
+      "32px \"Enterprise\"",
+      "32px \"Pricing\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Products",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Resources",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Enterprise",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Pricing",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Get a Demo",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Log In",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign Up",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Deploy now",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Talk to sales",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://elicit.com": {
+    "targets": 8,
+    "standalone": 8,
+    "inlineExempt": 0,
+    "shortOf44": 8,
+    "medianStandaloneHit": 36,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "34px \"Sign up\"",
+      "36px \"Solutions\"",
+      "36px \"Industries\"",
+      "36px \"Resources\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Solutions",
+        "boxH": 35.6,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Industries",
+        "boxH": 35.6,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Resources",
+        "boxH": 35.6,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Customers",
+        "boxH": 35.6,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Pricing",
+        "boxH": 35.6,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign in",
+        "boxH": 35.6,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://www.consensus.app": {
+    "targets": 16,
+    "standalone": 16,
+    "inlineExempt": 0,
+    "shortOf44": 15,
+    "medianStandaloneHit": 36,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "32px \"\"",
+      "36px \"Close sidebar\"",
+      "36px \"New ThreadCtrl+K\"",
+      "36px \"Home\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 64,
+        "hitH": 64,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Close sidebar",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "New ThreadCtrl+K",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Home",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign in",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sources",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Skills",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Deep",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Filter",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Search with filters",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Build a comparison table",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Run a Deep review",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 32,
+        "hitH": 32,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://claude.com": {
+    "targets": 13,
+    "standalone": 12,
+    "inlineExempt": 1,
+    "shortOf44": 9,
+    "medianStandaloneHit": 40,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "28px \"\"",
+      "36px \"Contact sales\"",
+      "36px \"Try Claude\"",
+      "40px \"Product\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 26.2,
+        "hitH": 28,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Product",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Developers",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Enterprise",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Resources",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Pricing",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Login",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Contact sales",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Try Claude",
+        "boxH": 36,
+        "hitH": 36,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Continue with Google",
+        "boxH": 44,
+        "hitH": 44,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Continue with email",
+        "boxH": 44,
+        "hitH": 45,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Privacy Policy",
+        "boxH": 15,
+        "hitH": 16,
+        "inline": true,
+        "extended": false
+      },
+      {
+        "label": "Download desktop app",
+        "boxH": 44,
+        "hitH": 44,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  },
+  "https://stripe.com": {
+    "targets": 18,
+    "standalone": 18,
+    "inlineExempt": 0,
+    "shortOf44": 16,
+    "medianStandaloneHit": 40,
+    "extendedInvisibly": 0,
+    "shortest": [
+      "26px \"\"",
+      "34px \"\"",
+      "34px \"\"",
+      "34px \"\""
+    ],
+    "rows": [
+      {
+        "label": "",
+        "boxH": 25,
+        "hitH": 26,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Products",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Solutions",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Developers",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Resources",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Pricing",
+        "boxH": 38,
+        "hitH": 38,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Guide me",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign inSign in",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Contact sales",
+        "boxH": 40,
+        "hitH": 40,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Get started",
+        "boxH": 48,
+        "hitH": 48,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "Sign up with Google",
+        "boxH": 48,
+        "hitH": 48,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      },
+      {
+        "label": "",
+        "boxH": 34,
+        "hitH": 34,
+        "inline": false,
+        "extended": false
+      }
+    ]
+  }
+}

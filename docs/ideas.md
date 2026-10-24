@@ -8715,3 +8715,82 @@ added at `21944ab` today because the clone is shallow.
   the staleness above was detectable at all.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (frontend, third run) — Where does Ursa's design canon come from, given that the charter describes a different product
+
+- Trigger: this run needed to decide whether two controls that render
+  identically must move identically, which is a canon question, and found
+  no canon to ask. `prompts/frontend-agent.md` orders every run to read
+  `docs/design/canon.md`, `ban-list.md` and `tuning.md` and treat the
+  three as charter. None of the three exists in this repository; they were
+  alexandria's, and the charter says so in its own header. Raised by the
+  2026-10-18, 2026-10-23, 2026-10-24 and 2026-10-24b reviews before this
+  one, each time as "still open, not this run's", which is now four
+  consecutive runs recording the same absence and acting anyway.
+- What: the blocker is not that nobody has written the file, it is that
+  nobody can, and two things are in the way rather than one. The first is
+  authority: `tuning.md` is explicitly outside this seat's hand ("You
+  never edit this file; the chair and the PM record her rulings into it"),
+  and a `canon.md` composed by this seat from its own priors is the exact
+  failure the charter exists to prevent, since the owner's stated reason
+  for the file is that the input should be Apple's and her own and never
+  the model's. The second is that the charter's description of the
+  identity does not match the product: it says black and white only,
+  system Helvetica, and the site this seat actually reviews is `--night`
+  `#020308` with a `--polar` accent, a mono type scale and a WebGL star
+  field. So a run inheriting the charter literally would have to repaint
+  the site to comply, and every run so far has correctly declined to.
+  What the measurable cost looks like: this run answered its canon
+  question by benchmarking six sites for the rule "same rendered shape,
+  same motion", confirmed it on thirteen control groups, and had nowhere
+  to put the answer except a CSS comment that only an editor of
+  `.quiet-link` will ever read. The next run needing the same rule for a
+  different pair derives it again.
+- First step: a ruling from the owner on which identity is Ursa's, which
+  is a sentence and not a document. Everything else follows from it and
+  nothing can start before it. If the answer is that Ursa Minor's current
+  palette and type are the identity, then the day-sized unit after it is
+  the chair or the PM opening `docs/design/tuning.md` with the rulings
+  already scattered across merged PR descriptions (#294's one-pixel lift,
+  #299's fade-rather-than-slice, this run's same-shape-same-motion), and
+  this seat starting `ban-list.md`, which its charter does put in its hand
+  to append to.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (frontend, fourth run) — A control-size floor derived by measurement rather than from the model's priors
+
+- Trigger: this run put a 44px hit area under two controls that were
+  drawn at 17px, and had to justify the number. The charter points at
+  `docs/design/canon.md` for exactly this and the file does not exist, so
+  the previous entry's complaint became this run's concrete problem for
+  the second time in two runs. Rather than restate it, this run did what
+  the missing file would have done and measured the answer, and the
+  answer turned out to be sharper than the standard it started from.
+- What: across six reference sites at two viewports, 127 standalone
+  controls were probed for the size a pointer actually has to hit, by
+  hit-testing outward from each control rather than by reading its box,
+  so that an invisible overlay counts the same as real padding
+  (`docs/design/reviews/2026-10-24d/data/benchmark-hit-areas*.json`).
+  **Not one of the 127 is under 24px.** The smallest anywhere is exactly
+  24, on Linear, at both widths. That is a floor six companies hold
+  without a single exception, which is a far stronger statement than any
+  of them meeting a guideline, because they plainly are not trying to:
+  115 of the 127 are under 44px, so the Apple and WCAG-AAA touch figure
+  is not a norm these sites observe on either viewport. The two rules
+  that fall out are therefore different in kind. **Nothing below 24px**
+  is a floor with no observed exception in the set. **44px where it is
+  free** is this seat's own overshoot toward the touch guideline, taken
+  because an `::after` overlay costs no pixels and no layout, and it
+  should be read as a weaker claim than the first.
+  Ursa's generation rows were 17.3px, below the floor all six hold.
+- First step: if the owner rules on where Ursa's canon comes from (the
+  entry above this one), the floor is a candidate for its first line,
+  and it has the property she asked for: it is the human input of the
+  past, read off what good products actually ship, rather than a number
+  this seat liked. The distinction between the two rules should survive
+  into the file, because a canon that records "44px" without recording
+  that the benchmark only supports 24 is the model's prior wearing a
+  measurement's clothes.
+- Cost: $0
+- Status: proposed

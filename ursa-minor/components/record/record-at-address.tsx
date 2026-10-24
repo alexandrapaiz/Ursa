@@ -146,22 +146,41 @@ export function RecordAtAddress({ initial }: { initial: string }) {
           e.preventDefault();
           void read(typed, false);
         }}
-        className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5"
+        className="mt-8 flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-baseline sm:gap-5"
       >
-        <input
-          type="text"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder="pages/you/your-repo/your-repo-2026-10-18-abc1234"
-          aria-label="a record address"
-          spellCheck={false}
-          autoCapitalize="off"
-          className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
-        />
+        {/* The filled example the placeholder used to carry,
+            `pages/you/your-repo/your-repo-2026-10-18-abc1234`, needs 336px of
+            its own monospace, and the field is 326px wide at a 390 viewport
+            and 256px at 320. So a phone silently cut two characters off it
+            and a smaller phone cut twelve, leaving `...your-repo-2026-1`. A
+            placeholder cannot scroll and gives no sign that it was trimmed,
+            so the reader's only example of the format was a malformed
+            address with nothing saying so, on the page whose whole argument
+            is that an address is exact. The schematic below is the one this
+            same component already prints in AddressForms, so the two now
+            agree, and at 32 characters it fits the narrowest field. */}
+        {/* The label is the target and the field is the drawing. It
+            carries the overlay that makes this a 44px press (`.rec-field`
+            in globals.css) and forwards the press to the field inside it,
+            which keeps its own box and so keeps its own focus ring. The
+            sizing lives out here for the same reason: the thing the row
+            lays out is the target. */}
+        <label className="rec-field w-full min-w-0 sm:flex-1">
+          <input
+            type="text"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder="pages/<owner>/<repo>/<record-id>"
+            aria-label="a record address"
+            spellCheck={false}
+            autoCapitalize="off"
+            className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
+          />
+        </label>
         <button
           type="submit"
           disabled={busy || !typed}
-          className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
         >
           {busy ? "reading…" : "read the record"}
         </button>
@@ -174,7 +193,7 @@ export function RecordAtAddress({ initial }: { initial: string }) {
           host and the path walking off the right edge. Breaking inside
           the word is the only thing that holds at that measure. */}
       {error ? (
-        <p role="alert" className="mt-7 max-w-2xl break-words text-[0.85rem] leading-[1.7] text-[var(--star)]">
+        <p role="alert" className="mt-7 measure break-words text-[0.85rem] leading-[1.7] text-[var(--star)]">
           {error}
         </p>
       ) : null}
@@ -222,7 +241,7 @@ function AddressForms() {
           </li>
         ))}
       </ul>
-      <p className="mt-8 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+      <p className="mt-8 measure text-[0.85rem] leading-[1.6] text-[var(--dim)]">
         Your own records print their address when you ask the resolver for it, and a published site
         states one for every record in its index. If what you have is a site rather than a single
         record,{" "}
@@ -269,7 +288,7 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       {/* The integrity line sits above the record rather than under it,
           because it governs how everything below should be read. */}
       <div className="mt-6 border-l border-[var(--line)] pl-5">
-        <p className="max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{copy.line}</p>
+        <p className="measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">{copy.line}</p>
         {digest ? (
           <p className="mt-3 [overflow-wrap:anywhere] font-mono text-[0.66rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
             sha256 {digest}
@@ -278,7 +297,7 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       </div>
 
       {address.scheme === "git" ? (
-        <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">
+        <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">
           A committed record is served as plain text, so the page the resolver writes beside it
           arrives at a browser as source code rather than as a page. On this form of address, this
           viewer is not the nicer way to read the record; it is the only one.
@@ -286,11 +305,11 @@ function OpenedAtAddress({ open, fromPath }: { open: Opened; fromPath: boolean }
       ) : null}
 
       {permanence ? (
-        <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{permanence}</p>
+        <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">{permanence}</p>
       ) : null}
 
       {fromPath ? (
-        <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">
+        <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">
           You opened this by its address, so whoever serves this page saw which record you asked
           for, and not one byte of it: the record itself went straight from{" "}
           {recordAddressHost(address)} to your browser. Pasting an address into the field above

@@ -1,7 +1,7 @@
 "use client";
 
 import { FATE_COPY, type OutcomeRecord } from "@/lib/record/types";
-import { elicitingPrompts, pct } from "@/lib/record/provenance";
+import { elicitingPrompts, pctFixed } from "@/lib/record/provenance";
 import RecordDocument from "./record-document";
 
 /**
@@ -12,6 +12,13 @@ import RecordDocument from "./record-document";
  * because that is the order the exchange happened in, and because the
  * whole point of the panel is that a reader can see a request and its
  * answer without holding either in their head.
+ *
+ * The row's header is the only way to open a generation, and it is a
+ * 17px box, so it carries `.rec-hit`: the hit area is 44px while the
+ * drawn row stays 17. The `py-5` below is what makes room for it. Two
+ * neighbouring rows leave 41px between their headers and the overlay
+ * takes 26.7px of that, so no row answers for the one beneath it. See
+ * the `.rec-hit` note in globals.css.
  *
  * Each generation's own spans are tinted by fate, so the text the person
  * threw away is visible as text rather than as a percentage. That is the
@@ -54,14 +61,14 @@ export function RecordGenerations({
                 type="button"
                 onClick={() => onToggle(gen.generationIndex)}
                 aria-expanded={open}
-                className="rec-action flex w-full flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-left font-mono text-[0.72rem] tracking-[0.06em] text-[var(--polar)]"
+                className="rec-action rec-hit flex w-full flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-left font-mono text-[0.72rem] tracking-[0.06em] text-[var(--polar)]"
               >
                 <span>
                   {gen.conversationId} · turn {gen.turnIndex} · {gen.model}
                   {gen.filePath ? ` · ${gen.filePath}` : ""}
                 </span>
                 <span className="text-[var(--dim)]">
-                  {conv ? `${pct(conv.survivalRate)} survived` : `${gen.text.length} chars`}
+                  {conv ? `${pctFixed(conv.survivalRate)} survived` : `${gen.text.length} chars`}
                   <span className="pl-3 text-[var(--star)]">{open ? "−" : "+"}</span>
                 </span>
               </button>

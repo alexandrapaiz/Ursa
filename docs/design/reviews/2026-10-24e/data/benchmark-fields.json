@@ -1,0 +1,275 @@
+{
+ "https://vercel.com/login": [
+  {
+   "tag": "input",
+   "type": "email",
+   "name": "Email Address",
+   "boxW": 320,
+   "boxH": 40,
+   "targetTag": "input",
+   "targetH": 40,
+   "padT": "0px",
+   "padB": "0px",
+   "fontSize": "16px",
+   "ring": {
+    "outlineWidth": "1px",
+    "outlineStyle": "none",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "0px/0px/0px/0px",
+    "drawnAs": "a box",
+    "background": "rgb(255, 255, 255)",
+    "visualOwner": null,
+    "tracesH": 40,
+    "changedOnFocus": [
+     "outline"
+    ]
+   }
+  }
+ ],
+ "https://consensus.app": [
+  {
+   "tag": "textarea",
+   "type": "",
+   "name": "Ask the research...",
+   "boxW": 742,
+   "boxH": 24,
+   "targetTag": "textarea",
+   "targetH": 24,
+   "padT": "0px",
+   "padB": "0px",
+   "fontSize": "16px",
+   "ring": {
+    "outlineWidth": "1px",
+    "outlineStyle": "none",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "0px/0px/0px/0px",
+    "drawnAs": "nothing at all",
+    "background": "rgba(0, 0, 0, 0)",
+    "visualOwner": {
+     "tag": "div",
+     "up": 2,
+     "h": 114,
+     "isLabel": false,
+     "forwards": false,
+     "radius": "24px"
+    },
+    "tracesH": 24,
+    "changedOnFocus": []
+   }
+  }
+ ],
+ "https://github.com/login": [
+  {
+   "tag": "input",
+   "type": "text",
+   "name": "login",
+   "boxW": 352,
+   "boxH": 40,
+   "targetTag": "input",
+   "targetH": 40,
+   "padT": "5px",
+   "padB": "5px",
+   "fontSize": "16px",
+   "ring": {
+    "outlineWidth": "3px",
+    "outlineStyle": "none",
+    "outlineOffset": "0px",
+    "boxShadow": "rgb(9, 105, 218) 0px 0px 0px 1px inset",
+    "borderWidth": "1px/1px/1px/1px",
+    "drawnAs": "a box",
+    "background": "rgb(255, 255, 255)",
+    "visualOwner": null,
+    "tracesH": 40,
+    "changedOnFocus": []
+   }
+  }
+ ],
+ "https://stripe.com": [
+  {
+   "tag": "input",
+   "type": "email",
+   "name": "Enter work email",
+   "boxW": 431,
+   "boxH": 46,
+   "targetTag": "input",
+   "targetH": 46,
+   "padT": "0px",
+   "padB": "0px",
+   "fontSize": "16px",
+   "ring": {
+    "outlineWidth": "0px",
+    "outlineStyle": "solid",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "0px/0px/0px/0px",
+    "drawnAs": "nothing at all",
+    "background": "rgba(0, 0, 0, 0)",
+    "visualOwner": {
+     "tag": "div",
+     "up": 2,
+     "h": 48,
+     "isLabel": false,
+     "forwards": false,
+     "radius": "4px"
+    },
+    "tracesH": 46,
+    "changedOnFocus": []
+   }
+  }
+ ],
+ "https://www.figma.com/login": [
+  {
+   "tag": "input",
+   "type": "email",
+   "name": "email",
+   "boxW": 358,
+   "boxH": 53,
+   "targetTag": "input",
+   "targetH": 53,
+   "padT": "24px",
+   "padB": "6px",
+   "fontSize": "18px",
+   "ring": {
+    "outlineWidth": "3px",
+    "outlineStyle": "none",
+    "outlineOffset": "0px",
+    "boxShadow": "rgb(68, 68, 68) 0px 0px 0px 2px inset",
+    "borderWidth": "0px/0px/0px/0px",
+    "drawnAs": "a box",
+    "background": "rgba(0, 0, 0, 0.05)",
+    "visualOwner": {
+     "tag": "div",
+     "up": 4,
+     "h": 804,
+     "isLabel": false,
+     "forwards": false,
+     "radius": "0px"
+    },
+    "tracesH": 53,
+    "changedOnFocus": [
+     "box-shadow"
+    ]
+   }
+  }
+ ],
+ "https://claude.com": [
+  {
+   "tag": "textarea",
+   "type": "",
+   "name": "Ask Claude",
+   "boxW": 222,
+   "boxH": 25,
+   "targetTag": "textarea",
+   "targetH": 25,
+   "padT": "4px",
+   "padB": "4px",
+   "fontSize": "12px",
+   "ring": {
+    "outlineWidth": "3px",
+    "outlineStyle": "none",
+    "outlineOffset": "2px",
+    "boxShadow": "none",
+    "borderWidth": "0px/0px/0px/0px",
+    "drawnAs": "nothing at all",
+    "background": "rgba(0, 0, 0, 0)",
+    "visualOwner": {
+     "tag": "div",
+     "up": 1,
+     "h": 46,
+     "isLabel": false,
+     "forwards": false,
+     "radius": "12px"
+    },
+    "tracesH": 25,
+    "changedOnFocus": []
+   }
+  }
+ ],
+ "https://duckduckgo.com": [
+  {
+   "tag": "textarea",
+   "type": "",
+   "name": "Search with DuckDuckGo",
+   "boxW": 462,
+   "boxH": 32,
+   "targetTag": "textarea",
+   "targetH": 32,
+   "padT": "6px",
+   "padB": "0px",
+   "fontSize": "16px",
+   "ring": {
+    "outlineWidth": "3px",
+    "outlineStyle": "none",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "0px/0px/0px/0px",
+    "drawnAs": "nothing at all",
+    "background": "rgba(0, 0, 0, 0)",
+    "visualOwner": {
+     "tag": "div",
+     "up": 1,
+     "h": 48,
+     "isLabel": false,
+     "forwards": false,
+     "radius": "24px"
+    },
+    "tracesH": 32,
+    "changedOnFocus": []
+   }
+  }
+ ],
+ "https://news.ycombinator.com/login": [
+  {
+   "tag": "input",
+   "type": "text",
+   "name": "acct",
+   "boxW": 185,
+   "boxH": 21,
+   "targetTag": "input",
+   "targetH": 21,
+   "padT": "1px",
+   "padB": "1px",
+   "fontSize": "13.3333px",
+   "ring": {
+    "outlineWidth": "1px",
+    "outlineStyle": "auto",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "2px/2px/2px/2px",
+    "drawnAs": "a box",
+    "background": "rgb(255, 255, 255)",
+    "visualOwner": null,
+    "tracesH": 21,
+    "changedOnFocus": []
+   }
+  },
+  {
+   "tag": "input",
+   "type": "text",
+   "name": "acct",
+   "boxW": 185,
+   "boxH": 21,
+   "targetTag": "input",
+   "targetH": 21,
+   "padT": "1px",
+   "padB": "1px",
+   "fontSize": "13.3333px",
+   "ring": {
+    "outlineWidth": "1px",
+    "outlineStyle": "auto",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "2px/2px/2px/2px",
+    "drawnAs": "a box",
+    "background": "rgb(255, 255, 255)",
+    "visualOwner": null,
+    "tracesH": 21,
+    "changedOnFocus": [
+     "outline"
+    ]
+   }
+  }
+ ]
+}

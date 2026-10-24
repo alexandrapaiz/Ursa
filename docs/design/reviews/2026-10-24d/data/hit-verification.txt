@@ -1,0 +1,82 @@
+=== every target on the site, before against after ===
+  ok    phone/home: same number of targets                         got 6  want 6
+  ok    phone/set: same number of targets                          got 8  want 8
+  ok    phone/record: same number of targets                       got 10  want 10
+  ok    phone/address: same number of targets                      got 5  want 5
+  ok    phone/404: same number of targets                          got 2  want 2
+  ok    tablet/home: same number of targets                        got 6  want 6
+  ok    tablet/set: same number of targets                         got 8  want 8
+  ok    tablet/record: same number of targets                      got 10  want 10
+  ok    tablet/address: same number of targets                     got 5  want 5
+  ok    tablet/404: same number of targets                         got 2  want 2
+  ok    desktop/home: same number of targets                       got 6  want 6
+  ok    desktop/set: same number of targets                        got 8  want 8
+  ok    desktop/record: same number of targets                     got 10  want 10
+  ok    desktop/address: same number of targets                    got 5  want 5
+  ok    desktop/404: same number of targets                        got 2  want 2
+  -> 15 hit areas grew, 75 unchanged, 0 shrank, every drawn box identical
+
+=== phone 390x844 · generation rows, pressed outside the drawn box ===
+  ok    two generation rows found                                  got 2  want 2
+  ok    row 0: box is short enough to need an overlay              got 38.5  want < 44
+  ok    row 0: press 2.7px ABOVE the box opened it                 got true  want true
+  ok    row 0: did not also toggle row 1                           got false  want false
+  ok    row 0: press 2.7px BELOW the box closed it                 got false  want false
+  ok    row 0: press 2px OUTSIDE the hit area did nothing          got false  want false
+  ok    row 1: box is short enough to need an overlay              got 38.5  want < 44
+  ok    row 1: press 2.7px ABOVE the box opened it                 got true  want true
+  ok    row 1: did not also toggle row 0                           got false  want false
+  ok    row 1: press 2.7px BELOW the box closed it                 got false  want false
+  ok    row 1: press 2px OUTSIDE the hit area did nothing          got false  want false
+
+=== phone 390x844 · copy controls, pressed outside the drawn box ===
+  ok    three copy controls found                                  got 3  want 3
+  ok    copy 0: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    copy 1: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    copy 2: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    a command block with somewhere to scroll exists            got 737px  want > 0px
+  ok    the command block still scrolls at its bottom edge         got 120  want > 0
+
+=== tablet 820x1180 · generation rows, pressed outside the drawn box ===
+  ok    two generation rows found                                  got 2  want 2
+  ok    row 0: box is short enough to need an overlay              got 17.3  want < 44
+  ok    row 0: press 13.4px ABOVE the box opened it                got true  want true
+  ok    row 0: did not also toggle row 1                           got false  want false
+  ok    row 0: press 13.4px BELOW the box closed it                got false  want false
+  ok    row 0: press 2px OUTSIDE the hit area did nothing          got false  want false
+  ok    row 1: box is short enough to need an overlay              got 17.3  want < 44
+  ok    row 1: press 13.4px ABOVE the box opened it                got true  want true
+  ok    row 1: did not also toggle row 0                           got false  want false
+  ok    row 1: press 13.4px BELOW the box closed it                got false  want false
+  ok    row 1: press 2px OUTSIDE the hit area did nothing          got false  want false
+
+=== tablet 820x1180 · copy controls, pressed outside the drawn box ===
+  ok    three copy controls found                                  got 3  want 3
+  ok    copy 0: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    copy 1: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    copy 2: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    a command block with somewhere to scroll exists            got 494px  want > 0px
+  ok    the command block still scrolls at its bottom edge         got 120  want > 0
+
+=== desktop 1440x900 · generation rows, pressed outside the drawn box ===
+  ok    two generation rows found                                  got 2  want 2
+  ok    row 0: box is short enough to need an overlay              got 17.3  want < 44
+  ok    row 0: press 13.4px ABOVE the box opened it                got true  want true
+  ok    row 0: did not also toggle row 1                           got false  want false
+  ok    row 0: press 13.4px BELOW the box closed it                got false  want false
+  ok    row 0: press 2px OUTSIDE the hit area did nothing          got false  want false
+  ok    row 1: box is short enough to need an overlay              got 17.3  want < 44
+  ok    row 1: press 13.4px ABOVE the box opened it                got true  want true
+  ok    row 1: did not also toggle row 0                           got false  want false
+  ok    row 1: press 13.4px BELOW the box closed it                got false  want false
+  ok    row 1: press 2px OUTSIDE the hit area did nothing          got false  want false
+
+=== desktop 1440x900 · copy controls, pressed outside the drawn box ===
+  ok    three copy controls found                                  got 3  want 3
+  ok    copy 0: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    copy 1: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    copy 2: press 7.6px ABOVE the box reached it               got "select it"  want "copied" or "select it"
+  ok    a command block with somewhere to scroll exists            got 575px  want > 0px
+  ok    the command block still scrolls at its bottom edge         got 120  want > 0
+
+=== 66 checks, 66 pass, 0 fail ===

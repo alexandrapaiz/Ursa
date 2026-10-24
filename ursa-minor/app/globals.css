@@ -156,6 +156,39 @@
   --line: #141b2b;
   /* display face: the light grotesque the hero is set in */
   --font-sans: "Helvetica Neue", -apple-system, "Segoe UI", Arial, sans-serif;
+
+  /* The house spring, measured 2026-10-24 rather than invented.
+     docs/design/reviews/2026-10-24 has the full account; the short form:
+
+     Two earlier runs of the frontend seat tried to describe the hover feel
+     the owner named on Elicit by reading its computed CSS at rest, and both
+     concluded there is no spring in it. There is not. The spring is handed
+     to the browser through the Web Animations API, which has no spring
+     either, so a motion library solves it first and ships the solution as a
+     `linear()` easing of a few dozen points. Read off their own animation
+     engine, Elicit's is 400ms, damping ratio 0.80, peaking 1.51 percent past
+     its target at 236ms, and ringing exactly zero times.
+
+     That is the correction worth having. "Bouncy" there is one and a half
+     percent of overshoot, not a bounce, and the property it is applied to
+     is background colour, where an overshoot of that size cannot be seen at
+     all. So what carries the feel is not the size of the spring. It is that
+     the motion arrives, goes a hair past, and settles, instead of stopping
+     dead on its mark.
+
+     Ours is the same physics re-solved at our own tempo instead of theirs:
+     damping ratio 0.80 kept exactly, duration 340ms so that it first
+     reaches its target at 163ms, which is the 160ms this file already uses
+     everywhere. Overshoot 1.50 percent, peak at 207ms, no ring. Regenerate
+     or audit it with:
+
+       node docs/design/review-kit/make-spring.mjs \
+         --damping 0.8 --duration 340 --wnT 8.88 --points 24
+
+     The same generator, given Elicit's own numbers, reproduces Elicit's own
+     40 points to within 0.008, which is how this value was checked against
+     something real before it was used. */
+  --spring-lift: linear(0 0%, 0.0606 4.3478%, 0.1964 8.6957%, 0.3579 13.0435%, 0.5155 17.3913%, 0.6537 21.7391%, 0.7662 26.087%, 0.8526 30.4348%, 0.9153 34.7826%, 0.9585 39.1304%, 0.9863 43.4783%, 1.0028 47.8261%, 1.0114 52.1739%, 1.0148 56.5217%, 1.015 60.8696%, 1.0134 65.2174%, 1.0111 69.5652%, 1.0087 73.913%, 1.0064 78.2609%, 1.0045 82.6087%, 1.0029 86.9565%, 1.0018 91.3043%, 1.001 95.6522%, 1 100%);
 }
 
 ::selection {
@@ -264,13 +297,45 @@ html {
    lift here is one pixel and the press beats the hover.
 
    Colour stays inside the existing palette: the border walks up to --polar
-   and the fill is --polar at 8%. Nothing new is introduced. */
+   and the fill is --polar at 8%. Nothing new is introduced.
+
+   Amended 2026-10-24. "Never bouncy" above, and the "Elicit (200ms on
+   transform)" it rests on, were both read off Elicit's stylesheet at rest,
+   and a stylesheet at rest cannot see a spring that is handed to the
+   animation engine already solved. Asked directly, that engine says 400ms,
+   damping ratio 0.80, 1.51 percent of overshoot, no ring. So Elicit is
+   bouncy, by one and a half percent, and the earlier reading was not wrong
+   about the pixels so much as blind to the mechanism.
+
+   One pixel of lift stands: Elicit's own geometric motion is also one
+   pixel. What changes is that the pixel now springs. The spring goes on
+   the transform and not on the colour, which is the other half of the
+   finding, because Elicit puts its spring on background colour where an
+   overshoot of 1.5 percent is invisible. Here the overshoot lands on the
+   only channel that can show it. */
 
 .cta {
   transition:
     border-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
     background-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
     transform 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Guarded, because `linear()` is recent. A browser without it never enters
+   this block and keeps the 160ms ease-out above, which is the behaviour
+   that shipped before today. The guard has to be @supports rather than two
+   declarations in a row: a var() that fails to substitute invalidates the
+   whole property at computed-value time instead of falling back to the
+   declaration before it. */
+@supports (transition-timing-function: linear(0, 1)) {
+  .cta {
+    transition-property: border-color, background-color, transform;
+    transition-duration: 160ms, 160ms, 340ms;
+    transition-timing-function:
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      var(--spring-lift);
+  }
 }
 
 /* Tailwind v4 already gates hover: behind (hover: hover); this rule is plain
@@ -317,24 +382,75 @@ html {
   background-color: rgba(232, 237, 247, 0);
   transition:
     background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 340ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* The lift, added 2026-10-24, and the reason it belongs here rather than
+   being a second opinion about .cta's.
+
+   This control and .cta are the same control. Measured on the shipped build
+   at 1440 (`docs/design/reviews/2026-10-24c/data/controls-before.txt`), the
+   404's "Back to Ursa Minor" and the home page's "Get Polaris" come back at
+   the same height 47.3px, the same font-size 11.52px, the same 1px border
+   and the same padding 14/26.7/14/29.3, asymmetric tracking correction and
+   all. Only their widths differ, because one label is longer. They are one
+   box wearing two class names, and until today one of them lifted a pixel
+   and sprang and the other did not move at all.
+
+   Benchmarked 2026-10-24 for exactly this question. Six sites, every link
+   and button drawn as a box, grouped by rendered shape rather than by class:
+   Linear, Vercel, Elicit, Consensus, claude.com, Stripe. Thirteen groups of
+   two or more same-shaped controls, and not one gives its members a
+   different motion character. Vercel's "Deploy now" and "Talk to sales",
+   claude.com's "Try Claude" and "Contact sales", Elicit's "Try now" and
+   "Learn more" are primary and secondary pairs that share one transition
+   each. Stripe is the only group that splits at all, and both halves still
+   run 0.3s on the same cubic-bezier(0.25,1,0.5,1); only the property list
+   differs. Hierarchy is drawn in colour everywhere, never in physics.
+   Capture in `docs/design/reviews/2026-10-24c/data/`.
+
+   So nothing new is invented here. This is .cta's own spring, the same
+   --spring-lift and the same 340ms, on the one other control shaped like
+   it. The colour treatment above is untouched: the wash still arrives in
+   160ms and still takes 260ms to leave, which is this control's own
+   asymmetry and has nothing to do with the transform.
+
+   The durations are spelled out in every state below rather than left to
+   the one-value shorthand. With three properties declared, a bare
+   `transition-duration: 160ms` applies 160ms to all three and quietly
+   collapses the spring into an ease. */
+@supports (transition-timing-function: linear(0, 1)) {
+  .quiet-link {
+    transition-property: background-color, border-color, transform;
+    transition-duration: 260ms, 260ms, 340ms;
+    transition-timing-function:
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      var(--spring-lift);
+  }
 }
 
 @media (hover: hover) {
   .quiet-link:hover {
     background-color: rgba(232, 237, 247, 0.06);
     border-color: rgba(168, 199, 250, 0.75);
-    transition-duration: 160ms;
+    transform: translateY(-1px);
+    transition-duration: 160ms, 160ms, 340ms;
   }
 }
 
 /* keyboard parity */
 /* the wash and border only; the ring itself comes from the site-wide
-   :focus-visible rule above */
+   :focus-visible rule above. No lift on focus, because .cta has none
+   either: a ring already says focused, and a control that rises when you
+   tab to it is saying it twice. The duration list is still spelled out, so
+   that focusing a control that is also hovered does not shorten the spring
+   from under it. */
 .quiet-link:focus-visible {
   background-color: rgba(232, 237, 247, 0.06);
   border-color: rgba(168, 199, 250, 0.75);
-  transition-duration: 160ms;
+  transition-duration: 160ms, 160ms, 340ms;
 }
 
 /* the press, and the only feedback a tap gets.
@@ -354,23 +470,56 @@ html {
    touch visitor, who gets neither of the other two, tapped the only live
    link on the site and saw nothing happen until the page changed.
 
-   Translated rather than copied: no scale, because the lift and settle
-   idiom already belongs to .cta and this is a text-sized control. The press
-   is the same starlight wash taken deeper and the border taken to full
-   --polar, arriving in 90ms, which is .cta's own press timing. Nothing new
-   enters the palette. */
+   The press is the same starlight wash taken deeper and the border taken to
+   full --polar, arriving in 90ms, which is .cta's own press timing. Nothing
+   new enters the palette.
+
+   Amended 2026-10-24. This block used to end "no scale, because the lift and
+   settle idiom already belongs to .cta and this is a text-sized control".
+   The first half stands and is why there is still no scale here. The second
+   half was wrong about its own subject: measured, .quiet-link is not a
+   text-sized control, it is the same 47.3px bordered box .cta is. The
+   text-sized control on this site is .rec-action, which has no border, no
+   padding and a 17px box, and which the sentence was presumably describing.
+   The lift now applies, for the reason recorded above the @supports block.
+
+   The press drops the lift to 0 in 90ms along with the colours, which is
+   .cta's behaviour exactly: the press beating the lift is what makes it
+   read as physical rather than as an animation. */
 .quiet-link:active {
   background-color: rgba(232, 237, 247, 0.11);
   border-color: var(--polar);
+  transform: translateY(0);
   transition-duration: 90ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* The transform leaves the property list entirely here, which is how .cta's
+     own reduced-motion block does it, rather than staying declared and being
+     neutralised by the `transform: none` below.
+
+     Both are wanted, and the first one is the one that is easy to skip. With
+     only `transform: none`, a reader asking this stylesheet what it animates
+     under reduced motion is still told "a spring on the transform", and the
+     promise is kept by two other declarations some distance away. Dropping
+     the property means the answer is no spring, from the one place that is
+     asked. The `transform: none` then stops the control moving even if a
+     later edit puts the property back. */
+  .quiet-link {
+    transition:
+      background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      border-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
   .quiet-link,
   .quiet-link:hover,
   .quiet-link:focus-visible,
   .quiet-link:active {
     transition-duration: 1ms;
+  }
+  /* the lift is removed outright rather than shortened, matching .cta */
+  .quiet-link:hover,
+  .quiet-link:active {
+    transform: none;
   }
 }
 
@@ -582,15 +731,50 @@ html {
   white-space: pre;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  /* The one indicator that the line continues past the edge. A thin
-     track in --line is the same hairline every other edge on this site
-     is drawn with, so it says "there is more" without adding a device.
-     It is not a complete answer: iOS paints overlay scrollbars and shows
-     nothing until a finger moves. The copy control carries the whole
-     command regardless of what is visible, which is why clipping is
-     survivable here and would not be in prose. */
+  /* The thin track was described here, until 2026-10-24, as "the one
+     indicator that the line continues past the edge". Measured on that
+     date, it is not an indicator at all. It reserves no width
+     (offsetHeight 44 against clientHeight 44, so the browser overlays it
+     rather than laying it out) and its thumb is --line on --night, which
+     is a contrast ratio of 1.198 to 1. It is kept because it costs
+     nothing and helps on a platform that paints a classic scrollbar.
+     The thing that actually says "there is more" is the fade below. */
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
+
+  /* The cut, before the fade: the Action's curl line ended at
+     "raw.githubusercontent.com/alexandrapaiz/Ursa/main/u" on a 1440
+     desktop, which is a line that looks finished. 536px of it were
+     hidden there, 455 at 820, 737 at 390 and 807 at 320, so this was
+     never only a phone problem. A reader cannot tell a clipped line from
+     a short one when the clip is clean, and a clean clip is what a
+     scroll container gives you.
+
+     So the edge is faded instead of sliced. Two reasons it is a mask and
+     not an overlay. The page's background is not a colour here, it is
+     the WebGL sky in PixelSky painted fixed behind everything, so an
+     opaque gradient in --night would read as a dark patch over a sky
+     that is visible either side of it. And a mask fades the glyph
+     itself, which is the thing that was lying about being complete.
+
+     The width of the fade is driven from the component, in --fade-l and
+     --fade-r, as the distance left to scroll on that side clamped to
+     32px, which is two of this card's 16px padding step and about four
+     and a half characters at this type size. Driving it from the
+     distance rather than from a boolean means the fade shrinks to
+     nothing over the last 32px instead of popping off at the end, and it
+     means both values are 0 whenever the line fits, so a command that
+     does not scroll is not faded for no reason. Before hydration both
+     are 0 and this rule paints exactly what shipped before it. */
+  --fade-l: 0px;
+  --fade-r: 0px;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
 }
 
 /* The share bar. 1px gaps in --night rather than margins, so the
@@ -632,6 +816,126 @@ html {
   .rec-action {
     transition-duration: 1ms;
   }
+}
+
+/* ---------- the 44px floor ----------
+
+   A control that is drawn small still has to be hittable. This site sets
+   its quiet controls in mono at 0.7rem, which renders a 17px box, and a
+   17px box is a target you miss with a thumb. Measured on the shipped
+   build at 1440, twelve of the nineteen standalone controls on the site
+   were under 44px tall, the shortest of them the only way to open a
+   generation (`docs/design/reviews/2026-10-24d/data/hit-areas-before.txt`).
+
+   The fix is the one this stylesheet already uses, established for
+   `.mark-link` on 2026-10-12: an absolutely positioned `::after` that is
+   taller than its own control and invisible. Nothing about the drawn box
+   changes, so the type keeps its size and the layout keeps its rhythm,
+   and the thing you can hit is the thing the hand expects rather than the
+   thing the eye measures.
+
+   Two reasons it is written as a calc rather than as a number. The
+   percentage in `inset` resolves against the containing block, which for
+   an absolutely positioned child is this control's own padding box, so
+   `(100% - 44px) / 2` is exactly the overhang each edge needs and it is
+   correct for a 17px box and a 29px one without being told which it is.
+   And it cannot overshoot: once a control is 44px or taller the inset
+   turns positive and the overlay shrinks back inside the box, where it
+   adds nothing, because the control's own box was always hit-tested
+   anyway. So the rule has no upper bound to maintain.
+
+   What it does NOT go on, which is the part that needs saying, because
+   the obvious move is to put it on `.rec-action` and be done:
+
+   - Not on a target that is inline in a sentence. WCAG 2.5.8 exempts
+     those, and the exemption is structural rather than a loophole: at
+     this site's 1.6 line height an overlay reaching 13px past a link's
+     own line box lands on the words above and below it and starts
+     answering their clicks. Eleven of the site's targets are inline
+     links in running prose and all eleven keep their own box.
+   - Not on the document spans in the record viewer. They tile the
+     person's text edge to edge, so every overlay would overlap its
+     neighbours and the topmost one would win. A short `.sp` is reported
+     as a finding and left alone.
+   - Not on the document spans, as above.
+
+   It DOES now go on the three form submit buttons, which the 2026-10-24d
+   version of this comment left out and predicted would need "an
+   asymmetric inset chosen per form". They did not. The obstacle was
+   real: below `sm` each form stacks and the button sat 12px under its
+   field, less than the 13.6px this overlay reaches, so it crossed the
+   field's own bottom edge. But the 12px was the thing to fix. Those
+   three gaps are now 16px (`gap-4`), which clears the overlay by 2.4px
+   and costs four pixels on a phone, and the symmetric rule is then
+   correct for all three forms. A gap that cannot hold two adjacent
+   targets apart is a spacing bug, not a reason for three bespoke
+   insets. */
+.rec-hit {
+  position: relative;
+}
+
+.rec-hit::after {
+  content: "";
+  position: absolute;
+  inset: calc((100% - 44px) / 2) 0;
+}
+
+/* ---------- the 44px floor, part two: the fields ----------
+
+   The three address fields are the one place on this site where the
+   overlay above cannot be put on the control itself. An `<input>` is a
+   replaced element and renders no `::after`, so there is nothing to hang
+   an overlay from. Measured on the shipped build: 26.3px at 390 and
+   27.2px above `sm`, which is one line box, 8px of padding and a
+   hairline (`docs/design/reviews/2026-10-24e/data/forms-before.txt`).
+
+   The first attempt at this gave the field the height for real, as
+   padding, and cancelled the layout cost with a negative margin of the
+   same size. It measured perfectly and it was wrong, and the screenshot
+   is the only reason anyone found out
+   (`docs/design/reviews/2026-10-24e/` §3). This site draws a
+   `:focus-visible` ring, and a ring traces the border box. Growing the
+   border box grew the ring: tab into the field and you got a 44px
+   rectangle with the text sitting at the bottom of it and 17px of empty
+   box above, and on a phone the top of that rectangle came within 6px of
+   the "Open a record" button's own border, so the two read as two boxes
+   colliding. Measured 0px of difference at rest and about 2% of the
+   frame once focused.
+
+   So the rule is the one `.rec-hit` already encodes, stated plainly:
+   **the ring belongs to what you see, and the hit area belongs to what
+   you press.** Padding conflates them, because one box was being asked
+   to be both. A wrapping `<label>` separates them again. The label is
+   the target and carries the overlay; the field keeps its own 27px box
+   and therefore its own ring, exactly as drawn today. A label forwards
+   its activation to the control it wraps, so a press anywhere in the
+   overlay puts the caret in the field, which is native behaviour and
+   works the same under a finger as under a mouse.
+
+   The inset is asymmetric where `.rec-hit`'s is centred, and that is the
+   design decision in this rule rather than an optimisation. A field here
+   is drawn as its text and the rule beneath it, and the rule is the
+   bottom of the field. Slack added below it would reach past the field's
+   own edge toward the button underneath; all of it goes above, into
+   space that was already empty. So the hit area ends exactly at the rule
+   and the field still owns its own bottom edge.
+
+   `100%` resolves against the label's padding box, which is the field's
+   own height, so one rule is right for the 26.3px box at 390 and the
+   27.2px box above `sm` without being told which. As with `.rec-hit` it
+   cannot overshoot: once a field is 44px or taller the inset turns
+   positive and the overlay shrinks back inside the box. Nothing about
+   layout changes, because an absolutely positioned overlay is not in
+   flow, and nothing drawn changes, because the overlay has no paint. */
+.rec-field {
+  position: relative;
+  display: flex;
+}
+
+.rec-field::after {
+  content: "";
+  position: absolute;
+  inset: calc(100% - 44px) 0 0;
 }
 
 /* ---------- the set's record rows ---------- */
@@ -680,4 +984,44 @@ html {
   .rec-row-id {
     transition-duration: 1ms;
   }
+}
+
+/* ---------- the measure ----------
+
+   The measure is a property of the type, not of the column, and until
+   2026-10-24 this site had it the other way round. Every prose box was a
+   pixel width, `max-w-xl` or `max-w-2xl`, and both of them were used at
+   two type sizes: 0.95rem for the body and 0.85rem for the smaller
+   paragraph that usually follows it. A box that does not change when the
+   type shrinks gives the smaller type a longer line, so the small print
+   ended up with the longest line on the page. Counted character by
+   character with a Range, at 1440 on the shipped build: on `/record/at`
+   the 0.85rem paragraph ran to 113 characters while the 0.95rem
+   paragraphs above it ran to 96, and on the home page the closing note
+   ran to 98 against its neighbours' 85
+   (`docs/design/reviews/2026-10-24f/data/measure-before.txt`).
+
+   In `em` the box is the type's own, so both sizes land on the same
+   count and a third size added later lands there too without anybody
+   remembering to pick a width for it.
+
+   The two values are the ones the 0.95rem paragraphs already had, to
+   within a rounding: 672px is 44.21em of 15.2px type and 576px is
+   37.89em. They are written as 44 and 38 rather than carried to four
+   decimals, which moves a 0.95rem paragraph by 3.2px and 1.6px
+   respectively, and the frame diff in that review says what that cost.
+
+   Both are above the measure every benchmarked site holds, and that is
+   deliberate rather than overlooked. 44em is about 100 characters where
+   six design-led products measured the same way sit between 47 and 87
+   (`data/benchmark-measure.json`). Narrowing the column is an identity
+   decision about how generous this page is, so it is recorded as a
+   proposal to the owner in §9 of that review and not taken here. This
+   rule fixes the drift and leaves the width where she can see it. */
+.measure {
+  max-width: 44em;
+}
+
+.measure-narrow {
+  max-width: 38em;
 }

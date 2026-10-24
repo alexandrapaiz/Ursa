@@ -176,7 +176,7 @@ export function PublishedSite() {
       <h2 className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
         <span className="text-[var(--polar)]">✦</span> Read a published site
       </h2>
-      <p className="mt-7 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+      <p className="mt-7 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
         <span className="font-mono text-[0.85rem] text-[var(--star)]">ursa publish</span> turns your
         records into a static site on hosting you own. Paste its address and this page reads the
         index at its root, which is how you see the whole set before fetching any of it. If what you
@@ -187,26 +187,34 @@ export function PublishedSite() {
         .
       </p>
 
-      <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-3 sm:flex-row sm:items-baseline sm:gap-5">
-        <input
-          type="url"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="https://you.github.io/your-repo/"
-          aria-label="the address of a published site"
-          className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
-        />
+      <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-baseline sm:gap-5">
+        {/* The label is the target and the field is the drawing. It
+            carries the overlay that makes this a 44px press (`.rec-field`
+            in globals.css) and forwards the press to the field inside it,
+            which keeps its own box and so keeps its own focus ring. The
+            sizing lives out here for the same reason: the thing the row
+            lays out is the target. */}
+        <label className="rec-field w-full min-w-0 sm:flex-1">
+          <input
+            type="url"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="https://you.github.io/your-repo/"
+            aria-label="the address of a published site"
+            className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
+          />
+        </label>
         <button
           type="submit"
           disabled={busy || !address}
-          className="rec-action shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
         >
           {busy ? "reading…" : "read the site"}
         </button>
       </form>
 
       {error ? (
-        <p role="alert" className="mt-6 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--star)]">
+        <p role="alert" className="mt-6 measure text-[0.85rem] leading-[1.6] text-[var(--star)]">
           {error}
         </p>
       ) : null}
@@ -302,13 +310,13 @@ function SiteSet({
   if (index.records.length === 0) {
     return (
       <>
-        <p className="mt-10 max-w-2xl text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
+        <p className="mt-10 measure text-[0.95rem] leading-[1.7] text-[#b7c0d4]">
           This is a published Ursa site and it lists no records. Either nobody has resolved any work
           here yet, which is the ordinary order to do it in, or the resolver did run and its pairing
           bounds were narrower than this history needed, in which case it found nothing to pair and
           published that honestly.
         </p>
-        <p className="mt-5 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+        <p className="mt-5 measure text-[0.85rem] leading-[1.6] text-[var(--dim)]">
           This page cannot tell you which of the two it is. The bounds a run used are stated per
           record, so a set with no records in it states none, and whoever published this is the only
           person who can say how far their resolver was allowed to look.
@@ -331,7 +339,7 @@ function SiteSet({
       </p>
 
       {site.note ? (
-        <p className="mt-5 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">{site.note}</p>
+        <p className="mt-5 measure text-[0.85rem] leading-[1.6] text-[var(--dim)]">{site.note}</p>
       ) : null}
 
       {/* New in index contract 0.4: how far the resolver was allowed to
@@ -341,7 +349,7 @@ function SiteSet({
           numbers in each row. It is the question the count itself is the
           answer to, and a reader who has already scrolled past ten
           records has read the count as a total. */}
-      <p className="mt-6 max-w-2xl text-[0.85rem] leading-[1.7] text-[var(--dim)]">{pairing.line}</p>
+      <p className="mt-6 measure text-[0.85rem] leading-[1.7] text-[var(--dim)]">{pairing.line}</p>
       {pairing.sets.length > 0 ? (
         <ul className="mt-4 max-w-2xl">
           {pairing.sets.map((b) => (
@@ -429,7 +437,7 @@ function SiteSet({
         })}
       </ul>
 
-      <p className="mt-9 max-w-2xl text-[0.85rem] leading-[1.6] text-[var(--dim)]">
+      <p className="mt-9 measure text-[0.85rem] leading-[1.6] text-[var(--dim)]">
         The three shares divide the whole finished work rather than the classified part of it, so
         they fall short of 100% by however much a run could not account for. Every number above came
         out of this site&rsquo;s index. Opening a record fetches that record and nothing else
@@ -485,7 +493,7 @@ function OpenRecord({
           copy.tone === "bad" ? "border-[var(--star)]" : "border-[var(--line)]"
         }`}
       >
-        <p className={`max-w-2xl text-[0.85rem] leading-[1.7] ${tone}`}>{copy.line}</p>
+        <p className={`measure text-[0.85rem] leading-[1.7] ${tone}`}>{copy.line}</p>
         <p className="mt-3 font-mono text-[0.66rem] leading-[1.9] tracking-[0.04em] text-[var(--dim)]">
           {humanBytes(open.integrity.bytes)} fetched
           {open.integrity.state === "verified" ? ` · sha256 ${open.integrity.sha256.slice(0, 16)}…` : ""}
