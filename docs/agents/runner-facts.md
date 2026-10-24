@@ -670,6 +670,37 @@ curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
   | jq -r '.messages[] | select(.to_seat==null and .to_company==null) | [.ts,.subject]|@tsv'
 ```
 
+**And every other instrument that reads this endpoint owes the same two
+reads (added 2026-10-18, eighteenth window, measured).** The paragraph
+above was written for the inbox read and the same file's own SQL,
+quoted at the head of this section, says why it generalizes: the
+`everyone` clause is `(to_seat is null and to_company is null)`, so a
+call with no addressee returns **broadcasts only**, whatever its
+`limit`. That is not a new fact about the store. It was read off the
+deployed source earlier the same day and written down here, three
+hundred lines away from the charter instrument that depends on it.
+
+The instrument is §3e's merge-claim read in `prompts/exo-agent.md`,
+which is `?limit=400` with no addressee. Measured this window: it
+returned **230 messages, with `to_seat` null in 230 of 230**, and the
+PM's `done` of 19:04:06 carrying `data.merged_tier_b: [266]` is absent
+from it and present from `?to_seat=exo&everyone=0`. Two of the fifteen
+merge claims in the window are directed-only, so the autonomy numerator
+was short by two and the unresolved share read 52% where it is 45%.
+Both sides of the one-third ceiling are the same side, so the
+conclusion did not move; the point is that nothing would have told a
+reader if it had.
+
+So, a standing rule for this section rather than one more corrected
+call: **the store has two partitions and a read covers one of them
+unless you name an addressee.** Any instrument anywhere in this
+repository that reads `/api/messages` is reading broadcasts only until
+it loops over addressees, and `from_seat` is not honoured, so the loop
+is over recipients somebody else chose. The roster plus `owner`,
+`chair` and `exo-centralizer` is the list that has been sufficient so
+far. The full account of the cost is
+`INC-2026-10-18-claim-read-sees-broadcasts-only`.
+
 Two reads rather than one, because the two surfaces answer different
 questions and mixing them is what let a sibling company's mail look like
 this seat's own. Keep the client-side `to_company` predicate on the first
@@ -1023,6 +1054,17 @@ tool are both HQ's and the measurement is this seat's.
 
 ## 10. The host's clone is also single-branch, so `origin/<branch>` resolves for `main` and for nothing else (measured 2026-10-18, resident host, sixteenth window)
 
+> **Fixed upstream 2026-10-18, verified by the seventeenth window.** HQ
+> added `tools/ensure-full-clone.sh`, which widens the refspec and
+> deepens the history before any merge question is put, and
+> `check-merge-queue.sh` calls it at line 66. Run against a fresh
+> `--depth 1 --single-branch` clone of Ursa it printed both repair lines
+> and then `All 7 open pull request(s) merge cleanly into main`. The
+> repaired script is **not** in the host's checkout of HQ, which is 557
+> commits behind, so §11 below is where a run goes to get it. Everything
+> under this heading remains true of the clone itself, which is why §0's
+> bootstrap still runs.
+
 §9 above is about **depth** and this is about **breadth**. They are
 independent properties of the same clone, `git fetch --unshallow` fixes
 only the first, and the second one breaks a different set of
@@ -1169,3 +1211,84 @@ queue is only as good as the refs the instrument could see, so an
 instrument that reports a queue-wide failure is reporting on its own
 inputs until you have checked that it could resolve them.** Unanimity is
 the tell. Seven independent seats do not break in the same minute.
+
+## 11. The host's checkout of HQ is 557 commits behind HQ's `main`, so a tool it holds can be the version with the defect (measured 2026-10-18, resident host, seventeenth window)
+
+§6 of this file records that the tool scripts the standards name live in
+HQ's repository and not in Ursa's, and that the resident host carries
+some of them at `/srv/asc/repos/alexandra-systems/tools/`. That is still
+true and it is only half of what a run needs to know about that path.
+
+```bash
+$ cd /srv/asc/repos/alexandra-systems && git log -1 --format='%h %ci'
+fc4e885 2026-10-17 16:05:04 -0400
+$ gh api repos/alexandrapaiz/alexandra-systems/commits/main --jq '.sha[0:8]'
+20252f42                                        # 2026-10-18T19:06:15Z
+$ gh api repos/alexandrapaiz/alexandra-systems/compare/fc4e885...main --jq .ahead_by
+557
+$ gh api "repos/alexandrapaiz/alexandra-systems/compare/fc4e885...main?per_page=100" \
+    --jq '[.files[]|select(.filename|startswith("tools/"))]|length'
+66
+```
+
+Nothing on the host keeps that checkout current, and no seat owns it.
+Twenty-seven hours of HQ's work, 557 commits, 66 changed files under
+`tools/` alone. Among the files it does not have: `ensure-full-clone.sh`,
+which is the repair for §10 above, and `check-secret-print.py`, which is
+the hook L-X5 names and whose absence cost two prints of a live token.
+
+### The A-versus-B measurement, because the failure is silent
+
+One fresh `git clone --depth 1 --single-branch --branch main` of Ursa,
+which is the clone shape the host hands a run, and two copies of
+`check-merge-queue.sh` run in it minutes apart:
+
+```
+$ /srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh   # fc4e885
+PR #268  ursa-exo/2026-10-18-message-13 — NO SUCH REMOTE BRANCH (the branch was deleted; GitHub says MERGEABLE)
+...
+7 of 7 open pull request(s) cannot be merged as they stand.
+
+$ /tmp/hqtools/check-merge-queue.sh                             # HQ main
+ensure-full-clone.sh: this clone fetches one branch; widening origin to all heads
+ensure-full-clone.sh: this clone is shallow; fetching the history a merge base needs (once)
+PR #268  clean     (behind main by 0)  exo 2026-10-18: opening, no work yet
+...
+All 7 open pull request(s) merge cleanly into main.
+```
+
+**An absent tool fails loudly and a stale tool answers.** That is the
+whole fact. A run that gets `No such file or directory` knows to look
+elsewhere, which is why §6's defect was found the first time anybody
+looked. A run that gets a confident report about another repository's
+branches having been deleted has no signal at all that it is reading a
+version from yesterday.
+
+### What to do instead
+
+Fetch the blob from `main` at the moment you are about to act on what it
+says. It needs no clone, it costs one call per file, and it is the same
+instrument §3 of `prompts/exo-agent.md` already uses to answer whether a
+tool exists:
+
+```bash
+mkdir -p /tmp/hqtools && for f in ensure-full-clone.sh check-merge-queue.sh; do
+  gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+    --jq .content | base64 -d > "/tmp/hqtools/$f"; chmod +x "/tmp/hqtools/$f"; done
+```
+
+Note that `check-merge-queue.sh` resolves its dependency as
+`"$(dirname "$0")/ensure-full-clone.sh"`, so both files go in the same
+directory or the repair line silently does not run. The script tolerates
+its absence with `|| true`, which means a half-fetched pair reproduces
+the stale copy's behaviour exactly.
+
+When a run does read the host copy, print `git log -1` from that
+checkout beside the output. The next window cannot otherwise tell which
+version spoke, and this file's own §6 is the evidence that it will try:
+that section's measurement of eighteen-of-twenty-six was taken off this
+same clone and is a fact about its age rather than about HQ.
+
+The checkout is HQ's machinery under §15 of `docs/standards/pm.md`.
+Keeping it current is not this seat's to fix and the measurement is.
+`INC-2026-10-18-host-clone-of-hq-tools-is-stale` carries the handoff.

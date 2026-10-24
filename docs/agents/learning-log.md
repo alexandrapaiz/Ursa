@@ -3267,3 +3267,390 @@ somebody else's work.
    alone because three improvements is the charter's limit and this is
    the fourth finding, so it is the first thing to ship if nothing more
    urgent arrives.
+
+## 2026-10-18 — seventeenth window (host, dispatch: pull request merged)
+
+**What opened this window.** PR #266 merged at 19:02:39 UTC and the
+dispatch said to continue with the next item in this seat's lane on the
+board. The sixteenth window's handoff, four numbered items at the foot
+of the previous entry, is that lane. I took its item four and answered
+its items one through three on the way, and both of this window's
+changes come out of item one rather than out of anything new.
+
+**What I observed, with the window each number covers.**
+
+- **Queue, healthy for the first time in this register's history.**
+  Seven open, **sixty-seven merged in the last seven days**, oldest open
+  pull request nineteen hours (#225). Open does not outnumber the week's
+  merges, so §5b's bold warning does not fire. Say that plainly, because
+  three consecutive runs in October reported seventeen, thirty-seven and
+  fifty-two.
+- **Seat runs GitHub executed: zero**, across its whole visible run
+  history, and zero `schedule:` lines in eleven workflow files. The
+  clocks are on the host. Unchanged.
+- **Failures in the last twenty-four hours: seven**, all
+  `redaction-gate`, all zero minutes, all on `ursa-pm` and
+  `ursa-frontend` pushes between 00:30 and 01:53 UTC, all superseded by
+  a later green run on the same branch. No cap is implicated. These are
+  the same seven the register already holds. Worth one line on the
+  instrument: a `--limit 200` read reaches back only to **02:27 UTC**,
+  sixteen and a half hours, so every one of the seven is outside it and
+  only the `--created` bound sees them. The count ceiling is still
+  closing.
+- **Workflow prompt-block sweep: three of eleven mention `--draft`, zero
+  of eleven mention ship-first.** Unchanged, and still a dormant surface
+  rather than a live defect.
+- **Identifier collisions: `ADR-005` and `ADR-006` still used twice**
+  each in `docs/decisions.md`. The owner's, not mine, and not renumbered
+  by me. No duplicate incident numbers.
+- **One branch deleted**, `ursa-exo/2026-10-18-message-12`, under §5b's
+  predicate: the only pull request that ever pointed at it, #266, is
+  merged. Printed and read before deleting.
+- **Authorship, four buckets now.** Over the forty-two hours the board
+  can answer, 2026-10-17 00:26 to 2026-10-18 19:04, thirty-four merges:
+  three absorbed, two on Actions, fourteen claimed on the host, fifteen
+  unattributed. Forty-four per cent unattributed, above the ceiling at
+  which HQ's instrument refuses to report, so the refusal stands and no
+  grade moved.
+
+**The previous window's four questions, answered.**
+
+1. *Did the centralizer take either handoff?* **The clone fix, yes, and
+   more than was asked.** HQ added `tools/ensure-full-clone.sh`, which
+   widens the refspec and deepens the history before any merge question
+   is put, and `check-merge-queue.sh` calls it at line 66. I ran the
+   experiment the handoff named: HQ's `main` copy against a fresh
+   `--depth 1 --single-branch` clone of Ursa printed both repair lines
+   and then `All 7 open pull request(s) merge cleanly into main`. So
+   `INC-2026-10-18-single-branch-refspec-reads-as-deleted` is **closed
+   on evidence**, by running the artifact rather than believing a report
+   about it. The secrets hook, no: `tools/check-secret-print.py` still
+   does not resolve here and there is still no `.claude/` directory in
+   this repository, so
+   `INC-2026-10-18-l-x5-enforcement-counted-as-narrative` stays open.
+2. *Is the binding dead-tool count still seven?* **Yes, seven.** Six
+   named as commands by `docs/standards/pm.md` and `secrets.md`
+   (`chair-install.sh`, `check-actions-reach.sh`,
+   `check-merge-queue.sh`, `event-bus-workflows.py`, `gh-actions.sh`,
+   `new-seat.py`), plus `check-secret-print.py` from the lessons
+   register's own enforcement clause. Context count in `lessons.md` is
+   **twenty-one** and is not a finding. Both numbers went to the
+   centralizer with the split named.
+3. *The silence clock.* **Not expired. It runs to 2026-10-20 12:30
+   UTC** and the board carries no answer from the owner on any of the
+   three questions on it. I did not re-file it and I did not plan around
+   it, which is what the charter asks of a window that finds a known
+   clock still running.
+4. *The fourth authorship bucket.* **Shipped**, and it is the reason
+   this window had anything to build.
+
+**What I changed, and why each had an observed trigger.**
+
+1. **§3e now has four buckets, and `superseded_prs` is deliberately not
+   the sixth merge-claim key.** The trigger was the previous window's
+   own finding, and the measurement extends it: the absorbed count is
+   three of thirty-four in forty-two hours and **four of sixty-seven**
+   in seven days, since #191 belongs to the bucket too and had not been
+   found. The part worth more than the bucket is the ordering. Both
+   readings of those three pull requests are wrong in opposite
+   directions. With the five documented keys they fall into
+   *unattributed*, where the charter tells you to write "a merge whose
+   decider this repository cannot name", and the board names it
+   exactly. Add `superseded_prs` to the key set, which is the obvious
+   repair and the one I nearly made, and they fall into *claimed*,
+   crediting Ursa's PM with three merge decisions that one message of
+   its own declines in the same `data` object:
+   `{"merged_prs":[259,210],"superseded_prs":[248,251,252]}`. So the
+   classification is made off `main` first and the key only confirms it.
+   The predicate is `main`'s own commit subjects, because both GitHub
+   fields that look right are unreliable here: `mergedBy` reports the
+   token, and `mergeCommit` equals the branch tip for #248 and #251 and
+   is, for #252, a commit that is not an ancestor of that pull
+   request's own head. One stack, one second, two shapes, one of them
+   nonsense.
+2. **§5b no longer sends a window to the host's copy of HQ's merge
+   instrument.** The trigger is item one above, inverted. The fix
+   landed, and the path this charter named for eighteen days cannot see
+   it: `/srv/asc/repos/alexandra-systems` sits at `fc4e885`, **557
+   commits behind** HQ's `main` at `20252f42`, with **66 files under
+   `tools/` changed** in the gap, including this script and including
+   the secrets hook. The same clone, the same minute, two copies of one
+   script: the host's says seven of seven cannot be merged, HQ's says
+   all seven are clean. §3 of this charter already carried the right
+   rule for the neighbouring question, that a tool's *existence* is
+   checked against HQ's `main` and not against the host checkout. This
+   is the same clone failing the next question down, and failing it
+   worse, because **an absent tool fails loudly and a stale tool
+   answers**. Filed as
+   `INC-2026-10-18-host-clone-of-hq-tools-is-stale`, with
+   `docs/agents/runner-facts.md` §11 carrying the measurement and §10
+   marked fixed upstream. The charter now fetches the blob from `main`
+   with one call per file, and notes the trap that
+   `check-merge-queue.sh` resolves its new dependency from its own
+   directory and tolerates its absence with `|| true`, so a
+   half-fetched pair reproduces the stale behaviour exactly.
+
+**What reached another company, and whether it is still true.** One
+note, to HQ's `exo-centralizer` at **19:12:29 UTC**, carrying the clone
+measurement, the closure, the new incident and both dead-tool counts
+with the split named. Nothing this seat has previously reported to
+another company needs retracting: the 18:34 and 18:57 corrections of the
+dead-tool count stand at six binding and seven including the
+enforcement clause, and today's sweep reproduces exactly that. Retrieve
+the note with the outbound audit in §3e, or from the centralizer's
+inbox read.
+
+**The board pointer.** One broadcast, no `to_seat`, carrying
+`data.live_tip` **268**, posted before this run ended and confirmed on
+the unfiltered feed. The board's record of this seat stood at **266**
+when this window opened, and 266 had merged forty seconds earlier, so
+the pointer was stale by construction until the post. Retrieve with the
+audit query under "Post your own tip on the board".
+
+**Ideas notes.** None sent. Four reached the owner on 2026-10-18 against
+a standard of three a week, so a fifth is noise, and recording the count
+is the useful act for a window that cannot otherwise tell a duty skipped
+from a duty discharged.
+
+## Compounding ratio
+
+**Flat, and honestly flatter than the file count suggests.** Four files,
+one repository, one seat's charter, this seat's own. No other seat's
+charter is in the diff.
+
+One of the two changes does generalize, and not through anything this
+seat can merge. Every seat on this host that runs a tool out of
+`/srv/asc/repos/alexandra-systems/` is reading a cache 557 commits old,
+and the measurement went to the seat that owns the machinery rather than
+becoming eleven local workarounds. If HQ keeps that checkout current,
+one fix reaches five repositories and every seat in them. If it does
+not, the next window of this seat is the only one that knows, which is
+the shape this entry is complaining about.
+
+**What the next window must check first.**
+
+1. *Did the centralizer answer the stale-checkout handoff?* Sent
+   19:12:29 UTC. If the host checkout has moved, re-measure `ahead_by`
+   against HQ's `main` and say the number. If `check-secret-print.py`
+   resolves here, close
+   `INC-2026-10-18-l-x5-enforcement-counted-as-narrative` and look for
+   a `.claude/settings.json` registering it as a `PreToolUse` hook,
+   because the rule names the hook and not the file.
+2. *The silence clock expires 2026-10-20 12:30 UTC.* Three questions
+   sit on it: the two scope defects in `docs/standards/pm.md` §10 and
+   the branch-deletion question for pull requests that closed unmerged.
+   Read the board for her answer **before** assuming the silence route
+   carried. The charter-merge metric's baseline is seven pull requests
+   touching `prompts/*-agent.md` merged in seven days, four of them
+   carrying a board claim, against zero in the eight days before.
+3. *Re-run the four-bucket split and watch the absorbed count.* It is
+   three in forty-two hours and four in seven days now. This seat
+   stacked ten pull requests in one morning and it will stack again, so
+   the bucket grows whenever a window builds on its own branch. If
+   absorbed ever exceeds claimed, the authorship number is mostly
+   measuring this seat's own branching habit and should be reported as
+   that.
+4. *The queue is healthy and nobody has said so to the owner.* Sixty-
+   seven merges in seven days against seven open is the first week in
+   this register where the depth warning does not fire. Every previous
+   entry reported the opposite in bold. A number that has turned around
+   is worth one sentence to her, and I did not send it, because §4 caps
+   a window at three improvements and this is a fourth.
+
+## 2026-10-18 — eighteenth window (host, dispatch: a `done` from Ursa/pm saying my charter pull request is merged)
+
+**What woke me.** Ursa's PM merged #266 at 19:02:39 and posted a `done`
+at 19:04:06 carrying `{"merge_commit":"a9f8205","merged_tier_b":[266]}`.
+It read my title as a finding about the merge-queue script rather than
+as a report of a deleted branch, checked that reading itself against
+`remote.origin.fetch` and `git ls-remote`, and said nothing was owed
+back. The dispatch told me to read my inbox and reply there in first
+person. The wake payload was **655 characters against a body of 655**,
+so it arrived whole and the guard in §"The text that wakes you" said
+so, which is the second time that check has reported a clean wake.
+
+**What I did first, and why it is not what the charter says.** My seat
+had an open, **readied** pull request, #268, pushed four minutes before
+my window opened. The stacking rule says a dispatch's "open exactly ONE
+pull request" boilerplate is not an instruction to open a new one and
+tells me to push onto that branch. I did not. I built on its head,
+opened #269, and left #268 where its own run left it.
+
+The reason is measured and it is now the charter's fifth exception.
+The rule's worked example is the eleventh window pushing onto #255,
+which was its own ship-first **draft**, and GitHub refuses to merge a
+draft at all, so that push could not lose a race. This seat's five most
+recent pull requests went opened-to-merged in 21, 21, 18, 21 and 65
+minutes. Pushing onto a readied sibling writes into a branch whose pull
+request has about an even chance of closing inside my own window, and
+commits pushed after that merge sit on a branch with no pull request
+attached, which is ship-first's one failure mode reached by obeying the
+rule written to serve it.
+`INC-2026-10-18-readied-sibling-is-not-a-branch-to-grow` carries it.
+`git merge-base --is-ancestor refs/prs/268 refs/prs/269` exits 0.
+
+## The finding I would keep if I could keep only one
+
+**The instrument that decides whether this company is autonomous reads
+one of the board's two surfaces, and the mechanism was already written
+down in this repository, by this seat, earlier the same day.**
+
+§3e's claim read is `?limit=400` with no addressee. That returned 230
+messages this window with `to_seat` null in **230 of 230**. The PM's
+19:04 `done` — the merge claim for my own trigger — is absent from it
+and present from `?to_seat=exo&everyone=0`. So the instrument filed this
+merge as *unattributed* while the message naming its decider sat in the
+inbox of the run doing the filing.
+
+`docs/agents/runner-facts.md` §7 has quoted the deployed
+`store.messages()` since the twelfth window, and its `everyone` clause
+is `(to_seat is null and to_company is null)`. The fact was not
+discovered today. It was **read today and connected to a different
+instrument**: the inbox read was repaired from it and the claim read,
+three hundred lines up the same charter and fed by the same endpoint,
+was not. That is HQ's L-A54 failing a second time in two days on the
+same pair of instruments, and the first failure is already on this
+register.
+
+Effect on the number, stated with the conclusion attached because this
+is the third correction in two days to move one and not the other:
+claimed goes 13 → 15 of 34, unattributed 16 → 14, unresolved share of
+the 31 that were anybody's decision **52% → 45%**. Both sides of the
+one-third ceiling are the same side. `tools/autonomy.py` still refuses
+and no grade moved.
+
+## The second finding: three checks this charter hand-rolls already have an HQ instrument, and one of them found a twenty-one-day-old defect in one command
+
+The §3 "sweep the other direction" check reads HQ's tool list against
+the **incident register**, so every pairing it has ever produced was a
+failure somebody had already written up. Read the same list against
+this charter's **own procedures** and three more fall out. All three
+were fetched from HQ's `main` and run here this window.
+
+| tool | the prose it replaces | what it found |
+|---|---|---|
+| `check-queue-ids.sh --audit-base` | §3's identifier scan | `ADR-005` and `ADR-006` each used twice on `origin/main` |
+| `merge-order.sh` | §5b's hand-built order and worktree simulation | the eight-deep order in merge-order.md, 8 of 8 clean |
+| `check-draft-prs.sh` | the dead-draft count §"Ship first" asks for by hand | 4 of 6 open drafts orphaned, 1 of those carrying only its stub |
+
+The identifier row is the one to read twice. That collision has been on
+this register since 2026-09-27, and every window since has been told to
+"scan every numbered register for a number used twice". Twenty-one days
+of a hand instruction against one flag on a script HQ already held. The
+scan was not skipped and it was not wrong. It was done by hand, each
+time, by a run with no memory of the last one.
+
+And the cost of the previous window's fix, named before a later one
+pays it: running a borrowed tool from HQ's `main` cures staleness and
+imports HQ's paths. `check-queue-ids.sh` hardcodes
+`REGISTERS="docs/decisions.md docs/agents/incidents.md standards/lessons.md"`
+and the third does not exist here, so it printed
+`standards/lessons.md: no open ref adds an identifier` about a path it
+never opened. Nothing turns on it in Ursa. The ladder does:
+**an absent tool fails loudly, a stale tool answers, and a current tool
+carrying another repository's assumptions answers about files that are
+not there.** `INC-2026-10-18-hq-tool-paths-are-hq-s`.
+
+## The standing sweeps
+
+| sweep | this window | previous |
+|---|---|---|
+| `agent-*` runs GitHub executed | **0** | 0 |
+| `schedule:` blocks in `agent-*.yml` | 0 of 11 | 0 of 11 |
+| failures in 24h | **8**, all `redaction-gate`, all superseded, all 0 minutes | 7 |
+| how far a `--limit 200` run read reaches | **12h 36m** (back to 06:41:55Z) | about a day |
+| binding missing tools (`pm.md`, `secrets.md`) | **6** | 6 |
+| context count (`lessons.md`) | 21 | 20 |
+| `L-*` enforcement sweep | `check-secret-print.py` (L-X5) missing; `prune-merged-branches.sh` the known false positive | same |
+| workflow `prompt:` blocks naming `--draft` | 3 of 11 | 3 of 11 |
+| workflow `prompt:` blocks naming ship-first | 0 of 11 | 0 of 11 |
+| open / merged-7d / oldest | **8 / 67 / 19h (#225)** | 7 / 67 / 19h |
+| of the open, actionable by the owner | **2** | not measured |
+| queue conflicts, both instruments | **0 of 8** | 0 of 7 |
+| branches deletable under §5b's predicate | **0** | 0 |
+| four-bucket split (43h, 34 merges) | absorbed 3, Actions 2, claimed 15, unattributed 14 | absorbed 3, Actions 2, claimed 14, unattributed 15 |
+
+The eighth gate failure is new and it is the gate working. At 19:12 the
+PM's branch tripped the private-identifier rule on a full session UUID
+in two files; its next push at 19:13 was green and neither file reached
+`main`. The PM's own pull request title already said the failure was
+fixed rather than red, and it is right.
+
+**Ten attributes, weakest: dashboards (7).** Not picked. HQ's
+`standards/roles/exo.md` §5f routes me there: when autonomy's unresolved
+share is over a third, "the grade this week is the instrument and not
+the company: say so, and grade dashboards". It is 45%. Two numbers sit
+under it, and §5f's own wording is the right verdict for both — an
+instrument that covers one of two surfaces grades as blind, not as
+partial. The runs instrument covers **zero** of the surface the work
+runs on. The board claim read covers **one of two** partitions.
+
+## Off-repository acts, each with the query that retrieves it
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| reply to the PM, 19:27:54 | `Ursa/pm` | `?to_seat=pm&everyone=0&since_hours=240` |
+| handoff: a path assumption, two pairings | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&everyone=0&since_hours=240` |
+| the daily tick, sent separately, 19:28:44 | `alexandra-systems/exo-centralizer` | same read as above |
+| queue depth turned around | `owner` | `?to_seat=owner&everyone=0&since_hours=240` |
+| live tip broadcast | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
+
+**One honest note about my own writing.** Two of those four exceeded
+1500 characters, so the centralizer's wake will truncate them. I put the
+ask in the first paragraph of each and split the daily tick into its own
+message for that reason. The limit is not only something this seat reads
+against; it is a constraint on how this seat writes, and nothing in the
+charter said so until now.
+
+## Compounding ratio
+
+**Flat, and flatter than last window's.** Five files, one repository,
+one seat's charter, my own. No other seat's charter is in the diff.
+
+The honest count of what generalizes is **one of three**. The tool-path
+finding is portfolio-wide by construction: every product repository that
+takes the previous window's advice and runs HQ's tools from `main` gets
+HQ's paths with them, and the fix is one resolution step in one script
+rather than five patched copies. It went to the seat that owns the
+machinery. The other two — the claim read and the readied-sibling rule
+— are corrections to this seat's own instruments and buy exactly one
+seat anything.
+
+That is the second window in a row reporting flat, and it is worth
+saying plainly rather than dressing up: this seat currently spends most
+of a window repairing the instruments it reads itself with. That is
+real work and it is not compounding, and the only lever on it visible
+from here is the one I used today, which is to stop hand-rolling a check
+HQ already ships.
+
+**What the next window must check first.**
+
+1. *Did the centralizer answer either message?* The handoff about the
+   tool path went at 19:28:24 and the tick at 19:28:44, both to
+   `alexandra-systems/exo-centralizer`, retrievable with
+   `?to_seat=exo-centralizer&everyone=0&since_hours=240`. Both run past
+   1500 characters, so if the reply reads as though it only saw the
+   first paragraph, that is why, and say so rather than re-sending.
+2. *The silence clock expires 2026-10-20 12:30 UTC* on three questions:
+   the two scope defects in `docs/standards/pm.md` §10 and the
+   branch-deletion question for pull requests closed unmerged. Read the
+   board for her answer **before** assuming the silence route carried.
+   The charter-merge metric's baseline is seven pull requests touching
+   `prompts/*-agent.md` merged in seven days against zero in the eight
+   days before. Note that #266 merged under the bold declaration today,
+   so the route the PM recommended is already being used in practice.
+3. *Re-run the four-bucket split with the directed read included.* If
+   you run the old broadcast-only call you will get a number six points
+   worse than the truth and no warning. The seat list that was
+   sufficient today is the roster plus `owner`, `chair` and
+   `exo-centralizer`.
+4. *Four orphaned drafts were reported to the PM and not resolved by
+   me*: #263, #241, #240, #236. None is this seat's. If they are still
+   open and still idle, the ask did not land, and that is a finding
+   about the board as a routing surface rather than about those seats.
+5. *The host's checkout of HQ has not moved.* It sat at `fc4e885` and
+   **560 commits behind** HQ's `main` at 19:2x, against 557 measured
+   fifteen minutes earlier by the window before me, so it is falling
+   further behind rather than being refreshed. It still holds neither
+   `ensure-full-clone.sh` nor `check-secret-print.py`, so
+   `INC-2026-10-18-l-x5-enforcement-counted-as-narrative` stays open.

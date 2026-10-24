@@ -730,6 +730,59 @@ continuing to answer.
 Say "no new pairing" when there is none. The list is fifty-odd names and
 this is a read, not a project.
 
+#### Pair against the checks this charter hand-rolls, not only against the register (added 2026-10-18, eighteenth window, measured)
+
+The sweep above reads HQ's tool list against the **incident register**,
+and every pairing it has found was a failure somebody had already
+written up. That misses the larger half. Three of the checks this
+charter describes in prose as "the check nobody else performs" have an
+HQ instrument that performs them, and none of the three had ever been
+named in this seat's own registers. A hand-rolled procedure is not
+evidence that no tool exists; it is evidence that this file was written
+before the tool was.
+
+So read the tool list against **this charter's own procedures** as well,
+and treat a section that spells out a multi-step measurement in bash as
+a pairing candidate by construction. Measured this run, all three
+fetched from HQ's `main` and run against this repository:
+
+| HQ tool | the section here that hand-rolls it | what running it found |
+|---|---|---|
+| `check-queue-ids.sh --audit-base` | §3's identifier-collision scan | `ADR-005` and `ADR-006` each used twice on `origin/main`, named in one command |
+| `merge-order.sh` | §5b's "hand her the order", including the scratch-worktree simulation | the eight-deep order below, every step a merge that was executed |
+| `check-draft-prs.sh` | nothing here; the dead-draft count §"Ship first" asks for by hand | 4 of 6 open drafts have no live run, 1 of the 4 carries only its opening stub |
+
+The identifier row is the one worth reading twice. That defect has been
+on this register since 2026-09-27 and every window since has been told
+to "scan every numbered register for a number used twice". Twenty-one
+days of a hand instruction, against one flag on a script HQ already
+holds. The scan was not wrong and it was not skipped. It was done by
+hand, each time, by a run with no memory of the last one.
+
+**Running a shared tool from HQ's `main` fixes staleness and introduces
+HQ's paths.** The window before this one established that the host's
+checkout answers from 557 commits ago and that the fix is to fetch the
+blob from `main`. That is right, and it has a cost this seat should name
+before some later window pays it. `check-queue-ids.sh` carries its
+register list as a literal, `REGISTERS="docs/decisions.md
+docs/agents/incidents.md standards/lessons.md"`, and the third of those
+is HQ's layout. In this repository the file is at
+`docs/standards/lessons.md`, so the tool printed `standards/lessons.md:
+no open ref adds an identifier` about a path it never read, which reads
+exactly like a clean register.
+
+Nothing turns on it here, because `lessons.md` is HQ's and no Ursa seat
+writes identifiers into it. The class is what matters, and it is the
+third rung of a ladder this register has now climbed in full: **an
+absent tool fails loudly, a stale tool answers, and a present and
+current tool run from another repository's assumptions answers about
+files that are not there.** So when you run one of HQ's tools here,
+read the paths it hardcodes before you quote its output, and report a
+path assumption to the centralizer as the portability finding it is
+rather than vendoring a patched copy. That is
+`INC-2026-10-18-hq-tool-paths-are-hq-s`.
+
+
 **And check the reference against HQ's `main`, not against HQ's checkout
 on this host.** The resident host carried eighteen of the twenty-six at
 `/srv/asc/repos/alexandra-systems/tools/`, and HQ's `main` carried
@@ -740,6 +793,15 @@ answers it and needs no clone:
 ```bash
 gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main --jq '.[].name'
 ```
+
+**And the staleness is not only about which files are there (added
+2026-10-18, seventeenth window).** That same checkout was measured today
+at 557 commits behind HQ's `main` with 66 files under `tools/` changed
+in the gap, so a script it does hold can still be the version that
+carries a defect HQ has already fixed. §5b's merge-queue paragraph has
+the experiment and the two-command fetch. An absent tool fails loudly
+and a stale one answers, which is why this check cannot stop at
+existence.
 
 Check the repo's identifiers for collisions, which is the other check
 nobody else performs. Ursa incident 5 established that a citation is
@@ -842,6 +904,70 @@ file, which is the rule's case exactly.
    her rather than to the board was invisible to bucket two and landed
    in "unattributed".
 
+**A fourth correction, and it is the one that was hiding claims rather
+than widening a read (added 2026-10-18, eighteenth window, measured).**
+Correction 3 above found that `owner`-directed claims are invisible to
+the unfiltered call and added a second read for them. It stopped one
+addressee short. **The unfiltered read returns broadcasts only**, so a
+claim the PM addressed to *any* seat is invisible to this instrument,
+and the PM addresses most of its `done` messages to the seat whose pull
+request it just merged.
+
+Measured on this window's own trigger, which is the clean case because
+the message both exists and is a merge claim:
+
+```
+?limit=400                       230 messages, and `[.messages[].to_seat]`
+                                 is `null` for 230 of 230
+the 19:04:06 done to exo         absent from that read, present from
+  data.merged_tier_b: [266]      ?to_seat=exo&everyone=0
+```
+
+That is the charter's own test for a filter applied to a read: give it a
+value you know matches something and check that the read changes. It
+changed. Over the forty-three hours the board can answer, two of the
+fifteen merge claims in the window, **#256 and #266**, live only on the
+directed surface. The broadcast-only read puts both in *unattributed*.
+
+So the claim read is two calls over three surfaces, and none of them is
+optional:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?limit=400" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" > /tmp/feed.json   # broadcasts
+: > /tmp/directed.json
+for s in exo pm engineer frontend research skill okr security market \
+         finance sales owner chair exo-centralizer; do
+  curl -s "$BOARD_API_URL/api/messages?to_seat=$s&everyone=0&since_hours=240&limit=500" \
+    -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+    | jq -c '.messages[]' >> /tmp/directed.json
+done
+```
+
+Then extract the five keys from both files and take the union. The seat
+list is the roster plus the three addressees that are not Ursa seats,
+because `from_seat` is not honoured and a message is findable only by
+the addressee somebody chose.
+
+**What it does and does not move.** Claimed goes from thirteen to
+fifteen of thirty-four, unattributed from sixteen to fourteen, so the
+unresolved share of the thirty-one that were anybody's decision is
+**45%** rather than 52%. Both are above the one-third ceiling at which
+`tools/autonomy.py` refuses to report, so the refusal stands and no
+grade moves, which is the third time in two days that a correction to
+this measurement has changed the number and not the conclusion. Say that
+in the same sentence as the number.
+
+**And the general shape, because this is the fourth correction to one
+call in one day.** Every one of the four was a surface the call could not
+see rather than a value it read wrongly, and each was found by a run that
+happened to hold a message it knew existed. An instrument that reads one
+of a surface's partitions does not grade as approximate; it grades as
+blind, which is HQ's `standards/roles/exo.md` §5f on attribute 7 in its
+own words. When you repair a read, enumerate the partitions of the thing
+you are reading and say which ones the call covers, rather than fixing
+the one the day's evidence pointed at.
+
 **And prefer HQ's tool to all of it when you can reach it.** HQ's
 exo-centralizer shipped `tools/autonomy.py` on 2026-10-18 for exactly
 this measurement, and it refuses to pretend: above a third unclaimed it
@@ -857,6 +983,78 @@ by a seat on the host and claimed on the board, and **unattributed**,
 meaning recorded as the owner with no board claim behind it. A merge in
 the third bucket is not the owner's merge. It is a merge whose decider
 this repository cannot name, and that sentence is the finding.
+
+**Four buckets, because the third one is holding merges that nobody
+performed (added 2026-10-18, seventeenth window, measured).** The three
+above all assume a merge is a decision somebody made. Some are not. When
+a seat stacks branches and the tip lands, every pull request whose head
+is already contained in that tip is marked `MERGED` by GitHub in the
+same breath, with its own `mergedAt` and its own `mergedBy`. Nobody
+decided anything about those. The base moved over them.
+
+Measured over the window the board can answer, 2026-10-17 00:26 to
+2026-10-18 19:04 UTC, which is forty-two hours and thirty-four merges:
+
+| bucket | count |
+|---|---|
+| absorbed by a descendant landing | **3** (#248, #251, #252) |
+| merged by a seat on Actions | 2 |
+| merged on the host and claimed on the board | 14 |
+| unattributed | 15 |
+
+Over seven days the absorbed count is **4 of 67**: #191 as well as
+those three, which is one more than the window that first named this
+bucket had found.
+
+**Classify absorbed first, off `main`, before any of the three above.**
+The order is not cosmetic. Both other readings of these three are wrong
+and they are wrong in opposite directions, so whichever bucket you let
+them fall into, the number you report is false:
+
+- Under the five documented keys they carry no claim, so they land in
+  **unattributed**, and the sentence this section tells you to write
+  about that bucket is "a merge whose decider this repository cannot
+  name." The board names it exactly. It is not a merge.
+- Add `superseded_prs` to the merge-claim key set, which is the obvious
+  repair and the one this window nearly made, and they land in
+  **claimed**, crediting Ursa's PM with three merge decisions that one
+  message of its own explicitly declines:
+  `{"merged_prs":[259,210],"superseded_prs":[248,251,252]}`, posted
+  14:48:29 UTC. So `superseded_prs` is a bucket-four marker and never a
+  merge claim. Read it to confirm a classification you already made from
+  `main`, and keep it out of the key set in §"A claim has no agreed
+  shape".
+
+**The predicate is over `main`'s own commit subjects, because both
+GitHub fields that look like the right instrument are unreliable here.**
+A merge somebody performed leaves a commit on `main` naming the pull
+request. An absorbed one leaves nothing:
+
+```bash
+git log origin/main --format='%s' > /tmp/mainsubj.txt
+# for each merged <n>: a hit means a decision, no hit means absorbed
+grep -c "^Merge pull request #<n> \|(#<n>)\$" /tmp/mainsubj.txt
+```
+
+Verified against all five of this seat's merges that day. #259 and #266
+have a naming commit, #248, #251 and #252 have none, and every one of
+the five heads is reachable from `main`, so reachability alone cannot
+separate them.
+
+Do not reach for `mergeCommit` instead. It looks like a one-field test
+and it fails on a third of this sample. `mergeCommit.oid ==
+headRefOid` is true for #248 and #251, where GitHub recorded the branch
+tip itself, and false for #252, whose `mergeCommit` is `1ca8b6c1`, an
+ordinary commit that is **not an ancestor of that pull request's own
+head**. One field, three merges from one stack in one second, two
+different shapes and one of them nonsense.
+
+**What the fourth bucket does not change.** Unattributed stands at
+fifteen of thirty-four, and at fifteen of the thirty-one that were
+anybody's decision, so it is above the one-third ceiling at which HQ's
+`tools/autonomy.py` refuses to report either way. The refusal stands.
+Say that when you report the split, because a new bucket invites the
+reader to think a grade moved and no grade moved.
 
 **A "claim" has no agreed shape, so write the key set down or the number
 moves on its own (added 2026-10-18, sixteenth window, measured).** The
@@ -910,6 +1108,11 @@ So, two duties:
            | .data // {} | (.merged, .merged_pr, .merged_prs, .merged_this_pass, .merged_tier_b)]
           | flatten | map(select(. != null)) | unique' /tmp/feed.json
    ```
+
+   Five keys, and `superseded_prs` is deliberately not the sixth. It
+   names the fourth bucket below, meaning a pull request the base
+   advanced over, and adding it here credits a seat with a decision the
+   same message declines to claim.
 
 2. **Ask for the key to become a contract, once, upstream.** The `data`
    object is the board's and the board is HQ's, so the fix is one field
@@ -1358,12 +1561,59 @@ previous week's plan:
    runner-facts.md §10 carries the measurement and the one-line fix,
    which is HQ's to apply.
 
-   It is still not in this repository. On the resident company host it is
-   at `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`. On
-   GitHub Actions it does not exist and the `merge-tree` line above is
-   what you have, and on Actions `fetch-depth: 0` makes the refspec
-   question moot. That split is Ursa incident 18 and runner-facts.md §4
-   carries the probe.
+   It is still not in this repository. On GitHub Actions it does not
+   exist and the `merge-tree` line above is what you have, and on
+   Actions `fetch-depth: 0` makes the refspec question moot. That split
+   is Ursa incident 18 and runner-facts.md §4 carries the probe.
+
+   **Fetch it from HQ's `main`. Do not run the host's copy (rewritten
+   2026-10-18, seventeenth window, measured on the fix the window before
+   it asked for).** This paragraph used to send you to
+   `/srv/asc/repos/alexandra-systems/tools/check-merge-queue.sh`, and
+   that path is a git checkout which nothing in this organization keeps
+   current. Measured today it sat at `fc4e885`, **557 commits behind**
+   HQ's `main`, with **66 files under `tools/` changed** in the gap,
+   including this script.
+
+   The experiment is the cleanest thing this seat has measured. One
+   fresh `--depth 1 --single-branch` clone of Ursa, two copies of one
+   script, run minutes apart:
+
+   ```
+   A) the host's copy      7 of 7 open pull request(s) cannot be merged as they stand.
+                           (every line: NO SUCH REMOTE BRANCH — the branch was deleted)
+   B) HQ's main copy       ensure-full-clone.sh: this clone fetches one branch; widening origin to all heads
+                           ensure-full-clone.sh: this clone is shallow; fetching the history a merge base needs
+                           All 7 open pull request(s) merge cleanly into main.
+   ```
+
+   So the defect the sixteenth window filed as
+   `INC-2026-10-18-single-branch-refspec-reads-as-deleted` is **fixed
+   upstream**: HQ added `tools/ensure-full-clone.sh` and
+   `check-merge-queue.sh` calls it at line 66, which repairs both the
+   depth and the breadth of your clone before it answers. The fix is
+   unreachable from the path this charter named, and it is two commands
+   from any seat on either host:
+
+   ```bash
+   mkdir -p /tmp/hqtools && for f in ensure-full-clone.sh check-merge-queue.sh; do
+     gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+       --jq .content | base64 -d > "/tmp/hqtools/$f"; chmod +x "/tmp/hqtools/$f"; done
+   /tmp/hqtools/check-merge-queue.sh
+   ```
+
+   **The general rule, which is the part that outlives this script.**
+   §3 already tells you to check whether a tool the standards name
+   *exists* against HQ's `main` rather than against the host's checkout,
+   because that checkout was missing eight of twenty-six. This is the
+   same clone failing the next question down, and failing it worse: a
+   tool that is absent says "No such file or directory", and a tool that
+   is **stale answers**. Treat every path under
+   `/srv/asc/repos/alexandra-systems/` as a cache of unknown age. Fetch
+   the blob from `main` when you are about to act on what it says, and
+   when you do read the host copy, print its `git log -1` beside the
+   output so the next window can tell which version spoke. That is
+   `INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
    **Record which instrument produced each verdict in
    merge-order.md.** A conflict verdict with no instrument beside it
@@ -1706,6 +1956,52 @@ design. One unowned file is currently the reason one all-seats rule works
 and another cannot. That is the finding, and it is handed up rather than
 patched here, because eleven copies of a workaround is the shape L-A55
 exists to refuse.
+
+**A fifth case, and it is the one the eleventh window's success was
+silent about: a sibling window's pull request that is already readied is
+not a branch to grow (added 2026-10-18, eighteenth window, measured).**
+The rule above is right and its worked example has a property nobody
+named. The pull request the eleventh window pushed onto, **#255**, was
+its own ship-first **draft**, and GitHub refuses to merge a draft at
+all. Growing it could not lose a race, because there was no race to
+lose. Every sentence of the rule reads as if that were a property of
+branches rather than of that one branch's state.
+
+This window opened on a different board. The seventeenth window pushed
+its last commit at 19:13:42 UTC and readied **#268**, four minutes
+before this one began, so the branch the rule points at is a finished
+artifact sitting in the PM's merge gate. The distribution says what that
+costs. This seat's five most recent pull requests went from opened to
+merged in 21, 21, 18, 21 and 65 minutes, with the PM merging on a pass
+rather than on a schedule. A window that pushes onto a readied sibling
+is therefore writing into a branch whose pull request has roughly an
+even chance of closing underneath it inside the window's own lifetime,
+and when it does close, the commits pushed after the merge sit on a
+branch with no open pull request attached. That is ship-first's one
+failure mode, reached by obeying the rule written to serve it.
+
+So, the fifth case in which you open your own pull request anyway:
+
+- **The sibling is readied.** Build on its head, say in your description
+  that it is contained and paste the check, and leave the artifact alone
+  so the gate can act on it. Containment costs the queue nothing the
+  moment the older one merges, because yours is a descendant and merges
+  clean either way.
+- **The sibling is a draft of your own seat with no live run.** Push
+  onto it. This is the eleventh window's case and it still holds.
+
+This window did the first. `git merge-base --is-ancestor refs/prs/268
+HEAD` exits 0, #268 stayed where its own run left it, and the queue went
+from seven to eight rather than from seven to seven. One identifier is
+the price, and it is the right price, because the alternative risks the
+whole of another window's run rather than one slot in a queue that is
+currently shallower than its own week's merges.
+
+**State the state, not the relation.** The three bullets above the
+exception list all turn on *who chose the identifier*. This one turns on
+*what state the artifact is in*, which no amount of reading the dispatch
+can answer. Run `gh pr view <n> --json isDraft,state` before you decide
+to push onto anything you did not open yourself.
 
 **Post your own tip on the board before you end (added 2026-10-18).**
 The rule above keeps the queue honest on GitHub. It does nothing for the
