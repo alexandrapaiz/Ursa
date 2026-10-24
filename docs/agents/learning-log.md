@@ -2890,7 +2890,7 @@ If the other three repositories were measured with this sweep or one
 shaped like it, their fourteens are drifting upward too, and for a
 reason that has nothing to do with their machinery.
 
-## The three numbers, at 18:40 UTC
+### The three numbers, at 18:40 UTC
 
 | | |
 |---|---|
@@ -2916,7 +2916,7 @@ are drafts, and five of those belong to runs that are over**, so the
 number the owner is handed as "open" is mostly work she cannot act on.
 That is the figure to watch now, not the depth.
 
-## The standing sweeps, run, with nothing new in any of them
+### The standing sweeps, run, with nothing new in any of them
 
 - **Charter against workflow prompt blocks (§2b).** Unchanged at **3 of
   11** mentioning `--draft` and **0 of 11** mentioning ship-first. Zero
@@ -2945,7 +2945,7 @@ That is the figure to watch now, not the depth.
 - **Identifier collisions.** Unchanged. `docs/decisions.md` still has
   `## ADR-005` twice and `## ADR-006` twice. Owner's edit, not mine.
 
-## The anomaly worth naming
+### The anomaly worth naming
 
 **The whole portfolio board went silent at 14:48:29 UTC and was still
 silent when this window opened at 18:26**, three hours and thirty-eight
@@ -2965,7 +2965,7 @@ rather than to explain. **If you are the next window and the board is
 still quiet, that is no longer an anomaly, it is an outage, and it
 belongs with the centralizer.**
 
-## Compounding ratio
+### Compounding ratio
 
 Flat, and said plainly. This window touched **four files in one
 repository and one seat's charter, this seat's own.** The charter fix
@@ -3022,7 +3022,7 @@ line and prints variable **names** only. No secret value was printed in
 this session. I am recording the exact command rather than the claim,
 because this window's second finding is about two runs that printed one.
 
-## The previous window's four questions, answered
+### The previous window's four questions, answered
 
 1. **Is the board still silent?** No. It stopped at 14:48:29 UTC and
    resumed at **18:30:57**, a gap of three hours forty-two minutes, and
@@ -3045,7 +3045,7 @@ because this window's second finding is about two runs that printed one.
    again, one of them this window's own and readied at the end of this
    run. The other five are other seats' and I closed none of them.
 
-## What I took, and what it cost to find
+### What I took, and what it cost to find
 
 The next item in the lane turned out to be a contradiction between two
 instruments rather than an item on a list. I measured the open queue
@@ -3081,7 +3081,7 @@ trusted instrument, after the cached `mergeable` field (Ursa incident
 (`INC-2026-10-18-shallow-clone-false-conflicts`). Unanimity is the tell.
 Seven independent seats do not break in the same minute.
 
-## The second finding, and it is a correction to the window before me
+### The second finding, and it is a correction to the window before me
 
 Ursa's PM printed `BOARD_RUNTIME_TOKEN` in full twice today and filed
 `INC-2026-10-18-board-runtime-token-printed-twice` itself at 18:31:48
@@ -3113,7 +3113,7 @@ later. It is **seven**, not six. I corrected it to the same addressee in
 this pass rather than only into this file, which is the duty §3e added
 after this seat failed it once today already.
 
-## The third finding: a number that moves with its own extractor
+### The third finding: a number that moves with its own extractor
 
 §3e's authorship join is this seat's whole autonomy instrument and it
 never said what a board "claim" looks like. Measured on one day of one
@@ -3137,7 +3137,7 @@ revives nothing. §5b has required the instrument beside every conflict
 verdict since 2026-10-04. The same rule was missing from the authorship
 number three hundred lines away in the same file.
 
-## The standing sweeps
+### The standing sweeps
 
 - **Dead tools, three buckets now.** Binding **7** (`chair-install.sh`,
   `check-actions-reach.sh`, `check-merge-queue.sh`,
@@ -3189,7 +3189,7 @@ number three hundred lines away in the same file.
   defects in `docs/standards/pm.md` §10 are both on her clock and I
   added nothing to that thread.
 
-## Off-repository acts, each with the query that retrieves it
+### Off-repository acts, each with the query that retrieves it
 
 Both are board posts, addressee named, per this section's own rule.
 
@@ -3222,7 +3222,7 @@ and one at 02:04:43, against the standard's three a week. A fifth would
 be noise. Recording the count is the useful act here, since a memoryless
 window cannot otherwise tell a duty performed from a duty skipped.
 
-## Compounding ratio
+### Compounding ratio
 
 **Flat, said plainly, and flatter than it looks.** This window touched
 six files in one repository and one seat's charter, this seat's own. No
@@ -3412,7 +3412,7 @@ a standard of three a week, so a fifth is noise, and recording the count
 is the useful act for a window that cannot otherwise tell a duty skipped
 from a duty discharged.
 
-## Compounding ratio
+### Compounding ratio
 
 **Flat, and honestly flatter than the file count suggests.** Four files,
 one repository, one seat's charter, this seat's own. No other seat's
@@ -3489,7 +3489,7 @@ rule written to serve it.
 `INC-2026-10-18-readied-sibling-is-not-a-branch-to-grow` carries it.
 `git merge-base --is-ancestor refs/prs/268 refs/prs/269` exits 0.
 
-## The finding I would keep if I could keep only one
+### The finding I would keep if I could keep only one
 
 **The instrument that decides whether this company is autonomous reads
 one of the board's two surfaces, and the mechanism was already written
@@ -3519,7 +3519,7 @@ the 31 that were anybody's decision **52% → 45%**. Both sides of the
 one-third ceiling are the same side. `tools/autonomy.py` still refuses
 and no grade moved.
 
-## The second finding: three checks this charter hand-rolls already have an HQ instrument, and one of them found a twenty-one-day-old defect in one command
+### The second finding: three checks this charter hand-rolls already have an HQ instrument, and one of them found a twenty-one-day-old defect in one command
 
 The §3 "sweep the other direction" check reads HQ's tool list against
 the **incident register**, so every pairing it has ever produced was a
@@ -3551,7 +3551,7 @@ never opened. Nothing turns on it in Ursa. The ladder does:
 carrying another repository's assumptions answers about files that are
 not there.** `INC-2026-10-18-hq-tool-paths-are-hq-s`.
 
-## The standing sweeps
+### The standing sweeps
 
 | sweep | this window | previous |
 |---|---|---|
@@ -3585,7 +3585,7 @@ instrument that covers one of two surfaces grades as blind, not as
 partial. The runs instrument covers **zero** of the surface the work
 runs on. The board claim read covers **one of two** partitions.
 
-## Off-repository acts, each with the query that retrieves it
+### Off-repository acts, each with the query that retrieves it
 
 | act | addressee | the one command that returns it |
 |---|---|---|
@@ -3602,7 +3602,7 @@ message for that reason. The limit is not only something this seat reads
 against; it is a constraint on how this seat writes, and nothing in the
 charter said so until now.
 
-## Compounding ratio
+### Compounding ratio
 
 **Flat, and flatter than last window's.** Five files, one repository,
 one seat's charter, my own. No other seat's charter is in the diff.
@@ -3674,7 +3674,7 @@ no live run is a branch to push onto. This window's own ship-first draft
 window's precedent. Net queue change from three exo pull requests to
 two.
 
-## The trigger could not be read from the surface its own marker named
+### The trigger could not be read from the surface its own marker named
 
 The wake carried 1264 of 1835 characters and, new since 2026-10-18, a
 marker naming its own truncation and ending "Read the whole message in
@@ -3692,7 +3692,7 @@ number in the brief, last in it by construction, and the one an ExO seat
 exists to react to. The systematic loss is confirmed a fourth time and
 for the first time on a scheduled trigger rather than a seat's note.
 
-## The ten attributes
+### The ten attributes
 
 Graded against `standards/roles/exo.md` §5f, each from the surface that
 standard names.
@@ -3737,7 +3737,7 @@ unresolved in three consecutive windows, each above the one-third
 ceiling, each concluding "the refusal stands and no grade moves". It is
 7% unresolved. The ceiling was firing on the read.
 
-## What I got wrong inside this window
+### What I got wrong inside this window
 
 My first replacement for the retired roster loop narrowed on
 `from_company=Ursa` and reported **44%** unresolved — worse than the
@@ -3749,7 +3749,7 @@ right axis was `kind`, not company. Recorded because the lesson is
 sharper with the error in it: a filter on the wrong axis is worse than
 no filter, because it looks like precision.
 
-## Off-repository acts, each with the query that retrieves it
+### Off-repository acts, each with the query that retrieves it
 
 | act | addressee | the one command that returns it |
 |---|---|---|
@@ -3759,7 +3759,7 @@ no filter, because it looks like precision.
 | three `Ideas` notes | `owner` | `?to_seat=owner&everyone=0&since_hours=240` |
 | live tip broadcast | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
 
-## Compounding ratio
+### Compounding ratio
 
 **Not flat, for the first time in three windows, and the evidence is in
 another company's source.** The deployed `store.messages()` docstring
@@ -3827,7 +3827,7 @@ opening stub the nineteenth window opened and closed inside its own
 run, was already resolved. The branch name the host handed me existed
 already, from `#295`, so this window is `-2`.
 
-## The finding: I published a wrong grade, and the charter told me to
+### The finding: I published a wrong grade, and the charter told me to
 
 The nineteenth window of this seat did two things in one pass. It found
 that HQ's `tools/autonomy.py` joins a board read capped at 500 rows
@@ -3926,7 +3926,7 @@ above that quote in the same log is titled "a filter on the wrong axis
 is worse than no filter, because it looks like precision." It was
 right, and then the window shipped no axis at all.
 
-## The second finding: the simulation step earned itself
+### The second finding: the simulation step earned itself
 
 The charter has required since 2026-10-04 that the landing order be
 verified by performing the merges in a scratch worktree. **This is the
@@ -3987,7 +3987,7 @@ postmortem naming its own cause as structural enumerates the class
 before it closes, and before writing one, grep `docs/design/` for the
 mechanism rather than the symptom.
 
-## The ten attributes
+### The ten attributes
 
 Graded from the surface `standards/roles/exo.md` §5f names for each.
 
@@ -4037,7 +4037,7 @@ centralizer deleted the early return rather than widening it, so a
 fifth class cannot reproduce the defect, which is the right shape and
 not the one this seat asked for.
 
-## Standing sweeps, all run, two unchanged
+### Standing sweeps, all run, two unchanged
 
 - **Binding missing tools:** 6, unchanged across every re-vendor since
   2026-10-16 (`chair-install.sh`, `check-actions-reach.sh`,
@@ -4060,7 +4060,7 @@ not the one this seat asked for.
 - **Queue:** 14 open, 45 merged in 7 days, oldest 6 days. The depth
   rule does not fire, for the fourth window running.
 
-## Off-repository acts, each with the query that retrieves it
+### Off-repository acts, each with the query that retrieves it
 
 | act | addressee | the one command that returns it |
 |---|---|---|
@@ -4069,7 +4069,7 @@ not the one this seat asked for.
 | three `Ideas` notes | `owner` | `?to_seat=owner&everyone=0&since_hours=240` |
 | live tip broadcast | nobody, broadcast | `?limit=400`, newest from `Ursa/exo` |
 
-## Compounding ratio
+### Compounding ratio
 
 **Flat this window, and I am saying so rather than dressing it.** The
 diff is one repository, one seat's charter, and four org documents. The
@@ -4098,7 +4098,7 @@ centralizer: a tool's absence from a repository's own `tools/` is a
 cache miss and never a verdict, and a per-branch conflict check does
 not predict that the queue lands.
 
-## What the next window must check first
+### What the next window must check first
 
 1. *HQ's pull request 379 merged at 01:24:32 UTC, during this window.*
    `tools/autonomy.py` now runs clean against the live board and
