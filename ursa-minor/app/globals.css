@@ -883,47 +883,59 @@ html {
 /* ---------- the 44px floor, part two: the fields ----------
 
    The three address fields are the one place on this site where the
-   overlay above cannot reach. An `<input>` is a replaced element and
-   renders no `::after`, so a field only gets a bigger target by having a
-   bigger box, and a bigger box is layout. Measured on the shipped build:
-   26.3px at 390 and 27.2px above `sm`, which is one line box, 8px of
-   padding and a hairline
-   (`docs/design/reviews/2026-10-24e/data/forms-before.txt`).
+   overlay above cannot be put on the control itself. An `<input>` is a
+   replaced element and renders no `::after`, so there is nothing to hang
+   an overlay from. Measured on the shipped build: 26.3px at 390 and
+   27.2px above `sm`, which is one line box, 8px of padding and a
+   hairline (`docs/design/reviews/2026-10-24e/data/forms-before.txt`).
 
-   Where the new height goes is a design decision rather than a free
-   one. A field here is drawn as its text and the rule beneath it, and
-   the 8px between those two is what makes them read as one object. Put
-   the height below the text and the rule drifts away from it, which is
-   the one change that would be visible. So all of it goes above, into
-   space that was already empty.
+   The first attempt at this gave the field the height for real, as
+   padding, and cancelled the layout cost with a negative margin of the
+   same size. It measured perfectly and it was wrong, and the screenshot
+   is the only reason anyone found out
+   (`docs/design/reviews/2026-10-24e/` §3). This site draws a
+   `:focus-visible` ring, and a ring traces the border box. Growing the
+   border box grew the ring: tab into the field and you got a 44px
+   rectangle with the text sitting at the bottom of it and 17px of empty
+   box above, and on a phone the top of that rectangle came within 6px of
+   the "Open a record" button's own border, so the two read as two boxes
+   colliding. Measured 0px of difference at rest and about 2% of the
+   frame once focused.
 
-   The negative margin is what keeps this from moving anything else.
-   Padding grows the border box, and the border box is what gets
-   hit-tested; the margin box is what flex layout stacks and what
-   baseline alignment measures its offsets from. Cancel one against the
-   other and there is a 44px box to hit inside a 27px box of layout, so
-   the text, the rule, the button beside it, the form's own height and
-   the height of the page all stay exactly where they were. Nothing is
-   drawn in the new band either: the field has no background, no top
-   border and no side borders, and focus only recolours the bottom one.
+   So the rule is the one `.rec-hit` already encodes, stated plainly:
+   **the ring belongs to what you see, and the hit area belongs to what
+   you press.** Padding conflates them, because one box was being asked
+   to be both. A wrapping `<label>` separates them again. The label is
+   the target and carries the overlay; the field keeps its own 27px box
+   and therefore its own ring, exactly as drawn today. A label forwards
+   its activation to the control it wraps, so a press anywhere in the
+   overlay puts the caret in the field, which is native behaviour and
+   works the same under a finger as under a mouse.
 
-   `1lh` does the arithmetic instead of a number, for the reason the calc
-   above does. The field is 11.52px/17.28px type at 390 and
-   12.16px/18.24px above `sm`, so the padding it wants differs between
-   the two viewports, and one rule that reads the field's own line box is
-   right at both without being told which. The `0.5rem` and the `1px`
-   are the `pb-2` and the `border-b` the markup carries; they are the
-   coupling in this rule, and a field wearing this class has to keep
-   both.
+   The inset is asymmetric where `.rec-hit`'s is centred, and that is the
+   design decision in this rule rather than an optimisation. A field here
+   is drawn as its text and the rule beneath it, and the rule is the
+   bottom of the field. Slack added below it would reach past the field's
+   own edge toward the button underneath; all of it goes above, into
+   space that was already empty. So the hit area ends exactly at the rule
+   and the field still owns its own bottom edge.
 
-   Where `lh` is unsupported both declarations are invalid together, both
-   fall back to 0, and the field keeps the box it has today. That is the
-   right failure for this: a target that is too small, which is the
-   status quo, rather than a field with its rule shoved 17px off its
-   text. */
+   `100%` resolves against the label's padding box, which is the field's
+   own height, so one rule is right for the 26.3px box at 390 and the
+   27.2px box above `sm` without being told which. As with `.rec-hit` it
+   cannot overshoot: once a field is 44px or taller the inset turns
+   positive and the overlay shrinks back inside the box. Nothing about
+   layout changes, because an absolutely positioned overlay is not in
+   flow, and nothing drawn changes, because the overlay has no paint. */
 .rec-field {
-  padding-top: calc(44px - 1lh - 0.5rem - 1px);
-  margin-top: calc(-44px + 1lh + 0.5rem + 1px);
+  position: relative;
+  display: flex;
+}
+
+.rec-field::after {
+  content: "";
+  position: absolute;
+  inset: calc(100% - 44px) 0 0;
 }
 
 /* ---------- the set's record rows ---------- */

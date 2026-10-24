@@ -50,7 +50,22 @@ const PAGES = [
 ];
 
 const probe = (MIN) => {
-  const owns = (hit, el) => !!hit && (hit === el || el.contains(hit));
+  /* A press "owns" a control if it lands on the control, on something
+     inside it, or on the <label> that forwards to it. The third case is
+     new on 2026-10-24e and it is a real semantic rather than a
+     convenience: a label's activation behaviour runs on its labelled
+     control, so a press on a label IS a press on the field, under a
+     finger as much as under a mouse. Without this clause the three
+     address fields measure as 27px while behaving as 44px, and the
+     measurement would be the thing that is wrong. */
+  const labelFor = (hit, el) => {
+    for (let n = hit; n; n = n.parentElement) {
+      if (n.tagName === "LABEL") return n.control === el;
+      if (n === el) return false;
+    }
+    return false;
+  };
+  const owns = (hit, el) => !!hit && (hit === el || el.contains(hit) || labelFor(hit, el));
 
   /** Is this target inline in a run of text? WCAG 2.5.8's exemption. */
   const inlineInFlow = (el) => {

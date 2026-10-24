@@ -159,16 +159,24 @@ export function RecordAtAddress({ initial }: { initial: string }) {
             is that an address is exact. The schematic below is the one this
             same component already prints in AddressForms, so the two now
             agree, and at 32 characters it fits the narrowest field. */}
-        <input
-          type="text"
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder="pages/<owner>/<repo>/<record-id>"
-          aria-label="a record address"
-          spellCheck={false}
-          autoCapitalize="off"
-          className="rec-field w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
-        />
+        {/* The label is the target and the field is the drawing. It
+            carries the overlay that makes this a 44px press (`.rec-field`
+            in globals.css) and forwards the press to the field inside it,
+            which keeps its own box and so keeps its own focus ring. The
+            sizing lives out here for the same reason: the thing the row
+            lays out is the target. */}
+        <label className="rec-field w-full min-w-0 sm:flex-1">
+          <input
+            type="text"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder="pages/<owner>/<repo>/<record-id>"
+            aria-label="a record address"
+            spellCheck={false}
+            autoCapitalize="off"
+            className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
+          />
+        </label>
         <button
           type="submit"
           disabled={busy || !typed}

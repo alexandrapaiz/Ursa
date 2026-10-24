@@ -188,14 +188,22 @@ export function PublishedSite() {
       </p>
 
       <form onSubmit={readSite} className="mt-8 flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-baseline sm:gap-5">
-        <input
-          type="url"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="https://you.github.io/your-repo/"
-          aria-label="the address of a published site"
-          className="rec-field w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:flex-1 sm:text-[0.76rem]"
-        />
+        {/* The label is the target and the field is the drawing. It
+            carries the overlay that makes this a 44px press (`.rec-field`
+            in globals.css) and forwards the press to the field inside it,
+            which keeps its own box and so keeps its own focus ring. The
+            sizing lives out here for the same reason: the thing the row
+            lays out is the target. */}
+        <label className="rec-field w-full min-w-0 sm:flex-1">
+          <input
+            type="url"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="https://you.github.io/your-repo/"
+            aria-label="the address of a published site"
+            className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
+          />
+        </label>
         <button
           type="submit"
           disabled={busy || !address}

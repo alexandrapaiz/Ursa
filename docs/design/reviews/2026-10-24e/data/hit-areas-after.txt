@@ -14,10 +14,10 @@
   134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
   114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
   168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
-  326x44        326x44       1      ok                input.rec-field ""
+  326x26.3      326x45       1      ok                input.w-full ""
   99.8x16.8     101x44       1      ok                button.rec-action "read the site"
-  1x1           -x-          1      COVERED           input.sr-only ""
-  326x44        326x44       1      ok                input.rec-field ""
+  1x1           183x48       1      ok                input.sr-only ""
+  326x26.3      326x45       1      ok                input.w-full ""
   53.7x16.8     55x44        1      ok                button.rec-action "read it"
   -> 0 of 6 standalone controls under 44px tall (2 inline, exempt)
 
@@ -38,7 +38,7 @@
 === phone 390x844 · address /record/at ===
   box WxH       hit WxH      lines  verdict           control
   134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  326x44        326x44       1      ok                input.rec-field ""
+  326x26.3      326x45       1      ok                input.w-full ""
   115.1x16.8    116x44       1      ok                button.rec-action "read the record"
   277.3x36.8    112x16       2      inline, exempt    a.rec-action "read the whole set instead"
   274.4x17      274x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
@@ -65,10 +65,10 @@
   134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
   114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
   168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
-  569.1x44      570x44       1      ok                input.rec-field ""
+  569.1x27.2    570x45       1      ok                input.w-full ""
   99.8x16.8     100x44       1      ok                button.rec-action "read the site"
-  1x1           -x-          1      COVERED           input.sr-only ""
-  401.2x44      402x44       1      ok                input.rec-field ""
+  1x1           183x48       1      ok                input.sr-only ""
+  401.2x27.2    402x45       1      ok                input.w-full ""
   53.7x16.8     54x44        1      ok                button.rec-action "read it"
   -> 0 of 6 standalone controls under 44px tall (2 inline, exempt)
 
@@ -89,7 +89,7 @@
 === tablet 820x1180 · address /record/at ===
   box WxH       hit WxH      lines  verdict           control
   134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  553.7x44      554x44       1      ok                input.rec-field ""
+  553.7x27.2    554x45       1      ok                input.w-full ""
   115.1x16.8    116x44       1      ok                button.rec-action "read the record"
   158.7x15      159x16       1      inline, exempt    a.rec-action "read the whole set instead"
   274.4x17      275x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
@@ -116,10 +116,10 @@
   134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
   114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
   168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
-  840.3x44      599x44       1      ok                input.rec-field ""
+  840.3x27.2    599x45       1      ok                input.w-full ""
   99.8x16.8     100x44       1      ok                button.rec-action "read the site"
-  1x1           -x-          1      COVERED           input.sr-only ""
-  672.3x44      599x44       1      ok                input.rec-field ""
+  1x1           183x48       1      ok                input.sr-only ""
+  672.3x27.2    599x45       1      ok                input.w-full ""
   53.7x16.8     54x44        1      ok                button.rec-action "read it"
   -> 0 of 6 standalone controls under 44px tall (2 inline, exempt)
 
@@ -140,7 +140,7 @@
 === desktop 1440x900 · address /record/at ===
   box WxH       hit WxH      lines  verdict           control
   134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  824.9x44      599x44       1      ok                input.rec-field ""
+  824.9x27.2    599x45       1      ok                input.w-full ""
   115.1x16.8    116x44       1      ok                button.rec-action "read the record"
   158.7x15      159x16       1      inline, exempt    a.rec-action "read the whole set instead"
   274.4x17      275x18       1      inline, exempt    a.rec-action "Opening the same record through its site"

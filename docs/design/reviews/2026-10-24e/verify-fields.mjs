@@ -1,33 +1,36 @@
 /**
  * Prove the three address fields and their buttons are 44px targets, and
- * prove the 44px came from empty space rather than from a neighbour.
+ * prove the 44px was taken from empty space rather than from a neighbour
+ * or from the drawing.
  *
- * The 2026-10-24d run's verifier asked "did any drawn box change?" and
- * took any answer but no as a failure. That premise is gone here. This
- * change grows the fields' border boxes on purpose, from 26.3/27.2 to 44,
- * because an <input> renders no ::after and so cannot be given an
- * invisible overlay. So the questions have to be sharper:
+ * The first version of this file tested the first version of the change,
+ * which put the height on the field as real padding. It passed 104 of
+ * 104 and the change was still wrong, because every check it made was
+ * about geometry and the defect was in paint: the focus ring traces the
+ * border box, so a taller border box drew a taller ring. The screenshot
+ * caught what the harness could not, which is the reason the charter
+ * puts the screenshot first.
  *
- *   1. Is the field's box 44px at all three viewports? The padding is a
- *      calc over `1lh`, and if `lh` is unsupported the declaration is
- *      invalid and the field silently keeps its old box. A number read
- *      back from the browser is the only thing that proves it resolved.
- *   2. Does a press in the new band reach the field? Geometry can be
- *      right while the press lands on an ancestor. Pressed 1px inside
- *      the new top edge, the field has to take focus. Pressed 2px
- *      outside it, the field must NOT, or the box is bigger than claimed.
- *   3. Does the field still own its own bottom edge? The button's
+ * So the questions here are the ones that version should have asked:
+ *
+ *   1. Is the FIELD's own drawn box unchanged? This is the check that
+ *      would have failed before. The field is the drawing and must stay
+ *      26.3/27.2px, ring included.
+ *   2. Is the TARGET 44px? The overlay lives on the wrapping label, so
+ *      the thing to measure is what a press reaches, not what a box
+ *      reports.
+ *   3. Does a press in the new band reach the field? A label forwards
+ *      activation to its control, but only if the markup actually
+ *      associates them. Pressed 1px inside the top edge the field has to
+ *      take focus; pressed 2px outside it, it must not, or the target is
+ *      bigger than claimed.
+ *   4. Does the field still own its own bottom edge? The button's
  *      overlay reaches 13.6px up, and below `sm` the button sits under
  *      the field. This is the specific thing the gap was widened for, so
- *      a press on the field's rule has to focus the field and not the
- *      button.
- *   4. Did anything lose hit area, anywhere on the site? Three boxes
+ *      a press on the field's rule has to focus the field, not submit.
+ *   5. Did anything lose hit area, anywhere on the site? Three targets
  *      grew into space four neighbours used to border. Every target is
  *      compared before against after and any shrink is a failure.
- *   5. Did layout move? Above `sm` the claim is that nothing moved at
- *      all, which the negative margin is there to guarantee. Below `sm`
- *      the claim is that exactly 4px moved per form, from the gap, and
- *      nothing else. Both are asserted rather than asserted-about.
  *
  * usage: node verify-fields.mjs out.txt   (needs data/hit-areas-{before,after}.json)
  */
@@ -60,12 +63,9 @@ for (const k of Object.keys(before)) {
   check(b.length === a.length, `${k}: same number of targets`, a.length, b.length);
   for (let i = 0; i < Math.min(b.length, a.length); i++) {
     const label = `${k}[${i}] ${b[i].tag}.${b[i].cls.slice(0, 16)} "${b[i].label.slice(0, 18)}"`;
-    // the three fields are the intended exception, and only upward
-    const isField = b[i].tag === "input";
-    if (b[i].boxH !== a[i].boxH) {
-      if (isField && a[i].boxH === 44) boxGrew++;
-      else check(false, `${label}: drawn box height unchanged`, a[i].boxH, b[i].boxH);
-    } else boxSame++;
+    // nothing drawn may change at all, fields included
+    if (b[i].boxH !== a[i].boxH) { boxGrew++; check(false, `${label}: drawn box height unchanged`, a[i].boxH, b[i].boxH); }
+    else boxSame++;
     if (b[i].boxW !== a[i].boxW) check(false, `${label}: drawn box width unchanged`, a[i].boxW, b[i].boxW);
     if (b[i].hitH !== null && a[i].hitH !== null) {
       if (a[i].hitH < b[i].hitH) { shrank++; check(false, `${label}: hit height not stolen`, a[i].hitH, `>= ${b[i].hitH}`); }
@@ -75,8 +75,8 @@ for (const k of Object.keys(before)) {
   }
 }
 check(shrank === 0, "no target anywhere lost hit area", shrank, 0);
-check(boxGrew === 9, "exactly 9 drawn boxes changed (3 fields x 3 viewports)", boxGrew, 9);
-log.push(`  -> ${grew} hit areas grew, ${same} unchanged, ${shrank} shrank; ${boxSame} drawn boxes identical, ${boxGrew} fields to 44px`);
+check(boxGrew === 0, "no drawn box anywhere changed size", boxGrew, 0);
+log.push(`  -> ${grew} hit areas grew, ${same} unchanged, ${shrank} shrank; ${boxSame} drawn boxes identical, ${boxGrew} changed`);
 
 const browser = await launch();
 for (const [vname, w, h] of VIEWPORTS) {
@@ -89,32 +89,44 @@ for (const [vname, w, h] of VIEWPORTS) {
     await page.goto(BASE + path, { waitUntil: "networkidle" });
     await page.waitForTimeout(250);
 
-    const fields = page.locator("input.rec-field");
-    check((await fields.count()) === count, `${pname}: ${count} field(s) wearing .rec-field`, await fields.count(), count);
+    const targets = page.locator("label.rec-field");
+    const fields = page.locator("label.rec-field > input");
+    check((await targets.count()) === count, `${pname}: ${count} label target(s) wearing .rec-field`, await targets.count(), count);
+    check((await fields.count()) === count, `${pname}: each one wraps its field`, await fields.count(), count);
 
     for (let i = 0; i < count; i++) {
       const f = fields.nth(i);
-      await f.scrollIntoViewIfNeeded();
+      const t = targets.nth(i);
+      await t.scrollIntoViewIfNeeded();
       await page.waitForTimeout(80);
       let box = await f.boundingBox();
 
-      /* 1. the calc resolved */
-      check(Math.abs(box.height - 44) < 0.5, `field ${i}: border box is 44px (lh calc resolved)`, box.height.toFixed(1), "44");
+      /* 1. the field is still drawn exactly as it was, ring included */
+      const want = stacked ? 26.3 : 27.2;
+      check(Math.abs(box.height - want) < 0.5, `field ${i}: drawn box still ${want}px, not grown`, box.height.toFixed(1), want);
+      const ring = await f.evaluate((el) => { el.focus(); const c = getComputedStyle(el); return { o: c.outlineWidth, off: c.outlineOffset, h: el.getBoundingClientRect().height }; });
+      check(Math.abs(ring.h - want) < 0.5, `field ${i}: the focus ring still traces the ${want}px box`, ring.h.toFixed(1), want);
+      await page.evaluate(() => document.activeElement?.blur());
 
-      /* 2. a press 1px inside the new top edge focuses the field */
-      await page.mouse.click(box.x + box.width / 2, box.y + 1);
+      /* 2. the target is 44px: the overlay reaches above the drawn box */
+      const tbox = await t.boundingBox();
+      box = await f.boundingBox();
+
+      /* 3. a press 1px inside the top edge of the target focuses the field */
+      await page.mouse.click(box.x + box.width / 2, box.y - (44 - box.height) + 1);
       await page.waitForTimeout(100);
       let activeIsField = await f.evaluate((el) => el === document.activeElement);
-      check(activeIsField, `field ${i}: press 1px inside the new TOP edge focused it`, activeIsField, true);
+      check(activeIsField, `field ${i}: press ${(44 - box.height).toFixed(1)}px ABOVE the drawn box focused it`, activeIsField, true);
 
-      /* 2b. a press 2px above it must not */
+      /* 3b. a press 2px further out must not, or the target is bigger
+         than 44px and is answering for its neighbours */
       await page.evaluate(() => document.activeElement?.blur());
-      await page.mouse.click(box.x + box.width / 2, box.y - 2);
+      await page.mouse.click(box.x + box.width / 2, box.y - (44 - box.height) - 2);
       await page.waitForTimeout(100);
       activeIsField = await f.evaluate((el) => el === document.activeElement);
-      check(!activeIsField, `field ${i}: press 2px ABOVE the box did not focus it`, activeIsField, false);
+      check(!activeIsField, `field ${i}: press 2px OUTSIDE the target did not focus it`, activeIsField, false);
 
-      /* 3. the field still owns its own bottom edge, rule included */
+      /* 4. the field still owns its own bottom edge, rule included */
       await page.evaluate(() => document.activeElement?.blur());
       box = await f.boundingBox();
       await page.mouse.click(box.x + box.width / 2, box.y + box.height - 1);

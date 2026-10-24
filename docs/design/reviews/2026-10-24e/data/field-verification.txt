@@ -15,18 +15,21 @@
   ok    desktop/address: same number of targets                        got 5  want 5
   ok    desktop/404: same number of targets                            got 2  want 2
   ok    no target anywhere lost hit area                               got 0  want 0
-  ok    exactly 9 drawn boxes changed (3 fields x 3 viewports)         got 9  want 9
-  -> 18 hit areas grew, 72 unchanged, 0 shrank; 84 drawn boxes identical, 9 fields to 44px
+  ok    no drawn box anywhere changed size                             got 0  want 0
+  -> 18 hit areas grew, 72 unchanged, 0 shrank; 93 drawn boxes identical, 0 changed
 
 === phone 390x844 · set /record ===
-  ok    set: 2 field(s) wearing .rec-field                             got 2  want 2
-  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    set: 2 label target(s) wearing .rec-field                      got 2  want 2
+  ok    set: each one wraps its field                                  got 2  want 2
+  ok    field 0: drawn box still 26.3px, not grown                     got 26.3  want 26.3
+  ok    field 0: the focus ring still traces the 26.3px box            got 26.3  want 26.3
+  ok    field 0: press 17.7px ABOVE the drawn box focused it           got true  want true
+  ok    field 0: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 0: press on its own rule focused it, not the button      got true  want true
-  ok    field 1: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 1: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 1: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 1: drawn box still 26.3px, not grown                     got 26.3  want 26.3
+  ok    field 1: the focus ring still traces the 26.3px box            got 26.3  want 26.3
+  ok    field 1: press 17.7px ABOVE the drawn box focused it           got true  want true
+  ok    field 1: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 1: press on its own rule focused it, not the button      got true  want true
   ok    set: 2 submit button(s) wearing .rec-hit                       got 2  want 2
   ok    button 0: enabled once its field has a value                   got true  want true
@@ -41,10 +44,12 @@
   ok    button 1: its overlay sits clear of the field above (stacked)  got false  want false
 
 === phone 390x844 · address /record/at ===
-  ok    address: 1 field(s) wearing .rec-field                         got 1  want 1
-  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    address: 1 label target(s) wearing .rec-field                  got 1  want 1
+  ok    address: each one wraps its field                              got 1  want 1
+  ok    field 0: drawn box still 26.3px, not grown                     got 26.3  want 26.3
+  ok    field 0: the focus ring still traces the 26.3px box            got 26.3  want 26.3
+  ok    field 0: press 17.7px ABOVE the drawn box focused it           got true  want true
+  ok    field 0: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 0: press on its own rule focused it, not the button      got true  want true
   ok    address: 1 submit button(s) wearing .rec-hit                   got 1  want 1
   ok    button 0: enabled once its field has a value                   got true  want true
@@ -54,14 +59,17 @@
   ok    button 0: its overlay sits clear of the field above (stacked)  got false  want false
 
 === tablet 820x1180 · set /record ===
-  ok    set: 2 field(s) wearing .rec-field                             got 2  want 2
-  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    set: 2 label target(s) wearing .rec-field                      got 2  want 2
+  ok    set: each one wraps its field                                  got 2  want 2
+  ok    field 0: drawn box still 27.2px, not grown                     got 27.2  want 27.2
+  ok    field 0: the focus ring still traces the 27.2px box            got 27.2  want 27.2
+  ok    field 0: press 16.8px ABOVE the drawn box focused it           got true  want true
+  ok    field 0: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 0: press on its own rule focused it, not the button      got true  want true
-  ok    field 1: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 1: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 1: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 1: drawn box still 27.2px, not grown                     got 27.2  want 27.2
+  ok    field 1: the focus ring still traces the 27.2px box            got 27.2  want 27.2
+  ok    field 1: press 16.8px ABOVE the drawn box focused it           got true  want true
+  ok    field 1: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 1: press on its own rule focused it, not the button      got true  want true
   ok    set: 2 submit button(s) wearing .rec-hit                       got 2  want 2
   ok    button 0: enabled once its field has a value                   got true  want true
@@ -74,10 +82,12 @@
   ok    button 1: press 2px OUTSIDE the hit area reached nothing       got   want not yes
 
 === tablet 820x1180 · address /record/at ===
-  ok    address: 1 field(s) wearing .rec-field                         got 1  want 1
-  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    address: 1 label target(s) wearing .rec-field                  got 1  want 1
+  ok    address: each one wraps its field                              got 1  want 1
+  ok    field 0: drawn box still 27.2px, not grown                     got 27.2  want 27.2
+  ok    field 0: the focus ring still traces the 27.2px box            got 27.2  want 27.2
+  ok    field 0: press 16.8px ABOVE the drawn box focused it           got true  want true
+  ok    field 0: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 0: press on its own rule focused it, not the button      got true  want true
   ok    address: 1 submit button(s) wearing .rec-hit                   got 1  want 1
   ok    button 0: enabled once its field has a value                   got true  want true
@@ -86,14 +96,17 @@
   ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
 
 === desktop 1440x900 · set /record ===
-  ok    set: 2 field(s) wearing .rec-field                             got 2  want 2
-  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    set: 2 label target(s) wearing .rec-field                      got 2  want 2
+  ok    set: each one wraps its field                                  got 2  want 2
+  ok    field 0: drawn box still 27.2px, not grown                     got 27.2  want 27.2
+  ok    field 0: the focus ring still traces the 27.2px box            got 27.2  want 27.2
+  ok    field 0: press 16.8px ABOVE the drawn box focused it           got true  want true
+  ok    field 0: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 0: press on its own rule focused it, not the button      got true  want true
-  ok    field 1: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 1: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 1: press 2px ABOVE the box did not focus it              got false  want false
+  ok    field 1: drawn box still 27.2px, not grown                     got 27.2  want 27.2
+  ok    field 1: the focus ring still traces the 27.2px box            got 27.2  want 27.2
+  ok    field 1: press 16.8px ABOVE the drawn box focused it           got true  want true
+  ok    field 1: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 1: press on its own rule focused it, not the button      got true  want true
   ok    set: 2 submit button(s) wearing .rec-hit                       got 2  want 2
   ok    button 0: enabled once its field has a value                   got true  want true
@@ -106,10 +119,12 @@
   ok    button 1: press 2px OUTSIDE the hit area reached nothing       got   want not yes
 
 === desktop 1440x900 · address /record/at ===
-  ok    address: 1 field(s) wearing .rec-field                         got 1  want 1
-  ok    field 0: border box is 44px (lh calc resolved)                 got 44.0  want 44
-  ok    field 0: press 1px inside the new TOP edge focused it          got true  want true
-  ok    field 0: press 2px ABOVE the box did not focus it              got false  want false
+  ok    address: 1 label target(s) wearing .rec-field                  got 1  want 1
+  ok    address: each one wraps its field                              got 1  want 1
+  ok    field 0: drawn box still 27.2px, not grown                     got 27.2  want 27.2
+  ok    field 0: the focus ring still traces the 27.2px box            got 27.2  want 27.2
+  ok    field 0: press 16.8px ABOVE the drawn box focused it           got true  want true
+  ok    field 0: press 2px OUTSIDE the target did not focus it         got false  want false
   ok    field 0: press on its own rule focused it, not the button      got true  want true
   ok    address: 1 submit button(s) wearing .rec-hit                   got 1  want 1
   ok    button 0: enabled once its field has a value                   got true  want true
@@ -117,4 +132,4 @@
   ok    button 0: press 13.6px ABOVE the box reached it                got yes  want yes
   ok    button 0: press 2px OUTSIDE the hit area reached nothing       got   want not yes
 
-=== 104 checks, 104 pass, 0 fail ===
+=== 119 checks, 119 pass, 0 fail ===
