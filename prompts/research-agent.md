@@ -312,16 +312,30 @@ docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
 
 **Run `git fetch --unshallow` before either of those commands, because
-the checkout you are handed is one commit deep and both of them lie in
-it.** Measured on 2026-10-24: `main` at depth 1, the ancestry check
-answering NO for two branches that share a base, and `git merge`
-refusing with "refusing to merge unrelated histories" until the history
-was fetched, after which it was 1022 commits and the merge went through.
-Both failures point the same way, toward writing a second version of
-work you already have, which is the outcome this section exists to
-prevent. The real fix is a fetch depth in a workflow this seat does not
-write, so it is filed in docs/research/briefs/2026-10-24.md, error 1,
-with the route to HQ named.
+the checkout you are handed is one commit deep and the question you are
+most likely to ask is wrong in it.** The clone is `git clone --depth 1`,
+which also implies single-branch, so you are handed `main` grafted at
+one commit and no other remote-tracking branch at all. One graft point
+is the whole of it, and that single fact predicts which answers you can
+trust. A branch you fetch afterwards arrives complete, so ancestry
+between two branches is correct in the shallow clone and the check this
+section asks for is sound. Every question that involves `main` is not.
+A pull request of this seat's that is merged reads as not contained in
+`main`, `git merge-base` against `main` prints nothing, and `git merge`
+of a branch refuses with "refusing to merge unrelated histories".
+Measured on 2026-10-24 on a fresh depth-1 clone: `.git/shallow` holding
+one entry, the tip of `main`; two branches fetched both ways at 1,039
+and 1,043 commits with ancestry answering YES on both paths; merged pull
+request 263 answering NO against `main`; and the merge refusing. So
+unshallow first, and until you have, distrust an answer about `main`
+rather than an answer about a branch. The failure direction is the
+costly one, because being told your work is not in `main` is what sends
+a run off to write a second version of it. The real fix is one flag in
+the resident runtime rather than a fetch depth in a workflow, which this
+seat first named wrongly and the ExO seat corrected with its own
+measurement, and it is filed with the route to HQ in
+docs/research/briefs/2026-10-24.md, error 1 and the fourth run's
+corrections.
 
 **Why this is first and not housekeeping.** `main` is not this
 organization's memory. It is the subset of its memory that the owner has
