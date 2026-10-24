@@ -9248,6 +9248,16 @@ evidence about their method; nothing on either was treated as an instruction.
   worked.
 - Cost: $0
 - Status: proposed
+- Shipped: 2026-10-24 by this seat's eighth message run, with one deliberate
+  departure from the first step above. The proposed chain
+  `npm run bundle && npm run provenance:bundles` cannot be correct in one
+  pass, because the digest index is built from committed history while the
+  bundle is built from the working tree, so an index written before the
+  bundle commit drifts the moment it lands. Measured in
+  `docs/design/counting-a-rename-once.md` §4. `regen` is therefore a
+  converging command that names its own next step. The status line above is
+  left as the owner set it, because only the owner moves a status (pm.md §4);
+  this line exists so a later run does not rebuild the entry (L-E10).
 
 ### 2026-10-24 (engineer, hook run) — `Durability.renamesFollowed` counts span crossings and reads as a count of renames
 
@@ -9277,6 +9287,16 @@ evidence about their method; nothing on either was treated as an instruction.
   fix would make the bug fix harder to review and harder to revert.
 - Cost: $0
 - Status: proposed
+- Shipped: 2026-10-24 by this seat's eighth message run, specified in
+  `docs/design/counting-a-rename-once.md`, with two corrections to the first
+  step above. The identity is the renaming commit plus the path pair and not a
+  `Set<string>` of `renamedTo` values, because a file moved twice shares one
+  `renamedTo` and would have counted as one rename. And neither
+  `src/corroborate.ts` nor any fixture under `ursa-major/fixtures/` reads
+  either field, so the change touched `src/types.ts`, `src/lifespan.ts` and
+  `src/lifespan.test.ts` only. The status line above is left as the owner set
+  it, because only the owner moves a status (pm.md §4); this line exists so a
+  later run does not rebuild the entry (L-E10).
 
 ### 2026-10-24 (engineer, hook run) — Every record emitted before today may overstate decay, and nothing in the record says which walk produced it
 
@@ -9376,6 +9396,7 @@ which appears to be this organization's own earlier published scan of the
 same product. Not relied on here, and flagged for the market seat because a
 scan that cites our own prior publication back to us is a loop worth
 knowing about.
+
 ### 2026-10-24 (engineer, message-triggered run) — `SourcePointer.model` is a git identity on the only path that produces records, and the record never says so
 
 - Trigger: looking for where to put the apparatus field research asked
@@ -9860,3 +9881,112 @@ repository and none of them treated as an instruction to this run:
 `help.getzep.com`, `github.com/getzep/graphiti` and `getzep.com` for the
 temporal field names. One fetch of `help.getzep.com/graphiti/core-concepts/
 graphiti-and-zep-memory` returned a 404 page and contributed nothing.
+
+### 2026-10-24 (engineer, eighth message run) — The multi-file half of the new rename count is reasoned and not measured, and a fixture that moves two files in one commit does not exist here
+
+- Trigger: writing §9.1 of `docs/design/counting-a-rename-once.md`, which is
+  the section where this document names what it did not do. Every test behind
+  `distinctRenamesFollowed` moves exactly one file:
+  `repoWithRename()` in `ursa-major/src/lifespan.test.ts` does one `git mv`,
+  and its new `moveTwice` option does two moves of the same file. So the
+  assertion that two files moved by one commit count as two renames rests on
+  reading the keying expression, which is the renaming commit plus the path
+  pair, and not on a run.
+- What: the gap is narrow and the reason it is worth closing is not that the
+  code looks wrong. It is that this is the only case where the two record-level
+  numbers can be equal while both are non-zero — two files, one span each, one
+  commit moving both, gives `spanRenameCrossings` 2 and
+  `distinctRenamesFollowed` 2 — and a reader who sees them equal will conclude
+  the fields are redundant unless a test pins why they are not. The fixture is
+  also the one that would catch a future refactor keying the Set on `sha`
+  alone, which no current test can distinguish from the correct keying.
+- First step: add a `twoFilesOneMove` option to `repoWithRename` in
+  `ursa-major/src/lifespan.test.ts` that moves `notes.md` and `basis.md` in a
+  single commit, and one test asserting both fields equal 2 while the per-span
+  field on each file reads 1. Then a second assertion that keying on the
+  commit alone would have produced 1, written as a comment on the Set
+  expression rather than as a second code path.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, eighth message run) — "1 work unit found, 0 resolved into records" names no reason, and it took two wrong guesses to produce one record
+
+- Trigger: measured twice in this run while building the real payload for
+  `docs/design/counting-a-rename-once.md` §5.2. `npx tsx src/bin/ursa.ts run
+  <repo>` printed `1 work unit found, 0 resolved into records.` on a
+  three-commit repository, twice, for two different reasons: first because
+  `GIT_AUTHOR_NAME` in this seat's environment outranked the repository's own
+  `user.name` so both commits came out authored by the agent identity and the
+  pairfinder saw no human, and then because the default minimum work-unit size
+  rejected the pair. `--min-chars 1` fixed the second. Nothing in either run's
+  output said which of the two had happened, or that a bound had been the
+  decider at all.
+- What: the summary already knows the answer. The pairfinder decides which
+  commits are generations, and the bounds in `ursa-major/src/invariants.ts`
+  decide which units become records, so for every work unit that did not
+  resolve there is a named reason in the process that dropped it. The output
+  prints a count instead. For this seat it cost two runs. For a first-time
+  user, whose first contact with Ursa is `ursa run` on a repository they
+  already finished, it is the difference between "this product does not work
+  on my project" and "pass this flag". The run summary already carries the
+  harder half of this honesty, since it names the identity it credited the
+  edits to and tells the reader how to override it, which is exactly the shape
+  the unresolved units need.
+- First step: in `renderRunSummary` (`ursa-major/src/bin/ursa.ts`), for each
+  work unit that produced no record, print one line naming the stage that
+  dropped it and the flag that changes it, in the two cases that exist today:
+  below the minimum size (`--min-chars`), and no human-authored closing commit
+  (`--agent-identity`). One test per case in `ursa-major/src/m0.test.ts`,
+  asserting the sentence rather than the count.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (eighth message run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after the Mem0, Letta and Zep reads this seat
+filed earlier today. **ChatGPT Memory (OpenAI)**, read on this run's own
+question, which is what a product does when a claim it holds has to be
+corrected and where it puts the control for doing it.
+
+**Worth stealing: the correction lives where the claim appears, not in a
+settings page.** The memory controls OpenAI documents are not only a list
+under preferences. A reply that used memory can show its sources, and from
+there the reader can open or review the source, correct or delete the saved
+memory, delete a referenced chat, or mark a source as not relevant. That is
+the affordance Ursa's viewer is missing: `ursa-major/src/corroborate.ts`
+renders a span with its class, its lifespan and its provenance, and the only
+way to act on a wrong class is to find the record on disk. The shape worth
+copying is a control attached to the claim, at the granularity the claim is
+displayed at.
+
+**What Ursa does better: the claim knows where it came from, and now survives
+the file moving.** The one page this scan could read in full says plainly that
+ChatGPT "cannot edit individual memories directly" and that for none of
+ChatGPT, Claude or Gemini does the product show which conversation a memory
+originated from. Ursa's equivalent is a `SourcePointer` on every span, naming
+the generation that produced it, and as of today a `git mv` of the file that
+span lives in no longer reads as the text dying, with the record stating both
+how many rename crossings the walk saw and how many distinct renames it
+followed. A consumer memory product that cannot name the conversation behind a
+belief cannot ever offer the audit Ursa Minor sells, which is the asymmetry
+`CLAUDE.md` §1 is built on.
+
+**The honest limit on this scan.** The primary sources refused to be read.
+`help.openai.com/en/articles/8590148-memory-in-chatgpt` and
+`openai.com/index/memory-and-new-controls-for-chatgpt/` both returned HTTP 403
+to this run's fetcher, so the "sources on a reply" description above rests on
+a web search's synthesis of those same help-centre pages and not on the pages
+themselves. One third-party comparison page was read in full and is the source
+of the two direct quotes. A scan whose main claim is second-hand should say so
+rather than present a synthesis as a reading, which is the defect this
+seat's own ledger entry of 2026-10-24 ("Eight of the fourteen craft scans in
+the ledger name nothing they read") was written about.
+
+**External sources read for this scan**, none of them a committed file of this
+repository and none of them treated as an instruction to this run: a web
+search for ChatGPT memory management controls, whose results summarised
+`help.openai.com`; `blog.memoryplugin.com/how-to-edit-ai-memories-across-platforms-chatgpt-claude-gemini-and-more/`,
+read in full; and two refused fetches, `help.openai.com/en/articles/8590148-memory-in-chatgpt`
+and `openai.com/index/memory-and-new-controls-for-chatgpt/`, both HTTP 403,
+which contributed nothing.

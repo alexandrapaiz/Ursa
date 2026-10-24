@@ -175,7 +175,8 @@ command. Nodes marked **new** were added by this change.
                 ▼
 ┌──────────────────────────────────────────────────────────────┐
 │ types.ts :: Durability (on OutcomeRecord.durability)          │
-│ decayRate: number, renamesFollowed?: number  // **new**       │
+│ decayRate: number, spanRenameCrossings?: number,              │
+│ distinctRenamesFollowed?: number             // **new**       │
 │ serialized to record.json by store.ts :: writeRecord          │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -284,6 +285,16 @@ export interface Durability {
   renamesFollowed?: number
 }
 ```
+
+**Amended 2026-10-24, later the same day.** The record-level field above
+shipped under that name for one afternoon. It sums the per-span field,
+so it counts span-rename crossings and not renames, which §6 measured
+and did not fix. It is now two fields,
+`Durability.spanRenameCrossings` for the sum and
+`Durability.distinctRenamesFollowed` for the count, specified in
+`docs/design/counting-a-rename-once.md` §3.1. `SpanLifespan` is
+unchanged by that amendment. No record carrying the old name is
+published in this repository.
 
 Both are optional and are **never written as `0`**. Absent means this
 walk crossed no rename. A record written before 2026-10-24, when the
@@ -456,6 +467,13 @@ truncated to twelve characters per the redaction rider.
 }
 ```
 
+**Amended 2026-10-24, later the same day.** A record emitted after
+`docs/design/counting-a-rename-once.md` shipped carries
+`"spanRenameCrossings": 4` and `"distinctRenamesFollowed": 1` in place
+of that last line. The discrepancy described below is what the
+amendment resolves; it is left standing here because it is the
+measurement that produced the fix.
+
 Read the two together and note the discrepancy, because it is real and
 it is the one thing in this change a reader will trip over. The span
 says `renamesFollowed: 1` and the record says `4`, for a repository
@@ -472,10 +490,17 @@ It is still a bad name for that quantity. A reviewer asking "how many
 renames did this walk cross" reads `4` and concludes four files moved.
 The honest reading of the current field is "span-rename crossings", and
 a record-level count of distinct renames is a different number that
-nothing currently reports. This is logged as a ledger entry dated
+nothing currently reports. This was logged as a ledger entry dated
 2026-10-24 rather than fixed here, because changing it is a field
 rename in a published record shape and that is not a change to make in
 the same pull request as the bug fix it was discovered by.
+
+**Fixed later the same day**, in
+`docs/design/counting-a-rename-once.md`: the sum kept its meaning and
+took the name `spanRenameCrossings`, and `distinctRenamesFollowed` was
+added beside it, counted from the renaming commit plus the path pair
+rather than summed. Measured end to end there on a repository with one
+`git mv` and three spans: `3` and `1`.
 
 ## 7. What following a rename does *not* claim
 
@@ -594,6 +619,10 @@ dist/ursa.cjs is current (sha256 2ed20990bde0816e17a780ebb6200f32c7c2d87af04891e
    not a fact, and nothing in the record says which one happened.
 3. **`Durability.renamesFollowed` counts span-rename crossings, not
    renames.** §6 states the discrepancy and why it is not fixed here.
+   **Closed 2026-10-24**, later the same day, by
+   `docs/design/counting-a-rename-once.md`: two fields, one for each
+   quantity. This entry stays because the shape of the mistake is worth
+   keeping, not because the defect is open.
 4. **Segmentation still follows the original path's extension.**
    `traceFile` calls `modeForPath(path)` on the record's path, so a
    rename from `.md` to `.ts` keeps prose segmentation. That is

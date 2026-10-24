@@ -6715,7 +6715,7 @@ function spanPresent(spanNorm, fileNorm, fileTokens) {
   }
   return { present: false };
 }
-function traceFile(repoPath, path, spans, closedAt, revisions) {
+function traceFile(repoPath, path, spans, closedAt, revisions, crossings) {
   const mode = modeForPath(path);
   const closedMs = Date.parse(closedAt);
   const unitsBySpan = /* @__PURE__ */ new Map();
@@ -6747,7 +6747,10 @@ function traceFile(repoPath, path, spans, closedAt, revisions) {
   for (const rev of revisions) {
     if (remaining === 0) break;
     const text = blobAt2(repoPath, rev.sha, rev.path);
-    if (rev.renamedFrom) renamesFollowed++;
+    if (rev.renamedFrom) {
+      renamesFollowed++;
+      crossings?.push({ sha: rev.sha, from: rev.renamedFrom, to: rev.path });
+    }
     lastPath = rev.path;
     const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? "" : normalize(text).norm;
     const fileTokens = new Set(tokens(fileNorm));
@@ -6806,19 +6809,20 @@ function median(values) {
 var SURVIVING = /* @__PURE__ */ new Set(["survived_verbatim", "survived_mutated"]);
 function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions = MAX_REVISIONS) {
   const tip = headSha(repoPath);
+  const crossings = [];
   for (const file of record.files) {
     const revisions = revisionsAfter(repoPath, closingSha, file.path, maxRevisions);
-    traceFile(repoPath, file.path, file.spans, closedAt, revisions);
+    traceFile(repoPath, file.path, file.spans, closedAt, revisions, crossings);
   }
   let testedSpans = 0, durableSpans = 0, erodedSpans = 0, decayedSpans = 0;
   let durableChars = 0, decayedChars = 0;
   let baseDurable = 0, baseDecayed = 0;
-  let renames = 0;
+  let spanCrossings = 0;
   const lifetimes = [];
   for (const file of record.files) {
     for (const span of file.spans) {
       const life = span.lifespan;
-      if (life?.renamesFollowed) renames += life.renamesFollowed;
+      if (life?.renamesFollowed) spanCrossings += life.renamesFollowed;
       if (!life || life.fate === "untested") continue;
       if (SURVIVING.has(span.class)) {
         testedSpans++;
@@ -6834,6 +6838,7 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
       }
     }
   }
+  const distinctRenames = new Set(crossings.map((c) => `${c.sha}\0${c.from}\0${c.to}`)).size;
   const baseTotal = baseDurable + baseDecayed;
   const total = durableChars + decayedChars;
   record.durability = {
@@ -6851,7 +6856,11 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
     medianIntactSeconds: median(lifetimes),
     maxRevisionsWalked: maxRevisions,
     minTraceableLen: MIN_TRACEABLE_LEN,
-    ...renames > 0 ? { renamesFollowed: renames } : {}
+    // Both absent rather than 0 when the walk crossed nothing, so a record
+    // from before the walk could follow a rename stays indistinguishable
+    // from one whose files never moved. See the field comments in types.ts.
+    ...spanCrossings > 0 ? { spanRenameCrossings: spanCrossings } : {},
+    ...distinctRenames > 0 ? { distinctRenamesFollowed: distinctRenames } : {}
   };
   return record;
 }

@@ -191,8 +191,29 @@ committed, because `ursa-major/action.yml` runs on a runner with no
 `npm install` step and therefore no `node_modules` to resolve. A commit
 that edits `ursa-major/src/` and forgets `npm run bundle` leaves a
 GitHub Action that silently executes the previous version of the
-resolver. No test catches that, because the tests import the TypeScript
-sources and not the bundle.
+resolver.
+
+**Corrected 2026-10-24.** This paragraph used to end "No test catches
+that, because the tests import the TypeScript sources and not the
+bundle." That stopped being true eleven days after it was written and
+nothing updated it. `src/bundle-canonical.test.ts` (2026-10-17) rebuilds
+the bundle and compares digests, `src/bundle-exec.test.ts` (2026-10-18)
+loads and executes the committed bundle, and `src/provenance-index.test.ts`
+fails when `docs/provenance/bundle-digests.json` drifts from history. All
+three ran red on a stale bundle on 2026-10-24, which is how the near miss
+recorded in `docs/design/counting-a-rename-once.md` §1.2 was caught. What
+remains true is the narrower claim: a seat that edits one module and runs
+only that module's tests sees none of the three, because they sit at the
+end of a 79-second full-suite run.
+
+**The ritual, therefore, has a name.** Any change under
+`ursa-major/src/` is followed by `npm run regen`, run again until it
+prints `clean`: it rebuilds `dist/ursa.cjs`, tells you to commit it, and
+then rewrites the digest index that only becomes computable once that
+commit exists. `npm run regen:check` verifies both artifacts and writes
+nothing. Both are `ursa-major/tools/make-regen.ts`, and the reason the
+two steps cannot collapse into one command is measured in
+`docs/design/counting-a-rename-once.md` §4.
 
 ### 3.3 `scripts/dep-floor.mjs`, the sibling gate, for contrast
 

@@ -3,7 +3,7 @@
 // exactly whether the range syntax and the revision order are right.
 
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -14,6 +14,7 @@ import {
   annotateDurability, revisionsAfter, spanPresent, traceFile,
   MIN_TRACEABLE_LEN,
 } from './lifespan'
+import type { RenameCrossing } from './lifespan'
 import { normalize } from './normalize'
 import { tokens } from './match'
 import type { FinalSpan, OutcomeRecord } from './types'
@@ -344,7 +345,14 @@ describe('the run summary tells the user the difference', () => {
  * above; the author identity still comes from the environment, per the note
  * at the top of this file.
  */
-function repoWithRename(opts: { gutOnMove?: boolean; moveBack?: boolean } = {}): string {
+function repoWithRename(
+  opts: {
+    gutOnMove?: boolean
+    moveBack?: boolean
+    /** a second `git mv` after the first, so the walk crosses two renames of one file */
+    moveTwice?: boolean
+  } = {},
+): string {
   const dir = mkdtempSync(join(tmpdir(), 'ursa-rename-'))
   sh(dir, ['init', '-q', '-b', 'main'])
   sh(dir, ['config', 'user.email', 'human@example.com'])
@@ -367,6 +375,12 @@ function repoWithRename(opts: { gutOnMove?: boolean; moveBack?: boolean } = {}):
     sh(dir, ['add', '-A'])
   }
   sh(dir, ['commit', '-q', '-m', opts.gutOnMove ? 'Move it and rewrite it' : 'Move it into place'])
+
+  if (opts.moveTwice) {
+    mkdirSync(join(dir, 'docs'), { recursive: true })
+    sh(dir, ['mv', 'moved.md', 'docs/notes.md'])
+    sh(dir, ['commit', '-q', '-a', '-m', 'Move it again, into docs/'])
+  }
 
   if (opts.moveBack) {
     sh(dir, ['mv', 'moved.md', 'notes.md'])
@@ -451,7 +465,8 @@ describe('annotateDurability across a rename', () => {
     // whose file never moved, because the older record cannot say.
     expect(kept.lifespan!.renamesFollowed).toBeUndefined()
     expect(kept.lifespan!.renamedTo).toBeUndefined()
-    expect(record.durability!.renamesFollowed).toBeUndefined()
+    expect(record.durability!.spanRenameCrossings).toBeUndefined()
+    expect(record.durability!.distinctRenamesFollowed).toBeUndefined()
   })
 
   it('a commit that moved the file and gutted it still reports death', () => {
@@ -470,13 +485,66 @@ describe('annotateDurability across a rename', () => {
     expect(moved.lifespan!.renamesFollowed).toBe(1)
   })
 
-  it('rolls the count up onto the record, summed over spans', () => {
+  it('rolls the count up onto the record twice, as a sum and as a count', () => {
+    // One `git mv` in the whole repository. The two record-level fields must
+    // disagree, and the disagreement is the point: the sum reconciles against
+    // the span records, the count answers "how many renames did this walk
+    // cross". Before 2026-10-24 only the sum existed and it was named
+    // `renamesFollowed`, so this repository reported 4 renames for one move.
     const repo = repoWithRename()
     const { record } = annotated(repo)
     const perSpan = record.files
       .flatMap((f) => f.spans)
       .reduce((n, s) => n + (s.lifespan?.renamesFollowed ?? 0), 0)
-    expect(record.durability!.renamesFollowed).toBe(perSpan)
-    expect(record.durability!.renamesFollowed).toBeGreaterThan(0)
+    const dur = record.durability!
+    expect(dur.spanRenameCrossings).toBe(perSpan)
+    expect(dur.spanRenameCrossings).toBeGreaterThan(1)
+    expect(dur.distinctRenamesFollowed).toBe(1)
+    expect(dur.spanRenameCrossings!).toBeGreaterThan(dur.distinctRenamesFollowed!)
+    // The old name is gone from the emitted shape, not kept as an alias: no
+    // published record in this repository carries it. `as` because the field
+    // no longer exists on the type, which is the assertion.
+    expect((dur as unknown as Record<string, unknown>).renamesFollowed).toBeUndefined()
+  })
+
+  it('counts a file moved twice as two renames and not as one', () => {
+    const repo = repoWithRename({ moveTwice: true })
+    const { record } = annotated(repo)
+    const moved = mainSpan(record, 'notes.md')
+    expect(moved.lifespan!.fate).toBe('durable')
+    expect(moved.lifespan!.renamesFollowed).toBe(2)
+    expect(moved.lifespan!.renamedTo).toBe('docs/notes.md')
+    // A set keyed on the destination path alone would also say 2 here. A set
+    // keyed on the final path of each file would say 1, which is the reason
+    // the identity is the renaming commit plus the path pair.
+    expect(record.durability!.distinctRenamesFollowed).toBe(2)
+  })
+
+  it('does not count a rename later than the commit every unit died at', () => {
+    // Two renames in the history, and a span whose text is in none of the
+    // three trees, so every unit of it dies at the first revision the walk
+    // reads. traceFile stops there, so the second rename was never looked
+    // at and claiming it would be claiming a place the walk never read.
+    //
+    // Driven through traceFile rather than through a fixture repository on
+    // purpose: making every classified unit die *inside* a commit git still
+    // calls a rename is not possible, because a destination that keeps none
+    // of the source's lines falls under git's -M similarity threshold and is
+    // reported as a delete plus an add, which is not a rename and is already
+    // covered by the deletion test above.
+    const repo = repoWithRename({ moveTwice: true })
+    const { ep } = annotated(repo)
+    const revs = revisionsAfter(repo, ep.finalSha, 'notes.md')
+    expect(revs.filter((r) => r.renamedFrom).map((r) => r.path)).toEqual(['moved.md', 'docs/notes.md'])
+
+    const absent: FinalSpan = {
+      start: 0, end: DOOMED.length, text: DOOMED, class: 'survived_verbatim',
+    }
+    const crossings: RenameCrossing[] = []
+    traceFile(repo, 'notes.md', [absent], ep.closedAt, revs, crossings)
+    expect(absent.lifespan!.fate).toBe('decayed')
+    expect(absent.lifespan!.revisionsChecked).toBe(1)
+    expect(absent.lifespan!.renamesFollowed).toBe(1)
+    expect(crossings).toEqual([{ sha: revs[0].sha, from: 'notes.md', to: 'moved.md' }])
   })
 })

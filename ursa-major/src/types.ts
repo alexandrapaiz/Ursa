@@ -358,6 +358,11 @@ export interface SpanLifespan {
    * the walk could follow a rename at all (before 2026-10-24) is then
    * indistinguishable from one whose file never moved, which is honest:
    * the older record cannot say.
+   *
+   * Accurate as a per-span count, because every span of one file crosses
+   * that file's renames. The two record-level roll-ups of it are
+   * `Durability.spanRenameCrossings` (this field summed) and
+   * `Durability.distinctRenamesFollowed` (each rename counted once).
    */
   renamesFollowed?: number
   /**
@@ -400,13 +405,34 @@ export interface Durability {
   medianIntactSeconds: number | null
   maxRevisionsWalked: number
   /**
-   * Renames the walk followed across every file in this record. Absent,
-   * never 0, when it followed none, for the same reason as
-   * `SpanLifespan.renamesFollowed`. A non-zero value is the one signal a
-   * reviewer needs to know that a `decayRate` in this record was taken
-   * across a file that moved.
+   * `SpanLifespan.renamesFollowed` summed over every span in this record.
+   * One file with four spans that each crossed the same single rename
+   * contributes 4, which is why this is named for crossings and not for
+   * renames: it is the number a reader of the span records can add up and
+   * reconcile against, and it is not an answer to "how many files moved".
+   * That question is `distinctRenamesFollowed` below.
+   *
+   * Absent, never 0, when the walk crossed none, for the same reason as
+   * `SpanLifespan.renamesFollowed`. Records emitted between 2026-10-24
+   * 21:56 UTC (PR #396, which taught the walk to follow a rename) and
+   * this field's introduction carry the same quantity under the name
+   * `renamesFollowed`; no such record is published in this repository,
+   * which is why the name was changed rather than kept and footnoted.
    */
-  renamesFollowed?: number
+  spanRenameCrossings?: number
+  /**
+   * How many distinct renames the walk followed, counted once each. A
+   * rename's identity is the commit that performed it together with the
+   * path pair it moved, so a file moved twice counts 2 and a single move
+   * under a four-span file counts 1.
+   *
+   * This is the number a reviewer auditing a record wants, because it is
+   * the one that says how much path movement a `decayRate` in this record
+   * was taken across. Absent, never 0, on the same convention as the
+   * field above. Always less than or equal to `spanRenameCrossings` when
+   * both are present.
+   */
+  distinctRenamesFollowed?: number
   minTraceableLen: number
 }
 
