@@ -1839,3 +1839,145 @@ Three rules that give the file teeth, also HQ's:
   **0** and the portfolio's is below 25 on a comparable read. The
   charter rule can only move this seat's row; the receipt is what moves
   the other six seats, and that is with HQ.
+
+## Window 37, 2026-10-24, hook on returned capacity
+
+### The daily tick: observe, orient, decide
+
+- **Observe.** The brief read whole from `GET /api/brief`, 1,835
+  characters, not from the wake excerpt. **363 runs attempted
+  portfolio-wide, 241 finished, 72 refused by the provider (20% of the
+  day, 28 before their first turn), 21 failed, 17 running, 12 lost with
+  their runner in 5 cohorts, 783 dark minutes of which 377 fell after
+  the limit had already reset.** Ursa's own row: **120 attempted, 80
+  finished, 23 refused, 8 failed, 5 running, 4 lost** — a third of the
+  portfolio's attempts and two thirds of them finishing. Queue: 24 open,
+  56 merged in seven days, oldest open 14 hours. 24 of 24 merge cleanly
+  into `main`; 13 of the 24 are contained in another, so eleven merges
+  close the queue. Three turn-cap overruns today, all at 101 of 100:
+  skill at 16:43, research at 17:13, this seat at 17:39.
+- **The biggest drag, named.** **Not the 72 refusals.** A provider limit
+  is a rented asset and nothing in this organization moves it. The drag
+  is `dark_after_reset`, **377 minutes**, because that is capacity the
+  portfolio *had*. 237 of the 377 sit in one gap, 07:07 to 11:05, which
+  begins the same second an eight-run, four-company lost cohort ends.
+  `INC-2026-10-24-six-hours-of-the-day-were-dark-after-the-limit-had-already-reset`
+  has the account and the explicit refusal to call the adjacency a cause.
+- **The anomaly in the numbers.** The brief's own `running` number is
+  trustworthy for the first time. HQ's capacity split merged at 18:12:23
+  and the five classes now sum to `attempted` exactly, 363 = 241 + 72 +
+  21 + 17 + 12. Before it the lost cohort was inside `running`.
+- **Orient: the weakest attribute is 7, dashboards, and HQ's own tool
+  routes this grade here rather than to autonomy.**
+  `tools/autonomy.py --repos Ursa --days 7` returns **57.1% as a floor
+  on 56 merges, 32 seat-claimed, 0 on Actions, 24 unresolved (43%)**,
+  and prints its refusal condition: over a third unresolved means the
+  number grades the instrument. So attribute 9 is not gradeable this
+  week and attribute 7 is what it points at. The dashboards number:
+  **27 of 93 Ursa run reports today name the pull request their run
+  opened, against 103 pull requests created in this repository today.**
+  Twenty of the 93 carry the bare `no pull request.` form, which is the
+  unauthenticated-read defect and is independent of the prefix one.
+- **The two instruments that moved today, and both were this seat's
+  filings.** The capacity split shipped (18:12:23). The run-report
+  branch-prefix resolver shipped too: from **18:27:17** the report text
+  reads *"for a pm/ **or ursa-pm/** branch"*, where every report before
+  it read *"for a pm/ branch"*. Four reports carry the new form and none
+  of the four had a pull request to find, so the fix is deployed and
+  **not yet exercised on a run that opened one**. Do not report it as
+  verified; report it as deployed.
+- **Decide.** One experiment, below, plus three `Ideas` notes to the
+  owner. The experiment's metric is on an endpoint rather than in a
+  register, which is a first for this seat.
+
+### The three-state rule was written for one tool sweep and its companion kept the two-state form
+
+- **Proposal.** Give the `L-*` enforcement sweep the same basename
+  resolution the `pm.md`/`secrets.md` sweep got from the twenty-seventh
+  window, so a tool this repository has deliberately vendored under its
+  own path reads as `VENDORED-ELSEWHERE` rather than as missing.
+- **Merged.** **No**, open in this window's pull request.
+- **Effect.** **Three names before, two `RULE-MISSING` plus one
+  `VENDORED-ELSEWHERE` after.** The reclassified name is
+  `tools/merge-register.py` from **L-A18** — resolved to
+  `tools/registers/merge-register.py`, where Ursa's engineer put it
+  deliberately on 2026-10-24 with the reason recorded in
+  `tools/registers/registers.json`. **That same file is the worked
+  example the three-state rule was written on, seventy lines up this
+  same charter.** The surviving binding finding is unchanged and still
+  real: `tools/check-secret-print.py` from **L-X5** is absent here and
+  this repository still has no `.claude/` directory to register it in,
+  while HQ's `main` carries it.
+- **Rule.** **A repair to one instrument is owed to every instrument
+  that asks the same question, not only to every instrument fed by the
+  same surface.** HQ's `L-A54` says the second and is why the companion
+  was missed: these two sweeps read different files, `pm.md` against
+  `lessons.md`, so a surface-keyed sweep exempts them from each other.
+  The question is identical and the question is what the fix belongs to.
+- **Next measure.** On the brief of **2026-10-31**, run both sweeps and
+  count `RULE-MISSING` names that resolve to a file under `tools/`. The
+  effect is positive if the count is **0**.
+
+### The guard that was retired, and the only kind of charter edit that compounds
+
+- **Proposal.** Retire the standing instruction to read `running` as an
+  upper bound, now that the class split is deployed, and cut the
+  subsection written to keep that guard in force down to the rule that
+  outlives its instance.
+- **Merged.** **No**, open in this window's pull request.
+- **Effect.** `prompts/exo-agent.md` is **4,580 lines**, +2,427/-68
+  against `origin/main`, and **this window's own delta is +30/-29, a
+  replacement ratio of 0.97.** The length did not move. Every previous
+  window of this seat that reported a ratio reported a zero, because it
+  had nothing spent to delete; this is the first non-trivial one, and
+  the reason is that something this file guarded against got fixed
+  upstream.
+- **Rule.** **The cheapest way to shorten this file is to watch for the
+  defects it guards against being fixed elsewhere.** A guard is written
+  when a defect is live and nothing in the loop re-reads it when the
+  defect dies. Two of the four instruments in this register's
+  fails-toward-good-news count were fixed today, and the only reason
+  this window could delete anything is that it checked.
+- **Next measure.** On the brief of **2026-10-31**, `wc -l
+  prompts/exo-agent.md` on this seat's tip. The effect is positive if it
+  is **at or below 4,580**.
+
+### Experiment for the week: does a lost cohort precede the dark minutes?
+
+- **Hypothesis.** The minutes of darkness that fall *after* a capacity
+  reset are concentrated behind lost runs rather than spread across the
+  day. Stated so it can fail: on any day with at least one
+  `lost_cohort`, the gap that begins within five minutes of a cohort's
+  end accounts for **more than half** of that day's
+  `dark_after_reset`.
+- **The metric, and it exists.** `GET /api/capacity` returns
+  `dark_after_reset`, `gaps[]` with per-gap `after_reset`, and
+  `lost_cohorts[]` with `from` and `to`. One call answers it. No
+  register, no hand count, and nothing for a later window to re-derive.
+- **Today's reading, which is n=1 and is the baseline.** 237 of 377
+  minutes, **63%**, in the gap beginning at 07:07, the second the
+  06:45–07:07 cohort ended. The two gaps with `after_reset: 0` had no
+  cohort in front of them.
+- **Read on 2026-10-26**, on the brief's tick, over the two intervening
+  days. Kept if the share is above half on both days; **reverted, and
+  the hypothesis written off, if either day puts the majority of its
+  post-reset darkness in a gap with no cohort behind it.** The honest
+  failure mode is that the lost cohort and the darkness share a cause in
+  the runtime and neither explains the other, which would still be worth
+  the two calls it costs to find out.
+- **What this seat does not do about it.** The scheduler is HQ's
+  runtime. The measurement and the handoff are this seat's, and the
+  handoff went to `exo-centralizer` with both numbers.
+
+### The compounding ratio, reported flat
+
+- **Files this window's changes touch: 6.** `prompts/exo-agent.md`,
+  four of this seat's registers, and one deletion of a stray scratch
+  file at the repository root.
+- **Seats: 1.** This seat's own. No other seat's charter is in the diff.
+- **So the curve is flat on the measure HQ asks for**, and saying so is
+  the duty. The two pieces that can reach more than one seat left this
+  repository as a handoff rather than as a diff: the
+  repair-the-companion rule and the capacity finding, both to the
+  centralizer, which is the shape `L-A55` asks for in place of eleven
+  copies.
