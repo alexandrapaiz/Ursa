@@ -5052,6 +5052,8 @@ of them.
   gate (non-zero blocks readying), which is the security seat's call
   under `docs/security/redaction-standard.md`, the sprint item that
   gates O2 KR2.2 and is still unbuilt.
+- Cost: $0
+- Status: proposed
 
 ### 2026-10-04 — Private data from before the gate is still in the public history (security run)
 - Trigger: the 2026-10-04 security audit scanned every blob reachable
@@ -8738,3 +8740,169 @@ added at `21944ab` today because the clone is shallow.
   ancestor, and Ursa has no multi-agent shared-memory surface at all, so
   the dimension Ursa wins on is one it attempted and the dimension Letta
   is solving is one Ursa has not reached.
+
+### 2026-10-24 (engineer, scheduled run) — A gate that has been wrong should carry its own error rate, because this one was wrong three times out of four and nothing recorded it
+- Trigger: two measurements from today's run, side by side. The ledger
+  contract gate in `tools/ledger/check.mjs` reported twelve violations on
+  `main`, and nine of the twelve turned out to be the gate applying
+  `docs/standards/pm.md` §4's five-line idea contract to competitive-scan
+  notes, which the standard never gave that contract to. That is a 75%
+  false-positive rate on a live gate, sustained for weeks, and no artifact
+  in this repository recorded it: the only number anywhere was "12
+  violation(s)", which reads as twelve defects in the file. Against that,
+  today's craft scan below: Prolific publishes the pass rate of its own
+  participant gate, 55%, as a headline figure in its own marketing, so a
+  buyer can see how often that gate fires before trusting what it blocks.
+- What: give each rule in `check.mjs` a committed history, so the gate
+  reports on itself and not only on the file. The rules already have names
+  as of today (`HEADING_SHAPE`, `IDEA_FIELDS_COMPLETE`, `STATUS_ALLOWED`,
+  `NEAR_DUPLICATE`, `CONFLICT_MARKER`), which is the precondition this
+  needs. Add `tools/ledger/rule-history.json`, one row per rule carrying
+  the date the rule was introduced, the number of blocks it fires on
+  today, and a list of dated judgements in which a firing was found to be
+  the rule's defect rather than the file's, each naming the pull request
+  that established it. `node tools/ledger/check.mjs --history` prints the
+  table. The part with teeth is the test: the suite asserts each rule's
+  stated fire count equals the count it actually produces against
+  `docs/ideas.md`, so a rule whose behaviour drifts cannot leave a stale
+  number behind, and a rule that starts firing on thirty blocks announces
+  itself instead of being averaged into a total. This is cheap because it
+  is bookkeeping over a structure that now exists; it was impossible last
+  week because violations were anonymous strings.
+- First step: the JSON file with today's five rules, today's fire counts
+  (`IDEA_FIELDS_COMPLETE` 0, `STATUS_ALLOWED` 1, the other three 0), and
+  the one judgement this run established (`IDEA_FIELDS_COMPLETE`,
+  2026-10-24, nine firings judged the rule's own defect, with the pull
+  request and `docs/design/ledger-block-kinds.md` §1 as the evidence),
+  plus the count assertion in `tools/ledger/check.test.mjs`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, scheduled run) — Eight of the fourteen craft scans in the ledger name nothing they read, and all eight are this seat's
+- Trigger: deciding whether the new `scan` contract should require a
+  source line, and measuring the file before deciding rather than after.
+  Of the fourteen competitive-scan notes in `docs/ideas.md`, exactly one
+  carries a bare `- Source:` line, three carry any `- Source...` field,
+  and six either carry a URL anywhere in the block or say in prose that
+  the run fetched nothing. The other eight name no provenance at all.
+  Attributed with `git log -S` on each heading: every one of the eight
+  landed in an engineer run's ledger-and-craft-scan commit, so this is
+  not a finding about other seats.
+- What: the org rule of 2026-10-05 in `prompts/engineer-agent.md`
+  requires every run to name the external sources it read, under a
+  heading in the pull request. A craft scan is the one artifact in this
+  repository whose entire content is a read of something outside it, and
+  eight of them cannot be checked against anything: a reader cannot tell
+  whether `### 2026-10-13 — Craft scan: Graphiti (Zep's memory engine)`
+  was written from Zep's documentation or from the model's recollection
+  of it, and those are different grades of evidence that the charter's
+  own rule exists to keep apart. The 2026-10-23 npm-and-PyPI note shows
+  the honest form, stating in its first line that the run fetched nothing
+  and that anything in it driving a decision should be re-read against
+  the live specification first. The deliberate non-decision, recorded so
+  the next run does not relitigate it: a `SCAN_NAMES_ITS_SOURCE` rule was
+  considered for today and declined, because shipping it now means
+  shipping a grandfather clause alongside it, and
+  `docs/design/ledger-block-kinds.md` §2 rejects exactly that mechanism
+  three paragraphs earlier. The rule goes in after the eight are filled,
+  not before, or it is a suppression list with a rule attached.
+- First step: this seat writes the missing line into the eight notes it
+  wrote, one run, no content touched other than an added
+  `- Source read:` line naming the page or stating that the run worked
+  from the model's own knowledge. The second unit, after that, is the
+  rule and its test. Both are day-sized and the order is not optional.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, scheduled run) — The owner-held half of a gate's output has nowhere to go, because the seat that finds it may not write to the tracker
+- Trigger: today's change split `check.mjs`'s exit code by who holds the
+  repair, and immediately produced a routing problem it cannot solve. The
+  gate now exits 2 on exactly one violation, `Status: done` on the
+  2026-10-04 security entry, which `pm.md` §4 reserves to the owner. The
+  only place that fact is written down is this run's stderr and this
+  run's pull request description. The tracker it belongs in is
+  `docs/sprints/pending.md`, whose §5 purpose is "what waits on an
+  owner-only action, each line dated", and this seat's charter forbids
+  editing anything under `docs/sprints/`. So the correct destination is
+  the one surface the finder cannot reach.
+- What: `node tools/ledger/check.mjs --owner-queue` emits the owner-held
+  violations as a Markdown fragment in the shape `pending.md` already
+  uses, one dated line per violation naming the rule, the block and the
+  move only the owner can make. The PM's run pastes it, or a later
+  version of the PM's own tooling reads it. This generalizes past the
+  ledger: every gate in this repository that finds something only the
+  owner can resolve has the same gap, and the pattern is a gate that
+  emits its owner-held findings in the tracker's own format rather than
+  in prose a human has to retype. It is explicitly not a seat writing to
+  `pending.md` through a side door: the output goes to stdout, a seat
+  quotes it in its pull request, and the PM remains the only writer.
+- First step: the `--owner-queue` flag over the `Violation` records
+  `check.mjs` already builds, one test asserting the fragment for the
+  real ledger's single owner-held violation, and one line in this run's
+  pull request showing the fragment so the next PM pass can paste it
+  without running anything.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, scheduled run) — Craft scan: Prolific, and a quality gate that publishes how often it rejects
+- Trigger: the daily craft scan, rotating onto Category 1 of
+  `docs/market/landscape.md`, the preference-data vendors. No craft scan
+  had ever reached Category 1: the fourteen notes before this one cover
+  evaluation products (Arena twice, LangSmith twice), memory layers
+  (Mem0 twice, Letta, Graphiti, ByteRover), and engineering tooling
+  (Vercel, Obsidian Sync, coverage.py, CodeRabbit, npm and PyPI
+  provenance), which means the category holding Ursa Minor's actual
+  competitors had been scanned by nobody. Prolific was picked out of the
+  seven in it because the landscape file's own note says its
+  verification rigor is "closer in spirit to Ursa's own consent
+  architecture than most peers", so it is the one where a craft read can
+  disagree with the positioning.
+- The product: a participant marketplace, originally for academic
+  research and now heavily into AI evaluation, RLHF and red-teaming,
+  with a vetted identity-checked pool. Its onboarding is a gate, and the
+  page read today states its terms precisely: "Each participant now
+  completes over 50 identity and behavioral checks to join the pool (55%
+  pass rate)", "Stronger ongoing verification that now includes periodic
+  video selfie checks", "Real-time behavioral monitoring flags
+  suspicious patterns", and a customer-facing authenticity tool that
+  "detects AI-generated content with 98.7% precision".
+- One thing worth stealing: the gate publishes its own firing rate, in
+  the marketing, as a headline. 55% pass means 45% rejected, and a buyer
+  reads that number before deciding what a Prolific response is worth.
+  Ursa's gates report on the artifact and never on themselves. Today's
+  measurement is the cost of that asymmetry: `check.mjs` said "12
+  violation(s)" for weeks, nine of which were its own defect, and the
+  output gave no reader any way to suspect the ratio. The stealable move
+  is not more precision in the message, it is publishing the
+  denominator: how many blocks a rule fires on, and how often a firing
+  was later judged to be the rule's fault. That is ledger entry 1 of
+  this run, and the reason it is worth a day is that a gate's error rate
+  is the number that decides whether anyone reads it.
+- One thing Ursa does better, and it is the thing today's change added:
+  the repair has a named owner. The page read today says nothing about
+  appeals, nothing about what a rejected participant can do, nothing
+  about a researcher's override, and nothing about how a dispute between
+  a participant and Prolific resolves. That absence is structural rather
+  than an oversight in one page: a 45% rejection rate with no stated
+  recourse is a verdict handed down. As of today, every violation
+  `check.mjs` reports carries a `held` field that names who may repair
+  it, `'seat'` or `'owner'`, with the clause of `pm.md` §4 that assigns
+  it, and the gate's exit code distinguishes "clean as far as a seat can
+  take it" from "clean". The user-facing form of the same property is
+  `CLAUDE.md` constraint 2, see-edit-revoke-delete, and
+  `ursa consent show` is where it is already implemented. Second
+  difference, on the signal rather than the process: "detects
+  AI-generated content with 98.7% precision" is a grader judging how an
+  output looks, which `docs/vision.md` §0b rejects on the third
+  principle. Ursa's label comes from whether the finished work kept the
+  text, so no detector's precision is in the path.
+- The honest discount: this is one vendor page, read today, written by
+  the vendor about itself. The 55% and the 98.7% are Prolific's own
+  claims with no method published beside them, and the absence of an
+  appeals process on a marketing page is weak evidence that no appeals
+  process exists. What the comparison establishes is that Prolific
+  chooses to publish its gate's rate and not its gate's recourse, which
+  is a fact about what it thinks its buyer wants to know.
+- Source read: https://www.prolific.com/resources/prolific-in-2025-more-precision-larger-scale-and-stronger-safeguards-for-quality-human-data,
+  fetched 2026-10-24. Read as evidence about another product, which is
+  all it is; nothing on it was treated as an instruction to this run.
