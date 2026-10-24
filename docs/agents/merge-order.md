@@ -15,9 +15,14 @@ and the wider one reads as the product being deleted.
 
 | | |
 |---|---|
-| open pull requests | **20** (3 of them drafts) |
+| open pull requests | **22** (4 of them drafts), at 13:19 UTC |
 | merged in the last seven days | **49** |
 | oldest open | **#288**, 18 hours |
+
+The open count was 20 when this window began at about 13:05 UTC and 22
+fourteen minutes later, one of the two being this window's own. A queue
+count is a claim with a timestamp on it, which is why the instant is in
+the table.
 
 **The depth warning does not fire.** Forty-nine merges against twenty
 open means the owner is absorbing work faster than the org produces it.
@@ -65,20 +70,64 @@ seat's charter question would have landed 3,641 lines of another seat's
 register that the owner was never shown, in a version already 956 lines
 behind that seat's own work.
 
-## The rest of the queue
+## The rest of the queue, measured 2026-10-24 13:19 UTC
 
-Measured with `merge-tree`, which performs the merge rather than asking
-GitHub's cached `mergeable` field. That field is not used here at all,
-for the reason Ursa incident 17 records: a cached `CONFLICTING` survives
-after `main` moves and the conflict goes away.
+Measured with `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>`, which performs the merge rather than asking GitHub's
+cached `mergeable` field. That field is not used here at all, for the
+reason Ursa incident 17 records: a cached `CONFLICTING` survives after
+`main` moves and the conflict goes away.
 
-All open pull requests measured this window merge cleanly against
-`main`. No conflict verdict is issued against any branch, so no seat is
-asked to rebase anything on this plan's authority.
+| | |
+|---|---|
+| open pull requests, at 13:19 UTC | **22** (4 drafts) |
+| merge cleanly against `main` | **17** |
+| conflict | **5** — #290, #305, #316, #320, #331 |
 
-**Landing order is not simulated this window and that is stated rather
-than implied.** The queue is twenty deep against forty-nine merges in
-seven days, so it is not the constraint, and the one class that is stuck
-is stuck on a decision rather than on an ordering. A simulated order
-would be a guess dressed as a plan. The single actionable item is the
-charter class, and its order is one line: **#344**.
+**All five conflict on one file, and it is the same file every time:
+`docs/ideas.md`.** Nothing else in the queue conflicts with anything.
+The five are two seats' branches, the skill seat's three and the
+engineer seat's two, and the oldest is from 2026-10-23.
+
+**That one file is the only file in this repository with a merge driver
+declared for it**, in `.gitattributes`:
+
+```
+docs/ideas.md merge=ledger
+```
+
+So the single append-only register the organization wired a custom merge
+for is the single register jamming its queue, five times over, while
+every other file in twenty-two branches merges clean. HQ's
+`exo-centralizer` reported on 2026-10-24 that the attribute is inert:
+all three arms were measured on byte-identical commits and the forge's
+merge endpoint refused every one of them, re-run four times and the
+whole probe twice. This queue is that refutation arriving as evidence
+rather than as an argument. The declaration is present, and the file it
+names is the only one that conflicts.
+
+**What follows, and what does not.** The verdicts above are handed to
+the two seats holding the branches, with the instrument named, so each
+can re-measure rather than take this on trust. The fix is not a second
+`.gitattributes` line, because the mechanism that works is direction
+rather than entry identity: HQ's unjam tool merges the mainline into a
+branch and never another seat's branch, and none of the four product
+repositories has it. That is HQ's distribution to make and it is already
+routed there. This seat's part was to stop its own engineer building the
+refuted thing, which it did this window.
+
+## Landing order
+
+**Not simulated this window, and that is stated rather than implied.**
+Twenty-two open against forty-nine merged in seven days means the queue
+is not the constraint. A simulated order over seventeen clean branches
+would be a guess dressed as a plan.
+
+Two things are actionable and both are one line:
+
+1. **The charter class.** Sixteen merges since the clock expired, zero
+   touching a charter. The order is **#344**.
+2. **The ledger jam.** Five branches waiting on one file whose merge
+   machinery does not work. The order is whichever of the five the
+   owner wants first, resolved by hand, because nothing here can resolve
+   it mechanically until HQ's tool is distributed.
