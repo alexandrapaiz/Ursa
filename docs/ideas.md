@@ -9162,3 +9162,57 @@ publish repeat counts and Ursa publishes none, which is the ledger entry above,
 and the comparison here is between a published method and this repository's
 practice, which are not the same kind of object. The two pages were read as
 evidence about their method; nothing on either was treated as an instruction.
+
+### 2026-10-24 (market, hook-triggered run) — Add the fourth reward-model-unreliability source, and open the citable packet with it
+
+- Trigger: this run's positioning update (docs/market/positioning.md,
+  "A fourth reward-model source, and this one is about the raters, not
+  the model"). "RLHF May Not Reflect Genuine Preferences" (Ghafouri,
+  Choi, Dey, and Ferrara, arXiv 2604.03238) measures annotator
+  inconsistency directly on two real RLHF datasets and finds filtering
+  out the most inconsistent annotators flips the majority harm
+  classification on 18.6% of prompts and shifts mean ratings over 13
+  points on a 100-point scale. Source:
+  [arXiv 2604.03238](https://arxiv.org/abs/2604.03238).
+- What: the 2026-10-14 ledger entry above built a three-source packet
+  for KR4.1's lab brief, each source about what happens *after* a
+  label exists (the reward model trained on it, or the judge grading
+  against it). This fourth source is different in kind: it attacks
+  whether the human-supplied label was ever genuine in the first
+  place. That makes it the strongest candidate for the packet's
+  opening citation, not just a fourth item appended to the list — a
+  lab reading the brief hits "the opinion itself is unreliable" before
+  "and here is what goes wrong downstream of it."
+- First step: when KR4.1's lab brief is drafted, open the verifier-gap
+  section with this citation first, then the three from the 2026-10-14
+  entry. This is a drafting instruction, not new research.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (market, hook-triggered run) — Watch whether the "build the task and verifier" vendors ever ingest a real deliverable instead of a constructed one
+
+- Trigger: this run's landscape watch (docs/market/landscape.md,
+  Halluminate entry). A second independently-funded vendor (Halluminate,
+  $30M Series A, four of the top five closed-source US labs as
+  customers) is now building RL "gyms" — a constructed starting file, a
+  constructed task, a built-in verifier — for knowledge work, the same
+  shape as Mercor's Deeptune acquisition tracked in the 2026-10-14
+  landscape update. Sources:
+  [Oak HC/FT: why we led Halluminate's $30M Series A](https://www.oakhcft.com/blog-post/the-internet-has-run-out-of-things-to-teach-why-we-led-halluminates-30-million-series-a),
+  [SiliconANGLE: Mercor buys Deeptune](https://siliconangle.com/2026/07/09/mercor-buys-deeptune-build-training-environments-ai-agents/).
+- What: two funded vendors now sit closer to CLAUDE.md §1's "verifier"
+  language than anything else in landscape.md's Category 1, but both
+  still seed a constructed task rather than observing a real
+  deliverable's own history. That is the one move that would turn this
+  from a head-start cost into a position cost (docs/market/positioning.md's
+  "Software parity is not position parity" test, applied to a different
+  category): if either vendor starts ingesting completed real work
+  instead of constructed starting files, it stops being a parallel
+  sub-category and starts being a direct claim on the outcome record's
+  own differentiation.
+- First step: the next monthly landscape pass (due around 2026-10-26)
+  should check both vendors' public materials specifically for the
+  words "real" or "completed" deliverable as a gym's seed, not a
+  constructed one, before assuming the gap is stable.
+- Cost: $0
+- Status: proposed
