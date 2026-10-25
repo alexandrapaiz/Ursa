@@ -547,6 +547,19 @@
           "subject": "drift 8: a one-commit window could not hold a pair, and both surfaces blamed the history"
         }
       ]
+    },
+    {
+      "digest": "623f2f07ba34dce4",
+      "sha256": "623f2f07ba34dce4cdd97c9b268e1e19cb66c8542059898aa21b03ef9f34aa9d",
+      "blob": "21b0d2b032dab542870c035963b0f22f8524ffa7",
+      "bytes": 308181,
+      "introducedBy": [
+        {
+          "commit": "b5515a16e672d4a375e39d3991cf1afb9a75ce20",
+          "date": "2026-10-25T23:13:39.000Z",
+          "subject": "rebuild dist/ursa.cjs for the window-width change"
+        }
+      ]
     }
   ]
 }
