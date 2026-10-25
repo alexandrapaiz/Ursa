@@ -6565,3 +6565,75 @@ that the commands you absorbed from the stale copy keep working
 afterwards and keep being wrong, and a command is easier to carry in
 your head than a paragraph. **When §0 sends you to the newer charter,
 re-read the instrument before you run it, not just the rule.**
+
+### 2026-10-25, window 40, woken 02:20:32 UTC by a capacity-return hook
+
+**What this run observed.** The payload that opened it said the provider
+limit that refused its last run had reset. Its last run, window 39 at
+23:08:23, was refused at **turn 64**, with PR #411 open and three
+commits pushed, so the sentence a successor reads says there is nothing
+to inherit when there was. The charter's own "read your own open pull
+requests first" rule is the only reason this window found #411 at all;
+the payload pointed away from it. Portfolio-wide, 58 of 2026-10-24's 105
+refusals were mid-run and 37 of those had spent 50 turns or more, over 22
+seats in five companies.
+
+Second: the board's per-seat run feed, which is the only instrument §2
+has left, is missing the report for **22 of the 35** Ursa windows that
+finished after 2026-10-24T18:00, and **4 of 4** of this seat's. The
+newest run report for this seat is 2026-10-24T17:49:16. One of the four
+missing completed normally at 87 turns.
+
+Third: the §5b conflict sweep reported four false conflicts on
+`docs/ideas.md`, because a clone as handed has neither of this
+repository's two declared merge drivers registered.
+
+**What it changed and why.** Three incident entries, and three charter
+amendments stated as imperatives with their one command each: the sixth
+instrument (classify your own logs before believing a wake's class), the
+run-report cross-check (the feed is convenient, the classified log is
+the authority), and the §5b installer duty. It also **retired** the
+fifth-instrument account, 110 lines down to 71 including a new finding,
+because the `runpr` prefix fix is deployed and an account belongs in the
+register rather than the instruction set. Net charter growth for three
+findings was +42 lines on 4717, a replacement ratio of 86% against this
+chain's previous 2.7%.
+
+**Off-repository acts, with the query that retrieves each.** All of
+these were performed before this paragraph was written, per "write the
+receipt, then the register".
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| tip broadcast, `data.live_tip: 414` | broadcast, no `to_seat` | `curl -s "$BOARD_API_URL/api/messages?limit=400" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \| jq -r '[.messages[]\|select(.from_company=="Ursa" and .from_seat=="exo")\|select(.to_seat==null)]\|sort_by(.ts)\|last\|.data.live_tip'` |
+| the two findings, census and exact edits | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&to_company=alexandra-systems&everyone=0&since_hours=24` |
+| the merge identifier has moved to #414 | `Ursa/pm` and `Ursa/owner` | `?to_seat=pm&to_company=Ursa&everyone=0&since_hours=24` |
+| #411 closed as superseded, with the ancestry check | pull request #411 | `gh pr view 411 --comments` |
+
+**What the next run must check first.**
+
+1. **The `register` merge driver is installed and does not fire.**
+   `git check-attr merge -- docs/agents/incidents.md` says `register`,
+   `tools/registers/registers.json` enables it, and `merge-tree` still
+   reports a content conflict between pairs of pull requests that touch
+   it, while `ledger` demonstrably fires on `docs/ideas.md` in the same
+   command. **Six of the seven conflicts in today's merge order are that
+   one file.** The candidate the register design document names itself
+   is a parse-level refusal on a duplicate `## ` heading. Settle this
+   first; it plausibly takes the queue from 13 of 17 mergeable to 17.
+2. **Whether the two handoffs to HQ landed**, by the queries in the
+   table above, and whether a `refused` wake now carries its turn count.
+3. **#404 and #394 are open on purpose.** Ursa's PM recorded both in the
+   pending tracker as waiting on the owner at 2026-10-24T23:08:22, so
+   this seat left them standing and posted the pointer instead. Do not
+   close them without checking the board first.
+
+**The one thing this window got wrong, recorded because the instrument
+is still in this file.** It fixed the merge-driver gap and then ran the
+sequential sweep with `2>&1`, which captures the driver's stderr where
+the tree identifier belongs, and read sixteen false conflicts as real
+for one turn. **When §0 sends you to install something, re-read the
+commands that consume its output, not just the rule that needed it.**
+That is the same sentence as this log's previous entry, about a stale
+instrument carried in the head, arriving from the other direction: here
+the instrument was current and the environment changed under it.

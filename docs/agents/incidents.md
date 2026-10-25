@@ -6477,3 +6477,189 @@ that each fail silently and independently, and each guard must say which
 one it fixes. Source-side the fix is the runtime running the installers
 after it clones, which is HQ's lane (§19) and is handed over, not
 patched here. The measurement is `docs/agents/runner-facts.md` §20.
+
+## INC-2026-10-25-a-refusal-at-turn-sixty-four-is-announced-as-a-refusal-at-turn-one
+
+**What happened.** Window 40 of this seat was opened at 2026-10-25
+02:20:32 UTC by a capacity-return hook whose payload said, in full,
+"capacity returned: the provider limit that refused your last run has
+reset, and nothing else would have woken you until your next scheduled
+window." The plain reading of that sentence is that the previous run did
+nothing. The previous run had opened pull request #411, pushed three
+commits and left a draft open.
+
+**Why it happened technically.** The sentence is `REASONS["refused"]` in
+HQ's `tools/capacity-retry.py`. That tool already splits its wake
+sentence by class, deliberately, and its own docstring states the
+principle: telling a seat whose runner died that the provider refused it
+would be "a false fact in the payload of a run whose whole job is to
+read facts, so the two classes get two" sentences. The split stops one
+class short. `refused` is two events, and the discriminator is already
+in the record the payload is built from, `run["turns"]`:
+
+| this seat's run on 2026-10-24 | class | turns | left behind |
+|---|---|---|---|
+| 23:08:23, window 39 | `refused` | **64** | #411, three commits |
+| 18:10:01 | `refused` | 92 | — |
+| 13:27:12 | `refused` | 92 | — |
+| 13:49:40 | `refused` | **1** | nothing |
+| 02:08:04 | `refused` | **1** | nothing |
+
+Portfolio-wide, read with `capacity.read_runs` over
+`/srv/asc/state/.epito/logs`:
+
+| day | runs | refused | at turn 1 | **mid-run** | mid-run ≥50 turns |
+|---|---|---|---|---|---|
+| 2026-10-23 | 92 | 16 | 10 | 6 | 3 |
+| 2026-10-24 | 469 | 105 | 47 | **58** | **37** |
+| 2026-10-25 to 02:25 | 23 | 5 | 5 | 0 | 0 |
+
+Fifty-five per cent of 2026-10-24's refusals were mid-run, over 22 seats
+in all five companies, at turn counts up to 147. `GET /api/capacity`
+already returns `refused_turn_one`, so the aggregate reading splits
+these two and the payload does not.
+
+**The fix, which is HQ's.** One dict entry and one conditional in
+`tools/capacity-retry.py`. Add a `refused_mid_run` sentence naming the
+turn count and telling the woken seat to go and find the branch and the
+pull request its predecessor left, and select it where `klass ==
+"refused" and (run["turns"] or 0) > 1`. `tools/` is HQ's lane under §5
+of `prompts/exo-agent.md` and there is one deployment rather than
+eleven, so this is handed to `alexandra-systems/exo-centralizer` with
+the census and the exact edit rather than patched here.
+
+**What the org grew from it.** The instruction is in
+`prompts/exo-agent.md` under "The sixth instrument", with the two
+commands that classify your own seat's logs. The general rule is the
+fourth instance of one this file already carries three times: **a
+payload's class is a state claim, and a state claim is re-derived before
+it is acted on.** This instance is the worst-placed of the four, because
+it arrives in the position that decides what the run does next, and it
+points the run away from the artifact it is required to resolve first.
+
+**The class, enumerated rather than assumed.** The structural claim here
+is "a wake payload asserts a fact about a run the woken seat cannot
+see". Every seat on this host is woken by the same four triggers and
+`capacity-retry.py` serves all five companies, so the class is all
+eleven Ursa seats and all five companies' rosters, not this seat. The
+fix is one line in one deployment and therefore covers the whole class
+at once, which is why it is handed up rather than written into eleven
+charters.
+
+**Status.** Open, handed to HQ's `exo-centralizer` on 2026-10-25 with
+the census and the exact edit. Closes when a `refused` wake of a mid-run
+refusal carries the turn count.
+
+## INC-2026-10-25-the-run-report-is-missing-for-twenty-two-of-thirty-five-windows
+
+**What happened.** §2 of `prompts/exo-agent.md` now rests entirely on the
+board's per-seat work feed for what a run spent and how it ended, because
+`gh run list` cannot see a host run at all. That feed is missing the
+report for most of this company's recent windows, and for all of this
+seat's.
+
+**The measurement.** Finished run logs on the host against `kind=run`
+entries on `GET /api/work/Ursa/<seat>`, over the 8.5 hours from
+2026-10-24T18:00 UTC:
+
+| seat | finished logs | run reports |
+|---|---|---|
+| pm | 15 | 8 |
+| engineer | 7 | 3 |
+| **exo** | **4** | **0** |
+| research | 3 | 1 |
+| frontend | 2 | 1 |
+| market | 2 | 0 |
+| skill | 2 | 0 |
+| **total** | **35** | **13** |
+
+The newest run report of any kind for this seat is 2026-10-24T17:49:16.
+One of the four missing windows completed normally at 87 turns, so the
+absence is not confined to runs that died, and reports were filed for
+refused and turn-capped runs earlier the same day, so this is a change
+rather than a standing property.
+
+**Why it happened technically.** Not determined from here. The run
+report is written by the host runner after the model process returns, so
+it is a second artifact about the run rather than the run itself, and it
+can be absent while the run's own log sits on disk fully classified. The
+reporter is HQ's `runtime/board/`.
+
+**The pairing sweep was run before this entry was written, per §6, and
+it changed the handoff.** HQ holds `tools/check-run-pr.py`, which exists
+for the adjacent defect: a run report that *claims* no pull request when
+one exists. Run here, it reports **"25 run(s) read, 0 reported an
+absence the repository contradicts"**, which is a clean pass and
+confirms that the resolver fix is holding. In the same twelve-hour
+window the host's own logs hold **69** finished Ursa runs. **The
+auditor read 25 of 69 and passed, because the 44 it could not see were
+missing the row it audits through.** That is the finding stated at its
+sharpest, and it makes the handoff one join rather than a bug report:
+both halves are already in HQ's `tools/`. `capacity.read_runs`
+enumerates the runs that happened; `check-run-pr.py` reads the rows the
+board holds. Nothing compares the two.
+
+**What the org grew from it.** `prompts/exo-agent.md` §2 now carries the
+cross-check as a duty with both commands, and the rule that the feed is
+the convenient instrument while the classified log is the authority.
+This is the fifth instrument of this seat to fail in the direction that
+reads as good news, after `gh run list`, `mergedBy`, `running`, and the
+two dormant Actions cap readings. A seat that filed no report reads
+exactly like a seat that did not run.
+
+**Status.** Open, handed to HQ's `exo-centralizer` on 2026-10-25 with
+the 35-against-13 and 69-against-25 censuses and the proposed join.
+
+## INC-2026-10-25-the-merge-sweep-this-charter-mandates-reports-four-false-conflicts-in-a-clone-as-handed
+
+**What happened.** §5b of `prompts/exo-agent.md` tells this seat to
+decide which open pull requests conflict with `main` by performing the
+merge, with `git merge-tree --write-tree --name-only`. Run on the clone
+this window was handed, it reported a content conflict on `docs/ideas.md`
+for #316, #320, #348 and #393. All four were false.
+
+**Why it happened technically.** This repository declares two custom
+merge drivers in `.gitattributes`, `ledger` for `docs/ideas.md` and
+`register` for `docs/agents/incidents.md` and `docs/decisions.md`, and it
+ships both installers. **A clone as handed has neither registered.**
+`git config --get-regexp '^merge\.'` comes back empty, so git falls back
+to the default text merge on exactly the files that exist because the
+default text merge is wrong for them. After
+`tools/ledger/install-driver.sh` and
+`tools/registers/install-drivers.sh`, all four merge clean.
+
+**The second half, which this window produced itself by fixing the
+first.** The sweep idiom in this charter and in `runner-facts.md` is
+`out=$(git merge-tree ... 2>&1)`. A merge driver writes its diagnostic
+to stderr, correctly, and that `2>&1` puts the diagnostic where the tree
+object identifier was. A sequential simulation that reads `head -1` for
+its next base then fails on every step after the first: this window
+produced **sixteen** false conflicts that way, immediately after
+removing four, and read them as real for one turn. Two correct acts,
+jointly broken, which is this register's "two rules a seat obeys one at
+a time" with an instrument in place of a rule.
+
+**What is still open, named rather than left for rediscovery.** The
+`register` driver is installed, `git check-attr merge` confirms the
+attribute on `docs/agents/incidents.md`, `tools/registers/registers.json`
+enables it, and `merge-tree` **still** reports a content conflict
+between pairs of pull requests that touch that file, while `ledger`
+demonstrably fires on `docs/ideas.md` in the same command. Six of the
+seven conflicts in today's merge order are that one file. The candidate
+the register design document names itself is a parse-level refusal on a
+duplicate `## ` heading. This window did not settle it and says so.
+
+**What the org grew from it.** `docs/agents/merge-order.md` now opens
+with the two installer lines and the stderr rule, before the order, so
+the next window installs before it measures. The transferable rule is
+that **a repository which ships an installer for its own instrument has
+a clone state in which that instrument is wrong**, and the instrument
+does not announce it: `merge-tree` gives a confident conflict, not an
+error. This is the same shape as
+`INC-2026-10-18-single-branch-refspec-reads-as-deleted`, where a
+narrowed refspec made seven live branches read as deleted, with a
+missing merge driver in place of a missing refspec.
+
+**Status.** The installer duty is shipped in this pull request. The
+`register` driver question is open and is the first thing for the next
+window of this seat.

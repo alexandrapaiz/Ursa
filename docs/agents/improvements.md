@@ -2073,3 +2073,83 @@ Three rules that give the file teeth, also HQ's:
   two agree, which means either the runtime now installs them or every
   seat's charter does. If they still disagree and the charter line
   merged, the charter is not the lever and the handoff to HQ is.
+
+### The capacity-return wake landed, and the darkness it was built for went from 377 minutes to 1
+
+- **Hypothesis.** A seat whose run the provider refused is simply over,
+  and nothing restarts it until its next scheduled window hours later,
+  so a tool that reads the reset time the refusal already announced and
+  wakes the seat at it should collapse the minutes of a day that fall
+  dark *after* capacity has returned.
+- **The metric, and it exists.** `GET /api/capacity` returns
+  `dark_after_reset` and per-gap `after_reset`. One call.
+- **Effect.** **377 minutes to 1.** The 37th window measured 377 dark
+  minutes falling after the provider limit had already reset on
+  2026-10-24. Today's reading at 02:25 UTC is `dark_after_reset: 1`, and
+  `last_start` is 02:20:33 against a `reset_at` of 02:20:00, so the wake
+  fired 33 seconds after capacity returned and took 17 seats in 5
+  companies with it. This window is one of them.
+- **What this seat did.** The measurement and the handoff only. The tool
+  is `tools/capacity-retry.py` and the scheduler is HQ's runtime. The
+  37th window's finding was that the tool's class predicate was
+  `refused` and the word `lost` was absent from all 233 lines; the
+  deployed version carries `OWED_CLASSES = ("refused", "lost")`.
+- **Next measure.** On the brief of **2026-10-31**, read
+  `dark_after_reset` over the intervening days. Carried as kept if it
+  stays under ten minutes on every day with at least one refusal window.
+
+### The run-pr resolver fix landed, and its auditor passes on a third of the runs
+
+- **Hypothesis.** `runtime/board/runpr.py` matched GitHub branches
+  against the board's **seat** column while the branch carries the host
+  manifest's **agent name**, so it resolved pull requests only for HQ,
+  and fixing the one line should stop this company's seats reading as
+  having shipped nothing.
+- **The metric, and it exists.** `tools/check-run-pr.py` counts run
+  reports whose claimed absence the repository contradicts.
+- **Effect, and it is two numbers that disagree.** The fix is deployed:
+  run reports from 2026-10-24T18:27 onward read `for a pm/ or ursa-pm/
+  branch`, and the auditor reports **"25 run(s) read, 0 reported an
+  absence the repository contradicts"**. That is a clean pass. In the
+  same twelve-hour window the host's own logs hold **69** finished Ursa
+  runs. **The auditor read 25 of 69 and passed, because the 44 it could
+  not see were missing the row it audits through.** So the fix held and
+  the surface it was measured on shrank under it.
+- **What this seat did.** Filed
+  `INC-2026-10-25-the-run-report-is-missing-for-twenty-two-of-thirty-five-windows`
+  and handed HQ a join rather than a bug report: `capacity.read_runs`
+  enumerates the runs that happened, `check-run-pr.py` reads the rows
+  the board holds, and nothing compares the two. Both halves are already
+  in HQ's `tools/`.
+- **Next measure.** On the brief of **2026-10-31**, run both and record
+  the pair. The experiment succeeds when the row count and the log count
+  agree to within the runs still in flight.
+
+### Experiment for the week: does installing the drivers a repository ships change what the owner is told to merge?
+
+- **Hypothesis.** Stated so it can fail: on any run of the §5b sweep,
+  the number of open pull requests reported as conflicting with `main`
+  is **strictly lower** after running this repository's two merge-driver
+  installers than before, and the difference is entirely accounted for
+  by files `.gitattributes` names.
+- **The metric, and it exists.** The sweep itself, run twice, and
+  `git config --get-regexp '^merge\.'` to say which state the clone was
+  in. No register and nothing for a later window to re-derive.
+- **Today's reading, which is the baseline.** **4 conflicts before, 0
+  after**, all four on `docs/ideas.md`, which `.gitattributes` names.
+  The clone as handed had no driver configured at all. The §5b
+  instrument would have told the owner that four of Ursa's skill pull
+  requests conflict with `main` when none of them do.
+- **Read on 2026-10-31.** Kept if the difference is non-zero and
+  attributable on at least two further runs. **Reverted, and the
+  installer duty written off as noise, if a clone as handed ever comes
+  back with the drivers already configured**, because that would mean
+  the runtime installs them and the charter line is dead weight. The
+  honest failure mode is the one this run already hit on the other
+  driver: `register` is installed, enabled and attributed, and still
+  does not fire, so "installed" and "working" are two states and this
+  experiment currently measures the first.
+- **What this seat does not do about it.** It does not patch either
+  driver. `tools/` here is shared machinery with a design document per
+  driver, and the `register` question belongs to whoever owns
+  `tools/registers/`.

@@ -2536,6 +2536,31 @@ previous week's plan:
    `UNKNOWN` for most of a large queue, because GitHub computes it
    lazily, so it is not a usable instrument here.
 
+   **Install this repository's merge drivers before you run it, or four
+   of its answers are false (added 2026-10-25, fortieth window,
+   measured).** `.gitattributes` binds `ledger` to `docs/ideas.md` and
+   `register` to `docs/agents/incidents.md` and `docs/decisions.md`, and
+   the repository ships both installers. **A clone as handed has neither
+   registered**, so `merge-tree` falls back to the default text merge on
+   exactly the files that exist because the default text merge is wrong
+   for them, and it reports a confident conflict rather than an error.
+   Measured this run: #316, #320, #348 and #393 all conflicted on
+   `docs/ideas.md` before, and all four were clean after.
+
+   ```bash
+   bash tools/ledger/install-driver.sh
+   bash tools/registers/install-drivers.sh
+   git config --get-regexp '^merge\.'     # empty here is the defect
+   ```
+
+   **Then drop the `2>&1` from every merge-tree call, including the ones
+   written above.** A driver writes its diagnostic to stderr, correctly,
+   and `2>&1` puts that line where the tree object identifier was. This
+   window removed four false conflicts and immediately produced sixteen
+   new ones that way. `INC-2026-10-25-the-merge-sweep-this-charter-mandates-reports-four-false-conflicts-in-a-clone-as-handed`
+   has the account, and the `register` driver is still not firing on
+   `docs/agents/incidents.md` for a reason that entry leaves open.
+
    **HQ's script is the better instrument and it is not usable here
    until §0's second line has run (rewritten 2026-10-18, sixteenth
    window, after it reported the whole queue as deleted).**
