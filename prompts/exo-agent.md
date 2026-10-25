@@ -2558,8 +2558,38 @@ previous week's plan:
    and `2>&1` puts that line where the tree object identifier was. This
    window removed four false conflicts and immediately produced sixteen
    new ones that way. `INC-2026-10-25-the-merge-sweep-this-charter-mandates-reports-four-false-conflicts-in-a-clone-as-handed`
-   has the account, and the `register` driver is still not firing on
-   `docs/agents/incidents.md` for a reason that entry leaves open.
+   has the account.
+
+   **That entry left open whether the `register` driver fires at all,
+   and it does. Answered with controls on 2026-10-25, forty-first
+   window; the matrix is `runner-facts` §21.** Two distinct new entries
+   appended to the tail go from a conflict to exit 0 with both kept,
+   which is the case the driver exists for, and `merge-tree` honours it
+   as `git merge` does. Three things to carry into the sweep:
+
+   - **Read the reason on stderr before you believe the exit status.**
+     `both sides added a different entry under '<id>'` wants a rename.
+     `both sides edited "<heading>" differently` may be a real
+     disagreement, or may be two edits in one entry that git merges
+     cleanly, because the driver's unit is the entry and git's is the
+     line. In the second case `merge-tree` returns **the same tree
+     object** with the driver on and off, exit 1 against exit 0, so a
+     file with no conflict markers in it is staged as conflicted.
+     Compare the trees when the reason is the second one.
+   - **An exit of 128 means the instrument did not run.** A clone with
+     `merge.register.name` set and `merge.register.driver` missing fatals
+     on every merge of that path with `custom merge driver register lacks
+     command line`, which §0 has already taught you to read as a
+     conflict. `git config --unset merge.register.driver` leaves the name
+     key behind and creates exactly that state, so if you are toggling
+     the driver to measure something, toggle the **attribute** in
+     `.git/info/attributes` and never the config.
+   - **A refusal naming an entry is a claim about who wrote it.** Check
+     with `git log -S` before you resolve either way. On this queue that
+     check turned one refusal from a duplicate-slug rename into
+     `INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`,
+     where the refusal was the only thing preventing a 107-line revert of
+     another seat's postmortem.
 
    **HQ's script is the better instrument and it is not usable here
    until §0's second line has run (rewritten 2026-10-18, sixteenth
@@ -3147,6 +3177,67 @@ window. The next process change will do the same thing to some other
 instrument, and the symptom will again be two confident readings that
 disagree with each other and with the repository.
 
+
+#### And a file-scoped split is not entry-scoped, so filter the entries of the files you keep (added 2026-10-25, forty-first window, measured on another seat's postmortem)
+
+The section above measures what splitting by copy costs your
+**instruments**. It does not say what it costs **other seats**, and that
+is the larger cost, because an instrument that misreads wastes a window
+and this loses another seat's work.
+
+The scope clause's unit is the file. Four of this repository's registers
+are one file with several authors, which `tools/registers/registers.json`
+states for each of them. So a filter that keeps `docs/agents/incidents.md`
+because it is this seat's file keeps **every entry in it**, including the
+entries other seats wrote, and an append-only register's author keeps
+appending while your copy does not. What you are carrying after a split
+is a stale fork of somebody else's record, and it presents itself to the
+merge machinery as an equal-authority alternative version of theirs.
+
+Measured: `5c111cd` kept the PM's `## Incident 19` at 75 lines. By the
+next morning its author had grown it to 182 on its own chain. Merging
+this seat's branch and then the PM's `#417` conflicted on that entry, and
+resolving the markers in favour of "ours" would have reverted 107 lines
+of a postmortem tracking one signature across five seats. The account is
+`INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`.
+
+So, when you split or copy, run this over every register you keep, and
+delete rather than refresh what it names:
+
+```sh
+# entries your chain adds to a shared register. anything here you did not
+# write is a fork of its author's live copy, not a contribution.
+comm -13 <(git show origin/main:<register> | grep '^## ' | sort) \
+         <(git show HEAD:<register>        | grep '^## ' | sort)
+git log --format='%h %an %ad' --date=short -S'## <the heading>' --all -- <register>
+```
+
+**Delete, do not refresh.** A refreshed copy is stale again on the
+author's next pass, and you do not own the entry. Deleting is safe in
+both merge orders, which is worth stating because it reads as risky: if
+yours merges first the author's pull request still adds the entry whole,
+and if theirs merges first your branch no longer touches it. Verified in
+both directions on this pair, exit 0 either way, 182 lines either way.
+
+**And read a refusal's reason as a claim about authorship, not as its
+diagnosis.** The driver said `both sides added a different entry under
+'## Incident 19'; rename one`, which is accurate about the merge base and
+wrong about the cause: nobody minted a duplicate, and renaming either
+side would have published two copies of one postmortem. From the base's
+point of view neither side had the entry, so both read as authors. One
+`git log -S` tells you which side actually wrote it, and that decides
+which way to resolve. Run it before you resolve a register conflict in
+either direction.
+
+**The general shape, which is the third instance of its family in this
+file.** A correct rule applied at the wrong granularity silently keeps
+what it was written to drop. Its siblings are "a rule that reschedules
+an act must reschedule that act's checks with it" and "a rule that
+replaces an artifact voids the older rules about its contents". All
+three are rules nobody can find by reading for contradictions, because
+there is none: the rule does exactly what it says, at a unit one layer
+coarser than the thing it protects. When you write a rule whose subject
+is a file, ask what the file's own unit is.
 #### The measure is coverage, not similarity, and the check is now a tool rather than three shell loops (measured 2026-10-24, thirty-sixth window)
 
 Both forms above are **exact-match** instruments. The positional one asks
