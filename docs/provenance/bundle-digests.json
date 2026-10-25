@@ -521,6 +521,19 @@
           "subject": "a test per drop reason, and the shipped bundle rebuilt"
         }
       ]
+    },
+    {
+      "digest": "702d3444a5080d9a",
+      "sha256": "702d3444a5080d9a1ece831077b00f0ff0099c5732c7b8d051ff59df645f354a",
+      "blob": "6b89f49c3ab46082d7ee75cf349eee08ab77e94c",
+      "bytes": 304768,
+      "introducedBy": [
+        {
+          "commit": "712d9afcb1edffaa6087b7a9c992f8e725f26f5f",
+          "date": "2026-10-25T02:40:09.000Z",
+          "subject": "the runner computed why it refused a pairing and threw it away, then denied the pairing existed"
+        }
+      ]
     }
   ]
 }
