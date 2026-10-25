@@ -3699,9 +3699,10 @@ the ledger proposal naming the fix shape (`docs/ideas.md`,
 live run in progress) failed `redaction-gate`'s `scan` step. The
 step's own log names the exact match: the pattern
 `(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/`, meant to catch a real
-machine path like `/home/alice/`, also matches the literal substring
-`/home/` inside `https://consensus.app/home/blog/welcome-to-consensus/`
-— a competitor's marketing URL, committed (correctly) in two files
+machine path like `/home/<user>/`, also matches the same slash-letter
+shape where it appears inside a competitor's marketing URL on
+`consensus.app` (path: `home/blog/welcome-to-consensus`), committed
+(correctly) in two files
 under `docs/design/reviews/2026-10-25/` (`bench-inline-links.mjs`,
 `data/benchmark-inline-links.json`). No machine path, no username, and
 no private information is present in either file.

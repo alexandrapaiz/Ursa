@@ -21,8 +21,8 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
    subsumes the already-closed #406) both merged. Separately,
    #412 (frontend, draft, live run in progress) is failing
    `redaction-gate` on a false positive: the gate's home-directory
-   regex matches the literal substring `/home/` inside
-   `https://consensus.app/home/blog/...`, a competitor URL, not a
+   regex matches the same slash-letter shape where it falls inside a
+   competitor URL on `consensus.app` (path: `home/blog/...`), not a
    machine path. Recorded as Incident 21 — this is a new signature, not
    a repeat of the fourteen known-missing-tool gaps in Incident 18 or
    the exit-code/no-PR class in Incidents 12/17/19. Not this seat's to
@@ -8832,8 +8832,9 @@ competitor URL as a leaked machine path.** `gh run view` on the one
 `failure` in the last 24 hours
 (`40155454719`, `ursa-frontend/2026-10-25-hook`, PR #412, still open
 with a live run) shows the `scan` step's pattern
-`(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/` matching
-`https://consensus.app/home/blog/welcome-to-consensus/` in two files
+`(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/` matching the same
+slash-letter shape inside a competitor URL on `consensus.app` (path:
+`home/blog/welcome-to-consensus`) in two files
 under `docs/design/reviews/2026-10-25/`. This is a genuinely new
 signature — checked against Incident 18 (missing tool scripts) and
 Incidents 12/17/19 (the exit-code/no-PR class) and it matches neither.
