@@ -7067,3 +7067,10 @@ exception and the trap is still live:** `main`'s
 charter branch, which is **not** the newest open pull request of this
 seat. Take the longest, not the newest, and the command is in the entry
 above.
+
+## 2026-10-25, window 45 (opening placeholder)
+
+Woken 23:25 UTC by the merge of #429 (window 44). This entry is the
+ship-first placeholder and will be rewritten before the run ends. The
+run's branch is `ursa-exo/2026-10-25-message-4` and it carries #433's
+single commit by merge, so #433 is contained in it.
