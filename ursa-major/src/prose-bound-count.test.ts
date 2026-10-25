@@ -74,7 +74,8 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { BOUND_COUNT } from './invariants'
+import { BOUND_COUNT, checkRecord } from './invariants'
+import type { OutcomeRecord } from './types'
 
 /**
  * How many committed records sit in `fixtures/violations/`, read off disk
@@ -87,6 +88,44 @@ import { BOUND_COUNT } from './invariants'
 const FIXTURE_RECORD_COUNT = readdirSync(join('fixtures', 'violations')).filter(
   (f) => f.endsWith('.json') && f !== 'base.json',
 ).length
+
+/**
+ * Every committed `OutcomeRecord` in `fixtures/violations/`, base included.
+ *
+ * A second count because that directory's README states both, in adjacent
+ * sentences, and they differ by exactly the base record. Stating one and
+ * deriving the other from it here would put the "+ 1" in this file rather
+ * than in the directory, and the directory is the thing being described.
+ */
+const FIXTURE_FILE_COUNT = readdirSync(join('fixtures', 'violations')).filter((f) =>
+  f.endsWith('.json'),
+).length
+
+/**
+ * How many counterexamples in `fixtures/violations/` fire exactly one bound.
+ *
+ * A third derived count, because that directory's README states it too
+ * ("nineteen single-bound fixtures, three pairs and one triple") and because
+ * leaving it underived had a measurable consequence: when this gate was
+ * probed with a nineteenth bound, this sentence's "nineteen" became an
+ * unregistered mention of the then-current count, which the sweep correctly
+ * refused and no maintainer should have to adjudicate. Deriving it removes
+ * the coincidence instead of documenting it.
+ *
+ * Computed by the gate itself over the committed records, which is the same
+ * measurement `src/invariants.violations.test.ts` makes when it asserts the
+ * directory produces 28 violations in total. That total is NOT checked here:
+ * it is a property of the records rather than a count of them, the test
+ * above already pins it, and this file is about numbers written as words.
+ */
+const SINGLE_VIOLATION_FIXTURE_COUNT = readdirSync(join('fixtures', 'violations'))
+  .filter((f) => f.endsWith('.json') && f !== 'base.json')
+  .filter((f) => {
+    const record = JSON.parse(
+      readFileSync(join('fixtures', 'violations', f), 'utf8'),
+    ) as OutcomeRecord
+    return checkRecord(record).length === 1
+  }).length
 
 /** one to thirty-nine, which is the whole range this project's prose uses */
 const ONES = [
@@ -166,6 +205,7 @@ function word(n: number): string {
  */
 const LIVE_SURFACES = [
   '../README.md',
+  'fixtures/violations/README.md',
   ...readdirSync('src', { recursive: true, encoding: 'utf8' })
     .filter((f) => f.endsWith('.ts'))
     .filter((f) => f !== 'prose-bound-count.test.ts')
@@ -189,9 +229,24 @@ const LIVE_SURFACES = [
  * `why` says what the sentence claims, because that is what decides whether
  * a future reader should update the number or the allowlist.
  */
+type Counts = {
+  /** the bound count, `BOUND_COUNT`, as a word: "eighteen" */
+  bounds: string
+  /** counterexample records in `fixtures/violations/`, as a word */
+  fixtures: string
+  /** the same count capitalised, for a sentence or heading that opens on it */
+  Fixtures: string
+  /** every record in that directory, base included, as a word */
+  files: string
+  /** counterexamples firing exactly one bound, as a word */
+  singles: string
+  /** the same count capitalised, for a sentence that opens on it */
+  Singles: string
+}
+
 type Claim = {
   file: string
-  phrase: (bounds: string, fixtures: string) => string
+  phrase: (n: Counts) => string
   why: string
 }
 
@@ -199,64 +254,126 @@ const CLAIMS: Claim[] = [
   // --- README.md, the surface a reader outside the project reads ---
   {
     file: '../README.md',
-    phrase: (b) => `the bound count went from ten to ${b}`,
+    phrase: (n) => `the bound count went from ten to ${n.bounds}`,
     why: 'the range the bound set has travelled, whose upper end is the count today, so it moves even though "ten" does not',
   },
   {
     file: '../README.md',
-    phrase: (b) => `${b} bounds a record must satisfy`,
+    phrase: (n) => `${n.bounds} bounds a record must satisfy`,
     why: 'the headline statement of what src/invariants.ts does, in the file-by-file table',
   },
   {
     file: '../README.md',
-    phrase: (b, f) => `${f} records over ${b} codes`,
+    phrase: (n) => `${n.fixtures} records over ${n.bounds} codes`,
     why: 'both derived numbers in one sentence: how many committed counterexamples exist, over how many bounds',
   },
   {
     file: '../README.md',
-    phrase: (b) => `two of the ${b} turned out to be unbreakable`,
+    phrase: (n) => `two of the ${n.bounds} turned out to be unbreakable`,
     why: 'a subset claim whose denominator is the count; the "two" is a measured property of the bound set, not derived here',
   },
   {
     file: '../README.md',
-    phrase: (b) => `satisfies all ${b} bounds`,
+    phrase: (n) => `satisfies all ${n.bounds} bounds`,
     why: 'what the shared launch step checks, in the src/launch.ts row of the same table',
   },
   // --- src/ and tools/, where a comment sits beside the code ---
   {
     file: 'src/store.ts',
-    phrase: (b) => `claim today's ${b} bounds for classifications made under ten`,
+    phrase: (n) => `claim today's ${n.bounds} bounds for classifications made under ten`,
     why: 'why saveRecord never overwrites task.gatedBy; the sentence contrasts the count today with the count a record was written under',
   },
   {
     file: 'src/types.ts',
-    phrase: (b) => `ten to ${b} in eleven days`,
+    phrase: (n) => `ten to ${n.bounds} in eleven days`,
     why: 'the measured rate of change that justifies shipping task.gatedBy at all',
   },
   {
     file: 'src/types.ts',
-    phrase: (b) => `the ${b} codes below are this`,
-    why: 'why GateIdentity.codes is string[] and not InvariantCode[]; the count names this build\'s bound set as against a later one\'s',
+    phrase: (n) => `the ${n.bounds} codes below are this`,
+    why: "why GateIdentity.codes is string[] and not InvariantCode[]; the count names this build's bound set as against a later one's",
   },
   {
     file: 'src/invariants.test.ts',
-    phrase: (b) => `${b} in eleven days, so two records bought two months apart`,
+    phrase: (n) => `${n.bounds} in eleven days, so two records bought two months apart`,
     why: 'the same measured rate of change as src/types.ts, restated where the bound is tested',
   },
   {
     file: 'src/invariants.violations.test.ts',
-    phrase: (b) => `passes all ${b} bounds`,
+    phrase: (n) => `passes all ${n.bounds} bounds`,
     why: 'the test title asserting the base fixture is clean, so each counterexample fails for its own edit',
   },
   {
     file: 'src/invariants.violations.test.ts',
-    phrase: (b) => `Two of the ${b} are backstops`,
+    phrase: (n) => `Two of the ${n.bounds} are backstops`,
     why: 'the two bounds that cannot be violated alone, stated over the current count',
   },
   {
     file: 'src/invariants.violations.test.ts',
-    phrase: (_b, f) => `${f} committed records`,
-    why: 'the fixture count in this file\'s own header, which is the number the directory listing must agree with',
+    phrase: (n) => `${n.fixtures} committed records`,
+    why: "the fixture count in this file's own header, which is the number the directory listing must agree with",
+  },
+  // --- fixtures/violations/README.md ---
+  //
+  // Nine entries from one file, which is not padding: this is the document
+  // that proves the gate was needed. On 2026-10-25 it stated seventeen
+  // bounds, twenty-two counterexamples and twenty-three committed files
+  // while the directory held eighteen, twenty-three and twenty-four, and the
+  // `adding-a-bound-to-the-record-gate` skill had already recorded the drift
+  // as evidence E29 on 2026-10-18 and re-confirmed it on 2026-10-23. Two
+  // seats read it, wrote down that it was wrong, and it was still wrong
+  // seven days later, because noticing is not a gate. The run that added
+  // this file corrected all nine and registered them here so the next bound
+  // cannot leave them behind.
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `# fixtures/violations — ${n.fixtures} records the gate must refuse`,
+    why: 'the title, which states how many counterexamples the directory holds',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `the opposite: ${n.files} committed`,
+    why: 'every record in the directory, base included, which is the counterexample count plus one',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `one clean base and ${n.fixtures} counterexamples`,
+    why: 'the same sentence splitting that total into the base and the counterexamples',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `states ${n.bounds} bounds a record must satisfy`,
+    why: 'what src/invariants.ts checks, as this directory explains why it exists',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `passes all ${n.bounds} bounds`,
+    why: "the base.json row of the table, which is the claim every counterexample's single edit is measured against",
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `Six of the ${n.bounds} bounds read nothing else`,
+    why: 'the bounds that read a structure the base had to be built to carry; the "six" counts table rows below it and is not derived here',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `${n.Singles} of the ${n.fixtures} fixtures fire exactly one violation`,
+    why: 'the distribution of violations across fixtures: both the numerator and the denominator are derived',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `asserts that count — ${n.singles}`,
+    why: 'the same numerator restated where the note points at the test that holds it; the "three pairs and one triple" beside it is pinned by that test, not here',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `Two of the ${n.bounds} bounds cannot be broken`,
+    why: 'the two backstop bounds, stated here over the same count src/invariants.violations.test.ts states it over',
+  },
+  {
+    file: 'fixtures/violations/README.md',
+    phrase: (n) => `## ${n.Fixtures} fixtures, ${n.bounds} bounds`,
+    why: 'the section heading carrying both counts at once, which is why it drifted twice',
   },
 ]
 
@@ -281,16 +398,59 @@ const NOT_A_BOUND_COUNT: Record<string, { count: number; why: string }> = {
 
 const read = (file: string) => readFileSync(file, 'utf8')
 
-/** every index at which `needle` occurs in `haystack` */
-function indicesOf(haystack: string, needle: string): number[] {
-  const out: number[] = []
-  for (let i = haystack.indexOf(needle); i !== -1; i = haystack.indexOf(needle, i + 1)) out.push(i)
-  return out
+/**
+ * A claim's sentence with its number slots left open, as a regular
+ * expression.
+ *
+ * WHY THE SWEEP MATCHES THIS AND NOT THE RENDERED PHRASE. The two
+ * assertions answer different questions and must not answer each other's.
+ * Assertion 1 asks "does this sentence state the current count", and
+ * reports the sentences that do not. Assertion 2 asks "is this mention of
+ * the count inside a sentence the registry knows about", which is a
+ * question about COVERAGE and has the same answer whether the number in
+ * that sentence is currently right or wrong.
+ *
+ * Matching the rendered phrase conflated them, and the probe that found it
+ * is in this file's own history: with a nineteenth bound added, the
+ * `asserts that count — eighteen` claim stopped matching, so its line's
+ * "nineteen" became an occurrence the sweep called unregistered. One
+ * defect, reported twice, the second time as the wrong defect — a
+ * maintainer reading "no CLAIMS entry covers this" would go looking for a
+ * registry gap that does not exist.
+ *
+ * Each count slot is rendered as a sentinel control character, which cannot
+ * occur in this project's prose, then escaped and widened to any single
+ * English number word. `[A-Za-z]` and not `[a-z]` because a sentence may
+ * open on the count ("Nineteen of the twenty-three fixtures").
+ */
+const SLOTS: Counts = {
+  bounds: '\u0001',
+  fixtures: '\u0002',
+  Fixtures: '\u0003',
+  files: '\u0004',
+  singles: '\u0005',
+  Singles: '\u0006',
+}
+
+function claimPattern(claim: Claim): RegExp {
+  const skeleton = claim.phrase(SLOTS)
+  const escaped = skeleton.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(escaped.replace(/[\u0001-\u0006]/g, '[A-Za-z]+(?:-[a-z]+)?'), 'g')
 }
 
 describe('the bound count in prose, against the bound count derived from the bounds', () => {
   const bounds = word(BOUND_COUNT)
   const fixtures = word(FIXTURE_RECORD_COUNT)
+  const counts: Counts = {
+    bounds,
+    fixtures,
+    Fixtures: fixtures.charAt(0).toUpperCase() + fixtures.slice(1),
+    files: word(FIXTURE_FILE_COUNT),
+    singles: word(SINGLE_VIOLATION_FIXTURE_COUNT),
+    Singles:
+      word(SINGLE_VIOLATION_FIXTURE_COUNT).charAt(0).toUpperCase() +
+      word(SINGLE_VIOLATION_FIXTURE_COUNT).slice(1),
+  }
 
   it('spells numbers correctly, so a failure below names a real string', () => {
     // Guards the gate's own vocabulary before any assertion rests on it. If
@@ -319,7 +479,7 @@ describe('the bound count in prose, against the bound count derived from the bou
   // ASSERTION 1. Fails when the count changes and a site was not updated.
   describe('every registered claim states the current count', () => {
     for (const claim of CLAIMS) {
-      const expected = claim.phrase(bounds, fixtures)
+      const expected = claim.phrase(counts)
       it(`${claim.file}: "${expected}"`, () => {
         const text = read(claim.file)
         expect(
@@ -352,10 +512,11 @@ describe('the bound count in prose, against the bound count derived from the bou
 
       it(`${file}: all ${hits.length} mention(s) of "${bounds}" are registered or declared`, () => {
         // The character ranges the registry already covers in this file.
-        const covered: [number, number][] = CLAIMS.filter((c) => c.file === file).flatMap((c) => {
-          const phrase = c.phrase(bounds, fixtures)
-          return indicesOf(text, phrase).map((i) => [i, i + phrase.length] as [number, number])
-        })
+        const covered: [number, number][] = CLAIMS.filter((c) => c.file === file).flatMap((c) =>
+          [...text.matchAll(claimPattern(c))].map(
+            (m) => [m.index!, m.index! + m[0].length] as [number, number],
+          ),
+        )
 
         const unexplained = hits.filter((h) => !covered.some(([s, e]) => h >= s && h < e))
         const declared = NOT_A_BOUND_COUNT[file]?.count ?? 0
@@ -379,6 +540,40 @@ describe('the bound count in prose, against the bound count derived from the bou
         ).toBe(declared)
       })
     }
+
+    it('matches a registered sentence whose number is wrong, which is the coverage question', () => {
+      // The mechanism assertion 2 rests on, tested directly rather than
+      // inferred from the sweep passing. A sentence the registry knows
+      // about stays covered when its number is stale, so the sweep reports
+      // registry GAPS and leaves stale numbers to assertion 1.
+      const claim: Claim = {
+        file: 'fixtures/violations/README.md',
+        phrase: (n) => `states ${n.bounds} bounds a record must satisfy`,
+        why: 'fixture for this test',
+      }
+      const pattern = () => claimPattern(claim)
+      expect('states eighteen bounds a record must satisfy').toMatch(pattern())
+      expect('states nineteen bounds a record must satisfy').toMatch(pattern())
+      expect('states twenty-three bounds a record must satisfy').toMatch(pattern())
+      // A capitalised opener, which is why the slot is [A-Za-z] and not [a-z].
+      expect('Nineteen of the twenty-three fixtures').toMatch(
+        claimPattern({
+          file: 'x',
+          phrase: (n) => `${n.Singles} of the ${n.fixtures} fixtures`,
+          why: 'fixture for this test',
+        }),
+      )
+      // And the slot is one number word, not any text: a sentence that has
+      // lost its number is NOT covered, so deleting the count from a
+      // registered sentence surfaces as a registry gap rather than silently.
+      expect('states bounds a record must satisfy').not.toMatch(pattern())
+      // Regex metacharacters in a claim are escaped, not interpreted.
+      expect(
+        claimPattern({ file: 'x', phrase: (n) => `(${n.bounds}) [codes]`, why: 'w' }).test(
+          '(eighteen) [codes]',
+        ),
+      ).toBe(true)
+    })
 
     it('sweeps the files it claims to, so an empty sweep cannot pass quietly', () => {
       // A sweep whose file list silently emptied would report no unexplained
