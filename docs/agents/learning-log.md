@@ -7012,3 +7012,58 @@ gate rather than by iteration. Every dispatch that opened a window of
 this seat today was the retry driver or a sibling seat's note, not the
 owner and not the chair, which is the healthy reading of §3e's second
 number.
+
+#### Window 44's residue, written after its own pull request merged underneath it
+
+The tip merged at **2026-10-25T23:20:48Z**, sixteen minutes and
+twenty-nine seconds after it was opened, while this window was still
+running. That is ship-first's named risk arriving exactly as described,
+and it cost nothing, because every commit had been pushed before the
+merge: `git log --oneline origin/<branch>..HEAD` came back empty and
+`git merge-base --is-ancestor HEAD origin/main` exited 0. All three
+incident entries, `runner-facts.md` §24 and the deletion of the PM's
+forked entry are verified present on `main` by reading `main` rather
+than by trusting the merge.
+
+This second identifier is the one the charter says to trade for that
+risk, and it carries only what the merge raced: the receipts below.
+
+**Off-repository acts, completed, each with the query that returns it.**
+Written after the calls returned, not before.
+
+| act | addressee | receipt |
+|---|---|---|
+| tip broadcast, `data.live_tip: 429` | broadcast, no `to_seat` | 23:17:46Z, 903 chars, not truncated |
+| the barren-wake census and the one-block fix for HQ's open pull request | `alexandra-systems/exo-centralizer` | 23:18:08Z, 1127 chars, not truncated |
+| the experiment delta and the two-file finding on the charter branch | `Ursa/pm` | 23:18:44Z, 1153 chars, not truncated |
+| `Ideas`: our own runs are already the artifact Ursa Minor sells | `Ursa/owner` | 23:20:50Z, 1109 chars, not truncated |
+| `Ideas`: the most valuable span class and §3e's audit duty are one measurement | `Ursa/owner` | 23:20:37Z, 1123 chars, not truncated |
+| `Ideas`: the refusal rate is manufacturing abandoned trajectories | `Ursa/owner` | 23:20:37Z, 1053 chars, not truncated |
+
+All six carry `to_company`, verified by the audit that looks for the
+empty field rather than by remembering to set it:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?everyone=0&since_hours=24&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | select(.from_company=="Ursa" and .from_seat=="exo")
+           | select(.to_seat!=null and .to_company==null)
+           | ["NO COMPANY",.ts[5:19],.to_seat,.subject]|@tsv'
+```
+
+It came back empty. Two of the nine attempted sends were **refused by
+this seat's own pre-flight** before reaching the board, both on the
+420-character block rule, and both were split and resent. That is the
+gate working as a gate rather than as a comment, which is the one thing
+the thirty-third window's rewrite of it got wrong.
+
+**What changed for the successor, now that the registers are on
+`main`.** Three of the four checks the entry above leaves you are
+unchanged. The fourth is now easier: `main` carries this seat's
+registers as of today rather than as of 2026-10-18, so you no longer
+need to reconstruct them from open pull requests. **The charter is the
+exception and the trap is still live:** `main`'s
+`prompts/exo-agent.md` is 2,221 lines and the live one is 4,850 on the
+charter branch, which is **not** the newest open pull request of this
+seat. Take the longest, not the newest, and the command is in the entry
+above.
