@@ -534,6 +534,19 @@
           "subject": "the runner computed why it refused a pairing and threw it away, then denied the pairing existed"
         }
       ]
+    },
+    {
+      "digest": "1382b88c7c4eb423",
+      "sha256": "1382b88c7c4eb4238a47ddb2e1082bff34dab6f83b44b1bbdfff9f6ac24aa648",
+      "blob": "1ce3d948b4f209d3d2e7b1447047902838dea694",
+      "bytes": 306709,
+      "introducedBy": [
+        {
+          "commit": "bc04f4ff0f19ff18cadbc3fb907278c25a1ccdad",
+          "date": "2026-10-25T03:07:59.000Z",
+          "subject": "drift 8: a one-commit window could not hold a pair, and both surfaces blamed the history"
+        }
+      ]
     }
   ]
 }

@@ -10166,3 +10166,168 @@ web search for ChatGPT's Sources panel and its empty-summary behaviour,
 one fetch of `www.memorylake.ai/en/blogs/check-what-chatgpt-memory-summary-leaves-out`,
 and one attempted fetch of `help.openai.com/en/articles/8590148-memory-faq`
 which returned 403 and contributed nothing.
+
+### 2026-10-25 (engineer, message run) — The comment now says what it could not know and names no command that would answer it, while a real one exists
+
+- Trigger: today's craft scan below, read against the sentence this run
+  shipped two hours earlier. Anthropic's memory-import page pairs its
+  caveat with a verification surface and a repair path: it says Claude
+  "may not always successfully incorporate imported memories", and then
+  offers "See what Claude learned about you" to check and a settings
+  control to fix what is wrong. Drift 7 and drift 8 both corrected what
+  Ursa's surfaces SAY about a zero. Neither gave the reader anything to
+  do about it. The too-small-window branch is the clearest case: the
+  merge has already happened, so no flag on the Ursa step can widen that
+  window, and the sentence stops at the diagnosis.
+- What: the remedy exists and the comment does not name it. `ursa run`
+  takes no range at all and never has, confirmed against
+  `src/bin/ursa.ts` usage lines 488 to 495: `listCommits` is called with
+  `--all` when no range is passed, so the local launch walks every commit
+  reachable from any ref and is not bounded by the merge window in any
+  way. On the exact history that produced today's false reading, the
+  generation sits one commit behind the window's base, which means the
+  local launch resolves it and the CI launch structurally cannot. So the
+  honest closing clause of that sentence is an invocation the reader can
+  type, and the one place in this product that already does this is the
+  refusal paragraph, which names three flags. The difference is that a
+  flag is an argument to a run that has already finished, and this is a
+  different run.
+- First step: in `emptyWindowSentence`'s too-small branch
+  (`src/ci/comment.ts`), close with the local invocation that answers the
+  question the window could not, and in the test assert the command is
+  real rather than plausible: feed the flag list from that string into
+  `main` from `src/bin/ursa.ts` against a fixture and assert exit 0,
+  rather than asserting the comment contains a string a reader will paste
+  into a shell. A prose command that no test executes is the same class of
+  claim as the sentence drift 8 fixed, and it fails the same way.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, message run) — The shared minimum both surfaces print is pinned by my own test's literals, not by the surfaces reading it
+
+- Trigger: writing `states the minimum once, where both surfaces read it`
+  in `src/launch-parity.test.ts` today, then reading the four assertions
+  around it. Every prose assertion in the drift 8 block spells the number
+  out: `expect(ciComment).toContain('a pairing takes 2 commits')`, and
+  the same literal again for the local surface and twice more in the
+  detail-block test.
+- What: `PAIR_MINIMUM_COMMITS` was introduced so one number reaches two
+  separately written sentences, which is the lesson drift 6 wrote down.
+  The test does not check that, and the gap was measured rather than
+  guessed at before this entry was filed. Replacing every
+  `${PAIR_MINIMUM_COMMITS}` in `src/ci/comment.ts` and
+  `src/bin/ursa.ts` with the literal `2`, which leaves the constant
+  imported by both files and read by neither, and running the drift 8
+  block: `Tests 7 passed | 26 skipped`. All seven, including
+  `states the minimum once, where both surfaces read it`, whose title is
+  the claim the run just falsified: it asserts the constant's VALUE,
+  which nobody was going to change, and nothing asserts the SHARING,
+  which is the whole reason the constant exists. This is the same shape
+  as the defect it was written to catch, one level up: drift 8 was a
+  surface asserting something it had not checked, and this is a test
+  asserting a contract it does not exercise.
+- First step: one test that renders both surfaces twice under different
+  values of the minimum and asserts both moved together. The cheap way is
+  to build the number into the assertion rather than the assertion into
+  the number: compute the expected substring from `PAIR_MINIMUM_COMMITS`
+  and assert that string appears in both the CI comment and the local
+  output, so a literal reintroduced in one file fails the moment the
+  constant and that file disagree. The stronger way, if the module shape
+  allows it without a mock, is to parameterise the two renderers on the
+  minimum. Try the cheap one first and report whether it actually catches
+  a reintroduced literal, by reintroducing one and running it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, message run) — `commitsScanned` counts two different populations and the type cannot tell a reader which, one line after a user-facing sentence started quoting it
+
+- Trigger: checking, before shipping the detail-block line that prints
+  this number to a user, what the number actually counts. `listCommits`
+  in `src/pairfinder.ts` is called with the caller's range when there is
+  one and with `--all` when there is not, and `commitsScanned` is
+  `commits.length` either way. So the same field is the size of a merge
+  window on the CI path and the size of the entire repository on the
+  local path. The field's own docstring documented only the second
+  reading until this run corrected it.
+- What: as of today `src/ci/comment.ts` renders that number to a reader
+  as `N commits in it`, beside a commit range, and decides on it whether
+  to say the window was too small to hold a pairing. That is correct
+  because `src/ci/run.ts` always passes `range: window.range`, and
+  nothing in the types says it must. A caller that builds a
+  `RunCommentContext` from a diagnostics object produced without a range
+  prints this repository's whole commit count labelled as one merge
+  window, which on this repository is roughly 2,814 rather than 1, and
+  the too-small branch then never fires on a window that is in fact one
+  commit. The documentation fix this run made is the weakest available
+  repair: it tells the next reader the right thing and lets the wrong
+  call compile.
+- First step: add `rangeScanned: number | null` to
+  `PairFinderDiagnostics`, set from `commits.length` when `opts.range`
+  was passed and `null` when it was not, leaving `commitsScanned`
+  untouched so no existing caller changes behaviour. Then narrow
+  `RunCommentContext.commitsInWindow` to be fed from `rangeScanned` in
+  `src/ci/run.ts`, and add one test asserting a diagnostics object walked
+  with no range has `rangeScanned === null` while `commitsScanned` is the
+  whole history, so the two populations are pinned apart by a test rather
+  than by a paragraph.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (message run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after yesterday's ChatGPT Memory read.
+**Claude Memory Import and Export (Anthropic)**, read on this run's own
+question, which drift 8 made specific: what does a product say when the
+operation it just performed might not have done what the user asked, and
+what does it give the user to do about it.
+
+**Worth stealing: a caveat that arrives with a verification surface and a
+repair path, not alone.** Anthropic's support page states the limit
+rather than implying success. On incompleteness: Claude's memory "is
+designed to focus on work-related topics", so it "may not retain
+imported personal details unrelated to work". On the operation itself:
+"Memory imports are experimental and still in active development, and at
+this stage, Claude may not always successfully incorporate imported
+memories." A product telling a user that the thing they just did may
+silently have failed is rare. What makes it craft rather than legal
+cover is what sits next to it: a control labelled "See what Claude
+learned about you" that opens a conversation showing what was actually
+retained, and a settings path, "Tell Claude what to change or remove",
+for fixing what is wrong. Caveat, then check, then repair. Ursa's two
+user-facing surfaces got the first of those three today and yesterday
+and have neither of the others, which is the first ledger entry above.
+
+**What Ursa does better: the caveat is computed per run, so it can say
+zero.** Anthropic's two disclaimers are static text on a help page. They
+are true of every import and therefore say nothing about any particular
+one, and a warning that always fires is a warning a reader learns to
+skip. Every qualification Ursa prints is derived from the walk that just
+ran: the refusal tally is absent when the walk abandoned nothing
+(`pairRefusals` returns `{ total: 0, refusals: [] }` and both surfaces
+print no paragraph), and as of today the too-small-window sentence
+appears only when the walk read fewer than two commits and is replaced by
+the original sentence otherwise, which is what the guard test in the
+drift 8 block pins. So a reader who sees a qualification in an Ursa
+surface knows it is about their merge. The honest limit on that
+comparison is in the second ledger entry above: the shared number behind
+the new sentence is not yet pinned to one place by any test, only by
+literals in the assertions.
+
+**Sourcing, stated because yesterday's scan could not state it.**
+Yesterday's read of ChatGPT Memory reached its quotations through a
+competitor's blog, because `help.openai.com` returned 403. This one is
+first-party: one fetch of
+`support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`,
+Anthropic's own page, which returned the text. All four quotations above
+are from it. What this scan does NOT claim is that the product behaves as
+the page says, because no run of this seat has used the feature. The
+landscape entry for this product already carries that caveat in stronger
+form for a neighbouring claim, asking for "a direct product test before
+leaning further on either 'one-directional' or 'symmetric' as the
+precise word", and nothing here closes that.
+
+**External sources read for this scan**, none of them a committed file of
+this repository and none of them treated as an instruction to this run:
+one fetch of
+`support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`.

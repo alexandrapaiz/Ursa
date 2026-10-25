@@ -22,6 +22,7 @@
 // would be a different contract and must not be mistaken for this one.
 
 import { BOUND_COUNT, currentGateIdentity } from '../invariants'
+import { PAIR_MINIMUM_COMMITS, windowTooSmallForAPair } from '../launch'
 import { formatResolverIdentity } from '../resolver-identity'
 import type { OutcomeRecord, ResolverIdentity } from '../types'
 import type { Episode } from '../episodes'
@@ -120,6 +121,28 @@ export interface RunCommentContext {
       limit: number | null
     }[]
   }
+  /**
+   * How many commits the pairing walk actually read in this window
+   * (`PairFinderDiagnostics.commitsScanned`), not the width of the range
+   * string above it.
+   *
+   * This exists because the two zero-state sentences before it both
+   * answer "what did this history contain" and neither asks whether the
+   * window was large enough for the question to have an answer. A pairing
+   * needs a generation and a LATER commit that edits the same file, so a
+   * one-commit window holds none by construction, and a squash merge
+   * produces exactly that: `src/ci/window.ts` degrades the window to the
+   * single squashed commit and says so in `windowNote`. The product
+   * already knew the window was degraded and the sentence did not read
+   * what it knew. That is drift 8 (`windowTooSmallForAPair` in
+   * src/launch.ts).
+   *
+   * Omitted by a caller that does not pass it, in which case the
+   * zero-unit sentence keeps the unconditional wording, because a caller
+   * with no count cannot tell a window that found nothing from a window
+   * that could not have found anything.
+   */
+  commitsInWindow?: number
   invariantViolations?: number
   /**
    * The resolver that wrote this run's records, as `task.resolvedBy`
@@ -266,6 +289,25 @@ function emptyWindowSentence(f: RunCommentFields, ctx: RunCommentContext): strin
     // what this branch did until 2026-10-25 (drift 7, src/launch.ts), and
     // on a repository where agent seats commit between the owner's own
     // touches it is the sentence every merge gets.
+    // Drift 8, and it is checked after the refusal tally rather than
+    // before it on purpose. A refusal means the walk DID find a
+    // generation and a later edit of the same file, which takes at least
+    // two commits, so the two branches cannot both apply to one window.
+    // Ordering the cheaper test first would still be correct and would
+    // read as though it might not be.
+    if (!refused && ctx.commitsInWindow !== undefined && windowTooSmallForAPair(ctx.commitsInWindow)) {
+      const held =
+        ctx.commitsInWindow === 1
+          ? 'this window holds one commit'
+          : `this window holds ${n(ctx.commitsInWindow)}`
+      return (
+        `${opening} a pairing takes ${PAIR_MINIMUM_COMMITS} commits, a generation and a later commit of yours ` +
+        `that edits the same file, and ${held}. So this window could not hold one whatever its commits carry, ` +
+        'which is a fact about the merge rather than about your history. The window note below says which merge ' +
+        'shape produced it, and a squash merge produces exactly this: the branch collapses into a single commit ' +
+        'and the generation-to-edit chain inside it is gone.'
+      )
+    }
     if (!refused) {
       return `${opening} no commit here carried an agent marker that a later human commit then edited.`
     }
@@ -306,7 +348,18 @@ export function renderRunComment(f: RunCommentFields, ctx: RunCommentContext): s
   lines.push('')
   lines.push('<details><summary>How this run was bounded</summary>')
   lines.push('')
-  lines.push(`- Commit window: \`${ctx.range}\``)
+  // The range, and how many commits are in it. The range alone was all
+  // this line carried until 2026-10-25, and a reader cannot count commits
+  // from two shas. The count is here rather than in the five-field table
+  // for the reason the self-check line is: the table's shape is fixed so
+  // two runs stay comparable, and this is a question a reader asks when
+  // deciding how far to trust a zero rather than one of the figures.
+  lines.push(
+    ctx.commitsInWindow === undefined
+      ? `- Commit window: \`${ctx.range}\``
+      : `- Commit window: \`${ctx.range}\`, ${n(ctx.commitsInWindow)} commit${ctx.commitsInWindow === 1 ? '' : 's'} in it. ` +
+        `${PAIR_MINIMUM_COMMITS} is the fewest a pairing can come from, since it needs a generation and a later commit of yours that edits the same file.`
+  )
   lines.push(`- Why that window: ${ctx.windowNote}`)
   lines.push(`- Acceptance declaration carried into these records: ${ctx.declarationBasis}`)
   lines.push(`- Records written to \`${ctx.recordsPath}\` on this runner. They are not pushed anywhere.`)
