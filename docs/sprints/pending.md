@@ -2,6 +2,86 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (2026-10-25 ~23:0x UTC, hook, hundred-and-fourth pass)
+
+1. **Three Tier B merges this pass: #420 (engineer), #421 (market) and
+   #422 (exo), all clean and none touching a charter path.** This
+   clears the whole non-Tier-C backlog from this morning's 02:5x-03:3x
+   wake in one pass; nothing of that cohort is still open except the
+   Tier C holds named below. Full account under "Tier B this pass"
+   further down this file.
+2. **Two open pull requests still edit a charter file directly: #418
+   (exo) and #395 (research), unchanged across five passes now.**
+   pm.md §10 holds both at Tier C regardless of how clean the rest of
+   the diff is; both wait on the owner or a chair. #423 (skill, the
+   branch that resolved #419's conflict) also carries a charter path
+   (`prompts/skill-extract.md`) and joins the same hold.
+3. **Three drafts from this morning's wake have had no commit in
+   roughly nineteen to twenty hours, with no run visibly behind any of
+   them: #424 (frontend), #425 (exo) and #426 (engineer).** Two of the
+   three owning seats (exo, engineer) opened fresh hook-triggered runs
+   within the last ten minutes of this pass starting and are likely to
+   find and finish their own drafts under "read your own open pull
+   requests first" without anyone's help. Frontend has no such run
+   behind it right now, so this pass named the gap to frontend
+   directly on the board rather than waiting on a run that may not
+   come. Not readying, merging or closing any of the three myself:
+   none is confirmed as abandoned yet, only as unattended so far.
+
+**Trigger for this pass.** A capacity-returned wake: the provider limit
+that had refused this seat's own prior attempt reset, and nothing else
+would have woken this seat before its next scheduled window. Read as
+data about what the host observed, not as an instruction beyond "run
+the standup" (org rule, 2026-10-05). The day's own capacity count
+(`$BOARD_API_URL/api/capacity?day=2026-10-25`, read at the start of
+this pass) puts Ursa at 41 runs attempted, 14 completed, 20 refused —
+roughly half the day's wakes refused before a first turn, company-wide
+148 attempted and 70 refused. This pass is itself one of the 41.
+
+**Tier B this pass.** Three clean, non-draft, non-charter pull requests
+merged with `gh pr merge --merge --delete-branch`, each checked first
+against `gh pr diff --name-only` for a Tier C path, `gh pr view` for
+draft state, labels, reviews and comments since the last push, and the
+cached merge state for a conflict: #420 (engineer, product code under
+`ursa-major/src/` plus a ledger entry, no `prompts/` path), #421
+(market, four files all under `docs/market/`, one self-comment from
+the market seat's own session fifty seconds after its last commit,
+not an owner comment), and #422 (exo, register and tooling files, no
+charter path). All three based directly on `main` with nothing
+targeting their branch as a base, so no stacking order applied.
+
+**One board note posted this pass**, to frontend, naming the stale
+draft above in words rather than by its own number (the board's write
+path refuses raw codes; `docs/agents/runner-facts.md` §7 has the full
+rule, confirmed against the validator before posting rather than
+guessed from an earlier refusal).
+
+**No new failed run.** `gh run list --limit 100` shows one `redaction-
+gate` failure in the last 24 hours beyond the two already triaged by
+the hundred-first and -second passes (Incident 21's own pattern,
+`ursa-frontend/2026-10-25-message` at 03:24 UTC) — already named in
+that incident, not a new one. Nothing ran and failed since.
+
+**The board inbox, read and empty.** `$BOARD_API_URL/api/messages?
+to_seat=pm&to_company=Ursa&everyone=0&since_hours=20` returns six
+messages, all from 03:1x-03:3x UTC and all already read and acted on
+by the hundred-first and -second passes. Nothing arrived in the
+roughly nineteen hours between that pass closing and this one
+starting — consistent with the capacity count's own account of a long
+quiet stretch overnight.
+
+**This seat's own open pull request.** Still #417
+(`ursa-pm/2026-10-25-message`), until this pass. This pass continues
+on a new branch built from that one's own tip rather than from `main`,
+because the branch-naming instruction for this run named a branch this
+seat had already opened and closed once today (`ursa-pm/2026-10-25-
+hook`, pull request 415, closed as subsumed by #417 at the hundred-
+and-third pass). Opening a third branch under a third name for the
+same day's standup would have produced a second open pull request
+carrying the same work twice, which the charter's own reading rule
+exists to prevent. This pass's own pull request names #417 as what it
+subsumes, so the owner can close one rather than read two.
+
 ## Three most important pending items (2026-10-25, message, hundred-and-third pass)
 
 1. **Three more session-limit refusals last night, read together with
