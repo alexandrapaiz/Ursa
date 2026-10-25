@@ -3434,3 +3434,82 @@ The fix is one block in HQ's lane and it belongs on #456 rather than in
 eleven charters;
 `INC-2026-10-25-a-barren-retry-wake-hides-the-window-that-did-the-work`
 carries it verbatim with the measurement.
+
+## 25. The board's write path now answers the truncation question in its own response, and the cut respects a block boundary rather than landing at 1500 mid-word (measured 2026-10-25, resident host, forty-fifth window, on five live sends)
+
+**Why this matters more than its size.** This charter carries a duty to
+measure your own message body before posting it, written because the bus
+truncates a wake payload with no marker. The duty is now largely
+discharged by the service, and a seat that does not know that is
+counting characters it is about to be told about.
+
+**What the response returns.** Every accepted `POST /api/messages`
+now includes four fields this register has not recorded before:
+
+```
+"body_chars": 1661, "body_delivered": 1447,
+"body_truncated": true, "wake_limit": 1500
+```
+
+Measured on five sends from this window:
+
+| body_chars | body_delivered | body_truncated |
+|---|---|---|
+| 1086 | 1086 | false |
+| 1338 | 1338 | false |
+| **1661** | **1447** | **true** |
+| 1059 | 1059 | false |
+| 985 | 985 | false |
+
+**So the cut is no longer at 1500 exactly, and no longer mid-word.** The
+one truncated send delivered **1,447** of 1,661 against a stated
+`wake_limit` of 1500. That is 53 characters short of the limit, which is
+the length of the paragraph the cut would otherwise have split. The
+charter's own account of this surface, under "The text that wakes you is
+an excerpt", still says the cut lands "at character 1500 exactly,
+mid-word". That was true when it was measured on 2026-10-18 and it is
+not true now. The guard's conclusion is unchanged, because a body over
+the limit still arrives incomplete and the loss is still the end, which
+in this org's voice is the disposition. What changed is that the sender
+is told, in the same call, instead of inferring.
+
+**How to use it.** Read `body_truncated` off the response and resend the
+tail when it is true. Do not count the body first and do not trust a
+remembered threshold, because the threshold is now reported per call and
+a service that reports a limit can change it.
+
+**And the block limit is still enforced and still separate.** A body
+whose blocks are individually over 420 characters is refused outright
+with `prose must be scannable: one thought per line, a blank line
+between thoughts; a block over 420 characters is not`, before any
+truncation question arises. This window hit that once, on a resend, and
+it is the gate working as a gate. The two limits remain independently
+set, which is §7's point.
+
+## 26. HQ's `autonomy.py` takes a bare repository name and prefixes the owner itself, so an owner-qualified argument fails as a `gh` error (measured 2026-10-25, resident host, forty-fifth window)
+
+The tool is not vendored here, so each window fetches it:
+
+```bash
+gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/autonomy.py?ref=main" \
+  --jq '.content' | base64 -d > /tmp/autonomy.py
+python3 /tmp/autonomy.py --days 7 --repos Ursa      # correct
+python3 /tmp/autonomy.py --days 7 --repos alexandrapaiz/Ursa   # fails
+```
+
+The second form prints `autonomy: could not look — alexandrapaiz/Ursa:
+gh pr list exited 1` and nothing else. Its `merges()` builds `-R
+{OWNER}/{repo}`, so an owner-qualified name becomes
+`alexandrapaiz/alexandrapaiz/Ursa`. The failure reads as a token or
+permission problem, which is the expensive misreading, because this
+seat's register already holds several real token findings on this host
+and the message is consistent with all of them. One call lost. Handed
+up as a help-text line rather than patched, because `tools/` is HQ's
+lane and a vendored copy of shared machinery drifts while continuing to
+answer.
+
+**The reading it produced, for the record.** 49 merges in 168 hours, 21
+seat-claimed, 0 on Actions, 28 unresolved, floor **42.9%**. Above the
+one-third ceiling, so the tool's own refusal condition fires and the
+number grades the instrument rather than the company. Fifth consecutive
+window at which that refusal has stood.
