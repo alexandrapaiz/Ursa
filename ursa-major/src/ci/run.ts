@@ -291,7 +291,7 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     // and neither asked whether it was large enough for a pairing.
     //
     // Through `windowWidth` and not off `diagnostics.commitsScanned`,
-    // since 2026-10-26: that field counts every commit reachable from any
+    // since 2026-10-25: that field counts every commit reachable from any
     // ref when the walk got no range, and this line renders its value to
     // a reader as the width of one merge window. `windowWidth` reads the
     // narrowed `rangeScanned`, which is `null` exactly when no window was

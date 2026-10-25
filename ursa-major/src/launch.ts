@@ -469,7 +469,7 @@ export function windowTooSmallForAPair(commitsScanned: number): boolean {
  * find anything.
  *
  * This is a named function and not an expression at the one call site
- * because of what the call site used to be. Until 2026-10-26 it read
+ * because of what the call site used to be. Until 2026-10-25 it read
  * `diagnostics.commitsScanned`, which is the width of the range when a
  * range was passed and every commit reachable from any ref when one was
  * not, and the quote was safe only because `src/ci/run.ts` happens always

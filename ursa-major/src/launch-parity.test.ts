@@ -786,7 +786,7 @@ describe('neither launch reads an empty window as an empty history', () => {
     // number to a reader, and they are written separately on purpose, so
     // the number itself is the thing that must come from one place.
     //
-    // RETITLED 2026-10-26. This was called `states the minimum once,
+    // RETITLED 2026-10-25. This was called `states the minimum once,
     // where both surfaces read it`, which is not what it checks: it
     // asserts the constant's value and the predicate's behaviour, and
     // nothing here renders a surface. Replacing every
@@ -841,7 +841,7 @@ describe('neither launch reads an empty window as an empty history', () => {
     expect(comment).toContain('- Commit window: `aaa1111..bbb2222`\n')
   })
 
-  // Drift 8's follow-on, 2026-10-26 in the ledger as
+  // Drift 8's follow-on, filed in the ledger on 2026-10-25 as
   // "`commitsScanned` counts two different populations and the type
   // cannot tell a reader which". The sentences above are correct today
   // and were correct for a reason outside the types: `src/ci/run.ts`
