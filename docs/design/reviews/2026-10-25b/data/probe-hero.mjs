@@ -1,4 +1,4 @@
-import { launch, VIEWPORTS } from '/tmp/epito-ursa-frontend-5l1SC0/docs/design/review-kit/lib/browser.mjs'
+import { launch, VIEWPORTS } from '../../../review-kit/lib/browser.mjs'
 const b = await launch()
 for (const [v,w,h] of VIEWPORTS) {
   const ctx = await b.newContext({viewport:{width:w,height:h},deviceScaleFactor:1})
