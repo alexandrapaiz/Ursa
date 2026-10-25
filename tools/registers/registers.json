@@ -38,6 +38,29 @@
       "heading": "^## ",
       "identifier": null,
       "why": "Deliberately excluded even though HQ's own lessons file names it as needing this. It is vendored from HQ and no Ursa seat appends to it, so every change to it arrives as a whole-file sync. An entry-keyed merge of a vendored sync would resolve by keeping both sides' entries, which is exactly how a stale local copy survives a sync that was supposed to replace it."
+    },
+    {
+      "path": "docs/agents/runner-facts.md",
+      "enabled": true,
+      "heading": "^## ",
+      "identifier": "^## ([0-9]+[a-z]?)\\.",
+      "why": "Added 2026-10-25 by the forty-second window, which measured the gap rather than inferring it. Merging this seat's own #418 and #422 in sequence conflicted on exactly the three registers this table did not declare, while the two it did declare merged at exit 0. This is one of the three, and it is the second-busiest file this seat appends to: 25 commits on main, a numbered section added by most windows.",
+      "why_identifier": "The sections are numbered and the number is allocated by reading the tail, which is precisely the case the identifier flag exists for. Window 41 wrote section 21 and window 42 wrote section 22 within an hour; two concurrent windows would both have written 22. With --heading alone that merges to exit 0 and publishes two sections answering to one citable number, which is how a cross-reference in another register silently stops resolving."
+    },
+    {
+      "path": "docs/agents/improvements.md",
+      "enabled": true,
+      "heading": "^## ",
+      "identifier": "^## (Week of [0-9-]+|Window [0-9]+)",
+      "why": "Added 2026-10-25 for the same measured reason as runner-facts above. HQ's console parses this file, so its format is a contract and a hand resolution in it is the kind that gets flattened by whoever is in a hurry.",
+      "why_identifier": "Two forms, both minted by reading the tail: the weekly roll-up and the per-window delta. Keyed on the week's date or the window's number so that two windows filing 'Window 42' are refused by name instead of both landing, which would give the console two deltas for one window."
+    },
+    {
+      "path": "docs/agents/merge-order.md",
+      "enabled": false,
+      "heading": "^## ",
+      "identifier": null,
+      "why": "Deliberately excluded, and declared here rather than left absent so the next window does not re-derive it. This file is not append-only: this charter's own instruction replaces it wholesale every run, so its headings are stable section names rather than entries and an entry-keyed merge would keep both windows' sections and publish two contradictory merge orders. It was the third of the three files that conflicted when #418 and #422 were merged in sequence, and it is the one where that conflict is correct. The resolution is always the same and needs no driver: take the later window's copy of the whole file, because the file is a measurement with a timestamp in its first line and the older one is simply stale."
     }
   ]
 }

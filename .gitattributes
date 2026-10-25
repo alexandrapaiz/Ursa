@@ -20,3 +20,13 @@ docs/decisions.md merge=register
 # is also the largest register this seat keeps, so it is the one a concurrent
 # append collides on most expensively.
 docs/agents/learning-log.md merge=register
+
+# The fourth and fifth, added 2026-10-25 after measuring the gap rather than
+# guessing at it: merging this seat's #418 and #422 in sequence conflicted on
+# exactly the three registers registers.json did not declare, and merged clean
+# on the two it did. These are two of those three. The third,
+# docs/agents/merge-order.md, is deliberately left out and declared `enabled:
+# false` by name, because this charter replaces it wholesale every run, so an
+# entry-keyed merge would publish two contradictory merge orders instead of one.
+docs/agents/runner-facts.md merge=register
+docs/agents/improvements.md merge=register
