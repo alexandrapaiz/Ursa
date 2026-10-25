@@ -98,6 +98,7 @@
 
 import { isForgotten, loadConsent } from './consent'
 import { checkRecord, formatViolations, type Violation } from './invariants'
+import type { PairFinderDiagnostics } from './pairfinder'
 import type { OutcomeRecord, PairingBounds } from './types'
 
 /**
@@ -429,10 +430,16 @@ export const PAIR_MINIMUM_COMMITS = 2
 /**
  * Could this window have produced a pairing at all?
  *
- * Takes the commit count the walk itself scanned
- * (`PairFinderDiagnostics.commitsScanned`), which is the number of commits
- * in the range the caller handed it, so the answer is about the window the
- * resolver actually read rather than about the range string it was given.
+ * Takes the commit count the walk itself scanned, so the answer is about
+ * the history the resolver actually read rather than about the range
+ * string it was given. Which count that is depends on the surface, and
+ * both are right for their own claim: `ursa ci` passes
+ * `PairFinderDiagnostics.rangeScanned`, the width of one merge window,
+ * because its sentence is about that merge; `ursa run` passes
+ * `commitsScanned`, every commit reachable from any ref, because its
+ * sentence is about the whole project it was pointed at. Those two
+ * populations shared one field name until 2026-10-25, which is the
+ * ledger entry `commitsScanned` counts two different populations.
  *
  * This is drift 8. Both launches held this count and neither asked this
  * question, so both reported an empty window the same way whether the
@@ -449,4 +456,34 @@ export const PAIR_MINIMUM_COMMITS = 2
  */
 export function windowTooSmallForAPair(commitsScanned: number): boolean {
   return commitsScanned < PAIR_MINIMUM_COMMITS
+}
+
+/**
+ * The commit count a merge comment may quote as its window width, taken
+ * off the walk that produced it.
+ *
+ * `undefined` when the walk read no window, which is the renderer's
+ * omitted case: `src/ci/comment.ts` then prints the range alone and keeps
+ * the unconditional zero-state sentence, because a caller with no window
+ * cannot tell a window that found nothing from a window too small to
+ * find anything.
+ *
+ * This is a named function and not an expression at the one call site
+ * because of what the call site used to be. Until 2026-10-26 it read
+ * `diagnostics.commitsScanned`, which is the width of the range when a
+ * range was passed and every commit reachable from any ref when one was
+ * not, and the quote was safe only because `src/ci/run.ts` happens always
+ * to pass `range: window.range` (src/ci/window.ts types it as a
+ * non-optional string). A second caller assembling the same context from
+ * a rangeless walk would have labelled roughly 2,800 commits as one merge
+ * window and switched off `windowTooSmallForAPair` for every window it
+ * ever rendered. Pinning that to a function gives the narrowing a test of
+ * its own rather than a paragraph; the ledger entry is "`commitsScanned`
+ * counts two different populations and the type cannot tell a reader
+ * which" (2026-10-25).
+ */
+export function windowWidth(
+  diagnostics: Pick<PairFinderDiagnostics, 'rangeScanned'>,
+): number | undefined {
+  return diagnostics.rangeScanned ?? undefined
 }

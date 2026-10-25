@@ -58,7 +58,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
-import { PAIR_MINIMUM_COMMITS, clearsSizeFloor, keepRecord, newDroppedUnits, pairRefusals, windowTooSmallForAPair } from './launch'
+import { PAIR_MINIMUM_COMMITS, clearsSizeFloor, keepRecord, newDroppedUnits, pairRefusals, windowTooSmallForAPair, windowWidth } from './launch'
 import { findCommitPairsWithDiagnostics, resolvePairingBounds } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
@@ -781,10 +781,22 @@ describe('neither launch reads an empty window as an empty history', () => {
     expect(localOutput).toContain('your corrections are not on this branch')
   })
 
-  it('states the minimum once, where both surfaces read it', () => {
+  it('the minimum has the value the two sentences above quote, and the predicate reads it', () => {
     // The unit test under the four above. Both sentences assert this
     // number to a reader, and they are written separately on purpose, so
     // the number itself is the thing that must come from one place.
+    //
+    // RETITLED 2026-10-26. This was called `states the minimum once,
+    // where both surfaces read it`, which is not what it checks: it
+    // asserts the constant's value and the predicate's behaviour, and
+    // nothing here renders a surface. Replacing every
+    // `${PAIR_MINIMUM_COMMITS}` in src/ci/comment.ts and src/bin/ursa.ts
+    // with a literal `2` leaves this whole block green, measured twice —
+    // by the run that wrote it and again by the run that filed the fix.
+    // The sharing is checked in src/pair-minimum-shared.test.ts, which
+    // substitutes the constant and fails on exactly that edit. The title
+    // is narrowed rather than the test deleted, because the value and the
+    // predicate are still worth pinning; what was wrong was the claim.
     expect(PAIR_MINIMUM_COMMITS).toBe(2)
     expect(windowTooSmallForAPair(0)).toBe(true)
     expect(windowTooSmallForAPair(1)).toBe(true)
@@ -827,6 +839,85 @@ describe('neither launch reads an empty window as an empty history', () => {
     expect(comment).toContain('no commit here carried an agent marker that a later human commit then edited')
     expect(comment).not.toContain('a pairing takes 2 commits')
     expect(comment).toContain('- Commit window: `aaa1111..bbb2222`\n')
+  })
+
+  // Drift 8's follow-on, 2026-10-26 in the ledger as
+  // "`commitsScanned` counts two different populations and the type
+  // cannot tell a reader which". The sentences above are correct today
+  // and were correct for a reason outside the types: `src/ci/run.ts`
+  // happens always to pass `range: window.range`. The two tests below
+  // pin the population apart so that stops being a coincidence.
+  it('a walk with no range reports no window width, and the whole history separately', () => {
+    // The two fields on one walk of one repository, so the numbers are
+    // comparable rather than taken from two fixtures. `unpairedFixture`
+    // is a three-commit history; walked with no range, the unfiltered
+    // count is all three and no window was asked for.
+    const repo = unpairedFixture()
+    const unranged = findCommitPairsWithDiagnostics(repo, {}).diagnostics
+    expect(unranged.commitsScanned).toBe(3)
+    expect(unranged.rangeScanned).toBeNull()
+
+    // The same walk handed one commit's worth of range: now both fields
+    // are populated and they disagree, which is the whole point. The
+    // wider one is still the whole history, so a caller that quoted it
+    // as a window width would have printed 3 for a window of 1.
+    const head = git(repo, ['rev-parse', 'HEAD'])
+    const base = git(repo, ['rev-parse', 'HEAD~1'])
+    const ranged = findCommitPairsWithDiagnostics(repo, { range: `${base}..${head}` }).diagnostics
+    expect(ranged.rangeScanned).toBe(1)
+    expect(ranged.commitsScanned).toBe(1)
+    // And on a range narrower than the history, the ranged field is the
+    // range. Asserted on a second range so the equality above is not read
+    // as the two fields being the same field under another name.
+    const wide = findCommitPairsWithDiagnostics(repo, {
+      range: `${git(repo, ['rev-parse', 'HEAD~2'])}..${head}`,
+    }).diagnostics
+    expect(wide.rangeScanned).toBe(2)
+  })
+
+  it('the CI launch quotes the window width, so a rangeless walk prints no count at all', async () => {
+    // Two assertions in one test because they are one claim: the number
+    // the reader sees is the ranged field, and when that field is null
+    // the renderer says nothing rather than guessing.
+    //
+    // First, the live path. `editedFixture` is three commits and the
+    // window is one, so the two populations differ by 2 and only one of
+    // them is a true thing to print.
+    const repo = editedFixture()
+    const { ciComment } = await bothLaunches(repo, 10, [], {}, ONE_COMMIT)
+    expect(ciComment).toContain('1 commit in it')
+    expect(ciComment).not.toContain('3 commits in it')
+
+    // Second, the function that feeds it, called exactly as
+    // src/ci/run.ts calls it. A rangeless walk's `rangeScanned` is null,
+    // `windowWidth` turns that into the renderer's omitted case, and the
+    // omitted case prints the range alone and keeps the unconditional
+    // sentence — which is honest, because a caller with no window cannot
+    // tell a window that found nothing from one too small to find
+    // anything.
+    const unranged = findCommitPairsWithDiagnostics(repo, {}).diagnostics
+    expect(windowWidth(unranged)).toBeUndefined()
+    expect(windowWidth({ rangeScanned: 7 })).toBe(7)
+    // Zero is a width and not an absence: an empty range is a real
+    // window that holds no commits, and the sentence for it is the
+    // too-small one rather than silence.
+    expect(windowWidth({ rangeScanned: 0 })).toBe(0)
+    const fields = runCommentFields([], [], {
+      unitsAdded: 0, unitsReinforced: 0, mode: 'ci-no-model', reason: 'test',
+    })
+    const comment = renderRunComment(fields, {
+      prNumber: 9, repo: 'o/r', range: 'aaa1111..bbb2222',
+      windowNote: 'merge style undetermined', declarationBasis: 'undeclared',
+      recordsPath: '.ursa/records', runUrl: null,
+      commitsInWindow: windowWidth(unranged),
+    })
+    expect(comment).toContain('- Commit window: `aaa1111..bbb2222`\n')
+    expect(comment).not.toContain('commits in it')
+    // The number that would have been printed had the wide field been
+    // quoted instead, named here so the test records what it is guarding
+    // against rather than only that the output is short.
+    expect(unranged.commitsScanned).toBe(3)
+    expect(comment).not.toContain('3 commits in it')
   })
 })
 
