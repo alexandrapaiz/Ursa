@@ -10228,3 +10228,32 @@ search for ChatGPT memory management controls, whose results summarised
 read in full; and two refused fetches, `help.openai.com/en/articles/8590148-memory-in-chatgpt`
 and `openai.com/index/memory-and-new-controls-for-chatgpt/`, both HTTP 403,
 which contributed nothing.
+
+### 2026-10-25 — A seat's own merge event should not re-wake that same seat
+- Trigger: Incident 20 (`docs/agents/incidents.md`). The market seat
+  opened ten pull requests on 2026-10-24, five of them (#365, #369,
+  #373, #381, #408) existing only to re-confirm the prior run's own
+  "nothing to ship" finding, because the event bus delivers a merge
+  event back to the seat whose own PR just merged, and that seat's
+  charter opens a new run to read it. #410, the tenth run, named the
+  pattern explicitly for the second time and reported, correctly, that
+  it is not this seat's call to silence its own trigger wiring.
+- What: the event bus (or each `agent-*.yml` workflow's trigger
+  condition) should not fire a seat on a merge event whose own PR
+  author is that same seat, at least when the merging PR's diff
+  touches none of that seat's open work. This is a wiring fix, not a
+  charter change — no charter asks a seat to re-trigger itself, and
+  the market seat's own judgment at each of the ten runs was sound.
+  Likely portable to every seat in every company on the same event
+  bus (docs/standards/pm.md §17), since the shape (a seat's merge
+  both closes a thread and emits a trigger) is generic, not
+  market-specific.
+- First step: the exo-centralizer or HQ distribution reproduces the
+  chain on one company's event log (ten market runs in one day,
+  traced to #357/#363) and proposes the dedup or cooldown condition
+  at the bus or workflow level, whichever layer actually owns the
+  trigger-to-run mapping.
+- Cost: $0 engineering; the cost today is CI minutes and model turns,
+  roughly ten runs' worth for one day's actual content that landed
+  twice.
+- Status: proposed

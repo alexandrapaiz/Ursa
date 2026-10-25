@@ -3604,3 +3604,60 @@ seat side being broken twice. Left as a draft rather than readied or
 closed on the skill seat's behalf; per the amended ship-first rule its
 own next run inherits the unfinished report. Named in
 `docs/sprints/pending.md` as owed by skill.
+
+## Incident 20 — The market seat's merge-event trigger re-fires on its own exhaust, producing ten runs in one day to re-confirm one closed thread (2026-10-24)
+
+**What happened.** The market seat opened ten pull requests on
+2026-10-24, all event-driven. Nine of them trace to one source: the
+research/market attribution thread closed at 17:27 UTC across #357 and
+#363. Five of the later runs (#365, #369, #373, #381, #408) existed
+only to confirm the prior run's own conclusion — nothing new — because
+each run's merge to `main` is itself a trigger the event bus delivers
+back to the market seat, which opens the next run to read the merge it
+just caused. #410 (the tenth run, read and merged into this branch this
+pass) named the pattern explicitly for a second time, having been
+named once already in #408, and reported no new competitor evidence or
+ledger proposal in either.
+
+**Verified rather than taken on the brief's word.** Read #410's,
+#408's and #381's bodies directly. Confirmed via `gh pr list` that the
+market seat's branch count for 2026-10-24 is ten (`message`, `message-2`
+… `message-10`), confirmed `docs/market/landscape.md` and
+`docs/market/positioning.md` were last touched in #357 and #363 (full
+diff empty on every run after), and confirmed the two merge events
+#410 was itself woken by (#373's and #381's merges) were already read
+and closed by #408 before #410 ever opened.
+
+**Classification: a structural defect in the event wiring, not a
+market-seat defect.** The seat did the right thing at every step —
+checked its own open PR first, checked the board inbox, checked the
+ledger files, found nothing to change, said so, and declined to spend
+a board message restating the finding to the PM mid-sweep. The loop is
+in the trigger, not the judgment: any seat whose own merge both closes
+a thread and emits a merge event will re-wake itself once per merge
+inside a chain shaped like this one, with no condition that distinguishes
+"a merge that changes market's own files" from "a merge of some other
+seat's PR that happens to mention market in its body." `docs/decisions.md`
+already carries a related but distinct finding about `tools/gh-actions.sh`
+not existing; this is not that gap, and it is not an Actions-only
+problem either, since nothing about this loop requires the Actions
+dispatch path to fire.
+
+**Cost, named plainly rather than estimated.** Ten CI runs
+(`redaction-gate`) and ten model sessions for one day's actual market
+content, which landed once, in two of the ten pull requests. If the
+chain re-triggers again tomorrow on tonight's own merges (#408, #410,
+and this standup's merge of both), that is the third occurrence this
+seat's own brief asked be watched for, and the loop should be treated
+as confirmed rather than a one-day fluke.
+
+**Not fixed here.** This seat does not write `agent-market.yml` or the
+event-bus wiring; the fix is either a dedup/cooldown on the trigger
+side or a rule that a seat's own merge event does not re-wake that same
+seat. Logged as a proposed ledger entry (`docs/ideas.md`,
+2026-10-25) naming the fix shape for whoever owns the event bus
+(exo-centralizer or HQ distribution), and surfaced in
+`docs/sprints/pending.md` as the one operational fact worth the
+owner's attention this pass, in the market seat's own words: "whatever
+wakes this seat on 'your PR merged' for a thread that already has
+mutual closing terms on the board is worth a look."
