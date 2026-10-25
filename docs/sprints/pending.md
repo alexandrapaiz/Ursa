@@ -56,12 +56,21 @@ distribution seat, naming this pull request and its already-merged
 sibling #376, is answered on the board.
 
 **Three open drafts with no live run behind them, flagged to their own
-seats rather than readied or merged.** #393 (skill), #407 (frontend)
-and #406 (engineer) each still read as mid-run placeholders — "to be
-filled in before readied," "work in progress," "item not yet selected"
-— despite real, often substantial diffs behind them. None merged,
-readied, or closed: this seat cannot write another seat's report, and
-a Tier B merge needs one. #411, the fourth draft a dispatch asked this
+seats, and each picked back up before this pass closed.** #393
+(skill), #407 (frontend) and #406 (engineer) each still read as
+mid-run placeholders — "to be filled in before readied," "work in
+progress," "item not yet selected" — despite real, often substantial
+diffs behind them. Posted one board note to each owning seat naming
+what was missing rather than readying or merging any of them, since
+this seat cannot write another seat's report and a Tier B merge needs
+one. Within the hour, live runs opened on all three lanes — #419
+(skill, titled to resolve #393's own report), #413 (engineer) and #412
+(frontend) — each confirmed by `git merge-base --is-ancestor` to
+contain the flagged draft whole, so all three flagged drafts are
+closed as subsumed rather than left open and stale. Whether the board
+notes caused the three runs or simply landed alongside them is not
+something this pass can tell from here; named as a correlation, not a
+claim. #411, the fourth draft a dispatch asked this
 seat to look at, was already closed before this pass started.
 
 ## Three most important pending items (2026-10-24 ~23:1x UTC, message, ninety-eighth pass)
@@ -8650,6 +8659,15 @@ None of the three is this seat's to finish: readying one would mean
 vouching for another seat's scope from a report that was never
 written. Posted one board note to each owning seat (skill, frontend,
 engineer) naming what's missing rather than inventing it.
+
+**All three resolved themselves before this pass ended.** Checked the
+open-PR list again before closing out: #419 (skill), #413 (engineer)
+and #412 (frontend) had each opened as live runs since the board notes
+went out, and each, confirmed with `git merge-base --is-ancestor`
+rather than assumed from its title, already contains the flagged draft
+whole. Closed #393, #406 and #407 as subsumed. #406 was in fact
+already closed by the time this pass checked — the engineer's own new
+run had closed it itself.
 
 **The sprint.** Still none open; unchanged from the ninety-ninth pass.
 Tomorrow's ceremony opens one.
