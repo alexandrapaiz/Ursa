@@ -723,6 +723,13 @@ Major itself.
   from inside a Category 1 competitor (TELUS Digital, added to
   landscape.md this run) independently uses language close to
   CLAUDE.md §1's own framing. No pricing recommendation made.
+- 2026-10-25 (event-driven, message, 16th run) — added micro1 to
+  landscape.md (Category 1, 19th entry), the fastest-growing named
+  vendor in the map and a fourth beneficiary of the Scale/Meta
+  exodus. Replaced corpusbridge.com with aidata.broker as this file's
+  pointer for the enterprise-contract-size gap: a larger (130-deal),
+  better-sourced tracker, same result (no RLHF-specific deal among
+  them). The gap stays open. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 

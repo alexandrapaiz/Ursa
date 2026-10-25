@@ -371,6 +371,43 @@ opinion mechanism CLAUDE.md §1 contrasts the outcome record against,
 at the largest labor scale found in this file yet. Last observed
 2026-10-25: [TELUS Digital: Data for AI Training](https://www.telusdigital.com/solutions/data-for-ai-training/data-validation-services), [TELUS Digital named Leader in 2026 NelsonHall NEAT Evaluation](https://www.telusdigital.com/about/newsroom/telus-digital-named-leader-in-2026-nelsonhall-neat-evaluation-for-ai-enablement-services).
 
+### micro1
+
+What it is: a human-data vendor supplying vetted domain experts (senior
+engineers, doctors, lawyers, professors) to frontier labs for training
+and evaluation, pivoted from an AI-recruiting business about a year
+before this entry. New entry, found via this run's funding-news search
+rather than a vendor-name sweep, the same method gap the 2026-10-25
+TELUS Digital entry named. Who it serves: Microsoft, Amazon, robotics
+firm 1X, and, per TechCrunch's 2025-09-12 report, OpenAI and Google
+before they distanced themselves from Scale AI post-Meta — making this
+the fourth named vendor in this map (after Mercor, Surge, Handshake) to
+disclose picking up business from that same exodus. Pricing: not
+public; the company itself has raised a $35M Series A (2025-09-12,
+$500M valuation) and a $100M+ Series B (2026-09-23, $4B valuation, an
+eightfold jump in twelve months). Revenue trajectory, three
+independently dated sources: $7M annualized at the start of 2025, $50M
+by September 2025, $500M by summer 2026, and a $1B annual run rate
+reported 2026-10-13 — roughly 140x in under two years, the fastest
+disclosed growth curve of any entry in this category. Headcount: ~180
+staff across 14+ countries as of the $1B report. Strengths: the growth
+rate itself, and a product build-out (Data Engine for expert-produced
+datasets, an "Intelligence Platform" whose "Realm" component sells RL
+environments where "experts recreate real-world scenarios") that makes
+this the third independently-funded vendor pivoting into constructed
+task-and-verifier environments, after Mercor's Deeptune acquisition and
+Halluminate (both tracked above) — confirming that sub-category is now
+a multi-vendor pattern, not a pair. Weakness against Ursa: the same
+structural gap as every Category 1 entry (solicited expert labor paid
+to grade or generate on request) plus the same caveat already applied
+to Mercor's and Halluminate's environments — a constructed scenario
+with a built-in verifier is not a real deliverable joined backward to
+its own generation history. Last observed 2026-10-25:
+[TechCrunch: micro1, a competitor to Scale AI, raises funds at $500M valuation](https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/),
+[Dealroom: micro1 raises $100M at $4B valuation for AI training data](https://dealroom.co/news/155583-micro1-raises-100m-at-4b-valuation-for-ai-training-data/),
+[Dealroom: micro1 passes a $1B run rate with about 180 staff](https://dealroom.co/news/161913-micro1-passes-a-1b-run-rate-with-about-180-staff-three-years-after-nearl/),
+[micro1.ai: Intelligence / Realm](https://www.micro1.ai/).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -973,3 +1010,16 @@ single attempt is gaining traction. Last observed 2026-10-25:
   worth naming as a gap in how this file finds new entries (byline and
   job-posting searches surfaced it; keyword sweeps of "RLHF vendor" did
   not).
+- 2026-10-25 (message, 16th run) — added micro1 (Category 1, 19th
+  entry), found via a funding-news search rather than a vendor-name
+  sweep, same method gap the 15th run named. The fastest disclosed
+  growth curve in this category ($7M to $1B annualized in under two
+  years), a fourth named beneficiary of the Scale/Meta exodus, and a
+  third independently-funded vendor (after Mercor's Deeptune and
+  Halluminate) building constructed task-and-verifier environments
+  rather than staying in solicited labeling. Also checked
+  aidata.broker, a 130-deal disclosed-licensing tracker with a stated
+  methodology, for an RLHF-specific contract size; it has none, same
+  result as corpusbridge.com (15th run), but it is the larger and
+  better-sourced of the two trackers, so it replaces corpusbridge.com
+  as this file's pointer for the next run that needs it.
