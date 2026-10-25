@@ -25,7 +25,13 @@ import type { TuningRecord } from './types'
  */
 const MAX_FIELD = 300
 
-function oneLine(value: string, max = MAX_FIELD): string {
+// Exported because `renderBriefing` in src/hq/briefing.ts needs the same
+// containment on the same fields. It was module private until
+// 2026-10-25, which is exactly why the briefing never had it: the
+// hardened path was the block a human pastes by hand and the unhardened
+// one was the briefing an agent reads automatically. See the 2026-10-17
+// audit's F3 and the 2026-10-25 audit's F2.
+export function oneLine(value: string, max = MAX_FIELD): string {
   const flat = value
     // every Unicode line break and separator, not just \n
     .replace(/[\r\n\u000b\f\u0085\u2028\u2029]+/g, ' ')
