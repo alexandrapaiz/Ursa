@@ -6758,3 +6758,89 @@ own style still gets refused. The fourth attempt was accepted and
 **delivered 1,413 of 1,590 characters**, so the effective wake cut is
 below the 1,500 the response itself reports as `wake_limit`. Budget
 about 1,400.
+
+## 2026-10-25, window 42 (message: a note from `Ursa/pm`, 03:06:40 UTC) — the hold my own branch shape was buying, and a register whose driver had been waiting on a repair that was already done
+
+**The trigger, and it asked for nothing.** The PM's note thanked this
+seat for two things, confirmed it had fetched the whole message rather
+than the wake's half, and restated that the live tip waits on the owner
+because it carries both charter files. 566 characters, so under the cut
+and intact — the check said so rather than being assumed. Nothing in it
+was a question. Re-derived every state claim in it before acting: the
+tip is `OPEN`, not a draft, unlabelled, `MERGEABLE`/`CLEAN`, and the
+closes it mentions hold. The PM was right on all counts.
+
+**So the finding had to come from asking why the right answer kept
+arriving.** Seven correct refusals in two days, all on the same ground.
+When a sibling seat is right seven times about your artifact, the defect
+is the artifact's shape and not the refusal. §10's merge checklist reads
+`gh pr diff --name-only` for a Tier C **path**, which makes the
+predicate branch-level: two charter files out of eight made 11,315 lines
+of register work owner-only. Measured 81.4% of the chain held by 18.6%
+of it, with every register frozen on `main` at 2026-10-18.
+
+**What I had never computed.** The scope clause partitions a branch by
+*whose file it is*. I had been running that partition faithfully for
+four windows. The gate partitions by *who can merge it*. Those are
+different partitions and I only ever had the first. Shipped the second
+as the branch itself rather than as a paragraph about it, and left the
+charter half standing exactly where the PM had placed it, because it is
+named in a report to the owner and the rule for that case is to move the
+pointer and not the artifact.
+
+**The half I am not allowed to fix, and did not pretend to.** §10 is
+path-scoped and §21 is content-scoped, nineteen days newer, an owner
+directive, and explicit that charters are included. Neither charter file
+in the tip changes any seat's authority. I checked HQ's live copy rather
+than Ursa's vendored sync, found the contradiction in the authoritative
+file, and then found HQ's own register had it twice already — once
+measured at epitome on exactly this shape. §10 is owner-only to change
+and the file is HQ's, so it went to the centralizer. **The thing I had
+to resist was telling the PM it had been wrong.** Its interim ruling is
+in HQ's own lesson: cite the path you read, not the intent you inferred.
+A seat that follows the standing interim rule is not the defect.
+
+**The second finding was free, and it came from reading a register's own
+stated condition instead of its verdict.** `registers.json` has carried
+`learning-log.md` as `enabled: false` since it was written, with the
+reason spelled out: the file held `## Compounding ratio` twice, the
+merger refuses at parse on a duplicate heading, *"the file is the exo
+seat's, so the repair is theirs; this flips to true once the heading is
+unique."* Checked the condition: 40 headings, 40 distinct. The repair had
+already happened, in some later window that renamed the heading without
+knowing it was unblocking anything, and the table had gone on reporting
+the block for days. Flipped it, wired the attribute, proved it on a
+synthetic two-sided append over the real 6,760-line file — plain git
+gives two markers, the driver exits 0 and keeps both entries — and all
+ten of the driver's existing tests still pass.
+
+**The lesson in that is bigger than the flag.** A register entry that
+records a blocker *and the condition for clearing it* is doing something
+most entries do not: it is making itself falsifiable. Nothing re-read
+it. So when an entry states its own exit condition, the condition is a
+**check to run**, not prose to carry forward, and the cheapest finding
+available to any window is to run the conditions its own registers
+already wrote down.
+
+**And I corrected my predecessor, on text thirty minutes old.** §21's
+heading claims a half-registered driver is a third exit status. Measured:
+it is exit 1, the same as a missing driver, with the same conflicted-file
+list; the three states differ by *stderr* and by *tree*, not by status.
+Worse, the absent case — which is every seat's clone on this host — is
+the silent one. The shortcut I reached for first, `git -c
+merge.register.driver=`, reproduces the half-install rather than the
+absence, so the instrument I would have used to measure the default
+state was measuring a different state. That is this register's own
+recurring shape: a replacement instrument built in a hurry is itself
+unvalidated, and the first thing to check is whether the quantity it
+prints is the quantity its caption claims.
+
+**What I owed and discharged.** The PM said at 02:47:22 that it could
+not settle whether the driver fires on a real overlapping hunk because
+no open pull request gave it one. Window 41 had settled it with a
+control matrix twenty minutes earlier, inside the pull request the PM
+can review and cannot merge — so the answer existed and was unreachable
+in the way that matters, which is the same gate this window is about.
+This window gave it the live case as well: its own branch and the PM's
+share a base and both append to the incidents register, and the driver
+turns a real `CONFLICT (content)` into exit 0 in both orders.

@@ -19,10 +19,11 @@
     },
     {
       "path": "docs/agents/learning-log.md",
-      "enabled": false,
+      "enabled": true,
       "heading": "^## ",
       "identifier": null,
-      "why": "Blocked by the file, not by this change, and this entry exists so the block is visible rather than rediscovered. The log holds `## Compounding ratio` twice, so the merger refuses at parse with `ours already contains '## Compounding ratio' twice; fix that side first` before it reaches any merge question. That refusal is correct: two entries under one heading cannot be told apart from a disagreement. The file is the exo seat's, so the repair is theirs; this flips to true once the heading is unique."
+      "why": "Two seats' work lands in it and it is the largest register this seat keeps (6,760 lines), so it is the file a split or a concurrent append collides on most expensively. Enabled 2026-10-25 by the forty-second window after measuring that the blocker this entry recorded is gone: the file held '## Compounding ratio' twice when this table was written, and today all 40 of its '## ' headings are unique, so the merger no longer refuses at parse. The condition this entry set for flipping it was 'once the heading is unique', and that is the condition that was checked rather than the claim being taken forward.",
+      "why_identifier": "Deliberately null. The entries are dated window headings with a free-text trigger in parentheses, so there is no short stable name to key on, and heading identity is the whole key. Verified on a synthetic two-sided append over the real 6,760-line file: two different new window entries at the tail merge at exit 0 keeping both, where plain git reports CONFLICT (content)."
     },
     {
       "path": "docs/ideas.md",

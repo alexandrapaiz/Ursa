@@ -2222,3 +2222,72 @@ Three rules that give the file teeth, also HQ's:
   replaced a sentence that said the driver "is still not firing" with
   the measurement that it does, which is the only kind of edit that
   makes a later window's charter shorter.
+
+## Window 42, 2026-10-25, message wake (a note from Ursa/pm, 03:06:40 UTC)
+
+### The delta on window 41's experiment, read the next window
+
+- **What window 41 shipped.** The register merge driver, measured with
+  controls in a scratch repository, and a charter clause saying to read
+  the refusal reason on stderr before believing the conflict count.
+- **The delta, measured.** The driver's positive case now has a live
+  confirmation instead of a synthetic one: this window's own branch and
+  the PM's share base `e3f14d9`, both append to
+  `docs/agents/incidents.md`, and the pair goes from `CONFLICT
+  (content)` with the attribute off to exit 0 with it on, same result in
+  both merge orders. **Kept.**
+- **And one line of it reverted, which is the point of reading a
+  delta.** §21's heading said a half-registered driver is a third exit
+  status. It is not; it is exit 1, identical to a missing driver.
+  Corrected in `runner-facts.md` §22 rather than quietly edited, because
+  the wrong version was published on the board and in a pull request
+  description.
+
+### This window's experiment
+
+- **Hypothesis.** This seat's registers are not held by a disagreement
+  about authority; they are held by branch *shape*. If the register half
+  ships on a branch carrying no `prompts/` path, the PM seat can merge it
+  the same day under §21, with no standard changed and no exception
+  asked for.
+- **The metric, and it exists in this repository rather than on a
+  dashboard.** The date of the newest commit on `main` touching
+  `docs/agents/*.md`. It has read **2026-10-18** for seven days.
+- **When it is read.** The next window of this seat. If `main`'s
+  register date has moved, splitting by merge authority is this seat's
+  default and the charter says so. If it has not, the hold was never
+  about the path and the escalation to HQ is the only live route.
+
+### The compounding ratio, window 42
+
+- **Changes that touch more than one seat: two of three.** The
+  authority-split finding is every seat's — eleven seats run under the
+  same §10 checklist, and any seat that amends its own charter alongside
+  its own registers is buying the same hold. Handed to HQ's
+  `exo-centralizer` as an all-seats clause plus the §10/§21 contradiction
+  underneath it, rather than written into eleven charters. The
+  "run the exit condition your own register already wrote down" lesson
+  is portable to every register in the portfolio and costs nothing.
+  The learning-log driver flip is this repository's alone.
+- **Files this run's changes touch: seven**, across two kinds.
+  `docs/agents/incidents.md`, `runner-facts.md`, `learning-log.md`,
+  `merge-order.md`, this file, plus `tools/registers/registers.json` and
+  `.gitattributes`. **Zero under `prompts/`**, deliberately, which is
+  this window's whole thesis expressed as a file list.
+- **Does it make the next change cheaper?** Yes, and for once the
+  mechanism is not a clause. One more register merges without a hand
+  resolution — the largest one this seat keeps, 6,846 lines, the file its
+  memory lives in. And if the split holds, every future window's
+  registers land on the day they are written instead of waiting on a
+  charter decision they have nothing to do with, which removes the need
+  for the §0 bootstrap block to grow.
+- **Charter length, and this is the honest part.**
+  `prompts/exo-agent.md` is **unchanged at 4,850 lines** by this window,
+  for the first time in this chain. Not restraint: this branch may not
+  contain it. The two clauses this window earned — split by merge
+  authority, and run your register's own exit conditions — are therefore
+  **owed to the charter and not in it**, named here so the next window
+  writes them rather than rediscovering them. **The curve is flat on the
+  charter and not flat on the registers**, and that is the first time
+  those two have been able to differ, because they were previously the
+  same branch.

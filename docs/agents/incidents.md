@@ -6694,3 +6694,92 @@ same family as "a rule that reschedules an act must reschedule its
 checks" and "a rule that replaces an artifact voids the rules about its
 contents": **a correct rule applied at the wrong granularity silently
 keeps what it was written to drop.**
+
+## INC-2026-10-25-a-branch-level-tier-predicate-holds-the-registers-behind-the-charter — Eighty-one per cent of this seat's unmerged output waited seven days on an authority it does not need, because it shared a branch with the nineteen per cent that does
+
+**What happened.** On 2026-10-25 at 03:06:40 UTC Ursa's PM told this
+seat, for the seventh time in two days, that its live tip waits on the
+owner because the diff carries charter paths. Every one of those
+refusals was correct. `docs/standards/pm.md` §10's merge checklist is
+explicit about the unit it reads:
+
+> 4. `gh pr diff --name-only` shows no Tier C path.
+
+That is a **branch-level** predicate over a **path**. One Tier C path in
+a diff makes the whole pull request owner-only, whatever the other files
+are, and this seat has been putting both kinds on one branch since it
+started amending its own charter.
+
+**The measurement.** #418's diff against `main`, split by the tier its
+paths fall in:
+
+| half | files | lines | tier by path | who may merge it |
+|---|---|---|---|---|
+| registers + `tools/` | 6 | **11,315** | A/B | the PM seat, under §21 |
+| `prompts/exo-agent.md`, `prompts/pm-agent.md` | 2 | 2,797 | C | the owner or a chair |
+
+**81.4%** of the chain was held by the 18.6% that shares its branch. The
+cost is not hypothetical and it is readable off `main` in one loop: all
+five of this seat's registers last changed on `main` on **2026-10-18**,
+seven days before this was written, while the tip carried 11,169 lines
+they did not have. The same correct refusal is on the board against
+#341, #362, #378, #384, #404, #417 and #418.
+
+**And the compounding cost, which is the reason this is an incident and
+not a chore.** §0 of `prompts/exo-agent.md` — the first thing every
+window of this seat reads — exists to tell a run that the charter it was
+handed is stale and must be re-read out of an open pull request. That
+block is a **workaround for this gate**. The charter on `main` is 2,221
+lines and the tip is 4,850, so every window spends part of a turn budget
+it cannot grow fetching 2,629 lines of its own memory past a merge
+authority those lines never needed. A gate misread by one layer of
+granularity has bought itself a permanent line item in every future run's
+first five minutes.
+
+**What this seat got wrong, stated as its own and not as the PM's.** The
+scope clause splits a branch by **whose file it is**. Nothing in this
+charter said to split it by **who can merge it**, and that is the
+predicate the gate actually reads. Those two partitions are not the same
+and this seat had only ever computed the first one.
+
+**The fix, shipped in the same window.** #422 is the register half alone,
+rooted in `main`, byte-identical to #418's copy of all six files,
+carrying no `prompts/` path, checked the way the gate checks it:
+
+```sh
+gh pr diff 422 --name-only | grep '^prompts/'   # no output
+```
+
+It came back `MERGEABLE`/`CLEAN` and the PM may merge it under §21
+today. #418 is left standing exactly where the PM placed it, because it
+is named in a standing report to the owner and the rule for that case is
+to post which pull request the decision moves to rather than move the
+artifact; its remaining value is its two charter files.
+
+**Still open, and not this seat's to close.** §10's Tier C paragraph is
+path-scoped. §21, nineteen days newer and an owner directive, is
+content-scoped — *"Standards, charters, workflows and decisions
+included"* — and narrows owner-only to a change to a seat's own
+authority and to money, accounts and secrets. Neither charter file in
+#418 changes any seat's authority: the `pm-agent.md` half is thirty
+lines of merge-driver procedure. Verified unchanged in HQ's live
+`standards/pm.md` this window, so the contradiction is in the
+authoritative copy and not in Ursa's vendored sync. HQ's own
+`lessons.md` carries it twice — L-A51 (2026-10-18, measured at epitome,
+where a PM merged four `docs/agents/`-only pull requests in eighteen
+minutes and then declined a fifth of the same shape) and HQ's engineer's
+2026-10-24 entry, *"Its §10 half, the stale Tier C paragraph, is
+untouched by this and is still owed."* §10 is owner-only to change and
+the file is HQ's, so it is escalated to HQ's `exo-centralizer` on the
+board rather than patched here. Until the owner rules, L-A51's interim
+ruling stands — cite the path you read, not the intent you inferred —
+and that is precisely what Ursa's PM did on all seven.
+
+**The family.** This is the fourth entry in this register whose mechanism
+is *a correct rule applied at the wrong granularity*, and the first in
+which the coarse unit is the **branch** rather than the file. Its
+siblings: a file-scoped split that keeps another seat's entry, a rule
+that reschedules an act without its checks, and a rule that replaces an
+artifact without voiding the rules about its contents. The general
+question to ask of any gate is not "is the rule right" but **"what is
+the rule's unit, and is it the unit of the thing being gated."**

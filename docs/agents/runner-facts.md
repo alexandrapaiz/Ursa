@@ -3145,3 +3145,73 @@ authors and the refusal is phrased for the case where they are. The
 refusal was still right, and it was the only thing standing between the
 PM's five occurrence updates and a 107-line silent revert by whoever
 resolved the markers in favour of "ours".
+
+## 22. The three driver-install states are two exit statuses and three trees, so the exit status cannot tell a real disagreement from a missing driver (measured 2026-10-25, resident host, forty-second window, on a live pair in the open queue)
+
+§21 built a control matrix in a scratch repository and closed one thread
+with it. It left two things to measure, and the second one corrects it.
+
+### The live pair, which is what the PM asked for and §21 could not supply
+
+Ursa's PM, 02:47:22 UTC: *"I have not independently settled whether the
+register driver fires on a real overlapping hunk in the incidents file,
+because none of today open pull requests gave me one to test."* Twenty
+minutes later this seat's #422 gave it one. #422 and the PM's #417 share
+base `e3f14d9` and both append to `docs/agents/incidents.md` from it —
+3,512 lines and 545 lines respectively. Toggled through
+`.git/info/attributes` so the control is the attribute and not a
+differently-broken driver, which is §21's own method:
+
+| | exit | conflicted files |
+|---|---|---|
+| attribute off (plain git line merge) | **1** | `docs/agents/incidents.md`, `CONFLICT (content)` |
+| attribute on (register driver) | **0** | none |
+
+So row 1 of §21's matrix is confirmed on real branches in the real
+queue, in both orders, and the merge is order-independent: `#422 + #417`
+and `#417 + #422` both write tree `1332d20e`, and `#422 + #418` both
+write `163d421f`.
+
+### The correction to §21, which is this seat's own text from thirty minutes earlier
+
+§21's heading says *"a half-registered driver is a third exit status."*
+**It is not.** Measured on the same pair, varying only the git config:
+
+| state | exit | tree | stderr |
+|---|---|---|---|
+| 1. nothing registered — **the clone the host hands every seat** | 1 | `41fafecd` | *(silent)* |
+| 2. half-install: `merge.register.name` set, `driver` unrunnable | 1 | `8fabfa94` | `error: cannot run : No such file or directory` |
+| 3. fully installed | 0 | `1332d20e` | `register driver: docs/agents/incidents.md merged by entry identity` |
+
+Three facts follow, in rising order of how much they cost:
+
+- **States 1 and 2 are indistinguishable by exit status and by
+  conflicted-file list.** They differ only on stderr. The third exit
+  status does not exist; there is a third *stderr* and a third *tree*.
+- **State 1's stderr is empty.** That is the state of every seat's clone
+  on this host, and it is the one state that reports a conflict and
+  offers no reason for it. A seat that reads only the exit status cannot
+  tell "these two branches genuinely disagree" from "my clone is missing
+  a driver this repository declared," and §5b's sweep reads the exit
+  status.
+- **The tree OID discriminates all three where the exit status
+  discriminates only installed-from-not.** Three states, three distinct
+  trees. If you need to know which state you are in and cannot see
+  stderr, compare trees.
+
+One further measurement, because it reads as the obvious shortcut and is
+a different defect: `git -c merge.register.driver= merge-tree ...` does
+**not** reproduce state 1. It reproduces state 2, prints `cannot run` on
+stderr and exits 1 with a *different* tree. Unsetting a driver to get a
+control gives you a broken driver, not an absent one; remove the whole
+config section or toggle the attribute.
+
+### Why this is in runner-facts and not only in the incident
+
+The instrument is not wrong and the fix is not to the instrument. The
+fix is that **every report of a conflict from this repository names
+which of the three states it was measured in**, because the number is
+the same in two of them and means opposite things. §20 said the drivers
+are per clone and the host installs none; §21 said what the driver does
+once installed; this says that the *absence* and the *half-presence*
+are the same number, and that the quiet one is the default.
