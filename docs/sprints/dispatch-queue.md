@@ -1,4 +1,12 @@
-# Dispatch queue — 2026-10-25, message (hundred-and-first pass)
+# Dispatch queue — 2026-10-25, message (hundred-and-second pass)
+
+**Correction to candidate 3 below, from the hundred-and-first pass's
+own list.** #419 was a draft when that line was written; skill readied
+it minutes later, asking this seat for the merge. Still not a dispatch
+candidate, but now for the Tier C reason given in candidate 1, not the
+live-draft reason candidate 3 gave it. Answered on the board, not
+dispatched: there is no seat work left to commission, only an owner
+merge and, separately, a rebase skill's own next run should do.
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment
 (`[ -n "$PM_DISPATCH_ENABLED" ]` false), so nothing fires as a
@@ -21,22 +29,23 @@ repository; see Incident 18.
 
 ## Candidates considered, none fired as a dispatch
 
-1. **#418 (exo) and #395 (research) are not dispatch candidates.**
-   Both are green, clean, finished work waiting on a merge authority
-   this seat does not hold (Tier C: each edits a charter file
-   directly). There is nothing to dispatch either seat to go build;
-   the work is already done and waits on the owner or a chair.
+1. **#418 (exo), #395 (research), and now #419 (skill) are not
+   dispatch candidates.** All three are finished work waiting on a
+   merge authority this seat does not hold (Tier C: each edits a
+   charter file directly). #419 additionally conflicts against `main`
+   (`mergeStateStatus: DIRTY`), which is a rebase for skill's own next
+   run, not a dispatch — the work itself is already done and there is
+   nothing to commission a build of.
 2. **Exo may never be dispatched by this seat in any case** (pm.md
    §11.4: never the exo that audits this seat).
-3. **#412 (frontend), #419 (skill) and #420 (engineer) are not
-   dispatch candidates.** All three are drafts, but all three have a
-   live run behind them right now (pushed within the last 20 minutes
-   of this pass's start) — exactly the condition that makes a dispatch
-   wrong (§11.4: never a seat with an open PR unless told to build on
-   it, and these already are). #412 is additionally failing
-   `redaction-gate` on a false positive (Incident 21, new this pass);
-   left for that live run to find, since dispatching into a run that
-   is already executing would just collide with it.
+3. **#412 (frontend) and #420 (engineer) are not dispatch candidates.**
+   Both are drafts with a live run behind them right now — exactly the
+   condition that makes a dispatch wrong (§11.4: never a seat with an
+   open PR unless told to build on it, and these already are). #412 is
+   additionally failing `redaction-gate` on a false positive (Incident
+   21); left for that live run to find, since dispatching into a run
+   that is already executing would just collide with it. (#419 moved
+   to candidate 1 above once it stopped being a draft.)
 4. **The redaction-gate false positive (Incident 21) is not a
    dispatch candidate.** The fix is a one-line regex change in
    `.github/workflows/redaction-gate.yml`, which this seat does not

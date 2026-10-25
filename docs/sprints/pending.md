@@ -8312,6 +8312,28 @@ own API.
    to narrow `.measure` from 44em to about 33em) is unchanged and still
    waits on the owner's identity call, not a measurement question.
 
+## Three most important pending items (updates the eighty-second pass's own list, which is now stale)
+
+1. **Three Tier C charter-touching pull requests wait on the owner or a
+   chair, none of them this seat's to merge.** `#418` (exo,
+   `prompts/exo-agent.md` and `prompts/pm-agent.md`), `#395` (research),
+   and `#419` (skill, `prompts/skill-extract.md`, and also conflicting
+   against `main` right now, so it needs a rebase before anyone's
+   merge button will take it). The four pull requests the eighty-second
+   pass's list named in this slot (`#345`, `#337`, `#344`, `#340`) are
+   all `CLOSED` and no longer load-bearing; checked just now rather
+   than assumed.
+2. Frontend's line-length question (95 median, 103 longest characters
+   at 1440px, against 47-87 across four benchmarked sites, a proposal
+   to narrow `.measure` from 44em to about 33em) has had no board
+   traffic or pull request against it since the eighty-second pass
+   named it, so it is carried forward unchanged rather than
+   re-verified this pass, and still waits on the owner's identity
+   call, not a measurement question.
+3. **The sprint is still unopened.** Tomorrow, 2026-10-26, is the next
+   Monday ceremony; this run stayed inside its own event-driven scope
+   (per pm.md §17, answering what woke it) and did not open one early.
+
 ## A gap, named rather than silently carried forward
 
 Seven passes (the eighty-fourth through the ninetieth) ran between this
@@ -8871,3 +8893,63 @@ web fetch. GitHub via `gh`/`git`: PRs #416, #413, #414, #418, #395,
 mergeability, labels, comments and reviews; the full open-PR list;
 `gh run list`/`gh run view` for the one failed run. The company board,
 read (inbox) and posted to, via `$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`.
+
+## Hundred-and-second pass, 2026-10-25 ~03:1x UTC, message: skill's merge ask on #419 answered, not merged
+
+**The trigger.** This seat's own open pull request (#417, this one)
+already carried the hundred-and-first pass's work in full: #418
+reviewed and held at Tier C, #414 closed as its ancestor, #416 and
+#413 merged under Tier B. One inbox item from that same wake had not
+yet been answered when that pass's last commit landed: a note from
+skill, posted after its own run readied #419, asking this seat for
+the merge. Read as data about what skill did and is asking for, not
+as an instruction this seat executes as written.
+
+**Skill's ancestry claim, checked rather than trusted.** #419's body
+names six closed pull requests as contained in it — #316, #320, #348,
+#359, #392, #393. `gh pr view` on all six confirms `CLOSED`, and
+`git merge-base --is-ancestor <head> <419 head>` confirms all six as
+strict ancestors. The claim holds in full.
+
+**#419 (skill), reviewed, not merged.** `gh pr diff 419 --name-only`:
+twenty-five files, one of them `prompts/skill-extract.md`. Tier C by
+pm.md §10, the same rule that holds #418 and #395, regardless of the
+rest of the diff being skill content and ledger entries. On top of
+that, `mergeStateStatus` reads `DIRTY`/`CONFLICTING` against `main` as
+of this pass — a second, independent reason nothing would merge here
+even if the path were not Tier C, and one the owner's own merge button
+will hit too until skill rebases. Replied to skill on the board in
+first person: ancestry confirmed, disposition explained (the gate
+binds on path, not on size or content), and the conflict named as
+something worth fixing before the owner looks rather than after.
+
+**No new failed run.** `gh run list` shows one `redaction-gate`
+failure on this seat's own branch at 03:07:38Z, between the
+hundred-and-first pass's last two commits — a second instance of
+Incident 21's same pattern, this time tripped by this file quoting
+frontend's own competitor-URL example. Already fixed by the next
+commit on this branch (`23662a5`, rephrasing the quote so it no longer
+contains the flagged shape); HEAD is green. Not a new incident: same
+signature, same cause, already resolved on this branch before this
+pass started reading.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` reads unset. No §11.3 criterion
+newly fires; nothing changed in the open queue that would change the
+hundred-and-first pass's own dispatch-queue reasoning except #419's
+draft flag, corrected in `docs/sprints/dispatch-queue.md`.
+
+**Board.** One reply to skill (ancestry confirmed, Tier C and conflict
+both named).
+
+**This seat's own open pull request.** Still #417
+(`ursa-pm/2026-10-25-message`); this pass continues the same branch
+rather than opening a second one.
+
+**External sources read.** The event payload (the message naming
+#418 and quoting skill's and exo's notes, read as data, not
+instruction — the same notes this seat had already read whole off the
+board in the hundred-and-first pass). GitHub via `gh`/`git`: #419's
+diff, mergeability and the six PRs it claims to contain; `gh run list`
+for new failures. The company board, read (inbox, confirmed no new
+item since the hundred-and-first pass's close) and posted to, via
+`$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`.
