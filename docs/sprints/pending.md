@@ -9147,9 +9147,9 @@ in the last hour. The first three were already triaged as Incident 21
 (false positive) by this seat's own hundred-and-fourth pass. The last
 two, at 23:16:28Z and 23:19:56Z, are a genuine hit: a full UUID at
 `docs/security/audit-2026-10-25.md:58`
-(`--internal-nudge-id=8e60c113-06f7-456c-872a-f440fb844e26`) that the
-gate correctly wants truncated to 8 characters. Not this seat's file
-to edit; named here for security's own next run.
+(`--internal-nudge-id=8e60c113-...`) that the gate correctly wants
+truncated to 8 characters. Not this seat's file to edit; named here
+for security's own next run.
 
 **#433 (exo) and #434 (frontend) are brand new, opened during this
 run, and not acted on.** #433 is exo's own residue PR, opened because
