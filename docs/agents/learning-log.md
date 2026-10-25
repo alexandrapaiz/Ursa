@@ -6844,3 +6844,226 @@ in the way that matters, which is the same gate this window is about.
 This window gave it the live case as well: its own branch and the PM's
 share a base and both append to the incidents register, and the driver
 turns a real `CONFLICT (content)` into exit 0 in both orders.
+
+## 2026-10-25, window 44 (hook on returned capacity, 23:02:10 UTC) — the wake named the run that left nothing, and my own §0 sent me to the stale charter
+
+**What woke me.** `tools/capacity-retry.py`, with the payload *"capacity
+returned: the provider limit that refused your last run has reset."*
+That sentence was true and it was about the wrong run. My last run, at
+18:00:05Z, was refused at turn **one** and left nothing. What I actually
+inherited was **#425**, from a run refused at turn **thirty-five** at
+03:27:48Z, carrying three commits and a title that still read `opening,
+no work yet`. Two barren turn-one refusals sat between them.
+
+**The first thing a successor must know, because it cost me five
+minutes and it will cost you the same.** §0 of my charter tells me to
+re-read the charter from **the newest** of this seat's open pull
+requests. After window 42 split the chain by merge authority, the newest
+open pull request carries `main`'s charter *by design* and the live one
+sits on an **older** pull request. At the start of this window: #425 and
+#422 held 2,221 lines, #418 held **4,850**. Obeying §0 literally returns
+a charter 2,629 lines short of this seat's own memory, which is exactly
+what §0 exists to prevent.
+
+**So, concretely, before you read anything else:** do not take the
+newest. Take the longest.
+
+```sh
+for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+             --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+  printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+done | sort -rn | head -1
+```
+
+As of the end of this window that is **#418**, and it is not the newest.
+
+**What I observed.** 149 runs attempted today, 59 completed, **70
+refused by the provider — 48% of the day, 53 of them before their first
+turn**, 4 failed, 14 running, 2 lost in one cohort at 02:20:32Z. The
+five classes sum to `attempted` exactly, so the partition is intact.
+Darkness was **1,191 minutes**, and the brief's renderer puts **one**
+minute of it after the limit had reset, against 377 the day before. The
+retry driver's hole is closed; the quota's hole is now the whole drag,
+and it is the owner's question rather than this seat's.
+
+The queue is **11 open against 44 merged in seven days**, oldest open
+2026-10-24T21:21:40Z. The depth warning does not fire.
+
+**What I changed, and all three findings are proxy failures.**
+
+1. **The retry wake decides from a seat's latest run alone.** Measured
+   over three days of host run logs: **73 of 110** barren turn-one
+   refusals that became a seat's latest run were masking an earlier
+   refusal past turn one with no completed run between — **66.4%, 19
+   seats, all five companies, nine runs deep** at worst, and `ursa/pm`
+   is the nine. HQ's **#456** is open and adds the mid-run split on the
+   same single-run key, so it cannot reach this. One block fixes it;
+   it is in the incident verbatim and handed up.
+2. **A second seat's register entry had been forked into my chain for
+   three windows.** The forty-first window wrote the rule and dropped
+   the PM's `## Incident 19`; `INC-2026-10-18-board-runtime-token-printed-twice`,
+   47 lines, authored by `ursa-pm`, was in the same file and survived,
+   because that sweep fires **on the act of splitting** and windows 42,
+   43 and 44 inherited the split instead of performing one. **No
+   conflict instrument could see it** — exit 0 both merge orders,
+   identical tree, because the copies are byte-identical today. Deleted.
+3. **§0's own selection predicate**, above.
+
+**What I did not do, and why, because the next window will want to.** I
+wrote **no charter edit**, deliberately. This branch is the register
+half; putting a `prompts/` path on it makes all of it Tier C by §10's
+path predicate and re-incurs the 81.4% hold window 42 measured and
+fixed, and it would **revert** the live charter, since this branch
+carries `main`'s copy. All three amendments are written out verbatim in
+`incidents.md` as **owed**, with the reason. They belong on the charter
+branch, and the charter branch is #418, which is named in a standing
+report to the owner — so exception four of "grow it instead of stacking
+past it" applies and I left it untouched.
+
+**Off-repository acts, each with the query that retrieves it.**
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| tip broadcast, `data.live_tip: 429` | broadcast, no `to_seat` | `?limit=400`, then `select(.from_seat=="exo" and .to_seat==null)` |
+| the #456 block and the 66.4% census | `alexandra-systems/exo-centralizer` | `?from_company=Ursa&from_seat=exo&since_hours=48&limit=500`, `select(.to_seat=="exo-centralizer")` |
+| the forked-entry notice | `Ursa/pm` | the same read, `select(.to_seat=="pm")` |
+
+**What the next window must check first.**
+
+1. **Read the longest charter, not the newest.** The command is above.
+2. **Whether HQ's #456 merged, and whether the block landed with it.**
+   `gh pr view 456 --repo alexandrapaiz/alexandra-systems --json state,mergedAt`
+   then grep the deployed `tools/capacity-retry.py` on HQ's `main` for
+   `unresolved`. If it merged without the block, the 66.4% stands and
+   the ask is still live.
+3. **Whether #418 is still the only carrier of the live charter.** If it
+   merged, `main` is current and §0's trap is closed by that merge
+   rather than by the amendment. If it did not, the three owed charter
+   amendments are still owed and still not this branch's to carry.
+4. **The experiment in `improvements.md`:** sweep this charter for
+   standing rules whose trigger is an **event** where the thing they
+   guard is a **state**. Four of the five members of the jointly-lossy
+   family are that shape. The output is a charter edit, so it needs the
+   charter branch.
+
+### Standing observations, window 44 (all measured 2026-10-25 23:1x–23:2xZ)
+
+**The three run instruments, and which surface each answers.**
+`gh run list` saw **0** `agent-*` runs, as it has since HQ moved the
+clocks to the host on 2026-10-17, and `schedule:` is absent from all
+eleven workflow files. That is the dormant-surface reading and it is
+**not** run health. The host's own partition is the authority: 149
+attempted, 59 completed, 70 refused, 4 failed, 14 running, 2 lost, and
+the five sum to `attempted` exactly. This seat's own runs on disk today:
+**7** — three completed at 82, 90 and 76 turns, one refused at turn 35,
+two refused at turn 1, and this one.
+
+**The biggest drag, named: the provider's refusal rate.** 70 of 149,
+**48% of the day**, 53 of them before their first turn, against 1,191
+dark minutes. The retry driver has closed its own hole to **one minute**
+after the reset, down from 377 the day before, so what remains is quota
+rather than scheduling. That is the owner's question about how many
+seats wake into one quota, and it is not this seat's to fix.
+
+**Charter length, the third cap.** `main`'s copy is **2,221** lines and
+unchanged by this branch, deliberately. The live copy on the charter
+branch is **4,850**. Replacement ratio this window: **zero**, because
+this window wrote no charter line at all; the three amendments it owes
+are in `incidents.md` with the reason they are not here. A zero ratio
+reported by a window that touched nothing is not a flat curve.
+
+**§2b, both halves of every charter.** 3 of 11 workflow `prompt:` blocks
+mention `--draft`, 0 of 11 mention ship-first. Unchanged, still a
+**revival risk** on a surface that has run nothing in eight days, and
+still not a live defect. Not queued as a workflow diff, per §5.
+
+**§3, what the standards point at.** Ten **BINDING-MISSING** under
+`pm.md` and `secrets.md`, one **VENDORED-ELSEWHERE**
+(`tools/merge-register.py` to `tools/registers/merge-register.py`, which
+is the engineer's deliberate placement and not a finding), and 30 names
+in `lessons.md` as context only. The binding count has not moved.
+
+**§3, identifier collisions.** `docs/decisions.md` still uses
+**ADR-005** and **ADR-006** twice each, for four unrelated rulings. Not
+renumbered, because the number is the owner's and other files cite it.
+`incidents.md` is clean.
+
+**§3, pairing HQ's 81 tools against this charter's hand-rolled
+procedures.** Two pairings worth naming, neither new to HQ:
+`check-draft-prs.sh` against the inherited-draft duty this window
+performed by hand — and that duty is the one that opened this run, which
+makes the pairing more than cosmetic; and `check-register-true.py` with
+`check-register-pointer.py` against
+`INC-2026-10-24-a-registers-state-is-written-everywhere-except-where-it-is-read`.
+`fill-run-refusals.py` is HQ's live work on the same surface as this
+window's finding and is already named in its open pull request.
+
+**§3e, autonomy, from HQ's own `tools/autonomy.py` rather than
+hand-rolled.** 44 merges in 168 hours, 20 seat-claimed, 0 on Actions,
+**24 unresolved**, floor **45.5%**. That is **above** the one-third
+ceiling, so HQ's refusal condition fires and **this number grades the
+instrument and not the company.** Say it that way: no grade moves, and
+the attribute to grade instead is dashboards. This is the fourth
+consecutive window at which the refusal has stood.
+
+**Rounds per artifact, and dispatches by author.** This seat's chain
+reached the owner as one artifact per window and converged at the merge
+gate rather than by iteration. Every dispatch that opened a window of
+this seat today was the retry driver or a sibling seat's note, not the
+owner and not the chair, which is the healthy reading of §3e's second
+number.
+
+#### Window 44's residue, written after its own pull request merged underneath it
+
+The tip merged at **2026-10-25T23:20:48Z**, sixteen minutes and
+twenty-nine seconds after it was opened, while this window was still
+running. That is ship-first's named risk arriving exactly as described,
+and it cost nothing, because every commit had been pushed before the
+merge: `git log --oneline origin/<branch>..HEAD` came back empty and
+`git merge-base --is-ancestor HEAD origin/main` exited 0. All three
+incident entries, `runner-facts.md` §24 and the deletion of the PM's
+forked entry are verified present on `main` by reading `main` rather
+than by trusting the merge.
+
+This second identifier is the one the charter says to trade for that
+risk, and it carries only what the merge raced: the receipts below.
+
+**Off-repository acts, completed, each with the query that returns it.**
+Written after the calls returned, not before.
+
+| act | addressee | receipt |
+|---|---|---|
+| tip broadcast, `data.live_tip: 429` | broadcast, no `to_seat` | 23:17:46Z, 903 chars, not truncated |
+| the barren-wake census and the one-block fix for HQ's open pull request | `alexandra-systems/exo-centralizer` | 23:18:08Z, 1127 chars, not truncated |
+| the experiment delta and the two-file finding on the charter branch | `Ursa/pm` | 23:18:44Z, 1153 chars, not truncated |
+| `Ideas`: our own runs are already the artifact Ursa Minor sells | `Ursa/owner` | 23:20:50Z, 1109 chars, not truncated |
+| `Ideas`: the most valuable span class and §3e's audit duty are one measurement | `Ursa/owner` | 23:20:37Z, 1123 chars, not truncated |
+| `Ideas`: the refusal rate is manufacturing abandoned trajectories | `Ursa/owner` | 23:20:37Z, 1053 chars, not truncated |
+
+All six carry `to_company`, verified by the audit that looks for the
+empty field rather than by remembering to set it:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?everyone=0&since_hours=24&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | select(.from_company=="Ursa" and .from_seat=="exo")
+           | select(.to_seat!=null and .to_company==null)
+           | ["NO COMPANY",.ts[5:19],.to_seat,.subject]|@tsv'
+```
+
+It came back empty. Two of the nine attempted sends were **refused by
+this seat's own pre-flight** before reaching the board, both on the
+420-character block rule, and both were split and resent. That is the
+gate working as a gate rather than as a comment, which is the one thing
+the thirty-third window's rewrite of it got wrong.
+
+**What changed for the successor, now that the registers are on
+`main`.** Three of the four checks the entry above leaves you are
+unchanged. The fourth is now easier: `main` carries this seat's
+registers as of today rather than as of 2026-10-18, so you no longer
+need to reconstruct them from open pull requests. **The charter is the
+exception and the trap is still live:** `main`'s
+`prompts/exo-agent.md` is 2,221 lines and the live one is 4,850 on the
+charter branch, which is **not** the newest open pull request of this
+seat. Take the longest, not the newest, and the command is in the entry
+above.

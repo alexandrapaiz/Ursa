@@ -42,6 +42,44 @@ product Ursa Minor is testing, and the honest positioning line is:
 rubric works, and the only signal at all for the domains where it
 doesn't.*
 
+**The field's own proposed fixes for "no verifier exists" are still
+constructed verifiers, not real outcomes (2026-10-25, 14th message
+run).** A widely-cited practitioner post on RLVR's limits beyond math
+and code names the same gap CLAUDE.md §1 opens with almost word for
+word ("Math has definitive answers. Code has test suites. What about
+everything else?") and proposes three substitutes for open-ended
+domains: extracting verifiable signal from reference outputs,
+auto-generating rubrics with a judge model, and converting QA
+checklists into training signal. All three are still a grader's
+construction standing in for ground truth, the same category of thing
+the five reward-model-unreliability sources already in this file's
+record have found unreliable at every stage checked — and the same
+post's own September 2026 update reports the approach "showed
+vulnerabilities when tested empirically." So what: the market's
+answer to the verifier gap, as of this source, is a sixth source for
+why constructed graders keep failing, not a counter-example to
+Minor's pitch. Ledger proposal opened for KR4.1's lab brief. [subhadipmitra.com](https://subhadipmitra.com/blog/2026/rlvr-beyond-math-code/).
+
+**A seventh source, this one a demand signal rather than a research
+paper, and from inside a competitor (2026-10-25, 15th message run).**
+A staff AI engineer at TELUS Digital (the Category 1 vendor added to
+landscape.md this run) published a practitioner's digest of LLM-judge
+failures on 2026-10-15: judges that are "perfectly consistent, [yet]
+reliably wrong" at only 51% ground-truth agreement, verdicts that flip
+across identical zero-temperature runs, and a bias-detection classifier
+whose accuracy drops from 99% to 42% when emotional tone changes. The
+author's own proposed fix is, again, a better-constructed grader
+(rubric-based pointwise scoring, tool-augmented judges) rather than
+real-outcome data — consistent with the pattern the six sources above
+already established. What makes this one worth citing separately: the
+author writes "make it cheap to actually look at what happened instead
+of trusting a single aggregate score" as general engineering advice,
+not as a description of Minor's own method, and that sentence is
+close enough to CLAUDE.md §1's own operating description that it reads
+as independent, unprompted corroboration from inside a competing
+vendor's own technical staff, not a Minor-sourced talking point.
+[dev.to: Felipe Oliveira, "Perfectly Consistent, Still Wrong"](https://dev.to/felipe0liveira/perfectly-consistent-still-wrong-llm-judges-keep-failing-the-same-way-plus-cheaper-alternatives-4eg3).
+
 ## Price ladder observed this run (Category 1, preference-data vendors)
 
 None of the five vendors in landscape.md's first category publish a
@@ -71,6 +109,63 @@ this run argues against that range. Nothing found this run validates a
 specific number inside it either. This is a gap for next run's demand
 signals ceremony: find a disclosed or leaked RLHF-vendor contract size
 (not publisher-content) to anchor the range.
+
+**A correction to this file's own language, found 2026-10-25 (14th
+message run):** three separate dated entries below (2026-10-25's
+Zep note, the Category 1 margin section, and one changelog line) call
+the open contract-size gap "Minor's $10/$30 question." That phrasing
+contradicts this file's own opening note: the $10/$30 tiers are
+alexandria's vendored language and do not describe anything Minor
+sells. Minor has no per-unit consumer price at all, by design
+(CLAUDE.md §4); the actual open question is the six-to-seven-figure
+*enterprise contract* anchor, not a per-unit comp. The three prior
+entries are left as written, since they are each a dated record of
+what that run said, but the shorthand should stop here rather than
+compound a fourth time.
+
+**A named per-year figure for the contract-shape comp, and a new
+wrinkle in it (2026-10-25, 14th message run):** the $203M aggregate
+Reddit IPO-filing figure cited above is the same Google deal reported
+elsewhere at ~$60M/year (Reuters, 2024-02-22), which is both a cleaner
+annual anchor and, as of a 2026-07-22 Wall Street Journal report, now
+a deal Reddit is reportedly weighing whether to renew at all: AI
+Overviews answering queries directly cuts the click-through traffic
+Reddit gets in return, so the supplier is reassessing whether feeding
+the buyer's downstream product is worth the licensing fee. [the-decoder.com](https://the-decoder.com/reddit-signs-60-million-annual-training-data-deal-with-google/).
+That tension has no analogue in Minor's own structure: an outcome
+record is a byproduct of a user's own work, not Minor's content, so
+Minor's downstream product (a lab's trained model) does not compete
+with the thing the supplier (the user) is trying to do, the way
+Google's AI answers compete with Reddit's own traffic. Worth a line in
+the lab brief the next time a buyer asks why this contract shape is
+durable where Reddit's is wobbling.
+
+A side note on sourcing this: searching for a disclosed RLHF-specific
+contract size (the actual gap named above) surfaces a cluster of
+SEO-style "AI data licensing" aggregator sites (ai-industry-reviews.com,
+aidata.broker, sourcex.si) reporting mutually inconsistent deal counts
+(312 vs. 130 vs. an explicitly partial 6-deal sample) with no named
+methodology for two of the three. Checked and not cited beyond this
+note. The gap stays open; only individually named, independently
+reported deals like Reddit-Google are usable here, and none found this
+run was RLHF-specific rather than bulk content.
+
+**A cleaner tracker for this same category, found 2026-10-25 (15th
+message run), to use instead of the inconsistent aggregators above.**
+corpusbridge.com's disclosed-deals page states an explicit, checkable
+methodology — "A deal appears here only when a named outlet or the
+company's own filing reported it," and "We do not estimate or model
+figures" — and lists 14 total deals, 8 priced, naming each buyer,
+seller, and figure individually rather than reporting an aggregate
+count. Two of its figures were spot-checked independently this run
+against multiple outlets and both held: NYT/Amazon ($20-25M/year, WSJ
+via The Information, 2025) and News Corp/Meta ($50M/year over three
+years, Editor & Publisher and TheWrap, 2026). Still none of its 8
+priced deals is RLHF-specific; all are bulk content (news, journals,
+books). The gap this file has tracked since 2026-09-26 is unchanged by
+this, but the next run that needs the bulk-content comp should start
+here instead of re-discovering the aggregator problem from scratch.
+[corpusbridge.com/learn/ai-data-licensing-deals](https://corpusbridge.com/learn/ai-data-licensing-deals).
 
 ## Category 3 read: why would a user adopt Ursa Major when memory is
 already built into ChatGPT for free?
@@ -605,6 +700,29 @@ Major itself.
   fourth: annotators cannot detect when their own stated preference
   was swapped, not just that they disagree with themselves across
   real opinions. No pricing recommendation made.
+- 2026-10-25 (event-driven, message, 14th run) — flagged and stopped a
+  three-time phrasing drift ("Minor's $10/$30 question") that
+  contradicted this file's own 2026-09-26 opening note; refined the
+  Reddit/Google contract-shape comp to a named ~$60M/year figure and
+  added the 2026-07-22 WSJ report that Reddit is weighing ending that
+  deal at renewal, which has no analogue in Minor's own structure;
+  added a sixth source to the reward-model-unreliability thread, this
+  one at the "proposed fix" layer rather than the "diagnosis" layer
+  (RLVR's own substitute verifiers for open-ended domains, reported
+  failing empirically by the same author). No pricing recommendation
+  made; the enterprise-contract-size gap (not a per-unit price) stays
+  open.
+- 2026-10-25 (event-driven, message, 15th run) — replaced the
+  inconsistent SEO-aggregator sources for the bulk-content contract
+  comp with corpusbridge.com, a tracker with a checkable methodology
+  (named-outlet-or-filing only, no estimation), spot-checked two of
+  its figures independently and both held. Still no RLHF-specific
+  deal among its 8 priced entries; the gap stays open with a cleaner
+  pointer for the next run. Added a seventh verifier-gap source, this
+  one a demand signal rather than a paper: a practitioner's digest
+  from inside a Category 1 competitor (TELUS Digital, added to
+  landscape.md this run) independently uses language close to
+  CLAUDE.md §1's own framing. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 

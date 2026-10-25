@@ -34,7 +34,7 @@ import { saveEpisodes, saveRecord, ursaDir } from '../store'
 import type { OutcomeRecord } from '../types'
 import type { Violation } from '../invariants'
 import { resolveEpisode } from '../resolve-episode'
-import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds } from '../launch'
+import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds, windowWidth } from '../launch'
 import { distill } from '../tuning/distill'
 import { emptyTuning, mergeDistill } from '../tuning/merge'
 import type { TuningRecord } from '../tuning/types'
@@ -289,7 +289,19 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     // handed. Drift 8 (`windowTooSmallForAPair` in src/launch.ts) is that
     // both launches have had this number since the diagnostics shipped
     // and neither asked whether it was large enough for a pairing.
-    commitsInWindow: diagnostics.commitsScanned,
+    //
+    // Through `windowWidth` and not off `diagnostics.commitsScanned`,
+    // since 2026-10-25: that field counts every commit reachable from any
+    // ref when the walk got no range, and this line renders its value to
+    // a reader as the width of one merge window. `windowWidth` reads the
+    // narrowed `rangeScanned`, which is `null` exactly when no window was
+    // walked, and returns `undefined` there so the renderer prints no
+    // count and keeps the unconditional sentence. On this path that null
+    // is unreachable (`window.range` is a non-optional string,
+    // src/ci/window.ts); the narrowing is still routed through a tested
+    // function, because what makes the quote safe should be checkable
+    // rather than a fact about one caller.
+    commitsInWindow: windowWidth(diagnostics),
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the
