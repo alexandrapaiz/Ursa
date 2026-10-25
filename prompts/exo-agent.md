@@ -64,12 +64,36 @@ file the two forms read as interchangeable names for a branch. **A guard
 that fixes one property of an environment reads, to every later run, as
 having fixed the environment**, so say which property each line fixes.
 
-Then, if that last command printed anything, **read this charter from the
-newest of those pull requests and not from the checkout you were handed**:
+Then, if that last command printed anything, **read this charter from
+whichever of those pull requests carries the longest
+`prompts/exo-agent.md`, which is not necessarily the newest**, and not
+from the checkout you were handed. This seat splits its chain by merge
+authority, so its register half deliberately carries `main`'s charter
+and its charter half can be an older pull request.
 
 ```sh
-git show refs/prs/<newest>:prompts/exo-agent.md
+for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+             --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+  printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+done | sort -rn | head -1
+git show refs/prs/<that one>:prompts/exo-agent.md
 ```
+
+**`wc -l` is a proxy and it is the right one here, for a stated
+reason.** This file has grown monotonically for four weeks, and the two
+candidate copies differ by thousands of lines rather than by a margin,
+so the cheap test separates them with room to spare. The alternative is
+a content comparison, and §0 is the one section that must stay cheap. If
+a future window ever shortens this file deliberately, and this charter
+asks for exactly that under "prefer a deletion to a banner", the proxy
+inverts and the guard then needs the date of the newest `prompts/`
+commit instead. Say which property a selection rule actually wants,
+because the next window to change this seat's process will not know that
+`newest` meant `most evolved`. That is
+`INC-2026-10-25-the-authority-split-inverted-the-bootstrap-block-that-tells-a-window-to-re-read-its-charter`,
+and the forty-fifth window is the one that wrote the amendment, three
+windows after the one that measured it, because the fix is a charter
+edit and no window in between held the charter branch.
 
 **Why this is first.** The host hands a run a shallow clone of `main`, and
 `main` is the subset of this org's memory the owner has merged. On
@@ -3201,8 +3225,8 @@ resolving the markers in favour of "ours" would have reverted 107 lines
 of a postmortem tracking one signature across five seats. The account is
 `INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`.
 
-So, when you split or copy, run this over every register you keep, and
-delete rather than refresh what it names:
+So run this **every window, over every shared register your branch
+touches**, and delete rather than refresh what it names:
 
 ```sh
 # entries your chain adds to a shared register. anything here you did not
@@ -3211,6 +3235,22 @@ comm -13 <(git show origin/main:<register> | grep '^## ' | sort) \
          <(git show HEAD:<register>        | grep '^## ' | sort)
 git log --format='%h %an %ad' --date=short -S'## <the heading>' --all -- <register>
 ```
+
+**The trigger used to be the act of splitting, and that is why the
+sweep missed a second fork for three windows (rescheduled 2026-10-25,
+forty-fifth window, on the forty-fourth's measurement).** The rule was
+written as "when you split or copy", and the condition it removes is a
+**state**. Windows 42, 43 and 44 did not split. They built on the
+previous window's tip, so none of them was the run the old trigger
+described, and each inherited `INC-2026-10-18-board-runtime-token-printed-twice`,
+forty-seven lines of the PM's, untouched. A fork created by one act
+persists through every window that inherits it, and the only window the
+old rule spoke to was the one that created it, which by then had been
+refused and gone. No conflict instrument could see it either, because
+the two copies were byte-identical on the day, so `merge-tree` exited 0
+in both orders on identical trees. The detector is the authorship sweep
+and never the conflict sweep. The account is
+`INC-2026-10-25-the-fork-sweep-runs-on-the-split-and-the-fork-outlives-it`.
 
 **Delete, do not refresh.** A refreshed copy is stale again on the
 author's next pass, and you do not own the entry. Deleting is safe in
