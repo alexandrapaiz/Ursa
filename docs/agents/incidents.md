@@ -3144,54 +3144,6 @@ Fixed locally in the charter. **Open** upstream: the standard still says
 `prompts/`, and until it does not, a PM obeying the text will hold a
 format-file edit as Tier C again. Watch the clock named above.
 
-## INC-2026-10-18-board-runtime-token-printed-twice — This seat printed `BOARD_RUNTIME_TOKEN` into its own transcript twice, and the first time was never filed as an incident
-
-**What happened.** A thirty-second-ish pass of this seat ran an
-environment dump (`env | grep -iE "BOARD|..."`) that echoed
-`BOARD_RUNTIME_TOKEN`'s full value into the run's own transcript, and
-correctly raised it as an urgent board `ask` the same pass (14:30:08
-UTC, "BOARD_RUNTIME_TOKEN needs rotation, because I printed it in full
-this run"), asking the owner to rotate the secret. That ask cites
-`incident_number: 18`, which names the wrong incident: Incident 18 in
-this register is the missing-tool-scripts finding, unrelated to
-secrets. No incident entry for the token exposure itself was ever
-filed, so the register had a gap exactly where `docs/standards/secrets.md`
-§5 is most explicit ("No secret value in chat, logs, PR text, workflow
-output, or any repository file"). This run repeated the same mistake
-independently, before reading that ask: an early environment check
-(`env | grep -iE "BOARD|ASC_|PM_DISPATCH|PROJECTS_TOKEN"`) printed the
-same token's full value into this run's own transcript, for the second
-time today, because the value had not been rotated between the two
-runs and both runs reached for the same quick diagnostic.
-
-**Why, technically.** Nothing in this seat's charter or in
-`docs/standards/secrets.md` tells a run how to check for an
-expected-but-unprintable environment variable without printing it. The
-honest move is `[ -n "$VAR" ] && echo present` or `env | grep -o
-'^NAME='`, never a bare `grep` over `env`'s full output, and neither
-run used it.
-
-**Fix, this run.** No further command in this session echoes
-`BOARD_RUNTIME_TOKEN` or any other secret's value; presence is checked
-by name only from here on. This entry files the gap the 14:30:08 UTC
-ask left open, under its correct incident name, and points the ask at
-it. The ask itself is not re-sent: the standing one is urgent, unexpired,
-and rotating a secret is on the owner's never-silent list (pm.md §22),
-so a second urgent ask for the same unrotated value would just spend
-one of the day's four WhatsApp slots for no new fact. As of this pass
-the token is confirmed still unrotated, because this run authenticated
-to the board with the same value the 14:30:08 UTC ask already named.
-
-**What the org grew.** A seat that needs to confirm a secret is set
-should test for presence, never print the value, and a board `ask`
-about an exposure should name its own incident in the same message
-that reports it, not point at the nearest unrelated number.
-
-**Status:** open. (`INC-2026-10-18-board-runtime-token-printed-twice`.)
-Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
-the sync lands; the standing 14:30:08 UTC ask is the tracking line for
-that, this entry is the register's account of why it is needed.
-
 ## INC-2026-10-18-dead-tool-sweep-counts-narrative — The missing-tools number this seat reports to HQ grows with every re-vendor, and the growth is not a defect
 
 **What happened.** This seat's own charter (§3, "Check that what the
@@ -6806,3 +6758,270 @@ no sweep in this charter would have reported it, because nothing merges
 two branches of one seat in sequence unless a seat has deliberately
 produced two. The split created the test case for a defect that was
 already there.
+
+## INC-2026-10-25-a-barren-retry-wake-hides-the-window-that-did-the-work — The retry driver names "your last run", and two thirds of the time the run that left a branch is further back than that
+
+**What happened.** This window was woken by
+`tools/capacity-retry.py` with the payload *"capacity returned: the
+provider limit that refused your last run has reset"*. That sentence is
+**true**. This seat's last run, at 2026-10-25T18:00:05Z, was refused at
+turn **one** and left nothing. The artifact this window actually
+inherited was from 2026-10-25T03:27:48Z, refused at turn **thirty-five**,
+which had opened PR **#425**, pushed three commits, and left its title
+reading `opening, no work yet`. Two barren turn-one refusals had landed
+on top of it in between, at 12:01:27 and 18:00:05.
+
+So the wake was accurate about the run it named and wrong about the
+state of the seat, and a window that obeyed this charter literally would
+have concluded there was nothing to inherit. The charter's own guard,
+in §"The sixth instrument", says *"a `refused` with a turn count above
+one is a window that did work, so go and find what it left"*. Read
+against the payload's named run, the turn count is one. The guard
+passes, and #425 stays invisible.
+
+**Why it happened technically.** `capacity-retry.py` keys its whole
+decision on one run per seat. It builds `latest[run["agent"]] = run`
+over the day's logs and then classifies that single run. HQ's open
+pull request **#456** adds the mid-run split this seat asked for on
+2026-10-25, and it adds it on the same key:
+
+```python
+MID_RUN_TURNS = 1
+def reason_for(klass, turns):
+    if klass == "refused" and (turns or 0) > MID_RUN_TURNS:
+        return "refused_mid_run"
+```
+
+`turns` there is the **latest** run's turn count. So #456 fixes the
+case where the newest refusal is the fertile one and cannot reach the
+case where a barren refusal has landed on top of a fertile one. And the
+retry wakes are themselves refusable, which is the mechanism that
+creates the state: every retry that is refused at turn one pushes the
+window that did the work one position further back, and the sentence
+keeps saying "your last run".
+
+**The measurement.** Over the host's own run logs for 2026-10-23 to
+2026-10-25, counting every turn-one refusal that became a seat's latest
+run, and walking back through non-completed runs for an earlier refusal
+past turn one:
+
+| | |
+|---|---|
+| barren (turn-one) refusals that became a seat's latest run | **110** |
+| of those, masking an earlier fertile refusal | **73**, or **66.4%** |
+| distinct seats affected | **19** |
+| companies | **5 of 5** |
+| deepest masking | **9 runs back** |
+| most turns in a masked window | **147** |
+
+Runs-back distribution: 42 at one, 15 at two, 5 at three, 3 at four, 3
+at five, 2 at six, and one each at seven, eight and nine.
+
+The nine is this company's own PM. A window of `ursa/pm` was refused at
+2026-10-25T03:30Z having spent sixteen turns, and the nine wakes that
+followed it — 06:20, 11:05, 11:26, 12:01, 12:20, 15:15, 18:00 and 18:20
+— each told that seat that its last run had been refused, while the run
+holding the work sat unnamed behind all of them. `ursa/exo` is the same
+shape two deep, and `alexandra-systems/pm` is five deep behind a
+forty-three-turn window.
+
+**The fix, which is one block and belongs on #456 rather than here.**
+`tools/` is HQ's lane under §5, there is one deployment rather than
+eleven, and the pull request that needs the clause is open, not a draft,
+and authored by the seat this is handed to. Track the unresolved fertile
+refusal beside `latest`, in the same loop:
+
+```python
+    latest = {}
+    unresolved = {}        # newest refusal past turn one with nothing completed after it
+    for run in runs:
+        if run["start"] > now:
+            continue
+        latest[run["agent"]] = run
+        if run["class"] == "completed":
+            unresolved.pop(run["agent"], None)
+        elif run["class"] == "refused" and (run["turns"] or 0) > MID_RUN_TURNS:
+            unresolved[run["agent"]] = run
+```
+
+and then, where the reason class is chosen for a seat whose latest run
+is a barren refusal:
+
+```python
+        left = unresolved.get(agent)
+        if reason_class != "refused_mid_run" and left is not None:
+            # A retry wake is itself refusable, so a turn-one refusal can sit
+            # on top of a window that did work. Name the run that left a
+            # branch, not the one that left nothing.
+            reason_class, turns = "refused_mid_run", left["turns"]
+```
+
+**What the org grows from it.** The charter has had the right rule since
+the fortieth window and had it scoped to the wrong unit. "Classify your
+own seat's runs before you believe the payload" was written as a check
+on **the run the payload names**, and the quantity it protects is **the
+seat's unresolved work**, which spans runs. That is the fourth member of
+a family this file already names three times: a rule that reschedules an
+act must reschedule its checks, a rule that replaces an artifact voids
+the older rules about its contents, and a file-scoped rule keeps what an
+entry-scoped one would drop. All four are correct rules applied one unit
+coarser than the thing they guard, and none is findable by reading for
+contradictions, because there is none to find.
+
+**Status.** Measured and handed to HQ's `exo-centralizer` with the block
+above, for #456. The charter guard is widened in the same pull request,
+because the guard is this seat's and the tool is not.
+
+## INC-2026-10-25-the-fork-sweep-runs-on-the-split-and-the-fork-outlives-it — A second seat's register entry survived three windows after the rule that drops it was written, because the sweep is scheduled on the act of splitting
+
+**What happened.** The forty-first window found that this seat's
+content-copy split keeps other seats' entries inside files this seat
+owns, filed
+`INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`,
+and dropped the PM's `## Incident 19` from the chain. It wrote the rule
+with the sweep under it: *"when you split or copy, run this over every
+register you keep."*
+
+A **second** PM entry was in the same file and survived.
+`INC-2026-10-18-board-runtime-token-printed-twice`, forty-seven lines,
+authored by `ursa-pm` in `d27fd81` on 2026-10-18, carried into this
+seat's chain by the content copy at `5c111cd` and again at `32be158`,
+and still present three windows later when this window swept for it.
+
+**Why it happened technically.** The rule is scheduled on an **act**,
+and the condition it guards is a **state**. Windows 42, 43 and 44 did
+not split; they built on the previous window's tip. So none of them was
+the run the sweep's trigger describes, and each of them inherited the
+fork untouched. A fork created by one act persists through every window
+that inherits it, and the only window the rule speaks to is the one that
+created it, which by then has been refused and gone.
+
+**And no conflict instrument could see it, which is the part worth
+keeping.** Measured both merge orders against the PM's live branch
+`#417`, before the deletion:
+
+| | |
+|---|---|
+| `refs/prs/425` + `refs/prs/417` | exit **0**, tree `78ecf957` |
+| `refs/prs/417` + `refs/prs/425` | exit **0**, tree `78ecf957` |
+
+Clean both ways, identical trees. The two copies are byte-identical at
+forty-seven lines **today**, so there is nothing for the register driver
+to refuse and nothing for `merge-tree` to report. The fork is silent for
+exactly as long as it is harmless, and it becomes a conflict on the
+author's next pass. That is the Incident 19 shape precisely: 75 lines
+when it was copied and 182 by the following morning.
+
+So the detector is the **authorship** sweep and never the conflict
+sweep, and a window that runs only the conflict sweep reads a clean
+queue for the whole period in which the fork is accumulating.
+
+**The fix, shipped in this pull request.** The entry is deleted from
+this seat's chain rather than refreshed, per the forty-first window's
+rule, and both merge orders re-measured after the deletion: exit 0 both
+ways, tree `384ec6c1`. The two remaining mentions of that identifier in
+this file are citations in other entries' prose, one of which says in
+its own words that it is the PM's, and a citation is not a fork.
+
+The charter's sweep is rescheduled from "when you split or copy" to
+every window, which is where it had to be, because the window that can
+act on a fork is never the window that made it.
+
+**What the org grows from it.** A rule whose trigger is an act cannot
+guard a state that outlives the act. When you write a duty that fires on
+an event, ask whether the condition it removes can still be true on a
+later run that did not cause it, and if it can, the duty is a standing
+check and not a step.
+
+## INC-2026-10-25-the-authority-split-inverted-the-bootstrap-block-that-tells-a-window-to-re-read-its-charter — §0 sends every window to the newest open pull request, and after the split the newest one carries the stale charter
+
+**What happened.** §0 of `prompts/exo-agent.md` is the first thing every
+window of this seat reads. Its whole purpose is to defeat one failure:
+the host hands a run `main`, `main` is the subset of this org's memory
+the owner has merged, and this seat's charter amendments sit unmerged for
+days. So it says, in bold, to re-read the charter out of this seat's own
+open pull requests:
+
+> Then, if that last command printed anything, **read this charter from
+> the newest of those pull requests and not from the checkout you were
+> handed.**
+
+That instruction was correct for as long as this seat put its charter and
+its registers on one branch, because then the newest branch was also the
+most evolved charter. Window 42 split the chain by **merge authority** —
+correctly, and it is the reason the registers merged today after seven
+days frozen. The register half carries no `prompts/` path **by design**.
+So the newest open pull request of this seat now carries `main`'s
+charter, and the live charter sits on an **older** pull request.
+
+Measured at the start of this window, which is how it was found:
+
+| open exo pull request | opened | `prompts/exo-agent.md` |
+|---|---|---|
+| **#425** (newest then) | 03:29 | **2,221 lines** — `main`'s copy |
+| #422 | 03:08 | **2,221 lines** — `main`'s copy |
+| #418 | 02:49 | **4,850 lines** — the live charter |
+
+`main`'s copy was last touched on **2026-10-18**. The live one carries
+seven days of amendments through today. So a window obeying §0 to the
+letter reads a charter **2,629 lines short of its own memory**, which is
+precisely the outcome §0 was written to prevent, and it reads it
+*because* it obeyed §0.
+
+**Why it happened technically.** §0's predicate is **recency**. The
+quantity it wants is **charter evolution**. Those two were the same
+thing until a window deliberately made them different, and nothing in
+either rule contradicts the other, so §3's standards-against-standards
+sweep cannot see it by reading. The split did not break §0; it removed
+the coincidence §0 was relying on without knowing it relied on it.
+
+**What it cost.** This run's first five minutes, which is the same cost
+§0's own preamble documents for the tenth window of 2026-10-18 and was
+written to stop. This window caught it only by diffing the charter
+across all three open pull requests instead of taking the newest, which
+is not a method the charter asks for. Every later window pays the same
+cost or reads the stale file.
+
+**The fix, which is a charter edit and is therefore owed rather than
+done here.** §0's selection sentence is replaced so that the predicate
+is the quantity:
+
+> Then, if that last command printed anything, read this charter from
+> whichever of those pull requests carries the **longest**
+> `prompts/exo-agent.md`, which is not necessarily the newest. This
+> seat splits its chain by merge authority, so its register half
+> deliberately carries `main`'s charter and its charter half can be an
+> older pull request.
+>
+> ```sh
+> for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+>              --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+>   printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+> done | sort -rn | head -1
+> ```
+
+`wc -l` is a proxy and a weak one, and it is the right proxy here for a
+stated reason: this seat's charter has grown monotonically for four
+weeks, the two candidate copies differ by 2,629 lines rather than by a
+margin, and the alternative is a content comparison that costs turns in
+§0, which is the one section that must stay cheap. If a future window
+ever shortens this file deliberately — and the charter asks for exactly
+that under "prefer a deletion to a banner" — this proxy inverts, and the
+guard then needs the date of the newest `prompts/` commit instead.
+
+**Why it is not on this branch.** Writing `prompts/exo-agent.md` here
+would put a Tier C path on the register half and re-incur the 81.4%
+hold window 42 measured and fixed, and it would **revert** the live
+charter, because this branch carries `main`'s copy. The amendment is
+routed to the centralizer with the exact text above, and recorded here
+as **owed**, not as done.
+
+**What the org grows from it.** This is the fifth member of the family
+this register keeps finding, and the first one where the two rules were
+written by the **same seat** four weeks apart: a correct rule whose
+predicate is a **proxy** for the quantity it wants, and a later correct
+change that breaks the proxy without touching the rule. The others all
+turn on granularity. This one turns on a correlation nobody wrote down.
+So: **when a rule selects an artifact by a property, say which property
+it actually wants**, because the next window to change your process will
+not know that `newest` meant `most evolved`.

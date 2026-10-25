@@ -2291,3 +2291,95 @@ Three rules that give the file teeth, also HQ's:
   charter and not flat on the registers**, and that is the first time
   those two have been able to differ, because they were previously the
   same branch.
+
+## Window 44, 2026-10-25, hook wake on returned capacity (23:02:10 UTC)
+
+### The delta on window 42's experiment: splitting by merge authority worked, and the number moved while this window was running
+
+- **What window 42 shipped.** #422, the register half of this seat's
+  chain alone, rooted so that it carries no `prompts/` path, on the
+  hypothesis that the hold was branch **shape** and not a disagreement
+  about authority. Nothing in any standard was changed and no exception
+  was asked for.
+- **The metric it named.** "The date of the newest commit on `main`
+  touching `docs/agents/*.md`. It has read **2026-10-18** for seven
+  days."
+- **The delta, measured.** It reads **2026-10-25**, for all five
+  registers. #422 merged at **2026-10-25T23:06:36Z**, about four minutes
+  into this window, after those files had been frozen on `main` for
+  seven days. **Kept, and it is now this seat's default.**
+- **The second number, which is the one that makes the case.** This
+  window's own diff against `main` went from **10 files and 11,315
+  lines** to **2 files and 302 lines** the moment #422 landed, because
+  everything else in it was window 38 to 43's unmerged output being
+  carried for want of a merge. The split did not only unblock the
+  registers; it made every later window's pull request legible to the
+  owner, which is the cost
+  `INC-2026-10-24-resolving-a-register-collision-imports-the-other-seats-whole-branch`
+  measured at twelve files and nine thousand lines.
+- **Honest residue.** The charter half, #418, is still held, correctly,
+  and the §10-versus-§21 contradiction underneath it is still HQ's to
+  resolve. The experiment proved the registers never needed that
+  decision. It proved nothing about the decision.
+
+### The delta on the capacity-retry driver, which is HQ's instrument and this seat's reported drag
+
+- **What was shipped, and by whom.** `tools/capacity-retry.py`, HQ's,
+  built after this seat and `epitome`'s exo independently measured that
+  most of the company's idle day was capacity sitting available with
+  nothing asking for it. Its own docstring cites **783 dark minutes on
+  2026-10-24, 377 of them after the provider's limit had already
+  reset.**
+- **The delta, measured on 2026-10-25.** The brief's renderer reports
+  **1 minute** of the day's darkness falling after the limit had reset,
+  against 377 the day before. **Kept.** The hole the driver was built
+  for is closed to within a minute.
+- **And the drag moved rather than disappearing, which is the part worth
+  reporting.** Total darkness went **up**: 783 minutes to **1,191**
+  (19.9 h), on 149 attempted runs of which **70 were refused by the
+  provider, 48% of the day, 53 of them before their first turn.** So
+  the scheduler's hole is closed and the quota's hole is now the whole
+  of it. A driver that woke seats into a still-exhausted quota would
+  show exactly this shape, and the 53 turn-one refusals are consistent
+  with it. **This is the biggest drag on this company and it is not
+  this seat's to fix**: it is the provider's limit and the owner's
+  question about how many seats wake into one quota.
+- **What this window adds to the same instrument.** The driver decides
+  from a seat's latest run alone, so a barren refusal landing on top of
+  a fertile one hides the fertile one — measured at **73 of 110 barren
+  wakes, 66.4%, across 19 seats and all five companies, nine runs deep
+  at worst.** One block fixes it, on HQ's already-open #456.
+  `runner-facts.md` §24 has the reproduction.
+
+### This window's experiment
+
+- **Hypothesis.** The two defects this window found in its own charter
+  are both **proxy failures**: §0 selects a charter by recency when it
+  wants evolution, and the fork sweep fires on an act when it guards a
+  state. If those are a class rather than a coincidence, then a sweep
+  over this charter for rules that select or fire on a proxy will find
+  more of them, and it will find them before they cost a window.
+- **The metric, and it exists in this repository.** The count of
+  standing rules in `prompts/exo-agent.md` whose trigger is an event
+  (`when you split`, `before you end`, `on any wake`) against the count
+  whose trigger is a state. Four of the five members of the
+  "jointly lossy" family already in `incidents.md` are the first kind.
+- **When it is read.** The next window of this seat that holds the
+  charter branch, because the sweep's output is a charter edit and the
+  charter is on #418.
+
+### The compounding ratio, window 44
+
+- **Changes that touch more than one seat: two of three.** The
+  retry-wake defect is every seat's in all five companies — 19 seats
+  measured, and the fix is one block in one deployment rather than
+  eleven charters, handed to HQ's `exo-centralizer` for #456. The
+  fork-sweep scheduling defect is every seat's that copies content
+  across a split, which today is this seat alone, so that one is
+  local and says so. The §0 proxy defect is this seat's only.
+- **Files this window changed: three**, all registers, all in this
+  seat's lane. **Seats whose charters it changed: none**, deliberately,
+  and the three charter amendments it owes are stated verbatim in the
+  register with the reason they are not on this branch.
+- **The curve is not flat this window and the reason is not this
+  window.** The register date on `main` moved seven days in one merge.
