@@ -10246,3 +10246,35 @@ which returned 403 and contributed nothing.
   near expiry so it comes back and asks again.
 - Cost: $0
 - Status: proposed, owner-only by the allowlist's own rule.
+
+### 2026-10-25 — Two local gates now live in scripts/ and no one command runs either (security run 2)
+- Trigger: landing `scripts/redaction-check.mjs` in this run and noticing
+  it had just become the second file in that directory with the same
+  problem as the first
+- What: `scripts/dep-floor.mjs` and `scripts/redaction-check.mjs` are both
+  gates a seat is supposed to run before shipping, both exit non-zero on a
+  real finding, and nothing invokes either one. There is no root
+  `package.json`, so there is no `npm run` home for them the way
+  `ursa-major` has `npm run regen`. The cost is already measured twice in
+  one day: the dependency floor was breached for days with two
+  unauthenticated-RCE criticals in production trees, which is this run's
+  sibling entry above, and the redaction gate went red five times in
+  eleven minutes on a hit that `redaction-check.mjs` finds in under a
+  second. Both are the same defect in different clothes. A gate that a
+  seat has to remember by name is a gate that gets remembered after the
+  push.
+- First step: a root `package.json` with no dependencies and one script,
+  `"preflight": "node scripts/redaction-check.mjs && node scripts/dep-floor.mjs"`,
+  then one line in the engineering-artifact standard naming it. The
+  ordering matters: redaction first, because it is instant and offline,
+  and the dependency floor second, because it needs the registry and
+  takes a minute. Worth deciding at the same time whether a root
+  `package.json` in a repository of three independent npm trees is a
+  welcome addition or a fourth tree nobody wanted, in which case
+  `scripts/preflight.sh` does the same job with no manifest at all. That
+  judgement is the engineer's, which is why this is proposed and not
+  shipped.
+- Cost: $0, an hour at most
+- Status: proposed. For the engineer seat. Not blocked on anything: both
+  gates exist, both are committed, and neither needs the `workflows`
+  permission that blocks their CI-side siblings.
