@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-10-25T02:37:37.779Z",
+  "measuredAt": "2026-10-25T03:28:51.290Z",
   "note": "public pages, read only; nothing clicked, typed into or followed",
   "results": [
     {
@@ -335,10 +335,167 @@
       "links": []
     },
     {
-      "url": "https://consensus.app/home/blog/welcome-to-consensus/",
+      "url": "https://react.dev/learn",
       "ok": true,
-      "count": 0,
-      "links": []
+      "count": 12,
+      "links": [
+        {
+          "text": "MDN",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "javascript.info",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "tools we recommend for local development",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "class",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "<link>",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "string concatenation",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "if",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "conditional ? operator.",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "logical && syntax",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "for loop",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "array map() function",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        },
+        {
+          "text": "API reference.",
+          "linkColor": "rgb(8, 126, 164)",
+          "proseColor": "rgb(35, 39, 47)",
+          "decorationLine": "none",
+          "decorationColor": "rgb(8, 126, 164)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.23,
+          "underlinedAtRest": false,
+          "bolderThanProse": false
+        }
+      ]
     }
   ]
 }

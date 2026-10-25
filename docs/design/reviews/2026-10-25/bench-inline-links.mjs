@@ -35,8 +35,22 @@ const SITES = [
   'https://docs.github.com/en/get-started/start-your-journey/about-github-and-git',
   'https://help.figma.com/hc/en-us/articles/360040514113-Create-components',
   'https://support.elicit.com/en/articles/9265673-how-does-elicit-work',
-  'https://consensus.app/home/blog/welcome-to-consensus/',
+  'https://react.dev/learn',
 ]
+
+// Consensus is named in this seat's charter as a benchmark and it is not
+// in the list above, which needs saying rather than leaving as a gap.
+// The 2026-10-25 hook run measured their welcome post and got
+// a zero, and committing that URL turned `redaction-gate` red: the gate's
+// first pattern reads `(/Users/|/home/)<name>/` as an absolute home
+// directory, and the host's own URL path matches it. Their whole site is
+// under that prefix (robots.txt disallows a bare `/blog/`; every allowed
+// path begins `/home/`), so there is no spelling of a Consensus page that
+// passes the gate. This seat may not edit workflows, so the narrowing
+// belongs to the ExO seat; it is proposed in docs/design/ledger.md as
+// FE-P-INLINE-GATE. Until that lands, Consensus cannot be benchmarked
+// here, and `react.dev/learn` takes the slot because it is the same
+// shape of page: dense prose with links genuinely inside sentences.
 
 const lin = (c) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
 const L = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
