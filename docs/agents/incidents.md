@@ -6932,3 +6932,96 @@ guard a state that outlives the act. When you write a duty that fires on
 an event, ask whether the condition it removes can still be true on a
 later run that did not cause it, and if it can, the duty is a standing
 check and not a step.
+
+## INC-2026-10-25-the-authority-split-inverted-the-bootstrap-block-that-tells-a-window-to-re-read-its-charter — §0 sends every window to the newest open pull request, and after the split the newest one carries the stale charter
+
+**What happened.** §0 of `prompts/exo-agent.md` is the first thing every
+window of this seat reads. Its whole purpose is to defeat one failure:
+the host hands a run `main`, `main` is the subset of this org's memory
+the owner has merged, and this seat's charter amendments sit unmerged for
+days. So it says, in bold, to re-read the charter out of this seat's own
+open pull requests:
+
+> Then, if that last command printed anything, **read this charter from
+> the newest of those pull requests and not from the checkout you were
+> handed.**
+
+That instruction was correct for as long as this seat put its charter and
+its registers on one branch, because then the newest branch was also the
+most evolved charter. Window 42 split the chain by **merge authority** —
+correctly, and it is the reason the registers merged today after seven
+days frozen. The register half carries no `prompts/` path **by design**.
+So the newest open pull request of this seat now carries `main`'s
+charter, and the live charter sits on an **older** pull request.
+
+Measured at the start of this window, which is how it was found:
+
+| open exo pull request | opened | `prompts/exo-agent.md` |
+|---|---|---|
+| **#425** (newest then) | 03:29 | **2,221 lines** — `main`'s copy |
+| #422 | 03:08 | **2,221 lines** — `main`'s copy |
+| #418 | 02:49 | **4,850 lines** — the live charter |
+
+`main`'s copy was last touched on **2026-10-18**. The live one carries
+seven days of amendments through today. So a window obeying §0 to the
+letter reads a charter **2,629 lines short of its own memory**, which is
+precisely the outcome §0 was written to prevent, and it reads it
+*because* it obeyed §0.
+
+**Why it happened technically.** §0's predicate is **recency**. The
+quantity it wants is **charter evolution**. Those two were the same
+thing until a window deliberately made them different, and nothing in
+either rule contradicts the other, so §3's standards-against-standards
+sweep cannot see it by reading. The split did not break §0; it removed
+the coincidence §0 was relying on without knowing it relied on it.
+
+**What it cost.** This run's first five minutes, which is the same cost
+§0's own preamble documents for the tenth window of 2026-10-18 and was
+written to stop. This window caught it only by diffing the charter
+across all three open pull requests instead of taking the newest, which
+is not a method the charter asks for. Every later window pays the same
+cost or reads the stale file.
+
+**The fix, which is a charter edit and is therefore owed rather than
+done here.** §0's selection sentence is replaced so that the predicate
+is the quantity:
+
+> Then, if that last command printed anything, read this charter from
+> whichever of those pull requests carries the **longest**
+> `prompts/exo-agent.md`, which is not necessarily the newest. This
+> seat splits its chain by merge authority, so its register half
+> deliberately carries `main`'s charter and its charter half can be an
+> older pull request.
+>
+> ```sh
+> for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+>              --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+>   printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+> done | sort -rn | head -1
+> ```
+
+`wc -l` is a proxy and a weak one, and it is the right proxy here for a
+stated reason: this seat's charter has grown monotonically for four
+weeks, the two candidate copies differ by 2,629 lines rather than by a
+margin, and the alternative is a content comparison that costs turns in
+§0, which is the one section that must stay cheap. If a future window
+ever shortens this file deliberately — and the charter asks for exactly
+that under "prefer a deletion to a banner" — this proxy inverts, and the
+guard then needs the date of the newest `prompts/` commit instead.
+
+**Why it is not on this branch.** Writing `prompts/exo-agent.md` here
+would put a Tier C path on the register half and re-incur the 81.4%
+hold window 42 measured and fixed, and it would **revert** the live
+charter, because this branch carries `main`'s copy. The amendment is
+routed to the centralizer with the exact text above, and recorded here
+as **owed**, not as done.
+
+**What the org grows from it.** This is the fifth member of the family
+this register keeps finding, and the first one where the two rules were
+written by the **same seat** four weeks apart: a correct rule whose
+predicate is a **proxy** for the quantity it wants, and a later correct
+change that breaks the proxy without touching the rule. The others all
+turn on granularity. This one turns on a correlation nobody wrote down.
+So: **when a rule selects an artifact by a property, say which property
+it actually wants**, because the next window to change your process will
+not know that `newest` meant `most evolved`.

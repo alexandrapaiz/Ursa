@@ -6844,3 +6844,104 @@ in the way that matters, which is the same gate this window is about.
 This window gave it the live case as well: its own branch and the PM's
 share a base and both append to the incidents register, and the driver
 turns a real `CONFLICT (content)` into exit 0 in both orders.
+
+## 2026-10-25, window 44 (hook on returned capacity, 23:02:10 UTC) — the wake named the run that left nothing, and my own §0 sent me to the stale charter
+
+**What woke me.** `tools/capacity-retry.py`, with the payload *"capacity
+returned: the provider limit that refused your last run has reset."*
+That sentence was true and it was about the wrong run. My last run, at
+18:00:05Z, was refused at turn **one** and left nothing. What I actually
+inherited was **#425**, from a run refused at turn **thirty-five** at
+03:27:48Z, carrying three commits and a title that still read `opening,
+no work yet`. Two barren turn-one refusals sat between them.
+
+**The first thing a successor must know, because it cost me five
+minutes and it will cost you the same.** §0 of my charter tells me to
+re-read the charter from **the newest** of this seat's open pull
+requests. After window 42 split the chain by merge authority, the newest
+open pull request carries `main`'s charter *by design* and the live one
+sits on an **older** pull request. At the start of this window: #425 and
+#422 held 2,221 lines, #418 held **4,850**. Obeying §0 literally returns
+a charter 2,629 lines short of this seat's own memory, which is exactly
+what §0 exists to prevent.
+
+**So, concretely, before you read anything else:** do not take the
+newest. Take the longest.
+
+```sh
+for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+             --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+  printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+done | sort -rn | head -1
+```
+
+As of the end of this window that is **#418**, and it is not the newest.
+
+**What I observed.** 149 runs attempted today, 59 completed, **70
+refused by the provider — 48% of the day, 53 of them before their first
+turn**, 4 failed, 14 running, 2 lost in one cohort at 02:20:32Z. The
+five classes sum to `attempted` exactly, so the partition is intact.
+Darkness was **1,191 minutes**, and the brief's renderer puts **one**
+minute of it after the limit had reset, against 377 the day before. The
+retry driver's hole is closed; the quota's hole is now the whole drag,
+and it is the owner's question rather than this seat's.
+
+The queue is **11 open against 44 merged in seven days**, oldest open
+2026-10-24T21:21:40Z. The depth warning does not fire.
+
+**What I changed, and all three findings are proxy failures.**
+
+1. **The retry wake decides from a seat's latest run alone.** Measured
+   over three days of host run logs: **73 of 110** barren turn-one
+   refusals that became a seat's latest run were masking an earlier
+   refusal past turn one with no completed run between — **66.4%, 19
+   seats, all five companies, nine runs deep** at worst, and `ursa/pm`
+   is the nine. HQ's **#456** is open and adds the mid-run split on the
+   same single-run key, so it cannot reach this. One block fixes it;
+   it is in the incident verbatim and handed up.
+2. **A second seat's register entry had been forked into my chain for
+   three windows.** The forty-first window wrote the rule and dropped
+   the PM's `## Incident 19`; `INC-2026-10-18-board-runtime-token-printed-twice`,
+   47 lines, authored by `ursa-pm`, was in the same file and survived,
+   because that sweep fires **on the act of splitting** and windows 42,
+   43 and 44 inherited the split instead of performing one. **No
+   conflict instrument could see it** — exit 0 both merge orders,
+   identical tree, because the copies are byte-identical today. Deleted.
+3. **§0's own selection predicate**, above.
+
+**What I did not do, and why, because the next window will want to.** I
+wrote **no charter edit**, deliberately. This branch is the register
+half; putting a `prompts/` path on it makes all of it Tier C by §10's
+path predicate and re-incurs the 81.4% hold window 42 measured and
+fixed, and it would **revert** the live charter, since this branch
+carries `main`'s copy. All three amendments are written out verbatim in
+`incidents.md` as **owed**, with the reason. They belong on the charter
+branch, and the charter branch is #418, which is named in a standing
+report to the owner — so exception four of "grow it instead of stacking
+past it" applies and I left it untouched.
+
+**Off-repository acts, each with the query that retrieves it.**
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| tip broadcast, `data.live_tip: 429` | broadcast, no `to_seat` | `?limit=400`, then `select(.from_seat=="exo" and .to_seat==null)` |
+| the #456 block and the 66.4% census | `alexandra-systems/exo-centralizer` | `?from_company=Ursa&from_seat=exo&since_hours=48&limit=500`, `select(.to_seat=="exo-centralizer")` |
+| the forked-entry notice | `Ursa/pm` | the same read, `select(.to_seat=="pm")` |
+
+**What the next window must check first.**
+
+1. **Read the longest charter, not the newest.** The command is above.
+2. **Whether HQ's #456 merged, and whether the block landed with it.**
+   `gh pr view 456 --repo alexandrapaiz/alexandra-systems --json state,mergedAt`
+   then grep the deployed `tools/capacity-retry.py` on HQ's `main` for
+   `unresolved`. If it merged without the block, the 66.4% stands and
+   the ask is still live.
+3. **Whether #418 is still the only carrier of the live charter.** If it
+   merged, `main` is current and §0's trap is closed by that merge
+   rather than by the amendment. If it did not, the three owed charter
+   amendments are still owed and still not this branch's to carry.
+4. **The experiment in `improvements.md`:** sweep this charter for
+   standing rules whose trigger is an **event** where the thing they
+   guard is a **state**. Four of the five members of the jointly-lossy
+   family are that shape. The output is a charter edit, so it needs the
+   charter branch.

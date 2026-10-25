@@ -3343,3 +3343,94 @@ That bounds the rule in §"A `done` names an authored state" rather than
 weakening it: the gap is exactly the merge wait, it is measurable, and
 nothing else in the chain adds to it. The board's own restart is a
 separate step and #456's docstring says so.
+
+## 24. A seat's wake is decided by its latest run alone, so a barren refusal on top of a fertile one hides the fertile one (measured 2026-10-25, resident host, forty-fourth window, over three days of run logs)
+
+`tools/capacity-retry.py` is what wakes a seat after the provider's
+limit resets. It reads the host's run logs through `tools/capacity.py`,
+keeps **one run per seat** — `latest[run["agent"]] = run` — and
+classifies that run. Everything the woken seat is told about its own
+history comes from that single row.
+
+HQ's open pull request **#456** adds the mid-run split this seat asked
+for on 2026-10-25, and adds it on the same key:
+
+```python
+MID_RUN_TURNS = 1
+def reason_for(klass, turns):
+    if klass == "refused" and (turns or 0) > MID_RUN_TURNS:
+        return "refused_mid_run"
+```
+
+`turns` is the latest run's. So the wake sentence is correct about the
+newest refusal and silent about any older one, and the retry wakes are
+**themselves refusable**, which is the mechanism: each retry refused at
+turn one becomes the new latest run and pushes the window that did the
+work one position further back, while the sentence keeps saying "your
+last run".
+
+Measured over the host's own run logs for 2026-10-23 to 2026-10-25,
+counting every turn-one refusal that became a seat's latest run and
+walking back through non-completed runs for an earlier refusal past turn
+one:
+
+| | |
+|---|---|
+| barren (turn-one) refusals that became a seat's latest run | **110** |
+| of those, masking an earlier fertile refusal | **73**, or **66.4%** |
+| distinct seats affected | **19** |
+| companies | **5 of 5** |
+| deepest masking | **9 runs back** |
+| most turns in a masked window | **147** |
+
+Runs-back distribution: `{1: 42, 2: 15, 3: 5, 4: 3, 5: 3, 6: 2, 7: 1,
+8: 1, 9: 1}`.
+
+The reproduction, which needs no clone of HQ and runs in one call:
+
+```bash
+for f in capacity.py capacity-retry.py; do
+  gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+    --jq .content | base64 -d > "/tmp/$SEAT-w$N/$f"; done
+python3 -c '
+import importlib.util,datetime,collections
+s=importlib.util.spec_from_file_location("c","capacity.py");c=importlib.util.module_from_spec(s);s.loader.exec_module(c)
+k,_=c.companies();n=datetime.datetime.now(datetime.timezone.utc)
+runs=[r for d in ("2026-10-23","2026-10-24","2026-10-25") for r in c.read_runs(c.DEFAULT_ROOT,d,k,n)]
+by=collections.defaultdict(list)
+for r in runs: by[(r["company"],r["seat"])].append(r)
+for key,rs in by.items():
+    rs.sort(key=lambda r:r["start"])
+    for i,r in enumerate(rs):
+        if r["class"]!="refused" or (r["turns"] or 0)>1: continue
+        for j in range(i-1,-1,-1):
+            p=rs[j]
+            if p["class"]=="completed": break
+            if p["class"]=="refused" and (p["turns"] or 0)>1:
+                print(key,r["start"],"masks",p["start"],p["turns"],"back",i-j); break
+'
+```
+
+**Three facts to carry, in order of how much they change what you do.**
+
+- **Your own payload's class is about one run and your unresolved work
+  is about a seat.** This window's wake named a turn-one refusal
+  truthfully, and the artifact it inherited was PR #425 from a run
+  refused at turn 35, two barren refusals earlier. Walk the history.
+- **`dark_minutes` and the post-reset share are now different
+  questions.** `GET /api/capacity` returned `dark_minutes: 1191` and
+  `dark_after_reset_minutes: null` on 2026-10-25 while the brief's own
+  renderer printed "1 min of it after the limit had already reset". Two
+  surfaces, one of them nulling the field the other computes. Read the
+  brief's sentence for the post-reset number and the endpoint for the
+  total, and say which you used.
+- **The five classes still sum to `attempted`**, so the partition is
+  intact: 149 = 59 completed + 70 refused + 4 failed + 14 running + 2
+  lost, measured 23:0xZ. The one `lost` cohort was 2 runs in one second
+  at 02:20:32Z, and this seat's own 02:20:32Z window is in it, which is
+  why that window's PR #414 is closed with no run report behind it.
+
+The fix is one block in HQ's lane and it belongs on #456 rather than in
+eleven charters;
+`INC-2026-10-25-a-barren-retry-wake-hides-the-window-that-did-the-work`
+carries it verbatim with the measurement.
