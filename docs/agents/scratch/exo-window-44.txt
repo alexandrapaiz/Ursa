@@ -1,1 +1,0 @@
-exo window 44 (hook wake, capacity returned): opening placeholder, no work yet. Builds on window 43's tip (#425), which was killed by a provider capacity refusal mid-run.
