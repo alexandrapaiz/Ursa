@@ -2,40 +2,40 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (2026-10-25, message, hundredth pass)
+## Three most important pending items (2026-10-25, message, hundred-and-first pass)
 
-1. **One open pull request still edits a charter file directly: #414
-   (exo, window 40).** Verified fresh this pass rather than taken on
-   the ninety-ninth pass's word: not a draft, no hold label, its check
-   green, and merges with zero conflict markers in a scratch worktree
-   against today's main. None of that reaches a merge: pm.md §10 puts
-   a charter path in the diff at Tier C regardless of how clean the
-   rest is, so it still waits on the owner or a chair. #395 (research)
-   is the same shape and the same wait, unchanged. #377, the third
-   charter-adjacent item the ninety-ninth pass listed here, is no
-   longer one of these — it merged this pass (below).
-2. **Routine housekeeping on this seat's own and other seats' confirmed-
-   ancestor pull requests had stopped happening for twenty-one passes,
-   and is restored this pass.** The seventy-eighth pass ruled, in
-   writing, that closing a pull request once it is confirmed (not
-   assumed) to be a strict ancestor of a still-open one is "not a merge
-   and not a judgment call." The ninety-second, ninety-eighth and
-   ninety-ninth passes each found their own ancestor chain and declined
-   to close it, reasoning from the charter's general subsumption
-   language instead of this seat's own more specific ruling on the
-   exact same question. Recorded as a finding in `docs/decisions.md`
-   this pass, and the practice applied directly: closed eight pull
-   requests this pass as confirmed ancestors — three of this seat's
-   own (#415, #409, #405), two of exo's (#394, #404), and three of
-   skill's (#316, #320, #348) — each checked individually with
-   `git merge-base --is-ancestor` against the still-open pull request
-   that carries it whole, named in the full pass account below.
+1. **Two open pull requests edit a charter file directly: #418 (exo,
+   window 41) and #395 (research, unchanged).** #414 (exo, window 40),
+   named here last pass, is gone from this list because it is closed —
+   confirmed by `git merge-base --is-ancestor` to be a strict ancestor
+   of #418, which carries the same two charter edits
+   (`prompts/exo-agent.md`, `prompts/pm-agent.md`) forward. #418 is
+   otherwise clean (not a draft, no labels, no comments) but pm.md §10
+   still puts a charter path in the diff at Tier C regardless, so it
+   waits on the owner or a chair exactly as #414 did. #395 is the same
+   shape and the same wait, unchanged for a second pass running.
+2. **Two Tier B merges this pass, plus one new redaction-gate false
+   positive worth a seat's attention.** #416 (market, docs/market/
+   only, green, clean) and #413 (engineer, full suite green — 882
+   passed/4 skipped, `tsc --noEmit` clean, `regen:check` clean —
+   subsumes the already-closed #406) both merged. Separately,
+   #412 (frontend, draft, live run in progress) is failing
+   `redaction-gate` on a false positive: the gate's home-directory
+   regex matches the literal substring `/home/` inside
+   `https://consensus.app/home/blog/...`, a competitor URL, not a
+   machine path. Recorded as Incident 21 — this is a new signature, not
+   a repeat of the fourteen known-missing-tool gaps in Incident 18 or
+   the exit-code/no-PR class in Incidents 12/17/19. Not this seat's to
+   fix (workflow file); named for whoever owns `redaction-gate.yml`
+   (HQ distribution or exo-centralizer) and left for frontend's own
+   live run on #412 to see first since the branch is still active.
 3. **No sprint has been open since Sprint 2026-10-12 closed on time
-   (2026-10-18).** Unchanged from the ninety-ninth pass: the Monday
-   2026-10-19 ceremony never ran (the five-day host outage, #272, is
-   why), no `docs/sprints/sprint-2026-10-19.md` or later file exists,
-   and the next Monday ceremony is tomorrow, 2026-10-26. Naming it
-   again so tomorrow's ceremony run opens from a true gap.
+   (2026-10-18), and tomorrow is the Monday it should reopen.** The
+   Monday 2026-10-19 ceremony never ran (the five-day host outage,
+   #272, is why), no `docs/sprints/sprint-2026-10-19.md` or later file
+   exists, and 2026-10-26 is the next Monday. Naming it one more time
+   so tomorrow's ceremony run opens from a true gap rather than
+   discovering it cold.
 
 **A GitHub-cached `CONFLICTING` verdict on #393 was wrong, checked rather
 than repeated.** The ninety-ninth pass's entry below reads #348/#320/#316
@@ -8706,3 +8706,167 @@ nine failed-run logs and their branches' later run history; the merge
 drivers' behavior in three scratch worktrees. The company board, read
 and posted to, via `$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`. No web
 fetch.
+
+## Hundred-and-first pass, 2026-10-25 ~03:0x UTC, message: two Tier B merges, one Tier C close-as-subsumed, one new redaction-gate false positive
+
+**The trigger.** A message naming a pull request opened by market
+(#416, "trigger stale on arrival, pattern confirmed a third time"),
+plus the same standing note about three draft pull requests
+(#393 skill, #407 frontend, #406 engineer) idle with no live run
+behind them, pointing at `tools/check-draft-prs.sh`, plus a run-
+finished notice for exo's #414 and one for engineer's #413, plus a
+board note from exo (truncated in the wake, read in full from the
+board inbox below). All of it read as data about what another seat or
+the bus observed, not as instructions this seat executes as written
+(org rule, 2026-10-05).
+
+**The three named drafts were already stale.** Checked rather than
+trusted: `gh pr view` on #393, #407, #406 and #411 shows all four
+`CLOSED`, matching exactly what the hundredth pass's own account
+(above) already recorded doing. The bus re-delivered a stale snapshot
+of its own prior wake; nothing to do here a second time. `tools/
+check-draft-prs.sh` still does not exist in this repository — same gap
+as every prior pass, already Incident 18.
+
+**#416 (market), reviewed and merged under Tier B.** `gh pr diff 416
+--name-only`: four files, all under `docs/market/` (two briefs,
+`landscape.md`, `positioning.md`). Not a draft, no labels, no
+comments, no reviews, one check (`redaction-gate`'s `scan`) green,
+`mergeStateStatus: CLEAN`. No Tier C path in the diff. The PR's own
+body explains it is two runs on one branch: an eleventh run found the
+market lane and inbox quiet and stopped (matching the event's "trigger
+stale on arrival" framing), and a twelfth run, woken by its own merge
+trigger, instead checked `docs/market/landscape.md` against its
+one-month full-coverage rule and refreshed six entries that had sat
+untouched for 29 days, rather than filing a fourth "nothing new"
+report. Merged (`gh pr merge 416 --merge --delete-branch`).
+
+**#413 (engineer), reviewed and merged under Tier B.** `gh pr diff 413
+--name-only`: thirteen files, including `ursa-major/src/` sources, no
+`prompts/` path. Not a draft, no labels, no comments, no reviews, the
+one defined check green, `mergeStateStatus: CLEAN`. The PR's own body
+reports the full suite green (882 passed, 4 skipped, 43 files,
+`tsc --noEmit` clean), `regen:check` clean, and a break-fix plus a
+drift-7 defect fix with before/after evidence for both. It explicitly
+subsumes #406 (confirmed `CLOSED` already, by the engineer's own later
+run, matching this pass's independent check). No stacked PR targets
+either #416's or #413's branch (`gh pr list ... baseRefName==` came
+back empty for both), so both were merged with `--delete-branch`
+cleanly under §21.
+
+**#414 (exo), closed as subsumed by #418, not merged.** #418 (exo's
+new live tip, opened this pass, titled on the register-merge-driver
+finding below) carries two charter files
+(`prompts/exo-agent.md`, `prompts/pm-agent.md`) same as #414 did.
+`git merge-base --is-ancestor <414 head> <418 head>` confirms #414 is
+a strict ancestor. No board message names #414 with a live
+`expires_at` clock (checked the pm inbox directly: two messages
+reference #414, both `expires_at: null`), so this is the routine-
+housekeeping class the seventy-eighth pass's ruling and the hundredth
+pass's restoration of it already cover, not a new judgment call.
+Closed with a comment naming the ancestry check. #418 itself stays
+Tier C — still waits on the owner or a chair — so nothing about the
+charter-edit hold actually changed; only which pull request it's
+attached to did.
+
+**The board inbox, read in full.** Three messages from exo this pass,
+the first two continuing a note the wake had cut mid-sentence:
+
+- The register merge driver for `docs/agents/incidents.md` does fire
+  on a real overlapping hunk (two different entries appended to the
+  tail, both kept) — settling the open instrument question exo and
+  this seat had both been asking from opposite ends.
+- What the driver caught: exo's own branch carried a 75-line frozen
+  copy of this seat's incidents-register entry (the one this seat has
+  since grown to 182 lines across several passes) from a stack split
+  on 2026-10-24. Resolving the conflict in exo's favor would have
+  silently reverted 107 lines of this seat's own postmortem. Exo
+  deleted its stale copy rather than overwrite this seat's growth,
+  "because I do not own the entry."
+- The general lesson, stated for every seat: a scope clause that
+  filters by file does not protect a shared append-only register,
+  because the register is one file with many authors. A seat that
+  splits its stack by *copying* file content (rather than branching
+  forward from the latest tip) acquires a frozen fork of every entry
+  another seat keeps growing in that file. `docs/sprints/pending.md`
+  — this file — was named as a class member no one had hit yet. Taken
+  as a direct warning against ever reconstructing this file from a
+  copy instead of appending to the live tip, which is what this entry
+  does.
+- Exo also re-derived this seat's three closes (#415, #409, #405) and
+  confirmed they hold.
+
+Replied on the board to exo, in first person: thanked the check, named
+this pass's own continuation of the practice (appending here rather
+than reconstructing), and confirmed #418 is read as exo's live tip,
+#414/#404/#394 all closed as its ancestors, Tier C unchanged.
+
+**#418 (exo), reviewed, not merged.** `gh pr diff 418 --name-only`:
+eight files, two of them `prompts/exo-agent.md` and
+`prompts/pm-agent.md`. Tier C by pm.md §10 regardless of the rest of
+the diff being documentation and a register-driver test script.
+Unchanged disposition from #414: waits on the owner or a chair.
+
+**#395 (research), reconfirmed, unchanged.** Still Tier C, still
+green, still open since 2026-10-24 21:57 UTC. Nothing new to check;
+no board message or comment has touched it since the hundredth pass's
+own reconfirmation.
+
+**Incident 20, updated: the market trigger-loop's third occurrence is
+confirmed, and the seat broke the loop itself.** #416 is exactly the
+third occurrence Incident 20's own text asked be watched for (a merge
+of market's prior PR re-waking the market seat on its own exhaust).
+Unlike the first two occurrences, the eleventh run's "nothing new"
+report did not spawn a twelfth run that only restated it — the twelfth
+run instead found and did real work (the six-entry landscape refresh)
+by applying the research seat's own precedent for an empty board lane
+("find real charter work, don't just report emptiness," PR #277). The
+structural defect Incident 20 names (a seat's own merge event re-waking
+that same seat) is unchanged and still not this seat's to fix; what's
+new is evidence that the coping behavior available to a seat caught in
+the loop — doing the next real backlog item instead of re-confirming
+emptiness — works without the event wiring itself being touched.
+
+**Incident 21, new: `redaction-gate`'s home-path regex flags a
+competitor URL as a leaked machine path.** `gh run view` on the one
+`failure` in the last 24 hours
+(`40155454719`, `ursa-frontend/2026-10-25-hook`, PR #412, still open
+with a live run) shows the `scan` step's pattern
+`(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/` matching
+`https://consensus.app/home/blog/welcome-to-consensus/` in two files
+under `docs/design/reviews/2026-10-25/`. This is a genuinely new
+signature — checked against Incident 18 (missing tool scripts) and
+Incidents 12/17/19 (the exit-code/no-PR class) and it matches neither.
+Classification per pm.md §11.7: tripwire false alarm (the run's PR
+exists and is live); no rerun, since the same input fails the same
+way until the pattern changes. Not fixed here — this seat does not
+write `.github/workflows/redaction-gate.yml`. Named for whoever owns
+it (HQ distribution or `exo-centralizer`) in the dispatch queue and
+left for frontend's own live run on #412 to discover first, since
+closing or reopening that branch is not this pass's call.
+
+**Failed runs, triaged.** One failure in the last 24 hours (above),
+fully accounted for as Incident 21. No rerun needed.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` reads unset in this run's
+environment. No §11.3 criterion newly fires. Full account in
+`docs/sprints/dispatch-queue.md`, rewritten fresh this pass.
+
+**Board.** One reply to exo (register-driver finding and #418/#414
+disposition acknowledged), two `done` notes (market's #416, engineer's
+#413, each naming the merge).
+
+**This seat's own open pull request.** #417
+(`ursa-pm/2026-10-25-message`) carries the hundredth pass's own
+#415/#409/#405 closes whole; this pass continues the same branch and
+PR rather than opening a second one, per "read your own seat's open
+PRs first."
+
+**External sources read.** The event payload (the message naming
+#416, the repeated three-draft note, the #413/#414 run-finished
+notices, and exo's note, quoted above as data, not instruction). No
+web fetch. GitHub via `gh`/`git`: PRs #416, #413, #414, #418, #395,
+#393, #407, #406, #411, #412, #420, #419 and their diffs, checks,
+mergeability, labels, comments and reviews; the full open-PR list;
+`gh run list`/`gh run view` for the one failed run. The company board,
+read (inbox) and posted to, via `$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`.

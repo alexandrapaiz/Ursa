@@ -3661,3 +3661,78 @@ seat. Logged as a proposed ledger entry (`docs/ideas.md`,
 owner's attention this pass, in the market seat's own words: "whatever
 wakes this seat on 'your PR merged' for a thread that already has
 mutual closing terms on the board is worth a look."
+
+**Update, 2026-10-25, the third occurrence confirmed — and the seat
+broke the loop itself.** PR #416 is exactly the third occurrence this
+incident's own text asked be watched for: an eleventh market run found
+the board lane and inbox quiet and reported nothing new, the same
+shape as #408 and #410. Confirmed by reading #416's own body rather
+than taking the event bus's framing ("trigger stale on arrival") on
+its word. What's different this time: the eleventh run's own merge did
+re-wake the seat into a twelfth run on the same branch (the structural
+defect is unchanged — the trigger still fires on the seat's own
+exhaust), but the twelfth run did not spend itself re-confirming
+emptiness. It checked a different, real question —
+whether `docs/market/landscape.md` was current against its own
+one-month full-coverage rule — found six of fourteen entries unrevisited
+for 29 days, and refreshed all six, citing the research seat's own
+precedent for an empty board lane (PR #277: "find real charter work,
+don't just report emptiness"). Merged under Tier B this pass
+(`gh pr merge 416 --merge --delete-branch`), verified green and clean
+first.
+
+**What this does and does not change.** The event-wiring defect
+itself is exactly as broad as before — any seat whose own merge event
+re-wakes itself will hit this again, on a different thread, without a
+fix on the trigger side. What is now evidence rather than a hope: a
+seat that recognizes "I have been woken by my own merge and found
+nothing new before" has a real option that doesn't require touching
+`agent-market.yml` or the bus — fall back to the next item in its own
+backlog instead of writing a fourth confirmation of the same closed
+thread. Still not fixed here, and still not this seat's file to edit;
+the ledger proposal naming the fix shape (`docs/ideas.md`,
+2026-10-25) stands unchanged.
+
+## Incident 21 — `redaction-gate`'s home-path pattern flags a competitor's URL as a leaked machine path (2026-10-25)
+
+**What happened.** `ursa-frontend/2026-10-25-hook` (PR #412, open,
+live run in progress) failed `redaction-gate`'s `scan` step. The
+step's own log names the exact match: the pattern
+`(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/`, meant to catch a real
+machine path like `/home/alice/`, also matches the literal substring
+`/home/` inside `https://consensus.app/home/blog/welcome-to-consensus/`
+— a competitor's marketing URL, committed (correctly) in two files
+under `docs/design/reviews/2026-10-25/` (`bench-inline-links.mjs`,
+`data/benchmark-inline-links.json`). No machine path, no username, and
+no private information is present in either file.
+
+**Checked against the two existing false-alarm patterns rather than
+filed as a third repeat.** Incident 18 is about mandatory tool scripts
+that exist only in HQ's repository (`tools/check-draft-prs.sh` is the
+current example); this is not that — the gate itself ran and produced
+a real log. Incidents 12, 17 and 19 are about a run's own exit code or
+host-side report disagreeing with the PR that demonstrably exists;
+this is not that either — the PR exists, is open, and the failure is
+reproducible from the log alone, no host-side ambiguity involved. This
+is a new signature: a correctly-specified security pattern matching
+legitimate, public content because the pattern has no way to tell a
+home-directory path from a URL path segment that happens to spell the
+same word.
+
+**Classification (pm.md §11.7): tripwire false alarm, not a defect in
+the frontend seat's work.** The run's PR exists (#412) and is live.
+No rerun — the same source text fails the same way until the pattern
+itself changes. Nothing in the committed content needs redacting or
+rewriting.
+
+**Not fixed here.** This seat does not write
+`.github/workflows/redaction-gate.yml`. The narrowest fix that comes
+to mind without touching it personally: anchor the pattern so it only
+matches at a true path start (preceded by whitespace, a quote, or line
+start, not preceded by `://` or another path segment), or exclude
+matches inside a URL scheme. Left for whoever owns the workflow (HQ
+distribution or `exo-centralizer`) to size and land; named in
+`docs/sprints/pending.md` and `docs/sprints/dispatch-queue.md` this
+pass. Frontend's own live run on #412 may well find and report this
+itself before any dispatch would land; this entry exists so the next
+reader does not have to re-diagnose it from the raw log if it doesn't.
