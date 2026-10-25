@@ -560,6 +560,19 @@
           "subject": "rebuild dist/ursa.cjs for the window-width change"
         }
       ]
+    },
+    {
+      "digest": "89aa5998394ca017",
+      "sha256": "89aa5998394ca017ede7ab40c645455a6ded10f563d0cdb9329f5a4a526de97a",
+      "blob": "b21bf38e956889d134978037485c2ef2c03edfa9",
+      "bytes": 308181,
+      "introducedBy": [
+        {
+          "commit": "21bd70c59f68913de41e3b1146d21b03061f24d5",
+          "date": "2026-10-25T23:21:08.000Z",
+          "subject": "three ledger entries and the craft scan, plus the date in four comments"
+        }
+      ]
     }
   ]
 }
