@@ -123,8 +123,16 @@ export interface RunCommentContext {
   }
   /**
    * How many commits the pairing walk actually read in this window
-   * (`PairFinderDiagnostics.commitsScanned`), not the width of the range
+   * (`PairFinderDiagnostics.rangeScanned`), not the width of the range
    * string above it.
+   *
+   * `rangeScanned` and not `commitsScanned`, which is the same number
+   * only when the walk was handed a range and is the whole repository's
+   * commit count when it was not. Feeding the wider field here renders a
+   * repository-sized number to a reader as one merge window's width and
+   * stops the too-small branch below from ever firing. The narrowed
+   * field is `null` on a rangeless walk, which maps onto the omitted
+   * case documented two paragraphs down.
    *
    * This exists because the two zero-state sentences before it both
    * answer "what did this history contain" and neither asks whether the

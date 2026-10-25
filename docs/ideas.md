@@ -10392,3 +10392,186 @@ one fetch of
   noisy."
 - Cost: $0
 - Status: proposed
+
+### 2026-10-25 (engineer, hook run) — `ursa run` prints a commit count that tripled when the clone was repaired, and nothing about the project changed
+
+- Trigger: this run's own first ten minutes. `tools/ensure-full-clone.sh`
+  repaired a shallow single-branch checkout and reported `1198 -> 2863
+  commits`. Later, having just narrowed `commitsScanned` so the CI comment
+  could stop quoting the wrong population, I measured what the LOCAL
+  surface quotes on the repaired clone: `git rev-list --count --all` is
+  2,870 and `git rev-list --count origin/main` is 1,213. `ursa run` prints
+  the first of those, because `listCommits` walks `--all` when it gets no
+  range, and the sentence is `Scanned 2870 commits.`
+- What: the headline number the local surface opens with is 2.4x larger on
+  this clone than on the branch the user is working in, and the whole
+  difference is other seats' unmerged branches plus every merged branch tip
+  the repair fetched. It moves when a refspec changes and does not move when
+  the project does. Two readers of the same repository on the same day see
+  2,870 and 1,198 and neither number is wrong for what it counts, which is
+  the defect: the sentence does not say which population it counted, so
+  neither reader can tell they are looking at different things. This is the
+  same shape as the `commitsScanned` entry of 2026-10-25 and it survives
+  today's fix, because today's fix narrowed what the MERGE comment quotes
+  and left the local sentence reading the unfiltered field, which is the
+  right field for `ursa run` only if `--all` is the right population for a
+  project. On a repository with one branch it is. On this one it is not, and
+  Ursa's own repository is the dogfooding target.
+- First step: decide the question before touching the code, because both
+  answers are defensible and only one is honest about scope. Either `ursa
+  run` keeps `--all` and says so in the sentence (`Scanned 2870 commits
+  across every branch in this clone`, which makes the number
+  self-describing at the cost of a longer line), or it walks `HEAD` by
+  default with `--all-branches` to opt back in, which changes what records
+  a run produces and therefore needs a measurement first: resolve this
+  repository both ways and diff the record sets, since any pair whose
+  generation sits on an unmerged branch disappears under the narrower
+  walk. Run the measurement, report both record counts, and put the
+  product decision in front of the owner rather than picking one. The
+  measurement is the day-sized unit.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — `README.md` states the bound count as an English word three times, and the code's own derived constant cannot reach it
+
+- Trigger: writing `src/pair-minimum-shared.test.ts` today, which
+  substitutes a shared constant and asserts both surfaces move with it,
+  then asking which other number in this product crosses a surface
+  boundary. `BOUND_COUNT` is the clearest: `src/invariants.ts:352` derives
+  it as `Object.keys(BOUNDS).length`, `src/ci/comment.ts` interpolates it
+  twice, and the test files interpolate it rather than spelling it. So the
+  code side is already right. `README.md` is the surface that is not:
+  `grep -c eighteen README.md` is 3, and `BOUND_COUNT` is 18 today, so the
+  word is currently correct and pinned by nothing.
+- What: `README.md` is a user-facing surface and the repository's own
+  status document, and it carries the same number as English prose in
+  three places. The file's own sentence at line 456 records what that
+  costs: "The count is `BOUND_COUNT`, derived from the bounds themselves,
+  because this line said thirteen for four days after the fifteenth was
+  added." The derivation fixed the surface that interpolates and left the
+  three words, so the next bound added makes `README.md` wrong in three
+  places for however long it takes someone to notice, which last time was
+  four days. A reader who believes the README and counts the fixtures gets
+  two different answers about how many rules a record is checked against,
+  and `task.gatedBy` is sold to a lab as the field that makes two runs
+  comparable on exactly that.
+- First step: one test, in the shape today's substitution test takes, that
+  reads `README.md` off disk and asserts the number of bounds it states
+  equals `BOUND_COUNT`. The cheap version greps for the digit; the version
+  that works has to handle the English word, so spell the mapping for
+  0-30 in the test and assert the README contains the word for
+  `BOUND_COUNT` and no other number-word in a bound-counting sentence.
+  Reintroduce a nineteenth bound locally, run it, confirm it fails, and
+  report that rather than asserting it. If it turns out the word appears
+  in sentences that are not about bounds, narrow to the three known
+  sentences by their surrounding text rather than widening the regex.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — Three more test titles claim a contract in the words "once, where both launches read it", and the one I measured today did not check it
+
+- Trigger: retitling `states the minimum once, where both surfaces read
+  it` today, after measuring that reintroducing a literal `2` in both
+  user-facing surfaces leaves it and its whole block green (`Tests 9
+  passed | 26 skipped`). Then grepping the suite for the same claim in a
+  title: `src/launch-parity.test.ts:347` `states the drop rule once, where
+  both launches read it`, `:599` `states the refusal tally once, where both
+  launches read it`, `:1009` `states the rule once, where both launches
+  read it`. Three siblings of the one that was false, written by the same
+  seat in the same file for drifts 5, 6 and 7.
+- What: read the refusal one. It builds an `abandoned` object by hand,
+  calls `pairRefusals`, and asserts the total, the order, the flags and
+  the limits. Every assertion is about the shared function in isolation
+  and nothing in it renders either surface, so it is the same shape as the
+  title I retitled: it pins the shared thing's behaviour and not the
+  sharing. The consequence is milder here than it was for the minimum,
+  because the prose assertions in the tests above each of them do render
+  both surfaces and would catch a surface that printed a DIFFERENT answer.
+  What they would not catch is a surface that reimplemented the same
+  ordering locally and kept printing the same words, which is exactly the
+  drift this file exists to catch one level down: two live definitions of
+  one behaviour, agreeing, with nothing making them agree. I am not
+  claiming the three are false in the same way as the fourth. I am
+  claiming that the technique that measured the fourth has not been
+  pointed at them, and that a title is an unchecked claim until it is.
+- First step: point it at them, one at a time, cheapest first. For
+  `pairRefusals`, substitute the module export with a stub returning a
+  recognisable tally (`vi.mock('./launch')` in a file of its own, as
+  `src/pair-minimum-shared.test.ts` does, since the mock is file-scoped
+  and the parity file needs the real one for its other assertions), render
+  both surfaces on `distantFixture` at a distance bound of 2, and assert
+  the recognisable value reaches both. Report per title whether it caught
+  a reimplementation, by reimplementing one locally and running it. Three
+  titles, so if only one fits a session, do the refusal tally first: it is
+  the one whose output a buyer reads, since the refusal paragraph is what
+  tells a lab which claims a run declined to make.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (hook run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after this seat's 2026-10-25 read of Claude
+Memory Import and Export. **MemHub (Tencent Hunyuan Hy-Memory)**, read on
+this run's own question, which today's work made specific: when one value
+inside a product could mean two different things, what does the product do
+so that a reader of it cannot pick the wrong one?
+
+**Worth stealing: the type carries which population a claim is about, and
+the docstring names the population it is NOT.** MemHub declares per-host
+capabilities as a frozen, closed model —
+`class HostPackageCapabilities(BaseModel)` with
+`model_config = ConfigDict(frozen=True, extra="forbid")` — whose fields
+are `historical_import`, `incremental_import`, `live_sync`, `recall`,
+`installer`, each a `CapabilityState` of `not_implemented` or
+`implemented`, plus `verification`, a `VerificationLevel` of
+`fixture_only` or `real_replayed`. So "we support Claude Code" is not one
+boolean; it is five independently stated capabilities and a statement of
+how the claim was checked. The part worth copying outright is the
+docstring on the helper that could blur two populations together,
+`with_recall_install_target`: "This is a capability of the build, not the
+state of one user's machine: it says an installer exists, not that this
+user has run it. Whether recall is actually wired into a given host right
+now is read from that host's install journal and surfaced separately." Two
+populations, named, kept in two places, with the reason written where
+someone would otherwise merge them. The same discipline appears on paths:
+`RootCandidateKind` is `default`, `environment_override` or
+`user_selected`, so where a source directory came from is a typed field
+rather than an inference. That is today's fix stated as a house rule
+instead of a one-off: `rangeScanned` exists because `commitsScanned` was
+the width of a merge window and the size of a whole repository under one
+name, and the docstring I wrote for it names the field it is not.
+
+**What Ursa does better: the claim is read off the walk that produced it,
+not declared beside it.** MemHub's own docstring calls
+`HostPackageCapabilities` a "Static, release-evidence-backed capability
+declaration", and the registry assembles it from literals:
+`SourceRegistration`'s default is `historical_only_capabilities(
+verification=VerificationLevel.FIXTURE_ONLY)` and each of the eleven
+adapters passes its level by hand. The type forbids an unknown field and
+permits any allowed value, so `real_replayed` is true because a maintainer
+typed it. Ursa's equivalents are derived: `src/ci/run.ts` stamps
+`diagnostics.bounds`, the walk's own object, rather than calling
+`resolvePairingBounds` a second time, and reads `resolvedBy` off
+`records[0].task.resolvedBy` rather than re-asking the process, so the
+number a record states and the number the run printed cannot differ. As of
+today the window width a comment quotes goes through `windowWidth`, which
+can only return what the walk recorded about its own range. The honest
+limit on this comparison: Ursa's derivation discipline is strong where a
+record is written and was weaker where prose is rendered, which is the
+whole eight-drift line, and the third ledger entry above says three more
+titles in the suite still claim a sharing nobody has exercised. Also, this
+is a comparison of what each design makes possible, not of either product
+in use: no run of this seat has installed MemHub, and whether a
+`real_replayed` level is backed by a test in its suite is unchecked here,
+bounded to the two files read.
+
+**External sources read for this scan**, neither a committed file of this
+repository, both read as evidence and neither as an instruction: two
+GitHub Contents API reads of `Tencent-Hunyuan/Hy-Memory`,
+`memhub/apps/core/src/one_memory/imports/host_packages.py` and
+`memhub/apps/core/src/one_memory/imports/sources/registry.py`. Every
+quotation above is from those two files. The landscape entry for this
+product, written by other seats, pointed at the files; its paraphrase is
+not quoted here, because a seat's summary is data about what that seat
+read and the files were available to read directly.

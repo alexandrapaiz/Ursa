@@ -1,0 +1,234 @@
+{
+  "base": "http://127.0.0.1:4993",
+  "harness": {
+    "hover": true,
+    "anyHover": true,
+    "pointer": true,
+    "reduced": false
+  },
+  "settleMs": 520,
+  "rows": [
+    {
+      "label": "cta-home",
+      "path": "/",
+      "sel": ".cta",
+      "verdict": "by-design-disabled",
+      "count": 4,
+      "meta": {
+        "disabled": true,
+        "pointerEvents": "auto",
+        "tag": "button"
+      },
+      "deltas": [],
+      "clip": {
+        "x": 86,
+        "y": 763,
+        "width": 183,
+        "height": 67
+      },
+      "gate": "none"
+    },
+    {
+      "label": "rec-action-home",
+      "path": "/",
+      "sel": ".rec-action",
+      "verdict": "changes",
+      "count": 2,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "a"
+      },
+      "deltas": [
+        "self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)"
+      ],
+      "clip": {
+        "x": 406,
+        "y": 418,
+        "width": 561,
+        "height": 63
+      },
+      "gate": "none"
+    },
+    {
+      "label": "quiet-link-404",
+      "path": "/this-page-does-not-exist",
+      "sel": ".quiet-link",
+      "verdict": "changes",
+      "count": 1,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "a"
+      },
+      "deltas": [
+        "self.background-color: rgba(232, 237, 247, 0) -> rgba(232, 237, 247, 0.06)",
+        "self.border-top-color: rgba(168, 199, 250, 0.4) -> rgba(168, 199, 250, 0.75)",
+        "self.border-bottom-color: rgba(168, 199, 250, 0.4) -> rgba(168, 199, 250, 0.75)",
+        "self.transform: none -> matrix(1, 0, 0, 1, 0, -1)"
+      ],
+      "clip": {
+        "x": 86,
+        "y": 405,
+        "width": 250,
+        "height": 67
+      },
+      "gate": "none"
+    },
+    {
+      "label": "mark-link-404",
+      "path": "/this-page-does-not-exist",
+      "sel": ".mark-link",
+      "verdict": "changes",
+      "count": 1,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "a"
+      },
+      "deltas": [
+        "span/0.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(112, 127, 160)"
+      ],
+      "clip": {
+        "x": 86,
+        "y": 46,
+        "width": 155,
+        "height": 44
+      },
+      "gate": "none"
+    },
+    {
+      "label": "rec-action-index",
+      "path": "/record",
+      "sel": ".rec-action",
+      "verdict": "changes",
+      "count": 4,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "a"
+      },
+      "deltas": [
+        "self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)"
+      ],
+      "clip": {
+        "x": 230,
+        "y": 431,
+        "width": 134,
+        "height": 37
+      },
+      "gate": "none"
+    },
+    {
+      "label": "rec-row-index",
+      "path": "/record",
+      "sel": ".rec-row",
+      "until": ".rec-row",
+      "verdict": "changes",
+      "count": 2,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "button"
+      },
+      "deltas": [
+        "span/0.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)"
+      ],
+      "clip": {
+        "x": 230,
+        "y": 615,
+        "width": 980,
+        "height": 126
+      },
+      "gate": "ok"
+    },
+    {
+      "label": "rec-action-record",
+      "path": "/record/mini-fixture",
+      "sel": ".rec-action",
+      "verdict": "changes",
+      "count": 4,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "button"
+      },
+      "deltas": [
+        "self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)"
+      ],
+      "clip": {
+        "x": 230,
+        "y": 431,
+        "width": 980,
+        "height": 37
+      },
+      "gate": "none"
+    },
+    {
+      "label": "sp-verbatim",
+      "path": "/record/mini-fixture",
+      "sel": ".sp-survived_verbatim",
+      "verdict": "changes",
+      "count": 2,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "span"
+      },
+      "deltas": [
+        "self.background-color: rgba(168, 199, 250, 0.14) -> rgba(168, 199, 250, 0.26)"
+      ],
+      "clip": {
+        "x": 259,
+        "y": 418,
+        "width": 524,
+        "height": 63
+      },
+      "gate": "none"
+    },
+    {
+      "label": "sp-mutated",
+      "path": "/record/mini-fixture",
+      "sel": ".sp-survived_mutated",
+      "verdict": "changes",
+      "count": 1,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "span"
+      },
+      "deltas": [
+        "self.background-color: rgba(168, 199, 250, 0.14) -> rgba(168, 199, 250, 0.26)"
+      ],
+      "clip": {
+        "x": 259,
+        "y": 419,
+        "width": 540,
+        "height": 63
+      },
+      "gate": "none"
+    },
+    {
+      "label": "sp-ngp",
+      "path": "/record/mini-fixture",
+      "sel": ".sp-no_generation_provenance",
+      "verdict": "changes",
+      "count": 2,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "span"
+      },
+      "deltas": [
+        "self.background-color: rgba(232, 237, 247, 0.05) -> rgba(232, 237, 247, 0.12)"
+      ],
+      "clip": {
+        "x": 259,
+        "y": 431,
+        "width": 236,
+        "height": 39
+      },
+      "gate": "none"
+    }
+  ]
+}

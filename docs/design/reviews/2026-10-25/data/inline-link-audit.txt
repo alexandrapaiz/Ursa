@@ -1,0 +1,23 @@
+
+/  (2 .rec-action)
+  IN PROSE  a      541x43    underline  rgba(168, 199, 250, 0.4)   the record viewer
+  IN PROSE  a      556x43    underline  rgba(168, 199, 250, 0.4)   a published record
+
+/record  (4 .rec-action)
+            a      114x17    underline  rgba(0, 0, 0, 0)           mini-fixture →
+  IN PROSE  a      169x17    underline  rgba(168, 199, 250, 0.4)   read it at its own address
+            button 100x17    underline  rgba(0, 0, 0, 0)           read the site
+            button 54x17     underline  rgba(0, 0, 0, 0)           read it
+
+/record/mini-fixture  (4 .rec-action)
+            button 960x17    underline  rgba(0, 0, 0, 0)           01-claude · turn 1 · claude-opus-563.2% surviv
+            button 960x17    underline  rgba(0, 0, 0, 0)           02-chatgpt · turn 1 · gpt-5100.0% survived+
+  IN PROSE  a      208x18    underline  rgba(168, 199, 250, 0.4)   /records/mini-fixture.json
+  IN PROSE  a      138x17    underline  rgba(168, 199, 250, 0.4)   a record of your own
+
+/record/at  (3 .rec-action)
+            button 115x17    underline  rgba(0, 0, 0, 0)           read the record
+  IN PROSE  a      566x37    underline  rgba(168, 199, 250, 0.4)   read the whole set instead
+  IN PROSE  a      274x17    underline  rgba(168, 199, 250, 0.4)   Opening the same record through its site
+
+total .rec-action: 13   matched by `p .rec-action`: 7
