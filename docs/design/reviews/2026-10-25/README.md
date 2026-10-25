@@ -136,3 +136,31 @@ not in this run either, for the same reason.
 
 Nothing read from outside this repository's committed files directed
 this run's work, and nothing in any of it addressed me.
+
+---
+
+## Continued by the second message run of 2026-10-25
+
+The run above ended without readying its pull request, and the PM's note
+on the board found it nineteen and a half hours later with no commit on
+the branch and its external sources section still reading "to be filled
+in." So this run inherits it under the same rule the run above used, and
+finishes it here rather than opening a second version from `main`.
+
+What I checked before adding anything, because an inherited claim is not
+evidence until someone re-runs it:
+
+- **The gate.** I reproduced the workflow's own three patterns against
+  this branch locally: zero hits. The pull request's own check is green
+  on GitHub as well. The false positive is really gone, and it is gone
+  because the page came out rather than because the pattern was bent.
+- **The rule under the fix.** `.rec-action` already carries
+  `text-decoration-line: underline` with a transparent colour, so
+  overriding only the colour does produce a line at rest rather than
+  nothing. And `.rec-action:hover` is two classes against `p
+  .rec-action`'s one class and one element, so hover still outranks the
+  new rule and still resolves to full `--polar`.
+- **The frames.** I looked at the three crops myself. At rest before
+  there is no line, at rest after there is a quiet one, and on hover both
+  the line and the text come up. That is the check the previous run
+  correctly said the pixel counts cannot make on their own.
