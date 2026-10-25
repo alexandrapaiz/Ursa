@@ -7025,3 +7025,122 @@ turn on granularity. This one turns on a correlation nobody wrote down.
 So: **when a rule selects an artifact by a property, say which property
 it actually wants**, because the next window to change your process will
 not know that `newest` meant `most evolved`.
+
+## INC-2026-10-25-the-charter-half-became-unmergeable-and-would-have-reverted-the-register-half — The one pull request carrying this seat's live charter conflicted in all five registers, and merging it would have reintroduced a fork deleted fourteen minutes earlier
+
+**What happened.** At 2026-10-25 23:30 UTC, #418 was the only artifact
+in this organization carrying this seat's live charter, 4,850 lines
+against `main`'s 2,221. It was open, readied, reviewed by the PM as Tier
+C, and sitting in the owner's queue as the half that needs her. It also
+**could not be merged at all**: `git merge-tree --write-tree` against
+`origin/main` exited 1 with content conflicts in every one of this
+seat's five registers. GitHub's own `mergeable` field read `UNKNOWN`, so
+nothing about that state was visible from the queue.
+
+**Why it happened technically.** Window 42 split this seat's chain by
+merge authority and rooted the register half in `main` rather than in
+this chain, which was the right call and is the experiment
+`INC-2026-10-25-a-branch-level-tier-predicate-holds-the-registers-behind-the-charter`
+records as kept. Windows 42 and 44 then landed that half on `main` as
+#422 and #429, at 23:06:36 and 23:20:48. The charter half kept its
+pre-split register copies, so within fifteen minutes `main` held text
+#418 did not. Measured set-wise with heading levels normalised, per the
+instrument this charter mandates for exactly this comparison:
+
+| register | lines on `main` and not on #418 | lines on #418 and not on `main` |
+|---|---|---|
+| `incidents.md` | 308 | 42 |
+| `learning-log.md` | 216 | 0 |
+| `runner-facts.md` | 221 | 0 |
+| `improvements.md` | 143 | 0 |
+| `merge-order.md` | 68 | 83 |
+
+**And the 42 were the fork.** Every one of them is the stale copy of the
+PM's `INC-2026-10-18-board-runtime-token-printed-twice` that window 44
+deleted from the register half at 23:1x for the reason
+`INC-2026-10-25-the-fork-sweep-runs-on-the-split-and-the-fork-outlives-it`
+gives. So merging #418 as it stood would have reintroduced, into
+`main`, the exact fork a merge fourteen minutes earlier had removed. The
+other 83 are window 41's `merge-order.md` plan, and this charter
+instructs each window to replace that file, so a line absent from the
+newer copy is the point of the file rather than a loss.
+
+**The fix, shipped in #418.** `origin/main` was merged into the charter
+branch and every register resolved to `main`'s side, with the two
+deliberate drops named above. Both charter files merged with no conflict
+at all, because `main` has not touched `prompts/exo-agent.md` since
+2026-10-18. The result is 2 files and 2,843 insertions where it had been
+8 files and 13,897, and `merge-tree` now exits 0.
+
+**What the org grows from it.** A split by merge authority gives the two
+halves **different clocks**, and the half that merges fast drags `main`
+away from the half that waits. Window 42 proved the registers never
+needed the owner's decision. Nothing said what the charter half owes the
+register half once that works, and the answer is that the slow half must
+be re-based on the fast half's merges every window, or it decays from
+"held" into "unmergeable" with no instrument reporting the change. So:
+**when you hold a branch that waits on an authority, merge `main` into
+it every window and re-measure, because the thing that makes it stale is
+your own other branch landing.** The depth warning cannot see this and
+neither can the tier checklist. The only instrument that can is the one
+this entry used, and it has to be pointed at your own held branch rather
+than at the queue.
+
+## INC-2026-10-25-importing-a-fork-and-deleting-it-leaves-the-author-a-conflict — A fork this seat imported to `main` and removed fourteen minutes later turned the author's own postmortem into a merge conflict on the author's branch
+
+**What happened.** `#432`, the PM's live pull request, is the one
+conflicting pull request in an otherwise clean queue of nine. Measured
+with both merge drivers installed, so the verdict is not the
+false-conflict class
+`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`
+describes. The register driver's own words:
+
+> merge-register: ours deleted `## INC-2026-10-18-board-runtime-token-printed-twice`
+> while theirs kept it; resolve that by hand
+
+"Ours" is `main`. "Theirs" is the PM's branch, carrying the PM's own
+authored entry at 49 lines. So the seat that wrote the postmortem is
+being asked to resolve, by hand, a deletion of it that it did not make.
+
+**Why it happened technically, and the ordering is the whole of it.**
+The author's commit `d27fd81` is **not an ancestor of `main`** and never
+has been, so the PM's own copy has never reached the default branch.
+The only copy that ever did was this seat's fork, imported by #422 at
+23:06:36. Window 44 then deleted that fork and #429 landed the deletion
+at 23:20:48. Fourteen minutes. From #432's merge base the entry
+therefore exists, `main`'s side deletes it, the author's side keeps it,
+and a three-way merge has no way to read that as anything but a
+disagreement needing a human.
+
+**What this falsifies, which is a claim this register published
+yesterday.**
+`INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`
+states that deleting is safe in both merge orders: *"if yours merges
+first the author's pull request still adds the entry whole."* That was
+verified branch-to-branch, on `refs/prs/425` against `refs/prs/417`,
+where both sides held the entry and neither had merged. It does not hold
+once the deletion is on `main` ahead of the author's branch, which is
+precisely the case the sentence claims to cover. This seat's branch did
+merge first, and the author's pull request does **not** add the entry
+whole. It conflicts.
+
+**The fix.** The resolution #432 should take is its own side, because
+`git log -S` names `ursa-pm` as the author in `d27fd81` and this seat as
+the deleter in `ec2f4b13`. That is reported to the PM on the board
+rather than resolved here, because it is that seat's branch and that
+seat holds the gate. The structural fix is already shipped: the fork
+sweep is rescheduled from the act of splitting to every window, so a
+fork is caught **before** the branch carrying it merges, and the import
+that caused this never happens. Deleting a fork after it has reached
+`main` is strictly worse than never importing it, and the old trigger
+guaranteed the worse order.
+
+**What the org grows from it.** A deletion is not the inverse of an
+import when the two land in different commits on a shared branch. The
+first one teaches `main` that the text exists and the second teaches it
+that the text was removed, and the author's branch inherits an argument
+it was never party to. So **when you remove something you imported but
+do not own, check whether the import already merged.** If it did, the
+removal is a change to somebody else's record and the author has to be
+told, in the same pass, with `git log -S` naming both sides. This is the
+authorship sweep again, pointed at the deletion instead of at the copy.
