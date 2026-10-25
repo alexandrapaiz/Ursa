@@ -7067,3 +7067,227 @@ exception and the trap is still live:** `main`'s
 charter branch, which is **not** the newest open pull request of this
 seat. Take the longest, not the newest, and the command is in the entry
 above.
+
+## 2026-10-25, window 45 (message: the merge of #429, 23:25 UTC) — the charter half had decayed from held into unmergeable, and my own two merges left the PM a conflict
+
+**What woke me.** The bus, reporting that #429 merged, with the standing
+reminder that #425 was an idle draft with no run behind it. **#425 was
+already closed**, by window 44, so that reminder was true when it was
+queued and spent before it arrived. Checked rather than assumed, which
+is the one useful thing to do with it.
+
+**What I took, since the wake asked me to say.** The charter branch.
+Windows 42, 43 and 44 each declined to hold it for a correct reason, and
+the consequence had compounded: three charter amendments recorded as
+**owed**, the registered experiment waiting on "the next window of this
+seat that holds the charter branch", and `main`'s copy of this charter
+frozen at 2,221 lines since 2026-10-18 while the live copy reached
+4,850. Every fresh clone, including mine, reads the frozen one.
+
+### The first thing a successor must know
+
+**My predecessor's handover was right and it was not enough.** It told
+me to take the longest charter and not the newest, and the command
+worked. But the reason that handover existed at all is that the fix is a
+charter edit, and three windows in a row correctly declined to make it,
+so the trap stayed live for every one of them. **A fix that can only
+ship from a branch nobody is willing to hold does not ship.** If you
+inherit a list of owed charter amendments, the thing to take is not the
+next item. It is the branch.
+
+### The finding, and it is the shape the split made
+
+**#418 could not be merged at all when this window opened.** It was
+open, readied, reviewed by the PM as Tier C, and sitting in the owner's
+queue as the half that needs her. `git merge-tree` exited 1 with content
+conflicts in **all five** of this seat's registers. GitHub's own
+`mergeable` field read `UNKNOWN`, so nothing about that was visible from
+the queue, and no number anybody reports had moved.
+
+The cause is window 42's split, which is right and which this window
+kept. Rooting the register half in `main` gives the two halves
+**different clocks**. The fast half merged at 23:06:36 and 23:20:48, and
+fifteen minutes later `main` held 956 lines of this seat's own registers
+that the slow half did not. A branch held behind an authority is made
+stale by **its own seat's merges**, and neither the depth warning nor
+the tier checklist can see it.
+
+**And merging it would have undone the window before.** Of the 42 lines
+#418 held that `main` lacked, all 42 were the fork of the PM's
+`INC-2026-10-18-board-runtime-token-printed-twice` that window 44 had
+deleted fourteen minutes earlier.
+
+Repaired on #418: `main` merged in, every register resolved to `main`'s
+side with the two deliberate drops named in the entry, both charter
+files clean because `main` has not touched them since 2026-10-18. Eight
+files and 13,897 insertions became **two files and 2,843**, and
+`merge-tree` exits 0. The account is
+`INC-2026-10-25-the-charter-half-became-unmergeable-and-would-have-reverted-the-register-half`.
+
+### The second finding, which is this seat's cost to another seat
+
+**The PM's own pull request is the one conflict in the queue, and the
+deletion it is arguing with is mine.** Measured with both drivers
+installed, so not the false-conflict class. The driver says `main`
+deleted the postmortem while the PM's branch kept it. The PM's authoring
+commit `d27fd818` has never been an ancestor of `main`. The only copy
+that ever reached `main` was this seat's fork, imported by #422 and
+deleted by #429, **fourteen minutes apart**. So the author is being
+asked to resolve, by hand, a deletion it did not make.
+
+This **falsifies a claim this register published yesterday**: that
+deleting a fork is safe in both merge orders because "if yours merges
+first the author's pull request still adds the entry whole". That was
+verified branch-to-branch, where neither side had merged. It does not
+hold once the deletion is on `main` ahead of the author's branch, which
+is the case the sentence claims to cover. Told to the PM on the board
+with the resolution to take and the `git log -S` proof.
+`INC-2026-10-25-importing-a-fork-and-deleting-it-leaves-the-author-a-conflict`.
+
+### What I shipped on the charter branch, which is the owed queue cleared
+
+1. **§0 selects by length, not recency** (owed three windows).
+2. **The fork sweep is rescheduled from the act of splitting to every
+   window** (owed). This is also the structural fix for the finding
+   above, because a fork caught before its branch merges is never
+   imported, and import-then-delete is strictly worse than never
+   importing.
+3. **Window 44's experiment, read.** Thirteen rules in this charter are
+   scheduled on an act, seven guard a condition that outlives the act,
+   three of those are already paired with a standing check, one is the
+   fork sweep, and **three were unpaired**. All three converted.
+
+**One of the three was live.** HQ's **#456 merged at 23:23:54Z without
+the block this seat handed up**, verified by reading the deployed
+`tools/capacity-retry.py` rather than the merge: `unresolved` appears
+zero times, the loop is still keyed on `latest[agent]`. The 66.4%
+barren-wake census stands and the ask is live. Nothing in this charter
+would have surfaced it. It reached me through my predecessor's prose,
+which is memory by luck, and it is now a standing check.
+
+### What I got wrong in this window, caught by my own instrument
+
+I broadcast at 23:42:50 that #433 was "closed as contained in #435". It
+was not closed. **It merged at 23:35:23Z**, seven minutes before I said
+otherwise. I had read its state at 23:25 and published a claim about it
+at 23:42 without re-deriving, which is a state measured early and
+published late, and it is precisely the rule I spent this window writing
+about. Corrected on the same surface at 23:43:31, dated, because a
+correction to something said on the board belongs on the board.
+
+### Off-repository acts, each with the query that retrieves it
+
+Written after the calls returned, with the response's own truncation
+field rather than a character count taken beforehand.
+
+| act | addressee | receipt |
+|---|---|---|
+| the #432 conflict, its cause and the resolution to take | `Ursa/pm` | 23:41:22Z, 1086 chars, not truncated |
+| #456 merged without the block, the census is still live | `alexandra-systems/exo-centralizer` | 23:41:38Z, 1338 chars, not truncated |
+| the observe and orient result, autonomy's fifth refusal | `alexandra-systems/exo-centralizer` | 23:41:58Z, **1661 chars, 1447 delivered, TRUNCATED** |
+| the tail the cut took, which was the only ask in it | `alexandra-systems/exo-centralizer` | 23:42:34Z, 1059 chars, not truncated, after one 420-block refusal |
+| tip broadcast, `data.live_tip: 435` | broadcast, no `to_seat` | 23:42:50Z, 985 chars, not truncated |
+| the correction to that broadcast | broadcast, no `to_seat` | 23:43:31Z, 914 chars, not truncated |
+
+The directed sends are retrieved by
+`?from_seat=exo&since_hours=48&limit=500` filtered on `to_seat`, and the
+two broadcasts by `?limit=400` filtered on
+`select(.from_seat=="exo" and .to_seat==null)`. The three `Ideas` notes
+the daily tick owes the owner were sent by window 44 at 23:20Z, within
+the same day, so this window owes none and did not pad the board with
+three more.
+
+### Standing observations, window 45 (all measured 2026-10-25 23:3x–23:4xZ)
+
+**The run instruments, and which surface each answers.** `gh run list`
+saw **0** `agent-*` runs and `schedule:` is absent from all eleven
+workflow files, which is the dormant-surface reading and **not** run
+health. **Nine** gate failures in the last 24 hours, every one
+`redaction-gate` at **zero minutes**, so no cap of any kind is
+implicated. Four of the five branches involved are green at their newest
+run, so those are superseded rather than absent. The fifth,
+`ursa-frontend/2026-10-25-hook`, is still red, and its pull request
+#412 closed unmerged, so nothing live depends on it. A count-bounded
+read of 200 runs reaches back only to 2026-10-24T18:02Z, which is
+**29 hours**, so the ceiling is close and `--created` is doing the work.
+
+**The queue.** **10 open against 49 merged in seven days**, oldest open
+26 hours. The depth warning does not fire. Ten is **eight decisions**:
+#432 and #438 are the identical commit `5f2fc97d` on two branch names,
+and #427 is contained in #439. Eight of the ten merge clean in ascending
+order, verified by performing the merges in a detached scratch worktree
+with the drivers installed. `merge-order.md` carries the table with the
+instrument named on every row.
+
+**Branch housekeeping.** Twelve remote branches satisfied the §5b
+predicate, meaning every pull request that ever pointed at the name is
+merged, and all twelve were deleted. 195 refs remain. One was this
+seat's own `ursa-exo/2026-10-25-hook-2-residue`, deletable because #433
+merged rather than closed.
+
+**§2b, both halves of every charter.** 3 of 11 workflow `prompt:` blocks
+mention `--draft`, 0 of 11 mention ship-first. Unchanged, still a
+**revival risk** on a surface that has run nothing in eight days, and
+still not a live defect. Not queued as a workflow diff, per §5.
+
+**§3, what the standards point at.** Eleven names under `pm.md` and
+`secrets.md` do not resolve here, and **all eleven exist on HQ's `main`**
+among its 81 tools. One of the eleven, `merge-register.py`, is vendored
+deliberately at `tools/registers/merge-register.py`, so the binding
+count is **ten** and has not moved. Thirty names in `lessons.md` as
+context only.
+
+**§3, the third bucket, `L-*` rules naming their own enforcement.**
+Three hits, one finding. `check-secret-print.py` from **L-X5** is
+binding and still absent, unchanged. `merge-register.py` from L-A18 is
+the vendored-elsewhere path above. `prune-merged-branches.sh` from
+**L-A59** is a false positive by the enforcement test: L-A59 binds here,
+and this window discharged it with `git push --delete` under the §5b
+predicate, so the duty is performable without the script.
+
+**§3, identifier collisions.** `docs/decisions.md` still uses
+**ADR-005** and **ADR-006** twice each for four unrelated rulings. Not
+renumbered, because the number is the owner's and other files cite it.
+`incidents.md` is clean.
+
+**§3e, autonomy, from HQ's own `tools/autonomy.py`.** 49 merges in 168
+hours, 21 seat-claimed, 0 on Actions, **28 unresolved**, floor
+**42.9%**. Above the one-third ceiling, so the tool's refusal fires and
+**this number grades the instrument and not the company**. Fifth
+consecutive window. The attribute to grade instead is dashboards. One
+lost call to its argument form, recorded as `runner-facts.md` §26.
+
+**Rounds per artifact, and dispatches by author.** Two identifiers for
+two different decisions rather than one decision split in two, which is
+the healthy shape. Every wake of this seat today was the retry driver or
+a sibling's note, not the owner and not the chair.
+
+**Charter length, the third cap.** `main`'s copy is **2,221** lines and
+has been since 2026-10-18. The live copy is **4,962** and it now merges
+clean, where ninety minutes ago it could not merge at all. Replacement
+ratio: three amendments shipped against three owed, so **the owed queue
+is zero** for the first time in three windows.
+
+### What the next window must check first
+
+1. **Take the longest charter, not the newest**, and the command is now
+   in §0 of the live copy. If #418 merged, `main` is current and the
+   trap is closed by the merge rather than by the amendment.
+2. **Merge `main` into whichever half of this chain is still held,
+   before anything else.** That is the standing fix this window shipped
+   and it is the thing that decayed #418 into unmergeable in fifteen
+   minutes. Re-measure with `git merge-tree --write-tree --name-only
+   origin/main refs/prs/<n>` and do not read GitHub's `mergeable`, which
+   said `UNKNOWN` for both halves tonight.
+3. **Whether the PM resolved #432 and #438 in its own favour.** If it
+   resolved toward `main`, its own 49-line postmortem is gone and this
+   seat caused it. Check with the `git log -S` in `merge-order.md`.
+4. **Whether HQ answered the #456 re-ask.** `grep -c unresolved` over
+   the deployed `tools/capacity-retry.py` on HQ's `main`. Zero means the
+   66.4% census is still live and still owed.
+5. **This window's experiment**, in `improvements.md`: count the entries
+   in `incidents.md` whose stated verification was a merge between two
+   pull request refs rather than against `origin/main`. Both of this
+   window's findings are safety claims that were proved branch-to-branch
+   and failed when one side became the default branch. The output is a
+   register entry, so either half can carry it.
