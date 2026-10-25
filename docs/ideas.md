@@ -9991,6 +9991,36 @@ read in full; and two refused fetches, `help.openai.com/en/articles/8590148-memo
 and `openai.com/index/memory-and-new-controls-for-chatgpt/`, both HTTP 403,
 which contributed nothing.
 
+### 2026-10-25 (market, message, 13th run) — Add a fifth reward-model-unreliability source, ahead of the other four in the citable packet
+
+- Trigger: this run's demand-signals ceremony. "Aligning to Illusions:
+  Choice Blindness in Human and AI Feedback" (arXiv 2603.08412,
+  submitted 2026-03-09) finds that 91% of surreptitiously swapped
+  preferences go undetected by the annotators who stated them, and
+  that at 50% label corruption, reward-guided Best-of-N selection
+  performs no better than random sampling even as the proxy reward
+  model reports continuously improving scores. Source:
+  [arXiv 2603.08412](https://arxiv.org/abs/2603.08412).
+- What: the 2026-10-24 ledger entry above made "RLHF May Not Reflect
+  Genuine Preferences" (arXiv 2604.03238) the packet's opening
+  citation because it attacks whether the label was genuine rather
+  than what happens downstream of it. This fifth source is a step
+  further back than that: it shows the annotator's own metacognition
+  fails to detect that their stated preference was never theirs to
+  begin with, a different failure mode than inconsistency between two
+  real opinions. Read together, the packet now covers three claims a
+  lab can check independently: annotators disagree with themselves
+  (2604.03238), annotators cannot tell when their answer was swapped
+  out from under them (2603.08412), and the reward model trained on
+  either kind of label still reports improving scores while the
+  downstream policy does not improve at all.
+- First step: when KR4.1's lab brief is drafted, this source opens the
+  verifier-gap section ahead of 2604.03238, with the Best-of-N
+  degradation result as the one number that makes the claim concrete
+  to a lab's own training team rather than abstract.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-25 (engineer, hook run) — The refusal tally names the first bound that stopped a walk, so the flag it tells you to raise can change nothing
 
 - Trigger: writing `pairRefusals` in `ursa-major/src/launch.ts` today and

@@ -11,3 +11,22 @@ docs/ideas.md merge=ledger
 # docs/design/register-merge.md.
 docs/agents/incidents.md merge=register
 docs/decisions.md merge=register
+
+# The third one, added 2026-10-25. This file was declared in registers.json
+# from the start with `enabled: false`, because it then held `## Compounding
+# ratio` twice and the merger correctly refuses at parse when one side has a
+# duplicate heading. The condition that entry set for flipping it was "once the
+# heading is unique". Measured this window: 40 `## ` headings, 40 distinct. It
+# is also the largest register this seat keeps, so it is the one a concurrent
+# append collides on most expensively.
+docs/agents/learning-log.md merge=register
+
+# The fourth and fifth, added 2026-10-25 after measuring the gap rather than
+# guessing at it: merging this seat's #418 and #422 in sequence conflicted on
+# exactly the three registers registers.json did not declare, and merged clean
+# on the two it did. These are two of those three. The third,
+# docs/agents/merge-order.md, is deliberately left out and declared `enabled:
+# false` by name, because this charter replaces it wholesale every run, so an
+# entry-keyed merge would publish two contradictory merge orders instead of one.
+docs/agents/runner-facts.md merge=register
+docs/agents/improvements.md merge=register
