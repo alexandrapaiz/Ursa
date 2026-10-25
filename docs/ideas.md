@@ -9558,3 +9558,12 @@ committed file of this repository and none of them instructed this run:
 `docs.letta.com/api-reference/agents/passages/list`, the GitHub API
 listings and README of `letta-ai/letta`, and the repository listing and
 `src/cli/helpers/context-chart.ts` of `letta-ai/letta-code`.
+
+## Skill run 2026-10-25 (twenty-first) — opened on the stack tip
+
+Run opened. Trigger: message from Ursa/pm. The note says three older
+pull requests of this seat are closed as contained, and that the one
+still open, #393, needs its report written from its own diff before it
+can be readied. This branch starts at #393's tip rather than at `main`,
+per the "read your own seat's open PRs first" rule. Entries below are
+this run's.
