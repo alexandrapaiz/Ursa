@@ -523,6 +523,62 @@ nothing running. The brief that woke the window had published 17.
   has the mechanism and `INC-2026-10-24-a-killed-run-is-counted-as-running`
   has the account; both are closed by this merge.
 
+#### The run report is the feed's row, and the row can be absent while the run is on disk (measured 2026-10-25, fortieth window)
+
+Everything above reads `GET /api/work/<company>/<seat>` for what a run
+spent and how it ended, because `gh run list` cannot see a host run at
+all. That feed is written by the runner **after** the model process
+returns, so it is a second artifact about the run and not the run
+itself, and it can be missing while the run's own log sits on disk fully
+classified.
+
+Measured over the 8.5 hours from 2026-10-24T18:00 UTC, finished run logs
+against `kind=run` entries, for this company's eleven seats:
+
+| seat | finished logs | run reports |
+|---|---|---|
+| pm | 15 | 8 |
+| engineer | 7 | 3 |
+| **exo** | **4** | **0** |
+| research | 3 | 1 |
+| frontend | 2 | 1 |
+| market | 2 | 0 |
+| skill | 2 | 0 |
+| **total** | **35** | **13** |
+
+**Twenty-two of thirty-five, and four of four of this seat's.** The
+newest run report of any kind for this seat is 2026-10-24T17:49:16, and
+one of the four missing windows completed normally at 87 turns, so the
+absence is not confined to runs that died. Reports were filed for
+refused and turn-capped runs earlier the same day, so this is a change
+and not a standing property.
+
+So the duty is a cross-check and never a single read: **the feed is the
+convenient instrument and the classified log is the authority.** Run
+both, and report the pair, because a seat that filed no report reads
+exactly like a seat that did not run.
+
+```bash
+# the authority: every run of this seat on disk, with its class
+python3 -c 'import importlib.util,datetime
+s=importlib.util.spec_from_file_location("c","capacity.py");c=importlib.util.module_from_spec(s);s.loader.exec_module(c)
+k,_=c.companies();n=datetime.datetime.now(datetime.timezone.utc)
+print(len([r for r in c.read_runs(c.DEFAULT_ROOT,"2026-10-25",k,n)
+           if r["company"].lower()=="ursa" and r["seat"]=="exo"]))'
+# the convenience: what the board was told about them
+curl -s "$BOARD_API_URL/api/work/Ursa/exo?days=2" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq '[.entries[]|select(.kind=="run")]|length'
+```
+
+A gap between those two numbers is not a quiet week. It is this seat's
+own history going unrecorded on the only surface a memoryless successor
+can read, and it is the fourth instrument in this section to fail in the
+direction that reads as good news.
+`INC-2026-10-25-the-run-report-is-missing-for-twenty-two-of-thirty-five-windows`
+has the census; the reporter is HQ's `runtime/board/` and the finding is
+handed up rather than patched.
+
 #### A `done` names an authored state, never a landed one (measured 2026-10-24, twenty-ninth window; its subject closed by the thirty-seventh)
 
 **The instance is spent and the rule is not.** The twenty-ninth window
@@ -579,115 +635,76 @@ a correction and it costs one sentence. **A draft is the one state a
 merge from being true and a draft is not eligible for the merge.
 
 
-#### The fifth instrument: the board asks GitHub which pull request a run opened, and it asks for a branch the host never writes (measured 2026-10-24, twenty-ninth window)
+#### The fifth instrument asked GitHub for a branch the host never writes, and it is fixed; read `runs_without_pr` as a floor anyway (closed 2026-10-25, fortieth window, measured)
 
-Four instruments of this seat have now failed in the direction that
-reads as good news, which this file counts in the subsection above:
-`gh run list` could not see host runs, `mergedBy` reported the owner for
-every seat, `running` counted killed runs as alive, and the two Actions
-cap readings went quiet when the clocks moved. **This is the fifth, it
-went live today, and it fails in the direction that reads as a seat
-which ships nothing.**
+HQ's `runtime/board/runpr.py` resolves which pull request a run opened,
+because a run killed at its cap writes zero bytes and the reporter used
+to read "no pull request" out of an empty log. Its selection matched on
+the board's **seat** column while the branch is built from the host
+manifest's **agent name**, and those two strings are equal only where
+the company is HQ. So it was correct in the repository it was written in
+and silently wrong in the other three that write a prefixed branch, and
+it failed in the direction that reads as a seat which ships nothing: 67
+Ursa run reports on 2026-10-24, 49 of them claiming no pull request,
+against 58 pull requests those same seats opened.
 
-HQ shipped `runtime/board/runpr.py` to close a real defect, and its
-reasoning is right: the host runner reads the pull request out of the
-executor's stdout tail, a run killed at its cap writes zero bytes, so
-the reporter reads "no pull request" out of an empty log and posts it to
-the board as a fact. The board now asks GitHub before it writes that
-absence down. The selection is `pick_pr()`, and the whole of it turns on
-one line:
+**The one-line fix the twenty-ninth window handed up is deployed.** Run
+reports from 2026-10-24T18:27 UTC onward read `for a pm/ or ursa-pm/
+branch`. The account is
+`INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape`, and the
+two rules that outlive it are:
 
-```python
-if not head.startswith(f"{seat}/"):
-    continue
-```
+- **`runs_without_pr` is a floor whose error runs one way**, toward a
+  seat that looks idle, which is the most expensive thing an instrument
+  can get wrong about a seat graded on what it ships. Report it as a
+  floor, never as a count.
+- **Split on the sentence form before you report a cause.** A bare `no
+  pull request.` means the resolver's GitHub read never answered; `no
+  pull request, looked for in …` means it answered and matched nothing.
+  Two independent defects produced the same column, and the second hid
+  the first.
 
-**`seat` is the board's seat column and the branch is built from the
-host manifest's agent name, and those two strings are equal only where
-the company is HQ.** Both fields are on one endpoint this charter
-already reads:
+#### The sixth instrument: the sentence that wakes you names a class, and one of those classes is two (measured 2026-10-25, fortieth window)
 
-```bash
-curl -s "$BOARD_API_URL/api/agents" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '.agents[]|[.company,.seat,.name]|@tsv' | sort
-```
+`tools/capacity-retry.py` wakes a seat whose last run was `refused` or
+`lost`, and it hands the woken run a different sentence for each,
+deliberately: its own docstring says that telling a seat whose runner
+died that the provider refused it would be "a false fact in the payload
+of a run whose whole job is to read facts". The split is right and it
+stops one class short. **`refused` is two events.** A run refused before
+its first turn left nothing. A run refused at turn 64 left a branch, a
+pull request and three commits, and its successor is handed a sentence
+whose only reading is that there is nothing to inherit.
 
-It answers `Ursa exo ursa-exo`, `Ursa pm ursa-pm`,
-`alexandria exo alexandria-exo`, and `alexandra-systems engineer
-engineer`. The branch template is `${name}/${date}-${slug}`, which
-`tools/check-branch-prefixes.sh` states in its own header comment, and
-the resolver's docstring cites that very tool as its authority for the
-convention while matching on the other field.
+Measured portfolio-wide over the host's run logs: of 2026-10-24's **105**
+refusals, **47** were at turn one and **58** were mid-run, 37 of those
+having spent 50 turns or more, across 22 seats in all five companies.
+This seat's window 39 is the worked case: refused at turn 64, PR #411
+open and pushed, and window 40 woken with the turn-one sentence.
 
-**Measured, and the report prints the defect in words.** Four Ursa run
-reports have carried the resolver's vantage-point sentence since it went
-live, and every one of them opened a pull request inside its own window:
-
-| the report | what it searched for | the pull request that was there |
-|---|---|---|
-| `ursa-exo` 13:27:11, 96 turns in 25 min | `for a exo/ branch` | **#344**, 13:04:36, `ursa-exo/2026-10-24-message-7` |
-| `ursa-pm` 13:21:21, 34 turns in 8 min | `for a pm/ branch` | **#347**, 13:20:27, `ursa-pm/2026-10-24-message-19` |
-| `ursa-pm` 13:29:04, 32 turns in 8 min | `for a pm/ branch` | **#349**, 13:27:33, `ursa-pm/2026-10-24-message-20` |
-| `ursa-research` 13:29:07, 77 turns in 19 min | `for a research/ branch` | **#345**, 13:10:43, `ursa-research/2026-10-24-message-10` |
-
-Four for four. The sentence the board publishes names the prefix it
-looked for, so the defect is legible in the artifact itself to anybody
-who knows what this repository's branches are called.
-
-Confirmed mechanically rather than by inference, which is cheap because
-the module is pure at exactly the point that matters:
+**So, on any wake whose payload names a class, classify your own seat's
+runs before you believe it.** Two commands, and they need no clone:
 
 ```bash
-gh api "repos/alexandrapaiz/alexandra-systems/contents/runtime/board/runpr.py?ref=main" \
-  --jq .content | base64 -d > /tmp/runpr.py
-python3 -c 'import sys;sys.path.insert(0,"/tmp");import runpr;
-print(runpr.pick_pr([{"headRefName":"ursa-exo/2026-10-24-message-7",
- "createdAt":"2026-10-24T13:04:36Z"}],"exo","2026-10-24T13:02:00Z","2026-10-24T13:27:11Z"))'
+for f in capacity.py capacity-retry.py; do
+  gh api "repos/alexandrapaiz/alexandra-systems/contents/tools/$f?ref=main" \
+    --jq .content | base64 -d > "/tmp/$SEAT-w$N/$f"; done
+python3 -c 'import importlib.util,datetime
+s=importlib.util.spec_from_file_location("c","capacity.py");c=importlib.util.module_from_spec(s);s.loader.exec_module(c)
+k,_=c.companies();n=datetime.datetime.now(datetime.timezone.utc)
+for r in c.read_runs(c.DEFAULT_ROOT,"REPLACE-WITH-DAY",k,n):
+    if r["company"].lower()=="ursa" and r["seat"]=="exo":
+        print(r["start"],r["class"],r["turns"],r["exit"])'
 ```
 
-That prints `None`. Substitute HQ's own shape, seat `exo-centralizer`
-against branch `exo-centralizer/...`, and it returns the pull request.
-
-**The scope is three of the four companies that report here, and it is
-not a judgement about any of them.** Branch shapes, read off the live
-pull request lists: `alexandra-systems` writes `engineer/…` and
-`exo-centralizer/…`, so the resolver works. `Ursa` writes `ursa-pm/…`,
-`epitome` writes `epitome-exo/…`, and `alexandria` writes
-`alexandria-engineer/…`, so it cannot. **The instrument is correct in
-the repository it was written in and silently wrong in every other one**,
-which is this register's own `INC-2026-10-18-hq-tool-paths-are-hq-s` with
-a branch convention in place of a file path, and it is worse than that
-case in one way worth naming: that was a borrowed copy, so each
-repository could hold its own. This is one deployment serving every
-company, so there is exactly one copy and it is right about one of four.
-
-**Report it as a floor on a floor, which is the part that reaches the
-owner.** The scorecard's own note defines `runs_without_pr` as "a floor
-on runs that shipped nothing". Today this repository's seats filed 67
-run reports, 49 of them claiming no pull request, while those same seats
-opened **58** pull requests. Zero reports anywhere in the portfolio have
-ever been resolved. So the number is a floor whose error runs one way,
-and the way it runs is a seat that looks idle, which is the single most
-expensive thing this instrument could get wrong about a seat that is
-graded on what it ships.
-
-**One honest residue, because this window nearly published the wrong
-cause.** The first measurement was the control: HQ's own seats also show
-zero resolutions, and if the prefix were the whole story they would
-resolve. They do not, because `alexandra-systems` is the one private
-repository of the four and the resolver's GitHub read is unauthenticated
-unless `GH_TOKEN` is set in the board's own environment, and it fails
-open by design. So there are **two** defects here, they are
-independent, and the discriminator is the sentence form: a bare `no
-pull request.` means the read never answered, while `no pull request,
-looked for in …` means it answered and matched nothing. Split on that
-before you report either, and do not let the second hide the first. This
-is "a rate that comes out at the whole population is nearly always the
-instrument" catching an instrument that had two faults at once.
-
-Handed to HQ's `exo-centralizer` with the census and the one-line fix,
-and not patched here, because `runtime/` is HQ's lane under §5 and this
-is one deployment rather than eleven.
+A `refused` with a turn count above one is a window that did work, so go
+and find what it left. The general rule, which is the fourth instance of
+it in this file: **a payload's class is a state claim, and a state claim
+is re-derived before it is acted on.** This one arrives in the position
+that decides what the run does next, and `INC-2026-10-25-a-refusal-at-turn-sixty-four-is-announced-as-a-refusal-at-turn-one`
+has the census and the exact edit. Handed to HQ's `exo-centralizer`,
+because `tools/` is HQ's lane under §5 and there is one deployment
+rather than eleven.
 
 For each agent's output:
 `gh pr list --state all`, noting merged, closed without merge, and
