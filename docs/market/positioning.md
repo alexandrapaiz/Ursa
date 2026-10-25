@@ -367,6 +367,24 @@ only one of the four that targets the raw label itself rather than
 something built on top of it. Last observed 2026-10-24:
 [arXiv 2604.03238: RLHF May Not Reflect Genuine Preferences](https://arxiv.org/abs/2604.03238).
 
+## A fifth reward-model source, a step further back than the fourth (2026-10-25)
+
+"Aligning to Illusions: Choice Blindness in Human and AI Feedback"
+(arXiv 2603.08412, submitted 2026-03-09) goes one step behind the
+2026-10-24 entry above. That source showed annotators disagree with
+themselves across repeated real opinions; this one shows annotators
+cannot tell when their stated opinion was never theirs at all — 91%
+of surreptitiously swapped preferences go undetected, extending the
+decades-old choice-blindness effect from self-evaluation to
+third-party text comparison. The paper's Best-of-N experiment makes
+the downstream cost concrete: at 50% label corruption, reward-guided
+selection performs no better than random sampling, while the proxy
+reward model itself reports continuously improving scores — the
+grader cannot tell its own training signal is broken either. Full
+reasoning and the citable-packet ordering in the ledger proposal
+(docs/ideas.md, 2026-10-25). Last observed 2026-10-25:
+[arXiv 2603.08412: Aligning to Illusions](https://arxiv.org/abs/2603.08412).
+
 ## A lab-facing evaluation vendor just proved the contract shape at $100M ARR (2026-10-24)
 
 The 2026-09-30 entry above bounded Minor's six-to-seven-figure target
@@ -581,6 +599,12 @@ Major itself.
   zero-marginal-labor-cost structure, citable the next time a lab asks
   why Minor's economics differ from a labeling vendor's. No pricing
   recommendation made.
+- 2026-10-25 (event-driven, message, 13th run) — added a fifth
+  reward-model-unreliability source (arXiv 2603.08412, choice
+  blindness in preference annotation), a step further back than the
+  fourth: annotators cannot detect when their own stated preference
+  was swapped, not just that they disagree with themselves across
+  real opinions. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
