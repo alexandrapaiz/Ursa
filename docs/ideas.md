@@ -9878,6 +9878,22 @@ per the "read your own seat's open PRs first" rule. Entries below are
 this run's.
 
 ### 2026-10-25 (skill, twenty-first run) — The library was shipping a skill its own index did not list, for three runs
+- Trigger: `skills/auditing-a-detected-correction-loop/` landed in the
+  eighteenth run and three runs later `skills/README.md` still opened with a
+  table of six skills and an areas section that ended at the sixth. Nothing
+  was red, because no guard reads the index.
+- What: a fourth check, or a mode on `skills/trigger-coverage.mjs`, that
+  compares the directory listing to the rows of the README table and to the
+  area paragraphs, and exits non-zero on a skill present in one and absent
+  from the other. The coverage tool already enumerates `skills/*/SKILL.md` to
+  build its roster, so it holds the right answer in memory while the index
+  holds the wrong one.
+- First step: in `trigger-coverage.mjs`, diff the roster it already has
+  against the slugs appearing in `skills/README.md`, and print both
+  directions of the difference.
+- Cost: $0, about five lines of work against a failure that lasted three
+  runs.
+- Status: proposed
 
 `skills/auditing-a-detected-correction-loop/` landed in the eighteenth
 run, was in `trigger-coverage.mjs`' roster from the moment it existed,
@@ -9900,6 +9916,20 @@ from the other. It is five lines of work against a failure that lasted
 three runs.
 
 ### 2026-10-25 (skill, twenty-first run) — A source comment counts to three and then lists four, and the skill that cites it says four
+- Trigger: found while reading `quoting-a-number-from-an-outcome-record/E33`.
+  `ursa-major/src/types.ts:435` introduces `noCandidate` with "Three
+  different things produce the same bare `no_generation_provenance` label"
+  and the bulleted list under it has four entries; `resolve.ts:488-507` sets
+  four values, so four is the true count and "Three" is stale prose.
+- What: correct the word in the comment. For the engineer seat, because
+  `ursa-major/` is not this seat's to edit. The skill's own `what` field
+  already says four and is right; it is the source that disagrees with
+  itself.
+- First step: change "Three different things" to "Four different things" at
+  `ursa-major/src/types.ts:435` and check whether any other comment in that
+  file counts the same list.
+- Cost: $0, one word.
+- Status: proposed
 
 `ursa-major/src/types.ts:435` introduces the `noCandidate` field with
 "Three different things produce the same bare `no_generation_provenance`
@@ -9920,6 +9950,20 @@ suggests the genre is worth a grep rather than a fix: a count written in
 prose beside a list that a later commit extended.
 
 ### 2026-10-25 (skill, twenty-first run) — Two over-attributed sentences in one skill, both invisible to the miss signal, both fixed by naming the second ref
+- Trigger: reading the last eight unread refs turned up two sentences whose
+  citation pointed at a range that does not state the claim while a sibling
+  range in the same skill states it outright, and neither was visible to
+  anything the tools measure.
+- What: a passage-level miss ratio, scored against the union of the ranges a
+  sentence tags, rather than the `what`-level ratio §5l already computes. The
+  sweep knows which refs share a sentence and which ranges overlap; it does
+  not compare a passage's content words to the lines its own tag points at.
+  Both of these would have sat at the top of that queue.
+- First step: compute the ratio over the library and print it beside each
+  passage, as `--signal` does for `what`, and measure it before believing it.
+- Cost: $0, and it should not become a gate until it is measured, the way
+  the fourteenth run declined to gate on §5l's signal.
+- Status: proposed
 
 Reading the last eight unread refs turned up two sentences whose
 citation pointed at a range that does not state the claim, while a
