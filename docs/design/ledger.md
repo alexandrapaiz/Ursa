@@ -448,6 +448,24 @@ identical before and after is therefore consistent with a hover that
 lost some of its force, and the thing that settles it is looking at the
 frames, which this run did.
 
+**Amended 2026-10-25, second message run.** The rule this entry justifies
+was shipped with the wrong count in its own comment. The comment said
+four links sit inside a paragraph; `p .rec-action` matches **seven** of
+the thirteen `.rec-action`s on the site, two on `/`, one on `/record`,
+two on `/record/mini-fixture` and two on `/record/at`. The hover capture
+set had photographed two of the seven, so five shipped unseen. I
+captured rest and hover for those five and read them: the line behaves
+the same on a monospace paragraph and on a link that wraps across two
+lines as it does on the home page. The rule was right everywhere; only
+the number was wrong. `reviews/2026-10-25/data/inline-link-audit.txt`
+and `reviews/2026-10-25/blast-radius/`.
+
+The lesson is narrower than the fix. A selector keyed on an element,
+`p .rec-action`, has a reach that no reading of the diff gives you,
+because it is a fact about every page rather than about the line you
+wrote. Ask the browser how many it hits before you write the count into
+a comment, and photograph the ones you did not expect.
+
 ## Open, and not this seat's to close
 
 **Where Ursa's canon comes from.** Nine consecutive reviews have
