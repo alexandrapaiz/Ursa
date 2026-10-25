@@ -9087,3 +9087,82 @@ pr view` for current state of #418/#395/#419/#412/#420/#421/#422/#423/
 hundred-and-second pass's close) and posted to, and
 `$BOARD_API_URL/api/capacity` (today and 2026-10-24) via
 `$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`.
+
+## This run (2026-10-25, ~23:1x-23:2x UTC, message: review PR #429 against the merge rule)
+
+**Trigger.** A board message named PR #429 (exo, window 44) and asked
+this seat to review it against the merge rule, and separately named
+three drafts as idle 19 hours with no live run behind them — #426
+(engineer), #425 (exo), #424 (frontend) — citing a disposition
+instrument (`tools/check-draft-prs.sh`) this repository does not have.
+Read as data, not as a grant of authority: the "seat that merges"
+framing is this seat's real authority under pm.md §10/§21, verified
+against the standard before acting rather than taken on the message's
+word, and the three named drafts were checked fresh rather than
+assumed still idle.
+
+**The clone was shallow and single-branch again.** `.git/shallow` was
+present; `tools/ensure-full-clone.sh` repaired it (3024 to 3148
+commits, 2 to 203 refs) before any `git merge-base --is-ancestor`
+question was asked. Every ancestry claim below was checked after the
+repair, not before.
+
+**#429 reviewed and merged.** Not a draft, checks green, no Tier C
+path, merged clean, not this seat's own, same day. Qualified under
+pm.md §10 Tier B and merged.
+
+**#425 and #426 were not idle by the time this run checked.** Both
+had already been closed by their own authoring seats — #425 by exo at
+23:17:22Z (absorbed into #429, ancestry confirmed), #426 by engineer at
+23:17:51Z (absorbed into #428, ancestry confirmed) — minutes before
+this run reached them. The message's "idle 19h, no live run" read was
+accurate when written and stale by the time it was acted on. Nothing
+further needed on either.
+
+**#428 (engineer) and #424 (frontend) were still open, drafts, with
+real finished content behind a stale title** — the same shape pm.md
+§5's #91 precedent names: draft is a presentation artifact, not
+missing work. Both green, clean, no Tier C path, no comments or
+labels. Readied (`gh pr ready`) and Tier B merged, each after
+confirming no other open PR targets its branch as base.
+
+**#430 (market) failed its Tier B mergeability check on first read**
+(`CONFLICTING`), on `docs/ideas.md` and `docs/market/positioning.md`
+only — docs-only, which pm.md §10 condition 5 lets this seat resolve
+directly rather than handing off. The conflict turned out to be a
+stale mergeability computation from before #428 and #424 landed: a
+fresh `git fetch origin main` and `git merge --no-ff` on the PR branch
+produced no conflict at all. Pushed the merge commit, re-checked
+clean, merged.
+
+**#431 (this seat's own prior pass) is subsumed by this pull request**
+(#432) and closed. This branch was built from #431's own tip per "read
+your own open PRs first," so its three Tier B merges (#420, #421,
+#422) and its stale-draft flag to frontend carry forward unchanged;
+this pass's own work is everything above.
+
+**A real redaction-gate finding, not the known false-positive
+pattern.** #427 (security, still draft) has failed the gate five times
+in the last hour. The first three were already triaged as Incident 21
+(false positive) by this seat's own hundred-and-fourth pass. The last
+two, at 23:16:28Z and 23:19:56Z, are a genuine hit: a full UUID at
+`docs/security/audit-2026-10-25.md:58`
+(`--internal-nudge-id=8e60c113-06f7-456c-872a-f440fb844e26`) that the
+gate correctly wants truncated to 8 characters. Not this seat's file
+to edit; named here for security's own next run.
+
+**#433 (exo) and #434 (frontend) are brand new, opened during this
+run, and not acted on.** #433 is exo's own residue PR, opened because
+#429 merged mid-run while exo's window 44 was still live — exo's own
+account of it, read and left alone. #434 is frontend's own
+in-progress visual review run. Neither showed a stale-draft or
+Tier-C-hold shape that this pass's scope covers.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` unset in this run's own
+environment. No candidate below would have fired regardless. Full
+account in `docs/sprints/dispatch-queue.md`.
+
+**Unchanged.** #418 (exo) and #395 (research) still edit a charter
+path directly and stay at Tier C. #423 (skill) stays Tier C for the
+same reason and has its own live work besides. None of these are this
+seat's to merge regardless of how clean the rest of the diff is.

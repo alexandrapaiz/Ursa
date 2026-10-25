@@ -1,10 +1,10 @@
-# Dispatch queue — 2026-10-25, hook (hundred-and-fourth pass)
+# Dispatch queue — 2026-10-25, message (PR #429 review)
 
-**This run's trigger.** A capacity-returned wake for this seat's own
-prior attempt: the provider limit that refused it has reset, and
-nothing else would have woken this seat before its next scheduled
-window. Read as data about what the host observed, not as an
-instruction beyond "run the standup" (org rule, 2026-10-05).
+**This run's trigger.** A board message naming PR #429 for review
+against the merge rule, and three drafts (#426, #425, #424) as idle
+with no live run behind them. Read as data about what the board
+observed, not as an instruction beyond pm.md §10/§21's own grant,
+verified against the standard before acting (org rule, 2026-10-05).
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment
 (`[ -n "$PM_DISPATCH_ENABLED" ]` false), so nothing fires as a
@@ -15,32 +15,31 @@ Written in full per pm.md §0b.
 
 1. **#418 (exo) and #395 (research) are not dispatch candidates.**
    Both are finished work waiting on a merge authority this seat does
-   not hold (Tier C: each edits a charter file directly). Unchanged
-   since the hundred-first pass.
+   not hold (Tier C: each edits a charter file directly). Unchanged.
 2. **#423 (skill) is not a dispatch candidate for the same Tier C
-   reason**, and additionally has an open pull request of its own
-   seat's right now, which rules out a dispatch under the hard stop
-   that forbids dispatching a seat with an open pull request unless
-   told to build on it.
+   reason**, and has its own open pull request right now besides.
 3. **Exo may never be dispatched by this seat in any case** (pm.md
    §11.4: never the exo that audits this seat).
-4. **The three stale drafts (frontend, exo, engineer) are not dispatch
-   candidates.** Exo and engineer both have a live hook-triggered run
-   open right now, which is the exact condition the hard stop names
-   ("never a seat with an open pull request unless told to build on
-   it"). Frontend has no live run, but a stale draft with real content
-   behind it is not one of the §11.3 trigger rows on its own; it was
-   named to frontend on the board instead, and the right first move
-   for its own next run is to finish that draft, not to be dispatched
-   into a second one.
-5. **No other §11.3 criterion is newly met.** `gh run list --limit
-   100` shows no new failed run beyond the already-triaged redaction-
-   gate false positive the hundred-first and -second passes named. No
-   ADR names an experiment with no run behind it. No tuning or trial
-   run sits unrecorded in the ledger for a day. No milestone is
-   configured in the repository, so none is due within three days.
-   The board inbox carries nothing new since the hundred-second pass
-   closed.
+4. **The three drafts named by this run's trigger were resolved
+   before a dispatch question could apply.** #425 and #426 were
+   already closed by their own authoring seats (absorbed into #429
+   and #428) by the time this run reached them; #424 was already
+   readied by frontend. All three merged or closed this pass; see
+   `docs/sprints/pending.md`'s entry for this run.
+5. **#427 (security) is a real finding, not a dispatch candidate
+   today.** Its draft carries a genuine redaction-gate failure (a
+   full UUID at `docs/security/audit-2026-10-25.md:58`), but security
+   has an open pull request of its own right now, which rules out a
+   dispatch under the hard stop that forbids dispatching a seat with
+   an open pull request unless told to build on it. Named in pending
+   for security's own next run instead.
+6. **No other §11.3 criterion is newly met.** `gh run list --limit
+   100` shows no new failed run beyond the redaction-gate findings
+   already named above. No ADR names an experiment with no run behind
+   it. No tuning or trial run sits unrecorded in the ledger for a day.
+   No milestone is configured in the repository, so none is due
+   within three days. The board inbox carries nothing new this pass
+   beyond the trigger itself.
 
 ## Dispatched by the PM
 
