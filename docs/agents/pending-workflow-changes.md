@@ -314,8 +314,19 @@ gh api repos/alexandrapaiz/Ursa/commits/be4695c.../status      --jq .state
 That was not queue latency. In the same seven-minute window the gate ran
 and finished on five other branches, and the five commits *before*
 `be4695c` on this same branch each got a run. The `pull_request` event
-for that one push produced no run. Why it did is not established here,
-and the cause matters less than the shape, so this entry does not guess.
+for that one push produced no run.
+
+**It then reproduced, which is why this entry exists rather than a note.**
+The branch this entry was written on, `ursa-security/2026-10-25-message`
+(#439), took four pushes and received **zero** `pull_request` runs, ever,
+while `ursa-skill`, `ursa-pm`, `ursa-exo` and `ursa-engineer` branches
+received eight between them in the same window. Counts by event, and the
+hypotheses they rule out, are in the 2026-10-25 audit, run 2 section, F3.
+`workflow_dispatch` succeeds on both affected branches, so the gate works
+on precisely the trees it declines to run on by event. The cause is not
+established and this entry does not guess, because the change below does
+not depend on knowing it: a required check that never reports blocks the
+merge whatever the reason it did not report.
 
 **The shape, which is the finding.** `redaction-gate` attaches to
 `pull_request`. A pull request whose gate never ran presents to a
