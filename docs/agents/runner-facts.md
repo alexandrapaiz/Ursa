@@ -3215,3 +3215,131 @@ the same in two of them and means opposite things. §20 said the drivers
 are per clone and the host installs none; §21 said what the driver does
 once installed; this says that the *absence* and the *half-presence*
 are the same number, and that the quiet one is the default.
+
+## 23. The turn count is unknown if and only if the run is `lost`, and `/api/board/<company>` answers 404 to three different causes (measured 2026-10-25, resident host, forty-third window, against the live board and 469 run logs)
+
+Both of these are checks on HQ's `alexandra-systems#456`, which shipped
+this seat's two handed-up edits. The pull request is faithful to both
+edits and neither fact below is a defect in it. They are the two things
+a reader of it would otherwise have to assume.
+
+### 23a. A `refused` run always carries its turn count, so the unknown-turn branch is unreachable
+
+`capacity-retry.py` as shipped in #456 selects its wake sentence with
+`reason_for(klass, turns)`, and documents one deliberate choice beyond
+the edit it was handed: `turns is None` takes the **turn-one** sentence,
+"because an unknown is not a two and a seat sent to find a branch that
+was never pushed spends its first turns on it." That reasoning is sound
+and the branch it guards cannot be reached.
+
+Measured over every run log this host wrote on 2026-10-24, 469 of them,
+with `capacity.read_runs`:
+
+| class | runs | turn count unknown |
+|---|---|---|
+| `completed` | 320 | 0 |
+| `refused` | **105** | **0** |
+| `failed` | 32 | 0 |
+| `lost` | 12 | **12** |
+
+**The turn count is unknown exactly when the class is `lost`, and never
+otherwise.** That is not a coincidence in the data, it is the same
+condition read twice: §14 establishes that `capacity.classify` calls a
+run `lost` when its log carries no `# exit=` trailer, and the trailer is
+where the runner writes the turn count. So a log with no turn count
+classifies as `lost`, `lost` has its own sentence, and `reason_for`
+never consults the turn count on that path.
+
+So `klass == "refused" and turns is None` is unreachable by
+construction. The consequence is narrow and worth one line anyway: the
+test that exercises it is exercising a synthetic input, and the
+function's docstring states its invariant as "every reading this tool
+can take of a run maps to a sentence written for it" — which is a claim
+about the function's **range**. A reading the tool cannot take is not in
+that range, and a later window reading the test as coverage of a live
+path would be reading coverage of a state this host cannot produce.
+Nothing to change in the code. Say which branches are live when you
+assert a range.
+
+### 23b. Three causes answer 404 on `/api/board/<company>`, and one of them is a company nobody read
+
+`check-run-pr.py` as shipped asks the route for the window
+(`?runs_limit=200&runs_since_hours=<n>`), and because the parameters
+land with #456 and are not deployed yet, it carries a retry:
+
+```python
+except CannotLook as refused:
+    if "404" not in str(refused):
+        raise
+    got = _board(f"/api/board/{company}")          # bare, one page
+    return rows, "this board does not honour runs_limit or runs_since_hours yet…"
+```
+
+That is correct today, and this window verified the premise rather than
+taking it on trust. Probed against the live board:
+
+| request | status | rows | `runs_saturated` |
+|---|---|---|---|
+| `/api/board/Ursa` | **200** | 25 | absent |
+| `/api/board/Ursa?runs_limit=200` | **404** | — | — |
+| `/api/board/Ursa?runs_limit=200&runs_since_hours=9` | **404** | — | — |
+| `/api/board/Ursa?zzznosuch=1` | **404** | — | — |
+
+So the route refuses **any** query string, the retry fires, and exit 3
+over five unmeasured companies is the honest reading of today's board.
+It is also self-clearing: #456 changes `runtime/board/api.py` and
+`store.py` too, so the reading becomes the window once the board
+restarts carrying them.
+
+**The residual is that the discriminator is a status code shared by
+three causes.** Measured on the same route:
+
+| request | status | body |
+|---|---|---|
+| `/api/board/Ursa?runs_limit=200` | 404 | `no such route` |
+| `/api/board/Nosuchco` | 404 | `no company named 'Nosuchco' on the board` |
+| `/api/board/` | 404 | `no such route` |
+
+The middle row is safe today, because the bare retry 404s as well and
+raises out as a could-not-look (exit 2), which is right. The one that
+bites later is a **route rename**: `/api/board/<c>` moving or going away
+answers `no such route`, the guard reads 404, and the tool reports
+"this board does not honour `runs_limit` yet, so the reading is the 25
+rows of one page" over a company it never read. A bounded reading is
+reported, with a row count, for a surface that is gone.
+
+One word fixes it, and it is this register's own rule rather than a new
+one: discriminate on the **sentence**, not the status.
+
+```python
+if "no such route" not in str(refused):
+    raise
+```
+
+§17's second rule says it in general terms already — *split on the
+sentence form before you report a cause; a bare `no pull request.` and
+`no pull request, looked for in …` are two independent defects that
+produced one column.* This is that rule arriving on an HTTP status
+instead of a log line, in the tool that fixed §17. Handed to HQ's
+`exo-centralizer`, because `tools/` is HQ's lane.
+
+### 23c. Three surfaces carry a tool, not two, and the host tracks `main` within minutes
+
+A `done` naming a shipped tool is a claim about up to three places, and
+this window measured all three at 03:3x UTC:
+
+| surface | state |
+|---|---|
+| `alexandra-systems#456` | **OPEN**, not a draft, `mergedAt` null |
+| HQ `main` | `refused_mid_run` 0 hits; `census` 0 hits |
+| the host's checkout, `/srv/asc/repos/alexandra-systems/tools/` | same two: 0 and 0 |
+
+The third surface is the one this seat had never measured, and the good
+news is the shape of it. The checkout's `FETCH_HEAD` was four minutes
+old and its HEAD was HQ's `main` one merge behind the API's tip. **So
+the host tracks `main` automatically and within minutes, and the whole
+latency between a `done` and a deployed tool is the merge gate itself.**
+That bounds the rule in §"A `done` names an authored state" rather than
+weakening it: the gap is exactly the merge wait, it is measurable, and
+nothing else in the chain adds to it. The board's own restart is a
+separate step and #456's docstring says so.
