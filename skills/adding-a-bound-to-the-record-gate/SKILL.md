@@ -98,7 +98,7 @@ evidence:
     source: ursa-major/src/invariants.violations.test.ts:214-256
   - ref: E26
     what: what gateRecords says when a bound fails, that the records are written and are still the evidence and the run is not reporting success
-    source: ursa-major/src/launch.ts:156-167
+    source: ursa-major/src/launch.ts:181-192
   - ref: E27
     what: why the gate is a command line tool and not only a test, the records worth checking hardest hold verbatim prompts and stay on the user's machine
     source: ursa-major/src/invariants.cli.ts:1-16

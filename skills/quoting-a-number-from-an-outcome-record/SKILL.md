@@ -31,7 +31,7 @@ evidence:
     source: ursa-major/src/stats.ts:8-12,70-71
   - ref: E3
     what: the schema says coveredChars excludes text no span covers, and reports it separately from finalChars
-    source: ursa-major/src/types.ts:656-661
+    source: ursa-major/src/types.ts:704-709
   - ref: E4
     what: in code mode a span is a trimmed non-empty line, so indentation and blank lines are never covered by any span
     source: ursa-major/src/segment.ts:21-33
@@ -55,7 +55,7 @@ evidence:
     source: ursa-major/src/resolve.ts:481-512
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
-    source: ursa-major/src/types.ts:662-663, ursa-major/src/stats.ts:36-37,54-55
+    source: ursa-major/src/types.ts:710-711, ursa-major/src/stats.ts:36-37,54-55
   - ref: E12
     what: CLAUDE.md lists all four classifications under one heading and calls no_generation_provenance the most valuable
     source: CLAUDE.md:65-70 (section 1, span classifications)
@@ -64,7 +64,7 @@ evidence:
     source: docs/okrs/2026-q4.md:13-18 (O1 KR1.1)
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
-    source: ursa-major/src/types.ts:793-794, ursa-major/src/stats.ts:132,140-142
+    source: ursa-major/src/types.ts:841-842, ursa-major/src/stats.ts:132,140-142
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
     source: ursa-major/src/cli.ts:184, ursa-major/src/viewer.ts:570,580
@@ -118,22 +118,22 @@ evidence:
     source: docs/vision.md:33-35 (section 0b, principle 4)
   - ref: E32
     what: survived_verbatim means byte-identical as of 2026-10-13, and a formatting-only match is now survived_mutated with normalizedOnly set and score 1, which 26 of 770 verbatim claims over ten records of this repository were
-    source: ursa-major/src/types.ts:396-427, ursa-major/src/resolve.ts:275-299, ursa-major/src/resolver.test.ts:168
+    source: ursa-major/src/types.ts:444-475, ursa-major/src/resolve.ts:275-299, ursa-major/src/resolver.test.ts:168
   - ref: E33
     what: noCandidate names which of four things produced a no_generation_provenance span, and df_cutoff_suppressed is the value that reports the matcher never looked rather than anything about the work
-    source: ursa-major/src/types.ts:435-451, ursa-major/src/resolve.ts:488-507
+    source: ursa-major/src/types.ts:483-499, ursa-major/src/resolve.ts:488-507
   - ref: E34
     what: Stats carries blindSpans and suppressedTokenSpans as span counts, blindSpans being the df-cutoff-suppressed spans and suppressedTokenSpans a superset that were mostly scored anyway
-    source: ursa-major/src/types.ts:664-693, ursa-major/src/stats.ts:56-57
+    source: ursa-major/src/types.ts:712-741, ursa-major/src/stats.ts:56-57
   - ref: E35
     what: blindSpans and notGeneratedChars are both optional and both read as zero when absent, and the schema says absence means a true zero for one and an unknowable value for the other
-    source: ursa-major/src/types.ts:678-683,724-727
+    source: ursa-major/src/types.ts:726-731,772-775
   - ref: E36
     what: the CLI prints the blind-span line only when the count is non-zero, and its own wording says those spans are counted as no_generation_provenance and should not be
     source: ursa-major/src/cli.ts:173-181
   - ref: E37
     what: the cutoff is an absolute count against a corpus that grows, so the blind share can only grow with it, which makes a rise between two records the signal rather than the level in any one, and both of this project's trials sit where the figure is zero
-    source: ursa-major/src/types.ts:453-468
+    source: ursa-major/src/types.ts:501-516
 supersedes: []
 ---
 

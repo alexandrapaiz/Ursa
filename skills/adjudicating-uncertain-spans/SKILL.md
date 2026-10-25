@@ -31,10 +31,10 @@ evidence:
     source: ursa-major/src/match.ts:6,8,49-52
   - ref: E3
     what: the below-threshold branch that sets uncertain, with the losing candidate kept on the span
-    source: ursa-major/src/resolve.ts:481-487, ursa-major/src/types.ts:429-430
+    source: ursa-major/src/resolve.ts:481-487, ursa-major/src/types.ts:477-478
   - ref: E4
     what: trivial is a different flag with a different cause, set on short raw-exact matches only, kept when the normalized-only demotion fires and dropped when the descent check demotes the span
-    source: ursa-major/src/resolve.ts:241-257,265-272,320-329,380-399, ursa-major/src/match.ts:10, ursa-major/src/types.ts:508
+    source: ursa-major/src/resolve.ts:241-257,265-272,320-329,380-399, ursa-major/src/match.ts:10, ursa-major/src/types.ts:556
   - ref: E5
     what: matching is deliberately lexical and deterministic so every label is explainable from the functions and the two thresholds
     source: ursa-major/src/match.ts:1-3
@@ -76,7 +76,7 @@ evidence:
     source: ursa-major/src/resolve.ts:471-476
   - ref: E18
     what: uncertainSpans and trivialSpans are two independent reads of the two flags over every span, so a span whose demotion dropped the trivial flag lands in the uncertain count and not in the trivial one
-    source: ursa-major/src/stats.ts:36-37,43-55, ursa-major/src/types.ts:662-663
+    source: ursa-major/src/stats.ts:36-37,43-55, ursa-major/src/types.ts:710-711
 supersedes: []
 ---
 

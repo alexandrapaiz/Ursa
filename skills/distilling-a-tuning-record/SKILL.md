@@ -90,7 +90,7 @@ evidence:
     source: ursa-major/src/resolve-episode.ts:183,205-213
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
-    source: ursa-major/src/parse.ts:14,57,81,113, ursa-major/src/types.ts:606-607
+    source: ursa-major/src/parse.ts:14,57,81,113, ursa-major/src/types.ts:654-655
   - ref: E24
     what: an episode id is the project slug, the generated commit date, and the first seven characters of the generated commit sha
     source: ursa-major/src/episodes.ts:60-64

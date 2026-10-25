@@ -45,7 +45,7 @@ evidence:
     source: ursa-major/src/resolve-episode.ts:134,209; ursa-major/src/episodes.ts:25
   - ref: E8
     what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:492-493; ursa-major/src/bin/ursa.ts:515; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
+    source: ursa-major/src/bin/ursa.ts:576-577; ursa-major/src/bin/ursa.ts:599; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:87-103
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:34-37
@@ -60,7 +60,7 @@ evidence:
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
   - ref: E13
     what: acceptance is a declaration, and the undeclared default states that retention is not acceptance
-    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:495-500
+    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:579-584
   - ref: E14
     what: the two paths measure different stages of the funnel, 82 percent deletion against 7 percent, and a record should state which stage it measured
     source: docs/beyond-preference-pairs.md:232-240
