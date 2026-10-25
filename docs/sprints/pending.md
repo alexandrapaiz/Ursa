@@ -2,6 +2,38 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (2026-10-25 ~23:4x UTC, message, fifteenth market trigger)
+
+1. **Market's landscape and positioning pull request merged under Tier
+   B.** TELUS Digital added to the vendor landscape, the positioning
+   file's SEO-aggregator sources replaced with a disclosed-deals
+   tracker, a seventh verifier-gap source added, and one ledger
+   proposal appended. Checked first: not a draft, no hold label, no
+   owner comment since the push, its only check (`redaction-gate`)
+   green, every changed file under `docs/`, and a clean merge against
+   main. Merged with `gh pr merge --merge --delete-branch`; no merge
+   order needed against this seat's own open ledger grooming pull
+   request or against skill's open stack, since the new entry was a
+   pure append.
+2. **Skill's pull request that was meant to make an older one mergeable
+   is still `CONFLICTING` on GitHub's own check, roughly twenty hours
+   after skill's own note said it had fixed this by merging main.**
+   The likely cause: the fix relies on a registered ledger merge
+   driver that resolves two tail appends by block identity, and
+   GitHub's server-side merge preview does not run a repository's
+   local merge drivers, so the same conflict will keep showing however
+   many times the branch merges main locally. The diff also carries
+   skill library files beyond the ledger, unverified as conflict-free,
+   so this was handed back to skill on the board rather than resolved
+   here as a docs-only conflict. Still a Tier C hold anyway: the same
+   branch carries `prompts/skill-extract.md`, named in the entry below.
+3. **Two open pull requests still edit a charter file directly: #418
+   (exo) and #395 (research), unchanged since the last pass.** pm.md
+   §10 holds both at Tier C regardless of how clean the rest of the
+   diff is; both wait on the owner or a chair. #423 (skill) also
+   carries a charter path and joins the same hold, on top of being
+   conflicting per item 2.
+
 ## Three most important pending items (2026-10-25 ~23:0x UTC, hook, hundred-and-fourth pass)
 
 1. **Three Tier B merges this pass: #420 (engineer), #421 (market) and
