@@ -1422,8 +1422,8 @@
   },
   "running-an-outcome-record-trial/E10": {
     "verdict": "supports",
-    "read": "2026-10-18",
-    "lines": "ca1d161ab3ab1652",
+    "read": "2026-10-25",
+    "lines": "43c4e246d28578ac",
     "what": "3c4103c9efbc2dd8",
     "passages": "f2e8fc9aa43b48d9"
   },
@@ -1554,11 +1554,11 @@
     "passages": "c5cbb25da2bcfa9f"
   },
   "running-an-outcome-record-trial/E8": {
-    "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "6e620c501db6b212",
-    "what": "c4da04c6000c4e86",
-    "passages": "902e6202899ac15f"
+    "verdict": "wrong",
+    "read": "2026-10-25",
+    "lines": "a45fcad9a134ab82",
+    "what": "eb272812bd65daa1",
+    "passages": "5dfe5a7281a35ea7"
   },
   "running-an-outcome-record-trial/E9": {
     "verdict": "supports",

@@ -44,8 +44,8 @@ evidence:
     what: on the git path the model attribution is whatever marker string classified the commit
     source: ursa-major/src/resolve-episode.ts:134,209; ursa-major/src/episodes.ts:25
   - ref: E8
-    what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:576-577; ursa-major/src/bin/ursa.ts:599; ursa-major/src/bin/ursa.ts:536; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:87-103
+    what: min-chars defaults to 200 and limit truncates, both launches ask the keep-or-drop decision through one shared predicate that exempts refusal-only records from the floor, and both keep one shared tally of which bound dropped each unit, which ursa run prints along with the lowest floor that would have kept one
+    source: ursa-major/src/bin/ursa.ts:576-577; ursa-major/src/bin/ursa.ts:599; ursa-major/src/bin/ursa.ts:126-147; ursa-major/src/bin/ursa.ts:610-613,624-628; ursa-major/src/ci/run.ts:220-223; ursa-major/src/launch.ts:87-103; ursa-major/src/launch.ts:246-275
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
     source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:34-37
@@ -193,11 +193,14 @@ path drops any episode whose generated side is under 200 characters, and
 truncates to `--limit` when given. Both paths now ask that through one
 predicate, which exempts a record that carries exclusions, so an episode
 whose every path was an import still produces the record whose only job
-is to say so [E8]. `ursa run` does not name what it dropped. The CI path
-does, counting its below-threshold drops separately [E8]. So on a local
-run, if step 2 counted more pairs than the run produced records, that gap
-is the default threshold rather than a bug, and you have to reconstruct
-it yourself. *Output: the two counts, and the reason for any difference.*
+is to say so [E8]. Both launches also name what they dropped, from one
+shared tally: the run summary says how many work units were found and not
+recorded, which bound dropped each, and for the ones under the floor the
+lowest `--min-chars` that would have kept at least one [E8]. So read the
+gap between step 2's count and the record count off the summary rather
+than reconstructing it. The local launch dropped silently until
+2026-10-24 and only the CI comment named the bounds [E8], so a run on an
+older build still needs the reconstruction by hand. *Output: the two counts, and the reason for any difference.*
 
 **8. Write down what the record measured, next to the record.** A record
 should state which stage of the funnel it came from [E14]. Also state
