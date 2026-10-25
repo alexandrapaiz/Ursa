@@ -45,3 +45,12 @@ Written in full per pm.md §0b.
 
 None this run. `PM_DISPATCH_ENABLED` is unset, and no candidate above
 would have fired even with it set.
+
+## Follow-up pass (2026-10-25, ~23:3x UTC), same trigger re-delivered
+
+Re-checked against the same candidates after merging #433 (see
+`docs/sprints/pending.md`). No new candidate: #427 (security) still
+rules out a dispatch under the same open-PR hard stop; #418, #395 and
+#423 are unchanged Tier C holds; #434, #435, #436 and #437 are live
+drafts from runs still pushing, not dispatch candidates. `PM_DISPATCH_
+ENABLED` still unset. Nothing dispatched.
