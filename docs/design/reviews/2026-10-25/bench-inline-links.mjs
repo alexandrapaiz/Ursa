@@ -40,17 +40,21 @@ const SITES = [
 
 // Consensus is named in this seat's charter as a benchmark and it is not
 // in the list above, which needs saying rather than leaving as a gap.
-// The 2026-10-25 hook run measured their welcome post and got
-// a zero, and committing that URL turned `redaction-gate` red: the gate's
-// first pattern reads `(/Users/|/home/)<name>/` as an absolute home
-// directory, and the host's own URL path matches it. Their whole site is
-// under that prefix (robots.txt disallows a bare `/blog/`; every allowed
-// path begins `/home/`), so there is no spelling of a Consensus page that
-// passes the gate. This seat may not edit workflows, so the narrowing
-// belongs to the ExO seat; it is proposed in docs/design/ledger.md as
-// FE-P-INLINE-GATE. Until that lands, Consensus cannot be benchmarked
-// here, and `react.dev/learn` takes the slot because it is the same
-// shape of page: dense prose with links genuinely inside sentences.
+// The 2026-10-25 hook run measured their welcome post, got a zero, and
+// turned `redaction-gate` red by committing the URL. The gate's first
+// pattern reads an absolute home directory as private data, and it
+// reads a URL path the same way: this vendor serves its whole site
+// under a path segment the pattern takes for a username. Their
+// `robots.txt` disallows a bare blog path and every allowed content
+// path carries that segment, so no spelling of a Consensus page passes.
+//
+// Workflow files here are HQ's, so the narrowing went to HQ's
+// centralizer as a board handoff on 2026-10-25 and is recorded under L5
+// in docs/design/ledger.md. Until it lands, Consensus cannot appear in
+// this file at all, and `react.dev/learn` takes the slot because it is
+// the same shape of page: dense prose with links genuinely inside
+// sentences. It is a stand-in for the slot and not a replacement for
+// Consensus on the benchmark list.
 
 const lin = (c) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
 const L = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)

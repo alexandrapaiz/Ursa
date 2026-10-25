@@ -127,6 +127,19 @@ same as a zero. Used as a low bar
 rather than a benchmark, and labelled as such wherever it appears:
 **Hacker News.**
 
+**Consensus cannot currently be measured at all, for a reason that has
+nothing to do with Consensus** (2026-10-25). It serves its entire site
+under a path segment that `redaction-gate` reads as a username in an
+absolute home directory, so committing any Consensus URL as evidence
+turns a branch red. Their `robots.txt` disallows a bare blog path and
+every allowed content path carries the segment, so there is no spelling
+that passes. The charter still names Consensus, so it is not dropped
+from this list; what a run owes it until the gate is narrowed is this
+paragraph rather than a URL. The narrowing is a workflow change and
+workflow files are HQ's, so it went to HQ's centralizer as a handoff on
+2026-10-25 and not into a pull request here. `react.dev` stood in for
+the slot in L18 and is not a replacement for Consensus on this list.
+
 Two cautions, both learned the expensive way. Marketing home pages carry
 almost no form controls, so a field or button benchmark has to go to a
 login or search page to find a sample at all. And several of these
@@ -382,6 +395,58 @@ A defect shipped by the most-used developer product in the world is
 still a defect.
 
 ---
+
+## L18 — A link inside a sentence spends on the underline or on 3:1, and every site measured spends on one
+
+**measured**, 2026-10-25, 34 inline prose links across five sites, at
+1440x900. `reviews/2026-10-25/data/benchmark-inline-links.json`.
+
+The question came off our own page, not off a checklist. An inline
+`.rec-action` on the home page was `rgb(168,199,250)` against prose of
+`rgb(183,192,212)`, which is **1.06:1**, and carried no underline at
+rest. Colour alone was the affordance and the colour was doing nothing.
+A reader scanning the page could not see the link, and a touch reader
+never could, because the `(hover: hover)` block was the only thing that
+ever drew the line.
+
+The sample splits in two and the split is the finding:
+
+| | links | underlined at rest | colour vs prose |
+|---|---|---|---|
+| Vercel docs | 12 | yes | 1.00:1 (plus weight) |
+| Linear docs | 5 | yes | 1.37:1 |
+| Claude docs | 4 | yes | 1.02:1 |
+| GitHub docs | 1 | yes | 3.26:1 |
+| react.dev | 12 | **no** | **3.23:1** |
+
+Twenty-two underline and spend nothing on colour. Twelve spend 3.23:1
+on colour and underline nothing. Nobody in the sample ships neither, and
+3.23 and 3.26 bracket WCAG G183's 3:1 closely enough that the threshold
+looks like the thing being designed to rather than a coincidence.
+
+**This seat's judgement**, on top of that: underlining is the cheaper of
+the two purchases here. Reaching 3:1 against this prose means a third
+light, and L13 measured that `--polar` and `--star` sit within 1.25:1 at
+equal lightness, so the colour route costs a palette change to fix a
+link. The underline costs one declaration. Applied at
+`p .rec-action` in `ursa-minor/app/globals.css`, scoped to links that
+are genuinely inside a paragraph, because the standalone `.rec-action`s
+the original comment was written for sit on their own line where
+position already says they are controls.
+
+**Verified by pixels, not by reading the rule.** Against the frozen
+capture set: of the ten hover targets, exactly one changed at rest
+(117px on the home page's inline link) and nine are byte-identical, and
+every hover afterwards moves the same pixel count it moved before.
+`reviews/2026-10-25/states-after/pixels.txt`.
+
+One caution for whoever re-runs this. The pixel count cannot see a hover
+that got *weaker*, only one that moves fewer pixels. This change took
+the resting underline from alpha 0 to 0.4 while the hover still goes to
+1.0, so the same pixels change and each changes by less. The count being
+identical before and after is therefore consistent with a hover that
+lost some of its force, and the thing that settles it is looking at the
+frames, which this run did.
 
 ## Open, and not this seat's to close
 

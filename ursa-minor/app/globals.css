@@ -906,12 +906,26 @@ html {
    `(hover: hover)` block above is the only thing that ever drew the line.
 
    Measured 2026-10-25 against the sites L5 names, on documentation pages
-   rather than marketing pages: 22 inline prose links across Linear,
-   Vercel, Claude docs and GitHub docs, and **all 22 are underlined at
-   rest**. Their colour does almost nothing: Vercel's inline link is the
-   same colour as its prose, 1.00:1, and distinguishes itself with weight
-   and the underline; Claude docs is 1.02:1 and Linear 1.37:1. Only GitHub
-   clears 3:1 on colour, and it underlines as well.
+   rather than marketing pages: **34 inline prose links across five
+   sites**, and they split cleanly in two.
+
+   Twenty-two are underlined at rest, across Linear, Vercel, Claude docs
+   and GitHub docs, and the colour of those twenty-two does almost
+   nothing. Vercel's inline link is the same colour as its prose, 1.00:1,
+   and distinguishes itself with weight and the underline; Claude docs is
+   1.02:1 and Linear 1.37:1. GitHub's one link clears 3:1 on colour and
+   underlines anyway.
+
+   The other twelve are all on one site, react.dev, and they carry no
+   underline at rest at all. They pay **3.23:1** against the prose for
+   it, which is G183's threshold almost exactly.
+
+   So the set does not say to underline. It says the underline and 3:1 of
+   colour are the two ways to spend, every site measured ships one of
+   them, and nothing measured ships neither. Ours shipped neither.
+   Underlining is the cheaper of the two here, because 3:1 against this
+   prose would mean a third light in a two-light palette, which L13
+   already ruled out for a different reason.
    `reviews/2026-10-25/data/benchmark-inline-links.json`.
 
    So the underline comes back at rest for these four, and only these
