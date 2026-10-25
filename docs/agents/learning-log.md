@@ -6945,3 +6945,70 @@ past it" applies and I left it untouched.
    guard is a **state**. Four of the five members of the jointly-lossy
    family are that shape. The output is a charter edit, so it needs the
    charter branch.
+
+### Standing observations, window 44 (all measured 2026-10-25 23:1x–23:2xZ)
+
+**The three run instruments, and which surface each answers.**
+`gh run list` saw **0** `agent-*` runs, as it has since HQ moved the
+clocks to the host on 2026-10-17, and `schedule:` is absent from all
+eleven workflow files. That is the dormant-surface reading and it is
+**not** run health. The host's own partition is the authority: 149
+attempted, 59 completed, 70 refused, 4 failed, 14 running, 2 lost, and
+the five sum to `attempted` exactly. This seat's own runs on disk today:
+**7** — three completed at 82, 90 and 76 turns, one refused at turn 35,
+two refused at turn 1, and this one.
+
+**The biggest drag, named: the provider's refusal rate.** 70 of 149,
+**48% of the day**, 53 of them before their first turn, against 1,191
+dark minutes. The retry driver has closed its own hole to **one minute**
+after the reset, down from 377 the day before, so what remains is quota
+rather than scheduling. That is the owner's question about how many
+seats wake into one quota, and it is not this seat's to fix.
+
+**Charter length, the third cap.** `main`'s copy is **2,221** lines and
+unchanged by this branch, deliberately. The live copy on the charter
+branch is **4,850**. Replacement ratio this window: **zero**, because
+this window wrote no charter line at all; the three amendments it owes
+are in `incidents.md` with the reason they are not here. A zero ratio
+reported by a window that touched nothing is not a flat curve.
+
+**§2b, both halves of every charter.** 3 of 11 workflow `prompt:` blocks
+mention `--draft`, 0 of 11 mention ship-first. Unchanged, still a
+**revival risk** on a surface that has run nothing in eight days, and
+still not a live defect. Not queued as a workflow diff, per §5.
+
+**§3, what the standards point at.** Ten **BINDING-MISSING** under
+`pm.md` and `secrets.md`, one **VENDORED-ELSEWHERE**
+(`tools/merge-register.py` to `tools/registers/merge-register.py`, which
+is the engineer's deliberate placement and not a finding), and 30 names
+in `lessons.md` as context only. The binding count has not moved.
+
+**§3, identifier collisions.** `docs/decisions.md` still uses
+**ADR-005** and **ADR-006** twice each, for four unrelated rulings. Not
+renumbered, because the number is the owner's and other files cite it.
+`incidents.md` is clean.
+
+**§3, pairing HQ's 81 tools against this charter's hand-rolled
+procedures.** Two pairings worth naming, neither new to HQ:
+`check-draft-prs.sh` against the inherited-draft duty this window
+performed by hand — and that duty is the one that opened this run, which
+makes the pairing more than cosmetic; and `check-register-true.py` with
+`check-register-pointer.py` against
+`INC-2026-10-24-a-registers-state-is-written-everywhere-except-where-it-is-read`.
+`fill-run-refusals.py` is HQ's live work on the same surface as this
+window's finding and is already named in its open pull request.
+
+**§3e, autonomy, from HQ's own `tools/autonomy.py` rather than
+hand-rolled.** 44 merges in 168 hours, 20 seat-claimed, 0 on Actions,
+**24 unresolved**, floor **45.5%**. That is **above** the one-third
+ceiling, so HQ's refusal condition fires and **this number grades the
+instrument and not the company.** Say it that way: no grade moves, and
+the attribute to grade instead is dashboards. This is the fourth
+consecutive window at which the refusal has stood.
+
+**Rounds per artifact, and dispatches by author.** This seat's chain
+reached the owner as one artifact per window and converged at the merge
+gate rather than by iteration. Every dispatch that opened a window of
+this seat today was the retry driver or a sibling seat's note, not the
+owner and not the chair, which is the healthy reading of §3e's second
+number.
