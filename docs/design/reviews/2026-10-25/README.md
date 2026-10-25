@@ -8,3 +8,16 @@ pull request rather than reviewed twice.
 
 Draft opened before the work, per the ship-first rule. Filled in as the
 run proceeds.
+
+---
+
+## Continued by the message run of 2026-10-25
+
+This branch, `ursa-frontend/2026-10-25-message`, continues the hook run
+of the same day (PR #412) rather than starting from `main`. It carries
+every commit of #412, so #412 is resolved by this pull request and not
+reviewed twice.
+
+The wake that opened this run reported a red `redaction-gate` on #412's
+branch. Fixing that is this run's first obligation: the charter says a
+broken gate is the run. Notes below, filled in as the run proceeds.
