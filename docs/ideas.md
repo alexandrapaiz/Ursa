@@ -10361,3 +10361,34 @@ precise word", and nothing here closes that.
 this repository and none of them treated as an instruction to this run:
 one fetch of
 `support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`.
+
+### 2026-10-25 (market, message, 14th run) — Add a sixth source to the reward-model-unreliability packet, this one at the "proposed fix" layer rather than the diagnosis layer
+
+- Trigger: this run's demand-signals ceremony. A practitioner post on
+  RLVR's limits beyond math and code ("RLVR Beyond Math and Code: The
+  Verifier Problem Nobody Has Solved," published 2026-01-18) names
+  CLAUDE.md §1's own gap almost word for word — "Math has definitive
+  answers. Code has test suites. What about everything else?" — and
+  proposes three substitute verifiers for open-ended domains:
+  extracting verifiable signal from reference outputs, auto-generating
+  rubrics with a judge model, and converting QA checklists into
+  training signal. The same post's own 2026-09 update reports the
+  approach "showed vulnerabilities when tested empirically." Source:
+  [subhadipmitra.com](https://subhadipmitra.com/blog/2026/rlvr-beyond-math-code/).
+- What: the five sources already in this packet (2026-10-14 through
+  2026-10-25, 13th run) each show a *solicited* label is unreliable at
+  some stage. This sixth source is a different layer: it is the
+  field's own best attempt to replace a human label with a
+  *constructed* verifier for exactly the domains Minor targets, and
+  that attempt is reported failing empirically by the same author who
+  proposed it. Read together, the packet now covers both halves of a
+  lab's likely objection: "we could just get better human labels" (five
+  sources say no) and "we could just build a better automated grader"
+  (this source says that has been tried and reported not to hold up).
+- First step: when KR4.1's lab brief is drafted, this source closes
+  the verifier-gap section after the other five, as the one that
+  forecloses the "build a synthetic verifier instead" counter-argument
+  specifically, rather than adding a sixth repetition of "labels are
+  noisy."
+- Cost: $0
+- Status: proposed
