@@ -15,15 +15,30 @@
 // against the constant instead of asking a human to remember both.
 //
 // THE EVIDENCE THAT THIS IS NOT HYPOTHETICAL. At the time this file was
-// written `BOUND_COUNT` was 18, and
-// `skills/adding-a-bound-to-the-record-gate/SKILL.md` said "seventeen
-// bounds" in two places while the `TRIGGER-TEST.md` beside it said
-// "eighteen". That skill is the instruction a seat follows to add a bound,
-// so the document most responsible for the count was the one carrying it
-// wrong. `skills/` is promoted by the reviewer panel and not writable by
-// this seat (`prompts/engineer-agent.md`, Boundaries), so that instance is
-// filed in `docs/ideas.md` rather than fixed here, and this gate's scope
-// stops at the surfaces this seat may edit.
+// written `BOUND_COUNT` was 18, and `fixtures/violations/README.md` said
+// "seventeen bounds" in four places, "twenty-two" counterexamples in three
+// and "27 violations" in its command block, against a directory holding
+// eighteen, twenty-three and twenty-eight. Nine stale numbers in the
+// document whose whole subject is one record per bound.
+//
+// AND IT HAD ALREADY BEEN FOUND, which is the part that decided the shape
+// of this file. `skills/adding-a-bound-to-the-record-gate/SKILL.md`
+// records that drift as evidence E29, dated 2026-10-18, and
+// `skills/relevance-audit.md` re-confirmed it on 2026-10-23 and found the
+// citation had UNDERSTATED the spread. So the "seventeen bounds" in
+// `skills/` is not a skill carrying the count wrong; it is a skill
+// correctly quoting a file that was. Two seats read the file, wrote down
+// that it was wrong, and it was still wrong seven days later when this run
+// corrected it. The gap being closed here is therefore not that nobody
+// noticed. It is that noticing produced a note and not a failing test, and
+// a note is read by whoever goes looking for it.
+//
+// `skills/` stays out of this gate's scope: it is promoted by the reviewer
+// panel and not writable by this seat (`prompts/engineer-agent.md`,
+// Boundaries), and its mentions are quotations of other files' prose,
+// which is the one category a gate like this must not police — correcting
+// a quotation to match today's count would falsify the record of what the
+// quoted file said.
 //
 // WHY TWO ASSERTIONS AND NOT ONE. They fail at opposite moments, and either
 // alone is a gate that passes while the defect is present.
