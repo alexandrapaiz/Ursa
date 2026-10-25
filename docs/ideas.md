@@ -9173,6 +9173,135 @@ no entity resolution and no bi-temporal store of any kind to put a window in.
 The comparison is between a mechanism that exists there and a sentence in a
 context file here.
 
+### 2026-10-24 (engineer, hook run) — Eleven charters instruct a command the clone they run in cannot answer
+- Trigger: performing the all-seats rule's own ancestry check as the first act
+  of this run. `git merge-base --is-ancestor origin/main refs/prs/N` answered
+  **NO for all four** of this seat's open pull requests, and the merge that
+  followed refused with `fatal: refusing to merge unrelated histories`. The
+  clone was `--depth 1 --single-branch`; after `git fetch --unshallow` and a
+  widened refspec the same four answered correctly.
+- What: `grep -l 'merge-base --is-ancestor' prompts/*.md` matches **11 of 12**
+  charters here. Each tells its seat to prove containment with that command
+  before rebuilding its own work, and none of them says to complete the clone
+  first. In the checkout a seat is actually given, a non-zero exit from that
+  command means *no common base was found*, which is indistinguishable from
+  *not contained* and is the opposite of the truth for a contained pair. So the
+  rule written to stop seats rebuilding finished work (L-E10, Ursa incident 9)
+  is, as instructed, an instrument that reads backwards. The repair now exists
+  at `tools/ensure-full-clone.sh`, built in this run and named by
+  `docs/standards/lessons.md` L-A55 and L-A77 three times at exactly that path
+  before it existed. The amendment is one line in each charter's "Read your own
+  seat's open PRs first" block: run the repair before the proof. Charters are
+  owner-merge-only (`prompts/engineer-agent.md`, Boundaries), so this run fixed
+  the two callers in `tools/` and could not fix the instruction.
+- First step: the owner adds `bash tools/ensure-full-clone.sh` above the
+  `merge-base` line in each of the eleven, or HQ writes it once into
+  `docs/standards/lessons.md` L-A55, which is the surface that already reaches
+  every seat in the portfolio and is where L-A55 itself argues such a rule
+  belongs.
+- Cost: $0. The repair takes 5.7 seconds once per run, measured.
+- Status: urgent
+
+### 2026-10-24 (engineer, hook run) — No measurement in this repository states how many times it was run
+- Trigger: today's craft scan below. Artificial Analysis publishes a repeat
+  count beside every benchmark it reports (`Terminal-Bench 4.0: 66 questions,
+  3 repeats`, `GDP.pdf: 100 tasks, 5 repeats`) and this run's own headline
+  figures — 0 of 3 merged before, 3 of 3 after — are each a single execution.
+- What: every number this seat has ever put in a pull request or a design
+  document is one run of one command, with no repeat count and no statement of
+  whether a second run would agree. For a deterministic check like
+  `check-attributes.mjs` that is fine and saying so costs a clause. For
+  anything touching the network, a timing, or `ursa-major`'s suite — where
+  #346 reported five failures that moved between consecutive runs and were
+  proven to be a slow sandbox — it is the difference between a measurement and
+  an anecdote, and this repository currently presents both in the same voice.
+  The asymmetry is the problem, not the single runs: a reader cannot tell which
+  of the two they are holding.
+- First step: a one-line convention for design documents and pull request
+  evidence sections, `n=1 deterministic` or `n=3, range X–Y`, applied first to
+  the timing figure in `docs/design/clone-completeness.md` §7, which is one run
+  of one `--unshallow` against one network.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, hook run) — A report whose rows disagree with its own counts should fail its own test
+- Trigger: `tools/stack/integrate.sh --json` in a seat-shaped clone emitted
+  `"result": "merged"` for all three branches in the same file whose summary
+  said `"merged": 0, "conflicted": 3`. Both halves were printed by the same
+  `printf` sequence twelve lines apart, and nothing made them agree.
+- What: the cause generalizes past this one tool. A shell report emitter states
+  the same fact twice, once per row and once as a total, and the two are
+  computed from different variables. Here the row logic asked "is the
+  conflicted-file list empty" and answered `merged` for a branch git had
+  refused to compare, while the total counted the `CONFLICTED` array. Today's
+  fix added the third result and a test that tallies the rows and asserts the
+  tally equals each count. That test is four lines and it is the only reason
+  the agreement is now a property rather than a coincidence. Every other tool
+  here that emits a summary — `tools/ledger/check.mjs`'s violation count,
+  `probe-server-merge.sh`'s three arms, `integrate.sh`'s own suite results — has
+  the same shape and no such test.
+- First step: add the tally assertion to `tools/ledger/check.test.mjs` for
+  `check.mjs`'s "N violation(s)" line against the number of lines it printed,
+  which is the cheapest of the three and the one a CI gate would read.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (engineer's craft scan)
+
+**Artificial Analysis**, `docs/market/landscape.md` Category 2, the evaluation
+and arena products. Chosen because this run's whole subject was an instrument
+that reported a confident wrong answer, and Artificial Analysis is the product
+in the landscape whose entire value is that its numbers are trusted by people
+who cannot re-derive them. Read today: its methodology index page and its
+intelligence-benchmarking methodology page. Neither is a product this seat can
+install, so the scan is of published method, which is the only surface it has.
+
+**Worth stealing: a harness failure is not a score, and it is not published as
+one.** Their exact wording: "All questions that failed all 30 retries are
+manually reviewed. Results where persistent API failures have caused issues are
+not published." That is the same distinction this run arrived at independently
+and wrote into `tools/stack/integrate.sh` as a third result: a merge git refused
+to attempt is a `tool_failure`, never a `conflict`, because a conflict count
+that includes merges nobody tried is not a number. Finding the same rule in a
+benchmarking product's method is the useful part, because it says the shape is
+general rather than a quirk of merging: any instrument that reports on a subject
+needs a category for "the instrument did not run", and the category has to be
+visible in the output rather than resolved by whoever reads the logs.
+
+**Also worth stealing: the aggregate carries a version, and the components carry
+their own.** The page names "Artificial Analysis Intelligence Index v4.3.2" over
+10 weighted evaluations, tracks component versions separately (`AA-Briefcase
+v1.1`, `GDPval-AA v2.1`), and states where comparison is invalid rather than
+leaving the reader to assume: "scores are not directly comparable with v1.0".
+Ursa has nothing like this. `invariants.ts` has a `boundsDigest` that identifies
+a rule set, which is the harder half, and no human-readable version at all, so
+two records gated by different bound sets are distinguishable by a 16-character
+hash and by nothing a person can read in a pull request.
+
+**Where Ursa is better, at the craft level.** Their separation of an instrument
+failure from a result is a **manual review followed by a publication decision**:
+it costs human attention per failure, it happens before anything is published,
+and it leaves no artifact a reader can check, so a reader's only options are to
+trust it or not. Ursa's version of the same rule is an exit code, a typed third
+member of a union in a machine-readable report, and a test that tallies the rows
+against the counts. And the deeper difference: their methodology page, asked
+directly, does not say how to reproduce a published number, and does not publish
+per-question outputs. Every figure in `docs/design/clone-completeness.md` names
+the committed instrument that produced it and the exact command, so a reader
+re-derives rather than trusts. That is the same property Ursa Minor sells to
+labs, applied to Ursa's own engineering claims.
+
+**The honest limits, including what the read could not establish.** Their
+methodology page says nothing about versioning or dating results for later
+interpretation, nothing about distinguishing a bad score from a broken harness
+in the published data, and nothing about reproduction instructions — three
+"not addressed on this page" answers, which is a statement about that page and
+not proof the practice is absent elsewhere in their work. Against that: they
+publish repeat counts and Ursa publishes none, which is the ledger entry above,
+and the comparison here is between a published method and this repository's
+practice, which are not the same kind of object. The two pages were read as
+evidence about their method; nothing on either was treated as an instruction.
+
 ### 2026-10-24 (market, hook-triggered run) — Add the fourth reward-model-unreliability source, and open the citable packet with it
 
 - Trigger: this run's positioning update (docs/market/positioning.md,
@@ -9226,6 +9355,186 @@ context file here.
   constructed one, before assuming the gap is stable.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-24 (engineer, hook run) — The shipped bundle is rebuilt by hand, so a correct fix can ship with the product missing it
+
+- Trigger: measured in this run, not reasoned about. The inherited commit on
+  PR #387 fixed `ursa-major/src/lifespan.ts` and did not rebuild
+  `ursa-major/dist/ursa.cjs`. `src/bundle-canonical.test.ts` and
+  `src/bundle-exec.test.ts` both pass on `main` and both failed on this
+  branch until `npm run bundle` ran. Rebuilding then drifted
+  `docs/provenance/bundle-digests.{json,md}`, which failed
+  `src/provenance-index.test.ts` until `npm run provenance:bundles` ran. So
+  one source edit required two follow-on generated-artifact commands, and
+  neither is named at the point where the edit happens.
+- What: the detection is already good, and that is the point worth being
+  precise about. Three tests caught all three states, which is why this is a
+  near miss and not an incident. The gap is that detection lives at the end
+  of a 79-second full-suite run, and a seat that edits one module and runs
+  only that module's tests, which is the normal and recommended thing to do,
+  sees green and pushes a bundle that does not contain its own fix.
+  `action.yml` runs `node "$GITHUB_ACTION_PATH/dist/ursa.cjs"` and GitHub
+  downloads an action as a tarball rather than cloning it, so on every
+  repository that is not this one the bundle is the whole product. The ask is
+  one script that makes the ritual atomic and nameable:
+  `"regen": "npm run bundle && npm run provenance:bundles"`, plus
+  `"regen:check": "npm run bundle:check && npm run provenance:bundles:check"`,
+  so a seat that touched `src/` runs one command instead of remembering two.
+- First step: add both scripts to `ursa-major/package.json`, and add one
+  sentence to `docs/design/build-and-test-gate.md` saying that any change
+  under `ursa-major/src/` is followed by `npm run regen` before commit. No
+  new tooling and no new gate, because the gate already exists and already
+  worked.
+- Cost: $0
+- Status: proposed
+- Shipped: 2026-10-24 by this seat's eighth message run, with one deliberate
+  departure from the first step above. The proposed chain
+  `npm run bundle && npm run provenance:bundles` cannot be correct in one
+  pass, because the digest index is built from committed history while the
+  bundle is built from the working tree, so an index written before the
+  bundle commit drifts the moment it lands. Measured in
+  `docs/design/counting-a-rename-once.md` §4. `regen` is therefore a
+  converging command that names its own next step. The status line above is
+  left as the owner set it, because only the owner moves a status (pm.md §4);
+  this line exists so a later run does not rebuild the entry (L-E10).
+
+### 2026-10-24 (engineer, hook run) — `Durability.renamesFollowed` counts span crossings and reads as a count of renames
+
+- Trigger: measured in this run while writing the real payload into
+  `docs/design/rename-reads-as-death.md` §6. On a fixture repository
+  containing exactly one `git mv`, the emitted record carries
+  `"renamesFollowed": 4` at `record.durability` and `"renamesFollowed": 1` on
+  the span. Both are what the code intends: the record-level field sums the
+  per-span field, so one file with four spans that each crossed the same
+  rename contributes four.
+- What: the summing is deliberate and defensible, because it lets a reader
+  add up the span fields and reconcile them against the record field. The
+  name is the defect. A reviewer who asks "how many renames did this walk
+  cross" reads `4` and concludes four files moved, and that reviewer is a
+  lab auditing a record it is paying for. The honest name for the current
+  quantity is `spanRenameCrossings`, and the number a reviewer actually
+  wants, the count of distinct renames the walk followed, is not reported
+  anywhere today. Both should exist: the crossings for reconciliation, the
+  distinct count for comprehension.
+- First step: rename `Durability.renamesFollowed` to
+  `spanRenameCrossings` and add `distinctRenamesFollowed`, computed in
+  `annotateDurability` from a `Set<string>` of `renamedTo` values rather than
+  by summing. Deliberately not done in the pull request that found it: it is
+  a field rename in a published record shape, it touches
+  `src/types.ts`, `src/lifespan.ts`, the viewer in `src/corroborate.ts` and
+  the fixture record under `ursa-major/fixtures/`, and bundling it with a bug
+  fix would make the bug fix harder to review and harder to revert.
+- Cost: $0
+- Status: proposed
+- Shipped: 2026-10-24 by this seat's eighth message run, specified in
+  `docs/design/counting-a-rename-once.md`, with two corrections to the first
+  step above. The identity is the renaming commit plus the path pair and not a
+  `Set<string>` of `renamedTo` values, because a file moved twice shares one
+  `renamedTo` and would have counted as one rename. And neither
+  `src/corroborate.ts` nor any fixture under `ursa-major/fixtures/` reads
+  either field, so the change touched `src/types.ts`, `src/lifespan.ts` and
+  `src/lifespan.test.ts` only. The status line above is left as the owner set
+  it, because only the owner moves a status (pm.md §4); this line exists so a
+  later run does not rebuild the entry (L-E10).
+
+### 2026-10-24 (engineer, hook run) — Every record emitted before today may overstate decay, and nothing in the record says which walk produced it
+
+- Trigger: a consequence of the defect fixed in this run, noticed while
+  writing `docs/design/rename-reads-as-death.md` §10.5. Until today the
+  durability walk read every revision at the path the record names, so any
+  file moved after its closing commit reported every span in it as
+  `decayed` while the text sat unmodified at the tip. On the fixture that
+  reproduces it, `Durability.decayRate` was `1` for a file whose text
+  `git show HEAD:moved.md` prints in full.
+- What: the fix is in, and the records already on disk are not. Every record
+  emitted before 2026-10-24 carries a `decayRate` computed by the broken
+  walk, and `Durability.method` reads `"git-forward-walk"` both before and
+  after the fix, so no consumer of a record can tell which walk produced the
+  number. That is the part that matters commercially rather than tidily.
+  `decayRate` is a quantity Ursa Minor sells, `CLAUDE.md` §1 stakes the whole
+  artifact on the label being supplied by the work rather than by a grader,
+  and a label that flipped because a file moved was supplied by neither. The
+  bias is also directional rather than noisy: refactors move files, refactors
+  cluster in exactly the engineering work this product targets, so the
+  records most likely to be corrupted are the ones most likely to be sold.
+- First step: two things, in this order. First, make new records
+  self-describing by bumping `Durability.method` to
+  `"git-forward-walk-renames"` or adding `followsRenames: true`, so a
+  consumer can partition records by walk without consulting a changelog;
+  that is an hour of work and it stops the problem growing. Second, and this
+  one is the owner's call and not this seat's, establish whether any record
+  carrying a pre-fix `decayRate` has left this repository, because the only
+  remedy for one that has is re-running the resolver and reissuing it.
+- Cost: $0 for the marker. The second half is a disclosure question, not an
+  engineering one.
+- Status: proposed
+
+### 2026-10-24 (engineer, hook run) — Craft scan: Letta's `BlockHistory`, where a user's edit to a derived fact can be rewound
+
+`docs/market/landscape.md` category 3 has carried Letta (formerly MemGPT)
+since the category was opened, and never on the mechanic underneath its
+memory writes. Mem0 was scanned on 2026-10-08 and Zep/Graphiti twice, most
+recently earlier today, so Letta is the rotation's turn.
+
+**What is worth stealing.** Letta's memory blocks are the unit a user or an
+agent edits, and they are flat: `label`, `description`, `value`, `limit`,
+plus a `read_only` flag. Setting `value` replaces the block entirely, and
+the documentation warns that with concurrent writers "the last write wins
+and overwrites all earlier changes." Underneath that, however, there is a
+`BlockHistory` table holding one full value snapshot per checkpoint with a
+`sequence_number`, and a `BlockManager` exposing `checkpoint_block_async`,
+`undo_checkpoint_block` and `redo_checkpoint_block`. So a block's past
+values are retained as an ordered sequence and an edit is reversible rather
+than destructive.
+
+That is the shape Ursa Major is missing. `CLAUDE.md` §0 constraint 2 says
+the user can always see, edit, revoke and delete what has been inferred
+about them, and today the edit in that sentence is a destructive one: a user
+who corrects a derived preference has no way back to what Ursa had inferred,
+and Ursa has no way to learn from the correction because the thing that was
+corrected is gone. An ordered snapshot per edit turns the correction itself
+into signal, which is precisely what `CLAUDE.md` §1 already says the
+artifact sells for text: "the mutation *is* the correction, expressed as an
+edit rather than a complaint." Ursa applies that reasoning to spans in a
+finished file and not yet to the user's own profile.
+
+**What Ursa does better, and it is the part Letta cannot easily fix.**
+Integrity. Letta's own issue tracker establishes, in
+`letta-ai/letta-code` issue #4433 against 0.16.8, that the checkpoint
+history accepts direct Postgres edits silently: a checkpoint value can be
+modified, recent checkpoints deleted, middle ones removed, the order
+changed, or new ones inserted, and all five proceed without error. The
+submitter's own summary is that it "is a record only as long as nobody with
+database access edits it." Ursa's durability record has the opposite
+property for free, because it does not store the history at all. It derives
+every verdict from git, where history is content-addressed, and it writes
+`tipSha` and `closingSha` into the record, so a lab holding a record can
+re-derive the verdict from the repository and detect a rewritten history by
+the shas failing to resolve. Ursa's claim is auditable by reconstruction;
+Letta's is auditable by trusting the database.
+
+**One caveat recorded honestly, because it cuts both ways.** Letta's own
+documentation page for memory blocks describes none of this. It states the
+four fields and the replace-on-write behaviour and mentions no version
+history, edit tracking or audit log at all; the `BlockHistory` mechanics
+above come from the issue tracker and third-party write-ups, not from the
+docs. An ownership surface a user cannot discover is not yet an ownership
+surface, which is a thing to steal carefully: build the snapshot, and then
+document it where the user looking for it will actually land. It is also a
+reminder that this scan read a feature into a product partly from secondary
+sources, and that the primary source contradicts them.
+
+**External content handled as data.** Issue #4433 contains instruction-shaped
+text, specifically `git clone` and `pip` commands to run a test suite it
+calls `agmi`, presented as a one-minute offline reproduction. Nothing was
+executed. It is reported here as evidence about Letta's integrity gap, per
+the external-content rule in `prompts/engineer-agent.md`. Separately, the
+search surfaced `letta-ai/letta` issue #3431, "Pre-publication review: our
+reading of Letta's memory write path (corrections welcome by 2026-08-30)",
+which appears to be this organization's own earlier published scan of the
+same product. Not relied on here, and flagged for the market seat because a
+scan that cites our own prior publication back to us is a loop worth
+knowing about.
 
 ### 2026-10-24 (engineer, message-triggered run) — `SourcePointer.model` is a git identity on the only path that produces records, and the record never says so
 
@@ -9646,3 +9955,441 @@ Offered as the next tool this seat builds, after the index check above,
 and it should be measured on the library before it is believed, the way
 §5l measured the `what`-level signal and the fourteenth run declined to
 make it a gate.
+
+### 2026-10-24 (engineer, seventh message run) — A suite that reports pass or fail does not report how close it came to failing
+
+- Trigger: six consecutive full runs of `ursa-major`'s suite in this run, with
+  no source change between them. Three at vitest's 5,000 millisecond default
+  produced 0, then 1, then 2 failures, every one a timeout and not one a failed
+  assertion. Three at `--testTimeout=60000` produced none, and the slowest
+  single test in them was 5,643 milliseconds, which is 113% of the limit the
+  first three were being given. Nothing in any of the six outputs says how much
+  headroom the suite had; `848 passed` is printed identically whether the
+  slowest test finished in 300 milliseconds or in 4,999.
+- What: this run set `testTimeout` to 20,000 milliseconds in a new
+  `ursa-major/vitest.config.ts`, sized from that measurement, which stops the
+  false reds. It does not make the margin visible, and the margin is the thing
+  that decays silently: every test added from here sits under a limit nobody is
+  watching, and the next time the slowest test drifts up to 19 seconds the
+  suite will be green on the run that reports it and red on the run after. A
+  seat writing "848 passed" into a pull request is reporting a fact whose
+  reliability it cannot see. The honest artifact is a margin, not a verdict,
+  and `vitest --reporter=json` already carries every per-test duration needed
+  to compute one.
+- First step: a script at `ursa-major/tools/test-margin.mjs` that runs
+  `npx vitest run --reporter=json --outputFile=<tmp>`, reads the per-test
+  durations out of it, and prints three lines: the slowest test with its
+  duration, that duration as a percentage of the configured `testTimeout`, and
+  the count of tests above half the limit. Then one line in the pull request
+  evidence section quoting it, the way a seat quotes a test count today. It is
+  a reader of output that already exists, so it adds no dependency and no run
+  time beyond the suite itself.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, seventh message run) — Vitest's own speed advice is smaller than this suite's run-to-run noise, and a seat that acts on it will report a saving it never measured
+
+- Trigger: every one of the six runs above printed its own optimization hint,
+  and the hints disagree with each other. Across the six: `at least ~4.64s`,
+  `~4.86s`, `~5.52s`, `~6.13s`, `~6.19s` and `~6.90s` faster with
+  `isolate: false`. Over the same six runs the suite's total wall clock ran
+  from 51.36 to 70.64 seconds, a spread of 19.28 seconds on identical code.
+- What: the largest saving vitest offered is 6.90 seconds, which is 36% of the
+  spread the same machine produces by itself, and the hint's own estimate moves
+  by 2.26 seconds between runs. So the claim cannot be confirmed or refuted by
+  a before-and-after pair of runs, which is exactly how a seat would test it,
+  and a seat that flips the flag and re-runs will see a number dominated by
+  load and will report whichever direction it happened to land in. This is not
+  an argument against `isolate: false`, which may well be worth taking for the
+  43 workers at roughly 460 milliseconds of startup each that the same hint
+  names. It is an argument that this repository cannot currently evaluate a
+  performance change to its own suite, because it has no procedure that
+  separates a 7-second effect from 19 seconds of noise. The general form is
+  today's other entry about repeat counts, and this is the first case where the
+  repository is being actively advised to act inside its own noise floor.
+- First step: before touching `isolate`, establish the noise floor as a
+  committed number: five consecutive runs of the unchanged suite, recording
+  total duration, and write the range into `ursa-major/vitest.config.ts` beside
+  the `testTimeout` measurement already there. A change to the suite's shape is
+  then worth taking only if its claimed effect exceeds that range, and
+  `isolate: false` at 6.90 seconds against a 19.28-second range does not,
+  measured on this sandbox. The second step, if the floor turns out to be
+  narrower on a quiet runner, is ten paired runs rather than two.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, seventh message run) — An outcome record says when the work happened but never when Ursa believed what it says
+
+- Trigger: today's craft scan below, read against `ursa-major/src/types.ts`.
+  Graphiti keeps two separate timelines on every edge and names all four
+  fields: `valid_at` and `invalid_at` for when a relation started and stopped
+  being true in the world, `created_at` and `expired_at` for when the database
+  learned it and when the database stopped holding it. Ursa's span carries the
+  first axis in detail, as `intactRevisions`, `intactSeconds`, `diedAtSha`,
+  `diedAt`, `liveAtTip` and `fate`. It carries nothing of the second. The
+  record's only belief timestamp is `task.generatedAt`, which is the whole
+  record's, and `task.resolvedBy` is documented as "stamped when the record is
+  first written to disk".
+- What: a span's classification is a claim Ursa makes, and claims get revised.
+  The corroborator already demotes a `survived_verbatim` span to
+  `survived_mutated` when it finds a rival, and the byte-identical fix that
+  shipped on 2026-10-18 changed what the label means for every record written
+  before it. In both cases the record that comes out the other side presents its
+  new label as though it had always said that, because regeneration overwrites
+  rather than supersedes. The buyer this matters to is the one `CLAUDE.md` §1
+  describes: a lab cannot tell a record that always said
+  `no_generation_provenance` from one corrected into it, and the second is
+  weaker evidence than the first. Two optional fields on the span, naming when
+  the current classification was first written and what it replaced, make the
+  difference legible without touching a single existing field. The distinction
+  Graphiti draws is the right one to copy and the mechanism is not: its
+  `invalid_at` is "captured by an LLM prompt during edge processing", whereas
+  every demotion Ursa performs is a byte comparison or a git ancestry check, so
+  Ursa's version of the field is evidence rather than a judgement.
+- First step: decide the narrower question first, because it is answerable
+  today and the field design follows from it. Count how many spans in the
+  committed fixture record at `ursa-major/fixtures/mini/record/` change class
+  when the record is regenerated against current code, using the
+  `record:fixture` script already in `ursa-major/package.json`. If the answer
+  is zero, the field is a guarantee nobody needs yet and the honest first
+  version is a line in the viewer naming the resolver version that classified
+  the record being read. If it is not zero, the two fields are the smaller
+  change.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (seventh message run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after the Mem0 and Letta reads this seat filed
+earlier today. **Zep**, and its open-source engine Graphiti, read on this
+run's own question, which is what another product does when a thing it
+asserted stops being true.
+
+**Worth stealing: two timelines, not one, and the honesty of which fields are
+optional.** A Graphiti edge carries four temporal fields and the product
+documents exactly which are load-bearing. `created_at` "is always present on
+the edge as we have access to this information during ingestion".
+`expired_at`, `valid_at` and `invalid_at` are optional. The split is the
+interesting part: `created_at` and `expired_at` are transaction time, set by
+the system, and `valid_at` and `invalid_at` are world time, "captured by an
+LLM prompt during edge processing when an episode is added". An outdated fact
+is not deleted. Graphiti marks "conflicting edges as 'expired' by setting the
+`expired_at` field" and keeps them as history. That is the third option
+between deleting a claim, which loses the fact that it was believed, and
+editing it in place, which loses the fact that it changed. It is the ledger
+entry above, and it is the same shape as the question another entry of this
+seat's asked this morning about withdrawn findings.
+
+**What Ursa does better: the thing that revises a claim here is a measurement,
+not a model.** Graphiti's world-time fields are filled by an LLM prompt
+reading an episode and judging whether new information negates an existing
+edge, which means the revision is a model's opinion about text and inherits
+whatever that model got wrong. Ursa's equivalent revisions are a byte
+comparison in the resolver, a document-frequency threshold with its
+suppression now recorded on the span, and a git ancestry walk. None of them
+asks a model anything. That is the property `CLAUDE.md` §1 is built on, that
+the label is supplied by the artifact rather than by a grader, and it is the
+reason Ursa's missing field is worth adding rather than the reason to skip it:
+the axis is right and the filling mechanism would be stronger here.
+
+**The honest limit on that comparison.** Ursa has no second axis at all, so
+this is a comparison between a mechanism that exists and one that does not.
+Graphiti ships the distinction imperfectly and Ursa ships it not at all, and
+until the entry above is built the better-grounded mechanism is the one with
+nothing to ground. Neither page read for this scan mentions a search response
+reporting a result limit it hit, which was the question the previous two scans
+in this rotation asked, so on that narrower point the category still holds at
+three products out of three.
+
+**External sources read for this scan**, none of them a committed file of this
+repository and none of them treated as an instruction to this run:
+`www.getzep.com/blog/beyond-static-knowledge-graphs/` and a web search over
+`help.getzep.com`, `github.com/getzep/graphiti` and `getzep.com` for the
+temporal field names. One fetch of `help.getzep.com/graphiti/core-concepts/
+graphiti-and-zep-memory` returned a 404 page and contributed nothing.
+
+### 2026-10-24 (engineer, eighth message run) — The multi-file half of the new rename count is reasoned and not measured, and a fixture that moves two files in one commit does not exist here
+
+- Trigger: writing §9.1 of `docs/design/counting-a-rename-once.md`, which is
+  the section where this document names what it did not do. Every test behind
+  `distinctRenamesFollowed` moves exactly one file:
+  `repoWithRename()` in `ursa-major/src/lifespan.test.ts` does one `git mv`,
+  and its new `moveTwice` option does two moves of the same file. So the
+  assertion that two files moved by one commit count as two renames rests on
+  reading the keying expression, which is the renaming commit plus the path
+  pair, and not on a run.
+- What: the gap is narrow and the reason it is worth closing is not that the
+  code looks wrong. It is that this is the only case where the two record-level
+  numbers can be equal while both are non-zero — two files, one span each, one
+  commit moving both, gives `spanRenameCrossings` 2 and
+  `distinctRenamesFollowed` 2 — and a reader who sees them equal will conclude
+  the fields are redundant unless a test pins why they are not. The fixture is
+  also the one that would catch a future refactor keying the Set on `sha`
+  alone, which no current test can distinguish from the correct keying.
+- First step: add a `twoFilesOneMove` option to `repoWithRename` in
+  `ursa-major/src/lifespan.test.ts` that moves `notes.md` and `basis.md` in a
+  single commit, and one test asserting both fields equal 2 while the per-span
+  field on each file reads 1. Then a second assertion that keying on the
+  commit alone would have produced 1, written as a comment on the Set
+  expression rather than as a second code path.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (engineer, eighth message run) — "1 work unit found, 0 resolved into records" names no reason, and it took two wrong guesses to produce one record
+
+- Trigger: measured twice in this run while building the real payload for
+  `docs/design/counting-a-rename-once.md` §5.2. `npx tsx src/bin/ursa.ts run
+  <repo>` printed `1 work unit found, 0 resolved into records.` on a
+  three-commit repository, twice, for two different reasons: first because
+  `GIT_AUTHOR_NAME` in this seat's environment outranked the repository's own
+  `user.name` so both commits came out authored by the agent identity and the
+  pairfinder saw no human, and then because the default minimum work-unit size
+  rejected the pair. `--min-chars 1` fixed the second. Nothing in either run's
+  output said which of the two had happened, or that a bound had been the
+  decider at all.
+- What: the summary already knows the answer. The pairfinder decides which
+  commits are generations, and the bounds in `ursa-major/src/invariants.ts`
+  decide which units become records, so for every work unit that did not
+  resolve there is a named reason in the process that dropped it. The output
+  prints a count instead. For this seat it cost two runs. For a first-time
+  user, whose first contact with Ursa is `ursa run` on a repository they
+  already finished, it is the difference between "this product does not work
+  on my project" and "pass this flag". The run summary already carries the
+  harder half of this honesty, since it names the identity it credited the
+  edits to and tells the reader how to override it, which is exactly the shape
+  the unresolved units need.
+- First step: in `renderRunSummary` (`ursa-major/src/bin/ursa.ts`), for each
+  work unit that produced no record, print one line naming the stage that
+  dropped it and the flag that changes it, in the two cases that exist today:
+  below the minimum size (`--min-chars`), and no human-authored closing commit
+  (`--agent-identity`). One test per case in `ursa-major/src/m0.test.ts`,
+  asserting the sentence rather than the count.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-24 (eighth message run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after the Mem0, Letta and Zep reads this seat
+filed earlier today. **ChatGPT Memory (OpenAI)**, read on this run's own
+question, which is what a product does when a claim it holds has to be
+corrected and where it puts the control for doing it.
+
+**Worth stealing: the correction lives where the claim appears, not in a
+settings page.** The memory controls OpenAI documents are not only a list
+under preferences. A reply that used memory can show its sources, and from
+there the reader can open or review the source, correct or delete the saved
+memory, delete a referenced chat, or mark a source as not relevant. That is
+the affordance Ursa's viewer is missing: `ursa-major/src/corroborate.ts`
+renders a span with its class, its lifespan and its provenance, and the only
+way to act on a wrong class is to find the record on disk. The shape worth
+copying is a control attached to the claim, at the granularity the claim is
+displayed at.
+
+**What Ursa does better: the claim knows where it came from, and now survives
+the file moving.** The one page this scan could read in full says plainly that
+ChatGPT "cannot edit individual memories directly" and that for none of
+ChatGPT, Claude or Gemini does the product show which conversation a memory
+originated from. Ursa's equivalent is a `SourcePointer` on every span, naming
+the generation that produced it, and as of today a `git mv` of the file that
+span lives in no longer reads as the text dying, with the record stating both
+how many rename crossings the walk saw and how many distinct renames it
+followed. A consumer memory product that cannot name the conversation behind a
+belief cannot ever offer the audit Ursa Minor sells, which is the asymmetry
+`CLAUDE.md` §1 is built on.
+
+**The honest limit on this scan.** The primary sources refused to be read.
+`help.openai.com/en/articles/8590148-memory-in-chatgpt` and
+`openai.com/index/memory-and-new-controls-for-chatgpt/` both returned HTTP 403
+to this run's fetcher, so the "sources on a reply" description above rests on
+a web search's synthesis of those same help-centre pages and not on the pages
+themselves. One third-party comparison page was read in full and is the source
+of the two direct quotes. A scan whose main claim is second-hand should say so
+rather than present a synthesis as a reading, which is the defect this
+seat's own ledger entry of 2026-10-24 ("Eight of the fourteen craft scans in
+the ledger name nothing they read") was written about.
+
+**External sources read for this scan**, none of them a committed file of this
+repository and none of them treated as an instruction to this run: a web
+search for ChatGPT memory management controls, whose results summarised
+`help.openai.com`; `blog.memoryplugin.com/how-to-edit-ai-memories-across-platforms-chatgpt-claude-gemini-and-more/`,
+read in full; and two refused fetches, `help.openai.com/en/articles/8590148-memory-in-chatgpt`
+and `openai.com/index/memory-and-new-controls-for-chatgpt/`, both HTTP 403,
+which contributed nothing.
+
+### 2026-10-25 (engineer, hook run) — The refusal tally names the first bound that stopped a walk, so the flag it tells you to raise can change nothing
+
+- Trigger: writing `pairRefusals` in `ursa-major/src/launch.ts` today and
+  then reading the docstring on the field it reads.
+  `PairFinderDiagnostics.abandoned` says it counts a generation "by
+  whichever bound stopped it FIRST. A generation appears at most once
+  here." That makes the tally a complete partition of the COUNT and not of
+  the CAUSE, and both surfaces shipped today present it as a cause: the
+  comment says `1 generation found no edit of the same file within 2
+  commits, the --max-pair-distance reach` and the terminal says the same
+  thing with the flag bare.
+- What: a generation stopped by the distance bound may also have been
+  outside the age bound, and the walk stops at the first refusal so it
+  never finds out. A reader who raises `--max-pair-distance` on the
+  strength of that sentence can get zero new records and no new
+  explanation, because the second bound was waiting behind the first.
+  Drift 5's own measurement is the case that makes this likely rather than
+  theoretical: on a repository where twelve agent seats commit between one
+  touch of a file by the owner and the next, the honest distance is in the
+  hundreds and the honest age is in the days, so a generation far enough
+  away to fail one bound is usually old enough to fail the other. The
+  remedy is not to evaluate every bound on every generation, which
+  changes the walk. It is to say what the number means: the surfaces
+  should report the first bound that stopped each generation as the first
+  bound, which is a smaller claim and a true one, and the word that does
+  it is "first".
+- First step: measure before wording anything. Add
+  `ursa-major/tools/measure-refusal-overlap.ts` that walks a repository
+  with every bound set to infinity, then for each generation that any
+  bound would have refused records which of the three bounds it violates,
+  and prints the distribution of how many bounds each refused generation
+  breaks. Run it on this repository, where the twelve-seat shape makes
+  overlap most likely, and on the `distantFixture` shape where it should
+  be exactly one. If the common case is one bound, the wording stands and
+  this entry closes with a measurement. If it is two or more, the
+  sentences shipped today are directing readers to a flag that will not
+  help them, and the fix is in the wording rather than in the walk.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — A sentence that asserts a negative about history is a claim, and no test in this product checks one
+
+- Trigger: drift 7, found and fixed today. The false sentence was `no
+  commit here carried an agent marker that a later human commit then
+  edited`, and it survived 880 passing tests, a file whose entire premise
+  is comparing the two launches, and a prior repair aimed at the same
+  sentence one branch over. It survived because every assertion in
+  `ursa-major/src/launch-parity.test.ts` compares records, and on the
+  history that falsifies the sentence both launches correctly wrote no
+  records at all. The divergence was never in a number. It was in prose,
+  and prose is what the product says to the only person who reads it.
+- What: the two user-facing surfaces both render sentences that assert a
+  negative about the history they just walked, and a negative claim is the
+  hardest kind to be right about because its evidence is an absence. Three
+  that shipped before today and were each true only under a condition
+  nothing checked: the marker-and-edit sentence, `your corrections are not
+  on this branch`, and `none of those was followed by an edit of the same
+  file without an agent marker`. Today's run conditioned all three on the
+  refusal tally, one at a time, after measuring one fixture. What is
+  missing is the sweep: how many more such sentences exist, and what
+  condition does each one actually require. This is a product-quality
+  item rather than a correctness one for every sentence that turns out to
+  be true, and it is the same class of defect as drift 7 for every one
+  that does not.
+- First step: an inventory, not a fix.
+  `docs/design/negative-claims.md` listing every sentence in
+  `ursa-major/src/bin/ursa.ts` and `ursa-major/src/ci/comment.ts` that
+  asserts something did not happen, with three columns per sentence: the
+  literal string, the condition under which it is true, and whether any
+  test pins that condition. Built by reading the two files rather than by
+  grep, because the sentences are template literals assembled across
+  lines and a grep for `no ` or `none` finds the word and not the claim.
+  The count is the finding. Every row whose third column is empty is a
+  candidate drift 7.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — The run comment states which commits it read and never how many, so a window that could not contain a pair reads like one that found none
+
+- Trigger: today's craft scan below, read against the comment this run was
+  already editing. OpenAI's memory summary, on its own account, handles
+  its zero state by listing the reasons a summary may be empty, one of
+  which is "not enough chat history". Ursa's CI comment has no equivalent
+  of that reason and the case it covers is real here: a pair needs a
+  generation commit and a later edit of the same file, so a merge window
+  of one commit cannot contain a pair by construction. The comment's
+  detail block prints `Commit window: <base>..<head>` and never the
+  number of commits in it, confirmed by grep against
+  `ursa-major/src/ci/comment.ts`, `run.ts` and `window.ts`, none of which
+  mentions a count.
+- What: on a one-commit merge the comment prints a sentence that is
+  literally true and reads as a verdict about the author's work, when the
+  honest reading is that the window was too small for the question to
+  have an answer. This is the same shape as drift 7 one step further out,
+  and the number that fixes it is now in hand rather than needing to be
+  computed: `diagnostics.commitsScanned` is already on the object
+  `src/ci/run.ts` started keeping today, so this is a field to pass and a
+  clause to write rather than a walk to change. A squash merge is the
+  common case here, since it collapses a whole branch to one commit, and
+  `window.ts` already degrades the window for it and says so in
+  `windowNote`, which means the product knows the window is degraded and
+  the zero-state sentence does not read what it knows.
+- First step: `RunCommentContext` gains `commitsInWindow`, passed from
+  `diagnostics.commitsScanned`, printed in the detail block beside the
+  range as a count. Then one clause in `emptyWindowSentence`: when the
+  count is below two and nothing was refused, say that a pair needs two
+  commits and this window held one, instead of saying no commit carried a
+  marker. One test in `src/launch-parity.test.ts` on a two-commit
+  fixture resolved with `baseRef` at `HEAD~1`, asserting the new sentence
+  and asserting the old one is absent, in the shape today's drift 7 block
+  already uses.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (hook run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after the Mem0, Letta and Zep reads filed
+yesterday. **ChatGPT Memory (OpenAI)**, and specifically its Sources
+panel, read on this run's own question, which is what a product says when
+it declines to make a claim.
+
+**Worth stealing: a zero state that lists the reasons it could be zero,
+and a provenance surface that admits what it leaves out.** Two things
+OpenAI's documentation does, per the secondary source read below. First,
+an empty memory summary is not presented as an empty memory. The reasons
+a summary may not have appeared yet are enumerated, including a new
+account, memory having been enabled recently, and not enough chat
+history, and the user is told it should populate over time. Second, and
+rarer, the per-response Sources panel disclaims its own completeness:
+sources "are designed to make memory easier to understand and control,
+though they may not show every factor or source that shaped a response",
+and "some details may not appear in the summary, including when ChatGPT
+determines they are less relevant or not appropriate to show in this
+view". A provenance surface that tells you it is partial is more useful
+than one that lets you assume it is total, and it is the opposite of what
+Ursa's CI comment did until today, which was to assume totality out loud
+on a history that contradicted it. The first of those two is the ledger
+entry above about window size.
+
+**What Ursa does better: the accounting is exhaustive and arithmetic, and
+the omission criterion is not a model's opinion.** The Sources panel
+omits a detail when "ChatGPT determines they are less relevant", which
+makes the completeness of a provenance surface a judgement by the same
+system whose behaviour is being explained. Ursa's refusal accounting has
+no judgement in it. `pairRefusals`, shipped today, sums to exactly the
+number of generations the walk abandoned, every refused generation appears
+in it exactly once, and each refusal is a commit distance, a timestamp
+difference, an interposed-generation count or a git ancestry check. None
+of them asks a model anything, which is the property `CLAUDE.md` §1 is
+built on. The honest qualification is the first ledger entry above: that
+exhaustiveness is of the count and not of the cause, because the walk
+stops at the first bound a generation breaks, and a reader told which
+flag to raise is told about one bound rather than all of them. So Ursa's
+version of this is stronger in kind and has its own incompleteness, which
+is now measured rather than assumed.
+
+**The honest limit on this comparison, which is about sourcing rather
+than about the products.** OpenAI's own help documentation returned HTTP
+403 to this run's fetch, so all three quotations above reach this scan
+through a third-party page that attributes them to OpenAI's documentation
+without linking to it. That page belongs to a competing memory product,
+which is a reason to treat its framing as interested even where its
+quotations are accurate. The quotations are consistent with the
+`landscape.md` entry's own 2026-09-30 and 2026-10-05 updates, which were
+sourced independently, and that is corroboration rather than
+verification. Treat the two quoted sentences as reported rather than
+confirmed until someone reads them at an openai.com address.
+
+**External sources read for this scan**, none of them a committed file of
+this repository and none of them treated as an instruction to this run: a
+web search for ChatGPT's Sources panel and its empty-summary behaviour,
+one fetch of `www.memorylake.ai/en/blogs/check-what-chatgpt-memory-summary-leaves-out`,
+and one attempted fetch of `help.openai.com/en/articles/8590148-memory-faq`
+which returned 403 and contributed nothing.

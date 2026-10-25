@@ -108,9 +108,6 @@ function isAncestor(repoPath, ancestor, descendant) {
     return false;
   }
 }
-function findCommitPairs(repoPath, opts = {}) {
-  return findCommitPairsWithDiagnostics(repoPath, opts).pairs;
-}
 function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
   const trailerPattern = opts.agentTrailerPattern ?? DEFAULT_TRAILER;
   const authorPattern = opts.agentAuthorPattern ?? DEFAULT_AUTHOR;
@@ -2193,6 +2190,50 @@ function gateRecords(records) {
     report: `${violations.length} record invariant${plural} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.
 ${formatViolations(violations)}`
   };
+}
+function newDroppedUnits(minChars) {
+  return { unresolvable: 0, belowMinChars: 0, minChars, largestBelowFloor: 0 };
+}
+function keepRecord(record, minChars, dropped) {
+  if (!record) {
+    dropped.unresolvable++;
+    return false;
+  }
+  if (!clearsSizeFloor(record, minChars)) {
+    dropped.belowMinChars++;
+    dropped.largestBelowFloor = Math.max(
+      dropped.largestBelowFloor,
+      record.stats.generated.totalChars
+    );
+    return false;
+  }
+  return true;
+}
+function pairRefusals(diagnostics) {
+  const { abandoned, bounds } = diagnostics;
+  const all = [
+    {
+      bound: "interposedGeneration",
+      count: abandoned.interposedGeneration,
+      flag: "--max-interposed-generations",
+      limit: bounds.maxInterposedGenerations
+    },
+    {
+      bound: "distance",
+      count: abandoned.distance,
+      flag: "--max-pair-distance",
+      limit: bounds.maxPairDistance
+    },
+    {
+      bound: "age",
+      count: abandoned.age,
+      flag: "--max-pair-age-hours",
+      limit: bounds.maxPairAgeHours
+    },
+    { bound: "notDescendant", count: abandoned.notDescendant, flag: null, limit: null }
+  ];
+  const refusals = all.filter((r) => r.count > 0);
+  return { total: refusals.reduce((n2, r) => n2 + r.count, 0), refusals };
 }
 var init_launch = __esm({
   "src/launch.ts"() {
@@ -6096,10 +6137,33 @@ function renderRunCommentFieldTable(f) {
     `| Tuning delta \u2014 preference units this run added to, or reinforced in, the tuning store | ${deltaCell} |`
   ].join("\n");
 }
+function refusedClause(ctx) {
+  const r = ctx.refused;
+  if (!r || r.total === 0) return null;
+  const parts = r.refusals.map((x) => {
+    const n2 = `${x.count} generation${x.count === 1 ? "" : "s"}`;
+    switch (x.bound) {
+      case "interposedGeneration":
+        return `${n2} had the same file rewritten by a later generation first, so the edit that followed corrected that generation and not this one`;
+      case "distance":
+        return `${n2} found no edit of the same file within ${x.limit} commits, the \`--max-pair-distance\` reach`;
+      case "age":
+        return `${n2} found none within ${x.limit} hours, the \`--max-pair-age-hours\` reach`;
+      case "notDescendant":
+        return `${n2} were only edited on a branch that never contained them, which no input widens`;
+    }
+  });
+  return parts.join(", and ");
+}
 function emptyWindowSentence(f, ctx) {
   const opening = "Nothing resolved in this window. That is a reading, not a failure:";
+  const refused = refusedClause(ctx);
   if (f.unitsFound === 0) {
-    return `${opening} no commit here carried an agent marker that a later human commit then edited.`;
+    if (!refused) {
+      return `${opening} no commit here carried an agent marker that a later human commit then edited.`;
+    }
+    const one2 = ctx.refused.total === 1;
+    return `${opening} commits here did carry agent markers and were followed by your edits, and ${ctx.refused.total} of those pairings ${one2 ? "was" : "were"} left out rather than guessed at. ${refused}. Those are claims this run could not stand behind, so it did not make them. Raise the pairing inputs on the Ursa step to see them anyway.`;
   }
   const one = f.unitsFound === 1;
   const found = one ? "1 work unit was found, and it did not become a record." : `${f.unitsFound} work units were found, and none of them became a record.`;
@@ -6209,12 +6273,13 @@ async function runCi(opts) {
     maxPairAgeHours: opts.maxPairAgeHours,
     maxInterposedGenerations: opts.maxInterposedGenerations
   };
-  const bounds = resolvePairingBounds(pairOptions);
-  const pairs = findCommitPairs(opts.projectPath, pairOptions);
+  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(opts.projectPath, pairOptions);
+  const bounds = diagnostics.bounds;
+  const refused = pairRefusals(diagnostics);
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
   const recordPaths = [];
-  const dropped = { unresolvable: 0, belowMinChars: 0, minChars };
+  const dropped = newDroppedUnits(minChars);
   const erased = erasedEpisodeIds(opts.projectPath, episodes.map((e) => e.id));
   let suppressed = 0;
   for (const episode of episodes) {
@@ -6223,14 +6288,7 @@ async function runCi(opts) {
       continue;
     }
     const record = resolveEpisode(opts.projectPath, episode);
-    if (!record) {
-      dropped.unresolvable++;
-      continue;
-    }
-    if (!clearsSizeFloor(record, minChars)) {
-      dropped.belowMinChars++;
-      continue;
-    }
+    if (!keepRecord(record, minChars, dropped)) continue;
     const signals = deriveSignals(record, declaration2);
     signals.notes = [...signals.notes ?? [], `CI launch: ${window.note}`];
     record.signals = signals;
@@ -6255,6 +6313,7 @@ async function runCi(opts) {
     declarationBasis: declaration2.basis,
     recordsPath: (0, import_node_path9.join)(ursaDir(opts.projectPath), "records"),
     dropped,
+    refused,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the
@@ -6603,21 +6662,41 @@ init_segment();
 var MAX_REVISIONS = 50;
 var MIN_TRACEABLE_LEN = 24;
 var MAX_BLOB_CHARS = 3e5;
-function git2(repoPath, args) {
-  return (0, import_node_child_process3.execFileSync)("git", ["-C", repoPath, ...args], {
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "ignore"]
-  });
-}
-function headSha(repoPath) {
+function firstVanish(repoPath, sha, path) {
+  let out;
   try {
-    return git2(repoPath, ["rev-parse", "HEAD"]).trim();
+    out = git2(repoPath, [
+      "log",
+      "--reverse",
+      "--topo-order",
+      "--diff-filter=D",
+      "--pretty=format:%H",
+      `${sha}..HEAD`,
+      "--",
+      path
+    ]);
   } catch {
     return null;
   }
+  const first = out.split("\n").find(Boolean);
+  return first ? first.trim() : null;
 }
-function revisionsAfter(repoPath, sha, path, limit = MAX_REVISIONS) {
+function renameTarget(repoPath, sha, path) {
+  let out;
+  try {
+    out = git2(repoPath, ["diff-tree", "-r", "-M", "--name-status", "--no-commit-id", "-z", sha]);
+  } catch {
+    return null;
+  }
+  const f = out.split("\0");
+  for (let i = 0; i < f.length; i++) {
+    if (!/^R\d*$/.test(f[i])) continue;
+    if (f[i + 1] === path && f[i + 2]) return f[i + 2];
+    i += 2;
+  }
+  return null;
+}
+function logOnePath(repoPath, sha, path, limit) {
   let out;
   try {
     out = git2(repoPath, [
@@ -6639,6 +6718,48 @@ function revisionsAfter(repoPath, sha, path, limit = MAX_REVISIONS) {
     return { sha: revSha, at, author, subject: rest.join("	") };
   });
 }
+function git2(repoPath, args) {
+  return (0, import_node_child_process3.execFileSync)("git", ["-C", repoPath, ...args], {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "ignore"]
+  });
+}
+function headSha(repoPath) {
+  try {
+    return git2(repoPath, ["rev-parse", "HEAD"]).trim();
+  } catch {
+    return null;
+  }
+}
+function revisionsAfter(repoPath, sha, path, limit = MAX_REVISIONS) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set([path]);
+  let currentPath = path;
+  let from = sha;
+  while (out.length < limit) {
+    const batch = logOnePath(repoPath, from, currentPath, limit - out.length);
+    if (batch.length === 0) break;
+    const vanishedAt = firstVanish(repoPath, from, currentPath);
+    const movedTo = vanishedAt ? renameTarget(repoPath, vanishedAt, currentPath) : null;
+    let followed = false;
+    for (const rev of batch) {
+      if (out.length >= limit) break;
+      if (movedTo && rev.sha === vanishedAt) {
+        out.push({ ...rev, path: movedTo, renamedFrom: currentPath });
+        currentPath = movedTo;
+        from = rev.sha;
+        followed = true;
+        break;
+      }
+      out.push({ ...rev, path: currentPath });
+    }
+    if (!followed) break;
+    if (seen.has(currentPath)) break;
+    seen.add(currentPath);
+  }
+  return out;
+}
 function blobAt2(repoPath, sha, path) {
   try {
     return git2(repoPath, ["show", `${sha}:${path}`]);
@@ -6653,7 +6774,7 @@ function spanPresent(spanNorm, fileNorm, fileTokens) {
   }
   return { present: false };
 }
-function traceFile(repoPath, path, spans, closedAt, revisions) {
+function traceFile(repoPath, path, spans, closedAt, revisions, crossings) {
   const mode = modeForPath(path);
   const closedMs = Date.parse(closedAt);
   const unitsBySpan = /* @__PURE__ */ new Map();
@@ -6680,9 +6801,16 @@ function traceFile(repoPath, path, spans, closedAt, revisions) {
   }
   if (revisions.length === 0) return spans;
   let remaining = live.length;
+  let renamesFollowed = 0;
+  let lastPath = path;
   for (const rev of revisions) {
     if (remaining === 0) break;
-    const text = blobAt2(repoPath, rev.sha, path);
+    const text = blobAt2(repoPath, rev.sha, rev.path);
+    if (rev.renamedFrom) {
+      renamesFollowed++;
+      crossings?.push({ sha: rev.sha, from: rev.renamedFrom, to: rev.path });
+    }
+    lastPath = rev.path;
     const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? "" : normalize(text).norm;
     const fileTokens = new Set(tokens(fileNorm));
     const revMs = Date.parse(rev.at);
@@ -6723,6 +6851,12 @@ function traceFile(repoPath, path, spans, closedAt, revisions) {
     }
     life.fate = lost.length === 0 ? "durable" : lost.length === units.length ? "decayed" : "eroded";
   }
+  if (renamesFollowed > 0) {
+    for (const span of spans) {
+      span.lifespan.renamesFollowed = renamesFollowed;
+      span.lifespan.renamedTo = lastPath;
+    }
+  }
   return spans;
 }
 function median(values) {
@@ -6734,17 +6868,20 @@ function median(values) {
 var SURVIVING = /* @__PURE__ */ new Set(["survived_verbatim", "survived_mutated"]);
 function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions = MAX_REVISIONS) {
   const tip = headSha(repoPath);
+  const crossings = [];
   for (const file of record.files) {
     const revisions = revisionsAfter(repoPath, closingSha, file.path, maxRevisions);
-    traceFile(repoPath, file.path, file.spans, closedAt, revisions);
+    traceFile(repoPath, file.path, file.spans, closedAt, revisions, crossings);
   }
   let testedSpans = 0, durableSpans = 0, erodedSpans = 0, decayedSpans = 0;
   let durableChars = 0, decayedChars = 0;
   let baseDurable = 0, baseDecayed = 0;
+  let spanCrossings = 0;
   const lifetimes = [];
   for (const file of record.files) {
     for (const span of file.spans) {
       const life = span.lifespan;
+      if (life?.renamesFollowed) spanCrossings += life.renamesFollowed;
       if (!life || life.fate === "untested") continue;
       if (SURVIVING.has(span.class)) {
         testedSpans++;
@@ -6760,6 +6897,7 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
       }
     }
   }
+  const distinctRenames = new Set(crossings.map((c) => `${c.sha}\0${c.from}\0${c.to}`)).size;
   const baseTotal = baseDurable + baseDecayed;
   const total = durableChars + decayedChars;
   record.durability = {
@@ -6776,7 +6914,12 @@ function annotateDurability(repoPath, record, closingSha, closedAt, maxRevisions
     baselineDecayRate: baseTotal === 0 ? null : baseDecayed / baseTotal,
     medianIntactSeconds: median(lifetimes),
     maxRevisionsWalked: maxRevisions,
-    minTraceableLen: MIN_TRACEABLE_LEN
+    minTraceableLen: MIN_TRACEABLE_LEN,
+    // Both absent rather than 0 when the walk crossed nothing, so a record
+    // from before the walk could follow a rename stays indistinguishable
+    // from one whose files never moved. See the field comments in types.ts.
+    ...spanCrossings > 0 ? { spanRenameCrossings: spanCrossings } : {},
+    ...distinctRenames > 0 ? { distinctRenamesFollowed: distinctRenames } : {}
   };
   return record;
 }
@@ -6788,7 +6931,7 @@ init_resolver_identity();
 init_launch();
 init_resolve_episode();
 init_resolve_episode();
-function renderRunSummary(records, episodes, diagnostics) {
+function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
   const lines = [];
   let verbatim = 0, mutated = 0, written = 0, traced = 0, claimed = 0;
   let humanDeleted = 0, mergeDeleted = 0, unknownDeleted = 0;
@@ -6803,8 +6946,37 @@ function renderRunSummary(records, episodes, diagnostics) {
     unknownDeleted += r.stats.generated.unknownDeletedChars;
   }
   lines.push(`${episodes.length} work unit${episodes.length === 1 ? "" : "s"} found, ${records.length} resolved into record${records.length === 1 ? "" : "s"}.`);
-  lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`);
-  lines.push(`That's the part worth noticing: not what got written, what got kept.`);
+  if (records.length > 0) {
+    lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`);
+    lines.push(`That's the part worth noticing: not what got written, what got kept.`);
+  }
+  if (droppedUnits) {
+    const d = droppedUnits;
+    const unrecorded = d.unresolvable + d.belowMinChars;
+    if (unrecorded > 0) {
+      const one = unrecorded === 1;
+      lines.push("");
+      lines.push(
+        `${unrecorded} work unit${one ? " was" : "s were"} found and not recorded, and this is which bound dropped ${one ? "it" : "them"}.`
+      );
+      if (d.belowMinChars > 0) {
+        const floorOne = d.belowMinChars === 1;
+        const remedy = d.largestBelowFloor > 0 ? ` ${floorOne ? "It generated" : "The largest of them generated"} ${d.largestBelowFloor.toLocaleString()}, so --min-chars ${d.largestBelowFloor} is the lowest floor that would have recorded ${floorOne ? "it" : "any of them"}.` : ` ${floorOne ? "It generated no" : "None of them generated any"} text a span could be taken from, so no floor would record ${floorOne ? "it" : "them"}.`;
+        lines.push(
+          `${d.belowMinChars} carried fewer than ${d.minChars.toLocaleString()} generated characters, which is the --min-chars floor, because a survival figure taken over that little text would be noise.${remedy}`
+        );
+      }
+      if (d.unresolvable > 0) {
+        const unOne = d.unresolvable === 1;
+        lines.push(
+          `${d.unresolvable} resolved to nothing this run could stand behind, meaning no file in ${unOne ? "it" : "them"} had a readable version at both commits of the pair and nothing arrived whole from elsewhere either, so there was no refusal to state instead.`
+        );
+        lines.push(
+          `No flag changes that one. The usual causes are a generated file your edit deleted outright, a commit this clone does not have the blobs for, and a file over the ${MAX_BLOB_CHARS2.toLocaleString()}-character ceiling the resolver reads up to. If the clone is shallow, run git fetch and ursa run again.`
+        );
+      }
+    }
+  }
   if (written > 0) {
     lines.push(`${written.toLocaleString()} chars were generated to get there, and ${claimed.toLocaleString()} of them reached the finished work unedited.`);
   }
@@ -6843,6 +7015,7 @@ function renderRunSummary(records, episodes, diagnostics) {
     );
   }
   if (diagnostics) {
+    const { total: refusedTotal, refusals } = pairRefusals(diagnostics);
     const suppressed = diagnostics.authorFallbackSuppressed;
     if (suppressed) {
       const names = suppressed.authors.map((a) => `"${a}"`).join(", ");
@@ -6863,40 +7036,32 @@ function renderRunSummary(records, episodes, diagnostics) {
         how.push(`${d.generatedByDeclaredIdentity} by an identity you declared`);
       }
       lines.push("");
+      const found = `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${how.join(", ")})`;
       lines.push(
-        `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${how.join(", ")}), and none of those was followed by an edit of the same file without an agent marker.`
+        refusedTotal === 0 ? `${found}, and none of those was followed by an edit of the same file without an agent marker.` : `${found}, and the ${refusedTotal === 1 ? "one that was" : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`
       );
-      if (looked > 0) {
+      if (looked > 0 && refusedTotal === 0) {
         lines.push(
           "If every commit here is an agent's, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads."
         );
       }
     }
-    const { abandoned, bounds } = diagnostics;
-    const dropped = abandoned.distance + abandoned.age + abandoned.interposedGeneration + abandoned.notDescendant;
-    if (dropped > 0) {
-      const why = [];
-      if (abandoned.interposedGeneration > 0) {
-        why.push(
-          `${abandoned.interposedGeneration} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`
-        );
-      }
-      if (abandoned.distance > 0) {
-        why.push(
-          `${abandoned.distance} found no edit within ${bounds.maxPairDistance} commits`
-        );
-      }
-      if (abandoned.age > 0) {
-        why.push(`${abandoned.age} found none within ${bounds.maxPairAgeHours} hours`);
-      }
-      if (abandoned.notDescendant > 0) {
-        why.push(
-          `${abandoned.notDescendant} were only edited on a branch that never contained them`
-        );
-      }
+    if (refusedTotal > 0) {
+      const why = refusals.map((r) => {
+        switch (r.bound) {
+          case "interposedGeneration":
+            return `${r.count} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`;
+          case "distance":
+            return `${r.count} found no edit within ${r.limit} commits`;
+          case "age":
+            return `${r.count} found none within ${r.limit} hours`;
+          case "notDescendant":
+            return `${r.count} were only edited on a branch that never contained them`;
+        }
+      });
       lines.push("");
       lines.push(
-        `${dropped} generation${dropped === 1 ? "" : "s"} were left out rather than guessed at: ${why.join("; ")}.`
+        `${refusedTotal} generation${refusedTotal === 1 ? " was" : "s were"} left out rather than guessed at: ${why.join("; ")}.`
       );
       lines.push(
         "Those are claims this run could not stand behind, so it did not make them. Raise --max-pair-distance, --max-pair-age-hours or --max-interposed-generations to see them anyway."
@@ -7131,6 +7296,7 @@ async function main(argv) {
   }));
   const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id));
   let suppressed = 0;
+  const dropped = newDroppedUnits(minChars);
   const records = [];
   for (const ep of episodes) {
     if (erased.has(ep.id)) {
@@ -7138,8 +7304,7 @@ async function main(argv) {
       continue;
     }
     const record = resolveEpisode(projectPath, ep, commits);
-    if (!record) continue;
-    if (!clearsSizeFloor(record, minChars)) continue;
+    if (!keepRecord(record, minChars, dropped)) continue;
     annotateDurability(projectPath, record, ep.finalSha, ep.closedAt);
     record.signals = deriveSignals(record, declaration2);
     stampPairingBounds(record, diagnostics.bounds);
@@ -7150,7 +7315,7 @@ async function main(argv) {
   if (records.length === 0 && suppressed > 0) {
     console.log(`${episodes.length} work unit${episodes.length === 1 ? "" : "s"} found, and ${suppressed === episodes.length ? "every one of them is" : `${suppressed} of them are`} erased. Nothing was rebuilt.`);
   } else {
-    console.log(renderRunSummary(records, episodes, diagnostics));
+    console.log(renderRunSummary(records, episodes, diagnostics, dropped));
     if (suppressed > 0) {
       console.log(`
 ${suppressed} work unit${suppressed === 1 ? "" : "s"} you erased stayed erased.`);

@@ -172,3 +172,35 @@ test('a committed conflict marker fails', () => {
   assert.equal(res.code, 1);
   assert.match(res.out, /conflict marker is committed/);
 });
+
+// BLOCK_SEPARATION. The drift this rule names is the one that was actually
+// live twice in one day: a `### ` heading appended with no blank line above
+// it, which `renderLedger` cannot reproduce, so the byte-equality assertion
+// in ledger.test.mjs goes red and reports a character count instead of a
+// location. The rule turns that into a line number.
+test('a heading with no blank line above it fails, by line number', () => {
+  const res = run(`${GOOD}### 2026-09-28 — The next idea\n- Trigger: an observation\n- What: one paragraph\n- First step: a day\n- Cost: $0\n- Status: proposed\n`);
+  assert.equal(res.code, 1);
+  assert.match(res.out, /BLOCK_SEPARATION/);
+  assert.match(res.out, /line 9: "### 2026-09-28 — The next idea" opens a block with no blank line above it/);
+});
+
+test('a heading with two blank lines above it fails too, in the other direction', () => {
+  const res = run(`${GOOD}\n\n### 2026-09-28 — The next idea\n- Trigger: an observation\n- What: one paragraph\n- First step: a day\n- Cost: $0\n- Status: proposed\n`);
+  assert.equal(res.code, 1);
+  assert.match(res.out, /more than one blank line above it/);
+});
+
+test('a dated note bullet is held to the same spacing as a heading', () => {
+  // Notes open blocks under the same grammar, so an append that lands one
+  // against the line above it drifts identically. Caught here because the
+  // rule asks `blockStartKind`, the one `parseLedger` itself asks.
+  const res = run(`${GOOD}- 2026-09-28 (engineer): a run note.\n`);
+  assert.equal(res.code, 1);
+  assert.match(res.out, /BLOCK_SEPARATION.*opens a block with no blank line above it/);
+});
+
+test('one blank line above each block is what the rule wants, and passes', () => {
+  const res = run(`${GOOD}\n### 2026-09-28 — The next idea\n- Trigger: an observation\n- What: one paragraph\n- First step: a day\n- Cost: $0\n- Status: proposed\n\n- 2026-09-28 (engineer): a run note.\n`);
+  assert.equal(res.code, 0, res.out);
+});

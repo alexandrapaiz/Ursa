@@ -1,0 +1,20 @@
+== first draft, record one: before/dashboard-desktop.png
+  row y=1697
+    (20, 27, 43)        320 samples
+== after, record one: after/dashboard-desktop.png
+  row y=1739
+    (116, 121, 134)     302 samples
+    (20, 27, 43)         11 samples
+    (168, 199, 250)       7 samples
+
+Measured off the frames, not computed from the stylesheet.
+  first draft, yours         (38, 40, 46)       vs night =  1.40:1
+  first draft, no span       (20, 27, 43)       vs night =  1.20:1
+  first draft, edited        (71, 85, 109)      vs night =  2.74:1
+  after, yours               (116, 121, 134)    vs night =  4.73:1
+  after, no span (track)     (20, 27, 43)       vs night =  1.20:1
+  after, as written/edited   (168, 199, 250)    vs night = 11.99:1
+
+  first draft: yours vs no span   = 1.17:1
+  after:       yours vs no span   = 3.95:1
+  after:       yours vs as written= 2.53:1

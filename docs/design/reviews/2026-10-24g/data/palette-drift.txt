@@ -1,0 +1,17 @@
+Two palettes for one product, named side by side.
+
+  ground      overlay --ground  #050810    ursa-minor --night #020308
+  body text   overlay --ink     #e8edf6    ursa-minor --star  #e8edf7
+  secondary   overlay --dim     #8b93a7    ursa-minor --dim   #707fa0
+  accent      overlay --accent  #a8c7fa    ursa-minor --polar #a8c7fa
+
+Three hues the panel has and the rest of Ursa does not:
+  --satisfied    #9ce0b9   13.14:1 on the panel's own ground
+  --unsatisfied  #f2b8b5   11.73:1 on the panel's own ground
+  --tension      #e8c47c   12.03:1 on the panel's own ground
+
+Secondary text, measured on each surface's own ground:
+  overlay    --dim #8b93a7 on --ground #050810 = 6.51:1   at the 12px and 13px this file sets
+  dashboard  --dim #707fa0 on --night  #020308 = 5.13:1   at 0.65-0.7rem
+
+Both clear 4.5:1, so this is a drift finding and not a contrast one.

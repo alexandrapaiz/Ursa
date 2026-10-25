@@ -1,0 +1,40 @@
+==== Linear
+  body background rgb(8, 9, 10)
+  hairline separators: 46 found
+      28  rgba(0, 0, 0, 0)
+       4  rgba(255, 255, 255, 0.08)
+       4  rgb(243, 78, 82)
+       4  rgb(39, 166, 68)
+       3  rgb(35, 37, 42)
+  thin proportional blocks (2-12px tall, >40px wide):
+
+==== Vercel
+  body background rgb(250, 250, 250)
+  hairline separators: 0 found
+  thin proportional blocks (2-12px tall, >40px wide):
+
+==== Stripe
+  body background rgba(0, 0, 0, 0)
+  hairline separators: 15 found
+      13  rgb(229, 237, 245)
+       1  rgb(83, 58, 253)
+       1  rgb(24, 38, 89)
+  thin proportional blocks (2-12px tall, >40px wide):
+
+==== Elicit
+  body background rgb(252, 252, 248)
+  hairline separators: 0 found
+  thin proportional blocks (2-12px tall, >40px wide):
+
+
+The hairline, as a ratio against the ground it is drawn on.
+  Linear, 28 of them   (28, 29, 30)       on (8, 9, 10)     = 1.18:1
+  Linear, 3 of them    (35, 37, 42)       on (8, 9, 10)     = 1.30:1
+  Stripe, 13 of them   (229, 237, 245)    on (255, 255, 255) = 1.18:1
+  Ursa --line          (20, 27, 43)       on (2, 3, 8)      = 1.20:1
+
+No site in the set draws a thin proportional block on its home page,
+so the survival bar has no benchmark here. That is the same caution
+ledger L5 already records about form controls: a marketing page
+carries almost no data surfaces, and a zero is a failed measurement
+rather than a finding.

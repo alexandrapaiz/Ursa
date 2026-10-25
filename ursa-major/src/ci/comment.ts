@@ -92,6 +92,34 @@ export interface RunCommentContext {
    * a reader goes to ask how far to trust the numbers, which is exactly the
    * question a violated bound answers.
    */
+  /**
+   * Generations the pairing walk abandoned before any work unit existed,
+   * one stage above `dropped` (`pairRefusals` in src/launch.ts).
+   *
+   * This exists because `dropped` fixed half of one sentence. Its
+   * docstring above records a run on 2026-10-08 asserting "no commit here
+   * carried an agent marker that a later human commit then edited" beside
+   * `units-found=1`, and the repair gave the `unitsFound > 0` branch a
+   * reason to name. A generation abandoned by a pairing bound produces no
+   * work unit at all, so it lands in the OTHER branch, where the same
+   * sentence was still the only thing on offer and is false in every
+   * clause: the marker was there, the human edit was there, and the walk
+   * declined to reach between them.
+   *
+   * Omitted by a caller that does not track it, in which case the
+   * zero-unit sentence keeps the unconditional wording, because a caller
+   * with no tally cannot distinguish the history that sentence is true of
+   * from the history it is false of.
+   */
+  refused?: {
+    total: number
+    refusals: {
+      bound: 'distance' | 'age' | 'interposedGeneration' | 'notDescendant'
+      count: number
+      flag: '--max-pair-distance' | '--max-pair-age-hours' | '--max-interposed-generations' | null
+      limit: number | null
+    }[]
+  }
   invariantViolations?: number
   /**
    * The resolver that wrote this run's records, as `task.resolvedBy`
@@ -198,10 +226,57 @@ export function renderRunCommentFieldTable(f: RunCommentFields): string {
  * the first for all three, which this comment did until 2026-10-08, tells a
  * user to go fix their commit trailers when the actual fix is one flag.
  */
+/**
+ * The abandonment tally as one clause, or null when there is nothing to say.
+ *
+ * Wording lives here and not in `pairRefusals`, for the reason drift 6
+ * gives in src/launch.ts: a markdown comment and a terminal are different
+ * surfaces, and only the NUMBER and the FLAG have to match between them.
+ * What is shared is which bound stopped how many generations; what is not
+ * is that this surface writes the flag as code and `src/bin/ursa.ts`
+ * writes it bare.
+ */
+function refusedClause(ctx: RunCommentContext): string | null {
+  const r = ctx.refused
+  if (!r || r.total === 0) return null
+  const parts = r.refusals.map((x) => {
+    const n = `${x.count} generation${x.count === 1 ? '' : 's'}`
+    switch (x.bound) {
+      case 'interposedGeneration':
+        return `${n} had the same file rewritten by a later generation first, so the edit that followed corrected that generation and not this one`
+      case 'distance':
+        return `${n} found no edit of the same file within ${x.limit} commits, the \`--max-pair-distance\` reach`
+      case 'age':
+        return `${n} found none within ${x.limit} hours, the \`--max-pair-age-hours\` reach`
+      case 'notDescendant':
+        return `${n} were only edited on a branch that never contained them, which no input widens`
+    }
+  })
+  return parts.join(', and ')
+}
+
 function emptyWindowSentence(f: RunCommentFields, ctx: RunCommentContext): string {
   const opening = 'Nothing resolved in this window. That is a reading, not a failure:'
+  const refused = refusedClause(ctx)
   if (f.unitsFound === 0) {
-    return `${opening} no commit here carried an agent marker that a later human commit then edited.`
+    // The marker-and-edit sentence is only true when the walk abandoned
+    // nothing. When it abandoned something, every clause of it is false:
+    // a commit DID carry a marker, a later human commit DID edit the same
+    // file, and a bound stopped the walk in between. Saying it anyway is
+    // what this branch did until 2026-10-25 (drift 7, src/launch.ts), and
+    // on a repository where agent seats commit between the owner's own
+    // touches it is the sentence every merge gets.
+    if (!refused) {
+      return `${opening} no commit here carried an agent marker that a later human commit then edited.`
+    }
+    const one = ctx.refused!.total === 1
+    return (
+      `${opening} commits here did carry agent markers and were followed by your edits, and ` +
+      `${ctx.refused!.total} of those pairings ${one ? 'was' : 'were'} left out rather than guessed at. ` +
+      `${refused}. ` +
+      'Those are claims this run could not stand behind, so it did not make them. Raise the pairing ' +
+      'inputs on the Ursa step to see them anyway.'
+    )
   }
   const one = f.unitsFound === 1
   const found = one

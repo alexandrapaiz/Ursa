@@ -469,6 +469,71 @@
           "subject": "Both items from research: name why a span has no candidate, and disclose the paste channel"
         }
       ]
+    },
+    {
+      "digest": "2ed20990bde0816e",
+      "sha256": "2ed20990bde0816e17a780ebb6200f32c7c2d87af04891e2c54e915087602bf1",
+      "blob": "f2f8ee511020d5149e6f3824b7074e0e980d9597",
+      "bytes": 294390,
+      "introducedBy": [
+        {
+          "commit": "1de6d9e9416d46224f78ac5a5c3811a76d4ccc6a",
+          "date": "2026-10-24T21:30:00.000Z",
+          "subject": "Rebuild dist/ursa.cjs so the shipped resolver carries the rename fix"
+        }
+      ]
+    },
+    {
+      "digest": "e9afa05466e58e97",
+      "sha256": "e9afa05466e58e97590d36238f13ae8ffbef61b19f7fdf7bc2801912fef1bf41",
+      "blob": "c49d0bb5a81aefee2972527d91f51ff5e373847e",
+      "bytes": 299845,
+      "introducedBy": [
+        {
+          "commit": "386e27829392705328998cd781eff7ac210faa88",
+          "date": "2026-10-24T21:46:21.000Z",
+          "subject": "Merge main into this branch: resolve docs/ideas.md append conflict (keep both), provenance placeholder pending regeneration"
+        }
+      ]
+    },
+    {
+      "digest": "f497687433163312",
+      "sha256": "f497687433163312eb6dfcd1bfd7d90e228504d06a931f9a7e6660af07eb6f32",
+      "blob": "eee1a01c4182f1ddcbe73c4c135e39258c617ab7",
+      "bytes": 300412,
+      "introducedBy": [
+        {
+          "commit": "7a4e39f2cf76991c103ecf0caa0a5e3324de7f76",
+          "date": "2026-10-24T22:26:03.000Z",
+          "subject": "Make the generated-artifact ritual one command: npm run regen"
+        }
+      ]
+    },
+    {
+      "digest": "8eafe22f58d78a07",
+      "sha256": "8eafe22f58d78a078ae517aff4df5024016f7d21474863e992c64eaf52ab7916",
+      "blob": "5419b960b5dab5cda2102180059c6db0d4637e02",
+      "bytes": 302684,
+      "introducedBy": [
+        {
+          "commit": "64953b1c654b9331c88bb7f89a9fa00abeaa4ec7",
+          "date": "2026-10-24T23:16:53.000Z",
+          "subject": "a test per drop reason, and the shipped bundle rebuilt"
+        }
+      ]
+    },
+    {
+      "digest": "702d3444a5080d9a",
+      "sha256": "702d3444a5080d9a1ece831077b00f0ff0099c5732c7b8d051ff59df645f354a",
+      "blob": "6b89f49c3ab46082d7ee75cf349eee08ab77e94c",
+      "bytes": 304768,
+      "introducedBy": [
+        {
+          "commit": "712d9afcb1edffaa6087b7a9c992f8e725f26f5f",
+          "date": "2026-10-25T02:40:09.000Z",
+          "subject": "the runner computed why it refused a pairing and threw it away, then denied the pairing existed"
+        }
+      ]
     }
   ]
 }

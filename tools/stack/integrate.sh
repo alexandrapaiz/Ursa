@@ -23,7 +23,10 @@
 #   bash tools/stack/integrate.sh --json out.json     # machine-readable IntegrationReport
 #
 # Exit status: 0 when every requested branch merged and every suite passed,
-# 1 when any branch conflicted or any suite failed. So it is usable as a gate.
+# 1 when any branch conflicted, any suite failed, or any merge could not be
+# attempted at all. That last case is reported as `tool failure` and never as a
+# conflict, because a conflict count that includes merges git refused to even
+# try is not a measurement. So it is usable as a gate.
 
 set -uo pipefail
 
@@ -61,6 +64,24 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
+
+# Before the fetch, not after: this script merges `origin/$branch` for every
+# open pull request, and in the clone a seat is given NONE of those refs exist.
+# `remote.origin.fetch` is `+refs/heads/main:refs/remotes/origin/main`, so the
+# fetch below updates main and nothing else, and every merge then fails with
+# `not something we can merge` rather than with a conflict. Measured on
+# 2026-10-24 in a clone shaped exactly like this seat's: `integrate.sh
+# --no-tests 290 305 346` reported 0 of 3 merged and all three CONFLICT with an
+# empty file list. After widening the refspec alone, with no other change, the
+# same three reported 3 of 3 merged and a 239-entry ledger union. So every
+# conflict this script has ever reported in a seat's clone was false, and the
+# tool whose job is to answer "would the union build" was answering a different
+# question confidently. docs/standards/lessons.md L-A55.
+bash "$REPO_ROOT/tools/ensure-full-clone.sh" || {
+  echo "refusing to integrate from an incomplete clone: every merge below would be" >&2
+  echo "reported as a conflict in no files. See the error above." >&2
+  exit 2
+}
 
 echo "fetching..."
 git fetch --quiet origin
@@ -129,8 +150,9 @@ echo "worktree: $WORKTREE"
 echo ""
 
 DRIVER_READY=0
-OK=(); CONFLICTED=()
+OK=(); CONFLICTED=(); FAILURES=()
 declare -A CONFLICT_FILES
+declare -A FAILURE_WHY
 
 # The ledger merge driver ships inside one of the open branches (tools/ledger,
 # PR #27). It is not on `main`, so the union cannot have it until that branch is
@@ -150,21 +172,39 @@ install_driver_if_available
 
 for row in "${PAIRS[@]}"; do
   num=${row%% *}; branch=${row#* }
-  if git -C "$WORKTREE" merge --no-edit --quiet "origin/$branch" >/dev/null 2>&1; then
+  if err=$(git -C "$WORKTREE" merge --no-edit --quiet "origin/$branch" 2>&1 >/dev/null); then
     printf '  #%-3s %-45s merged\n' "$num" "$branch"
     OK+=("$num")
   else
     files=$(git -C "$WORKTREE" diff --name-only --diff-filter=U | tr '\n' ' ')
-    printf '  #%-3s %-45s CONFLICT  %s\n' "$num" "$branch" "$files"
-    git -C "$WORKTREE" merge --abort >/dev/null 2>&1
-    CONFLICTED+=("$num")
-    CONFLICT_FILES[$num]="$files"
+    if [ -z "$files" ]; then
+      # A real content conflict always leaves at least one unmerged path. None
+      # here means `git merge` refused the operands rather than the content: a
+      # missing ref, unrelated histories, a dirty worktree. Reporting that as a
+      # conflict is how this script spent a day telling seats their branches
+      # collided when the clone simply could not see them. Fail loudly instead,
+      # because a conflict count that includes tool failures is not a number.
+      printf '  #%-3s %-45s TOOL FAILURE  %s\n' "$num" "$branch" "$(echo "$err" | head -1)"
+      FAILURES+=("$num")
+      FAILURE_WHY[$num]="$(echo "$err" | head -1)"
+      git -C "$WORKTREE" merge --abort >/dev/null 2>&1
+    else
+      printf '  #%-3s %-45s CONFLICT  %s\n' "$num" "$branch" "$files"
+      git -C "$WORKTREE" merge --abort >/dev/null 2>&1
+      CONFLICTED+=("$num")
+      CONFLICT_FILES[$num]="$files"
+    fi
   fi
   install_driver_if_available
 done
 
 echo ""
-echo "merged ${#OK[@]} of ${#PAIRS[@]};  conflicted: ${CONFLICTED[*]:-none}"
+echo "merged ${#OK[@]} of ${#PAIRS[@]};  conflicted: ${CONFLICTED[*]:-none};  tool failures: ${FAILURES[*]:-none}"
+if [ ${#FAILURES[@]} -gt 0 ]; then
+  echo ""
+  echo "A tool failure is NOT a conflict. These branches were never compared:"
+  for num in "${FAILURES[@]}"; do echo "  #$num  ${FAILURE_WHY[$num]}"; done
+fi
 
 # A committed conflict marker in the ledger is the failure the driver exists to
 # prevent, so check for one rather than trusting that the driver ran.
@@ -176,6 +216,7 @@ fi
 
 FAILED=0
 [ ${#CONFLICTED[@]} -gt 0 ] && FAILED=1
+[ ${#FAILURES[@]} -gt 0 ] && FAILED=1
 [ "$MARKERS" != 0 ] && FAILED=1
 
 MAJOR_RESULT="skipped"
@@ -239,7 +280,15 @@ if [ -n "$JSON_OUT" ]; then
       num=${row%% *}; branch=${row#* }
       [ $first = 0 ] && printf ',\n'
       first=0
-      if [ -n "${CONFLICT_FILES[$num]:-}" ]; then
+      # Three results, not two. Keying "merged" off an EMPTY conflicted-file
+      # list is what made this emitter print `"result": "merged"` for all three
+      # branches in the same file whose summary said `"merged": 0,
+      # "conflicted": 3` — measured in a seat-shaped clone on 2026-10-24. The
+      # per-branch half is the half a consumer reads.
+      if [ -n "${FAILURE_WHY[$num]:-}" ]; then
+        printf '    { "pr": %s, "branch": "%s", "result": "tool_failure", "conflictedFiles": [], "why": "%s" }' \
+          "$num" "$branch" "$(echo "${FAILURE_WHY[$num]}" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+      elif [ -n "${CONFLICT_FILES[$num]:-}" ]; then
         files=$(echo "${CONFLICT_FILES[$num]}" | tr -s ' ' | sed 's/ $//' \
           | awk '{for(i=1;i<=NF;i++) printf "%s\"%s\"", (i>1?", ":""), $i}')
         printf '    { "pr": %s, "branch": "%s", "result": "conflict", "conflictedFiles": [%s] }' \
@@ -254,7 +303,8 @@ if [ -n "$JSON_OUT" ]; then
       "$(grep -c '^### ' "$WORKTREE/docs/ideas.md" 2>/dev/null || echo 0)" "$MARKERS"
     printf '  "suites": { "ursaMajorTypecheck": "%s", "ursaMajorTest": "%s", "ursaMinorBuild": "%s" },\n' \
       "$TYPES_RESULT" "$MAJOR_RESULT" "$MINOR_RESULT"
-    printf '  "merged": %s,\n  "conflicted": %s,\n' "${#OK[@]}" "${#CONFLICTED[@]}"
+    printf '  "merged": %s,\n  "conflicted": %s,\n  "toolFailures": %s,\n' \
+      "${#OK[@]}" "${#CONFLICTED[@]}" "${#FAILURES[@]}"
     printf '  "green": %s\n}\n' "$([ $FAILED = 0 ] && echo true || echo false)"
   } > "$JSON_OUT"
   node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$JSON_OUT" \
@@ -273,7 +323,9 @@ if [ -n "$REPORT" ]; then
     echo "|---|---|---|---|"
     for row in "${PAIRS[@]}"; do
       num=${row%% *}; branch=${row#* }
-      if [ -n "${CONFLICT_FILES[$num]:-}" ]; then
+      if [ -n "${FAILURE_WHY[$num]:-}" ]; then
+        echo "| #$num | \`$branch\` | tool failure, never compared | ${FAILURE_WHY[$num]} |"
+      elif [ -n "${CONFLICT_FILES[$num]:-}" ]; then
         echo "| #$num | \`$branch\` | conflict | ${CONFLICT_FILES[$num]} |"
       else
         echo "| #$num | \`$branch\` | merged | — |"

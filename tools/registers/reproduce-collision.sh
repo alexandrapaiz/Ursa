@@ -20,6 +20,25 @@
 # Requires: git, python3, node, and the two PR refs fetched. It fetches them.
 set -uo pipefail
 root="$(git rev-parse --show-toplevel)"
+
+# The clone a seat is given is shallow and single-branch, and in it the
+# merge-base below prints NOTHING and exits non-zero without stopping this
+# script, because `set -e` is deliberately absent. `$base_commit` then becomes
+# the empty string, `"$base_commit:$reg"` becomes `":$reg"`, and git reads that
+# as stage 0 of the INDEX and exits 0. So the base of this three-way comparison
+# silently becomes the run current copy of the register instead of the commit
+# both branches descend from. Measured on 2026-10-24, git 2.43.0: in a shallow
+# clone this script printed an empty base commit and every count it reported was
+# still plausible, because this branch happens not to touch docs/agents/incidents.md
+# and the index copy happened to equal the base copy. One appended entry breaks
+# that coincidence and every number shifts by one at exit 0: base 35 -> 36,
+# ours 37 -> 38, theirs 42 -> 43, union 44 -> 45. The run own uncommitted entry
+# is then counted on BOTH sides of a merge this script reports as a
+# reproduction of two other seats collision. docs/standards/lessons.md L-A77.
+bash "$root/tools/ensure-full-clone.sh" --quiet || {
+  echo "refusing to reproduce anything from an incomplete clone; see the error above" >&2
+  exit 2
+}
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 reg="docs/agents/incidents.md"
@@ -32,6 +51,14 @@ git -C "$root" fetch -q origin 'refs/pull/301/head:refs/prs/301' 'refs/pull/302/
 # and #301 would appear to add nothing. The ancestor all three share is the
 # commit at which neither seat's entries existed yet.
 base_commit="$(git -C "$root" merge-base origin/main refs/prs/301)"
+# Checked before use, not after. An empty substitution here does not make the
+# next command fail; it makes it succeed on a different input.
+[ -n "$base_commit" ] || {
+  echo "ABORT: git merge-base origin/main refs/prs/301 printed nothing, so there is no" >&2
+  echo "       common ancestor in this clone. Every number below would be computed against" >&2
+  echo "       the index copy of $reg rather than against the base commit, at exit 0." >&2
+  exit 2
+}
 echo "   base commit: $base_commit"
 
 git -C "$root" show "$base_commit:$reg" > "$work/base.md"

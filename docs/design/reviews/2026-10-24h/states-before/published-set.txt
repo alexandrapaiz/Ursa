@@ -1,0 +1,10 @@
+the published set view at http://127.0.0.1:4971/fixtures/site-04/, frozen
+
+phone  390x844  ->  states-before/published-set-phone.png
+tablet  820x1180  ->  states-before/published-set-tablet.png
+desktop  1440x900  ->  states-before/published-set-desktop.png
+  bar 960px wide, 942px of it painted, 18px of track left showing
+  segment 1  w= 388px  rgb(92,110,140)  3.99:1 against the night
+  segment 2  w= 226px  rgb(48,57,75)  1.78:1 against the night
+  segment 3  w= 327px  rgb(29,31,37)  1.25:1 against the night
+  track       rgb(2,3,8)  1.00:1 against the night

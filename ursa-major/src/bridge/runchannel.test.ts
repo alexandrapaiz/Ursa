@@ -45,7 +45,15 @@ async function bridge() {
     // file. See the `Launcher` doc comment in ./index for the measurement
     // that made this necessary: the three tests below that take the allow
     // branch used to wait on `npx tsx ... run` and cost 7.48s, 5.64s and
-    // 5.07s against a 5s timeout.
+    // 5.07s.
+    //
+    // Reason restated 2026-10-24, when `vitest.config.ts` raised testTimeout
+    // from the 5,000 ms default to 20,000 ms: those three figures no longer
+    // exceed the limit, so the limit is no longer why the stub is here. The
+    // reason that survives is cost. Three tests about CORS should not each
+    // pay seven seconds to resolve a repository they make no assertion
+    // about. Keeping the old sentence would have left the next reader
+    // comparing 7.48s against a 5s limit that is not the limit any more.
     launch: async (projectPath) => { launched.push(projectPath); return 'resolved 1 episode, wrote 1 record' },
     log: (l) => logs.push(l),
   })

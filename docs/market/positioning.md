@@ -569,3 +569,28 @@ Major itself.
   outcome record's content. No pricing recommendation made; the $10/$30
   tiers remain out of scope per this file's opening note (Ursa Minor
   has no per-unit consumer price to test).
+- 2026-10-25 (event-driven, message) — recorded a real pricing and
+  packaging move at a Category 3 incumbent (Zep cut its entry price and
+  deprecated free self-hosting) and read it as evidence against
+  complacency rather than for it. No pricing recommendation made; still
+  no per-unit anchor for Minor's $10/$30 question.
+
+## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
+
+Zep deprecated its self-hosted Community Edition this run's observation
+window and restructured Zep Cloud's tiers at the same time: free
+dropped from 10,000 credits/month to 1,000, and the paid tier that used
+to start at $125/mo was replaced by a $25/mo "Flex" tier with every
+feature available at every tier, volume being the only thing gated
+(docs/market/landscape.md, Zep entry). Read against Major's Category 3
+position: this moves in the direction that argues against complacency
+about "memory is free and good enough already," not toward it. A
+developer-facing incumbent cutting its entry price five-to-one while
+making free self-hosting harder reads as pressure on its own margins,
+not confidence that the current free tier already satisfies demand.
+It is still not a comp for Major, which is free to the end user by
+design and sells nothing at any tier (CLAUDE.md §3) — Zep's move has
+no effect on the $10/$30 question, which is Minor's, not Major's, and
+which this file has had no per-unit anchor to test since 2026-09-26.
+Flagging the move because the charter asks this file to carry pricing
+moves as they happen, not because it changes a recommendation.
