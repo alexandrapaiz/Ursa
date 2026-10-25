@@ -508,6 +508,19 @@
           "subject": "Make the generated-artifact ritual one command: npm run regen"
         }
       ]
+    },
+    {
+      "digest": "8eafe22f58d78a07",
+      "sha256": "8eafe22f58d78a078ae517aff4df5024016f7d21474863e992c64eaf52ab7916",
+      "blob": "5419b960b5dab5cda2102180059c6db0d4637e02",
+      "bytes": 302684,
+      "introducedBy": [
+        {
+          "commit": "64953b1c654b9331c88bb7f89a9fa00abeaa4ec7",
+          "date": "2026-10-24T23:16:53.000Z",
+          "subject": "a test per drop reason, and the shipped bundle rebuilt"
+        }
+      ]
     }
   ]
 }
