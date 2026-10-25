@@ -10997,3 +10997,85 @@ read and the files were available to read directly.
   after name-based searches had not.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-25 (skill, twenty-third run) — #423 was mergeable for sixteen hours, and what un-merged it was a thirty-seven-minute merge window, not the merge driver
+
+- Trigger: a handoff from the PM reading #423's red check as the ledger
+  merge driver defeating every local merge, on the reasoning that GitHub's
+  server-side preview does not run a repository's drivers, so "the same two
+  tail appends will keep showing as a conflict however many times you merge
+  main locally".
+- What: the first half of that is true and the conclusion does not follow,
+  and the difference decides what the next run does. A pushed merge commit
+  bakes its resolution into a tree, so GitHub never needs the driver and
+  never runs it. Measured on the commits themselves: the twenty-second run
+  merged main at #413 and pushed at 2026-10-25T03:21:54Z, and
+  `git rev-list --count 1129ca1..e3f14d9` is 0, so main was contained and no
+  conflict was computable against it. The branch then stayed clean until
+  2026-10-25T19:06:26-04:00, when #420 landed. Between 19:06 and 19:43 that
+  evening the owner merged nine pull requests in thirty-seven minutes, and
+  five of the nine appended to `docs/ideas.md`. So merging main is not
+  futile, it is perishable, and a stack that waits sixteen hours for a
+  merge window will be re-conflicted by the window itself. Every seat that
+  re-merges before a window pays again after it.
+- First step: drain the ledger-conflicting stacks inside the merge window
+  rather than ahead of it, or merge the oldest stack first and let the nine
+  newer branches absorb it, since they are the ones with one entry to carry
+  rather than fifty commits.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-third run) — docs/agents/merge-order.md reports CLEAN for the branch GitHub reports CONFLICTING, and the precondition it prints in bold is what makes it unable to predict the button
+
+- Trigger: that file's conflict table lists #423 as CLEAN by
+  `git merge-tree --write-tree`, and the same file requires in bold that
+  "both of this repository's merge drivers registered" before any verdict is
+  taken, on pain of every verdict below being false.
+- What: both verdicts are correct and they answer different questions, which
+  is why nobody could reconcile them. Measured today on the identical
+  commits. With the drivers registered, `git merge-tree --write-tree
+  origin/main 1129ca1` exits 0 and the ledger driver reports 15 blocks taken
+  from the other branch. With `merge.ledger.driver` and
+  `merge.register.driver` emptied, the same command on the same commits
+  exits 1 and stages three `docs/ideas.md` blobs. Drivers-on answers "can a
+  seat resolve this without a person", and drivers-off answers "will the
+  owner's green button work", because the server has no clone to register a
+  driver in, which is the property `tools/ledger/probe-server-merge.sh`
+  exists to measure. The table answers the first question, and the owner and
+  the PM read it to decide the second. The PM read GitHub, saw the opposite
+  of the table, and reasonably concluded the driver was defeating the merge.
+- First step: give the merge-order conflict table two columns, drivers-on
+  and drivers-off, and make the owner-facing verdict the drivers-off one,
+  since that is the merge the button performs. This is the ExO seat's file,
+  so it is a proposal rather than a diff.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-third run) — A seat's clone arrives shallow, and the two ancestry commands this charter prescribes then return wrong answers with no error
+
+- Trigger: this run's first measurement. `git merge-base HEAD origin/main`
+  exited 1 and printed nothing, and `git rev-list --count HEAD..origin/main`
+  printed 1. After `git fetch --unshallow` the same two commands returned
+  e3f14d9 and 9. Nothing in between changed except the depth of the clone.
+- What: a shallow clone truncates history at a graft boundary, and the
+  commands that walk across it fail by answering rather than by erroring.
+  Reproduced from scratch to be sure it is the depth and not this clone:
+  `git clone --depth 1 --no-single-branch` of this repository, then
+  `git merge-base <branch> origin/main` exits 1 with empty output, and
+  `git rev-list --count <branch>..origin/main` reports 1 where the true
+  answer is 0. Both readings are the dangerous direction. Exit 1 from
+  merge-base reads as "no common ancestor", and a count of 1 reads as "main
+  is ahead of this branch" when main is fully contained in it. The charter's
+  own rule for reading a seat's open pull requests prescribes
+  `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` to decide
+  whether an older branch is already contained, which is exactly the
+  question a shallow clone answers wrongly, and a wrong answer there sends
+  a seat to rebuild work it already has. `docs/agents/merge-order.md`
+  already unshallows as its §0 and says so, so the knowledge exists in one
+  seat's file and in no charter.
+- First step: put `git fetch --unshallow` and the widened
+  `remote.origin.fetch` next to the ancestry command in the org rule itself,
+  so every seat that is told to run the check is told what the check needs,
+  rather than one seat knowing it in its own window notes.
+- Cost: $0.
+- Status: proposed
