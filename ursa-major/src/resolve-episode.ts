@@ -36,7 +36,7 @@ const TEXT_EXTS = new Set([
   '.md', '.mdx', '.txt', '.tex', '.json', '.yml', '.yaml', '.toml', '.sql',
 ])
 const SKIP_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'])
-const MAX_BLOB_CHARS = 300_000
+export const MAX_BLOB_CHARS = 300_000
 
 /**
  * The episode's touched paths this run would read at all.

@@ -1,0 +1,2 @@
+engineer 2026-10-25 (hook)
+run opened; branch stacked on PR #406; item not yet selected

@@ -37,6 +37,18 @@
 // on any repository running agent seats of its own. Fixed in
 // `src/ci/run.ts` and `action.yml`, pinned in the last describe block
 // below.
+//
+// A seventh was found on 2026-10-25, by the fixture drift 5 had already
+// built. `distantFixture` at `--max-pair-distance 2` is a history where
+// a generation is followed by a human edit of the same file and the
+// distance bound abandons the pairing, and the two launches did not
+// disagree about any record there, because both correctly wrote none.
+// They disagreed about what they SAID. `ursa run` named the abandonment;
+// `ursa ci` called `findCommitPairs`, discarded the identical tally, and
+// posted a comment asserting "no commit here carried an agent marker that
+// a later human commit then edited", which that history falsifies in
+// every clause. Fixed in `pairRefusals` (src/launch.ts), read by both
+// surfaces, pinned in the drift 7 block below.
 
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -46,7 +58,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
-import { clearsSizeFloor } from './launch'
+import { clearsSizeFloor, keepRecord, newDroppedUnits, pairRefusals } from './launch'
 import { findCommitPairsWithDiagnostics, resolvePairingBounds } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
@@ -234,6 +246,13 @@ async function bothLaunches(
   ciExitCode: number
   localExitCode: number
   ciComment: string
+  /**
+   * What the local launch printed. Captured rather than discarded since
+   * 2026-10-24, because drift 6 is a divergence in what the two launches
+   * SAY about the same history, which a comparison of records cannot see:
+   * both launches wrote nothing, correctly, and only one of them said why.
+   */
+  localOutput: string
 }> {
   const head = git(repo, ['rev-parse', 'HEAD'])
   const base = git(repo, ['rev-parse', baseRef])
@@ -257,7 +276,8 @@ async function bothLaunches(
 
   const realLog = console.log
   const realError = console.error
-  console.log = () => {}
+  const printed: string[] = []
+  console.log = (...a: unknown[]) => { printed.push(a.map(String).join(' ')) }
   console.error = () => {}
   let localExitCode: number
   try {
@@ -278,8 +298,102 @@ async function bothLaunches(
   return {
     ci, local: recordsOnDisk(repo), ciExitCode: ciResult.exitCode, localExitCode,
     ciComment: ciResult.comment ?? '',
+    localOutput: printed.join('\n'),
   }
 }
+
+describe('both launches say which bound dropped a work unit', () => {
+  // Drift 6, found 2026-10-24. Every other entry in this file is a drift
+  // where the local launch was ahead; this is the one where the runner
+  // was. `src/ci/run.ts` has counted `unresolvable` and `belowMinChars`
+  // since 2026-10-08 and puts them in the pull-request comment, and
+  // `src/bin/ursa.ts` counted neither, so the launch a person types was
+  // the only one that could not say which flag to move.
+  //
+  // The tally is now in `src/launch.ts` and the wording is not, which is
+  // deliberate: a terminal and a markdown comment are different surfaces.
+  // So what this block pins is the two things that would actually break a
+  // reader. The two launches must agree on the NUMBER of units dropped
+  // and on WHICH reason dropped them, and both must name the same flag.
+  it('agrees on the count and the reason, and both name --min-chars', async () => {
+    const repo = editedFixture()
+    // A floor no fixture clears, so the drop is certain and is the floor
+    // rather than anything about the history.
+    const { ci, local, ciComment, localOutput } = await bothLaunches(repo, 100_000)
+
+    // Both wrote nothing, which is the state in which the two launches
+    // used to be indistinguishable and are now not.
+    expect([...ci.keys()]).toEqual([])
+    expect([...local.keys()]).toEqual([])
+
+    // One unit found on both sides, none recorded on either.
+    expect(ciComment).toContain('1 work unit was found, and it did not become a record.')
+    expect(localOutput).toContain('1 work unit found, 0 resolved into records.')
+    expect(localOutput).toContain('1 work unit was found and not recorded')
+
+    // The same reason, named by both, with the same floor in it.
+    expect(ciComment).toContain('carried fewer than 100000 generated characters')
+    expect(localOutput).toContain('carried fewer than 100,000 generated characters')
+    expect(ciComment).toContain('`--min-chars` floor')
+    expect(localOutput).toContain('--min-chars floor')
+
+    // And neither blames the other reason. A launch that reported both
+    // for one unit would be printing arithmetic that cannot be true,
+    // which is the defect the abandoned-generations line was fixed for.
+    expect(ciComment).not.toContain('resolved to nothing')
+    expect(localOutput).not.toContain('resolved to nothing')
+  })
+
+  it('states the drop rule once, where both launches read it', () => {
+    const tiny = {
+      stats: { generated: { totalChars: 12 } }, exclusions: [],
+    } as unknown as OutcomeRecord
+    const big = {
+      stats: { generated: { totalChars: 4_096 } }, exclusions: [],
+    } as unknown as OutcomeRecord
+
+    const d = newDroppedUnits(200)
+    expect(keepRecord(null, 200, d)).toBe(false)
+    expect(keepRecord(tiny, 200, d)).toBe(false)
+    expect(keepRecord(big, 200, d)).toBe(true)
+    expect(d).toEqual({
+      unresolvable: 1,
+      belowMinChars: 1,
+      minChars: 200,
+      // The biggest generation side the floor rejected, which is what the
+      // local launch turns into `--min-chars 12`. `big` cleared the floor
+      // and must not appear here.
+      largestBelowFloor: 12,
+    })
+  })
+
+  it('keeps the largest rejected generation, not the last one', () => {
+    // The remedy sentence names one number for a set of dropped units, so
+    // it has to be the one that unblocks at least one of them. Taking the
+    // last would make the advice wrong whenever the units arrive in
+    // descending size, which is a plausible order and not a rare one.
+    const of = (chars: number) => ({
+      stats: { generated: { totalChars: chars } }, exclusions: [],
+    } as unknown as OutcomeRecord)
+    const d = newDroppedUnits(500)
+    for (const chars of [410, 120, 7]) keepRecord(of(chars), 500, d)
+    expect(d.belowMinChars).toBe(3)
+    expect(d.largestBelowFloor).toBe(410)
+  })
+
+  it('the exemption still wins: a refusal-only record is not counted as dropped', () => {
+    // `clearsSizeFloor` exempts a record with no generation side, and that
+    // exemption has to survive being moved behind `keepRecord`, or drift 1
+    // comes back counted instead of silent.
+    const refusalOnly = {
+      stats: { generated: { totalChars: 0 } },
+      exclusions: [{ path: 'vendor.md' }],
+    } as unknown as OutcomeRecord
+    const d = newDroppedUnits(200)
+    expect(keepRecord(refusalOnly, 200, d)).toBe(true)
+    expect(d).toEqual({ unresolvable: 0, belowMinChars: 0, minChars: 200, largestBelowFloor: 0 })
+  })
+})
 
 describe('both launches read the same declaration of who is an agent', () => {
   // The fourth drift, found on 2026-10-11 while landing `--agent-identity`
@@ -398,6 +512,143 @@ describe('both launches read the same pairing bounds', () => {
     const { diagnostics } = findCommitPairsWithDiagnostics(repo, { maxPairDistance: 2 })
     expect(diagnostics.abandoned.distance).toBe(1)
     expect(diagnostics.bounds.maxPairDistance).toBe(2)
+  })
+})
+
+describe('both launches say which pairing bound refused a generation', () => {
+  // Drift 7, found 2026-10-25. The stage above drift 6: that one was a
+  // work unit built and then refused, this one is a generation refused
+  // before any work unit existed. Both launches see it in
+  // `diagnostics.abandoned` and only one of them used to look.
+  //
+  // The fixture is drift 5's, unchanged, at the distance that abandons its
+  // one pairing. What makes it the right fixture is that the RECORDS are
+  // identical and correct on both sides, so every assertion in the rest of
+  // this file passes on it. The divergence is entirely in the prose, which
+  // is why it survived a file whose premise is comparing records.
+  const ROOT = 'HEAD~6'
+
+  it('the CI comment no longer denies the pair it refused, and names the bound', async () => {
+    const repo = distantFixture()
+    const { ci, local, ciComment, localOutput } = await bothLaunches(
+      repo, 10, [], { maxPairDistance: 2 }, ROOT,
+    )
+
+    // Neither launch wrote anything, and both are right not to. This is
+    // the state drift 6 made legible one stage lower.
+    expect([...ci.keys()]).toEqual([])
+    expect([...local.keys()]).toEqual([])
+
+    // The sentence this drift exists for. Asserted as an absence because
+    // the defect was a false claim rather than a missing one: a test that
+    // only checked the new wording was present would still pass if the old
+    // sentence were printed beside it, which is exactly the contradiction
+    // `ursa run` was printing in its own output.
+    expect(ciComment).not.toContain(
+      'no commit here carried an agent marker that a later human commit then edited',
+    )
+    expect(ciComment).toContain('commits here did carry agent markers and were followed by your edits')
+
+    // Both surfaces name the same count, the same limit, and the same flag.
+    // The wording differs on purpose; these three may not.
+    expect(ciComment).toContain('1 of those pairings was left out rather than guessed at')
+    expect(localOutput).toContain('1 generation was left out rather than guessed at')
+    expect(ciComment).toContain('within 2 commits')
+    expect(localOutput).toContain('within 2 commits')
+    expect(ciComment).toContain('--max-pair-distance')
+    expect(localOutput).toContain('--max-pair-distance')
+  })
+
+  it('the local run stops contradicting itself two paragraphs later', async () => {
+    // The same false claim as the CI comment's, on the surface that was
+    // already reporting the truth underneath it. Before this fix the one
+    // run printed both of these about one history:
+    //
+    //   ... and none of those was followed by an edit of the same file
+    //   without an agent marker.
+    //   1 generation were left out rather than guessed at: 1 found no edit
+    //   within 2 commits.
+    const repo = distantFixture()
+    const { localOutput } = await bothLaunches(repo, 10, [], { maxPairDistance: 2 }, ROOT)
+
+    expect(localOutput).not.toContain(
+      'none of those was followed by an edit of the same file without an agent marker',
+    )
+    expect(localOutput).toContain('the one that was followed by an edit of yours fell outside the bounds')
+    // And the paragraph that sends the reader to the pull-request path is
+    // withheld, because on this history the corrections ARE on this branch.
+    expect(localOutput).not.toContain('your corrections are not on this branch')
+    // The verb agrees with the count. `1 generation were` shipped until today.
+    expect(localOutput).toContain('1 generation was left out')
+    expect(localOutput).not.toContain('1 generation were left out')
+  })
+
+  it('a walk that abandoned nothing keeps the original sentence on both surfaces', async () => {
+    // The guard on the fix. `editedFixture` pairs cleanly at the default
+    // bounds, so there is no refusal to report and the unconditional
+    // sentence is a true claim about that history. A fix that rewrote the
+    // sentence whenever the window was empty would have replaced one wrong
+    // sentence with another.
+    const repo = editedFixture()
+    const { ciComment, localOutput } = await bothLaunches(repo, 100_000)
+    expect(pairRefusals(findCommitPairsWithDiagnostics(repo).diagnostics).total).toBe(0)
+    expect(ciComment).not.toContain('left out rather than guessed at')
+    expect(localOutput).not.toContain('left out rather than guessed at')
+  })
+
+  it('states the refusal tally once, where both launches read it', () => {
+    // The unit test under the two above: the order, the flags, and the one
+    // reason that has no flag. Built by hand rather than from a walk, so
+    // the contract is pinned independently of any fixture's history.
+    const refusals = pairRefusals({
+      abandoned: { distance: 3, age: 2, interposedGeneration: 1, notDescendant: 4 },
+      bounds: { maxPairDistance: 25, maxPairAgeHours: 72, maxInterposedGenerations: 0 },
+    })
+    expect(refusals.total).toBe(10)
+    // Order is part of the contract and it is not `abandoned`'s declaration
+    // order: the interposed-generation refusal comes first because raising
+    // that bound makes the walk claim a correction it can see belongs to
+    // another generation, which is the opposite of what the other two do.
+    expect(refusals.refusals.map((r) => r.bound)).toEqual([
+      'interposedGeneration', 'distance', 'age', 'notDescendant',
+    ])
+    expect(refusals.refusals.map((r) => r.flag)).toEqual([
+      '--max-interposed-generations', '--max-pair-distance', '--max-pair-age-hours', null,
+    ])
+    // `notDescendant` carries no limit because no input widens it. A null
+    // here rather than a number is what stops a surface printing one
+    // flag's name for four reasons.
+    expect(refusals.refusals.map((r) => r.limit)).toEqual([0, 25, 72, null])
+  })
+
+  it('reports only the reasons that fired, and nothing at all when none did', () => {
+    const none = pairRefusals({
+      abandoned: { distance: 0, age: 0, interposedGeneration: 0, notDescendant: 0 },
+      bounds: { maxPairDistance: 25, maxPairAgeHours: 72, maxInterposedGenerations: 0 },
+    })
+    expect(none).toEqual({ total: 0, refusals: [] })
+
+    const one = pairRefusals({
+      abandoned: { distance: 0, age: 7, interposedGeneration: 0, notDescendant: 0 },
+      bounds: { maxPairDistance: 25, maxPairAgeHours: 72, maxInterposedGenerations: 0 },
+    })
+    expect(one.total).toBe(7)
+    expect(one.refusals).toEqual([
+      { bound: 'age', count: 7, flag: '--max-pair-age-hours', limit: 72 },
+    ])
+  })
+
+  it('the CI launch stamps the bounds its own walk used, not a second reading of them', async () => {
+    // What changed structurally: `src/ci/run.ts` called `findCommitPairs`
+    // and `resolvePairingBounds` separately, so the number stamped into a
+    // record came from a different call than the walk that produced it.
+    // They agreed, and nothing made them agree. The stamp now reads
+    // `diagnostics.bounds`, which is the walk's own object.
+    const repo = distantFixture()
+    const { ci, local } = await bothLaunches(repo, 10, [], { maxPairDistance: 20 }, ROOT)
+    const walked = findCommitPairsWithDiagnostics(repo, { maxPairDistance: 20 }).diagnostics.bounds
+    expect([...ci.values()][0].task.pairedBy).toEqual(walked)
+    expect([...local.values()][0].task.pairedBy).toEqual(walked)
   })
 })
 
