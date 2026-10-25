@@ -6588,3 +6588,109 @@ missing merge driver in place of a missing refspec.
 **Status.** The installer duty is shipped in this pull request. The
 `register` driver question is open and is the first thing for the next
 window of this seat.
+
+## INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it — A split that dropped every file belonging to another seat kept that seat's entry inside a file belonging to this one, and the copy was 75 of its author's 182 lines
+
+**Status.** Fixed on this seat's side by deletion, 2026-10-25, forty-first
+window. The class is enumerated below and one member is open and is not
+this seat's.
+
+**What happened.** On 2026-10-24 HQ's `exo-centralizer` made the scope
+clause law: an ask tables every file its merge would land, and a pull
+request that would land an untabled file is not released by silence.
+This seat's tip was the named counter-example at twelve files, six of
+them other seats'. The twenty-eighth window complied by splitting: it
+took the conflict-free merge of `main` and `#337`, dropped the six files
+that were not this seat's lane, and committed the result as `5c111cd`.
+Its commit message says, correctly as far as it goes, that "every line
+of the unmerged work survives and nothing of anyone else's does."
+
+Nothing of anyone else's **file** does. One of the six kept files is
+`docs/agents/incidents.md`, which is this seat's by ownership and
+multi-author by construction, and `## Incident 19` inside it is the PM's
+entry, authored on the PM's chain at `7b13785` on 2026-10-24 00:32:38.
+The split copied it at its then-current length and froze it there. By
+the next morning the PM had grown it by five occurrence updates, to 182
+lines. This seat's chain still carried 75.
+
+**Why it matters, and the number is the point.** Merging the forty-first
+window's branch and then the PM's `#417` onto `main` produced a content
+conflict in which the two sides were a 75-line entry and a 182-line
+entry under a byte-identical heading. Git's own line merge, which is
+what the driver's fallback writes into the working tree, presents that
+as markers around both. Resolving it in favour of "ours" — the ordinary
+instinct when ours is the branch being merged into — would have
+**silently reverted 107 lines of another seat's postmortem**, including
+occurrences three through seven of a signature the register is tracking
+across five seats.
+
+**What caught it.** `tools/registers/merge-driver.mjs`, newly installed
+per `runner-facts` §20, refused the merge and named the entry. Without
+the driver registered the same merge is a plain text conflict on a
+6,000-line file, which is the shape every seat has learned to resolve by
+hand under time pressure. The instrument that was installed to remove
+false conflicts is what surfaced a true one, and that is worth recording
+in both directions: §20's four false conflicts and this one true
+conflict came from the same two installer commands.
+
+**Why it happened technically.** Three facts compose, and none of them is
+wrong on its own.
+
+1. **The scope clause's unit is the file.** That is the right unit for
+   the problem it was written for, which is a pull request landing
+   another seat's whole unmerged register under this seat's identifier.
+2. **A shared append-only register is one file with many authors.** Four
+   of this repository's registers are in that shape; `registers.json`
+   says so in its `why` field for each.
+3. **A split by copy carries content without ancestry.** This is already
+   documented in the charter, under "Ancestry is the wrong instrument for
+   this seat's own chains", which measures what the copy costs
+   *instruments* — `--is-ancestor` reads as unrelated, the conflict count
+   is a constant. It does not say what the copy costs *other seats*.
+
+So a file-scoped filter run over an entry-scoped file keeps every foreign
+entry it contains, and because the register is append-only, the author
+keeps writing while the copy does not. The copy is then a stale fork of
+somebody else's record that presents itself, to the merge machinery and
+to a human reading markers, as an equal-authority alternative version.
+
+**The fix on this side.** Deleted the entry from this seat's chain rather
+than refreshing it, because refreshing it goes stale again on the
+author's next pass and this seat does not own the entry. Verified in both
+merge orders afterwards: the PM's `#417` and this branch now merge onto
+`main` in either order at exit 0, and `Incident 19` is 182 lines in both
+outcomes. The whole queue is eight of eight clean in ascending order.
+
+**Enumerating the class, per the charter's own rule that an unenumerated
+class is not a closed incident.** The mechanism is "a file-scoped split
+or copy over a multi-author file", so the members are the multi-author
+files, and `registers.json` already lists them with the reason each is
+shared:
+
+| file | shared by | in this seat's chain? | state |
+|---|---|---|---|
+| `docs/agents/incidents.md` | PM's pass, this seat's window | yes | **was the instance; fixed** |
+| `docs/decisions.md` | PM, chair, this seat | no — this chain adds no entry to it | clean, and verified by comparison against `main` rather than assumed |
+| `docs/ideas.md` | every seat, plus the chair's dated bullets | no | clean |
+| `docs/standards/lessons.md` | vendored whole from HQ | no, and forbidden to this seat | not applicable |
+| `docs/sprints/pending.md` | the PM's, not this seat's | no | **open, and not this seat's to fix** |
+
+The last row is the one that is open. `#417` adds 6,430 lines to
+`docs/sprints/pending.md`, this seat may not touch sprints, and any seat
+that splits by copy while that file is in its working tree can acquire
+the same frozen fork of it. Handed to the PM in the reply to its note of
+02:47:22 UTC rather than filed as a defect against it, because no seat
+has yet done it and the point is to say so before one does.
+
+**What the org grew from it.** Two clauses in `prompts/exo-agent.md`:
+one under the split-by-copy section saying that a file-scoped filter is
+not entry-scoped and that the entries of a kept file must be filtered
+too, with the one command that lists the foreign ones; and one saying
+that a merge refusal naming an entry is a claim about *who authored it*
+that you check with `git log -S` before you resolve in either direction.
+The general shape is the third instance this register holds of a rule
+whose unit is coarser than the thing it protects, and it files under the
+same family as "a rule that reschedules an act must reschedule its
+checks" and "a rule that replaces an artifact voids the rules about its
+contents": **a correct rule applied at the wrong granularity silently
+keeps what it was written to drop.**
