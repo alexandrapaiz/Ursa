@@ -302,8 +302,8 @@
   },
   "adjudicating-uncertain-spans/E3": {
     "verdict": "supports",
-    "read": "2026-10-18",
-    "lines": "4047645b9fcbfa4e",
+    "read": "2026-10-25",
+    "lines": "def7bb9167cb4703",
     "what": "c9c70705529423fb",
     "passages": "cc3b90324867e689"
   },
@@ -645,10 +645,10 @@
   },
   "clearing-a-record-for-release/E19": {
     "verdict": "supports",
-    "read": "2026-10-24",
+    "read": "2026-10-25",
     "lines": "8cc12992a166cce6",
     "what": "d626509331d3bf42",
-    "passages": "71a9441544fdb41f"
+    "passages": "017b29ff4b45159c"
   },
   "clearing-a-record-for-release/E2": {
     "verdict": "supports",
@@ -679,25 +679,25 @@
     "passages": "b0b51fc62fc1e526"
   },
   "clearing-a-record-for-release/E23": {
-    "verdict": "widened",
-    "read": "2026-10-24",
-    "lines": "0b52ac8510a07464",
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "af428b63e08f630b",
     "what": "9c1ba82e03dc6b47",
     "passages": "3f0e5a7b9ade4f6c"
   },
   "clearing-a-record-for-release/E24": {
     "verdict": "widened",
-    "read": "2026-10-24",
-    "lines": "d3e003319f6beffc",
-    "what": "2a3b8855cc27e010",
-    "passages": "fe3d6e4a3552f8f6"
+    "read": "2026-10-25",
+    "lines": "adb5fc192eaf2995",
+    "what": "2080451f32f47501",
+    "passages": "337513dbe414f866"
   },
   "clearing-a-record-for-release/E25": {
     "verdict": "widened",
-    "read": "2026-10-24",
-    "lines": "1bb6d255b4ee9d26",
-    "what": "10c5b1a2c76e4d4b",
-    "passages": "fa2daab15d557c93"
+    "read": "2026-10-25",
+    "lines": "1178797b29d743ac",
+    "what": "1451ba8f05870d44",
+    "passages": "19f0b271c662214e"
   },
   "clearing-a-record-for-release/E26": {
     "verdict": "widened",
@@ -764,10 +764,10 @@
   },
   "clearing-a-record-for-release/E34": {
     "verdict": "widened",
-    "read": "2026-10-24",
-    "lines": "6ec1b39a2b4c495a",
+    "read": "2026-10-25",
+    "lines": "f07f69e6ef5d4e9a",
     "what": "ea1251b13fbf27c5",
-    "passages": "be55645ada86ffb0"
+    "passages": "ec3c189ced028fe4"
   },
   "clearing-a-record-for-release/E35": {
     "verdict": "widened",
@@ -1141,9 +1141,9 @@
     "passages": "c468734c4145430d"
   },
   "quoting-a-number-from-an-outcome-record/E10": {
-    "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "264a6be6ff783444",
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "8782ef70cbbc71ab",
     "what": "410fbb74a55929a3",
     "passages": "d080c24d2c99c9cd"
   },
@@ -1156,10 +1156,10 @@
   },
   "quoting-a-number-from-an-outcome-record/E12": {
     "verdict": "supports",
-    "read": "2026-10-18",
+    "read": "2026-10-25",
     "lines": "1f6a5d1412b5c1c3",
     "what": "d71491e4a3ce5dbc",
-    "passages": "6e3293742cf087c9"
+    "passages": "a40ee30208436023"
   },
   "quoting-a-number-from-an-outcome-record/E13": {
     "verdict": "supports",
@@ -1190,9 +1190,9 @@
     "passages": "ce8bf52854e5dceb"
   },
   "quoting-a-number-from-an-outcome-record/E17": {
-    "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "4f25eaefc7727326",
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "c357fa5b68c4dc52",
     "what": "6af17df7eba675c7",
     "passages": "635c2749d30b41fc"
   },
@@ -1219,8 +1219,8 @@
   },
   "quoting-a-number-from-an-outcome-record/E20": {
     "verdict": "supports",
-    "read": "2026-10-18",
-    "lines": "3fff434a6de4fd10",
+    "read": "2026-10-25",
+    "lines": "5c946cd33bf968ce",
     "what": "84d55d11e3450a62",
     "passages": "f14b34ca0fd6eb1b"
   },
@@ -1344,9 +1344,9 @@
     "passages": "2b072d2d04368ae4"
   },
   "quoting-a-number-from-an-outcome-record/E8": {
-    "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "c934bf41e91b8995",
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "bef19b2acd95e892",
     "what": "afec5dcb536dc9b9",
     "passages": "23ee12b1875a18d2"
   },
@@ -1428,9 +1428,9 @@
     "passages": "f28438286bdbd9f4"
   },
   "running-an-outcome-record-trial/E19": {
-    "verdict": "wrong",
-    "read": "2026-10-18",
-    "lines": "fcb46315b66f02d2",
+    "verdict": "widened",
+    "read": "2026-10-25",
+    "lines": "b4fc3dc4b5253b50",
     "what": "d5ce14c044a781d7",
     "passages": "81641dcf09a68469"
   },

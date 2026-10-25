@@ -91,11 +91,11 @@ evidence:
     what: what `ursa consent show` prints, including the active and revoked inference counts, the erasures with what each removed, and the closing sentence that differs by consent state
     source: ursa-major/src/consent.cli.ts:86-157
   - ref: E24
-    what: revoking a scope is a stop and not an undo, and deletion of what was already sent is a request to the aggregation layer
-    source: ursa-major/src/consent.cli.ts:172-181
+    what: revoking a scope is a stop and not an undo, deletion of what was already sent is a request to the aggregation layer, and the state the scope returns to is withheld
+    source: ursa-major/src/consent.cli.ts:172-181; ursa-major/src/consent.ts:194-201
   - ref: E25
-    what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay
-    source: ursa-major/src/consent.cli.ts:184-192
+    what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay, which is six call sites filtering on the status it sets
+    source: ursa-major/src/consent.cli.ts:184-192; ursa-major/src/tuning/revoke.ts:166-174; ursa-major/src/tuning/types.ts:63-69
   - ref: E26
     what: the order disclose runs in, project then report the withholdings then audit, and that a single finding means nothing is written and the command exits 1
     source: ursa-major/src/consent.cli.ts:255-269
@@ -122,7 +122,7 @@ evidence:
     source: docs/design/consent-and-erasure.md:83-85
   - ref: E34
     what: erasure against revocation, mechanism by mechanism, and why an axiom grounded only in the erased record is deleted outright rather than tombstoned
-    source: docs/design/consent-and-erasure.md:427-438
+    source: docs/design/consent-and-erasure.md:427-438,480-487
   - ref: E35
     what: aggregate() is the reference implementation of what the ingest route owes, and the two schema defects reported rather than patched around, the missing character total and the collapsed survival scalar
     source: docs/design/consent-and-erasure.md:505-519

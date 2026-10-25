@@ -78,7 +78,7 @@ evidence:
     source: docs/agents/incidents.md:204-210
   - ref: E19
     what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
-    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:14,68-69; ursa-major/src/parse.ts:81,109-114,147-157,177
+    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:14,31,56-58,68-69; ursa-major/src/parse.ts:81,109-114,147-157,177,185-198
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
     source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52
