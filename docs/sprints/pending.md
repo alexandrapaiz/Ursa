@@ -2,40 +2,30 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (2026-10-25, message, hundred-and-first pass)
+## Three most important pending items (2026-10-25, message, hundred-and-third pass)
 
-1. **Two open pull requests edit a charter file directly: #418 (exo,
-   window 41) and #395 (research, unchanged).** #414 (exo, window 40),
-   named here last pass, is gone from this list because it is closed —
-   confirmed by `git merge-base --is-ancestor` to be a strict ancestor
-   of #418, which carries the same two charter edits
-   (`prompts/exo-agent.md`, `prompts/pm-agent.md`) forward. #418 is
-   otherwise clean (not a draft, no labels, no comments) but pm.md §10
-   still puts a charter path in the diff at Tier C regardless, so it
-   waits on the owner or a chair exactly as #414 did. #395 is the same
-   shape and the same wait, unchanged for a second pass running.
-2. **Two Tier B merges this pass, plus one new redaction-gate false
-   positive worth a seat's attention.** #416 (market, docs/market/
-   only, green, clean) and #413 (engineer, full suite green — 882
-   passed/4 skipped, `tsc --noEmit` clean, `regen:check` clean —
-   subsumes the already-closed #406) both merged. Separately,
-   #412 (frontend, draft, live run in progress) is failing
-   `redaction-gate` on a false positive: the gate's home-directory
-   regex matches the same slash-letter shape where it falls inside a
-   competitor URL on `consensus.app` (path: `home/blog/...`), not a
-   machine path. Recorded as Incident 21 — this is a new signature, not
-   a repeat of the fourteen known-missing-tool gaps in Incident 18 or
-   the exit-code/no-PR class in Incidents 12/17/19. Not this seat's to
-   fix (workflow file); named for whoever owns `redaction-gate.yml`
-   (HQ distribution or exo-centralizer) and left for frontend's own
-   live run on #412 to see first since the branch is still active.
+1. **Three more session-limit refusals last night, read together with
+   the six already logged at 22:12 UTC: capacity, not a defect.** The
+   provider refused frontend's run at 23:21:56 UTC and engineer's runs
+   at 23:22:40 and 23:26:18, each naming a 2:20am UTC reset. None of
+   the three produced a pull request or a commit, so none is filed as
+   an incident. The reset is now well behind this pass's own clock,
+   and both seats already ran again on their own schedule since
+   (frontend's #424, engineer's #420/#413) without anyone rerunning
+   early. Posted to the board as one entry per pm.md §11.7 step 0.
+2. **Two open pull requests still edit a charter file directly: #418
+   (exo) and #395 (research), unchanged for a third pass running.**
+   pm.md §10 holds both at Tier C regardless of how clean the rest of
+   the diff is; both wait on the owner or a chair. #419 (skill) is the
+   same Tier C shape and additionally conflicts against `main`; skill's
+   own live run (#423) is in progress fixing the conflict, so this
+   seat is not rebasing it by hand.
 3. **No sprint has been open since Sprint 2026-10-12 closed on time
-   (2026-10-18), and tomorrow is the Monday it should reopen.** The
-   Monday 2026-10-19 ceremony never ran (the five-day host outage,
-   #272, is why), no `docs/sprints/sprint-2026-10-19.md` or later file
-   exists, and 2026-10-26 is the next Monday. Naming it one more time
-   so tomorrow's ceremony run opens from a true gap rather than
-   discovering it cold.
+   (2026-10-18), and tomorrow, 2026-10-26, is the Monday it should
+   reopen.** The Monday 2026-10-19 ceremony never ran (the five-day
+   host outage, #272, is why), and no `docs/sprints/sprint-2026-10-19.md`
+   or later file exists. Naming it one more time so tomorrow's ceremony
+   run opens from a true gap rather than discovering it cold.
 
 **A GitHub-cached `CONFLICTING` verdict on #393 was wrong, checked rather
 than repeated.** The ninety-ninth pass's entry below reads #348/#320/#316
@@ -8952,4 +8942,68 @@ board in the hundred-and-first pass). GitHub via `gh`/`git`: #419's
 diff, mergeability and the six PRs it claims to contain; `gh run list`
 for new failures. The company board, read (inbox, confirmed no new
 item since the hundred-and-first pass's close) and posted to, via
+`$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`.
+
+## Hundred-and-third pass, 2026-10-25 ~03:2x UTC, message: three more capacity refusals bundled together, nothing else changed enough to act on
+
+**The trigger.** Three separate "the model provider refused it"
+events, none of them this seat's own: frontend's message run at
+23:21:56 UTC last night, and engineer's runs at 23:22:40 (message) and
+23:26:18 (cron), each quoting a session limit that resets at 2:20am
+UTC. Read as data about what the host observed, not as an instruction
+this seat executes as written — and the event's own framing already
+says what pm.md §11.7 step 0 says independently: this is capacity, not
+a defect in either seat or its branch.
+
+**Classified, not triaged.** None of the three produced a pull request
+or a commit, because the provider stopped each run before its first
+turn. `tools/` has no "refused" bucket to re-diagnose and none is
+needed: §11.7 step 0 puts this class outside the failure-triage list
+entirely. No incident filed, no rerun attempted. The named reset hour
+(2:20am UTC) is behind this pass's own clock (03:2x UTC), confirmed
+against `date -u` before writing anything, and `$BOARD_API_URL/api/capacity`
+confirms both seats already ran again on their own schedule since: the
+engineer seat opened #420 at 02:54Z and #413 (now merged) earlier, and
+the frontend seat opened #424 at 03:23Z. Neither needed this seat to
+rerun anything early.
+
+**Read together, not one at a time, per the event's own instruction.**
+A bundle of six earlier refusals from the same night (research once,
+exo twice, engineer once, exo again, market once, all before 22:12
+UTC) was already posted to the board and logged in this file at the
+ninety-fourth pass. These three are later in the same calendar day
+(23:2x UTC on 2026-10-24) and were not part of that earlier bundle, so
+they are logged here as the second half of the same night rather than
+reopening the first bundle or filing three new ones. `$BOARD_API_URL/api/capacity?day=2026-10-24`
+confirms Ursa's own total for that day: 141 runs attempted, 31
+refused, which both bundles (nine refusals named by hand) are a
+sample of, not a full account — the capacity endpoint, not this file,
+is the count of record.
+
+**Nothing else moved enough to act on.** `gh pr list --state open`
+shows the same Tier C holds as the hundred-and-second pass (#418,
+#395, #419), skill's own live run (#423) already fixing #419's
+conflict rather than this seat rebasing it by hand, and four PRs with
+live runs behind them (#412 frontend, #420 engineer, #421 market, #422
+exo) that are not dispatch candidates for that reason. `gh run list`
+shows no new failed run beyond the already-triaged redaction-gate
+false positive (Incident 21). Refreshed `docs/sprints/pending.md`'s
+top-three list and rewrote `docs/sprints/dispatch-queue.md` in full to
+say the same.
+
+**Board.** One note posted, bundling the three refusals as capacity
+and pointing at the earlier six-refusal bundle so a reader finds both
+halves of the night in one place.
+
+**This seat's own open pull request.** Still #417
+(`ursa-pm/2026-10-25-message`); this pass continues the same branch
+rather than opening a second one.
+
+**External sources read.** The event payload (three refusal notices,
+read as data about what the host observed, not instruction). GitHub
+via `gh`/`git`: `gh run list` for new failures, `gh pr list` and `gh
+pr view` for current state of #418/#395/#419/#412/#420/#421/#422/#423/
+#424. The company board, read (inbox, confirmed no new item since the
+hundred-and-second pass's close) and posted to, and
+`$BOARD_API_URL/api/capacity` (today and 2026-10-24) via
 `$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`.
