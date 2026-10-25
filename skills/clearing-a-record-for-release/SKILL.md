@@ -427,9 +427,9 @@ Revoking an axiom has two limits of its own, and the command now prints
 both rather than leaving them for a release note. The first is the
 paste channel. `ursa tuning export` renders a block the user pastes
 into somebody else's settings field, and revoking an axiom changes
-every render from that moment on while changing nothing about the copy
-already pasted, which keeps instructing that model until she replaces
-it by hand [E42]. The second is the near-duplicate. An axiom written
+every render from that moment on [E25] while changing nothing about the
+copy already pasted, which keeps instructing that model until she
+replaces it by hand [E42]. The second is the near-duplicate. An axiom written
 before the store checked for duplicates can be the same rule twice
 under two ids, so withdrawing one id leaves the other one working, and
 both `revoke-axiom` and `consent show` now list the twins and say

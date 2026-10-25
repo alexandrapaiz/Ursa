@@ -252,7 +252,10 @@ cutoff is an absolute count against a corpus that grows every time the
 tool runs, so the blind share can only grow with the dataset [E37].
 That makes it the one number here whose level in a single record is
 almost uninformative and whose movement between two records of the same
-project is the whole signal [E37]. Both of this project's trials sit at
+project is the whole signal [E34, E37]. That second sentence is the
+schema's own conclusion and not ours: E34's range states it in those
+terms, and E37's carries the monotone shape and the measured proxy
+points it rests on. Both of this project's trials sit at
 the scale where it is zero [E37], which is also why a reader who
 learned the output format from a trial transcript has never seen the
 line that reports it [E36]. Output: either an adjusted figure with its
@@ -311,8 +314,8 @@ every record written before 2026-10-14 omits it and zero is the true
 value for those records, because no descent gate ran on them and no
 segment of them could carry the fate. For `blindSpans`, every record
 written before 2026-10-24 omits it and zero is wrong but unknowable,
-because the cutoff was always suppressing tokens and nothing counted
-them [E35]. Output: before quoting either field at zero, check whether
+because the cutoff was in force in those runs and nothing counted what
+it suppressed, so the true value is unknown rather than zero [E35]. Output: before quoting either field at zero, check whether
 the record predates it, and quote "not measured" rather than zero where
 it does.
 

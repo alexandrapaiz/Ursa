@@ -697,7 +697,7 @@
     "read": "2026-10-25",
     "lines": "1178797b29d743ac",
     "what": "1451ba8f05870d44",
-    "passages": "19f0b271c662214e"
+    "passages": "dce75e1b8c43204e"
   },
   "clearing-a-record-for-release/E26": {
     "verdict": "widened",
@@ -824,6 +824,27 @@
     "lines": "5332bdd08c1dbbc5",
     "what": "d0a56b718554c003",
     "passages": "4922a488b19dabcc"
+  },
+  "clearing-a-record-for-release/E42": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "81f5c018ef38c89d",
+    "what": "d19c2a9749b21952",
+    "passages": "dce75e1b8c43204e"
+  },
+  "clearing-a-record-for-release/E43": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "6ccf2085b26d4041",
+    "what": "cc4416fae7fcd6d3",
+    "passages": "e4d0fcb9cbe63cff"
+  },
+  "clearing-a-record-for-release/E44": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "26f7ce9469f8dffe",
+    "what": "00d0a90aabc0a849",
+    "passages": "e90194962a610711"
   },
   "clearing-a-record-for-release/E5": {
     "verdict": "supports",
@@ -1314,6 +1335,41 @@
     "lines": "eb49fb64b45d0f97",
     "what": "66a124cb52f01539",
     "passages": "bafafcc9dbfc62f5"
+  },
+  "quoting-a-number-from-an-outcome-record/E33": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "1ad1afbfae414829",
+    "what": "65345f2adb6df4a8",
+    "passages": "e2dc793b7b24a0d3"
+  },
+  "quoting-a-number-from-an-outcome-record/E34": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "1f8805e047d05576",
+    "what": "17c358bf01976cfc",
+    "passages": "96274eb146457837"
+  },
+  "quoting-a-number-from-an-outcome-record/E35": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "2101c80b0e2757fc",
+    "what": "5228d0871650e294",
+    "passages": "ffe9d41555a12a4f"
+  },
+  "quoting-a-number-from-an-outcome-record/E36": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "2df22deb3a649d1d",
+    "what": "e776f72f21b25c43",
+    "passages": "f4467daaff43f5c8"
+  },
+  "quoting-a-number-from-an-outcome-record/E37": {
+    "verdict": "supports",
+    "read": "2026-10-25",
+    "lines": "4dde75c0eabfc860",
+    "what": "5995c9a54134d300",
+    "passages": "a0a0a4953e3331d0"
   },
   "quoting-a-number-from-an-outcome-record/E4": {
     "verdict": "supports",

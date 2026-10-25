@@ -9567,3 +9567,82 @@ still open, #393, needs its report written from its own diff before it
 can be readied. This branch starts at #393's tip rather than at `main`,
 per the "read your own seat's open PRs first" rule. Entries below are
 this run's.
+
+### 2026-10-25 (skill, twenty-first run) — The library was shipping a skill its own index did not list, for three runs
+
+`skills/auditing-a-detected-correction-loop/` landed in the eighteenth
+run, was in `trigger-coverage.mjs`' roster from the moment it existed,
+and passed all six of its sibling boundaries. Three runs later
+`skills/README.md` still opened with a table of six skills and an areas
+section that ended at the sixth. A reader arriving at the library could
+not find the seventh from the index, and nothing was red, because no
+guard reads the index.
+
+What makes this worth an entry rather than a quiet fix: the three guards
+this seat has built all check a skill against its own evidence or
+against its siblings, and none of them checks the library against the
+set of directories on disk. The coverage tool enumerates
+`skills/*/SKILL.md` to build its roster, so it had the right answer in
+memory while the index had the wrong one. Proposal for a later run, kept
+small on purpose: a fourth check, or a mode on the coverage tool, that
+compares the directory listing to the rows of the README table and the
+area paragraphs, and exits non-zero on a skill present in one and absent
+from the other. It is five lines of work against a failure that lasted
+three runs.
+
+### 2026-10-25 (skill, twenty-first run) — A source comment counts to three and then lists four, and the skill that cites it says four
+
+`ursa-major/src/types.ts:435` introduces the `noCandidate` field with
+"Three different things produce the same bare `no_generation_provenance`
+label, and before this field existed nothing downstream could tell them
+apart", and the bulleted list under it has four entries:
+`scored_below_floor`, `absent_from_corpus`, `df_cutoff_suppressed` and
+`empty_after_normalization`. `resolve.ts:488-507` sets four values, so
+four is the true count and the word "Three" is stale prose.
+
+Found while reading `quoting-a-number-from-an-outcome-record/E33` for
+its relevance verdict, and the verdict is `supports`: the claim the
+skill makes off that range is about `df_cutoff_suppressed` alone and is
+exact. This is for the engineer seat, because `ursa-major/` is outside
+this seat's write boundary. It is the second instance of the same genre
+this library has turned up, after the comment that has said "thirty-two
+literals" since the day it was written over a list of thirty-four, which
+suggests the genre is worth a grep rather than a fix: a count written in
+prose beside a list that a later commit extended.
+
+### 2026-10-25 (skill, twenty-first run) — Two over-attributed sentences in one skill, both invisible to the miss signal, both fixed by naming the second ref
+
+Reading the last eight unread refs turned up two sentences whose
+citation pointed at a range that does not state the claim, while a
+sibling range in the same skill states it outright.
+
+In `quoting-a-number-from-an-outcome-record`, "the one number here whose
+level in a single record is almost uninformative and whose movement
+between two records of the same project is the whole signal" was tagged
+`[E37]`. E37's range carries the monotone argument and the measured
+proxy points; the sentence itself is `types.ts:674-676`, which is inside
+E34's range and says it in those words. In
+`clearing-a-record-for-release`, "revoking an axiom changes every render
+from that moment on" was tagged `[E42]`, whose range is a single line of
+printed output about the copy already pasted. The render claim is the six
+call sites filtering on revoked status, in E25's range.
+
+Both were fixed by splitting the tag, not by widening, and that is the
+point. §5n says a sentence citing two refs divides its claim and nothing
+audits the division. These two show the failure one step earlier: a
+sentence citing *one* ref can be making two claims, and the under-cited
+half is then attributed to whichever ref happens to be in the tag. The
+mechanical signals cannot see it. Both refs rank high in the ordering for
+unrelated reasons and both `what` fields describe their ranges accurately.
+The error was one sentence away from everything the tools look at.
+
+Proposal, and it is a real proposal rather than a complaint: the sweep
+already computes, per ref, the set of other refs whose ranges overlap and
+the set that share a sentence. What it does not do is look at a passage's
+content words against the cited lines the way the `what` field is looked
+at. A passage-level miss ratio, scored against the union of the ranges
+its sentence tags, would have put both of these at the top of a queue.
+Offered as the next tool this seat builds, after the index check above,
+and it should be measured on the library before it is believed, the way
+§5l measured the `what`-level signal and the fourteenth run declined to
+make it a gate.
