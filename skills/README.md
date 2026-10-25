@@ -17,13 +17,17 @@ run, quality over count. The owner's merge is the gate.
 | [distilling-a-tuning-record](distilling-a-tuning-record/SKILL.md) | What an axiom may claim, what its confidence count means, and what may leave the machine with a tuning block | 39 | draft, `validated: false` |
 | [adding-a-bound-to-the-record-gate](adding-a-bound-to-the-record-gate/SKILL.md) | Whether a proposed rule about outcome records is a bound or a measurement, how its statement and its committed counterexample are written, and whether a violation means the bound or the resolver is wrong | 32 | draft, `validated: false` |
 | [clearing-a-record-for-release](clearing-a-record-for-release/SKILL.md) | Which of the three exits a release is taking, what that exit demands of raw text, and what an erasure has to reach once something has already left | 41 | draft, `validated: false` |
+| [auditing-a-detected-correction-loop](auditing-a-detected-correction-loop/SKILL.md) | Whether a detected correction loop is the loop the user actually ran, what `recurrences`, `openedStep`, `closedStep` and `resolution` compute rather than name, and where a complaint the user plainly made went when no signal carries it | 32 | draft, `validated: false` |
 
-## Four areas, and the edges between them
+## Five areas, and the edges between them
 
-The first three skills work on `outcome_record.json`. The fourth works
-on `tuning.json`. The fifth works on neither: it works on the checker
-those records are held against. The sixth works on none of the three: it
-works on what leaves the machine. Every near miss in
+The first three skills work on `files[].spans` and `stats` inside
+`outcome_record.json`. The fourth works on `tuning.json`. The fifth
+works on neither: it works on the checker those records are held
+against. The sixth works on none of the three: it works on what leaves
+the machine. The seventh is back inside the record and still its own
+area, because it works on `signals`, which is the one block no span
+label and no percentage can settle. Every near miss in
 `distilling-a-tuning-record/TRIGGER-TEST.md` and in
 `adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
 the record side of its own edge, which is what `prompts/skill-extract.md`
@@ -38,8 +42,8 @@ As of 2026-10-24 every skill in the library does, for every other skill
 in the library, which `node skills/trigger-coverage.mjs` measures and
 the section below describes. Closing the last nine of those boundaries
 turned up the limit of the artifact test: two of
-`adjudicating-uncertain-spans`' five neighbours name no file in common
-with it at all, and the boundary with them still had to be written down,
+`adjudicating-uncertain-spans`' then five neighbours named no file in
+common with it at all, and the boundary with them still had to be written down,
 because what they share is the *shape of the judgment* rather than the
 object, and a reader matches on shape. A rule about every record and a
 departure from the machine are both things a span-adjudication skill can
@@ -64,9 +68,9 @@ what the axiom may claim.
 **The gate area.** `adding-a-bound-to-the-record-gate` is the first
 skill here whose object is code rather than a record:
 `ursa-major/src/invariants.ts` and the committed counterexamples under
-`ursa-major/fixtures/violations/`. It therefore has all four others as
-neighbours and is still one edge, between the records and the thing
-that checks them. A prompt that spans the edge is handled records-side
+`ursa-major/fixtures/violations/`. It therefore has every other skill
+in the library as a neighbour and is still one edge, between the
+records and the thing that checks them. A prompt that spans the edge is handled records-side
 first in one direction and gate-side first in the other. Which label a
 span carries is never a gate question, because a bound can only catch a
 record contradicting itself. Whether a rule about records should exist
@@ -84,9 +88,9 @@ page, and all three are called *disclosure* in the code and in the
 prose. So reaching for the nearest check is a live way to be wrong in
 either direction, which is the argument the skill is built on.
 
-It has all five others as neighbours and still one edge, and the edge is
-a handoff rather than a border: the five decide what a record says, this
-one decides what may leave with it. Both directions are handled
+It has every other skill as a neighbour and still one edge, and the
+edge is a handoff rather than a border: the others decide what a record
+says, this one decides what may leave with it. Both directions are handled
 record-side first, because nothing can be cleared for release until it
 is settled what it is. The near miss worth reading is the quoting
 skill's own first trigger, since the two share every noun. The line is
@@ -94,6 +98,33 @@ mechanical and not a matter of taste: every field under `stats` ships,
 so a one-record statistic is never blocked here, and the only number
 this skill rules on is an aggregate across contributors, which no single
 record carries.
+
+**The signals area.** `auditing-a-detected-correction-loop` is back
+inside `outcome_record.json` and is still its own area, which is the
+one place in this library where the artifact test alone would have cut
+wrong. It shares the file with the three record skills and shares every
+noun with all six siblings. What separates it is which block of the
+record it rules on: the others rule on `files[].spans` and on `stats`,
+and this one rules on `signals`, the block `deriveSignals` writes after
+the labels are settled. No span label and no percentage can answer its
+question, because a loop is a fact about the sequence of prompts and
+not about any one piece of text.
+
+Its edge is the same handoff shape as the release skill's, counted six
+times rather than six different edges, and it runs last of the three
+record-side stages: the trial produces the record, adjudication settles
+the labels, and only then is there a signals block to audit. Two
+directions are worth knowing cold. A number out of `signals` that is
+going into a document a reader will trust is a quoting question first,
+because this skill says what `recurrences` counts and the quoting skill
+says what may be said about it. What a loop implies about the user is a
+distilling question, never this one, because the detector is lexical
+and deterministic and says nothing about a person. That last point is
+the skill's own ref E5, over `ursa-major/src/loops.ts:11-13`; it is
+named in longhand here rather than as an `[E5]` tag, because this file
+is not inside a skill directory and so no tool in `skills/` would
+fingerprint a tag written in it. See "Where a citation may stand".
+
 
 ## Checking the receipts
 
