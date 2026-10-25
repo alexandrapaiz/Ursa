@@ -1,0 +1,8 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# settled 1500ms after networkidle before each shutter.
+dashboard-phone                  200    390/390   overflow    0px  height  3872px
+home-phone                       200    390/390   overflow    0px  height   844px
+dashboard-tablet                 200    820/820   overflow    0px  height  3246px
+home-tablet                      200    820/820   overflow    0px  height  1180px
+dashboard-desktop                200   1440/1440  overflow    0px  height  3246px
+home-desktop                     200   1440/1440  overflow    0px  height   900px

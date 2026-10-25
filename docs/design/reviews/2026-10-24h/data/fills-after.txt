@@ -1,0 +1,15 @@
+fills sampled off rendered frames, http://127.0.0.1:4971, 1440x900, frozen
+
+/record/mini-fixture  bar 960x6 at y=438
+  ground above the bar  rgb(2,3,8)
+
+  segment                 declared                       rendered        vs ground   vs next
+  1  w= 395px  rgb(168, 199, 250)            rgb(168,199,250)   11.99     1.00
+  2  w= 230px  rgb(168, 199, 250)            rgb(168,199,250)   11.99     2.53
+  3  w= 333px  rgba(232, 237, 247, 0.45)     rgb(116,121,134)    4.73        —
+
+  legend swatch           declared                       rendered        vs ground
+  1           rgb(168, 199, 250)            rgb(168,199,250)   11.99
+  2           rgb(168, 199, 250)            rgb(168,199,250)   11.99
+  3           rgba(232, 237, 247, 0.45)     rgb(106,108,115)    3.93
+

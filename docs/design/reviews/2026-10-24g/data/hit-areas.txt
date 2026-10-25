@@ -1,0 +1,75 @@
+
+=== phone 390x844 · dashboard /dashboard ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> 0 of 0 standalone controls under 44px tall (20 inline, exempt)
+
+=== tablet 820x1180 · dashboard /dashboard ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     89x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     89x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> 0 of 0 standalone controls under 44px tall (20 inline, exempt)
+
+=== desktop 1440x900 · dashboard /dashboard ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     89x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     89x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  87.6x17.9     88x44        1      inline, exempt    button.dash-action "withdraw this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> 0 of 0 standalone controls under 44px tall (20 inline, exempt)
+
+=== total across every page and viewport ===
+  0 short of 0 standalone, 60 inline and exempt, 60 targets seen
