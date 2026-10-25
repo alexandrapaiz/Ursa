@@ -116,8 +116,13 @@ rather than to all eleven.
 **Queued by:** security seat, 2026-10-04 run. PWC-7 is held by the
 engineer seat's dependency-floor gate in PR #36, so this takes 8.
 
-**Evidence.** Two defects in `redaction-gate.yml`, both found by running
-the gate's own patterns in a wider scope than the gate does.
+**Amended 2026-10-25** by this seat's second run of that day, which
+added defect (3). It was found the way the first two were not: by the
+gate firing, five times in eleven minutes, on this seat's own branch.
+
+**Evidence.** Three defects in `redaction-gate.yml`. The first two were
+found by running the gate's own patterns in a wider scope than the gate
+does. The third was found by watching it work.
 
 1. The gate greps the working tree only. Sixteen blobs across five
    files, all reachable from `origin/main`, carry the three classes it
@@ -129,6 +134,19 @@ the gate's own patterns in a wider scope than the gate does.
    discards the entire matching line, so a genuinely leaked path that
    happens to share a line with a `/home/runner/` path is not reported.
    Narrow, but it is a bypass in a gate whose whole job is to have none.
+3. **The failure output republishes the value.** The tree step runs
+   `printf '%s\n' "$hits" | head -20`, so a hit is reported as the whole
+   matching line. On 2026-10-25 the gate caught a full identifier in
+   `docs/security/audit-2026-10-25.md` and printed it, in full, into
+   five Actions logs on a public repository, where the logs outlive the
+   branch and the commit that is later corrected. That is the gate
+   doing the thing it exists to prevent, at a wider blast radius than
+   the file it was guarding. In that instance the value was a vendor's
+   per-invocation tracking id rather than anything of the owner's, so
+   it needed no rotation and the audit of that run says so. The
+   mechanism does not know the difference. A Class B home path or a
+   Class C session id tripping the same pattern is published the same
+   way. Run ids are in the 2026-10-25 audit, run 2 section, F2.
 
 **Change.** For (2), anchor the allowance to the pattern rather than the
 line, by removing the matched CI prefixes from the line before testing
@@ -141,12 +159,28 @@ to fail only on blobs reachable from `origin/main`, so an in-flight
 branch that the gate is about to reject on its tree is not also reported
 twice.
 
+For (3), replace `printf '%s\n' "$hits" | head -20` with a form that
+emits only the location, for example piping the hits through
+`cut -d: -f1,2`, which leaves `path:line` and discards the matched text.
+The seat that has to fix a hit needs the location and already has the
+file; it never needs CI to quote the value back. Apply this one first if
+only one gets applied, because it is three characters of pipeline and it
+closes a live publication path. `scripts/redaction-check.mjs`, landed
+2026-10-25, already behaves this way, and its suite asserts that the
+value it caught does not appear in its own output.
+
 Expect it to fail on the first run, because F2 is currently true. Either
 apply it after the F2 decision, or land it in report-only mode first.
 
 **Verification after applying.** The step reports the sixteen known
 blobs before the F2 decision and reports nothing after a purge. Never
 have it print a matched value, only the path, the blob and the class.
+That last sentence was written for the history step and is now a
+requirement on both: after applying (3), re-run the gate against a
+branch carrying a known synthetic hit and confirm the Actions log names
+the file and the line and does not contain the value. Easiest check,
+needing no fixture: `node scripts/redaction-check.mjs` already satisfies
+it, so compare the two outputs on the same dirty tree.
 
 ---
 
@@ -254,3 +288,69 @@ every hit sitting between the two markers.
 grants no execution, but the mitigation that exists today is a
 disposition written in prose in every charter, and the structural
 version costs six lines per file.
+
+---
+
+## PWC-12 — No check at all looks the same as a passing check, and nothing in the process can tell
+
+**Queued by:** security seat, 2026-10-25 run 2 (message). Queued because
+the run cannot apply it: it is a branch-protection setting rather than a
+file, so it needs the owner in repository settings. The runner's token
+can write neither `.github/workflows/` (runner-facts §1b) nor the
+repository's protection rules.
+
+**Evidence, measured today.** Commit `be4695c` was pushed to
+`ursa-security/2026-10-25-hook` at 23:38:22 UTC, the tip of open pull
+request #427. Seven minutes later the GitHub API reported zero check
+runs against it and a combined status of `pending`:
+
+```
+gh api repos/alexandrapaiz/Ursa/commits/be4695c.../check-runs --jq .total_count
+# 0
+gh api repos/alexandrapaiz/Ursa/commits/be4695c.../status      --jq .state
+# pending
+```
+
+That was not queue latency. In the same seven-minute window the gate ran
+and finished on five other branches, and the five commits *before*
+`be4695c` on this same branch each got a run. The `pull_request` event
+for that one push produced no run. Why it did is not established here,
+and the cause matters less than the shape, so this entry does not guess.
+
+**The shape, which is the finding.** `redaction-gate` attaches to
+`pull_request`. A pull request whose gate never ran presents to a
+reviewer as a pull request with nothing wrong: the checks section is
+empty rather than red. The board cannot distinguish "scanned and clean"
+from "never scanned", and no seat is asked to confirm that a verdict
+exists before readying its own pull request. A gate that can be absent
+without anyone noticing is advisory, not a gate, which is the exact
+sentence `scripts/dep-floor.mjs` opens with about a different gate.
+
+For this pull request the content was in fact clean. This run proved it
+by dispatching the gate by hand (`gh workflow run redaction-gate.yml
+--ref ursa-security/2026-10-25-hook`, run 40246150644, success), which is
+also the workaround until this is applied. The point is that nothing
+other than a run that went looking would have produced that fact.
+
+**Change.** Two parts, and the first is most of the value.
+
+1. Make `redaction-gate / scan` a **required status check** on `main` in
+   branch protection. A required check that has not reported blocks the
+   merge, which converts the silent case into a visible one. This is the
+   whole fix for the reviewer-facing half.
+2. Add `workflow_dispatch` as the documented recovery, which the gate
+   already accepts, and record in `docs/security/redaction-standard.md`
+   that a seat confirms its own tip carries a verdict before readying.
+   The second half of that is applied in this run; this entry is the
+   half that needs settings.
+
+**Verification after applying.** Open a scratch pull request, push a
+commit, and confirm the merge button reports the required check as
+expected before it reports it as passing. Then re-run the measurement
+above against any open pull request's tip and expect a non-zero count or
+a blocked merge, never both zero and mergeable.
+
+**Severity.** Medium, and it is a reliability finding more than an
+exposure. It does not create a leak. It removes the guarantee that the
+thing which catches leaks ran at all, which is what two incidents and
+three PWC entries have been spent on.
