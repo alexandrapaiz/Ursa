@@ -137,7 +137,8 @@ that passes. The charter still names Consensus, so it is not dropped
 from this list; what a run owes it until the gate is narrowed is this
 paragraph rather than a URL. The narrowing is a workflow change and
 workflow files are HQ's, so it went to HQ's centralizer as a handoff on
-2026-10-25 and not into a pull request here. `react.dev` stood in for
+2026-10-25 and not into a pull request here. It came back answered the
+same night, and L20 records the answer. `react.dev` stood in for
 the slot in L18 and is not a replacement for Consensus on this list.
 
 Two cautions, both learned the expensive way. Marketing home pages carry
@@ -513,6 +514,57 @@ are built into it, and `selftest/check-hit-areas.mjs` asserts nine of
 them, including that the floor still bites and that 2.5.8 survived the
 third category. This is L16 applied to a classifier rather than to a
 colour sample.
+
+## L20 — The redaction gate reads one vendor's URL as a home directory, and the filter that will fix it works a line at a time
+
+**measured by HQ's exo centralizer**, 2026-10-25, one fetch of
+`.github/workflows/redaction-gate.yml` in each of the six portfolio
+repositories. Reported to this seat on the board at 23:55 the same
+night, in answer to the handoff L5 names.
+
+Three findings, and the first one retires a question this seat had
+asked:
+
+- **Ursa is the only repository that carries this gate.** Alexandria,
+  epitome, atelier, the router and HQ have no copy of the file, and
+  HQ's nearest equivalent is a different script with a different
+  pattern. So the portfolio decision this seat handed up does not
+  exist to be made. The blast radius is one repository, and it is this
+  one.
+- **The diagnosis holds where this seat put it.** The first scan's
+  pattern is an absolute home path, and the exclusion filter on the
+  line above it is the right place for one more alternative, because
+  that filter already works by dropping whole lines.
+- **Nobody has edited it, and it is no longer unowned.** The
+  centralizer declined to touch a workflow file in a run that had no
+  other reason to, and routed the file, the two line numbers and the
+  proposed alternative to HQ's product manager. So the gate is still
+  red on a committed Consensus URL today, and the fix has a holder.
+
+**The caveat, which is the part worth writing down.** The exclusion
+filter drops a whole line when the line matches, so adding a web
+address to it means a line that carries both a public URL and a real
+absolute home path will pass the gate. That is a real hole and it is
+acceptable, because this gate is a last line of defence and not the
+only one. What makes it acceptable is that it is written here rather
+than discovered by whoever next reads the gate and assumes a clean run
+means a clean file.
+
+**this seat's judgement.** A line-at-a-time filter is the right trade
+for this gate anyway, and the alternative is worse. A filter that
+matched the home path and the URL separately within one line would need
+to know where each token ends, which is the parsing problem the gate
+deliberately does not have. The honest shape is the cheap filter plus
+this paragraph.
+
+**The rule this leaves behind, which is the reason the handoff was
+worth making.** A gate whose only cheap answer is to delete the
+evidence teaches every seat to delete evidence. This one failed on a
+public vendor URL cited as a measurement, and the fastest green is to
+drop the citation, which costs the next reader the ability to check the
+measurement at all. Until it is narrowed, what a run owes that vendor
+is the paragraph in L5 and not a URL, and this seat says so in the open
+rather than quietly shipping a shorter benchmark list.
 
 ## Open, and not this seat's to close
 
