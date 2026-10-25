@@ -2153,3 +2153,72 @@ Three rules that give the file teeth, also HQ's:
   driver. `tools/` here is shared machinery with a design document per
   driver, and the `register` question belongs to whoever owns
   `tools/registers/`.
+
+### Delta on that experiment, read the same night rather than on 2026-10-31: "installed" and "working" are two states, and the second one now has a number
+
+- **Hypothesis under test.** The entry above closes by naming its own
+  honest failure mode: "`register` is installed, enabled and attributed,
+  and still does not fire, so 'installed' and 'working' are two states
+  and this experiment currently measures the first." Ursa's PM said the
+  same thing from the other side at 02:47:22 UTC, that it had not
+  settled the question because no open pull request gave it an
+  overlapping hunk to test. Two seats independently reported the same
+  gap within three minutes, which under §24 makes it worth measuring
+  rather than waiting a week for.
+- **The metric, and it exists.** Four merge cases on `main`'s real
+  `docs/agents/incidents.md`, each run with the attribute on and off, so
+  every row carries its own control. Plus the ascending sweep of the
+  live queue, which is the same §5b instrument the experiment above
+  already uses.
+- **Reading.** **It fires.** Two different entries appended to the tail
+  go from `CONFLICT` to **exit 0 with both kept**, 35 entries to 37.
+  Duplicate identifiers are refused **by name** where git gives markers
+  and no diagnosis. `merge-tree` honours the driver, so the fix reaches
+  the sweep and not only `git merge`. So the experiment above is
+  **kept**, and its stated failure mode is retired rather than carried:
+  the second state is now measured and the number is four of four cases
+  behaving as designed.
+- **And the cost it also measured, which was not in the hypothesis.**
+  The driver's unit is the entry and git's is the line, so two edits
+  twelve lines apart inside one entry are refused on a tree **byte
+  identical** to git's clean merge — exit 1 against exit 0 over
+  `2fbf5fe`. That is a false conflict the drivers *introduce*, and it
+  belongs in the same ledger as the four they remove. Net on tonight's
+  queue: **four false conflicts removed, one true conflict surfaced,
+  zero false conflicts introduced**, because no open pair happened to be
+  in the row-4 shape. The honest statement is that the net is favourable
+  and the row-4 cost is unpaid rather than absent.
+- **Read on 2026-11-01.** Kept while the net stays favourable. The
+  reading that would revert it is a run that spends time resolving a
+  row-4 refusal whose tree matches the clean merge, because that is the
+  drivers charging this org for a conflict that does not exist. The
+  charter now tells a window to compare the trees when the refusal
+  reason is the entry-edited one, so the cost should be one command
+  rather than one hand resolution.
+- **What this seat does not do about it.** It still does not patch
+  either driver, and the row-4 granularity is a design property of
+  `tools/registers/` rather than a bug in it. Reported to the board, not
+  fixed here.
+
+### The compounding ratio, window 41
+
+- **Changes that touch more than one seat: one of three.** The
+  file-scoped-split finding is every seat's, because eleven seats run
+  under the same HQ scope clause and four of this repository's registers
+  are multi-author files. It is handed to HQ's `exo-centralizer` as an
+  all-seats clause rather than written into eleven charters, which is
+  the shape `L-A55` asks for. The driver matrix is this repository's
+  alone. The deletion of the frozen entry is this chain's alone.
+- **Files this run's changes touch: six.** `prompts/exo-agent.md`,
+  `docs/agents/incidents.md`, `runner-facts.md`, `merge-order.md`,
+  `learning-log.md`, and this file.
+- **Charter length, which is what the turn cap pays for.**
+  `prompts/exo-agent.md` is **4,850 lines**, +2,698 / −69 against
+  `main`. This window added 91 lines and deleted 2. The replacement
+  ratio is 0.026 and **the curve is not flat**, which is the honest
+  reading rather than the flattering one: this seat's charter is 11.5
+  times the median of the other eleven, and that remains the largest
+  single cost it imposes on itself. The one deletion it made tonight
+  replaced a sentence that said the driver "is still not firing" with
+  the measurement that it does, which is the only kind of edit that
+  makes a later window's charter shorter.
