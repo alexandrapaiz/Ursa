@@ -133,6 +133,15 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
   const useAuthorFallback = !authorMatchesAll;
   const diagnostics = {
     commitsScanned: commits.length,
+    // `opts.range === undefined` rather than a truthiness test, so this
+    // field says what the CALLER asked for and not what git made of it.
+    // The two only differ on the empty string, and `listCommits` hands
+    // that straight to git (`range ?? '--all'` keeps `''`), where it
+    // fails with `fatal: ambiguous argument ''` before this line runs.
+    // So the falsy case is unreachable, and writing it as `opts.range ?`
+    // would read as though a caller could reach here having asked for a
+    // window and be told none was asked for.
+    rangeScanned: opts.range === void 0 ? null : commits.length,
     generatedByTrailer: 0,
     generatedByAuthorName: 0,
     generatedByDeclaredIdentity: 0,
@@ -2237,6 +2246,9 @@ function pairRefusals(diagnostics) {
 }
 function windowTooSmallForAPair(commitsScanned) {
   return commitsScanned < PAIR_MINIMUM_COMMITS;
+}
+function windowWidth(diagnostics) {
+  return diagnostics.rangeScanned ?? void 0;
 }
 var PAIR_MINIMUM_COMMITS;
 var init_launch = __esm({
@@ -6332,7 +6344,19 @@ async function runCi(opts) {
     // handed. Drift 8 (`windowTooSmallForAPair` in src/launch.ts) is that
     // both launches have had this number since the diagnostics shipped
     // and neither asked whether it was large enough for a pairing.
-    commitsInWindow: diagnostics.commitsScanned,
+    //
+    // Through `windowWidth` and not off `diagnostics.commitsScanned`,
+    // since 2026-10-26: that field counts every commit reachable from any
+    // ref when the walk got no range, and this line renders its value to
+    // a reader as the width of one merge window. `windowWidth` reads the
+    // narrowed `rangeScanned`, which is `null` exactly when no window was
+    // walked, and returns `undefined` there so the renderer prints no
+    // count and keeps the unconditional sentence. On this path that null
+    // is unreachable (`window.range` is a non-optional string,
+    // src/ci/window.ts); the narrowing is still routed through a tested
+    // function, because what makes the quote safe should be checkable
+    // rather than a fact about one caller.
+    commitsInWindow: windowWidth(diagnostics),
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the
