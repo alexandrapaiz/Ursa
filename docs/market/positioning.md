@@ -574,6 +574,13 @@ Major itself.
   deprecated free self-hosting) and read it as evidence against
   complacency rather than for it. No pricing recommendation made; still
   no per-unit anchor for Minor's $10/$30 question.
+- 2026-10-25 (event-driven, message, 13th run) — added the first real
+  margin figure found for a Category 1 vendor: Handshake AI pays out
+  60-70% of its AI-training gross revenue to contracted experts, per
+  The Information. Read as the cost-side counterpart to Minor's own
+  zero-marginal-labor-cost structure, citable the next time a lab asks
+  why Minor's economics differ from a labeling vendor's. No pricing
+  recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -594,3 +601,26 @@ no effect on the $10/$30 question, which is Minor's, not Major's, and
 which this file has had no per-unit anchor to test since 2026-09-26.
 Flagging the move because the charter asks this file to carry pricing
 moves as they happen, not because it changes a recommendation.
+
+## A Category 1 incumbent's own cost structure is the sharpest margin comp found yet (2026-10-25)
+
+The price ladder above (2026-09-26) found labor-side pay rates but no
+margin figure for any Category 1 vendor. The Information's exclusive
+on Handshake AI closes that gap directly: contractor payments run
+60-70% of the AI-training unit's gross revenue (docs/market/landscape.md,
+Handshake AI entry), meaning the vendor keeps 30-40 cents of every
+dollar a lab pays it, and "losing even one major client hits hard"
+given that structure. Read against Minor's own economics
+(CLAUDE.md's cost structure: "light," "sub-linear," processing on
+users' own devices): this is the first real number showing what a
+solicited-labor data vendor actually pays to generate its product,
+and it is the structural argument for why Minor's revealed-preference
+model can price differently, not just pitch differently. Minor's raw
+material is a byproduct of someone doing their own job; it carries no
+per-unit labor cost to generate at all, only the cost of structuring
+and licensing it. This is not a reason to set Minor's price above or
+below a Category 1 vendor's contract size, since the two are not
+selling the same asset, but it is the first concrete cost-side number
+this file can cite when a lab asks why Minor's margins look different
+from a labeling vendor's. No pricing recommendation made; the $10/$30
+tiers remain out of scope per this file's opening note.
