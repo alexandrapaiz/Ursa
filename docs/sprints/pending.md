@@ -2,6 +2,61 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Three most important pending items (2026-10-25, standup, hook-triggered, ninety-ninth pass)
+
+1. **New this pass: Incident 20, the market seat's own merges have been
+   re-waking it.** Nine of the market seat's ten pull requests on
+   2026-10-24 trace to one merge-event chain that re-fires on itself —
+   each merge both closes a thread and emits the event that opens the
+   next run to re-read it. The seat's own judgment was sound at every
+   step; the defect is the trigger wiring, not the seat. Logged as
+   Incident 20 (`docs/agents/incidents.md`) and a ledger proposal
+   (`docs/ideas.md`, 2026-10-25) naming the fix for whoever owns the
+   event bus (exo-centralizer or HQ distribution). Not asking the owner
+   to fix the wiring herself; naming it because the market seat asked,
+   in its own words, that "whatever wakes this seat on 'your PR merged'
+   ... is worth a look."
+2. **Three open pull requests still edit a charter file directly: #404
+   (exo, window 38, also contains #394 by ancestry — one decision
+   covers both), #395 (research), #377 (HQ's one-file `pm.md`
+   re-vendor).** Re-checked fresh this pass, all still green, `CLEAN`,
+   not drafts. None of that reaches a merge: pm.md §10 puts a charter
+   path in the diff at Tier C regardless of how clean the rest is.
+   Unchanged from the ninety-eighth pass below; none of these are
+   mine.
+3. **No sprint has been open since Sprint 2026-10-12 closed on time
+   (2026-10-18).** The Monday 2026-10-19 ceremony never ran — the
+   five-day host outage (#272) is why — and no ceremony since has
+   opened a new one: no `docs/sprints/sprint-2026-10-19.md` or later
+   file exists anywhere, the GitHub milestone list ends at "Sprint
+   2026-10-12" (closed), and the board's "This sprint" column is
+   empty. Not an emergency for a Sunday standup to fix — the charter
+   reserves opening a sprint for the Monday ceremony, and tomorrow,
+   2026-10-26, is that Monday. Naming it so tomorrow's ceremony run
+   knows it is opening from a true gap, not carrying stale backlog
+   items forward from a sprint that already closed.
+
+**This seat's own open pull requests.** #409 and #405
+(`ursa-pm/2026-10-24-message-402` and `-404`) are both subsumed by this
+pass's own #415 (`ursa-pm/2026-10-25-hook`), which starts from #409's
+tip and therefore fast-forward-contains both. Closeable as one decision
+once #415 is ready, not closed from this seat's own hand since they are
+real, reviewable work on their own.
+
+**Tier B this pass.** Two clean, non-draft, non-charter pull requests
+merged: #408 and #410 (market briefs — the tail end of the Incident 20
+chain above). Everything else open and not this seat's own is either a
+draft, `CONFLICTING` (#348, #320, #316 — a skill-seat rebase, not a
+docs-only conflict, and #320/#316 already correctly marked superseded
+by #348 in an earlier pass's comment), or already covered under item 2
+above.
+
+**Not this seat's to act on.** Three sibling seats — frontend (#412),
+engineer (#413), exo (#414) — were woken by the same capacity-return
+hook event this pass was, and are mid-run with their own drafts open as
+of this check. Named so a later pass does not mistake them for stalled
+work; they are live, not abandoned.
+
 ## Three most important pending items (2026-10-24 ~23:1x UTC, message, ninety-eighth pass)
 
 1. **#404 (exo, window 38) is reviewed against the merge rule and it is Tier C, waiting on you or a chair, not on this seat.** It is green (the one defined check, `redaction-gate`, passes), `mergeStateStatus: CLEAN`, not a draft, no `hold` label, no comment or review pending. None of that reaches a merge, because its diff touches `prompts/exo-agent.md` and `prompts/pm-agent.md`, and pm.md §10 puts charters in Tier C regardless of how clean the rest of the diff is. This is the same shape #394, #395 and #377 are already in this tracker for, not a new kind of hold.
