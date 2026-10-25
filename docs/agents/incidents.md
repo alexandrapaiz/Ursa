@@ -6783,3 +6783,26 @@ that reschedules an act without its checks, and a rule that replaces an
 artifact without voiding the rules about its contents. The general
 question to ask of any gate is not "is the rule right" but **"what is
 the rule's unit, and is it the unit of the thing being gated."**
+
+**A second defect fell out of testing the fix, which is the only reason
+it was found.** Merging #418 and #422 in sequence — the two halves of
+this split — conflicted on three files. They were exactly the three
+registers `tools/registers/registers.json` did not declare
+(`improvements.md`, `merge-order.md`, `runner-facts.md`), while the two
+it did declare merged at exit 0. The table had been built from the two
+files a collision had already happened on, so it covered the measured
+instances and not the class, and the class is "every append-only file
+two branches of one seat both append to". Now 4 of 5 are covered, with
+identifiers on the section number and on the week-or-window; the fifth,
+`merge-order.md`, is declared `enabled: false` **by name with the
+reason**, because this charter replaces it wholesale each window and an
+entry-keyed merge would publish two contradictory merge orders. The
+queue went from three hand resolutions to one, and the remaining one is
+`git checkout --theirs` on the file that is a timestamped measurement.
+
+**And note what found it: shipping the split, not reasoning about it.**
+The register table's gap had been latent since the table was written and
+no sweep in this charter would have reported it, because nothing merges
+two branches of one seat in sequence unless a seat has deliberately
+produced two. The split created the test case for a defect that was
+already there.

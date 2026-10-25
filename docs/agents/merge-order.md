@@ -16,18 +16,41 @@ this remains the healthiest stretch in this register's history. Three of
 the eight are drafts of runs that are live this minute (#412, #420,
 #421), which is a live window and not a stale artifact.
 
-## The order: ascending, and every pair of it was measured
+## The order: ascending, and the one hand resolution it needs
 
 ```
 395, 412, 417, 418, 419, 420, 421, 422
 ```
 
-**8 of 8 clean, each merged in sequence onto a running tree**, in a
-scratch worktree off `origin/main` with the drivers configured — not
-`merge-tree` exit statuses read one at a time against `main`, which is
-the weaker check this register has been caught trusting before. Each
-pull request also merges cleanly against `main` on its own, so there is
-no ordering trap anywhere in the queue.
+**8 of 8 merge, with exactly one trivial resolution**, measured by
+merging each in sequence onto a running tree in a scratch worktree off
+`origin/main` with all drivers configured — not by reading eight
+`merge-tree` exit statuses against `main` one at a time, which is the
+weaker check this register has been caught trusting before. Every pull
+request also merges cleanly against `main` on its own.
+
+**The one resolution, and it is one command.** #422 after #418 conflicts
+on `docs/agents/merge-order.md` — this file — because both carry a copy
+of it and this charter replaces it wholesale every window. Take the
+later one:
+
+```sh
+git checkout --theirs docs/agents/merge-order.md && git add -A
+```
+
+Verified end to end: the merge then completes, and after all eight the
+four entry-keyed registers hold 80, 41, 24 and 4 entries, every heading
+distinct, zero conflict markers anywhere.
+
+**This number was three an hour ago, and closing it is the measurement
+that produced the fix.** Merging #418 then #422 first conflicted on
+`improvements.md`, `merge-order.md` **and** `runner-facts.md` — which is
+exactly the set of registers `tools/registers/registers.json` did not
+declare, while the two it did declare merged at exit 0. So the gap was
+readable off the failure rather than guessed at. The two real registers
+are now covered by the driver with identifiers on the section number and
+on the week-or-window, `merge-order.md` is declared `enabled: false` by
+name with the reason, and all ten driver tests still pass.
 
 Window 41's constraint is **discharged**: #414, the branch carrying the
 frozen 75-line copy of the PM's `## Incident 19`, was closed at
