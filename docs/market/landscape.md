@@ -832,6 +832,22 @@ either of those two. Worth a one-line recheck at the next monthly
 pass, not a promotion to its own entry yet. Last observed 2026-10-24:
 [GitHub: edihasaj/universal-memory-protocol](https://github.com/edihasaj/universal-memory-protocol), [Hacker News: Universal Memory Protocol](https://news.ycombinator.com/item?id=48428796).
 
+Update 2026-10-25: re-reading the 2026-10-05 source itself (rather
+than this entry's own paraphrase of it) turned up two more named
+attempts the earlier notes didn't carry forward: MIF (an individual
+developer's interchange spec) and memorywire (an academic wire-format
+proposal), both first half of 2026, alongside the already-tracked
+Open Memory Protocol. That makes six distinct fragmentation attempts
+in one year across this one source alone (COGX, ByteRover, OMP, MIF,
+memorywire, and now UMP), and the source's own count was already
+four before UMP existed. None of the six has a second independent
+implementation or institutional governance — the same bar the
+2026-10-05 and 2026-10-24 notes already applied, still uncleared. This
+does not change the conclusion; it is the strongest evidence yet for
+it, since the fragmentation itself is accelerating faster than any
+single attempt is gaining traction. Last observed 2026-10-25:
+[stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -914,4 +930,9 @@ pass, not a promotion to its own entry yet. Last observed 2026-10-24:
   entry already tracked for April — growth has plateaued since
   spring, not kept compounding — and discloses contractor costs at
   60-70% of gross revenue, the sharpest cost-structure contrast this
-  map has found with Minor's own near-zero-marginal-cost labor.
+  map has found with Minor's own near-zero-marginal-cost labor. Also
+  re-read the 2026-10-05 Category 3 source in full rather than this
+  file's own paraphrase of it, and found two more named memory-
+  interchange attempts (MIF, memorywire) the earlier notes hadn't
+  carried forward — six distinct fragmentation attempts in one year
+  now, none with a second independent implementation.
