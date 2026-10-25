@@ -42,6 +42,44 @@ product Ursa Minor is testing, and the honest positioning line is:
 rubric works, and the only signal at all for the domains where it
 doesn't.*
 
+**The field's own proposed fixes for "no verifier exists" are still
+constructed verifiers, not real outcomes (2026-10-25, 14th message
+run).** A widely-cited practitioner post on RLVR's limits beyond math
+and code names the same gap CLAUDE.md §1 opens with almost word for
+word ("Math has definitive answers. Code has test suites. What about
+everything else?") and proposes three substitutes for open-ended
+domains: extracting verifiable signal from reference outputs,
+auto-generating rubrics with a judge model, and converting QA
+checklists into training signal. All three are still a grader's
+construction standing in for ground truth, the same category of thing
+the five reward-model-unreliability sources already in this file's
+record have found unreliable at every stage checked — and the same
+post's own September 2026 update reports the approach "showed
+vulnerabilities when tested empirically." So what: the market's
+answer to the verifier gap, as of this source, is a sixth source for
+why constructed graders keep failing, not a counter-example to
+Minor's pitch. Ledger proposal opened for KR4.1's lab brief. [subhadipmitra.com](https://subhadipmitra.com/blog/2026/rlvr-beyond-math-code/).
+
+**A seventh source, this one a demand signal rather than a research
+paper, and from inside a competitor (2026-10-25, 15th message run).**
+A staff AI engineer at TELUS Digital (the Category 1 vendor added to
+landscape.md this run) published a practitioner's digest of LLM-judge
+failures on 2026-10-15: judges that are "perfectly consistent, [yet]
+reliably wrong" at only 51% ground-truth agreement, verdicts that flip
+across identical zero-temperature runs, and a bias-detection classifier
+whose accuracy drops from 99% to 42% when emotional tone changes. The
+author's own proposed fix is, again, a better-constructed grader
+(rubric-based pointwise scoring, tool-augmented judges) rather than
+real-outcome data — consistent with the pattern the six sources above
+already established. What makes this one worth citing separately: the
+author writes "make it cheap to actually look at what happened instead
+of trusting a single aggregate score" as general engineering advice,
+not as a description of Minor's own method, and that sentence is
+close enough to CLAUDE.md §1's own operating description that it reads
+as independent, unprompted corroboration from inside a competing
+vendor's own technical staff, not a Minor-sourced talking point.
+[dev.to: Felipe Oliveira, "Perfectly Consistent, Still Wrong"](https://dev.to/felipe0liveira/perfectly-consistent-still-wrong-llm-judges-keep-failing-the-same-way-plus-cheaper-alternatives-4eg3).
+
 ## Price ladder observed this run (Category 1, preference-data vendors)
 
 None of the five vendors in landscape.md's first category publish a
@@ -71,6 +109,63 @@ this run argues against that range. Nothing found this run validates a
 specific number inside it either. This is a gap for next run's demand
 signals ceremony: find a disclosed or leaked RLHF-vendor contract size
 (not publisher-content) to anchor the range.
+
+**A correction to this file's own language, found 2026-10-25 (14th
+message run):** three separate dated entries below (2026-10-25's
+Zep note, the Category 1 margin section, and one changelog line) call
+the open contract-size gap "Minor's $10/$30 question." That phrasing
+contradicts this file's own opening note: the $10/$30 tiers are
+alexandria's vendored language and do not describe anything Minor
+sells. Minor has no per-unit consumer price at all, by design
+(CLAUDE.md §4); the actual open question is the six-to-seven-figure
+*enterprise contract* anchor, not a per-unit comp. The three prior
+entries are left as written, since they are each a dated record of
+what that run said, but the shorthand should stop here rather than
+compound a fourth time.
+
+**A named per-year figure for the contract-shape comp, and a new
+wrinkle in it (2026-10-25, 14th message run):** the $203M aggregate
+Reddit IPO-filing figure cited above is the same Google deal reported
+elsewhere at ~$60M/year (Reuters, 2024-02-22), which is both a cleaner
+annual anchor and, as of a 2026-07-22 Wall Street Journal report, now
+a deal Reddit is reportedly weighing whether to renew at all: AI
+Overviews answering queries directly cuts the click-through traffic
+Reddit gets in return, so the supplier is reassessing whether feeding
+the buyer's downstream product is worth the licensing fee. [the-decoder.com](https://the-decoder.com/reddit-signs-60-million-annual-training-data-deal-with-google/).
+That tension has no analogue in Minor's own structure: an outcome
+record is a byproduct of a user's own work, not Minor's content, so
+Minor's downstream product (a lab's trained model) does not compete
+with the thing the supplier (the user) is trying to do, the way
+Google's AI answers compete with Reddit's own traffic. Worth a line in
+the lab brief the next time a buyer asks why this contract shape is
+durable where Reddit's is wobbling.
+
+A side note on sourcing this: searching for a disclosed RLHF-specific
+contract size (the actual gap named above) surfaces a cluster of
+SEO-style "AI data licensing" aggregator sites (ai-industry-reviews.com,
+aidata.broker, sourcex.si) reporting mutually inconsistent deal counts
+(312 vs. 130 vs. an explicitly partial 6-deal sample) with no named
+methodology for two of the three. Checked and not cited beyond this
+note. The gap stays open; only individually named, independently
+reported deals like Reddit-Google are usable here, and none found this
+run was RLHF-specific rather than bulk content.
+
+**A cleaner tracker for this same category, found 2026-10-25 (15th
+message run), to use instead of the inconsistent aggregators above.**
+corpusbridge.com's disclosed-deals page states an explicit, checkable
+methodology — "A deal appears here only when a named outlet or the
+company's own filing reported it," and "We do not estimate or model
+figures" — and lists 14 total deals, 8 priced, naming each buyer,
+seller, and figure individually rather than reporting an aggregate
+count. Two of its figures were spot-checked independently this run
+against multiple outlets and both held: NYT/Amazon ($20-25M/year, WSJ
+via The Information, 2025) and News Corp/Meta ($50M/year over three
+years, Editor & Publisher and TheWrap, 2026). Still none of its 8
+priced deals is RLHF-specific; all are bulk content (news, journals,
+books). The gap this file has tracked since 2026-09-26 is unchanged by
+this, but the next run that needs the bulk-content comp should start
+here instead of re-discovering the aggregator problem from scratch.
+[corpusbridge.com/learn/ai-data-licensing-deals](https://corpusbridge.com/learn/ai-data-licensing-deals).
 
 ## Category 3 read: why would a user adopt Ursa Major when memory is
 already built into ChatGPT for free?
@@ -367,6 +462,24 @@ only one of the four that targets the raw label itself rather than
 something built on top of it. Last observed 2026-10-24:
 [arXiv 2604.03238: RLHF May Not Reflect Genuine Preferences](https://arxiv.org/abs/2604.03238).
 
+## A fifth reward-model source, a step further back than the fourth (2026-10-25)
+
+"Aligning to Illusions: Choice Blindness in Human and AI Feedback"
+(arXiv 2603.08412, submitted 2026-03-09) goes one step behind the
+2026-10-24 entry above. That source showed annotators disagree with
+themselves across repeated real opinions; this one shows annotators
+cannot tell when their stated opinion was never theirs at all — 91%
+of surreptitiously swapped preferences go undetected, extending the
+decades-old choice-blindness effect from self-evaluation to
+third-party text comparison. The paper's Best-of-N experiment makes
+the downstream cost concrete: at 50% label corruption, reward-guided
+selection performs no better than random sampling, while the proxy
+reward model itself reports continuously improving scores — the
+grader cannot tell its own training signal is broken either. Full
+reasoning and the citable-packet ordering in the ledger proposal
+(docs/ideas.md, 2026-10-25). Last observed 2026-10-25:
+[arXiv 2603.08412: Aligning to Illusions](https://arxiv.org/abs/2603.08412).
+
 ## A lab-facing evaluation vendor just proved the contract shape at $100M ARR (2026-10-24)
 
 The 2026-09-30 entry above bounded Minor's six-to-seven-figure target
@@ -574,6 +687,42 @@ Major itself.
   deprecated free self-hosting) and read it as evidence against
   complacency rather than for it. No pricing recommendation made; still
   no per-unit anchor for Minor's $10/$30 question.
+- 2026-10-25 (event-driven, message, 13th run) — added the first real
+  margin figure found for a Category 1 vendor: Handshake AI pays out
+  60-70% of its AI-training gross revenue to contracted experts, per
+  The Information. Read as the cost-side counterpart to Minor's own
+  zero-marginal-labor-cost structure, citable the next time a lab asks
+  why Minor's economics differ from a labeling vendor's. No pricing
+  recommendation made.
+- 2026-10-25 (event-driven, message, 13th run) — added a fifth
+  reward-model-unreliability source (arXiv 2603.08412, choice
+  blindness in preference annotation), a step further back than the
+  fourth: annotators cannot detect when their own stated preference
+  was swapped, not just that they disagree with themselves across
+  real opinions. No pricing recommendation made.
+- 2026-10-25 (event-driven, message, 14th run) — flagged and stopped a
+  three-time phrasing drift ("Minor's $10/$30 question") that
+  contradicted this file's own 2026-09-26 opening note; refined the
+  Reddit/Google contract-shape comp to a named ~$60M/year figure and
+  added the 2026-07-22 WSJ report that Reddit is weighing ending that
+  deal at renewal, which has no analogue in Minor's own structure;
+  added a sixth source to the reward-model-unreliability thread, this
+  one at the "proposed fix" layer rather than the "diagnosis" layer
+  (RLVR's own substitute verifiers for open-ended domains, reported
+  failing empirically by the same author). No pricing recommendation
+  made; the enterprise-contract-size gap (not a per-unit price) stays
+  open.
+- 2026-10-25 (event-driven, message, 15th run) — replaced the
+  inconsistent SEO-aggregator sources for the bulk-content contract
+  comp with corpusbridge.com, a tracker with a checkable methodology
+  (named-outlet-or-filing only, no estimation), spot-checked two of
+  its figures independently and both held. Still no RLHF-specific
+  deal among its 8 priced entries; the gap stays open with a cleaner
+  pointer for the next run. Added a seventh verifier-gap source, this
+  one a demand signal rather than a paper: a practitioner's digest
+  from inside a Category 1 competitor (TELUS Digital, added to
+  landscape.md this run) independently uses language close to
+  CLAUDE.md §1's own framing. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -594,3 +743,26 @@ no effect on the $10/$30 question, which is Minor's, not Major's, and
 which this file has had no per-unit anchor to test since 2026-09-26.
 Flagging the move because the charter asks this file to carry pricing
 moves as they happen, not because it changes a recommendation.
+
+## A Category 1 incumbent's own cost structure is the sharpest margin comp found yet (2026-10-25)
+
+The price ladder above (2026-09-26) found labor-side pay rates but no
+margin figure for any Category 1 vendor. The Information's exclusive
+on Handshake AI closes that gap directly: contractor payments run
+60-70% of the AI-training unit's gross revenue (docs/market/landscape.md,
+Handshake AI entry), meaning the vendor keeps 30-40 cents of every
+dollar a lab pays it, and "losing even one major client hits hard"
+given that structure. Read against Minor's own economics
+(CLAUDE.md's cost structure: "light," "sub-linear," processing on
+users' own devices): this is the first real number showing what a
+solicited-labor data vendor actually pays to generate its product,
+and it is the structural argument for why Minor's revealed-preference
+model can price differently, not just pitch differently. Minor's raw
+material is a byproduct of someone doing their own job; it carries no
+per-unit labor cost to generate at all, only the cost of structuring
+and licensing it. This is not a reason to set Minor's price above or
+below a Category 1 vendor's contract size, since the two are not
+selling the same asset, but it is the first concrete cost-side number
+this file can cite when a lab asks why Minor's margins look different
+from a labeling vendor's. No pricing recommendation made; the $10/$30
+tiers remain out of scope per this file's opening note.

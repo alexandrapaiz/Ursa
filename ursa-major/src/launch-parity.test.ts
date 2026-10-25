@@ -58,7 +58,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { main } from './bin/ursa'
 import { runCi } from './ci/run'
 import { renderRunComment, runCommentFields } from './ci/comment'
-import { clearsSizeFloor, keepRecord, newDroppedUnits, pairRefusals } from './launch'
+import { PAIR_MINIMUM_COMMITS, clearsSizeFloor, keepRecord, newDroppedUnits, pairRefusals, windowTooSmallForAPair, windowWidth } from './launch'
 import { findCommitPairsWithDiagnostics, resolvePairingBounds } from './pairfinder'
 import { BOUND_COUNT } from './invariants'
 import type { GitHubApi } from './ci/github'
@@ -652,6 +652,275 @@ describe('both launches say which pairing bound refused a generation', () => {
   })
 })
 
+describe('neither launch reads an empty window as an empty history', () => {
+  // Drift 8, found 2026-10-25. One step further out than drift 7, and the
+  // first of the eight that is not a number one launch held and the other
+  // did not: BOTH launches have had `diagnostics.commitsScanned` since the
+  // diagnostics shipped, `ursa run` even printed it, and neither of them
+  // asked whether it was large enough for the question they were about to
+  // answer.
+  //
+  // A pairing is a generation plus a LATER commit editing the same file.
+  // One commit cannot be later than itself, so a one-commit window holds
+  // no pairing whatever it contains, and both surfaces reported that the
+  // same way they report a window that was searched and came up empty.
+  //
+  // The fixture is `editedFixture` with the merge window's base moved to
+  // `HEAD~1`. That is the same three-commit history every other assertion
+  // in this file passes on; only the window narrows. The generation is one
+  // commit behind the base, which is what makes the old sentence a false
+  // reading rather than a useless one: the reader is told their commits
+  // carry no agent marker while the marked commit sits just outside the
+  // window the resolver was handed.
+  const ONE_COMMIT = 'HEAD~1'
+
+  it('the CI comment says the window was too small instead of blaming the history', async () => {
+    const repo = editedFixture()
+    const { ci, ciComment } = await bothLaunches(repo, 10, [], {}, ONE_COMMIT)
+
+    // Nothing resolved, and that is correct. The divergence is in prose,
+    // which is why drift 7's block had to exist and why this one does.
+    expect([...ci.keys()]).toEqual([])
+    // Nothing was refused either, so drift 7's clause does not cover this
+    // history. Asserted rather than assumed, because if a bound had fired
+    // the comment would be exercising the other branch.
+    const diagnostics = findCommitPairsWithDiagnostics(repo, {
+      range: `${git(repo, ['rev-parse', ONE_COMMIT])}..${git(repo, ['rev-parse', 'HEAD'])}`,
+    }).diagnostics
+    expect(diagnostics.commitsScanned).toBe(1)
+    expect(pairRefusals(diagnostics).total).toBe(0)
+
+    // Asserted as an absence as well as a presence, for the reason drift
+    // 7's block gives: the defect is a false claim and not a missing one,
+    // so a presence-only test passes on output that prints both.
+    expect(ciComment).not.toContain(
+      'no commit here carried an agent marker that a later human commit then edited',
+    )
+    expect(ciComment).toContain('a pairing takes 2 commits')
+    expect(ciComment).toContain('this window holds one commit')
+    expect(ciComment).toContain('a fact about the merge rather than about your history')
+  })
+
+  it('the detail block states how many commits were in the window, not just the range', async () => {
+    // The range alone was all that line carried until today, and no
+    // reader can count commits from two shas. Checked on both window
+    // widths from one history so the count is shown to track the window
+    // rather than to be a constant that happens to read right once.
+    const repo = editedFixture()
+    const narrow = await bothLaunches(repo, 10, [], {}, ONE_COMMIT)
+    expect(narrow.ciComment).toContain('1 commit in it')
+    expect(narrow.ciComment).toContain('2 is the fewest a pairing can come from')
+
+    const wide = await bothLaunches(repo, 10, [], {}, 'HEAD~2')
+    expect(wide.ciComment).toContain('2 commits in it')
+    // And it appears on a run that DID resolve something, because the
+    // question "how much history was read" is not only asked about zeros.
+    expect([...wide.ci.keys()]).toHaveLength(1)
+  })
+
+  it('the local run stops drawing a conclusion from a search that could not run', async () => {
+    // `ursa run` has no merge window, so this is reached through a
+    // repository whose whole history is one commit: a generation with
+    // nothing after it. The old output asserted that nothing generated
+    // was followed by an edit of the person's, and then sent them to the
+    // pull-request path on the strength of it.
+    const repo = oneCommitFixture()
+    const printed: string[] = []
+    const realLog = console.log
+    console.log = (...a: unknown[]) => { printed.push(a.map(String).join(' ')) }
+    let exitCode: number
+    try {
+      exitCode = await main(['run', repo, '--min-chars', '10'])
+    } finally {
+      console.log = realLog
+    }
+    const localOutput = printed.join('\n')
+
+    expect(exitCode).toBe(0)
+    expect(localOutput).toContain('Scanned 1 commit')
+    expect(localOutput).not.toContain(
+      'none of those was followed by an edit of the same file without an agent marker',
+    )
+    expect(localOutput).toContain('a pairing takes 2 commits')
+    expect(localOutput).toContain('too short to hold one yet')
+    // The paragraph that reads an absent edit as evidence about where the
+    // person works is withheld too. On one commit it is a recommendation
+    // drawn from a search that never happened.
+    expect(localOutput).not.toContain('your corrections are not on this branch')
+  })
+
+  it('a window big enough to search keeps the original sentences on both surfaces', async () => {
+    // The guard, in the shape drift 7's block already uses. `unpairedFixture`
+    // is the case the original sentences were written for and are true of: a
+    // generation is present, two commits were read, and no later commit
+    // edited the file. A fix that rewrote them on every zero would have
+    // replaced one false reading with another.
+    //
+    // Note which fixture this is NOT. `editedFixture` at a floor above its
+    // generation resolves a work unit and then drops it, so neither surface
+    // reaches the empty-window branch at all and an assertion there would
+    // pass without testing anything in it.
+    const repo = unpairedFixture()
+    const { ci, ciComment, localOutput } = await bothLaunches(repo, 10, [], {}, 'HEAD~2')
+    expect([...ci.keys()]).toEqual([])
+
+    expect(ciComment).toContain('2 commits in it')
+    expect(ciComment).not.toContain('a pairing takes 2 commits')
+    expect(ciComment).toContain(
+      'no commit here carried an agent marker that a later human commit then edited',
+    )
+
+    expect(localOutput).toContain('Scanned 3 commits')
+    expect(localOutput).not.toContain('a pairing takes 2 commits')
+    expect(localOutput).toContain(
+      'none of those was followed by an edit of the same file without an agent marker',
+    )
+    // And the pull-request paragraph, which drift 8 withholds on a
+    // too-short history, is still printed here. This is the history it
+    // was written about.
+    expect(localOutput).toContain('your corrections are not on this branch')
+  })
+
+  it('the minimum has the value the two sentences above quote, and the predicate reads it', () => {
+    // The unit test under the four above. Both sentences assert this
+    // number to a reader, and they are written separately on purpose, so
+    // the number itself is the thing that must come from one place.
+    //
+    // RETITLED 2026-10-25. This was called `states the minimum once,
+    // where both surfaces read it`, which is not what it checks: it
+    // asserts the constant's value and the predicate's behaviour, and
+    // nothing here renders a surface. Replacing every
+    // `${PAIR_MINIMUM_COMMITS}` in src/ci/comment.ts and src/bin/ursa.ts
+    // with a literal `2` leaves this whole block green, measured twice —
+    // by the run that wrote it and again by the run that filed the fix.
+    // The sharing is checked in src/pair-minimum-shared.test.ts, which
+    // substitutes the constant and fails on exactly that edit. The title
+    // is narrowed rather than the test deleted, because the value and the
+    // predicate are still worth pinning; what was wrong was the claim.
+    expect(PAIR_MINIMUM_COMMITS).toBe(2)
+    expect(windowTooSmallForAPair(0)).toBe(true)
+    expect(windowTooSmallForAPair(1)).toBe(true)
+    expect(windowTooSmallForAPair(2)).toBe(false)
+    expect(windowTooSmallForAPair(400)).toBe(false)
+  })
+
+  it('an empty window is too small too, and says so without claiming one commit', () => {
+    // A base equal to the head is a zero-commit range. Rendered directly
+    // rather than through a fixture, because git will not produce this
+    // window from a merged pull request and a reader of the sentence still
+    // has to get a true one.
+    const fields = runCommentFields([], [], {
+      unitsAdded: 0, unitsReinforced: 0, mode: 'ci-no-model', reason: 'test',
+    })
+    const comment = renderRunComment(fields, {
+      prNumber: 9, repo: 'o/r', range: 'aaa1111..aaa1111',
+      windowNote: 'merge style undetermined', declarationBasis: 'undeclared',
+      recordsPath: '.ursa/records', runUrl: null, commitsInWindow: 0,
+    })
+    expect(comment).toContain('this window holds 0')
+    expect(comment).not.toContain('this window holds one commit')
+    expect(comment).toContain('0 commits in it')
+  })
+
+  it('a caller that passes no count keeps the unconditional sentence and prints no count', () => {
+    // The compatibility edge, asserted rather than assumed. `action.yml`
+    // and `src/ci/run.ts` are not the only possible callers of this
+    // renderer, and a caller with no count cannot tell a window that
+    // found nothing from one that could not have found anything. Silence
+    // is the honest output there, not a guess in either direction.
+    const fields = runCommentFields([], [], {
+      unitsAdded: 0, unitsReinforced: 0, mode: 'ci-no-model', reason: 'test',
+    })
+    const comment = renderRunComment(fields, {
+      prNumber: 9, repo: 'o/r', range: 'aaa1111..bbb2222',
+      windowNote: 'merge style undetermined', declarationBasis: 'undeclared',
+      recordsPath: '.ursa/records', runUrl: null,
+    })
+    expect(comment).toContain('no commit here carried an agent marker that a later human commit then edited')
+    expect(comment).not.toContain('a pairing takes 2 commits')
+    expect(comment).toContain('- Commit window: `aaa1111..bbb2222`\n')
+  })
+
+  // Drift 8's follow-on, filed in the ledger on 2026-10-25 as
+  // "`commitsScanned` counts two different populations and the type
+  // cannot tell a reader which". The sentences above are correct today
+  // and were correct for a reason outside the types: `src/ci/run.ts`
+  // happens always to pass `range: window.range`. The two tests below
+  // pin the population apart so that stops being a coincidence.
+  it('a walk with no range reports no window width, and the whole history separately', () => {
+    // The two fields on one walk of one repository, so the numbers are
+    // comparable rather than taken from two fixtures. `unpairedFixture`
+    // is a three-commit history; walked with no range, the unfiltered
+    // count is all three and no window was asked for.
+    const repo = unpairedFixture()
+    const unranged = findCommitPairsWithDiagnostics(repo, {}).diagnostics
+    expect(unranged.commitsScanned).toBe(3)
+    expect(unranged.rangeScanned).toBeNull()
+
+    // The same walk handed one commit's worth of range: now both fields
+    // are populated and they disagree, which is the whole point. The
+    // wider one is still the whole history, so a caller that quoted it
+    // as a window width would have printed 3 for a window of 1.
+    const head = git(repo, ['rev-parse', 'HEAD'])
+    const base = git(repo, ['rev-parse', 'HEAD~1'])
+    const ranged = findCommitPairsWithDiagnostics(repo, { range: `${base}..${head}` }).diagnostics
+    expect(ranged.rangeScanned).toBe(1)
+    expect(ranged.commitsScanned).toBe(1)
+    // And on a range narrower than the history, the ranged field is the
+    // range. Asserted on a second range so the equality above is not read
+    // as the two fields being the same field under another name.
+    const wide = findCommitPairsWithDiagnostics(repo, {
+      range: `${git(repo, ['rev-parse', 'HEAD~2'])}..${head}`,
+    }).diagnostics
+    expect(wide.rangeScanned).toBe(2)
+  })
+
+  it('the CI launch quotes the window width, so a rangeless walk prints no count at all', async () => {
+    // Two assertions in one test because they are one claim: the number
+    // the reader sees is the ranged field, and when that field is null
+    // the renderer says nothing rather than guessing.
+    //
+    // First, the live path. `editedFixture` is three commits and the
+    // window is one, so the two populations differ by 2 and only one of
+    // them is a true thing to print.
+    const repo = editedFixture()
+    const { ciComment } = await bothLaunches(repo, 10, [], {}, ONE_COMMIT)
+    expect(ciComment).toContain('1 commit in it')
+    expect(ciComment).not.toContain('3 commits in it')
+
+    // Second, the function that feeds it, called exactly as
+    // src/ci/run.ts calls it. A rangeless walk's `rangeScanned` is null,
+    // `windowWidth` turns that into the renderer's omitted case, and the
+    // omitted case prints the range alone and keeps the unconditional
+    // sentence — which is honest, because a caller with no window cannot
+    // tell a window that found nothing from one too small to find
+    // anything.
+    const unranged = findCommitPairsWithDiagnostics(repo, {}).diagnostics
+    expect(windowWidth(unranged)).toBeUndefined()
+    expect(windowWidth({ rangeScanned: 7 })).toBe(7)
+    // Zero is a width and not an absence: an empty range is a real
+    // window that holds no commits, and the sentence for it is the
+    // too-small one rather than silence.
+    expect(windowWidth({ rangeScanned: 0 })).toBe(0)
+    const fields = runCommentFields([], [], {
+      unitsAdded: 0, unitsReinforced: 0, mode: 'ci-no-model', reason: 'test',
+    })
+    const comment = renderRunComment(fields, {
+      prNumber: 9, repo: 'o/r', range: 'aaa1111..bbb2222',
+      windowNote: 'merge style undetermined', declarationBasis: 'undeclared',
+      recordsPath: '.ursa/records', runUrl: null,
+      commitsInWindow: windowWidth(unranged),
+    })
+    expect(comment).toContain('- Commit window: `aaa1111..bbb2222`\n')
+    expect(comment).not.toContain('commits in it')
+    // The number that would have been printed had the wide field been
+    // quoted instead, named here so the test records what it is guarding
+    // against rather than only that the output is short.
+    expect(unranged.commitsScanned).toBe(3)
+    expect(comment).not.toContain('3 commits in it')
+  })
+})
+
 describe('one repository resolved through both launches produces the same record', () => {
   it('agrees on every span class, every span extent, and every stats block', async () => {
     const repo = editedFixture()
@@ -928,6 +1197,60 @@ function distantFixture(): string {
   writeFileSync(join(dir, 'digest.js'), edited + '\n')
   git(dir, ['add', '.'])
   git(dir, ['commit', '-q', '-m', 'Tighten digest prose'])
+  return dir
+}
+
+/**
+ * One commit, and it is a generation: the agent writes `digest.js` and
+ * nothing follows it.
+ *
+ * Drift 8's local case. `ursa run` has no merge window, so the only way
+ * to hand it a history too short to hold a pairing is to give it a
+ * repository that short. A pairing needs a generation and a LATER commit
+ * editing the same file, and there is no later commit here at all, so the
+ * walk classifies one generation and finds nothing to pair it with
+ * without any bound firing.
+ *
+ * Deliberately a generation rather than an ordinary commit. With a marker
+ * present, `looked > 0` holds and the pull-request paragraph is reachable,
+ * which is the second sentence drift 8 withholds. A fixture whose one
+ * commit carried no marker would exercise the first sentence and quietly
+ * skip the second.
+ */
+function oneCommitFixture(): string {
+  const dir = newRepo()
+  writeFileSync(join(dir, 'digest.js'), GENERATED + '\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Generate digest module\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+  return dir
+}
+
+/**
+ * Three commits with a generation in them and no edit of it: a README
+ * base, the agent writing `digest.js`, and one unrelated commit of the
+ * person's that touches another file.
+ *
+ * Drift 8's guard, and the history the sentences drift 8 narrows were
+ * written for. Two commits are inside a `HEAD~2` merge window, so the
+ * window is big enough for a pairing to have been possible, a generation
+ * really is there, and no later commit edits it, so the walk searched and
+ * found nothing with no bound firing. That is the one state where "none
+ * of those was followed by an edit of the same file without an agent
+ * marker" is a true claim, and it must survive the fix.
+ */
+function unpairedFixture(): string {
+  const dir = newRepo()
+  writeFileSync(join(dir, 'README.md'), '# project\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Base'])
+
+  writeFileSync(join(dir, 'digest.js'), GENERATED + '\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Generate digest module\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+
+  writeFileSync(join(dir, 'note.md'), '# a note, not an edit of the generated file\n')
+  git(dir, ['add', '.'])
+  git(dir, ['commit', '-q', '-m', 'Add an unrelated note'])
   return dir
 }
 

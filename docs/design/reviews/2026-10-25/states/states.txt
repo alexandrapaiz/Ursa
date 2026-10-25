@@ -1,0 +1,30 @@
+harness: (hover:hover)=true  (any-hover:hover)=true  (pointer:fine)=true  (prefers-reduced-motion:reduce)=false
+viewport: 1440x900   settle: 520ms   frames: frozen (clock pinned, Math.random seeded)
+
+cta-home             by-design-disabled     .cta on /  (4 matches, button, disabled, box 163x47)
+rec-action-home      changes                .rec-action on /  (2 matches, a, box 541x43)
+                      self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+quiet-link-404       changes                .quiet-link on /this-page-does-not-exist  (1 match, a, box 230x47)
+                      self.background-color: rgba(232, 237, 247, 0) -> rgba(232, 237, 247, 0.06)
+                      self.border-top-color: rgba(168, 199, 250, 0.4) -> rgba(168, 199, 250, 0.75)
+                      self.border-bottom-color: rgba(168, 199, 250, 0.4) -> rgba(168, 199, 250, 0.75)
+                      self.transform: none -> matrix(1, 0, 0, 1, 0, -1)
+mark-link-404        changes                .mark-link on /this-page-does-not-exist  (1 match, a, box 135x24)
+                      span/0.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(112, 127, 160)
+rec-action-index     changes                .rec-action on /record  (4 matches, a, box 114x17)
+                      self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+rec-row-index        changes                .rec-row on /record  (2 matches, button, box 960x106)
+                      span/0.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+rec-action-record    changes                .rec-action on /record/mini-fixture  (4 matches, button, box 960x17)
+                      self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+sp-verbatim          changes                .sp-survived_verbatim on /record/mini-fixture  (2 matches, span, box 504x43)
+                      self.background-color: rgba(168, 199, 250, 0.14) -> rgba(168, 199, 250, 0.26)
+sp-mutated           changes                .sp-survived_mutated on /record/mini-fixture  (1 match, span, box 520x43)
+                      self.background-color: rgba(168, 199, 250, 0.14) -> rgba(168, 199, 250, 0.26)
+sp-ngp               changes                .sp-no_generation_provenance on /record/mini-fixture  (2 matches, span, box 216x19)
+                      self.background-color: rgba(232, 237, 247, 0.05) -> rgba(232, 237, 247, 0.12)
+
+A verdict of `changes` is not yet a verified hover. It says the computed
+style moved. Whether a reader can see it moving is the pixel count from
+  python3 diff-frames.py ../docs/design/reviews/2026-10-25/states/rest ../docs/design/reviews/2026-10-25/states/hover
+and a hover worth fewer pixels than the hairline it draws is a finding.
