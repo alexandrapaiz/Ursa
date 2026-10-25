@@ -45,27 +45,52 @@ export const SEED = 0x9e3779b9
  * through addInitScript rather than closing over them, because the
  * function is serialised across the process boundary.
  */
-export function freezeInit({ t, seed }) {
+export function freezeInit({ t, seed, clock = true, random = true }) {
   let s = seed >>> 0
   // xorshift32. Any seeded generator would do; this one is three lines and
   // needs no dependency in a page we are only photographing.
-  Math.random = () => {
-    s ^= s << 13
-    s >>>= 0
-    s ^= s >>> 17
-    s ^= s << 5
-    s >>>= 0
-    return s / 4294967296
+  if (random) {
+    Math.random = () => {
+      s ^= s << 13
+      s >>>= 0
+      s ^= s >>> 17
+      s ^= s << 5
+      s >>>= 0
+      return s / 4294967296
+    }
   }
-  const raf = window.requestAnimationFrame.bind(window)
-  window.requestAnimationFrame = (cb) => raf(() => cb(t))
+  if (clock) {
+    const raf = window.requestAnimationFrame.bind(window)
+    window.requestAnimationFrame = (cb) => raf(() => cb(t))
+  }
 }
 
 /**
  * Make every page in this context render the same frame twice. Call before
  * the first navigation; addInitScript applies to each one.
  */
-export async function freezeContext(ctx, { t = PINNED_MS, seed = SEED } = {}) {
-  await ctx.addInitScript(freezeInit, { t, seed })
+export async function freezeContext(ctx, { t = PINNED_MS, seed = SEED, clock = true, random = true } = {}) {
+  await ctx.addInitScript(freezeInit, { t, seed, clock, random })
   return ctx
+}
+
+/**
+ * The randomness half on its own, for an instrument that is measuring
+ * motion rather than photographing a still.
+ *
+ * The two halves of the freeze are not interchangeable and the 2026-10-24i
+ * review is where that was found. Pinning the rAF timestamp is what makes a
+ * still frame reproducible, and it is exactly wrong for a motion capture: a
+ * spring driven from JavaScript reads the clock on every frame and computes
+ * its next position from it, so a pinned clock does not make such a spring
+ * reproducible, it stops it. `sample-motion.mjs` exists to see precisely
+ * that kind of spring on third-party sites, and it would have reported
+ * every one of them as motionless.
+ *
+ * Seeding `Math.random` carries none of that risk, because nothing times
+ * itself off a random number. So a motion capture gets this half, which
+ * fixes our own starfield's texture, and leaves the clock running.
+ */
+export async function seedRandomContext(ctx, { seed = SEED } = {}) {
+  return freezeContext(ctx, { seed, clock: false, random: true })
 }
