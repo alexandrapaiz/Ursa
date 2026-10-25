@@ -22,6 +22,7 @@
 // would be a different contract and must not be mistaken for this one.
 
 import { BOUND_COUNT, currentGateIdentity } from '../invariants'
+import { PAIR_MINIMUM_COMMITS, windowTooSmallForAPair } from '../launch'
 import { formatResolverIdentity } from '../resolver-identity'
 import type { OutcomeRecord, ResolverIdentity } from '../types'
 import type { Episode } from '../episodes'
@@ -92,6 +93,64 @@ export interface RunCommentContext {
    * a reader goes to ask how far to trust the numbers, which is exactly the
    * question a violated bound answers.
    */
+  /**
+   * Generations the pairing walk abandoned before any work unit existed,
+   * one stage above `dropped` (`pairRefusals` in src/launch.ts).
+   *
+   * This exists because `dropped` fixed half of one sentence. Its
+   * docstring above records a run on 2026-10-08 asserting "no commit here
+   * carried an agent marker that a later human commit then edited" beside
+   * `units-found=1`, and the repair gave the `unitsFound > 0` branch a
+   * reason to name. A generation abandoned by a pairing bound produces no
+   * work unit at all, so it lands in the OTHER branch, where the same
+   * sentence was still the only thing on offer and is false in every
+   * clause: the marker was there, the human edit was there, and the walk
+   * declined to reach between them.
+   *
+   * Omitted by a caller that does not track it, in which case the
+   * zero-unit sentence keeps the unconditional wording, because a caller
+   * with no tally cannot distinguish the history that sentence is true of
+   * from the history it is false of.
+   */
+  refused?: {
+    total: number
+    refusals: {
+      bound: 'distance' | 'age' | 'interposedGeneration' | 'notDescendant'
+      count: number
+      flag: '--max-pair-distance' | '--max-pair-age-hours' | '--max-interposed-generations' | null
+      limit: number | null
+    }[]
+  }
+  /**
+   * How many commits the pairing walk actually read in this window
+   * (`PairFinderDiagnostics.rangeScanned`), not the width of the range
+   * string above it.
+   *
+   * `rangeScanned` and not `commitsScanned`, which is the same number
+   * only when the walk was handed a range and is the whole repository's
+   * commit count when it was not. Feeding the wider field here renders a
+   * repository-sized number to a reader as one merge window's width and
+   * stops the too-small branch below from ever firing. The narrowed
+   * field is `null` on a rangeless walk, which maps onto the omitted
+   * case documented two paragraphs down.
+   *
+   * This exists because the two zero-state sentences before it both
+   * answer "what did this history contain" and neither asks whether the
+   * window was large enough for the question to have an answer. A pairing
+   * needs a generation and a LATER commit that edits the same file, so a
+   * one-commit window holds none by construction, and a squash merge
+   * produces exactly that: `src/ci/window.ts` degrades the window to the
+   * single squashed commit and says so in `windowNote`. The product
+   * already knew the window was degraded and the sentence did not read
+   * what it knew. That is drift 8 (`windowTooSmallForAPair` in
+   * src/launch.ts).
+   *
+   * Omitted by a caller that does not pass it, in which case the
+   * zero-unit sentence keeps the unconditional wording, because a caller
+   * with no count cannot tell a window that found nothing from a window
+   * that could not have found anything.
+   */
+  commitsInWindow?: number
   invariantViolations?: number
   /**
    * The resolver that wrote this run's records, as `task.resolvedBy`
@@ -198,10 +257,76 @@ export function renderRunCommentFieldTable(f: RunCommentFields): string {
  * the first for all three, which this comment did until 2026-10-08, tells a
  * user to go fix their commit trailers when the actual fix is one flag.
  */
+/**
+ * The abandonment tally as one clause, or null when there is nothing to say.
+ *
+ * Wording lives here and not in `pairRefusals`, for the reason drift 6
+ * gives in src/launch.ts: a markdown comment and a terminal are different
+ * surfaces, and only the NUMBER and the FLAG have to match between them.
+ * What is shared is which bound stopped how many generations; what is not
+ * is that this surface writes the flag as code and `src/bin/ursa.ts`
+ * writes it bare.
+ */
+function refusedClause(ctx: RunCommentContext): string | null {
+  const r = ctx.refused
+  if (!r || r.total === 0) return null
+  const parts = r.refusals.map((x) => {
+    const n = `${x.count} generation${x.count === 1 ? '' : 's'}`
+    switch (x.bound) {
+      case 'interposedGeneration':
+        return `${n} had the same file rewritten by a later generation first, so the edit that followed corrected that generation and not this one`
+      case 'distance':
+        return `${n} found no edit of the same file within ${x.limit} commits, the \`--max-pair-distance\` reach`
+      case 'age':
+        return `${n} found none within ${x.limit} hours, the \`--max-pair-age-hours\` reach`
+      case 'notDescendant':
+        return `${n} were only edited on a branch that never contained them, which no input widens`
+    }
+  })
+  return parts.join(', and ')
+}
+
 function emptyWindowSentence(f: RunCommentFields, ctx: RunCommentContext): string {
   const opening = 'Nothing resolved in this window. That is a reading, not a failure:'
+  const refused = refusedClause(ctx)
   if (f.unitsFound === 0) {
-    return `${opening} no commit here carried an agent marker that a later human commit then edited.`
+    // The marker-and-edit sentence is only true when the walk abandoned
+    // nothing. When it abandoned something, every clause of it is false:
+    // a commit DID carry a marker, a later human commit DID edit the same
+    // file, and a bound stopped the walk in between. Saying it anyway is
+    // what this branch did until 2026-10-25 (drift 7, src/launch.ts), and
+    // on a repository where agent seats commit between the owner's own
+    // touches it is the sentence every merge gets.
+    // Drift 8, and it is checked after the refusal tally rather than
+    // before it on purpose. A refusal means the walk DID find a
+    // generation and a later edit of the same file, which takes at least
+    // two commits, so the two branches cannot both apply to one window.
+    // Ordering the cheaper test first would still be correct and would
+    // read as though it might not be.
+    if (!refused && ctx.commitsInWindow !== undefined && windowTooSmallForAPair(ctx.commitsInWindow)) {
+      const held =
+        ctx.commitsInWindow === 1
+          ? 'this window holds one commit'
+          : `this window holds ${n(ctx.commitsInWindow)}`
+      return (
+        `${opening} a pairing takes ${PAIR_MINIMUM_COMMITS} commits, a generation and a later commit of yours ` +
+        `that edits the same file, and ${held}. So this window could not hold one whatever its commits carry, ` +
+        'which is a fact about the merge rather than about your history. The window note below says which merge ' +
+        'shape produced it, and a squash merge produces exactly this: the branch collapses into a single commit ' +
+        'and the generation-to-edit chain inside it is gone.'
+      )
+    }
+    if (!refused) {
+      return `${opening} no commit here carried an agent marker that a later human commit then edited.`
+    }
+    const one = ctx.refused!.total === 1
+    return (
+      `${opening} commits here did carry agent markers and were followed by your edits, and ` +
+      `${ctx.refused!.total} of those pairings ${one ? 'was' : 'were'} left out rather than guessed at. ` +
+      `${refused}. ` +
+      'Those are claims this run could not stand behind, so it did not make them. Raise the pairing ' +
+      'inputs on the Ursa step to see them anyway.'
+    )
   }
   const one = f.unitsFound === 1
   const found = one
@@ -231,7 +356,18 @@ export function renderRunComment(f: RunCommentFields, ctx: RunCommentContext): s
   lines.push('')
   lines.push('<details><summary>How this run was bounded</summary>')
   lines.push('')
-  lines.push(`- Commit window: \`${ctx.range}\``)
+  // The range, and how many commits are in it. The range alone was all
+  // this line carried until 2026-10-25, and a reader cannot count commits
+  // from two shas. The count is here rather than in the five-field table
+  // for the reason the self-check line is: the table's shape is fixed so
+  // two runs stay comparable, and this is a question a reader asks when
+  // deciding how far to trust a zero rather than one of the figures.
+  lines.push(
+    ctx.commitsInWindow === undefined
+      ? `- Commit window: \`${ctx.range}\``
+      : `- Commit window: \`${ctx.range}\`, ${n(ctx.commitsInWindow)} commit${ctx.commitsInWindow === 1 ? '' : 's'} in it. ` +
+        `${PAIR_MINIMUM_COMMITS} is the fewest a pairing can come from, since it needs a generation and a later commit of yours that edits the same file.`
+  )
   lines.push(`- Why that window: ${ctx.windowNote}`)
   lines.push(`- Acceptance declaration carried into these records: ${ctx.declarationBasis}`)
   lines.push(`- Records written to \`${ctx.recordsPath}\` on this runner. They are not pushed anywhere.`)

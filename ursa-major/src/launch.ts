@@ -51,9 +51,54 @@
 //      seats commit between one touch of a file by the owner and the
 //      next. Fixed in `src/bin/ursa.ts` (`pairingBounds`),
 //      `src/ci/run.ts` and `action.yml`.
+//   6. Why a work unit was dropped. The first drift that runs the other
+//      way: `ursa ci` has counted its two drop reasons since 2026-10-08
+//      and names them in the pull-request comment, and `ursa run` counted
+//      nothing and printed `1 work unit found, 0 resolved into records.`
+//      So the launch a person types was the one that could not say which
+//      bound to move, and the two surfaces could not be compared at all
+//      because only one of them held a number. Found 2026-10-24 by
+//      resolving two three-commit fixtures locally and getting
+//      byte-identical output from a unit below the size floor and a unit
+//      whose generated file was deleted. Fixed in `DroppedUnits` and
+//      `keepRecord` below, read by `src/bin/ursa.ts` and `src/ci/run.ts`.
+//   7. Why a generation never became a work unit. The stage above drift 6,
+//      and it runs back the original way. `ursa run` has printed the
+//      pairing walk's abandonment tally since the bounds shipped; `ursa
+//      ci` called `findCommitPairs`, which is
+//      `findCommitPairsWithDiagnostics(...).pairs`, so the runner computed
+//      all four counts and discarded them on the same line. With none in
+//      hand, the pull-request comment had one explanation for a window
+//      that resolved nothing and asserted it unconditionally: `no commit
+//      here carried an agent marker that a later human commit then
+//      edited`. Found 2026-10-25 by resolving `distantFixture` through
+//      both launches at `--max-pair-distance 2`, where a pair exists, is
+//      abandoned by the distance bound, and that sentence is false in
+//      every clause. Fixed in `PairRefusal` and `pairRefusals` below,
+//      read by `src/bin/ursa.ts` and `src/ci/comment.ts`.
+//   8. Whether the window could have held a pair at all. Drift 7 one step
+//      further out, and the first of these eight that is not about a
+//      number one launch held and the other did not. Both launches had
+//      `diagnostics.commitsScanned` and only `ursa run` printed it, and
+//      neither of them read it. So on a window of one commit, where a
+//      pairing is impossible by construction because it needs a
+//      generation and a LATER commit that edits the same file, both
+//      surfaces answered the question as though the window had been big
+//      enough and the history had come up empty. Found 2026-10-25 by
+//      resolving `editedFixture` with the merge window's base at `HEAD~1`
+//      instead of `HEAD~2`: `commitsScanned` is 1, every `abandoned`
+//      count is 0, and the comment reads `no commit here carried an agent
+//      marker that a later human commit then edited` about a history
+//      whose generation is one commit behind the base. A squash merge is
+//      the common case, since it collapses a whole branch into one commit
+//      and `src/ci/window.ts` already degrades the window to it and says
+//      so in `windowNote`. Fixed in `PAIR_MINIMUM_COMMITS` and
+//      `windowTooSmallForAPair` below, read by `src/bin/ursa.ts` and
+//      `src/ci/comment.ts`.
 
 import { isForgotten, loadConsent } from './consent'
 import { checkRecord, formatViolations, type Violation } from './invariants'
+import type { PairFinderDiagnostics } from './pairfinder'
 import type { OutcomeRecord, PairingBounds } from './types'
 
 /**
@@ -164,4 +209,281 @@ export function gateRecords(records: OutcomeRecord[]): GateResult {
       'still the evidence, but the numbers above cannot all be true at once, so this run is not ' +
       `reporting success.\n${formatViolations(violations)}`,
   }
+}
+
+/**
+ * Why the work units a launch found did not become records.
+ *
+ * Both launches drop a resolved episode for exactly two reasons, and they
+ * used to count them in two places: `src/ci/run.ts` kept this tally and
+ * put it in the pull-request comment, and `src/bin/ursa.ts` kept none at
+ * all and printed `1 work unit found, 0 resolved into records.` That is
+ * drift 6 at the top of this file, and it is the one drift so far that
+ * runs the other way, with the runner's surface ahead of the one a person
+ * types.
+ *
+ * Measured on 2026-10-24, on two three-commit fixtures a few lines apart:
+ * a pair whose generation is below the floor, and a pair whose generated
+ * file the human then deleted, produce byte-identical local output. One
+ * needs a flag and the other needs nothing, and the terminal cannot tell
+ * the two apart.
+ *
+ * The counting is shared; the wording is not. A terminal and a markdown
+ * comment are different surfaces and already say the same facts
+ * differently everywhere else in this codebase. What can silently
+ * diverge into a WRONG NUMBER — which episode counts as which kind of
+ * drop — is decided once, in `keepRecord` below. That both surfaces name
+ * the same flag is pinned by a test instead
+ * (`src/launch-parity.test.ts`).
+ */
+export interface DroppedUnits {
+  /** units `resolveEpisode` returned nothing for, with no exclusion to state */
+  unresolvable: number
+  /** units whose generation side was smaller than the `--min-chars` floor */
+  belowMinChars: number
+  /** the floor those units fell under, so the reader can raise it */
+  minChars: number
+  /**
+   * The biggest generation side among the units the floor dropped, in
+   * characters, or 0 when it dropped none.
+   *
+   * Carried so the remedy can name a value rather than a placeholder. The
+   * run already knows this number and withholding it is what made the
+   * fix two guesses instead of one: `--min-chars 1` was the second guess,
+   * and `--min-chars <this>` is the smallest value that would have
+   * recorded something. It is not part of the CI comment's own `dropped`
+   * shape (`src/ci/comment.ts`), which predates it and compares
+   * structurally, so passing this richer object to it needs no change
+   * there.
+   */
+  largestBelowFloor: number
+}
+
+export function newDroppedUnits(minChars: number): DroppedUnits {
+  return { unresolvable: 0, belowMinChars: 0, minChars, largestBelowFloor: 0 }
+}
+
+/**
+ * Is this resolved episode one to write, and if not, which bound dropped it?
+ *
+ * The two `continue`s both launches had, written once. Returns false and
+ * records the reason in `dropped`, so a caller's loop is
+ * `if (!keepRecord(record, minChars, dropped)) continue` and the decision
+ * and its label cannot be made in one place and counted in another.
+ *
+ * A type predicate because the caller needs the non-null narrowing the
+ * `if (!record)` it replaces used to give it.
+ */
+export function keepRecord(
+  record: OutcomeRecord | null,
+  minChars: number,
+  dropped: DroppedUnits,
+): record is OutcomeRecord {
+  if (!record) {
+    dropped.unresolvable++
+    return false
+  }
+  if (!clearsSizeFloor(record, minChars)) {
+    dropped.belowMinChars++
+    dropped.largestBelowFloor = Math.max(
+      dropped.largestBelowFloor,
+      record.stats.generated.totalChars,
+    )
+    return false
+  }
+  return true
+}
+
+/**
+ * Why a generation never reached the episode builder at all.
+ *
+ * Drift 7, and the stage above `keepRecord`. `DroppedUnits` counts work
+ * units that were built and then refused; this counts generations that
+ * were found, walked forward from, and abandoned before any work unit
+ * existed, because the walk hit one of its three pairing bounds
+ * (`findCommitPairsWithDiagnostics` in src/pairfinder.ts, which has
+ * tallied them under `diagnostics.abandoned` since the bounds shipped).
+ *
+ * It is shared for the same reason the drop tally is, and the asymmetry
+ * that made it necessary is the mirror image of drift 6's. There the
+ * runner held a number the terminal did not. Here the terminal rendered
+ * `diagnostics.abandoned` from its own `findCommitPairsWithDiagnostics`
+ * call and `src/ci/run.ts` called `findCommitPairs`, which is literally
+ * `findCommitPairsWithDiagnostics(...).pairs`, so the runner COMPUTED
+ * every one of these counts and then discarded them one line later.
+ *
+ * What the discard cost is not a missing number. With no abandonment
+ * tally in hand, `emptyWindowSentence` in src/ci/comment.ts had one
+ * explanation available for a window that resolved nothing and asserted
+ * it unconditionally: "no commit here carried an agent marker that a
+ * later human commit then edited." On a history where a pair was found
+ * and then abandoned by `--max-pair-distance`, every clause of that
+ * sentence is false. A commit carried the marker, a later human commit
+ * did edit the same file, and the walk declined to reach that far. That
+ * failure mode is already written down one stage lower, in
+ * `RunCommentContext.dropped`'s own docstring, which records a run on
+ * 2026-10-08 printing the same sentence beside `units-found=1`. The
+ * repair applied then covered the `unitsFound > 0` branch; this stage
+ * lands in the `unitsFound === 0` branch, because a generation abandoned
+ * by a bound produces no work unit to count.
+ *
+ * Why it matters on real history rather than only on a fixture: drift 5
+ * measured this repository at zero records under the default distance of
+ * 25 and two records at 400, because twelve agent seats commit between
+ * one touch of a file by the owner and the next. Every merge on a
+ * repository shaped like that one gets the sentence above, which tells
+ * the owner her agents never wrote anything she edited.
+ */
+export interface PairRefusal {
+  /** the `abandoned` key this came from, so a caller can switch on it */
+  bound: 'distance' | 'age' | 'interposedGeneration' | 'notDescendant'
+  /** generations the bound stopped, counted by whichever bound stopped first */
+  count: number
+  /**
+   * The flag that moves this bound, or null when no flag can.
+   *
+   * `notDescendant` is the null: the only edit found was on a branch the
+   * generation is not an ancestor of, which is a fact about the commit
+   * graph rather than a reach a caller can widen. Null rather than
+   * omitted so a surface that prints a remedy has to handle the case
+   * where there is none, instead of printing one flag's name for four
+   * reasons.
+   */
+  flag: '--max-pair-distance' | '--max-pair-age-hours' | '--max-interposed-generations' | null
+  /** the resolved value this walk ran under, or null where `flag` is null */
+  limit: number | null
+}
+
+export interface PairRefusals {
+  /** every refusal above, summed; zero when the walk abandoned nothing */
+  total: number
+  /** only the non-zero reasons, in the order a reader should read them */
+  refusals: PairRefusal[]
+}
+
+/**
+ * The abandonment tally both launches report, read off one walk's diagnostics.
+ *
+ * Takes the two diagnostic fields it needs rather than the whole
+ * `PairFinderDiagnostics`, so `src/ci/comment.ts` can hold this type in
+ * its context without importing the pair finder, and so a test can build
+ * an input by hand.
+ *
+ * ORDER IS PART OF THE CONTRACT, and it is not the declaration order of
+ * `abandoned`. `interposedGeneration` comes first because it is the one
+ * refusal that is not a reach limit: the file WAS edited in range, by a
+ * later generation, so the person's edit corrected that generation and
+ * not this one. Raising that bound makes the walk claim a correction it
+ * can see belongs to someone else, which is the opposite of what raising
+ * the other two does. A reader shown the cheap fixes first would move
+ * the wrong flag.
+ */
+export function pairRefusals(diagnostics: {
+  abandoned: { distance: number; age: number; interposedGeneration: number; notDescendant: number }
+  bounds: { maxPairDistance: number; maxPairAgeHours: number; maxInterposedGenerations: number }
+}): PairRefusals {
+  const { abandoned, bounds } = diagnostics
+  const all: PairRefusal[] = [
+    {
+      bound: 'interposedGeneration',
+      count: abandoned.interposedGeneration,
+      flag: '--max-interposed-generations',
+      limit: bounds.maxInterposedGenerations,
+    },
+    {
+      bound: 'distance',
+      count: abandoned.distance,
+      flag: '--max-pair-distance',
+      limit: bounds.maxPairDistance,
+    },
+    {
+      bound: 'age',
+      count: abandoned.age,
+      flag: '--max-pair-age-hours',
+      limit: bounds.maxPairAgeHours,
+    },
+    { bound: 'notDescendant', count: abandoned.notDescendant, flag: null, limit: null },
+  ]
+  const refusals = all.filter((r) => r.count > 0)
+  return { total: refusals.reduce((n, r) => n + r.count, 0), refusals }
+}
+
+/**
+ * The fewest commits a window can hold and still be able to produce one
+ * pairing: two.
+ *
+ * A pairing is a generation commit plus a LATER commit that edits the same
+ * file (`findCommitPairsWithDiagnostics` in src/pairfinder.ts). "Later" is
+ * the whole of it. One commit cannot be later than itself, so a window of
+ * one commit holds no pairing whatever that commit contains, and a window
+ * of none holds no pairing for the same reason with nothing to inspect.
+ *
+ * A constant and not the literal `2`, because this is the one number in
+ * drift 8 that both surfaces assert to a reader, and the two sentences
+ * that carry it are written separately on purpose (drift 6's rule above:
+ * a markdown comment and a terminal are different surfaces, and only the
+ * NUMBER has to match between them). A literal in each file is how the
+ * two come to disagree.
+ */
+export const PAIR_MINIMUM_COMMITS = 2
+
+/**
+ * Could this window have produced a pairing at all?
+ *
+ * Takes the commit count the walk itself scanned, so the answer is about
+ * the history the resolver actually read rather than about the range
+ * string it was given. Which count that is depends on the surface, and
+ * both are right for their own claim: `ursa ci` passes
+ * `PairFinderDiagnostics.rangeScanned`, the width of one merge window,
+ * because its sentence is about that merge; `ursa run` passes
+ * `commitsScanned`, every commit reachable from any ref, because its
+ * sentence is about the whole project it was pointed at. Those two
+ * populations shared one field name until 2026-10-25, which is the
+ * ledger entry `commitsScanned` counts two different populations.
+ *
+ * This is drift 8. Both launches held this count and neither asked this
+ * question, so both reported an empty window the same way whether the
+ * window was big enough to answer or not. The distinction matters because
+ * the two states call for opposite actions: a history that carries no
+ * agent markers is a question about commit trailers, and a window too
+ * small to hold a pair is a question about the merge, usually a squash.
+ * Telling a reader the first when the second is true sends them to fix
+ * their trailers, which are fine.
+ *
+ * `true` is not a failure and callers must not treat it as one. It is the
+ * reason a zero is uninformative, which is a different claim from the zero
+ * being wrong.
+ */
+export function windowTooSmallForAPair(commitsScanned: number): boolean {
+  return commitsScanned < PAIR_MINIMUM_COMMITS
+}
+
+/**
+ * The commit count a merge comment may quote as its window width, taken
+ * off the walk that produced it.
+ *
+ * `undefined` when the walk read no window, which is the renderer's
+ * omitted case: `src/ci/comment.ts` then prints the range alone and keeps
+ * the unconditional zero-state sentence, because a caller with no window
+ * cannot tell a window that found nothing from a window too small to
+ * find anything.
+ *
+ * This is a named function and not an expression at the one call site
+ * because of what the call site used to be. Until 2026-10-25 it read
+ * `diagnostics.commitsScanned`, which is the width of the range when a
+ * range was passed and every commit reachable from any ref when one was
+ * not, and the quote was safe only because `src/ci/run.ts` happens always
+ * to pass `range: window.range` (src/ci/window.ts types it as a
+ * non-optional string). A second caller assembling the same context from
+ * a rangeless walk would have labelled roughly 2,800 commits as one merge
+ * window and switched off `windowTooSmallForAPair` for every window it
+ * ever rendered. Pinning that to a function gives the narrowing a test of
+ * its own rather than a paragraph; the ledger entry is "`commitsScanned`
+ * counts two different populations and the type cannot tell a reader
+ * which" (2026-10-25).
+ */
+export function windowWidth(
+  diagnostics: Pick<PairFinderDiagnostics, 'rangeScanned'>,
+): number | undefined {
+  return diagnostics.rangeScanned ?? undefined
 }

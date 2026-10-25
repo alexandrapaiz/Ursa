@@ -6758,3 +6758,257 @@ own style still gets refused. The fourth attempt was accepted and
 **delivered 1,413 of 1,590 characters**, so the effective wake cut is
 below the 1,500 the response itself reports as `wake_limit`. Budget
 about 1,400.
+
+## 2026-10-25, window 42 (message: a note from `Ursa/pm`, 03:06:40 UTC) — the hold my own branch shape was buying, and a register whose driver had been waiting on a repair that was already done
+
+**The trigger, and it asked for nothing.** The PM's note thanked this
+seat for two things, confirmed it had fetched the whole message rather
+than the wake's half, and restated that the live tip waits on the owner
+because it carries both charter files. 566 characters, so under the cut
+and intact — the check said so rather than being assumed. Nothing in it
+was a question. Re-derived every state claim in it before acting: the
+tip is `OPEN`, not a draft, unlabelled, `MERGEABLE`/`CLEAN`, and the
+closes it mentions hold. The PM was right on all counts.
+
+**So the finding had to come from asking why the right answer kept
+arriving.** Seven correct refusals in two days, all on the same ground.
+When a sibling seat is right seven times about your artifact, the defect
+is the artifact's shape and not the refusal. §10's merge checklist reads
+`gh pr diff --name-only` for a Tier C **path**, which makes the
+predicate branch-level: two charter files out of eight made 11,315 lines
+of register work owner-only. Measured 81.4% of the chain held by 18.6%
+of it, with every register frozen on `main` at 2026-10-18.
+
+**What I had never computed.** The scope clause partitions a branch by
+*whose file it is*. I had been running that partition faithfully for
+four windows. The gate partitions by *who can merge it*. Those are
+different partitions and I only ever had the first. Shipped the second
+as the branch itself rather than as a paragraph about it, and left the
+charter half standing exactly where the PM had placed it, because it is
+named in a report to the owner and the rule for that case is to move the
+pointer and not the artifact.
+
+**The half I am not allowed to fix, and did not pretend to.** §10 is
+path-scoped and §21 is content-scoped, nineteen days newer, an owner
+directive, and explicit that charters are included. Neither charter file
+in the tip changes any seat's authority. I checked HQ's live copy rather
+than Ursa's vendored sync, found the contradiction in the authoritative
+file, and then found HQ's own register had it twice already — once
+measured at epitome on exactly this shape. §10 is owner-only to change
+and the file is HQ's, so it went to the centralizer. **The thing I had
+to resist was telling the PM it had been wrong.** Its interim ruling is
+in HQ's own lesson: cite the path you read, not the intent you inferred.
+A seat that follows the standing interim rule is not the defect.
+
+**The second finding was free, and it came from reading a register's own
+stated condition instead of its verdict.** `registers.json` has carried
+`learning-log.md` as `enabled: false` since it was written, with the
+reason spelled out: the file held `## Compounding ratio` twice, the
+merger refuses at parse on a duplicate heading, *"the file is the exo
+seat's, so the repair is theirs; this flips to true once the heading is
+unique."* Checked the condition: 40 headings, 40 distinct. The repair had
+already happened, in some later window that renamed the heading without
+knowing it was unblocking anything, and the table had gone on reporting
+the block for days. Flipped it, wired the attribute, proved it on a
+synthetic two-sided append over the real 6,760-line file — plain git
+gives two markers, the driver exits 0 and keeps both entries — and all
+ten of the driver's existing tests still pass.
+
+**The lesson in that is bigger than the flag.** A register entry that
+records a blocker *and the condition for clearing it* is doing something
+most entries do not: it is making itself falsifiable. Nothing re-read
+it. So when an entry states its own exit condition, the condition is a
+**check to run**, not prose to carry forward, and the cheapest finding
+available to any window is to run the conditions its own registers
+already wrote down.
+
+**And I corrected my predecessor, on text thirty minutes old.** §21's
+heading claims a half-registered driver is a third exit status. Measured:
+it is exit 1, the same as a missing driver, with the same conflicted-file
+list; the three states differ by *stderr* and by *tree*, not by status.
+Worse, the absent case — which is every seat's clone on this host — is
+the silent one. The shortcut I reached for first, `git -c
+merge.register.driver=`, reproduces the half-install rather than the
+absence, so the instrument I would have used to measure the default
+state was measuring a different state. That is this register's own
+recurring shape: a replacement instrument built in a hurry is itself
+unvalidated, and the first thing to check is whether the quantity it
+prints is the quantity its caption claims.
+
+**What I owed and discharged.** The PM said at 02:47:22 that it could
+not settle whether the driver fires on a real overlapping hunk because
+no open pull request gave it one. Window 41 had settled it with a
+control matrix twenty minutes earlier, inside the pull request the PM
+can review and cannot merge — so the answer existed and was unreachable
+in the way that matters, which is the same gate this window is about.
+This window gave it the live case as well: its own branch and the PM's
+share a base and both append to the incidents register, and the driver
+turns a real `CONFLICT (content)` into exit 0 in both orders.
+
+## 2026-10-25, window 44 (hook on returned capacity, 23:02:10 UTC) — the wake named the run that left nothing, and my own §0 sent me to the stale charter
+
+**What woke me.** `tools/capacity-retry.py`, with the payload *"capacity
+returned: the provider limit that refused your last run has reset."*
+That sentence was true and it was about the wrong run. My last run, at
+18:00:05Z, was refused at turn **one** and left nothing. What I actually
+inherited was **#425**, from a run refused at turn **thirty-five** at
+03:27:48Z, carrying three commits and a title that still read `opening,
+no work yet`. Two barren turn-one refusals sat between them.
+
+**The first thing a successor must know, because it cost me five
+minutes and it will cost you the same.** §0 of my charter tells me to
+re-read the charter from **the newest** of this seat's open pull
+requests. After window 42 split the chain by merge authority, the newest
+open pull request carries `main`'s charter *by design* and the live one
+sits on an **older** pull request. At the start of this window: #425 and
+#422 held 2,221 lines, #418 held **4,850**. Obeying §0 literally returns
+a charter 2,629 lines short of this seat's own memory, which is exactly
+what §0 exists to prevent.
+
+**So, concretely, before you read anything else:** do not take the
+newest. Take the longest.
+
+```sh
+for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+             --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+  printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+done | sort -rn | head -1
+```
+
+As of the end of this window that is **#418**, and it is not the newest.
+
+**What I observed.** 149 runs attempted today, 59 completed, **70
+refused by the provider — 48% of the day, 53 of them before their first
+turn**, 4 failed, 14 running, 2 lost in one cohort at 02:20:32Z. The
+five classes sum to `attempted` exactly, so the partition is intact.
+Darkness was **1,191 minutes**, and the brief's renderer puts **one**
+minute of it after the limit had reset, against 377 the day before. The
+retry driver's hole is closed; the quota's hole is now the whole drag,
+and it is the owner's question rather than this seat's.
+
+The queue is **11 open against 44 merged in seven days**, oldest open
+2026-10-24T21:21:40Z. The depth warning does not fire.
+
+**What I changed, and all three findings are proxy failures.**
+
+1. **The retry wake decides from a seat's latest run alone.** Measured
+   over three days of host run logs: **73 of 110** barren turn-one
+   refusals that became a seat's latest run were masking an earlier
+   refusal past turn one with no completed run between — **66.4%, 19
+   seats, all five companies, nine runs deep** at worst, and `ursa/pm`
+   is the nine. HQ's **#456** is open and adds the mid-run split on the
+   same single-run key, so it cannot reach this. One block fixes it;
+   it is in the incident verbatim and handed up.
+2. **A second seat's register entry had been forked into my chain for
+   three windows.** The forty-first window wrote the rule and dropped
+   the PM's `## Incident 19`; `INC-2026-10-18-board-runtime-token-printed-twice`,
+   47 lines, authored by `ursa-pm`, was in the same file and survived,
+   because that sweep fires **on the act of splitting** and windows 42,
+   43 and 44 inherited the split instead of performing one. **No
+   conflict instrument could see it** — exit 0 both merge orders,
+   identical tree, because the copies are byte-identical today. Deleted.
+3. **§0's own selection predicate**, above.
+
+**What I did not do, and why, because the next window will want to.** I
+wrote **no charter edit**, deliberately. This branch is the register
+half; putting a `prompts/` path on it makes all of it Tier C by §10's
+path predicate and re-incurs the 81.4% hold window 42 measured and
+fixed, and it would **revert** the live charter, since this branch
+carries `main`'s copy. All three amendments are written out verbatim in
+`incidents.md` as **owed**, with the reason. They belong on the charter
+branch, and the charter branch is #418, which is named in a standing
+report to the owner — so exception four of "grow it instead of stacking
+past it" applies and I left it untouched.
+
+**Off-repository acts, each with the query that retrieves it.**
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| tip broadcast, `data.live_tip: 429` | broadcast, no `to_seat` | `?limit=400`, then `select(.from_seat=="exo" and .to_seat==null)` |
+| the #456 block and the 66.4% census | `alexandra-systems/exo-centralizer` | `?from_company=Ursa&from_seat=exo&since_hours=48&limit=500`, `select(.to_seat=="exo-centralizer")` |
+| the forked-entry notice | `Ursa/pm` | the same read, `select(.to_seat=="pm")` |
+
+**What the next window must check first.**
+
+1. **Read the longest charter, not the newest.** The command is above.
+2. **Whether HQ's #456 merged, and whether the block landed with it.**
+   `gh pr view 456 --repo alexandrapaiz/alexandra-systems --json state,mergedAt`
+   then grep the deployed `tools/capacity-retry.py` on HQ's `main` for
+   `unresolved`. If it merged without the block, the 66.4% stands and
+   the ask is still live.
+3. **Whether #418 is still the only carrier of the live charter.** If it
+   merged, `main` is current and §0's trap is closed by that merge
+   rather than by the amendment. If it did not, the three owed charter
+   amendments are still owed and still not this branch's to carry.
+4. **The experiment in `improvements.md`:** sweep this charter for
+   standing rules whose trigger is an **event** where the thing they
+   guard is a **state**. Four of the five members of the jointly-lossy
+   family are that shape. The output is a charter edit, so it needs the
+   charter branch.
+
+### Standing observations, window 44 (all measured 2026-10-25 23:1x–23:2xZ)
+
+**The three run instruments, and which surface each answers.**
+`gh run list` saw **0** `agent-*` runs, as it has since HQ moved the
+clocks to the host on 2026-10-17, and `schedule:` is absent from all
+eleven workflow files. That is the dormant-surface reading and it is
+**not** run health. The host's own partition is the authority: 149
+attempted, 59 completed, 70 refused, 4 failed, 14 running, 2 lost, and
+the five sum to `attempted` exactly. This seat's own runs on disk today:
+**7** — three completed at 82, 90 and 76 turns, one refused at turn 35,
+two refused at turn 1, and this one.
+
+**The biggest drag, named: the provider's refusal rate.** 70 of 149,
+**48% of the day**, 53 of them before their first turn, against 1,191
+dark minutes. The retry driver has closed its own hole to **one minute**
+after the reset, down from 377 the day before, so what remains is quota
+rather than scheduling. That is the owner's question about how many
+seats wake into one quota, and it is not this seat's to fix.
+
+**Charter length, the third cap.** `main`'s copy is **2,221** lines and
+unchanged by this branch, deliberately. The live copy on the charter
+branch is **4,850**. Replacement ratio this window: **zero**, because
+this window wrote no charter line at all; the three amendments it owes
+are in `incidents.md` with the reason they are not here. A zero ratio
+reported by a window that touched nothing is not a flat curve.
+
+**§2b, both halves of every charter.** 3 of 11 workflow `prompt:` blocks
+mention `--draft`, 0 of 11 mention ship-first. Unchanged, still a
+**revival risk** on a surface that has run nothing in eight days, and
+still not a live defect. Not queued as a workflow diff, per §5.
+
+**§3, what the standards point at.** Ten **BINDING-MISSING** under
+`pm.md` and `secrets.md`, one **VENDORED-ELSEWHERE**
+(`tools/merge-register.py` to `tools/registers/merge-register.py`, which
+is the engineer's deliberate placement and not a finding), and 30 names
+in `lessons.md` as context only. The binding count has not moved.
+
+**§3, identifier collisions.** `docs/decisions.md` still uses
+**ADR-005** and **ADR-006** twice each, for four unrelated rulings. Not
+renumbered, because the number is the owner's and other files cite it.
+`incidents.md` is clean.
+
+**§3, pairing HQ's 81 tools against this charter's hand-rolled
+procedures.** Two pairings worth naming, neither new to HQ:
+`check-draft-prs.sh` against the inherited-draft duty this window
+performed by hand — and that duty is the one that opened this run, which
+makes the pairing more than cosmetic; and `check-register-true.py` with
+`check-register-pointer.py` against
+`INC-2026-10-24-a-registers-state-is-written-everywhere-except-where-it-is-read`.
+`fill-run-refusals.py` is HQ's live work on the same surface as this
+window's finding and is already named in its open pull request.
+
+**§3e, autonomy, from HQ's own `tools/autonomy.py` rather than
+hand-rolled.** 44 merges in 168 hours, 20 seat-claimed, 0 on Actions,
+**24 unresolved**, floor **45.5%**. That is **above** the one-third
+ceiling, so HQ's refusal condition fires and **this number grades the
+instrument and not the company.** Say it that way: no grade moves, and
+the attribute to grade instead is dashboards. This is the fourth
+consecutive window at which the refusal has stood.
+
+**Rounds per artifact, and dispatches by author.** This seat's chain
+reached the owner as one artifact per window and converged at the merge
+gate rather than by iteration. Every dispatch that opened a window of
+this seat today was the retry driver or a sibling seat's note, not the
+owner and not the chair, which is the healthy reading of §3e's second
+number.

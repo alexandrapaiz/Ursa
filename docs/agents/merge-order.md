@@ -1,113 +1,100 @@
-# Merge order for the owner — replaced each run by Ursa's exo seat
+# Merge order — replaced each window by Ursa's ExO seat
 
-Measured 2026-10-25 at 03:05 UTC, window 41, on an unshallowed clone with
-`remote.origin.fetch` widened and **both merge drivers installed**. Read
-the one constraint below before the order, because it is the only thing
-in this file that changes an outcome.
-
-## The three numbers (§5b)
-
-**7 open, 68 merged in the last seven days, oldest open #395 at
-2026-10-24T21:21:40Z, under six hours old.** Merges outrun the open
-queue by nearly ten to one, so the depth alarm is not firing. This is
-the healthiest reading in this register's history, against 17 open
-earlier tonight, 52 on 2026-10-04 and 37 on 2026-09-30. Three of the
-seven are drafts of runs that are live this minute.
-
-## The one constraint: merge #418, not #414
-
-#414 and #418 are both this seat's and **#414 is contained in #418**:
-
-```
-git merge-base --is-ancestor refs/prs/414 refs/prs/418   # exit 0 = contained
-```
-
-**#414 cannot be merged after #417, in any position in any order.** It
-carries a 75-line copy of the PM's `## Incident 19`, frozen by this
-seat's split of 2026-10-24, while the entry's author has grown it to 182
-lines on #417. The two collide on that entry, and #418 is the pull
-request that deletes the copy. Measured:
-
-| order | result |
-|---|---|
-| 395, 412, **417, 418**, 419, 420 | **7 of 7 clean**, and #414 then merges as "Already up to date" |
-| 395, 412, 414, 417, … | #417 refuses on `Incident 19` |
-| 395, 412, 417, 414, … | #414 refuses on `Incident 19` |
-
-So #414 is not an alternative to #418 and never was: it is contained in
-it and it is the member of the pair that conflicts. It is left open
-rather than closed because Ursa's PM has named it to the owner in an
-open ask, and this seat does not move a pull request another seat has
-promised the owner would stay put.
-
-**And note what this says about a verdict that was correct.** The PM
-reviewed #414 at 02:47:22 UTC, merged it in a scratch worktree against
-current `main` with both drivers installed, got zero conflict markers,
-and reported it as waiting only on the owner. Every word of that is
-true. `merge-tree origin/main refs/prs/414` still exits 0 at 03:05.
-Clean against `main` and mergeable are different claims the moment a
-second pull request is in the queue, and only the ordering sweep can
-tell them apart. That is the argument for this file existing.
-
-## The order
-
-| | PR | seat | what it is |
-|---|---|---|---|
-| 1 | #395 | research | the judge-score result crossing from vision into text |
-| 2 | #412 | frontend | verify the frozen hover captures (draft, live run) |
-| 3 | #417 | pm | tonight's standup, and the author's full `Incident 19` |
-| 4 | **#418** | **exo** | **window 41, and it contains #414, #404 and #394** |
-| 5 | #419 | skill | write #393's report (draft, live run) |
-| 6 | #420 | engineer | hook run (draft, live run) |
-| — | #414 | exo | **absorbed by #418. Do not merge it separately.** |
-
-Positions 3 and 4 may be swapped: #418 and #417 merge clean in either
-order and `Incident 19` is 182 lines in both outcomes. Everything else
-is order-independent, because no other pair touches a shared register
-entry.
-
-Four of the seven touch a driver-managed file, which is why the
-installers are the first thing this file asks for: #413's successor
-#420, #417, #418 and #419 on `docs/ideas.md`, and #414, #417 and #418 on
-`docs/agents/incidents.md`.
-
-## Install the drivers before you measure, or the answers are false in both directions
-
-This repository declares two custom merge drivers in `.gitattributes`
-and ships both installers. **A clone as handed has neither registered**,
-and `git config --get-regexp '^merge\.'` comes back empty.
+**Measured 2026-10-25 at 23:1xZ by the forty-fourth window**, on an
+unshallowed clone with `remote.origin.fetch` widened to all heads (§0)
+and **both of this repository's merge drivers registered** before any
+verdict was taken:
 
 ```sh
 bash tools/ledger/install-driver.sh
 bash tools/registers/install-drivers.sh
-git config --get-regexp 'merge\.(ledger|register)\.'   # must print 6 lines
+git config --get-regexp 'merge\..*\.driver'   # two lines, or every verdict below is false
 ```
 
-Window 40 measured the first direction: four of seventeen pull requests
-reported `CONFLICT docs/ideas.md` before the installers and none after,
-same commits and same instrument. Window 41 measured the second: once
-installed, the `register` driver **refused one merge that git would have
-taken**, and it was right to, because the merge would have reverted 107
-lines of another seat's postmortem. The same two commands removed four
-false conflicts and surfaced one true one.
+## The queue
 
-**Drop the `2>&1` from every `merge-tree` call.** A driver writes its
-diagnostic to stderr, correctly, and `2>&1` puts that line where the
-tree object identifier was.
+| | |
+|---|---|
+| open pull requests | **11** |
+| merged in the last seven days | **44** |
+| oldest open | 2026-10-24T21:21:40Z |
 
-**And read the refusal reason before you believe the exit status.** The
-driver's unit is the entry and git's is the line, so two edits twelve
-lines apart inside one entry are refused on a tree that is **byte
-identical** to the clean merge: exit 1 and exit 0 over the same tree
-object. The four measured cases, the three exit statuses of a
-half-registered driver, and the controls are `runner-facts` §21. The
-account of what the refusal caught is
-`INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`.
+Open does not outnumber the week's merges, so the depth warning does
+not fire. The owner is absorbing work faster than the org produces it.
 
-## Pull requests this seat is holding open deliberately
+## Conflicts with `main`
 
-#414, #404 and #394 are all contained in #418 and are **left standing**
-on purpose. The PM reviewed #404 at 2026-10-24T23:08:22 and #414 at
-2026-10-25T02:47:22, found each clean and unmergeable only for want of
-owner authority over `prompts/`, and recorded them as waiting on her.
-**The identifier the decision should move to is #418.**
+Instrument: `git merge-tree --write-tree origin/main refs/prs/<n>`,
+drivers registered, **no `2>&1`**, because a driver writes its
+diagnostic to stderr and redirecting it puts that line where the tree
+object identifier was.
+
+| pull request | branch | verdict | instrument |
+|---|---|---|---|
+| #395 | ursa-research/2026-10-24-hook-2 | CLEAN | merge-tree, drivers on |
+| #418 | ursa-exo/2026-10-25-message | **CONFLICT**, one file | merge-tree, drivers on |
+| #423 | ursa-skill/2026-10-25-message-merge | CLEAN | merge-tree, drivers on |
+| #424 | ursa-frontend/2026-10-25-message | CLEAN | merge-tree, drivers on |
+| #425 | ursa-exo/2026-10-25-message-3 | CLEAN | merge-tree, drivers on |
+| #426 | ursa-engineer/2026-10-25-message-2 | CLEAN | merge-tree, drivers on |
+| #427 | ursa-security/2026-10-25-hook | CLEAN | merge-tree, drivers on |
+| #428 | ursa-engineer/2026-10-25-hook | CLEAN | merge-tree, drivers on |
+| #429 | ursa-exo/2026-10-25-hook-2 | CLEAN | merge-tree, drivers on |
+| #430 | ursa-market/2026-10-25-message | CLEAN | merge-tree, drivers on |
+| #431 | ursa-pm/2026-10-25-hook-2 | CLEAN | merge-tree, drivers on |
+
+**Ten of eleven are clean and there is no ordering constraint between
+any of them.** All four register drivers fired on #418 and auto-merged
+all four registers; the full stderr is in this window's pull request.
+
+## The one conflict, and it is the file this charter rewrites
+
+#418's only conflicted path is **`docs/agents/merge-order.md`** — this
+file. It is declared `enabled: false` **by name with the reason** in
+`tools/registers/registers.json`, because this charter replaces it
+wholesale each window and an entry-keyed merge would publish two
+contradictory merge orders. So the conflict is correct, expected, and
+resolved by taking the newer copy:
+
+```sh
+git checkout --theirs docs/agents/merge-order.md
+```
+
+## The finding the owner should have before she reads #418
+
+**#418's register half is now provably redundant with `main`**, measured
+set-wise with heading levels normalised, after #422 merged at
+2026-10-25T23:06:36Z:
+
+| file | lines in #418 found nowhere on `main` |
+|---|---|
+| `docs/agents/incidents.md` | **0** |
+| `docs/agents/learning-log.md` | **0** |
+| `docs/agents/runner-facts.md` | **0** |
+| `docs/agents/improvements.md` | **0** |
+
+So everything in #418 except its two charter files has already landed by
+another route. What remains is `prompts/exo-agent.md` (+2,698/-69) and
+`prompts/pm-agent.md` (+30/-0), which is Tier C and hers.
+
+**The decision in front of her is now a two-file charter decision**,
+where a week ago it was a twelve-file, nine-thousand-line one. That is
+the whole of what window 42's split bought, and it is reported rather
+than acted on: #418 is named in a standing report to the owner, and the
+rule for that case is to post which pull request the decision moves to
+and leave the artifact exactly where the PM placed it. **Nothing in
+#418 has been touched.**
+
+## Landing order
+
+There is no ordering constraint to simulate. Any of the ten clean pull
+requests may land in any order. #418 lands whenever its charter question
+is answered, and its one conflict is resolved with the single command
+above.
+
+#429 is this window's own and the PM may merge it under §21: it carries
+no `prompts/` path, which is the predicate §10's checklist reads.
+
+```sh
+gh pr diff 429 --name-only | grep '^prompts/'   # no output
+```

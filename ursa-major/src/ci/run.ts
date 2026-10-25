@@ -27,14 +27,14 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { findCommitPairs, resolvePairingBounds } from '../pairfinder'
+import { findCommitPairsWithDiagnostics } from '../pairfinder'
 import { buildEpisodes, type Episode } from '../episodes'
 import { deriveSignals, type Declaration } from '../signals'
 import { saveEpisodes, saveRecord, ursaDir } from '../store'
 import type { OutcomeRecord } from '../types'
 import type { Violation } from '../invariants'
 import { resolveEpisode } from '../resolve-episode'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
+import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds, windowWidth } from '../launch'
 import { distill } from '../tuning/distill'
 import { emptyTuning, mergeDistill } from '../tuning/merge'
 import type { TuningRecord } from '../tuning/types'
@@ -189,11 +189,18 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR
 
   // 3. Resolve.
-  // Built once and passed to the walk, so the numbers stamped into every
-  // record below are the numbers the walk used and not a second reading
-  // of the same options (`resolvePairingBounds` in src/pairfinder.ts).
-  // This launch calls `findCommitPairs`, which returns no diagnostics, so
-  // without this it had no access to the resolved bounds at all.
+  // One walk, and its diagnostics kept. Until 2026-10-25 this line called
+  // `findCommitPairs` and a separate `resolvePairingBounds` beside it, on
+  // the stated grounds that `findCommitPairs` "returns no diagnostics, so
+  // without this it had no access to the resolved bounds at all". That was
+  // true of the bounds and false of everything else in the same object:
+  // `findCommitPairs` is `findCommitPairsWithDiagnostics(...).pairs`, so
+  // this launch computed the walk's whole abandonment tally and threw it
+  // away one line later. That is drift 7 (`pairRefusals` in src/launch.ts).
+  //
+  // Taking `bounds` off the diagnostics rather than from a second
+  // `resolvePairingBounds` call also makes the record's stamp structurally
+  // the walk's own numbers instead of two calls that agree today.
   const pairOptions = {
     range: window.range,
     agentIdentities: opts.agentIdentities,
@@ -201,15 +208,19 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     maxPairAgeHours: opts.maxPairAgeHours,
     maxInterposedGenerations: opts.maxInterposedGenerations,
   }
-  const bounds = resolvePairingBounds(pairOptions)
-  const pairs = findCommitPairs(opts.projectPath, pairOptions)
+  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(opts.projectPath, pairOptions)
+  const bounds = diagnostics.bounds
+  // The stage above `dropped` below: generations the walk abandoned before
+  // any episode existed. Shared with `ursa run` so the two surfaces cannot
+  // report different numbers for the same history (src/launch.ts).
+  const refused = pairRefusals(diagnostics)
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
   const recordPaths: string[] = []
   // Counted so the run comment can say which bound dropped a unit instead of
   // asserting the one reason it is most likely NOT to be (src/ci/comment.ts,
   // emptyWindowSentence).
-  const dropped = { unresolvable: 0, belowMinChars: 0, minChars }
+  const dropped = newDroppedUnits(minChars)
   // Erasure survives re-derivation on this launch too. A runner that has
   // the project's `.ursa/` (committed, cached, or simply the same machine
   // on a self-hosted runner) holds the tombstones `ursa forget` wrote, and
@@ -221,13 +232,14 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   for (const episode of episodes) {
     if (erased.has(episode.id)) { suppressed++; continue }
     const record = resolveEpisode(opts.projectPath, episode)
-    if (!record) { dropped.unresolvable++; continue }
-    // The same floor `ursa run` applies, and for the same reason it exempts
-    // a refusal-only record from it (src/launch.ts, clearsSizeFloor). Asked
-    // here as `record.stats.generated.totalChars < minChars` alone until
-    // 2026-10-10, which dropped the one record whose whole job is to say
-    // out loud that an episode's every path was an import.
-    if (!clearsSizeFloor(record, minChars)) { dropped.belowMinChars++; continue }
+    // Both drops and both tallies in one call, shared with `ursa run`
+    // (src/launch.ts, `keepRecord`). The floor it asks is the same one
+    // `ursa run` asks, and for the same reason it exempts a refusal-only
+    // record from it. This was `record.stats.generated.totalChars <
+    // minChars` alone until 2026-10-10, which dropped the one record
+    // whose whole job is to say out loud that an episode's every path was
+    // an import.
+    if (!keepRecord(record, minChars, dropped)) continue
     const signals = deriveSignals(record, declaration)
     signals.notes = [...(signals.notes ?? []), `CI launch: ${window.note}`]
     record.signals = signals
@@ -270,6 +282,26 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     declarationBasis: declaration.basis,
     recordsPath: join(ursaDir(opts.projectPath), 'records'),
     dropped,
+    refused,
+    // The walk's own count, for the same reason `bounds` above is taken
+    // off the diagnostics rather than recomputed: this is the number of
+    // commits the resolver read, not the width of the range string it was
+    // handed. Drift 8 (`windowTooSmallForAPair` in src/launch.ts) is that
+    // both launches have had this number since the diagnostics shipped
+    // and neither asked whether it was large enough for a pairing.
+    //
+    // Through `windowWidth` and not off `diagnostics.commitsScanned`,
+    // since 2026-10-25: that field counts every commit reachable from any
+    // ref when the walk got no range, and this line renders its value to
+    // a reader as the width of one merge window. `windowWidth` reads the
+    // narrowed `rangeScanned`, which is `null` exactly when no window was
+    // walked, and returns `undefined` there so the renderer prints no
+    // count and keeps the unconditional sentence. On this path that null
+    // is unreachable (`window.range` is a non-optional string,
+    // src/ci/window.ts); the narrowing is still routed through a tested
+    // function, because what makes the quote safe should be checkable
+    // rather than a fact about one caller.
+    commitsInWindow: windowWidth(diagnostics),
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the

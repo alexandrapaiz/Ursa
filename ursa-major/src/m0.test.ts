@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -113,6 +113,140 @@ describe('M0: ursa run over a git repo', () => {
     expect(existsSync(join(repo, '.ursa', 'episodes.json'))).toBe(true)
     const eps = JSON.parse(readFileSync(join(repo, '.ursa', 'episodes.json'), 'utf8'))
     expect(existsSync(join(repo, '.ursa', 'records', `${eps[0].id}.json`))).toBe(true)
+  })
+})
+
+describe('a work unit that did not become a record says which bound dropped it', () => {
+  // The defect, measured on 2026-10-24: `1 work unit found, 0 resolved into
+  // records.` was the entire explanation the local launch gave, for both of
+  // the two reasons a unit can be dropped. The two fixtures below printed
+  // byte-identical output on main. One of them is fixed by passing a flag
+  // and the other cannot be fixed by any flag, which is the difference the
+  // reader had no way to see.
+  //
+  // Asserted on the sentence rather than on the count, because the count was
+  // already right. What was missing was a reason, and a test that reads
+  // `records.length` would pass on the output this describe block exists to
+  // replace.
+
+  /** The run's own stdout, which is the surface under test here. */
+  async function runLocally(repo: string, args: string[] = []): Promise<{ out: string; code: number }> {
+    const chunks: string[] = []
+    const realLog = console.log
+    console.log = (...a: unknown[]) => { chunks.push(a.map(String).join(' ')) }
+    try {
+      const code = await main(['run', repo, ...args])
+      return { out: chunks.join('\n'), code }
+    } finally {
+      console.log = realLog
+    }
+  }
+
+  /**
+   * A real pair whose generation side is tiny: 32 characters, which is below
+   * every floor this product ships with. The work is genuine and the only
+   * thing wrong with it is its size, so the remedy is a number.
+   */
+  function smallPairRepo(): string {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-small-'))
+    sh(dir, 'git', ['init', '-q', '-b', 'main'])
+    writeFileSync(join(dir, 'note.md'), 'seed\n')
+    sh(dir, 'git', ['add', '.'])
+    sh(dir, 'git', ['commit', '-q', '-m', 'Base'])
+    writeFileSync(join(dir, 'note.md'), 'The model wrote this short note.\n')
+    sh(dir, 'git', ['add', '.'])
+    sh(dir, 'git', ['commit', '-q', '-m', 'Generate note\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+    writeFileSync(join(dir, 'note.md'), 'The model wrote this brief note.\n')
+    sh(dir, 'git', ['add', '.'])
+    sh(dir, 'git', ['commit', '-q', '-m', 'Tighten it'])
+    return dir
+  }
+
+  /**
+   * A real pair the resolver cannot read: the model wrote a file and the
+   * person deleted it, so the finished side of every resolvable path is
+   * absent and there is no import to state instead
+   * (`src/resolve-episode.ts` returns null). It is also the outcome this
+   * product most wants to record, since a draft thrown away whole is
+   * `generated_deleted`, so the honest message has to say that no flag
+   * recovers it rather than implying one does.
+   */
+  function deletedDraftRepo(): string {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-deleted-'))
+    sh(dir, 'git', ['init', '-q', '-b', 'main'])
+    writeFileSync(join(dir, 'seed.md'), 'seed\n')
+    sh(dir, 'git', ['add', '.'])
+    sh(dir, 'git', ['commit', '-q', '-m', 'Base'])
+    writeFileSync(join(dir, 'draft.md'), 'A draft the model wrote.\n'.repeat(20))
+    sh(dir, 'git', ['add', '.'])
+    sh(dir, 'git', ['commit', '-q', '-m', 'Generate draft\n\nCo-Authored-By: Claude <noreply@anthropic.com>'])
+    rmSync(join(dir, 'draft.md'))
+    sh(dir, 'git', ['add', '-A'])
+    sh(dir, 'git', ['commit', '-q', '-m', 'Throw the draft away'])
+    return dir
+  }
+
+  it('names the --min-chars floor, and the lowest value that would have recorded the unit', async () => {
+    const repo = smallPairRepo()
+    const { out } = await runLocally(repo, ['--min-chars', '200'])
+    expect(out).toContain('1 work unit found, 0 resolved into records.')
+    expect(out).toContain('1 work unit was found and not recorded')
+    expect(out).toContain('carried fewer than 200 generated characters, which is the --min-chars floor')
+    // The remedy names a value, not a placeholder. 32 is the generation
+    // side of this fixture, and the floor is `>=`, so it is exactly the
+    // lowest floor that keeps the unit.
+    expect(out).toContain('--min-chars 32 is the lowest floor that would have recorded it')
+  })
+
+  it('and that value is the real boundary, asserted from both sides', async () => {
+    // The sentence above is a claim about this resolver's behaviour, so it
+    // is checked against the behaviour rather than trusted. A message that
+    // names a number the run then refuses is worse than one that names no
+    // number, because the reader stops believing the next sentence too.
+    const repo = smallPairRepo()
+    const at = await runLocally(repo, ['--min-chars', '32'])
+    expect(at.out).toContain('1 work unit found, 1 resolved into record.')
+    rmSync(join(repo, '.ursa'), { recursive: true, force: true })
+    const above = await runLocally(repo, ['--min-chars', '33'])
+    expect(above.out).toContain('1 work unit found, 0 resolved into records.')
+    expect(above.out).toContain('--min-chars 32 is the lowest floor')
+  })
+
+  it('says no flag recovers a unit whose generated file the edit deleted', async () => {
+    const repo = deletedDraftRepo()
+    const { out } = await runLocally(repo, ['--min-chars', '10'])
+    expect(out).toContain('1 work unit found, 0 resolved into records.')
+    expect(out).toContain('1 resolved to nothing this run could stand behind')
+    expect(out).toContain('No flag changes that one')
+    expect(out).toContain('a generated file your edit deleted outright')
+    // The size floor did not fire here, so its sentence must not appear.
+    // Printing both reasons for one unit is the arithmetic failure the
+    // abandoned-generations block upstream was already fixed for.
+    expect(out).not.toContain('--min-chars floor')
+  })
+
+  it('the two cases no longer print the same thing, which is the whole defect', async () => {
+    // On main both of these produced exactly `1 work unit found, 0 resolved
+    // into records.` followed by two lines of zeros. This assertion is the
+    // regression guard for the defect itself rather than for either message.
+    const small = await runLocally(smallPairRepo(), ['--min-chars', '200'])
+    const deleted = await runLocally(deletedDraftRepo(), ['--min-chars', '10'])
+    expect(small.out).not.toBe(deleted.out)
+    expect(small.out).toContain('--min-chars')
+    expect(deleted.out).not.toContain('--min-chars floor')
+  })
+
+  it('stops reciting zeros when nothing was recorded', async () => {
+    // `0 chars survived your editing verbatim, 0 survived edited.` followed
+    // by `That's the part worth noticing` is what a user saw above the
+    // silence. The erased-episode path in `main` already refuses to print
+    // that shape, for the same reason.
+    const { out } = await runLocally(smallPairRepo(), ['--min-chars', '200'])
+    expect(out).not.toContain('0 chars survived your editing verbatim')
+    expect(out).not.toContain('part worth noticing')
+    // Still printed when there is something to notice.
+    const kept = await runLocally(fixtureRepo(), ['--min-chars', '10'])
+    expect(kept.out).toContain('part worth noticing')
   })
 })
 

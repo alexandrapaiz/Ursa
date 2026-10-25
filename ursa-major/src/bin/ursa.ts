@@ -54,7 +54,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
 import { formatResolverIdentity } from '../resolver-identity'
-import { clearsSizeFloor, erasedEpisodeIds, gateRecords, stampPairingBounds } from '../launch'
+import { PAIR_MINIMUM_COMMITS, erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds, windowTooSmallForAPair, type DroppedUnits } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -63,12 +63,19 @@ import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types
 // before the CI launch existed, and moving the definition is not a reason
 // to make every caller move with it.
 export { artifactFor, resolvablePaths, resolveEpisode } from '../resolve-episode'
-import { artifactFor, resolvablePaths, resolveEpisode } from '../resolve-episode'
+import { artifactFor, MAX_BLOB_CHARS, resolvablePaths, resolveEpisode } from '../resolve-episode'
 
 export function renderRunSummary(
   records: OutcomeRecord[],
   episodes: Episode[],
   diagnostics?: PairFinderDiagnostics,
+  /**
+   * Which bound dropped each work unit that did not become a record
+   * (`src/launch.ts`). Omitted by a caller that does not track it, in
+   * which case the gap between the two counts on the first line goes
+   * unexplained, exactly as it did on every local run before 2026-10-24.
+   */
+  droppedUnits?: DroppedUnits,
 ): string {
   const lines: string[] = []
   let verbatim = 0, mutated = 0, written = 0, traced = 0, claimed = 0
@@ -94,8 +101,62 @@ export function renderRunSummary(
     unknownDeleted += r.stats.generated.unknownDeletedChars
   }
   lines.push(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, ${records.length} resolved into record${records.length === 1 ? '' : 's'}.`)
-  lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
-  lines.push(`That's the part worth noticing: not what got written, what got kept.`)
+  // Only when something was written. With no records these two lines are
+  // `0 chars survived your editing verbatim, 0 survived edited.` followed
+  // by an instruction to notice it, which is the shape the erased-episode
+  // path in `main` already refuses to print for the same reason: reciting
+  // zeros at someone reads as a failed run, and here the run has not
+  // failed, it has an answer it is about to give lower down.
+  if (records.length > 0) {
+    lines.push(`${verbatim.toLocaleString()} chars survived your editing verbatim, ${mutated.toLocaleString()} survived edited.`)
+    lines.push(`That's the part worth noticing: not what got written, what got kept.`)
+  }
+
+  // The gap on the line above, named. Two entirely different situations
+  // used to print the same seven words. Measured 2026-10-24 on two
+  // three-commit fixtures: a pair whose generation is 32 characters and a
+  // pair whose generated file the human then deleted both printed `1 work
+  // unit found, 0 resolved into records.` and nothing else. One of those
+  // is fixed by a flag and the other cannot be fixed by any flag, and the
+  // terminal gave the reader no way to tell which one they had. The CI
+  // launch has named these same two reasons in its pull-request comment
+  // since 2026-10-08 (src/ci/comment.ts, `emptyWindowSentence`), so this
+  // is the local launch catching up to the runner, and the tally itself
+  // is now shared between them (src/launch.ts, drift 6).
+  if (droppedUnits) {
+    const d = droppedUnits
+    const unrecorded = d.unresolvable + d.belowMinChars
+    if (unrecorded > 0) {
+      const one = unrecorded === 1
+      lines.push('')
+      lines.push(
+        `${unrecorded} work unit${one ? ' was' : 's were'} found and not recorded, and this is which bound dropped ${one ? 'it' : 'them'}.`,
+      )
+      if (d.belowMinChars > 0) {
+        const floorOne = d.belowMinChars === 1
+        // The remedy names a value and not a placeholder. `--min-chars
+        // <largest>` is exactly the lowest floor that would have kept at
+        // least one of these units, because the floor is `>=`, and the
+        // run already knew the number. Withholding it is what made this
+        // fix two guesses instead of one.
+        const remedy = d.largestBelowFloor > 0
+          ? ` ${floorOne ? 'It generated' : 'The largest of them generated'} ${d.largestBelowFloor.toLocaleString()}, so --min-chars ${d.largestBelowFloor} is the lowest floor that would have recorded ${floorOne ? 'it' : 'any of them'}.`
+          : ` ${floorOne ? 'It generated no' : 'None of them generated any'} text a span could be taken from, so no floor would record ${floorOne ? 'it' : 'them'}.`
+        lines.push(
+          `${d.belowMinChars} carried fewer than ${d.minChars.toLocaleString()} generated characters, which is the --min-chars floor, because a survival figure taken over that little text would be noise.${remedy}`,
+        )
+      }
+      if (d.unresolvable > 0) {
+        const unOne = d.unresolvable === 1
+        lines.push(
+          `${d.unresolvable} resolved to nothing this run could stand behind, meaning no file in ${unOne ? 'it' : 'them'} had a readable version at both commits of the pair and nothing arrived whole from elsewhere either, so there was no refusal to state instead.`,
+        )
+        lines.push(
+          `No flag changes that one. The usual causes are a generated file your edit deleted outright, a commit this clone does not have the blobs for, and a file over the ${MAX_BLOB_CHARS.toLocaleString()}-character ceiling the resolver reads up to. If the clone is shallow, run git fetch and ursa run again.`,
+        )
+      }
+    }
+  }
   if (written > 0) {
     lines.push(`${written.toLocaleString()} chars were generated to get there, and ${claimed.toLocaleString()} of them reached the finished work unedited.`)
   }
@@ -164,6 +225,14 @@ export function renderRunSummary(
   // "this project has no correction work in it". Often it means the opposite,
   // so say what was looked at and what the walk decided.
   if (diagnostics) {
+    // Read once, above both paragraphs that need it. The empty-run
+    // paragraph below says what the walk DID NOT FIND and the refusal
+    // paragraph after it says what the walk REFUSED, and before 2026-10-25
+    // only the second had this tally. So the first asserted that nothing
+    // generated was followed by a human edit of the same file, two lines
+    // above the second reporting the pairings where exactly that had
+    // happened and been abandoned.
+    const { total: refusedTotal, refusals } = pairRefusals(diagnostics)
     const suppressed = diagnostics.authorFallbackSuppressed
     if (suppressed) {
       const names = suppressed.authors.map((a) => `"${a}"`).join(', ')
@@ -189,14 +258,47 @@ export function renderRunSummary(
         how.push(`${d.generatedByDeclaredIdentity} by an identity you declared`)
       }
       lines.push('')
+      // The second clause is a claim about the history and it is only
+      // true when the walk abandoned nothing. `refusedTotal > 0` means
+      // some generation WAS followed by a human edit of the same file and
+      // a bound stopped the walk before it got there, so asserting the
+      // negative prints a contradiction of the paragraph below it.
+      const found = `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${how.join(', ')})`
+      // Drift 8. This surface has printed the commit count since the
+      // diagnostics shipped and still answered as though the count could
+      // not matter: a pairing needs a generation and a LATER commit that
+      // edits the same file, so a history of one commit holds none by
+      // construction, and asserting that nothing generated was followed
+      // by an edit of yours describes a search that could not have run.
+      // The predicate is shared with the pull-request comment
+      // (`windowTooSmallForAPair` in src/launch.ts) so the two surfaces
+      // cannot disagree about which histories are too short, and the
+      // wording stays local here for drift 6's reason.
+      const tooSmall = windowTooSmallForAPair(d.commitsScanned)
       lines.push(
-        `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${how.join(', ')}), and none of those was followed by an edit of the same file without an agent marker.`,
+        refusedTotal > 0
+          ? `${found}, and the ${refusedTotal === 1 ? 'one that was' : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`
+          : tooSmall
+            ? `${found}, and a pairing takes ${PAIR_MINIMUM_COMMITS} commits, a generation and a later commit of yours that edits the same file, so this history is too short to hold one yet.`
+            : `${found}, and none of those was followed by an edit of the same file without an agent marker.`,
       )
       // The case this repository is in, and it is not an empty result.
       // Every commit on the default branch is an agent's, so there is no
       // human edit for a pair to close on, and the person's corrections
       // are somewhere else entirely: in the pull requests they reviewed.
-      if (looked > 0) {
+      //
+      // Withheld when the walk abandoned something, for the same reason
+      // the sentence above is rewritten then: the corrections ARE on this
+      // branch in that case, and the remedy is a bound rather than the
+      // pull-request path.
+      //
+      // Withheld on a too-short history for a different reason, added
+      // 2026-10-25 with drift 8: this paragraph reads the absence of a
+      // human edit as evidence about where the person works, and a
+      // history of one commit is no evidence of that at all. Sending a
+      // reader to the pull-request path on it is a recommendation drawn
+      // from a search that never ran.
+      if (looked > 0 && refusedTotal === 0 && !tooSmall) {
         lines.push(
           'If every commit here is an agent\'s, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads.',
         )
@@ -210,32 +312,34 @@ export function renderRunSummary(
     // five others had written. A number that drops by three quarters
     // without explanation is not more trustworthy than the wrong one, so
     // the reason ships next to it.
-    const { abandoned, bounds } = diagnostics
-    const dropped =
-      abandoned.distance + abandoned.age + abandoned.interposedGeneration + abandoned.notDescendant
-    if (dropped > 0) {
-      const why: string[] = []
-      if (abandoned.interposedGeneration > 0) {
-        why.push(
-          `${abandoned.interposedGeneration} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`,
-        )
-      }
-      if (abandoned.distance > 0) {
-        why.push(
-          `${abandoned.distance} found no edit within ${bounds.maxPairDistance} commits`,
-        )
-      }
-      if (abandoned.age > 0) {
-        why.push(`${abandoned.age} found none within ${bounds.maxPairAgeHours} hours`)
-      }
-      if (abandoned.notDescendant > 0) {
-        why.push(
-          `${abandoned.notDescendant} were only edited on a branch that never contained them`,
-        )
-      }
+    // Counted by `pairRefusals` in src/launch.ts since 2026-10-25, rather
+    // than summed and labelled here. This block held the only reading of
+    // `diagnostics.abandoned` in the product, and `src/ci/run.ts` threw
+    // the same four counts away on the line it computed them, so the
+    // pull-request comment asserted that no marker-then-edit pair existed
+    // on exactly the histories where one had been abandoned. That is drift
+    // 7. The wording below stays local to this surface; the numbers and
+    // the flag names are now the shared ones.
+    if (refusedTotal > 0) {
+      const why = refusals.map((r) => {
+        switch (r.bound) {
+          case 'interposedGeneration':
+            return `${r.count} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`
+          case 'distance':
+            return `${r.count} found no edit within ${r.limit} commits`
+          case 'age':
+            return `${r.count} found none within ${r.limit} hours`
+          case 'notDescendant':
+            return `${r.count} were only edited on a branch that never contained them`
+        }
+      })
       lines.push('')
+      // The verb agrees with the count. It did not until 2026-10-25: the
+      // noun was pluralized and `were` was hardcoded beside it, so the
+      // single-refusal case printed `1 generation were left out`, which is
+      // the commonest case of the four on a small history.
       lines.push(
-        `${dropped} generation${dropped === 1 ? '' : 's'} were left out rather than guessed at: ${why.join('; ')}.`,
+        `${refusedTotal} generation${refusedTotal === 1 ? ' was' : 's were'} left out rather than guessed at: ${why.join('; ')}.`,
       )
       lines.push(
         'Those are claims this run could not stand behind, so it did not make them. Raise --max-pair-distance, --max-pair-age-hours or --max-interposed-generations to see them anyway.',
@@ -523,17 +627,25 @@ export async function main(argv: string[]): Promise<number> {
   // entirely and so resurrected what this one refuses to.
   const erased = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id))
   let suppressed = 0
+  // Which bound dropped each work unit that did not become a record, so
+  // the summary can name it. Shared with `ursa ci`, which has kept this
+  // tally since 2026-10-08 (src/launch.ts, `newDroppedUnits`).
+  const dropped = newDroppedUnits(minChars)
   const records: OutcomeRecord[] = []
   for (const ep of episodes) {
     if (erased.has(ep.id)) { suppressed++; continue }
     const record = resolveEpisode(projectPath, ep, commits)
     // `--min-chars` filters out an episode too small to carry signal, and
     // it is measured on the generation side, which a refusal-only record
-    // has none of. Without the second clause the record this run writes to
-    // explain an import would be dropped by a threshold aimed at something
-    // else, and the absence would be back.
-    if (!record) continue
-    if (!clearsSizeFloor(record, minChars)) continue
+    // has none of. Without that exemption the record this run writes to
+    // explain an import would be dropped by a threshold aimed at
+    // something else, and the absence would be back.
+    //
+    // Both drops are asked by one shared function, which also tallies
+    // which one fired, because until 2026-10-24 this loop dropped a unit
+    // silently and the summary below could only print a zero
+    // (src/launch.ts, drift 6, `keepRecord`).
+    if (!keepRecord(record, minChars, dropped)) continue
     // The time dimension: the span classes above are a verdict taken at
     // ep.finalSha. This walks the commits after it and records what the
     // real work did to each span. Git-only, so it lives here and not in
@@ -554,7 +666,7 @@ export async function main(argv: string[]): Promise<number> {
   if (records.length === 0 && suppressed > 0) {
     console.log(`${episodes.length} work unit${episodes.length === 1 ? '' : 's'} found, and ${suppressed === episodes.length ? 'every one of them is' : `${suppressed} of them are`} erased. Nothing was rebuilt.`)
   } else {
-    console.log(renderRunSummary(records, episodes, diagnostics))
+    console.log(renderRunSummary(records, episodes, diagnostics, dropped))
     if (suppressed > 0) {
       console.log(`\n${suppressed} work unit${suppressed === 1 ? '' : 's'} you erased stayed erased.`)
     }

@@ -367,6 +367,24 @@ only one of the four that targets the raw label itself rather than
 something built on top of it. Last observed 2026-10-24:
 [arXiv 2604.03238: RLHF May Not Reflect Genuine Preferences](https://arxiv.org/abs/2604.03238).
 
+## A fifth reward-model source, a step further back than the fourth (2026-10-25)
+
+"Aligning to Illusions: Choice Blindness in Human and AI Feedback"
+(arXiv 2603.08412, submitted 2026-03-09) goes one step behind the
+2026-10-24 entry above. That source showed annotators disagree with
+themselves across repeated real opinions; this one shows annotators
+cannot tell when their stated opinion was never theirs at all — 91%
+of surreptitiously swapped preferences go undetected, extending the
+decades-old choice-blindness effect from self-evaluation to
+third-party text comparison. The paper's Best-of-N experiment makes
+the downstream cost concrete: at 50% label corruption, reward-guided
+selection performs no better than random sampling, while the proxy
+reward model itself reports continuously improving scores — the
+grader cannot tell its own training signal is broken either. Full
+reasoning and the citable-packet ordering in the ledger proposal
+(docs/ideas.md, 2026-10-25). Last observed 2026-10-25:
+[arXiv 2603.08412: Aligning to Illusions](https://arxiv.org/abs/2603.08412).
+
 ## A lab-facing evaluation vendor just proved the contract shape at $100M ARR (2026-10-24)
 
 The 2026-09-30 entry above bounded Minor's six-to-seven-figure target
@@ -569,3 +587,64 @@ Major itself.
   outcome record's content. No pricing recommendation made; the $10/$30
   tiers remain out of scope per this file's opening note (Ursa Minor
   has no per-unit consumer price to test).
+- 2026-10-25 (event-driven, message) — recorded a real pricing and
+  packaging move at a Category 3 incumbent (Zep cut its entry price and
+  deprecated free self-hosting) and read it as evidence against
+  complacency rather than for it. No pricing recommendation made; still
+  no per-unit anchor for Minor's $10/$30 question.
+- 2026-10-25 (event-driven, message, 13th run) — added the first real
+  margin figure found for a Category 1 vendor: Handshake AI pays out
+  60-70% of its AI-training gross revenue to contracted experts, per
+  The Information. Read as the cost-side counterpart to Minor's own
+  zero-marginal-labor-cost structure, citable the next time a lab asks
+  why Minor's economics differ from a labeling vendor's. No pricing
+  recommendation made.
+- 2026-10-25 (event-driven, message, 13th run) — added a fifth
+  reward-model-unreliability source (arXiv 2603.08412, choice
+  blindness in preference annotation), a step further back than the
+  fourth: annotators cannot detect when their own stated preference
+  was swapped, not just that they disagree with themselves across
+  real opinions. No pricing recommendation made.
+
+## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
+
+Zep deprecated its self-hosted Community Edition this run's observation
+window and restructured Zep Cloud's tiers at the same time: free
+dropped from 10,000 credits/month to 1,000, and the paid tier that used
+to start at $125/mo was replaced by a $25/mo "Flex" tier with every
+feature available at every tier, volume being the only thing gated
+(docs/market/landscape.md, Zep entry). Read against Major's Category 3
+position: this moves in the direction that argues against complacency
+about "memory is free and good enough already," not toward it. A
+developer-facing incumbent cutting its entry price five-to-one while
+making free self-hosting harder reads as pressure on its own margins,
+not confidence that the current free tier already satisfies demand.
+It is still not a comp for Major, which is free to the end user by
+design and sells nothing at any tier (CLAUDE.md §3) — Zep's move has
+no effect on the $10/$30 question, which is Minor's, not Major's, and
+which this file has had no per-unit anchor to test since 2026-09-26.
+Flagging the move because the charter asks this file to carry pricing
+moves as they happen, not because it changes a recommendation.
+
+## A Category 1 incumbent's own cost structure is the sharpest margin comp found yet (2026-10-25)
+
+The price ladder above (2026-09-26) found labor-side pay rates but no
+margin figure for any Category 1 vendor. The Information's exclusive
+on Handshake AI closes that gap directly: contractor payments run
+60-70% of the AI-training unit's gross revenue (docs/market/landscape.md,
+Handshake AI entry), meaning the vendor keeps 30-40 cents of every
+dollar a lab pays it, and "losing even one major client hits hard"
+given that structure. Read against Minor's own economics
+(CLAUDE.md's cost structure: "light," "sub-linear," processing on
+users' own devices): this is the first real number showing what a
+solicited-labor data vendor actually pays to generate its product,
+and it is the structural argument for why Minor's revealed-preference
+model can price differently, not just pitch differently. Minor's raw
+material is a byproduct of someone doing their own job; it carries no
+per-unit labor cost to generate at all, only the cost of structuring
+and licensing it. This is not a reason to set Minor's price above or
+below a Category 1 vendor's contract size, since the two are not
+selling the same asset, but it is the first concrete cost-side number
+this file can cite when a lab asks why Minor's margins look different
+from a labeling vendor's. No pricing recommendation made; the $10/$30
+tiers remain out of scope per this file's opening note.

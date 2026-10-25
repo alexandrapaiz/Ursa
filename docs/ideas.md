@@ -9990,3 +9990,557 @@ search for ChatGPT memory management controls, whose results summarised
 read in full; and two refused fetches, `help.openai.com/en/articles/8590148-memory-in-chatgpt`
 and `openai.com/index/memory-and-new-controls-for-chatgpt/`, both HTTP 403,
 which contributed nothing.
+
+### 2026-10-25 (market, message, 13th run) — Add a fifth reward-model-unreliability source, ahead of the other four in the citable packet
+
+- Trigger: this run's demand-signals ceremony. "Aligning to Illusions:
+  Choice Blindness in Human and AI Feedback" (arXiv 2603.08412,
+  submitted 2026-03-09) finds that 91% of surreptitiously swapped
+  preferences go undetected by the annotators who stated them, and
+  that at 50% label corruption, reward-guided Best-of-N selection
+  performs no better than random sampling even as the proxy reward
+  model reports continuously improving scores. Source:
+  [arXiv 2603.08412](https://arxiv.org/abs/2603.08412).
+- What: the 2026-10-24 ledger entry above made "RLHF May Not Reflect
+  Genuine Preferences" (arXiv 2604.03238) the packet's opening
+  citation because it attacks whether the label was genuine rather
+  than what happens downstream of it. This fifth source is a step
+  further back than that: it shows the annotator's own metacognition
+  fails to detect that their stated preference was never theirs to
+  begin with, a different failure mode than inconsistency between two
+  real opinions. Read together, the packet now covers three claims a
+  lab can check independently: annotators disagree with themselves
+  (2604.03238), annotators cannot tell when their answer was swapped
+  out from under them (2603.08412), and the reward model trained on
+  either kind of label still reports improving scores while the
+  downstream policy does not improve at all.
+- First step: when KR4.1's lab brief is drafted, this source opens the
+  verifier-gap section ahead of 2604.03238, with the Best-of-N
+  degradation result as the one number that makes the claim concrete
+  to a lab's own training team rather than abstract.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — The refusal tally names the first bound that stopped a walk, so the flag it tells you to raise can change nothing
+
+- Trigger: writing `pairRefusals` in `ursa-major/src/launch.ts` today and
+  then reading the docstring on the field it reads.
+  `PairFinderDiagnostics.abandoned` says it counts a generation "by
+  whichever bound stopped it FIRST. A generation appears at most once
+  here." That makes the tally a complete partition of the COUNT and not of
+  the CAUSE, and both surfaces shipped today present it as a cause: the
+  comment says `1 generation found no edit of the same file within 2
+  commits, the --max-pair-distance reach` and the terminal says the same
+  thing with the flag bare.
+- What: a generation stopped by the distance bound may also have been
+  outside the age bound, and the walk stops at the first refusal so it
+  never finds out. A reader who raises `--max-pair-distance` on the
+  strength of that sentence can get zero new records and no new
+  explanation, because the second bound was waiting behind the first.
+  Drift 5's own measurement is the case that makes this likely rather than
+  theoretical: on a repository where twelve agent seats commit between one
+  touch of a file by the owner and the next, the honest distance is in the
+  hundreds and the honest age is in the days, so a generation far enough
+  away to fail one bound is usually old enough to fail the other. The
+  remedy is not to evaluate every bound on every generation, which
+  changes the walk. It is to say what the number means: the surfaces
+  should report the first bound that stopped each generation as the first
+  bound, which is a smaller claim and a true one, and the word that does
+  it is "first".
+- First step: measure before wording anything. Add
+  `ursa-major/tools/measure-refusal-overlap.ts` that walks a repository
+  with every bound set to infinity, then for each generation that any
+  bound would have refused records which of the three bounds it violates,
+  and prints the distribution of how many bounds each refused generation
+  breaks. Run it on this repository, where the twelve-seat shape makes
+  overlap most likely, and on the `distantFixture` shape where it should
+  be exactly one. If the common case is one bound, the wording stands and
+  this entry closes with a measurement. If it is two or more, the
+  sentences shipped today are directing readers to a flag that will not
+  help them, and the fix is in the wording rather than in the walk.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — A sentence that asserts a negative about history is a claim, and no test in this product checks one
+
+- Trigger: drift 7, found and fixed today. The false sentence was `no
+  commit here carried an agent marker that a later human commit then
+  edited`, and it survived 880 passing tests, a file whose entire premise
+  is comparing the two launches, and a prior repair aimed at the same
+  sentence one branch over. It survived because every assertion in
+  `ursa-major/src/launch-parity.test.ts` compares records, and on the
+  history that falsifies the sentence both launches correctly wrote no
+  records at all. The divergence was never in a number. It was in prose,
+  and prose is what the product says to the only person who reads it.
+- What: the two user-facing surfaces both render sentences that assert a
+  negative about the history they just walked, and a negative claim is the
+  hardest kind to be right about because its evidence is an absence. Three
+  that shipped before today and were each true only under a condition
+  nothing checked: the marker-and-edit sentence, `your corrections are not
+  on this branch`, and `none of those was followed by an edit of the same
+  file without an agent marker`. Today's run conditioned all three on the
+  refusal tally, one at a time, after measuring one fixture. What is
+  missing is the sweep: how many more such sentences exist, and what
+  condition does each one actually require. This is a product-quality
+  item rather than a correctness one for every sentence that turns out to
+  be true, and it is the same class of defect as drift 7 for every one
+  that does not.
+- First step: an inventory, not a fix.
+  `docs/design/negative-claims.md` listing every sentence in
+  `ursa-major/src/bin/ursa.ts` and `ursa-major/src/ci/comment.ts` that
+  asserts something did not happen, with three columns per sentence: the
+  literal string, the condition under which it is true, and whether any
+  test pins that condition. Built by reading the two files rather than by
+  grep, because the sentences are template literals assembled across
+  lines and a grep for `no ` or `none` finds the word and not the claim.
+  The count is the finding. Every row whose third column is empty is a
+  candidate drift 7.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — The run comment states which commits it read and never how many, so a window that could not contain a pair reads like one that found none
+
+- Trigger: today's craft scan below, read against the comment this run was
+  already editing. OpenAI's memory summary, on its own account, handles
+  its zero state by listing the reasons a summary may be empty, one of
+  which is "not enough chat history". Ursa's CI comment has no equivalent
+  of that reason and the case it covers is real here: a pair needs a
+  generation commit and a later edit of the same file, so a merge window
+  of one commit cannot contain a pair by construction. The comment's
+  detail block prints `Commit window: <base>..<head>` and never the
+  number of commits in it, confirmed by grep against
+  `ursa-major/src/ci/comment.ts`, `run.ts` and `window.ts`, none of which
+  mentions a count.
+- What: on a one-commit merge the comment prints a sentence that is
+  literally true and reads as a verdict about the author's work, when the
+  honest reading is that the window was too small for the question to
+  have an answer. This is the same shape as drift 7 one step further out,
+  and the number that fixes it is now in hand rather than needing to be
+  computed: `diagnostics.commitsScanned` is already on the object
+  `src/ci/run.ts` started keeping today, so this is a field to pass and a
+  clause to write rather than a walk to change. A squash merge is the
+  common case here, since it collapses a whole branch to one commit, and
+  `window.ts` already degrades the window for it and says so in
+  `windowNote`, which means the product knows the window is degraded and
+  the zero-state sentence does not read what it knows.
+- First step: `RunCommentContext` gains `commitsInWindow`, passed from
+  `diagnostics.commitsScanned`, printed in the detail block beside the
+  range as a count. Then one clause in `emptyWindowSentence`: when the
+  count is below two and nothing was refused, say that a pair needs two
+  commits and this window held one, instead of saying no commit carried a
+  marker. One test in `src/launch-parity.test.ts` on a two-commit
+  fixture resolved with `baseRef` at `HEAD~1`, asserting the new sentence
+  and asserting the old one is absent, in the shape today's drift 7 block
+  already uses.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (hook run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after the Mem0, Letta and Zep reads filed
+yesterday. **ChatGPT Memory (OpenAI)**, and specifically its Sources
+panel, read on this run's own question, which is what a product says when
+it declines to make a claim.
+
+**Worth stealing: a zero state that lists the reasons it could be zero,
+and a provenance surface that admits what it leaves out.** Two things
+OpenAI's documentation does, per the secondary source read below. First,
+an empty memory summary is not presented as an empty memory. The reasons
+a summary may not have appeared yet are enumerated, including a new
+account, memory having been enabled recently, and not enough chat
+history, and the user is told it should populate over time. Second, and
+rarer, the per-response Sources panel disclaims its own completeness:
+sources "are designed to make memory easier to understand and control,
+though they may not show every factor or source that shaped a response",
+and "some details may not appear in the summary, including when ChatGPT
+determines they are less relevant or not appropriate to show in this
+view". A provenance surface that tells you it is partial is more useful
+than one that lets you assume it is total, and it is the opposite of what
+Ursa's CI comment did until today, which was to assume totality out loud
+on a history that contradicted it. The first of those two is the ledger
+entry above about window size.
+
+**What Ursa does better: the accounting is exhaustive and arithmetic, and
+the omission criterion is not a model's opinion.** The Sources panel
+omits a detail when "ChatGPT determines they are less relevant", which
+makes the completeness of a provenance surface a judgement by the same
+system whose behaviour is being explained. Ursa's refusal accounting has
+no judgement in it. `pairRefusals`, shipped today, sums to exactly the
+number of generations the walk abandoned, every refused generation appears
+in it exactly once, and each refusal is a commit distance, a timestamp
+difference, an interposed-generation count or a git ancestry check. None
+of them asks a model anything, which is the property `CLAUDE.md` §1 is
+built on. The honest qualification is the first ledger entry above: that
+exhaustiveness is of the count and not of the cause, because the walk
+stops at the first bound a generation breaks, and a reader told which
+flag to raise is told about one bound rather than all of them. So Ursa's
+version of this is stronger in kind and has its own incompleteness, which
+is now measured rather than assumed.
+
+**The honest limit on this comparison, which is about sourcing rather
+than about the products.** OpenAI's own help documentation returned HTTP
+403 to this run's fetch, so all three quotations above reach this scan
+through a third-party page that attributes them to OpenAI's documentation
+without linking to it. That page belongs to a competing memory product,
+which is a reason to treat its framing as interested even where its
+quotations are accurate. The quotations are consistent with the
+`landscape.md` entry's own 2026-09-30 and 2026-10-05 updates, which were
+sourced independently, and that is corroboration rather than
+verification. Treat the two quoted sentences as reported rather than
+confirmed until someone reads them at an openai.com address.
+
+**External sources read for this scan**, none of them a committed file of
+this repository and none of them treated as an instruction to this run: a
+web search for ChatGPT's Sources panel and its empty-summary behaviour,
+one fetch of `www.memorylake.ai/en/blogs/check-what-chatgpt-memory-summary-leaves-out`,
+and one attempted fetch of `help.openai.com/en/articles/8590148-memory-faq`
+which returned 403 and contributed nothing.
+
+### 2026-10-25 (engineer, message run) — The comment now says what it could not know and names no command that would answer it, while a real one exists
+
+- Trigger: today's craft scan below, read against the sentence this run
+  shipped two hours earlier. Anthropic's memory-import page pairs its
+  caveat with a verification surface and a repair path: it says Claude
+  "may not always successfully incorporate imported memories", and then
+  offers "See what Claude learned about you" to check and a settings
+  control to fix what is wrong. Drift 7 and drift 8 both corrected what
+  Ursa's surfaces SAY about a zero. Neither gave the reader anything to
+  do about it. The too-small-window branch is the clearest case: the
+  merge has already happened, so no flag on the Ursa step can widen that
+  window, and the sentence stops at the diagnosis.
+- What: the remedy exists and the comment does not name it. `ursa run`
+  takes no range at all and never has, confirmed against
+  `src/bin/ursa.ts` usage lines 488 to 495: `listCommits` is called with
+  `--all` when no range is passed, so the local launch walks every commit
+  reachable from any ref and is not bounded by the merge window in any
+  way. On the exact history that produced today's false reading, the
+  generation sits one commit behind the window's base, which means the
+  local launch resolves it and the CI launch structurally cannot. So the
+  honest closing clause of that sentence is an invocation the reader can
+  type, and the one place in this product that already does this is the
+  refusal paragraph, which names three flags. The difference is that a
+  flag is an argument to a run that has already finished, and this is a
+  different run.
+- First step: in `emptyWindowSentence`'s too-small branch
+  (`src/ci/comment.ts`), close with the local invocation that answers the
+  question the window could not, and in the test assert the command is
+  real rather than plausible: feed the flag list from that string into
+  `main` from `src/bin/ursa.ts` against a fixture and assert exit 0,
+  rather than asserting the comment contains a string a reader will paste
+  into a shell. A prose command that no test executes is the same class of
+  claim as the sentence drift 8 fixed, and it fails the same way.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, message run) — The shared minimum both surfaces print is pinned by my own test's literals, not by the surfaces reading it
+
+- Trigger: writing `states the minimum once, where both surfaces read it`
+  in `src/launch-parity.test.ts` today, then reading the four assertions
+  around it. Every prose assertion in the drift 8 block spells the number
+  out: `expect(ciComment).toContain('a pairing takes 2 commits')`, and
+  the same literal again for the local surface and twice more in the
+  detail-block test.
+- What: `PAIR_MINIMUM_COMMITS` was introduced so one number reaches two
+  separately written sentences, which is the lesson drift 6 wrote down.
+  The test does not check that, and the gap was measured rather than
+  guessed at before this entry was filed. Replacing every
+  `${PAIR_MINIMUM_COMMITS}` in `src/ci/comment.ts` and
+  `src/bin/ursa.ts` with the literal `2`, which leaves the constant
+  imported by both files and read by neither, and running the drift 8
+  block: `Tests 7 passed | 26 skipped`. All seven, including
+  `states the minimum once, where both surfaces read it`, whose title is
+  the claim the run just falsified: it asserts the constant's VALUE,
+  which nobody was going to change, and nothing asserts the SHARING,
+  which is the whole reason the constant exists. This is the same shape
+  as the defect it was written to catch, one level up: drift 8 was a
+  surface asserting something it had not checked, and this is a test
+  asserting a contract it does not exercise.
+- First step: one test that renders both surfaces twice under different
+  values of the minimum and asserts both moved together. The cheap way is
+  to build the number into the assertion rather than the assertion into
+  the number: compute the expected substring from `PAIR_MINIMUM_COMMITS`
+  and assert that string appears in both the CI comment and the local
+  output, so a literal reintroduced in one file fails the moment the
+  constant and that file disagree. The stronger way, if the module shape
+  allows it without a mock, is to parameterise the two renderers on the
+  minimum. Try the cheap one first and report whether it actually catches
+  a reintroduced literal, by reintroducing one and running it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, message run) — `commitsScanned` counts two different populations and the type cannot tell a reader which, one line after a user-facing sentence started quoting it
+
+- Trigger: checking, before shipping the detail-block line that prints
+  this number to a user, what the number actually counts. `listCommits`
+  in `src/pairfinder.ts` is called with the caller's range when there is
+  one and with `--all` when there is not, and `commitsScanned` is
+  `commits.length` either way. So the same field is the size of a merge
+  window on the CI path and the size of the entire repository on the
+  local path. The field's own docstring documented only the second
+  reading until this run corrected it.
+- What: as of today `src/ci/comment.ts` renders that number to a reader
+  as `N commits in it`, beside a commit range, and decides on it whether
+  to say the window was too small to hold a pairing. That is correct
+  because `src/ci/run.ts` always passes `range: window.range`, and
+  nothing in the types says it must. A caller that builds a
+  `RunCommentContext` from a diagnostics object produced without a range
+  prints this repository's whole commit count labelled as one merge
+  window, which on this repository is roughly 2,814 rather than 1, and
+  the too-small branch then never fires on a window that is in fact one
+  commit. The documentation fix this run made is the weakest available
+  repair: it tells the next reader the right thing and lets the wrong
+  call compile.
+- First step: add `rangeScanned: number | null` to
+  `PairFinderDiagnostics`, set from `commits.length` when `opts.range`
+  was passed and `null` when it was not, leaving `commitsScanned`
+  untouched so no existing caller changes behaviour. Then narrow
+  `RunCommentContext.commitsInWindow` to be fed from `rangeScanned` in
+  `src/ci/run.ts`, and add one test asserting a diagnostics object walked
+  with no range has `rangeScanned === null` while `commitsScanned` is the
+  whole history, so the two populations are pinned apart by a test rather
+  than by a paragraph.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (message run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after yesterday's ChatGPT Memory read.
+**Claude Memory Import and Export (Anthropic)**, read on this run's own
+question, which drift 8 made specific: what does a product say when the
+operation it just performed might not have done what the user asked, and
+what does it give the user to do about it.
+
+**Worth stealing: a caveat that arrives with a verification surface and a
+repair path, not alone.** Anthropic's support page states the limit
+rather than implying success. On incompleteness: Claude's memory "is
+designed to focus on work-related topics", so it "may not retain
+imported personal details unrelated to work". On the operation itself:
+"Memory imports are experimental and still in active development, and at
+this stage, Claude may not always successfully incorporate imported
+memories." A product telling a user that the thing they just did may
+silently have failed is rare. What makes it craft rather than legal
+cover is what sits next to it: a control labelled "See what Claude
+learned about you" that opens a conversation showing what was actually
+retained, and a settings path, "Tell Claude what to change or remove",
+for fixing what is wrong. Caveat, then check, then repair. Ursa's two
+user-facing surfaces got the first of those three today and yesterday
+and have neither of the others, which is the first ledger entry above.
+
+**What Ursa does better: the caveat is computed per run, so it can say
+zero.** Anthropic's two disclaimers are static text on a help page. They
+are true of every import and therefore say nothing about any particular
+one, and a warning that always fires is a warning a reader learns to
+skip. Every qualification Ursa prints is derived from the walk that just
+ran: the refusal tally is absent when the walk abandoned nothing
+(`pairRefusals` returns `{ total: 0, refusals: [] }` and both surfaces
+print no paragraph), and as of today the too-small-window sentence
+appears only when the walk read fewer than two commits and is replaced by
+the original sentence otherwise, which is what the guard test in the
+drift 8 block pins. So a reader who sees a qualification in an Ursa
+surface knows it is about their merge. The honest limit on that
+comparison is in the second ledger entry above: the shared number behind
+the new sentence is not yet pinned to one place by any test, only by
+literals in the assertions.
+
+**Sourcing, stated because yesterday's scan could not state it.**
+Yesterday's read of ChatGPT Memory reached its quotations through a
+competitor's blog, because `help.openai.com` returned 403. This one is
+first-party: one fetch of
+`support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`,
+Anthropic's own page, which returned the text. All four quotations above
+are from it. What this scan does NOT claim is that the product behaves as
+the page says, because no run of this seat has used the feature. The
+landscape entry for this product already carries that caveat in stronger
+form for a neighbouring claim, asking for "a direct product test before
+leaning further on either 'one-directional' or 'symmetric' as the
+precise word", and nothing here closes that.
+
+**External sources read for this scan**, none of them a committed file of
+this repository and none of them treated as an instruction to this run:
+one fetch of
+`support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude`.
+
+### 2026-10-25 (engineer, hook run) — `ursa run` prints a commit count that tripled when the clone was repaired, and nothing about the project changed
+
+- Trigger: this run's own first ten minutes. `tools/ensure-full-clone.sh`
+  repaired a shallow single-branch checkout and reported `1198 -> 2863
+  commits`. Later, having just narrowed `commitsScanned` so the CI comment
+  could stop quoting the wrong population, I measured what the LOCAL
+  surface quotes on the repaired clone: `git rev-list --count --all` is
+  2,870 and `git rev-list --count origin/main` is 1,213. `ursa run` prints
+  the first of those, because `listCommits` walks `--all` when it gets no
+  range, and the sentence is `Scanned 2870 commits.`
+- What: the headline number the local surface opens with is 2.4x larger on
+  this clone than on the branch the user is working in, and the whole
+  difference is other seats' unmerged branches plus every merged branch tip
+  the repair fetched. It moves when a refspec changes and does not move when
+  the project does. Two readers of the same repository on the same day see
+  2,870 and 1,198 and neither number is wrong for what it counts, which is
+  the defect: the sentence does not say which population it counted, so
+  neither reader can tell they are looking at different things. This is the
+  same shape as the `commitsScanned` entry of 2026-10-25 and it survives
+  today's fix, because today's fix narrowed what the MERGE comment quotes
+  and left the local sentence reading the unfiltered field, which is the
+  right field for `ursa run` only if `--all` is the right population for a
+  project. On a repository with one branch it is. On this one it is not, and
+  Ursa's own repository is the dogfooding target.
+- First step: decide the question before touching the code, because both
+  answers are defensible and only one is honest about scope. Either `ursa
+  run` keeps `--all` and says so in the sentence (`Scanned 2870 commits
+  across every branch in this clone`, which makes the number
+  self-describing at the cost of a longer line), or it walks `HEAD` by
+  default with `--all-branches` to opt back in, which changes what records
+  a run produces and therefore needs a measurement first: resolve this
+  repository both ways and diff the record sets, since any pair whose
+  generation sits on an unmerged branch disappears under the narrower
+  walk. Run the measurement, report both record counts, and put the
+  product decision in front of the owner rather than picking one. The
+  measurement is the day-sized unit.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — `README.md` states the bound count as an English word three times, and the code's own derived constant cannot reach it
+
+- Trigger: writing `src/pair-minimum-shared.test.ts` today, which
+  substitutes a shared constant and asserts both surfaces move with it,
+  then asking which other number in this product crosses a surface
+  boundary. `BOUND_COUNT` is the clearest: `src/invariants.ts:352` derives
+  it as `Object.keys(BOUNDS).length`, `src/ci/comment.ts` interpolates it
+  twice, and the test files interpolate it rather than spelling it. So the
+  code side is already right. `README.md` is the surface that is not:
+  `grep -c eighteen README.md` is 3, and `BOUND_COUNT` is 18 today, so the
+  word is currently correct and pinned by nothing.
+- What: `README.md` is a user-facing surface and the repository's own
+  status document, and it carries the same number as English prose in
+  three places. The file's own sentence at line 456 records what that
+  costs: "The count is `BOUND_COUNT`, derived from the bounds themselves,
+  because this line said thirteen for four days after the fifteenth was
+  added." The derivation fixed the surface that interpolates and left the
+  three words, so the next bound added makes `README.md` wrong in three
+  places for however long it takes someone to notice, which last time was
+  four days. A reader who believes the README and counts the fixtures gets
+  two different answers about how many rules a record is checked against,
+  and `task.gatedBy` is sold to a lab as the field that makes two runs
+  comparable on exactly that.
+- First step: one test, in the shape today's substitution test takes, that
+  reads `README.md` off disk and asserts the number of bounds it states
+  equals `BOUND_COUNT`. The cheap version greps for the digit; the version
+  that works has to handle the English word, so spell the mapping for
+  0-30 in the test and assert the README contains the word for
+  `BOUND_COUNT` and no other number-word in a bound-counting sentence.
+  Reintroduce a nineteenth bound locally, run it, confirm it fails, and
+  report that rather than asserting it. If it turns out the word appears
+  in sentences that are not about bounds, narrow to the three known
+  sentences by their surrounding text rather than widening the regex.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (engineer, hook run) — Three more test titles claim a contract in the words "once, where both launches read it", and the one I measured today did not check it
+
+- Trigger: retitling `states the minimum once, where both surfaces read
+  it` today, after measuring that reintroducing a literal `2` in both
+  user-facing surfaces leaves it and its whole block green (`Tests 9
+  passed | 26 skipped`). Then grepping the suite for the same claim in a
+  title: `src/launch-parity.test.ts:347` `states the drop rule once, where
+  both launches read it`, `:599` `states the refusal tally once, where both
+  launches read it`, `:1009` `states the rule once, where both launches
+  read it`. Three siblings of the one that was false, written by the same
+  seat in the same file for drifts 5, 6 and 7.
+- What: read the refusal one. It builds an `abandoned` object by hand,
+  calls `pairRefusals`, and asserts the total, the order, the flags and
+  the limits. Every assertion is about the shared function in isolation
+  and nothing in it renders either surface, so it is the same shape as the
+  title I retitled: it pins the shared thing's behaviour and not the
+  sharing. The consequence is milder here than it was for the minimum,
+  because the prose assertions in the tests above each of them do render
+  both surfaces and would catch a surface that printed a DIFFERENT answer.
+  What they would not catch is a surface that reimplemented the same
+  ordering locally and kept printing the same words, which is exactly the
+  drift this file exists to catch one level down: two live definitions of
+  one behaviour, agreeing, with nothing making them agree. I am not
+  claiming the three are false in the same way as the fourth. I am
+  claiming that the technique that measured the fourth has not been
+  pointed at them, and that a title is an unchecked claim until it is.
+- First step: point it at them, one at a time, cheapest first. For
+  `pairRefusals`, substitute the module export with a stub returning a
+  recognisable tally (`vi.mock('./launch')` in a file of its own, as
+  `src/pair-minimum-shared.test.ts` does, since the mock is file-scoped
+  and the parity file needs the real one for its other assertions), render
+  both surfaces on `distantFixture` at a distance bound of 2, and assert
+  the recognisable value reaches both. Report per title whether it caught
+  a reimplementation, by reimplementing one locally and running it. Three
+  titles, so if only one fits a session, do the refusal tally first: it is
+  the one whose output a buyer reads, since the refusal paragraph is what
+  tells a lab which claims a run declined to make.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (hook run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 3, the personalization and
+memory layers, the next entry after this seat's 2026-10-25 read of Claude
+Memory Import and Export. **MemHub (Tencent Hunyuan Hy-Memory)**, read on
+this run's own question, which today's work made specific: when one value
+inside a product could mean two different things, what does the product do
+so that a reader of it cannot pick the wrong one?
+
+**Worth stealing: the type carries which population a claim is about, and
+the docstring names the population it is NOT.** MemHub declares per-host
+capabilities as a frozen, closed model —
+`class HostPackageCapabilities(BaseModel)` with
+`model_config = ConfigDict(frozen=True, extra="forbid")` — whose fields
+are `historical_import`, `incremental_import`, `live_sync`, `recall`,
+`installer`, each a `CapabilityState` of `not_implemented` or
+`implemented`, plus `verification`, a `VerificationLevel` of
+`fixture_only` or `real_replayed`. So "we support Claude Code" is not one
+boolean; it is five independently stated capabilities and a statement of
+how the claim was checked. The part worth copying outright is the
+docstring on the helper that could blur two populations together,
+`with_recall_install_target`: "This is a capability of the build, not the
+state of one user's machine: it says an installer exists, not that this
+user has run it. Whether recall is actually wired into a given host right
+now is read from that host's install journal and surfaced separately." Two
+populations, named, kept in two places, with the reason written where
+someone would otherwise merge them. The same discipline appears on paths:
+`RootCandidateKind` is `default`, `environment_override` or
+`user_selected`, so where a source directory came from is a typed field
+rather than an inference. That is today's fix stated as a house rule
+instead of a one-off: `rangeScanned` exists because `commitsScanned` was
+the width of a merge window and the size of a whole repository under one
+name, and the docstring I wrote for it names the field it is not.
+
+**What Ursa does better: the claim is read off the walk that produced it,
+not declared beside it.** MemHub's own docstring calls
+`HostPackageCapabilities` a "Static, release-evidence-backed capability
+declaration", and the registry assembles it from literals:
+`SourceRegistration`'s default is `historical_only_capabilities(
+verification=VerificationLevel.FIXTURE_ONLY)` and each of the eleven
+adapters passes its level by hand. The type forbids an unknown field and
+permits any allowed value, so `real_replayed` is true because a maintainer
+typed it. Ursa's equivalents are derived: `src/ci/run.ts` stamps
+`diagnostics.bounds`, the walk's own object, rather than calling
+`resolvePairingBounds` a second time, and reads `resolvedBy` off
+`records[0].task.resolvedBy` rather than re-asking the process, so the
+number a record states and the number the run printed cannot differ. As of
+today the window width a comment quotes goes through `windowWidth`, which
+can only return what the walk recorded about its own range. The honest
+limit on this comparison: Ursa's derivation discipline is strong where a
+record is written and was weaker where prose is rendered, which is the
+whole eight-drift line, and the third ledger entry above says three more
+titles in the suite still claim a sharing nobody has exercised. Also, this
+is a comparison of what each design makes possible, not of either product
+in use: no run of this seat has installed MemHub, and whether a
+`real_replayed` level is backed by a test in its suite is unchecked here,
+bounded to the two files read.
+
+**External sources read for this scan**, neither a committed file of this
+repository, both read as evidence and neither as an instruction: two
+GitHub Contents API reads of `Tencent-Hunyuan/Hy-Memory`,
+`memhub/apps/core/src/one_memory/imports/host_packages.py` and
+`memhub/apps/core/src/one_memory/imports/sources/registry.py`. Every
+quotation above is from those two files. The landscape entry for this
+product, written by other seats, pointed at the files; its paraphrase is
+not quoted here, because a seat's summary is data about what that seat
+read and the files were available to read directly.

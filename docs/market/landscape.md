@@ -15,6 +15,12 @@ ChatGPT Memory, and added one new entry (Claude Memory Import,
 Category 3, now 14 total). The weekly rhythm (a handful of entries
 plus anything new, full map monthly) continues from here.
 
+Run of 2026-10-25: revisited the six entries that had gone untouched
+since the file opened on 2026-09-26 — Prolific, Artificial Analysis,
+Vals AI, Mem0, Letta, Zep — closing out the first full-map pass inside
+the one-month window the charter sets. Every entry in the file now
+carries at least one update since 2026-09-26.
+
 A note on "weaknesses against Ursa": Ursa Minor does not yet sell
 anything, so this is a read of structural gaps the outcome-record
 approach (CLAUDE.md §1) is built to fill, not a claim of current market
@@ -227,6 +233,18 @@ underlying unit is still a study a participant opts into and completes
 for pay, not a real task the participant was already doing for
 themselves. Last observed 2026-09-26: [Prolific in 2025/2026](https://www.prolific.com/resources/prolific-in-2025-more-precision-larger-scale-and-stronger-safeguards-for-quality-human-data), [Prolific AI services](https://www.prolific.com/ai-services).
 
+Update 2026-10-25: Sacra confirms the $350M figure is an April-2026
+snapshot, not trailing revenue, and details the mechanism: corporate
+customers pay a 42.8% platform fee on top of participant rewards,
+while academic researchers pay a lower rate, and 2025 volume was
+380,000 studies and 8M+ hours of human input. A trade-press social
+post this week claims Prolific is "set to surpass $500 million"
+annualized, but it links no filing or company statement, so recording
+it as an unverified claim rather than a figure — the same treatment
+the Scale AI S-1 rumor got on 2026-09-30. No pricing or product change
+found. Weakness against Ursa unchanged. Last observed 2026-10-25:
+[Sacra: Prolific](https://sacra.com/c/prolific/), [Business Post via X: Prolific nearing $500M annualized (unverified)](https://x.com/businessposthq/status/2055226729413726576).
+
 ### Invisible Technologies
 
 What it is: an enterprise AI-data and applied-ops platform (five
@@ -249,6 +267,19 @@ toward Category 2 below: a company that sells solicited feedback now
 also wants to sell the grading rubric. Last observed 2026-09-30:
 [Invisible Technologies Newsroom](https://invisibletech.ai/newsroom), [Yahoo Finance: Invisible joins WEF](https://finance.yahoo.com/news/invisible-technologies-joins-world-economic-140000900.html).
 
+Re-checked 2026-10-25: no pivot, pricing move, or structural change
+since the WEF/WeCP update. The company's own 2026 outlook (published
+2025-12-02, so predates this entry's window but is the newest
+strategy statement available) argues human-in-the-loop labor stays
+necessary for "another decade" and that "the constraint will be
+adoption, not capability" — a direct argument against the autonomous,
+no-grader shape of Ursa's own bet, worth naming as the clearest
+public disagreement with CLAUDE.md §1 found in this category. Only
+other news since is two client case studies (Alliance Nationwide
+Exposition, Orchestra of St. Luke's) and a reconfirmed $2.0B
+valuation, neither a landscape-level change. Last observed 2026-10-25:
+[Invisible: 2026 AI trends](https://invisibletech.ai/2026-trends), [QuantLogix: Invisible Technologies valuation](https://quantlogix.ai/private-company/invisible-technologies).
+
 ### Handshake AI
 
 What it is: an expert network for frontier-lab RLHF and model
@@ -267,6 +298,22 @@ Weakness against Ursa: the identical structural gap as the rest of
 this category — a credentialed expert paid to grade or generate on
 request, not a person's own real work observed after the fact. New
 entry, added this run. Last observed 2026-09-30: [Handshake: Introducing Handshake AI](https://joinhandshake.com/blog/our-team/introducing-handshake-ai/), [Annotation Academy: What is Handshake AI](https://annotation.academy/glossary/what-is-handshake-ai-and-how-does-it-work).
+
+Update 2026-10-25: The Information's own exclusive puts the AI-training
+unit's gross annualized revenue at nearly $1B, up from $550M in January
+2026 and roughly $5-10M a year before that — a ~100x run-up in under
+twelve months, and roughly flat against the $1.1B figure this entry
+already tracked for April, meaning the growth curve has plateaued
+rather than kept compounding since spring. The same reporting puts
+contractor costs at 60-70% of gross revenue, so combined with its
+college-recruiting business (total gross ARR ~$1.15B), net margin on
+the AI-training side is thin and concentration risk is real: "losing
+even one major client hits hard." That cost structure is the sharpest
+contrast this map has found yet with Ursa Minor's own: Handshake pays
+out 60-70 cents of every training-revenue dollar to the credentialed
+experts doing the work, where Minor's labor is the unpaid byproduct of
+someone doing their own real job anyway. Weakness against Ursa
+otherwise unchanged. Last observed 2026-10-25: [The Information on X](https://x.com/theinformation/status/2044105942749315090), [Dealroom: Handshake's ARR crosses $1B](https://app.dealroom.co/news/note/handshake-s-arr-crosses-1b-as-ai-training-revenue-surges).
 
 ### Halluminate
 
@@ -376,6 +423,16 @@ the world" failure mode the vision doc's fourth principle names, with
 no link back to whether any real deliverable used the model's output.
 Last observed 2026-09-26: [Artificial Analysis leaderboard](https://artificialanalysis.ai/leaderboards/models).
 
+Update 2026-10-25: the leaderboard now runs on Intelligence Index v4.2,
+with scores dated as recently as 2026-10-23 and Anthropic's Claude
+Fable 5.1 reported leading the index, OpenAI's GPT-6 Astra close
+behind. No funding or pricing news surfaced for the firm itself this
+pass. The update confirms rather than changes the standing read: a
+single composite score, however frequently refreshed, is still a
+constructed-benchmark number with no link back to whether a real
+deliverable used the model's output. Last observed 2026-10-25:
+[Announcing Artificial Analysis Intelligence Index v4.2](https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v4-2).
+
 ### Vals AI
 
 What it is: an independent AI-evaluation startup benchmarking frontier
@@ -395,6 +452,19 @@ central-assessment claim the vision doc's fourth principle flags —
 performance on Vals's tasks says nothing about a model's revealed
 performance on a user's own unscripted work. Last observed 2026-09-26:
 [TechCrunch on Vals](https://techcrunch.com/2026/09/19/vals-backed-by-andreessen-horowitz-is-looking-to-become-the-gold-standard-for-ai-benchmarking/), [Vals AI benchmarks](https://www.vals.ai/benchmarks).
+
+Update 2026-10-25: since the $40M Series A closed in September, Vals
+has shipped a new domain-specific index at a pace of roughly one every
+one to three days this month alone: Vals Index v2.2 (Oct 19, tightening
+grading across five existing sub-benchmarks), Vals Science Index (Oct
+16), Vals Router Index and ClaimBench (Oct 20), Vals Finance Index and
+a Web Search Index update (Oct 21), Vals Inference Provider Index (Oct
+22), Vals Legal Index (Oct 23). This is the clearest evidence this
+cycle of a well-funded competitor scaling exactly the construction the
+vision's fourth principle flags: a private, non-trainable answer key
+per domain, expanding domain by domain, rather than a verifier that
+reads what survived in a real deliverable. Worth a line in this week's
+"Moves." Last observed 2026-10-25: [Vals AI News](https://www.vals.ai/news).
 
 ## Category 3 — Personalization and memory layers
 
@@ -422,6 +492,20 @@ app to an unrelated one the way an Ursa Major profile is designed to
 move between Claude, ChatGPT, and Gemini. Last observed 2026-09-26:
 [Mem0 pricing](https://mem0.ai/pricing), [Mem0 Series A announcement](https://mem0.ai/series-a).
 
+Update 2026-10-25: Mem0 shipped a single-pass "ADD-only" extraction
+algorithm (one LLM call, no UPDATE or DELETE; memories accumulate
+rather than get revised), claiming 93.4% on LongMemEval and 91.6% on
+LoCoMo at under 7,000 tokens per retrieval versus 25,000+ for a
+full-context baseline. Adoption now reported around 63k GitHub stars,
+and the project is used as a memory provider inside AWS's own agent
+tooling — the widest distribution of any product in this category.
+Pricing unchanged (Starter $19/mo, Pro $249/mo). The "ADD-only, never
+revise" design is a structural data point for Ursa's own case: this
+category's leading product by adoption still has no notion of a
+correction overwriting a stale fact, let alone a user-facing
+edit/delete surface. Weakness against Ursa otherwise unchanged. Last
+observed 2026-10-25: [FourWeekMBA: Mem0's memory build cost](https://fourweekmba.com/ai-mem0s-memory-build-cost-more-than-full-context-study-finds/).
+
 ### Letta (formerly MemGPT)
 
 What it is: an open-source platform for "stateful agents" — an
@@ -437,6 +521,20 @@ Weakness against Ursa: same as Mem0, the memory is scoped to one
 deployed agent, not a portable, user-owned profile, and there is no
 consent/edit/delete surface built for the end user rather than the
 developer. Last observed 2026-09-26: [Letta GitHub](https://github.com/letta-ai/letta), [Letta on agent memory](https://www.letta.com/blog/agent-memory/).
+
+Update 2026-10-25: Letta shipped FrontierMemory (Oct 2026), a benchmark
+comparing agent harnesses on continual learning, following Context
+Repositories (git-based memory, Feb), Context Constitution (Apr), and
+a "Memory Models" research post (Jun) on memory-native RL. The
+through-line across all four: Letta's own framing is now "agents that
+carry their memory and learning across model generations," which
+reads close to Ursa Major's portability pitch in words. It stays
+structurally different in substance: the memory Letta describes is
+still one deployed agent's internal state, authored and read by that
+agent, with no user-facing consent, edit, or delete surface and no
+notion of a person's profile moving between separately-run agents or
+vendors. Worth tracking because the rhetoric is converging even where
+the architecture has not. Last observed 2026-10-25: [Letta: Memory Models — Towards Agents That Learn](https://www.letta.com/blog/towards-agents-that-learn/), [Letta Research](https://www.letta.com/research/).
 
 ### Zep
 
@@ -454,6 +552,23 @@ single-app infrastructure with no user-facing ownership surface —
 the graph belongs to the developer's product, and there is no path for
 a user to take their Zep graph to a different AI vendor. Last observed
 2026-09-26: [Zep agent memory product page](https://www.getzep.com/product/agent-memory/), [Zep vs Mem0 comparison](https://vectorize.io/articles/mem0-vs-zep).
+
+Update 2026-10-25, a real pricing and packaging move: Zep deprecated
+its self-hosted Community Edition. Self-hosting now means standing up
+Graphiti directly against your own Neo4j, FalkorDB, or Kuzu instance,
+with none of the managed layer Community Edition used to provide.
+Zep Cloud's tiers were restructured at the same time: the free tier
+dropped from 10,000 credits/month to 1,000, and the single paid tier
+that used to start at $125/mo was replaced by a $25/mo "Flex" tier
+(20,000 credits) plus custom Enterprise, with every feature — temporal
+modeling, graph traversal, the full Graphiti engine — available at
+every tier rather than gated by plan. Net effect: a materially cheaper
+entry price, paired with the free self-hosting path getting harder to
+operate. This is the kind of concrete pricing move positioning.md's
+price ladder should carry; added there this run. Weakness against
+Ursa unchanged: still infrastructure the developer's product owns, not
+a profile the end user owns and carries. Last observed 2026-10-25:
+[Vectorize: Mem0 vs Zep (Graphiti)](https://vectorize.io/articles/mem0-vs-zep).
 
 ### ChatGPT Memory (OpenAI)
 
@@ -717,6 +832,22 @@ either of those two. Worth a one-line recheck at the next monthly
 pass, not a promotion to its own entry yet. Last observed 2026-10-24:
 [GitHub: edihasaj/universal-memory-protocol](https://github.com/edihasaj/universal-memory-protocol), [Hacker News: Universal Memory Protocol](https://news.ycombinator.com/item?id=48428796).
 
+Update 2026-10-25: re-reading the 2026-10-05 source itself (rather
+than this entry's own paraphrase of it) turned up two more named
+attempts the earlier notes didn't carry forward: MIF (an individual
+developer's interchange spec) and memorywire (an academic wire-format
+proposal), both first half of 2026, alongside the already-tracked
+Open Memory Protocol. That makes six distinct fragmentation attempts
+in one year across this one source alone (COGX, ByteRover, OMP, MIF,
+memorywire, and now UMP), and the source's own count was already
+four before UMP existed. None of the six has a second independent
+implementation or institutional governance — the same bar the
+2026-10-05 and 2026-10-24 notes already applied, still uncleared. This
+does not change the conclusion; it is the strongest evidence yet for
+it, since the fragmentation itself is accelerating faster than any
+single attempt is gaining traction. Last observed 2026-10-25:
+[stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -787,3 +918,21 @@ pass, not a promotion to its own entry yet. Last observed 2026-10-24:
   the adoption bar the 2026-10-05 note already applied to two more
   established attempts. No new Category 3 entry; the monthly full-map
   pass is due around 2026-10-26.
+- 2026-10-25 (message, 13th run) — closed out the last two entries
+  still dated only to the map's opening (2026-09-26) or the week after
+  (2026-09-30), completing this cycle's full-map pass a day ahead of
+  the 2026-10-26 deadline. Invisible Technologies: re-checked, no
+  pivot or pricing change since the WEF/WeCP update; added its own
+  2026 outlook statement as the clearest public argument against
+  Ursa's no-human-grader bet found in this category. Handshake AI: The
+  Information's own exclusive puts AI-training gross ARR at nearly $1B
+  (up from $550M in January), roughly flat against the $1.1B this
+  entry already tracked for April — growth has plateaued since
+  spring, not kept compounding — and discloses contractor costs at
+  60-70% of gross revenue, the sharpest cost-structure contrast this
+  map has found with Minor's own near-zero-marginal-cost labor. Also
+  re-read the 2026-10-05 Category 3 source in full rather than this
+  file's own paraphrase of it, and found two more named memory-
+  interchange attempts (MIF, memorywire) the earlier notes hadn't
+  carried forward — six distinct fragmentation attempts in one year
+  now, none with a second independent implementation.
