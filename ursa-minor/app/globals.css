@@ -890,6 +890,41 @@ html {
   text-decoration-color: var(--polar);
 }
 
+/* A link inside a sentence is the one case the rule above does not cover.
+
+   The comment on `.rec-action` names what it is for: the generation jump,
+   the tabs, the loader's controls. Every one of those is a standalone
+   control that sits on its own line, where position says it is a control
+   and an underline would only add noise. Four `.rec-action`s are not that.
+   They sit inside a paragraph, and for those the resting state said
+   nothing at all: no underline, and `rgb(168,199,250)` against prose of
+   `rgb(183,192,212)`, which is **1.06:1**. Both read at about 11:1 against
+   the night, so neither is a contrast failure on its own. The failure is
+   between them, and WCAG's G183 asks for 3:1 before colour may carry an
+   affordance by itself. A reader scanning the page could not see that
+   there was a link there, and a touch reader never could, because the
+   `(hover: hover)` block above is the only thing that ever drew the line.
+
+   Measured 2026-10-25 against the sites L5 names, on documentation pages
+   rather than marketing pages: 22 inline prose links across Linear,
+   Vercel, Claude docs and GitHub docs, and **all 22 are underlined at
+   rest**. Their colour does almost nothing: Vercel's inline link is the
+   same colour as its prose, 1.00:1, and distinguishes itself with weight
+   and the underline; Claude docs is 1.02:1 and Linear 1.37:1. Only GitHub
+   clears 3:1 on colour, and it underlines as well.
+   `reviews/2026-10-25/data/benchmark-inline-links.json`.
+
+   So the underline comes back at rest for these four, and only these
+   four. The value is not a new one: `rgba(168,199,250,0.4)` is what `.cta`
+   already uses for a line that is present but quiet, and it resolves to
+   full `--polar` on hover exactly as that border does, so the hover still
+   has somewhere to go. Keyed on the paragraph rather than on a new class,
+   because `p` is what "inside a sentence" means here and this is a polish
+   diff that should not reach into the page files. */
+p .rec-action {
+  text-decoration-color: rgba(168, 199, 250, 0.4);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sp,
   .rec-action {

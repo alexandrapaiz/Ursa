@@ -1,0 +1,344 @@
+{
+  "measuredAt": "2026-10-25T02:37:37.779Z",
+  "note": "public pages, read only; nothing clicked, typed into or followed",
+  "results": [
+    {
+      "url": "https://linear.app/docs/start-guide",
+      "ok": true,
+      "count": 5,
+      "links": [
+        {
+          "text": "demo workspace",
+          "linkColor": "rgb(247, 248, 248)",
+          "proseColor": "rgb(208, 214, 224)",
+          "decorationLine": "underline",
+          "decorationColor": "rgb(98, 102, 109)",
+          "decorationThickness": "from-font",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.373,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "onboarding session",
+          "linkColor": "rgb(247, 248, 248)",
+          "proseColor": "rgb(208, 214, 224)",
+          "decorationLine": "underline",
+          "decorationColor": "rgb(98, 102, 109)",
+          "decorationThickness": "from-font",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.373,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "create a workspace",
+          "linkColor": "rgb(247, 248, 248)",
+          "proseColor": "rgb(208, 214, 224)",
+          "decorationLine": "underline",
+          "decorationColor": "rgb(98, 102, 109)",
+          "decorationThickness": "from-font",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.373,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "Customers",
+          "linkColor": "rgb(247, 248, 248)",
+          "proseColor": "rgb(208, 214, 224)",
+          "decorationLine": "underline",
+          "decorationColor": "rgb(98, 102, 109)",
+          "decorationThickness": "from-font",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.373,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "our blog",
+          "linkColor": "rgb(247, 248, 248)",
+          "proseColor": "rgb(208, 214, 224)",
+          "decorationLine": "underline",
+          "decorationColor": "rgb(98, 102, 109)",
+          "decorationThickness": "from-font",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.373,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        }
+      ]
+    },
+    {
+      "url": "https://vercel.com/docs/getting-started-with-vercel",
+      "ok": true,
+      "count": 12,
+      "links": [
+        {
+          "text": "Claude Code",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "OpenAI Codex",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "Grok Build",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "Cursor",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "GitHub Copilot",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "Kimi Code",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "Vercel Plugin",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "Vercel Plugin documentation",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "Skills.sh",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "vercel install",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "vercel integration add",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        },
+        {
+          "text": "New Project",
+          "linkColor": "rgb(23, 23, 23)",
+          "proseColor": "rgb(23, 23, 23)",
+          "decorationLine": "underline",
+          "decorationColor": "rgba(0, 0, 0, 0.34)",
+          "decorationThickness": "auto",
+          "fontWeight": "500",
+          "proseWeight": "400",
+          "contrastVsProse": 1,
+          "underlinedAtRest": true,
+          "bolderThanProse": true
+        }
+      ]
+    },
+    {
+      "url": "https://docs.stripe.com/payments",
+      "ok": true,
+      "count": 0,
+      "links": []
+    },
+    {
+      "url": "https://docs.claude.com/en/docs/intro",
+      "ok": true,
+      "count": 4,
+      "links": [
+        {
+          "text": "Using the Messages API",
+          "linkColor": "rgb(24, 79, 149)",
+          "proseColor": "rgb(82, 81, 78)",
+          "decorationLine": "underline",
+          "decorationColor": "color(srgb 0.0941176 0.309804 0.584314 / 0.4)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.021,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "Claude Managed Agents overview",
+          "linkColor": "rgb(24, 79, 149)",
+          "proseColor": "rgb(82, 81, 78)",
+          "decorationLine": "underline",
+          "decorationColor": "color(srgb 0.0941176 0.309804 0.584314 / 0.4)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.021,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "Claude Opus 5.5",
+          "linkColor": "rgb(24, 79, 149)",
+          "proseColor": "rgb(82, 81, 78)",
+          "decorationLine": "underline",
+          "decorationColor": "color(srgb 0.0941176 0.309804 0.584314 / 0.4)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.021,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        },
+        {
+          "text": "Claude Fable 5.1",
+          "linkColor": "rgb(24, 79, 149)",
+          "proseColor": "rgb(82, 81, 78)",
+          "decorationLine": "underline",
+          "decorationColor": "color(srgb 0.0941176 0.309804 0.584314 / 0.4)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 1.021,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        }
+      ]
+    },
+    {
+      "url": "https://docs.github.com/en/get-started/start-your-journey/about-github-and-git",
+      "ok": true,
+      "count": 1,
+      "links": [
+        {
+          "text": "Start your journey",
+          "linkColor": "rgb(0, 85, 213)",
+          "proseColor": "rgb(0, 0, 0)",
+          "decorationLine": "underline",
+          "decorationColor": "rgb(0, 85, 213)",
+          "decorationThickness": "auto",
+          "fontWeight": "400",
+          "proseWeight": "400",
+          "contrastVsProse": 3.26,
+          "underlinedAtRest": true,
+          "bolderThanProse": false
+        }
+      ]
+    },
+    {
+      "url": "https://help.figma.com/hc/en-us/articles/360040514113-Create-components",
+      "ok": true,
+      "count": 0,
+      "links": []
+    },
+    {
+      "url": "https://support.elicit.com/en/articles/9265673-how-does-elicit-work",
+      "ok": true,
+      "count": 0,
+      "links": []
+    },
+    {
+      "url": "https://consensus.app/home/blog/welcome-to-consensus/",
+      "ok": true,
+      "count": 0,
+      "links": []
+    }
+  ]
+}
