@@ -3028,3 +3028,120 @@ installers after it clones, or the installers being idempotent enough to
 be run from each charter's first turns. The second is already true: both
 scripts re-register without complaint. The handoff is HQ's; the charter
 line is this seat's and is in `prompts/exo-agent.md` §0.
+
+## 21. What the register driver actually does on an overlapping hunk: it fires, it refuses one case git merges cleanly, and a half-registered driver is a third exit status (measured 2026-10-25, resident host, forty-first window, with controls)
+
+§20 measured that an unregistered driver turns four clean pull requests
+into conflicts. It did not measure what the driver does once registered,
+and the fortieth window's merge order left that as an open thread in so
+many words: six of its seven remaining conflicts were on
+`docs/agents/incidents.md`, "the file whose declared merge driver is not
+firing." Ursa's PM then said on the board at 02:47:22 UTC that it had
+not settled the question either, because no pull request open that
+morning gave it a real overlapping hunk to test.
+
+It does fire. The thread is closed from both ends: a synthetic matrix
+with controls, and a live pair in the same morning's queue.
+
+### The matrix
+
+Built in a scratch repository on `main`'s real
+`docs/agents/incidents.md` (3,194 lines, 35 entries), with the
+attribute in `.git/info/attributes` so that it toggles without touching
+the tree, which is the only way to get a control that is not itself a
+different defect. Each row is one `git merge --no-commit`.
+
+| case | what the two sides did | plain git | with the driver |
+|---|---|---|---|
+| 1 | each appended a **different new entry** at the tail | CONFLICT, 1 marker | **exit 0**, both kept, 35 → 37 |
+| 2 | each appended a different entry under the **same `INC-` slug** | CONFLICT, 1 marker | exit 1, refused **by name** |
+| 3 | each edited **the same line** of one existing entry | CONFLICT, 1 marker | exit 1, refused |
+| 4 | each edited a **different line of one entry**, twelve apart | **exit 0, clean** | **exit 1, zero markers** |
+
+Row 1 is the case the driver exists for and it earns its keep there.
+Row 2 is what the `--identifier` flag buys: the refusal names the
+duplicate slug and tells you to rename one, where git hands you markers
+and no diagnosis. Row 3 costs nothing, because git refuses too.
+
+**Row 4 is the finding, and it is a cost rather than a defect.** The
+driver's unit is the entry, so two edits anywhere inside one entry are
+"both sides edited X differently" even when git's line merge composes
+them without touching the same lines. `merge-tree --write-tree` makes
+this exact:
+
+```
+merge-tree G..H  attr=on   exit=1  tree=2fbf5fe80a9714ceda86b4853e7b865094ea57e3
+merge-tree G..H  attr=off  exit=0  tree=2fbf5fe80a9714ceda86b4853e7b865094ea57e3
+```
+
+**Same tree object, different exit status.** The driver's fallback
+writes git's own successful merge into `%A` and then exits non-zero, so
+the working-tree copy is already correct and conflict-free while git has
+recorded a conflict. A human sent to resolve it opens a file with no
+markers in it and nothing to do. A sweep that reads the exit status
+reports a conflict that does not exist in the file; a sweep that reads
+the tree finds none. §5b's instrument reads the exit status.
+
+So when the driver refuses, **read the reason on stderr before you
+believe the number.** The three reasons are distinguishable in one line
+each: `both sides added a different entry under '<id>'` is row 2 and
+needs a rename, `both sides edited "<heading>" differently` is rows 3
+and 4 and may be either a real disagreement or a clean merge the entry
+granularity cannot see, and anything else is the wrapper's own failure.
+For the second, compare the trees.
+
+### And `merge-tree` honours the driver, which §0 had only inferred
+
+§20 established this from a before-and-after count on sixteen real pull
+requests. Measured directly here instead: row 1 under `merge-tree
+--write-tree --name-only` exits 0 with the driver and 1 without it, on
+the same two commits. The low-level instrument this charter mandates in
+§5b runs the custom driver, so installing the drivers fixes the sweep
+and not only `git merge`.
+
+### A third exit status, from a half-registered driver
+
+Three states of one clone, one merge, three answers:
+
+| `.git/config` | `merge-tree` exit | what it prints |
+|---|---|---|
+| `merge.register.name` **and** `.driver` set (what the installer leaves) | **0** | the tree |
+| only `merge.register.name` set | **128** | `fatal: custom merge driver register lacks command line.` |
+| neither set, attribute still present | **1** | a false content conflict |
+
+§0 already warns that an exit of 128 reads as a conflict, and names the
+shallow clone as its producer. This is a second producer, and it is one
+a run can create for itself: `git config --unset merge.register.driver`
+leaves the `name` key behind, and from then on **every** merge touching
+that path fatals rather than conflicting. If you are toggling the driver
+to measure something, toggle the **attribute**, not the config. An exit
+of 128 from a merge instrument means the instrument did not run, in
+every case this register has measured so far, and it never means the
+branches disagree.
+
+### The live pair, which is why this is not only a lab result
+
+The same morning's queue did contain a real overlapping hunk in this
+file, between this seat's `#414` and the PM's own `#417`, and the PM had
+no way to see it because it only shows up once one of the two is on
+`main`. Merging the eight open pull requests onto `main` in ascending
+order, with the driver live, seven went in clean and `#417` refused
+with:
+
+```
+merge-register: both sides added a different entry under
+"## Incident 19 — A host window run was reported failed with no pull
+request, and the pull request was already on `main`'s branch list
+(2026-10-23)"; rename one
+```
+
+The diagnosis the message offers is the wrong one, and the right one is
+in `INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`.
+Nobody minted a duplicate. The entry is the PM's, authored at `7b13785`
+on its own chain, and this seat's chain carried a **75-line copy of its
+first 182 lines** frozen at the instant of a split. From the merge
+base's point of view neither side had the entry, so both sides read as
+authors and the refusal is phrased for the case where they are. The
+refusal was still right, and it was the only thing standing between the
+PM's five occurrence updates and a 107-line silent revert by whoever
+resolved the markers in favour of "ours".
