@@ -62,6 +62,20 @@
 //      byte-identical output from a unit below the size floor and a unit
 //      whose generated file was deleted. Fixed in `DroppedUnits` and
 //      `keepRecord` below, read by `src/bin/ursa.ts` and `src/ci/run.ts`.
+//   7. Why a generation never became a work unit. The stage above drift 6,
+//      and it runs back the original way. `ursa run` has printed the
+//      pairing walk's abandonment tally since the bounds shipped; `ursa
+//      ci` called `findCommitPairs`, which is
+//      `findCommitPairsWithDiagnostics(...).pairs`, so the runner computed
+//      all four counts and discarded them on the same line. With none in
+//      hand, the pull-request comment had one explanation for a window
+//      that resolved nothing and asserted it unconditionally: `no commit
+//      here carried an agent marker that a later human commit then
+//      edited`. Found 2026-10-25 by resolving `distantFixture` through
+//      both launches at `--max-pair-distance 2`, where a pair exists, is
+//      abandoned by the distance bound, and that sentence is false in
+//      every clause. Fixed in `PairRefusal` and `pairRefusals` below,
+//      read by `src/bin/ursa.ts` and `src/ci/comment.ts`.
 
 import { isForgotten, loadConsent } from './consent'
 import { checkRecord, formatViolations, type Violation } from './invariants'
@@ -258,4 +272,118 @@ export function keepRecord(
     return false
   }
   return true
+}
+
+/**
+ * Why a generation never reached the episode builder at all.
+ *
+ * Drift 7, and the stage above `keepRecord`. `DroppedUnits` counts work
+ * units that were built and then refused; this counts generations that
+ * were found, walked forward from, and abandoned before any work unit
+ * existed, because the walk hit one of its three pairing bounds
+ * (`findCommitPairsWithDiagnostics` in src/pairfinder.ts, which has
+ * tallied them under `diagnostics.abandoned` since the bounds shipped).
+ *
+ * It is shared for the same reason the drop tally is, and the asymmetry
+ * that made it necessary is the mirror image of drift 6's. There the
+ * runner held a number the terminal did not. Here the terminal rendered
+ * `diagnostics.abandoned` from its own `findCommitPairsWithDiagnostics`
+ * call and `src/ci/run.ts` called `findCommitPairs`, which is literally
+ * `findCommitPairsWithDiagnostics(...).pairs`, so the runner COMPUTED
+ * every one of these counts and then discarded them one line later.
+ *
+ * What the discard cost is not a missing number. With no abandonment
+ * tally in hand, `emptyWindowSentence` in src/ci/comment.ts had one
+ * explanation available for a window that resolved nothing and asserted
+ * it unconditionally: "no commit here carried an agent marker that a
+ * later human commit then edited." On a history where a pair was found
+ * and then abandoned by `--max-pair-distance`, every clause of that
+ * sentence is false. A commit carried the marker, a later human commit
+ * did edit the same file, and the walk declined to reach that far. That
+ * failure mode is already written down one stage lower, in
+ * `RunCommentContext.dropped`'s own docstring, which records a run on
+ * 2026-10-08 printing the same sentence beside `units-found=1`. The
+ * repair applied then covered the `unitsFound > 0` branch; this stage
+ * lands in the `unitsFound === 0` branch, because a generation abandoned
+ * by a bound produces no work unit to count.
+ *
+ * Why it matters on real history rather than only on a fixture: drift 5
+ * measured this repository at zero records under the default distance of
+ * 25 and two records at 400, because twelve agent seats commit between
+ * one touch of a file by the owner and the next. Every merge on a
+ * repository shaped like that one gets the sentence above, which tells
+ * the owner her agents never wrote anything she edited.
+ */
+export interface PairRefusal {
+  /** the `abandoned` key this came from, so a caller can switch on it */
+  bound: 'distance' | 'age' | 'interposedGeneration' | 'notDescendant'
+  /** generations the bound stopped, counted by whichever bound stopped first */
+  count: number
+  /**
+   * The flag that moves this bound, or null when no flag can.
+   *
+   * `notDescendant` is the null: the only edit found was on a branch the
+   * generation is not an ancestor of, which is a fact about the commit
+   * graph rather than a reach a caller can widen. Null rather than
+   * omitted so a surface that prints a remedy has to handle the case
+   * where there is none, instead of printing one flag's name for four
+   * reasons.
+   */
+  flag: '--max-pair-distance' | '--max-pair-age-hours' | '--max-interposed-generations' | null
+  /** the resolved value this walk ran under, or null where `flag` is null */
+  limit: number | null
+}
+
+export interface PairRefusals {
+  /** every refusal above, summed; zero when the walk abandoned nothing */
+  total: number
+  /** only the non-zero reasons, in the order a reader should read them */
+  refusals: PairRefusal[]
+}
+
+/**
+ * The abandonment tally both launches report, read off one walk's diagnostics.
+ *
+ * Takes the two diagnostic fields it needs rather than the whole
+ * `PairFinderDiagnostics`, so `src/ci/comment.ts` can hold this type in
+ * its context without importing the pair finder, and so a test can build
+ * an input by hand.
+ *
+ * ORDER IS PART OF THE CONTRACT, and it is not the declaration order of
+ * `abandoned`. `interposedGeneration` comes first because it is the one
+ * refusal that is not a reach limit: the file WAS edited in range, by a
+ * later generation, so the person's edit corrected that generation and
+ * not this one. Raising that bound makes the walk claim a correction it
+ * can see belongs to someone else, which is the opposite of what raising
+ * the other two does. A reader shown the cheap fixes first would move
+ * the wrong flag.
+ */
+export function pairRefusals(diagnostics: {
+  abandoned: { distance: number; age: number; interposedGeneration: number; notDescendant: number }
+  bounds: { maxPairDistance: number; maxPairAgeHours: number; maxInterposedGenerations: number }
+}): PairRefusals {
+  const { abandoned, bounds } = diagnostics
+  const all: PairRefusal[] = [
+    {
+      bound: 'interposedGeneration',
+      count: abandoned.interposedGeneration,
+      flag: '--max-interposed-generations',
+      limit: bounds.maxInterposedGenerations,
+    },
+    {
+      bound: 'distance',
+      count: abandoned.distance,
+      flag: '--max-pair-distance',
+      limit: bounds.maxPairDistance,
+    },
+    {
+      bound: 'age',
+      count: abandoned.age,
+      flag: '--max-pair-age-hours',
+      limit: bounds.maxPairAgeHours,
+    },
+    { bound: 'notDescendant', count: abandoned.notDescendant, flag: null, limit: null },
+  ]
+  const refusals = all.filter((r) => r.count > 0)
+  return { total: refusals.reduce((n, r) => n + r.count, 0), refusals }
 }

@@ -54,7 +54,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
 import { formatResolverIdentity } from '../resolver-identity'
-import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, stampPairingBounds, type DroppedUnits } from '../launch'
+import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds, type DroppedUnits } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -225,6 +225,14 @@ export function renderRunSummary(
   // "this project has no correction work in it". Often it means the opposite,
   // so say what was looked at and what the walk decided.
   if (diagnostics) {
+    // Read once, above both paragraphs that need it. The empty-run
+    // paragraph below says what the walk DID NOT FIND and the refusal
+    // paragraph after it says what the walk REFUSED, and before 2026-10-25
+    // only the second had this tally. So the first asserted that nothing
+    // generated was followed by a human edit of the same file, two lines
+    // above the second reporting the pairings where exactly that had
+    // happened and been abandoned.
+    const { total: refusedTotal, refusals } = pairRefusals(diagnostics)
     const suppressed = diagnostics.authorFallbackSuppressed
     if (suppressed) {
       const names = suppressed.authors.map((a) => `"${a}"`).join(', ')
@@ -250,14 +258,27 @@ export function renderRunSummary(
         how.push(`${d.generatedByDeclaredIdentity} by an identity you declared`)
       }
       lines.push('')
+      // The second clause is a claim about the history and it is only
+      // true when the walk abandoned nothing. `refusedTotal > 0` means
+      // some generation WAS followed by a human edit of the same file and
+      // a bound stopped the walk before it got there, so asserting the
+      // negative prints a contradiction of the paragraph below it.
+      const found = `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${how.join(', ')})`
       lines.push(
-        `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${how.join(', ')}), and none of those was followed by an edit of the same file without an agent marker.`,
+        refusedTotal === 0
+          ? `${found}, and none of those was followed by an edit of the same file without an agent marker.`
+          : `${found}, and the ${refusedTotal === 1 ? 'one that was' : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`,
       )
       // The case this repository is in, and it is not an empty result.
       // Every commit on the default branch is an agent's, so there is no
       // human edit for a pair to close on, and the person's corrections
       // are somewhere else entirely: in the pull requests they reviewed.
-      if (looked > 0) {
+      //
+      // Withheld when the walk abandoned something, for the same reason
+      // the sentence above is rewritten then: the corrections ARE on this
+      // branch in that case, and the remedy is a bound rather than the
+      // pull-request path.
+      if (looked > 0 && refusedTotal === 0) {
         lines.push(
           'If every commit here is an agent\'s, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads.',
         )
@@ -271,32 +292,34 @@ export function renderRunSummary(
     // five others had written. A number that drops by three quarters
     // without explanation is not more trustworthy than the wrong one, so
     // the reason ships next to it.
-    const { abandoned, bounds } = diagnostics
-    const dropped =
-      abandoned.distance + abandoned.age + abandoned.interposedGeneration + abandoned.notDescendant
-    if (dropped > 0) {
-      const why: string[] = []
-      if (abandoned.interposedGeneration > 0) {
-        why.push(
-          `${abandoned.interposedGeneration} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`,
-        )
-      }
-      if (abandoned.distance > 0) {
-        why.push(
-          `${abandoned.distance} found no edit within ${bounds.maxPairDistance} commits`,
-        )
-      }
-      if (abandoned.age > 0) {
-        why.push(`${abandoned.age} found none within ${bounds.maxPairAgeHours} hours`)
-      }
-      if (abandoned.notDescendant > 0) {
-        why.push(
-          `${abandoned.notDescendant} were only edited on a branch that never contained them`,
-        )
-      }
+    // Counted by `pairRefusals` in src/launch.ts since 2026-10-25, rather
+    // than summed and labelled here. This block held the only reading of
+    // `diagnostics.abandoned` in the product, and `src/ci/run.ts` threw
+    // the same four counts away on the line it computed them, so the
+    // pull-request comment asserted that no marker-then-edit pair existed
+    // on exactly the histories where one had been abandoned. That is drift
+    // 7. The wording below stays local to this surface; the numbers and
+    // the flag names are now the shared ones.
+    if (refusedTotal > 0) {
+      const why = refusals.map((r) => {
+        switch (r.bound) {
+          case 'interposedGeneration':
+            return `${r.count} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`
+          case 'distance':
+            return `${r.count} found no edit within ${r.limit} commits`
+          case 'age':
+            return `${r.count} found none within ${r.limit} hours`
+          case 'notDescendant':
+            return `${r.count} were only edited on a branch that never contained them`
+        }
+      })
       lines.push('')
+      // The verb agrees with the count. It did not until 2026-10-25: the
+      // noun was pluralized and `were` was hardcoded beside it, so the
+      // single-refusal case printed `1 generation were left out`, which is
+      // the commonest case of the four on a small history.
       lines.push(
-        `${dropped} generation${dropped === 1 ? '' : 's'} were left out rather than guessed at: ${why.join('; ')}.`,
+        `${refusedTotal} generation${refusedTotal === 1 ? ' was' : 's were'} left out rather than guessed at: ${why.join('; ')}.`,
       )
       lines.push(
         'Those are claims this run could not stand behind, so it did not make them. Raise --max-pair-distance, --max-pair-age-hours or --max-interposed-generations to see them anyway.',

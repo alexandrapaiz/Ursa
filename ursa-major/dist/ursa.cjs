@@ -108,9 +108,6 @@ function isAncestor(repoPath, ancestor, descendant) {
     return false;
   }
 }
-function findCommitPairs(repoPath, opts = {}) {
-  return findCommitPairsWithDiagnostics(repoPath, opts).pairs;
-}
 function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
   const trailerPattern = opts.agentTrailerPattern ?? DEFAULT_TRAILER;
   const authorPattern = opts.agentAuthorPattern ?? DEFAULT_AUTHOR;
@@ -2211,6 +2208,32 @@ function keepRecord(record, minChars, dropped) {
     return false;
   }
   return true;
+}
+function pairRefusals(diagnostics) {
+  const { abandoned, bounds } = diagnostics;
+  const all = [
+    {
+      bound: "interposedGeneration",
+      count: abandoned.interposedGeneration,
+      flag: "--max-interposed-generations",
+      limit: bounds.maxInterposedGenerations
+    },
+    {
+      bound: "distance",
+      count: abandoned.distance,
+      flag: "--max-pair-distance",
+      limit: bounds.maxPairDistance
+    },
+    {
+      bound: "age",
+      count: abandoned.age,
+      flag: "--max-pair-age-hours",
+      limit: bounds.maxPairAgeHours
+    },
+    { bound: "notDescendant", count: abandoned.notDescendant, flag: null, limit: null }
+  ];
+  const refusals = all.filter((r) => r.count > 0);
+  return { total: refusals.reduce((n2, r) => n2 + r.count, 0), refusals };
 }
 var init_launch = __esm({
   "src/launch.ts"() {
@@ -6114,10 +6137,33 @@ function renderRunCommentFieldTable(f) {
     `| Tuning delta \u2014 preference units this run added to, or reinforced in, the tuning store | ${deltaCell} |`
   ].join("\n");
 }
+function refusedClause(ctx) {
+  const r = ctx.refused;
+  if (!r || r.total === 0) return null;
+  const parts = r.refusals.map((x) => {
+    const n2 = `${x.count} generation${x.count === 1 ? "" : "s"}`;
+    switch (x.bound) {
+      case "interposedGeneration":
+        return `${n2} had the same file rewritten by a later generation first, so the edit that followed corrected that generation and not this one`;
+      case "distance":
+        return `${n2} found no edit of the same file within ${x.limit} commits, the \`--max-pair-distance\` reach`;
+      case "age":
+        return `${n2} found none within ${x.limit} hours, the \`--max-pair-age-hours\` reach`;
+      case "notDescendant":
+        return `${n2} were only edited on a branch that never contained them, which no input widens`;
+    }
+  });
+  return parts.join(", and ");
+}
 function emptyWindowSentence(f, ctx) {
   const opening = "Nothing resolved in this window. That is a reading, not a failure:";
+  const refused = refusedClause(ctx);
   if (f.unitsFound === 0) {
-    return `${opening} no commit here carried an agent marker that a later human commit then edited.`;
+    if (!refused) {
+      return `${opening} no commit here carried an agent marker that a later human commit then edited.`;
+    }
+    const one2 = ctx.refused.total === 1;
+    return `${opening} commits here did carry agent markers and were followed by your edits, and ${ctx.refused.total} of those pairings ${one2 ? "was" : "were"} left out rather than guessed at. ${refused}. Those are claims this run could not stand behind, so it did not make them. Raise the pairing inputs on the Ursa step to see them anyway.`;
   }
   const one = f.unitsFound === 1;
   const found = one ? "1 work unit was found, and it did not become a record." : `${f.unitsFound} work units were found, and none of them became a record.`;
@@ -6227,8 +6273,9 @@ async function runCi(opts) {
     maxPairAgeHours: opts.maxPairAgeHours,
     maxInterposedGenerations: opts.maxInterposedGenerations
   };
-  const bounds = resolvePairingBounds(pairOptions);
-  const pairs = findCommitPairs(opts.projectPath, pairOptions);
+  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(opts.projectPath, pairOptions);
+  const bounds = diagnostics.bounds;
+  const refused = pairRefusals(diagnostics);
   const episodes = buildEpisodes(pairs, opts.projectPath);
   const records = [];
   const recordPaths = [];
@@ -6266,6 +6313,7 @@ async function runCi(opts) {
     declarationBasis: declaration2.basis,
     recordsPath: (0, import_node_path9.join)(ursaDir(opts.projectPath), "records"),
     dropped,
+    refused,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the
@@ -6967,6 +7015,7 @@ function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
     );
   }
   if (diagnostics) {
+    const { total: refusedTotal, refusals } = pairRefusals(diagnostics);
     const suppressed = diagnostics.authorFallbackSuppressed;
     if (suppressed) {
       const names = suppressed.authors.map((a) => `"${a}"`).join(", ");
@@ -6987,40 +7036,32 @@ function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
         how.push(`${d.generatedByDeclaredIdentity} by an identity you declared`);
       }
       lines.push("");
+      const found = `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${how.join(", ")})`;
       lines.push(
-        `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${how.join(", ")}), and none of those was followed by an edit of the same file without an agent marker.`
+        refusedTotal === 0 ? `${found}, and none of those was followed by an edit of the same file without an agent marker.` : `${found}, and the ${refusedTotal === 1 ? "one that was" : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`
       );
-      if (looked > 0) {
+      if (looked > 0 && refusedTotal === 0) {
         lines.push(
           "If every commit here is an agent's, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads."
         );
       }
     }
-    const { abandoned, bounds } = diagnostics;
-    const dropped = abandoned.distance + abandoned.age + abandoned.interposedGeneration + abandoned.notDescendant;
-    if (dropped > 0) {
-      const why = [];
-      if (abandoned.interposedGeneration > 0) {
-        why.push(
-          `${abandoned.interposedGeneration} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`
-        );
-      }
-      if (abandoned.distance > 0) {
-        why.push(
-          `${abandoned.distance} found no edit within ${bounds.maxPairDistance} commits`
-        );
-      }
-      if (abandoned.age > 0) {
-        why.push(`${abandoned.age} found none within ${bounds.maxPairAgeHours} hours`);
-      }
-      if (abandoned.notDescendant > 0) {
-        why.push(
-          `${abandoned.notDescendant} were only edited on a branch that never contained them`
-        );
-      }
+    if (refusedTotal > 0) {
+      const why = refusals.map((r) => {
+        switch (r.bound) {
+          case "interposedGeneration":
+            return `${r.count} had the same file rewritten by a later generation before you touched it, so your edit corrected that one and not this`;
+          case "distance":
+            return `${r.count} found no edit within ${r.limit} commits`;
+          case "age":
+            return `${r.count} found none within ${r.limit} hours`;
+          case "notDescendant":
+            return `${r.count} were only edited on a branch that never contained them`;
+        }
+      });
       lines.push("");
       lines.push(
-        `${dropped} generation${dropped === 1 ? "" : "s"} were left out rather than guessed at: ${why.join("; ")}.`
+        `${refusedTotal} generation${refusedTotal === 1 ? " was" : "s were"} left out rather than guessed at: ${why.join("; ")}.`
       );
       lines.push(
         "Those are claims this run could not stand behind, so it did not make them. Raise --max-pair-distance, --max-pair-age-hours or --max-interposed-generations to see them anyway."

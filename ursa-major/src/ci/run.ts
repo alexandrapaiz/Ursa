@@ -27,14 +27,14 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { findCommitPairs, resolvePairingBounds } from '../pairfinder'
+import { findCommitPairsWithDiagnostics } from '../pairfinder'
 import { buildEpisodes, type Episode } from '../episodes'
 import { deriveSignals, type Declaration } from '../signals'
 import { saveEpisodes, saveRecord, ursaDir } from '../store'
 import type { OutcomeRecord } from '../types'
 import type { Violation } from '../invariants'
 import { resolveEpisode } from '../resolve-episode'
-import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, stampPairingBounds } from '../launch'
+import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds } from '../launch'
 import { distill } from '../tuning/distill'
 import { emptyTuning, mergeDistill } from '../tuning/merge'
 import type { TuningRecord } from '../tuning/types'
@@ -189,11 +189,18 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
   const declaration = ownAcceptance ? declarationFromReaction(ownAcceptance) : NO_PRIOR
 
   // 3. Resolve.
-  // Built once and passed to the walk, so the numbers stamped into every
-  // record below are the numbers the walk used and not a second reading
-  // of the same options (`resolvePairingBounds` in src/pairfinder.ts).
-  // This launch calls `findCommitPairs`, which returns no diagnostics, so
-  // without this it had no access to the resolved bounds at all.
+  // One walk, and its diagnostics kept. Until 2026-10-25 this line called
+  // `findCommitPairs` and a separate `resolvePairingBounds` beside it, on
+  // the stated grounds that `findCommitPairs` "returns no diagnostics, so
+  // without this it had no access to the resolved bounds at all". That was
+  // true of the bounds and false of everything else in the same object:
+  // `findCommitPairs` is `findCommitPairsWithDiagnostics(...).pairs`, so
+  // this launch computed the walk's whole abandonment tally and threw it
+  // away one line later. That is drift 7 (`pairRefusals` in src/launch.ts).
+  //
+  // Taking `bounds` off the diagnostics rather than from a second
+  // `resolvePairingBounds` call also makes the record's stamp structurally
+  // the walk's own numbers instead of two calls that agree today.
   const pairOptions = {
     range: window.range,
     agentIdentities: opts.agentIdentities,
@@ -201,8 +208,12 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     maxPairAgeHours: opts.maxPairAgeHours,
     maxInterposedGenerations: opts.maxInterposedGenerations,
   }
-  const bounds = resolvePairingBounds(pairOptions)
-  const pairs = findCommitPairs(opts.projectPath, pairOptions)
+  const { pairs, diagnostics } = findCommitPairsWithDiagnostics(opts.projectPath, pairOptions)
+  const bounds = diagnostics.bounds
+  // The stage above `dropped` below: generations the walk abandoned before
+  // any episode existed. Shared with `ursa run` so the two surfaces cannot
+  // report different numbers for the same history (src/launch.ts).
+  const refused = pairRefusals(diagnostics)
   const episodes = buildEpisodes(pairs, opts.projectPath)
   const records: OutcomeRecord[] = []
   const recordPaths: string[] = []
@@ -271,6 +282,7 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     declarationBasis: declaration.basis,
     recordsPath: join(ursaDir(opts.projectPath), 'records'),
     dropped,
+    refused,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the
