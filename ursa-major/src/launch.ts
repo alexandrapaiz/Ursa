@@ -76,9 +76,29 @@
 //      abandoned by the distance bound, and that sentence is false in
 //      every clause. Fixed in `PairRefusal` and `pairRefusals` below,
 //      read by `src/bin/ursa.ts` and `src/ci/comment.ts`.
+//   8. Whether the window could have held a pair at all. Drift 7 one step
+//      further out, and the first of these eight that is not about a
+//      number one launch held and the other did not. Both launches had
+//      `diagnostics.commitsScanned` and only `ursa run` printed it, and
+//      neither of them read it. So on a window of one commit, where a
+//      pairing is impossible by construction because it needs a
+//      generation and a LATER commit that edits the same file, both
+//      surfaces answered the question as though the window had been big
+//      enough and the history had come up empty. Found 2026-10-25 by
+//      resolving `editedFixture` with the merge window's base at `HEAD~1`
+//      instead of `HEAD~2`: `commitsScanned` is 1, every `abandoned`
+//      count is 0, and the comment reads `no commit here carried an agent
+//      marker that a later human commit then edited` about a history
+//      whose generation is one commit behind the base. A squash merge is
+//      the common case, since it collapses a whole branch into one commit
+//      and `src/ci/window.ts` already degrades the window to it and says
+//      so in `windowNote`. Fixed in `PAIR_MINIMUM_COMMITS` and
+//      `windowTooSmallForAPair` below, read by `src/bin/ursa.ts` and
+//      `src/ci/comment.ts`.
 
 import { isForgotten, loadConsent } from './consent'
 import { checkRecord, formatViolations, type Violation } from './invariants'
+import type { PairFinderDiagnostics } from './pairfinder'
 import type { OutcomeRecord, PairingBounds } from './types'
 
 /**
@@ -386,4 +406,84 @@ export function pairRefusals(diagnostics: {
   ]
   const refusals = all.filter((r) => r.count > 0)
   return { total: refusals.reduce((n, r) => n + r.count, 0), refusals }
+}
+
+/**
+ * The fewest commits a window can hold and still be able to produce one
+ * pairing: two.
+ *
+ * A pairing is a generation commit plus a LATER commit that edits the same
+ * file (`findCommitPairsWithDiagnostics` in src/pairfinder.ts). "Later" is
+ * the whole of it. One commit cannot be later than itself, so a window of
+ * one commit holds no pairing whatever that commit contains, and a window
+ * of none holds no pairing for the same reason with nothing to inspect.
+ *
+ * A constant and not the literal `2`, because this is the one number in
+ * drift 8 that both surfaces assert to a reader, and the two sentences
+ * that carry it are written separately on purpose (drift 6's rule above:
+ * a markdown comment and a terminal are different surfaces, and only the
+ * NUMBER has to match between them). A literal in each file is how the
+ * two come to disagree.
+ */
+export const PAIR_MINIMUM_COMMITS = 2
+
+/**
+ * Could this window have produced a pairing at all?
+ *
+ * Takes the commit count the walk itself scanned, so the answer is about
+ * the history the resolver actually read rather than about the range
+ * string it was given. Which count that is depends on the surface, and
+ * both are right for their own claim: `ursa ci` passes
+ * `PairFinderDiagnostics.rangeScanned`, the width of one merge window,
+ * because its sentence is about that merge; `ursa run` passes
+ * `commitsScanned`, every commit reachable from any ref, because its
+ * sentence is about the whole project it was pointed at. Those two
+ * populations shared one field name until 2026-10-25, which is the
+ * ledger entry `commitsScanned` counts two different populations.
+ *
+ * This is drift 8. Both launches held this count and neither asked this
+ * question, so both reported an empty window the same way whether the
+ * window was big enough to answer or not. The distinction matters because
+ * the two states call for opposite actions: a history that carries no
+ * agent markers is a question about commit trailers, and a window too
+ * small to hold a pair is a question about the merge, usually a squash.
+ * Telling a reader the first when the second is true sends them to fix
+ * their trailers, which are fine.
+ *
+ * `true` is not a failure and callers must not treat it as one. It is the
+ * reason a zero is uninformative, which is a different claim from the zero
+ * being wrong.
+ */
+export function windowTooSmallForAPair(commitsScanned: number): boolean {
+  return commitsScanned < PAIR_MINIMUM_COMMITS
+}
+
+/**
+ * The commit count a merge comment may quote as its window width, taken
+ * off the walk that produced it.
+ *
+ * `undefined` when the walk read no window, which is the renderer's
+ * omitted case: `src/ci/comment.ts` then prints the range alone and keeps
+ * the unconditional zero-state sentence, because a caller with no window
+ * cannot tell a window that found nothing from a window too small to
+ * find anything.
+ *
+ * This is a named function and not an expression at the one call site
+ * because of what the call site used to be. Until 2026-10-25 it read
+ * `diagnostics.commitsScanned`, which is the width of the range when a
+ * range was passed and every commit reachable from any ref when one was
+ * not, and the quote was safe only because `src/ci/run.ts` happens always
+ * to pass `range: window.range` (src/ci/window.ts types it as a
+ * non-optional string). A second caller assembling the same context from
+ * a rangeless walk would have labelled roughly 2,800 commits as one merge
+ * window and switched off `windowTooSmallForAPair` for every window it
+ * ever rendered. Pinning that to a function gives the narrowing a test of
+ * its own rather than a paragraph; the ledger entry is "`commitsScanned`
+ * counts two different populations and the type cannot tell a reader
+ * which" (2026-10-25).
+ */
+export function windowWidth(
+  diagnostics: Pick<PairFinderDiagnostics, 'rangeScanned'>,
+): number | undefined {
+  return diagnostics.rangeScanned ?? undefined
 }

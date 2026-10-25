@@ -1,129 +1,100 @@
-# Merge order — measured 2026-10-18 19:0x UTC, ExO sixteenth window
+# Merge order — replaced each window by Ursa's ExO seat
 
-Replaces the previous plan entirely, as this file's convention requires.
-Measured against `origin/main` at `57c8fda`.
+**Measured 2026-10-25 at 23:1xZ by the forty-fourth window**, on an
+unshallowed clone with `remote.origin.fetch` widened to all heads (§0)
+and **both of this repository's merge drivers registered** before any
+verdict was taken:
 
-**Read the two-line caveat first, because it gained a line this
-window.** Every number below was taken on a clone that had been both
-**unshallowed** and **widened**. The host hands each run a clone that is
-shallow *and* single-branch, and those are independent defects:
+```sh
+bash tools/ledger/install-driver.sh
+bash tools/registers/install-drivers.sh
+git config --get-regexp 'merge\..*\.driver'   # two lines, or every verdict below is false
+```
 
-- Shallow makes `merge-tree` exit 128 and read as a conflict, and makes
-  `merge-base --is-ancestor` return a clean exit meaning the opposite of
-  the truth (`docs/agents/runner-facts.md` §9).
-- Single-branch leaves `remote.origin.fetch` at
-  `+refs/heads/main:refs/remotes/origin/main`, so no `origin/<branch>`
-  but `origin/main` ever resolves, and any instrument that resolves a
-  head by remote-tracking name reports the branch **deleted**
-  (`runner-facts.md` §10).
-
-Run the bootstrap block at the top of `prompts/exo-agent.md`, all three
-lines of it, before you believe any instrument here.
-
-## The three numbers
+## The queue
 
 | | |
 |---|---|
-| open pull requests | **7** |
-| merged in the last seven days | **65** |
-| age of the oldest open | **19 hours** (#225, 2026-10-18 00:26 UTC) |
-| drafts the owner cannot merge | **6 of 7** (all but #225) |
-| real conflicts against `origin/main` | **zero of seven** |
-| independent decisions | **seven** (no pull request contains another) |
+| open pull requests | **11** |
+| merged in the last seven days | **44** |
+| oldest open | 2026-10-24T21:21:40Z |
 
-The depth rule does not fire, for the sixth consecutive run. Open is
-outnumbered by the week's merges nine to one, every open pull request
-was created today, and twenty-seven merged on 2026-10-18 against the
-queue's seven survivors.
+Open does not outnumber the week's merges, so the depth warning does
+not fire. The owner is absorbing work faster than the org produces it.
 
-**The figure to watch is still the drafts and not the depth.** Six of
-seven are drafts, so the number the owner is handed as "open" is mostly
-work she cannot act on. One of the six, #266, is this window's own and
-is readied at the end of this run. The other five belong to other seats
-and are theirs to resolve, not this seat's to close.
+## Conflicts with `main`
 
-## Conflicts, with the instrument beside each verdict
+Instrument: `git merge-tree --write-tree origin/main refs/prs/<n>`,
+drivers registered, **no `2>&1`**, because a driver writes its
+diagnostic to stderr and redirecting it puts that line where the tree
+object identifier was.
 
-Two instruments were run over the same seven pull requests in the same
-minute, and they disagreed completely. The table records both readings
-because the disagreement is this window's finding.
+| pull request | branch | verdict | instrument |
+|---|---|---|---|
+| #395 | ursa-research/2026-10-24-hook-2 | CLEAN | merge-tree, drivers on |
+| #418 | ursa-exo/2026-10-25-message | **CONFLICT**, one file | merge-tree, drivers on |
+| #423 | ursa-skill/2026-10-25-message-merge | CLEAN | merge-tree, drivers on |
+| #424 | ursa-frontend/2026-10-25-message | CLEAN | merge-tree, drivers on |
+| #425 | ursa-exo/2026-10-25-message-3 | CLEAN | merge-tree, drivers on |
+| #426 | ursa-engineer/2026-10-25-message-2 | CLEAN | merge-tree, drivers on |
+| #427 | ursa-security/2026-10-25-hook | CLEAN | merge-tree, drivers on |
+| #428 | ursa-engineer/2026-10-25-hook | CLEAN | merge-tree, drivers on |
+| #429 | ursa-exo/2026-10-25-hook-2 | CLEAN | merge-tree, drivers on |
+| #430 | ursa-market/2026-10-25-message | CLEAN | merge-tree, drivers on |
+| #431 | ursa-pm/2026-10-25-hook-2 | CLEAN | merge-tree, drivers on |
 
-| PR | branch | `git merge-tree` vs `origin/main` | simulated real merge | HQ `check-merge-queue.sh` |
-|---|---|---|---|---|
-| #225 | `ursa-pm/2026-10-18-message` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
-| #236 | `ursa-frontend/2026-10-18-message-5` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
-| #240 | `ursa-frontend/2026-10-18-message` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
-| #241 | `ursa-engineer/2026-10-18-message-5` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
-| #263 | `ursa-research/2026-10-18-message` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
-| #264 | `ursa-skill/2026-10-18-message-h` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
-| #266 | `ursa-exo/2026-10-18-message-12` | clean | clean | *NO SUCH REMOTE BRANCH* (false) |
+**Ten of eleven are clean and there is no ordering constraint between
+any of them.** All four register drivers fired on #418 and auto-merged
+all four registers; the full stderr is in this window's pull request.
 
-The third column is `git merge-tree --write-tree --name-only
-origin/main refs/prs/<n>`, exit 0 for all seven. The fourth is a real
-three-way merge of each, performed in sequence in a throwaway detached
-worktree off `origin/main`, which is the simulation this file's
-convention requires rather than an order taken on trust. All seven
-merged with no conflict resolution.
+## The one conflict, and it is the file this charter rewrites
 
-The fifth column is HQ's `tools/check-merge-queue.sh`, run from
-`/srv/asc/repos/alexandra-systems/tools/`, which `prompts/exo-agent.md`
-§5b until this window told this seat to **prefer** over the one-liner.
-It reported `7 of 7 open pull request(s) cannot be merged as they
-stand`, every row attributed to a deleted branch. `git ls-remote --heads
-origin` listed seventy-eight branches in the same minute, including all
-seven. The cause is the single-branch refspec above and the fix is one
-line in HQ's script, handed to the `exo-centralizer` this run. See
-`INC-2026-10-18-single-branch-refspec-reads-as-deleted`.
+#418's only conflicted path is **`docs/agents/merge-order.md`** — this
+file. It is declared `enabled: false` **by name with the reason** in
+`tools/registers/registers.json`, because this charter replaces it
+wholesale each window and an entry-keyed merge would publish two
+contradictory merge orders. So the conflict is correct, expected, and
+resolved by taking the newer copy:
 
-**The fifth column was re-run after widening the refspec, in the same
-session, and it agrees with the other two:** `All 7 open pull request(s)
-merge cleanly into main`, with the drift each branch carries, which is
-the one number no other instrument here produces.
+```sh
+git checkout --theirs docs/agents/merge-order.md
+```
 
-| PR | behind `main` |
+## The finding the owner should have before she reads #418
+
+**#418's register half is now provably redundant with `main`**, measured
+set-wise with heading levels normalised, after #422 merged at
+2026-10-25T23:06:36Z:
+
+| file | lines in #418 found nowhere on `main` |
 |---|---|
-| #225 | 0 |
-| #266 | 1 |
-| #264 | 8 |
-| #263 | 27 |
-| #241 | 201 |
-| #240 | 212 |
-| #236 | 220 |
+| `docs/agents/incidents.md` | **0** |
+| `docs/agents/learning-log.md` | **0** |
+| `docs/agents/runner-facts.md` | **0** |
+| `docs/agents/improvements.md` | **0** |
 
-Two of those are worth a seat's attention on their own. **#236 is 220
-commits behind and #240 is 212**, both the frontend seat's, and both
-still merge cleanly today. A branch that far back merges cleanly until it
-does not, and neither is this seat's to rebase.
+So everything in #418 except its two charter files has already landed by
+another route. What remains is `prompts/exo-agent.md` (+2,698/-69) and
+`prompts/pm-agent.md` (+30/-0), which is Tier C and hers.
 
-**If you are the next window: run the script and if it still reports
-deleted branches, either the fetch fix has not landed upstream or you
-have not run §0's second line. Check your own refspec before you file
-anything.**
+**The decision in front of her is now a two-file charter decision**,
+where a week ago it was a twelve-file, nine-thousand-line one. That is
+the whole of what window 42's split bought, and it is reported rather
+than acted on: #418 is named in a standing report to the owner, and the
+rule for that case is to post which pull request the decision moves to
+and leave the artifact exactly where the PM placed it. **Nothing in
+#418 has been touched.**
 
-## Containment
+## Landing order
 
-`git merge-base --is-ancestor refs/prs/<a> refs/prs/<b>` over all
-forty-two ordered pairs of the seven open heads, on the unshallowed
-clone: **no pair is contained in another.** Seven open pull requests are
-seven independent decisions, the second consecutive window with nothing
-to collapse, and every seat is on one branch of its own.
+There is no ordering constraint to simulate. Any of the ten clean pull
+requests may land in any order. #418 lands whenever its charter question
+is answered, and its one conflict is resolved with the single command
+above.
 
-## The landing order
+#429 is this window's own and the PM may merge it under §21: it carries
+no `prompts/` path, which is the predicate §10's checklist reads.
 
-Any order works, since nothing conflicts and nothing is contained.
-Simulated in this sequence and clean throughout:
-
-1. **#225** (pm) — the only non-draft, and the only one she can merge
-   today without a seat readying it first. It carries
-   `INC-2026-10-18-board-runtime-token-printed-twice`, which is the
-   register's account of a credential still unrotated, so landing it
-   first puts that account on `main` where a memoryless run finds it.
-2. **#266** (exo, this window) — readied at the end of this run.
-3. **#264** (skill), **#263** (research), **#241** (engineer),
-   **#240** and **#236** (frontend) — drafts belonging to other seats.
-   Each is that seat's to ready or close under the ship-first rule. They
-   are listed here so the order is complete, not because anything about
-   them is actionable by her while they are drafts.
-
-Merging is the owner's alone. This file is the order and the evidence,
-and nothing in it is a request to loosen that.
+```sh
+gh pr diff 429 --name-only | grep '^prompts/'   # no output
+```

@@ -267,6 +267,19 @@ toward Category 2 below: a company that sells solicited feedback now
 also wants to sell the grading rubric. Last observed 2026-09-30:
 [Invisible Technologies Newsroom](https://invisibletech.ai/newsroom), [Yahoo Finance: Invisible joins WEF](https://finance.yahoo.com/news/invisible-technologies-joins-world-economic-140000900.html).
 
+Re-checked 2026-10-25: no pivot, pricing move, or structural change
+since the WEF/WeCP update. The company's own 2026 outlook (published
+2025-12-02, so predates this entry's window but is the newest
+strategy statement available) argues human-in-the-loop labor stays
+necessary for "another decade" and that "the constraint will be
+adoption, not capability" — a direct argument against the autonomous,
+no-grader shape of Ursa's own bet, worth naming as the clearest
+public disagreement with CLAUDE.md §1 found in this category. Only
+other news since is two client case studies (Alliance Nationwide
+Exposition, Orchestra of St. Luke's) and a reconfirmed $2.0B
+valuation, neither a landscape-level change. Last observed 2026-10-25:
+[Invisible: 2026 AI trends](https://invisibletech.ai/2026-trends), [QuantLogix: Invisible Technologies valuation](https://quantlogix.ai/private-company/invisible-technologies).
+
 ### Handshake AI
 
 What it is: an expert network for frontier-lab RLHF and model
@@ -285,6 +298,22 @@ Weakness against Ursa: the identical structural gap as the rest of
 this category — a credentialed expert paid to grade or generate on
 request, not a person's own real work observed after the fact. New
 entry, added this run. Last observed 2026-09-30: [Handshake: Introducing Handshake AI](https://joinhandshake.com/blog/our-team/introducing-handshake-ai/), [Annotation Academy: What is Handshake AI](https://annotation.academy/glossary/what-is-handshake-ai-and-how-does-it-work).
+
+Update 2026-10-25: The Information's own exclusive puts the AI-training
+unit's gross annualized revenue at nearly $1B, up from $550M in January
+2026 and roughly $5-10M a year before that — a ~100x run-up in under
+twelve months, and roughly flat against the $1.1B figure this entry
+already tracked for April, meaning the growth curve has plateaued
+rather than kept compounding since spring. The same reporting puts
+contractor costs at 60-70% of gross revenue, so combined with its
+college-recruiting business (total gross ARR ~$1.15B), net margin on
+the AI-training side is thin and concentration risk is real: "losing
+even one major client hits hard." That cost structure is the sharpest
+contrast this map has found yet with Ursa Minor's own: Handshake pays
+out 60-70 cents of every training-revenue dollar to the credentialed
+experts doing the work, where Minor's labor is the unpaid byproduct of
+someone doing their own real job anyway. Weakness against Ursa
+otherwise unchanged. Last observed 2026-10-25: [The Information on X](https://x.com/theinformation/status/2044105942749315090), [Dealroom: Handshake's ARR crosses $1B](https://app.dealroom.co/news/note/handshake-s-arr-crosses-1b-as-ai-training-revenue-surges).
 
 ### Halluminate
 
@@ -313,6 +342,34 @@ The reward comes from a simulation of work, not a record of work that
 actually happened. Worth tracking whether this sub-category's
 environments ever ingest real completed deliverables rather than
 seeding constructed ones. Last observed 2026-10-24: [Oak HC/FT: why we led Halluminate's $30M Series A](https://www.oakhcft.com/blog-post/the-internet-has-run-out-of-things-to-teach-why-we-led-halluminates-30-million-series-a), [Y Combinator on X: Halluminate](https://x.com/ycombinator/status/2105682350814470399).
+
+### TELUS Digital (TELUS International's AI data arm)
+
+What it is: a publicly traded (TSX/NASDAQ: TIXT) BPO conglomerate's
+AI-data division, offering RLHF, SFT, and annotation through a
+proprietary "Fine-Tune Studio" platform, drawing on a self-described
+"Global AI Community" of more than one million annotators, reviewers,
+linguists and raters across 20+ domains and 100+ languages. New entry,
+found this run via a practitioner's own byline (a staff AI engineer at
+TELUS Digital) rather than a landscape sweep, which is itself worth
+naming: a vendor at this scale had gone unlisted for a month because
+nothing in the first four landscape passes surfaced it by name. Who it
+serves: enterprise AI buyers broadly, not frontier-labs-only like
+Surge; named a Leader in NelsonHall's 2026 NEAT evaluation for AI
+enablement services, which NelsonHall's own analysis reportedly found
+rates specialized RLHF services as carrying the highest client
+satisfaction among AI-enablement buyers generally. Pricing: not
+public; no rate card found. Strengths: scale (the million-annotator
+figure dwarfs every other Category 1 entry's disclosed headcount) and
+a packaged "structured rubrics for preference ranking, side-by-side
+model comparison and output scoring" product, meaning the RLHF
+pipeline itself is productized rather than bespoke per client.
+Weakness against Ursa: the same structural gap as every other Category
+1 entry, stated in TELUS's own marketing copy rather than inferred —
+"structured rubrics" and "side-by-side comparison" are the solicited-
+opinion mechanism CLAUDE.md §1 contrasts the outcome record against,
+at the largest labor scale found in this file yet. Last observed
+2026-10-25: [TELUS Digital: Data for AI Training](https://www.telusdigital.com/solutions/data-for-ai-training/data-validation-services), [TELUS Digital named Leader in 2026 NelsonHall NEAT Evaluation](https://www.telusdigital.com/about/newsroom/telus-digital-named-leader-in-2026-nelsonhall-neat-evaluation-for-ai-enablement-services).
 
 ## Category 2 — Evaluation and arena products
 
@@ -803,6 +860,22 @@ either of those two. Worth a one-line recheck at the next monthly
 pass, not a promotion to its own entry yet. Last observed 2026-10-24:
 [GitHub: edihasaj/universal-memory-protocol](https://github.com/edihasaj/universal-memory-protocol), [Hacker News: Universal Memory Protocol](https://news.ycombinator.com/item?id=48428796).
 
+Update 2026-10-25: re-reading the 2026-10-05 source itself (rather
+than this entry's own paraphrase of it) turned up two more named
+attempts the earlier notes didn't carry forward: MIF (an individual
+developer's interchange spec) and memorywire (an academic wire-format
+proposal), both first half of 2026, alongside the already-tracked
+Open Memory Protocol. That makes six distinct fragmentation attempts
+in one year across this one source alone (COGX, ByteRover, OMP, MIF,
+memorywire, and now UMP), and the source's own count was already
+four before UMP existed. None of the six has a second independent
+implementation or institutional governance — the same bar the
+2026-10-05 and 2026-10-24 notes already applied, still uncleared. This
+does not change the conclusion; it is the strongest evidence yet for
+it, since the fragmentation itself is accelerating faster than any
+single attempt is gaining traction. Last observed 2026-10-25:
+[stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -873,3 +946,30 @@ pass, not a promotion to its own entry yet. Last observed 2026-10-24:
   the adoption bar the 2026-10-05 note already applied to two more
   established attempts. No new Category 3 entry; the monthly full-map
   pass is due around 2026-10-26.
+- 2026-10-25 (message, 13th run) — closed out the last two entries
+  still dated only to the map's opening (2026-09-26) or the week after
+  (2026-09-30), completing this cycle's full-map pass a day ahead of
+  the 2026-10-26 deadline. Invisible Technologies: re-checked, no
+  pivot or pricing change since the WEF/WeCP update; added its own
+  2026 outlook statement as the clearest public argument against
+  Ursa's no-human-grader bet found in this category. Handshake AI: The
+  Information's own exclusive puts AI-training gross ARR at nearly $1B
+  (up from $550M in January), roughly flat against the $1.1B this
+  entry already tracked for April — growth has plateaued since
+  spring, not kept compounding — and discloses contractor costs at
+  60-70% of gross revenue, the sharpest cost-structure contrast this
+  map has found with Minor's own near-zero-marginal-cost labor. Also
+  re-read the 2026-10-05 Category 3 source in full rather than this
+  file's own paraphrase of it, and found two more named memory-
+  interchange attempts (MIF, memorywire) the earlier notes hadn't
+  carried forward — six distinct fragmentation attempts in one year
+  now, none with a second independent implementation.
+- 2026-10-25 (message, 15th run) — added TELUS Digital (Category 1,
+  18th entry): a publicly traded BPO conglomerate's RLHF/annotation
+  arm with a self-described million-plus-annotator workforce, found
+  via a practitioner's own byline rather than a landscape sweep. The
+  vendor had gone unlisted through four prior full-map passes despite
+  operating at the largest disclosed scale of any Category 1 entry,
+  worth naming as a gap in how this file finds new entries (byline and
+  job-posting searches surfaced it; keyword sweeps of "RLHF vendor" did
+  not).

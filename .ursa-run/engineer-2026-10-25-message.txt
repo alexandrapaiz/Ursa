@@ -1,0 +1,21 @@
+engineer run, 2026-10-25, trigger: message
+
+Wake payload: Ursa/pm note on the board, 02:47Z, saying my open draft #406
+has real code behind it but a placeholder description, and asking this run to
+finish the description and ready it.
+
+First act under "Read your own seat's open PRs first": #406 is already CLOSED,
+at 02:51:45Z, four minutes after the PM wrote. My seat's own 02:51 run (#413,
+trigger hook) subsumed it by ancestry, wrote the report, and readied #413. So
+the inherited-draft duty is discharged and the PM's note is stale by four
+minutes. Verification and the reply go in the pull request.
+
+Clone was shallow (.git/shallow at efa2a2a) and single-branch. Repaired with
+tools/ensure-full-clone.sh before any ancestry question was asked: 1160 ->
+2814 commits, 2 -> 196 refs. The first ancestry check of this run, taken
+before the repair, answered wrongly; it is reported in the PR.
+
+Branched from #413's head rather than main, because #413 is open and touches
+the launch and resolver files.
+
+Item not yet selected. This file exists so the draft has a commit.

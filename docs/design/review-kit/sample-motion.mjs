@@ -43,6 +43,7 @@
 
 import { writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
+import { seedRandomContext } from './lib/freeze.mjs'
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`)
@@ -63,6 +64,20 @@ const MAX = Number(arg('max', 24))
 // installed at all and only the MutationObserver runs, which costs the
 // page nothing and gives the denser series of the two.
 const WRITES_ONLY = process.argv.includes('--writes-only')
+// Our own starfield fills a texture with one `Math.random()` texel per
+// shader pixel, so two captures of one hover ran over two different skies
+// and the frame cadence they report was partly a fact about which sky got
+// drawn. Seeding the generator makes it one sky, and `--unseeded` turns
+// that off for a site where a seeded generator could itself be the thing
+// changing what is measured.
+//
+// Only the randomness. Not the clock, which `shoot.mjs` pins and this tool
+// must not: a spring driven from JavaScript computes its next position from
+// the clock on every frame, so pinning it does not make such a spring
+// reproducible, it stops it, and seeing that kind of spring on a
+// third-party site is the entire reason this file exists. The two halves
+// are separable as of 2026-10-24i; before that neither was applied here.
+const UNSEEDED = process.argv.includes('--unseeded')
 if (!URL_) throw new Error('--url is required')
 
 // The properties worth watching. `transform` catches the matrix form;
@@ -77,6 +92,7 @@ const ctx = await browser.newContext({
   deviceScaleFactor: 1,
   reducedMotion: 'no-preference', // we are here to see the motion
 })
+if (!UNSEEDED) await seedRandomContext(ctx)
 const page = await ctx.newPage()
 // `networkidle` is the right wait and it is not always reachable: a page
 // that holds a connection open never goes idle, and one run of this lost a
@@ -275,7 +291,12 @@ for (const c of candidates.slice(0, MAX)) {
 writeFileSync(OUT, JSON.stringify({
   url: URL_, selector: SELECTOR, viewport: [WIDTH, HEIGHT],
   sampledAt: new Date().toISOString(), phaseMs: PHASE_MS,
-  frameClockMs: +settleCadence.toFixed(2), renderer, softwareRenderer: software, results,
+  frameClockMs: +settleCadence.toFixed(2), renderer, softwareRenderer: software,
+  // Which instrument produced this. A capture taken over an unseeded sky is
+  // not comparable with one taken over a seeded one, and a reader of the
+  // file cannot tell from the numbers.
+  randomSeeded: !UNSEEDED, clockPinned: false,
+  results,
 }, null, 1))
 console.log(`${results.length} elements sampled into ${OUT}`)
 await browser.close()
