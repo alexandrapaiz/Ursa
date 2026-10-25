@@ -10437,3 +10437,110 @@ web search for ChatGPT's Sources panel and its empty-summary behaviour,
 one fetch of `www.memorylake.ai/en/blogs/check-what-chatgpt-memory-summary-leaves-out`,
 and one attempted fetch of `help.openai.com/en/articles/8590148-memory-faq`
 which returned 403 and contributed nothing.
+
+### 2026-10-25 (skill, twenty-second run) — A branch's green checks are green against the base it branched from, and that tree is not the one the merge button ships
+
+- Trigger: this seat's 48-commit library stack reported three green checks
+  in #419 and all three were honest: `check-evidence` OK over 359 ranges,
+  `relevance-sweep --stale` 224 of 224 bound, `trigger-coverage` 100 per
+  cent. Merging `main` into the same branch this run broke two of them
+  immediately. 27 of the 359 cited ranges drifted, `check-evidence` exited
+  1, and `relevance-sweep` fell to 203 of 224. Nothing about the branch
+  changed. The tree the checks had been run against simply was not the tree
+  the owner's merge would produce.
+- What: run the library's checks on the merge result rather than on the
+  branch tip. The branch tip is a tree nobody ships, and for a library whose
+  whole product is fingerprints over `ursa-major/src`, a green over it is a
+  claim about a tree that stops existing the moment the branch lands. The
+  measurement this run makes the case: 24 of the 27 were pure relocation and
+  cost one command, but one of the remaining three was a claim `main` had
+  made false, and a reader following the shipped library would have done
+  work the product now does for them. That one was only findable by merging.
+  This is not the stale-citation problem `relevance-sweep` already solves,
+  which is about a verdict outliving its lines inside one tree; it is a green
+  gate scoped to the wrong tree.
+- First step: a `skills/check-against-main.sh` that merges `origin/main`
+  into a detached scratch worktree, runs the three checks there, and exits
+  non-zero, reporting nothing into the real working tree.
+  `tools/ledger/requeue.sh` already does the merge-in-a-worktree half, so
+  the pattern is in the repository and only the check half is new.
+- Cost: $0. Worth measuring on one more stack before anyone makes it a
+  gate, because the right answer may be that it belongs in the pull
+  request's own checks rather than in a command a seat has to remember.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-second run) — Nothing tells a seat to register the merge drivers this repository's own attributes file declares, so the first merge of main shows a conflict that is not one
+
+- Trigger: the first `git merge origin/main` of this run reported
+  `CONFLICT (content): Merge conflict in docs/ideas.md`. It was not a
+  conflict. `.gitattributes` declares `docs/ideas.md merge=ledger`, the
+  driver behind that name is registered per clone by
+  `tools/ledger/install-driver.sh`, and a fresh clone has not run it, so git
+  fell back to the default line merge and reported a collision between two
+  appends. With the installer run, the same merge printed "merged by block
+  identity, 15 blocks taken from the other branch, 0 removed" and conflicted
+  on nothing. `grep -rl install-driver prompts/ docs/standards/` returns
+  nothing: no charter and no standard mentions it.
+- What: this is not theoretical and it is not only this seat's. Yesterday
+  the PM seat hand-resolved exactly this non-conflict, in commit 386e278,
+  "resolve docs/ideas.md append conflict (keep both)", which is now on
+  `main`. And a hand resolution of a line-merged ledger is the destructive
+  case this repository already measured: the 2026-10-24 seventeenth-run
+  entry above found that two appends ending in byte-identical lines align as
+  shared context and one entry loses its First step, Cost and Status with
+  exit zero and no marker. So the gap turns a safe merge into the one shape
+  of merge that silently eats an entry.
+- First step: one line in the part of the charter every seat shares, next to
+  the open-PR check: run `bash tools/ledger/install-driver.sh` before your
+  first merge. Cheaper and better than a line in eleven charters: have
+  whatever prepares a seat's clone run it, since the installer already checks
+  its own post-condition and prints what it covered.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-second run) — One Tier C path in a 27-file stack holds the other 26 behind the owner, and the seat that wrote it could not have known before opening the PR
+
+- Trigger: the PM's note on #419 says the branch waits on the owner rather
+  than on the PM because one of its files sits under `prompts/`, and that
+  path is Tier C under pm.md §10 regardless of how small the edit inside it
+  is. The file is `prompts/skill-extract.md`, which this seat's charter
+  explicitly permits it to write. The other 26 files are `skills/` and
+  `docs/ideas.md`, which are Tier B or Tier A. So one permitted edit moved
+  26 files' worth of review from the PM's daily run to the owner's queue.
+- What: two halves, and only the first is clearly right. The first is that a
+  seat should be able to see its own tier before it opens a pull request,
+  from its changed paths and §10's lists, rather than learning it from a PM
+  note afterwards. The second, splitting Tier C paths into their own thin
+  pull request, is a real trade and not an obvious win: the reason to keep
+  them together is that a charter or prompt edit is best reviewed beside the
+  work that motivated it, which is precisely what a thin PR throws away. The
+  honest minimum is that a run whose diff crosses into Tier C says so in its
+  own description, with the path named, so the owner can see the gate's
+  cause is one file and not twenty-seven.
+- First step: a `tools/tier.sh` that runs `gh pr diff --name-only` (or
+  `git diff --name-only origin/main...HEAD` before the PR exists), matches
+  each path against §10's three lists, and prints the tier with the paths
+  that decided it. Mechanical, since §10's lists are explicit.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-second run) — pm.md §10.5 prescribes a rebase where it means "make it merge clean", and on a verified stack the rebase is the destructive option
+
+- Trigger: §10.5 says a conflict "is not the PM's to resolve in code: it
+  messages the owning seat to rebase". The note this run acted on used that
+  word. Taken literally it would have been the wrong instruction here: the
+  same note's main finding was that six pull requests verify as strict
+  ancestors of this branch by `git merge-base`, checked by hand, and
+  rebasing 48 commits rewrites every one of them so that all six claims stop
+  holding against the new hashes. A merge commit fixes the mergeability and
+  costs none of it.
+- What: one word in the standard. What the PM needs is that the branch
+  merges clean, which is the condition §10.5's criterion 5 actually states;
+  how the seat gets there is the seat's choice, and on a stack whose
+  containment someone has verified by hand, the merge is strictly better.
+  HQ's standard and not this seat's to edit, so it is a ledger entry and a
+  proposal rather than a diff.
+- First step: propose to HQ that §10.5 read "to make it merge clean" rather
+  than "to rebase it", and that criterion 5 say so too.
+- Cost: $0.
+- Status: proposed
