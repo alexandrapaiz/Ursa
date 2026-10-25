@@ -54,7 +54,7 @@ import { buildEpisodes, type Episode } from '../episodes'
 
 import { saveEpisodes, saveRecord } from '../store'
 import { formatResolverIdentity } from '../resolver-identity'
-import { erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds, type DroppedUnits } from '../launch'
+import { PAIR_MINIMUM_COMMITS, erasedEpisodeIds, gateRecords, keepRecord, newDroppedUnits, pairRefusals, stampPairingBounds, windowTooSmallForAPair, type DroppedUnits } from '../launch'
 import type { Artifact, Exclusion, OutcomeRecord, RawGeneration } from '../types'
 
 // The resolve-one-episode step lives in src/resolve-episode.ts, which the
@@ -264,10 +264,23 @@ export function renderRunSummary(
       // a bound stopped the walk before it got there, so asserting the
       // negative prints a contradiction of the paragraph below it.
       const found = `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? '' : 's'}. ${looked} looked generated (${how.join(', ')})`
+      // Drift 8. This surface has printed the commit count since the
+      // diagnostics shipped and still answered as though the count could
+      // not matter: a pairing needs a generation and a LATER commit that
+      // edits the same file, so a history of one commit holds none by
+      // construction, and asserting that nothing generated was followed
+      // by an edit of yours describes a search that could not have run.
+      // The predicate is shared with the pull-request comment
+      // (`windowTooSmallForAPair` in src/launch.ts) so the two surfaces
+      // cannot disagree about which histories are too short, and the
+      // wording stays local here for drift 6's reason.
+      const tooSmall = windowTooSmallForAPair(d.commitsScanned)
       lines.push(
-        refusedTotal === 0
-          ? `${found}, and none of those was followed by an edit of the same file without an agent marker.`
-          : `${found}, and the ${refusedTotal === 1 ? 'one that was' : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`,
+        refusedTotal > 0
+          ? `${found}, and the ${refusedTotal === 1 ? 'one that was' : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`
+          : tooSmall
+            ? `${found}, and a pairing takes ${PAIR_MINIMUM_COMMITS} commits, a generation and a later commit of yours that edits the same file, so this history is too short to hold one yet.`
+            : `${found}, and none of those was followed by an edit of the same file without an agent marker.`,
       )
       // The case this repository is in, and it is not an empty result.
       // Every commit on the default branch is an agent's, so there is no
@@ -278,7 +291,14 @@ export function renderRunSummary(
       // the sentence above is rewritten then: the corrections ARE on this
       // branch in that case, and the remedy is a bound rather than the
       // pull-request path.
-      if (looked > 0 && refusedTotal === 0) {
+      //
+      // Withheld on a too-short history for a different reason, added
+      // 2026-10-25 with drift 8: this paragraph reads the absence of a
+      // human edit as evidence about where the person works, and a
+      // history of one commit is no evidence of that at all. Sending a
+      // reader to the pull-request path on it is a recommendation drawn
+      // from a search that never ran.
+      if (looked > 0 && refusedTotal === 0 && !tooSmall) {
         lines.push(
           'If every commit here is an agent\'s, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads.',
         )

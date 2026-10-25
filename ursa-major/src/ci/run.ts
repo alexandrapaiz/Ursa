@@ -283,6 +283,13 @@ export async function runCi(opts: CiOptions): Promise<CiResult> {
     recordsPath: join(ursaDir(opts.projectPath), 'records'),
     dropped,
     refused,
+    // The walk's own count, for the same reason `bounds` above is taken
+    // off the diagnostics rather than recomputed: this is the number of
+    // commits the resolver read, not the width of the range string it was
+    // handed. Drift 8 (`windowTooSmallForAPair` in src/launch.ts) is that
+    // both launches have had this number since the diagnostics shipped
+    // and neither asked whether it was large enough for a pairing.
+    commitsInWindow: diagnostics.commitsScanned,
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the

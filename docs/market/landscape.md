@@ -267,6 +267,19 @@ toward Category 2 below: a company that sells solicited feedback now
 also wants to sell the grading rubric. Last observed 2026-09-30:
 [Invisible Technologies Newsroom](https://invisibletech.ai/newsroom), [Yahoo Finance: Invisible joins WEF](https://finance.yahoo.com/news/invisible-technologies-joins-world-economic-140000900.html).
 
+Re-checked 2026-10-25: no pivot, pricing move, or structural change
+since the WEF/WeCP update. The company's own 2026 outlook (published
+2025-12-02, so predates this entry's window but is the newest
+strategy statement available) argues human-in-the-loop labor stays
+necessary for "another decade" and that "the constraint will be
+adoption, not capability" — a direct argument against the autonomous,
+no-grader shape of Ursa's own bet, worth naming as the clearest
+public disagreement with CLAUDE.md §1 found in this category. Only
+other news since is two client case studies (Alliance Nationwide
+Exposition, Orchestra of St. Luke's) and a reconfirmed $2.0B
+valuation, neither a landscape-level change. Last observed 2026-10-25:
+[Invisible: 2026 AI trends](https://invisibletech.ai/2026-trends), [QuantLogix: Invisible Technologies valuation](https://quantlogix.ai/private-company/invisible-technologies).
+
 ### Handshake AI
 
 What it is: an expert network for frontier-lab RLHF and model
@@ -285,6 +298,22 @@ Weakness against Ursa: the identical structural gap as the rest of
 this category — a credentialed expert paid to grade or generate on
 request, not a person's own real work observed after the fact. New
 entry, added this run. Last observed 2026-09-30: [Handshake: Introducing Handshake AI](https://joinhandshake.com/blog/our-team/introducing-handshake-ai/), [Annotation Academy: What is Handshake AI](https://annotation.academy/glossary/what-is-handshake-ai-and-how-does-it-work).
+
+Update 2026-10-25: The Information's own exclusive puts the AI-training
+unit's gross annualized revenue at nearly $1B, up from $550M in January
+2026 and roughly $5-10M a year before that — a ~100x run-up in under
+twelve months, and roughly flat against the $1.1B figure this entry
+already tracked for April, meaning the growth curve has plateaued
+rather than kept compounding since spring. The same reporting puts
+contractor costs at 60-70% of gross revenue, so combined with its
+college-recruiting business (total gross ARR ~$1.15B), net margin on
+the AI-training side is thin and concentration risk is real: "losing
+even one major client hits hard." That cost structure is the sharpest
+contrast this map has found yet with Ursa Minor's own: Handshake pays
+out 60-70 cents of every training-revenue dollar to the credentialed
+experts doing the work, where Minor's labor is the unpaid byproduct of
+someone doing their own real job anyway. Weakness against Ursa
+otherwise unchanged. Last observed 2026-10-25: [The Information on X](https://x.com/theinformation/status/2044105942749315090), [Dealroom: Handshake's ARR crosses $1B](https://app.dealroom.co/news/note/handshake-s-arr-crosses-1b-as-ai-training-revenue-surges).
 
 ### Halluminate
 
@@ -803,6 +832,22 @@ either of those two. Worth a one-line recheck at the next monthly
 pass, not a promotion to its own entry yet. Last observed 2026-10-24:
 [GitHub: edihasaj/universal-memory-protocol](https://github.com/edihasaj/universal-memory-protocol), [Hacker News: Universal Memory Protocol](https://news.ycombinator.com/item?id=48428796).
 
+Update 2026-10-25: re-reading the 2026-10-05 source itself (rather
+than this entry's own paraphrase of it) turned up two more named
+attempts the earlier notes didn't carry forward: MIF (an individual
+developer's interchange spec) and memorywire (an academic wire-format
+proposal), both first half of 2026, alongside the already-tracked
+Open Memory Protocol. That makes six distinct fragmentation attempts
+in one year across this one source alone (COGX, ByteRover, OMP, MIF,
+memorywire, and now UMP), and the source's own count was already
+four before UMP existed. None of the six has a second independent
+implementation or institutional governance — the same bar the
+2026-10-05 and 2026-10-24 notes already applied, still uncleared. This
+does not change the conclusion; it is the strongest evidence yet for
+it, since the fragmentation itself is accelerating faster than any
+single attempt is gaining traction. Last observed 2026-10-25:
+[stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -873,3 +918,21 @@ pass, not a promotion to its own entry yet. Last observed 2026-10-24:
   the adoption bar the 2026-10-05 note already applied to two more
   established attempts. No new Category 3 entry; the monthly full-map
   pass is due around 2026-10-26.
+- 2026-10-25 (message, 13th run) — closed out the last two entries
+  still dated only to the map's opening (2026-09-26) or the week after
+  (2026-09-30), completing this cycle's full-map pass a day ahead of
+  the 2026-10-26 deadline. Invisible Technologies: re-checked, no
+  pivot or pricing change since the WEF/WeCP update; added its own
+  2026 outlook statement as the clearest public argument against
+  Ursa's no-human-grader bet found in this category. Handshake AI: The
+  Information's own exclusive puts AI-training gross ARR at nearly $1B
+  (up from $550M in January), roughly flat against the $1.1B this
+  entry already tracked for April — growth has plateaued since
+  spring, not kept compounding — and discloses contractor costs at
+  60-70% of gross revenue, the sharpest cost-structure contrast this
+  map has found with Minor's own near-zero-marginal-cost labor. Also
+  re-read the 2026-10-05 Category 3 source in full rather than this
+  file's own paraphrase of it, and found two more named memory-
+  interchange attempts (MIF, memorywire) the earlier notes hadn't
+  carried forward — six distinct fragmentation attempts in one year
+  now, none with a second independent implementation.
