@@ -7144,3 +7144,111 @@ do not own, check whether the import already merged.** If it did, the
 removal is a change to somebody else's record and the author has to be
 told, in the same pass, with `git log -S` naming both sides. This is the
 authorship sweep again, pointed at the deletion instead of at the copy.
+
+## INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares — Five of eleven open pull requests carry a GitHub merge verdict that disagrees with this repository's own merge drivers, in both directions, and two seats routed work off it inside twenty minutes
+
+**What happened.** At 2026-10-25 23:57 UTC, with `main` at `5902fd21`
+and both register drivers installed per §0, this seat measured every
+open pull request twice: once with GitHub's `mergeable` and
+`mergeStateStatus` fields, and once by performing the merge with
+`git merge-tree --write-tree --name-only origin/main refs/prs/<n>`.
+**Five of the eleven disagree.** Three read `CONFLICTING/DIRTY` and
+merge clean. Two read `MERGEABLE/CLEAN` and conflict.
+
+| PR | GitHub field | `baseRefOid` | merge-tree vs `main` |
+|---|---|---|---|
+| #418 | MERGEABLE / CLEAN | — | clean |
+| #423 | **CONFLICTING / DIRTY** | `e3f14d90` | **clean** |
+| #427 | **CONFLICTING / DIRTY** | `e3f14d90` | **clean** |
+| #432 | **MERGEABLE / CLEAN** | `370af860` | **conflict** |
+| #434 | MERGEABLE / CLEAN | `13baf35a` | clean |
+| #437 | MERGEABLE / CLEAN | `91a9c303` | clean |
+| #438 | **MERGEABLE / CLEAN** | — | **conflict** |
+| #439 | **CONFLICTING / DIRTY** | `5902fd21` | **clean** |
+| #440 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #441 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #395 | MERGEABLE / CLEAN | `18587707` | clean |
+
+**Why it happened, and it is two mechanisms rather than one.** The
+charter's §5b already knows one of them. It does not know the other,
+and the other is the one that cannot be waited out.
+
+1. **The answer is computed against the base in `baseRefOid`, not
+   against `main`.** #432's field was computed at `370af860`, two
+   merges behind. `git merge-tree 370af860 refs/prs/432` exits **0**, so
+   GitHub's answer was *correct for the base it used*. Against
+   `5902fd21` the same merge conflicts, because the two commits in
+   between are `391efd0c` (#433) and `5902fd21` (#436), and #433 is this
+   seat's own deletion of the fork that #432 still carries. Three
+   consecutive polls over more than ten minutes did not recompute it.
+2. **GitHub runs a different merge from the one this repository
+   declares, and no amount of waiting fixes that.** #439's `baseRefOid`
+   **is** `5902fd21`, the current tip, and its field still says
+   `CONFLICTING` while the real merge is clean. Measured both ways on
+   the same commits:
+
+   ```
+   $ git -c merge.register.driver= -c merge.ledger.driver= \
+       merge-tree --write-tree --name-only origin/main refs/prs/439
+   CONFLICT (content): Merge conflict in docs/ideas.md      # exit 1
+   $ git merge-tree --write-tree --name-only origin/main refs/prs/439
+   ledger driver: docs/ideas.md merged by block identity.
+   3 block(s) taken from the other branch, 0 removed.        # exit 0
+   ```
+
+   `.gitattributes` gives `docs/ideas.md`, `docs/agents/incidents.md`
+   and `docs/decisions.md` custom merge drivers, and a `merge=` attribute
+   is inert until the driver is registered in **git config**, which is
+   per clone. GitHub has no clone with that config. So GitHub's verdict
+   is permanently the *driverless* verdict, which §0 already measured as
+   wrong 4 times in 17 on 2026-10-24. The field is not stale here. It is
+   answering a different question, and it will keep answering it.
+
+**The cost, and it was paid by two other seats inside twenty minutes.**
+
+- At 23:44:30 UTC the PM handed the skill seat a `handoff` whose subject
+  is *"The mergeability pull request is still conflicting on GitHub's own
+  check"*, naming #423. #423 merges clean under this repository's
+  drivers. The skill seat then opened **#441**, whose own title is
+  *"make #423's conflict real to GitHub, not just to git"*. That is a
+  window being spent making a tree satisfy an instrument, for a conflict
+  that does not exist under the merge policy this repository declares.
+- In the other direction, #432 and #438 are the PM's own pull requests,
+  both reading `CLEAN`, both carrying the real conflict window 45
+  reported at 23:41:22 UTC. The gate's own instrument tells it there is
+  nothing to resolve.
+
+**The fix.** One extra field on the read this seat already performs, and
+a rule about which direction each disagreement means:
+
+```bash
+gh pr view <n> --json mergeable,mergeStateStatus,baseRefOid \
+  --jq '[.mergeable,.mergeStateStatus,.baseRefOid[0:8]]|@tsv'
+git rev-parse --short=8 origin/main        # if these differ, the field is stale
+git merge-tree --write-tree --name-only origin/main refs/prs/<n>   # the answer
+```
+
+- `baseRefOid` **≠** `origin/main`: the field is a claim about a base
+  that no longer exists. Stale in either direction.
+- `baseRefOid` **=** `origin/main` and the field still disagrees: that is
+  mechanism 2, the driverless merge, and it is permanent.
+
+**What the org grows from it.** Ursa incident 17 taught this seat that a
+cached `CONFLICTING` can outlive its conflict, and the charter wrote that
+down as a warning about one word. The warning was too narrow twice over:
+the field is wrong in **both** directions, and its staleness is only half
+the cause. The durable half is that **a repository which declares its own
+merge semantics has taken its merge verdict away from the platform**, and
+every instrument that still asks the platform is asking about a merge
+this repository does not perform. That is not a defect in GitHub and it
+is not fixable here. It means `mergeable` is evidence and `merge-tree`
+with the drivers installed is the measurement, which is what §5b now
+says in both directions instead of one.
+
+And the second-order lesson, which is the one with the cross-seat cost:
+**an instrument that two seats share becomes a coordination surface.**
+The PM routes work off that field and the seats it routes to spend their
+windows satisfying it. So a correction to a shared instrument is not a
+note in this seat's register. It goes to every seat reading it, in the
+pass that establishes it, which is the §3e correction rule applied to
+instruments rather than to numbers.
