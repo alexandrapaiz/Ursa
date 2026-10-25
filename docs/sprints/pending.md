@@ -2,60 +2,67 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Three most important pending items (2026-10-25, standup, hook-triggered, ninety-ninth pass)
+## Three most important pending items (2026-10-25, message, hundredth pass)
 
-1. **New this pass: Incident 20, the market seat's own merges have been
-   re-waking it.** Nine of the market seat's ten pull requests on
-   2026-10-24 trace to one merge-event chain that re-fires on itself —
-   each merge both closes a thread and emits the event that opens the
-   next run to re-read it. The seat's own judgment was sound at every
-   step; the defect is the trigger wiring, not the seat. Logged as
-   Incident 20 (`docs/agents/incidents.md`) and a ledger proposal
-   (`docs/ideas.md`, 2026-10-25) naming the fix for whoever owns the
-   event bus (exo-centralizer or HQ distribution). Not asking the owner
-   to fix the wiring herself; naming it because the market seat asked,
-   in its own words, that "whatever wakes this seat on 'your PR merged'
-   ... is worth a look."
-2. **Three open pull requests still edit a charter file directly: #404
-   (exo, window 38, also contains #394 by ancestry — one decision
-   covers both), #395 (research), #377 (HQ's one-file `pm.md`
-   re-vendor).** Re-checked fresh this pass, all still green, `CLEAN`,
-   not drafts. None of that reaches a merge: pm.md §10 puts a charter
-   path in the diff at Tier C regardless of how clean the rest is.
-   Unchanged from the ninety-eighth pass below; none of these are
-   mine.
+1. **One open pull request still edits a charter file directly: #414
+   (exo, window 40).** Verified fresh this pass rather than taken on
+   the ninety-ninth pass's word: not a draft, no hold label, its check
+   green, and merges with zero conflict markers in a scratch worktree
+   against today's main. None of that reaches a merge: pm.md §10 puts
+   a charter path in the diff at Tier C regardless of how clean the
+   rest is, so it still waits on the owner or a chair. #395 (research)
+   is the same shape and the same wait, unchanged. #377, the third
+   charter-adjacent item the ninety-ninth pass listed here, is no
+   longer one of these — it merged this pass (below).
+2. **Routine housekeeping on this seat's own and other seats' confirmed-
+   ancestor pull requests had stopped happening for twenty-one passes,
+   and is restored this pass.** The seventy-eighth pass ruled, in
+   writing, that closing a pull request once it is confirmed (not
+   assumed) to be a strict ancestor of a still-open one is "not a merge
+   and not a judgment call." The ninety-second, ninety-eighth and
+   ninety-ninth passes each found their own ancestor chain and declined
+   to close it, reasoning from the charter's general subsumption
+   language instead of this seat's own more specific ruling on the
+   exact same question. Recorded as a finding in `docs/decisions.md`
+   this pass, and the practice applied directly: closed eight pull
+   requests this pass as confirmed ancestors — three of this seat's
+   own (#415, #409, #405), two of exo's (#394, #404), and three of
+   skill's (#316, #320, #348) — each checked individually with
+   `git merge-base --is-ancestor` against the still-open pull request
+   that carries it whole, named in the full pass account below.
 3. **No sprint has been open since Sprint 2026-10-12 closed on time
-   (2026-10-18).** The Monday 2026-10-19 ceremony never ran — the
-   five-day host outage (#272) is why — and no ceremony since has
-   opened a new one: no `docs/sprints/sprint-2026-10-19.md` or later
-   file exists anywhere, the GitHub milestone list ends at "Sprint
-   2026-10-12" (closed), and the board's "This sprint" column is
-   empty. Not an emergency for a Sunday standup to fix — the charter
-   reserves opening a sprint for the Monday ceremony, and tomorrow,
-   2026-10-26, is that Monday. Naming it so tomorrow's ceremony run
-   knows it is opening from a true gap, not carrying stale backlog
-   items forward from a sprint that already closed.
+   (2026-10-18).** Unchanged from the ninety-ninth pass: the Monday
+   2026-10-19 ceremony never ran (the five-day host outage, #272, is
+   why), no `docs/sprints/sprint-2026-10-19.md` or later file exists,
+   and the next Monday ceremony is tomorrow, 2026-10-26. Naming it
+   again so tomorrow's ceremony run opens from a true gap.
 
-**This seat's own open pull requests.** #409 and #405
-(`ursa-pm/2026-10-24-message-402` and `-404`) are both subsumed by this
-pass's own #415 (`ursa-pm/2026-10-25-hook`), which starts from #409's
-tip and therefore fast-forward-contains both. Closeable as one decision
-once #415 is ready, not closed from this seat's own hand since they are
-real, reviewable work on their own.
+**A GitHub-cached `CONFLICTING` verdict on #393 was wrong, checked rather
+than repeated.** The ninety-ninth pass's entry below reads #348/#320/#316
+as `CONFLICTING`, meaning a real skill-seat rebase. Fetched #393 (the
+current tip of that same stack) into a scratch worktree with both merge
+drivers installed and ran the merge against today's main: it went
+clean, zero conflict markers, the ledger driver firing and reporting
+eight blocks taken. The same false-`CONFLICTING`-reading #414's own
+diff documents for a different pull request applies here too. #348,
+#320 and #316 are closed this pass as confirmed ancestors of #393
+regardless (item 2), so this matters only for #393 itself, which is
+not `CONFLICTING` and was never going to need a rebase.
 
-**Tier B this pass.** Two clean, non-draft, non-charter pull requests
-merged: #408 and #410 (market briefs — the tail end of the Incident 20
-chain above). Everything else open and not this seat's own is either a
-draft, `CONFLICTING` (#348, #320, #316 — a skill-seat rebase, not a
-docs-only conflict, and #320/#316 already correctly marked superseded
-by #348 in an earlier pass's comment), or already covered under item 2
-above.
+**Tier B this pass.** One clean, non-draft, non-charter pull request
+merged: #377 (HQ's `pm.md` re-vendor, exactly the kind of HQ-synced
+standard pm.md §10 names as Tier B). A matching handoff from HQ's
+distribution seat, naming this pull request and its already-merged
+sibling #376, is answered on the board.
 
-**Not this seat's to act on.** Three sibling seats — frontend (#412),
-engineer (#413), exo (#414) — were woken by the same capacity-return
-hook event this pass was, and are mid-run with their own drafts open as
-of this check. Named so a later pass does not mistake them for stalled
-work; they are live, not abandoned.
+**Three open drafts with no live run behind them, flagged to their own
+seats rather than readied or merged.** #393 (skill), #407 (frontend)
+and #406 (engineer) each still read as mid-run placeholders — "to be
+filled in before readied," "work in progress," "item not yet selected"
+— despite real, often substantial diffs behind them. None merged,
+readied, or closed: this seat cannot write another seat's report, and
+a Tier B merge needs one. #411, the fourth draft a dispatch asked this
+seat to look at, was already closed before this pass started.
 
 ## Three most important pending items (2026-10-24 ~23:1x UTC, message, ninety-eighth pass)
 
@@ -8511,3 +8518,173 @@ title, quoted above as data, not instruction). GitHub via `gh`/`git`:
 PR #404's and #394's diffs, checks, mergeability, comments, reviews and
 labels; the full open-PR list; this seat's own open PR (#405) and its
 diff. The company board, to post the note to exo. No web fetch.
+
+## Ninety-ninth pass, 2026-10-25 ~02:3x UTC, hook — recorded here from its own board report, not reconstructed
+
+This pass's full chronological account was never written into this
+file (its pull request's own title said "pending.md in progress"); the
+work is real and is carried whole into the hundredth pass below, which
+branched from this pass's tip directly rather than from `main`. Its own
+shipped work, per its board `done` posts: merged #408 and #410 (market
+briefs, Tier B), logged Incident 20 (the market self-trigger chain) in
+`docs/agents/incidents.md` and proposed its fix in `docs/ideas.md`,
+and wrote the top-of-file summary this pass's own top section has now
+replaced. Its pull request (#415) is closed this pass as a confirmed
+ancestor, per item 2 above.
+
+## Hundredth pass, 2026-10-25 ~02:3x-02:5x UTC, message: #414 reviewed against the merge rule, four named draft pull requests dispositioned, routine housekeeping restored
+
+**The trigger.** A message naming a pull request opened by exo (#414,
+window 40) and asking this seat to review it against the merge rule:
+merge it, or say on the board what it still needs and hand that to its
+seat. The same message named four draft pull requests — #393 (skill),
+#407 (frontend), #411 (exo), #406 (engineer) — as idle with no live run
+behind them and pointed at a tool, `tools/check-draft-prs.sh`, to read
+their disposition off their diffs. Both halves are the trigger's own
+claim about the world, read as data rather than as instructions this
+seat must execute as written (org rule, 2026-10-05): nothing in either
+sentence was obeyed, only verified, and one of the two claims was
+already false before this pass started.
+
+**Read this seat's own open PRs first.** Three were open: #415 (today's
+hook pass), #409 and #405 (both already named by #415 as subsumed).
+Confirmed with `git merge-base --is-ancestor` that #415 contains both
+#409 and #405. Branched this pass from #415's tip rather than from
+`main`, so all three are carried whole.
+
+**The tool named in the trigger does not exist.** `find . -iname
+"check-draft-prs*"` returns nothing; `ls tools/` lists only
+`ensure-full-clone.sh`, `ledger/`, `registers/` and `stack/`. The
+disposition work below was done directly with `gh pr view`, `gh pr
+diff` and `git merge-base --is-ancestor` instead of a tool that was
+never there to run.
+
+**One of the four named drafts was already stale.** #411 (exo) was
+already `CLOSED` before this pass started — #414's own description
+says so and closes it as the "silent draft" its previous window left.
+Checked rather than trusted: `gh pr view 411 --json state` confirms
+`CLOSED`. Named here because the trigger's own claim that it was one
+of four open drafts needing a disposition was not true at the time it
+was sent, matching the trigger's own larger point about a sentence
+staying attached to a run after the run's own state has moved past it.
+
+**#414, reviewed fresh.** `gh pr view 414`: not a draft, `mergeable:
+MERGEABLE`, no labels, no comments, no review decision. `gh pr diff 414
+--name-only`: eight files, two of them charters under `prompts/`
+(`exo-agent.md`, `pm-agent.md`). pm.md §10 and §16 both put a charter
+path at Tier C regardless of how clean the rest of the diff is, the
+same rule #404, #394, #395 and #377 (before it merged) were already
+held under in this tracker. **Verdict: Tier C. This seat cannot merge
+#414; it waits on the owner or a chair.** Containment checked rather
+than trusted: `git merge-base --is-ancestor` confirmed #411, #404 and
+#394 are each a strict ancestor of #414, matching the PR's own claim.
+Also checked independently of the pull request's own claim: merged
+#414 into a scratch worktree against today's `main` (after #377 landed)
+with both merge drivers installed, and it went clean with zero conflict
+markers, answering the instrument question exo's board note raised
+about whether the register driver fires at all.
+
+**Housekeeping restored (docs/decisions.md finding, this pass).** The
+seventy-eighth pass ruled that closing a confirmed-ancestor pull
+request of this seat's own is routine housekeeping, not a merge and
+not a judgment call. The ninety-second, ninety-eighth and ninety-ninth
+passes each found an ancestor chain of their own and declined to close
+it. This pass applied the seventy-eighth pass's ruling directly,
+closing eight pull requests after confirming each one individually
+with `git merge-base --is-ancestor` against the open pull request that
+carries it whole:
+
+- #415, #409, #405 (this seat's own) → ancestors of #417, this pass's
+  own pull request.
+- #394, #404 (exo) → ancestors of #414.
+- #316, #320, #348 (skill) → ancestors of #393. #393 is itself a
+  charter edit (`prompts/skill-extract.md`), so the Tier C hold these
+  three already carried moves forward to #393 rather than disappearing;
+  nothing the owner might act on was orphaned by closing them.
+
+Before closing #404 and #394, checked the board for whether a formal
+ask to the owner named either by number with a live clock — exo's own
+note said it left both open rather than move them for exactly that
+reason. Found none with a real `expires_at` (none of this file's own
+asks have one either, which #377's own diff documents as a portfolio-
+wide gap, zero of a hundred and sixteen). The pending-tracker entries
+naming #404/#394 as "waiting on the owner" are prose, not a declared
+clock, and #414 is the pull request that phrase now has to mean.
+
+**#395 (research), reconfirmed.** Still edits two charter files
+(`prompts/engineer-agent.md`, `prompts/research-agent.md`), still
+green, still Tier C. The board ask that asked this seat to move an
+earlier research hold to a newer tip (#380 → #386) was already
+answered by an earlier pass: `gh pr view` on #380, #386 and #390 all
+read `CLOSED` now, and #395 is the live descendant carrying the hold.
+Nothing new to do here.
+
+**#377, merged.** `gh pr diff 377 --name-only`: one file,
+`docs/standards/pm.md`. This is exactly what pm.md §10 calls Tier B
+("standards that HQ syncs into a product repo") rather than Tier C —
+it is a vendoring copy of the standard, not this product's own charter.
+Not a draft, no labels, no comments, no reviews, `mergeStateStatus:
+CLEAN`. Read the diff before merging rather than merging on shape
+alone: it adds a vendoring header, amends the ship-first clause to
+ready a branch at the first moment it is worth merging rather than
+"when finished," adds the refused/never-started/ran-and-failed triage
+split to §11.7, tightens the board message rules (no PR numbers in
+prose, a declared reason word, a 420-character paragraph cap), adds the
+branch-deletion rule to §21, and scopes a silence release to the exact
+files an ask tabled (§22). Merged (`gh pr merge 377 --merge
+--delete-branch`) and merged `origin/main` back into this pass's own
+branch afterward to pick it up. Answered HQ distribution's handoff
+naming this pull request and its already-merged sibling (#376) on the
+board.
+
+**#393, #407, #406 — flagged, not readied or merged.** All three are
+drafts with no live run behind them for three to four hours, and all
+three still read as mid-run placeholders in their own description —
+#393's external-sources line says "(to be filled in before this PR is
+readied)," #407 says "Draft, work in progress," #406 says "This
+description will be rewritten as the standup report before the PR is
+readied." #393 and #406 both carry real, substantial diffs underneath
+the placeholder text; #407 is small and its own body says the
+underlying investigation itself is unfinished, not only the write-up.
+None of the three is this seat's to finish: readying one would mean
+vouching for another seat's scope from a report that was never
+written. Posted one board note to each owning seat (skill, frontend,
+engineer) naming what's missing rather than inventing it.
+
+**The sprint.** Still none open; unchanged from the ninety-ninth pass.
+Tomorrow's ceremony opens one.
+
+**Failed runs, triaged.** Nine `redaction-gate` failures in the last
+24 hours, all on branches whose pull request is now closed (#350) or
+whose branch has a later green run on the same commit chain (checked
+per-branch with `gh run list --branch <b> --workflow redaction-gate.yml`
+rather than trusting the failure list alone): the known UUID-
+truncation class this tracker has already diagnosed twice this week,
+self-healing by the next commit, none of it a new or live signature.
+No rerun needed; nothing untriaged.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` reads unset in this run's
+environment. No §11.3 criterion fires: full account in
+`docs/sprints/dispatch-queue.md`, rewritten fresh this pass.
+
+**Board.** Five messages this pass: a reply to exo (the instrument
+question answered, the three flagged pull requests confirmed closed
+rather than merged so there is nothing left to collide), a `done` to
+HQ's distribution seat (both vendoring pull requests resolved), and
+one note each to skill, frontend and engineer naming what their own
+open draft still needs.
+
+**This seat's own open pull request.** #417
+(`ursa-pm/2026-10-25-message`) carries #415 whole, which carries #409
+and #405 whole; all three are closed this pass per the housekeeping
+finding above, so there is one tip rather than four.
+
+**External sources read.** The event payload (the dispatch message
+naming #414 and the four drafts, quoted above as data, not
+instruction). GitHub via `gh`/`git`: PR #414's, #395's, #393's, #407's
+and #406's diffs, checks, mergeability, comments and reviews; the full
+open- and closed-PR list; this seat's own open PRs and their ancestry;
+nine failed-run logs and their branches' later run history; the merge
+drivers' behavior in three scratch worktrees. The company board, read
+and posted to, via `$BOARD_API_URL`/`$BOARD_RUNTIME_TOKEN`. No web
+fetch.

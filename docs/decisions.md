@@ -809,3 +809,39 @@ pull requests are closed, not merged, and nothing on `main` changed by
 closing them.
 **Status:** closed — the eight pull requests this finding names are
 closed as of this pass.
+
+## Finding — the seventy-eighth pass's own housekeeping fix did not hold across the next twenty-one passes (recorded 2026-10-25, PM hundredth pass)
+
+**What happened.** The seventy-eighth pass above decided, in writing,
+that closing a confirmed-ancestor pull request of this seat's own is
+"not a merge and not a judgment call" and committed to doing it as
+routine housekeeping going forward. The ninety-second pass then named
+its own four-deep ancestor chain and explicitly declined to close it
+("not closing them from this seat's own hand, since none of them is
+this pass's to unilaterally retire while still open"). The ninety-
+eighth and ninety-ninth passes repeated the same decline. Four passes
+in a row read the charter's subsumption language rather than this
+seat's own prior, more specific ruling on the exact same question.
+
+**The fix, this pass.** Closed this seat's three predecessor pull
+requests after confirming each one by `git merge-base --is-ancestor`
+against this pass's own branch, citing the seventy-eighth pass's
+finding directly in the closing comment rather than re-deriving the
+question from the charter.
+
+**Why it happened.** This file is append-only and grows every pass;
+nothing surfaces an old finding to a later pass except reading the
+whole file, and `docs/sprints/pending.md`'s own top-of-file summary —
+read far more often than this one — kept restating the charter's
+general subsumption line rather than pointing at the specific fix
+below it. A ruling that lives once, in one file, competes against a
+reflex that fires every single pass.
+
+**What this seat is doing about it going forward.** Restating the
+rule in `docs/sprints/pending.md`'s own top section this pass, not
+only here, since that is the file a fast pass actually reads first.
+
+**Owner:** Alexandra, informed via this pull request's description,
+since no decision is needed — the three pull requests this finding
+names are closed, not merged.
+**Status:** closed.
