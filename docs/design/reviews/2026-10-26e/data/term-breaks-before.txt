@@ -1,0 +1,85 @@
+  base http://127.0.0.1:4972/dashboard?port=7831   selector .dash-row .dash-meta   widths 320, 360, 390, 820, 1440
+
+  320   row 0  "commit" / "3e35dbe"   prose wrap
+  320   row 1  "2.1%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 2  "and" / "did"   prose wrap
+  320   row 3  "commit" / "3e35dbe"   prose wrap
+  320   row 4  "6.3%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 5  "saw" / "and"   prose wrap
+  320   row 6  "commit" / "3e35dbe"   prose wrap
+  320   row 7  "10.6%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 8  "saw" / "and"   prose wrap
+  320   row 9  "commit" / "3e35dbe"   prose wrap
+  320   row 10 "20.6%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 11 "saw" / "and"   prose wrap
+  320   row 12 "commit" / "3e35dbe"   prose wrap
+  320   row 13 "3.7%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 14 "and" / "did"   prose wrap
+  320   row 15 "commit" / "3e35dbe"   prose wrap
+  320   row 16 "0.2%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 17 "and" / "did"   prose wrap
+  320   row 18 "commit" / "3e35dbe"   prose wrap
+  320   row 19 "0.1%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 20 "and" / "did"   prose wrap
+  320   row 21 "commit" / "3e35dbe"   prose wrap
+  320   row 22 "1.5%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 23 "saw" / "and"   prose wrap
+  320   row 24 "commit" / "3e35dbe"   prose wrap
+  320   row 25 "0.6%" / "edited"   BREAK INSIDE A FIGURE
+  320   row 26 "and" / "did"   prose wrap
+  360   row 0  "3e35dbe" / "·"   break at a separator
+  360   row 1  "·" / "94.4%"   break at a separator
+  360   row 2  "not" / "keep"   prose wrap
+  360   row 3  "3e35dbe" / "·"   break at a separator
+  360   row 4  "·" / "89.4%"   break at a separator
+  360   row 5  "did" / "not"   prose wrap
+  360   row 6  "3e35dbe" / "·"   break at a separator
+  360   row 7  "edited" / "·"   break at a separator
+  360   row 8  "did" / "not"   prose wrap
+  360   row 9  "3e35dbe" / "·"   break at a separator
+  360   row 10 "·" / "68.8%"   break at a separator
+  360   row 11 "did" / "not"   prose wrap
+  360   row 12 "3e35dbe" / "·"   break at a separator
+  360   row 13 "·" / "79.7%"   break at a separator
+  360   row 14 "did" / "not"   prose wrap
+  360   row 15 "3e35dbe" / "·"   break at a separator
+  360   row 16 "·" / "75.5%"   break at a separator
+  360   row 17 "did" / "not"   prose wrap
+  360   row 18 "3e35dbe" / "·"   break at a separator
+  360   row 19 "·" / "94.1%"   break at a separator
+  360   row 20 "did" / "not"   prose wrap
+  360   row 21 "3e35dbe" / "·"   break at a separator
+  360   row 22 "·" / "87.1%"   break at a separator
+  360   row 23 "did" / "not"   prose wrap
+  360   row 24 "3e35dbe" / "·"   break at a separator
+  360   row 25 "·" / "92.0%"   break at a separator
+  360   row 26 "did" / "not"   prose wrap
+  390   row 0  "·" / "forget"   break at a separator
+  390   row 1  "94.4%" / "yours"   BREAK INSIDE A FIGURE
+  390   row 2  "not" / "keep"   prose wrap
+  390   row 3  "·" / "forget"   break at a separator
+  390   row 4  "89.4%" / "yours"   BREAK INSIDE A FIGURE
+  390   row 5  "not" / "keep"   prose wrap
+  390   row 6  "·" / "forget"   break at a separator
+  390   row 7  "·" / "64.6%"   break at a separator
+  390   row 8  "not" / "keep"   prose wrap
+  390   row 9  "·" / "forget"   break at a separator
+  390   row 10 "·" / "68.8%"   break at a separator
+  390   row 11 "not" / "keep"   prose wrap
+  390   row 12 "·" / "forget"   break at a separator
+  390   row 13 "·" / "79.7%"   break at a separator
+  390   row 14 "not" / "keep"   prose wrap
+  390   row 15 "·" / "forget"   break at a separator
+  390   row 16 "·" / "75.5%"   break at a separator
+  390   row 17 "not" / "keep"   prose wrap
+  390   row 18 "·" / "forget"   break at a separator
+  390   row 19 "·" / "94.1%"   break at a separator
+  390   row 20 "not" / "keep"   prose wrap
+  390   row 21 "·" / "forget"   break at a separator
+  390   row 22 "·" / "87.1%"   break at a separator
+  390   row 23 "not" / "keep"   prose wrap
+  390   row 24 "·" / "forget"   break at a separator
+  390   row 25 "·" / "92.0%"   break at a separator
+  390   row 26 "not" / "keep"   prose wrap
+
+  81 line breaks in this selector; 11 of them split a figure from the word it counts.

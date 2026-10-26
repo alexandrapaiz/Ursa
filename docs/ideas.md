@@ -11893,6 +11893,25 @@ itself to this run or asked it to do anything.**
 - Cost: $0, an afternoon
 - Status: proposed. For the engineer seat. Not blocked: no new permission,
   no network, and the measurement above is reproducible from this branch.
+- **Update 2026-10-26 (security run 11): the measurement reproduces
+  exactly, and the exclusion table is one class short.** Re-run a day
+  later in the same scope: 18 absent cited paths, 11 alive on another ref,
+  7 on no ref at all. Identical. That is worth recording because this run
+  first measured a wider scope, read 21, and would have published a rise
+  that does not exist; the instrument is stable and the number is not
+  moving.
+  - The third exclusion class: an **unqualified path into another
+    repository**. Extending the scope from `docs/` to `prompts/` and
+    `skills/` adds exactly two paths, `prompts/exo-centralizer.md` and
+    `skills/harness-engineering/SKILL.md`, and both are correct citations
+    of files that exist elsewhere, HQ's charter and an alexandria skill,
+    the second said to live in alexandria in the same sentence that cites
+    it. By path alone a cross-repo citation is indistinguishable from rot,
+    so it belongs in the declared table beside `docs/standards/` and the
+    proposal targets rather than in a heuristic.
+  - The useful half for the first step: widening the scope costs the gate
+    nothing in red, since the only paths the wider scope adds are in the
+    class that must be excluded anyway. So declare the scope wide.
 
 ### 2026-10-26 — The security charter's MCP bullet points at a file this company does not have, while the MCP server it does have went unaudited for a month (security run)
 - Trigger: reading recently merged diffs for defects and finding
@@ -12957,6 +12976,78 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   this run is narrower and is not a substitute: two of its own instruments
   stopped reading their numbers back from shared names, and `.gitignore`
   now makes the in-tree workaround safe to leave behind.
+- **Update 2026-10-26 (security run 10): the first step above already
+  exists, so this entry is no longer a request to build and is now a
+  request to deploy.** HQ's distribution seat replied to this seat's note
+  saying so, and this run verified all three of its claims from inside its
+  own run rather than taking them, because a claim about a host is the one
+  kind a second company can measure independently.
+  - The repair is built and staged in HQ at
+    `tools/host/epitod-hotfix-2026-10-17/runner.js`, which builds the child
+    environment with `TMPDIR` and `ASC_SCRATCH` both pointing at a private
+    per-run directory. That is the `TMPDIR` change this entry asked for,
+    written nine days before this entry was filed.
+  - It is not deployed. Two independent readings agree. HQ's own contract
+    checker, `tools/check-seat-env.py`, **fails five of its six clauses
+    inside this run**: no `ASC_SCRATCH`, no `TMPDIR`, temp files landing in
+    `/tmp`, `/tmp` owned by uid 0, and the scratch of 22 other runs visible.
+    Separately, the runtime the daemon is actually running,
+    `/srv/asc/repos/epitome/cli/src/lib/runner.js`, is dated 2026-10-17 and
+    does not contain the string `ASC_SCRATCH` anywhere. The second reading
+    matters because the installer's report is a line count, and a distance
+    is not a behaviour.
+  - The hazard is live rather than latent. One pass of the checker's
+    `--measure` mode at 10:45 UTC counted **14 collision-shaped scratch
+    files, every one writable by this run**, all written within the previous
+    ninety minutes by seats still running. Two of the names are the exact
+    two from the two recorded failures: a pull request body (`body.md`), and
+    a board inbox of 193,980 bytes (`inbox.json`).
+  - **Why it has not been deployed, which is a cost and not an oversight.**
+    The install is one apply and one restart of the unit every seat on the
+    box runs inside, and the restart ends every run in flight with no exit
+    code written. HQ's installer refuses to do that and prints the command
+    instead, which is the right behaviour. So the decision is an operator's
+    and nobody else's, and this seat did not touch it.
+  - What changed for Ursa: nothing in the code, and one thing in the
+    reading. `.gitignore`'s `.scratch/` rule is not a local invention, it is
+    the interim HQ's own checker recommends in its closing line, which this
+    run learned only by running the checker. The entry's own first step
+    should be read as discharged on HQ's side and open on the operator's.
+- **Update 2026-10-26 (security run 11): two more instances the same day,
+  one of them in this repository's own `main`, and both from runs that
+  were reaching for the nearest thing that looked right.** The argument
+  this entry makes is no longer about carelessness, because neither run
+  was careless.
+  - HQ's distribution seat recorded its own fourth instance in five runs:
+    it wrote a pull request body and a syntax check to unqualified names
+    in the shared directory while its own ignored scratch directory sat
+    ready, **inside the hour it read this seat's note naming those exact
+    two collision names**. Nothing was observed to collide and both files
+    are gone. The seat that filed this entry's original report is the seat
+    that did it.
+  - This repository's own instance, found by reading the day's merges to
+    `main`: an exo window's ship-first opening commit added
+    `.exo-window-52-scratch` at the repository root and deleted it two
+    commits later, so it is in `main`'s history permanently. The blob is
+    75 bytes of benign placeholder text, nothing is disclosed, nothing
+    needs rotating. What it demonstrates is that the interim remedy is one
+    exact directory name and this run missed it by one word, the same way
+    the distribution seat's tenth run missed the right name by one word.
+    `.gitignore` is widened in security run 11 to the other spellings of
+    the same idea, which closes that one word and not the class.
+  - Re-measured on the host rather than accepted: five of six clauses of
+    HQ's contract checker still fail inside this run, the scratch of **27
+    other runs** is visible against 23 earlier in the day, and the runtime
+    the daemon is actually running is still dated 2026-10-17 with zero
+    occurrences of `ASC_SCRATCH`. The collision-shaped file count is the
+    sharper figure: **27 now against 14 at 10:45 UTC**, so the population
+    nearly doubled in four hours with nothing applied.
+  - The status does not change and the reason it does not is the point. A
+    workaround a run has to remember is not a control, and this entry now
+    holds four runs that read the warning and reached for the wrong path
+    anyway. It stays urgent, it stays the operator's, and no amount of
+    further prose in this file is going to reach the moment where the
+    choice is made.
 
 ### 2026-10-26 (security run 8) — Nothing detects a committed instruction to write a bare shared temporary path, which is why the same collision has now happened three times
 - Trigger: the entry above, and the sentence this repository's own learning
@@ -13177,6 +13268,51 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   answer plainly even if all three come back "authored," since a
   three-out-of-six confirmation is still worth more than a
   three-out-of-three one for the lab brief's own citation strength.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (security, message, run 9) — Decide the enforceable passphrase policy for sync, and the migration that has to come with it
+
+- Trigger: this run read the sync derivation end to end rather than its
+  comments. `ursa-major/src/bridge/crypto.ts` stretches the passphrase
+  under a salt that is a fixed application constant, the same for every
+  user, and says why: the sync server must never learn whose blob a blob
+  is, so there is no per-user salt to mix in. That is a recorded
+  tradeoff and the right one for this product. The same file names the
+  precondition it rests on, "the passphrase must therefore be strong".
+  The only check that existed anywhere was that the string is not empty,
+  in `src/bin/ursa.ts`, at the one moment a person chooses it. The
+  overlay's own copy of the derivation did not mention the tradeoff at
+  all, so a reviewer of the user-facing surface had no way to know the
+  constant was load-bearing.
+- What: a shared salt makes that precondition load-bearing rather than
+  ordinary advice, for a reason specific to this design. One offline
+  table of candidate passphrases serves every user of every deployment
+  at once, and each entry in that table is also a URL, because the blob
+  id is the other half of the same PBKDF2 output. So the failure mode is
+  not one weak account. It is enumeration of the user base, over a read
+  path that is open by design, with nothing that looks like an attack to
+  rate-limit, and the same guess yields the write capability too. What
+  is still open is the enforceable policy, which is a product decision
+  and not a fix: a minimum length, a strength estimate, a generated
+  passphrase offered as the default, or a per-user salt derived from a
+  second input the user supplies and the server never sees.
+- Why it is not fixed in this run: the passphrase is the only name an
+  existing blob has. A minimum enforced at the prompt locks out whoever
+  already chose something shorter, and there is no recovery to offer
+  them, since nobody holds a copy. Every real option therefore carries a
+  migration, and the salt string already ends in `-v2` because the last
+  change to this derivation was exactly that kind of migration. This run
+  shipped the behaviour-preserving half only: `ursa bridge` now warns
+  below twenty characters, says that the salt is shared and that a short
+  passphrase can be found offline and read off the sync URL, and
+  continues. The threshold is a warning threshold and not a claim about
+  any attacker's budget.
+- First step: the owner picks between enforcing a minimum with a
+  migration and keeping the warning, since locking a user out of their
+  own records is hers to authorise and nobody else's. If she picks
+  enforcement, the engineer's work is the second input or the salt bump
+  plus a re-encrypt path, not the length check, which is one line.
 - Cost: $0
 - Status: proposed
 

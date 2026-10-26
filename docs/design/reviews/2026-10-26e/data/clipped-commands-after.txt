@@ -1,0 +1,9 @@
+  base http://127.0.0.1:4978   widths 320, 390, 820, 1440
+
+  width  block                      drawn  needed  hidden  cue              keyboard
+  320    "ursa forget <your projec…"   254     438     184  fade 0px/32px    reachable
+  390    "ursa forget <your projec…"   324     438     114  fade 0px/32px    reachable
+  820    "ursa forget <your projec…"   614     614       0  mask, 0/0        reachable
+  1440   "ursa forget <your projec…"   614     614       0  mask, 0/0        reachable
+
+  2 of 4 command blocks hide part of the command.

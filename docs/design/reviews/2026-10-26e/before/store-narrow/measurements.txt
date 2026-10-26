@@ -1,0 +1,5 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# settled 1500ms after networkidle and after `.dash-bar` appeared before each shutter.
+# viewports narrow 320x844, small 360x844 (--viewports, not the charter default)
+dashboard-narrow       200    320/320   overflow    0px  height  2369px
+dashboard-small        200    360/360   overflow    0px  height  2307px
