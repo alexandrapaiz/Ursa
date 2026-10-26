@@ -1112,3 +1112,149 @@ frontend seat on 2026-10-24 (ninth run) while fixing the bar that draws
 both, and left alone: changing a published number is a product decision,
 and the viewer's bar and its printed figures at least agree with each
 other today.
+
+## L33 — A cleanup the tool undoes on its next run is not a fix
+
+**measured**, 2026-10-26e and the hook run that finished it,
+`reviews/2026-10-26e/README.md` §4.
+
+The 2026-10-26e run renamed four review frames by hand, because
+`shoot.mjs` had slugged `/dashboard?port=7831` into their names and a `?`
+in a file name has to be percent-escaped in every markdown link that
+points at it. Then it shot four more frames an hour later and got
+`dashboard?port=7831-narrow.png` straight back. Nothing had changed in
+the thing that makes the names.
+
+The repair reached the artifacts and not the generator, so it had a
+half-life of one invocation. `slug()` drops everything from the first `?`
+or `#` now, which is the fix at the only place that can hold.
+
+**The general form, which is the part worth keeping.** A manual cleanup
+of generated output is a measurement that the generator is wrong. Doing
+the cleanup and not the generator leaves the finding undiscovered and
+leaves a reader of the directory unable to tell which convention is the
+real one, because both are present. The four frames and the nineteen
+beside them disagreed about their own naming for an hour inside one
+review folder.
+
+This is the same shape as L31 one door over. There the tool was wrong in
+the direction that trains you to ignore it. Here the tool was right about
+nothing and the output was corrected instead, which trains the next run
+to correct it again.
+
+## L34 — On a shared host a port is an address, not an identity
+
+**measured**, 2026-10-26 (hook), `reviews/2026-10-26e/README.md` §5.
+
+The reproduction block every review in this folder inherits starts the
+store server on `--port 7831`, and the three probes written on 2026-10-26e
+had `7831` compiled into them. On this host the port was held by another
+seat's store server. `ursa serve` refused the bind and named the fix,
+which is correct behaviour and is also the only reason this was caught.
+
+What answered on the port instead:
+
+```
+{"server":"ursa-store","project":"store-demo","store":".ursa","routes":[…]}
+```
+
+**That is byte-indistinguishable from this seat's own server**, because
+every run of this seat clones into a directory called `store-demo` and
+the project name is the directory name. The server refuses the bind, but
+a probe pointed at a port never asks the server anything. It asks the
+page, and the page fetches whatever is listening.
+
+The review kit already carries the `/tmp` version of this hazard, written
+after this seat published another seat's prose from `/tmp/prbody.md` on
+2026-10-24g. Twenty or so seats share one unix user here, so every
+unqualified name in a shared namespace is the same bug: a path, a port, a
+lock file, a database name. The probes take `--store <port>` now.
+
+**The cheap property that settled it, and is worth keeping on purpose.**
+Whether the cut-off run's own frames had been shot against a stranger's
+store was checkable rather than a matter of trust, because its frames
+carry record identifiers and a commit hash, and
+`crops/figures-320-before.png` reads `commit 3e35dbe`, that run's own
+first commit, which exists on no branch but this seat's. A frame that
+names the commit it was taken from names whose store it came from. It was
+free here. It is worth not losing.
+
+## L35 — The benchmark that comes back saying you are ahead
+
+**measured**, 2026-10-26 (hook), `reviews/2026-10-26e/README.md` §7.
+
+The charter's step three sends every run to the public web to study
+interaction craft, and the implicit shape of the answer is a curve, a
+timing or a spring to translate into this identity. This run asked a
+question with a different answer.
+
+The question was the one it had just shipped: how do other people's
+products cue a command block that does not fit? L32 had already
+established that the trip should be spent on something the repository
+cannot answer, and the repository could not answer this. Its only prior
+art was `.rec-cmd`, which is this house's own, so "we do it this way" was
+the entire evidence base under a fix that had just landed.
+
+Measured at 390, block-level code only, 24px or more hidden, every fact
+read off the live element: **126 clipped command blocks across
+vercel.com, docs.stripe.com, nextjs.org and tailwindcss.com, and not one
+paints a cue of any kind.** Two of the 126 can be reached from a
+keyboard. Stripe's CLI reference hides 1435px of one command and cuts it
+mid-literal at a clean edge, which is the before this run fixed at four
+times the magnitude.
+
+**So the honest report is that the house is ahead on this question, and
+the better prior art was already in the repository.** That is a
+legitimate outcome of step three and it should not be written up as a
+disappointment or padded into a refinement to justify the trip. L32
+established that "no external sources were read" is a legitimate line in
+a review. This establishes the next one along: "they were read and they
+were worse" is also a result.
+
+**Two guards on the number, both of which changed it.** The first run of
+the probe counted every inline `<code>` in prose and reported 74
+scrolling blocks on one site with a minimum of 3px hidden, which is a
+subpixel inside a sentence rather than a command anyone is asked to run.
+Tightening to block-level and to 24px held the finding, where a softer
+threshold would have inflated it. And two of the six sites return a zero
+denominator, having no block-level code at all on the pages fetched, so
+they are reported as zero denominators and not as passes.
+
+## L36 — A key nobody can see keys nothing
+
+**proposed, not decided**, 2026-10-26 (hook),
+`reviews/2026-10-26e/README.md` §6, `data/bar-contrast.txt`.
+
+The provenance bar is the one graphic on the overlay's dashboard that has
+to be read rather than looked at. Its four classes are the data artifact
+`CLAUDE.md` calls the technically distinctive part of the company, and
+the legend beneath it is the only key to them. WCAG 1.4.11 asks 3:1 of a
+graphical object required to understand the content, which this is.
+
+Measured against the pixels actually behind each swatch, sampling every
+row of it rather than its centre: 11.99, 11.99 and 3.93 for the first
+three, and **1.20 for `covered by no span`**, where the floor is 3.
+
+The fourth swatch is `var(--line)`, the track's own colour, and it is
+that deliberately. The stylesheet states the reasoning in its own words,
+"so the faintest mark on the page is at least named next to the three
+that are easy to see." That is honest, and it is also precisely why the
+key is invisible.
+
+**Left to the owner rather than fixed, and the reason is not the
+charter's two-change cap.** Both available repairs are palette decisions.
+Drawing the swatch as an outline in its own label's colour introduces no
+new value and would read, but the swatch then stops showing what the
+track actually looks like. Lifting `--line` itself fixes the legend and
+every bar on the page at once. Which of the two honesties wins is a
+product decision, which is where L28 left the panel's second sub-4.5 run
+for the same reason.
+
+**The probe's own near miss, because it bears on how to read the number.**
+Its first draft sampled each swatch at its centre and reported 1.00:1
+between `kept as written` and `kept and edited`, a second finding that
+does not exist: `.dash-seg-mutated` is the same fill with a 2px inset at
+the bottom of a 6px swatch, so a centre sample cannot see the one thing
+that distinguishes them. It samples every row now and reports how many
+distinct rows each swatch has, which turns the inset into a fact instead
+of an absence. A swatch is a column, so sample the column.

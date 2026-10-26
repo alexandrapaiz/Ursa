@@ -1,0 +1,157 @@
+  base http://127.0.0.1:4961/dashboard?port=7842   selector .dash-row .dash-meta   widths 320, 360, 390, 820, 1440
+
+  320   row 0  "commit" / "164eb55"   prose wrap
+  320   row 1  "·" / "2.1%"   break at a separator
+  320   row 2  "and" / "did"   prose wrap
+  320   row 3  "commit" / "164eb55"   prose wrap
+  320   row 4  "·" / "6.3%"   break at a separator
+  320   row 5  "saw" / "and"   prose wrap
+  320   row 6  "commit" / "164eb55"   prose wrap
+  320   row 7  "·" / "10.6%"   break at a separator
+  320   row 8  "saw" / "and"   prose wrap
+  320   row 9  "commit" / "164eb55"   prose wrap
+  320   row 10 "·" / "20.6%"   break at a separator
+  320   row 11 "saw" / "and"   prose wrap
+  320   row 12 "commit" / "164eb55"   prose wrap
+  320   row 13 "·" / "3.7%"   break at a separator
+  320   row 14 "and" / "did"   prose wrap
+  320   row 15 "commit" / "164eb55"   prose wrap
+  320   row 16 "·" / "0.2%"   break at a separator
+  320   row 17 "and" / "did"   prose wrap
+  320   row 18 "commit" / "164eb55"   prose wrap
+  320   row 19 "·" / "0.1%"   break at a separator
+  320   row 20 "and" / "did"   prose wrap
+  320   row 21 "commit" / "164eb55"   prose wrap
+  320   row 22 "·" / "1.5%"   break at a separator
+  320   row 23 "saw" / "and"   prose wrap
+  320   row 24 "commit" / "164eb55"   prose wrap
+  320   row 25 "·" / "0.8%"   break at a separator
+  320   row 26 "saw" / "and"   prose wrap
+  320   row 27 "commit" / "164eb55"   prose wrap
+  320   row 28 "·" / "0.6%"   break at a separator
+  320   row 29 "and" / "did"   prose wrap
+  320   row 30 "commit" / "164eb55"   prose wrap
+  320   row 31 "·" / "0.1%"   break at a separator
+  320   row 32 "and" / "did"   prose wrap
+  320   row 33 "commit" / "164eb55"   prose wrap
+  320   row 34 "·" / "0.7%"   break at a separator
+  320   row 35 "and" / "did"   prose wrap
+  320   row 36 "commit" / "164eb55"   prose wrap
+  320   row 37 "·" / "2.0%"   break at a separator
+  320   row 38 "and" / "did"   prose wrap
+  320   row 39 "commit" / "164eb55"   prose wrap
+  320   row 40 "·" / "0.5%"   break at a separator
+  320   row 41 "and" / "did"   prose wrap
+  320   row 42 "commit" / "164eb55"   prose wrap
+  320   row 43 "·" / "0.2%"   break at a separator
+  320   row 44 "and" / "did"   prose wrap
+  320   row 45 "commit" / "164eb55"   prose wrap
+  320   row 46 "·" / "0.0%"   break at a separator
+  320   row 47 "and" / "did"   prose wrap
+  320   row 48 "commit" / "164eb55"   prose wrap
+  320   row 49 "·" / "0.1%"   break at a separator
+  320   row 50 "saw" / "and"   prose wrap
+  360   row 0  "164eb55" / "(dirty"   prose wrap
+  360   row 1  "·" / "94.4%"   break at a separator
+  360   row 2  "not" / "keep"   prose wrap
+  360   row 3  "164eb55" / "(dirty"   prose wrap
+  360   row 4  "·" / "89.4%"   break at a separator
+  360   row 5  "did" / "not"   prose wrap
+  360   row 6  "164eb55" / "(dirty"   prose wrap
+  360   row 7  "edited" / "·"   break at a separator
+  360   row 8  "did" / "not"   prose wrap
+  360   row 9  "164eb55" / "(dirty"   prose wrap
+  360   row 10 "·" / "68.8%"   break at a separator
+  360   row 11 "did" / "not"   prose wrap
+  360   row 12 "164eb55" / "(dirty"   prose wrap
+  360   row 13 "·" / "79.7%"   break at a separator
+  360   row 14 "did" / "not"   prose wrap
+  360   row 15 "164eb55" / "(dirty"   prose wrap
+  360   row 16 "·" / "75.5%"   break at a separator
+  360   row 17 "did" / "not"   prose wrap
+  360   row 18 "164eb55" / "(dirty"   prose wrap
+  360   row 19 "·" / "94.1%"   break at a separator
+  360   row 20 "did" / "not"   prose wrap
+  360   row 21 "164eb55" / "(dirty"   prose wrap
+  360   row 22 "·" / "87.1%"   break at a separator
+  360   row 23 "did" / "not"   prose wrap
+  360   row 24 "164eb55" / "(dirty"   prose wrap
+  360   row 25 "·" / "90.2%"   break at a separator
+  360   row 26 "did" / "not"   prose wrap
+  360   row 27 "164eb55" / "(dirty"   prose wrap
+  360   row 28 "·" / "92.0%"   break at a separator
+  360   row 29 "did" / "not"   prose wrap
+  360   row 30 "164eb55" / "(dirty"   prose wrap
+  360   row 31 "·" / "65.1%"   break at a separator
+  360   row 32 "did" / "not"   prose wrap
+  360   row 33 "164eb55" / "(dirty"   prose wrap
+  360   row 34 "·" / "6.0%"   break at a separator
+  360   row 35 "did" / "not"   prose wrap
+  360   row 36 "164eb55" / "(dirty"   prose wrap
+  360   row 37 "·" / "79.2%"   break at a separator
+  360   row 38 "did" / "not"   prose wrap
+  360   row 39 "164eb55" / "(dirty"   prose wrap
+  360   row 40 "·" / "80.5%"   break at a separator
+  360   row 41 "did" / "not"   prose wrap
+  360   row 42 "164eb55" / "(dirty"   prose wrap
+  360   row 43 "·" / "93.7%"   break at a separator
+  360   row 44 "did" / "not"   prose wrap
+  360   row 45 "164eb55" / "(dirty"   prose wrap
+  360   row 46 "·" / "29.3%"   break at a separator
+  360   row 47 "did" / "not"   prose wrap
+  360   row 48 "164eb55" / "(dirty"   prose wrap
+  360   row 49 "·" / "95.0%"   break at a separator
+  360   row 50 "did" / "not"   prose wrap
+  390   row 0  "164eb55" / "(dirty"   prose wrap
+  390   row 1  "·" / "94.4%"   break at a separator
+  390   row 2  "not" / "keep"   prose wrap
+  390   row 3  "164eb55" / "(dirty"   prose wrap
+  390   row 4  "·" / "89.4%"   break at a separator
+  390   row 5  "not" / "keep"   prose wrap
+  390   row 6  "164eb55" / "(dirty"   prose wrap
+  390   row 7  "·" / "64.6%"   break at a separator
+  390   row 8  "not" / "keep"   prose wrap
+  390   row 9  "164eb55" / "(dirty"   prose wrap
+  390   row 10 "·" / "68.8%"   break at a separator
+  390   row 11 "not" / "keep"   prose wrap
+  390   row 12 "164eb55" / "(dirty"   prose wrap
+  390   row 13 "·" / "79.7%"   break at a separator
+  390   row 14 "not" / "keep"   prose wrap
+  390   row 15 "164eb55" / "(dirty"   prose wrap
+  390   row 16 "·" / "75.5%"   break at a separator
+  390   row 17 "not" / "keep"   prose wrap
+  390   row 18 "164eb55" / "(dirty"   prose wrap
+  390   row 19 "·" / "94.1%"   break at a separator
+  390   row 20 "not" / "keep"   prose wrap
+  390   row 21 "164eb55" / "(dirty"   prose wrap
+  390   row 22 "·" / "87.1%"   break at a separator
+  390   row 23 "not" / "keep"   prose wrap
+  390   row 24 "164eb55" / "(dirty"   prose wrap
+  390   row 25 "·" / "90.2%"   break at a separator
+  390   row 26 "not" / "keep"   prose wrap
+  390   row 27 "164eb55" / "(dirty"   prose wrap
+  390   row 28 "·" / "92.0%"   break at a separator
+  390   row 29 "not" / "keep"   prose wrap
+  390   row 30 "164eb55" / "(dirty"   prose wrap
+  390   row 31 "·" / "65.1%"   break at a separator
+  390   row 32 "not" / "keep"   prose wrap
+  390   row 33 "164eb55" / "(dirty"   prose wrap
+  390   row 34 "·" / "6.0%"   break at a separator
+  390   row 35 "not" / "keep"   prose wrap
+  390   row 36 "164eb55" / "(dirty"   prose wrap
+  390   row 37 "·" / "79.2%"   break at a separator
+  390   row 38 "not" / "keep"   prose wrap
+  390   row 39 "164eb55" / "(dirty"   prose wrap
+  390   row 40 "·" / "80.5%"   break at a separator
+  390   row 41 "not" / "keep"   prose wrap
+  390   row 42 "164eb55" / "(dirty"   prose wrap
+  390   row 43 "·" / "93.7%"   break at a separator
+  390   row 44 "not" / "keep"   prose wrap
+  390   row 45 "164eb55" / "(dirty"   prose wrap
+  390   row 46 "·" / "29.3%"   break at a separator
+  390   row 47 "not" / "keep"   prose wrap
+  390   row 48 "164eb55" / "(dirty"   prose wrap
+  390   row 49 "·" / "95.0%"   break at a separator
+  390   row 50 "not" / "keep"   prose wrap
+
+  153 line breaks in this selector; 0 of them split a figure from the word it counts.

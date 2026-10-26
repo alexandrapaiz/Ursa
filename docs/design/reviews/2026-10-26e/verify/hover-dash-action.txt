@@ -1,0 +1,13 @@
+declared on the element:
+  property text-decoration-color, color
+  duration 0.16s, 0.16s
+  timing   cubic-bezier(0.25, 0.46, 0.45, 0.94), cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+text-decoration-color scrubbed across the whole transition:
+     0ms  rgba(0, 0, 0, 0)
+     4ms  rgba(168, 199, 250, 0.047)
+  …
+   152ms  rgba(168, 199, 250, 0.992)
+   156ms  rgba(168, 199, 250, 0.996)
+   160ms  rgb(168, 199, 250)
+   160ms  rgb(168, 199, 250)
