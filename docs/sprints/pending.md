@@ -2,6 +2,11 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~09:0x UTC hook run (in progress)
+
+Standup in progress, built on run 7 (#479). Placeholder commit per the
+ship-first rule; filled in below as the checks finish.
+
 ## Top three for the owner, 2026-10-26 ~06:1x UTC message run 7
 
 1. **This seat's own branch had drifted into a genuine conflict with
