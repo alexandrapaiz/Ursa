@@ -11268,7 +11268,16 @@ itself to this run or asked it to do anything.**
   and running the one repair in its write-nothing `--check` mode. Output
   comparison is the next increment if the preceding ledger entry's sweep
   proves worth building.
-- First step: no adoption proposed. Neither tool fits, because the
+  **No adoption proposed, and therefore no `- First step:` line**, which
+  is the convention the 2026-10-23 npm-and-PyPI scan note set and
+  `tools/ledger/block-kinds.mjs` reads: a scan note that carries that
+  field is an idea wearing a scan heading, so writing `First step: no
+  adoption proposed` makes the classifier call this an idea and the gate
+  demand the other four fields of it. (Unlabelled on 2026-10-26 by the
+  message run, which found `node --test tools/ledger/block-kinds.test.mjs`
+  red on `main` for exactly this block and for its own. Not one word of
+  the original sentence changed; only the field marker did.)
+  Neither tool fits, because the
   commands that mattered today were generated at runtime by a TypeScript
   function rather than written in a markdown fence, and that is the shape
   `src/regen-commands-runnable.test.ts` already handles. The borrowable
@@ -11415,9 +11424,47 @@ itself to this run or asked it to do anything.**
   not", which has no vitest equivalent and is the class that most often
   means a bug was fixed and nobody noticed. Nothing in Ursa models an
   expected failure at all.
-- First step: no adoption proposed, and nothing to install. pytest is not
+  **No adoption proposed, and nothing to install, so no `- First step:`
+  line**, for the reason the entry above now states in full. pytest is not
   a dependency here and this repository has no Python test suite. The
   borrowable piece is the one line of design above, and the place to
   apply it is Option C in the preceding entry.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run) — A gate's failure message enumerated two causes, the real one was a third, and nothing checks that the list is complete
+
+- Trigger: `node --test tools/ledger/*.test.mjs` on `main` at `177b7f6`,
+  58 pass / 1 fail. The failing assertion is `every real heading that
+  announces a scan is classified as one` in
+  `tools/ledger/block-kinds.test.mjs`, and its message says "either the
+  heading needs the standard spelling or SCAN_TITLE needs the new one".
+  Both headings it named have the standard spelling and `SCAN_TITLE`
+  matches both. The actual cause is the third branch of the same
+  `isScan` expression: `COMMITS_WORK` sees a `- First step:` line and
+  demotes the block to an idea. Two causes listed, three in the code,
+  and the one missing from the list is the one that fired.
+- What: a failure message is the only part of a gate most readers ever
+  see, and this one sent a reader to check two things that were both
+  fine. The structural version of the defect is small and general: the
+  message was written by hand from the author's memory of the predicate,
+  `SCAN_TITLE.test(title) && !COMMITS_WORK.test(text)`, and nothing
+  relates the one to the other, so the message could not notice when the
+  predicate grew a conjunct. It is the same shape as the two defects
+  this run's other entries describe, moved from the assertion to the
+  message: a string that restates a fact instead of being derived from
+  it. This run fixed this instance by hand, which does not fix the
+  class.
+- First step: measure before building anything, because the cheap fix
+  may be enough. Count, across `tools/**/*.test.mjs` and
+  `ursa-major/src/**/*.test.ts`, the assertion messages that enumerate
+  causes (a message containing `either ... or`, `one of`, or a numbered
+  list) and compare each list's length to the number of conjuncts in the
+  predicate it describes. If the count of mismatches is one, this entry
+  is already closed and the class is not real. If it is several, the
+  thing worth building is the smaller discipline rather than a gate:
+  a message that names the predicate's own sub-results, computed, as
+  `--check agrees with git about this repository own checkout` now does
+  with the shape it read.
 - Cost: $0
 - Status: proposed
