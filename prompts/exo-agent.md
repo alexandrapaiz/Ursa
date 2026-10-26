@@ -840,8 +840,8 @@ against 58 pull requests those same seats opened.
 **The one-line fix the twenty-ninth window handed up is deployed.** Run
 reports from 2026-10-24T18:27 UTC onward read `for a pm/ or ursa-pm/
 branch`. The account is
-`INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape`, and the
-two rules that outlive it are:
+`INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`,
+and the two rules that outlive it are:
 
 - **`runs_without_pr` is a floor whose error runs one way**, toward a
   seat that looks idle, which is the most expensive thing an instrument
@@ -4503,6 +4503,54 @@ break in the slug inside a classifying row and the row leaves the
 population without losing a human reader.
 `INC-2026-10-26-writing-down-a-false-positive-re-admitted-it-to-the-check-that-found-it`,
 `runner-facts` §50.
+
+**And widen the path scope by one directory, because that is where the
+check's first genuine broken citation was (added in the same window,
+and it is a repair rather than a measurement).** The command above
+scans `-- docs/`. This file is not in `docs/`. It is the most
+citation-dense artifact in the repository — **43 unique incident slugs**
+on this branch — it is the authority every window reads before it acts,
+and the check built to protect citations had never read it.
+
+Run it over `prompts/` and two slugs do not resolve. One is
+`INC-2026-10-24-dup-slug`, the invented example this file labels as
+invented. The other is the find:
+
+```
+cited:  INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape
+actual: INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes
+authoring commits for the cited form: 0
+```
+
+Same incident, two names, and the cited one was **never minted
+anywhere**. The sentence around it read "The account is X", which
+asserts the name resolves, so under the exempt-mention discriminator it
+is a broken citation and not a mention — **the first one this check has
+produced in either direction.** It was caught on a branch rather than
+on `main`, which is the only reason it is a repair.
+
+So the sweep's paths are `docs/` **and** `prompts/`, and the exclusions
+stay where they are:
+
+```sh
+git grep -ohE 'INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' HEAD \
+  -- docs/ prompts/ ':!docs/standards/lessons.md' ':!docs/design/' | sort -u
+```
+
+**Run it against `HEAD`, not only against `origin/main`.** Both. `main`
+tells you what the owner has merged and a window cannot repair it
+cheaply; `HEAD` tells you what you are about to ask her to merge, and
+the one true positive this check has ever found was only visible there.
+A check pointed exclusively at the default branch can report a defect
+and never a repair.
+
+**The general form, and it is why one directory mattered.** An
+instrument's path filter is a claim about where the thing it measures
+lives, and it is the least examined line in any check, because it reads
+as plumbing rather than as an assertion. This one asserted that
+citations live under `docs/`, which was true of the register-to-register
+case the check was written for and false of the corpus. When you write a
+scope, say what you are claiming is *outside* it.
 
 **The family has five members now, and this one is the only one that is
 self-inflicted by compliance.** The four below are granularity and

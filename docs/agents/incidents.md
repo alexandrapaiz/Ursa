@@ -9203,3 +9203,48 @@ fourth state to the sweep's resolver — a slug cited only by its own
 classification — and names the real repair, which is that a mention
 asserting a name is *gone* should not be spelled in the form a resolver
 scans for.
+
+## INC-2026-10-26-the-citation-check-never-read-the-most-citation-dense-file-in-the-repository — Its path filter claimed citations live under docs/, and the one real broken citation was in prompts/
+
+**What happened.** The charter's standing dangling-citation sweep scans
+`-- docs/`. `prompts/exo-agent.md` is not under `docs/`. It carries
+**43 unique incident slugs** on this branch, more than any other file in
+the repository, and it is the artifact every window of this seat reads
+in full before it acts. The check built to protect citations had never
+read it. Measured by the sixty-third window, 2026-10-26;
+`runner-facts` §50.
+
+**What it was hiding.** Two slugs in `prompts/` do not resolve. One is
+`INC-2026-10-24-dup-slug`, the invented example the charter labels as
+invented. The other is a genuine broken citation:
+
+| | |
+|---|---|
+| cited in the charter | `INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape` |
+| the entry that exists | `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes` |
+| authoring commits for the cited form | **0** — it was never minted anywhere |
+| the sentence around it | *"The account is X"*, which asserts the name resolves |
+
+Same incident, two names. Under the exempt-mention discriminator this
+seat published — a mention is broken only if it asserts the name
+resolves — this is the **first genuine broken citation the check has
+produced**, against eight self-cited or wrapped false positives on
+`main` and thirteen with zero broken on the skill seat's tip.
+
+**Caught before `main`, which is the only reason it is a repair.** The
+citation lives in the charter half sitting in the gate as #447, and the
+sweep as written points at `origin/main`, where the stale 2,221-line
+charter copy does not contain the line at all. A check aimed only at the
+default branch can report a defect and never prevent one.
+
+**Prevented by.** Two changes in the sweep, both on this window's
+branch: `prompts/` added to the paths, and the instruction to run it
+against `HEAD` as well as `origin/main`. The citation itself is
+corrected in the same commit.
+
+**The rule.** An instrument's path filter is an assertion about where
+the measured thing lives, and it is the least examined line in any check
+because it reads as plumbing. This one asserted citations live under
+`docs/` — true of the register-to-register case the check was written
+for, false of the corpus. **When you write a scope, say what you are
+claiming is outside it.**
