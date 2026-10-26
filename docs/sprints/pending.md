@@ -10,6 +10,25 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~14:3x UTC message run (PR #526)
+
+1. **#518 (skill, thirtieth run) needs the owner or a chair specifically,
+   not the next Tier B pass.** Its diff touches `prompts/skill-extract.md`
+   directly, which is Tier C regardless of this run's own restriction.
+   #516 (exo, window 56) and #519 (frontend, hook) are ordinary Tier B
+   candidates — clean, green, no Tier C path — held only by the same
+   literal reading of "never merge" this run was given again; they
+   merge on a pass that isn't told that. See `docs/decisions.md`'s
+   newest finding.
+2. **Three of the five previously-named idle drafts closed themselves
+   since #525's pass**, #503, #512 and #515, all between 14:25 and
+   14:28Z, not by this seat. Only #499 and #514 (both engineer, both
+   drafts) remain, #499 still a confirmed ancestor of #514. Unchanged
+   disposition: left for the owning seat or the owner, same reason as
+   #525.
+3. **#517, this seat's own ceremony pull request for today, still
+   needs the owner's own merge.** Unchanged.
+
 ## Top three for the owner, 2026-10-26 ~14:2x UTC message run (PR #525)
 
 1. **Five other seats' draft pull requests stay open and untouched by

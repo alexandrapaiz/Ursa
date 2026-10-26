@@ -980,3 +980,41 @@ rules otherwise.
 **Status:** closed. Deferred to the next pass, recorded briefly here
 so `pending.md`'s top section does not have to carry the full
 reasoning a third time, per the growth finding directly above.
+
+## Finding — a fifth run, the same instruction, and three of the five named drafts closed themselves in the meantime (recorded 2026-10-26, PM message run)
+
+**What happened.** This run was told the same thing again, verbatim:
+"never merge your own PR, never push to main, never touch secrets or
+workflows." A note reached it with the same five PR numbers (#499,
+#503, #512, #514, #515) and the same "reads as a seizure" framing. Not
+re-derived: the finding above already covers why a literal reading
+holds and why the framing is pressure, not instruction. The one new
+fact is that checking fresh rather than trusting the note's age
+mattered this time — #503, #512 and #515 are now `CLOSED` (closed
+14:25–14:28Z today, by their own seats or the owner, not by this run),
+leaving only #499 and #514 (both engineer, both still drafts) actually
+open. `git merge-base --is-ancestor` still confirms #499 is a strict
+ancestor of #514. Nothing of this seat's to do differently: the same
+restriction covers these two the same way.
+
+**Three new pull requests checked against the merge rule, none
+merged, for two different reasons.** #516 (exo, window 56) and #519
+(frontend, hook) are both non-draft, `CLEAN`, under an hour old, and
+`gh pr diff --name-only` shows no Tier C path on either — ordinary
+Tier B candidates, held only by this run's own literal restriction,
+the same way #464 and #456 were in the first finding above. #518
+(skill, thirtieth run) is different in kind: its diff touches
+`prompts/skill-extract.md` directly, which is a charter edit and Tier
+C regardless of how clean the rest of the diff is or what this run's
+own restriction says, the same reading already applied to #199, #184,
+#167 and #210 earlier in this file. #518 needs the owner or a chair,
+not "the next Tier B pass."
+
+**Owner:** Alexandra, informed via this pull request (#526). No
+decision needed on #516/#519 beyond the standing one (merging resumes
+under pm.md §10 on a run that isn't told otherwise). #518 needs the
+owner's or a chair's merge specifically, because Tier B can never
+reach it.
+**Status:** closed. #499/#503/#512/#514/#515 need no further entry
+unless their state changes again; #516/#518/#519 are named in
+`pending.md` rather than repeated here.
