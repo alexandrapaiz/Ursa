@@ -1,0 +1,10 @@
+6 of 9 text runs below their threshold at the median, 0 inactive and exempt under 1.4.3, 0 short in places only, 0 unmeasured (0 too small to sample, 0 drawn in their backdrop's own colour)
+
+every page held still between the two shutters (worst drift 0.000% of the frame), so the backdrops above are the backdrops a reader sees.
+
+panel/phone                  p                        12px/400  median  4.48  p5  4.48  min  4.48  needs 4.5  SHORT  "held in memory only; it never leaves this "
+panel/phone                  input::placeholder.mono   13px/400  median  4.12  p5  4.12  min  4.12  needs 4.5  SHORT  "passphrase"
+panel/tablet                 p                        12px/400  median  4.48  p5  4.48  min  4.48  needs 4.5  SHORT  "held in memory only; it never leaves this "
+panel/tablet                 input::placeholder.mono   13px/400  median  4.12  p5  4.12  min  4.12  needs 4.5  SHORT  "passphrase"
+panel/desktop                p                        12px/400  median  4.48  p5  4.48  min  4.48  needs 4.5  SHORT  "held in memory only; it never leaves this "
+panel/desktop                input::placeholder.mono   13px/400  median  4.12  p5  4.12  min  4.12  needs 4.5  SHORT  "passphrase"
