@@ -622,3 +622,94 @@ describe('an erased record', () => {
     expect(after.finalChars).toBeLessThan(before.finalChars)
   })
 })
+
+// The filename and `record.task.id` are two different strings, and until
+// 2026-10-26 only the first one was checked. These four tests each failed
+// against the pre-fix module and pass against the fixed one, which is the
+// property that makes them regression tests rather than decoration.
+describe('a record whose id inside the file is not its filename', () => {
+  /** A record on disk under `filename`.json whose `task.id` says otherwise. */
+  function recordNamed(project: string, filename: string, innerId: string): void {
+    const r = fixtureRecord('placeholder')
+    r.task.id = innerId
+    mkdirSync(join(project, '.ursa', 'records'), { recursive: true })
+    writeFileSync(
+      join(project, '.ursa', 'records', `${filename}.json`),
+      JSON.stringify(r, null, 2),
+    )
+  }
+
+  it('cannot write its two files outside the output directory', () => {
+    const project = projectWith([fixtureRecord('kept')])
+    const out = outDirIn(project)
+    const escapee = join(project, 'escaped')
+    mkdirSync(escapee, { recursive: true })
+    recordNamed(project, 'safe-name', '../../escaped/leaked')
+
+    const result = publish({ projectPath: project, outDir: out, acknowledged: true })
+
+    // Read the filesystem rather than the return value. The pre-fix
+    // module reported success and named the escaped paths in `written`,
+    // so a test that trusted the result would have passed.
+    expect(readdirSync(escapee)).toEqual([])
+    expect(result.skipped).toEqual([{ id: 'safe-name', reason: 'unsafe-id' }])
+    expect(result.index.records.map((r) => r.id)).toEqual(['kept'])
+    for (const path of result.written) expect(path.startsWith(out)).toBe(true)
+  })
+
+  it('does not reach the disclosure manifest, so its text is never counted as published', () => {
+    const project = projectWith([fixtureRecord('kept')])
+    recordNamed(project, 'safe-name', '../../escaped/leaked')
+    const m = manifestFor(loadPublishable(project).records)
+    expect(m.records).toBe(1)
+    expect(m.recordIds).toEqual(['kept'])
+  })
+
+  it('is refused even when the id it carries is a perfectly safe one', () => {
+    // Not only the traversal case. A mismatch means `isForgotten` was
+    // asked about one id and the page was named after another, so a
+    // record erased under its real id would publish under its filename.
+    const project = projectWith([fixtureRecord('kept')])
+    recordNamed(project, 'innocent', 'something-else')
+    const result = publish({ projectPath: project, outDir: outDirIn(project), acknowledged: true })
+    expect(result.skipped).toEqual([{ id: 'innocent', reason: 'unsafe-id' }])
+    expect(existsSync(join(outDirIn(project), 'records', 'something-else.html'))).toBe(false)
+    expect(existsSync(join(outDirIn(project), 'records', 'innocent.html'))).toBe(false)
+  })
+
+  it('still publishes every record a resolver actually wrote', () => {
+    // The guard is only correct if it refuses nothing real. `saveRecord`
+    // writes `records/<record.task.id>.json`, so agreement is the normal
+    // case and this asserts the fix did not narrow it.
+    const project = projectWith([fixtureRecord('one'), fixtureRecord('two')])
+    const result = publish({ projectPath: project, outDir: outDirIn(project), acknowledged: true })
+    expect(result.skipped).toEqual([])
+    expect(result.index.records.map((r) => r.id)).toEqual(['one', 'two'])
+  })
+})
+
+describe('one malformed record in a store of good ones', () => {
+  it('is skipped rather than taking the whole publication down with it', () => {
+    // `PublishResult.skipped` promises that "one unreadable file must not
+    // stop a publication of fifty good records". `summarize` dereferences
+    // `artifact.kind` and `stats.generated`, which `isRecordShaped` did
+    // not check, so a record missing either threw out of `publish` and
+    // nothing was written at all.
+    const project = projectWith([fixtureRecord('good')])
+    for (const [filename, drop] of [
+      ['no-artifact', (r: OutcomeRecord) => delete (r as { artifact?: unknown }).artifact],
+      ['no-generated', (r: OutcomeRecord) => delete (r.stats as { generated?: unknown }).generated],
+    ] as const) {
+      const r = fixtureRecord(filename)
+      drop(r)
+      writeFileSync(join(project, '.ursa', 'records', `${filename}.json`), JSON.stringify(r, null, 2))
+    }
+
+    const result = publish({ projectPath: project, outDir: outDirIn(project), acknowledged: true })
+
+    expect(result.index.records.map((r) => r.id)).toEqual(['good'])
+    expect(result.skipped.map((s) => s.id).sort()).toEqual(['no-artifact', 'no-generated'])
+    expect(result.skipped.every((s) => s.reason === 'unreadable')).toBe(true)
+    expect(existsSync(join(outDirIn(project), 'records', 'good.html'))).toBe(true)
+  })
+})

@@ -9,6 +9,8 @@
 //
 //   node hover.mjs --url http://127.0.0.1:4488/ --selector .cta --at 200 --shot /tmp/a.png
 //   node hover.mjs --url http://127.0.0.1:4488/ --selector .cta --curve
+//   node hover.mjs --url http://127.0.0.1:4961/ --selector .panel-run \
+//     --state docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs
 //
 // `--curve` sweeps the whole transition and prints the property's value at
 // every step, which is how you check that a spring in a stylesheet is the
@@ -51,12 +53,29 @@ const PAD = Number(arg('pad', 12))
 // pair: the control at rest and the control hovered, same element, same
 // clip, same sky. `--rest` is the other half of that pair.
 const REST = process.argv.includes('--rest')
+// `--until` and `--state`, the same two seams shoot.mjs and
+// measure-hit-areas.mjs already carry, and for a reason this tool makes
+// sharper than either of them. The overlay's panel draws one control
+// before a key is derived and three more afterwards, so every control
+// this seat was asked to give a hover to lives behind a state. An
+// instrument that can only be handed a URL cannot reach a single one of
+// them, which means the charter's order to verify a hover by screenshot
+// was not reachable for that surface with the tool written for it.
+// `--state` is a module whose default export is `async (page, name) => {}`,
+// run after `--until` and before the pointer moves.
+const UNTIL = arg('until', null)
+const STATE = arg('state', null)
+const enterState = STATE
+  ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
+  : null
 
 const browser = await launch()
 const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
 if (!LIVE) await freezeContext(ctx)
 const page = await ctx.newPage()
 await page.goto(URL_, { waitUntil: 'networkidle' })
+if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+if (enterState) await enterState(page, 'hover')
 await page.waitForTimeout(800)
 
 const el = (await page.$$(SEL))[NTH]

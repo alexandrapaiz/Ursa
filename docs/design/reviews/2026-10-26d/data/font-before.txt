@@ -1,0 +1,19 @@
+# What the panel's controls were actually drawn in, before 2026-10-26d.
+#
+# Read off the shipped build with getComputedStyle. The point of the
+# measurement is the second row: a <button> does not inherit a family, and
+# Chromium's user agent stylesheet gives it one of its own, so the single
+# control on this panel that named no family was drawn in Arial inside a
+# sentence set in Inter Tight.
+
+the sentence it sits in (span)   {"family":"\"Inter Tight\", \"Inter Tight Fallback\", system-ui, sans-serif","size":"13px","weight":"400","box":[203.25,19.5]}
+misread? (button)                {"family":"Arial","size":"11px","weight":"400","box":[45.25,12]}
+run (button)                     {"family":"\"JetBrains Mono\", \"JetBrains Mono Fallback\", ui-monospace, monospace","size":"12px","weight":"400","box":[51,26]}
+body                             {"family":"\"Inter Tight\", \"Inter Tight Fallback\", system-ui, sans-serif","size":"13px","weight":"400","box":[390,844]}
+
+# The run button escaped it only because className="mono" happens to name
+# a family. After the change, misread? is Inter Tight at 11px and its box
+# is 43x16.5: 2.25px narrower and 4.5px taller, the taller being
+# `line-height: 1.5` inherited where the user agent had `normal`. The
+# frame diff shows it moved nothing: same frame height at all three
+# viewports, 280 pixels changed, all inside the word.

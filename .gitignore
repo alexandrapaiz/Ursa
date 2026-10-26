@@ -16,3 +16,21 @@ node_modules/
 # conversations (fixtures/mini uses ids like 01-claude) carries verbatim
 # prompt text with none of those shapes.
 ursa-major/trial/*/
+
+# Run scratch, inside the working tree on purpose.
+#
+# Seat runs on the resident host share /tmp: it is mode 1777, TMPDIR is
+# unset, and every seat runs as the same user, so a bare /tmp/<noun> name is
+# a shared mutable path and not a private one. On 2026-10-26 HQ's
+# distribution seat composed a pull request body at such a path, a sibling
+# seat wrote the same filename in between, and `gh pr edit` published the
+# sibling's body. Both writes succeeded and no exit status reported it.
+#
+# The real repair is a private scratch directory exported by whatever
+# provisions a run, and it is filed as a ledger entry. Until that exists, a
+# run has two safe options: `mktemp -d`, or a path under this directory.
+# This entry is what makes the second one safe, because the in-tree
+# workaround is otherwise one `git add -A` away from committing a pull
+# request body, and the seats that have used it so far relied on
+# remembering to delete the file by hand.
+.scratch/

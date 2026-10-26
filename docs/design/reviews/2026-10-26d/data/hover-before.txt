@@ -1,0 +1,40 @@
+# The panel's controls, hovered, BEFORE 2026-10-26d.
+#
+# Taken on the shipped build of commit c6836eb (this branch's first
+# commit, which carries #484 unchanged), served by `next build` followed
+# by `next start`, with `--state` reaching the synced panel. Transcribed
+# verbatim from the tool's output, because the build it was taken on was
+# deleted to make the after build and these three readings are what the
+# whole run rests on. Reproducible from that commit with the commands
+# below; `hover-after.txt` is the same commands on the same surface.
+
+$ node docs/design/review-kit/hover.mjs --url <server>/ --selector .panel-hit \
+    --state docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs \
+    --prop transform --at 200 --width 390 --height 844
+
+declared on the element:
+  property all
+  duration 0s
+  timing   ease
+
+transform at 200ms: none
+
+$ node docs/design/review-kit/hover.mjs --url <server>/ --selector 'button:has-text("misread")' \
+    --state docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs \
+    --prop text-decoration-color --at 200 --width 390 --height 844
+
+declared on the element:
+  property all
+  duration 0s
+  timing   ease
+
+text-decoration-color at 200ms: rgb(139, 147, 167)
+
+$ node docs/design/review-kit/hover.mjs --url <server>/ --selector 'input[type=password]' \
+    --prop border-color --at 200 --width 390 --height 844
+
+TimeoutError: element is not receiving pointer events
+
+# That third one is not a tool failure and it is where the field finding
+# came from. The field could not be hovered at all, because its own 44px
+# target overlay was on top of it. See field-pointer-before.txt.

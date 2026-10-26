@@ -92,6 +92,44 @@ test('a scan heading that commits a day of work is an idea, not a scan', () => {
   assert.equal(c.kind, 'idea', 'a `- First step:` line is the commitment that makes it an idea');
 });
 
+test('a scan heading whose First step declines work is still an idea, and says it announced a scan', () => {
+  // The real block from `main`, 2026-10-26, trimmed to its shape. The rule is
+  // literal on purpose (block-kinds.mjs says why reading the sentence was
+  // refused), so this stays an `idea`. What changes is that the
+  // classification now carries enough for check.mjs to explain WHICH of the
+  // three paths in the sweep test below made it one. The missing-field
+  // message alone sent a seat after the heading spelling, and the heading
+  // was never the problem.
+  const c = classifyBlock(
+    entry(
+      [
+        '### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0',
+        '- Trigger: this run’s own defect',
+        '- First step: no adoption proposed. Neither tool fits.',
+      ].join('\n'),
+    ),
+  );
+  assert.equal(c.kind, 'idea');
+  assert.equal(c.announcesScan, true);
+});
+
+test('a well-formed scan note announces a scan and is one', () => {
+  // The pair to the test above: announcesScan is true for both, and `kind`
+  // is what differs. Asserting it here stops a future change from making
+  // announcesScan a synonym for `kind === 'scan'`, which would make the
+  // explanation in check.mjs unreachable in the only case it is for.
+  const c = classifyBlock(
+    entry(
+      [
+        '### 2026-10-24 — Craft scan: a competitor',
+        'Prose about what it does and what Ursa does better.',
+      ].join('\n'),
+    ),
+  );
+  assert.equal(c.kind, 'scan');
+  assert.equal(c.announcesScan, true);
+});
+
 test('a heading that merely mentions scanning is not a scan note', () => {
   const titles = [
     'The redaction scan should run before a seat readies',
