@@ -558,6 +558,32 @@ export function loadPublishable(projectPath: string): {
     // `OutcomeRecord` would refuse records written by older resolvers
     // that this path can read perfectly well.
     if (!isRecordShaped(record)) { skipped.push({ id, reason: 'unreadable' }); continue }
+    // THE ID THAT WAS CHECKED ABOVE IS NOT THE ID THIS MODULE USES. The
+    // loop validates the filename, and every path and URL downstream is
+    // built from `record.task.id`, a field inside the file: `publish`
+    // writes `join(recordsDir, record.task.id + '.html')`, `recordHref`
+    // puts it in `index.json`, and `isForgotten` above was asked about
+    // the filename. So an unchecked `task.id` escaped three separate
+    // gates at once, and the security sweep of 2026-10-26 measured all
+    // three against a record named `safe-name-...json` carrying
+    // `"id": "../../outside/escaped"`: the two raw files landed two
+    // directories above `outDir`, `publish` returned success with the
+    // escaped paths in `written`, and the published set silently did not
+    // contain the record it had just disclosed.
+    //
+    // `saveRecord` in src/store.ts writes `records/<record.task.id>.json`,
+    // so the filename and the field are the same string for every record
+    // this product has ever written, and requiring them to agree refuses
+    // nothing a resolver can produce. It is a real case rather than a
+    // contrived one on the `ursa ci` path, where records arrive in a
+    // runner workspace from a repository anyone may open a pull request
+    // against.
+    //
+    // Refused rather than sanitised. A publish is the one operation here
+    // whose output a stranger reads, and rewriting an identifier to make
+    // it safe would publish a record under an address that is not its
+    // own.
+    if (record.task.id !== id) { skipped.push({ id, reason: 'unsafe-id' }); continue }
     records.push(record)
   }
   return { records, skipped }
@@ -568,6 +594,15 @@ export function loadPublishable(projectPath: string): {
  * kind. Not a validation of `OutcomeRecord` and not trying to be: it is
  * the precondition of `manifestFor` and `summarize`, written where those
  * two are.
+ *
+ * `artifact.kind` and `stats.generated` are here because `summarize`
+ * dereferences both and this function did not check either, so the
+ * contract on `PublishResult.skipped` — "one unreadable file must not
+ * stop a publication of fifty good records" — did not hold for the two
+ * fields the summary needs and the manifest does not. Measured on
+ * 2026-10-26 with three records in one store, one of them missing
+ * `artifact`: `publish` threw `Cannot read properties of undefined
+ * (reading 'kind')` and the two good records were not published either.
  */
 export function isRecordShaped(r: OutcomeRecord): boolean {
   return (
@@ -575,8 +610,11 @@ export function isRecordShaped(r: OutcomeRecord): boolean {
     Array.isArray(r.generations) &&
     Array.isArray(r.conversations) &&
     typeof r.task?.id === 'string' &&
+    typeof r.artifact?.kind === 'string' &&
     typeof r.stats?.finalChars === 'number' &&
-    typeof r.stats?.byClass === 'object'
+    typeof r.stats?.byClass === 'object' &&
+    typeof r.stats?.generated?.charsWritten === 'number' &&
+    typeof r.stats?.generated?.deletedChars === 'number'
   )
 }
 
