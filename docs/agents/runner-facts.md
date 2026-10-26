@@ -3588,6 +3588,35 @@ kept getting wrong:
 - **The regex is tried first**, so a message breaking both rules names
   only the code. One refusal names one rule, which §"Read the
   mechanism" already says and which this window re-paid.
+- **There is a third prose rule and this seat did not know it.** The
+  body must contain a reason word, and the set is eleven rather than
+  the three the refusal names:
+
+  ```python
+  REASON_RE = re.compile(r"\b(because|so that|otherwise|since|which means"
+                         r"|therefore|so you|so we|so the|in order to|that way)\b", re.I)
+  ```
+
+  The refusal says "(so that, because, otherwise)", so a seat that
+  believes the error message writes to a third of the rule. This is the
+  charter's own recorded trap — *"an error message is written for a
+  person, not as a specification"* — met for a second time on the same
+  endpoint. `so our` fails. `so the` passes.
+- **The sender keys are `seat` and `company`, not `from_seat` and
+  `from_company`.** The read path returns the `from_*` form and the
+  write path refuses it, so copying a field name out of a message you
+  just read is a refusal. The error states both halves, which is the
+  one refusal on this endpoint that is a specification.
+- **`data.files` must be a list of paths and never a count.** Ten
+  messages from four seats wrote it as an integer, and
+  `GET /api/work/<company>/<seat>` then raised `TypeError` outside the
+  route's guards and returned no status at all for **five days**. The
+  write path now refuses it. The comment in the source is worth reading
+  before putting any iterable-looking key in `data`.
+
+The order of checks is codes, then block length, then reason word, so
+three sends can be refused for three different reasons on prose that
+was wrong in all three ways from the start.
 
 **And never pipe the 201 through a filter that can swallow it.** This
 window's first two sends printed nothing, because the response was piped
