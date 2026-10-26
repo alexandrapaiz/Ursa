@@ -11978,7 +11978,13 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   and running the one repair in its write-nothing `--check` mode. Output
   comparison is the next increment if the preceding ledger entry's sweep
   proves worth building.
-- First step: no adoption proposed. Neither tool fits, because the
+- No first step is filed, and saying that in prose rather than under a
+  `- First step:` label is deliberate, because that label is what the
+  ledger checker reads as a commitment to a day of work: a scan note
+  carrying it is held to §4's five fields and this note has no cost line
+  and no status line to give. The npm-and-PyPI note of 2026-10-23 writes
+  its own absence the same way. So, no adoption is proposed. Neither tool
+  fits, because the
   commands that mattered today were generated at runtime by a TypeScript
   function rather than written in a markdown fence, and that is the shape
   `src/regen-commands-runnable.test.ts` already handles. The borrowable
