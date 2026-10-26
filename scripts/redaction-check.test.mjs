@@ -50,6 +50,21 @@ function sandbox(files) {
   return dir;
 }
 
+// A sandbox that is a real git work tree, because the file set the script
+// scans there comes from git and not from walking the directory. Nothing is
+// committed: `--cached --others --exclude-standard` is meant to answer about
+// what the branch will carry, so an uncommitted file that is not ignored has
+// to be in scope, and an ignored one has to be out.
+function gitSandbox(files) {
+  const dir = sandbox(files);
+  const git = (...args) =>
+    execFileSync('git', args, { cwd: dir, stdio: ['ignore', 'ignore', 'ignore'] });
+  git('init', '-q');
+  git('config', 'user.email', 'seat@example.invalid');
+  git('config', 'user.name', 'seat');
+  return dir;
+}
+
 describe('redaction-check', () => {
   test('passes a clean tree, and says how many patterns it read', () => {
     const dir = sandbox({ 'notes.md': 'Nothing private here.\n' });
@@ -138,6 +153,71 @@ describe('redaction-check', () => {
       const { code, stderr } = runCheck(dir, [`--workflow=${join(dir, 'nope.yml')}`]);
       assert.equal(code, 2);
       assert.match(stderr, /the file is missing/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The 2026-10-26 regression, in both directions. Before the fix the
+  // script walked the directory, so an ignored file could turn it red and
+  // it would report that the gate "would fail" about a file the gate is
+  // never shown. `.scratch/` is the live case: the repository tells runs to
+  // put scratch there and the next run's board read failed this script.
+  test('ignores a gitignored file, because the gate will never see one', () => {
+    const dir = gitSandbox({
+      '.gitignore': '.scratch/\n',
+      '.scratch/board.json': `{"id":"${fakeSessionId}"}\n`,
+      'notes.md': 'Nothing private here.\n',
+    });
+    try {
+      const { code, stdout } = runCheck(dir);
+      assert.equal(code, 0);
+      assert.match(stdout, /ignored paths out/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The other direction, which is the one that would make the fix a
+  // loophole: not ignored means in scope, committed or not.
+  test('still catches a violation in a file that is merely uncommitted', () => {
+    const dir = gitSandbox({
+      '.gitignore': '.scratch/\n',
+      'audit.md': `id: ${fakeSessionId}\n`,
+    });
+    try {
+      const { code, stderr } = runCheck(dir);
+      assert.equal(code, 1);
+      assert.match(stderr, /session or conversation UUID/);
+      assert.match(stderr, /audit\.md:1/);
+      assert.ok(!stderr.includes(fakeSessionId), 'must not reprint the value it caught');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // grep drops the filename prefix when it is handed exactly one file, and
+  // the reporter splits on the first colon, so a one-file scan used to be
+  // reportable as a line number in the filename column.
+  test('names the file even when the whole scan is one file', () => {
+    const dir = gitSandbox({ 'only.md': `line one\nid: ${fakeSessionId}\n` });
+    try {
+      const { code, stderr } = runCheck(dir);
+      assert.equal(code, 1);
+      assert.match(stderr, /only\.md:2/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // Same rule as a gate it cannot parse: a scan over nothing is exit 2, not
+  // a clean bill. An empty work tree is the only way to reach it.
+  test('refuses, with exit 2, a work tree git reports no files for', () => {
+    const dir = gitSandbox({});
+    try {
+      const { code, stderr } = runCheck(dir);
+      assert.equal(code, 2);
+      assert.match(stderr, /no files to scan/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -23,6 +23,33 @@
 // line-scoped. And it is blind to Class A, verbatim human text, which is
 // the class that caused Ursa incident 2. See the redaction standard §1.
 //
+// Which files it answers about, which is not the same set the gate reads
+// and was not the same set this script read until 2026-10-26. The gate
+// runs on `actions/checkout@v4`, so the only files it can see are the ones
+// the branch carries. This script runs in a live working tree, where there
+// are also ignored files, and it was grepping those too and then reporting
+// "the gate would fail" about files the gate will never be shown. That is
+// a false red, and a false red on a checker a run is told to trust before
+// pushing is how the checker stops being used. It arrived the day the
+// repository started telling runs to write scratch under `.scratch/`: the
+// next run put a board read there and this script failed on it.
+//
+// So in a git work tree it asks git for the file set instead of walking
+// the directory: tracked files plus untracked files that are not ignored,
+// which is exactly what the branch will carry once the run commits what it
+// has. Ignored paths are out, and that includes `ursa-major/trial/*/`,
+// real outcome records that the gitignore exists to keep uncommitted and
+// that carry session-shaped ids on purpose.
+//
+// Outside a git work tree it walks the directory as before, and either way
+// it prints which of the two it did, because a checker whose verdict has a
+// scope should say what the scope was. The one case still outside both: a
+// violation that is committed and then edited out of the working tree
+// without committing. The gate reads the commit, this reads the file, so
+// this says clean and the gate says no. The question this answers is "if I
+// commit what I have, does the gate pass", which is the question a run has
+// before it pushes, and not "does the gate pass on what I committed".
+//
 // Usage:
 //   node scripts/redaction-check.mjs            # exit 1 on a violation
 //   node scripts/redaction-check.mjs --json     # same exit code, JSON out
@@ -106,17 +133,84 @@ function grepLines(args) {
   }
 }
 
+// The file set, when SCAN_ROOT is a git work tree: tracked plus untracked
+// and not ignored, which is what the branch will carry once the run commits
+// what it has. Returns null when SCAN_ROOT is not a work tree, which is the
+// `--root=` test seam and any directory a person points this at by hand.
+function gitFileSet() {
+  let out;
+  try {
+    out = execFileSync(
+      'git',
+      ['ls-files', '-z', '--cached', '--others', '--exclude-standard'],
+      { cwd: SCAN_ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] }
+    );
+  } catch {
+    return null;
+  }
+  return out.split('\0').filter((p) => p !== '');
+}
+
+// The gate's exclusions, applied to an explicit file list. `--exclude-dir`
+// and `--exclude` are honoured by this grep for command-line arguments as
+// well as for `-r`, but that is a property of one grep and not of the flag,
+// and the one name the gate excludes is the workflow that holds the
+// patterns, so a miss here reports the rules as a violation of themselves.
+// Filtered here as well, on purpose, rather than bet the verdict on it.
+function applyExclusions(files, { excludeDirs, excludeFiles }) {
+  const dirs = new Set(excludeDirs);
+  const names = new Set(excludeFiles);
+  return files.filter((p) => {
+    const parts = p.split('/');
+    if (parts.some((seg) => dirs.has(seg))) return false;
+    return !names.has(parts[parts.length - 1]);
+  });
+}
+
+// One grep per batch: a few thousand paths is well inside this platform's
+// argument limit, but the tracked set grows and an E2BIG here would look
+// like a crash rather than a verdict.
+function* batches(items, size) {
+  for (let i = 0; i < items.length; i += size) yield items.slice(i, i + size);
+}
+
 function run() {
   const json = process.argv.includes('--json');
   const gate = readGate();
   const findings = [];
 
-  for (const { label, pattern } of gate.pairs) {
-    const args = ['-rInE', pattern, '.'];
-    for (const d of gate.excludeDirs) args.push(`--exclude-dir=${d}`);
-    for (const f of gate.excludeFiles) args.push(`--exclude=${f}`);
+  const tracked = gitFileSet();
+  const files = tracked === null ? null : applyExclusions(tracked, gate);
+  // Same rule as a gate whose patterns cannot be found: scanning nothing is
+  // not a clean verdict. Exit 2 is "I could not do my job".
+  if (files !== null && files.length === 0) {
+    console.error('redaction-check: git reported no files to scan in this work tree');
+    console.error('  Scanning nothing is not the same as being clean, so this is exit 2.');
+    process.exit(2);
+  }
+  const scope =
+    files === null
+      ? 'walked the directory (not a git work tree)'
+      : `${files.length} files git would carry (tracked plus untracked, ignored paths out)`;
 
-    const raw = grepLines(args);
+  for (const { label, pattern } of gate.pairs) {
+    const exclusions = [
+      ...gate.excludeDirs.map((d) => `--exclude-dir=${d}`),
+      ...gate.excludeFiles.map((f) => `--exclude=${f}`),
+    ];
+
+    let raw;
+    if (files === null) {
+      raw = grepLines(['-rInE', pattern, '.', ...exclusions]);
+    } else {
+      // `-H` because grep omits the filename when it is given exactly one
+      // file, and a batch of one would then print `<line>:<text>`, which
+      // this script's reporter would read as a filename.
+      raw = '';
+      for (const batch of batches(files, 500)) {
+        raw += grepLines(['-HInE', pattern, ...exclusions, '--', ...batch]);
+      }
+    }
     if (raw === '') continue;
 
     // Apply the gate's own allowance with the gate's own tool, so the
@@ -139,9 +233,10 @@ function run() {
   }
 
   if (json) {
-    console.log(JSON.stringify({ clean: findings.length === 0, findings }, null, 2));
+    console.log(JSON.stringify({ clean: findings.length === 0, scope, findings }, null, 2));
   } else if (findings.length === 0) {
     console.log(`Redaction gate clean (${gate.pairs.length} patterns, read from the workflow).`);
+    console.log(`  Scope: ${scope}.`);
   } else {
     for (const f of findings) {
       console.error(`error: ${f.label}`);
@@ -157,6 +252,7 @@ function run() {
     console.error(
       'Redaction gate would fail. See docs/security/redaction-standard.md and Ursa incident 4.'
     );
+    console.error(`  Scope: ${scope}.`);
   }
 
   process.exit(findings.length === 0 ? 0 : 1);
