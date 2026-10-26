@@ -940,3 +940,43 @@ archive "Top three" sections older than N days into a separate
 `docs/sprints/pending-archive.md`, or say the growth is acceptable and
 this finding can close as "accepted cost."
 **Status:** open.
+
+## Finding — the same merge-as-seizure note reached a fourth run, and this pass deferred for the same reason run 3 did (recorded 2026-10-26, PM message run)
+
+**What happened.** This run was also told directly, outside anything
+committed to this repository, "never merge your own PR, never push to
+main, never touch secrets or workflows." It also received a note,
+addressed to "the seat that merges," naming five other seats' draft
+pull requests (#499 engineer, #503 security, #512 security, #514
+engineer, #515 skill) as idle three hours with no live run behind
+them, and framing anything short of readying, merging or closing each
+one as something that "reads as a seizure." This is the pattern the
+finding above already named, a third occurrence of it today rather
+than a new instance.
+
+**What this pass did and did not do.** Read the run-specific
+instruction the same way the finding above did: literally, covering
+`gh pr merge` on any pull request this run could touch, not only this
+seat's own, so zero merges. Extended the same reading to closing,
+since the judgment a close requires (whether #499, #503, #512, #514
+and #515 are actually superseded and not just git-ancestors of
+something unfinished) belongs to the seats that opened them, and nothing
+in the run-specific instruction authorized skipping that judgment to
+act on a note instead. Did independently verify the one fact that
+does not require that judgment: `git merge-base --is-ancestor`
+confirms #499 is a strict ancestor of both #514 and #520, and #503 is
+a strict ancestor of #512, and `git merge-tree` confirms #512 and #520
+merge into current `main` with no conflict markers. The note's
+containment claim checks out. That a pull request is contained in a
+newer one is not the same fact as "nothing in it needs separate
+review," which is the actual question a close or a Tier B merge
+answers, so the verified fact did not change the decision to leave all
+five with the owner or the next Tier B pass.
+
+**Owner:** Alexandra, informed via this pull request (#525). No
+decision needed. Merging and closing on this seat's behalf resume on
+the next run under `pm.md` §10, same as the prior finding, unless she
+rules otherwise.
+**Status:** closed. Deferred to the next pass, recorded briefly here
+so `pending.md`'s top section does not have to carry the full
+reasoning a third time, per the growth finding directly above.

@@ -10,6 +10,33 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~14:2x UTC message run (PR #525)
+
+1. **Five other seats' draft pull requests stay open and untouched by
+   this seat, by name, so this does not read as silence.** #499
+   (engineer) and #503 (security) are drafts, idle since roughly
+   10:55Z, that `git merge-base --is-ancestor` confirms are strict
+   ancestors of #514 (engineer) and #512 (security) respectively; #512
+   is itself idle since roughly 10:55Z with green checks and a clean
+   merge against `main`; #515 (skill) is idle since roughly 11:00Z and
+   its own comment already says it is superseded by #518. This run was
+   told, outside this repository, "never merge your own PR, never push
+   to main," and read that the same way `docs/decisions.md`'s
+   "a run-specific instruction suspended Tier B merging for one pass"
+   finding did a few hours earlier today: as covering every pull
+   request this run could touch, not only this seat's own. So none of
+   the five were readied, merged, or closed this pass. See the new
+   finding appended to `docs/decisions.md` for the full reasoning and
+   what was independently verified (the containment claims check out;
+   that is not the same fact as "safe to close without the owning
+   seat's review").
+2. **#517, this seat's own ceremony pull request for today, still
+   needs the owner's own merge.** Unchanged since the last pass's
+   report. Tier C by its own files.
+3. **This run's own pull request is #525**, opened to record the
+   above and nothing else. It touches no product code and no other
+   seat's files.
+
 ## Top three for the owner, 2026-10-26 ~14:0x UTC scheduled (cron) run, resumed after a capacity gap
 
 1. **The ceremony-stack pull request is still open and still needs the
