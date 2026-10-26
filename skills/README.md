@@ -18,8 +18,9 @@ run, quality over count. The owner's merge is the gate.
 | [adding-a-bound-to-the-record-gate](adding-a-bound-to-the-record-gate/SKILL.md) | Whether a proposed rule about outcome records is a bound or a measurement, how its statement and its committed counterexample are written, and whether a violation means the bound or the resolver is wrong | 32 | draft, `validated: false` |
 | [clearing-a-record-for-release](clearing-a-record-for-release/SKILL.md) | Which of the three exits a release is taking, what that exit demands of raw text, and what an erasure has to reach once something has already left | 41 | draft, `validated: false` |
 | [auditing-a-detected-correction-loop](auditing-a-detected-correction-loop/SKILL.md) | Whether a detected correction loop is the loop the user actually ran, what `recurrences`, `openedStep`, `closedStep` and `resolution` compute rather than name, and where a complaint the user plainly made went when no signal carries it | 32 | draft, `validated: false` |
+| [auditing-a-durability-walk](auditing-a-durability-walk/SKILL.md) | Whether the forward walk behind a `durability` block ran at all, over which window and to which tip, and what `decayRate`, `durableChars`, `fate` and `medianIntactSeconds` compute rather than name | 27 | draft, `validated: false` |
 
-## Five areas, and the edges between them
+## Six areas, and the edges between them
 
 The first three skills work on `files[].spans` and `stats` inside
 `outcome_record.json`. The fourth works on `tuning.json`. The fifth
@@ -27,7 +28,11 @@ works on neither: it works on the checker those records are held
 against. The sixth works on none of the three: it works on what leaves
 the machine. The seventh is back inside the record and still its own
 area, because it works on `signals`, which is the one block no span
-label and no percentage can settle. Every near miss in
+label and no percentage can settle. The eighth is inside the record
+too and is cut by time rather than by object: `durability` and
+`spans[].lifespan` are the only blocks computed from what happened
+*after* the episode closed, so they are the only ones that can answer
+differently tomorrow. Every near miss in
 `distilling-a-tuning-record/TRIGGER-TEST.md` and in
 `adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
 the record side of its own edge, which is what `prompts/skill-extract.md`
@@ -124,6 +129,41 @@ the skill's own ref E5, over `ursa-major/src/loops.ts:11-13`; it is
 named in longhand here rather than as an `[E5]` tag, because this file
 is not inside a skill directory and so no tool in `skills/` would
 fingerprint a tag written in it. See "Where a citation may stand".
+
+
+**The durability area.** `auditing-a-durability-walk` is the second
+skill inside `outcome_record.json` whose cut the artifact test cannot
+make, and it is a sharper case than the signals area, because its two
+blocks are not even the only things it shares. `durability` is a
+record-level block of rates, exactly like `stats`, and
+`spans[].lifespan` sits on the same spans the first three skills rule
+on. By §5e's letter this should be re-cut into them.
+
+What separates it is time rather than object. Every other block of an
+outcome record is a function of the episode, computed from the finished
+work and the generations behind it, so it is settled the moment the
+episode closes and will read the same a year later. `durability` is a
+function of the commits that came *after* the closing commit, along
+whatever branch was checked out, up to whatever `HEAD` was when the
+walk ran. It is the only part of a record that can give a different
+answer tomorrow with nothing about the episode having changed, and the
+block stores `closingSha` and `tipSha` precisely because of that.
+
+So the order, which matters most against the quoting skill and is the
+sharpest boundary in this library. This skill runs **first**, and
+decides whether the two walks behind two numbers measured comparable
+things: whether anything was tested at all, over which window, and
+whether the revision cap or a rename sits underneath. The quoting skill
+then decides what may be said about the numbers and whether they may be
+combined. The practical test for a reader holding both is whether the
+question would survive the answer "those two walks ended at different
+commits". If that dissolves the question, it was this skill's.
+
+Against the other six the edges are ordinary. The trial skill chooses
+work whose history can be walked, adjudication settles the classes this
+skill's denominator is built from, and the gate, release, tuning and
+signals edges are the same handoff shape those skills already have,
+counted seven times rather than seven different edges.
 
 
 ## Checking the receipts

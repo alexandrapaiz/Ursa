@@ -573,6 +573,195 @@
     "what": "83b287396217e4e0",
     "passages": "59d0ddc80e6dccd7"
   },
+  "auditing-a-durability-walk/E1": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "07fe8118ba04cffc",
+    "what": "4b1d1dd2d12099dd",
+    "passages": "4d87178e4630ea39"
+  },
+  "auditing-a-durability-walk/E10": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "0d5190fe01241292",
+    "what": "7fcb67e40ebf5660",
+    "passages": "1c5b65fa511d2f54"
+  },
+  "auditing-a-durability-walk/E11": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "b52005738a54c302",
+    "what": "ff6dcfa9b3341091",
+    "passages": "ee6f708fc4086be7"
+  },
+  "auditing-a-durability-walk/E12": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "f15a80f2aa1bb902",
+    "what": "e09f56e58e2907d0",
+    "passages": "a24c41bc98f41063"
+  },
+  "auditing-a-durability-walk/E13": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "256d3d72dbd7ff4b",
+    "what": "0670b7c8ac2cbc23",
+    "passages": "ce5c1fe41c857a20"
+  },
+  "auditing-a-durability-walk/E14": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "5d7295614c22b16c",
+    "what": "7ec2b763ad34e2ae",
+    "passages": "4b6b65c26ad359dd"
+  },
+  "auditing-a-durability-walk/E15": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "1ed66428a8ffe5f9",
+    "what": "ace36763bb70e039",
+    "passages": "5aff27329e06b13a"
+  },
+  "auditing-a-durability-walk/E16": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "fbcb2e166379aa30",
+    "what": "aab557c5045293f0",
+    "passages": "0d36d6ff031d28b9"
+  },
+  "auditing-a-durability-walk/E17": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "08ceb9be2e0d1d53",
+    "what": "e06210b7ab24170c",
+    "passages": "481cc0f487644bf8"
+  },
+  "auditing-a-durability-walk/E18": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "77468ce188eb8573",
+    "what": "6f4d04e2fa8cae52",
+    "passages": "d28836809e4ef516"
+  },
+  "auditing-a-durability-walk/E19": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "9fd289eb0126b848",
+    "what": "8ed400c1e4d489f2",
+    "passages": "20a53dfa066d8685"
+  },
+  "auditing-a-durability-walk/E2": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "5cda28f04feef5b1",
+    "what": "3ffd14617d79dc1c",
+    "passages": "adb2bd27eb726821"
+  },
+  "auditing-a-durability-walk/E20": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "9d398d50cdc6beb2",
+    "what": "1cbb548078a0ddf3",
+    "passages": "20a53dfa066d8685"
+  },
+  "auditing-a-durability-walk/E21": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "e563d05f08179022",
+    "what": "ea6eef143cc1877a",
+    "passages": "5918c2f81b2c0888"
+  },
+  "auditing-a-durability-walk/E22": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "fec87671259c5f4c",
+    "what": "109b527be0111402",
+    "passages": "c05abf2faddf1e69"
+  },
+  "auditing-a-durability-walk/E23": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "ff0cb8fdf7a63b96",
+    "what": "849f79d41a5f6f8b",
+    "passages": "b6e75818c770171c"
+  },
+  "auditing-a-durability-walk/E24": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "14edd9ed12855107",
+    "what": "5f8755e70cbba3b2",
+    "passages": "7983166391e9b146"
+  },
+  "auditing-a-durability-walk/E25": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "c6dfce9d82c7eb15",
+    "what": "be7b25692ff06c14",
+    "passages": "8d900f19afb8e09c"
+  },
+  "auditing-a-durability-walk/E26": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "a0278b3975fa167a",
+    "what": "915c44332372d1fe",
+    "passages": "afdbc5cb6dd0c809"
+  },
+  "auditing-a-durability-walk/E27": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "800ba110c1abc41a",
+    "what": "3bb5b5c01dee37e8",
+    "passages": "eaa7e3846f68b8b1"
+  },
+  "auditing-a-durability-walk/E3": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "57bce688e49d5e6f",
+    "what": "735fe72726b3a52c",
+    "passages": "e5ad0be5d238bfce"
+  },
+  "auditing-a-durability-walk/E4": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "c65b9b6ff7642cd8",
+    "what": "84a24b5b68861adb",
+    "passages": "9f1908890865a0f4"
+  },
+  "auditing-a-durability-walk/E5": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "119ab10aeded699b",
+    "what": "c4f08c4e9a332e0c",
+    "passages": "f4f0b4e6a4826175"
+  },
+  "auditing-a-durability-walk/E6": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "a9e0d26baf10a504",
+    "what": "14be1e4e69e3fbd5",
+    "passages": "2f79cbabaa64b5ff"
+  },
+  "auditing-a-durability-walk/E7": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "bb432cb29392218c",
+    "what": "ba669400115b6790",
+    "passages": "b0ed78f36cef4957"
+  },
+  "auditing-a-durability-walk/E8": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "b1fe02ac4fa682d7",
+    "what": "0d32531463277c38",
+    "passages": "2c94fe8845a881cf"
+  },
+  "auditing-a-durability-walk/E9": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "4c15c3ec2289c108",
+    "what": "6b74c7b441de6a81",
+    "passages": "9f1908890865a0f4"
+  },
   "clearing-a-record-for-release/E1": {
     "verdict": "supports",
     "read": "2026-10-24",
