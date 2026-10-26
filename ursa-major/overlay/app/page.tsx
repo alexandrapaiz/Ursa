@@ -153,7 +153,14 @@ export default function Overlay() {
         <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{payload?.project ?? '…'}</span>
         <span className="mono" style={{ color: 'var(--dim)', fontSize: 10 }}>
           {payload?.sessionFile ? `${payload.sessionFile.slice(0, 8)}… · ` : ''}
-          {payload ? new Date(payload.updatedAt).toLocaleTimeString() : 'connecting'}
+          {/* This slot holds the time of the last good sync, so with no
+              payload it has no time and says which kind of nothing it
+              has. `connecting` after a connection that answered 500 is
+              the panel claiming an in-flight state it is not in, which
+              is the same defect as §7.1 one layer down. Neither branch
+              restates the error: that is one line below, once. */}
+          {payload ? new Date(payload.updatedAt).toLocaleTimeString()
+            : error ? 'not synced' : 'connecting'}
         </span>
       </header>
 

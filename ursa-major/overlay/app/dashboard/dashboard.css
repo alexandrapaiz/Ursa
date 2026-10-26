@@ -283,8 +283,11 @@
    without it the sentence butts against the metadata line and reads as a
    fourth line of it. The bottom one is because the sentence ends in a full
    stop and the line under it opens with a lowercase "and", which under the
-   bar continues "1.9% no span" correctly and under a sentence does not. */
-.dash-nothing {
+   bar continues "1.9% no span" correctly and under a sentence does not.
+   Compound rather than a bare class because `.dash p { margin: 0 }` above
+   is (0,1,1) and a bare `.dash-nothing` is (0,1,0), so the first version
+   of this rule lost and the frame came back byte-identical. */
+.dash .dash-nothing {
   margin-top: 0.8rem;
   margin-bottom: 0.5rem;
 }
