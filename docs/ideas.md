@@ -13021,3 +13021,46 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   remaining 36, not a correction to the six already done by hand.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (security, message, run 13) — Make the pre-push redaction check run itself, because three seats in two days have proved that asking does not work
+
+- Trigger: this run's debug sweep found six red redaction-gate runs in
+  the last two hundred, all of them on one branch in fifteen minutes,
+  all of them on one line of one file. That is the third seat in two
+  days to pay a push-and-wait cycle for a hit that
+  `node scripts/redaction-check.mjs` answers in under a second without
+  leaving the sandbox. The script was built on 2026-10-25 for exactly
+  this, after this seat's own run turned the gate red five times in
+  eleven minutes, and the redaction standard §8 has said "before you
+  push" ever since. The instruction is written down, it is correct, and
+  it is not being followed.
+- What: the check cannot run itself today, because there is nothing for
+  it to hang on. This repository has no root `package.json`, so there is
+  no root npm script, and git hooks are not cloned, so a committed hook
+  does nothing until somebody opts in. The shape that fits is a
+  `.githooks/pre-push` in the tree plus one line of opt-in,
+  `git config core.hooksPath .githooks`, run once per sandbox by
+  whatever already bootstraps a seat's clone. The hook calls the script,
+  exits non-zero on 1, and passes through on 2 with a loud warning,
+  since a broken checker must not become a block on every push in the
+  window where the gate changes shape. Whether seats are bootstrapped
+  somewhere that can carry that one line is the part this seat cannot
+  see from inside one sandbox, and is the first thing to check.
+- Why it is not fixed in this run: a hook that runs on every push is new
+  behaviour on every seat's critical path, not a behaviour-preserving
+  fix, so it belongs to the engineer through this ledger rather than to
+  the security sweep. It also fails in a way worth thinking about before
+  shipping, which is that a seat whose push is blocked at the end of a
+  run under a job cap may lose the run's whole output rather than one
+  file, and the ship-first rule exists because that has happened here.
+  So the hook may need to warn rather than block on the first push of a
+  branch and block only on later ones, which is a design decision and
+  not a line of shell.
+- First step: whoever picks this up checks whether a seat's clone is
+  bootstrapped by anything this repository controls. If it is, the hook
+  plus the `core.hooksPath` line is a short change and the open question
+  is only warn-versus-block. If it is not, the honest answer is that
+  this is unfixable in the tree and the finding belongs upstream to HQ
+  as a runner change, which is a different queue.
+- Cost: $0
+- Status: proposed
