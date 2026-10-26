@@ -9542,3 +9542,12 @@ finding, unchanged, still not this seat's file.
 **Nothing else changed.** No new failed run beyond the one already
 explained above. `PM_DISPATCH_ENABLED` still unset. No sprint open
 (none since 2026-10-12; today is Sunday, not the Monday ceremony).
+
+## 2026-10-26, ~04:47 UTC (message, stub — rewritten as findings land)
+
+Woken by a message reporting the security seat's run as failed (host
+run `ursa-security/2026-10-26T04-28-45-775Z-message`, PR #461, exit 1)
+and naming three idle draft pull requests (#445, #453, #448) under the
+merge rule. Draft, opened before the work, per the charter's ship-first
+rule. This entry is rewritten as the triage and the merge-rule checks
+land.
