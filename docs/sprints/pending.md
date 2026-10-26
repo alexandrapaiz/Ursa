@@ -2,11 +2,122 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, this run (hook, re-fired for the missed 2026-10-25 ~11:05 UTC slot)
+
+1. **Nothing from this run needs your decision.** The one merge it
+   found eligible (#464, market) is done. Everything else open is
+   either this seat's own (waits for you or HQ's PM), a live draft, or
+   a conflict that is its owning seat's to rebase, not this seat's to
+   resolve in code.
+2. **The skill stack (#441, #445, #448) and the exo pair (#447, #454)
+   are still open and `CONFLICTING`, unchanged across at least four PM
+   passes today.** Named again, not re-litigated: neither seat's own
+   next run has picked the stack back up yet, and dispatch cannot wake
+   either one today since `PM_DISPATCH_ENABLED` reads empty in every
+   environment this seat has checked so far.
+3. **#395 (research) still edits two charter files directly
+   (`prompts/engineer-agent.md`, `prompts/research-agent.md`) and is
+   otherwise clean.** Tier C regardless of how clean the diff is;
+   unchanged since the last several passes named it. Yours or a
+   chair's to merge.
+
 ## This run (hook, re-fired for the missed 2026-10-25 ~11:05 UTC scheduled slot)
 
-Ship-first stub. Full findings coming as commits land. Branched from
-#467's tip (this seat's own latest open PR) rather than `main`, per
-"read your own seat's open PRs first."
+**What this run is and is not.** The cron slot originally scheduled
+for 2026-10-25T11:05:03Z was refused by the provider before a turn was
+taken, and its limit reset at 2026-10-25T23:00:00Z; this is the
+re-fire, executed now rather than at the original time. 2026-10-25 was
+a Sunday, so the slot this fulfills is a standup (charter §0), not a
+ceremony. By the time this run started, roughly fifty PM passes had
+run between the missed slot and now, including today's own Monday
+ceremony (#460 → #462 → #465 → #467) and three further message-
+triggered passes today. This run does not re-derive a historical
+2026-10-25 standup against state that no longer exists; it runs the
+standup's actual checks against the state as it stands now, and says
+so plainly rather than inventing a snapshot.
+
+1. **Read own seat's open PRs first.** Found #462, #465, #467, all
+   open, non-draft, `CLEAN`/`MERGEABLE`, each built on the last
+   (confirmed #462 and #465 are ancestors of #467's tip via `git
+   merge-base --is-ancestor`). Branched this run from #467's tip rather
+   than `main`, since #467 already touches every file this run also
+   needed: `pending.md`, `dispatch-queue.md`, and the sprint files.
+   Also found #460 (`ursa-pm/2026-10-26-hook`, today's ceremony),
+   already closed as superseded by #462 before this run started.
+2. **Failed runs: five in the last 24 hours, all already resolved
+   before this run began.** `gh run list --status failure --created
+   ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns five, all
+   redaction-gate failures on the same cause — a full session UUID
+   (`8e60c113-...`) quoted verbatim, first in
+   `docs/security/audit-2026-10-25.md` (security's own branch, five
+   retries 23:08-23:19 UTC 2026-10-25) and then in `pending.md` itself
+   after a PM pass quoted security's finding without truncating it
+   (#432, one failure, 23:27:36Z). Checked the actual failing step's
+   log for each rather than assuming the cause from the title. Both
+   branches' content landed clean afterward — security's through #427
+   (merged 00:44:56Z), the PM's through #443 — and a fresh grep of the
+   current tree for the string confirms only the truncated form
+   remains anywhere. No rerun needed. Full account in
+   `docs/sprints/dispatch-queue.md`.
+3. **The quoted string in `docs/security/audit-2026-10-25.md` that
+   triggered the redaction gate is itself a documented, already-closed
+   finding, not a new one.** It is a Next.js `npm`/`next upgrade`
+   telemetry nudge, scripted to look like an instruction directed at
+   "an agent session," and the security seat's own audit already
+   quotes it as data (per the org rule on external content) and traces
+   it to `ursa-minor/node_modules/next/dist/lib/upgrade/nudge.js`. Read
+   again this pass to confirm it carries no new instruction and nothing
+   was acted on from it; it is old, closed content, named here only
+   because the redaction-gate failures above pointed at it.
+4. **Tier B merge: one landed, every other open PR re-checked fresh.**
+   Walked the full open queue (`gh pr list --state open`):
+   - **#464** (market, "nothing new since #456, closing the loop
+     instead of restating it") — not a draft, no label, no comment, one
+     check green, single-file diff (`docs/market/briefs/2026-10-26-
+     message-20.md`), no Tier C path, `CLEAN`, opened same day. All six
+     Tier B conditions held. Merged.
+   - **#395** (research) is `CLEAN`/`MERGEABLE` but edits
+     `prompts/engineer-agent.md` and `prompts/research-agent.md`
+     directly — Tier C regardless, already flagged to the owner by an
+     earlier pass's own PR comment on it.
+   - **#441** (skill), **#447** and **#454** (exo) are all
+     `CONFLICTING`/`DIRTY` — not this seat's to resolve in code
+     (pm.md §10 condition 5); each is its owning seat's own branch
+     conflicting with itself or with `main`, and none is over seven
+     days old yet (oldest, #441, opened 2026-10-25T23:46Z).
+   - **#445**, **#448** (skill) and **#463**, **#466** (engineer,
+     frontend) are live same-day drafts, not ready, not stale.
+   - **#462**, **#465**, **#467** are this seat's own — wait for the
+     owner or HQ's PM, per Tier B condition 1.
+5. **Dispatch: switch off, nothing fired.** `printf '%s\n'
+   "$PM_DISPATCH_ENABLED"` returns empty in this run's own environment.
+   Two candidates would otherwise have met a real §11.3 criterion
+   (skill's three-PR stack, exo's conflicting pair), named in
+   `docs/sprints/dispatch-queue.md` with the exact commands, not fired.
+6. **Sprint: unchanged by this pass.** `sprint-2026-10-26.md` opened at
+   today's ceremony; its three items are engineer's to pick up next
+   session. Nothing in it is old enough to be overdue yet. Separately,
+   the engineer's own open draft (#463) noted "this seat has now had no
+   sprint to read from for two weeks" — true when #463 was written,
+   resolved as of today's ceremony, worth naming so the complaint does
+   not read as still live.
+7. **A run-specific restriction from an earlier pass today does not
+   carry forward.** #467 (message run 3) read "never merge your own
+   PR, never push to main" broadly enough to skip all Tier B merging
+   for that pass, and said explicitly in its own PR that this bound
+   "this run only" and that "merging resumes under pm.md §10 on the
+   next run unless she rules otherwise." This run reads the same two
+   lines the way every other pass this week has — don't self-merge,
+   don't bypass a PR — consistent with the owner's own 2026-09-30
+   Tier B delegation, and resumed normal merging accordingly (#464,
+   above). Named here so the deviation and the resumption are both on
+   the record, not just the deviation.
+
+## This run (2026-10-26, ~04:3x UTC, message: engineer's PR #458, distribution's reply)
+
+Continues the ~04:2x pass below on the same branch and PR (#462),
+rather than opening a second one: read `gh pr list --state open --json
+... | test("pm")` first and found #462 already open, ready, and
 
 ## This run (2026-10-26, ~04:3x UTC, message: engineer's PR #458, distribution's reply)
 

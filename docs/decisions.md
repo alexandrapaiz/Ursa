@@ -870,5 +870,40 @@ repetition and framing are the finding.
 **Owner:** Alexandra, informed via this pull request. No decision
 needed this pass — merging resumes under pm.md §10 on the next run
 unless she rules otherwise.
-**Status:** open — #456 and #464 (market) wait on a merger; named in
-`docs/sprints/pending.md`.
+**Status:** closed — merging resumed this pass (PR #468, the hook run
+fulfilling the missed 2026-10-25 standup slot). #464 (market) merged
+under Tier B; #456 (market) is `CONFLICTING` and stays with the market
+seat to rebase, unchanged by the resumption.
+
+## Finding — a full session UUID leaked through a quoted security finding into two branches' committed files, caught by the redaction gate both times (recorded 2026-10-26, PM hook run fulfilling the missed 2026-10-25 standup slot)
+
+**What happened.** The security seat's 2026-10-25 audit
+(`docs/security/audit-2026-10-25.md`) quoted, as a documented finding
+per the org rule on external content, a Next.js `next upgrade`
+telemetry nudge carrying a full `randomUUID` in its example command.
+The redaction gate correctly rejected the full UUID five times on
+security's own branch (`ursa-security/2026-10-25-hook`, 23:08-23:19 UTC
+2026-10-25) before it landed truncated in #427. A PM pass later the
+same night quoted security's finding in `docs/sprints/pending.md`
+without truncating the UUID a second time, and the gate caught that
+too (#432, 23:27:36Z). Neither failure reached `main`: #427 merged
+clean with the UUID truncated, and #432 was closed without merging,
+with the content landing clean through #443 instead.
+
+**Why this is a finding and not just two tripwire hits.** The gate is
+working exactly as designed — it is also catching, correctly, the
+outputs of a model that already knew to truncate the UUID on first
+quote and then re-introduced the full string while quoting someone
+else's quote of it. The failure mode is copy-through, not a missing
+check.
+
+**What this seat is doing about it going forward.** Nothing new
+required: both instances were caught before `main`, both are resolved,
+and the existing gate is the correct control. Named here only so a
+future pass that finds the string `8e60c113` in `gh run list`'s
+failure history does not have to re-derive that it is one already-
+closed incident appearing twice, not two separate ones.
+
+**Owner:** Alexandra, informed via this pull request. No decision
+needed — both failing branches already landed clean.
+**Status:** closed.

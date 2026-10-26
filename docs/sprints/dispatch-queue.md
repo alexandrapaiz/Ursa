@@ -1,45 +1,58 @@
-# Dispatch queue — 2026-10-26, hook (Monday ceremony)
+# Dispatch queue — 2026-10-26, hook run fulfilling the missed 2026-10-25 ~11:05 UTC standup slot
 
-**This run's trigger.** Scheduled hook, Monday, so this charter's §0
-ceremony (retrospective, grooming, sprint planning) ran first; this is
-the standup that follows it. `PM_DISPATCH_ENABLED` is unset in this
-run's own environment (`[ -n "$PM_DISPATCH_ENABLED" ]` false), so
-nothing below fires as a `gh workflow run` dispatch regardless of what
+**This run's trigger.** The cron slot originally scheduled for
+2026-10-25T11:05:03Z was refused by the provider before a turn was
+taken; its limit reset at 2026-10-25T23:00:00Z, and this is the
+re-fire. 2026-10-25 was a Sunday, so the slot this fulfills is a
+standup, not a ceremony — today's own Monday ceremony already ran and
+shipped separately (#460 → #462 → #465 → #467). `PM_DISPATCH_ENABLED`
+reads empty in this run's own environment (`printf '%s\n'
+"$PM_DISPATCH_ENABLED"`), so nothing below fires regardless of what
 qualifies. Written in full per pm.md §0b.
 
-## Candidates considered, none fired as a dispatch
+## Candidates considered, none fired (switch off)
 
-- **Frontend (#457), engineer (#458), security (#459)** all opened
-  hook-triggered pull requests within ten minutes of this one (04:03-
-  04:13 UTC) — live windows just starting, not idle ones.
-- **Exo (#447, #454)** are unchanged since the last PM pass checked
-  them 3h17m ago (both last pushed 00:56 UTC). Both edit
-  `prompts/exo-agent.md` or `prompts/pm-agent.md` directly, which is a
-  merge-authority boundary already settled in `docs/decisions.md` (the
-  2026-10-18 charter-freeze finding), not a dispatch decision in any
-  case. Exo is never dispatched regardless (pm.md §11.4).
-- **Skill (#441 → #445 → #448)** is the same clean stack named by the
-  last pass, each built on the last — not idle.
-- **Market (#452, #456)** and **frontend (#444)** are checks-green,
-  non-draft, not stalled, nothing to dispatch.
-- **Research (#395)** is unchanged and still Tier C (edits a
-  `prompts/` path); no new fact moves it this pass.
-- No sprint item is overdue by a fact this pass did not already know:
-  `sprint-2026-10-26.md` opened this same pass, so nothing in it is
-  old enough to be late yet.
+- **Skill (#441 → #445 → #448).** Three open PRs, two still draft, all
+  three `CONFLICTING`/`DIRTY`, unchanged since the last PM pass checked
+  them (#467, ~05:00 UTC). Meets §11.3's "two or more open PRs on one
+  scope, none merged." Not fired — switch off.
+  `gh workflow run agent-skill.yml -f owner_instructions='Three open
+  PRs on this seat (#441, #445, #448), two still draft, all three
+  CONFLICTING. Land or close the stack before opening a fourth.'`
+- **Exo (#447, #454).** Two open PRs from the same seat's own windows
+  (47-48), both `CONFLICTING`, neither merged, unchanged since the
+  last check. Exo is never dispatched regardless (pm.md §11.4), so
+  this is named for the record, not a live candidate.
+- **Research (#395).** Unchanged, still Tier C (edits
+  `prompts/engineer-agent.md` and `prompts/research-agent.md`
+  directly) — a merge-authority wait, not a dispatch decision.
+- **Market, frontend, engineer.** #464 merged this pass (below). No
+  other open PR from these seats is stalled: #462/#465/#467 are this
+  seat's own; #466 and #463 are live same-day drafts with no trigger
+  asking for review yet.
+- No sprint item is overdue: `sprint-2026-10-26.md` opened at today's
+  ceremony, nothing in it old enough to be late.
 
 ## Failed-run triage this run (pm.md §11.7)
 
-`gh run list --limit 30` this pass: zero non-success runs since the
-last check. Nothing to triage.
+Five failures in the last 24 hours (`gh run list --status failure
+--created ">=$(date -u -d '-24 hours' +%FT%TZ)"`), all predating this
+run's branch point and all already resolved:
 
-## Clone-correctness note, logged here because it shaped how this pass
-checked ancestry
+- `ursa-security/2026-10-25-hook`, five redaction-gate failures
+  (23:08–23:19 UTC 2026-10-25), same cause each time: a full session
+  UUID quoted verbatim in `docs/security/audit-2026-10-25.md`. That
+  branch's PR (#427) merged clean at 2026-10-26T00:44:56Z with the UUID
+  truncated — confirmed by grepping the current tree; only the
+  truncated form remains. No rerun needed.
+- `ursa-pm/2026-10-25-message-2` (#432), one redaction-gate failure
+  (23:27:36Z), same UUID leaking through a quote in `pending.md`. #432
+  was closed without merging the same night; the content landed clean
+  through #443 instead. Confirmed by the same grep. No rerun needed.
 
-This pass's own checkout was shallow (`.git/shallow` present, 1473 of
-3041 commits, `origin/main` the only populated remote ref) until
-`bash tools/ensure-full-clone.sh` was run against it, per "Eleven
-charters instruct a command the clone they run in cannot answer"
-(docs/ideas.md, 2026-10-24, `urgent`). Every merge-base ancestry
-check in this pass's own PR description was run only after that
-repair, not before.
+Nothing in the last 24 hours is unresolved or needs a rerun.
+
+## Tier B this run
+
+Merged **#464** (market, single docs-only file, clean, green, no Tier
+C path, same-day, not this seat's own). Full account in `pending.md`.
