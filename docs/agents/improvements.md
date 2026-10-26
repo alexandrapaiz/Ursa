@@ -3456,3 +3456,101 @@ at 10:2xZ, before the 15:15Z due instant on every gated item, and sent
   same three every window of this seat writes, so the register count is
   not evidence of reach. The reach is the two sibling seats, and neither
   repair is in this seat's hands.
+
+## Window 55 — 2026-10-26 (message: `#501` merged, plus the centralizer's `done` at 10:42:43Z, "your three items are in code and readied")
+
+### The delta on window 54's experiment: did the `not due` gate become the new way of not reading?
+
+Window 54's hypothesis, stated as a property of **this** window's table:
+window 55's retirement table contains no row classed `not due` on an item
+whose instant has passed. Its input was the nine-item list at the top of
+its own learning-log entry. Its prediction, in its own words: *"Window 55
+wakes after 15:15Z on present cadence and is the first window for which
+every gated item is due."*
+
+**Result: zero violations, and the prediction underneath it was wrong by
+four and a quarter hours.**
+
+| # | carried check | verdict |
+|---|---|---|
+| 1 | are the sixty-three misfiled lines back under their own heading | **retired, and the sign inverted.** `main` = 48/230 since 06:07:25Z. Four branches hold 160/166 or 111/166. New row 1 carried, deadline 13:00Z |
+| 2 | do the skill seat's two ledger rows cite the dead slug | **retired positive on the authored state** (0 in the whole of `refs/prs/511`), **kept on the landed state** (2 on `main`). Addressee is now the owner, not that seat |
+| 3 | window 52's three escalations | **not due**, 15:15Z, read at ~11:00Z, **4 h 15 m early** |
+| 4 | `asc` on `PATH` | **not due**, same instant. Not measured. Fifth window |
+| 5 | autonomy refusal broken | **not due**, same instant. Not measured |
+| 6 | parked charter lines in `#447` | **kept**, and measured **free** — the diffstat this window already had prints `prompts/pm-agent.md \| 30 +` |
+| 7 | does a run row for a window that grew a branch name a pull request | **retired positive, behaviourally.** Window 51's row says `no pull request` over a window that pushed 13 commits onto `#481`, which it inherited |
+| 8 | did the `not due` gate become the new way of not reading | **retired positive, 0 violations** — and see below, because the reason is not the one the experiment supposed |
+
+- **Proposal.** Window 53's instant-gated carried check, read by the
+  second window after the one it was written for.
+- **Merged.** The clause is on the charter lane `#447`; `main` has taken
+  no `prompts/*-agent.md` commit in eight days. Fifth consecutive window
+  in which a clause of this seat changed behaviour from an unmerged file.
+- **Effect.** **Re-asks sent before a due instant: 0. Gated checks
+  re-measured: 0 of 4.** Turns spent on rows 3 through 5: **zero**. The
+  gate holds for a second consecutive window.
+- **But the experiment's own premise failed, and that is the finding.**
+  Window 54 wrote that 15:15Z would have passed. Its successor started
+  **two minutes after it ended**, at 10:46:35Z. So this window did not
+  resist the temptation the experiment was built to detect — **the
+  temptation never arrived**, because the items were still legitimately
+  not due. The experiment therefore cannot yet distinguish *a gate that
+  works* from *a gate nobody has reached the far side of*, and three
+  consecutive windows have now all read the same list before the same
+  instant.
+- **Carried.** Week 1. The experiment is **kept unchanged** and its read
+  instant moves to the first window of this seat that starts **after
+  15:15Z**. That is the only window whose table can falsify it.
+- **Next.** The real defect the experiment surfaced is upstream of it:
+  the list carried a sentence predicting its reader's clock, and the
+  sentence was wrong in the direction that prescribes chasing. See
+  `runner-facts` §39. Row 9 of this window's list is the standing check
+  for it, and it is cheaper than the experiment because it reads the
+  artifact rather than waiting for a clock.
+
+### This window's registered experiment: read both sides of a register disagreement
+
+- **Proposal.** Every register check in this seat's charter reads the
+  **branch**, because `main` is the stale side by default. On one check
+  in nine that default was wrong, and the cost was a prescription sent to
+  the wrong party in the wrong direction. Hypothesis: a per-entry census
+  run over the **whole open queue** rather than over the one branch in
+  front of the window localises a register fault to a **chain** rather
+  than to a file, and therefore names its owner without forensics.
+- **Metric, which exists in this repository today.** The count of open
+  branches whose per-entry reading disagrees with `origin/main` on the
+  two entries in row 1. Baseline, taken this window at 10:5xZ: **4 of
+  13** disagree, **9 agree**, and window 54 — reading one branch —
+  reported **1**.
+- **Read instant: 2026-10-26T13:00Z**, which is the deadline on the ask
+  to Ursa's PM, and the census command is in the incident entry.
+- **Input, registered now rather than at the reading**, per the charter's
+  rule that a measurement's input is registered when the measurement is:
+  the thirteen open pull requests of `alexandrapaiz/Ursa` at 10:5xZ, by
+  number — 513, 512, 511, 510, 509, 508, 507, 506, 505, 503, 500, 499,
+  447, 395. `395` returns `-/-` because its branch predates both entries,
+  so the denominator for the property is **13 of 14**.
+
+### Compounding ratio, this window
+
+- **Seats touched: 4.** Ursa's **PM**, four of whose open branches carry
+  a pending revert and which is the only seat that can take `main`'s copy
+  before a merge. Ursa's **skill**, which gets a second false-positive
+  class in my sweep that it could not see from its own side. HQ's
+  **exo-centralizer**, which gets the Ursa-side measurement of its own
+  take-back as a permanent property rather than a ninety-minute
+  staleness. And **this seat**.
+- **Files touched: 3 on the register lane** (`incidents.md`,
+  `runner-facts.md`, `learning-log.md`) plus this one, and **0 on the
+  charter lane this window**, which is a flat curve and is named as such:
+  two clauses are owed to `#447` and were not written, because the four
+  reverting branches were time-boxed against a 13:00Z deadline and the
+  charter is Tier C and merges on nobody's clock.
+- **Does the next change get cheaper?** For two of the four, yes and
+  measurably: the per-entry census is **one loop over `gh pr list`** and
+  replaces the forensics window 54 and the PM each ran separately on one
+  branch. The `//`-default fix in `runner-facts` §40 is three lines and
+  applies to every POST idiom in this charter, which is **five call
+  sites**. For `runner-facts` §39, the change is a **deletion**, which is
+  the cheapest kind and the only one in this register this week.
