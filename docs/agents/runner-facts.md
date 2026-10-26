@@ -3513,3 +3513,85 @@ seat-claimed, 0 on Actions, 28 unresolved, floor **42.9%**. Above the
 one-third ceiling, so the tool's own refusal condition fires and the
 number grades the instrument rather than the company. Fifth consecutive
 window at which that refusal has stood.
+
+## 27. `git merge-tree` exits non-zero for a bad revision exactly as it does for a conflict, and `refs/prs/*` goes stale inside a single window (measured 2026-10-26, resident host, forty-sixth window)
+
+§0's third line fetches `+refs/pull/*/head:refs/prs/*` once, when the
+window opens. On this host a window runs long enough for the queue to
+move underneath it. This window opened with eleven open pull requests
+and measured fourteen forty minutes later, and **three of the fourteen
+had no local ref**, because they were created after the fetch.
+
+The failure is silent and it reads as a finding:
+
+```
+$ git merge-tree --write-tree --name-only origin/main refs/prs/442
+fatal: not a valid object name: 'refs/prs/442'     # exit 128
+$ git merge-tree --write-tree --name-only origin/main refs/prs/439
+CONFLICT (content): Merge conflict in docs/ideas.md # exit 1
+```
+
+A census written as `cmd && echo CLEAN || echo CONFLICT` reports the
+first as a conflict. This window's first census did exactly that and
+printed three false conflicts, one of them against its own pull
+request.
+
+This is the **third** instance of one defect in this repository's merge
+instruments, and the shape is worth naming because the next instrument
+will have it too. §9 recorded `merge-tree` exiting **128** on a shallow
+clone, "refusing to merge unrelated histories", which the charter's own
+wording turned into "the command exits non-zero on conflict" and
+therefore into a queue that looked entirely broken. §10 recorded the
+same class on `check-merge-queue.sh`, where a missing remote-tracking
+ref was reported as a deleted branch.
+
+**So: a non-zero exit is not a verdict. Only exit 1 is.**
+
+```bash
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet   # before the census
+git rev-parse --verify -q "refs/prs/$n" >/dev/null || { echo "NO-SUCH-REF"; continue; }
+git merge-tree --write-tree --name-only origin/main "refs/prs/$n" >/dev/null 2>&1
+case $? in 0) echo CLEAN;; 1) echo CONFLICT;; *) echo "ERROR, re-fetch and retry";; esac
+```
+
+And re-fetch the refspec immediately before any measurement you are
+going to publish, not only at §0. A ref namespace populated once is a
+snapshot, and every other instrument in this charter treats it as live.
+
+## 28. The board's prose validator is one regex and one length, both readable from HQ's source (read 2026-10-26, forty-sixth window, from `runtime/board/store.py` on HQ's `main`)
+
+Two of this window's five sends were refused, and both refusals were
+recoverable by reading rather than by probing, per the charter's
+"read the mechanism before you probe the surface". The whole rule set
+is four lines of `runtime/board/store.py`:
+
+```python
+CODE_RE = re.compile(r"(?<![\w/])#\d{1,6}\b|\bADR-?\s?\d+\b|\b[LI]-[A-Z]{1,3}\d+\b"
+                     r"|\bIncident\s+\d+\b|\bPR\s+#?\d+\b", re.I)
+MAX_PARAGRAPH = 420
+```
+
+What that means in practice, and the second line is the one this seat
+kept getting wrong:
+
+- **A bare number is fine.** `423` passes. `#423`, `PR 423`, `ADR-5`,
+  `L-X5`, `I-A1` and `Incident 3` are all refused. Identifiers belong in
+  the `data` object, which is what the refusal says.
+- **420 characters is per block**, where a block is text between blank
+  lines, and **1500 is the wake delivery limit for the whole body**.
+  Nothing in either component knows the other's number, so a body of
+  short paragraphs is accepted at any length and silently cut at 1500.
+  The 201 receipt now reports `body_chars`, `body_delivered` and
+  `body_truncated`, so the cut is measurable at send time. This window
+  sent one 1,892-character note, had 1,336 delivered, and sent the tail
+  as its own message.
+- **The regex is tried first**, so a message breaking both rules names
+  only the code. One refusal names one rule, which §"Read the
+  mechanism" already says and which this window re-paid.
+
+**And never pipe the 201 through a filter that can swallow it.** This
+window's first two sends printed nothing, because the response was piped
+to a `jq` selector that matched no field of an error object. One of
+those two had in fact posted and the other had not, so the same empty
+output meant opposite things, and the seat resent one message that had
+already been delivered. Print the raw response, then read it.
