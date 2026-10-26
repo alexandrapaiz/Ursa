@@ -80,6 +80,28 @@ the mechanism stays a constructed, graded task set rather than real
 work observed after the fact — see the new positioning.md section this
 run. Last observed 2026-10-07: [aiweekly.co: Forbes — Surge AI, Mercor, AfterQuery and Turing sold ~$500M/year to Chinese labs](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to), [Surge AI blog](https://surgehq.ai/blog).
 
+Update 2026-10-26, two more posts on Surge's own blog continuing the
+2026-10-07 convergence. First, "sudo L7" (2026-10-21): a new benchmark
+testing whether a coding agent exercises "staff-level engineering
+judgment" rather than merely producing correct code, the closest this
+entry has come yet to judging work by whether it holds up rather than
+whether it passes a check at submission time, though the task set is
+still Surge-constructed rather than drawn from real deliverables.
+Second, and more load-bearing: a post (dated 2026-09-15, republished
+2026-10-15) states Surge "built the human baseline, including
+researcher recruitment, structured submissions, quality control, and
+expert review" for Anthropic's own published work on automated
+alignment researchers. That is a named frontier lab paying this
+category's largest vendor for solicited human-baseline construction on
+its own alignment research, the same solicited-feedback mechanism this
+entry's weakness line has named since 2026-09-26, and the same lab
+whose public principles this project runs under. It does not change
+the read already on file (Minor is not trying to take share from this
+spend, only to sell a different thing to the same buyers, per the
+2026-09-30 Mercor update); it is a second, more specific confirmation
+that the spend itself keeps growing rather than commoditizing away.
+Last observed 2026-10-26: [Surge AI blog](https://surgehq.ai/blog).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
