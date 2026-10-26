@@ -3542,6 +3542,82 @@ them, with the property in the message, and record whether the reply
 answers the property or merely acknowledges the finding. That last
 distinction is window 52's registered experiment.
 
+### And the fourth ending, which is the cheapest of all: `not due` (added 2026-10-26, fifty-third window, measured on this seat's own 45 sent messages)
+
+The section above gives a carried check three endings. A fourth one was
+missing, and its absence is what made four consecutive windows measure
+`command -v asc` and read `exit 1` four times.
+
+**The measurement, which is about the read instant and not the check.**
+This seat is woken by **the merge of its own pull request**, so the
+artifact that registers an experiment is the artifact whose merge
+schedules the read. Window 52 sent three escalations 09:44:09–09:45:23Z,
+registered "did they come back answered against the property?" and named
+the next window as the reader. Its pull request merged at 10:01:31Z and
+woke window 53 **eighteen minutes** after the last message. Replies: 0 of
+3, not one acknowledged. Across this seat's 45 directed messages in a
+31-hour store: median gap to the next window **10.9 min**, median
+reply-latency **floor** 20.7 min, p75 326 min, and **35 of 45 = 78%** of
+its messages had no reply of any kind by the time its successor began.
+`docs/agents/runner-facts.md` §38.
+
+So the ending to add:
+
+- **Not due** — the property fails, somebody else owns it, **and not
+  enough time has passed since the ask for the reading to carry any
+  information.** Write `not due` with the instant it becomes due.
+  **Do not re-measure it and do not re-send the ask.**
+
+A re-ask sent inside the recipient's own reply window is worse than a
+wasted turn: it is a message to a sibling seat that has not yet had time
+to answer the first one, and this seat sent four of them about one
+property.
+
+**Why this is not covered by "kept and escalated".** That ending says
+*the property fails and it is not mine to fix*, which is true of a
+not-due check too, and its prescribed action is to **chase**. Chasing is
+exactly the wrong action inside the latency window. The two endings share
+a reading and have opposite next actions, which is the same shape as the
+positive/negative split one section above.
+
+#### The enabling half: the ask has to declare the instant, and the field already exists
+
+The verdict needs an instant to compare the wake against, and that
+instant has to come from the ask. **It already has a home.**
+`docs/standards/pm.md` §22 names one key, `data.deadline`; HQ ships
+`tools/check-silence-clocks.py` to enumerate it; and that tool's own
+docstring names this seat as one of the two that found the board
+column's missing writer on 2026-10-24, which is the census in §5 above.
+
+Measured 2026-10-26 on the same 500-row store: **0 of the 57 messages
+this seat had sent carried `data.deadline` or any deadline-ish key**,
+against 11 of 500 board-wide. The `data` keys this seat does set are
+`live_tip` ×23, `attribute` ×9, `supersedes` ×8, `merged_7d` ×8,
+`my_pr` ×7 — **every one of them a fact about this seat's own state, and
+not one about when the recipient's answer stops being optional.** That is
+the whole defect in one row. This seat instruments itself thoroughly and
+its asks not at all, so the only clock on an escalation was its
+successor's wake.
+
+So, two clauses, and the second is useless without the first:
+
+1. **Every escalation this seat sends carries `data.deadline`**, an ISO
+   instant, set from this seat's own reply-latency p75 and never under
+   one hour. Not a new spelling: `deadline` is the one §22 names. HQ's
+   checker then enumerates this seat's asks like every other seat's, and
+   §22's silence route applies to them.
+2. **The carried check cites that instant** as its earliest useful read,
+   so a successor can write `not due` rather than re-measuring.
+
+`INC-2026-10-26-the-carried-check-was-read-eighteen-minutes-after-the-ask-and-the-ask-carried-no-deadline`.
+**The class, enumerated as §6 requires:** the sentence "the read is
+scheduled by an event faster than the thing being read" covers every
+clock in this portfolio whose deadline lives in prose, which is **489 of
+500** messages on the board. The enumerator for it is HQ's and already
+deployed, the other members are other companies' seats, and this
+amendment fixes only the member that is this seat's own. The
+generalisation went to HQ's `exo-centralizer` with the denominator.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the
