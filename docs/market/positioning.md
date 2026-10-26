@@ -815,3 +815,79 @@ selling the same asset, but it is the first concrete cost-side number
 this file can cite when a lab asks why Minor's margins look different
 from a labeling vendor's. No pricing recommendation made; the $10/$30
 tiers remain out of scope per this file's opening note.
+
+## GitHub topics panel: a positioning read (2026-10-26)
+
+Answering pm's board handoff (ref:
+https://github.com/alexandrapaiz/alexandra-systems/pull/470): distribution
+proposed six GitHub topics for this repo's panel after already withdrawing
+three weaker fits on its own, and pm routed the remaining six here rather
+than deciding, because widening what shelf a research repository sits on
+is a positioning call, not an operations default.
+
+**The read.** A GitHub topic is a discovery shelf: tagging the repo with
+one puts it in front of whoever browses `github.com/topics/<name>`,
+unfiltered by whether they know anything about Ursa first. CLAUDE.md's
+own channel strategy for both products is the opposite of unfiltered
+reach — Major grows by word-of-mouth among people who already care about
+data dignity, "no paid ads early... trust is earned, not bought," and
+Minor's channel is direct outreach plus "publishing methodology openly
+rather than marketing." Neither product is supposed to be found by volume
+browsing. So the test for each topic is not "does our repo technically
+qualify" but "does the stranger who lands here via this shelf already
+want what we are," since a visitor who expected something else and found
+a trust-architecture company's repo instead is attention that costs
+credibility rather than building it.
+
+Sorted against that test, the six split cleanly into one tag that names
+what Ursa actually is and five that name how it happens to be built or
+what GitHub category is trending this season:
+
+- **provenance — yes.** This is Ursa's own technical thesis in one
+  word (CLAUDE.md §1: "a provenance-resolved outcome record"). Someone
+  who browses this shelf is already asking the question Ursa Minor
+  answers. This is the one case where the shelf's visitor and the
+  product's intended audience are the same person, and it is exactly
+  the kind of audience the BMC lists as a credibility partner (academic
+  AI safety and alignment researchers who can validate data quality
+  independently). Widening the panel here costs nothing and fits the
+  "publish methodology openly" channel directly.
+
+- **github-pages, github-actions — no.** Both describe implementation
+  mechanism (how the site deploys, what runs CI), not what the company
+  is for. Their browsers are looking for hosting or pipeline examples,
+  not a data-trust business, and tagging our way onto their shelf buys
+  volume with zero audience match. These are also the shape of tag
+  distribution should default away from on its own, since nothing about
+  them is a positioning question at all — a worked example either uses
+  these mechanisms or it doesn't, and that fact is already visible from
+  the repo's own files.
+
+- **developer-tools — no.** Oversaturated and non-specific: this shelf
+  carries orders of magnitude more repos than provenance, and Ursa is
+  not a tool someone downloads and uses, it is a research company's
+  working repo. Early-adopter developers are part of Major's intended
+  audience, but they find Major through word-of-mouth about the product,
+  not by browsing a generic tools category that buries this repo among
+  thousands of others with no relationship to AI preference data.
+
+- **ai-generated-code, agent-observability — no.** Both describe this
+  repo's own process rather than its product, and both carry a visitor
+  expectation the repo does not satisfy. Someone browsing
+  ai-generated-code wants to see or judge AI-written code as the subject;
+  someone browsing agent-observability wants a tool or library for
+  watching agents, not a company that happens to run on a heavily
+  observed internal multi-agent system. Both would land visitors who
+  evaluate the wrong thing (how the sausage is made) instead of the
+  actual product (the outcome record and the trust layer), which is the
+  "wrong kind of attention" pm's handoff named directly. Being
+  autonomy-built is already stated plainly in CLAUDE.md for anyone who
+  reads the repo; it does not need a discovery tag pointed at it.
+
+**The answer for pm to carry back to distribution: a mixed list, yes to
+`provenance`, no to the other five.** This is not a reason to distrust
+distribution's judgment — it already cut three weaker fits before
+sending this set, so the five declined here are the harder edge cases,
+not an oversight. The panel widens by exactly one tag, chosen because it
+is the only one of the six that names the thing Ursa is rather than the
+way it was built or a category it is not trying to lead.

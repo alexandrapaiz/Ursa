@@ -193,10 +193,19 @@ the script still runs. The script exists so the base is resolver-produced
 rather than typed, and so each note quotes the gate instead of
 paraphrasing it.
 
+That test asks what the gate does with these files. A second test,
+`src/violation-fixtures-current.test.ts`, asks the other question: are
+the committed bytes the bytes the script would write today. It spawns
+`fixtures:violations:check` rather than reimplementing the comparison,
+so there is one definition of "drifted". Added 2026-10-26, after the
+check was found red on `main` with the suite green — see "Why the
+records are byte-reproducible" below for what that cost.
+
 ```bash
 cd ursa-major
 npm run fixtures:violations          # rewrite every file in this directory
 npm run fixtures:violations:check    # exit non-zero if any file drifted
+                                     # (also run inside npm test, 2026-10-26)
 npx vitest run src/invariants.violations.test.ts
 npx tsx src/invariants.cli.ts fixtures/violations   # 28 violations, exit 1
 ```
@@ -245,3 +254,21 @@ fixture that changes on every run cannot be diffed and
 consequence — that a buyer handed a record cannot reproduce it
 byte-for-byte from its stated inputs — is a ledger entry rather than
 something to fix from a fixture script.
+
+### What this claim cost before anything enforced it
+
+On 2026-10-25 `fixtures:violations:check` was found red on `main`, 24 of
+47 files, and the full test suite was green. The drift was three fields
+the record schema grew on 2026-10-24 and these files never received:
+`noCandidate` on a span, `blindSpans` and `suppressedTokenSpans` in
+`stats`. No bound reads any of the three, so every assertion in
+`src/invariants.violations.test.ts` passed — adding an optional field
+changes no bound's verdict and no bound's `observed` string.
+
+The cost was not cosmetic. A reviewer who ran the command this file
+documents was told the directory had drifted, with no way to tell a
+stale regeneration from a real corruption, and the records this project
+points at as its counterexamples were not the records its current
+resolver would write. Both were fixed on 2026-10-26 by regenerating,
+and the gap that allowed it was closed the same day by running the
+check inside `npm test`.
