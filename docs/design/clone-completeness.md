@@ -523,13 +523,61 @@ bash tools/ensure-full-clone.sh --check
 rather than by reporting that every test passes:
 
 ```bash
+# cwd: repository root, on a COMPLETE checkout (see the note below; one of
+# these three numbers depends on the shape of the checkout you measure in).
 # in tools/ensure-full-clone.sh, each in turn:
-#   `if narrow; then`  -> `if false; then`     6 of 18 tests fail
-#   `if shallow; then` -> `if false; then`     5 of 18 tests fail
-#   `if [ "$CHECK" = 1 ]; then` -> `if false;` 1 of 18 tests fail
+#   `if narrow; then`  -> `if false; then`     6 of 19 tests fail
+#   `if shallow; then` -> `if false; then`     5 of 19 tests fail
+#   `if [ "$CHECK" = 1 ]; then` -> `if false;` 1 of 19 tests fail
 # in tools/stack/integrate.sh, each in turn:
 #   `if [ -z "$files" ]; then` -> `if false;`  4 of 8 tests fail
 #   the ensure-full-clone call removed            7 of 8 tests fail
+```
+
+**One of those numbers depends on the shape of the checkout, and that is the
+point of the nineteenth test.** Re-measured on 2026-10-26 in a seat-shaped
+clone of this branch, built with `git clone --depth 1 --single-branch -b
+<branch> file:///path/to/Ursa/.git`, which is the shape every seat sandbox
+arrives in:
+
+```bash
+# cwd: a --depth 1 --single-branch clone of this repository
+#   `if narrow; then`  -> `if false; then`     6 of 19 tests fail   (same)
+#   `if shallow; then` -> `if false; then`     5 of 19 tests fail   (same)
+#   `if [ "$CHECK" = 1 ]; then` -> `if false;` 2 of 19 tests fail   (one more)
+```
+
+The extra failure is `--check agrees with git about this repository own
+checkout`, and the regression it catches is the worst one this script can
+have: with the `--check` branch gone, `--check` falls through and *repairs*,
+so a flag documented as read-only writes `remote.origin.fetch` and fetches a
+full history in a caller that asked only for a verdict. The test catches it
+because its last assertion re-reads `--is-shallow-repository` after the call
+and compares it to what git said before. The test this one replaced could not
+catch it on a seat-shaped checkout, because on that population it was already
+failing for an unrelated reason: it asserted that the ambient checkout *is*
+complete, which is a property of the sandbox and not of the script, so it was
+red on every seat run (measured 17 pass / 1 fail as the sandbox arrived on
+both 2026-10-24 and 2026-10-26, and 18 / 0 after `bash
+tools/ensure-full-clone.sh` on that same checkout). A red that is normal
+carries no information, and the next real regression arrives wearing it.
+
+The suite is now **19 pass / 0 fail on both shapes**, measured on each:
+
+```bash
+# cwd: repository root
+node --test tools/ensure-full-clone.test.mjs      # 19 pass, 0 fail
+```
+
+The shape the ambient test ran against is printed in the test's own name,
+because node:test's reporters print a passing test's name and nothing else
+about it, so a reason recorded anywhere but the name is a reason nobody
+reads. This is the convention `ursa-major/src/provenance-index.test.ts`
+already states for vitest, applied to the same problem here:
+
+```
+✔ --check agrees with git about this repository own checkout, whichever shape it is in (this one: unrepaired: depth + refspec)
+✔ --check agrees with git about this repository own checkout, whichever shape it is in (this one: complete)
 ```
 
 ---
@@ -543,7 +591,7 @@ over what else was considered.
 |---|---|---|---|
 | **git** | 2.43.0 | The subject. Both faults are properties of a git clone, and every claim in §1 and §3 is a measurement of this binary's behaviour, not of a wrapper's. | Not a choice. It is what the faults are made of. The version is load-bearing and stated because the `":path"`-reads-the-index behaviour and the exit status of `merge-base --is-ancestor` on a missing base are version-dependent in principle, and the `measured:` tests fail rather than silently pass if a future version changes either. |
 | **bash** | 5.2.21(1) aarch64-unknown-linux-gnu | The language of `ensure-full-clone.sh`, `integrate.sh` and `reproduce-collision.sh`. | The repair must run *before* anything else in a checkout, including before `npm install`, and it must be callable from the two existing shell callers without a dependency step. A Node version would be the nicer program and would need `node_modules` to be a precondition of fixing a precondition. Chosen for the dependency order, not for the ergonomics. |
-| **node:test** (Node.js built-in test runner) | Node v22.23.2 | Runs both suites: 18 tests for the repair, 8 for the classification. | Matches `tools/ledger/*.test.mjs`, which is already zero-dependency on purpose because a merge driver has to run during a merge in a bare clone with no `node_modules`. Vitest is already in `ursa-major/` and was not used here: adding a `tools/` dependency on it would make running the gate require an install, which is the same dependency-order problem as above. |
+| **node:test** (Node.js built-in test runner) | Node v22.23.2 | Runs both suites: 19 tests for the repair, 8 for the classification. | Matches `tools/ledger/*.test.mjs`, which is already zero-dependency on purpose because a merge driver has to run during a merge in a bare clone with no `node_modules`. Vitest is already in `ursa-major/` and was not used here: adding a `tools/` dependency on it would make running the gate require an install, which is the same dependency-order problem as above. |
 | **`git worktree`** | part of git 2.43.0 | `integrate.sh` merges into a scratch worktree under `/tmp/ursa-stack-XXXXXX` so the checkout it is run from is never written to. | A second full `git clone` per run would cost a fresh network fetch of a 2,818-commit history to answer a question about refs already present locally. Unchanged by this work; named because the diagram's `$WORKTREE` node is it. |
 | **`file://` transport** | part of git 2.43.0 | Both test suites build a local bare repository and clone it with `--depth 1 --single-branch` over `file://`, which reproduces both faults with no network. | A plain local-path clone silently discards the flag, in git's own words: `warning: --depth is ignored in local clones; use file:// instead.` Measured: the local-path clone of a four-commit fixture reports `shallow=false commits=4`, the `file://` clone of the same bare repository reports `shallow=true commits=1`. So `file://` is what makes the fixture a real shallow clone rather than a full one wearing the flag. A network fixture against GitHub would make the suite slow, flaky and unusable in a sandbox. The equality of the fixture's clone shape with a seat's is asserted in the first test rather than assumed. |
 | **python3** | 3.12.3 | Only inside `reproduce-collision.sh`, for the register entry-splitting already there. | Pre-existing. Not introduced by this change and not removed by it, since rewriting that parser was not this run's unit of work. |

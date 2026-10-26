@@ -804,6 +804,112 @@ in a review folder, and it belongs run against the field as well as
 against us, because four of those five exemptions were found on somebody
 else's markup and none of them would have been found on ours.
 
+## L27 — A paragraph put into a row inherits the row's width, and the row is as wide as the page
+
+**measured**, 2026-10-26 (hook run), counted with L9's method at three
+viewports. `reviews/2026-10-26c/data/measure-dash-prose-before.txt` and
+`-after.txt`, `README.md` §3.
+
+The run before this one replaced an empty bar and four em dashes with a
+sentence, which was the right call and is §2 here. The sentence went
+into a `.dash-row`, and a row on that page is the page: no rule
+constrained it, so it took the full 640px column at 0.7rem and ran
+**128 characters a line** at tablet and desktop. The page's own prose
+two blocks above it runs 84.
+
+```
+  before   p.dash-meta.dash-nothing   640px  11.2px   median 128
+  after    p.dash-meta.dash-nothing   426px  11.2px   median  81
+  the page's own prose, unchanged     517px  13.6px   median  84
+```
+
+So the smallest type on the page had the longest line on it, which is
+L9's drift arriving by a new door. L9 was written about a prose box set
+in pixels and used at two sizes. This is about a paragraph given no box
+at all, in a container sized for a bar, and no instrument watches for
+it: the frame does not overflow, the contrast is fine, the tap targets
+are fine, and every sweep this seat owns returns a clean number.
+
+**128 is also longer than anything L10 wrote down.** L10's highest
+figure is Claude's 109, which that entry called a defect shipped by a
+frontier lab and declined to take as cover. A review that then ships 128
+on its own surface has taken it as cover anyway.
+
+**this seat's judgement.** The fix is the 38em `.dash-empty` already
+carries on the same page, not a width chosen fresh for this sentence,
+and the page's overall measure does not move. Narrowing that remains
+L10's open proposal and the owner's call.
+
+**The general rule, which is the part worth promoting.** Any text added
+to a container that was sized for something other than text needs its
+measure stated, because the container has no opinion about reading and
+every sweep in the kit will pass it.
+
+## L28 — The panel's contrast is a range and not a number, because its backdrop is the user's terminal
+
+**measured**, 2026-10-26 (hook run), 9 runs of text across three
+viewports on the shipped build.
+`reviews/2026-10-26c/data/contrast-panel/` and `contrast-panel-after/`,
+`README.md` §4.
+
+L21 measured 533 runs on `ursa-minor` and the number everyone has quoted
+since is "0 of 533". The overlay's panel, which is the surface a user
+meets first, had never been pointed at by this instrument at all. Asked
+for the first time, it returns two runs under 4.5 at every viewport:
+
+```
+  p                       12px  4.48  needs 4.5  "held in memory only; …"
+  input::placeholder      13px  4.12  needs 4.5  "passphrase"
+```
+
+**Why the first number is not a number.** `body` on that surface is
+`rgba(5, 8, 16, 0.85)`, deliberately, so the terminal reads through
+faintly. In a browser the pixels under that glass are the canvas, and
+the backdrop composites to `rgb(43, 45, 52)`, which is measured and not
+assumed: the frozen frame's own pixel at (200, 400) is exactly that.
+In the product the pixels under the glass are whatever the user's
+terminal is showing. `--dim` over that glass reads
+
+```
+  white terminal   backdrop (43, 45, 52)   4.48
+  mid grey         backdrop (23, 26, 33)   5.66
+  black terminal   backdrop  (4,  7, 14)   6.56
+```
+
+so every contrast figure this instrument will ever report for the panel
+is the worst end of a 2.08-point range, and the 15% of transparency that
+buys the glass effect is what costs it.
+
+**this seat's judgement, and the owner can overrule it in one sentence,
+which is L21's form.** Leave `--dim` alone. A 0.02 shortfall at one end
+of a range the user controls is not worth a palette edit, and `--dim` is
+load-bearing across the whole panel. If she would rather the panel clear
+4.5 against a white terminal, the change is one token and this entry is
+the thing to revise.
+
+**The placeholder is a different case and was fixed.** It read 4.12
+because the field named no placeholder colour, so Chromium supplied its
+own, which is the field's `color` at 54% alpha. A value nobody in this
+repository chose is a gap rather than a palette decision, and the fix
+names `--dim`, the token the panel already uses for this rank of text.
+It reads 6.18 now, against the field's own opaque fill rather than
+against the glass. 500 pixels changed, every one of them inside the
+bounding box of the word.
+
+**Checked against the field rather than asserted.**
+`reviews/2026-10-26c/data/bench-placeholders.mjs`, 1440x900, read-only:
+
+| site | visible placeholder | colour | verdict |
+|---|---|---|---|
+| Stripe | "Sell software subscripti…" | `rgb(100, 116, 141)` | chosen, alpha 1 |
+| Consensus | "Ask the research…" | `rgb(113, 113, 123)` | chosen, alpha 1 |
+| Linear | none on the home page | — | — |
+| Vercel | none on the home page | — | — |
+| Elicit | none on the home page | — | — |
+
+Two of five ship one, both name a colour outright, and neither takes the
+user agent's. Nobody measured here leaves this to the browser.
+
 ## Open, and not this seat's to close
 
 **Where Ursa's canon comes from.** Fourteen reviews under `reviews/`
@@ -831,8 +937,13 @@ the cost of waiting stays visible.
 drawn at 6px radii in two Google faces with three hues the rest of Ursa
 does not have, and the record viewer is square hairlines, Helvetica, two
 lights on one night. Three of the panel's tokens are near-copies of
-house tokens under different names. Neither has a contrast problem, so
-this is drift and not a defect. It is left open rather than fixed
+house tokens under different names. That entry said "neither has a
+contrast problem", and **that clause is withdrawn**: it was written
+before either surface had been contrast-measured, and when the panel was
+finally asked on 2026-10-26 it returned two runs under 4.5 (L28). One of
+them is fixed and the other is a range the user controls, so the
+conclusion below survives, but it survives on a measurement now instead
+of on an absence of one. The drift is still drift and not a defect, so It is left open rather than fixed
 because the panel's three hues carry satisfied, unsatisfied and tension,
 which is meaning the two-light palette currently cannot say, and
 choosing which identity wins is the owner's.

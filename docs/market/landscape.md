@@ -1033,6 +1033,39 @@ transcript doesn't go into a file — it goes into a live session")
 suggests even this narrower translation has real fidelity limits. Last
 observed 2026-10-26: [Launch HN: Skillsync (YC W26)](https://news.ycombinator.com/item?id=49743049), [YesPress: Skillsync (YC W26)](https://yespress.io/skillsync-yc-w26).
 
+### Memory Forge (Phoenix Grove Systems)
+
+What it is: a browser-based conversion tool that turns a raw ChatGPT,
+Claude, or Gemini conversation export into a single portable markdown
+"memory chip" file, reloadable into any AI that accepts file uploads
+by prompting it to "activate memory chip." Who it serves: individual
+consumers switching AI platforms, surfaced specifically by the
+#QuitGPT boycott of OpenAI's Pentagon contract (campaign launched late
+February 2026; QuitGPT's own count puts cancellations and cancellation
+pledges above 2.5 million, with reporting that Claude passed ChatGPT
+in the US App Store for the first time during the same window).
+Pricing: $3.95/mo for unlimited conversions, no token fees, files
+remain usable after cancellation. Strengths: conversion is claimed to
+run entirely in the browser, "no cloud, no upload," the same on-device
+principle CLAUDE.md §0 states as a hard constraint for Ursa, and this
+is the most direct evidence this map has found of a consumer paying,
+in real time, for a worse version of what Ursa Major gives away free —
+a manual export-and-reload step with no persistent sync, no
+cross-model inference layer, and a one-shot "activate" prompt the user
+has to remember to issue each session. Weakness against Ursa: it moves
+a raw transcript file, not a provenance-resolved preference profile;
+there is no inference, no revealed-preference structure, and nothing
+analogous to the consent/revoke surface CLAUDE.md §0 requires, so it
+feeds nothing into anything resembling Minor's side of the flywheel.
+It is a bridge a user builds by hand during a specific exodus event,
+not an ongoing relationship. No independent traction numbers found for
+the tool itself; the article's "becoming the unofficial exit ramp" is
+the vendor's own framing via a single syndicated piece, not an
+independent count. Last observed 2026-10-26: [Programming Insider:
+ChatGPT Protesters Are Using Memory Forge to Take Their Data With
+Them](https://programminginsider.com/chatgpt-protesters-are-using-memory-forge-to-take-their-data-with-them/),
+[Memory Forge product page](https://pgsgrove.com/memoryforgeland).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -1105,6 +1138,54 @@ governed, widely adopted." Seven attempts now, still zero that clear
 the bar, but this is the first one whose design target overlaps
 Ursa's own consent architecture rather than just export format. Last
 observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.com/publications/portable-memory).
+
+Update 2026-10-26 (message, 27th run): an eighth fragmentation
+attempt, found via the demand-signals ceremony rather than a
+landscape sweep: "Portable Agent Memory: A Protocol for
+Cryptographically-Verified Memory Transfer Across Heterogeneous AI
+Agents" (Ravindran, arXiv 2605.11032, submitted 2026-05-10). A
+single-author open protocol using a Merkle-DAG structure for
+tamper-evident, cryptographically verified memory transfer, with an
+"injection-resistant rehydration process" for adapting memory across
+model architectures. Checked against this note's own bar: the
+author's own reference implementation demonstrates transfer between
+GPT-4, Claude, Gemini, and Llama, which is the broadest cross-vendor
+demo found in this note so far, but every adapter is still the
+author's own code (54 passing tests, Apache 2.0, no third-party
+organization named as implementing or adopting it). Same gap as all
+seven prior attempts, now with the widest model coverage and the
+strongest security framing (the "injection-resistant" claim is the
+first attempt in this note to engage with hostile input at all,
+worth a flag for the security seat's own watch rather than action by
+this one). Eight attempts now, still zero that clear the
+independent-implementation bar. Last observed 2026-10-26: [arXiv
+2605.11032: Portable Agent Memory](https://arxiv.org/abs/2605.11032).
+
+Update 2026-10-26 (message, 27th run): separately, a controlled
+academic study gives the first quantified answer to *why* none of
+the eight attempts above has cleared the bar on the first try, rather
+than just whether one has. "Does Your Agent's Memory Survive a Model
+Upgrade? A Controlled Study of Memory Portability" (Goyal and Ray,
+arXiv 2609.05339, submitted 2026-09-04) tested four memory storage
+formats (verbatim long-context history, chunked RAG retrieval,
+model-compressed natural-language notes, and fixed-schema knowledge
+graphs) across a model swap, using 48 synthetic histories on two
+open-weight models under 10B parameters. The result: fixed-schema
+structures transferred almost losslessly (accuracy changed by
++0.0004 ± 0.0020), while compressed natural-language notes — the
+format closest to what a "derived signal" or narrative summary looks
+like — swung 9 to 13 percentage points depending on migration
+direction, and RAG retrieval degraded without a full re-embedding
+pass. This is a small, synthetic, non-product study, not evidence
+about any named entry in this file, but it is the first source this
+note has found that explains the fragmentation above as a format
+problem with a measurable cost rather than only a coordination
+problem: a neutral standard that picked the wrong internal
+representation would still fail this test. Positioning consequence
+(a concrete numeric bar for the automated-round-trip test) in
+docs/market/positioning.md. Last observed 2026-10-26: [arXiv
+2609.05339: Does Your Agent's Memory Survive a Model
+Upgrade?](https://arxiv.org/abs/2609.05339).
 
 ## Changelog
 
@@ -1268,3 +1349,24 @@ observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.
   a different axis and a different outcome than Scale AI's
   equity-driven, not-reported-as-recovered customer exodus above.
   Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 26th run) — added Memory Forge / Phoenix Grove
+  Systems (Category 3, now 18 entries), found via the demand-signals
+  ceremony. A $3.95/mo browser-based tool that converts an AI
+  conversation export into a portable file, surfaced by the #QuitGPT
+  boycott of OpenAI's Pentagon contract (2.5M+ cancellations/pledges
+  claimed, reported App Store rank change to Claude). The most direct
+  evidence yet of a consumer paying for a worse, manual version of
+  Major's free value proposition during a real, dated exodus event.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 27th run) — added an eighth entry to the
+  no-neutral-standard cross-cutting note, a cryptographically-verified
+  memory-transfer protocol (Ravindran, arXiv 2605.11032) with the
+  widest cross-model demo found yet (GPT-4, Claude, Gemini, Llama) and
+  the same single-author-adapter gap as the prior seven. Separately,
+  found an academic controlled study (Goyal and Ray, arXiv 2609.05339)
+  that quantifies, for the first time in this file, why portability
+  attempts fail by format rather than just whether any has: fixed-
+  schema structures survive a model swap almost losslessly while
+  compressed natural-language notes swing 9-13 percentage points.
+  Positioning consequence (a concrete numeric bar for the automated-
+  round-trip test) in docs/market/positioning.md.

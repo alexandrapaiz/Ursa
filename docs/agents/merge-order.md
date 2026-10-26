@@ -1,105 +1,99 @@
-# Merge order — replaced for window 48, 2026-10-26
+# Merge order — what the owner can land right now
 
-Measured at 2026-10-26 00:4x–00:5x UTC against `main` at `6bd03363`,
-from a clone unshallowed and widened per §0 of `prompts/exo-agent.md`,
-with both register merge drivers registered
-(`git config --get-regexp 'merge\.(ledger|register)\.'` prints six
-lines). Every verdict below names the instrument that produced it,
-because a conflict verdict with no instrument beside it cannot be
-re-measured by the seat holding the branch.
+Replaced wholesale every run of the ExO seat, per `prompts/exo-agent.md`
+§5b. Measured **2026-10-26 at 09:3x UTC** against `main` at `132398fb`,
+with `refs/prs/*` re-fetched immediately before the census and both
+merge drivers registered by `tools/ledger/install-driver.sh`. Every
+verdict below is a merge that was **performed**, in a detached scratch
+worktree, not a prediction.
 
 ## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **12** (6 of them drafts) |
-| merged in the last seven days | **54** |
-| age of the oldest open | `#395`, opened 2026-10-24T21:21Z, **27 hours** |
+| open pull requests | **11**, seven of them drafts |
+| merged in the last seven days | **71** |
+| oldest open | `#395`, 2026-10-24 21:21 UTC, **36 hours** |
 
 Open does not outnumber the week's merges, so the depth warning does not
-fire. The owner is absorbing work faster than the org produces it.
-**One class of file is the exception and it is the same exception as
-four windows ago: zero of the fifty-four merges touched any
-`prompts/*-agent.md`, and `main`'s newest charter commit is `94e926b7`
-of 2026-10-18.** The gate is working and one predicate inside it has not
-moved in eight days.
+fire. The number inside the gate that has not moved in eight days:
+**zero of the 71 merges touched any `prompts/*-agent.md`**, so `main`'s
+copy of this seat's charter is still the 2,221-line file of 2026-10-18
+while the live one is 5,490.
 
-## Conflicts
+## Nine decisions, not eleven
 
-Instrument: `git merge-tree --write-tree --name-only origin/main refs/prs/<n>`,
-exit status read with the drivers registered and with the §27 caveat
-that a non-zero exit is not by itself a conflict verdict.
+Containment, instrument
+`git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
+exit 0 = contained. Stated contained-in-tip, never as "ancestor of".
 
-**All twelve are clean.** `#395 #427 #439 #441 #444 #445 #446 #447 #448
-#449 #450 #451`, exit 0 every one.
+| chain | members | tip | decisions saved |
+|---|---|---|---|
+| the engineer seat's | `#463` ⊂ `#482` ⊂ `#485` | **#485** | 2 |
 
-## Containment
+So 11 open pull requests are **nine** decisions: eight standalone
+(`#395 #447 #461 #481 #483 #484 #486 #487`) plus one chain tip.
 
-Instrument: `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
-exit 0 meaning contained. Stated in the direction that cannot invert.
+**And the chain retires window 49's one open judgement.** `#463` was the
+`drivers-disagree` case — clean to the button, refused by this
+repository's `ledger` driver on a single block of `docs/ideas.md` — and
+window 49 routed it to the engineer seat as a judgement that seat owed.
+Re-measured this window: `#463` still refuses with the drivers, and
+`#485`, which contains it, **merges clean with the drivers**. The
+engineer resolved it in the ordinary course of stacking. Nobody owes a
+judgement; the decision is `#485` and `#463` should not be merged on its
+own. Retired, fixed differently, which is the class HQ's centralizer
+named this morning.
 
-- `#445` is contained in `#448` (skill)
-- `#427` is contained in `#439`, and `#439` is contained in `#446` (security)
-- `#427` is contained in `#446` (transitively, checked directly)
+## Three states, and the third is empty this window
 
-So twelve identifiers are **nine decisions**. Merging `#446` closes
-three of the security seat's and merging `#448` closes two of the
-skill seat's.
+| state | pull requests | who acts |
+|---|---|---|
+| **clean** — the button takes it and the drivers agree | `#395 #447 #481 #483 #484 #486 #487` | the owner, or the PM under Tier B |
+| **needs-local-merge** — the button refuses, the drivers resolve it, no judgement required | `#461 #482 #485` | the **authoring seat**, by merging `main` into its own branch and pushing the resolved tree |
+| **drivers-disagree** — the button takes it and the drivers refuse, which is the dangerous direction | **none** | — |
 
-## The order, simulated rather than guessed
+All three `needs-local-merge` entries are drafts of live or
+recently-killed runs (`security`, `engineer` ×2), so no seat needs to be
+told; each will see it on its own next pass. `#482` is contained in
+`#485` and needs nothing of its own.
 
-Performed in a detached scratch worktree at `origin/main`, drivers
-registered, `git merge --no-edit` in this sequence. **Nine of nine
-merged with no conflict and nothing to resolve by hand:**
+## The order
 
-```
-450  446  448  441  449  451  444  395  447
-```
+Simulated in sequence in a scratch worktree, each merge performed on the
+result of the last, drivers registered:
 
-`#450` first because it is the PM's own pass and because it is the only
-live route to `main` for
-`INC-2026-10-18-board-runtime-token-printed-twice`, whose 48-line entry
-is absent from `main` while nine citations across three registers name
-it (`docs/agents/improvements.md` 1, `docs/agents/incidents.md` 5,
-`docs/agents/learning-log.md` 3). `#443` and `#438` both carried it and
-both closed as superseded at 00:36 today, correctly and with the
-ancestry pasted; `#450` contains them.
+1. `#481` — this seat's register half. Tier B, registers only, no
+   `prompts/` path. Take it first because it is the only entry that
+   carries another window's finished work (`#478`, absorbed and closed).
+2. `#486` — the PM's standup.
+3. `#487` — the skill seat's twenty-seventh run.
+4. `#483` — market's twenty-fifth.
+5. `#484` — frontend, finishing `#473`.
+6. `#395` — research, the oldest open, 36 hours.
+7. `#447` — this seat's charter half. **Tier C, owner or chair only**,
+   two files, `prompts/exo-agent.md` and `prompts/pm-agent.md`. It is the
+   whole of the Tier C backlog.
+8. `#485` — the engineer's chain tip, **after** that seat pushes the
+   local merge.
+9. `#461` — security, **after** that seat pushes the local merge.
 
-`#447` last because it is this seat's charter half and Tier C, so it
-waits on the owner whatever the rest of the queue does. Nothing in the
-order depends on it.
+The first six are order-independent; they were simulated ascending and
+no pair interacts. `#447` is placed seventh only because it is the one
+entry no other seat can unblock.
 
-## What a seat holding one of these should know
+## One instrument correction this census produced
 
-- A `CONFLICTING` or `UNKNOWN` from `gh pr list`'s `mergeable` field
-  disagrees with every verdict above, in both directions, and the
-  account is
-  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`.
-  Re-measure with `merge-tree` and the drivers registered before you
-  rebase anything.
-- If a verdict here contradicts what you measure, yours is the newer
-  one. `refs/prs/*` goes stale inside a single window (runner-facts §27).
-
-## Postscript, 00:46–00:53 UTC, written because the queue moved under this file
-
-Dated rather than rewritten, because the difference between a verdict
-that was wrong and one that was true and expired calls for opposite
-responses, and this one is the second.
-
-Between the sweep above and this paragraph the owner merged four of the
-nine: `#446` and `#427` and `#439` (security, 00:44:54 and 00:44:56) and
-`#449` (market, 00:46:01). So the order's first three decisions are
-discharged and the remainder is `450 448 441 451 444 395 447`.
-
-Re-measured at 00:53: **13 open** (six drafts), **58** merged in the last
-seven days, oldest still `#395`. The two new identifiers are this
-window's own `#454` and one other seat's.
-
-Four branches were deleted under §5b's predicate after each was checked
-individually against `gh pr list` rather than taken from the query:
-`ursa-market/2026-10-26-message`, `ursa-security/2026-10-25-hook`,
-`ursa-security/2026-10-25-message`, `ursa-security/2026-10-26-message`.
-All four had merged in the preceding nine minutes, which is exactly why
-the rule says print the list and read it rather than piping it into
-`git push --delete`: the same query run twenty minutes earlier would
-have named three branches with open pull requests on them.
+**You cannot simulate the driverless merge in this clone by removing the
+driver configuration.** `git config --unset merge.ledger.driver` leaves
+`.gitattributes` declaring `docs/ideas.md merge=ledger`, so git finds the
+attribute, fails to resolve the driver, and aborts the entire merge with
+`fatal: custom merge driver ledger lacks command line.` — exit 128 for
+`git merge` and for `git merge-tree` alike, with no file list and
+without the word "conflict" anywhere in the message. A census that reads
+exit status records that as a conflict on every pull request touching a
+declared path. Measured this window on `#461` and `#463`; the full
+account, with the third behaviour of the same knob, is
+`docs/agents/runner-facts.md` §34. The driverless side of the table
+above is therefore GitHub's own `mergeable` field, re-read at 09:3x, and
+not a local simulation.

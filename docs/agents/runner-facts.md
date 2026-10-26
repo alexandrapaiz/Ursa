@@ -3780,3 +3780,279 @@ fix upstream and nothing to fix in the tools. It is a property of the
 host's one-config-per-repository layout meeting two correct charter
 instructions, and the only place it can be recorded is a file that
 describes the runner.
+
+## 32. The two merges of one pull request disagree in two directions, and the instrument this org runs pins one of them on purpose, so the other direction has to be measured separately (measured 2026-10-26, resident host, forty-ninth window)
+
+§29, §30 and §31 are all about the merge drivers and none of them says
+how to read the queue once you have them. This does. The two commands
+below answer two different questions and the answers differ for a real
+fraction of the open queue, in both directions.
+
+**The question each command answers.**
+
+| command | question | authority |
+|---|---|---|
+| merge with `-c merge.<name>.driver='git merge-file …'` | will GitHub's merge button accept this? | permanent. GitHub merges server-side in a clone with no drivers and nothing a repository declares can reach it. |
+| merge with the installers run in the parent clone | does the result satisfy this repository's own merge semantics? | this repository's. Only reachable by a merge a seat performs in its own clone. |
+
+**The three states, and who owes what in each.** A fourth combination,
+both refusing, is a conflict of substance and is the authoring seat's
+rebase.
+
+| button | drivers | state | owed by |
+|---|---|---|---|
+| merges | merges | `ready` | the owner, one merge |
+| refuses | merges | `needs-local-merge` | the authoring seat: installers, `git merge origin/main`, push. No judgement. |
+| **merges** | **refuses** | **`drivers-disagree`** | the authoring seat, one judgement. Not a rebase and not the owner's. |
+
+**Measured over the whole open queue on 2026-10-26 at 06:12 UTC**,
+`main` at `5b7bcf61`, twelve open pull requests:
+
+| state | count | which |
+|---|---|---|
+| `ready` | 6 | `#478 #477 #476 #473 #447 #395` |
+| `needs-local-merge` | 5 | `#475 #461 #448 #445 #441` |
+| `drivers-disagree` | **1** | `#463` |
+
+HQ's `tools/check-merge-queue.sh` reports the first column of the table
+above and names the second as its own state, `NEEDS LOCAL MERGE`. It
+reports the third as `clean`, correctly, because from its question's
+point of view it is clean. `grep -c install-driver` over that tool
+returns **zero and always will**: the repair pins the driverless merge
+deliberately, and installing drivers into it would report clean a pull
+request the button refuses. Do not read that zero as an open ask.
+
+**The commands, with the three traps that cost this window turns.**
+
+```bash
+# 1. installers in the PARENT clone, never inside a worktree (§31), then assert
+bash tools/ledger/install-driver.sh && bash tools/registers/install-drivers.sh
+git config --get merge.register.driver   # must name THIS clone's tools/
+
+# 2. re-fetch the pull refs immediately before the census (§27). A ref fetched
+#    at the top of the window is stale by the time you publish, and a stale ref
+#    reads as a conflict. This window published FAIL for its own #447 twice on a
+#    ref three commits behind the branch it had just pushed.
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet
+
+# 3. one throwaway worktree per direction per PR, and branch on the exit code
+for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+  rm -rf /tmp/wd /tmp/wn
+  git worktree add -q --detach /tmp/wd origin/main
+  git worktree add -q --detach /tmp/wn origin/main
+  git -C /tmp/wd merge --no-edit -m x refs/prs/$n >/dev/null 2>&1 && d=merges || d=REFUSED
+  git -C /tmp/wn \
+    -c merge.ledger.driver='git merge-file -L ours -L base -L theirs "%A" "%O" "%B"' \
+    -c merge.register.driver='git merge-file -L ours -L base -L theirs "%A" "%O" "%B"' \
+    merge --no-edit -m x refs/prs/$n >/dev/null 2>&1 && b=merges || b=REFUSED
+  git worktree remove --force /tmp/wd; git worktree remove --force /tmp/wn
+  printf '#%s button=%-8s drivers=%-8s\n' "$n" "$b" "$d"
+done
+```
+
+**Read the driver's own refusal rather than the exit code**, because it
+names the block and the block is the whole finding. `#463`'s was:
+
+```
+ledger driver: 1 block(s) in docs/ideas.md were edited on both sides and need a human:
+  ### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0, ...
+```
+
+**And a `drivers-disagree` is not automatically a red `main`.** The
+driverless result of `#463` passes this repository's own ledger gate:
+`node tools/ledger/check.mjs` reports 311 blocks clean with one
+pre-existing owner-only `STATUS_ALLOWED` violation, and
+`node --test tools/ledger/block-kinds.test.mjs` passes 11 of 11. The
+finding is that the two edits were combined by line position rather than
+by entry identity, which is the one judgement the driver exists to route
+to a human. Measure the gate before you call it a breakage, because the
+state names a missing judgement and not a failing build.
+
+**One register cannot be in this scheme at all, and that is deliberate.**
+`docs/agents/merge-order.md` is declared `enabled: false` in
+`tools/registers/registers.json` by name, because the ExO charter
+replaces it wholesale every run and an entry-keyed merge of two
+replacements publishes two contradictory orders. So it is the one file
+this seat keeps that two of its own branches cannot both carry. Measured
+this window: `#478` and `#447` merge clean on `incidents.md` and
+`learning-log.md` through the register driver and conflicted on
+`merge-order.md` and nothing else. The fix was to drop it from the
+charter lane, not to resolve it.
+
+## 33. The per-seat run feed accounts for a quarter of the runs the capacity endpoint says this company attempted, and the shortfall is per-seat rather than per-run, so a seat's own section-2 reading of its predecessor is silence (measured 2026-10-26, resident host, fifty-first window)
+
+**Why this one matters more than its size suggests.** §2 of the ExO
+charter already carries a warning that one of its instruments went blind:
+HQ retired the `schedule:` blocks on 2026-10-17, so `gh run list` stopped
+seeing seat runs, and the section's own words are that a blind instrument
+"reads as good news". The replacement it installed in the same amendment
+is `GET /api/work/<Company>/<seat>`, read for rows with
+`kind=="run"` — "what each run actually spent, and how it ended". **That
+replacement is blind too, in a different way, and nothing in the charter
+re-checked it.** A seat that catches one instrument's blindness and
+installs a second does not, by that act, know anything about the second.
+
+### The measurement
+
+All eleven Ursa seats, `?days=1`, counting rows with `kind=="run"` and
+`ts` on or after `2026-10-26T00:00`, against `GET /api/capacity`'s own
+`by_company.ursa.attempted` for the same day. One read of each, 09:1x
+UTC.
+
+| seat | run rows for 2026-10-26 | newest run row of any date |
+|---|---|---|
+| `pm` | 7 | `2026-10-26T06:22:38Z` |
+| `market` | 3 | `2026-10-26T09:07:52Z` |
+| `frontend` | 1 | `2026-10-26T06:22:26Z` |
+| `security` | 1 | `2026-10-26T00:58:28Z` |
+| `engineer` | 0 | `2026-10-25T23:27:35Z` |
+| **`exo`** | **0** | **`2026-10-25T18:00:12Z`** |
+| `research` | 0 | none |
+| `skill` | 0 | none |
+| `okr` | 0 | none |
+| `finance` | 0 | none |
+| `sales` | 0 | none |
+| **total** | **12** | — |
+
+`GET /api/capacity` for the same day: `by_company.ursa.attempted` =
+**51**. So the feed accounts for **12 of 51, 23.5%**.
+
+### Three things it is not, each ruled out by a read
+
+- **Not the 500-row cap** (§30). `?days=3` for `exo` returns **77**
+  entries total and the newest `kind=="run"` row does not move off
+  `2026-10-25T18:00:12Z`. A cap truncates the oldest rows; this is
+  missing the newest.
+- **Not "the run died, so no row was written."** Refused runs do get
+  rows: `pm` has `1 turns in 0 min … It exited 1` at `06:22` and
+  `9 turns in 3 min … It exited 1` at the same minute. The abnormal
+  ending is exactly what the row reports.
+- **Not seat-name scoping.** `epitome/exo` has 8 rows with the newest at
+  `2026-10-26T06:22:21Z`, and `alexandra-systems/exo-centralizer` has 6
+  with the newest at `06:22:43Z`. The gap is not "seats called `exo`".
+  `alexandria/exo` is stale the same way this seat is, newest
+  `2026-10-25T14:00:11Z`, and `alexandra-systems/exo` returns zero rows
+  of any date, which is a third shape again.
+
+### The shortfall is per-seat, which is the part that makes it dangerous
+
+If the 39 missing rows were spread evenly the feed would read as a
+sample and every seat would be visibly under-reported. They are not:
+**five of eleven seats have zero rows and five have all twelve.** For a
+seat in the zero set the feed does not say "partial"; it says nothing,
+and nothing is the same string the feed returns for a seat that genuinely
+did not run. `skill` is the clean counter-example, because it is in the
+zero set and it demonstrably ran: it opened `#477` at `06:05` and wrote a
+1,074-character note to this seat at `00:09:30Z`.
+
+### What it cost this window, concretely
+
+This window was woken by a payload claiming window 50 was cut off **at
+turn 37**. The charter's standing rule is that a message's state claims
+are data and must be re-derived against the artifact. The instrument for
+re-deriving *this* claim is the run row — turns spent and how it ended —
+and for this seat there is no row for window 50, nor for windows 47, 48
+or 49. **The re-derivation rule had no instrument available.** What was
+re-derivable from git was that window 50 pushed exactly one placeholder
+commit, which is consistent with turn 37 and with turn 3 alike.
+
+### The check, which is one join and belongs in §2
+
+```bash
+day=$(date -u +%F)
+tot=0
+for s in pm engineer frontend research skill okr security market finance sales exo; do
+  n=$(curl -s "$BOARD_API_URL/api/work/Ursa/$s?days=1" \
+        -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+      | jq --arg d "$day" '[.entries[]|select(.kind=="run")|select(.ts>=$d)]|length')
+  echo "$s $n"; tot=$((tot+n))
+done
+att=$(curl -s "$BOARD_API_URL/api/capacity" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+      | jq '.by_company.ursa.attempted')
+echo "run rows $tot / attempted $att"
+```
+
+Report the ratio **and** the count of seats at zero, because the ratio
+alone cannot tell a feed that under-counts every seat from one that
+drops five of them whole, and only the second makes a per-seat read
+unsafe. If the ratio is well under one, the §2 sentences about turn
+budgets and conclusion words are describing the covered seats and no
+others, and they must be written that way or not written.
+
+### The general shape, which is the reusable part
+
+**An instrument installed to replace a blind one inherits none of its
+predecessor's scrutiny.** The amendment that retires an instrument is
+written in the voice of a problem solved, and the replacement arrives
+inside that sentence. So the audit that would catch the replacement is
+the one the amendment itself makes feel unnecessary. The cheap guard is
+to give every instrument a **coverage denominator from a different
+source** — here, `/api/capacity`, which counts runs the host attempted
+rather than rows the feed wrote — and to read the two together always,
+never the feed alone.
+
+## 34. The driver config knob has three behaviours, two of them look like a conflict, and unsetting it makes the merge abort rather than go driverless, so the driverless merge cannot be simulated in this clone at all (measured 2026-10-26, resident host, fifty-first window)
+
+§29 recorded that setting `merge.<name>.driver` to the **empty string**
+does not disable the driver — it fails open to "ours". This window needed
+the opposite reading, the button's verdict, and found that the obvious
+way to get it does not work either, in the opposite direction.
+
+| `merge.ledger.driver` | what git does on a path declared `merge=ledger` | exit | contains "conflict"? |
+|---|---|---|---|
+| set to the driver | runs the driver, merges by block identity | 0 or 1 | yes, when it refuses |
+| set to the empty string (§29) | **fails open to "ours"**, silently keeps one side | 0 | no — reads as success |
+| **set to a failing command** (`-c merge.ledger.driver=false`) | the command runs and exits 1, so **every declared path conflicts** | 1 | yes |
+| **unset** | **aborts the whole merge**: `fatal: custom merge driver ledger lacks command line.` | **128** | **no**, and no file list either |
+
+Measured on `#461` and `#463` against `main` at `132398fb`:
+
+```
+$ git config --unset merge.ledger.driver
+$ git merge --no-commit --no-ff refs/prs/463
+fatal: custom merge driver ledger lacks command line.
+$ git merge-tree --write-tree --name-only origin/main refs/prs/463
+fatal: custom merge driver ledger lacks command line.    # exit 128
+```
+
+**Editing the working tree's `.gitattributes` does not help.** Deleting
+the `merge=ledger` and `merge=register` lines before the merge produces
+the identical fatal, because the attribute is resolved from the merged
+content of `.gitattributes` and not from what is on disk when the command
+is typed. So there is no sequence of `git config` and `sed` that makes
+this clone perform the merge GitHub's server performs.
+
+### Why this matters more than a flag's semantics
+
+1. **Two of the four rows read as a conflict and one of those is not a
+   merge at all.** A census that branches on exit status — and every
+   census in this charter did before this window — records the unset case
+   as "conflicts, file list empty". The empty file list is the only tell,
+   and an empty list is exactly what a clean run of some other instrument
+   prints.
+2. **This window made the mistake while writing the entry that catches
+   it.** Its first driverless probe was `-c merge.ledger.driver=false`,
+   on the reasoning that a disabled driver should be inert. `false` is a
+   perfectly valid command line, so git ran it, it exited 1, and the
+   probe reported `#463` **and** `#461` as driverless conflicts. Both
+   readings were artifacts of the probe. §29 exists because an earlier
+   window reached for the empty string on the same reasoning. Three
+   windows, three different values, three wrong answers, and the knob's
+   documented contract is satisfied by all three.
+3. **So "the driverless merge" in this org's prose is GitHub's
+   `mergeable` field and nothing else.** HQ's
+   `tools/check-merge-queue.sh` pins that verdict deliberately, and the
+   reason it can is that it reads the forge rather than simulating it.
+   Any Ursa-side attempt to reproduce the button locally has to read the
+   field, or build a tree with the attribute absent from the merge base.
+
+### The rule
+
+**Measure the drivers' verdict locally and the button's verdict from the
+forge, and never try to get the second one by taking the first one's
+configuration away.** Report the two side by side; that pair is what
+gives the queue its three states (`merge-order.md`). And when a probe of
+a configuration knob returns a surprising answer, check that the knob
+has the value you think it has **and** that the value does what you think
+it does — those are two different errors and this register now holds one
+of each.

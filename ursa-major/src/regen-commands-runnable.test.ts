@@ -170,20 +170,37 @@ describe('every command tools/regen.ts prints is runnable from the cwd it prints
     // which a checkout with no `origin` reaches and which is not a defect
     // in the message.
     expect([0, 1, 2], `bash ${path} --check from ursa-major/ exited ${status}\n${out}`).toContain(status)
-    // `--check` answers in two voices and this assertion used to hear
-    // only one. On a clone that needs repair it prints each fault and
-    // `Run: bash tools/ensure-full-clone.sh` on stderr, which carries
-    // the script's own name. On a clone that is already complete it
-    // prints `clone is complete: N commits, M refs` on stdout, which
-    // does not. So asserting the name was green exactly on the
-    // checkouts the script exists to fix and red on the ones it had
-    // already fixed, which is the wrong way round for a gate. What both
-    // voices share, and the thing actually worth asserting, is that the
-    // script answered the question it was asked rather than some other
-    // script answering a different one.
+
+    // The script has TWO outputs and which one is correct here depends on
+    // the shape of the checkout, so the assertion is over the set rather
+    // than over one member. On an incomplete clone `--check` exits 1 and
+    // writes `ensure-full-clone: <fault>` per fault to STDERR; on a
+    // complete one it exits 0 and writes `clone is complete: N commits,
+    // M remote-tracking refs under origin/.` to STDOUT, with no prefix,
+    // because `say()` does not prefix and `fail()` does.
+    //
+    // What this replaced was `expect(out).toContain('ensure-full-clone')`,
+    // which only the first shape satisfies. That made this file's verdict
+    // a property of the checkout, which is the exact defect the file
+    // exists to catch, inverted: green on every seat sandbox, which
+    // arrives `--depth 1 --single-branch`, and red the moment anyone runs
+    // the repair the rest of this suite tells them to run. Measured
+    // 2026-10-26 on a checkout repaired with `bash
+    // tools/ensure-full-clone.sh`: `npx vitest run`, 993 tests, 1 failed,
+    // and this was it.
     expect(
       out,
-      `bash ${path} --check said nothing about clone completeness\n${out}`,
-    ).toMatch(/clone is complete|ensure-full-clone\.sh/)
+      `bash ${path} --check printed neither of the script's two outputs:\n${out}`,
+    ).toMatch(/^(ensure-full-clone: |clone is complete: )/m)
+
+    // The other half of what the old assertion was reaching for, kept and
+    // made shape-independent: that the file at this path is THIS script
+    // and not some other file that happens to tolerate `--check`. `--help`
+    // prints the usage block out of the script's own header and exits 0 on
+    // every checkout, so it names the script without asking the checkout
+    // anything.
+    const help = execFileSync('bash', [path, '--help'], { cwd: PKG, encoding: 'utf8' })
+    expect(help, `bash ${path} --help did not identify the script:\n${help}`)
+      .toContain('ensure-full-clone.sh')
   })
 })

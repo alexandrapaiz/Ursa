@@ -1085,3 +1085,77 @@ aimed at that layer, since the body demonstrably can ship one if the
 labs decide it serves them. [Linux Foundation: Agentic AI Foundation
 Announces Four New
 Projects](https://www.linuxfoundation.org/press/agentic-ai-foundation-announces-four-new-projects-agent-skills-open-responses-openenv-and-opensandbox).
+
+## A real exodus event, and the cheapest paid comp yet for manual portability (2026-10-26)
+
+This run's demand-signals ceremony found Memory Forge
+(docs/market/landscape.md, Category 3), a $3.95/mo tool that converts
+a raw ChatGPT/Claude/Gemini export into a reloadable file, built
+specifically for users leaving ChatGPT over OpenAI's Pentagon
+contract. The #QuitGPT campaign's own count (2.5M+ cancellations and
+pledges) and the reported App Store rank change are the largest, most
+precisely dated demand signal this file has recorded for the exact
+need Major exists to serve: a user's AI relationship surviving a
+platform exit. Read against the price ladder this file has tracked
+since 2026-09-26: every other paid comp found is either a labor-side
+vendor cost (Category 1) or a developer-infrastructure subscription
+(Zep, Wire); Memory Forge is the first consumer-facing, end-user-paid
+price point in Category 3, and it exists only because no free,
+ongoing alternative that survives a platform switch was available to
+the cohort that needed one that week. That is not a reason to question
+Major's free-forever design (CLAUDE.md §3's non-goal is explicit and
+this file has no standing to argue against it), but it is a concrete
+answer to "would anyone actually pay for worse than what Major gives
+away" — yes, $3.95/mo, during a real exodus, for a tool with no
+persistent sync and no inference layer at all. The honest reading: a
+real-time demand event matching Major's pitch almost exactly is rare
+enough in this map that it is worth naming on its own, separate from
+the steady-state "would you pay" question the $10/$30 note above
+already closed as out of scope for Major.
+
+## New ledger proposal, this run: check whether Major's own positioning already reaches this cohort
+
+Flagged, not actioned (market never builds, never sells, never
+contacts anyone): ledger proposal below, routed to whoever owns
+Major's public-facing copy and growth surface, since the #QuitGPT
+window is active now rather than a historical case study.
+
+## A quantified bound for the automated-round-trip test, and an eighth fragmentation attempt (2026-10-26, 27th message run)
+
+The 2026-10-14 entry above stated the automated-round-trip
+portability test in words: an export produced by one vendor,
+ingested by a different vendor's model with no human copy-paste step
+and no bespoke parser, reconstructing structure and attribution
+intact. Every entry checked since, including the two found this run
+in docs/market/landscape.md's no-neutral-standard note (an eighth
+fragmentation attempt, a cryptographically-verified transfer
+protocol from a single academic author, arXiv 2605.11032), has failed
+the same way: one author's own adapter, no second party reading the
+format back.
+
+This run's demand-signals ceremony found something different in
+kind, not another attempt: a controlled academic study ("Does Your
+Agent's Memory Survive a Model Upgrade?", Goyal and Ray, arXiv
+2609.05339) that tested four memory formats across a model swap and
+measured the result. Fixed-schema knowledge graphs changed accuracy
+by only +0.0004 ± 0.0020; compressed natural-language notes, the
+format closest to a narrative "derived signal" summary, swung 9 to
+13 percentage points depending on migration direction. Read plainly:
+this gives the round-trip test a number for the first time. "Nothing
+has been shown to pass this test" has so far meant "no attempt has
+tried." This paper says passing is also not guaranteed by trying —
+the internal representation has to be schema-shaped, or the test
+fails even with full cooperation and no adversarial vendor involved.
+
+The study is small, synthetic, and non-product (48 synthetic
+histories, two sub-10B open-weight models), so it says nothing about
+any named entry in this landscape, Major included. But it converts
+the ledger proposals already open (19th run, test Major's own export
+against the bar; 21st run, check MacPaw's `.mem` adapters) from a
+binary pass/fail into a graded one: whichever of Major's own export
+representations gets tested should be scored against this paper's
+own metric (accuracy delta across a model swap), not just a yes/no on
+whether bytes round-trip. No pricing or positioning change follows
+from this alone; it sharpens how the existing open tests should be
+read when they are run, which is still a product task this file
+cannot do from the outside. No pricing recommendation made.
