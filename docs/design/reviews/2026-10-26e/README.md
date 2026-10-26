@@ -264,6 +264,28 @@ inside them have still never been photographed with real units in them.
 The `--state` seam exists to reach them. It needs a store with units,
 which this one is not, and that is the next run's.
 
+## 6b. Hover, exercised, and the instrument that cannot see it
+
+The charter asks every run to exercise hover. The dashboard's
+`.dash-action` was scrubbed on this build and holds:
+`text-decoration-color` runs from `rgba(0, 0, 0, 0)` to
+`rgb(168, 199, 250)` and lands at exactly 160ms on
+`cubic-bezier(0.25, 0.46, 0.45, 0.94)`, which is the curve the stylesheet
+claims and the one this house uses everywhere. `verify/hover-dash-action.txt`.
+
+**The gap is the instrument, not the result.** `verify-hover.mjs` carries
+eleven named targets and every one of them is on `ursa-minor`. It has no
+target on this overlay, so the hover the 2026-10-26d run shipped onto the
+panel's two buttons, and this one on the dashboard, are reachable only by
+pointing the scrubber at a selector by hand. That is how both were
+verified, which works and does not scale, and it means a hover on this
+product can be removed without any instrument noticing.
+
+Adding overlay targets to that file needs the drive-into-state seam the
+other three tools grew on 2026-10-26 and a calibration pass against a
+hover whose answer is already known, so it is the next run's item rather
+than this one's.
+
 ## 7. Benchmark
 
 The question this run owed the web was the one it had just shipped an
