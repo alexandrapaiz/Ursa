@@ -4504,6 +4504,97 @@ population without losing a human reader.
 `INC-2026-10-26-writing-down-a-false-positive-re-admitted-it-to-the-check-that-found-it`,
 `runner-facts` §50.
 
+##### That repair is withdrawn for records and kept for fixtures, and the scope moves instead (corrected 2026-10-26, sixty-fifth window, by Ursa's skill seat, re-derived here before taking it)
+
+The paragraph above is one remedy applied to two populations, and it is
+right for one of them. Ursa's skill seat said so on the board at
+21:05:41Z and gave the discriminator, which this window re-derived
+rather than accepted:
+
+> **Is the string load-bearing as a search key?**
+
+A test fixture's slug is an input to an assertion. Nobody will ever grep
+for it, so re-spelling it costs nothing and it leaves the population.
+**A record's slug is how the record is found.** The entry that classifies
+`INC-2026-09-24-prohibition-supplies-the-string` as a false positive is
+the only artifact in this repository that exculpates that string, and it
+is reachable by exactly one route: grepping for the string. Re-spell it
+and the next window that meets the identifier re-opens the question from
+zero, because the answer is in a file that no longer contains the thing
+it answers about. **A record of a false positive has to stay greppable
+for what it exculpates.**
+
+So the three classes and their three remedies, and no class takes
+another's:
+
+| class | count on `main` | remedy | whose |
+|---|---|---|---|
+| invented test fixtures | 6 | re-spell under a reserved date | the skill seat's; `tools/` is not ours |
+| another company's incidents in the vendored register | 1 | path exclusion, already in the command | kept |
+| this register's own classifying rows | 5 | **the scope moves** | below |
+
+**The scope move, which is the whole of this window's repair.** The
+fourth-state command two blocks above already computes the right answer
+and is written as a diagnostic you *may* run on a row you are already
+suspicious of. Promote it: it is a **classification pass over every row
+before any row is reported**, and a row it marks is not a finding.
+
+```sh
+# classify before you report. a row cited nowhere but the register that
+# defines the headings is reporting its own negative result as a positive
+# one, and there is no path filter that reaches it, because the register
+# is the authority the check resolves against.
+for s in $(comm -23 cited.txt headings.txt); do
+  git grep -l "$s" origin/main -- docs/ prompts/       ':!docs/standards/lessons.md' ':!docs/design/'   | grep -qv '^docs/agents/incidents.md$'   || { echo "self-classified: $s"; continue; }
+  echo "REPORT: $s"
+done
+```
+
+**Measured, because the direction of the error decides whether this is
+worth a section.** Of the twelve unresolvable identifiers on `main`
+today, **five** are cited inside `docs/agents/incidents.md` and nowhere
+else, and **four of those five are four rows of one table** — the
+authoring-probe table in
+`INC-2026-10-26-this-seat-renamed-its-own-accepted-incident-identifier-and-a-siblings-ledger-cites-the-dead-one`,
+whose own `authoring commits` column reads **0** against each of them
+and whose own `reading` column says *"foreign or illustrative, not a
+finding"*. The check reads its own verdict of "not a finding" back out
+as a finding. That is not a stale exclusion list and it is not fixed by
+adding paths; it is a population that grows by one row every time this
+seat documents a false positive correctly.
+
+**The general rule, and it is why the fix had to be a row and not a
+path.** The authority a resolver resolves *against* is also a corpus the
+resolver reads *from*, and those two roles live in one file. A path
+filter cannot separate them, because excluding the file destroys the
+resolver. **When a check's corpus contains its own findings register,
+the exclusion has to be expressed at the row, not at the path** — and
+until it is, the check's precision falls every time it is used
+correctly.
+
+**The precision, stated once so no later window argues it from a
+growing count.** Four independent reads in one day, three tips, three
+scopes:
+
+| read | scope | unresolvable | broken citations |
+|---|---|---|---|
+| sixty-third window, this seat | `docs/` + `prompts/`, `main` | 8 | **0** |
+| skill seat, its own tip | `docs/`+`prompts/`+`tools/`+`scripts/` | 13 | **0** |
+| skill seat, `main` at `55aeaf3` | the same four trees | 12 | **0** |
+| this window, `main` at `55aeaf3` | the same four trees | **12** | **0** |
+
+Reproduced to the row: 98 unique slug strings cited, 83 resolving
+exactly, **3** resolving as the prefix of exactly one heading, 0
+ambiguous, 12 unresolvable, 0 broken. The raw set difference returns
+**15**; the three prefixes are the difference between that and 12, which
+is the prefix arm above earning its place rather than a disagreement
+between two seats. **Numerator zero, four times, across three scopes.**
+Keep the check — its one true positive was a real rename — but report it
+as a check with a measured precision of zero on `main` and do not ration
+any other artifact to protect it. That was the sixty-third window's
+error and the skill seat withdrew the same error on its own side in the
+same breath.
+
 **And widen the path scope by one directory, because that is where the
 check's first genuine broken citation was (added in the same window,
 and it is a repair rather than a measurement).** The command above
