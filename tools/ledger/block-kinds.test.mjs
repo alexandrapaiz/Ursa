@@ -153,8 +153,14 @@ test('every real heading that announces a scan is classified as one', () => {
   assert.deepEqual(
     missed,
     [],
-    'a scan note the classifier does not recognise owes §4’s five fields and will go red; ' +
-      'either the heading needs the standard spelling or SCAN_TITLE needs the new one',
+    'a scan note the classifier does not recognise owes §4’s five fields and will go red. ' +
+      'THREE causes, not two. (1) The heading needs the standard spelling, or (2) SCAN_TITLE ' +
+      'needs the new one, or (3) — the one that actually happened, twice, on 2026-10-26 — the ' +
+      'heading is fine and the block carries a `- First step:` line, so COMMITS_WORK demoted it ' +
+      'to an idea. Check for (3) first: it is the only one of the three where the heading above ' +
+      'looks correct. A scan note with nothing to propose states that in prose, as the ' +
+      '2026-10-23 npm-and-PyPI note does, rather than writing `First step: no adoption proposed`, ' +
+      'because the classifier reads whether the field is present and not what it says.',
   );
 });
 

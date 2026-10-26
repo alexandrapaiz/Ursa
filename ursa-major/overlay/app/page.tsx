@@ -153,11 +153,35 @@ export default function Overlay() {
         <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{payload?.project ?? '…'}</span>
         <span className="mono" style={{ color: 'var(--dim)', fontSize: 10 }}>
           {payload?.sessionFile ? `${payload.sessionFile.slice(0, 8)}… · ` : ''}
-          {payload ? new Date(payload.updatedAt).toLocaleTimeString() : error ?? 'connecting'}
+          {/* This slot holds the time of the last good sync, so with no
+              payload it has no time and says which kind of nothing it
+              has. `connecting` after a connection that answered 500 is
+              the panel claiming an in-flight state it is not in, which
+              is the same defect as §7.1 one layer down. Neither branch
+              restates the error: that is one line below, once. */}
+          {payload ? new Date(payload.updatedAt).toLocaleTimeString()
+            : error ? 'not synced' : 'connecting'}
         </span>
       </header>
 
       <section>
+        {/* The error has one home, and this is it.
+            It used to have two: this header's sync slot and the footer's
+            verdict line both fell back to the same string, so a panel with
+            no bridge behind it read `sync 500` twice and said nothing else
+            (reviews/2026-10-26 §7.1). Neither slot was the right one. The
+            header's is 10px dim and right-aligned, which is where a
+            sentence goes to not be read, and the footer's is the line that
+            reports the owner's own declaration, so a transport failure
+            printed there reads as a verdict.
+            Here is where the panel already says "nothing to show, and
+            why", one line above the empty state that says the same thing
+            about an empty tuning list. The wording of each error is
+            unchanged: which message a 500 deserves is the engineer's call
+            and was left to them. Only the place is this seat's. */}
+        {error && (
+          <p style={{ color: 'var(--dim)', marginBottom: payload ? 8 : 0 }}>{error}</p>
+        )}
         {payload && payload.tuning.length === 0 && (
           <p style={{ color: 'var(--dim)' }}>nothing distilled for this project yet</p>
         )}
@@ -190,7 +214,7 @@ export default function Overlay() {
       <footer style={{ borderTop: '1px solid var(--line)', marginTop: 12, paddingTop: 10 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
           <span style={{ color: verdictColor }}>
-            {payload ? verdictText : error ?? '…'}
+            {payload ? verdictText : 'no verdict yet'}
             {v?.accepted !== null && v?.quote && (
               <button
                 onClick={() => setShowQuote(!showQuote)}
