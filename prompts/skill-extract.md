@@ -1862,3 +1862,161 @@ were ever filed under the short name. Part 4's precision figure is
 measured on one tip of one repository on one day, so it is evidence that
 this sweep is not worth building here and not a general claim about
 string-resolution checks.
+
+## 5ab. The merge gate is a property of a path, so a pull request states its gate rather than making its reader derive it
+
+(Added 2026-10-26, thirty-ninth run, after Ursa's PM seat declined to merge
+the thirty-eighth run's pull request and said so on the board instead of
+leaving it to be guessed at. The finding this rests on is not this seat's:
+it is the exo seat's, written into `prompts/exo-agent.md` §5 at lines
+1127-1186 on 2026-10-18. What this run adds is the price for this seat,
+the precedent nobody had written down, and the one line this seat can ship
+without anyone's permission.)
+
+**What happened, and why the PM was right.** `docs/standards/pm.md` §10
+defines the first item of Tier C as "Charters (`prompts/`)", by directory,
+and criterion 4 of the Tier B list is that `gh pr diff --name-only` shows
+no Tier C path. This file is under `prompts/`. So one file in a diff of
+forty-one escalates the whole pull request to the owner or a chair, and
+the PM's note is a correct reading of the text it was reading. It also
+read the diff itself rather than trusting the title, which is the form
+this register asks for everywhere, and it named the block as the path
+rather than asking for a content change, which is the distinction that
+makes the note actionable.
+
+**The finding is eight days old and this seat does not get to re-derive
+it.** The exo seat established it after two seats made the same mistake in
+opposite directions inside ten minutes: the charter set is
+`prompts/*-agent.md`, eleven files, one per seat, and the twelfth file in
+that directory is this one, a format specification the skill seat writes
+as ordinary work. This seat's own charter says so at
+`prompts/skill-agent.md` line 56, "Write only under `skills/`,
+`prompts/skill-extract.md`, and ledger". So a path predicate of `prompts/`
+over-reports charter activity by exactly one file, and that file is one of
+the busiest in the repository. That seat also named the upstream defect as
+the standard's wording, said it was not its to fix because §10 is Tier C
+and HQ's, and asked that it be added to the escalation the PM carried to
+the owner at 12:29:59 on 2026-10-18 with a silence clock to 2026-10-20
+12:30 UTC.
+
+**The clock expired six days ago.** Verified this run: §10 on
+`origin/main` still reads "Charters (`prompts/`)" at line 286. So the
+ambiguity is not in flight in any sense a seat can rely on, and every pass
+of the merge gate that meets this file pays for it again.
+
+**The price, measured on a repaired clone.** The checkout this run was
+given was shallow, and `git log origin/main --first-parent -- <path>`
+answered **0** on it for every path below, which is §5v exactly: a guard
+that asks git a question answers from this clone, and the clone is not the
+repository. After `bash tools/ensure-full-clone.sh` took it from 1,648 to
+3,482 commits and from 3 to 246 remote-tracking refs, over the 195
+first-parent merges on `origin/main`:
+
+| | count |
+|---|---|
+| pull requests landed on `main` touching any `prompts/*.md` | 30 |
+| of those, touching a `*-agent.md` charter | 22 |
+| of those, touching `prompts/skill-extract.md` | 8 |
+| touching both | **0** |
+
+So the directory predicate calls 30 landed pull requests charter changes
+and 8 of them, 27 percent, changed no charter at all. The two sets are
+**disjoint**, which is the load-bearing half: no pull request in this
+repository's history has ever bundled this file with a real charter edit,
+so the over-report is clean and an exception written at the path level
+would cost the gate nothing it currently catches.
+
+**And the price for this seat, on one day.** The six pull requests this
+seat opened on 2026-10-26:
+
+| | count |
+|---|---|
+| opened by this seat | 6 |
+| carrying exactly one file under `prompts/` | 6 |
+| that one file being `prompts/skill-extract.md` | 6 |
+| carrying a `*-agent.md` charter | **0** |
+| passing the PM's own criterion 4 | **0** |
+
+On this run's tip the diff against `origin/main` is 5,700 changed lines,
+of which 807 are this file and 4,893 are skills, tests, trigger tests and
+run records. **So 86 percent of the run's output waits on a gate that 14
+percent of it earns**, and this seat has never once handed its own
+company's merge gate something that gate was allowed to act on.
+
+**The precedent, which is what a reader actually needs.** Eight pull
+requests carrying this file have landed on `main`, the most recent of them
+today. Four of the eight are claimed on the board by the PM seat's own
+passes, in `data.merged`, on 2026-10-18 at 13:40, 13:54, 14:17 and 18:33
+UTC. The 14:17 one names itself in its own subject: "Thirty-sixth pass
+closed: fixed my own prior pass own Tier C misread, merged the…", with
+`{"pass": 36, "merged": [254]}` in its data. So this company's operative
+practice, set by its own merge gate four times in one day and by the
+landed record eight times in all, is that this file is Tier B, and the
+text of its standard says the opposite. Today's pass read the text. The
+2026-10-18 pass read the practice. Neither pass misread what it read, and
+that is the definition of an ambiguity rather than an error — which is
+also why arguing it a tenth time is not the remedy and a sentence in the
+standard is.
+
+**The rule.**
+
+1. **Every pull request from this seat states its merge gate in the
+   description, in one line, above everything else.** The form:
+
+   ```
+   Merge gate: Tier C by path — prompts/skill-extract.md (+807/-0).
+   No prompts/*-agent.md charter in this diff. Tier B otherwise.
+   ```
+
+   Say `Merge gate: Tier B — no Tier C path in this diff` when there is
+   none. The number is what `git diff --stat origin/main...HEAD --
+   prompts/skill-extract.md` prints; the charter check is `git diff
+   --name-only origin/main...HEAD -- 'prompts/*-agent.md'`, which is the
+   predicate the exo seat corrected to and the one this seat is counted
+   by. This is that seat's own disclosure line turned on the diff that
+   caused it, for the same stated reason: the party who must act on a
+   classification cannot be told by a description that does not mention
+   it.
+
+2. **State the gate; do not argue it.** The line reports a path and a
+   predicate, both of which the reader can run in one command. A seat that
+   uses its own pull request to lobby its own merger has turned a
+   disclosure into a brief, and the next pass has to re-litigate rather
+   than read. Where this seat has an argument about the tier, it belongs
+   in the ledger, addressed to the owner, once.
+
+3. **The escalation is inherited down a stack, and this run cannot
+   demonstrate it.** "Read your own seat's open PRs first" tells a run to
+   branch from its own open tip rather than from `main`, so once any run
+   touches this file every later run that stacks on it is Tier C by path
+   whether its own commits touch the file or not. This run's own commits
+   do touch it, so this run is not the evidence; the evidence would be the
+   first stacked run after one that leaves the file alone, and it should
+   say so in its gate line when it happens. Until then this is a
+   consequence of two rules read together, not a measurement.
+
+4. **Do not ship the relocation as this seat's remedy, and do not treat
+   the gate as a reason to split the run.** Moving this file out of
+   `prompts/` would make the predicate true, and it is not this seat's
+   move to make: it would edit `.github/workflows/agent-skill.yml` line
+   81, which is HQ's machinery and which no product seat edits;
+   `prompts/skill-agent.md` lines 36 and 56, which is this seat's own
+   charter and Tier C; and `prompts/exo-agent.md` and
+   `prompts/research-agent.md`, which are other seats'. Four files across
+   three owners, none of them this one. It goes in the ledger with that
+   cost attached so the owner can weigh it against the wording fix in one
+   read, and the wording fix stays the remedy this seat backs, because it
+   is already in front of her and because it fixes the predicate for every
+   seat rather than for this file. Splitting the work into two pull
+   requests to get the library half merged is not available either: the
+   charter allows one pull request per run, and a run that ships its rule
+   late to buy a merge has paid in the thing the register is for.
+
+Ours, not a paper's, and most of it someone else's. The path analysis and
+the corrected predicate are the exo seat's, carried on its argument and on
+the disjointness measured here rather than taken. The precedent count, the
+27 percent, the six-of-six and the 86 percent are this run's, measured on
+one repaired clone of one repository on one day; the eight landed pull
+requests are a fact about this history and the four board claims are a
+fact about four messages, and neither is a claim about what the owner would
+decide if asked. Part 3 has no instance yet and says so.
