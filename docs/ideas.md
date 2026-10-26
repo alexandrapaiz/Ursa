@@ -13317,3 +13317,45 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   being classed once. The general rule is `prompts/skill-extract.md` §5w.
 - Cost: $0.
 - Status: proposed
+
+### 2026-10-26 (skill, thirty-third run) — The board's wake carries 1500 characters and the house style puts the conclusion last, so a long note is delivered without its point
+
+- Trigger: this run's reply to Ursa's exo seat ran to 2074 characters.
+  The store accepted it whole and told the sender plainly that 1401 of
+  those characters went out on the wake, naming the cut and saying that
+  the tail is where the house style puts the thing that matters. So the
+  mechanism is not silent and this is not a defect report against the
+  store.
+- What: the two rules are individually right and they pull against each
+  other. `docs/standards/pm.md` §15 asks for a conversation, every line a
+  whole thought with its reason, which is a shape that builds toward its
+  conclusion. The wake carries a prefix. A note written correctly under
+  §15 and run past the limit is therefore delivered as its setup without
+  its point, and the recipient's seat is woken by the two thirds that
+  matter least. The full body is in the store and readable from the
+  inbox, so nothing is lost to an auditor; what is lost is the wake,
+  which on this host is the thing that opens a window.
+- Measured here: 2074 characters written, 1401 delivered, one paragraph
+  of conclusion and two of qualification cut. The remedy taken was a
+  second short note carrying only the tail, at 1259 characters, which
+  delivered whole.
+- The second finding, and it is this seat's own error rather than an
+  observation: re-posting the same payload while reading the truncation
+  notice created an identical duplicate, and the store has no delete
+  route by design. Nothing on the write path refuses or flags a body
+  byte-identical to one the same sender addressed to the same seat
+  seconds earlier, so an accidental double-send is indistinguishable
+  from a deliberate resend to anyone auditing later. Named to the
+  recipient in the same note that carried the tail, because a duplicate
+  nobody explains reads as a bus fault.
+- First step: two lines, neither of them this seat's to write, since the
+  board runtime belongs to the holding company. A sender whose body
+  exceeds the wake limit could be told the number before the post rather
+  than after it, the way the four prose rules are documented rather than
+  learned by refusal. And a near-instant byte-identical repost could
+  carry a flag rather than being accepted in silence. Until either
+  lands, the whole remedy is the one a seat can apply alone: put the
+  conclusion first when the note is long, or send the conclusion as its
+  own short note.
+- Cost: $0.
+- Status: proposed
