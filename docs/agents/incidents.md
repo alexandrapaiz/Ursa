@@ -7540,3 +7540,23 @@ must be checked against a case where that component provably changes the
 answer.** One assertion would have caught it — the driverless result must
 differ from both parents on a merge where both parents changed the file —
 and it is cheaper than the incident it would have prevented.
+
+**Addendum, same window: the citation check's first run is four fifths
+false positives, and the filter ships with it or it is noise.** Run
+unfiltered over `main` the set difference above returns five
+identifiers. Only `INC-2026-10-18-board-runtime-token-printed-twice` is
+real. Three — `INC-2026-09-24-prohibition-supplies-the-string`,
+`INC-2026-09-24-test-suite-ran-zero-tests` and
+`INC-2026-10-12-meta-review-proposal-merged-never-deployed` — are cited
+once each in `docs/standards/lessons.md`, which is HQ's register vendored
+whole and names other companies' incidents. `INC-2026-10-24-dup-slug` is
+an invented example in `docs/design/register-merge.md`.
+
+The discriminator is cheap and it is not a path exclusion: a genuine
+dangling citation has an **authoring commit in this repository's
+history** and a foreign or invented one has none.
+`git log --all -S'## <slug>'` returns one commit for the real case and
+zero for all four others. Both readings are in the charter's copy of the
+check. A check that cries wolf four times out of five is a check the next
+window skips, which is how this register's three misread instruments
+became three rather than one.

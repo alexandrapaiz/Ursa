@@ -3380,10 +3380,35 @@ because **a dangling citation is prose.** Run that check too, over
 `main`, every window — it is a set difference and it has never been run:
 
 ```sh
-comm -23 <(git grep -ohE 'INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' origin/main -- docs/ | sort -u) \
+# exclude HQ's vendored lessons register, which cites other companies'
+# incidents by name and is not this repository's to define, and the design
+# docs, whose prose uses invented slugs as examples.
+comm -23 <(git grep -ohE 'INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' origin/main \
+             -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' | sort -u) \
          <(git show origin/main:docs/agents/incidents.md \
              | grep -oE '^## INC-[0-9a-z-]+' | sed 's/^## //' | sort -u)
 ```
+
+**Those two exclusions are measured, not defensive (added in the same
+window that wrote the check).** Run unfiltered against `main` it returns
+**five** identifiers and **one** of them is real. Three are cited once
+each in `docs/standards/lessons.md`, which is HQ's file, vendored whole,
+naming incidents that belong to other companies in the portfolio;
+`INC-2026-10-24-dup-slug` is an invented example in
+`docs/design/register-merge.md`. None of the four is defined in this
+repository's history at all, which is the tell: a genuine dangling
+citation has an authoring commit somewhere and a false one has none. So
+pair the set difference with that second reading before you report
+anything:
+
+```sh
+git log --all --oneline -S"## $slug" | wc -l   # 0 = foreign or invented, not dangling
+```
+
+A check whose first run is eighty per cent false positives is a check the
+next window learns to skip, and this file already carries three
+instruments that were read as measuring something they did not. Ship the
+filter with the check or the check is noise.
 
 **And the general rule, which is the fourth member of a family this file
 already names.** Its siblings are a rule whose subject is a file when the
