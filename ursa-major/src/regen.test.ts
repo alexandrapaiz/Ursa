@@ -13,7 +13,7 @@
 // means it is testable only if the strings are asserted.
 
 import { describe, expect, it } from 'vitest'
-import { regenStep, SHORT_DIGEST_LEN } from '../tools/regen'
+import { FULL_CLONE_REPAIR, regenCheckVerdict, regenStep, SHORT_DIGEST_LEN } from '../tools/regen'
 
 const REBUILT = 'f497687433163312eb6dfcd1bfd7d90e228504d06a931f9a7e6660af07eb6f32'
 const OLDER = 'a6580c3119dcb33a6ac2ae8ec6edcbea16a87bbd1b6b4ee4b02c1aa7ffb0d3a2'
@@ -52,7 +52,13 @@ describe('regenStep, the four states a generated artifact can be in', () => {
     })
     expect(step.state).toBe('index-unverifiable')
     expect(step.runAgain).toBe(true)
-    expect(step.message).toContain('tools/ensure-full-clone.sh')
+    // Against the exported constant, not a hand-copied literal. This line
+    // read `toContain('tools/ensure-full-clone.sh')` until 2026-10-26, and
+    // passed for a path that did not exist, because a message asserted in
+    // the message's own words cannot disagree with it. Whether the command
+    // runs is checked where it can be:
+    // `src/regen-commands-runnable.test.ts`.
+    expect(step.message).toContain(FULL_CLONE_REPAIR)
   })
 
   it('history is only consulted once the bundle matches, so staleness is reported in order', () => {
@@ -101,6 +107,81 @@ describe('regenStep, the four states a generated artifact can be in', () => {
       // so no message is allowed to be one.
       expect(step.message.split(' ').length).toBeGreaterThan(8)
       expect(step.runAgain ? /`npm run regen`/.test(step.message) : true).toBe(true)
+    }
+  })
+})
+
+describe('regenCheckVerdict, what `npm run regen:check` is allowed to claim', () => {
+  const verified = { bundle: 0, index: 0, historyBlocked: null }
+
+  it('claims both artifacts only when both were actually compared', () => {
+    const v = regenCheckVerdict(verified)
+    expect(v.exit).toBe(0)
+    expect(v.bothVerified).toBe(true)
+    expect(v.message).toContain('the digest index matches history')
+  })
+
+  it('does not claim the index matches history when history could not be read', () => {
+    // The regression this function was extracted for. The child script
+    // exits 0 on a shallow clone on purpose, having printed its reason,
+    // and the parent used to collapse that 0 into "the digest index
+    // matches history" — the one thing the child had just said it could
+    // not determine.
+    const v = regenCheckVerdict({ ...verified, historyBlocked: 'this is a shallow clone' })
+    expect(v.message).not.toContain('matches history')
+    expect(v.message).toContain('NOT')
+    expect(v.message).toContain('this is a shallow clone')
+    expect(v.bothVerified).toBe(false)
+  })
+
+  it('still exits 0 on that skip, because the skip is not a failure', () => {
+    // Deliberately unchanged. `tools/make-bundle-digest-index.ts` exits 0
+    // here for a sound reason — nothing is known to be wrong — and the
+    // Action checkouts that take this path would otherwise start failing
+    // on a condition that is not a defect. Only the claim was wrong.
+    expect(regenCheckVerdict({ ...verified, historyBlocked: 'this is a shallow clone' }).exit).toBe(0)
+  })
+
+  it('names the command that turns the skip into a real check', () => {
+    const v = regenCheckVerdict({ ...verified, historyBlocked: 'this is a shallow clone' })
+    expect(v.message).toContain(FULL_CLONE_REPAIR)
+    expect(v.message).toContain('npm run regen:check')
+  })
+
+  it('reports a stale artifact by name, in the singular and the plural', () => {
+    expect(regenCheckVerdict({ ...verified, bundle: 1 }).message).toBe(
+      'the bundle is stale. Run: npm run regen',
+    )
+    expect(regenCheckVerdict({ ...verified, index: 1 }).message).toBe(
+      'the digest index is stale. Run: npm run regen',
+    )
+    expect(regenCheckVerdict({ ...verified, bundle: 1, index: 1 }).message).toBe(
+      'the bundle and the digest index are stale. Run: npm run regen',
+    )
+  })
+
+  it('exits 1 on any stale artifact, and a blocked history does not soften that', () => {
+    for (const historyBlocked of [null, 'this is a shallow clone']) {
+      expect(regenCheckVerdict({ bundle: 1, index: 0, historyBlocked }).exit).toBe(1)
+      expect(regenCheckVerdict({ bundle: 0, index: 1, historyBlocked }).exit).toBe(1)
+    }
+  })
+
+  it('treats a signal death as a failure, since the caller reports one as 1', () => {
+    // `run()` in tools/make-regen.ts turns a null status into 1 for this
+    // reason: an unknown outcome is not a pass. Asserted here so the two
+    // halves of that convention cannot drift apart.
+    expect(regenCheckVerdict({ ...verified, bundle: 1 }).exit).toBe(1)
+    expect(regenCheckVerdict({ ...verified, bundle: 137 }).exit).toBe(1)
+  })
+
+  it('never reports a pass as a bare status word', () => {
+    // Same bar `regenStep`'s messages are held to above: the defect this
+    // tool exists to prevent is a reader who is told a state and not a
+    // next step.
+    for (const historyBlocked of [null, 'this is a shallow clone']) {
+      const v = regenCheckVerdict({ ...verified, historyBlocked })
+      expect(v.message.split(' ').length).toBeGreaterThan(8)
     }
   })
 })
