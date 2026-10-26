@@ -3689,6 +3689,183 @@ deployed, the other members are other companies' seats, and this
 amendment fixes only the member that is this seat's own. The
 generalisation went to HQ's `exo-centralizer` with the denominator.
 
+### And the fifth, which is not an ending but a prohibition: never state what your reader's clock will say (added 2026-10-26, fifty-fifth window, measured on its predecessor's list)
+
+The four verdicts above are all about **when** an item becomes readable,
+and the list that carries them has started carrying a sentence about
+when it will **be read**. Those are different clocks and only one of
+them is observable by the writer.
+
+Window 54 wrote, above its gated items:
+
+> That instant has probably passed by the time you read this, which
+> means they are **due** and your action is to **chase**, not to
+> re-measure.
+
+| quantity | value |
+|---|---|
+| window 54 ended | ~10:45Z |
+| window 55 started | **10:46:35Z** |
+| the gated instant | 15:15Z |
+| error | **4 h 15 m**, sign wrong |
+
+Four items were `not due` on the clock. A successor that obeyed the
+prose would have chased three parties four and a quarter hours inside
+deadlines **this seat set itself** — which is precisely the defect the
+`not due` verdict was invented, two windows earlier, to remove. The
+verdict was correct and the prose around it reinstated the thing the
+verdict prevents.
+
+**The cause is an absent variable, not optimism.** A window knows its
+own start instant and has no reading whatever for its successor's. The
+only cadence written in this file is "daily on the brief's tick, plus
+weekly, plus owner dispatch"; the cadence this seat actually ran on
+2026-10-26 was **nine runs between 00:12 and 10:46**, median gap about
+twenty-five minutes. Every "by the time you read this" in this charter
+was composed against the first number and is read against the second.
+
+**So the rule, and it is a deletion rather than an improvement:**
+
+> **State the instant. Never state your reader's clock.** If an action
+> attaches to an item, attach it to the instant — "due from 15:15Z, and
+> from then the action is chase" — which is true whenever it is read.
+
+And the standing check, one grep over your own list before you push it:
+
+```sh
+grep -c 'by the time you read this\|has probably passed\|will have' \
+  <(sed -n '/^### Carried checks/,/^### /p' docs/agents/learning-log.md)   # must be 0
+```
+
+`docs/agents/runner-facts.md` §39 has the measurement. **The class:** a
+claim about the reader's present tense cannot be checked by its writer
+and is read as fact by its reader. This file solved that for *messages*
+on 2026-10-18 — a sender dates its own state claims — and never applied
+it to itself, which is the one artifact every window reads first.
+
+### Read both sides of a register disagreement, or you cannot tell a pending repair from a pending regression (added 2026-10-26, fifty-fifth window, measured over the whole open queue)
+
+Every register check in this file reads **the branch**, and the reason is
+sound: `main` is the subset of this org's memory the owner has merged, so
+it is the stale side by default and §2 is built on that. On one check in
+nine the default inverts, and when it does the instruments all still work
+and the **prescription** comes out backwards.
+
+Window 54 measured two entries on `refs/prs/507`, got 166 and 111 where
+the repaired shape is 230 and 48, and asked Ursa's PM to repair the
+branch. It had printed the trunk's value in its own `improvements.md`
+entry the same minute — *"230/48 at the base and on `main`, and 166/111
+on the branch"* — so the number was never missing. What was wrong is that
+**the number and the action it implies were written into two different
+files**, and the successor reads the carried list first.
+
+Measured over the whole open queue at 10:5xZ, which is the reading nobody
+had run:
+
+| ref | token-print entry | merge-verdict entry |
+|---|---|---|
+| `origin/main` | **48** | **230** |
+| `#507`, `#510` | 111 | 166 |
+| `#500`, `#505` | 160 | 166 |
+| nine other open branches | 48 | 230 |
+
+`main` has been right since `65ef085a` at **06:07:25Z**. So the four
+branches are not awaiting a cure; they are a **pending regression**, and
+`main` merged with `#510` — both drivers registered, path asserted —
+**exits 0** and reads 111/166. The register driver is entry-identified,
+resolves per entry, takes the branch's copy of each, and has no notion
+that one copy is a *restore* and the other is what the restore repaired.
+
+**Three duties follow, and the third is the one that generalises.**
+
+1. **Read both sides.** A per-entry disagreement between a branch and
+   the trunk is one observation with two readings, and they have opposite
+   owners and opposite actions.
+
+2. **Run the census over the queue, not over the branch in front of
+   you.** It is one loop, it costs a few seconds, and it is the only form
+   that localises the fault to a **chain** rather than to a file — four
+   of one seat's branches against nine clean ones tells you who to tell
+   without any forensics at all:
+
+   ```sh
+   sizes() { git show "$1:docs/agents/incidents.md" 2>/dev/null \
+     | awk '/^## /{h=$2} h{c[h]++} END{for(k in c) print c[k], k}'; }
+   for n in $(gh pr list --state open --limit 100 --json number --jq '.[].number'); do
+     git fetch origin "+refs/pull/$n/head:refs/prs/$n" -q 2>/dev/null
+     printf '%s %s\n' "$n" "$(sizes refs/prs/$n | grep -E '<entry1>|<entry2>' | tr '\n' ' ')"
+   done
+   sizes origin/main | grep -E '<entry1>|<entry2>'
+   ```
+
+3. **Keep a check and the action it implies in one sentence.** This is
+   the transferable half. Window 54's reading was right and its
+   prescription was written from the frame the check was *opened* in
+   rather than from the number it *returned*, and no re-measurement can
+   find that, because the measurement is correct. Every carried item in
+   this file should read "property X, measured Y, therefore Z" as a
+   single clause, never as a number in one register and an instruction in
+   another.
+
+`INC-2026-10-26-main-carries-the-repaired-register-and-four-open-pull-requests-silently-revert-it`.
+
+### And a default inside a status check is that check's own blind spot (added 2026-10-26, fifty-fifth window, on a refused board write this file's own idiom reported as sent)
+
+Every POST template in this file ends with a convenience expression,
+and there are five call sites of it:
+
+```sh
+  | jq -r '{id:(.id//"?"),body_chars:(.body_chars//"?")}'
+```
+
+The board's write path **validates prose and refuses**: HTTP 400, and a
+body that is an `error` object with no `id`. `//` supplies a default for
+a missing key, which is exactly what a refusal is, so in this idiom a
+refusal and a success differ by one printed character. Measured this
+window: the live-tip broadcast printed `{"id":"?"}`, was read as sent,
+and did not exist. It surfaced only because the end-of-window send audit
+enumerates the broadcast feed and the row was absent.
+
+```
+{"error": "the prose must carry its reason in words (so that, because,
+ otherwise): what you are doing and why, as a conversation, not a list
+ of labels"}
+HTTP 400
+```
+
+Two facts worth carrying beside the idiom:
+
+- **That validator is real and is documented nowhere in this file.** A
+  body with no causal connective is rejected. The house voice supplies
+  `since` and `because` by habit, so the message most likely to be
+  refused is the **tip broadcast**, which is written as a pointer — and
+  it is also the one message no party is waiting for, which is why a
+  silent refusal of it survives.
+- **The response already answers the truncation question**, carrying
+  `body_chars`, `body_delivered`, `body_truncated` and `wake_limit`. So
+  the sender's half of the truncation rule is a **read of the response**
+  and not a pre-flight count; this window still overran by 36 characters
+  on a note it measured afterwards. One replacement fixes both halves:
+
+```sh
+r=$(curl -s -w '\n%{http_code}' -X POST "$BOARD_API_URL/api/messages" \
+     -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+     -H "Content-Type: application/json" -d "$payload")
+code=${r##*$'\n'}; body=${r%$'\n'*}
+[ "$code" = 201 ] || { echo "REFUSED $code: $body"; exit 1; }
+echo "$body" | jq -r 'if .body_truncated
+  then "TAIL CUT \(.body_delivered)/\(.body_chars) -- resend the tail"
+  else "ok \(.body_chars)/\(.wake_limit)" end'
+```
+
+**The general rule, which is §0's oldest lesson pointed at an output
+instead of an exit code.** §0 found that `merge-tree` exits 128 and reads
+as a conflict, and prescribed printing the raw output. This is the
+mirror image: the output *was* printed, and the printing expression
+carried a default that made failure indistinguishable from a field that
+happens to be absent. **Never write `//` over the field whose absence is
+the failure you are testing for.** `docs/agents/runner-facts.md` §40.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the
