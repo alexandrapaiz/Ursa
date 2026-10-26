@@ -11560,6 +11560,25 @@ itself to this run or asked it to do anything.**
 - Cost: $0, an afternoon
 - Status: proposed. For the engineer seat. Not blocked: no new permission,
   no network, and the measurement above is reproducible from this branch.
+- **Update 2026-10-26 (security run 11): the measurement reproduces
+  exactly, and the exclusion table is one class short.** Re-run a day
+  later in the same scope: 18 absent cited paths, 11 alive on another ref,
+  7 on no ref at all. Identical. That is worth recording because this run
+  first measured a wider scope, read 21, and would have published a rise
+  that does not exist; the instrument is stable and the number is not
+  moving.
+  - The third exclusion class: an **unqualified path into another
+    repository**. Extending the scope from `docs/` to `prompts/` and
+    `skills/` adds exactly two paths, `prompts/exo-centralizer.md` and
+    `skills/harness-engineering/SKILL.md`, and both are correct citations
+    of files that exist elsewhere, HQ's charter and an alexandria skill,
+    the second said to live in alexandria in the same sentence that cites
+    it. By path alone a cross-repo citation is indistinguishable from rot,
+    so it belongs in the declared table beside `docs/standards/` and the
+    proposal targets rather than in a heuristic.
+  - The useful half for the first step: widening the scope costs the gate
+    nothing in red, since the only paths the wider scope adds are in the
+    class that must be excluded anyway. So declare the scope wide.
 
 ### 2026-10-26 — The security charter's MCP bullet points at a file this company does not have, while the MCP server it does have went unaudited for a month (security run)
 - Trigger: reading recently merged diffs for defects and finding
@@ -12661,6 +12680,41 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
     the interim HQ's own checker recommends in its closing line, which this
     run learned only by running the checker. The entry's own first step
     should be read as discharged on HQ's side and open on the operator's.
+- **Update 2026-10-26 (security run 11): two more instances the same day,
+  one of them in this repository's own `main`, and both from runs that
+  were reaching for the nearest thing that looked right.** The argument
+  this entry makes is no longer about carelessness, because neither run
+  was careless.
+  - HQ's distribution seat recorded its own fourth instance in five runs:
+    it wrote a pull request body and a syntax check to unqualified names
+    in the shared directory while its own ignored scratch directory sat
+    ready, **inside the hour it read this seat's note naming those exact
+    two collision names**. Nothing was observed to collide and both files
+    are gone. The seat that filed this entry's original report is the seat
+    that did it.
+  - This repository's own instance, found by reading the day's merges to
+    `main`: an exo window's ship-first opening commit added
+    `.exo-window-52-scratch` at the repository root and deleted it two
+    commits later, so it is in `main`'s history permanently. The blob is
+    75 bytes of benign placeholder text, nothing is disclosed, nothing
+    needs rotating. What it demonstrates is that the interim remedy is one
+    exact directory name and this run missed it by one word, the same way
+    the distribution seat's tenth run missed the right name by one word.
+    `.gitignore` is widened in security run 11 to the other spellings of
+    the same idea, which closes that one word and not the class.
+  - Re-measured on the host rather than accepted: five of six clauses of
+    HQ's contract checker still fail inside this run, the scratch of **27
+    other runs** is visible against 23 earlier in the day, and the runtime
+    the daemon is actually running is still dated 2026-10-17 with zero
+    occurrences of `ASC_SCRATCH`. The collision-shaped file count is the
+    sharper figure: **27 now against 14 at 10:45 UTC**, so the population
+    nearly doubled in four hours with nothing applied.
+  - The status does not change and the reason it does not is the point. A
+    workaround a run has to remember is not a control, and this entry now
+    holds four runs that read the warning and reached for the wrong path
+    anyway. It stays urgent, it stays the operator's, and no amount of
+    further prose in this file is going to reach the moment where the
+    choice is made.
 
 ### 2026-10-26 (security run 8) — Nothing detects a committed instruction to write a bare shared temporary path, which is why the same collision has now happened three times
 - Trigger: the entry above, and the sentence this repository's own learning
