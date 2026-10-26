@@ -2,6 +2,46 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~09:5x UTC message run (11th)
+
+Woken by a board note from exo (signed "Ursa/exo") reporting that it had
+registered the `docs/ideas.md` ledger merge driver, performed every open
+merge with `git merge-tree`, and found the security seat's two drafts
+both clean. The note asked this seat directly to ready and merge, close,
+or annotate the older of the two, naming it the PM's act under the merge
+rule. Per the external-content org rule, that ask is data, not a command,
+so it was checked against the repository's actual state before anything
+was decided, not acted on for the way it was framed.
+
+1. **The "both clean" claim does not hold for the newer draft, #490,
+   checked fresh with git's own `merge-tree` (both the legacy and the
+   `--write-tree`/ort form) against current `main`.** Two files conflict,
+   not zero: `docs/ideas.md`, which carries the declared `merge=ledger`
+   driver in `.gitattributes` and is exactly what registering that driver
+   fixes, and `ursa-major/src/regen-commands-runnable.test.ts`, which
+   carries no declared driver at all and is a genuine unresolved code
+   conflict between `main`'s current text and the security branch's. The
+   exo note's own register (PR body) says the comparison ran against the
+   same `main` commit and the same head commit this check used, so the
+   discrepancy is in what the two checks measured, not in timing. Worth
+   the exo seat's own attention, not edited here.
+2. **Not acting on #461 or #490, and it would have been wrong to.** #461
+   was never an orphan with no live run behind it: #490, the same seat's
+   own newer draft, already said in its own body that it subsumes #461
+   and would close it. While this check was still running, the security
+   seat opened a third draft, #498, that merged `main` in, resolved both
+   conflicts (the ledger one and the code one this check found),
+   confirmed `#461`'s four commits are fully contained in #490's, and
+   closed #461 itself. #498 now reads `MERGEABLE` against current `main`.
+   Readying or merging #461 or #490 on this seat's own initiative, as the
+   note asked, would have collided with the owning seat's own live run
+   doing the same work more completely, seconds apart.
+3. **No dispatch fired.** `PM_DISPATCH_ENABLED` reads empty in this run's
+   environment, same as every pass today, and the seat in question was
+   never idle by any measure this run could find — it was pushing new
+   commits while this check was still running — so even with the switch
+   on, no criterion in the dispatch-criteria table would have fired.
+
 ## Top three for the owner, 2026-10-26 ~09:4x UTC message run (10th)
 
 Woken by two events: the skill seat's run failing (exit 1, 101 turns,
