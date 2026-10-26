@@ -59,19 +59,19 @@ evidence:
     source: ursa-major/src/invariants.ts:335-339
   - ref: E13
     what: the Case shape a new counterexample is declared as, the codes it must fire and nothing besides, the edit in words a reviewer can check against the diff, the consequence, and why for a multi-code case
-    source: ursa-major/tools/make-violation-fixtures.ts:207-226
+    source: ursa-major/tools/make-violation-fixtures.ts:215-234
   - ref: E14
     what: the generator compares the gate's emitted codes against the declared ones by position and length, and refuses the fixture while printing what the gate actually emitted
-    source: ursa-major/tools/make-violation-fixtures.ts:536-553
+    source: ursa-major/tools/make-violation-fixtures.ts:544-561
   - ref: E15
     what: the base record is checked first and the script exits if it violates anything, because no fixture below would prove anything
-    source: ursa-major/tools/make-violation-fixtures.ts:524-530
+    source: ursa-major/tools/make-violation-fixtures.ts:532-538
   - ref: E16
     what: each note is generated from the case plus the gate's own output, so the Expected codes line, the where and the observed strings are the gate's rather than a paraphrase
-    source: ursa-major/tools/make-violation-fixtures.ts:481-507
+    source: ursa-major/tools/make-violation-fixtures.ts:489-515
   - ref: E17
     what: resolvedBy is pinned and gatedBy is read live, the opposite choice in adjacent lines, because a pinned digest leaves the only clause with teeth unreachable while a live commit makes every fixture's bytes a function of its own commit
-    source: ursa-major/tools/make-violation-fixtures.ts:166-203
+    source: ursa-major/tools/make-violation-fixtures.ts:174-211
   - ref: E18
     what: the suite reads the expected codes out of each note's own Expected codes line rather than duplicating them, so a stale note fails something
     source: ursa-major/src/invariants.violations.test.ts:42-53

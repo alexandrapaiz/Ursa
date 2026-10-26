@@ -72,10 +72,10 @@ evidence:
     source: ursa-major/src/tuning/cli.ts:42-46
   - ref: E17
     what: the exported block tells its reader that confidence is independent evidence count and to follow high-confidence rules from the first message
-    source: ursa-major/src/tuning/export.ts:59-67
+    source: ursa-major/src/tuning/export.ts:65-73
   - ref: E18
     what: export drops revoked axioms, groups by domain, orders by evidenceCount, and lists tensions with an ask-do-not-guess instruction
-    source: ursa-major/src/tuning/export.ts:43-57,69-92
+    source: ursa-major/src/tuning/export.ts:49-63,75-98
   - ref: E19
     what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted, one per survived_mutated span that carries a diff and a source and is not formatting-only
     source: ursa-major/src/signals.ts:1-7,40-46,62-63,111-137
@@ -138,7 +138,7 @@ evidence:
     source: ursa-major/src/signals.ts:65-81
   - ref: E39
     what: the four free-text axiom fields, id, statement, domain and each contradicts id, are flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before they are rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere; basis, polarity and evidenceCount are rendered without the sanitizer
-    source: ursa-major/src/tuning/export.ts:8-40,44-50,74-78
+    source: ursa-major/src/tuning/export.ts:8-40,50-56,80-84
 supersedes: []
 ---
 
