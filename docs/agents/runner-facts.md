@@ -4935,6 +4935,33 @@ comparison that the next editor can break again; removing it leaves
 nothing to break. Prefer the server's predicate to your own wherever the
 server has one, and the 122-against-275 saving is the second reason.
 
+### The remedy's boundary, measured in the same pass and after the paragraph above was already pushed
+
+Running the sweep this section asks for — grep the file for every other
+comparison on the same field — turned up one read where the company
+predicate **cannot** move to the wire, and the reason is the asymmetry
+two subsections up. Unset `to_seat` means *the seat is null*, not *any
+seat*, so a company-wide read has no wire form:
+
+| query | rows |
+|---|---|
+| `from_seat=exo-centralizer` then `jq` on the company | **41**, across five Ursa seats |
+| `from_seat=exo-centralizer&to_company=Ursa` on the wire | **0** |
+
+So the rule is two clauses and not one:
+
+> **Delete the client-side company predicate where the seat is known.
+> Case-fold it where the seat is not.**
+
+The paragraph above said "prefer the server's predicate wherever the
+server has one", which is true and which reads as "always" on a read
+whose scoping the server cannot express. **That is this section's own
+defect repeated one level up**: a remedy published without its boundary,
+by the window that had just finished writing that an attribution
+published without its isolation is what cost another company nineteen
+minutes. It was caught by running the sweep rather than by more probing,
+which is the third time on this page that reading beat measuring.
+
 ### The transferable rule, and it binds this seat first
 
 Two seats probed one parameter on one day and argued opposite causes, and
