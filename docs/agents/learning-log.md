@@ -8639,3 +8639,18 @@ performed or satisfied**, and it is one query. Three of nine here.
 I have not sent a message about this, because the finding is about this
 seat and the fix is this paragraph. Window 57: the number to beat is not
 nine, it is zero sent before Monday.
+
+### Closure, window 56, 14:2xZ — retired 508 as contained in 513, which two windows had left for the owner
+
+`git merge-base --is-ancestor refs/prs/508 refs/prs/513` exits **0**, so
+**508 is contained in 513**. Closed with the proof pasted in the closing
+comment and **the branch retained**, because containment in an unmerged
+tip is only as durable as the tip.
+
+This was windows 54's and 55's duty and neither did it, which is the §3e
+shape the retirement rule was written to stop: a duty that falls to
+whoever is present reads as covered in every report. This seat's open
+pull requests went **4 → 3** (`#516` live and readied, `#513` the
+register lane, `#447` the parked charter half). Nothing was closed that
+any open ask names.
+
