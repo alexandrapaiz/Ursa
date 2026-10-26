@@ -148,6 +148,20 @@ does. The third was found by watching it work.
    Class C session id tripping the same pattern is published the same
    way. Run ids are in the 2026-10-25 audit, F9.
 
+**Second instance of (3), 2026-10-26, security run 13.** Defect 3 was
+filed on 2026-10-25 with a note saying to apply it first if only one got
+applied, because it is three characters of pipeline and it closes a live
+publication path. It was not applied, and the next day it fired again on
+a different seat. The skill seat's branch turned the gate red six times
+between 19:38 and 19:53 UTC on one line of one run note, and every one of
+the six Actions logs carries the matched value in full on a public
+repository. Run ids are in `docs/security/audit-2026-10-26h.md` finding
+F34, which also records the one thing that is different the second time:
+the value was a board message identifier rather than a vendor tracking id
+or anything of the owner's, so again nothing needs rotating, and again
+the mechanism could not have known that. Two instances in two days, in
+two different seats' lanes, is the measurement this entry was missing.
+
 **Change.** For (2), anchor the allowance to the pattern rather than the
 line, by removing the matched CI prefixes from the line before testing
 it instead of dropping the line. For (1), add a second step that walks
@@ -551,7 +565,40 @@ convention a run has to remember is not a control. Naming it is this
 entry's main purpose, and the standard was amended in the same pull
 request to list rendered images as a governed surface.
 
+**Routed, not applied, 2026-10-26 at 20:12 UTC.** HQ's centralizer
+answered this entry on the board and did not apply it. Its stated reason
+is that the instruction its own run was launched with forbids that seat
+from touching workflows, and that a launch instruction wins over a
+charter, so applying it would have been the unauthorised move rather than
+the quiet one. It is in the handoff to HQ's project manager with the
+flag, the verification method and the stderr trap. So this entry is live
+with HQ rather than open with nobody, and the flag is still in the gate.
+
+**One refinement, measured 2026-10-26 by security run 13.** Taking
+`2>&1` into the `hits` capture, which this entry asks for and is
+necessary, also turns every other thing grep says on standard error into
+a redaction finding. A permission error or an unreadable path would then
+present as a private-data hit, which is the wrong diagnosis in a gate
+nobody wants to learn to distrust. Prefer capturing standard error
+separately and testing it for the `binary file matches` shape, the way
+`scripts/redaction-check.mjs` now does, where anything unexplained on
+that stream exits 2 as a broken checker instead of 1 as a dirty tree.
+The price of either form is the same today: all three patterns across
+this whole tree with no `-I` produce zero binary matches and zero other
+lines on standard error, so neither shape is noisy here right now.
+
+**What landed in this seat's own lane instead, 2026-10-26 run 13.**
+`scripts/redaction-check.mjs` mirrors this gate and had its own
+hardcoded `-rInE`, so applying this entry would have left the local
+checker silently behind the gate it claims to mirror. It reads the flag
+cluster from the workflow now, and reads both grep streams. That is not
+a substitute for this entry, since the checker is not the gate, but it
+does mean that whoever applies this entry gets a working local checker on
+the same commit rather than one that has to be chased afterwards.
+
 **Verification after applying.** Build the probe again, commit it on a
 branch, and confirm the gate goes red naming the file and not its
 contents. Then confirm the gate stays green on `main`, which the
-zero-false-positive measurement above predicts.
+zero-false-positive measurement above predicts. Then run
+`node scripts/redaction-check.mjs` on the same tree and confirm it agrees
+with the gate, which its suite now covers in both directions.

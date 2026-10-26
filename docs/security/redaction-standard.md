@@ -75,6 +75,18 @@ conversation titles or identifiers taken from a real session. Full
 UUIDs are detectable and are in the gate. Titles are not, because a
 title is prose.
 
+One identifier that is not session identity at all trips this pattern
+every time, and it is the one every seat handles daily. **Board message
+and dispatch identifiers are UUIDs**, so quoting one in full in a run
+note turns the gate red and, until PWC-8 defect 3 is applied, publishes
+it into a public Actions log on the way. The gate cannot tell a board
+identifier from a session identifier, because the two have the same
+shape, and that is the whole of PWC-8 defect 3's argument rather than an
+objection to it. **Truncate a board identifier to eight characters, the
+same as a session id.** On 2026-10-26 this was measured rather than
+assumed: one seat's run note quoted a message id in full and the gate
+went red six times in fifteen minutes on that one line.
+
 **Class D, credentials.** Anything credential shaped that a person
 pasted into a session while working. A record is built from whatever
 was in the conversation, so a pasted key becomes a field in the record.
@@ -193,7 +205,11 @@ are the dangerous ones without having to rediscover incident 2.
 
 A third weakness, found 2026-10-26 and queued as PWC-13: the gate runs
 `grep -rInE`, and `-I` means it skips every binary file, so none of the
-three patterns has ever been applied to surface 5. The metadata half of
+three patterns has ever been applied to surface 5. HQ's centralizer
+routed that change to HQ's project manager on 2026-10-26 at 20:12 UTC
+rather than applying it, because the instruction its own run was launched
+with forbade it from touching workflows, so the flag is still live and so
+is this limit. The metadata half of
 that is machine checkable and the fix is one flag, which is what PWC-13
 asks for. The rendered half is not checkable by anything, because a path
 or an identifier drawn into a screenshot is pixels. So the rule for
@@ -218,10 +234,15 @@ the question was to push and wait.
 node scripts/redaction-check.mjs
 ```
 
-It reads the three patterns out of
-`.github/workflows/redaction-gate.yml` and runs them with the same
-`grep -rInE`, so the workflow stays the authority and there is no second
-copy of the rules to drift. If the gate ever changes shape so the
+It reads the three patterns, the exclusions, the allowance and the grep
+flags out of `.github/workflows/redaction-gate.yml`, so the workflow
+stays the authority and there is no second copy of the rules to drift.
+The flags were the exception until 2026-10-26, when this seat's run 13
+found them hardcoded as `-rInE` in the script that claimed to read them.
+That mattered for exactly one reason, which is that PWC-13 asks HQ to
+drop `-I`, and on the day it lands a checker carrying its own `-I` would
+have reported clean on a tree the gate rejects. A second copy of a rule
+is only safe while nobody changes the original. If the gate ever changes shape so the
 patterns cannot be found, the script exits 2 and says so rather than
 reporting a clean tree it never scanned. Exit 1 is a dirty tree, exit 2
 is a broken checker, and the difference is deliberate.
@@ -231,6 +252,16 @@ line, which means a gate failure publishes the value into a public
 Actions log, which is PWC-8 defect 3. Until that is applied, a red gate
 is itself a small disclosure, and one more reason to find the hit here
 instead of there.
+
+That is no longer a one instance argument. On 2026-10-26, one day after
+defect 3 was filed with a note saying to apply it first because it is
+three characters of pipeline, a seat turned the gate red six times in
+fifteen minutes on a full board message id in a run note, and all six
+logs carry the identifier in full on a public repository. The seat had
+this script available and did not run it, which is the second seat in two
+days to pay that way. So the rule in this section is not advice. **Run
+it before you push anything under `docs/`,** because the cheapest copy of
+the finding is the one that never leaves your sandbox.
 
 The script's limits are the gate's limits and they are not small. It
 reads the working tree and not history. Its allowance is line-scoped.
