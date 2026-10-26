@@ -29,6 +29,10 @@
 // payload carries `readAt` and the header shows it.
 
 import { useCallback, useEffect, useState } from 'react'
+import {
+  REVOCATION_HOLDS_FORWARD,
+  revocationCannotReachPastedCopies,
+} from '../../lib/revocation-reach'
 import './dashboard.css'
 
 type SpanClass = 'survived_verbatim' | 'survived_mutated' | 'no_generation_provenance'
@@ -305,11 +309,25 @@ export default function Dashboard() {
                   </p>
                   {openRevoke === u.id && (
                     <>
+                      {/* Two sentences, and the second one is why this is
+                          not one. The first says what withdrawing does, and
+                          it was the whole of this disclosure until
+                          2026-10-26, when it read "stops it being applied or
+                          disclosed" with no subject — true of every export
+                          Ursa renders afterwards, and false of a block she
+                          had already pasted into another vendor's settings.
+                          Both halves now come from overlay/lib/revocation-
+                          reach.ts, which the CLI's own confirmation also
+                          reads, so the two surfaces cannot promise different
+                          things about the same withdrawal. */}
                       <p className="dash-ask">
                         Withdrawing keeps the statement on your machine as a
-                        tombstone and stops it being applied or disclosed. The
-                        tombstone is what stops a later pass from concluding it
-                        again, and it is the receipt that your withdrawal held.
+                        tombstone. {REVOCATION_HOLDS_FORWARD} The tombstone is
+                        what stops a later pass from concluding it again, and
+                        it is the receipt that your withdrawal held.
+                      </p>
+                      <p className="dash-ask">
+                        {revocationCannotReachPastedCopies('this page')}
                       </p>
                       <code className="dash-cmd dash-mono">
                         ursa consent revoke-axiom &lt;your project&gt; --axiom {u.id}
@@ -369,9 +387,19 @@ export default function Dashboard() {
         {revoked.length > 0 && (
           <section className="dash-section">
             <h2>Withdrawn, and kept as the receipt</h2>
+            {/* "no longer applied" had the same missing subject as the
+                withdraw disclosure above: Ursa no longer applies them, and
+                a copy she exported before withdrawing is not covered by
+                that. Named here rather than left to the disclosure above,
+                because a reader who arrives at her own tombstones is
+                reading the receipt and is entitled to its limit beside
+                it. */}
             <p className="dash-empty">
-              These are no longer applied and are never disclosed. They stay
-              on your machine so a later pass cannot conclude them again.
+              Ursa no longer applies these and never discloses them. They stay
+              on your machine so a later pass cannot conclude them again. A
+              block you exported and pasted somewhere before withdrawing is
+              not covered by that: it is a copy in another product, and it
+              keeps working until you replace it.
             </p>
             <div style={{ marginTop: '1.25rem' }}>
               {revoked.map((u) => (
