@@ -20,8 +20,9 @@ run, quality over count. The owner's merge is the gate.
 | [auditing-a-detected-correction-loop](auditing-a-detected-correction-loop/SKILL.md) | Whether a detected correction loop is the loop the user actually ran, what `recurrences`, `openedStep`, `closedStep` and `resolution` compute rather than name, and where a complaint the user plainly made went when no signal carries it | 32 | draft, `validated: false` |
 | [auditing-a-durability-walk](auditing-a-durability-walk/SKILL.md) | Whether the forward walk behind a `durability` block ran at all, over which window and to which tip, and what `decayRate`, `durableChars`, `fate` and `medianIntactSeconds` compute rather than name | 27 | draft, `validated: false` |
 | [attributing-a-deleted-span](attributing-a-deleted-span/SKILL.md) | What destroyed a `generated_deleted` span, whether a zero in `mergeDeletedChars` is a measurement or a default, which of the three `unknownReason` values is in hand and what fetch would settle it, and whether `humanDeletedChars` may be called a discard rate on this clone | 15 | draft, `validated: false` |
+| [excluding-a-file-from-an-outcome-record](excluding-a-file-from-an-outcome-record/SKILL.md) | Whether a file-level refusal is proven, declared, or backwards in time, what an absent `exclusions` key says about whether the question was ever asked, how `finalChars` reconciles against the characters an exclusion removed, and whether one imported file is carrying a survival figure | 26 | draft, `validated: false` |
 
-## Seven areas, and the edges between them
+## Eight areas, and the edges between them
 
 The first three skills work on `files[].spans` and `stats` inside
 `outcome_record.json`. The fourth works on `tuning.json`. The fifth
@@ -49,6 +50,19 @@ merge commits standing between the generation and the closure, by a
 function the resolver does not have and the caller injects. It is
 therefore the only block that can be absent, defaulted, or wrong
 because of the clone rather than because of the work.
+
+The tenth is cut by altitude rather than by object, by time, or by where
+the computation came from. `exclusions[]` sits at the top level of
+`outcome_record.json`, so the artifact test puts it with the record
+skills, and the two figures an exclusion moves sit in `stats`, so it
+also overlaps the quoting skill. What separates it is that every other
+record skill rules on something *in* the record and this one rules on
+whether a path is in the record at all. Its answer does not move a
+label. It removes a path from `files[]`, from `coveredChars`, and from
+every percentage computed over them at once, which is why the gate's
+own bound calls the file-level mistake the more expensive one, and why
+a reader who arrives span-first never finds the question: there is no
+span to read.
 
 **The record area.** The three are adjacent and share almost all their
 vocabulary, so each ships a `TRIGGER-TEST.md` whose near misses include
@@ -171,12 +185,13 @@ combined. The practical test for a reader holding both is whether the
 question would survive the answer "those two walks ended at different
 commits". If that dissolves the question, it was this skill's.
 
-Against the other seven the edges are ordinary. The trial skill chooses
+Against the other eight the edges are ordinary. The trial skill chooses
 work whose history can be walked, adjudication settles the classes this
-skill's denominator is built from, and the gate, release, tuning,
-signals and deletion-cause edges are the same handoff shape those
-skills already have, counted eight times rather than eight different
-edges.
+skill's denominator is built from, exclusion decides which paths are in
+the walk's population before the walk runs, and the gate, release,
+tuning, signals and deletion-cause edges are the same handoff shape
+those skills already have, counted five times rather than five
+different edges.
 
 
 **The deletion-cause area.** `attributing-a-deleted-span` is the third
@@ -218,6 +233,64 @@ gate is green on exactly the record this skill exists to catch, and no
 bound can reach it, because the evidence that settles a cause is a git
 tree and no record carries one.
 
+
+**The exclusion area.** `excluding-a-file-from-an-outcome-record` is
+the fourth skill whose cut the artifact test cannot make, and it is the
+only one cut by the altitude of its decision. Its object is
+`exclusions[]` at the top level of `outcome_record.json`, with
+`stats.perFile[].excluded` as the live pointer into it and
+`EXCLUSION_NOT_CLASSIFIED` and `PERFILE_ENUMERATES_PATHS` as the two
+bounds that hold the two sides together.
+
+What it exists for is the one failure in this library that has already
+happened and reached a number. A file arrived in this repository by a
+sync commit copying a standard from another company, the resolver read
+all 63,362 characters of it as model output and 60,616 as text the
+person kept, and the module that refuses imports could not refuse it,
+because content imported from a different repository never existed in
+this object store for a blob search to find. That single file carried
+84.7 percent of that run's headline survival figure. So the skill's
+subject is not a schema detail. It is the difference between a survival
+number about the model and a survival number about someone else's
+prose.
+
+The errors are not symmetric and the asymmetry runs both ways, which is
+unusual here and is the reason the skill is worth its own area.
+Excluding a file the person actually wrote destroys the survival signal
+in it and, by the procedure's own step 8, the discard signal with it.
+Failing to exclude an imported file manufactures survival signal out of
+text nobody in the episode composed. Both directions are expensive and
+neither is the safe default, so the decision cannot be resolved by
+picking a direction once.
+
+Three edges are worth stating because a reader will arrive along them.
+
+Against the quoting skill the order is the reverse of the deletion
+skill's, and the reversal is not an inconsistency. A deletion cause is
+read *out of* a figure, so the figure's population has to be pinned
+first and a spanning prompt is handled quoting-side first. An exclusion
+*changes* the population, so a spanning prompt is handled
+**exclusion-side first**: what a number is a share of cannot be settled
+until it is settled which paths are in it.
+
+Against `adjudicating-uncertain-spans` the two run the same clock test
+at two grains, and the schema says so. A `sibling` exclusion's author
+date ordered against `task.generatedAt` is what `DescentEvidence`'s
+`rival` variant carries one level down, and `RIVAL_NOT_AFTER_FINAL` is
+the span-level bound to `EXCLUSION_NOT_CLASSIFIED`'s third clause. The
+discriminator is the unit the answer moves, a path against a span, and
+the cheap version is that a prompt holding a `relation` is this
+skill's while a prompt holding a `DescentEvidence` variant is
+adjudication's.
+
+Against the gate the asymmetry has a hole in it that no bound can
+close. The gate catches a refusal that was computed and then not
+applied, because both halves of that contradiction are in the record.
+It can never catch a refusal that should have been made and was not,
+because no record carries the object store that would settle it. The
+most expensive failure in this area is therefore permanently out of the
+gate's reach, which is the argument for a skill rather than another
+bound.
 
 ## Checking the receipts
 
