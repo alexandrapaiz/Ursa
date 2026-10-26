@@ -10755,3 +10755,84 @@ in:file extension:py`; and `orgs/lmarena/repos` with two sibling
 `search/repositories` queries used only to pick the target. Every
 quotation above is from those files. **Nothing in any of them addressed
 itself to this run or asked it to do anything.**
+
+### 2026-10-25 (market, message, 15th run) — Add TELUS Digital, a vendor at the largest disclosed labor scale in Category 1, and a seventh verifier-gap source from inside it
+
+- Trigger: this run's landscape and demand-signals ceremonies. TELUS
+  Digital (TSX/NASDAQ: TIXT) runs an RLHF/annotation business with a
+  self-described "Global AI Community" of more than one million
+  annotators, named a Leader in NelsonHall's 2026 NEAT evaluation for
+  AI enablement services — a Category 1 competitor at a labor scale
+  this map had not found in four prior full passes, surfaced only
+  through a staff engineer's own byline. That engineer's 2026-10-15
+  practitioner digest of LLM-judge failures (51% ground-truth
+  agreement from the "most consistent" judge, verdicts flipping at
+  zero temperature) is this thread's seventh source, and the only one
+  written by someone employed at a direct competitor rather than an
+  academic or an outside practitioner. Sources:
+  [TELUS Digital: Data for AI Training](https://www.telusdigital.com/solutions/data-for-ai-training/data-validation-services),
+  [dev.to: Felipe Oliveira, "Perfectly Consistent, Still Wrong"](https://dev.to/felipe0liveira/perfectly-consistent-still-wrong-llm-judges-keep-failing-the-same-way-plus-cheaper-alternatives-4eg3).
+- What: two things, both landed in docs/market/landscape.md and
+  docs/market/positioning.md this run rather than left for a future
+  one. First, a gap in how this map finds new entries: TELUS Digital
+  operates at a scale larger than every named Category 1 vendor
+  combined and went unlisted through the 2026-09-26 opening map and
+  three subsequent full passes, because the sweeps so far have
+  searched by vendor name or "RLHF vendor" generally rather than by
+  byline or job posting. Second, the author's own proposed fix is
+  again a better-constructed grader, not real-outcome data, matching
+  the pattern the six prior sources established, but the author
+  independently writes "make it cheap to actually look at what
+  happened instead of trusting a single aggregate score" — language
+  close enough to CLAUDE.md §1's own framing that it reads as
+  unprompted corroboration from inside a competing vendor's technical
+  staff, which the other six sources (academic papers and outside
+  observers) could not supply.
+- First step: when KR4.1's lab brief is drafted, this source closes
+  the verifier-gap section with the one citation that comes from
+  inside a Category 1 vendor rather than from outside the market,
+  which forecloses the "the people selling solicited labels don't see
+  the problem" version of a lab's objection. Separately, whoever next
+  runs the landscape ceremony's "anything new you discover" step
+  should try a byline/job-posting search alongside the usual
+  vendor-name sweep, since that is specifically what found this entry
+  after name-based searches had not.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 (market, message, 16th run) — The "build task + verifier" pivot is now a three-vendor pattern, not a pair
+
+- Trigger: this run's landscape ceremony. micro1, a human-data vendor
+  (added to docs/market/landscape.md as Category 1's 19th entry this
+  run), raised a $100M+ Series B in September 2026 at a $4B valuation
+  and reported a $1B annualized run rate on 2026-10-13, up from $7M at
+  the start of 2025 — the fastest disclosed growth curve this map has
+  found. Its product build-out includes "Realm," an RL-environment
+  offering where, per the company's own site, "experts recreate
+  real-world scenarios" to train model reasoning. That makes three
+  independently-funded vendors now building constructed
+  task-and-verifier environments rather than staying in solicited
+  labeling: Mercor (Deeptune acquisition, 2026-07-09), Halluminate
+  ($30M Series A, 2026-10-01), and now micro1. Sources:
+  [TechCrunch: micro1 raises funds at $500M valuation](https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/),
+  [Dealroom: micro1 raises $100M at $4B valuation](https://dealroom.co/news/155583-micro1-raises-100m-at-4b-valuation-for-ai-training-data/),
+  [Dealroom: micro1 passes a $1B run rate](https://dealroom.co/news/161913-micro1-passes-a-1b-run-rate-with-about-180-staff-three-years-after-nearl/).
+- What: when one vendor builds a constructed verifier, it reads as
+  that vendor's own bet. When three independently-funded vendors do it
+  inside the same few months, it reads as the market's own answer to
+  the verifier gap CLAUDE.md §1 names, and it is the wrong answer by
+  this project's own thesis: a gym seeded with a constructed task is
+  still not a real deliverable joined backward to its own generation
+  history, no matter how good the built-in verifier is. This sharpens
+  rather than weakens Minor's pitch, because it shows the market has
+  identified the same gap and is reaching for the solution the
+  principles of intelligence rule out (a central grader, however
+  well-constructed, contradicts §0b's second and fourth principles),
+  not that the gap itself is already filled.
+- First step: when KR4.1's lab brief is drafted, name this pattern
+  explicitly as the anticipated objection to pre-empt: "why not just
+  use a better verifier environment like Mercor's or micro1's,"
+  answered by the distinction above. No code or product change
+  implied; this is framing for the sales/positioning material only.
+- Cost: $0
+- Status: proposed

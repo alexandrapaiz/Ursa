@@ -1,0 +1,75 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>hit-areas self-test</title>
+<!--
+  A fixture whose right answers are known, so that `measure-hit-areas.mjs`
+  can be shown to still find a failure. Added 2026-10-25b, when the tool
+  grew a third category and its headline went to zero on the real site:
+  a number that only ever reads zero proves nothing on its own.
+
+  Serve this directory and point the tool at the file:
+
+    python3 -m http.server 4971 -d docs/design/review-kit/selftest &
+    node docs/design/review-kit/measure-hit-areas.mjs \
+      --base http://127.0.0.1:4971 --pages selftest=/hit-areas.html \
+      --out selftest.txt
+
+  Expected, and asserted by `check-hit-areas.mjs` beside this file:
+  2 standalone of 2 short, 1 inline exempt, 4 document spans of which
+  1 does not cover its own line and 1 is covered outright.
+-->
+<style>
+  body { margin: 0; padding: 24px; font: 16px/1.5 Helvetica, Arial, sans-serif; background: #0b0d10; color: #e8eaed; }
+  /* (1) and (2): standalone controls under the floor. No text siblings, not
+     in a pre, so nothing exempts them. These must come back SHORT. */
+  .tiny { display: block; height: 17px; padding: 0; margin: 24px 0; font: 11px/17px monospace; background: none; color: inherit; border: 1px solid #555; }
+  /* (3): an inline link in a sentence. WCAG 2.5.8's own exemption, which
+     the document category must not have swallowed. */
+  /* (4)-(7): a tiled document, the shape the record viewer draws. Every
+     span abuts its neighbours, and there is no bare text between them. */
+  pre.doc { position: relative; border: 1px solid #555; padding: 20px; font: 13px/19px monospace; }
+  pre.doc .sp { cursor: pointer; background: rgba(168,199,250,0.12); }
+  /* (6): something sits over the bottom few pixels of this span's line.
+     The probe starts at the centre of the line box, so it can still walk
+     up out of the span but is stopped early walking down, and the hit
+     height comes back under the span's own line box. The strip has to be
+     thinner than half the line box or the probe's own start point lands
+     inside it and the span reads COVERED instead, which is a different
+     finding; that is what case (7) is for. */
+  .clip-lower { position: absolute; left: 0; right: 0; background: transparent; }
+  /* (7): something sits over the whole line. COVERED. */
+  .clip-all { position: absolute; left: 0; right: 0; background: transparent; }
+</style>
+
+<button class="tiny" id="t1">a seventeen pixel control</button>
+<button class="tiny" id="t2">another one</button>
+
+<p>A sentence with <a href="#x">an inline link</a> inside it, surrounded by
+real words on both sides so that the sentence test has something to see.</p>
+
+<pre class="doc" id="doc"><span class="sp" role="button" tabindex="0">a tiled span that is fine</span><span>  </span><span class="sp" role="button" tabindex="0">a second tiled span, also fine</span>
+<span class="sp" role="button" tabindex="0">this one is clipped from below</span>
+<span class="sp" role="button" tabindex="0">and this one is covered entirely</span>
+</pre>
+
+<script>
+  // The two overlays are placed from script against the measured line
+  // boxes rather than written as magic numbers, so the fixture stays
+  // correct if the font metrics move under it.
+  const doc = document.getElementById("doc");
+  const spans = [...doc.querySelectorAll(".sp")];
+  const base = doc.getBoundingClientRect();
+  const place = (el, target, strip) => {
+    const r = target.getClientRects()[0];
+    const h = strip === "all" ? r.height : Math.max(2, Math.floor(r.height / 3));
+    el.style.height = h + "px";
+    el.style.top = r.top - base.top + (strip === "all" ? 0 : r.height - h) + "px";
+    doc.appendChild(el);
+  };
+  const lower = document.createElement("div");
+  lower.className = "clip-lower";
+  place(lower, spans[2], "lower");
+  const all = document.createElement("div");
+  all.className = "clip-all";
+  place(all, spans[3], "all");
+</script>
