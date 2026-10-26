@@ -4,114 +4,104 @@ Replaced wholesale each run by Ursa's ExO seat under
 `prompts/exo-agent.md` §5b. Nothing in this file is carried forward: a
 line absent from the newest copy is the point of the file, not a loss.
 
-**Measured 2026-10-26, 19:4x UTC, sixty-first window**, against
-`origin/main` at `9e2f21b7`, in a clone that was **unshallowed and had its
-refspec widened first** (§0, verified: `--is-shallow-repository` prints
-`false` and `main` carries 1616 commits), and every verdict
-**performed** rather than asked of GitHub.
+**Measured 2026-10-26, 20:3x UTC, sixty-second window**, against
+`origin/main` at `9e2f21b7`, in a clone that was unshallowed and had its
+refspec widened first (§0, verified: `--is-shallow-repository` prints
+`false`, `main` carries 1,616 commits), **and that had the repository's
+merge drivers registered before any merge was performed**. Every verdict
+was performed rather than asked of GitHub.
 
-## The headline: five merges close eleven of sixteen, and one pair cannot land through the green button
+**The driver registration is new this run and it is the difference
+between this copy and the last one.** `bash tools/registers/install-drivers.sh`,
+once in the checkout and once in every scratch worktree, because a
+worktree does not inherit it. Without it `git merge-tree` exits 128 with
+`fatal: custom merge driver ledger lacks command line.` on any pair that
+both touch `docs/ideas.md`, `docs/decisions.md` or
+`docs/agents/runner-facts.md`, and §5b's old wording reads that as a
+conflict. The measurement, the three failure modes and the exit-code
+table are `docs/agents/runner-facts.md` §48.
 
-| order | merge | closes with it | verdict vs `main` | instrument |
-|---|---|---|---|---|
-| 1 | **542** (skill) | 511, 518, 539 | CLEAN | `merge-tree --write-tree` + sequenced `git merge` |
-| 2 | **540** (engineer) | 520, 530 | CLEAN vs `main`, **collides with 542 driverless** | see the instruction below |
-| 3 | **543** (pm) | 517 | CLEAN | same |
-| 4 | **536** (exo) | — | CLEAN | same |
-| 5 | **447** (exo) | — | CLEAN | same |
-| 6 | **395** (research) | — | CLEAN | same |
-| 7 | **509** (market) | — | CLEAN | same |
-| 8 | **532** (security) | — | CLEAN | same |
-| — | 544 (skill), 545 (engineer) | — | drafts with live runs behind them, not ordered | — |
+## The headline: there is no conflict in this queue, and eight merges close all seventeen
 
-All sixteen open heads are clean against `origin/main` individually, by
-`git merge-tree --write-tree --name-only origin/main refs/prs/<n>`, every
-one exiting zero. The whole eight-step order above was then **performed**
-in sequence and every step exited zero, in a clone with this
-repository's own declared merge drivers registered.
+The previous copy of this file named a trunk conflict on one head and an
+order-independent collision on a pair, and told the engineer seat to
+rebase. **Both are withdrawn.** The trunk verdict was already withdrawn
+by window 61. The collision is real driverless and resolves to nothing
+with the driver registered, which is Ursa's engineer seat's measurement,
+reproduced independently here on the same pair.
 
-## The one instruction in this file: 540 and 542 collide on the ledger in both orders, and the driver is the fix rather than a rebase
+| order | merge | seat | closes with it | verdict vs `main` | tier | instrument |
+|---|---|---|---|---|---|---|
+| 1 | **549** | engineer | 520, 530, 540, 545 | CLEAN | B | `merge-tree` + sequenced `git merge`, drivers registered |
+| 2 | **550** | pm | 517, 546 | CLEAN | B | same |
+| 3 | **551** | security | 532 | CLEAN | B | same |
+| 4 | **548** | exo | 536 | CLEAN | B | same |
+| 5 | **552** | skill | 547 | CLEAN | B | same |
+| 6 | **509** | market | — | CLEAN | B | same |
+| 7 | **395** | research | — | CLEAN | **C** | same |
+| 8 | **447** | exo | — | CLEAN | **C** | same |
 
-**Neither conflicts with `main`. They conflict with each other**, and a
-queue measured only against the trunk reports it nowhere. The collision
-is on `docs/ideas.md` and it is **order-independent**, which the
-previous copy of this file did not test for:
+Eight merges, seventeen pull requests closed. Nine of the seventeen are
+contained in another open head and close for free.
 
-```
-driverless, 542 then 540: CONFLICT (content) in docs/ideas.md
-driverless, 540 then 542: CONFLICT (content) in docs/ideas.md
-```
-
-Both heads append to the ledger: 540 is +599/−0 and 542 is +485/−27.
-That is exactly the shape `.gitattributes` declares `docs/ideas.md
-merge=ledger` for, so the conflict is an artifact of the merge being
-performed **without** the driver.
-
-With the driver registered, in a separate clone so no shared config was
-repointed (runner-facts §31):
+**The order is verified by performing it**, in a detached scratch
+worktree with the drivers registered, against `origin/main` and never
+against `main`:
 
 ```
-bash tools/registers/install-drivers.sh
-# 6 declaration(s) over 2 driver(s), all registered in this clone
-542 then 540: OK
+549 OK  550 OK  551 OK  548 OK  552 OK  395 OK  447 OK  509 OK
+all 17 open heads contained in the simulated result
 ```
 
-**So the instruction is not a rebase.** The previous copy of this file
-told the engineer seat to rebase its ledger append behind the skill
-seat's, on the asymmetry of the two diffs. That advice is withdrawn: it
-costs a seat a run and the driver resolves the same conflict in one
-command. What is true instead:
+The two Tier C rows are last deliberately, because they wait on the
+owner and nothing below them depends on them.
 
-- **GitHub's green button performs the driverless merge** (runner-facts
-  §25 and §32), so it will refuse the second of 540 and 542 whichever
-  one goes first. This is the owner's constraint and nobody else's.
-- **A local merge with `bash tools/registers/install-drivers.sh` run
-  first lands both**, in the order above, verified this window.
-- Nothing needs rebasing and no seat is owed a run of work.
+## Containment, measured rather than assumed
 
-## Retired from the previous copy, with the reason
-
-| claim | now | why |
-|---|---|---|
-| **520** is the only head conflicting with the trunk | **CLEAN**, and contained in 540 | re-measured this window; `merge-tree` exits zero |
-| merge 539 first and hand 530 the rebase | withdrawn | 539 and 530 are both contained in newer heads, and the driver makes the rebase unnecessary |
-| 538 closes six | gone from the queue | 538 is no longer open |
-| three merges close fifteen of twenty-three | five close eleven of sixteen | three of this seat's own heads closed as contained this window |
-
-## Containment, measured pairwise over every open head
-
-`git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`, exit
-zero meaning contained, stated in the direction that cannot invert:
+Instrument: `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
+exit 0 meaning contained, stated in the direction §"Read your own seat's
+open PRs first" requires.
 
 ```
-511 is contained in 518, 539, 542, 544
-518 is contained in 539, 542, 544
-539 is contained in 542, 544
-542 is contained in 544
-517 is contained in 543
-520 is contained in 540
-530 is contained in 540
+517 is contained in 546, 550        532 is contained in 551
+520 is contained in 540, 549        536 is contained in 548
+530 is contained in 540, 549        540 is contained in 549
+545 is contained in 549             546 is contained in 550
+547 is contained in 552
 ```
 
-Two chains, and the deepest **ready** head of each is what the order
-uses, because a draft cannot be merged at all: 542 for the skill chain
-and 540 for the engineer chain. 544 and 545 are deeper and are drafts
-with live runs behind them.
+The eight tips above are exactly the heads contained in nothing.
 
-## Queue depth
+## Pairwise, and the half this seat cannot measure
+
+Every ordered pair of the seventeen open heads, drivers registered:
+**zero** real conflicts. Driverless, fourteen pairs collide and all
+fourteen are on `docs/ideas.md`.
+
+**GitHub's green button honours no `.gitattributes` driver.** That is the
+engineer seat's measurement, written up in its own repository as Finding 1
+of `docs/design/server-side-merge-measurement.md`, and this seat has not
+independently reproduced it. So the second head of a colliding pair will
+show CONFLICTING at the button the moment the first lands, and the
+remedy is one command on the second head,
+`bash tools/ledger/requeue.sh --push <second>`, rather than a rebase.
+Either order works. Nothing in the table above needs reordering for it.
+
+## The two numbers for the owner
 
 | | |
 |---|---|
-| open pull requests | **16** |
+| open pull requests | **17** |
 | merged in the last seven days | **87** |
-| oldest open | 395, created 2026-10-24 21:21 UTC, about 46 hours |
-| drafts among the open | 3, all with live runs behind them |
+| oldest open | 395, created 2026-10-24 21:21 UTC, about 47 hours |
 
-Open is well below the last seven days' merges, so **no depth warning
-this window**. The queue is being absorbed faster than it is produced.
+Open is far below the week's merges, so **no depth warning**. The gate is
+absorbing faster than the seats produce.
 
-## What this file does not decide
-
-Merging is the owner's alone. Measuring the queue and naming the order
-is information for her. This seat never loosens the merge gate, never
-enables auto-merge, and never advises a seat to merge its own work.
+**The queue moved four times while this file was being written**, from 14
+to 17 open heads between 20:0x and 20:3x UTC, and two of this window's
+own pairwise rows were pull requests that did not exist at its fetch. A
+row in this table is a claim about 20:3x UTC and no later instant. Fetch
+`refs/prs/*` immediately before acting on any row of it, because a
+missing ref exits 1 with an empty file list and reads as a conflict
+(runner-facts §48).
