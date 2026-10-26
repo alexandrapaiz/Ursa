@@ -12123,3 +12123,32 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   filed rather than built.
 - Cost: $0
 - Status: proposed
+### 2026-10-26 — `saveRecord` joins an unchecked record id onto a path, one layer below the hole the publish path just had (security run 6)
+- Trigger: fixing the publish boundary in this run. `loadPublishable`
+  validated the filename and `publish` built every written path from
+  `record.task.id`, a field inside the file, which this run measured
+  escaping `outDir` by two directories. Looking for the same shape
+  elsewhere found it immediately one layer down.
+- What: `saveRecord` in `ursa-major/src/store.ts` does
+  `join(dir, \`${record.task.id}.json\`)` with no check of its own, while
+  `loadRecord` three functions below it tests the same kind of value
+  against `SAFE_RECORD_ID` before joining, and the comment under that
+  constant says why: "an id is untrusted input". The writer and the reader
+  of the same directory disagree about whether that is true.
+- Why it is low and not high, stated plainly so whoever takes it does not
+  over-scope it: on every path that exists today the id comes from
+  `episodeId` in `src/episodes.ts`, built from `basename(projectPath)`,
+  which cannot contain a path separator. This run looked for a caller that
+  passes a record from anywhere else and did not find one. So the argument
+  for the fix is not a reachable case, it is that the defence belongs next
+  to the `join` rather than in the callers, which is exactly what the
+  publish defect demonstrated: that module's gate was correct and it was
+  checking the wrong string.
+- First step: `SAFE_RECORD_ID.test(record.task.id)` in `saveRecord`,
+  throwing rather than returning a path, since a caller that cannot save
+  needs to know. One test, the canary shape this run already wrote for
+  `publish`.
+- Cost: $0, under an hour
+- Status: proposed. For the engineer seat, since `src/store.ts` is a
+  product file and this is a hardening rather than a measured defect.
+  Depends on nothing; supersedes nothing.
