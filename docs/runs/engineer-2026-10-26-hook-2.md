@@ -203,3 +203,43 @@ npm run fixtures:violations:check                               47 of 47 match
   in `docs/design/ledger-closure-backlinks.md` §§2 and 9.
 
 Nothing else outside this repository's committed files was read.
+
+## `origin/main` moved during this run, and the merge is in the branch
+
+`main` advanced 98 commits between this branch's cut and the end of the run.
+`git merge origin/main` conflicted once, on `docs/ideas.md`, which is the
+two-appends-at-the-end collision the union merge driver exists for and which
+this clone has not registered. Resolved by keeping both sides whole,
+`origin/main`'s appends first and then this run's, with nothing dropped from
+either side. Verified after the resolution rather than assumed:
+
+```bash
+# cwd: repository root
+grep -c '^<<<<<<<\|^=======$\|^>>>>>>>' docs/ideas.md        # 0
+node tools/ledger/check.mjs                                  # 340 blocks, exit 2
+node tools/ledger/check-closures.mjs                         # exit 0, 3 markers
+grep -c '^- Status: urgent' docs/ideas.md                    # 6
+```
+
+Those six are exactly the six owner-held entries §"Orient" names, by heading.
+`check.mjs` now reports **two** owner-held statuses rather than one: the
+second, `Status: decided` on the 2026-10-24 skill-seat entry, arrived with
+`main` and belongs to that seat and the owner, not to this run.
+
+Every gate re-run on the merged head:
+
+```
+node --test tools/ledger/*.test.mjs                           89 pass, 0 fail
+node --test tools/ensure-full-clone.test.mjs                  19 pass, 0 fail
+node --test tools/stack/integrate.test.mjs                     8 pass, 0 fail
+node tools/secret-scan.mjs                     2016 files, 16 classes, 0 hits
+node scripts/redaction-check.mjs                           clean, 3 patterns
+cd ursa-major && npm test            989 passed, 4 skipped, 0 failed (993)
+npm run bundle:check                        current, sha256 89aa5998…
+npm run fixtures:violations:check                       47 of 47 match
+npm run regen:check            clean, and the digest index matches history
+```
+
+`regen:check` now checks the digest index too, because the checkout was
+repaired earlier in the run. On the shallow checkout this sandbox arrived
+with, that half is skipped and the script says so.
