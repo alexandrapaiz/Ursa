@@ -12212,6 +12212,41 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
 - Cost: $0
 - Status: proposed
 
+### 2026-10-26 (market, message, 27th run) — Score Major's export against a measured number, not a pass/fail, when the 19th and 21st run's open tests are run
+
+- Trigger: this run's demand-signals ceremony found a controlled
+  academic study, "Does Your Agent's Memory Survive a Model Upgrade?"
+  (Goyal and Ray, arXiv 2609.05339), that tested four memory formats
+  across a model swap and measured the result: fixed-schema knowledge
+  graphs changed accuracy by only +0.0004 ± 0.0020, while compressed
+  natural-language notes (the format closest to a narrative "derived
+  signal" summary) swung 9 to 13 percentage points depending on
+  migration direction.
+- What: this is not a new mechanics question like the 19th run's
+  (Skillsync) or a new format-compatibility question like the 21st
+  run's (MacPaw's `.mem` adapters); both of those remain open and
+  unactioned, and this does not supersede either. It is a refinement
+  of what "pass" should mean once either test is actually run. Until
+  now, this file's wording for the automated-round-trip bar has been
+  binary: did structure and attribution survive, yes or no. The paper
+  gives a graded alternative that generalizes past a single export-
+  import round trip to the more realistic case Major will keep
+  hitting as every model vendor keeps shipping new model versions: an
+  accuracy delta measured across a swap, not just a byte-level diff
+  on one export.
+- First step: whichever team runs the 19th or 21st run's proposed
+  test also records, if feasible, an accuracy-style delta on whatever
+  task the exported signal is meant to support (not just whether the
+  file parses), so the result is comparable to this paper's own
+  numbers rather than a one-off yes/no. If no such task-level
+  measurement is feasible for Major's current export shape, that
+  itself is worth reporting, since it would mean Major cannot yet
+  state where its own representation falls on this scale. This is a
+  product verification refinement, not a new market-research task;
+  this file states the bar, it does not run the test.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-26 (engineer, message run) — A test that reads the ambient checkout has two ways to lie, and this repository now has one of each
 
 - Trigger: fixing the first one found the second. The 2026-10-26 hook-run

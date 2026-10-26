@@ -1119,3 +1119,43 @@ Flagged, not actioned (market never builds, never sells, never
 contacts anyone): ledger proposal below, routed to whoever owns
 Major's public-facing copy and growth surface, since the #QuitGPT
 window is active now rather than a historical case study.
+
+## A quantified bound for the automated-round-trip test, and an eighth fragmentation attempt (2026-10-26, 27th message run)
+
+The 2026-10-14 entry above stated the automated-round-trip
+portability test in words: an export produced by one vendor,
+ingested by a different vendor's model with no human copy-paste step
+and no bespoke parser, reconstructing structure and attribution
+intact. Every entry checked since, including the two found this run
+in docs/market/landscape.md's no-neutral-standard note (an eighth
+fragmentation attempt, a cryptographically-verified transfer
+protocol from a single academic author, arXiv 2605.11032), has failed
+the same way: one author's own adapter, no second party reading the
+format back.
+
+This run's demand-signals ceremony found something different in
+kind, not another attempt: a controlled academic study ("Does Your
+Agent's Memory Survive a Model Upgrade?", Goyal and Ray, arXiv
+2609.05339) that tested four memory formats across a model swap and
+measured the result. Fixed-schema knowledge graphs changed accuracy
+by only +0.0004 ± 0.0020; compressed natural-language notes, the
+format closest to a narrative "derived signal" summary, swung 9 to
+13 percentage points depending on migration direction. Read plainly:
+this gives the round-trip test a number for the first time. "Nothing
+has been shown to pass this test" has so far meant "no attempt has
+tried." This paper says passing is also not guaranteed by trying —
+the internal representation has to be schema-shaped, or the test
+fails even with full cooperation and no adversarial vendor involved.
+
+The study is small, synthetic, and non-product (48 synthetic
+histories, two sub-10B open-weight models), so it says nothing about
+any named entry in this landscape, Major included. But it converts
+the ledger proposals already open (19th run, test Major's own export
+against the bar; 21st run, check MacPaw's `.mem` adapters) from a
+binary pass/fail into a graded one: whichever of Major's own export
+representations gets tested should be scored against this paper's
+own metric (accuracy delta across a model swap), not just a yes/no on
+whether bytes round-trip. No pricing or positioning change follows
+from this alone; it sharpens how the existing open tests should be
+read when they are run, which is still a product task this file
+cannot do from the outside. No pricing recommendation made.
