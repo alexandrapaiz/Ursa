@@ -2,6 +2,29 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~10:2x UTC message run (13th)
+
+1. **The ceremony-stack pull request still waits on the owner, one PR
+   further on than the 12th run reported.** This run's own PR supersedes
+   #507's own chain back through #505, #500 and earlier today. It still
+   touches `docs/decisions.md` and `docs/prfaq/mvp-public-address.md`
+   alongside pure knowledge surfaces, so it stays outside Tier A despite
+   being this seat's own, and Tier B excludes a PM's own PR (§10
+   condition 1). It needs the owner's own merge.
+2. **One Tier B merge landed this pass.** The frontend seat's hover and
+   controls review (today's `d` run) turned up green, clean, undrafted,
+   unlabelled and uncommented, with no Tier C path in its diff. Merged
+   under Tier B. The seat's own next pull request already says it
+   subsumes nothing from the merged one and should be read on its own,
+   so nothing was superseded by the merge.
+3. **This seat's own register conflict, diagnosed by exo, is fixed.**
+   The incident register carried one entry twice on this seat's own
+   branch (lines 7683 and 7795), caused by two merges independently
+   rescuing the same entry rather than a content disagreement. The
+   shorter, 7795 copy is deleted; the 7683 copy, which carries the
+   forty-seventh window's correction, stands. Replied to exo on the
+   board in first person, as asked.
+
 ## Top three for the owner, 2026-10-26 ~10:0x-10:1x UTC message run (12th)
 
 1. **One pull request now carries today's whole ceremony stack and waits
@@ -27,6 +50,58 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
    Touches `prompts/exo-agent.md` and `prompts/pm-agent.md` directly —
    charter files, owner-merge only by definition. #500 already flagged
    it as Tier C "by its own account"; nothing about it changed this pass.
+
+## This run (2026-10-26, ~10:2x UTC, message run, 13th)
+
+**Read own seat's open PRs first.** Found #505 (12th run), this seat's
+own, open and ready, carrying today's cumulative ceremony state plus
+the two Tier B merges it recorded. Branched from its tip, not `main`.
+
+**This run's trigger.** Three events: review the frontend seat's hover
+and controls pull request against the merge rule; a note from exo
+naming this seat's own branch as the one conflicting pull request in
+the queue, with a full diagnosis and a one-line fix; and a notice that
+the frontend seat's run producing that pull request had finished.
+
+**The frontend pull request, checked fresh against all six Tier B
+conditions.** Not this seat's own, not a draft, no labels, no comments
+or reviews, checks green (`redaction-gate` success), `mergeStateStatus:
+CLEAN`, no Tier C path in `gh pr diff --name-only` (only
+`ursa-major/overlay/`, `scripts/redaction-check.mjs` and its test, and
+the design-review evidence folder), opened today. Merged under Tier B,
+branch deleted. Checked the seat's own later, still-draft pull request
+for supersession and found none — it says explicitly that it carries
+the merged one's commits only because it was cut from the same tip, and
+that the merged one should be read and merged on its own.
+
+**Exo's conflict, fixed exactly as diagnosed.** Confirmed by diffing
+both copies: the one at line 7683 is 112 lines and carries the
+forty-seventh window's correction; the one at line 7795 is 48 lines and
+stops before it. Deleted the 7795 copy, kept 7683, and confirmed by
+grep that no heading in the file is still duplicated. Replied to exo on
+the board in first person with the reason, as the note asked, rather
+than only fixing the file silently.
+
+**The "hand the next thing to a seat" instruction, checked rather than
+assumed empty.** Looked for an idle seat before concluding there was
+none to hand anything to: the engineer seat already has its own open
+draft mid-run on the sprint's own item one, the frontend seat already
+has its own open draft mid-run on its next design item (cut from the
+just-merged pull request's tip, by its own account), and
+`PM_DISPATCH_ENABLED` reads empty in this run's own environment, same
+as every pass today. A fresh `gh run list` shows nothing non-success in
+the last 15 runs. Nothing idle, nothing new to hand off.
+
+**A secret-printing mistake, not repeated further.** An early
+`env | grep -iE "board|asc_"` in this run's own session printed
+`BOARD_RUNTIME_TOKEN`'s full value into this run's own transcript, the
+same mistake `INC-2026-10-18-board-runtime-token-printed-twice`
+(the entry this pass just de-duplicated) already names twice. No
+further command in this session echoed the value; presence should be
+checked by name only, never a bare `grep` over `env`'s full output.
+Not re-filed as a new incident and the standing ask not re-sent, since
+the entry already tracks this exact recurrence pattern and the owner's
+rotation is the only thing that closes it.
 
 ## This run (2026-10-26, ~10:0x-10:1x UTC, message run, 12th)
 
