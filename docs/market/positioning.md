@@ -696,6 +696,32 @@ can show it fixed than to a structural conflict of interest it can't
 undo. No pricing recommendation made; this sharpens a trust argument,
 not a price.
 
+## The "build task and verifier" comparison has to hold against a market, not three names (2026-10-26, 29th message run)
+
+The Mercor/Deeptune (2026-10-14), Halluminate (2026-10-24), and micro1
+(2026-10-25) entries each named the same weakness against a single
+named vendor: a constructed task with a built-in verifier is not a
+real deliverable joined backward to its own generation history. This
+run's landscape watch (docs/market/landscape.md, new cross-cutting
+note) found an independent directory naming 42 companies in this exact
+sub-category, with real funding behind several (AfterQuery $30.5M,
+Bespoke Labs $40M, Fleet AI $15M, Datacurve $17.7M) and the
+category's own incumbents (Scale AI, Mercor, Surge AI) now also
+building in it. The positioning consequence is a scope correction, not
+a new argument: whoever writes the sentence distinguishing Minor's
+outcome record from a gym should not write it as if the comparison is
+against three recent pivots. It is against an already-funded,
+already-mapped market at least 42 names deep, and the one structural
+gap checked across all three names examined individually so far holds
+across the sample, not just the sample's size. No pricing
+recommendation made; this sharpens how large a claim "we are not a
+constructed verifier" has to support, not what Minor charges for not
+being one. First step, not yet taken: spot-check two or three of the
+better-funded, unexamined names (AfterQuery, Bespoke Labs, Fleet AI)
+the way Halluminate and micro1 already were, since a sample of three
+out of 42 is not yet strong enough to claim the gap holds market-wide
+rather than just vendor-by-vendor. Ledger proposal below.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -860,6 +886,14 @@ not a price.
   added Mercor's APEX benchmark suite as a second named vendor (after
   Surge's Tuesday Work Index) using "measure AI on real work" language
   close to CLAUDE.md §1's own framing. No pricing recommendation made.
+- 2026-10-26 (event-driven, message, 29th run) — found an independent
+  directory (rl-list.com) mapping 42 named companies in the "build the
+  task and the verifier" sub-category this file had tracked one vendor
+  at a time (Mercor/Deeptune, Halluminate, micro1). Scope correction:
+  the structural gap already named against those three names has to
+  hold against an already-funded market, not a handful of recent
+  pivots. No pricing recommendation made; flagged a first step (spot-
+  check two or three unexamined, better-funded names) not yet taken.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -1119,3 +1153,73 @@ Flagged, not actioned (market never builds, never sells, never
 contacts anyone): ledger proposal below, routed to whoever owns
 Major's public-facing copy and growth surface, since the #QuitGPT
 window is active now rather than a historical case study.
+
+## A quantified bound for the automated-round-trip test, and an eighth fragmentation attempt (2026-10-26, 27th message run)
+
+The 2026-10-14 entry above stated the automated-round-trip
+portability test in words: an export produced by one vendor,
+ingested by a different vendor's model with no human copy-paste step
+and no bespoke parser, reconstructing structure and attribution
+intact. Every entry checked since, including the two found this run
+in docs/market/landscape.md's no-neutral-standard note (an eighth
+fragmentation attempt, a cryptographically-verified transfer
+protocol from a single academic author, arXiv 2605.11032), has failed
+the same way: one author's own adapter, no second party reading the
+format back.
+
+This run's demand-signals ceremony found something different in
+kind, not another attempt: a controlled academic study ("Does Your
+Agent's Memory Survive a Model Upgrade?", Goyal and Ray, arXiv
+2609.05339) that tested four memory formats across a model swap and
+measured the result. Fixed-schema knowledge graphs changed accuracy
+by only +0.0004 ± 0.0020; compressed natural-language notes, the
+format closest to a narrative "derived signal" summary, swung 9 to
+13 percentage points depending on migration direction. Read plainly:
+this gives the round-trip test a number for the first time. "Nothing
+has been shown to pass this test" has so far meant "no attempt has
+tried." This paper says passing is also not guaranteed by trying —
+the internal representation has to be schema-shaped, or the test
+fails even with full cooperation and no adversarial vendor involved.
+
+The study is small, synthetic, and non-product (48 synthetic
+histories, two sub-10B open-weight models), so it says nothing about
+any named entry in this landscape, Major included. But it converts
+the ledger proposals already open (19th run, test Major's own export
+against the bar; 21st run, check MacPaw's `.mem` adapters) from a
+binary pass/fail into a graded one: whichever of Major's own export
+representations gets tested should be scored against this paper's
+own metric (accuracy delta across a model swap), not just a yes/no on
+whether bytes round-trip. No pricing or positioning change follows
+from this alone; it sharpens how the existing open tests should be
+read when they are run, which is still a product task this file
+cannot do from the outside. No pricing recommendation made.
+
+## A third "neutral by design" entrant, and the same self-graded gap as the other two (2026-10-26, 28th message run)
+
+docs/market/landscape.md this run added MemoryLake, a bootstrapped
+(no outside funding, per Tracxn) hosted memory store pitched almost
+word for word like Wire's: memory is "a genuine feature and a
+retention mechanism" at once, and the fix is a store the user owns
+"outside any single vendor." Found via the same demand-signals search
+pattern that surfaced Wire and Skillsync on 2026-10-26 (searching
+lock-in discussion, not competitor lists), which is itself now a
+pattern worth naming: three separate teams converging on the identical
+diagnosis within the same stretch of weeks is independent evidence the
+diagnosis is widely held, not a coincidence of search terms.
+
+Read against the price ladder (2026-09-26) rather than the
+automated-round-trip bar this time, because MemoryLake's claim is
+about accuracy and reach, not translation mechanics. It connects to
+eight named AI products plus "any API-compatible system" (the broadest
+reach found in Category 3 to date) and cites a 94.03% LoCoMo score as
+"the highest score in this evaluation." That number is worth exactly
+as much as any vendor's self-graded benchmark and no more: it is
+published on MemoryLake's own page, about MemoryLake's own product,
+with no third party named as having reproduced it. This is the same
+shape of gap the reward-model-unreliability packet (now seven sources,
+positioning.md throughout) has already found at every other layer it
+checked — a grader grading itself. The honest read for whoever prices
+against this comp: MemoryLake is evidence the market wants a neutral
+store, priced in the same $19-199/mo band Wire and MemoryLake both
+now occupy, not evidence any named product currently delivers
+verified neutrality. No pricing recommendation made.

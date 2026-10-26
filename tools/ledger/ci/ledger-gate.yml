@@ -38,6 +38,8 @@ jobs:
           tools/ledger/ledger.test.mjs
           tools/ledger/check.test.mjs
           tools/ledger/check-attributes.test.mjs
+          tools/ledger/block-kinds.test.mjs
+          tools/ledger/check-closures.test.mjs
           tools/registers/merge-driver.test.mjs
       # Without --clone, so this passes on a fresh checkout: it asks only
       # whether the committed declarations are ones some committed script
@@ -55,6 +57,19 @@ jobs:
       - name: Ledger contract
         run: |
           node tools/ledger/check.mjs docs/ideas.md && exit 0
+          status=$?
+          if [ "$status" = "2" ]; then
+            echo "Exit 2: every remaining violation needs the owner. Not a seat's failure."
+            exit 0
+          fi
+          exit "$status"
+      # Same exit contract, same reason, different subject: a document in this
+      # repository claiming to close a ledger entry the ledger still calls open.
+      # Exit 2 here is a marker on a `proposed` entry, which only the owner can
+      # move out of, so it is reported and does not fail the job.
+      - name: Closure backlinks
+        run: |
+          node tools/ledger/check-closures.mjs docs/ideas.md && exit 0
           status=$?
           if [ "$status" = "2" ]; then
             echo "Exit 2: every remaining violation needs the owner. Not a seat's failure."
