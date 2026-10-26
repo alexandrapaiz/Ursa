@@ -10619,3 +10619,40 @@ read and the files were available to read directly.
   after name-based searches had not.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-25 (market, message, 16th run) — The "build task + verifier" pivot is now a three-vendor pattern, not a pair
+
+- Trigger: this run's landscape ceremony. micro1, a human-data vendor
+  (added to docs/market/landscape.md as Category 1's 19th entry this
+  run), raised a $100M+ Series B in September 2026 at a $4B valuation
+  and reported a $1B annualized run rate on 2026-10-13, up from $7M at
+  the start of 2025 — the fastest disclosed growth curve this map has
+  found. Its product build-out includes "Realm," an RL-environment
+  offering where, per the company's own site, "experts recreate
+  real-world scenarios" to train model reasoning. That makes three
+  independently-funded vendors now building constructed
+  task-and-verifier environments rather than staying in solicited
+  labeling: Mercor (Deeptune acquisition, 2026-07-09), Halluminate
+  ($30M Series A, 2026-10-01), and now micro1. Sources:
+  [TechCrunch: micro1 raises funds at $500M valuation](https://techcrunch.com/2025/09/12/micro1-a-competitor-to-scale-ai-raises-funds-at-500m-valuation/),
+  [Dealroom: micro1 raises $100M at $4B valuation](https://dealroom.co/news/155583-micro1-raises-100m-at-4b-valuation-for-ai-training-data/),
+  [Dealroom: micro1 passes a $1B run rate](https://dealroom.co/news/161913-micro1-passes-a-1b-run-rate-with-about-180-staff-three-years-after-nearl/).
+- What: when one vendor builds a constructed verifier, it reads as
+  that vendor's own bet. When three independently-funded vendors do it
+  inside the same few months, it reads as the market's own answer to
+  the verifier gap CLAUDE.md §1 names, and it is the wrong answer by
+  this project's own thesis: a gym seeded with a constructed task is
+  still not a real deliverable joined backward to its own generation
+  history, no matter how good the built-in verifier is. This sharpens
+  rather than weakens Minor's pitch, because it shows the market has
+  identified the same gap and is reaching for the solution the
+  principles of intelligence rule out (a central grader, however
+  well-constructed, contradicts §0b's second and fourth principles),
+  not that the gap itself is already filled.
+- First step: when KR4.1's lab brief is drafted, name this pattern
+  explicitly as the anticipated objection to pre-empt: "why not just
+  use a better verifier environment like Mercor's or micro1's,"
+  answered by the distinction above. No code or product change
+  implied; this is framing for the sales/positioning material only.
+- Cost: $0
+- Status: proposed
