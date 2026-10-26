@@ -12846,3 +12846,48 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   three-out-of-three one for the lab brief's own citation strength.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (security, message, run 9) — Decide the enforceable passphrase policy for sync, and the migration that has to come with it
+
+- Trigger: this run read the sync derivation end to end rather than its
+  comments. `ursa-major/src/bridge/crypto.ts` stretches the passphrase
+  under a salt that is a fixed application constant, the same for every
+  user, and says why: the sync server must never learn whose blob a blob
+  is, so there is no per-user salt to mix in. That is a recorded
+  tradeoff and the right one for this product. The same file names the
+  precondition it rests on, "the passphrase must therefore be strong".
+  The only check that existed anywhere was that the string is not empty,
+  in `src/bin/ursa.ts`, at the one moment a person chooses it. The
+  overlay's own copy of the derivation did not mention the tradeoff at
+  all, so a reviewer of the user-facing surface had no way to know the
+  constant was load-bearing.
+- What: a shared salt makes that precondition load-bearing rather than
+  ordinary advice, for a reason specific to this design. One offline
+  table of candidate passphrases serves every user of every deployment
+  at once, and each entry in that table is also a URL, because the blob
+  id is the other half of the same PBKDF2 output. So the failure mode is
+  not one weak account. It is enumeration of the user base, over a read
+  path that is open by design, with nothing that looks like an attack to
+  rate-limit, and the same guess yields the write capability too. What
+  is still open is the enforceable policy, which is a product decision
+  and not a fix: a minimum length, a strength estimate, a generated
+  passphrase offered as the default, or a per-user salt derived from a
+  second input the user supplies and the server never sees.
+- Why it is not fixed in this run: the passphrase is the only name an
+  existing blob has. A minimum enforced at the prompt locks out whoever
+  already chose something shorter, and there is no recovery to offer
+  them, since nobody holds a copy. Every real option therefore carries a
+  migration, and the salt string already ends in `-v2` because the last
+  change to this derivation was exactly that kind of migration. This run
+  shipped the behaviour-preserving half only: `ursa bridge` now warns
+  below twenty characters, says that the salt is shared and that a short
+  passphrase can be found offline and read off the sync URL, and
+  continues. The threshold is a warning threshold and not a claim about
+  any attacker's budget.
+- First step: the owner picks between enforcing a minimum with a
+  migration and keeping the warning, since locking a user out of their
+  own records is hers to authorise and nobody else's. If she picks
+  enforcement, the engineer's work is the second input or the salt bump
+  plus a re-encrypt path, not the length check, which is one line.
+- Cost: $0
+- Status: proposed

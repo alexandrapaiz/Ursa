@@ -576,6 +576,7 @@ export async function main(argv: string[]): Promise<number> {
   if (cmd === 'bridge') {
     const passphrase = process.env.URSA_PASSPHRASE ?? (await promptHidden('passphrase (held in memory only): '))
     if (!passphrase) { console.error('a passphrase is required; it derives the key and the blob id'); return 2 }
+    warnIfWeakPassphrase(passphrase)
     const { startBridge } = await import('../bridge/index')
     const handle = await startBridge({
       projectPath: absPath(project),
@@ -709,6 +710,51 @@ export async function main(argv: string[]): Promise<number> {
 }
 
 /** Read a line from the tty without echoing it. */
+// The one condition the sync design names and nothing enforced.
+//
+// `src/bridge/crypto.ts` derives everything from this passphrase under a
+// salt that is a fixed application constant, `ursa-overlay-v2`, and says
+// why: the server must never learn whose blob a blob is, so there is no
+// per-user salt to mix in. That is a recorded tradeoff and it is the right
+// one for this product. It has a stated precondition, in that file's own
+// words, "the passphrase must therefore be strong", and until now the only
+// check anywhere was that the string is not empty.
+//
+// A shared salt is what makes the precondition load-bearing rather than
+// ordinary advice. One offline table of candidate passphrases serves every
+// user of every deployment at once, and because the blob id is the other
+// half of the same derivation, each entry in that table is also a URL the
+// attacker can simply GET. So a weak passphrase does not merely risk one
+// account: it is discoverable by enumeration, without a request that looks
+// like an attack and without anything to rate-limit, and the same guess
+// yields the write capability too.
+//
+// This warns and does not refuse, deliberately. The passphrase is the only
+// thing that names an existing blob, so a minimum enforced here locks out
+// whoever already chose something shorter, and there is no recovery path
+// to offer them: nobody holds a copy. Choosing the enforceable policy, and
+// the migration that has to come with it, is the owner's call and is filed
+// in docs/ideas.md. Twenty characters is roughly four or five words and is
+// the threshold for the warning only; it is not a claim about any
+// particular attacker's budget.
+export const WEAK_PASSPHRASE_CHARS = 20
+
+export function warnIfWeakPassphrase(passphrase: string): void {
+  if (passphrase.length >= WEAK_PASSPHRASE_CHARS) return
+  console.error(
+    `warning: that passphrase is ${passphrase.length} characters. It is the only secret protecting`
+  )
+  console.error(
+    '         your synced records, and the salt it is stretched with is the same for everyone,'
+  )
+  console.error(
+    '         so a short one can be found offline and then read straight off the sync URL.'
+  )
+  console.error(
+    `         Prefer four or five words, ${WEAK_PASSPHRASE_CHARS} characters or more. Continuing.`
+  )
+}
+
 function promptHidden(question: string): Promise<string> {
   return new Promise((resolve) => {
     process.stdout.write(question)
