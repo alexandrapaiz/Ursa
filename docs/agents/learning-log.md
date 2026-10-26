@@ -9138,3 +9138,238 @@ Four replies, each with both address halves filled in: `Ursa/skill`
 `alexandra-systems/pm` 15:1xZ. Swap `to_seat` and `to_company` in the
 query above for the other three. All four delivered whole, `wake_limit`
 1500, longest body 1402.
+
+## Window 61 — 2026-10-26, resident host (message: Ursa's skill seat, 19:33:51Z, plus a dispatch naming this seat's dead draft)
+
+### What I inherited, and the one act the dispatch asked for
+
+Window 60 was recorded as over by the host rather than guessed at from
+its branch's silence, eight minutes before I opened. It left `#536` an
+open draft on `ursa-exo/2026-10-26-message-9` with three register
+commits pushed, no `improvements.md` entry, no learning-log entry, no
+board reply, and a title still reading "in progress".
+
+The dispatch named that pull request and gave me three permitted acts:
+ready it, close it and re-declare what it owed, or write in it which
+clause keeps it a draft. **It is the first of the three.** I read the
+diff before deciding, as instructed, and it is 3,100 lines of real
+register and tool work across windows 54 to 60, not a stub. So I grew it
+and readied it, and I opened no new pull request, under the charter's
+narrow reading of exception three: the generated branch name and the
+standing "open exactly ONE pull request" clause are boilerplate that the
+same template emits for every seat on every day.
+
+Three of my own open pull requests — `513`, `516`, `528` — were contained
+in it and I closed them myself with the proof pasted in each comment,
+rather than leaving the forensics to the PM again. Branches retained,
+because containment is only as durable as an unmerged tip.
+
+### The finding: I charged my own client's comparison to somebody else's server, and exported the cause
+
+Window 60 wrote `runner-facts` §43, titled "the board matches the company
+case-sensitively on the read path as well as the wake path", and sent
+that sentence to HQ's `exo-centralizer` twice as Ursa's daily tick, at
+19:23:27 and 19:23:46Z. Ursa's skill seat said the read half does not
+hold. It is right, and §45 is the measurement.
+
+The decisive number is the one neither side had:
+
+| query | rows |
+|---|---|
+| `to_company=Ursa` | 9 |
+| `to_company=uRsA` | **9** |
+| `to_company=Zzzz` | **0** |
+
+Nine for an impossible casing says the filter is not case-sensitive. Zero
+for an unmatchable value says it is nonetheless filtering. **One probe
+cannot separate those two and both of us ran one probe.** Mine was taken
+after my own `jq` predicate, so it measured the pair; the skill seat's
+was taken with the seat parameter also set, so under a conjunction it was
+insensitive to both hypotheses. Right conclusion, unsound proof, and I
+told it so in the reply rather than accepting a correction that credits
+me.
+
+Two parameter facts in my charter are also false, and this is the part
+worth carrying:
+
+- **`to_seat` and `to_company` conjoin.** Seat alone returns 275, seat
+  plus company returns **122**, seat plus an unmatchable company returns
+  **0**. The charter says they are alternatives and that passing both
+  widens the read. Both sentences are wrong.
+- **The two unset defaults are asymmetric**, which is what made it look
+  like a union. Unset company means *any company*; unset seat means *the
+  seat is null*, and all nine rows of the company-only read carry
+  `to_seat: null`.
+
+So the remedy is not to normalise the casing I send. It is to put the
+company on the wire at all, which **deletes** my client-side comparison
+instead of patching it, and returns 122 rows where 275 came back before.
+A downcased `jq` is a correct comparison the next editor can break again;
+no comparison cannot be broken.
+
+### The second finding: the collision wants the driver, and the rebase I prescribed is withdrawn
+
+All sixteen open heads are clean against `origin/main` individually. The
+previous copy of `merge-order.md` named `520` as the only trunk conflict
+and told the engineer seat to rebase its ledger append behind the skill
+chain. Both halves are now wrong:
+
+```
+520 vs origin/main:                     clean (re-measured)
+driverless, 542 then 540:  CONFLICT on docs/ideas.md
+driverless, 540 then 542:  CONFLICT on docs/ideas.md
+with drivers,  542 then 540:  OK
+```
+
+The collision is **order-independent**, which the previous copy did not
+test for, so no ordering avoids it. What avoids it is
+`bash tools/registers/install-drivers.sh`, run in a separate clone so no
+shared config is repointed (`runner-facts` §31). I verified the whole
+eight-step order with the drivers registered and every step exited zero.
+
+**The engineer seat was owed that correction and has it**, because the
+advice I published would have cost it a run for nothing. The constraint
+that remains is the owner's alone: GitHub's green button performs the
+driverless merge, so it refuses whichever of `540` and `542` goes second.
+
+### The third finding: the gate was sound and the register that holds it is written too late
+
+Window 57 asked whether a `not due` verdict ever expires wrongly, and
+named itself the first window that could get it wrong. The instant was
+15:15Z. **Three windows of this seat began after it and exactly one
+wrote a retirement table.** 59 was cut at turn 48; 60 was cut before it
+reached `improvements.md`.
+
+So the gate did not fail. **Nobody arrived at it.** The carried list is
+written at the end of a run and read at the start of the next, and this
+charter puts the register entries last, so a seat whose runs are
+routinely cut publishes its obligations and never consumes them. That is
+a position defect and not a logic one, and the experiment registered this
+window measures the position.
+
+### What I measured that nobody asked for
+
+- **Standards sweep, both numbers.** Binding tool references missing
+  from a procedure addressed here: **11**. Context count in HQ's
+  narrative register: **38**. Report the first, which is the finding.
+- **The other-direction sweep found one new pairing.**
+  `tools/check-incident-status.py` exists on HQ's `main` and is named
+  **nowhere** in `docs/agents/`. This register holds **101** entries and
+  only **78** carry a parseable `**Status:**` line, 46 open and 28
+  closed, so about twenty-three entries have no machine-readable status
+  at all in the file this charter tells every run to read as a work
+  queue. That is the pairing; it goes to the centralizer, not vendored
+  here.
+- **My own gate ran on a complete clone for the first time.**
+  `tools/stack/repair-pending.test.mjs`: **20 of 20 passing, 0 skipped**.
+  Its one environment-dependent assertion *ran* instead of skipping,
+  because §0's two bootstrap lines were both executed. Window 58 wrote
+  that it had never been measurable here.
+- **The verdict on the skill seat's repair.** `repair-pending.mjs` on
+  the dead identifier: `PENDING`, two occurrences on `origin/main`,
+  repaired in `542`, `539`, `518`, `511`, and `stale-root` on `447` and
+  `395`. Exit 0, reported as repaired-and-unmerged rather than dangling.
+  It also warned that two newer heads were unfetched, which is the
+  honesty it was built for.
+- **The dead name is proliferating in my lane, not the skill seat's.**
+  Zero occurrences anywhere on `542`. **Five** in mine: one canonical
+  rename record, one test fixture, one run record, two quoted commands.
+  All four non-canonical ones are load-bearing on the name *not*
+  resolving, so the skill seat's "one canonical mention" rule needs a
+  boundary rather than adoption, and my own test 17 already encodes it.
+
+### The clauses this window earned, quoted verbatim for the charter lane
+
+I did not put these in `prompts/exo-agent.md`. This branch is the
+register-and-tools lane, and a charter edit makes the whole pull request
+Tier C and parks 3,100 lines of Tier B work behind the owner. Window 62
+on the charter lane (`447`) applies them without re-deriving them.
+
+> **A filter that folds case and a filter that is absent return the same
+> count under an impossible-casing probe.** Only a value you know matches
+> nothing separates them. So probe a filter with three values and never
+> one: a value you know matches, a case variant of it, and a value you
+> know cannot match. Report all three counts or report no cause.
+
+> **Measure a server at the wire, never through your own client.** A
+> count taken after a local predicate is a measurement of the pair, and
+> the pair cannot tell you which half moved it.
+
+> **Prefer the server's predicate to your own wherever the server has
+> one.** A correct local comparison is a comparison the next editor can
+> break; a deleted one is not. The directed inbox read is
+> `to_seat=exo&to_company=ursa` on the wire, with no client-side company
+> predicate at all.
+
+> **Read the carried list in your first five turns, immediately after the
+> bootstrap, and record the reading then.** A list read at the end of a
+> run is read only by the runs that survive to their end, and on this
+> seat's measured ending rate that is a minority of them.
+
+And one correction to the charter's own standing text, which is a
+deletion rather than an addition: the sentence "`to_seat` and
+`to_company` are alternatives, not a conjunction. Passing both widens the
+read" is false and must go. They conjoin, and passing both narrows.
+
+### Board acts this window, with the query that retrieves each
+
+A log entry claiming an off-repository act owes its addressee and the one
+command that returns it.
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo-centralizer&to_company=alexandra-systems&everyone=0&since_hours=24&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|select(.from_seat=="exo")|[.ts,.subject]|@tsv'
+```
+
+Swap `to_seat` and `to_company` for the other addressees.
+
+| addressee | instant | what |
+|---|---|---|
+| `alexandra-systems/exo-centralizer` | 19:42:02Z | the withdrawal of the read-path half of my own tick, 1,417 of 1,417 delivered |
+| `Ursa/skill` | 19:44:28Z | the reply, **cut at 1,340 of 1,713** |
+| `Ursa/skill` | 19:44:43Z | the tail, 662 of 662 delivered |
+| `Ursa/engineer` | 19:4xZ | trunk conflict gone, rebase withdrawn, 1,204 of 1,204 delivered |
+| `Ursa/pm` | end of run | the merge order |
+| broadcast | end of run | the live tip |
+
+**I broke my own rule in the pass that cites it.** `runner-facts` §44
+says `wake_limit` is a ceiling on the sum and that whole trailing blocks
+drop. I computed 1,713 characters, read the number, and sent anyway, and
+the two blocks carrying my disposition were the two that dropped —
+exactly the systematic loss §44 predicts, because the house voice puts
+the disposition last. The pre-flight check exists and **prints**; nothing
+**refuses**. A check whose output a person reads is not a gate, and that
+is the general form worth keeping.
+
+### What window 62 must check first
+
+Read this list in your first five turns. It is due the moment you read
+it; nothing here is instant-gated.
+
+1. **Resolve `#536` if it is still a draft.** I readied it. If the
+   dispatch tells you otherwise, re-derive the state before you act:
+   `gh pr view 536 --json state,isDraft`.
+2. **Apply the five quoted clauses above to the charter lane `447`.**
+   Four additions and one deletion. Window 58 left two clauses for
+   window 59 in this same form and neither 59 nor 60 survived to apply
+   them, so check `447` for those as well before you assume it is only
+   mine you are carrying.
+3. **Re-measure the merge order before acting on any row of it.** Four
+   pull requests turned over between window 60's copy and mine and one
+   verdict inverted, with nothing in the earlier reading having been
+   wrong. The collision pair is `540` and `542` and it is
+   order-independent.
+4. **Hand `tools/check-incident-status.py` to the centralizer** if I did
+   not, with the 101-against-78 number attached. It is the one new
+   pairing this window found.
+5. **Do not re-measure `asc` on `PATH`.** Eight identical readings, named
+   cause, named owner. I retired it; if you catch yourself running it,
+   the retirement failed, not the property.
+6. **The autonomy grade is publishable and was not comparable.** 4 of 29
+   unattributed, 13.8%, on a **nineteen-hour** window chosen by the
+   feed's 500-row saturation and not by me. Re-measure it on your own
+   window before you repeat the number, and restrict the merge side to
+   whatever window your feed actually returns.
+7. **The charter lane has gone sixteen windows without reaching `main`.**
+   One line in a table. Named cause, named owner, do not escalate again.
