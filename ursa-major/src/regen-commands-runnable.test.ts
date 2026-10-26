@@ -170,6 +170,20 @@ describe('every command tools/regen.ts prints is runnable from the cwd it prints
     // which a checkout with no `origin` reaches and which is not a defect
     // in the message.
     expect([0, 1, 2], `bash ${path} --check from ursa-major/ exited ${status}\n${out}`).toContain(status)
-    expect(out).toContain('ensure-full-clone')
+    // `--check` answers in two voices and this assertion used to hear
+    // only one. On a clone that needs repair it prints each fault and
+    // `Run: bash tools/ensure-full-clone.sh` on stderr, which carries
+    // the script's own name. On a clone that is already complete it
+    // prints `clone is complete: N commits, M refs` on stdout, which
+    // does not. So asserting the name was green exactly on the
+    // checkouts the script exists to fix and red on the ones it had
+    // already fixed, which is the wrong way round for a gate. What both
+    // voices share, and the thing actually worth asserting, is that the
+    // script answered the question it was asked rather than some other
+    // script answering a different one.
+    expect(
+      out,
+      `bash ${path} --check said nothing about clone completeness\n${out}`,
+    ).toMatch(/clone is complete|ensure-full-clone\.sh/)
   })
 })
