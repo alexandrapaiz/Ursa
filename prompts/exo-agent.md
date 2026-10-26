@@ -3003,6 +3003,92 @@ previous week's plan:
    enumerate the shared instruments that were correct before you adopted
    it.** Each of them is now wrong about you, silently, and none of them
    will report it.
+   **The tool now registers nothing on purpose, and the sentence above
+   is the one a window must not re-file (corrected 2026-10-26,
+   forty-ninth window, measured).** "HQ's `tools/check-merge-queue.sh`,
+   which repairs the clone's refspec and never registers a driver" was
+   true when it was written and is now the wrong half of a true fact.
+   HQ's repair landed and **pins** the driverless merge deliberately, by
+   overriding every declared driver for the length of one `git`
+   invocation, on this repository's own argument: the button merges
+   server-side in a clone with no drivers, so the driverless merge is
+   its verdict permanently. Installing drivers into that tool would
+   report clean a pull request the button refuses, which is the
+   dangerous direction. The tool also reads all three places a `merge=`
+   attribute can come from and gives the mechanical case its own state,
+   `NEEDS LOCAL MERGE`, so a missing driver is not charged to a seat's
+   judgement. `grep -c install-driver` over it returns zero and will
+   always return zero. Do not read that zero as an open ask; it is the
+   fix. See the re-ask section in §3 and
+   `INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted`.
+
+   **So the queue has three states and one instrument answers two of
+   them (added 2026-10-26, forty-ninth window, measured).** The tool's
+   question is "what can the owner land right now", and that is a
+   property of GitHub's driverless clone. It is not the same question as
+   "does the result satisfy this repository's own merge semantics", and
+   the second question has an answer the first cannot contain:
+
+   | button (driverless) | this repo's drivers | state | who owes what |
+   |---|---|---|---|
+   | merges | merges | `ready` | the owner, one merge |
+   | refuses | merges | `needs-local-merge` | the authoring seat, one local merge and a push. No judgement, no owner. |
+   | **merges** | **refuses** | **`drivers-disagree`** | the authoring seat, one judgement. **Not the owner's, and not a rebase.** |
+
+   The third row is the direction the tool's own comment block calls
+   dangerous, and the tool reports it as `clean` because from its
+   question's point of view it is. Measured on 2026-10-26 at 06:1x over
+   the twelve open pull requests the tool called clean: **one**, `#463`,
+   where the `ledger` driver names one block in `docs/ideas.md` edited
+   on both sides and the button's three-way merge combines the two edits
+   by line position because they fall on different lines. The account is
+   `INC-2026-10-26-clean-from-the-button-is-not-clean-from-this-repositorys-own-merge-semantics`.
+
+   So take the second measurement every run, for every pull request the
+   tool calls clean whose diff touches a path `.gitattributes` gives a
+   `merge=` attribute, and give the disagreement its own column in
+   `merge-order.md` beside the instrument that produced it. Run the
+   installers in the **parent** clone and never inside the scratch
+   worktree, for the reason §0 already gives, then assert the path:
+
+   ```bash
+   bash tools/ledger/install-driver.sh && bash tools/registers/install-drivers.sh
+   git config --get merge.register.driver     # must name THIS clone's tools/
+   paths=$(git show origin/main:.gitattributes | grep -oE '^[^ #]+ +merge=' | awk '{print $1}')
+   for n in <the clean ones>; do
+     git diff --name-only origin/main...refs/prs/$n > /tmp/f.txt
+     grep -qxFf /tmp/f.txt <<<"$paths" || continue        # no driver path, skip
+     rm -rf /tmp/wt-d && git worktree add -q --detach /tmp/wt-d origin/main
+     git -C /tmp/wt-d merge --no-edit -m x refs/prs/$n >/dev/null 2>&1 \
+       && echo "#$n agrees" || echo "#$n DRIVERS-DISAGREE"
+     git -C /tmp/wt-d merge --abort 2>/dev/null
+     git worktree remove --force /tmp/wt-d
+   done
+   ```
+
+   **And report it to the authoring seat, not to the owner.** All three
+   states above are routing decisions, and two of the three route away
+   from her. A `drivers-disagree` reported in the merge order as a
+   conflict dispatches a rebase that would not help; reported as clean
+   it hands her a judgement the entry's author owes. Name the state, the
+   file, and the block the driver named.
+
+   **One lane per wholesale-replaced file, which is the cost this window
+   paid for the authority split (added 2026-10-26, forty-ninth
+   window).** `docs/agents/merge-order.md` is declared `enabled: false`
+   in `tools/registers/registers.json` by name, because this charter
+   replaces it every run and an entry-keyed merge of two replacements
+   publishes two contradictory orders. So it is the one register this
+   seat keeps that **cannot** be merged by driver, and window 48 put a
+   rewrite of it on both halves of the authority split. Measured this
+   window: `#478` and `#447` merge clean on `incidents.md` and
+   `learning-log.md` through the register driver and conflict on
+   `merge-order.md` and nothing else, which is this seat's own two pull
+   requests colliding by construction. A file the drivers are told not
+   to merge belongs on exactly one lane, and that lane is the register
+   lane, because the order is a Tier B fact about the queue and never a
+   charter change.
+
 2. **Which PRs are already contained in others**, with `git merge-base
    --is-ancestor` over every pair of open PR heads. Seats stack, so the
    queue is much shorter than its count. On 2026-10-04, twenty-five of
