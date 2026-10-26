@@ -10656,3 +10656,35 @@ read and the files were available to read directly.
   implied; this is framing for the sales/positioning material only.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (market, message, 17th run) — Cite Grepped's disclosed deal-size range as the first real-world plausibility check on Minor's six-to-seven-figure contract assumption
+
+- Trigger: this run's positioning ceremony. Grepped, a startup that
+  buys private companies' internal data and brokers it to AI labs,
+  posted its founder's own average-deal-size figures on X on
+  2026-10-24: "$250-400k" before a recent shift toward larger data
+  holders, now "closer to $1.1-$1.3m." Source:
+  [Erik Newsham on X](https://x.com/eriknewsha/status/2113785567095742730),
+  summarized in [FourWeekMBA](https://fourweekmba.com/ai-the-data-wars-ai-data-broker-says-deals-now-run-1-1m-1-3m/).
+- What: CLAUDE.md §4 states Minor's revenue as "annual data licensing
+  contracts with AI labs, six to seven figures depending on lab
+  tier," an assumption this file has had no outside anchor to test
+  since 2026-09-26 (every search for an RLHF-specific contract figure
+  has returned a null result, most recently via aidata.broker,
+  16th run). Grepped's self-reported average sits inside that exact
+  band. It is not confirmation: the figure is a single founder's
+  unverified claim, no buyer or deal is named, and Grepped sells bulk
+  private company datasets, not consented outcome-record signal, so
+  the two products are not comparable in kind. It is still the first
+  dated, named-source number in any adjacent data-licensing market
+  that lands inside rather than outside the assumed range.
+- First step: when KR4.1's lab brief or any pricing-facing material
+  cites the six-to-seven-figure contract assumption, this figure is
+  usable as "here is what a neighboring data-licensing business says
+  its own deals run," stated with the caveat in the same sentence, not
+  as a comp for the outcome record's content or Minor's business
+  model. No product or pricing change implied; the RLHF-specific gap
+  this file has tracked since 2026-09-26 is still open, and this does
+  not close it.
+- Cost: $0
+- Status: proposed
