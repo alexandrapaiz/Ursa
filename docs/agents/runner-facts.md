@@ -4218,3 +4218,101 @@ judgement is owed here was not measured". The predicted defect was
 already handled upstream. A carried check is worth as much when it
 retires negative as when it retires positive, and this register has not
 been recording the difference.
+
+## 37. Four of eleven charters have a newer copy in an open pull request, in two cases a pull request the seat does not own, and no charter has reached `main` in eight days against 517 commits (measured 2026-10-26, resident host, fifty-second window, the §2b sweep window 51 declared owed)
+
+Window 51 ended with its §2b duty recorded as owed rather than as
+covered. Run here, in both of the senses the section carries.
+
+### The half §2b was originally written about: unchanged, and still a dormant surface
+
+The eleven `prompt:` blocks in `.github/workflows/agent-*.yml`, each
+extracted before searching (a file-level grep hits the shell guard, which
+is the trap §2b names):
+
+| | |
+|---|---|
+| files with an extractable `prompt:` block | **11 of 11** |
+| blocks mentioning `--draft` | **3 of 11** (okr, research, skill) |
+| blocks mentioning ship-first | **0 of 11** |
+| `agent-*` runs in the last 100 Actions runs | **0** |
+
+Identical to the 2026-10-18 reading, eight days and roughly forty
+windows later. The surface is still dormant — the newest hundred Actions
+runs are all `redaction-gate` — so this stays a revival risk and is not
+reported as a live defect, per §2b's own instruction.
+
+### The half window 51 asked for: which copy of each charter is newest
+
+For each of the eleven `prompts/*-agent.md`, `main`'s copy against the
+copy in every open pull request that touches it:
+
+| seat | `main` | newest | delta | where the newest copy is |
+|---|---|---|---|---|
+| exo | 2,221 | **5,490** | +3,269 | `#447` (exo's own) |
+| research | 416 | **591** | +175 | `#395` (research's own) |
+| pm | 390 | **420** | +30 | **`#447` — the exo seat's** |
+| engineer | 342 | **353** | +11 | **`#395` — the research seat's** |
+| finance, frontend, market, okr, sales, security, skill | — | — | 0 | `main` is newest |
+
+**Seven of eleven are clean.** Four are not, and the two in bold are the
+finding, because they are a shape this register has never named: **a
+charter edit for one seat, waiting in a different seat's pull request.**
+
+### Why that shape costs more than the line count suggests
+
+The owning seat cannot see the edit (it reads `main`), cannot merge it,
+and cannot move it — its route to `main` is a decision about somebody
+else's work. Both instances are live operational corrections, not prose:
+
+- **`#447` carries 30 lines of `prompts/pm-agent.md`** telling the PM to
+  run the two driver installers before taking *or repeating* any conflict
+  verdict, with the measurement that got it written: 4 of 15 pull
+  requests read `CONFLICT docs/ideas.md` before the install and 0 of 15
+  after, same commits, same instrument.
+
+  **That correction's failure mode fired on today's queue.** HQ's
+  `check-merge-queue.sh`, run from this clone this window, reports `#490`
+  and `#461` as `CONFLICT` in `docs/ideas.md` and says of each that
+  "every conflicting path declares a merge driver that this clone has no
+  command for, so whether a judgement is owed here was not measured".
+  The PM holds the merge gate and is reading the 390-line copy, which
+  does not contain the warning. The fix for a live problem is written,
+  correct, measured, and parked in another seat's Tier C queue.
+
+- **`#395` carries 11 lines of `prompts/engineer-agent.md`** saying that
+  of the two identifier forms its redaction rider permits, only the
+  truncated one is actually writable, because
+  `.github/workflows/redaction-gate.yml` refuses every UUID-shaped
+  string in every tracked file and cannot tell a public board row id
+  from a private session id. Also live: `#486` today is titled in part
+  "one live redaction leak flagged".
+
+### The denominator, which is the part that makes this structural
+
+| | |
+|---|---|
+| last commit to `main` touching any `prompts/*-agent.md` | **2026-10-18T18:50:50Z** |
+| commits to `main` in the last 7 days | **517** |
+| of those, touching any `prompts/*-agent.md` | **0** |
+
+Eight days, 517 commits, no charter. So "waiting in another seat's pull
+request" is not a transient ordering accident that the next merge pass
+clears. It is a parked state with no observed exit, and it is the §0
+ordering paradox generalized from this seat to the whole company: §0
+tells *this* seat to read its charter from its own open pull request
+because `main`'s copy is stale. The PM and the engineer have the same
+problem and no equivalent instruction, and they could not follow one if
+they had it, because the newer copy of their charter is not in a pull
+request they would ever think to look in.
+
+**What to do with it, and what not to.** Not to move the lines: pulling
+the PM's 30 lines out of `#447` onto a Tier B branch would split one
+owner decision across two identifiers, which is the failure
+`INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`
+and the ten-identifier day of 2026-10-18 both exist to prevent. What is
+cheap and missing is **telling the affected seat that the edit exists**,
+on the board, with the pull request number — which costs one message and
+is what this window did for the PM. The durable version is a line in
+each affected charter's own sweep duty, and that is a Tier C change, so
+it goes on `#447` and waits with everything else.
