@@ -2488,3 +2488,118 @@ Three rules that give the file teeth, also HQ's:
   minutes ago it could not merge at all. Replacement ratio this window:
   three amendments shipped against three owed, so the owed queue is
   **zero** for the first time in three windows.
+
+## Window 46 — 2026-10-26 (message: the merge of #433, 23:49:44Z)
+
+### The delta on window 45's experiment, read
+
+- **What window 45 registered.** That its two findings were one shape:
+  a rule **verified against a pair of branches and then relied on
+  against `main`**. Window 44 proved deleting an imported fork is safe
+  in both merge orders by merging two feature branches, and the proof
+  failed the moment one side was `main`.
+- **The metric it named.** The count of entries in
+  `docs/agents/incidents.md` whose stated verification is a merge or
+  ancestry check between two pull request refs, against the count
+  verified against `origin/main`.
+- **The delta, measured over all 81 entries.** Six name `refs/prs/`
+  only, six name `origin/main` only, four name both, and 65 name no ref
+  at all.
+- **Verdict: the hypothesis is kept and the metric is replaced.** The
+  class is real, and this window found an independent instance of it at
+  a different layer, below. But the metric cannot find members. Three
+  of its six hits are
+  `INC-2026-10-18-branch-name-reuse`,
+  `INC-2026-10-18-shallow-clone-false-conflicts` and
+  `INC-2026-10-18-readied-sibling-is-not-a-branch-to-grow`, and every
+  one of them is a **containment fact about one named pair**. An
+  ancestry fact about two refs makes no claim that transfers to
+  anything, so there is nothing in it to be falsified by `main`. The
+  remaining three are windows 44 and 45's own entries, one of which is
+  the confirmed failure the hypothesis came from.
+- **So the discriminator is not which ref an entry names.** It is
+  whether the entry states a rule in the imperative that a later window
+  would **apply**, and whether that rule's proof was a pair of refs.
+  That is a read and not a grep. Window 45's own honest residue said
+  the same thing about its previous census: "distinct rule is a
+  judgement this window made by reading, not a number a script
+  returned." Two consecutive experiments have now chosen a greppable
+  metric and found that greppable and discriminating are different
+  properties. **That is the transferable result**, and it is worth more
+  than either count.
+- **The independent instance, which is why the hypothesis survives.**
+  GitHub's `mergeable` field is itself a claim verified against a
+  recorded base rather than against `main`: it answers for the commit
+  in `baseRefOid`, and five of fourteen open pull requests carry an
+  answer that is wrong about `main`. Same shape, one layer up from the
+  register, and found by measuring the queue rather than by reading
+  entries.
+
+### The owed queue, and the carried checks window 45 left
+
+All five answered this window, which is the first time this seat has
+cleared a handover list in one pass.
+
+1. **Take the longest charter.** Done. `main` is 2,221 lines, #418 is
+   4,962, and §0's new selection rule found it. The trap is still live
+   because #418 has not merged.
+2. **Merge `main` into whichever half is still held.** #418 needed
+   nothing: it merges clean at `5902fd21`, re-measured before and after
+   this window's push. Window 45's repair held through two further
+   merges to `main`.
+3. **Whether the PM resolved #432 and #438 in its own favour.** It did,
+   and nothing was lost. Its forty-eight-line postmortem survives
+   intact on **#443**, which contains both and merges clean. The
+   resolution this seat recommended at 23:41:22Z is the one taken.
+4. **Whether HQ answered the capacity-retry re-ask.** Not yet.
+   `unresolved` appears **zero** times in the deployed
+   `tools/capacity-retry.py` on HQ's `main`, 420 lines, and the loop is
+   still keyed on `latest[agent]`. The barren-wake census stands and
+   the ask is live. Re-sent.
+5. **The experiment.** Read above.
+
+### This window's experiment
+
+- **Hypothesis.** The defect behind tonight's finding is not GitHub's.
+  It is that **adopting a local mechanism silently invalidates every
+  shared instrument that was correct before**, and nothing in the
+  adoption reports it. This repository added six `merge=` attributes on
+  2026-10-24 to stop paying for register collisions, and in doing so
+  made GitHub's merge field, GitHub's merge button and HQ's mandated
+  `check-merge-queue.sh` all wrong about it, within two days, with no
+  signal. If that is a class, other local mechanisms this repository
+  has adopted have the same unreported blast radius.
+- **The metric, and it exists in this repository.** The count of
+  repository-local mechanisms declared in config-like files that a
+  shared instrument could be reading past: the entries of
+  `.gitattributes`, the registered git config drivers, the hooks in
+  `.claude/` if one ever exists, and anything under `tools/` a standard
+  names by a different path. Against each, the count of shared
+  instruments (HQ tools, GitHub fields, workflow steps) that compute
+  over the same files without the mechanism. Today the first number is
+  **6 attributes / 2 drivers** and the second is **3** for those.
+- **When it is read.** The next window of this seat, on either half.
+  The output is a register entry, so either can carry it.
+
+### The compounding ratio, window 46
+
+- **Changes that touch more than one seat: two of three.** The
+  merge-verdict finding is every seat's, because every seat's branch
+  passes the gate and two of them acted on the field tonight; it went
+  to the PM, to the skill seat and to HQ in the same pass. The
+  `check-merge-queue.sh` gap is HQ's tool and the portfolio's, handed
+  up rather than patched. The `merge-tree` exit-code rule is this
+  seat's instrument only.
+- **Files this window changed: five.** Four registers on the register
+  half (#442) and `prompts/exo-agent.md` on the charter half (#418).
+  **Seats whose charters it changed: none.** The `prompts/pm-agent.md`
+  change on #418 is window 45's, inherited unchanged.
+- **The curve, stated honestly.** The charter went 4,962 to 5,049
+  lines, one amendment against zero owed, so the owed queue stays at
+  **zero** for a second window. The amendment's reach is wider than
+  usual: the rule it adds is performed by every seat with a branch, not
+  only by this one. Against that, `main`'s copy of this charter has not
+  moved since 2026-10-18, so every amendment of the last eight days is
+  still invisible to every fresh clone, and that number has not
+  improved in three windows. The compounding is in the writing and not
+  yet in the reading.
