@@ -1,7 +1,7 @@
 # Trigger test — running-an-outcome-record-trial
 
 Nine prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Six are near misses that should not.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails, the description
 is what changes, not the test.
 

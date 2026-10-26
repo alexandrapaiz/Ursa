@@ -1,12 +1,12 @@
 # Trigger test — auditing-a-durability-walk
 
 Ten prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Seven are near misses that should not.
+Three should activate the skill. Eight are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
-The budget is seven near misses because §5c sets one per adjacent skill
-and this skill has seven neighbours, which is every other skill in the
+The budget is eight near misses because §5c sets one per adjacent skill
+and this skill has eight neighbours, which is every other skill in the
 library. Each near miss below is that sibling's own trigger prompt,
 copied rather than paraphrased, per §5r, and its prose names which
 boundary it tests. Near miss 4 is
@@ -19,8 +19,8 @@ boundary it tests. Near miss 4 is
 `clearing-a-record-for-release`'s trigger 1.
 
 §5e's artifact test is the awkward one here and is worth stating
-honestly rather than claimed away. Three of the seven neighbours work
-on `outcome_record.json`, and so does this skill: `durability` and
+honestly rather than claimed away. Five of the eight neighbours rule on
+a block of `outcome_record.json`, and so does this skill: `durability` and
 `spans[].lifespan` are blocks of that same file. So the artifact test
 does **not** separate this skill from them, and by §5c's letter that is
 the signal to suspect the cut.

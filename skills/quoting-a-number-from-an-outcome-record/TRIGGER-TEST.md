@@ -1,14 +1,14 @@
 # Trigger test — quoting-a-number-from-an-outcome-record
 
 Nine prompts, written against the `description` field in `SKILL.md`.
-Four should activate the skill. Five are near misses that should not.
+Four should activate the skill. Eight are near misses that should not.
 The fourth should-fire prompt was added on 2026-10-15 under the §5
 budget-is-a-floor rule, after the skill gained the `survived_verbatim`
 redefinition. Per `prompts/skill-extract.md` §5, when the test fails
 the description is what changes, not the test.
 
-The budget is five near misses because §5c sets one per adjacent skill
-and this skill has five neighbours, which is every other skill in the
+The budget is eight near misses because §5c sets one per adjacent skill
+and this skill has eight neighbours, which is every other skill in the
 library. Near miss 4 is `adjudicating-uncertain-spans`' own trigger, 5
 is `running-an-outcome-record-trial`'s, 6 is
 `adding-a-bound-to-the-record-gate`'s, 7 is

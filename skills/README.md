@@ -19,8 +19,9 @@ run, quality over count. The owner's merge is the gate.
 | [clearing-a-record-for-release](clearing-a-record-for-release/SKILL.md) | Which of the three exits a release is taking, what that exit demands of raw text, and what an erasure has to reach once something has already left | 41 | draft, `validated: false` |
 | [auditing-a-detected-correction-loop](auditing-a-detected-correction-loop/SKILL.md) | Whether a detected correction loop is the loop the user actually ran, what `recurrences`, `openedStep`, `closedStep` and `resolution` compute rather than name, and where a complaint the user plainly made went when no signal carries it | 32 | draft, `validated: false` |
 | [auditing-a-durability-walk](auditing-a-durability-walk/SKILL.md) | Whether the forward walk behind a `durability` block ran at all, over which window and to which tip, and what `decayRate`, `durableChars`, `fate` and `medianIntactSeconds` compute rather than name | 27 | draft, `validated: false` |
+| [attributing-a-deleted-span](attributing-a-deleted-span/SKILL.md) | What destroyed a `generated_deleted` span, whether a zero in `mergeDeletedChars` is a measurement or a default, which of the three `unknownReason` values is in hand and what fetch would settle it, and whether `humanDeletedChars` may be called a discard rate on this clone | 15 | draft, `validated: false` |
 
-## Six areas, and the edges between them
+## Seven areas, and the edges between them
 
 The first three skills work on `files[].spans` and `stats` inside
 `outcome_record.json`. The fourth works on `tuning.json`. The fifth
@@ -37,6 +38,17 @@ differently tomorrow. Every near miss in
 `adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
 the record side of its own edge, which is what `prompts/skill-extract.md`
 §5e means by counting artifacts rather than neighbours.
+
+The ninth is inside the record as well and is cut by neither object nor
+time. `deletion` sits on `generations[].spans[]` and the three figures
+it governs sit in `stats.generated`, so the artifact test puts it with
+the record skills and the quoting skill. What separates it is where its
+input comes from: every other block of a record is computed from the
+record's own inputs, and this one is computed from the git trees of the
+merge commits standing between the generation and the closure, by a
+function the resolver does not have and the caller injects. It is
+therefore the only block that can be absent, defaulted, or wrong
+because of the clone rather than because of the work.
 
 **The record area.** The three are adjacent and share almost all their
 vocabulary, so each ships a `TRIGGER-TEST.md` whose near misses include
@@ -108,7 +120,7 @@ record carries.
 inside `outcome_record.json` and is still its own area, which is the
 one place in this library where the artifact test alone would have cut
 wrong. It shares the file with the three record skills and shares every
-noun with all six siblings. What separates it is which block of the
+noun with all eight siblings. What separates it is which block of the
 record it rules on: the others rule on `files[].spans` and on `stats`,
 and this one rules on `signals`, the block `deriveSignals` writes after
 the labels are settled. No span label and no percentage can answer its
@@ -159,11 +171,52 @@ combined. The practical test for a reader holding both is whether the
 question would survive the answer "those two walks ended at different
 commits". If that dissolves the question, it was this skill's.
 
-Against the other six the edges are ordinary. The trial skill chooses
+Against the other seven the edges are ordinary. The trial skill chooses
 work whose history can be walked, adjudication settles the classes this
-skill's denominator is built from, and the gate, release, tuning and
-signals edges are the same handoff shape those skills already have,
-counted seven times rather than seven different edges.
+skill's denominator is built from, and the gate, release, tuning,
+signals and deletion-cause edges are the same handoff shape those
+skills already have, counted eight times rather than eight different
+edges.
+
+
+**The deletion-cause area.** `attributing-a-deleted-span` is the third
+skill whose cut the artifact test cannot make, and it is the first one
+cut by provenance of the computation rather than by object or by time.
+Its block is `generations[].spans[].deletion`, set only when a
+segment's fate is `generated_deleted`, and the three figures it governs
+are `humanDeletedChars`, `mergeDeletedChars` and `unknownDeletedChars`
+in `stats.generated`.
+
+What it exists for is that `generated_deleted` is the label
+`CLAUDE.md` §1 calls the correction, and the resolver cannot see a
+cause. It sees that text is absent. A merge between the generation and
+the closing commit can have destroyed the text with nobody having read
+and rejected it, and a clone that cannot be read produces no answer at
+all, so the schema carries three causes rather than one. The errors are
+not symmetric and the asymmetry is the argument for the skill: a false
+`merge` loses signal, and a false `human_edit` manufactures signal and
+sells it.
+
+The boundary that matters is with the quoting skill, and it is the
+closest pair in this library, because both rule on the same four
+fields. The division is which half of the sentence is in question. The
+quoting skill rules on what a number is a share of. This one rules on
+whether the numerator names a person at all, which is a question about
+whether a git test ran and what it could read. A prompt that spans the
+two is handled **quoting-side first**, because a cause cannot be
+audited until it is settled which population the figure covers.
+
+Against the durability skill the test is direction across the closing
+commit. Durability walks forward over text that survived the episode;
+this skill tests backward at merge boundaries inside it, over text that
+never reached the finished file. Against the gate the asymmetry is the
+usual one with a twist worth knowing: `DELETION_SPLIT_EXACT` holds the
+three-way split exact, and it holds on a record every one of whose
+deletion figures is a default, because the identity is true by
+construction of the subtraction that produces the human share. The
+gate is green on exactly the record this skill exists to catch, and no
+bound can reach it, because the evidence that settles a cause is a git
+tree and no record carries one.
 
 
 ## Checking the receipts

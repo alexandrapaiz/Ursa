@@ -1,12 +1,12 @@
 # Trigger test — clearing-a-record-for-release
 
 Eight prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Five are near misses that should not.
+Three should activate the skill. Eight are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
-The budget is five near misses because §5c sets one per adjacent skill
-and this skill has five neighbours, which is every other skill in the
+The budget is eight near misses because §5c sets one per adjacent skill
+and this skill has eight neighbours, which is every other skill in the
 library. §5e is what says that is not a sign the cut is wrong: the five
 work on `outcome_record.json`, on `tuning.json` and on the gate, while
 this one works on what leaves, so its five boundaries are one edge

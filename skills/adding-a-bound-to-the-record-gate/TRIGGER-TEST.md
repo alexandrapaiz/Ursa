@@ -1,7 +1,7 @@
 # Trigger test — adding-a-bound-to-the-record-gate
 
 Seven prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Four are near misses that should not.
+Three should activate the skill. Eight are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test. The reasoning below points at the
 skill's own steps and limits rather than at evidence refs. When this
@@ -14,8 +14,8 @@ test argues about where the description's edge falls and not about
 what the code says, and routing through a step keeps one claim in one
 place instead of two.
 
-The budget is five near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has five neighbours: every
+The budget is eight near misses rather than two because §5c sets one
+near miss per adjacent skill, and this skill has eight neighbours: every
 other skill in the library. §5e is what says that is not a sign the cut
 is wrong, and the note at the end is the argument.
 
@@ -186,11 +186,11 @@ describing a topic rather than a piece of work. This skill has five and
 should not be re-cut, for the reason §5e gives: count artifacts, not
 neighbours.
 
-Four of the five neighbours work on two artifacts,
+Seven of the eight neighbours work on two artifacts,
 `outcome_record.json` and `tuning.json`, and both of those are data a
 run produced. This skill works on `ursa-major/src/invariants.ts` and
 the committed records under `ursa-major/fixtures/violations/`, which
-are the checker and its counterexamples. So those four boundaries are
+are the checker and its counterexamples. So those seven boundaries are
 the same boundary counted four times, between the records and the
 thing that checks them, and each of those near misses fails by sitting
 on the records side of it.

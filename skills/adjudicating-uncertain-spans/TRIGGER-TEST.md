@@ -5,8 +5,8 @@ per `prompts/skill-extract.md` section 5. Three should activate the
 skill and seven should not. When this test fails, the description is
 what changes, not the test.
 
-The budget is seven near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has five neighbours: every
+The budget is ten near misses rather than two because §5c sets one
+near miss per adjacent skill, and this skill has eight neighbours: every
 other skill in the library. Near misses 4 and 5 are this seat's own
 wording and predate the siblings they now sit beside; near misses 6
 through 10 each carry one sibling's own trigger prompt verbatim, which
@@ -233,8 +233,9 @@ list built from artifacts cannot name them.
 Ours: the test that separates a topic from a piece of work is whether a
 skill's inputs and outputs name the same file as its neighbours', which
 is §5e. This file is the case that shows §5e is necessary but not
-sufficient. Two of its five neighbours name no shared file at all, and
-the boundary with them still has to be written down, because what is
+sufficient. Two of its eight neighbours name no shared file at all, the
+record gate and the release ruling, and the boundary with them still
+has to be written down, because what is
 shared is the *shape of the judgment* and a reader matches on shape. So
 the budget of one near miss per neighbour is right even where the
 artifact test already says there is no overlap, and §5e's test should be
