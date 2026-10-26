@@ -12846,3 +12846,42 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   three-out-of-three one for the lab brief's own citation strength.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (market, message, 30th run) — Sweep rl-list.com's own listing text for any of the 42 "build the task and verifier" vendors that itself claims real-deliverable ingestion, instead of continuing to spot-check one vendor's product page at a time
+
+- Trigger: this run spot-checked the three names the 29th run's ledger
+  entry asked for (AfterQuery, Bespoke Labs, Fleet AI) and found all
+  three authored, not real-deliverable, bringing the running tally to
+  6 of 42 checked and 6 of 6 authored (docs/market/landscape.md,
+  docs/market/positioning.md, both updated this run). Six names took
+  one run each to check by fetching individual product pages; at that
+  rate, covering the other 36 costs roughly six more runs of the same
+  shape for a claim this file may not need stated at full market
+  coverage to be useful.
+- What: rl-list.com's own directory already writes a short, source-
+  cited description of what each of the 42 vendors' environments are
+  built from, since that is exactly what let this run and the 29th
+  run's Datacurve check work without visiting every vendor's own site.
+  Reading that directory's own text for all 42 entries in one pass and
+  flagging any vendor whose own listed description uses language
+  closer to "real completed work" than "constructed scenario" (the
+  same two-way split this file has now applied by hand six times) is
+  cheaper than one-by-one spot-checks and would surface the one
+  positive case that matters, if one exists, faster than continuing to
+  sample blind. A sweep that comes back with zero candidates is itself
+  a stronger claim than six individual spot-checks, because it covers
+  the whole named market rather than a 14% sample of it.
+- First step: whoever next has capacity for this sub-category reads
+  rl-list.com's full "RL Environment Vendors" and "RL Environments for
+  Coding" listing pages once, end to end, and records which of the 42
+  (if any) describe sourcing real, independently-existing completed
+  work rather than an authored scenario, per the directory's own
+  words rather than a second hop to each vendor's own site. Spot-check
+  any candidate the sweep turns up against the vendor's own page
+  before citing it, the same check this run and the 29th and 28th runs
+  already applied to every name examined so far. Does not replace the
+  four already-checked individual names (Mercor/Deeptune, Halluminate,
+  micro1, Datacurve) with a redo; it is the cheaper path for the
+  remaining 36, not a correction to the six already done by hand.
+- Cost: $0
+- Status: proposed

@@ -531,6 +531,42 @@ Vendors](https://www.rl-list.com/), [rl-list.com: RL Environments for
 Coding](https://www.rl-list.com/rl-environments-for-coding), [rl-list.com:
 Datacurve vendor profile](https://www.rl-list.com/vendors/datacurve).
 
+**Update (2026-10-26, 30th run): the three better-funded names this
+note asked the next run to check all come back "authored," same as
+the first three.** Read each vendor's own product page directly.
+Bespoke Labs states its own approach in its own words — "company-scale
+simulations with real codebases and microservices" — and names no
+frontier-lab customer, only "Frontier Labs" and "Neolabs" as audience
+categories. Fleet AI's own language is "gyms" that "replicate"
+enterprise software (Salesforce, Excel); rl-list.com's vendor profile
+states plainly that "no lab customer is named or verified" and that
+Fleet's only named customer segment (financial services and insurance)
+is a self-claim from its own blog, not third-party-confirmed.
+AfterQuery is the one worth a caveat rather than a clean "authored":
+its page emphasizes 300,000+ "verified practitioners" producing
+"expert-demonstrated trajectories" from real professional domains
+(medicine, law, finance), which reads closer to this file's standard
+than a purely synthetic gym does. But a practitioner demonstrating a
+task on request, for the purpose of generating training data, is still
+not the same object as a deliverable that existed because the
+practitioner's actual work needed it done — it is demonstration data
+collected to train on, not a deliverable joined backward to its own
+generation history after the fact. On the evidence on these three
+public pages, none crosses the line from constructed to real. Tally
+now 6 of 42 checked, 6 of 6 "authored." So what: six of six is still a
+thin fraction of 42, but it is now twice the sample run 29 had, in the
+same direction, including the two best-funded unchecked names
+(Bespoke Labs $40M, Fleet AI's reported $750M valuation talks). The
+next checkable step, if the lab brief needs a cheaper path than another
+round of one-by-one vendor fetches, is a keyword sweep of rl-list.com's
+own listing text across all 42 for any vendor that itself claims
+real-deliverable ingestion rather than authored-scenario construction,
+which would surface a positive case faster than continuing to sample
+blind. Ledger proposal below. Last observed 2026-10-26: [AfterQuery:
+AI Training Data Products](https://www.afterquery.com/products),
+[Bespoke Labs](https://bespokelabs.ai/), [rl-list.com: Fleet AI vendor
+profile](https://www.rl-list.com/vendors/fleet-ai).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
