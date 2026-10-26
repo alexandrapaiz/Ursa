@@ -79,7 +79,7 @@ nothing.
 | `pairwise` | `root-refs-prs` | One commit object identifier per pull request, fetched from the refspec `pull/<number>/head`. |
 | `root-clone` | `probe-clone` | The full object database, hardlinked by `git clone --local`, plus the branches `refs/heads/*`; then the references `refs/prs/*` by an explicit second fetch, because a local clone does not carry references outside `refs/heads` and `refs/tags`. |
 | `probe-clone` | `pairwise` | For each ordered pair, a merge exit status (`number`) and the newline-separated path list from `git diff --name-only --diff-filter=U` (`string[]`). |
-| `install-drivers` | `probe-clone` | Two configuration lines written into `.git/config`: `merge.ledger.driver` and `merge.register.driver`, each a command template containing `%O %A %B %L %P`. |
+| `install-drivers` | `probe-clone` | Six configuration lines written into `.git/config`: for each of `ledger` and `register`, a `.name` shown in git's conflict messages, a `.driver` command template containing `%O %A %B %L %P`, and `.recursive binary`, which tells git to take one side wholesale rather than re-running the driver on the virtual ancestor a criss-cross merge builds. |
 | `probe-clone` | `union-merge` | Per conflicted ledger merge, five arguments: the ancestor, ours, and theirs temp file paths, the conflict marker size, and the real pathname `docs/ideas.md`. |
 | `pairwise` | standard output | Either the human report, or one JSON document matching the `PairwiseResult` type in §3 when `--json` is passed. |
 | `pairwise` | process exit status | `0` when no finding is `needs-human`, `1` when at least one is, `2` on a usage or environment fault. |
@@ -194,10 +194,12 @@ And after, which is the post-condition `installDrivers` checks:
 
 ```
 $ git -C /tmp/pairwise-XXXXXX/probe config --get-regexp '^merge\.'
-merge.ledger.name Ursa ledger merge, by entry identity
-merge.ledger.driver /tmp/pairwise-XXXXXX/probe/tools/ledger/union-merge.mjs %O %A %B %L %P
-merge.register.name HQ register merge, by numbered identifier
-merge.register.driver /tmp/pairwise-XXXXXX/probe/tools/registers/merge-driver.mjs %O %A %B %L %P
+merge.ledger.name Ursa ledger: merge docs/ideas.md by entry identity
+merge.ledger.driver node /tmp/pairwise-XXXXXX/probe/tools/ledger/union-merge.mjs %O %A %B %L %P
+merge.ledger.recursive binary
+merge.register.name Ursa registers: merge an append-only register by entry identity
+merge.register.driver node /tmp/pairwise-XXXXXX/probe/tools/registers/merge-driver.mjs %O %A %B %L %P
+merge.register.recursive binary
 ```
 
 The `--json` payload, real output from this branch at `origin/main`
