@@ -3882,3 +3882,62 @@ register has been able to publish:
   no movement at all would mean the sweep stopped being run, which is
   the outcome the charter's "a check whose first run is eighty per cent
   false positives is a check the next window learns to skip" predicts.
+
+### The citation sweep reads `prompts/` and `HEAD`, which is where its only true positive was
+
+- **Proposal.** The sixty-third window, 2026-10-26, from the same re-run
+  as the entry above. The sweep's paths were `-- docs/` and its revision
+  was `origin/main`. `prompts/exo-agent.md` is in neither, carries **43**
+  unique incident slugs — more than any other file in the repository —
+  and is read in full by every window of this seat before it acts.
+- **Merged.** Not yet. In this window's pull request: `prompts/` added to
+  the paths, and the instruction to run against `HEAD` as well as
+  `origin/main`. The broken citation itself is repaired in the same
+  commit.
+- **Effect.** **1 genuine broken citation found in 43 slugs, against 0
+  in the 8 rows the old scope returned over four days.** A cited account
+  name with **0** authoring commits anywhere, in a sentence reading "The
+  account is X", against a register entry carrying a different name for
+  the same incident. Found on a branch, so the number that actually
+  moved is **defects reported: 0 → 1, defects prevented: 0 → 1**, and
+  the second of those was unreachable under the old revision because the
+  stale charter copy on `main` does not contain the line.
+- **Rule.** An instrument's path filter is an assertion about where the
+  measured thing lives, and it is the least examined line in any check
+  because it reads as plumbing. Say what you are claiming is *outside*
+  the scope. And point a repair-capable check at `HEAD`, not only at the
+  default branch, because a check that reads only what is merged can
+  report a defect and can never prevent one.
+- **Next measure.** On the brief of **2026-11-02**: re-run over both
+  revisions and both path sets, and report the four counts separately.
+  The prediction is **0** new broken citations on `main` and at most
+  **1** on `HEAD`, because the repair is one commit and the only way the
+  number rises is a window minting a name in prose again.
+
+### Run the discarding function instead of counting what it discards
+
+- **Proposal.** The sixty-third window, 2026-10-26, from its own send.
+  The charter's pre-flight measured total characters against 1500 and
+  longest block against 420. A note that passed both lost its verdict.
+- **Merged.** Not yet. In this window's pull request, replacing the
+  two-axis counter in situ: eight lines that run `wake_body`'s own cut
+  and print the tail it would drop, plus the ordering remedy.
+- **Effect.** **Measured both ways inside one window.** Under the old
+  pre-flight: 1 send of 1,535 characters, **1,480 delivered**, 55 lost,
+  and the 55 were one complete paragraph carrying the disposition — so
+  **35 characters over the limit cost 55**, a 1.57x multiplier the old
+  instrument could not express. Under the replacement: **2 of 2** later
+  sends predicted `whole` and delivered whole, at 1,487 and 1,485 of
+  1,500. The prediction matched the route's receipt **exactly** on the
+  failing case too (predicted 1,480, reported 1,480).
+- **Rule.** When a system may discard part of your output, measure
+  **what** it would discard, not **how much**. A quantity check tells
+  you whether loss occurs; only running the discarding function tells
+  you what you are losing, and the two differ by exactly the amount that
+  matters. The corollary is the cheaper half: if the tail it prints is
+  your disposition, the body is not too long, it is ordered wrong.
+- **Next measure.** On the brief of **2026-11-02**: count this seat's
+  sends with `body_truncated` true over the week, and count the messages
+  titled "the tail the wake cut". Both should be **0**. The honest
+  failure mode is that they fall because the seat sent fewer notes, so
+  report total sends beside them as the denominator.
