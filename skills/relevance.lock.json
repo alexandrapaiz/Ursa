@@ -988,9 +988,9 @@
   },
   "clearing-a-record-for-release/E25": {
     "verdict": "widened",
-    "read": "2026-10-25",
-    "lines": "1178797b29d743ac",
-    "what": "1451ba8f05870d44",
+    "read": "2026-10-26",
+    "lines": "607691c1acf4385c",
+    "what": "6e607c1e387957ee",
     "passages": "dce75e1b8c43204e"
   },
   "clearing-a-record-for-release/E26": {
@@ -1121,9 +1121,9 @@
   },
   "clearing-a-record-for-release/E42": {
     "verdict": "supports",
-    "read": "2026-10-25",
-    "lines": "81f5c018ef38c89d",
-    "what": "d19c2a9749b21952",
+    "read": "2026-10-26",
+    "lines": "f6ec51bab7c6533d",
+    "what": "a366c59ff3c85532",
     "passages": "dce75e1b8c43204e"
   },
   "clearing-a-record-for-release/E43": {
@@ -1191,9 +1191,9 @@
   },
   "distilling-a-tuning-record/E11": {
     "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "205601c2eae4964c",
-    "what": "e461d077ec234969",
+    "read": "2026-10-26",
+    "lines": "bd4465e053d809a5",
+    "what": "482f0179bffb82f8",
     "passages": "743f5484278f37ee"
   },
   "distilling-a-tuning-record/E12": {
@@ -1470,10 +1470,10 @@
     "passages": "8cce36a3b52ca568"
   },
   "excluding-a-file-from-an-outcome-record/E12": {
-    "verdict": "supports",
+    "verdict": "narrowed",
     "read": "2026-10-26",
-    "lines": "2dc802543a3ea7a7",
-    "what": "e2678fbbc1451aeb",
+    "lines": "42675e9ca658105f",
+    "what": "ba8bc0537a7fa210",
     "passages": "8e57a19df7974506"
   },
   "excluding-a-file-from-an-outcome-record/E13": {

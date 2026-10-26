@@ -53,8 +53,8 @@ evidence:
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
     source: ursa-major/src/tuning/distill.ts:11-18,136-146
   - ref: E11
-    what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
-    source: ursa-major/src/tuning/distill.ts:154-166,170
+    what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin, and since 2026-10-26 the call itself lives in one helper this module shares with the verdict reader, which passes its own timeout
+    source: ursa-major/src/tuning/distill.ts:149-164; ursa-major/src/claude-cli.ts:159-167
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
     source: ursa-major/src/tuning/merge.ts:57-64,76-83

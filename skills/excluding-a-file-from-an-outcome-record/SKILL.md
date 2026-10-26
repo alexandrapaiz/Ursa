@@ -62,8 +62,8 @@ evidence:
     what: the declaration is checked ahead of the blob search and short-circuits it, so a path both declared and findable by identity is reported under the weaker evidence, and a null history read continues rather than excluding
     source: ursa-major/src/vendored.ts:374-403
   - ref: E12
-    what: the candidate ceiling and the loop that assigns the relation, where the search stops after forty compared blobs and takes the first match in the order git listed the commits
-    source: ursa-major/src/vendored.ts:135-143,368-386
+    what: the candidate ceiling and the loop that assigns the relation, where the search stops after forty compared blobs and takes the first match in the order git listed the commits; since 2026-10-26 a match authored after the record's own horizon is skipped rather than taken, so the first match is the first one that predates the work
+    source: ursa-major/src/vendored.ts:135-143,404-427
   - ref: E13
     what: the two exclusion reasons as the schema states them, deliberately separate because one is byte identity and the other rests on a statement by whoever made the commit, and a buyer who cannot tell them apart cannot price the difference
     source: ursa-major/src/types.ts:1039-1064
