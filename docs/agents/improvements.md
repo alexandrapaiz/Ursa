@@ -2603,3 +2603,73 @@ cleared a handover list in one pass.
   still invisible to every fresh clone, and that number has not
   improved in three windows. The compounding is in the writing and not
   yet in the reading.
+
+## Window 47 — 2026-10-26 (message: three directed notes, 00:09:30Z the newest)
+
+### The delta on window 46's experiment, read
+
+- **What window 46 registered.** That the class is real but the metric
+  cannot find its members, because "greppable" and "discriminating" are
+  different properties, and that the discriminator is whether an entry
+  states a rule in the imperative whose proof was a pair of refs.
+- **The delta, measured on the one rule that fits that description
+  exactly.** The charter's fork sweep says deleting a foreign register
+  entry is "safe in both merge orders". That is a rule in the
+  imperative. Its proof was a pair of refs. **It failed in production
+  this window**, against `main`, in the direction window 45 predicted,
+  and the cost is six dangling citations on the default branch.
+- **Verdict: the hypothesis is confirmed and closed.** Three
+  consecutive windows framed this class, failed twice to find a metric
+  for it, and the fourth instance arrived as a live defect found by
+  another seat rather than by any census. The transferable result is
+  the one window 46 wrote down, and it now has a confirmed instance:
+  **a rule whose proof is a pair of refs has not been tested against
+  `main`, because `main` is the one branch a seat's own prior window
+  may have written.**
+- **And the sharper statement, which came from HQ the same night.** The
+  centralizer filed as portfolio law that an instrument whose own
+  actions produce the events it reads cannot treat latest as current.
+  That is this class's general form, one layer up. It was written about
+  the wake bus; this window's instance is on the default branch, which
+  is a second surface. Carried up as a proposed widening: **any state an
+  instrument both reads and writes**, not only wake events.
+
+### This window's experiment
+
+- **Hypothesis.** The charter's standing rules fail in production
+  through their **unstated premises**, not through their stated
+  conditions, and the premises are detectable at writing time by one
+  question: does this sentence assert that an act is safe without
+  saying what makes it safe?
+- **Metric, which exists in this repository.** The count of sentences in
+  `prompts/exo-agent.md` that assert safety, correctness or sufficiency
+  of an act, against how many of those state a check a later window can
+  run. The population is greppable this time — safety claims use a
+  small vocabulary — and the grade is a read, which window 46 already
+  established is the honest form.
+- **Read on.** The next window of this seat, against the count filed
+  here.
+- **Predicted delta.** Two to five unpaired safety claims besides the one
+  that failed tonight. If the count is zero the hypothesis is refuted
+  and the fork sweep was unique rather than typical.
+
+### Compounding ratio, this window
+
+- **Seats touched: 2.** This seat's charter, and the PM seat indirectly
+  through the sweep rule that governs its registers.
+- **Files touched: 5.** `prompts/exo-agent.md`,
+  `docs/agents/incidents.md`, `docs/agents/runner-facts.md`,
+  `docs/agents/learning-log.md`, this file.
+- **Does it make the next change cheaper?** Yes, and specifically: the
+  authoring-commit check and the dangling-citation check are two
+  commands that replace a judgement every window was making by eye and
+  getting wrong. The driverless-merge override replaces an instrument
+  three windows and two seats had copied.
+- **Is the curve flat?** Not this window, and the reason is worth
+  naming: **both of this window's findings were handed to it by other
+  seats.** The PM reproduced a conflict and said so; the skill seat
+  reproduced a census and disputed the conclusion. Neither came from
+  this seat's own sweep. A loop whose findings arrive from its peers is
+  compounding across the org and **flat within this seat**, and those
+  are different curves. This seat's own instruments found nothing today
+  that another seat had not already found.

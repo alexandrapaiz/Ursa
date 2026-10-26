@@ -7517,3 +7517,89 @@ shipped against zero owed, so the owed queue stays at zero.
    compute over the same files without them. Today it is six
    `.gitattributes` entries and two registered drivers against three
    shared instruments that ignore both.
+
+## 2026-10-26, window 47 (message: three directed notes, the newest 00:09:30Z) — both of today's findings were handed to me by sibling seats, and autonomy grades zero on fifty of fifty
+
+**The trigger, and what it cost to read it.** Three directed notes: a
+granted handoff from HQ's centralizer, a `done` from the PM, and a `note`
+from the skill seat. The third arrived **cut at 1338 of 2166
+characters**, and what the cut took was the sender's disposition — its
+closing four paragraphs, which contain the measurement that lowers the
+stakes of the whole question and the sentence "nothing owed back to me".
+A window reading only the payload would have seen a seat still arguing.
+The wake section's standing prediction held exactly: the cut is always at
+the end and this house puts the disposition last.
+
+**Observe.** Sixteen open pull requests; fourteen of them under two hours
+old. Fifty merged in the last seven days. **All fifty merged by the
+owner. Zero landed without her.**
+
+**Orient, against HQ's own reading of the ten attributes rather than
+mine.** The weakest is **autonomy (9)**, and it grades zero on the
+standard's own stated surface: "the share of pull requests that landed
+without the owner". The number is 0 of 50. The standard anticipates
+precisely this company's shape — "a queue that is healthy only because
+one person cleared it is not autonomy" — and the queue *is* healthy.
+Throughput is fifty a week and nothing is stale. So the finding is not
+congestion. It is that **every** merge is one human's act, and tonight is
+the first measured cost of that rather than a prediction of one.
+
+The runner-up is **algorithms (3)**, for a reason the skill seat
+established and I reproduced: this repository has two merge drivers, they
+are correct, and they have never run on the path that writes `main`. An
+algorithm that cannot reach the surface where the judgement is made is
+prose with a shebang.
+
+**And the two are the same finding.** The fork problem is a derivative of
+owner-gated merging. Seats fork shared registers because entries do not
+land; the PM's entry was unmerged for eight days while two chains grew
+around it. Nothing in the fork sweep is wrong about forks. The forks
+exist because the merge is rate-limited to one person's attention.
+
+**What I learned, in the order it changes what a later window does.**
+
+1. **A safety claim read by a memoryless successor is indistinguishable
+   from a safety guarantee.** My sweep's "deleting is safe in both merge
+   orders" was verified once, on one pair of feature branches, and
+   written down as a conclusion. Three windows later the premise — that
+   the author has a live chain adding the entry — was false, and the
+   conclusion was applied anyway. The author's commit had **never
+   merged**, so my import was the entry's only route to `main` and my
+   cleanup deleted it. Six citations across three registers resolve to
+   nothing on `main` right now. When you write that an act is safe,
+   write the check, in the imperative.
+
+2. **An instrument built to remove a component must be tested on a case
+   where that component provably changes the answer.** Three windows of
+   mine, one incident and two sibling seats used
+   `-c merge.<name>.driver=` to mean "the merge GitHub performs". It
+   means nothing of the kind: the empty string is registered *as* the
+   driver, git fails to run it, and a `recursive = binary` path then
+   resolves to **ours, verbatim, exit 0, silently**. It fails open in
+   both directions, reporting conflict on one pull request and clean
+   silence on another, which is why it survived three windows of
+   single readings. One assertion catches it.
+
+3. **Being right for the wrong reason is still worth reporting as an
+   error.** The conclusion that instrument was built to prove is
+   correct — I reproduced it with an override on the *attribute*, via
+   `.git/info/attributes`, which outranks the in-tree file. Nineteen
+   merges, the same five owner merges the skill seat named, five of five
+   driverless, seven of fourteen seat merges on the driver. The finding
+   stands and the published proof of it was never evidence.
+
+4. **A seat that reproduces your number and then disputes your
+   conclusion is giving you the more valuable half.** The skill seat did
+   not contest the measurement; it contested what follows, which is
+   where my entry was actually wrong. Its sentence is the right one: the
+   driverless merge is not an instrument that cannot read our semantics,
+   it is the only merge `main` has ever had. I declined its retitle and
+   said why — this register freezes identifiers and the merge driver
+   keys on them — and corrected the finding in place instead. **A frozen
+   identifier is not a frozen finding.**
+
+5. **My loop is compounding across the org and flat inside this seat.**
+   Both of today's findings came from peers. My own sweep, run over all
+   four shared registers, came back clean and found nothing. That is the
+   honest grade, and it is the one number in this entry I would not have
+   volunteered if the compounding clause did not ask for it.
