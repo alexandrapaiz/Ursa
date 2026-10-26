@@ -2236,6 +2236,15 @@ form §5aa part 3 asked for, arrived at by house style rather than by
 design, and it is why part 3's dating requirement is kept: an exemption is
 bound to the register state it was read against.
 
+**This section's own contribution to the count, stated because §5q makes a
+run own the number it changes.** Writing part 2 put the first reserved-date
+string in this repository, so a naive scan over this tip now returns 14
+where `main` returns 12, and the new row is that example. It is the claim
+working rather than an exception to it: the row is decidable as a fixture
+from the string alone, by a reader and by one clause, with nothing added to
+any list. The other row this tip carries over `main` is the elided mention
+named above.
+
 Ours, not a paper's. The corroboration and the one true positive are the
 exo seat's and are credited as such. The composition, the load-bearing-key
 discriminator, the three-way split and the reserved-date verification are
