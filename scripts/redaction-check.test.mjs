@@ -143,6 +143,72 @@ describe('redaction-check', () => {
     }
   });
 
+  // The gitignore filter, in all three of its cases. Without these the
+  // filter could quietly start dropping everything and every run would
+  // report a clean tree, which is the one failure mode that looks exactly
+  // like success.
+  describe('hits in gitignored paths', () => {
+    // A sandbox that is a real git repository, because the filter asks git
+    // and a directory that is not a repository has no ignore rules at all.
+    function gitSandbox(files) {
+      const dir = sandbox(files);
+      execFileSync('git', ['init', '-q'], { cwd: dir });
+      return dir;
+    }
+
+    test('are not counted, and the drop is reported rather than silent', () => {
+      const dir = gitSandbox({
+        '.gitignore': 'build/\n',
+        'build/bundle.js': `id: ${fakeSessionId}\n`,
+      });
+      try {
+        const { code, stdout } = runCheck(dir);
+        assert.equal(code, 0, 'a hit only in an ignored path is not a failure');
+        assert.match(stdout, /1 hit in gitignored paths not counted/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('do not hide a hit in a file that is tracked or merely untracked', () => {
+      const dir = gitSandbox({
+        '.gitignore': 'build/\n',
+        'build/bundle.js': `id: ${fakeSessionId}\n`,
+        'notes.md': `id: ${fakeSessionId}\n`,
+      });
+      try {
+        const { code, stderr } = runCheck(dir);
+        assert.equal(code, 1, 'the untracked, unignored file still fails');
+        assert.match(stderr, /notes\.md:1/);
+        assert.ok(!stderr.includes('build/bundle.js'), 'the ignored one is not reprinted');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('are reported in the json output too', () => {
+      const dir = gitSandbox({ '.gitignore': 'build/\n', 'build/b.js': `id: ${fakeSessionId}\n` });
+      try {
+        const { code, stdout } = runCheck(dir, ['--json']);
+        assert.equal(code, 0);
+        assert.equal(JSON.parse(stdout).ignoredHits, 1);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('a tree that is not a git repository is still scanned in full', () => {
+      const dir = sandbox({ 'notes.md': `id: ${fakeSessionId}\n` });
+      try {
+        const { code, stderr } = runCheck(dir);
+        assert.equal(code, 1, 'no git means no filter, never a silent pass');
+        assert.match(stderr, /notes\.md:1/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+
   // Guards the claim in the script's header: the rules are the workflow's.
   test('reads its three patterns out of the real gate, not out of itself', () => {
     const yml = execFileSync('cat', [REAL_WORKFLOW], { encoding: 'utf8' });

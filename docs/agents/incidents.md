@@ -7375,6 +7375,54 @@ line above is left standing as the thing this seat believed on
 is not a frozen finding.
 
 
+## INC-2026-10-18-board-runtime-token-printed-twice — This seat printed `BOARD_RUNTIME_TOKEN` into its own transcript twice, and the first time was never filed as an incident
+
+**What happened.** A thirty-second-ish pass of this seat ran an
+environment dump (`env | grep -iE "BOARD|..."`) that echoed
+`BOARD_RUNTIME_TOKEN`'s full value into the run's own transcript, and
+correctly raised it as an urgent board `ask` the same pass (14:30:08
+UTC, "BOARD_RUNTIME_TOKEN needs rotation, because I printed it in full
+this run"), asking the owner to rotate the secret. That ask cites
+`incident_number: 18`, which names the wrong incident: Incident 18 in
+this register is the missing-tool-scripts finding, unrelated to
+secrets. No incident entry for the token exposure itself was ever
+filed, so the register had a gap exactly where `docs/standards/secrets.md`
+§5 is most explicit ("No secret value in chat, logs, PR text, workflow
+output, or any repository file"). This run repeated the same mistake
+independently, before reading that ask: an early environment check
+(`env | grep -iE "BOARD|ASC_|PM_DISPATCH|PROJECTS_TOKEN"`) printed the
+same token's full value into this run's own transcript, for the second
+time today, because the value had not been rotated between the two
+runs and both runs reached for the same quick diagnostic.
+
+**Why, technically.** Nothing in this seat's charter or in
+`docs/standards/secrets.md` tells a run how to check for an
+expected-but-unprintable environment variable without printing it. The
+honest move is `[ -n "$VAR" ] && echo present` or `env | grep -o
+'^NAME='`, never a bare `grep` over `env`'s full output, and neither
+run used it.
+
+**Fix, this run.** No further command in this session echoes
+`BOARD_RUNTIME_TOKEN` or any other secret's value; presence is checked
+by name only from here on. This entry files the gap the 14:30:08 UTC
+ask left open, under its correct incident name, and points the ask at
+it. The ask itself is not re-sent: the standing one is urgent, unexpired,
+and rotating a secret is on the owner's never-silent list (pm.md §22),
+so a second urgent ask for the same unrotated value would just spend
+one of the day's four WhatsApp slots for no new fact. As of this pass
+the token is confirmed still unrotated, because this run authenticated
+to the board with the same value the 14:30:08 UTC ask already named.
+
+**What the org grew.** A seat that needs to confirm a secret is set
+should test for presence, never print the value, and a board `ask`
+about an exposure should name its own incident in the same message
+that reports it, not point at the nearest unrelated number.
+
+**Status:** open. (`INC-2026-10-18-board-runtime-token-printed-twice`.)
+Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
+the sync lands; the standing 14:30:08 UTC ask is the tracking line for
+that, this entry is the register's account of why it is needed.
+
 ## INC-2026-10-25-gate-prints-what-it-catches — A near miss: the gate built after Ursa incident 4 published the identifier it caught into five public Actions logs, and the value happened to be nobody's
 
 **Status:** open on the gate, closed on the local side. The fix to
@@ -7855,3 +7903,438 @@ a mergeable merge commit exists", which is a strictly narrower claim than
 until the day it is load-bearing. Worth checking the other eleven
 workflows' triggers against what their authors meant, which this entry
 does not do and names as the obvious next pass.
+
+## INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted — Two asks re-sent for a third and a fourth window, both already satisfied, both probes a grep for a string from my own proposed fix
+
+**What happened.** Two asks this seat had routed to HQ's
+`exo-centralizer` were carried in the learning log as live and re-sent
+on the board by windows 45, 47 and 48, each time with a measurement
+attached, each time reading zero. Both were satisfied on HQ's `main`
+at the time of the last re-send. The centralizer said so at 05:52:03
+UTC on 2026-10-26 in a note of 1,495 characters, under the wake cut, so
+it arrived whole. This window re-derived both claims against HQ's
+`main` before accepting either, and both check out.
+
+**Re-ask one, which is *fixed differently*.** The carried check was
+"`grep -c install-driver` over HQ's `tools/check-merge-queue.sh`; zero
+means the ask is live." Measured this window: **zero hits, and 454
+lines of a tool that solves the whole of it.** The landed repair
+*pins* the driverless merge on purpose, overriding every declared
+driver for the length of one `git` invocation, and its own comment
+gives this seat's own argument as the reason: GitHub merges
+server-side in a clone with no drivers, so the driverless merge is the
+button's verdict permanently and nothing a repository declares can
+reach it. Installing the drivers would have produced the direction the
+tool's comment calls dangerous, a pull request the button will refuse
+reported clean. The repair also reads all three places a `merge=`
+attribute can come from and names `needs-local-merge` as its own state,
+so a mechanical conflict is not charged to a seat's judgement. None of
+that can contain the string `install-driver`.
+
+**Re-ask two, which is *the wrong revision*.** The carried check was
+"`grep -c unresolved` over HQ's `tools/capacity-retry.py` on `main`;
+zero means the barren-wake census is live." Window 48 published
+"**zero** times ... on `main`, **420 lines**". Measured this window at
+05:5x, instrument
+`gh api repos/alexandrapaiz/alexandra-systems/contents/tools/capacity-retry.py?ref=main`:
+
+| ref | lines | hits for `unresolved` |
+|---|---|---|
+| `2ab9648d` 2026-10-24 13:06 | 233 | 0 |
+| `3ddff966` 2026-10-24 22:09 | 354 | 0 |
+| `00ee4e53` 2026-10-25 03:05 | **420** | **0** |
+| `2c750e4d` 2026-10-25 23:48 (`main` now) | **774** | **4** |
+
+So 420 lines and zero hits was a correct reading of `main` taken
+between 03:05 and 23:48 on 2026-10-25, and window 48 ran from 00:14 to
+00:5x on 2026-10-26, after `2c750e4d`. The number was right about a
+revision that had been superseded for an hour before the window that
+re-sent it existed. The centralizer's note is sharper than the
+diagnosis the seat would have reached on its own: the probe reported a
+count **and a size**, and the size already said the count was about a
+different file.
+
+Two further facts. The four hits include this seat's own refusal split
+at 66.4% with its percentage in the comment, so the ask was not merely
+satisfied, it landed with this seat's measurement cited. And the
+centralizer had said so on the board at **2026-10-25 23:53:52**, under
+the subject "Your refusal split is in at 66.4 per cent" — twenty-one
+minutes before window 48 opened and re-sent the ask. The message was in
+the inbox the whole time.
+
+**Why it happened technically.** Three causes, and the third is the
+only one that is this seat's charter rather than this seat's judgement.
+
+1. **A greppable string from the asker's own fix is not the property
+   asked about.** Both probes tested for an implementation this seat had
+   proposed. A hit count alone cannot tell *not fixed* from *fixed
+   differently* from *you are holding the wrong file*, and those three
+   have different next actions: wait, retire the ask, re-measure.
+2. **A carried check was inherited across windows without its instant.**
+   The learning log's entry reads "`unresolved` appears zero times in
+   HQ's `capacity-retry.py` on `main`, 420 lines (fourth window)". The
+   parenthetical names the *window that measured it* and no window can
+   tell, from that line, whether a later window re-measured or
+   inherited. This charter already requires the writer of a state claim
+   about another seat's live branch to name the instant it was measured
+   (§"And the writer's half"). It never applied the same rule to the
+   claims this seat carries forward in its own register, which is the
+   surface every fresh window reads first.
+3. **The charter's §2 "work queue" rule has no retirement path for an
+   ask whose answer is "already done, differently".** It says an entry
+   marked pending is an unpaid debt that outranks a new idea. It does
+   not say how a debt is discharged by somebody else's different fix.
+
+**The fix.** On the charter branch, in the §3 standards sweep where the
+re-ask is generated:
+
+- Every carried ask states the **property** in a sentence a reader could
+  verify without this seat's diff, beside any string it greps.
+- Every carried measurement names its **instant and the commit**, not
+  the window ordinal.
+- Before re-sending, re-measure at `main` and compare the artifact's
+  **size** as well as the count, because a size that moved is the
+  cheapest available signal that the count is about a different file.
+- Read the artifact's own account of itself first: `--help`, the usage
+  block, the comment above the function. All three of the repairs this
+  seat failed to see are described in their own files in this seat's own
+  words.
+
+**What the org grows from it.** The centralizer filed the general shape
+as a portfolio lesson, `standards/lessons-inbox/2026-10-26-a-re-ask-whose-probe-greps-for-your-own-fix.md`,
+`binds: any, exo, pm`. **It is on HQ's open `#489` and not on HQ's
+`main`**, checked this window with
+`gh api .../contents/standards/lessons-inbox?ref=main`, which does not
+list it. So the lesson is an artifact and not yet portfolio law, which
+is the state the charter's own rule about a sibling's "I have fixed it"
+describes exactly. Nothing in the note misstates this: its subject's
+"already law on the trunk" is about the two **repairs**, which are on
+the trunk and were verified here, and its `data.inbox_entry` is about
+the **lesson**, which is on a pull request. Two facts with two states in
+one message, and the reader owes the second `gh api` call.
+
+What this cost: four seat windows across two companies spent on two
+items that were already law, while this seat's real findings waited
+behind them in the same messages.
+
+## INC-2026-10-26-clean-from-the-button-is-not-clean-from-this-repositorys-own-merge-semantics — The queue instrument answers what the merge button will do, and one open pull request this morning is clean to the button and refused by Ursa's own ledger driver
+
+**What happened.** This window ran HQ's `tools/check-merge-queue.sh`
+over the 16 open pull requests, twice, once with this clone's merge
+drivers unregistered and once with them registered by
+`tools/ledger/install-driver.sh` and `tools/registers/install-drivers.sh`.
+The tool is correct and its two states are the two it names. Then this
+window ran the third measurement the tool does not take, which is the
+merge **with** the drivers, per pull request, against `origin/main`:
+
+| | drivers registered | driverless (what the button does) |
+|---|---|---|
+| `#474 #473 #472 #470 #468 #467 #465 #462 #454 #447 #395` | merges | merges |
+| **`#463`** | **refused** | **merges** |
+
+`#463` is the engineer seat's. The refusal is the `ledger` driver's own
+and it names the block:
+
+```
+ledger driver: 1 block(s) in docs/ideas.md were edited on both sides and need a human:
+  ### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0, ...
+```
+
+Verified on both sides against the merge base `177b7f60`. `main`
+removed that block's closing `- Cost: $0` and `- Status: proposed`
+lines; `#463` rewrote the block's `- First step:` line into a paragraph
+explaining why a scan note carries no such field. Both edits are real,
+both are inside one ledger block, and they fall on different lines, so
+git's own three-way merge combines them without noticing and the button
+will accept it.
+
+**Why it happened technically.** `check-merge-queue.sh` pins the
+driverless merge **deliberately and correctly**, because its question is
+"what can the owner actually merge right now" and the answer to that
+question is a property of GitHub's server-side clone, which has no
+drivers. Its `needs-local-merge` state covers the direction where the
+drivers resolve something the button refuses, which is mechanical and
+needs no judgement, and four of the sixteen open pull requests are in
+it. The opposite direction — the button resolves something the
+repository's own semantics refuse — is the direction the tool's own
+comment block calls dangerous, and the tool reports it as `clean`
+because from its question's point of view it **is** clean. Nothing is
+wrong with the instrument. The gap is that this org runs one instrument
+for a question with two halves.
+
+**What is not claimed.** The driverless result passes Ursa's own ledger
+gate: `node tools/ledger/check.mjs` on the merged tree reports 311
+blocks clean with one pre-existing owner-only `STATUS_ALLOWED`
+violation, and `node --test tools/ledger/block-kinds.test.mjs` passes
+11 of 11. So this is not a red `main` waiting to happen. It is a block
+whose two edits were combined by line position rather than by entry
+identity, which is the one judgement the `ledger` driver exists to
+route to a human, and the button will make it silently. Whether the
+combined block is right is the engineer seat's call and the ledger's
+statuses are the owner's, so this seat measures it and hands it over.
+
+**The fix.** In §5b's merge-order duty, on the charter branch: for every
+pull request the queue checker calls `clean` whose diff touches a path
+`.gitattributes` gives a `merge=` attribute, run the merge a second
+time with this repository's drivers registered and report a
+disagreement as its own state, `drivers-disagree`. One column in
+`merge-order.md`, and the command is in `runner-facts.md` §32.
+
+**What the org grows from it.** Window 48 filed this as an idea to the
+owner at 00:27:37 UTC today, under `Ideas: we declare a merge the forge
+will never run, and the cheapest f...`, from first principles and with
+no instance. Nine hours later it has one, measured, in the open queue.
+An idea filed with no instance is cheap to file and this is the first
+time one of this seat's has acquired an instance before the owner
+answered it.
+
+## INC-2026-10-26-the-experiment-registered-its-metric-and-scheduled-its-denominator-for-the-end-of-the-run — Window 49 was killed before writing the carried-check list its own experiment reads, so the result is unreadable rather than negative, and the scheduling defect is the one this org had already diagnosed for pull requests
+
+**What happened.** Window 49 of this seat, woken at 06:0x UTC on
+2026-10-26 by HQ's `exo-centralizer`, registered an experiment in
+`docs/agents/improvements.md` in the format the daily tick requires:
+
+- *Hypothesis.* The carried-check list at the foot of each learning-log
+  entry is this seat's only queue and has no retirement path, so an ask
+  satisfied by somebody else's different fix stays on the list forever.
+  Adding the **property** beside the command should make a satisfied ask
+  retire on first re-read.
+- *Metric.* "The number of carried checks in the learning log's newest
+  entry that a later window retires **on its first read**, against the
+  number it re-sends."
+- *Read on.* "The next window of this seat, **against the carried list
+  this entry leaves below**, every item of which now carries a property,
+  an instant and a commit."
+
+Window 49's run then ended without writing that list, and without
+writing the body of its own learning-log entry, and without renaming its
+pull request off `opening, no work yet`. Window 50 opened at 06:18,
+pushed one placeholder line, and was cut off by the provider limit at
+turn 37. Window 51 — this one — is the window the experiment named as
+its reader.
+
+**So the denominator is zero and the experiment cannot be read in either
+direction.** It is not a negative result. A negative result would be a
+window that read the list and retired nothing, and that would have
+falsified the hypothesis usefully. What exists instead is a registered
+experiment with no input, which in `improvements.md` sits beside real
+deltas looking exactly like one.
+
+**Why it happened.** Everything the experiment needed to be readable was
+scheduled at the end of the run:
+
+| artifact | when window 49 wrote it | survived? |
+|---|---|---|
+| the experiment's registration | mid-run | **yes** |
+| `runner-facts.md` §32 | mid-run | **yes** |
+| the restored `board-runtime-token` entry | mid-run | **yes** |
+| the learning-log entry's **body** | end | no |
+| the **carried-check list** (the metric's denominator) | end | no |
+| the pull request's **title** | end | no |
+
+This is not a new mechanism. It is `ship-first`'s "Resolve it when the
+work stands, not before you end" clause, measured on 2026-10-24 across
+four windows in two days, and its own sentence is that "the whole of
+this org's artifact hygiene is scheduled at the one moment a window is
+least likely to get". **That clause was applied to pull requests and
+registers. It was never applied to the registers' own measurement
+scaffolding**, because an experiment's denominator does not look like
+artifact hygiene; it looks like a result, and results are what you write
+at the end.
+
+**The direction of the error is the harmful one.** A killed run's
+*findings* are visibly absent — the entry says "the findings follow
+below" and no reader mistakes that for a conclusion. A killed run's
+*experiment* is visibly present, in full, with a hypothesis and a metric
+and a read date, and the only thing missing is the input, which no reader
+of `improvements.md` can see is missing. One of those degrades loudly and
+the other degrades silently.
+
+**What was done about it.** Window 51 wrote its carried-check list as the
+**first** section of its learning-log entry, above the run's own work,
+with a sentence saying why it is there and that the foot-of-entry copy is
+a convenience. Six items, each with the property, the instant and the
+commit. If window 51 had also been killed at turn 10, window 52 would
+still have had a readable list.
+
+**The standing rule.** *Write the input a measurement reads at the moment
+you register the measurement, not at the moment you expect to read it.*
+An experiment whose denominator is produced by the same run that
+registers it is a single point of failure dressed as a method, and on
+this host a run does not choose its ending. Stated generally, because it
+is not about carried checks: **if a run registers a claim that a later
+run is to verify, the artifact the verification reads is part of the
+registration and not part of the conclusion.**
+
+**Status.** Window 49's experiment is **re-registered unchanged by
+window 51**, with window 51's own list as its denominator, so the
+hypothesis gets its first real test rather than being carried forward as
+"not swept". Carried-check item 1 of window 51's list.
+
+## INC-2026-10-26-the-run-pr-resolver-cannot-see-a-push-onto-a-pull-request-it-did-not-open — The board asks GitHub before writing an absence down, and asks the wrong question, so the two org rules this seat paid most to learn both make the run that obeys them read as having shipped nothing
+
+**What happened.** The board's run row for window 51 of this seat, at
+2026-10-26T09:24:35Z, reads:
+
+> Host window run of ursa-exo on hook: 103 turns in 22 min, **no pull
+> request**, looked for in GitHub's alexandrapaiz/Ursa pull requests,
+> newest 30, for a exo/ or ursa-exo/ branch opened in the run's window.
+
+Window 51 shipped eleven commits in that window across two pull
+requests: nine onto `ursa-exo/2026-10-26-message-w50` (`#481`, since
+merged) and two onto the charter half `#447`. The PM reads these rows.
+The next window of this seat reads these rows — §2 instructs it to.
+
+**Why it happened.** `/srv/asc/hq/runtime/board/runpr.py` exists
+precisely to stop an unchecked absence being published: the host runner
+reads "no pull request" out of an empty log and the board asks GitHub
+before writing it down. Its selector requires the candidate pull request
+to have been **created** inside the run's window:
+
+```python
+opened = _when(pr.get("created_at") or pr.get("createdAt"))
+if not opened or opened < start or opened > end + slack:
+    continue
+```
+
+`#447` was created at 00:14:11Z and `#481` at 06:18:01Z. Both predate
+window 51's 09:02:46Z start, so `pick_pr` returns `None` and the absence
+is published with a vantage point attached, which is what makes it read
+as checked.
+
+**The part that makes it an incident rather than a wishlist item: the
+organization's own rules route runs into the failing case.**
+
+- `prompts/exo-agent.md`, *"While an owner ask names one of your pull
+  requests, grow it instead of stacking past it"* — written after the
+  ten-identifier day of 2026-10-18 — tells a window to push onto a pull
+  request it did not open.
+- The host's dispatch, *"the next run of your seat inherits it"*, does
+  the same for every window that picks up a killed predecessor's branch.
+
+Window 51 was both cases at once: it inherited window 50's branch and
+absorbed window 49's. It obeyed both rules exactly and the board
+recorded it as having opened nothing.
+
+**Scope, measured.** All eleven Ursa seats, `GET
+/api/runs?company=Ursa&seat=<s>&days=1`, 82 rows: 61 carried a
+`pr_url`, 31 were resolved by this very module from the branch, 21 claim
+no pull request. Of those 21, fourteen are one-turn refusals where the
+absence is true, and **two are false absences confirmed against git** —
+this seat's window 51, and the **PM's** 86-turn run at 00:37:46Z, which
+pushed two commits onto `#450`, created 00:31:52Z, six minutes before
+its own window opened. Two seats, one cause, one day.
+
+**The diagnosis the module already contains.** Its docstring states the
+rule it was built on and the implementation does not follow it:
+
+> The log is the wrong instrument. The branch is the right one.
+
+The branch *is* the right instrument, and `pick_pr` never looks at it —
+it looks at the pull request's birth certificate. So this is the same
+defect at the next vantage point out: an absence measured from a place
+that could not have seen the thing even if it happened. The honest
+reading is that `pick_pr`'s contract ("the pull request this run
+**opened**") and the sentence the board publishes ("no pull request",
+read by every seat as *shipped nothing*) are two different claims, and
+only the first one is implemented.
+
+**Whose it is.** `runtime/` is HQ's lane, so this is handed to
+`alexandra-systems/exo-centralizer` with the measurement and the two
+false-absence identifiers, and is not patched in this repository. The
+change is inside `pick_pr`, which the module's own docstring calls "the
+part with the edge cases, so this is the part under test".
+
+**What this repository does instead.** `docs/agents/runner-facts.md`
+§35 carries the measurement and the sound attribution instrument (credit
+each commit to the **earliest-created** pull request containing it;
+crediting every pull request that contains it over-counts by an order of
+magnitude on a stacking org, and `--not origin/main` under-counts
+because it cannot see work that has since merged). The charter's §2 gets
+the reader's half: **a run row claiming no pull request is not evidence
+that a window shipped nothing, and this seat's own window 51 is the
+worked example.**
+
+## INC-2026-10-26-the-carried-check-was-read-eighteen-minutes-after-the-ask-and-the-ask-carried-no-deadline — Four windows measured one property that could not change, because the only clock on an escalation was the next window's wake
+
+**Status:** open on the behaviour, which is this seat's own and fixed in
+the charter amendment on `#447`; **the measurement is closed**
+(`docs/agents/runner-facts.md` §38).
+**Found:** 2026-10-26, fifty-third window, by retiring its predecessor's
+carried-check list.
+**Class:** scheduling. Not a tool defect — every instrument involved
+returned a correct reading.
+
+### What happened
+
+Window 52 sent three escalations between 09:44:09Z and 09:45:23Z,
+registered "did they come back answered against the stated property?" as
+its experiment, and named **the next window of this seat** as the read.
+Its pull request merged at 10:01:31Z. That merge woke window 53 at
+10:02:57Z, **18 minutes** after the last of the three messages. Replies
+at that instant: **0 of 3, not one acknowledged.**
+
+The experiment was therefore unreadable, and — this is the part that
+cost real work — the *previous* round of the same checks was not. Check 2
+of the list, `command -v asc` exits 0, has been measured by **four
+consecutive windows** with an identical `exit 1`, and escalated twice.
+Nothing could have changed between those readings.
+
+### Why it happened, technically
+
+Three facts, each measured rather than reasoned (§38):
+
+1. **The trigger is causally downstream of the registration.** This seat
+   is woken by the merge of its own pull request. The pull request that
+   registers an experiment is the pull request whose merge schedules the
+   read. Shipping faster makes the read earlier.
+2. **The wake gap is shorter than the reply latency.** Median gap from
+   this seat sending a message to its next window beginning: **10.9
+   min**. Median floor on reply latency: **20.7 min**, p75 **326 min**.
+   In **35 of 45** sent messages the next window began before any reply
+   had arrived; in 21 of those no reply arrived within 31 hours.
+3. **The ask declared no deadline, so there was nothing to compare the
+   wake against.** `standards/pm.md` §22 names `data.deadline` and HQ
+   ships `tools/check-silence-clocks.py` to enumerate it. **0 of the 57
+   messages this seat sent in the store carry it.** Every `data` key this
+   seat sets describes its own state — `live_tip`, `supersedes`,
+   `my_pr` — and none describes when the recipient's answer is due.
+
+The register's shape then converts the early read into work: a check
+recorded as *pending* reads as *still true and worth measuring*, so each
+window measures it, finds it correctly failing, and re-sends. A re-ask to
+a seat that has not had time to answer the first ask is the output.
+
+### The fix
+
+1. **A fourth verdict, `not due`**, in the carried-check format, with the
+   instant it becomes due. Charter §6, on `#447`.
+2. **Every escalation carries `data.deadline`**, from this seat's own
+   reply-latency p75, never under an hour. This is the enabling half: the
+   verdict needs an instant and the instant has to come from the ask.
+   Charter §5, on `#447`.
+3. **A check marked `not due` is neither re-measured nor re-sent.**
+
+### What the org grew from it
+
+**The class, enumerated as §6 requires.** The sentence "the read is
+scheduled by an event this seat does not control, and that event is
+faster than the thing being read" is not about carried checks. It covers
+every clock in this organisation whose deadline lives in prose rather
+than in `data`, and the board-wide number is **11 of 500** messages
+carrying a deadline-ish key. So the class is nearly the whole board, the
+instrument to enumerate it is HQ's and already deployed, and the only
+member this incident fixes is this seat's own. Handed to HQ's
+centralizer with the number, because the other members are other
+companies' seats.
+
+**And the pair it completes.** This is the third of three defects in one
+register in one day, all in the same object and each one layer down.
+`INC-2026-10-26-the-experiment-registered-its-metric-and-scheduled-its-denominator-for-the-end-of-the-run`
+was the input not existing. Window 52's three-verdict split was the
+verdict space being too small.
+`INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted`
+was the probe being wrong. This one is the probe being **right and run
+too early**, which is the hardest of the four to see, because a correct
+instrument returning a correct failing reading is indistinguishable from
+diligence.

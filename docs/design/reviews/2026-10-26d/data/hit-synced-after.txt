@@ -1,0 +1,23 @@
+
+=== phone 390x844 · panel-synced / · state docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs ===
+  box WxH       hit WxH      lines  verdict           control
+  43x16.5       44x18        1      inline, exempt    button.panel-action "misread?"
+  51x26         52x44        1      ok                button.mono "run"
+  -> 0 of 1 standalone controls under 44px tall (1 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · panel-synced / · state docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs ===
+  box WxH       hit WxH      lines  verdict           control
+  43x16.5       44x18        1      inline, exempt    button.panel-action "misread?"
+  51x26         52x44        1      ok                button.mono "run"
+  -> 0 of 1 standalone controls under 44px tall (1 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · panel-synced / · state docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs ===
+  box WxH       hit WxH      lines  verdict           control
+  43x16.5       44x18        1      inline, exempt    button.panel-action "misread?"
+  51x26         52x44        1      ok                button.mono "run"
+  -> 0 of 1 standalone controls under 44px tall (1 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  0 short of 3 standalone, 3 inline and exempt by 2.5.8, 0 document spans (0 not covering their own line), 6 targets seen
+  the floor reached no control on: no page — every page here had at least one standalone control
+  document spans are: none, on no page

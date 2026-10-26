@@ -484,6 +484,89 @@ its own generation history. Last observed 2026-10-25:
 [Dealroom: micro1 passes a $1B run rate with about 180 staff](https://dealroom.co/news/161913-micro1-passes-a-1b-run-rate-with-about-180-staff-three-years-after-nearl/),
 [micro1.ai: Intelligence / Realm](https://www.micro1.ai/).
 
+### Cross-cutting note (2026-10-26, 29th run): "build the task and the verifier" is a mapped ~42-company market, not three isolated pivots
+
+This file has tracked the environments-and-verifiers sub-category one
+vendor at a time as it was individually discovered: Mercor's Deeptune
+acquisition (2026-10-14), Halluminate's Series A (2026-10-24), and
+micro1's Realm product (2026-10-25). Each update named the pattern as
+emerging without a sense of its size. rl-list.com, an independent
+directory ("a transparent, source-cited RL-environment directory,"
+last updated 2026-10-05, methodology page referenced but not fully
+read this run) names 42 companies building "simulated tasks and worlds
+used to train and evaluate AI agents with reinforcement learning,"
+split into pure-play environment builders (AfterQuery, $30.5M raised;
+Bespoke Labs, $40M; Fleet AI, $15M, replicating Salesforce/Excel/browser
+workflows; Datacurve, $17.7M, expert-sourced coding environments and
+the DeepSWE benchmark, adopted by Artificial Analysis's own Coding
+Agent Index; Proximal, $15M; Chakra Labs, $10M; HUD, $16M),
+infrastructure providers that sell compute rather than environments
+(Modal, Daytona, E2B, Runloop, Morph), and incumbents moving in from
+labeling (Scale AI, Snorkel AI, Mercor, Surge AI, all already tracked
+above). Spot-checked Datacurve's own profile directly: no named
+frontier-lab customers published, "frontier-lab relationships remain
+unverified self-descriptions" per the directory's own caveat, the same
+sourcing gap this file has flagged on vendor-authored figures
+elsewhere.
+
+So what: the weakness this file has stated three separate times
+("a constructed scenario with a built-in verifier is not a real
+deliverable joined backward to its own generation history") is not a
+caveat on three companies, it is a caveat on an entire, already-funded
+sub-category at least 42 names deep, plus every Category 1 incumbent
+now entering it. None of the three vendors checked individually so far
+(Mercor/Deeptune, Halluminate, micro1/Realm) has been shown to ingest
+a real completed deliverable rather than a constructed one, and this
+run did not find a fourth that does either — the gap scales with the
+market rather than closing as it grows. Worth citing in whatever lab
+brief first has to explain why Minor's outcome record is a different
+object than a gym: the comparison now needs to hold against a market,
+not a handful of named competitors. No landscape entry opened for any
+individual name in the 42; the next run with capacity to spare should
+pick two or three of the better-funded, not-yet-checked ones (AfterQuery,
+Bespoke Labs, Fleet AI) and test them against the same "real deliverable
+or constructed one" question Halluminate and micro1 already got. Ledger
+proposal below. Last observed 2026-10-26: [rl-list.com: RL Environment
+Vendors](https://www.rl-list.com/), [rl-list.com: RL Environments for
+Coding](https://www.rl-list.com/rl-environments-for-coding), [rl-list.com:
+Datacurve vendor profile](https://www.rl-list.com/vendors/datacurve).
+
+**Update (2026-10-26, 30th run): the three better-funded names this
+note asked the next run to check all come back "authored," same as
+the first three.** Read each vendor's own product page directly.
+Bespoke Labs states its own approach in its own words — "company-scale
+simulations with real codebases and microservices" — and names no
+frontier-lab customer, only "Frontier Labs" and "Neolabs" as audience
+categories. Fleet AI's own language is "gyms" that "replicate"
+enterprise software (Salesforce, Excel); rl-list.com's vendor profile
+states plainly that "no lab customer is named or verified" and that
+Fleet's only named customer segment (financial services and insurance)
+is a self-claim from its own blog, not third-party-confirmed.
+AfterQuery is the one worth a caveat rather than a clean "authored":
+its page emphasizes 300,000+ "verified practitioners" producing
+"expert-demonstrated trajectories" from real professional domains
+(medicine, law, finance), which reads closer to this file's standard
+than a purely synthetic gym does. But a practitioner demonstrating a
+task on request, for the purpose of generating training data, is still
+not the same object as a deliverable that existed because the
+practitioner's actual work needed it done — it is demonstration data
+collected to train on, not a deliverable joined backward to its own
+generation history after the fact. On the evidence on these three
+public pages, none crosses the line from constructed to real. Tally
+now 6 of 42 checked, 6 of 6 "authored." So what: six of six is still a
+thin fraction of 42, but it is now twice the sample run 29 had, in the
+same direction, including the two best-funded unchecked names
+(Bespoke Labs $40M, Fleet AI's reported $750M valuation talks). The
+next checkable step, if the lab brief needs a cheaper path than another
+round of one-by-one vendor fetches, is a keyword sweep of rl-list.com's
+own listing text across all 42 for any vendor that itself claims
+real-deliverable ingestion rather than authored-scenario construction,
+which would surface a positive case faster than continuing to sample
+blind. Ledger proposal below. Last observed 2026-10-26: [AfterQuery:
+AI Training Data Products](https://www.afterquery.com/products),
+[Bespoke Labs](https://bespokelabs.ai/), [rl-list.com: Fleet AI vendor
+profile](https://www.rl-list.com/vendors/fleet-ai).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1033,6 +1116,78 @@ transcript doesn't go into a file — it goes into a live session")
 suggests even this narrower translation has real fidelity limits. Last
 observed 2026-10-26: [Launch HN: Skillsync (YC W26)](https://news.ycombinator.com/item?id=49743049), [YesPress: Skillsync (YC W26)](https://yespress.io/skillsync-yc-w26).
 
+### Memory Forge (Phoenix Grove Systems)
+
+What it is: a browser-based conversion tool that turns a raw ChatGPT,
+Claude, or Gemini conversation export into a single portable markdown
+"memory chip" file, reloadable into any AI that accepts file uploads
+by prompting it to "activate memory chip." Who it serves: individual
+consumers switching AI platforms, surfaced specifically by the
+#QuitGPT boycott of OpenAI's Pentagon contract (campaign launched late
+February 2026; QuitGPT's own count puts cancellations and cancellation
+pledges above 2.5 million, with reporting that Claude passed ChatGPT
+in the US App Store for the first time during the same window).
+Pricing: $3.95/mo for unlimited conversions, no token fees, files
+remain usable after cancellation. Strengths: conversion is claimed to
+run entirely in the browser, "no cloud, no upload," the same on-device
+principle CLAUDE.md §0 states as a hard constraint for Ursa, and this
+is the most direct evidence this map has found of a consumer paying,
+in real time, for a worse version of what Ursa Major gives away free —
+a manual export-and-reload step with no persistent sync, no
+cross-model inference layer, and a one-shot "activate" prompt the user
+has to remember to issue each session. Weakness against Ursa: it moves
+a raw transcript file, not a provenance-resolved preference profile;
+there is no inference, no revealed-preference structure, and nothing
+analogous to the consent/revoke surface CLAUDE.md §0 requires, so it
+feeds nothing into anything resembling Minor's side of the flywheel.
+It is a bridge a user builds by hand during a specific exodus event,
+not an ongoing relationship. No independent traction numbers found for
+the tool itself; the article's "becoming the unofficial exit ramp" is
+the vendor's own framing via a single syndicated piece, not an
+independent count. Last observed 2026-10-26: [Programming Insider:
+ChatGPT Protesters Are Using Memory Forge to Take Their Data With
+Them](https://programminginsider.com/chatgpt-protesters-are-using-memory-forge-to-take-their-data-with-them/),
+[Memory Forge product page](https://pgsgrove.com/memoryforgeland).
+
+### MemoryLake
+
+What it is: a bootstrapped (founded 2024, no funding raised, per
+Tracxn) hosted "memory lake" that stores typed, versioned memories
+(conversations, documents, spreadsheets, audio, video) separately from
+chat logs and exposes them to "every AI and agent" (ChatGPT, Claude,
+Qwen, Gemini, OpenClaw, AutoGPT, Manus, Perplexity named, plus any
+API-compatible system) via MCP, REST, and a CLI, pitched explicitly as
+"neutral by design" and "outside any single vendor." Who it serves:
+individuals and enterprises wanting one memory store that follows them
+across tools rather than a per-vendor memory feature. Pricing: free
+tier (300K tokens/month), Pro $19/mo (6.2M tokens/month), Premium
+$199/mo (66M tokens/month), on-demand metering beyond that at roughly
+$3.125/million tokens. Strengths: the broadest platform-connection list
+found in this category to date (eight named AI products plus "any
+API-compatible system," versus Wire's MCP-client scope or Skillsync's
+six named coding agents), and a company blog post (2026-06-05) makes
+the identical architectural argument Wire's does independently — memory
+is simultaneously "a genuine feature and a retention mechanism," and
+the fix is a store the user owns outside any one vendor. Weakness
+against Ursa, and the same one as every other entry in this
+fragmentation count: the one external-validation data point on the
+page, a 94.03% LoCoMo score claimed as "the highest score in this
+evaluation," is MemoryLake's own self-reported result on its own
+product page, not a third party reading MemoryLake's export back in.
+Nothing on the site or in independent coverage found this run shows a
+competing platform (or a third party at all) importing a MemoryLake
+export and reconstructing it; the product is itself the destination
+every connected AI reads from, the same centralized-store architecture
+as Wire, not an on-device profile the user holds (CLAUDE.md §0,
+constraint 3). Another entry in this file's running count of commercial
+products solving portability for their own adapters only (Mem0, Letta,
+Zep, Wire, Skillsync, Memory Forge, and now this one) — a separate
+tally from the cross-cutting note's own count of protocol/format
+*specs* below, which this is not one of. Last observed 2026-10-26:
+[MemoryLake: Is AI Memory a Feature or a Lock-In?](https://www.memorylake.ai/en/blogs/is-ai-memory-a-feature-or-lock-in),
+[MemoryLake](https://www.memorylake.ai/), [MemoryLake pricing](https://www.memorylake.ai/en/pricing),
+[Tracxn: MemoryLake company profile](https://tracxn.com/d/companies/memorylake/___0NgAT2k9L33aWunlgxgnpw3otgpFY9Q6kIe_kmuA8o).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -1105,6 +1260,54 @@ governed, widely adopted." Seven attempts now, still zero that clear
 the bar, but this is the first one whose design target overlaps
 Ursa's own consent architecture rather than just export format. Last
 observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.com/publications/portable-memory).
+
+Update 2026-10-26 (message, 27th run): an eighth fragmentation
+attempt, found via the demand-signals ceremony rather than a
+landscape sweep: "Portable Agent Memory: A Protocol for
+Cryptographically-Verified Memory Transfer Across Heterogeneous AI
+Agents" (Ravindran, arXiv 2605.11032, submitted 2026-05-10). A
+single-author open protocol using a Merkle-DAG structure for
+tamper-evident, cryptographically verified memory transfer, with an
+"injection-resistant rehydration process" for adapting memory across
+model architectures. Checked against this note's own bar: the
+author's own reference implementation demonstrates transfer between
+GPT-4, Claude, Gemini, and Llama, which is the broadest cross-vendor
+demo found in this note so far, but every adapter is still the
+author's own code (54 passing tests, Apache 2.0, no third-party
+organization named as implementing or adopting it). Same gap as all
+seven prior attempts, now with the widest model coverage and the
+strongest security framing (the "injection-resistant" claim is the
+first attempt in this note to engage with hostile input at all,
+worth a flag for the security seat's own watch rather than action by
+this one). Eight attempts now, still zero that clear the
+independent-implementation bar. Last observed 2026-10-26: [arXiv
+2605.11032: Portable Agent Memory](https://arxiv.org/abs/2605.11032).
+
+Update 2026-10-26 (message, 27th run): separately, a controlled
+academic study gives the first quantified answer to *why* none of
+the eight attempts above has cleared the bar on the first try, rather
+than just whether one has. "Does Your Agent's Memory Survive a Model
+Upgrade? A Controlled Study of Memory Portability" (Goyal and Ray,
+arXiv 2609.05339, submitted 2026-09-04) tested four memory storage
+formats (verbatim long-context history, chunked RAG retrieval,
+model-compressed natural-language notes, and fixed-schema knowledge
+graphs) across a model swap, using 48 synthetic histories on two
+open-weight models under 10B parameters. The result: fixed-schema
+structures transferred almost losslessly (accuracy changed by
++0.0004 ± 0.0020), while compressed natural-language notes — the
+format closest to what a "derived signal" or narrative summary looks
+like — swung 9 to 13 percentage points depending on migration
+direction, and RAG retrieval degraded without a full re-embedding
+pass. This is a small, synthetic, non-product study, not evidence
+about any named entry in this file, but it is the first source this
+note has found that explains the fragmentation above as a format
+problem with a measurable cost rather than only a coordination
+problem: a neutral standard that picked the wrong internal
+representation would still fail this test. Positioning consequence
+(a concrete numeric bar for the automated-round-trip test) in
+docs/market/positioning.md. Last observed 2026-10-26: [arXiv
+2609.05339: Does Your Agent's Memory Survive a Model
+Upgrade?](https://arxiv.org/abs/2609.05339).
 
 ## Changelog
 
@@ -1268,3 +1471,35 @@ observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.
   a different axis and a different outcome than Scale AI's
   equity-driven, not-reported-as-recovered customer exodus above.
   Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 26th run) — added Memory Forge / Phoenix Grove
+  Systems (Category 3, now 18 entries), found via the demand-signals
+  ceremony. A $3.95/mo browser-based tool that converts an AI
+  conversation export into a portable file, surfaced by the #QuitGPT
+  boycott of OpenAI's Pentagon contract (2.5M+ cancellations/pledges
+  claimed, reported App Store rank change to Claude). The most direct
+  evidence yet of a consumer paying for a worse, manual version of
+  Major's free value proposition during a real, dated exodus event.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 27th run) — added an eighth entry to the
+  no-neutral-standard cross-cutting note, a cryptographically-verified
+  memory-transfer protocol (Ravindran, arXiv 2605.11032) with the
+  widest cross-model demo found yet (GPT-4, Claude, Gemini, Llama) and
+  the same single-author-adapter gap as the prior seven. Separately,
+  found an academic controlled study (Goyal and Ray, arXiv 2609.05339)
+  that quantifies, for the first time in this file, why portability
+  attempts fail by format rather than just whether any has: fixed-
+  schema structures survive a model swap almost losslessly while
+  compressed natural-language notes swing 9-13 percentage points.
+  Positioning consequence (a concrete numeric bar for the automated-
+  round-trip test) in docs/market/positioning.md.
+- 2026-10-26 (message, 29th run) — added a cross-cutting note to
+  Category 1: an independent directory (rl-list.com) maps 42 named
+  companies building "constructed task plus verifier" RL environments,
+  showing the sub-category this file had tracked one vendor at a time
+  (Mercor/Deeptune, Halluminate, micro1/Realm) is a mapped market, not
+  three isolated pivots. Spot-checked one profile (Datacurve) directly;
+  no named frontier-lab customers published, same self-description gap
+  already flagged elsewhere in this file. No individual vendor entry
+  added; the next run with capacity should spot-check a few of the
+  better-funded, unverified names. Positioning consequence in
+  docs/market/positioning.md.

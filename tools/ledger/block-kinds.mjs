@@ -81,6 +81,37 @@ const SCAN_TITLE = /^(craft|competitive)\s+scan\b\s*(\([^)]*\))?\s*:/i;
  * first entry above to be its justification rather than a separate idea,
  * which is why it is not filed as one." The idea it refers to is a separate
  * `### ` entry with all five lines. That is the shape this rule enforces.
+ *
+ * THE RULE IS LITERAL, AND THAT IS THE DESIGN. The test is the presence of
+ * the LABEL, never what the sentence after it says. Measured on `main` at
+ * 2026-10-26, twice in one morning. The engineer seat's hook run appended
+ * `- First step: no adoption proposed. Neither tool fits, because ...` to a
+ * block headed `Craft scan: tesh 0.3.2 and txm 8.2.0`, a first-step line
+ * whose own content declines to propose any work, and a later run of the
+ * same seat wrote the same shape into its own note. Both times COMMITS_WORK
+ * fired on the label, the block became an `idea`, it owed five fields and
+ * carried three, and the gate was red on the default branch itself rather
+ * than on anyone's branch.
+ *
+ * The alternative was considered and refused: read the sentence and exempt
+ * the ones that decline. "No adoption proposed", "nothing to build here",
+ * "not worth a day" and every phrasing nobody has written yet is an
+ * open-ended English judgement, and this module's whole premise (see this
+ * file's header) is that keying a contract on which English words a block
+ * happens to use is a coincidence of vocabulary rather than a
+ * discriminator. A label means what it says. A note that files no first
+ * step writes that in prose, and `announcesScan` below is how the checker
+ * explains that repair instead of leaving a seat to find it.
+ *
+ * What this cost, and why the explanation and not the rule changed. The
+ * red gate was handed to a second seat, which read the failure, took the
+ * only cause the message named, and reported that the heading used a
+ * spelling the classifier does not recognise. SCAN_TITLE matches
+ * `Craft scan:` and always did. One run was spent on a diagnosis the
+ * message had made the obvious one, and the handoff then recommended the
+ * repair that would have changed nothing. The test's own failure message
+ * named the same single cause, which is why `block-kinds.test.mjs` now
+ * lists all three and says to check this one first.
  */
 const COMMITS_WORK = /^-\s+First step:/m;
 
@@ -90,6 +121,7 @@ const COMMITS_WORK = /^-\s+First step:/m;
  *             date: string | null,
  *             seatTag: string | null,
  *             title: string | null,
+ *             announcesScan: boolean,
  *             headingWellFormed: boolean }} Classification
  *   kind              which contract the block owes. See this file's header.
  *   heading           the block's first line when it starts with `### `,
@@ -100,6 +132,14 @@ const COMMITS_WORK = /^-\s+First step:/m;
  *                     null when absent or the heading does not parse.
  *   title             everything after the em dash, or null when the heading
  *                     does not parse.
+ *   announcesScan     true when the title announces a craft scan, whatever
+ *                     the block then owes. This is deliberately NOT the
+ *                     same as `kind === 'scan'`: a block can announce a
+ *                     scan and still be an `idea`, which is exactly what
+ *                     COMMITS_WORK does to it, and that combination is the
+ *                     one a seat cannot diagnose from a missing-field
+ *                     message alone. `check.mjs` reads this field to say
+ *                     so in the violation.
  *   headingWellFormed false for a `### ` block whose heading does not match
  *                     ENTRY_HEADING. Such a block is still classified, as an
  *                     `idea`, so that it is reported rather than exempted:
@@ -121,6 +161,7 @@ export function classifyBlock(block) {
     date: null,
     seatTag: null,
     title: null,
+    announcesScan: false,
     headingWellFormed: true,
   };
   if (block.kind !== 'entry') return none;
@@ -132,13 +173,15 @@ export function classifyBlock(block) {
   }
 
   const [, date, seatTag, title] = m;
-  const isScan = SCAN_TITLE.test(title.trim()) && !COMMITS_WORK.test(block.text);
+  const announcesScan = SCAN_TITLE.test(title.trim());
+  const isScan = announcesScan && !COMMITS_WORK.test(block.text);
   return {
     kind: isScan ? 'scan' : 'idea',
     heading,
     date,
     seatTag: seatTag ?? null,
     title,
+    announcesScan,
     headingWellFormed: true,
   };
 }

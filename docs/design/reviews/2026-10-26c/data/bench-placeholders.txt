@@ -1,0 +1,5 @@
+linear     no visible input carries a placeholder on this page
+vercel     no visible input carries a placeholder on this page
+stripe     "Sell software subscripti" placeholder rgb(100, 116, 141)         field rgb(0, 0, 0)               alpha 1     chosen
+consensus  "Ask the research..."      placeholder rgb(113, 113, 123)         field rgb(24, 24, 27)            alpha 1     chosen
+elicit     no visible input carries a placeholder on this page

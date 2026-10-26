@@ -804,6 +804,112 @@ in a review folder, and it belongs run against the field as well as
 against us, because four of those five exemptions were found on somebody
 else's markup and none of them would have been found on ours.
 
+## L27 — A paragraph put into a row inherits the row's width, and the row is as wide as the page
+
+**measured**, 2026-10-26 (hook run), counted with L9's method at three
+viewports. `reviews/2026-10-26c/data/measure-dash-prose-before.txt` and
+`-after.txt`, `README.md` §3.
+
+The run before this one replaced an empty bar and four em dashes with a
+sentence, which was the right call and is §2 here. The sentence went
+into a `.dash-row`, and a row on that page is the page: no rule
+constrained it, so it took the full 640px column at 0.7rem and ran
+**128 characters a line** at tablet and desktop. The page's own prose
+two blocks above it runs 84.
+
+```
+  before   p.dash-meta.dash-nothing   640px  11.2px   median 128
+  after    p.dash-meta.dash-nothing   426px  11.2px   median  81
+  the page's own prose, unchanged     517px  13.6px   median  84
+```
+
+So the smallest type on the page had the longest line on it, which is
+L9's drift arriving by a new door. L9 was written about a prose box set
+in pixels and used at two sizes. This is about a paragraph given no box
+at all, in a container sized for a bar, and no instrument watches for
+it: the frame does not overflow, the contrast is fine, the tap targets
+are fine, and every sweep this seat owns returns a clean number.
+
+**128 is also longer than anything L10 wrote down.** L10's highest
+figure is Claude's 109, which that entry called a defect shipped by a
+frontier lab and declined to take as cover. A review that then ships 128
+on its own surface has taken it as cover anyway.
+
+**this seat's judgement.** The fix is the 38em `.dash-empty` already
+carries on the same page, not a width chosen fresh for this sentence,
+and the page's overall measure does not move. Narrowing that remains
+L10's open proposal and the owner's call.
+
+**The general rule, which is the part worth promoting.** Any text added
+to a container that was sized for something other than text needs its
+measure stated, because the container has no opinion about reading and
+every sweep in the kit will pass it.
+
+## L28 — The panel's contrast is a range and not a number, because its backdrop is the user's terminal
+
+**measured**, 2026-10-26 (hook run), 9 runs of text across three
+viewports on the shipped build.
+`reviews/2026-10-26c/data/contrast-panel/` and `contrast-panel-after/`,
+`README.md` §4.
+
+L21 measured 533 runs on `ursa-minor` and the number everyone has quoted
+since is "0 of 533". The overlay's panel, which is the surface a user
+meets first, had never been pointed at by this instrument at all. Asked
+for the first time, it returns two runs under 4.5 at every viewport:
+
+```
+  p                       12px  4.48  needs 4.5  "held in memory only; …"
+  input::placeholder      13px  4.12  needs 4.5  "passphrase"
+```
+
+**Why the first number is not a number.** `body` on that surface is
+`rgba(5, 8, 16, 0.85)`, deliberately, so the terminal reads through
+faintly. In a browser the pixels under that glass are the canvas, and
+the backdrop composites to `rgb(43, 45, 52)`, which is measured and not
+assumed: the frozen frame's own pixel at (200, 400) is exactly that.
+In the product the pixels under the glass are whatever the user's
+terminal is showing. `--dim` over that glass reads
+
+```
+  white terminal   backdrop (43, 45, 52)   4.48
+  mid grey         backdrop (23, 26, 33)   5.66
+  black terminal   backdrop  (4,  7, 14)   6.56
+```
+
+so every contrast figure this instrument will ever report for the panel
+is the worst end of a 2.08-point range, and the 15% of transparency that
+buys the glass effect is what costs it.
+
+**this seat's judgement, and the owner can overrule it in one sentence,
+which is L21's form.** Leave `--dim` alone. A 0.02 shortfall at one end
+of a range the user controls is not worth a palette edit, and `--dim` is
+load-bearing across the whole panel. If she would rather the panel clear
+4.5 against a white terminal, the change is one token and this entry is
+the thing to revise.
+
+**The placeholder is a different case and was fixed.** It read 4.12
+because the field named no placeholder colour, so Chromium supplied its
+own, which is the field's `color` at 54% alpha. A value nobody in this
+repository chose is a gap rather than a palette decision, and the fix
+names `--dim`, the token the panel already uses for this rank of text.
+It reads 6.18 now, against the field's own opaque fill rather than
+against the glass. 500 pixels changed, every one of them inside the
+bounding box of the word.
+
+**Checked against the field rather than asserted.**
+`reviews/2026-10-26c/data/bench-placeholders.mjs`, 1440x900, read-only:
+
+| site | visible placeholder | colour | verdict |
+|---|---|---|---|
+| Stripe | "Sell software subscripti…" | `rgb(100, 116, 141)` | chosen, alpha 1 |
+| Consensus | "Ask the research…" | `rgb(113, 113, 123)` | chosen, alpha 1 |
+| Linear | none on the home page | — | — |
+| Vercel | none on the home page | — | — |
+| Elicit | none on the home page | — | — |
+
+Two of five ship one, both name a colour outright, and neither takes the
+user agent's. Nobody measured here leaves this to the browser.
+
 ## Open, and not this seat's to close
 
 **Where Ursa's canon comes from.** Fourteen reviews under `reviews/`
@@ -826,13 +932,162 @@ seat's reasoning for not writing the files itself rather than restating
 it. Nothing here changes until she answers; the count above is kept so
 the cost of waiting stays visible.
 
+## L29 — A tap target on a wrapper covers the control it is protecting
+
+**measured**, 2026-10-26d, `document.elementFromPoint` and six pointer
+gestures at three viewports. `reviews/2026-10-26d/data/field-pointer-
+before.txt` and `-after.txt`, `README.md` §6.
+
+L3 says the ring belongs to what you see and the target to what you
+press, and the overlay panel's passphrase field implemented it with an
+`::after` on a wrapping `<label>`, because an `<input>` is a replaced
+element and renders no pseudo-element of its own. That reasoning is
+right. The consequence nobody followed through is that **a pseudo-element
+of the label is not a child of the input**, so the overlay is not inside
+the control, it is on top of it, and every pointer event over the field
+landed on the label.
+
+What that cost, measured rather than reasoned about:
+
+```
+                        before              after
+cursor over the field   default             text
+click near left edge    caret at the end    caret where you clicked
+drag across the text    selects nothing     selects
+double click            BLURS the field     selects, keeps focus
+```
+
+**Six reviews and a tap-target sweep passed it, and the reason is the
+useful part.** The only question anyone asked was whether a press opens
+the field, and it does: a label forwards activation to its control
+natively. The instrument asks about activation, and activation was never
+what broke. Everything a pointer does to a text field *other than*
+activate it was gone, and no instrument in the kit asks about any of it.
+
+The rule: **when the target goes on a wrapper rather than on the control,
+the slack has to go outside the control's own box, not over it.** Two
+out-of-flow bands, one above and one below, each
+`height: calc((44px - 100%) / 2)`. The control's own box is then the
+topmost thing over itself; the bands still belong to the label and still
+forward activation. 44 contiguous pressable pixels and none of them over
+the control. The tap-target instrument reads `348x35` drawn and `348x44`
+pressed before and after, and the frame diff is byte-identical.
+
+**`.panel-hit` on the same panel is the same shape and is correct**,
+which is the distinction to carry: its `::after` is on the button itself,
+so it is a child of the control and events over it reach the control.
+Wrapper or control is the whole difference.
+
+**The corollary for the kit.** `measure-hit-areas.mjs` cannot see this
+class of defect, by construction. A tool that probes activation outward
+will report a 44px pass on a control that cannot be typed into. The thing
+that found it was `hover.mjs` refusing to hover the field, which is a
+tool failing usefully.
+
+## L30 — A button does not inherit a font, so the control that names none is the one word in a foreign face
+
+**measured**, 2026-10-26d, `getComputedStyle` on the shipped build.
+`reviews/2026-10-26d/data/font-before.txt`, `README.md` §8.
+
+`misread?` on the overlay panel was drawn in **Arial**, inside a sentence
+set in Inter Tight, at 11px. Chromium's user agent stylesheet gives a
+`<button>` a family of its own and a `<button>` does not inherit one, so
+the single control on that panel that named no family was the single word
+on the page in a typeface nobody in this repository chose. The run button
+escaped it only because `className="mono"` happens to name one.
+
+This is L-shaped with the placeholder colour of the run before it: the
+field named no placeholder colour, Chromium supplied one, and it measured
+4.12 against the panel's own 4.48. **A value no one here chose is a gap,
+not a palette decision being protected.** The two doors are different and
+the answer is the same, so the general form is worth stating once: the
+user agent has an opinion about every property you decline to state, and
+on a `<button>`, `<input>`, `<select>` or `<textarea>` it is not the
+opinion the page around it has.
+
+Cost of the fix, bounded and measured: 280 pixels at every viewport,
+inside the bounding box of that one word, with the frame the same size at
+all three, so the button growing from 12px to 16.5px tall stayed inside
+the line box it sits in.
+
+## L31 — A checker that is wrong whenever you have built the app is a checker nobody runs
+
+**measured**, 2026-10-26d, against this seat's own tree.
+`scripts/redaction-check.mjs`, `reviews/2026-10-26d/README.md` §7.
+
+This seat turned the redaction gate red five times in eleven minutes on
+2026-10-25 and three times on 2026-10-26, both times on the same class of
+string. `redaction-check.mjs` was written after the first of those to ask
+the question locally, before a push. It was not run before the second.
+
+Pointed at the tree afterwards it reported two violations, both inside
+`ursa-major/overlay/.next/`: build output, gitignored, regenerated by the
+`next build` this seat's charter orders **every run**, and invisible to a
+gate that runs on a fresh checkout. So the tool was red on every single
+run of the seat that needed it most, and a real hit would have arrived as
+a third line under two the reader had learned to scroll past.
+
+**The failure is not that the tool was wrong. It is that it was wrong in
+the direction that trains you to ignore it.** A false negative gets found
+by the gate. A false positive on every run gets found by nobody, because
+the behaviour it produces is a seat that stops running the tool, and that
+behaviour leaves no trace in any log.
+
+Hits in gitignored paths are dropped now, the count of what was dropped
+prints on every run including a clean one, and untracked-but-not-ignored
+files are still reported, because a new file about to be committed is the
+case the tool exists for. Four tests, including the no-git case: a filter
+that can silently become a no-op is worse than no filter.
+
+**It paid for itself inside the same run.** The first draft of that
+run's own review quoted the gate's failure log verbatim, which put the
+36-character id back into the tree one directory from where it had been
+removed that morning. The fixed checker caught it on the last commit,
+which is the fourth red run it would otherwise have been.
+
+## L32 — The benchmark you already took beats the benchmark you are about to take
+
+**decided**, 2026-10-26d, `reviews/2026-10-26d/README.md` §3 and §4.
+
+The charter's step three sends every run to the public web to study
+interaction craft, and the owner has named the feel she wants: Elicit's
+bouncy hover. The run that was finally asked to put a hover on the
+overlay panel did not go. The house already owned a measured answer to
+that exact question, taken on 2026-10-24 off Elicit's own animation
+engine rather than off its stylesheet at rest, and recorded with the
+generator command that reproduces it.
+
+Taking a fourth reading of the same site would have produced a second
+spring, and **a second spring is a second identity**. What the run owed
+instead was an audit of the value it was about to reuse, which is cheap
+and which nobody had done: `read-spring.mjs` reads 0.801 damping and 1.50
+percent overshoot back out of the committed literal against the 0.80 and
+1.50 its comment claims, and `make-spring.mjs` regenerates it
+byte-identically from the command the comment records.
+
+That audit found the thing worth finding. **One of the two committed
+copies was unreachable from the surface that needed it**: the overlay's
+was declared on `.dash`, a scoping class on the dashboard page, and
+nothing in that file used it, so the panel could not see it at all. The
+token moved to `:root` in `globals.css`, which the root layout imports.
+
+So: reuse first, audit what you reuse, and spend the web trip on a
+question the repository cannot already answer. "No external sources were
+read" is a legitimate line in a review, and this run's §9 is the first
+one in this folder to say it.
+
 **Ursa Major has two web surfaces and two identities.** Measured on
 2026-10-24 (`reviews/2026-10-24g/README.md` §7): the capture panel is
 drawn at 6px radii in two Google faces with three hues the rest of Ursa
 does not have, and the record viewer is square hairlines, Helvetica, two
 lights on one night. Three of the panel's tokens are near-copies of
-house tokens under different names. Neither has a contrast problem, so
-this is drift and not a defect. It is left open rather than fixed
+house tokens under different names. That entry said "neither has a
+contrast problem", and **that clause is withdrawn**: it was written
+before either surface had been contrast-measured, and when the panel was
+finally asked on 2026-10-26 it returned two runs under 4.5 (L28). One of
+them is fixed and the other is a range the user controls, so the
+conclusion below survives, but it survives on a measurement now instead
+of on an absence of one. The drift is still drift and not a defect, so It is left open rather than fixed
 because the panel's three hues carry satisfied, unsatisfied and tension,
 which is meaning the two-light palette currently cannot say, and
 choosing which identity wins is the owner's.

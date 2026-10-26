@@ -3,7 +3,9 @@
 Engineer run 2026-10-13. Sprint item 1 of
 `docs/sprints/sprint-2026-10-12.md`. Continues the ledger entry
 "`survived_verbatim` is not verbatim, and a record sold today proves it"
-(`docs/ideas.md`, 2026-10-12, status `urgent`).
+(`docs/ideas.md`, 2026-10-12, status `urgent` on the day this ran).
+
+<!-- closes: docs/ideas.md 2026-10-12 "`survived_verbatim` is not verbatim, and a record sold today proves it" -->
 
 Written to the engineering-artifact standard in
 `prompts/engineer-agent.md`: a system diagram whose nodes are real, real

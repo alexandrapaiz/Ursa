@@ -55,6 +55,20 @@ command -v gh >/dev/null || { echo "gh is required (github.com/cli/cli)" >&2; ex
 WORKTREE=$(mktemp -d /tmp/ursa-stack-XXXXXX)
 rm -rf "$WORKTREE"
 
+# The suite logs go in a directory unique to this run, for the same reason the
+# worktree above does. They used to be three fixed paths, `/tmp/ursa-stack-
+# types.log` and its two siblings, and this script does not merely write them:
+# it reads them back to produce the numbers it reports, the `error TS` count
+# and the `Tests N passed` line. `/tmp` is shared by every seat running
+# concurrently on this host, so a second run of this script, or any seat that
+# happened to pick the same name, made this one report a type-error count and
+# a test total measured on somebody else's tree. Nothing failed when that
+# happened: both writes succeed and both logs are valid text, which is the
+# shape that makes it worth a unique name rather than a warning. Kept out of
+# $WORKTREE deliberately, because `cleanup` removes that and the FAIL lines
+# below tell the reader to go open these.
+LOGDIR=$(mktemp -d /tmp/ursa-stack-logs-XXXXXX)
+
 cleanup() {
   if [ "$KEEP" = 1 ]; then
     echo ""
@@ -236,30 +250,30 @@ if [ "$RUN_TESTS" = 1 ]; then
   # (#66, #16) missing in the HQ briefing fixture (#22).
   echo ""
   echo "ursa-major: npm ci && npx tsc --noEmit"
-  if ( cd "$WORKTREE/ursa-major" && npm ci --silent >/dev/null 2>&1 && npx tsc --noEmit >/tmp/ursa-stack-types.log 2>&1 ); then
+  if ( cd "$WORKTREE/ursa-major" && npm ci --silent >/dev/null 2>&1 && npx tsc --noEmit >"$LOGDIR/types.log" 2>&1 ); then
     TYPES_RESULT="pass (0 type errors)"
   else
-    TYPES_RESULT="FAIL ($(grep -c 'error TS' /tmp/ursa-stack-types.log 2>/dev/null || echo '?') type errors, see /tmp/ursa-stack-types.log)"
+    TYPES_RESULT="FAIL ($(grep -c 'error TS' "$LOGDIR/types.log" 2>/dev/null || echo '?') type errors, see $LOGDIR/types.log)"
     FAILED=1
   fi
   echo "  $TYPES_RESULT"
 
   echo "ursa-major: npm test"
-  if ( cd "$WORKTREE/ursa-major" && npm test >/tmp/ursa-stack-major.log 2>&1 ); then
-    MAJOR_RESULT=$(sed -e 's/\x1b\[[0-9;]*m//g' /tmp/ursa-stack-major.log \
+  if ( cd "$WORKTREE/ursa-major" && npm test >"$LOGDIR/major.log" 2>&1 ); then
+    MAJOR_RESULT=$(sed -e 's/\x1b\[[0-9;]*m//g' "$LOGDIR/major.log" \
       | grep -oE 'Tests +[0-9]+ passed.*' | tail -1 | tr -s ' ')
     MAJOR_RESULT="pass (${MAJOR_RESULT:-summary not found in log})"
   else
-    MAJOR_RESULT="FAIL (see /tmp/ursa-stack-major.log)"
+    MAJOR_RESULT="FAIL (see $LOGDIR/major.log)"
     FAILED=1
   fi
   echo "  $MAJOR_RESULT"
 
   echo "ursa-minor: npm ci && npm run build"
-  if ( cd "$WORKTREE/ursa-minor" && npm ci --silent >/dev/null 2>&1 && npm run build >/tmp/ursa-stack-minor.log 2>&1 ); then
+  if ( cd "$WORKTREE/ursa-minor" && npm ci --silent >/dev/null 2>&1 && npm run build >"$LOGDIR/minor.log" 2>&1 ); then
     MINOR_RESULT="pass (next $(node -p "require('$WORKTREE/ursa-minor/package.json').dependencies.next" 2>/dev/null))"
   else
-    MINOR_RESULT="FAIL (see /tmp/ursa-stack-minor.log)"
+    MINOR_RESULT="FAIL (see $LOGDIR/minor.log)"
     FAILED=1
   fi
   echo "  $MINOR_RESULT"
