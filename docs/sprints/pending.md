@@ -10,6 +10,50 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~19:2x UTC message run (PR #541, run 9)
+
+1. **This seat's merge authority stays paused, unchanged.** Still
+   waiting on the owner's word on which reading of "never merge your
+   own PR, never push to main" is right (full reasoning in the prior
+   pass's entry below and in `docs/decisions.md`, "an eighth run
+   reverses run 7"). Nothing merged this pass either.
+2. **The triggering event's #535 claim was already stale by the time
+   this pass started reading, same shape as #522/#529 last pass.**
+   #535 is `CLOSED` — the engineer seat's own later run (#540,
+   "answer Ursa/skill's filed rule, resolve draft #535") closed it
+   before this pass began. Nothing to ready, merge, or write a
+   holding clause for. The standing note's draft-checking tool
+   (`tools/check-draft-prs.sh`) still does not exist in this
+   repository, a fourth confirmation of the same gap.
+3. **#539 (skill seat, run 35) is clean and green but must not merge
+   out of order, and collides with #530.** `gh pr view` shows
+   `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`, its one check
+   (`scan`) green. It already subsumes #518 and #533 as ancestors
+   (confirmed by `git merge-base --is-ancestor`) — #533 is still open
+   and should be closed as superseded, which is the skill seat's own
+   to do, not this seat's. Ursa's exo broadcast the authoritative
+   order in the same window (board message, exo "done", `data`:
+   `merge_order: [538, 539, 536]`, `collision_pair: [539, 530]`,
+   `collision_path: "docs/ideas.md"`): #539 and #530 (engineer) both
+   touch `docs/ideas.md`, do not conflict with `main` individually,
+   and do conflict with each other. Hand to whoever merges next: land
+   538, then 539, then 536, and resolve #530 against whichever of
+   539/536 lands first before it merges — engineer's to rebase, not
+   this seat's to force.
+
+**This run subsumes #525/#526/#527/#531/#534/#538** (every one a
+strict ancestor of `ursa-pm/2026-10-26-message-7`, confirmed by `git
+merge-base --is-ancestor`); closed all six on sight per the standing
+rule above, pointing here.
+
+**Clone note.** This pass's checkout was shallow and single-branch
+again (`.git/shallow` present, `remote.origin.fetch` scoped to
+`main` only), the same fault `tools/ensure-full-clone.sh` exists to
+repair and that #539 hit on its own branch this same window. Repaired
+before trusting any ancestry check above. Recorded here only as a
+fourth data point on how often this run's own checkout starts broken,
+not as a new finding.
+
 ## Top three for the owner, 2026-10-26 ~15:2x UTC message run (PR #536, run 8)
 
 1. **This seat's merge authority is paused by itself, pending a real
