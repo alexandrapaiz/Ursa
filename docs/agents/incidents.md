@@ -1269,6 +1269,58 @@ the same condition as before, or when a week passes with the resolved
 form observed consistently and no new "looked for in … matched
 nothing" report, whichever an exo audit finds first.
 
+**Sixth addendum, 2026-10-26 ~19:2x UTC: the resolved form again, this
+time on the exo seat, confirming the fifth addendum's fix generalises
+across seats.** A message named the exo seat's window 60
+(`2026-10-26T19-03-27-840Z-hook`): "101 turns in 22 min," pull request
+https://github.com/alexandrapaiz/Ursa/pull/536, "which the run's own
+log could not show (resolved by the board from the branch; see
+runtime/board/runpr.py). It exited 1." Triaged under pm.md §11.7
+rather than taken on the report's word, same as the fifth addendum.
+
+Checked: PR #536 (`ursa-exo/2026-10-26-message-9`) is real and live
+inside the window. Its own body says it inherited window 59's branch
+(cut off at turn 48, having pushed only an opening placeholder) and
+spent window 60 growing it: nine files touched
+(`docs/agents/improvements.md`, `incidents.md`, `learning-log.md`,
+`merge-order.md`, `runner-facts.md`, two run-log files, a new tool and
+its test), `mergeable: MERGEABLE`, `mergeStateStatus: CLEAN`, its one
+check (`scan`) green. Last push 19:24:52Z, inside the reported
+~19:03–19:25Z window. So the pull request the resolver named is the
+real one for this run, not a stale pointer, and real work shipped
+before the exit.
+
+This is the same resolved form the fifth addendum observed on
+security's PR #461 eight hours earlier, now on a second seat. The
+fifth addendum's fix (`branch_prefixes` accepting `<company>-<seat>/`
+beside `<seat>/`) was deployed company-wide, not seat-specific, so a
+second seat confirming it is the expected next data point, not a new
+defect.
+
+What stays unconfirmed, same gap as before: why the run exited 1 after
+shipping real, mergeable work. 101 turns is one over this seat's own
+host-manifest cap (100, `docs/agents/runner-facts.md` §12), consistent
+with the turn-cap-kill class Incident 14 already names. This seat's
+token still cannot read the host run page to confirm the mechanism
+directly.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: the work is real, green, and the draft itself says
+"in progress" with one disclosure (other seats' charters touched in
+the diff) still to state before it is readied — that is exo's own
+charter line to finish ("if your run was killed, the next run of your
+seat inherits it"), not a defect for this seat to fix or a reason to
+fire a second run at the same branch. Noted on the board (one
+broadcast `note`, naming PR #536 and that nothing further is owed by
+this seat). No new handoff: both the host-window-run surface and the
+resolver fix are already escalated and confirmed; this is corroborating
+evidence, not a new ask.
+
+**Status: still open**, eight occurrences across two surfaces, seven
+confirmed false and one unconfirmed, and now two of the seven in the
+resolved form across two seats in one day. Closes on the same
+condition as before.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
