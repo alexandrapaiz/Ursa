@@ -48,6 +48,16 @@ PREFIX="tmp/sslm"
 ARMS=(control union ledger)
 JSON_OUT="${JSON_OUT:-}"
 WT="/tmp/ursa-sslm-probe.$$"
+# Qualified by pid for the same reason $WT above is. These two files used to be
+# `/tmp/sslm-local-$arm.md` and `/tmp/sslm-github-$arm.md`, fixed names in a
+# directory every concurrently running seat shares, and the GitHub one is not
+# just written: line 181 reads it straight back through `survived` to produce
+# the number this probe exists to report. A sibling run, or any seat that chose
+# the same name, therefore scored this probe's GitHub arm on somebody else's
+# merge, with both writes succeeding and no exit status to say so. This probe
+# has already twice reported the opposite of the truth for an unrelated reason,
+# which is the argument for closing this one before it does it a third time.
+OUT="/tmp/ursa-sslm-out.$$"
 ROOT="$(git rev-parse --show-toplevel)"
 
 cleanup() {
@@ -72,6 +82,7 @@ echo "merge.* config registered in this clone: $(git -C "$ROOT" config --get-reg
 
 trap cleanup EXIT INT TERM
 git -C "$ROOT" worktree add --quiet --detach "$WT" "$START_SHA"
+mkdir -p "$OUT"
 cd "$WT"
 
 # Identity for the probe's throwaway commits, as EXPORTED ENVIRONMENT, never
@@ -150,7 +161,7 @@ for arm in "${ARMS[@]}"; do
   git checkout --quiet --detach "$PREFIX-$arm-base"
   if git merge --no-edit --quiet "$PREFIX-$arm-head" >/dev/null 2>&1; then
     LOCAL[$arm]="merged  $(survived docs/ideas.md)"
-    cp docs/ideas.md "/tmp/sslm-local-$arm.md"
+    cp docs/ideas.md "$OUT/local-$arm.md"
   else
     LOCAL[$arm]="CONFLICT"
     git merge --abort 2>/dev/null || true
@@ -177,8 +188,8 @@ for arm in "${ARMS[@]}"; do
             -f commit_message="probe $arm" 2>&1 || true)"
   if grep -q '"sha"' <<<"$resp"; then
     git fetch --quiet --force origin "$PREFIX-$arm-base"
-    git show FETCH_HEAD:docs/ideas.md > "/tmp/sslm-github-$arm.md"
-    GH[$arm]="201 merged  $(survived "/tmp/sslm-github-$arm.md")"
+    git show FETCH_HEAD:docs/ideas.md > "$OUT/github-$arm.md"
+    GH[$arm]="201 merged  $(survived "$OUT/github-$arm.md")"
   elif grep -q 'HTTP 409' <<<"$resp"; then
     GH[$arm]="409 conflict"
   elif [[ -z "${resp//[[:space:]]/}" ]]; then
