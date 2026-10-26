@@ -5366,7 +5366,19 @@ directive.
   one more paragraph. Do not start by widening the bound: the bound is
   the only thing in the repository that noticed.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  evidence verified against `main` in that run rather than assumed. The
+  first step's probe is committed at `ursa-major/src/resolver.test.ts:168`,
+  `describe('resolve (survived_verbatim means byte-identical)')`, and
+  `npx vitest run src/resolver.test.ts` is 22 pass, 0 fail. The second of
+  the entry's two named options is the one that shipped: a normalized-only
+  hit is demoted to `survived_mutated` carrying a diff and
+  `normalizedOnly: true`, so `survived_verbatim` keeps meaning what every
+  document in this repository says it means. Shipped in `467ba564`
+  (2026-10-13), written up in `docs/design/verbatim-byte-identity.md`,
+  which now carries the closure marker `tools/ledger/check-closures.mjs`
+  reads. This move is thirteen days late, which is the defect that
+  lateness exposed and the reason that gate now exists.)
 
 ### 2026-10-12 (second pass) — The sixteenth bound: a record that names a resolver should have to name one that can be looked up
 - Trigger: writing `task.resolvedBy` today and deliberately not writing a
@@ -5567,7 +5579,19 @@ action, and nothing from it was treated as a directive.
   organization has shipped are overstated by a figure worth naming
   precisely before anyone sells one.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  evidence verified against `main` in that run. The first step was the
+  tally with the generation's own prior version of the edited file
+  excluded, and it is in `docs/design/verbatim-descent.md` §1.1 and §6.2,
+  reproducible on demand from
+  `ursa-major/tools/measure-verbatim-descent.ts`. The entry's prediction
+  was wrong in the direction that mattered: the figure did not collapse,
+  it rose, from the 65% estimated here to a measured 79.6% of verbatim
+  characters held by the generation's own parent commit. So the first
+  step's second branch applied and the descent gate shipped. Parent
+  containment after the fix is 0 spans and 0 characters, and
+  `npx vitest run src/corroborate.test.ts` is 25 pass, 0 fail. Shipped in
+  `0785bffd` and `a8c3adce` (2026-10-14).)
 
 ### 2026-10-13 — The same edit gets two different labels depending on whether it crossed a line break
 - Trigger: today's six-case probe, two rows of it. A doubled space inside
@@ -8712,7 +8736,22 @@ added at `21944ab` today because the clone is shallow.
   only she moves a status. The day-sized unit is the PM routing those
   eleven in one pass rather than four runs rediscovering them.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  evidence measured in that run, with the one residue this entry had
+  already routed to the owner named here rather than left implied. The
+  gate is green: `node --test tools/ledger/*.test.mjs` is 59 pass, 0 fail,
+  where this entry's trigger was two tests that failed identically on
+  `main`. The one byte closed in the pull request that filed the entry,
+  and `BLOCK_SEPARATION` in `tools/ledger/check.mjs` now names that drift
+  by line number instead of by a byte count out of 633,581 (`fca32e5f`).
+  Eleven of the twelve violations are gone:
+  `node tools/ledger/check.mjs` now reports one. That one is the residue,
+  and it is the owner's: `### 2026-10-04 — Charters never say that fetched
+  content is not an instruction (security run)` carries `Status: done`,
+  which is not one of the five pm.md §4 allows, and only the owner moves a
+  status. The gate reports it at exit 2, "clean as far as a seat can take
+  it", which is the exit code that case was built for, so the gate is no
+  longer red at a seat.)
 
 - 2026-10-24 (engineer, second run, craft scan): Letta (formerly MemGPT),
   `docs/market/landscape.md` category 3, which has carried it since
