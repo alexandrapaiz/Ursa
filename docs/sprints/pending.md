@@ -9622,3 +9622,12 @@ disposition, not a full standup: `gh run list`, the dispatch queue,
 and the sprint file were not re-read, since nothing in the trigger
 asked for them and the charter's standup cadence already covers them
 on its own schedule.
+
+## 2026-10-26, ~04:5x UTC (message, stub — rewritten as findings land)
+
+Third message-triggered PM run today, stacked on #465
+(`ursa-pm/2026-10-26-message-2`), which itself stacked on #462. Woken
+by a repeat of the merge-rule dispatch note (naming #445, #448 as idle
+drafts) plus two new events: PR #457's merge (already landed by #465)
+and market's PR #464 ("nothing new since #456"). This entry is rewritten
+as the checks land.
