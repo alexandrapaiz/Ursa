@@ -2986,6 +2986,10 @@ Tier C backlog at two files.
   ```bash
   awk '/^```(bash|sh)/{f=1;b="";next} /^```$/{if(f){if(b~/api\/capacity|came back at 500|MISSING/)c++;f=0}} f{b=b" "$0} END{print c+0, "of", NR}' prompts/exo-agent.md
   ```
+- **After this window's ship, measured rather than predicted: 7 of 65.**
+  The charter lane gained the §2 coverage join and the §6 registration
+  rule, which is one bounded block and one unbounded one. Stated here so
+  window 52 reads a true starting point and not the baseline.
 - **Read on.** Window 52 of this seat, against `prompts/exo-agent.md` on
   the charter lane.
 - **Predicted delta.** Two numbers, and the second is the one that

@@ -7867,3 +7867,82 @@ instant and the commit the reading was taken at.
    `git show origin/main:prompts/exo-agent.md | wc -l`. Measured 09:1x:
    **2,221**, dated 2026-10-18, against **5,389** live on `#447`.
    Eleventh window carrying it.
+
+### What this window did, in the order it did it
+
+1. **Bootstrap, §0.** The handed clone was shallow and single-refspec.
+   Unshallowed, refspec replaced, `refs/prs/*` fetched. The charter in
+   the checkout was **2,221** lines; the live one on `refs/prs/447` was
+   **5,389**. Read the live one. §0 earned its place again.
+2. **Inherited two drafts rather than one.** The payload named window 50.
+   Window **49**'s draft was the expensive one: `#478`, 563 insertions
+   across four registers, still titled `opening, no work yet` three hours
+   after its run died, which GitHub refuses to merge at all. Absorbed by
+   merge into `#481`, verified per file at **0 lines absent**, closed
+   with the check pasted and the branch left standing.
+3. **Did not open a twelfth identifier.** Grew window 50's, per the rule
+   that an open pull request of your own seat satisfies a dispatch's
+   "open one pull request". `#481` retitled for what it contains.
+4. **Observe, 09:1x.** The table is in `improvements.md`. The new number
+   is the run-row coverage: **12 rows against 51 attempted**, five of
+   eleven seats at zero, this seat among them. `runner-facts.md` §33.
+5. **Orient.** Weakest attribute **7, dashboards**, third consecutive
+   window and a different number each time. Autonomy refuses for the
+   **sixth** consecutive window, 45% unresolved on 71 merges. Standards
+   tool sweep: **11 of 11** binding references missing, up from 6 of 6
+   on 2026-10-18 — HQ's, handed up, not vendored.
+6. **The census produced an instrument correction of its own.**
+   `runner-facts.md` §34: unsetting a merge driver does not make the
+   clone driverless, it makes git abort with `fatal: custom merge driver
+   ledger lacks command line` at exit 128 with no file list. This window
+   made the error twice in one turn — first with
+   `-c merge.ledger.driver=false`, which is a valid command that exits 1
+   and so reports every declared path as conflicting — and caught both
+   only because the numbers disagreed with the forge in two directions
+   at once. §29 is the same knob and the third wrong value.
+7. **Merge order replaced**, measured at 09:3x, every verdict performed.
+   Eleven open are nine decisions. **`drivers-disagree` is empty**: the
+   engineer's `#485` contains `#463` and merges clean with the drivers,
+   so window 49's one routed judgement retired without anybody acting on
+   it, which is the retired-fixed-differently class again.
+8. **Shipped the charter half on `#447`**: §2 gets the coverage join,
+   §6 gets the registration rule. 5,389 → 5,490.
+9. **Six board acts, each written after the call returned.** One
+   broadcast of the live tip; two to HQ's `exo-centralizer` (the run-row
+   coverage gap and `asc` not on `PATH`, then the general clause and the
+   observe/orient); three `Ideas` notes to the owner. Two were split
+   after this seat's own 420-character pre-flight refused a block, which
+   is the gate behaving as a gate. All five directed sends carry
+   `to_company`.
+
+### The receipts
+
+| act | instant | surface |
+|---|---|---|
+| live tip broadcast, `data.live_tip` 481 | 09:18:31Z | board, broadcast |
+| handoff: run-row coverage, `asc` on `PATH` | 09:19:02Z | `alexandra-systems/exo-centralizer` |
+| note: the replacement-instrument clause, observe/orient | 09:19:22Z | `alexandra-systems/exo-centralizer` |
+| `Ideas` 1: ship the capture denominator inside the artifact | 09:20:04Z | `Ursa/owner` |
+| `Ideas` 2: count the owner's own edits as survived-mutated | 09:20:24Z | `Ursa/owner` |
+| `Ideas` 3: the goal-shift instant is in the pull request's own edit history | 09:20:24Z | `Ursa/owner` |
+| note: tip ready under Tier B, queue states, driver correction | 09:20:50Z | `Ursa/pm` |
+
+Seven acts, not six; the count above was written before the PM note.
+Corrected here rather than in the sentence, because the instant each was
+sent is the part a later window needs.
+
+### What held, and what this window would tell its successor
+
+**The authority split is the one thing working unambiguously.** `#454`
+cleared in 77 minutes, `#478`'s content is live an hour after its
+author's run died, and the charter half is the entire Tier C backlog at
+two files. Three windows have now paid for it once and collected three
+times.
+
+**The thing to distrust is the instrument your own charter recommends
+most warmly.** Both of this window's findings came from re-measuring a
+fix a previous window had already landed and written up as solved: §2's
+replacement for `gh run list`, and the driver knob §29 had already
+documented once. A sibling's claim gets checked here as a matter of
+standing rule. A predecessor's *fix* does not, because the register
+records it as closed, and closed is the one state nothing re-reads.
