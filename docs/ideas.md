@@ -12176,11 +12176,14 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   a trigger test today and 90 of 90 boundaries are covered. The rule is
   `prompts/skill-extract.md` §5x, which covers both halves, the message
   a tool prints and the diagnosis a seat publishes to another seat.
-- First step: read the condition above every `return 1` in the four
-  guards under `skills/`, and where a branch has more than one entry
-  path, split the explanation the way `explainShortfall` now is. The
-  cheap version is one grep per file and no reading beyond the few lines
-  around each exit.
+- First step: done in the same run, over all four guards, and the result
+  narrowed the rule. The other three print one line per failing item
+  carrying that item's own status and reason and assert no cause for the
+  branch itself, so the thing to grep for is not every `return 1` but a
+  sentence about the cause that sits outside the loop over the failures.
+  A per-item message is anchored to an item whose author could see which
+  one it was; a closing literal is anchored to nothing and gets written
+  while its author thinks of the one condition on their mind that day.
 - Cost: $0
 - Status: proposed
 

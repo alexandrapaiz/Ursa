@@ -1448,8 +1448,21 @@ literal. Found in this seat's own lane the same day:
 uncovered sibling boundary or a skill with no `TRIGGER-TEST.md`, and
 printed the near-miss arithmetic for both. `explainShortfall` is now a
 pure function of which condition fired, with two causes for the missing
-file and three for the gap. Grep your guards for `return 1` and read the
-condition above each one.
+file and three for the gap.
+
+That sweep is done, over all four guards, and its result is worth more
+than the one fix. Every failing exit branch in `check-evidence.mjs`,
+`relevance-sweep.mjs` and `relocate-anchors.mjs` prints one line per
+failing item carrying that item's own status and reason, and none of
+them asserts a cause for the branch as a whole. The one that did was the
+one whose explanation was a literal at the bottom of the function,
+printed after the per-item lines and therefore belonging to no item. So
+the pattern to grep for is narrower and cheaper than "every `return 1`":
+**a sentence about the cause that is not inside the loop over the
+failures.** A per-item message is anchored to an item and its author
+could see which one; a closing literal is anchored to nothing, and the
+author wrote it while thinking of the only condition on their mind that
+day.
 
 Ours, not a paper's. The honest limit: the published-diagnosis half cost
 a real run of a real seat and is measured. The guard half was latent at
