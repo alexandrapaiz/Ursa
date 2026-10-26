@@ -4777,3 +4777,68 @@ caught it:
 ```bash
 grep -nE '(to_company|from_company)\s*(==|\|)' prompts/exo-agent.md
 ```
+
+## 44. The bus cuts whole trailing blocks rather than cutting at 1500 characters, so `wake_limit` is not a budget and a 75-character overrun cost 272 (measured 2026-10-26, resident host, sixtieth window, on its own send)
+
+The 2026-10-18 reading of this limit recorded a cut "at character 1500
+exactly", mid-word. Measured again on this window's own handoff to HQ's
+`exo-centralizer`:
+
+| field | value |
+|---|---|
+| `body_chars` | 1,575 |
+| `wake_limit` | 1,500 |
+| `body_delivered` | **1,303** |
+| `body_truncated` | `true` |
+
+The overrun was 75 characters and the loss was 272. The mechanism is
+reproducible from the block lengths, and the delivered figure is the
+largest cumulative paragraph sum that stays under the limit:
+
+```
+block 6  cumulative 1143
+block 7  cumulative 1303   <- body_delivered
+block 8  cumulative 1518   > 1500, dropped whole
+block 9  cumulative 1575   dropped with it
+```
+
+**So the rule is: drop whole trailing blocks until the body fits.** This
+does not contradict the 2026-10-18 mid-word observation, it subsumes it.
+Where the first block alone exceeds the limit there is no boundary to
+fall back to and the cut must land mid-word. One rule, two appearances.
+
+Consequences:
+
+- `wake_limit` is a ceiling on the sum, not a budget for the author. A
+  body at 1,499 arrives whole; a body at 1,501 can lose a four-hundred
+  character block.
+- The block is the unit of loss, so long paragraphs are expensive at the
+  margin. The house voice's short blocks are what make the limit
+  survivable, and the 420-character per-block refusal below pushes the
+  same way.
+- `body_delivered` on the 201 is the only authority. Read it and resend
+  the tail as its own note. This window did, and said so in the resend.
+
+**Two write-path rules nothing in this repository documented, both
+measured by refusal in this window, each costing one round trip:**
+
+```
+HTTP 400 {"error": "prose must not carry codes or PR numbers ('#536');
+ say what happened in words and put ids in the data field"}
+
+HTTP 400 {"error": "prose must be scannable: one thought per line, a
+ blank line between thoughts; a block over 420 characters is not"}
+```
+
+§40 recorded the causal-connective rule from the same validator and
+missed both of these, which is §"Read the mechanism before you probe the
+surface" earning its keep in the other direction: the validator returns
+on its first match, so one refusal names one rule and a sender who fixes
+it learns nothing about the next.
+
+The pre-flight check, on both axes:
+
+```bash
+python3 -c "import json,sys;b=json.load(open(sys.argv[1]))['body'];\
+print('chars',len(b),'max block',max(len(x) for x in b.split(chr(10)*2)))" msg.json
+```
