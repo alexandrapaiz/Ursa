@@ -23,6 +23,7 @@ import { buildEpisodes, type Episode } from './episodes'
 import { findCommitPairs, listCommits } from './pairfinder'
 import { renderRunSummary, resolveEpisode, resolvablePaths } from './bin/ursa'
 import { IMPORT_TRAILER, vendoredPaths } from './vendored'
+import { authoredAfterHorizon } from './corroborate'
 import { checkRecord, measure } from './invariants'
 import { resolve } from './resolve'
 
@@ -730,31 +731,29 @@ describe('a file synced from another repository is not read as text a model comp
   })
 
   /**
-   * The refusal running backwards, on a real repository, 2026-10-15.
+   * The refusal that used to run backwards, fixed at the search on
+   * 2026-10-26. This test is the one the 2026-10-15 version of this file
+   * said would fail, loudly and by design, on the day someone bounded
+   * `vendoredPaths` by its own horizon. That day is today, and what it
+   * asserts is inverted accordingly: the file is no longer excluded, the
+   * record keeps it, and there is nothing left for the gate to refuse.
    *
-   * `vendoredPaths` applies no time bound. It asks only whether some
-   * commit outside the generation's descent holds the finished blob, and
-   * byte identity is symmetric: it cannot tell a copy the person took FROM
-   * that branch apart from a copy somebody later took OF the person's
-   * work. The horizon argument added to the span-level search on
-   * 2026-10-14 (`authoredAfterHorizon` in src/corroborate.ts) never
-   * reached this module.
-   *
-   * So the record below is the one the resolver really writes, and it is
-   * wrong in the expensive direction: the person composed `standard.md`,
-   * somebody branched off the baseline and committed the same bytes two
-   * hours later, and the whole file leaves every figure in the record.
-   * This is not a span losing its label. `stats.finalChars` drops by the
-   * size of the file, and every percentage built on it moves with it.
-   *
-   * The assertion is deliberately that the GATE catches what the resolver
-   * does not. Fixing `vendoredPaths` to bound its own search is a
-   * separate change with its own cost — it would need the episode's close
-   * time threaded into a module that currently takes none — and this test
-   * is what will fail, loudly and by design, on the day someone makes it,
-   * because the record will stop being refused.
+   * What the shape still proves, and why it is worth keeping rather than
+   * deleting. Byte identity is symmetric, so this repository builds the
+   * one case where identity alone gives the wrong answer: the person
+   * composes `standard.md`, somebody branches off the baseline and
+   * commits the same bytes afterwards, and the later commit is a copy OF
+   * the work rather than a source for it. Before the fix the whole file
+   * left every figure in the record — not a span losing its label, but
+   * `stats.finalChars` dropping by the size of the file with every
+   * percentage built on it moving too — and the record was then refused
+   * by `EXCLUSION_NOT_CLASSIFIED`'s third clause, which left `ursa run`
+   * writing a record its own gate rejects and the person with no
+   * recourse. On 2026-10-26 that stopped being hypothetical: a default
+   * `ursa run --limit 20` over this repository hit it on
+   * `docs/market/landscape.md`, 30,287 characters, and exited 1.
    */
-  it('refuses a record whose sibling copy was authored after the work closed', () => {
+  it('keeps a file whose only identical copy was authored after the work closed', () => {
     const r = repo()
     r.commit({ 'standard.md': doc('drafts'), 'module.ts': 'export const derived0 = 0\n' }, 'Baseline')
     const baseline = r.at('HEAD')
@@ -777,31 +776,32 @@ describe('a file synced from another repository is not read as text a model comp
     r.git(['checkout', '-q', 'main'])
 
     const ep = episodeFor(r, generatedSha)
-    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), listCommits(r.dir))
+    const commits = listCommits(r.dir)
+    const found = vendoredPaths(r.dir, ep, resolvablePaths(ep), commits)
 
-    // The resolver excludes it, and says so with a date that gives the
-    // reader what the resolver did not use.
-    expect(found.map((v) => v.path)).toEqual(['standard.md'])
-    expect(found[0].relation).toBe('sibling')
-    expect(lateSha.startsWith(found[0].sha)).toBe(true)
+    // Nothing is excluded, because the only identical blob outside the
+    // generation's descent is in the record's own future.
+    expect(found).toEqual([])
+    // The candidate was really there and really matched, so the empty
+    // answer above is the time bound's doing and not an accident of this
+    // repository's shape: the late commit holds the finished bytes at the
+    // same path, and `authoredAfterHorizon` is what removes it.
+    expect(execFileSync('git', ['-C', r.dir, 'show', `${lateSha}:standard.md`], { encoding: 'utf8' })).toBe(HQ)
+    expect(authoredAfterHorizon(commits, ep.generatedSha, ep.finalSha)(lateSha)).toBe(true)
 
     const record = resolveEpisode(r.dir, { ...ep, vendoredPaths: found })!
-    expect(record.files.map((f) => f.path)).toEqual(['module.ts'])
-    const excluded = record.exclusions![0]
-    expect(Date.parse(excluded.date!))
-      .toBeGreaterThan(Date.parse(record.task.generatedAt))
 
-    // What this cost the record, stated as the number rather than implied:
-    // the file the person wrote is the larger part of the finished work,
-    // and it is now in no class and no percentage.
-    expect(excluded.chars).toBe(HQ.length)
-    expect(excluded.chars).toBeGreaterThan(record.stats.finalChars)
+    // The file the person wrote is in the record, classified, with its
+    // characters inside the figures rather than outside them.
+    expect(record.files.map((f) => f.path).sort()).toEqual(['module.ts', 'standard.md'])
+    expect(record.exclusions ?? []).toEqual([])
+    expect(record.stats.finalChars).toBeGreaterThan(HQ.length)
 
-    // And the bound that notices. Before today this record satisfied every
-    // bound in src/invariants.ts, because the exclusion carried no time.
-    const violations = checkRecord(record)
-    expect(violations.map((v) => v.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
-    expect(violations[0].observed).toContain('after task.generatedAt')
-    expect(violations[0].observed).toContain(`${excluded.chars} chars`)
+    // And nothing for the gate to refuse. Until today this record failed
+    // `EXCLUSION_NOT_CLASSIFIED`'s third clause, which is now what it was
+    // always meant to be: a restatement over the record alone of a rule
+    // the resolver already follows, so it can only fire on a record this
+    // resolver did not write.
+    expect(checkRecord(record)).toEqual([])
   })
 })

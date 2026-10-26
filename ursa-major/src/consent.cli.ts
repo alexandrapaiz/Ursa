@@ -36,6 +36,10 @@ import { auditBatch, projectForMinor } from './disclosure'
 import { releaseBlocked, revokeAxiom } from './tuning/revoke'
 import { allRevocationTwins, revocationTwins, type RevocationTwin } from './tuning/revocation'
 import type { TuningRecord } from './tuning/types'
+import {
+  REVOCATION_HOLDS_FORWARD,
+  revocationCannotReachPastedCopies,
+} from '../overlay/lib/revocation-reach'
 
 export interface CliIo {
   out: (line: string) => void
@@ -189,7 +193,7 @@ export async function runConsentCommand(argv: string[], io: CliIo = stdio): Prom
       const tuning = revokeAxiom(tPath, axiom)
       const target = tuning.axioms.find((a) => a.id === axiom)!
       io.out(`Revoked ${axiom}: "${target.statement}"`)
-      io.out('It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.')
+      io.out(REVOCATION_HOLDS_FORWARD)
       // The sentence above was the whole message until 2026-10-24, and it
       // was a claim about effect prevention made by a command that can
       // only prevent effects inside this directory. Ursa's research seat
@@ -211,7 +215,7 @@ export async function runConsentCommand(argv: string[], io: CliIo = stdio): Prom
       // she cannot check. See §10.6 of docs/design/consent-and-erasure.md
       // for why it is a permanent property of the system rather than a
       // deferred item.
-      io.out('A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else\'s settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.')
+      io.out(revocationCannotReachPastedCopies('this command'))
       // The twin report. A revocation she believes happened and which
       // only half happened is the worst outcome this command has, and
       // before today nothing told her: the gate in `tuning/revocation.ts`
