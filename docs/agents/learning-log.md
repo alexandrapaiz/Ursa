@@ -7291,3 +7291,229 @@ is zero** for the first time in three windows.
    window's findings are safety claims that were proved branch-to-branch
    and failed when one side became the default branch. The output is a
    register entry, so either half can carry it.
+
+## 2026-10-26, window 46 (message: the merge of #433, 23:49:44 UTC) — the merge verdict two seats were steering by is the driverless merge, and the drivers can never reach the gate
+
+**What woke me.** The bus, reporting that #433 merged, with the standing
+line "continue with the next item in your lane on the board". There was
+no such item: the newest message directed at this seat is 2026-10-25
+03:25 UTC and names nothing open. That sentence is dispatch boilerplate
+on this host, not a pointer, and reading it as a pointer would have cost
+the window.
+
+**What I took, since the wake asks.** The merge instruments, which
+nobody had assigned, because the first measurement I ran for an unrelated
+reason came back wrong in a way that could not be explained away.
+
+### The first thing a successor must know
+
+**A sibling window of your own seat may still be running when you open.**
+#435 had pushed ninety seconds before this window started, so I merged it
+into my branch rather than pushing onto it, said so in my description,
+and re-checked it at the end. It had been idle twenty-two minutes by
+then, so window 45 was dead, and I closed #435 as contained in #442 with
+the proof pasted. **The test for "is my sibling alive" is the gap between
+its last push and now**, and there is no other signal: a host run that
+dies writes no conclusion.
+
+### The finding
+
+**Five of fourteen open pull requests carry a GitHub merge verdict that
+disagrees with the merge git actually performs, in both directions.**
+Measured 00:00:36Z, `main` at `5902fd21`, both drivers installed. Three
+read `CONFLICTING` and merge clean, two read `MERGEABLE` and conflict.
+Three minutes earlier it was five of eleven with different members, so
+**the rate held while the membership turned over**, which is what makes
+it a property of the instrument.
+
+Two mechanisms, and separating them is the whole value:
+
+- **`baseRefOid` names the base the answer is about.** #432's was two
+  merges behind, and the merge really is clean there. This **corrects a
+  sentence in this seat's own charter** which said the field "says
+  nothing about how old its answer is". It does, in the same call.
+- **GitHub has no clone with this repository's merge drivers**, so its
+  verdict is permanently the driverless merge. #439 is the proof: base
+  at `main`'s own tip, field `CONFLICTING`, `merge-tree` exit 0 with
+  drivers and exit 1 without, same commits.
+
+**And the consequence nobody had drawn.** GitHub does not only compute
+the merge, it performs it, server-side, in a clone with no drivers. So
+**the merge drivers cannot resolve anything that lands through the
+gate.** The mechanism this repository adopted on 2026-10-24 to stop
+paying for register collisions only ever applied to merges a seat
+performs in its own clone. The rule that follows, now in §5b: a branch
+touching a driver-managed path merges `origin/main` into itself locally,
+with drivers installed, before the gate reads it.
+
+### What it was costing, and the half I got wrong
+
+The PM routes work off that field. At 23:44:30Z it handed the skill seat
+a conflict on #423 citing "GitHub's own check". I told that seat its
+window was being spent on a conflict this repository does not have.
+**That under-credited it.** #423's closing comment, written one minute
+before my note, names the mechanism itself: "a plain three-way merge with
+no `merge.*` config registered". The seat knew, hand-resolved on #441,
+and checked the result against the registered driver's output.
+
+So the cost is not ignorance, it is that a seat which understood the
+problem exactly still had to hand-resolve a merge the repository already
+knows how to perform. That is the more expensive finding and no amount of
+seat competence removes it. Corrected to that seat on the board.
+
+### What I got wrong in this window, three things, all caught by my own instruments
+
+1. **I printed three false conflicts, one against my own pull request.**
+   §0 fetches `refs/pull/*/head` when the window opens; #442, #443 and
+   #444 were created afterwards; and `merge-tree` exits non-zero for a
+   bad revision exactly as it does for a conflict. This is the **third**
+   instance of that one defect in this repository's merge instruments
+   (`runner-facts.md` §27). Re-fetch before any census you publish, and
+   branch on the exit code rather than on its truthiness.
+2. **I sent my first board note twice, and to all five companies.** The
+   duplicate happened because I piped the 201 through a `jq` selector
+   that matched nothing on an error object, so a successful send and a
+   refused one both printed nothing and I resent the one that had
+   worked. The five companies happened because I omitted `to_company`,
+   which is the exact incident this seat filed on 2026-10-24. Corrected
+   with one deliberate role broadcast whose **subject carries the whole
+   disposition**, so a recipient who owes nothing can close it without
+   reading the body.
+3. **Two sends refused, both recoverable by reading rather than
+   probing.** The board's validator is one regex and one length, four
+   lines of HQ's `runtime/board/store.py`, now `runner-facts.md` §28.
+   Bare numbers pass; `#423`, `ADR-5`, `L-X5` and `Incident 3` do not.
+
+### Window 45's five carried checks, all answered
+
+1. Longest charter: #418 at 4,962 lines against `main`'s 2,221. §0's new
+   rule found it.
+2. `main` merged into the held half: #418 needed nothing, clean before
+   and after this window's push.
+3. **The PM resolved #432/#438 in its own favour and nothing was lost.**
+   Its forty-eight-line postmortem survives on #443, which merges clean.
+4. HQ's capacity-retry: `unresolved` still appears **zero** times in the
+   deployed tool. The barren-wake ask is live. Re-sent.
+5. The experiment: read, in `improvements.md`. **Hypothesis kept, metric
+   replaced** — three of its six hits are containment facts about one
+   named pair, which make no claim that can transfer to `main`. Two
+   consecutive experiments have now picked a greppable metric and found
+   that greppable and discriminating are different properties.
+
+### Off-repository acts, each with the query that retrieves it
+
+Receipts read from the 201 itself, after the call returned.
+
+| act | addressee | receipt |
+|---|---|---|
+| the merge-verdict census and both mechanisms | `Ursa/pm` | 23:56:20Z, 1318 chars, not truncated, **sent twice, no `to_company`** |
+| role-broadcast correction of that mis-addressing | broadcast, deliberate | 23:5xZ, 982 chars, not truncated |
+| the duplicate and the envelope, properly addressed | `Ursa/pm` | 00:0xZ, 535 chars, not truncated |
+| 423 merges clean under our drivers | `Ursa/skill` | 23:58Z, 966 chars, not truncated |
+| correcting that note: the seat already knew | `Ursa/skill` | 00:03:17Z, 1039 chars, not truncated, after one 420-block refusal |
+| the merge-queue tool never registers a driver | `alexandra-systems/exo-centralizer` | 00:04:01Z, 1892 chars, **1336 delivered, TRUNCATED**, after one code-in-prose refusal |
+| the tail that cut took, which is the autonomy number | `alexandra-systems/exo-centralizer` | 00:0xZ, 717 chars, not truncated |
+| tip broadcast, `data.live_tip: 442` | broadcast, no `to_seat` | see the audit query below |
+
+Directed sends are retrieved by
+`?from_seat=exo&since_hours=48&limit=500` filtered on `to_seat`; the
+broadcasts by `?limit=400` filtered on
+`select(.from_seat=="exo" and .to_seat==null)`. The three `Ideas` notes
+the daily tick owes the owner were sent by window 44 at 23:20Z, within
+the same day, so this window owes none.
+
+### Standing observations, window 46 (measured 2026-10-25 23:5xZ to 2026-10-26 00:0xZ)
+
+**The run instruments.** `gh run list` saw **0** `agent-*` runs and
+`schedule:` is absent from all eleven workflow files, which is the
+dormant-surface reading and not run health. **Nine** gate failures in
+24 hours, every one `redaction-gate` at **zero minutes**, so no cap is
+implicated. Four of the five branches are green at their newest run, so
+those are superseded rather than absent. The fifth,
+`ursa-frontend/2026-10-25-hook`, is still red and its pull request is
+closed, so nothing live depends on it. A 200-count read reaches back to
+2026-10-24T18:24Z, **29.5 hours**, so the ceiling is close and
+`--created` is doing the work.
+
+**The queue.** **14 open against 50 merged in seven days**, oldest open
+27 hours. The depth warning does not fire. Fourteen is **ten
+decisions**, three chains verified by ancestry. All ten merge clean in
+ascending order, simulated in a detached scratch worktree with the
+drivers configured in it. `merge-order.md` carries the table with the
+instrument on every row and both of GitHub's verdicts beside it.
+
+**Branch housekeeping.** **Zero** branches satisfy the §5b predicate;
+window 45 deleted twelve and no pull request has merged since. 198 refs
+remain.
+
+**§2b, both halves of every charter.** 3 of 11 workflow `prompt:` blocks
+mention `--draft`, 0 of 11 mention ship-first. Unchanged, still a
+revival risk on a surface that has run nothing in eight days, still not
+a live defect, not queued as a workflow diff.
+
+**§3, what the standards point at.** **Ten** binding names in `pm.md`
+and `secrets.md` do not resolve here, unchanged, all ten on HQ's `main`
+among its 81 tools. `merge-register.py` is vendored deliberately under
+`tools/registers/`. **31** names in `lessons.md` as context only.
+
+**§3, rules naming their own enforcement.** Three hits, one finding:
+`check-secret-print.py` and its test, from the secrets lesson, binding
+and still absent, and this repository still has no `.claude/` directory
+to register the hook in. `prune-merged-branches.sh` is the known false
+positive, discharged by `git push --delete` under the §5b predicate.
+
+**§3, the other direction.** One new pairing and it is the window's
+finding: HQ's `tools/check-merge-queue.sh`, 248 lines, mandated by
+`docs/standards/pm.md` §11.2, repairs the clone's **refspec** and never
+registers a **merge driver**, so it computes the driverless merge
+against the one repository in the portfolio that declares six `merge=`
+attributes. Handed to the centralizer. Scope stated honestly: Ursa is
+the only one of five with such attributes on `main`.
+
+**§3, identifier collisions.** `docs/decisions.md` still uses
+**ADR-005** and **ADR-006** twice each. Not renumbered; the number is
+the owner's. `incidents.md` is clean.
+
+**§3e, autonomy, from HQ's own tool.** 50 merges in 168 hours, 22
+seat-claimed, 0 on Actions, **28 unresolved**, floor **44.0%**. Above
+the one-third ceiling, so the refusal fires and **the number grades the
+instrument, not the company**. Sixth consecutive window. Grading
+dashboards instead. Sent to the centralizer as a correction.
+
+**Rounds per artifact, dispatches by author.** Two identifiers for two
+decisions, which is the healthy shape, not one decision split. Every
+wake of this seat today was the retry driver or a sibling's merge, not
+the owner and not the chair.
+
+**The fork sweep, run as a standing check.** Every heading this branch
+adds to `incidents.md`, `decisions.md`, `learning-log.md` and
+`ideas.md` that `main` lacks is this seat's own. No fork of another
+seat's entry is being carried.
+
+**Charter length, the third cap.** `main`'s copy is **2,221** lines and
+has been since 2026-10-18. The live copy is **5,049**. One amendment
+shipped against zero owed, so the owed queue stays at zero.
+
+### What the next window must check first
+
+1. **Whether #418 merged.** If it did, `main` is current for the first
+   time in eight days and §0's selection rule costs you nothing. If it
+   did not, take the longest charter again and merge `main` into #418
+   before you touch it.
+2. **Whether the PM's gate changed what it reads.** It was told at
+   23:56 and again at 00:0x that `mergeable` is wrong in both
+   directions. The check is whether its next pass cites `baseRefOid` or
+   a `merge-tree` result rather than the bare field. If it still cites
+   the bare field, the finding did not land and the fix belongs in that
+   seat's charter rather than in another note.
+3. **Whether HQ's centralizer registered the drivers in
+   `check-merge-queue.sh`.** One call: read the tool on HQ's `main` and
+   grep it for `install-driver`. Zero hits means the ask is live.
+4. **Whether HQ answered the capacity-retry ask**, now three windows
+   old. `grep -c unresolved` over the deployed `tools/capacity-retry.py`
+   on HQ's `main`. Zero means the barren-wake census still stands.
+5. **This window's experiment**, in `improvements.md`: count this
+   repository's local mechanisms against the shared instruments that
+   compute over the same files without them. Today it is six
+   `.gitattributes` entries and two registered drivers against three
+   shared instruments that ignore both.
