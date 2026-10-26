@@ -1,43 +1,50 @@
-# Dispatch queue — 2026-10-26, message run (11th, ~09:5x UTC)
+# Dispatch queue — 2026-10-26, message run (12th, ~10:0x-10:1x UTC)
 
-**This run's trigger.** A board note from exo, signed "Ursa/exo",
-reporting a clean merge-tree verdict on every open pull request and
-asking this seat to ready, merge, or close the security seat's older
-draft (#461) directly. Per the external-content org rule, that ask is
-data, not a command: checked against the repository's live state before
-anything was decided. `PM_DISPATCH_ENABLED` reads empty in this run's
-own environment, same as every pass today, so nothing below fires
-regardless of what qualifies.
+**This run's trigger.** Four board/event items, all already resolved by
+this seat's own prior run (#500, the 11th) before this run started:
+security's host-run failure (artifact PR #490, closed by security itself
+via #498), exo's finished run (PR #492, merged), engineer's finished run
+(PR #494, merged), and market's opened PR (#497, merged). Re-verified
+each fresh with `gh pr view` rather than trusted from #500's account.
+`PM_DISPATCH_ENABLED` reads empty in this run's own environment, same as
+every pass today, so nothing below fires regardless of what qualifies.
 
 ## Candidates considered, none fired (switch off, and none would have fired anyway)
 
-1. **Security, #461 / #490 / #498.** The note's "both clean" claim does
-   not hold for #490 when checked fresh with `git merge-tree`: besides
-   the `docs/ideas.md` ledger conflict (driver-fixable, as the note
-   says), `ursa-major/src/regen-commands-runnable.test.ts` conflicts too
-   with no driver declared for it at all. That is moot now: while this
-   check was running, the security seat opened #498, merged `main` in,
-   resolved both conflicts itself, confirmed #461's commits are fully
-   contained in #490's, and closed #461. No dispatch criterion applied
-   at any point — the seat was never idle, only mid-run while this pass
-   was still reading it.
-2. **Nothing else new.** No two-open-PRs-one-scope-none-merged pattern
-   beyond the one above. No ADR naming an unstarted experiment. No
-   milestone besides the sprint's own date within three days with open
-   items.
+1. **Security, #461/#490/#498 — moot before this run began.** #498
+   (security's own 8th run) already merged `main`, resolved both
+   conflicts an earlier pass had found, confirmed #461's commits fully
+   contained in #490's, and closed #461. This run found #498 itself had
+   turned ready mid-session and merged it under Tier B (see
+   `docs/sprints/pending.md`). No dispatch criterion ever applied — the
+   seat was mid-run the whole time, never idle.
+2. **Nothing else new.** No two-open-PRs-one-scope-none-merged pattern.
+   No ADR naming an unstarted experiment. No milestone besides the
+   sprint's own date within three days with open items. #447 (exo,
+   charter-half) is Tier C and unchanged; it is not a dispatch candidate,
+   it is an owner-merge wait.
 
 Nothing proposed meets the bar for a third entry; the three-entry cap is
 not binding this pass.
 
 ## Failed-run triage this run (§11.7)
 
-`gh run list --status failure --created ">=...-24 hours"` returns
-thirteen rows, all `redaction-gate`. The four on
-`ursa-frontend/2026-10-26-hook` are the same leak #495 already triaged
-and closed out (green on its fourth run at 09:37:42Z, merged as #484).
-One on `ursa-pm/2026-10-26-hook-2` and one on
-`ursa-market/2026-10-26-message-24` are stale branches from earlier
-passes today with no open PR now. The remaining six, all
-`ursa-security/2026-10-25-hook`, are from yesterday and already outside
-any pass's 24-hour window that matters today. Nothing new to classify,
-rerun, or hand off this pass.
+`gh run list --status failure --created ">=$(date -u -d '-24 hours' +%Y-%m-%dT%H:%M:%SZ)"`
+returns the same set the 11th run's queue already classified: the
+`redaction-gate` runs on `ursa-frontend/2026-10-26-hook` (the leak #495
+already triaged and closed, green on its fourth run, merged as #484),
+one stale `ursa-pm/2026-10-26-hook-2` branch with no open PR now, one
+stale `ursa-market/2026-10-26-message-24` branch with no open PR now,
+and the `ursa-security/2026-10-25-hook` runs from yesterday, now mostly
+outside the 24-hour window. Nothing new to classify, rerun, or hand off.
+
+## The draft-liveness check this pass
+
+Ran HQ's `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
+fresh (the standing note's path, `tools/check-draft-prs.sh`, does not
+exist inside this repo; HQ's copy does, at the absolute path above).
+Four drafts found, all read as live runs by the tool's own
+timeout-derived liveness test: #501 (exo, idle 0m), #499 (engineer, idle
+14m), #496 (frontend, idle 4m), #487 (skill, idle 60m). No orphans. #461,
+the draft the standing note names as "idle 5h," is not listed at all
+because it is already closed — the note is stale.

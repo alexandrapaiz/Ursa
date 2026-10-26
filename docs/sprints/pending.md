@@ -2,6 +2,102 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~10:0x-10:1x UTC message run (12th)
+
+1. **One pull request now carries today's whole ceremony stack and waits
+   on the owner, not on this seat.** This run's own PR supersedes #500
+   (11th run), which supersedes the chain back through #495, #491 and
+   earlier today. It touches `docs/decisions.md` and
+   `docs/prfaq/mvp-public-address.md` alongside the pure knowledge
+   surfaces, so it is not Tier A even though it is this seat's own, and
+   Tier B explicitly excludes a PM's own PR (§10 condition 1). It needs
+   the owner's own merge. Closing the superseded link each run keeps this
+   to one open PM pull request rather than a dozen.
+2. **Two Tier B merges landed this pass, both turning ready mid-run.**
+   #498 (security: consolidates and closes #461 and #490, the exact
+   failed-run artifact this run was woken to triage) and #502 (market's
+   29th run) were both still drafts moments into this run and both
+   flipped to ready while this run was reading them. Re-checked fresh
+   against all six Tier B conditions after the flip rather than trusted
+   from an earlier snapshot; both green, clean, no Tier C path, under
+   seven days old, no owner comment. Merged in that order (security
+   first, since it was the subject of this run's own trigger), branches
+   deleted. Full account below.
+3. **#447 (exo, charter-half) is unchanged, still Tier C, still open.**
+   Touches `prompts/exo-agent.md` and `prompts/pm-agent.md` directly —
+   charter files, owner-merge only by definition. #500 already flagged
+   it as Tier C "by its own account"; nothing about it changed this pass.
+
+## This run (2026-10-26, ~10:0x-10:1x UTC, message run, 12th)
+
+**Read own seat's open PRs first.** Found #500
+(`ursa-pm/2026-10-26-message-11`), this seat's own, open and ready (not
+draft), carrying today's cumulative ceremony state (retro, grooming, the
+new sprint, two ledger rulings, and a PR/FAQ draft). Branched this run
+from its tip rather than `main`. #500 still waits on the owner (its diff
+is not a pure knowledge surface: `docs/decisions.md` and
+`docs/prfaq/mvp-public-address.md` are both outside the Tier A list, and
+Tier B excludes a PM's own PR by its own §10 condition 1); unchanged by
+this run beyond the additions here.
+
+**This run's own trigger, re-verified rather than re-derived.** The event
+payload named four things: the security seat's host-run failure (artifact
+PR #490), exo's finished run (PR #492), engineer's finished run (PR #494),
+and market's opened PR (#497), plus the standing note's claim about an
+idle draft, #461. All four were already fully resolved by #500 before
+this run started: #492, #494 and #497 merged; #490 and #461 closed by the
+security seat itself, which opened and landed #498 while #500 was still
+being written. Verified each with a fresh `gh pr view`, not assumed from
+#500's own account. Nothing in the payload needed a second action.
+
+**The standing note's tool reference, checked rather than taken on
+faith.** The note attached to every event this run read says
+`tools/check-draft-prs.sh --repo alexandrapaiz/Ursa` "reads each one's
+disposition off its diff." No such path exists in this repository (`find`
+and `git log --all` both come up empty) — but HQ's own copy exists on the
+host at `/srv/asc/hq/tools/check-draft-prs.sh`, and running it fresh
+against the live repo (not trusted from the note's prose) found no
+orphaned drafts: #501, #499, #496 and #487 all read as "run may still be
+live; leave it alone" by the tool's own liveness test against each
+workflow's declared timeout. #461, the draft the note names, is not
+listed at all, because it is already closed. The note's framing ("idle
+5h") is now stale; no action was needed or taken on it.
+
+**Two Tier B merges, both turning ready mid-run.** #498 (security,
+consolidating and closing #461 and #490 — answers this run's own
+triage duty directly) and #502 (market's 29th run) were both still
+drafts when this run started reading the queue and both flipped to
+ready (not draft) within the first few minutes. Re-checked fresh
+against all six Tier B conditions after the flip: not this seat's own
+PR, not draft, no labels, no comments or reviews, checks green,
+`mergeStateStatus: CLEAN`, no Tier C path in `gh pr diff --name-only`
+for either (security touches `.gitignore`, `docs/ideas.md`,
+`docs/provenance/`, `docs/security/`, `tools/ledger/`, `tools/stack/`,
+and `ursa-major/src/` application code and tests — none of it
+charters, `company.yaml`, or the tiers themselves; market touches only
+`docs/ideas.md` and `docs/market/`), both under a day old. Merged
+security first since it was this run's own trigger subject, waited for
+GitHub's async mergeability to resettle (polled `mergeStateStatus`
+rather than trusting the first `UNKNOWN` read), then merged market.
+Both branches deleted. #500 (this seat's own open PR, also touching
+`docs/ideas.md`) re-polled `MERGEABLE`/`CLEAN` after both merges landed,
+confirming the file's `merge=ledger` driver absorbed both appends
+cleanly.
+
+**#447 unchanged.** Still `prompts/exo-agent.md` and
+`prompts/pm-agent.md` directly, still Tier C, still open, nothing new
+to flag beyond what #500 already said.
+
+**No dispatch.** `PM_DISPATCH_ENABLED` reads empty in this run's own
+environment (`echo "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"`), same
+as every pass today. A fresh `gh run list --status failure` for the
+trailing 24 hours returns the same set `docs/sprints/dispatch-queue.md`
+already classified this pass (all `redaction-gate`, already triaged or
+stale); nothing new to dispatch or escalate.
+
+**Board.** Posting a `note` naming the two merges and the stale-note
+finding, first person, no new PR numbers beyond what `data` carries.
+
 ## Top three for the owner, 2026-10-26 ~09:5x UTC message run (11th)
 
 Woken by a board note from exo (signed "Ursa/exo") reporting that it had
