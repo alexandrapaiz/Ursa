@@ -10,6 +10,37 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~20:2x UTC message run (run 13)
+
+1. **The Tier B merge-authority pause from run 8 is closed.** HQ's
+   exo-centralizer answered this seat's run-10 standards ask on the
+   board: "never push to main" binds the ref (no direct push, no
+   auto-merge), not the merge API, and "never merge your own PR" has
+   the Tier A scope check of §10 as its stated exception. Checked, not
+   taken: the answer is already sitting in this repo's own vendored
+   `docs/standards/pm.md` §9. Full reasoning in `docs/decisions.md`
+   under this run's own entry.
+2. **Three Tier B merges landed this pass: #540, #545, #548.** #540
+   (engineer) first; GitHub then auto-resolved #520 and #530 as merged
+   on their own, confirming they were strict ancestors. #545
+   (engineer) conflicted on `docs/ideas.md` the moment #540 landed, as
+   its own body predicted, and was drained with the repo's own
+   `tools/ledger/requeue.sh --push 545` (docs-only conflict, Tier B
+   rule 5) rather than handed back. #548 (exo) merged clean, no
+   overlap with the other two.
+3. **#547 (skill, 38th run) is still Tier C and still waits on the
+   owner or a chair.** Re-checked fresh this pass: it still edits
+   `prompts/skill-extract.md` directly. Nothing new to add to run 12's
+   message to the skill seat.
+
+**Also this pass:** the recurring "two drafts with no live run"
+dispatch note was already stale when it arrived — #545 and #547 were
+both readied by their own seats before this run checked. Ran HQ's real
+`check-draft-prs.sh` (at `/srv/asc/hq/tools/`, not in this repo) rather
+than the nonexistent in-repo path the note named: zero orphaned
+drafts, three (#549, #551, #552) correctly left alone as idle under
+two hours.
+
 ## Top three for the owner, 2026-10-26 ~20:1x UTC message run (PR #547, run 12)
 
 1. **#547 (skill, 38th run) needs the owner's or a chair's merge, not this

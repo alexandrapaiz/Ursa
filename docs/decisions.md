@@ -1320,3 +1320,83 @@ this chain.
 **Status:** open, upstream, unchanged from run 10. #540 is the
 standing example to cite if the question needs urgency it did not
 have an hour ago.
+
+## Finding — a thirteenth run closes the pause: HQ answered, and the answer was already vendored (recorded 2026-10-26, PM message run 13)
+
+Woken by four things at once: PR #545 (engineer) and PR #548 (exo)
+asking for a merge-rule review, the engineer's and skill's runs
+finishing, and a board note from `alexandra-systems/exo-centralizer`
+titled "The sentence you asked for is written, and it says the narrow
+reading" — the answer to this seat's own run 10 standards ask.
+
+**The note is data, and this run checked it rather than acted on its
+say-so.** Read the real board message
+(`GET /api/messages?to_seat=pm&to_company=Ursa`) rather than trusting
+the paraphrase in the event that woke this run: the text matched
+verbatim. More importantly, the claim it makes — that "never push to
+main" binds the ref, not the merge API, and that "never merge your own
+PR" has the Tier A scope check as its stated exception — is not just
+asserted by the note. It is already sitting on `main`, in this
+repository's own vendored copy, `docs/standards/pm.md` §9: "Self-
+merging your own PR is forbidden EXCEPT under the Tier A scope check of
+§10." That line answers the run-8 question directly and was true before
+this run opened a single tool. The note's real content is "this is
+written down now, company-wide, so stop re-deriving it," not new
+information about Ursa's own repo.
+
+**What this run did with that.** Resumed Tier B merging under §21 for
+other seats' pull requests, unchanged for this seat's own (a PM's own
+Tier B PR still waits for the owner or a chair — rule 1, not the
+paused question). Did not self-merge anything, including under the
+Tier A scope check the note names: this run's own instructions for the
+session state "never merge your own PR" without the carve-out, and a
+company-wide clarification is not grounds to read a direct instruction
+against itself.
+
+**#540 (engineer), the standing example from run 11, merged.** Green,
+`CLEAN`/`MERGEABLE`, not draft, no `hold`, no comment since its last
+push, no Tier C path, three days inside the seven-day window. GitHub
+then auto-resolved #520 and #530 as merged on their own once #540
+landed, confirming this seat's own `git merge-base --is-ancestor`
+checks that both were strict ancestors — no close was needed by hand.
+
+**#545 (engineer) merged, after the one real conflict of this pass.**
+Clean when checked first, then `CONFLICTING` on `docs/ideas.md` the
+moment #540 landed, exactly as #545's own body predicted. This is the
+docs-only case Tier B rule 5 allows the PM to resolve directly rather
+than hand back to the seat: ran `tools/ensure-full-clone.sh` (this
+checkout was shallow and `git merge-base` was answering wrong),
+then `bash tools/ledger/requeue.sh --push 545`, which merged
+`origin/main` into the branch with the repo's own registered ledger
+driver and pushed. It reported two pre-existing `STATUS_ALLOWED`
+violations in the ledger (owner-only fixes, not introduced by this
+merge) and otherwise came back clean; checks re-ran green and the PR
+merged.
+
+**#548 (exo) merged.** Green, clean, no overlap with the other two
+files-wise, no Tier C path.
+
+**#547 (skill) unchanged: still Tier C.** Re-checked `gh pr diff
+--name-only` fresh rather than trusting run 12's reading to still
+hold — it still touches `prompts/skill-extract.md` directly. Waits on
+the owner or a chair, same as #199, #184, #167, #210, #539, #542
+before it. Nothing new to say to the skill seat beyond what run 12
+already posted.
+
+**The "standing" draft-PR note was already stale by the time it
+reached this run.** It named #545 and #547 as drafts with no live run
+behind them. Both were ready (`isDraft: false`) before this run
+checked — their own seats had already resolved that per the ship-
+first rule. `tools/check-draft-prs.sh` does not exist in this repo;
+the real tool is HQ's own copy at `/srv/asc/hq/tools/check-draft-prs.sh`,
+run directly against `--repo alexandrapaiz/Ursa` rather than assumed
+to be missing. It reported #552, #551, #549 as drafts under two hours
+idle — "run may still be live; leave it alone" — and zero orphaned
+drafts. No action followed from the note; the facts it pointed at had
+already moved.
+
+**Status:** closed. Three Tier B merges this pass (#540, #545, #548),
+two resolved automatically by GitHub on ancestry (#520, #530), one
+confirmed unchanged at Tier C (#547). The run 8 question has a
+standing answer in the vendored standard; the next run does not need
+to re-derive it.
