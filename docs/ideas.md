@@ -12155,32 +12155,39 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
 - Cost: $0
 - Status: proposed
 
-### 2026-10-26 — The ledger gate is red on `main` over one scan heading the classifier does not know (skill run)
+### 2026-10-26 — The ledger gate was red on `main`, and this seat published the wrong cause for it (skill run)
 - Trigger: merging `origin/main` into this seat's stack this run and
   running the ledger's own tests on the merge result. Two of 69 fail,
   `every real heading that announces a scan is classified as one` and
   `the real ledger carries no violation a seat could repair`. Both
   reproduce unchanged on `origin/main` itself at `5b7bcf6`, in a
   worktree with nothing of this branch in it, so the merge did not
-  cause them and resolving the merge cannot clear them.
-- What: one heading is the whole cause. `### 2026-10-26 (engineer, hook
-  run) — Craft scan: tesh 0.3.2 and txm 8.2.0, where a documented
-  command is executed by the test suite instead of read by a reviewer`
-  is a scan note, but `SCAN_TITLE` in `tools/ledger/block-kinds.mjs`
-  does not recognise that spelling, so the classifier treats the block
-  as an ordinary idea and §4's five fields fall due on it. It has no
-  `- Cost:` line and no `- Status:` line, which is exactly what
-  `node tools/ledger/check.mjs docs/ideas.md` reports: two violations a
-  seat must repair, in 330 blocks. The failure is benign in itself and
-  corrosive in effect, because a gate that is red for a reason everyone
-  knows is a gate nobody reads, and the next real violation lands in
-  the same output.
-- First step: the engineer seat picks one of the two repairs the test's
-  own failure message names, either give the heading the standard scan
-  spelling or add the new one to `SCAN_TITLE`, and says which in the
-  pull request. Adding the spelling is the better one if hook runs will
-  keep producing it, because the alternative is a rule that depends on
-  a hook remembering a phrasing.
+  cause them and resolving the merge cannot clear them. **Corrected
+  2026-10-26 by a later run of this seat**, after the engineer seat
+  answered the handoff and this run re-read the classifier: the
+  observation above is right and the cause named below it was wrong.
+- What: the red was real and the diagnosis this seat handed on was not.
+  `### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm
+  8.2.0, ...` is a scan note that also carries a `- First step:` line,
+  and `COMMITS_WORK` in `tools/ledger/block-kinds.mjs` fires on that
+  label, which makes the block an idea wearing a scan heading and
+  brings §4's five fields due on it correctly. It had three of the
+  five. This seat instead reported that `SCAN_TITLE` did not recognise
+  the heading's spelling. `SCAN_TITLE` matches `Craft scan:` and always
+  did, which is checkable in one grep of the file the failure names, and
+  the only evidence this seat had for its own claim was the failing
+  test's message, which named that one cause and no other. The
+  mechanism is in `prompts/skill-extract.md` §5x.
+- First step: done, by the engineer seat rather than by this one, and
+  not the repair this entry first recommended. Giving `SCAN_TITLE` a new
+  spelling would have changed nothing, because it already matched. What
+  landed instead is the explanation: `block-kinds.mjs` now documents the
+  literal-label design and why reading the sentence after the label was
+  refused, and `block-kinds.test.mjs` lists all three causes of that
+  failure and says to check the first-step label first. Verified on this
+  branch rather than taken from the answer: 94 tests pass, the contract
+  checker exits 2 with two owner-held statuses and no seat-repairable
+  violation, and the closure and attribute checkers exit 0.
 - Cost: $0
 - Status: proposed
 
