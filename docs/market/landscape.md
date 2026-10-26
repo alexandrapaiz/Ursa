@@ -696,6 +696,19 @@ closing" read allowed for. Not verified independently this run; worth
 a direct product test next time rather than taking one critique at
 face value. Last observed 2026-10-05: [OpenAI: Dreaming launch](https://alternativeto.net/news/2026/6/openai-launches-scalable-dreaming-memory-system-for-chatgpt/), [shloked.com: ChatGPT's Memory Update Has a Packaging Problem](https://www.shloked.com/chatgpt-memory-2026).
 
+Update 2026-10-26: OpenAI rolled out "Locked Chats" starting
+2026-10-20 (all tiers, desktop/web/mobile) — a PIN- or biometric-gated
+space where locked conversations are hidden from history, pinned
+chats, and search, and draw on a separate memory shared only among
+locked chats. This is a privacy/visibility feature, not a portability
+one: OpenAI's own documentation states locked chats are not end-to-end
+encrypted and does not change how long OpenAI retains the underlying
+data or delete what the model already learned before a chat was
+locked. No change to this entry's weakness against Ursa; flagged as a
+landscape move because it is new product surface, not because it
+narrows or widens the portability gap. Last observed 2026-10-26:
+[Android Authority: ChatGPT rolls out locked chats](https://www.androidauthority.com/chatgpt-rolls-out-locked-chats-3725766/).
+
 ### Claude Memory Import (Anthropic)
 
 What it is: a feature Anthropic added to Claude in July 2026, labeled
@@ -859,6 +872,66 @@ files, not taken from either seat's paraphrase. Last observed
 `memhub/packages/contracts/src/backup-restore.ts`, read in full
 (github.com/Tencent-Hunyuan/Hy-Memory).
 
+### Wire (usewire.io)
+
+What it is: a "Context as a Service" platform — hosted, permissioned
+containers that give multiple AI agents (via MCP) read/write access to
+the same shared context store, pitched explicitly against export-based
+portability. Who it serves: developers and teams running AI coding
+agents and other MCP clients who want one context store instead of
+several (Claude Code, Cursor named). Pricing: pay-as-you-go (3,000
+starter credits, no subscription), Starter $9/mo (10K credits), Pro
+$19/mo (20K credits), Team $199/mo (200K credits); storage, search, and
+file reads are credit-metered, container creation, writes, deletes,
+and uploads are free. Strengths: the clearest public articulation
+found yet of the exact critique Ursa Major's own thesis rests on — a
+2026-08-31 company blog post argues "export satisfies data-portability
+obligations without changing the practical cost" because migration
+tools create "two copies" that drift apart, and that the fix is a
+store the user owns outside any one vendor ("Code has GitHub.
+Everything else has Wire"). The same post cites developer multi-tool
+usage stats (82% ChatGPT, 68% Copilot, 47% Gemini, 41% Claude) as
+evidence multi-model use is the norm, not a transition state —
+independent corroboration of the premise Major's cross-model pitch
+depends on. Weakness against Ursa: Wire's own fix for lock-in is to
+become a new centralized point every agent reads from, not to return
+data to the user's own device — the opposite architecture from
+Major's on-device, user-held profile (CLAUDE.md §0, constraint 3). It
+also serves developers integrating MCP clients, not a consumer product
+with its own consent/revoke surface, and raw shared context (files,
+API output, tool calls) is not the same object as a
+provenance-resolved outcome record; Wire has nothing analogous to the
+revealed-preference flywheel Minor's pricing depends on. Last observed
+2026-10-26: [Wire: AI Memory Lock-in](https://usewire.io/blog/ai-memory-lock-in-blocks-your-own-product/), [Wire](https://usewire.io/).
+
+### Skillsync (YC W26)
+
+What it is: a YC-backed ($500K, Y Combinator plus Character Capital)
+startup building portability specifically for AI coding-agent
+sessions — a local-first desktop app plus an open-source Rust
+translation engine, txcript, that converts a session (conversation,
+reasoning blocks, tool calls) from one agent's on-disk format into
+another's, described by its own founders as "ffmpeg... for agent
+sessions." Who it serves: developers who switch between coding agents
+mid-task (Claude Code, Codex, Cursor, Hermes, OpenClaw, Antigravity
+named as supported) and want sessions and reusable "skills" to follow
+them. Pricing: txcript itself is free and open-source; the companion
+desktop app is $20/mo Pro. Launched on Hacker News 2026-09-17 (68
+points, "Launch HN: Skillsync (YC W26)"). Strengths: the first thing
+found in this landscape that attempts actual automated,
+no-human-copy-paste translation between competing vendors' own session
+formats, which is closer to the "automated round-trip, no bespoke
+parser" bar docs/market/positioning.md's 2026-10-14 entry set for
+testing any portability claim, Major's own included, than anything
+else checked to date. Weakness against Ursa: scoped entirely to
+coding-agent session transcripts and reusable skills, not inferred
+user preferences or a consumer chat relationship, and it moves the raw
+transcript itself rather than a provenance-resolved record of what
+happened to any of it; a Launch HN commenter's own skepticism ("the
+transcript doesn't go into a file — it goes into a live session")
+suggests even this narrower translation has real fidelity limits. Last
+observed 2026-10-26: [Launch HN: Skillsync (YC W26)](https://news.ycombinator.com/item?id=49743049), [YesPress: Skillsync (YC W26)](https://yespress.io/skillsync-yc-w26).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -912,6 +985,25 @@ does not change the conclusion; it is the strongest evidence yet for
 it, since the fragmentation itself is accelerating faster than any
 single attempt is gaining traction. Last observed 2026-10-25:
 [stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
+
+Update 2026-10-26: a seventh fragmentation attempt, older than this
+note's existing six and missed until this run: MacPaw Research
+published "Portable Memory" on 2026-07-06, a `.mem` bundle format
+(canonical serialization, optional Ed25519 signing) with one feature
+none of the other six name — portable deletion tombstones with
+proof-of-reach, a verifiable-delete primitive close in shape to
+CLAUDE.md §0's second load-bearing constraint (users can revoke and
+delete what's inferred about them). MacPaw ships MIT-licensed Python
+and Swift reference implementations plus ingest adapters for mem0,
+ChatGPT, and Claude memory. Checked against this note's own bar
+(does a competing product read the format back without the format's
+author writing the adapter): no, the adapters are MacPaw's own, the
+same gap COGX and ByteRover had. The authors say so themselves,
+calling the spec "not yet — independently implemented, neutrally
+governed, widely adopted." Seven attempts now, still zero that clear
+the bar, but this is the first one whose design target overlaps
+Ursa's own consent architecture rather than just export format. Last
+observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.com/publications/portable-memory).
 
 ## Changelog
 
@@ -1036,3 +1128,28 @@ single attempt is gaining traction. Last observed 2026-10-25:
   this file already does for every vendor-authored figure elsewhere.
   No replacement pointer found or needed; the caveat attaches to the
   existing one. [aidata.broker footer, checked 2026-10-26].
+- 2026-10-26 (message, 19th run) — added two new Category 3 entries,
+  both found via the demand-signals ceremony rather than a landscape
+  sweep. Wire (usewire.io): a hosted "Context as a Service" platform
+  whose own blog post argues export-based portability is fake and
+  proposes a centralized shared store instead, the sharpest public
+  articulation of Major's own critique found anywhere, from a vendor
+  whose fix is structurally the opposite of Major's on-device bet.
+  Skillsync (YC W26): a $500K YC-backed startup whose open-source
+  txcript engine attempts actual automated translation between
+  competing coding agents' own session formats, the first thing found
+  in this landscape that even attempts the "no human copy-paste, no
+  bespoke parser" bar docs/market/positioning.md set on 2026-10-14,
+  though scoped to raw session transcripts, not inferred preferences.
+  Also added a dated note to ChatGPT Memory for OpenAI's 2026-10-20
+  "Locked Chats" launch, a privacy feature with no portability
+  implication. Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 21st run) — absorbed the 19th run's open PR
+  (#456, superseded by this run's) and added a seventh entry to the
+  no-neutral-standard cross-cutting note: MacPaw Research's "Portable
+  Memory" `.mem` spec (2026-07-06, missed by prior sweeps), notable
+  for a verifiable-deletion primitive that overlaps CLAUDE.md §0's
+  consent architecture more than any prior entry in that note, but
+  still unproven against the note's own independent-implementation
+  bar. Positioning consequence (EU Data Act scope check) in
+  docs/market/positioning.md.
