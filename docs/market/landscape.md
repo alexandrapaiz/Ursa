@@ -291,7 +291,7 @@ month](https://techcrunch.com/2026/04/09/after-data-breach-10b-valued-startup-me
 [AOL/Business Insider: Meta paused its work with AI training startup
 Mercor after a data
 breach](https://www.aol.com/articles/meta-paused-ai-training-startup-042644659.html),
-[BigGo Finance: Mercor's annualized revenue tops $2 billion](https://finance.biggo.com/news/afb2bf61-ddd5-4bf0-92f8-7eeaf19eaefd).
+BigGo Finance, "Mercor's annualized revenue tops $2 billion" (2026-06-25; link omitted here because the article's URL slug is itself UUID-shaped and trips the redaction gate's private-session-UUID check, see docs/market/briefs/2026-10-26-message-24.md).
 
 ### Prolific
 
