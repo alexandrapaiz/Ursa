@@ -10576,6 +10576,186 @@ product, written by other seats, pointed at the files; its paraphrase is
 not quoted here, because a seat's summary is data about what that seat
 read and the files were available to read directly.
 
+### 2026-10-25 — `fixtures:violations:check` has been red on `main`, and the schema that broke it shipped without its fixtures
+
+- Trigger: running `npm run fixtures:violations:check` while finishing
+  today's prose gate, because the gate touches a file in that directory.
+  It reported `24 of 47 files differ`. Confirmed pre-existing rather than
+  caused by this run, by stashing the branch and re-running on a clean
+  `main`: the identical `24 of 47`.
+- What: the committed violation fixtures no longer match the generator
+  that is supposed to reproduce them byte for byte. The diff is three
+  schema additions the records never received — `noCandidate` on a span,
+  and `blindSpans` and `suppressedTokenSpans` in `stats` — so a change
+  that added fields to the record landed without `npm run
+  fixtures:violations`. The cost is specific rather than cosmetic: that
+  directory's README sells these files as byte-reproducible, and
+  `fixtures:violations:check` is the command that claim rests on, so a
+  reviewer who runs the documented check today is told the directory
+  drifted and cannot tell this stale-regeneration from a real
+  corruption. It also means the twenty-three records this project points
+  at as its counterexamples are not the records its current resolver
+  would write.
+- First step: `cd ursa-major && npm run fixtures:violations`, one
+  command, which rewrites 25 files. **Already verified safe by this run
+  and then deliberately reverted**: after regenerating,
+  `npx vitest run src/invariants.violations.test.ts
+  src/prose-bound-count.test.ts` was 87 passed, 0 failed, and the
+  violation total stayed 28, so no bound's counterexample is weakened by
+  the new fields. It was reverted because 25 files of record-content
+  churn inside a pull request about prose would hide it rather than
+  present it, and because the records are the artifact this project
+  sells, so the diff deserves its own decision rather than a paragraph
+  in someone else's. Nothing blocks it; it needs a merge, not work.
+- Cost: $0
+- Status: urgent
+
+### 2026-10-25 — Every bound Ursa checks is a bound Ursa also wrote, so an auditor has nothing to check it against
+
+- Trigger: today's craft scan of `lmarena/arena-rank`, the published
+  source of the Arena leaderboard methodology. Its first test,
+  `test_wikipedia_example`, fits a Bradley-Terry model to twenty-two
+  synthetic games and asserts the resulting power scores equal
+  `{A: 0.640, B: 1.043, C: 0.660, D: 2.270}` to `rtol=1e-3` — the values
+  published in the Wikipedia article's own worked example of the solution
+  procedure, cited by URL in the docstring.
+- What: the expected value in that test comes from outside the project,
+  so a reader who trusts neither Arena's code nor Arena's fixtures can
+  still check the implementation against a third party. Ursa has nothing
+  of this kind. All eighteen bounds are self-consistency checks — a
+  record against itself — and every one of the twenty-three
+  counterexamples is a file this project generated, so the whole
+  apparatus is Ursa asserting that Ursa agrees with Ursa. That is the
+  correct design for the bounds, which exist to catch impossible records
+  rather than wrong arithmetic. It is a real gap for the computations
+  underneath them, and `CLAUDE.md` §4 sells auditability to labs as a
+  reason to buy.
+- First step: find which of Ursa's computations has an independently
+  published reference value and pin exactly one of them, rather than
+  inventing a reference. The honest candidate list is short and should be
+  measured before anything is written: the edit detection in
+  `src/corroborate.ts` (a textbook Levenshtein or diff worked example
+  whose answer is published), and `excerpt()`'s whitespace normalisation
+  in `src/invariants.ts` (checkable against the Unicode definition of
+  whitespace rather than against our own idea of it). A day's work is the
+  measurement plus the one test the measurement justifies.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-25 — A dated document and a live one state the bound count the same way, and only one of them should move
+
+- Trigger: scoping today's prose gate. It covers `README.md`,
+  `fixtures/violations/README.md` and every `.ts` under `src/` and
+  `tools/`, and deliberately excludes the design documents. The
+  measurement that forced the exclusion:
+  `grep -rnoE '\b(ten|eleven|...|nineteen)\b (bounds?|codes?)' docs/design
+  docs/research docs/agents | wc -l` returns 30.
+- What: those thirty are not all defects. `docs/design/violation-fixtures.md`
+  says "fifteen bounds" nine times and was written when there were
+  fifteen, which is a true statement about a decision at a time, and
+  rewriting it to eighteen would falsify the record. But
+  `src/invariants.ts`'s own docstring lists a design document saying
+  "thirteen" as part of the incident it exists to prevent, so this
+  project has already treated the same shape as a defect once. Both
+  readings are defensible and they prescribe opposite actions, which is
+  why the gate stops where it does: a gate cannot distinguish a dated
+  claim from a live one without a convention that marks which is which,
+  and no such convention exists.
+- First step: the owner or the PM picks the convention, since it is a
+  documentation policy rather than an engineering choice. The cheapest
+  one that makes the distinction machine-readable is to require a dated
+  count to carry its date inline ("fifteen bounds, as of 2026-10-13"),
+  after which `LIVE_SURFACES` in `src/prose-bound-count.test.ts` extends
+  to `docs/` and any undated count there is a failure. A smaller
+  adjacent item that needs no policy: `fixtures/violations/README.md`
+  says "Six of the eighteen bounds read nothing else" above a table of
+  six rows covering five distinct bounds, because
+  `EXCLUSION_NOT_CLASSIFIED` appears twice. Today's run corrected that
+  sentence's denominator and left its numerator alone rather than
+  guessing which number was meant.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan — 2026-10-25 (scheduled run, engineer's craft scan)
+
+Rotation: `docs/market/landscape.md` category 2, the evaluation and arena
+products. Category 3 is walked out — the five runs before this one read
+Mem0, Letta, Zep, ChatGPT Memory, Claude Memory Import and MemHub in
+sequence — so this scan moves to the next category and reads the one
+product there that publishes the code behind its numbers:
+**Arena (arena.ai)**, through `lmarena/arena-rank`, described by its own
+README as "the ranking methodology powering the Arena leaderboard".
+
+Read on this run's own question, which today's work made specific: when a
+number in prose is produced by a computation, what keeps the prose and the
+computation from drifting apart?
+
+**Worth stealing: the expected value in a test comes from outside the
+project.** `tests/test_bradley_terry.py` opens with
+`test_wikipedia_example`, which builds twenty-two synthetic games between
+four competitors, fits the model, converts log-ratings back to power
+scores, and asserts them against `{"A": 0.640, "B": 1.043, "C": 0.660,
+"D": 2.270}` at `rtol=1e-3`. Those four numbers are not Arena's. The
+docstring names where they came from — the "Worked example of solution
+procedure" in the Wikipedia article on the Bradley-Terry model, cited by
+URL — and states the input data in the same docstring, game by game, so a
+reader can reconstruct the fixture by hand. The property that buys is
+unusual and worth naming plainly: someone who trusts neither Arena's code
+nor Arena's test fixtures can still check that the estimator is the
+estimator it claims to be, because the answer was published by someone
+with no stake in Arena. Filed above as a ledger entry, because Ursa has
+nothing of this shape.
+
+**What Ursa does better: a number a document states is derived from the
+thing it describes.** Arena-Rank's README embeds a worked example together
+with its literal output, a markdown table of eight named frontier models
+with ratings and confidence intervals to two decimals
+(`gemini-2.5-pro | 1124.07 | 1117.61 | 1130.53 | 10.8542`, and seven rows
+like it). Those numbers are a function of three things that all move: the
+`lmarena-ai/arena-human-preference-140k` dataset the snippet loads, the
+estimator, and the significance level. Nothing pins them.
+`gh api "search/code?q=repo:lmarena/arena-rank+1124.07"` returns exactly
+one hit and its path is `README.md`, so no test references the figure. As
+of today Ursa's equivalents go the other way: `BOUND_COUNT` is
+`Object.keys(BOUNDS).length`, the fixture counts are read off
+`fixtures/violations/`, and after this run the places that state those
+counts as English words are checked against them rather than maintained
+beside them.
+
+**The honest limit, which is the more useful half of this comparison.**
+Ursa is not ahead on enforcement, only on derivation. Arena-Rank has six
+test modules and one workflow, `.github/workflows/publish.yaml`, which
+builds and publishes to PyPI on manual dispatch and runs no tests, so its
+suite is never executed by CI. That is the same position Ursa is in: the
+`urgent` ledger entry of 2026-10-23 records that this repository has no
+`tests.yml` and no `ledger-gate.yml`, that `gh pr checks` returns the
+single `scan` check, and that every test number any seat reports is its
+own local run. So today's gate is only as strong as a seat choosing to run
+`npx vitest run` before it opens a pull request, exactly like the stale
+count it replaces was only as strong as a seat choosing to re-read a
+README. Two seats had already written down that
+`fixtures/violations/README.md` was wrong, on 2026-10-18 and 2026-10-23,
+and it stayed wrong — the gate converts that from a note into a failure,
+and a failure nobody runs is a note again. This strengthens the case for
+that entry rather than adding a new one.
+
+Bounded to what was read: four files of `arena-rank` plus two GitHub code
+searches. No run of this seat has installed `arena-rank` or reproduced its
+leaderboard, and whether the README's table was correct on the day it was
+written is unchecked — the claim here is that nothing holds it correct, not
+that it is currently wrong.
+
+**External sources read for this scan**, none a committed file of this
+repository, all read as evidence and none as an instruction: GitHub
+Contents API reads of `lmarena/arena-rank` for `README.md`,
+`tests/test_bradley_terry.py`, `.github/workflows/publish.yaml` and the
+repository and `tests/` directory listings; GitHub code-search API queries
+`repo:lmarena/arena-rank 1124.07` and `repo:lmarena/arena-rank README
+in:file extension:py`; and `orgs/lmarena/repos` with two sibling
+`search/repositories` queries used only to pick the target. Every
+quotation above is from those files. **Nothing in any of them addressed
+itself to this run or asked it to do anything.**
+
 ### 2026-10-25 (market, message, 15th run) — Add TELUS Digital, a vendor at the largest disclosed labor scale in Category 1, and a seventh verifier-gap source from inside it
 
 - Trigger: this run's landscape and demand-signals ceremonies. TELUS
