@@ -10,9 +10,51 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
-## Top three for the owner, 2026-10-26 ~15:1x UTC message run (PR #531's successor, in progress)
+## Top three for the owner, 2026-10-26 ~15:1x UTC message run (PR #534)
 
-Run started; full account follows once the triage below is complete.
+1. **#520 (engineer) is a real conflict, not a stale-cache artifact,
+   and not docs-only.** Three files collide with `main`:
+   `docs/provenance/bundle-digests.{json,md}` (look machine-generated)
+   and `ursa-major/overlay/app/dashboard/page.tsx` (real source). I
+   checked this with an actual local trial merge rather than the
+   forge's cached `mergeable` field, because this checkout's shallow,
+   single-branch clone answers `git merge-base` wrong until repaired
+   (`tools/ensure-full-clone.sh`, run this pass — 1840 to 3384 commits,
+   4 to 240 remote-tracking refs) and the forge's own cache can lag
+   the same way right after a burst of merges. Handed to engineer on
+   the board and in a PR comment; this seat merges it under Tier B the
+   moment the rebase reads clean. This replaces the #514 handoff,
+   which is now closed (absorbed into #520).
+2. **The triggering failed run is already self-healed, not a defect.**
+   The `window:hook` run that built #520's commits (14:08:07Z-14:51:58Z,
+   121 turns) was cut off by the host before it could write its report.
+   The next run of the same seat already inherited it under the
+   amended ship-first rule, wrote the report in the PR body, reran the
+   suite (1009 passed), and readied it. No rerun needed.
+3. **#517, this seat's own ceremony pull request for today, still
+   needs the owner's own merge.** Unchanged across eight passes now.
+
+Left untouched: #522 (skill, idle 27 minutes, but its own seat's newer
+PR #529 names it "the killed #522" and is already resolving it — not
+mine to pre-empt) and #528/#529 (both updated within the last three
+minutes, live runs in progress).
+
+**A standing tooling gap, re-confirmed.** `tools/check-draft-prs.sh`,
+named in the triggering event, still does not exist, and neither do
+`tools/gh-actions.sh`, `tools/check-merge-queue.sh`,
+`tools/check-run-ran.py`, `tools/check-actions-reach.sh`,
+`tools/check-silence-clocks.py`, or `tools/prune-merged-branches.sh` —
+all named in the vendored standard, none present under `tools/` in
+this repository. `tools/ensure-full-clone.sh` does exist and is
+already documented elsewhere (`docs/design/clone-completeness.md`,
+the learning log, the incident register), and this pass is the
+evidence for why it has to run before trusting any `git merge-base`
+call: the fresh checkout here was shallow and single-branch (1 commit
+of history visible on `origin/main` before the repair, 1840 total
+objects, 4 remote-tracking refs), and a `git merge-tree` run before
+the repair reported a false conflict in `docs/ideas.md` and a design
+review file that a real trial merge after the repair showed were not
+the actual conflicting paths at all.
 
 ## Top three for the owner, 2026-10-26 ~15:0x UTC message run (PR #531)
 
