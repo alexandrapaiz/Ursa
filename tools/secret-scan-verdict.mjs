@@ -24,16 +24,21 @@
 //
 //   2. THE VERDICT IS THREE PARTS, NOT ONE. On a hit the gate prints the
 //      summary, then the hits, then a blank line and two lines of handling
-//      instruction. Those two lines are part of the verdict -- they are
-//      conditional on `!ok` and they are the only place the owner's half of
-//      the repair is named -- so `trailer` exists and the MIXED_LOCI_NAMED
-//      check has to read `line` and `trailer` together. This matters for
-//      correctness of the check and not just for tidiness: the summary line
-//      alone names a count and a mode and no actor at all, so a check that
-//      read only `line` would have reported this gate as committing the exact
-//      defect the whole exercise is about, and it does not commit it. A false
-//      red on the one gate held up as a model is how a check gets switched
-//      off.
+//      instruction. Those two lines are part of the verdict and not of the
+//      findings -- they are conditional on `!ok`, they name no hit, and they
+//      are the only place the owner's half of the remedy is stated -- so
+//      `trailer` exists. The claim this buys is narrow and worth stating
+//      narrowly: `{exitCode, line, stream}` alone cannot round-trip what this
+//      gate prints, so `renderVerdict` needs `position` and `trailer` to
+//      reproduce it, and `secret-scan-verdict.test.mjs` pins the five-line
+//      rendering against literals. It is NOT true that MIXED_LOCI_NAMED needs
+//      the trailer in order to judge this gate: every hit in one invocation
+//      shares one locus (see below), so that check cannot fire here at all.
+//      The enumerator reads line and trailer together because a gate is
+//      ALLOWED to name a locus only in its trailer, which is a design
+//      allowance proved by a synthetic gate in
+//      `tools/gates/enumerate-verdicts.test.mjs` rather than a property of
+//      this one.
 //
 //   3. EXIT 2 HAS NO FINDINGS. `fail()` fires when a history scan is asked for
 //      in a shallow clone: the scanner cannot establish the facts, so there is
@@ -161,10 +166,17 @@ export const GATE = describeGate({
     // word in the summary line, which is what says whether that file is the
     // working tree or a blob in history.
     [LOCUS.READER]: { noun: /secret-scan (tree|history)/ },
-    // Rotation is never the reader's, and the trailer is the only place it is
-    // said. This is why MIXED_LOCI_NAMED reads line and trailer together.
-    [LOCUS.OWNER]: { noun: /rotation is the owner's action/ },
   },
+  // Every hit in one invocation shares this locus, because `scanTree` and
+  // `scanHistory` are exclusive: a run yields hits that are all tracked
+  // working-tree files or all history blobs, never a mix. So the locus is a
+  // property of the invocation and not of a hit, and the hits carry no `locus`
+  // field to partition on. Declared here rather than left absent, so the
+  // enumerator partitions these findings instead of reporting the actor check
+  // as unmeasurable on this gate -- the difference between "one actor, checked"
+  // and "no actor key, so nothing was checked" is the whole point of the
+  // exercise and must not be a blank cell.
+  findingsLocus: LOCUS.READER,
   probes: [
     { name: 'clean tree', findings: [], seen: TREE },
     { name: 'one hit in the tree', findings: [hit()], seen: TREE },

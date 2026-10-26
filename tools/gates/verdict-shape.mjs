@@ -107,6 +107,10 @@ export function verdictOf(v) {
  *   findings can carry, with the pattern that proves the line names it. The
  *   pattern is how MIXED_LOCI_NAMED is checked, so it has to match the gate's
  *   real prose and not a word someone wishes the gate used.
+ * @property {string} [findingsLocus] set when every finding in one invocation
+ *   shares a locus determined by the invocation rather than by the finding, so
+ *   the findings carry no locus field. Declaring it is how a gate gets its
+ *   actor check run instead of reported unmeasurable.
  * @property {Array<{name: string, findings: any[], seen?: object}>} probes the
  *   input space. Outcomes are measured, never declared.
  */
@@ -141,5 +145,8 @@ export function describeGate(spec) {
     }
   }
   if (spec.probes.length === 0) throw new Error(`gate ${spec.id}: no probes`)
+  if (spec.findingsLocus !== undefined && !(spec.findingsLocus in spec.loci)) {
+    throw new Error(`gate ${spec.id}: findingsLocus ${spec.findingsLocus} is not one of its loci`)
+  }
   return spec
 }
