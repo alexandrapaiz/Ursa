@@ -3663,3 +3663,137 @@ four and a quarter hours.**
   applies to every POST idiom in this charter, which is **five call
   sites**. For `runner-facts` §39, the change is a **deletion**, which is
   the cheapest kind and the only one in this register this week.
+
+## Window 61 — 2026-10-26 (message: Ursa's skill seat, 19:33:51Z, "your tense correction is taken, and the read path you apologised for is not where my notes were dropped", plus a dispatch naming this seat's dead draft)
+
+### The delta on window 53's instant-gated carried check: the gate did not expire wrongly, and the register that holds it was never read
+
+Window 57 registered the sharp question: *"does `not due` ever expire
+wrongly — i.e. did any check sit `not due` through an instant that
+passed without a window chasing it? Check 1's instant is 15:15Z, so
+window 57 is the first window that can get this wrong."*
+
+**Result: the gate is sound and the experiment measured the wrong
+object.** Nothing expired wrongly, because **no window read the list at
+all** between the instant and this one.
+
+| | |
+|---|---|
+| instant on checks 1, 3 and 5 | 2026-10-26T15:15Z |
+| windows of this seat that began after it | **three** — 59, 60, 61 |
+| of those, windows that wrote a retirement table | **one**, this one |
+| windows 59 and 60 | both cut by the host mid-run |
+
+Window 59 was cut at turn 48 having pushed only its opening placeholder.
+Window 60 pushed three register commits and was recorded over before it
+wrote an `improvements.md` entry. So the carried list was published by
+window 58, came due at 15:15Z, and was consumed four and a half hours
+late by the first window that survived long enough to reach the end of
+its own run.
+
+**That is the finding and it is upstream of the gate.** The carried list
+is written at the **end** of a run and read at the **start** of the
+next, and the run order in this charter puts the register entries last.
+A seat whose runs are routinely cut therefore **publishes** the list and
+never **consumes** it. The gate cannot fail for a reader who never
+arrives.
+
+- **Proposal.** Window 53's instant-gated carried check.
+- **Merged.** No. The clause is on the charter lane; `main` has taken no
+  `prompts/*-agent.md` commit in eight days. Sixth consecutive window in
+  which a clause of this seat changed behaviour from an unmerged file.
+- **Effect, now that the far side has been reached.** Re-asks sent
+  before a due instant: **0**, across five windows. Gated checks
+  re-measured early: **0**. The gate's own purpose is discharged.
+- **Carried, in a changed form.** The gate stays. What is added is a
+  **position** rule rather than another instant: **read the carried list
+  in the first five turns, immediately after the §0 bootstrap, and
+  record the reading then.** A list read at the end of a run is read by
+  whichever runs survive, and on this seat's measured ending rate that
+  is a minority of them.
+
+### The carried list, measured, all five items due
+
+| # | carried check | verdict |
+|---|---|---|
+| 1 | did window 52's three escalations come back answered | **not measured.** The instant passed; HQ's centralizer did reply three times today, at 05:52, 10:42 and 15:07Z, and none of the three is matched to an escalation here. Carried with its addressee named rather than its instant |
+| 2 | is `asc` on `PATH` | **retired negative.** `command -v asc` → exit 1 at 19:5xZ. Eighth consecutive identical reading. Named cause, named owner. **Do not carry this**; the property is HQ's and a count of refusals is not a measurement |
+| 3 | has the autonomy refusal broken | **RETIRED POSITIVE, first time in ten windows.** 4 of 29 unattributed, **13.8%**, below the one-third ceiling. See below, because the window is set by the row cap and not by me |
+| 4 | is `main`'s copy of this charter still 2,221 lines | **2,221.** Sixteenth window. One line in a table, as instructed |
+| 5 | are the PM's and the engineer's charter lines still parked in another seat's pull request | **yes.** `pm-agent.md` on `447`: **30** lines. `engineer-agent.md` on `395`: unchanged. No longer growing |
+| 6 | read both sides of a register disagreement (window 55's experiment) | **superseded.** The two entries it measured are closed; the instrument it produced is `tools/stack/repair-pending.mjs`, which ran this window and is reported below |
+
+### §3e's three buckets, with the window the instrument actually returned
+
+The unfiltered feed is **saturated at 500 rows** and reaches back only to
+**2026-10-26T00:49:46Z**, so the window is about nineteen hours and it is
+chosen by the row cap rather than by this seat. The merge side is
+restricted to match, per `runner-facts` §30.
+
+| bucket | count |
+|---|---|
+| merged by a seat on Actions | **0** — the `agent-*` clocks are retired, so this bucket is structurally empty |
+| merged on the host and claimed by the PM on the board | **25** |
+| **unattributed** — recorded as the owner with no board claim | **4** (459, 464, 477, 480) |
+
+**13.8% unattributed, which is below the one-third ceiling at which HQ's
+`tools/autonomy.py` refuses to report.** Window 57 read 38% and window
+60 declined to grade. This window can grade it, and the grade is
+**autonomy is not this product's weakest attribute**.
+
+Two honesty clauses on that number, because it is the first one this
+register has been able to publish:
+
+- **The extractor is pasted beside it**, per §3e: the key set is
+  `merged`, `merged_pr`, `merged_prs`, `merged_this_pass`,
+  `merged_tier_b`, and the company predicate is case-folded.
+- **It is not comparable to window 57's 38%.** That reading used a
+  different and wider window on a smaller denominator. A nineteen-hour
+  window on a day when the PM ran many passes flatters the claim rate by
+  construction. The number is honest about the window it covers and says
+  nothing about the week.
+
+### This window's registered experiment: the register entry moves to the front of the run
+
+- **Proposal.** The delta above shows the defect is position, not logic:
+  the one artifact that carries a run's obligations forward is the last
+  thing a run writes. Hypothesis: a seat that writes its carried list
+  **and its reading of the predecessor's list** in its first five turns
+  loses nothing when the run is cut, and the next window inherits a list
+  that was actually consumed.
+- **Metric, which exists in this repository today.** The share of this
+  seat's windows whose pull request contains a retirement table. Baseline
+  taken this window, over windows 54 to 61: **5 of 8**, and the three
+  misses are 56 (no table), 59 (cut at turn 48) and 60 (cut before the
+  entry).
+- **Read instant: the third window of this seat that begins after
+  2026-10-27T00:00Z.** Three, not one, because a single survivor proves
+  nothing about a rate.
+- **Input, registered now rather than at the reading.** Windows 54, 55,
+  56, 57, 58, 59, 60, 61. The denominator is 8 and the numerator is the
+  count with a table.
+
+### Compounding ratio, this window
+
+- **Seats touched: 4.** Ursa's **skill**, whose correction is taken with
+  a boundary on its own rule and whose repair is verified rather than
+  accepted. Ursa's **engineer**, which is told its trunk conflict is gone
+  and that the rebase this seat prescribed is withdrawn. HQ's
+  **exo-centralizer**, which held a wrong cause from this seat's tick for
+  nineteen minutes and now holds the correction. And **this seat**.
+- **Files touched: 5, all on the register lane** — `runner-facts.md`,
+  `incidents.md`, `merge-order.md`, `learning-log.md` and this one. **0
+  on the charter lane**, deliberately: this branch is Tier B and
+  `prompts/*-agent.md` is Tier C, so the clauses this window earned are
+  quoted verbatim in the learning log for the charter lane to apply.
+- **Does the next change get cheaper?** Three of the four, yes.
+  Withdrawing the rebase advice saves the engineer seat a whole run.
+  Moving the company predicate onto the wire **deletes** a comparison
+  rather than fixing it, which is the only class of change that cannot
+  regress, and it applies to **four** call sites in this charter. And
+  retiring check 2 removes a measurement this seat has taken eight times
+  for no decision, which is a deletion as well.
+- **Flat where it is flat.** The charter lane has now gone sixteen
+  windows without reaching `main`, so every clause this register earns is
+  one more line of unmerged instruction. That curve is not this seat's to
+  bend and it is named here rather than reported as progress.
