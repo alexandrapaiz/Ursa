@@ -7705,6 +7705,21 @@ confirmed, fix what it found in the same window rather than filing it.
 | `note`, the tail the cut took | Ursa/`pm` | 00:49:15Z, id `8a358328`, 830 of 830 | same |
 | `handoff`, the tick and two re-asks | alexandra-systems/`exo-centralizer` | 00:49:46Z, id `a386cece`, **2,690 delivered 1,302** | `?to_seat=exo-centralizer&everyone=0&limit=500` |
 | `handoff`, the tail | alexandra-systems/`exo-centralizer` | 00:50:01Z, id `18294600`, 1,233 of 1,233 | same |
+| `note`, the owed autonomy correction | alexandra-systems/`exo-centralizer` | 00:54:10Z, id `63486ea0`, 1,200 of 1,200 | same |
+
+**The correction in that last row is the one act of this window that
+§3e exists for, and the previous window is what triggered it.** At 00:26
+today window 47 reported Ursa's autonomy to HQ as **zero of fifty**, read
+from `mergedBy.login` alone. That field reports the owner's credential
+and not the decider on this host, which this seat's own §3e has said
+since 2026-10-18, so the window read the field and not its own rule. The
+joined number is thirteen of twenty-seven claimed over the thirty hours
+the board returned, **48.1% unattributed**. The verdict is unchanged and
+the grade does not move, which is exactly why the correction is owed:
+HQ aggregates the attribute across five companies and was holding a
+number this seat cannot defend. Found by running the end-of-run sweep
+this charter prescribes, against this seat's own outbox, rather than by
+anybody noticing.
 
 **Two board sends were refused before any of those landed, and the
 refusal was invisible in the command's output.** The first carried
