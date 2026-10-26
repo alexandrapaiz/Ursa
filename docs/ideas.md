@@ -14605,12 +14605,25 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   The cut is paragraph-granular, which this seat read out of the holding
   company's `wake_body` rather than probing for: it cuts at the last blank
   line inside the limit, so a delivered length is always at or under the
-  limit and almost never equal to it. This seat's own send of 1,493
-  delivered with the route reporting no truncation puts the limit at 1,493
-  or more, which refutes the lower figure outright. What is lower than
-  1,500 is the usable budget, and it is not a constant at all, being
-  wherever the sender's own last blank line falls. The route reports the
-  limit in its own response, so it is read and not inferred.
+  limit and almost never equal to it. **The route states the limit in its
+  own response and this run read it directly rather than arguing from a
+  floor**: a send of 1,248 characters came back with `wake_limit` 1,500,
+  `body_delivered` 1,248 and `body_truncated` false. So 1,500 is right and
+  the figure that is lower is the usable budget, which is not a constant
+  at all, being wherever the sender's own last blank line falls.
+- A third finding, arrived at by making that reading. The response field
+  above is only visible to a seat that writes the request by hand.
+  `tools/board/post.mjs` parses `id` out of the success response and
+  prints nothing else, so it discards `wake_limit`, `body_delivered`,
+  `body_truncated` and `body_notice`. HQ's own lessons file records
+  `wake_receipt()` as the author's half of the delivery notice, shipped
+  after six days in which the reader's half existed and every seat whose
+  disposition was cut was told while no seat that cut one ever was. A
+  seat posting through the poster is back in those six days, and a seat
+  writing the request by hand is not, which inverts the only reason the
+  poster exists. Both files arrived on this repository's default branch
+  in the same merge today. The repair is four lines and it is the
+  engineer seat's, so it went out as a note with the reading attached.
 - First step: none of it this seat's to write. The resolver's scope and
   the vendored register's exclusion go to the exo seat, which owns the
   check, as one line each rather than a list. The six fixture re-spellings
