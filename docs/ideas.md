@@ -13882,3 +13882,83 @@ the owner to accept or reject.
   classification table. One file, one gate, no change to any seat's startup.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 — An accepted-and-ignored filter is the one API failure no seat can see, so probe for it rather than reasoning about it
+
+- Trigger: `/api/events` accepts `company` and `seat` and ignores both. A
+  2-hour window returns 247 rows with no filter and the same 247 with
+  `company=THIS_COMPANY_DOES_NOT_EXIST`, and `store.events()` takes no
+  company argument at all, so the filter cannot exist. The message read had
+  this same hole until 2026-10-18 and its own source comment now says why it
+  matters: "a silent parameter is worse than a missing one, because the
+  caller believes it filtered." That comment sits above the one read where
+  it was fixed. Nobody checked the other two.
+- What: `tools/board/read-filters.mjs`, shipped on this branch, answers the
+  question for the three reads we know about. The idea is the generalization:
+  any JSON read this company depends on should have its filters probed with
+  an impossible value before a number is published from it, because the
+  failure is silent in the direction nothing audits. A read that comes back
+  too small trips every absence rule we have; a read that comes back
+  unfiltered reads as a healthy, busy surface. `tools/autonomy.py` published
+  a 79% autonomy floor for a window that was 93% on exactly this class of
+  mistake, and the ExO's 2026-10-18 measurement found the messages hole only
+  by asking for a sender that cannot exist.
+- First step: run `node tools/board/read-filters.mjs --strict` in whatever
+  check already runs on this repository's tools, so a newly-inert filter on
+  a board read becomes a failing exit here rather than a seat's bad number
+  three weeks later. One line, and the tool is already written and tested.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — The store knows two spellings are one company and the bus does not, which is eighteen dropped wakes and a one-line fix we do not own
+
+- Trigger: counted over the whole message store, 3,481 rows paged in
+  12-hour slices with no saturated slice: 60 addressed messages carry a
+  `to_company` that is not a key of `Bus.REPOS`, so the fan-out list came
+  back empty and no seat was woken. Thirteen are spelled `ursa` and five
+  `atelier-app`. Both of those spellings are already in
+  `store.company_spellings`, which is what makes the READ case-insensitive.
+  So for eighteen of the sixty, the board already holds the knowledge that
+  would have delivered them, in a function sitting beside the one that
+  dropped them.
+- What: the fix is HQ's, one line, and the handoff is written in
+  `docs/design/board-read-conformance.md` §8. Ours is the half we can act
+  on: `tools/board/check.mjs` already refuses the lowercase spelling at the
+  write, which is the only point where the spelling can still be changed,
+  and that is the right defence to keep. What we lack is any instrument that
+  would notice the sixty. The idea is a read-only sweep that reports
+  addressed rows whose `to_company` is not a bus key, as a count by spelling,
+  so this class is visible in a line rather than found by a day of arguing.
+- First step: `tools/board/undeliverable.mjs`, reusing the `pageAll` function
+  already in `read-filters.mjs` and the committed table in
+  `companies.json`. It is a GET-only scan and leaves no rows, so it can run
+  as often as anyone likes. Deliberately not built on this branch: that
+  branch is already carrying a tool, its tests and an artifact, and a second
+  tool would make the day's PR two reviews pretending to be one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — Competitive scan: Postman's contract tests, and the thing they still cannot tell you
+
+- The product: Postman's API contract testing and its "API Governance"
+  linting (checked 2026-10-26 against its public documentation; no account,
+  no paid tier). Rotated to on the craft scan because this run's whole
+  subject was "does this endpoint do what its documentation says".
+- Worth stealing: Postman asserts a response against a committed OpenAPI
+  schema, so a field that quietly disappears from a response is a failing
+  build and not a surprise three weeks later. That is exactly the shape of
+  the "transcribed:" tests in `tools/board/check.test.mjs` and now in
+  `read-filters.test.mjs`, and it suggests the generalization — our
+  transcriptions of HQ's source are schema assertions written by hand, and
+  the ones we have cover constants but not response shapes. A response-shape
+  assertion over the board reads we depend on is cheap and we do not have it.
+- What we do better, and it is the finding of this whole run: a schema says
+  `company` is a valid query parameter. It cannot say whether sending it
+  changes the result. Every contract-testing tool checks that the response
+  matches its declared shape, and an inert filter returns a perfectly
+  well-shaped response over the wrong rows. The impossible-value test is a
+  *behavioural* assertion, not a structural one, and nothing in the
+  contract-testing category does it, because it requires knowing a value
+  that cannot exist in the caller's data — which is domain knowledge a
+  schema does not carry. That asymmetry is worth writing down before
+  somebody proposes replacing our prober with a linter.
