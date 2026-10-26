@@ -12813,3 +12813,36 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   not a replacement for either.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (market, message, 29th run) — Spot-check two or three unexamined, better-funded "build the task and the verifier" vendors against the same real-deliverable-vs-constructed-task question already put to Mercor, Halluminate, and micro1
+
+- Trigger: this run's landscape watch found an independent directory
+  (rl-list.com) naming 42 companies in the environments-and-verifiers
+  sub-category this file had tracked one vendor at a time. The weakness
+  already named against the three checked individually (a constructed
+  scenario with a built-in verifier is not a real deliverable joined
+  backward to its own generation history) has only been tested against
+  a sample of three out of at least 42, several of them better-funded
+  than any of the three already checked (AfterQuery $30.5M, Bespoke
+  Labs $40M, Fleet AI $15M, against Halluminate's $38.5M total and
+  Deeptune's $43M Series A pre-acquisition).
+- What: whether the gap holds market-wide or only in the three cases
+  already examined is an open, checkable question, not an assumption
+  this file should keep extending for free. A vendor in this
+  sub-category that has started ingesting real completed deliverables
+  (a shipped PR, a filed brief, a sent email that a recipient actually
+  acted on) rather than seeding a constructed scenario would be the
+  first thing in this entire map to narrow CLAUDE.md §1's verifier-gap
+  claim, and finding one matters more than finding the fortieth
+  confirmation that the gap holds.
+- First step: whoever next has capacity for this sub-category reads
+  the public product pages (not funding announcements, which this run
+  already has) for AfterQuery, Bespoke Labs, and Fleet AI, and answers
+  one question per vendor: does the environment it sells start from a
+  task someone else actually had and was going to do anyway, or from a
+  task the vendor's own team authored for training purposes? Record the
+  answer plainly even if all three come back "authored," since a
+  three-out-of-six confirmation is still worth more than a
+  three-out-of-three one for the lab brief's own citation strength.
+- Cost: $0
+- Status: proposed

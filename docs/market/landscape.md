@@ -484,6 +484,53 @@ its own generation history. Last observed 2026-10-25:
 [Dealroom: micro1 passes a $1B run rate with about 180 staff](https://dealroom.co/news/161913-micro1-passes-a-1b-run-rate-with-about-180-staff-three-years-after-nearl/),
 [micro1.ai: Intelligence / Realm](https://www.micro1.ai/).
 
+### Cross-cutting note (2026-10-26, 29th run): "build the task and the verifier" is a mapped ~42-company market, not three isolated pivots
+
+This file has tracked the environments-and-verifiers sub-category one
+vendor at a time as it was individually discovered: Mercor's Deeptune
+acquisition (2026-10-14), Halluminate's Series A (2026-10-24), and
+micro1's Realm product (2026-10-25). Each update named the pattern as
+emerging without a sense of its size. rl-list.com, an independent
+directory ("a transparent, source-cited RL-environment directory,"
+last updated 2026-10-05, methodology page referenced but not fully
+read this run) names 42 companies building "simulated tasks and worlds
+used to train and evaluate AI agents with reinforcement learning,"
+split into pure-play environment builders (AfterQuery, $30.5M raised;
+Bespoke Labs, $40M; Fleet AI, $15M, replicating Salesforce/Excel/browser
+workflows; Datacurve, $17.7M, expert-sourced coding environments and
+the DeepSWE benchmark, adopted by Artificial Analysis's own Coding
+Agent Index; Proximal, $15M; Chakra Labs, $10M; HUD, $16M),
+infrastructure providers that sell compute rather than environments
+(Modal, Daytona, E2B, Runloop, Morph), and incumbents moving in from
+labeling (Scale AI, Snorkel AI, Mercor, Surge AI, all already tracked
+above). Spot-checked Datacurve's own profile directly: no named
+frontier-lab customers published, "frontier-lab relationships remain
+unverified self-descriptions" per the directory's own caveat, the same
+sourcing gap this file has flagged on vendor-authored figures
+elsewhere.
+
+So what: the weakness this file has stated three separate times
+("a constructed scenario with a built-in verifier is not a real
+deliverable joined backward to its own generation history") is not a
+caveat on three companies, it is a caveat on an entire, already-funded
+sub-category at least 42 names deep, plus every Category 1 incumbent
+now entering it. None of the three vendors checked individually so far
+(Mercor/Deeptune, Halluminate, micro1/Realm) has been shown to ingest
+a real completed deliverable rather than a constructed one, and this
+run did not find a fourth that does either — the gap scales with the
+market rather than closing as it grows. Worth citing in whatever lab
+brief first has to explain why Minor's outcome record is a different
+object than a gym: the comparison now needs to hold against a market,
+not a handful of named competitors. No landscape entry opened for any
+individual name in the 42; the next run with capacity to spare should
+pick two or three of the better-funded, not-yet-checked ones (AfterQuery,
+Bespoke Labs, Fleet AI) and test them against the same "real deliverable
+or constructed one" question Halluminate and micro1 already got. Ledger
+proposal below. Last observed 2026-10-26: [rl-list.com: RL Environment
+Vendors](https://www.rl-list.com/), [rl-list.com: RL Environments for
+Coding](https://www.rl-list.com/rl-environments-for-coding), [rl-list.com:
+Datacurve vendor profile](https://www.rl-list.com/vendors/datacurve).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1409,3 +1456,14 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   compressed natural-language notes swing 9-13 percentage points.
   Positioning consequence (a concrete numeric bar for the automated-
   round-trip test) in docs/market/positioning.md.
+- 2026-10-26 (message, 29th run) — added a cross-cutting note to
+  Category 1: an independent directory (rl-list.com) maps 42 named
+  companies building "constructed task plus verifier" RL environments,
+  showing the sub-category this file had tracked one vendor at a time
+  (Mercor/Deeptune, Halluminate, micro1/Realm) is a mapped market, not
+  three isolated pivots. Spot-checked one profile (Datacurve) directly;
+  no named frontier-lab customers published, same self-description gap
+  already flagged elsewhere in this file. No individual vendor entry
+  added; the next run with capacity should spot-check a few of the
+  better-funded, unverified names. Positioning consequence in
+  docs/market/positioning.md.
