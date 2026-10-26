@@ -806,6 +806,19 @@ Major itself.
   shown to pass that test" claim to "nothing consumer-facing has," a
   precise distinction rather than a reversal. No pricing recommendation
   made.
+- 2026-10-26 (event-driven, message, 22nd run) — found the Agentic AI
+  Foundation's four new projects (2026-10-22, one contributed each by
+  Anthropic, OpenAI, Hugging Face, and Alibaba) and checked them against
+  this file's own 2026-09-30 assumption that joint lab cooperation on an
+  open standard is "unlikely." It isn't, as of this month, though the
+  four live projects address agent-infrastructure interoperability, not
+  memory/preference portability specifically. Dropped "unlikely" from
+  the risk language; the real open question is now whether this
+  demonstrated-capable body ever points a project at the layer that
+  would close Major's gap. Also updated the MemHub entry
+  (docs/market/landscape.md) for Tencent's "Hy Memory 2.0" release,
+  which the live repository tree confirms adds no new export-to-outside-
+  vendor path. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -985,3 +998,49 @@ automated-translation mechanism is buildable today for a narrower
 case, which weakens any assumption that the bar is aspirational rather
 than achievable, and sharpens the case for testing Major's own export
 against it directly. Ledger proposal below.
+
+## Frontier labs now jointly ship open standards, voluntarily, with no regulatory push — checked against this file's own "unlikely" assumption (2026-10-26, 22nd message run)
+
+The Category 3 risk entry above (2026-09-30) names the scenario that
+would close Major's portability gap overnight: "if OpenAI, Anthropic,
+or Google ship a portable-memory standard jointly (unlikely, given
+CLAUDE.md's own naming of model providers as a competitive threat, but
+not impossible under regulatory pressure)." This run's demand-signals
+ceremony found a live test of the "unlikely" half of that sentence,
+separate from the regulatory half the 2026-10-26 EU Data Act entry
+already closed out.
+
+On 2026-10-22, the Agentic AI Foundation (an independent nonprofit
+under the Linux Foundation) announced four new projects, each
+contributed by a different frontier or near-frontier lab: Agent Skills
+(Anthropic), Open Responses (OpenAI), OpenEnv (Hugging Face), and
+OpenSandbox (Alibaba). Checked directly rather than taken at the
+headline (press release plus a recap piece, both read in full): all
+four address agent *infrastructure* interoperability — how an agent
+loads a reusable capability, how a request/response schema stays
+portable across model providers, how a training/eval environment is
+packaged, and where an agent executes safely. None of the four
+addresses a user's memory, preferences, or personal data profile
+moving across vendors. The nonprofit itself has grown from 3 projects
+to 10 in its first year, so this is a going structure for lab
+cooperation, not a one-off.
+
+So what, read against this file's own language: the premise that
+competing labs "never cooperate on joint standards" voluntarily is now
+directly false, demonstrated this month, with no regulatory trigger at
+all, same as the EU Data Act's cloud-switching chapter was real motion
+in the wrong layer. AAIF is real motion in the wrong *scope*: the labs
+have shown they will build and ship a shared open standard together
+when it serves infrastructure interests all of them have (agent
+interop sells more agents to more customers regardless of model
+vendor), but none of the four live projects extend that cooperation to
+the one layer that would threaten Major specifically. The honest
+positioning update: "unlikely" should be dropped from how this file
+describes lab cooperation itself; what stays true, and is now the
+load-bearing half of the sentence, is that no cooperative project has
+been pointed at memory/preference portability yet. Worth a standing
+watch item on whether AAIF's project list grows an eleventh entry
+aimed at that layer, since the body demonstrably can ship one if the
+labs decide it serves them. [Linux Foundation: Agentic AI Foundation
+Announces Four New
+Projects](https://www.linuxfoundation.org/press/agentic-ai-foundation-announces-four-new-projects-agent-skills-open-responses-openenv-and-opensandbox).

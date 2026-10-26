@@ -872,6 +872,31 @@ files, not taken from either seat's paraphrase. Last observed
 `memhub/packages/contracts/src/backup-restore.ts`, read in full
 (github.com/Tencent-Hunyuan/Hy-Memory).
 
+Update 2026-10-26 (message, 22nd run): Tencent Hunyuan shipped "Hy
+Memory 2.0" on 2026-10-15/17, open-sourcing a dedicated memory-writer
+model, `Hy-Memory-30B-A3B` (Apache-2.0, ~30B total/~3B active
+parameters, mixture-of-experts), trained in two stages (on-policy
+distillation from a frozen teacher, then reinforcement learning
+rewarded on whether later questions get answered correctly from what
+was written). Independent reporting puts it ahead of Claude Opus 5 on
+cross-harness memory benchmarks (55.49 vs. 54.62 macro average,
+AlphaSignal). This is the same MemHub stack this entry already tracks,
+not a new product: re-ran the repository-tree check that found the
+eleven import adapters and the backup-restore contract above
+(`gh api repos/Tencent-Hunyuan/Hy-Memory/git/trees/main?recursive=1`)
+and found the same export-shaped files as the 2026-10-24 correction,
+no new user-facing path for a consolidated profile to leave this stack
+for an unrelated vendor's model. So the head-start-vs-position
+conclusion in docs/market/positioning.md is unchanged, but the
+underlying point sharpens: the free, open-source competitor's memory
+quality is now independently benchmarked ahead of a frontier lab's own
+flagship on the specific task Major competes on, which is a stronger
+version of "the software is not the moat" than this entry had evidence
+for last week. Last observed 2026-10-26: [AlphaSignal: Tencent's Hy
+Memory 2.0 Beats Claude Opus 5 at Remembering What Agents
+Need](https://alphasignal.ai/news/tencent-s-hy-memory-2-0-beats-claude-opus-5-at-remembering-what-agents-need),
+[Hy-Memory 2.0 product site](https://memory.hunyuan.tencent.com/en/).
+
 ### Wire (usewire.io)
 
 What it is: a "Context as a Service" platform — hosted, permissioned
