@@ -13,8 +13,23 @@
 // `--curve` sweeps the whole transition and prints the property's value at
 // every step, which is how you check that a spring in a stylesheet is the
 // spring you meant to put there.
+//
+// The frame this writes is frozen, like `shoot.mjs`'s. Until 2026-10-24i it
+// was not, and two shots of one hover frame on the home page differed by
+// 147,435 of 1,296,000 pixels, 11.4% of the viewport, because the starfield
+// behind the control is a new random texture on every load. So no hover
+// state this seat ever photographed could be diffed against itself, and the
+// charter's order to verify hover by screenshot was not reachable with this
+// tool. `--live` lets the sky animate when that is what you want to see.
+//
+// Pinning the clock is safe here and nowhere near as safe as it looks: this
+// tool does not wait for a transition, it scrubs it by `currentTime`, so the
+// clock plays no part in where the motion is when the shutter opens. A tool
+// that samples motion as it runs needs the other half of the freeze; see
+// `seedRandomContext` in lib/freeze.mjs.
 
 import { launch } from './lib/browser.mjs'
+import { freezeContext } from './lib/freeze.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const URL_ = arg('url', 'http://127.0.0.1:4488/')
@@ -26,9 +41,20 @@ const HEIGHT = Number(arg('height', 900))
 const SHOT = arg('shot', null)
 const AT = Number(arg('at', 200))
 const CURVE = process.argv.includes('--curve')
+const LIVE = process.argv.includes('--live')
+// A hover frame cut out of a page frame is mostly the page. Clipped to the
+// element's own box it is the thing under review, which is the same lesson
+// the 2026-10-24h benchmark learned about sampling a mark on its own.
+const CLIP = process.argv.includes('--clip')
+const PAD = Number(arg('pad', 12))
+// A hover frame on its own proves nothing. What a reviewer has to see is the
+// pair: the control at rest and the control hovered, same element, same
+// clip, same sky. `--rest` is the other half of that pair.
+const REST = process.argv.includes('--rest')
 
 const browser = await launch()
 const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
+if (!LIVE) await freezeContext(ctx)
 const page = await ctx.newPage()
 await page.goto(URL_, { waitUntil: 'networkidle' })
 await page.waitForTimeout(800)
@@ -49,10 +75,17 @@ console.log(`  property ${declared.property}`)
 console.log(`  duration ${declared.duration}`)
 console.log(`  timing   ${declared.timing}`)
 
-await el.hover()
-await page.waitForTimeout(16)
+if (!REST) {
+  await el.hover()
+  await page.waitForTimeout(16)
+} else {
+  // Park the pointer somewhere inert, because playwright's pointer starts at
+  // 0,0 and on these pages that is inside the header.
+  await page.mouse.move(WIDTH - 2, HEIGHT - 2)
+  await page.waitForTimeout(80)
+}
 
-const scrub = (ms) => el.evaluate((e, [ms, prop]) => {
+const scrub = (ms) => REST ? el.evaluate((e, [, prop]) => getComputedStyle(e)[prop], [ms, PROP]) : el.evaluate((e, [ms, prop]) => {
   for (const a of e.getAnimations()) {
     // Only the transition for the property we are asking about.
     if (a.transitionProperty && a.transitionProperty !== prop) continue
@@ -87,8 +120,21 @@ if (CURVE) {
   }
 } else {
   const v = await scrub(AT)
-  console.log(`\n${PROP} at ${AT}ms: ${v}`)
-  if (SHOT) { await page.screenshot({ path: SHOT, scale: 'css' }); console.log(`shot ${SHOT}`) }
+  console.log(`\n${PROP} ${REST ? 'at rest' : `at ${AT}ms`}: ${v}`)
+  if (SHOT) {
+    let clip
+    if (CLIP) {
+      const b = await el.boundingBox()
+      clip = {
+        x: Math.max(0, Math.round(b.x) - PAD),
+        y: Math.max(0, Math.round(b.y) - PAD),
+        width: Math.round(b.width) + PAD * 2,
+        height: Math.round(b.height) + PAD * 2,
+      }
+    }
+    await page.screenshot({ path: SHOT, scale: 'css', ...(clip ? { clip } : {}) })
+    console.log(`shot ${SHOT}  (${REST ? 'at rest, ' : ''}${LIVE ? 'LIVE, differs from itself' : 'frozen'}${CLIP ? ', clipped to the element' : ''})`)
+  }
 }
 
 await browser.close()

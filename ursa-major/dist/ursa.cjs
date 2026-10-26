@@ -133,6 +133,15 @@ function findCommitPairsWithDiagnostics(repoPath, opts = {}) {
   const useAuthorFallback = !authorMatchesAll;
   const diagnostics = {
     commitsScanned: commits.length,
+    // `opts.range === undefined` rather than a truthiness test, so this
+    // field says what the CALLER asked for and not what git made of it.
+    // The two only differ on the empty string, and `listCommits` hands
+    // that straight to git (`range ?? '--all'` keeps `''`), where it
+    // fails with `fatal: ambiguous argument ''` before this line runs.
+    // So the falsy case is unreachable, and writing it as `opts.range ?`
+    // would read as though a caller could reach here having asked for a
+    // window and be told none was asked for.
+    rangeScanned: opts.range === void 0 ? null : commits.length,
     generatedByTrailer: 0,
     generatedByAuthorName: 0,
     generatedByDeclaredIdentity: 0,
@@ -2235,11 +2244,19 @@ function pairRefusals(diagnostics) {
   const refusals = all.filter((r) => r.count > 0);
   return { total: refusals.reduce((n2, r) => n2 + r.count, 0), refusals };
 }
+function windowTooSmallForAPair(commitsScanned) {
+  return commitsScanned < PAIR_MINIMUM_COMMITS;
+}
+function windowWidth(diagnostics) {
+  return diagnostics.rangeScanned ?? void 0;
+}
+var PAIR_MINIMUM_COMMITS;
 var init_launch = __esm({
   "src/launch.ts"() {
     "use strict";
     init_consent();
     init_invariants();
+    PAIR_MINIMUM_COMMITS = 2;
   }
 });
 
@@ -6159,6 +6176,10 @@ function emptyWindowSentence(f, ctx) {
   const opening = "Nothing resolved in this window. That is a reading, not a failure:";
   const refused = refusedClause(ctx);
   if (f.unitsFound === 0) {
+    if (!refused && ctx.commitsInWindow !== void 0 && windowTooSmallForAPair(ctx.commitsInWindow)) {
+      const held = ctx.commitsInWindow === 1 ? "this window holds one commit" : `this window holds ${n(ctx.commitsInWindow)}`;
+      return `${opening} a pairing takes ${PAIR_MINIMUM_COMMITS} commits, a generation and a later commit of yours that edits the same file, and ${held}. So this window could not hold one whatever its commits carry, which is a fact about the merge rather than about your history. The window note below says which merge shape produced it, and a squash merge produces exactly this: the branch collapses into a single commit and the generation-to-edit chain inside it is gone.`;
+    }
     if (!refused) {
       return `${opening} no commit here carried an agent marker that a later human commit then edited.`;
     }
@@ -6190,7 +6211,9 @@ function renderRunComment(f, ctx) {
   lines.push("");
   lines.push("<details><summary>How this run was bounded</summary>");
   lines.push("");
-  lines.push(`- Commit window: \`${ctx.range}\``);
+  lines.push(
+    ctx.commitsInWindow === void 0 ? `- Commit window: \`${ctx.range}\`` : `- Commit window: \`${ctx.range}\`, ${n(ctx.commitsInWindow)} commit${ctx.commitsInWindow === 1 ? "" : "s"} in it. ${PAIR_MINIMUM_COMMITS} is the fewest a pairing can come from, since it needs a generation and a later commit of yours that edits the same file.`
+  );
   lines.push(`- Why that window: ${ctx.windowNote}`);
   lines.push(`- Acceptance declaration carried into these records: ${ctx.declarationBasis}`);
   lines.push(`- Records written to \`${ctx.recordsPath}\` on this runner. They are not pushed anywhere.`);
@@ -6216,6 +6239,7 @@ var init_comment = __esm({
   "src/ci/comment.ts"() {
     "use strict";
     init_invariants();
+    init_launch();
     init_resolver_identity();
     RUN_COMMENT_MARKER = "<!-- ursa-major:run-comment:v1 -->";
   }
@@ -6314,6 +6338,25 @@ async function runCi(opts) {
     recordsPath: (0, import_node_path9.join)(ursaDir(opts.projectPath), "records"),
     dropped,
     refused,
+    // The walk's own count, for the same reason `bounds` above is taken
+    // off the diagnostics rather than recomputed: this is the number of
+    // commits the resolver read, not the width of the range string it was
+    // handed. Drift 8 (`windowTooSmallForAPair` in src/launch.ts) is that
+    // both launches have had this number since the diagnostics shipped
+    // and neither asked whether it was large enough for a pairing.
+    //
+    // Through `windowWidth` and not off `diagnostics.commitsScanned`,
+    // since 2026-10-25: that field counts every commit reachable from any
+    // ref when the walk got no range, and this line renders its value to
+    // a reader as the width of one merge window. `windowWidth` reads the
+    // narrowed `rangeScanned`, which is `null` exactly when no window was
+    // walked, and returns `undefined` there so the renderer prints no
+    // count and keeps the unconditional sentence. On this path that null
+    // is unreachable (`window.range` is a non-optional string,
+    // src/ci/window.ts); the narrowing is still routed through a tested
+    // function, because what makes the quote safe should be checkable
+    // rather than a fact about one caller.
+    commitsInWindow: windowWidth(diagnostics),
     runUrl: opts.runUrl ?? null,
     invariantViolations: gate.violations.length,
     // Read off the records rather than re-asked of the process, so the
@@ -7037,10 +7080,11 @@ function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
       }
       lines.push("");
       const found = `Scanned ${d.commitsScanned} commit${d.commitsScanned === 1 ? "" : "s"}. ${looked} looked generated (${how.join(", ")})`;
+      const tooSmall = windowTooSmallForAPair(d.commitsScanned);
       lines.push(
-        refusedTotal === 0 ? `${found}, and none of those was followed by an edit of the same file without an agent marker.` : `${found}, and the ${refusedTotal === 1 ? "one that was" : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.`
+        refusedTotal > 0 ? `${found}, and the ${refusedTotal === 1 ? "one that was" : `${refusedTotal} that were`} followed by an edit of yours fell outside the bounds this walk ran under, which is the next paragraph.` : tooSmall ? `${found}, and a pairing takes ${PAIR_MINIMUM_COMMITS} commits, a generation and a later commit of yours that edits the same file, so this history is too short to hold one yet.` : `${found}, and none of those was followed by an edit of the same file without an agent marker.`
       );
-      if (looked > 0 && refusedTotal === 0) {
+      if (looked > 0 && refusedTotal === 0 && !tooSmall) {
         lines.push(
           "If every commit here is an agent's, that is an answer rather than a failure: your corrections are not on this branch. They are in the pull requests you reviewed, which is what the pull-request path reads."
         );
