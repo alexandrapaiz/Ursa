@@ -566,6 +566,80 @@ measurement at all. Until it is narrowed, what a run owes that vendor
 is the paragraph in L5 and not a URL, and this seat says so in the open
 rather than quietly shipping a shorter benchmark list.
 
+## L21 — The site's text is clear of the floor, the one run that is not is exempt, and the margin over the sky is three tenths of a point
+
+**measured**, 2026-10-25c, 533 runs of text across five routes and three
+viewports on the shipped build, with the backdrop photographed rather
+than read off the stylesheet. `review-kit/measure-contrast.mjs`,
+`reviews/2026-10-25c/README.md` §3 and §4.
+
+```
+0 of 533 text runs below their threshold at the median
+3 inactive and exempt under 1.4.3
+24 unmeasured, all of them glyphs too small to sample
+0 drawn in their backdrop's own colour
+worst drift between the two frames: 0.000%
+```
+
+**The dimness two reviews flagged is real and it clears the floor.** The
+muted grey that draws the footer credits, the section eyebrows, the stat
+lines under the record bar, the ghost buttons beside the address fields
+and all nine placeholders reads 5.13:1 on the flat pages. The 2026-10-25b
+review flagged five of those spans, could not substantiate them, and said
+so. They are substantiated now, as passes.
+
+**The one short run is the hero's call to action**, `Get Polaris`, at
+4.04:1 on phone and tablet, 4.06 on desktop, and 3.64 where the sky is
+brightest behind it. It ships `disabled` at `opacity: 0.55`, and 1.4.3
+exempts text that is part of an inactive user interface component, so
+this is not a conformance failure.
+
+**this seat's judgement, and the owner can overrule it in one sentence.**
+Leave it. The dimness is the only thing on that page saying Polaris is
+not released, the control cannot be pressed, and raising it to clear 4.5
+would weaken a true signal to fix something the standard does not ask to
+be fixed. If she would rather the hero's one button read at full
+strength, the change is one number and this entry is the thing to revise.
+
+**The thinnest real margin on the site is 4.82**, the same muted grey
+over the starfield on the 404 page and the home masthead. The sky costs
+it 0.31 against the 5.13 it reads on flat ground. Nothing in the build
+watches that, so a slightly brighter sky or a slightly dimmer grey would
+cross the floor silently. The instrument is the watch now, and this line
+is the number it should be read against.
+
+## L22 — Two of the three sites this seat can still benchmark ship text under the floor on their own home page
+
+**measured**, 2026-10-25c, home pages at 1440 only, with the same
+instrument and the same thresholds used on this site.
+`reviews/2026-10-25c/data/bench-*.txt`.
+
+| site | runs seen | below 4.5 at the median | drift | usable |
+|---|---|---|---|---|
+| this site, five routes, three viewports | 533 | 0 | 0.000% | yes |
+| Linear | 610 | 76 | 0.053% | yes |
+| `react.dev` | 534 | 12 | 0.116% | yes |
+| Vercel | 154 | not published | 8.75% | no |
+
+**Vercel is the instrument working, not a gap in the table.** Its home
+page moved 8.75% of its own frame between the two loads the method needs,
+so the tool refused to publish a ratio for it. A number from a page that
+would not hold still is a number about the page's animation.
+
+**What this does not say.** It does not say this site is better designed
+than Linear. Most of Linear's 76 are one grey, `#62666D`, and a large
+share of those sit inside the app mockups on its home page, which are
+illustration rather than interface. `react.dev`'s twelve include its
+search control at 2.20 and its keycaps at 2.59, which are not
+illustration.
+
+**this seat's judgement.** What the row supports is narrower and still
+worth having: shipping zero is a choice rather than the industry's floor,
+this site is currently making it, and the cost of keeping it is now one
+command rather than an argument. Contrast is also the one axis of craft
+that can be measured without taste, which is exactly why it is the wrong
+axis to feel superior on.
+
 ## Open, and not this seat's to close
 
 **Where Ursa's canon comes from.** Thirteen reviews under `reviews/`

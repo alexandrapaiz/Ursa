@@ -16,6 +16,7 @@ cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromiu
 | `lib/browser.mjs` | Launches chromium. On a host with no root it fetches the shared libraries chromium needs with `apt-get download` and `dpkg-deb -x`, which need no privilege, and retries. |
 | `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. `--wait <ms>` sets the settle and `--until <selector>` gates the shutter on content, which any page that fetches after hydration needs. |
 | `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`. |
+| `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
 | `crop.mjs` | Magnifies a named region of a frame, so a 6px bar or a 2px foot can actually be judged. `--in`, `--out`, `--box x,y,w,h`, `--scale`. Written in `reviews/2026-10-24g/`, promoted here on 2026-10-24h, where a second run wanted it. |
@@ -39,6 +40,15 @@ forces a style recalculation per frame, which on a heavy page halves the
 frame rate and makes every motion look slower than it is. Use
 `--writes-only` when the page is busy, and check `cadenceMs` in the
 output before believing a fit.
+
+**The freeze makes two loads identical, not two shutters.** Measured
+2026-10-25c while building `measure-contrast.mjs`: two consecutive
+full-page screenshots of the frozen home page at 390px differ by 4,456
+pixels of sky, while the same page loaded twice is bit-identical. So any
+tool that needs two frames of one page has to take them from two loads,
+which is what `measure-contrast.mjs` does with a second context. A tool
+that changes the page and shoots again is measuring the sky as well as
+the change.
 
 **A pixel count from a `--live` frame is a fact about the starfield.** Two
 `--live` shoots of one build differ by 4,921 to 19,140 pixels on the home
