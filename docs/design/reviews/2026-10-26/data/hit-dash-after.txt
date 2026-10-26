@@ -1,0 +1,65 @@
+
+=== phone 390x844 · dashboard /dashboard?port=7831 ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> NOT MEASURED AGAINST THE FLOOR: no standalone control on this surface, so the 44px floor was applied to nothing (16 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · dashboard /dashboard?port=7831 ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> NOT MEASURED AGAINST THE FLOOR: no standalone control on this surface, so the 44px floor was applied to nothing (16 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · dashboard /dashboard?port=7831 ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> NOT MEASURED AGAINST THE FLOOR: no standalone control on this surface, so the 44px floor was applied to nothing (16 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  the 44px floor was applied to NO control anywhere in this run, 48 inline and exempt by 2.5.8, 0 document spans (0 not covering their own line), 48 targets seen
+  the floor reached no control on: desktop/dashboard, phone/dashboard, tablet/dashboard
+  document spans are: none, on no page
