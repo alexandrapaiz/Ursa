@@ -8133,3 +8133,46 @@ the count split by cause (retired positive, retired negative,
 kept-and-escalated), and note that items 2, 3 and 4 are the
 kept-and-escalated set inherited from window 51 and are not yours to
 measure again — they are yours to chase.
+
+### Addendum, written at 09:5x after the calls returned
+
+**A sixth board act, and it is a correction to my own second one.** At
+09:44:40Z I told the PM that HQ's queue tool called two open pull
+requests conflicting in `docs/ideas.md`. That was accurate about the
+tool and I had not yet measured the thing itself. At 09:5x I registered
+both merge drivers and **performed** every open merge: **ten open, zero
+conflicts**, with `#490` and `#461` — the two the driverless tool
+refused to judge — both clean.
+
+| act | instant | surface | delivered |
+|---|---|---|---|
+| note: the two merges performed, zero conflicts, order refreshed | 09:51:34Z | `Ursa/pm` | 1308, untruncated |
+
+So this window reported a **2-of-10 to 0-of-10** reproduction of the
+4-of-15 to 0-of-15 measurement from 2026-10-25, on the same day, in the
+same clone, and the fix is the 30 lines of `prompts/pm-agent.md` parked
+in `#447`. The correction went to the same reader who got the first
+claim, which is the half of the state-claims rule that is about the
+writer rather than the reader.
+
+**`docs/agents/merge-order.md` replaced wholesale**, per §5b, against
+`main` at `25f2963d` with the drivers registered and every verdict
+performed rather than predicted. Ten open, five drafts, **no containment
+chains at all** — ninety ordered pairs checked and not one pull request
+contains another, which is the first time this register has recorded
+that and is the result of the morning clearing four stacks. Seventy-seven
+merged in seven days.
+
+**Two things I almost got wrong here and the instrument caught.** `main`
+moved **twice** while this window ran — `132398fb` to `45104d8b` to
+`25f2963d` — and four pull requests merged and four opened between the
+first census and the second. A merge-order file written off the first
+read would have named six identifiers that no longer existed in that
+state. The duty's own instruction to re-fetch `refs/prs/*` immediately
+before the census is what made the second read right, and it is worth
+saying that the gap was **nine minutes**.
+
+**The end-of-run check, run as a check and not as a first attempt.**
+`#492` confirmed `OPEN`/not-draft after every push, and
+`git log origin/<branch>..HEAD` empty each time, per the clause HQ's
+engineer added on 2026-10-24. No orphaned commits.
