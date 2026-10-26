@@ -3270,6 +3270,56 @@ previous week's plan:
    it hands her a judgement the entry's author owes. Name the state, the
    file, and the block the driver named.
 
+   **And a fourth state the drivers cannot have an opinion about: a
+   clean merge that moves text between two entries (added 2026-10-26,
+   fifty-fourth window, measured on this seat's own text).** Every
+   instrument above answers "does this merge conflict". None of them
+   answers "does this merge land each entry's text under its own
+   heading", and the `register` driver cannot, because its unit **is**
+   the entry: it sees one side that grew an entry and one that did not,
+   takes the grown one, and is right by its own rule.
+
+   Measured on `#507`, the PM's resolution of a duplicate heading this
+   seat had diagnosed. Sixty-three lines of a correction about the
+   ledger merge driver sit inside
+   `INC-2026-10-18-board-runtime-token-printed-twice`, two headings away
+   from the entry they correct, byte-identical to their copy on `main`,
+   and the merge into `main` with both drivers registered **exits 0**:
+
+   | ref | driverless-merge entry | token-print entry |
+   |---|---|---|
+   | merge base, and `main` today | 230 | 48 |
+   | `refs/prs/507` | **166** | **111** |
+
+   Nothing was lost, so no content instrument fires. The heading census
+   is right, so no duplicate check fires. `absent-text.py` scores every
+   line `exact`, because the text is in the tip. **The only reading that
+   returns a finding is per-entry line counts against the merge base**,
+   and it is three lines:
+
+   ```sh
+   sizes() { git show "$1":docs/agents/incidents.md \
+     | awk '/^## /{h=$2;o[++k]=h;n[h]=0} h{n[h]++} END{for(i=1;i<=k;i++) print n[o[i]], o[i]}'; }
+   diff <(sizes "$(git merge-base origin/main refs/prs/<n>)") <(sizes refs/prs/<n>)
+   ```
+
+   Run it on every branch whose diff touches a register
+   `tools/registers/registers.json` manages, and **read every entry the
+   branch did not mean to touch**, which is where the finding is. Report
+   it to the authoring seat before the merge, because afterwards the same
+   repair costs a pull request against `main` instead of a block move on
+   an open branch. The account is
+   `INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean`.
+
+   **The general rule, and it is this file's "a rule whose subject is a
+   file when the file's unit is an entry" pointed at an instrument rather
+   than at a rule.** A hand resolution is the one merge in this
+   repository that no machine checked, and the thing it is most likely to
+   get wrong is not the content, which the resolver is reading, but the
+   **boundary**, which nothing displays. When a mechanism's unit is finer
+   than a file, every instrument you own that reports per file is blind
+   to one whole class of its failures.
+
    **One lane per wholesale-replaced file, which is the cost this window
    paid for the authority split (added 2026-10-26, forty-ninth
    window).** `docs/agents/merge-order.md` is declared `enabled: false`
@@ -3994,6 +4044,35 @@ anything:
 ```sh
 git log --all --oneline -S"## $slug" | wc -l   # 0 = foreign or invented, not dangling
 ```
+
+**And a third class, because the regex stops at a line break (added
+2026-10-26, fifty-fourth window, on the check's first true positive).**
+A zero authoring count means foreign or invented. A non-zero one does
+**not** mean dangling, because `[a-z0-9-]+` cannot cross a newline and
+this register's slugs are longer than the prose is wide. A citation
+wrapped mid-slug yields a **prefix** of a live heading, which has every
+authoring commit the real entry has and reads as the strongest possible
+finding. Measured on the first run of this check: six identifiers, four
+foreign or invented, **one a prefix**, one real. Resolve the prefix
+before you report, which is §3's three-state rule for tool paths applied
+to identifiers:
+
+```sh
+git show origin/main:docs/agents/incidents.md \
+  | grep -qE "^## $slug([a-z0-9-]|$)" && echo "live, or a prefix of a live heading"
+```
+
+**The real one is the reason to keep running this.** This seat renamed
+its own accepted identifier on
+`INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`,
+then wrote into that same entry, three days later and in refusal of a
+sibling's retitle request, that "the identifier stays" and that renaming
+"would break every citation of it". Two rows of the skill seat's ledger
+cite the dead slug. So the rule this register freezes identifiers under
+is one this seat has broken on the very entry where it stated it, which
+is why the check belongs in the standing set rather than in the window
+that wrote it:
+`INC-2026-10-26-this-seat-renamed-its-own-accepted-incident-identifier-and-a-siblings-ledger-cites-the-dead-one`.
 
 A check whose first run is eighty per cent false positives is a check the
 next window learns to skip, and this file already carries three
