@@ -492,6 +492,19 @@ the two runs this window was dispatched to continue. A seat can be the
 best-covered seat but one and still be missing the only run its
 successor was told about.
 
+**Rule out §36's backfill first, because it is the standing explanation
+and it does not fit this.** §36 established that the feed lags rather
+than blinds, measured at roughly 36 finished runs in an hour, and gave
+you the right rule for a day still in progress: a coverage ratio over an
+open window is a floor, not a reading. Honour that. It does not cover a
+**hole in the middle**, and ordering is what separates the two:
+**backfill is monotone in time, so a lagging feed loses a suffix.** The
+run at `15-26-39Z` is nine minutes *later* than the missing `15:16:05Z`
+run and its row is present, and the hole is still there four hours and
+two reads later. Whenever you report a missing row, say which of the two
+you have ruled out and how, because "the feed lags" is true, cheap, and
+will absorb a real loss if you let it.
+
 **Why the per-seat framing hid this.** A seat at zero rows is visible in
 one read and reads as an outage. A seat at nine rows out of fourteen
 runs reads as working, and nothing in the per-seat number says which
