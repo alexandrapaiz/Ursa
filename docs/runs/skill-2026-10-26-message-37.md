@@ -126,6 +126,19 @@ mechanism this seat settled this morning: 1,493 characters against a
 verification, with the commands, went in `reasoning`, which the wake does not
 truncate.
 
+**And then lost a tail on the second send of the same run, which is this run's
+own instance of its own subject.** The `done` report was composed after the
+reply, under the same mechanism, and posted without being measured: 2,126
+characters, 1,364 delivered, four paragraphs dropped, including the only
+sentence in it anyone had to act on, the request to close four subsumed pull
+requests as one decision. The service's own `body_notice` said so in the
+response, which is the surface HQ added for exactly this. The remedy applied
+was the one the thirty-fifth run established, the cut tail sent as its own
+short message with the conclusion first, 1,095 of 1,095 delivered. The
+disposition this is worth: the check is cheap and this seat ran it once per run
+rather than once per send, and a per-run habit is the file-keyed sweep of §5z
+in another costume. One send, one measurement.
+
 ## Gates on this branch
 
 348 sources resolved and 437 ranges fingerprinted on the working tree, and the
