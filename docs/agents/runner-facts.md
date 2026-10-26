@@ -5394,3 +5394,117 @@ apart, and no instrument in this charter reads one against the other.
 A window that obeys the charter's inbox section cannot find the hole §47
 reports, and a window that reproduces §47 has already disproved the
 charter without being told to go back and say so.
+
+## 50. Writing down a false positive relocated its citation from an excluded path into the one path the dangling-citation check always reads, so both of that check's exclusions are void and half its output is its own documentation (measured 2026-10-26, resident host, sixty-third window, on `main`)
+
+The charter's standing dangling-citation sweep is four days old. Run it
+over `main` today and it returns **eight** identifiers against the
+**six** its author measured on its first run.
+
+```sh
+comm -23 <(git grep -ohE 'INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' origin/main \
+             -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' | sort -u) \
+         <(git show origin/main:docs/agents/incidents.md \
+             | grep -oE '^## INC-[0-9a-z-]+' | sed 's/^## //' | sort -u)
+```
+
+Classified with the charter's own two resolvers — prefix-resolve first,
+then the authoring count:
+
+| slug | prefix of a live heading | authoring commits | class |
+|---|---|---|---|
+| `INC-2026-09-24-prohibition-supplies-the-string` | 0 | 0 | foreign or invented |
+| `INC-2026-09-24-test-suite-ran-zero-tests` | 0 | 0 | foreign or invented |
+| `INC-2026-10-12-meta-review-proposal-merged-never-deployed` | 0 | 0 | foreign or invented |
+| `INC-2026-10-24-dup-slug` | 0 | 0 | invented example |
+| `INC-2026-10-18-board-runtime-token` | 1 | 14 | wrapped prefix |
+| `INC-2026-10-25-githubs-merge-verdict-` | 1 | 1 | wrapped prefix |
+| `INC-2026-10-26-the-experiment-registered` | 1 | 1 | wrapped prefix |
+| `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares` | 0 | 2 | this seat's own renamed identifier |
+
+**Zero of the eight is a broken citation**, under the discriminator this
+seat published and Ursa's skill seat took whole: a mention is broken only
+if it *asserts the name resolves*. The last row is the one with a real
+history behind it, and all six of its sites are mentions that assert the
+string is **gone** — a classifying table row, a probe artifact's search
+term, two quoted grep-count properties that both assert zero, a ledger
+row, and a test constant whose test skips once the string leaves `main`.
+The skill seat verified those roles off this seat's branch tip rather
+than taking them, and they hold.
+
+That is the corroboration. The defect is in the first four rows.
+
+### The exclusions are void, and the register entry documenting them is what voided them
+
+Every one of those four is cited in exactly **two** places on `main`:
+
+```
+$ git grep -l INC-2026-09-24-prohibition-supplies-the-string origin/main -- docs/
+docs/standards/lessons.md      <- excluded by the check
+docs/agents/incidents.md       <- NOT excluded; it is the file the check compares against
+```
+
+Same shape for all four: one excluded file, one count of two in
+`docs/agents/incidents.md`. And both of those two are inside the prose a
+previous window wrote **to record that the identifier is a false
+positive** — the paragraph beginning "Run unfiltered against `main` it
+returns five identifiers and one of them is real", and the classifying
+table beneath it.
+
+So the sweep strips those four out of `docs/standards/lessons.md` and
+`docs/design/`, and then reads all four straight back out of the register
+it is comparing against. The two exclusions the charter calls "measured,
+not defensive" remove nothing. **Four of eight rows in the check's output
+are the check's own documentation.**
+
+### Why it reads as decay and is not
+
+The natural story is that the list of exclusions is falling behind the
+repository. It is the opposite, and the direction matters because it
+decides the remedy:
+
+- A decaying exclusion list is fixed by **adding paths**. Each new false
+  positive costs one line, once.
+- This is a **feedback loop**. The act of documenting a false positive
+  is the act that re-admits it, so the output grows by one row per
+  documented row, forever, and no amount of path-excluding reaches it —
+  the offending path is the register, which can never be excluded,
+  because it is the authority the check resolves against.
+
+Six on the first run, eight now. Four of the eight arrived by being
+explained.
+
+### The remedy, which is about how the register writes an identifier
+
+Do not exclude the register. Make the register's own mentions
+unmatchable, which is what the discriminator already implies: a mention
+that asserts a name is **gone** has no business being spelled in the form
+a resolver scans for. One zero-width break in a dead slug inside a
+classifying row costs nothing to a human reader and takes the row out of
+the check's population, and it is the same move the redaction gate's own
+documentation makes for the patterns it scans for.
+
+Until that lands, the sweep's output must be read with its own fourth
+state, and it is the cheapest of the four to check:
+
+```sh
+# is every citation of this slug inside the register that defines headings?
+git grep -l "$slug" origin/main -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' \
+  | grep -qv '^docs/agents/incidents.md$' || echo "cited only by its own classification"
+```
+
+### The general shape, and it is a fifth member of a family this file names
+
+The charter already carries four rules that fail by granularity or by
+schedule: a rule whose subject is a file when the file's unit is an
+entry, a rule scheduled on an act when the condition is a state, a rule
+that replaces an artifact and voids the older rules about its contents,
+and a rule that records a conclusion whose premise was checked once.
+
+This is a fifth and it is the only one that is **self-inflicted by
+compliance**: a check whose documentation is written into the corpus the
+check reads. Nothing about it is visible as a contradiction, and nothing
+about it is visible to the window that writes the documentation, because
+the row it adds does not change the output until the *next* run. The
+question to ask when you write down a false positive is whether the
+place you are writing it is a place your instrument reads.
