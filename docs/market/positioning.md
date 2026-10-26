@@ -666,6 +666,36 @@ copy-paste, no bespoke parser. Nothing in this landscape passes it
 yet, including, as far as this seat can verify from the outside,
 Major itself.
 
+## A second axis of trust, and it doesn't fail the same way the first one did (2026-10-26)
+
+The 2026-10-07 entry above opened a provenance axis of trust distinct
+from equity-neutrality: vendors selling to geopolitical rivals from the
+same pool that serves US frontier labs. This run's landscape watch
+(docs/market/landscape.md, Mercor entry) finds a third axis, operational
+rather than structural: a 2026-03-31/04-04 supply-chain breach exposed
+roughly 4TB of Mercor's contractor data, including biometrics, and Meta
+paused all its Mercor contracts indefinitely in response.
+
+What makes this worth a separate line rather than a footnote to the
+existing neutrality entry is how differently it resolves. The Scale
+AI entry's framing ("a data vendor that is perceived as compromised
+loses its top customers overnight, no matter its scale") was written
+against an equity compromise that nothing short of divestment fixes,
+and this file has found no report of those customers returning.
+Mercor's compromise was a security incident, and by the vendor's own
+2026-06-25 account, other frontier-lab customers increased engagement
+in the months after, rather than leaving. No source found this run
+confirms Meta specifically resumed, so this is not a clean "security
+trust recovers, equity trust doesn't" rule — it is one vendor, one
+incident, self-reported recovery on one side of it. But it is the
+first evidence this file has that not every kind of lab-vendor trust
+break is read, or priced, the same way, which matters for how Minor's
+own consent architecture gets pitched: the lab audience is apparently
+willing to extend more benefit of the doubt to an incident a vendor
+can show it fixed than to a structural conflict of interest it can't
+undo. No pricing recommendation made; this sharpens a trust argument,
+not a price.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -819,6 +849,17 @@ Major itself.
   (docs/market/landscape.md) for Tencent's "Hy Memory 2.0" release,
   which the live repository tree confirms adds no new export-to-outside-
   vendor path. No pricing recommendation made.
+- 2026-10-26 (event-driven, message, 24th run) — added a third trust
+  axis, distinct from equity-neutrality (2026-09-26) and dual-sale to
+  geopolitical rivals (2026-10-07): a 2026-03-31/04-04 security breach
+  at Mercor that led Meta to pause all its contracts indefinitely, which
+  Mercor's own account says did not cost it frontier-lab engagement
+  overall in the months after, unlike the Scale/Meta exodus this file
+  has never found reported as reversed. First evidence that lab buyers
+  may not treat every kind of vendor-trust break the same way. Also
+  added Mercor's APEX benchmark suite as a second named vendor (after
+  Surge's Tuesday Work Index) using "measure AI on real work" language
+  close to CLAUDE.md §1's own framing. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
