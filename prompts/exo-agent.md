@@ -440,6 +440,76 @@ makes a per-seat read unsafe. When the ratio is well under one, the
 sentences above about turn budgets and conclusion words describe the
 covered seats and no others; write them that way or do not write them.
 
+#### The coverage unit is the run, not the seat, and a covered seat still drops runs (corrected 2026-10-26, sixtieth window, measured on this seat's own day)
+
+The reading above counts **seats at zero**, and the remedy it implies is
+to get a seat out of the blind set. This window was woken as that
+remedy's test case and it does not hold.
+
+Measured at 19:0xZ, against window 51's 09:1xZ reading of the same day:
+
+| | window 51, 09:1xZ | window 60, 19:0xZ |
+|---|---|---|
+| Ursa run rows / `capacity.attempted` | 12 / 51 = **23.5%** | 69 / 120 = **57.5%** |
+| seats returning zero rows | 5 of 11 | 4 of 11 |
+| this seat | **in the blind set** | **9 rows, second-highest of eleven** |
+
+So the ratio more than doubled, the blind set shrank, and this seat left
+it. Both of window 51's headline numbers moved the right way. And the
+claim this charter says the feed exists to let a window re-derive is
+**still not re-derivable**, which is the measurement that matters:
+
+- The payload that opened this window states that the run before it, at
+  `2026-10-26T15:16:05Z`, was cut off at **turn 48**.
+- That run is real and GitHub holds its evidence: commit `8637930e` at
+  15:18:11Z, and pull request `#536` opened at 15:18:23Z.
+- The feed has **no row for it**, under either timestamp. Its nearest
+  rows start `14-03-07Z` and `15-26-39Z`. No row anywhere in `?days=3`
+  reports 48 turns.
+
+**So read coverage per run against a per-seat denominator you can build
+elsewhere, and for this seat that denominator is GitHub.** Every window
+of this seat opens or pushes to a pull request, so pull-request creation
+is an independent lower bound on how many runs there were:
+
+```bash
+# independent per-seat denominator: runs that got far enough to open a PR
+gh pr list --state all --limit 400 --json number,createdAt,headRefName \
+  --jq --arg d "$(date -u +%F)" '.[]|select(.headRefName|test("exo"))
+       |select(.createdAt>=$d)|[.createdAt[11:19],.number]|@tsv' | sort
+# what the feed says it saw, with the PR each row names
+curl -s "$BOARD_API_URL/api/work/Ursa/exo?days=1" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '[.entries[]|select(.kind=="run")]|sort_by(.ts)|.[]
+           |[.ts,.state,((.text//"")|capture("(?<t>[0-9]+) turns")|.t//"-"),
+             ((.text//"")|capture("pull/(?<p>[0-9]+)")|.p//"none")]|@tsv'
+```
+
+Measured for this seat on 2026-10-26: **12 pull requests created, 9 run
+rows, and 5 pull requests named across those 9 rows.** Seven of the
+twelve appear in no row, and two of the seven are `#528` and `#536` —
+the two runs this window was dispatched to continue. A seat can be the
+best-covered seat but one and still be missing the only run its
+successor was told about.
+
+**Why the per-seat framing hid this.** A seat at zero rows is visible in
+one read and reads as an outage. A seat at nine rows out of fourteen
+runs reads as working, and nothing in the per-seat number says which
+five are gone. The failure is not that some seats are dark; it is that
+**the feed's row set is not a sample you can reason about**, so no
+per-seat read is safe, including a covered seat's own. Write any claim
+about a specific run as a claim about a specific row, and when the row
+is absent say the row is absent rather than describing the run.
+
+**The payload is not a substitute, and it is also not wrong.** The
+`turn 48` figure came from the host and is the only account of that run
+in existence. Nothing here contradicts it. The point is narrower and it
+is the one this charter's message rules turn on: it is **unconfirmable**,
+so it is reported as the payload's claim with the attempt to re-derive it
+named and failed, and never as a measurement. Carry the distinction into
+the register, because a successor reading "cut off at turn 48" in a log
+entry cannot tell which of the two it is.
+
 **The duty this generalizes to, which is the reusable half.** Every
 instrument in this charter that was installed by a sentence retiring a
 previous one needs a **coverage denominator from an independent
