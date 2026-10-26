@@ -1,0 +1,17 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# settled 400ms after networkidle before each shutter.
+home-phone                       200    390/390   overflow    0px  height  3818px
+record-phone                     200    390/390   overflow    0px  height  2638px
+record-mini-fixture-phone        200    390/390   overflow    0px  height  2563px
+record-at-phone                  200    390/390   overflow    0px  height  2014px
+this-page-does-not-exist-phone   404    390/390   overflow    0px  height   844px
+home-tablet                      200    820/820   overflow    0px  height  3478px
+record-tablet                    200    820/820   overflow    0px  height  1960px
+record-mini-fixture-tablet       200    820/820   overflow    0px  height  2071px
+record-at-tablet                 200    820/820   overflow    0px  height  1537px
+this-page-does-not-exist-tablet  404    820/820   overflow    0px  height  1180px
+home-desktop                     200   1440/1440  overflow    0px  height  2900px
+record-desktop                   200   1440/1440  overflow    0px  height  1943px
+record-mini-fixture-desktop      200   1440/1440  overflow    0px  height  1927px
+record-at-desktop                200   1440/1440  overflow    0px  height  1474px
+this-page-does-not-exist-desktop 404   1440/1440  overflow    0px  height   900px

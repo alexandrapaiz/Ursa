@@ -1,0 +1,11 @@
+ok     7 (want 7)  targets seen
+ok     2 (want 2)  standalone controls (cases 1 and 2)
+ok     2 (want 2)  of those, short — the floor still bites
+ok     1 (want 1)  inline and exempt (case 3), 2.5.8 survived the third category
+ok     4 (want 4)  document spans (cases 4 to 7)
+ok     2 (want 2)  document spans covering their own line (4 and 5)
+ok     1 (want 1)  document spans under their own line (case 6)
+ok     1 (want 1)  document spans covered outright (case 7)
+ok     0 (want 0)  document spans wrongly counted against the floor
+
+all 9 expectations hold

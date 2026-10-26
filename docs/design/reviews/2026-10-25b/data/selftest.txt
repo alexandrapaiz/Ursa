@@ -1,0 +1,15 @@
+
+=== desktop 1440x900 · selftest /hit-areas.html ===
+  box WxH       hit WxH      lines  verdict           control
+  167.6x17      168x19       1      SHORT by 25       button.tiny "a seventeen pixel control"
+  74.9x17       76x19        1      SHORT by 25       button.tiny "another one"
+  88.1x17       89x18        1      inline, exempt    a. "an inline link"
+  195.7x15      195x16       1      document, exempt  span.sp "a tiled span that is fine"
+  234.8x15      236x16       1      document, exempt  span.sp "a second tiled span, also fine"
+  234.8x15      236x11       1      UNDER ITS LINE by 4span.sp "this one is clipped from below"
+  250.5x15      -x-          1      COVERED           span.sp "and this one is covered entirely"
+  -> 2 of 2 standalone controls under 44px tall (1 inline, exempt; 4 document spans, 1 not covering their own line)
+
+=== total across every page and viewport ===
+  2 short of 2 standalone, 1 inline and exempt by 2.5.8, 4 document spans (1 not covering their own line), 7 targets seen
+  document spans are: span.sp, on selftest

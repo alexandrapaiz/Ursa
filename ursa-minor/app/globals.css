@@ -988,13 +988,22 @@ p .rec-action {
      those, and the exemption is structural rather than a loophole: at
      this site's 1.6 line height an overlay reaching 13px past a link's
      own line box lands on the words above and below it and starts
-     answering their clicks. Eleven of the site's targets are inline
-     links in running prose and all eleven keep their own box.
+     answering their clicks. Eight of the site's targets are inline links
+     in running prose, two on each of `/`, `/record`,
+     `/record/mini-fixture` and `/record/at`, and all eight keep their
+     own box. The 2026-10-24e version of this comment said eleven, and
+     the browser said twelve at 390 and 1440 and nine at 820, because
+     four of the document spans below were being counted as inline
+     whenever they happened to wrap. With those filed where they belong
+     the figure is eight at all three viewports, which is the stability a
+     count of prose links should have (2026-10-25b).
    - Not on the document spans in the record viewer. They tile the
      person's text edge to edge, so every overlay would overlap its
-     neighbours and the topmost one would win. A short `.sp` is reported
-     as a finding and left alone.
-   - Not on the document spans, as above.
+     neighbours and the topmost one would win. They are measured as their
+     own category rather than against this floor, since a floor that can
+     never be met is not a finding; the check that does apply to them is
+     that each one stays hittable across the line you can read, which is
+     what `measure-hit-areas.mjs` asserts of all fifteen.
 
    It DOES now go on the three form submit buttons, which the 2026-10-24d
    version of this comment left out and predicted would need "an
