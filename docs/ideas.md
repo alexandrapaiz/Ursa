@@ -13460,3 +13460,163 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   deployed on this host, which are committed files of another
   repository rather than this one and are therefore evidence about
   the board rather than instructions to this seat.
+
+### 2026-10-26 (engineer, message run, 9) — One grep found the one-named-cause defect twice in one run, and nothing in this repository looks for it
+- Trigger: Ursa's skill seat filed a generalised rule at this seat today,
+  after this seat found the first instance in the ledger gate: a failure
+  message names the cause its author thought of, while the number of ways
+  to reach that branch is a property of the code, so one named cause for a
+  condition with several is a hypothesis wearing the authority of a
+  measurement. Applying it took one grep for disjunctive guards that
+  precede an error, over `ursa-major/src`, `tools/` and `scripts/`. That
+  grep returns 92 candidate sites, 80 in `ursa-major/src` and 12 in
+  `tools/` and `scripts/`, and two of them were live defects, fixed in
+  this run: the `claude -p` envelope guard, duplicated in
+  `src/verdict.ts` and `src/tuning/distill.ts`, where three conditions
+  reached one message and the costliest branch discarded the operator's
+  one-command fix; and `scripts/dep-floor.mjs`, which called an expired
+  owner exception a breached dependency floor. The skill seat
+  independently found a third in its own trigger guard the same day, so
+  three instances across two lanes in one day.
+  The honest reading of 2 in 92 is that most disjunctive guards in this
+  repository are fine, which is an argument for measuring the hit rate
+  before building anything and is why the first step below is a count
+  rather than a tool. An earlier draft of this entry said 40 candidates;
+  that was a truncated grep read as a total, and the corrected number
+  makes the tool less obviously worth writing, not more.
+- What: a reporting-only checker, `tools/diagnostics/one-cause.mjs`, that
+  flags each site where a guard's condition is a disjunction of two or
+  more independent terms and its body raises or exits with a single
+  message that is a string literal with no interpolation of the deciding
+  term. It reports candidates with file, line, the terms it counted and
+  the message it found; it does not fail a build, because "this message
+  names one of its two branches" is sometimes correct and a gate that
+  cannot tell will be switched off. The output is a worklist, which is
+  what `tools/ledger/check.mjs`'s `BLOCK_SEPARATION` rule already is for
+  a byte assertion it cannot localise: the invariant stays elsewhere and
+  the tool's job is to name the line.
+- First step: run the grep that found today's two by hand over the three
+  directories, write the 40 candidates into
+  `docs/design/one-cause-candidates.md` with a verdict on each, and count
+  how many are real. If the hit rate holds near today's, the checker is
+  worth writing and the document is its specification. If it does not,
+  the document is the measurement that says so and the checker is not
+  built, which is the cheaper outcome to discover first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 9) — Git line-merged a 310KB minified bundle today and the result was byte-correct by luck
+- Trigger: resolving this seat's #520 against `main` in this run. Three
+  files conflicted and `ursa-major/dist/ursa.cjs` was not one of them:
+  git line-merged two different builds of a minified 310,134-byte bundle
+  and reported success. `npm run bundle:check` then confirmed the merged
+  bytes match a fresh build of the merged source exactly, which this run
+  checked rather than assumed, so nothing was shipped wrong. The point is
+  that nothing in the mechanism earned that outcome. A textual hunk merge
+  of minified output has no reason to produce the build of the merged
+  source, and the only thing between a plausible-but-wrong bundle and
+  `main` is `src/bundle-exec.test.ts`, a test that was already red in
+  this run for the unrelated and expected reason that the source had
+  changed. A reviewer reading one red bundle test does not learn which
+  of the two causes it had.
+- What: declare the built artifact unmergeable, so a collision on it is
+  a conflict a person resolves by rebuilding rather than a silent
+  success. One line in `.gitattributes`, `ursa-major/dist/ursa.cjs
+  merge=binary`, makes git refuse to line-merge it and leave both
+  versions for the resolver, whose only correct action is `npm run
+  bundle` followed by the index commit the two-commit discipline in
+  `tools/bundle-digest-index.ts` already requires. This is the same
+  move `.gitattributes` already makes five times for files whose line
+  hunks are meaningless, except that for the registers the answer was a
+  smarter driver and here the answer is no driver at all, because a
+  bundle has exactly one correct merge and it is a rebuild.
+- First step: add the one line, then reproduce today's merge on a scratch
+  branch and confirm git now reports `dist/ursa.cjs` as conflicted where
+  it previously auto-merged. The before and after are both one command,
+  so the entry is verifiable in a few minutes rather than argued.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 9) — The dependency floor gate skips any package with no lockfile and reports the floor as holding
+- Trigger: reading `scripts/dep-floor.mjs` while splitting its summary in
+  this run. `findPackages` collects "any directory with both a
+  package.json and a lockfile", so a package carrying a `package.json`
+  and no `package-lock.json` is not audited, is not counted, is not named
+  in the output, and does not stop the gate printing "Dependency floor
+  holds: no critical anywhere, no high in any production tree" over a
+  tree it never read. Measured on this branch: every `package.json`
+  outside `node_modules` has a lockfile beside it, so there is no live
+  miss today and this is a gate-completeness hole rather than a current
+  misreport. Naming it anyway because the condition that creates one is
+  ordinary. A new package lands lockfile-last, or a `.gitignore` catches
+  the lockfile, and the gate's silence is indistinguishable from its
+  approval. That is the same shape as the incident this repository's own
+  `check-vendored.mjs` header cites: "A missing tool fails loudly. A
+  stale one does not."
+- What: make the skip speak. `findPackages` returns the directories it
+  audited; have it also return the directories it declined and why, and
+  print one line per declined package before the summary. A `package.json`
+  with no lockfile is reported as `not audited: no package-lock.json, so
+  nothing here is covered by the floor`, in the same place the warnings
+  print. Whether it should also fail the gate is a judgement for the
+  owner and not assumed here: `npm audit` genuinely cannot run without a
+  lockfile, so a package that has not got one yet is a real state and not
+  only an error. The defensible first version reports and does not fail,
+  matching how the same file already treats a dev-only high.
+- First step: change `findPackages` to collect both lists, add the
+  reporting line, and add a case to `scripts/dep-floor-summary.test.mjs`
+  asserting that a run with a declined package does not print the
+  unqualified "floor holds" sentence. The fixture is one temporary
+  directory holding a `package.json` and nothing else.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 9) — Craft scan: `claude -p --output-format json`, where the failure path and the success path are the same shape
+- Trigger: this run spent its substance inside two callers of the Claude
+  Code CLI's print mode, so the scan is of the product this seat was
+  actually holding rather than one picked off a list. The adjacent
+  product named in this seat's charter fallback is Anthropic's CLI and
+  skills ecosystem.
+  **The thing worth stealing** is that `claude -p --output-format json`
+  emits one complete, well-formed envelope on failure as well as on
+  success, and carries the machine fact and the human fact in separate
+  fields of it: `is_error` and `terminal_reason` for the caller's
+  branching, `result` for the reader's eyes. That single property is the
+  whole reason `cliFailureReason` in `src/claude-cli.ts` can exist. When
+  the CLI exits 1 on an unauthenticated host, the sentence a person can
+  act on, `Not logged in · Please run /login`, is still sitting in a
+  field at a known name, so a caller can retrieve it instead of
+  surfacing Node's `Command failed: claude -p ...`. The contrast is with
+  every tool that switches to unstructured stderr when it fails, which
+  obliges the caller to write a second parser for the case it understands
+  least and tested least. Ursa Major has a surface with the same
+  obligation: `ursa run` writes a record on success and, before #520,
+  wrote nothing at all for an episode whose every path was an import, so
+  the absence had to be guessed at. `resolve-episode.ts` now answers that
+  with a record that states its own emptiness, which is the same
+  principle arrived at separately. The scan's lesson is to apply it as a
+  rule rather than per incident: every exit of a surface a person reads
+  should carry the same shape as its success.
+  **The thing Ursa does better** is checking the fields of one record
+  against each other. The envelope's shape is honest but it is not
+  constrained: `is_error: true` with an empty `result` is representable,
+  `is_error` absent with `result` absent is representable, and the
+  relationship between the two fields is nowhere stated, which is
+  exactly what let one guard in this repository collapse three
+  conditions into one message for months. `ursa-major/src/invariants.ts`
+  is the thing the envelope has no equivalent of: eighteen named bounds
+  that hold between two numbers measured over the same set of
+  characters in one record, each failing with its own code and both
+  sides of the bound printed. `GEN_CHARS_CONSISTENT` exists because a
+  record once claimed 239,976 characters survived out of 239,841
+  generated and 344 tests passed, and the repair was not a better test
+  but a statement about the record's own arithmetic. An envelope with
+  one such bound, `is_error` implies a non-empty `result`, would have
+  made today's costliest branch unreachable rather than merely
+  better-reported.
+  **External sources read for this scan**: none. The envelope fields
+  quoted above are read from this repository's own committed files,
+  `src/tuning/distill.ts`'s measurement comment of 2026-10-26 and the
+  fixtures in `src/tuning/tuning.test.ts`. Nothing was fetched, so there
+  is nothing here that could have asked anything of this run.
+- Status: proposed
