@@ -7560,3 +7560,84 @@ zero for all four others. Both readings are in the charter's copy of the
 check. A check that cries wolf four times out of five is a check the next
 window skips, which is how this register's three misread instruments
 became three rather than one.
+
+## INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner — Two correct rules, and obeying the newer one put 460 lines of Tier B register work into a queue that has merged 0 of 54
+
+**What happened.** This seat holds two rules about where a window's
+commits go, written six days apart, both measured, both right.
+
+- **"Grow it instead of stacking past it"** (the all-seats section of
+  this charter, 2026-10-18, measured at ten pull requests in one day for
+  one body of work): when your seat already has an open pull request and
+  your window would build on its branch anyway, push onto that branch.
+  "An already-open pull request of your own seat satisfies it exactly."
+- **The authority split** (window 42, 2026-10-25, measured at 81.4% of
+  this seat's held work needing no owner): keep the register work on a
+  branch with no `prompts/` path, so it merges under Tier B, and let the
+  charter work wait on the owner separately.
+
+Window 47 merged both halves into one branch. Window 48 read the grow
+rule, pushed onto that branch, and thereby put this window's register
+work into the owner's queue. Measured on `#447` at 2026-10-26 00:4x
+against `main` at `6bd03363`, instrument
+`git diff --numstat origin/main...refs/prs/447`:
+
+| | |
+|---|---|
+| `prompts/exo-agent.md` | **+2,975 / -72** |
+| `prompts/pm-agent.md` | +30 |
+| the four registers | **+460** (incidents 250, learning-log 86, improvements 70, runner-facts 54) |
+| the register share of the insertions | **13.1%** |
+| the tier predicate `git diff --name-only origin/main...refs/prs/447 -- 'prompts/*-agent.md'` | two files, so **Tier C** |
+
+**What the two routes cost, measured on this seat's own last four pull
+requests.** The register halves merged in minutes: `#429` opened 23:04
+and merged 23:20, `#433` opened 23:22 and merged 23:35, `#442` opened
+23:50 and merged 00:27. The charter half `#418` opened on 2026-10-25 and
+**closed unmerged**. And the queue the grow rule moved this window's
+registers into is measurable in one number:
+
+```sh
+since=$(date -u -d '-7 days' +%FT%TZ)
+for p in $(gh pr list --state merged --limit 300 --json number,mergedAt \
+             --jq "[.[]|select(.mergedAt>\"$since\")|.number]|.[]"); do
+  gh pr view $p --json files \
+    --jq '[.files[].path|select(test("^prompts/.*-agent\\.md$"))]|length'
+done | grep -cv '^0$'
+```
+
+**Zero of fifty-four.** Fifty-four pull requests merged in the seven
+days to 2026-10-26 and not one of them touched a `prompts/*-agent.md`
+file. `main`'s copy of this charter is still `94e926b7`, 2026-10-18
+18:50, eight days old. So the grow rule did not slow the register work
+down, it moved it into the one class of file this repository has not
+merged in a week.
+
+**Why neither rule can see this.** The grow rule's stated subject is the
+**queue's depth** — it was written to stop one body of work consuming
+ten identifiers, and on that it is right and this entry does not weaken
+it. Its unstated premise is that the open pull request's **merge route**
+is the same as your work's. That premise held every day it was written
+under, because this seat had one chain. The split created a second route
+and nothing went back to the older rule. This is the same family as
+`INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main`:
+a rule that records a conclusion whose premise was checked once, and the
+premise was a property of the process rather than of the repository, so
+the process changed underneath it in silence.
+
+**The fix, which is a check rather than a judgement.** Before you grow
+an open pull request of your own seat, ask which tier **its** diff is in
+and which tier **your** window's work is in. Growing is free when they
+agree and costs you the whole difference between the two routes when
+they do not. The charter now carries the predicate in the grow bullet,
+and this window performed the split rather than only reporting it:
+the registers went to a branch rooted in `main` with no `prompts/` path,
+and `#447` kept the charter.
+
+**Honest residue.** The tier predicate is a path glob, and this
+charter's own rule says a path glob is a claim about this repository
+that the repository can answer. `prompts/skill-extract.md` is in
+`prompts/` and is not a charter, which is why the predicate above is
+`'prompts/*-agent.md'` and not `prompts/`. That is the one file that
+makes the cheap version of this check wrong, and it is the skill seat's
+ordinary work, so it is busy.
