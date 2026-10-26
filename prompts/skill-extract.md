@@ -1876,14 +1876,14 @@ without anyone's permission.)
 **What happened, and why the PM was right.** `docs/standards/pm.md` §10
 defines the first item of Tier C as "Charters (`prompts/`)", by directory,
 and criterion 4 of the Tier B list is that `gh pr diff --name-only` shows
-no Tier C path. This file is under `prompts/`. So one file in that
-diff of forty-one escalates the whole pull request to the owner or a
-chair, and the PM's note is a correct reading of the text it was
-reading. It also
-read the diff itself rather than trusting the title, which is the form
-this register asks for everywhere, and it named the block as the path
-rather than asking for a content change, which is the distinction that
-makes the note actionable.
+no Tier C path. This file is under `prompts/`. The thirty-eighth run's
+pull request changed forty-one files, of which this one was the only file
+under that directory, and that single path escalated the whole of it to
+the owner or a chair. So the PM's note is a correct reading of the text it
+was reading. It also read the diff itself rather than trusting the title,
+which is the form this register asks for everywhere, and it named the
+block as the path rather than asking for a content change, which is the
+distinction that makes a note like it actionable in one pass.
 
 **The finding is eight days old and this seat does not get to re-derive
 it.** The exo seat established it after two seats made the same mistake in
