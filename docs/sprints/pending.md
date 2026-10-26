@@ -14,7 +14,8 @@ confirmed ancestor of this branch (`git merge-base --is-ancestor`).
    UUID (not a workflow-file artifact — read past the failing commit
    first, per pm.md §11.7, and confirmed there is no later commit on
    the branch): `docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs:26`
-   carries a full `7f3a91c4-2b6e-4d80-9a15-c3e8f0217bd9`. Same shape as
+   carries a full session UUID (`7f3a91c4`, truncated here per the
+   gate's own rule). Same shape as
    the two session-UUID leaks `docs/decisions.md` already closed out
    today (security's audit quote, this seat's own echo of it) — the
    gate is working as designed, catching a model that reused a session
