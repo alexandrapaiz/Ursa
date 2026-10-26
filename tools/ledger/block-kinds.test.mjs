@@ -97,8 +97,9 @@ test('a scan heading whose First step declines work is still an idea, and says i
   // literal on purpose (block-kinds.mjs says why reading the sentence was
   // refused), so this stays an `idea`. What changes is that the
   // classification now carries enough for check.mjs to explain WHICH of the
-  // two paths made it one, because the missing-field message alone sent a
-  // seat after the heading spelling.
+  // three paths in the sweep test below made it one. The missing-field
+  // message alone sent a seat after the heading spelling, and the heading
+  // was never the problem.
   const c = classifyBlock(
     entry(
       [
@@ -109,6 +110,23 @@ test('a scan heading whose First step declines work is still an idea, and says i
     ),
   );
   assert.equal(c.kind, 'idea');
+  assert.equal(c.announcesScan, true);
+});
+
+test('a well-formed scan note announces a scan and is one', () => {
+  // The pair to the test above: announcesScan is true for both, and `kind`
+  // is what differs. Asserting it here stops a future change from making
+  // announcesScan a synonym for `kind === 'scan'`, which would make the
+  // explanation in check.mjs unreachable in the only case it is for.
+  const c = classifyBlock(
+    entry(
+      [
+        '### 2026-10-24 — Craft scan: a competitor',
+        'Prose about what it does and what Ursa does better.',
+      ].join('\n'),
+    ),
+  );
+  assert.equal(c.kind, 'scan');
   assert.equal(c.announcesScan, true);
 });
 
@@ -147,14 +165,9 @@ const realBlocks = parseLedger(readFileSync(LEDGER, 'utf8'));
 const classified = realBlocks.map((b) => ({ block: b, c: classifyBlock(b) }));
 
 test('every real heading that announces a scan is classified as one', () => {
-  // A sweep for the failure that matters: a heading announces a scan and the
-  // block is nonetheless an `idea`, so the gate goes red on a note that owes
-  // nothing. Two causes reach that state. Either a seat invents a spelling
-  // SCAN_TITLE does not know, which is the one this test was written for, or
-  // the note carries a `- First step:` label and COMMITS_WORK reclassifies
-  // it, which is the one that then happened, on `main`, on 2026-10-26.
-  // Keep both in the failure message: the first instance was diagnosed as
-  // the first cause by a seat reading a message that named no other.
+  // A sweep for the failure that matters: a seat invents a spelling of the
+  // scan heading that SCAN_TITLE does not know, the block silently becomes an
+  // `idea`, and the gate goes red on a note that owes nothing.
   //
   // The sweep has to be looser than SCAN_TITLE or it tests nothing, and it
   // cannot be as loose as "the title mentions a scan" or it sweeps in ideas
@@ -178,12 +191,14 @@ test('every real heading that announces a scan is classified as one', () => {
   assert.deepEqual(
     missed,
     [],
-    'a heading that announces a scan is not being classified as one, so it owes §4’s five ' +
-      'fields and will go red. Two causes, and the second is the one that has actually ' +
-      'happened: either SCAN_TITLE does not know this spelling, or the block carries a ' +
-      '“- First step:” label and COMMITS_WORK took the exemption away. Check the label ' +
-      'first — on 2026-10-26 this test went red for the second cause and the message named ' +
-      'only the first, and the seat that read it reported a spelling defect that did not exist',
+    'a scan note the classifier does not recognise owes §4’s five fields and will go red. ' +
+      'THREE causes, not two. (1) The heading needs the standard spelling, or (2) SCAN_TITLE ' +
+      'needs the new one, or (3) — the one that actually happened, twice, on 2026-10-26 — the ' +
+      'heading is fine and the block carries a `- First step:` line, so COMMITS_WORK demoted it ' +
+      'to an idea. Check for (3) first: it is the only one of the three where the heading above ' +
+      'looks correct. A scan note with nothing to propose states that in prose, as the ' +
+      '2026-10-23 npm-and-PyPI note does, rather than writing `First step: no adoption proposed`, ' +
+      'because the classifier reads whether the field is present and not what it says.',
   );
 });
 

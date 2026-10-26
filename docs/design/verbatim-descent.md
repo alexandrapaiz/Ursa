@@ -2,8 +2,11 @@
 
 Engineer run 2026-10-14. Continues the ledger entry "Two thirds of the
 characters sold as verbatim have a rival nobody asked about"
-(`docs/ideas.md`, 2026-10-13, status `urgent`), and the fix shipped the
-day before it in `docs/design/verbatim-byte-identity.md`.
+(`docs/ideas.md`, 2026-10-13, status `urgent` on the day this ran), and
+the fix shipped the day before it in
+`docs/design/verbatim-byte-identity.md`.
+
+<!-- closes: docs/ideas.md 2026-10-13 "Two thirds of the characters sold as verbatim have a rival nobody asked about" -->
 
 Held to the engineering-artifact standard in `prompts/engineer-agent.md`:
 a system diagram whose nodes are real, interfaces as TypeScript

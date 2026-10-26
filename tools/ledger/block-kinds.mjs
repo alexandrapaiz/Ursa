@@ -84,12 +84,14 @@ const SCAN_TITLE = /^(craft|competitive)\s+scan\b\s*(\([^)]*\))?\s*:/i;
  *
  * THE RULE IS LITERAL, AND THAT IS THE DESIGN. The test is the presence of
  * the LABEL, never what the sentence after it says. Measured on `main` at
- * 2026-10-26: the engineer seat's hook run appended `- First step: no
- * adoption proposed. Neither tool fits, because ...` to a block headed
- * `Craft scan: tesh 0.3.2 and txm 8.2.0`, a first-step line whose own
- * content declines to propose any work. COMMITS_WORK fired on the label,
- * the block became an `idea`, it owed five fields and carried three, and
- * the gate went red on the default branch for a day.
+ * 2026-10-26, twice in one morning. The engineer seat's hook run appended
+ * `- First step: no adoption proposed. Neither tool fits, because ...` to a
+ * block headed `Craft scan: tesh 0.3.2 and txm 8.2.0`, a first-step line
+ * whose own content declines to propose any work, and a later run of the
+ * same seat wrote the same shape into its own note. Both times COMMITS_WORK
+ * fired on the label, the block became an `idea`, it owed five fields and
+ * carried three, and the gate was red on the default branch itself rather
+ * than on anyone's branch.
  *
  * The alternative was considered and refused: read the sentence and exempt
  * the ones that decline. "No adoption proposed", "nothing to build here",
@@ -106,7 +108,10 @@ const SCAN_TITLE = /^(craft|competitive)\s+scan\b\s*(\([^)]*\))?\s*:/i;
  * only cause the message named, and reported that the heading used a
  * spelling the classifier does not recognise. SCAN_TITLE matches
  * `Craft scan:` and always did. One run was spent on a diagnosis the
- * message had made the obvious one.
+ * message had made the obvious one, and the handoff then recommended the
+ * repair that would have changed nothing. The test's own failure message
+ * named the same single cause, which is why `block-kinds.test.mjs` now
+ * lists all three and says to check this one first.
  */
 const COMMITS_WORK = /^-\s+First step:/m;
 

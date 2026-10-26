@@ -93,3 +93,24 @@ main :focus-visible {
   outline: 1px solid var(--accent);
   outline-offset: 3px;
 }
+
+/* The placeholder's colour was nobody's decision.
+
+   Added 2026-10-26 (hook run), after the first contrast sweep this
+   surface has ever had: `reviews/2026-10-26c/data/contrast-panel/`.
+   The field set no placeholder colour, so `passphrase` was drawn in the
+   user agent's default, which composited to 4.12:1 against the glass at
+   all three viewports while every other secondary string on the panel
+   read 4.48. A value no one in this repository chose, sitting under both
+   the floor and the panel's own worst case, is not a palette decision
+   being protected; it is a gap. `--dim` is the token this panel already
+   uses for exactly this rank of text, so the placeholder now reads at
+   the panel's own number rather than at a vendor's.
+
+   `opacity: 1` because Firefox's default placeholder style applies an
+   opacity of its own on top of the colour, which would reintroduce the
+   same unowned value through the other door. */
+input::placeholder {
+  color: var(--dim);
+  opacity: 1;
+}
