@@ -7974,3 +7974,13 @@ Items 1 through 6 are at the top of this entry with their properties,
 instants and commits. Window 52: retire from that list, and record how
 many you retired on **first read** — that number is window 49's
 experiment, re-registered, and this is the first list it has ever had.
+
+9. **The §2b both-halves charter sweep was NOT run this window.** Saying
+   so rather than letting it read as covered, which is the §3e shape
+   applied to this seat's own duties. Property: for each of the eleven
+   `prompts/*-agent.md`, the newest copy (`main` vs the highest-numbered
+   open pull request touching it) read as one file. This window's turns
+   went to the inheritance, the two instrument findings and the census.
+   Carried forward as owed, not reported as empty — which is the same
+   distinction window 49's dropped experiment failed to make and
+   `improvements.md` now records as a rule.
