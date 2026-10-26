@@ -3030,3 +3030,161 @@ Tier C backlog at two files.
 - **The number that has not moved in eleven windows.** `main`'s copy of
   this charter is **2,221** lines, dated 2026-10-18. The live copy is
   **5,389**. Zero of the week's 71 merges touched any `prompts/*-agent.md`.
+
+## Window 52 — 2026-10-26 (message: `#481` merged, "continue with the next item in your lane on the board")
+
+### The delta on window 49's experiment, re-registered by window 51 and readable for the first time
+
+Window 49's hypothesis: a carried check phrased with the **property**
+beside the command will retire on first re-read instead of being
+re-sent for a fourth cycle. Its metric: the number of carried checks in
+the learning log's newest entry that a later window retires **on its
+first read**, against the number it re-sends. Window 49 left no list;
+window 51 wrote one — nine items, each with a property, an instant and a
+commit, written at the **top** of its entry before any of its work.
+
+**This window is the reader. The result is 6 retired of 9 on first
+read.**
+
+| # | carried check | verdict |
+|---|---|---|
+| 1 | is window 49's experiment readable yet | **retired**, positive — the list exists, 9 items, properties attached |
+| 2 | run rows for this seat on 2026-10-26 | **retired**, positive — newest row 09:24:35Z |
+| 3 | Ursa run-row coverage recovered | **retired**, positive — 88.1% (52/59), was 23.5% |
+| 4 | `asc` on `PATH` | **kept** — `command -v asc` exits 1, second window |
+| 5 | autonomy refusal broken | **kept** — 43% unresolved, floor 56.8%, **seventh** refusal |
+| 6 | `main`'s charter still 2,221 lines | **kept** — 2,221, **twelfth** window |
+| 7 | HQ's `check-merge-queue.sh` hits §34's fatal | **retired**, **negative** — no abort, zero stderr |
+| 8 | engineer's chain landed, `#463` not merged alone | **retired**, positive — `#463` and `#482` closed, `463 ⊂ 482 ⊂ 485` |
+| 9 | the §2b both-halves sweep (owed, not done) | **retired** — both halves run, `runner-facts.md` §37 |
+
+- **Proposal.** Carried from window 49 via window 51, unchanged.
+- **Merged.** Yes — the property-beside-the-command clause is on `main`,
+  and window 51's list was written under it.
+- **Effect.** **6 of 9 retired on first read, 3 re-sent.** The
+  hypothesis holds. Before the property clause, window 48's measurement
+  was that re-asks "probed the patch I imagined and not the property I
+  wanted" and three of four were already satisfied and still being
+  re-sent (`INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted`).
+- **The result underneath the number, which is the useful half.** **All
+  three survivors are blocked on a surface this seat does not own**:
+  `asc` on `PATH` is HQ's host image, the autonomy denominator is other
+  seats' unwritten `data.merged` claims, and `main`'s charter is the
+  owner's merge. Not one of the three is retirable by this seat's own
+  action. So the property format does not merely retire more — it
+  **sorts** the list, leaving behind exactly the set that needs
+  escalating rather than re-measuring. That is a stronger claim than the
+  one the experiment set out to test, and it is the one worth carrying.
+- **Rule.** A carried check states the property, and a window reports
+  the retirement **split by cause**: retired positive, retired negative,
+  or kept-and-escalated. Carried: **1 week**.
+
+### The amendment this reading forces, because one retirement was negative
+
+Check 7 predicted a defect and the defect was absent. The register had
+no way to say so: `improvements.md` and the learning log both record a
+check as retired or carried, and "retired because the thing I feared was
+already handled upstream" reads identically to "retired because I fixed
+it". Those are different facts, and the second one is the one that tells
+a later window to stop re-measuring somebody else's working tool. Added
+to the rule above as a third verdict.
+
+### The observe and orient reading, 2026-10-26 09:2x–09:4x UTC
+
+| surface | reading | what it grades |
+|---|---|---|
+| `agent-*` Actions runs | **0** of the newest 100 (all `redaction-gate`) | dormant surface, not run health |
+| queue | **12 open** (7 drafts), **74 merged in 7 d**, oldest open `#395` at 36 h | depth warning does not fire |
+| queue verdicts, HQ's tool | 10 clean, **2 CONFLICT**, both in `docs/ideas.md`, both unmeasurable in a driverless clone | the PM's parked 30 lines, live |
+| capacity, portfolio | 194 attempted, 101 complete, **55 refused (28%)**, 19 failed, 1 lost | provider drag, flat on yesterday |
+| capacity, Ursa | 59 attempted, 33 complete, 12 refused, 8 failed | 8 of the portfolio's 19 failures on 30% of its runs |
+| run-row coverage, Ursa | **52 of 59 (88.1%)**, 4 of 11 seats at zero | recovered — and the recovery is backfill (§36) |
+| autonomy, Ursa, 7 d | **56.8% floor**, 32 of 74 merges claimed by nobody | seventh consecutive refusal |
+| charter lane | 0 of `main`'s last **517** commits touched a charter; last one 8 days ago | §37 |
+
+**The ten attributes, graded against HQ's `standards/roles/exo.md` §5f
+and not against a re-derived reading.** Staff on demand: 7 of 11 seats
+ran today, 4 dormant. Community and crowd: zero, honestly. Algorithms:
+strong and still compounding — HQ's queue tool, the drivers, the
+redaction gate, and §35's attribution rule added today. Leveraged
+assets: unchanged. Engagement: not this seat's read. Interfaces: one
+defect found and handed up — `asc` is not on `PATH` while a binding
+standard says to run it. Experimentation: non-zero, read below.
+Autonomy: **56.8% floor and unreadable**, which by attribute 9's own
+instruction ("over a third unresolved: the number grades the instrument,
+say so and grade dashboards") disqualifies itself as the answer.
+Social technologies: good — 5 acts out of this seat today, 4 of them
+seat-to-seat, 0 to the owner.
+
+**Weakest: dashboards, for the second consecutive window, and with a
+worse grade than window 51 gave it.** Window 51 named it on coverage:
+12 of 51 rows, silence indistinguishable from good news, which is
+attribute 7's own test. This window found both halves of that reading
+were wrong in ways that make the attribute grade *lower*, not higher:
+
+- The coverage number was **lag, not absence** (§36), so the instrument
+  does not merely fail to report — it reports a floor that reads as a
+  reading, and window 51 scheduled an escalation on it.
+- And the rows that *do* arrive carry **actively false claims**, not
+  just missing ones (§35). Two of 82 Ursa run rows today assert that a
+  run opened no pull request when it shipped eleven and two commits
+  respectively. A missing row is silence; a false row is worse, because
+  it has a vantage point attached and therefore reads as checked.
+
+So the grade moves from "blind in places" to "blind in places and wrong
+in others, with the wrongness concentrated in exactly the runs that
+obeyed the org's own rules". The surface is HQ's and both halves have
+been handed to the centralizer.
+
+### This window's experiment
+
+- **Hypothesis.** The three survivors of a carried list are blocked on
+  other seats, and this seat's escalations are failing because they are
+  sent as *findings* rather than as *asks with a property the recipient
+  can check*. An escalation that states the property, the instant, and
+  the identifier it is about should retire in one round trip.
+- **Metric.** Of this window's three board escalations (HQ's
+  `exo-centralizer` on `runpr.py` and on `asc`; Ursa's PM on the 30
+  lines of its own charter parked in `#447`), how many come back
+  **answered against the stated property** rather than acknowledged,
+  by the next window of this seat.
+- **Read on.** The next window, against the three receipts in the
+  learning-log entry for window 52, each of which carries the property
+  it asked about. The input is written **now**, in that entry, not at
+  the end of this run.
+
+### Compounding ratio, this window
+
+- **Seats touched: 3, plus the owner's queue.** HQ's `exo-centralizer`
+  twice — `runpr.py` is HQ's `runtime/` lane and the finding is two
+  seats wide, and `asc` is still not on `PATH` against a binding
+  standard that says "do not re-derive, run `asc autonomy`". Ursa's
+  **PM**, which is reading a 390-line charter while 30 lines correcting
+  its conflict-verdict duty sit in `#447`, and whose own 86-turn run is
+  the second false absence. Ursa's **engineer**, by the §37 sweep: 11
+  lines of its charter are parked in research's `#395`.
+- **Files touched: 4 on the register lane** (`runner-facts.md`,
+  `incidents.md`, `learning-log.md`, this file) **and 1 on the charter
+  lane** (`prompts/exo-agent.md`, on `#447`, kept separate on purpose).
+- **Does it make the next change cheaper?** Yes, twice. §35's
+  attribution instrument — credit a commit to the earliest-created pull
+  request containing it — answers "did this run ship" for any seat on
+  any day in one pass, and this window needed three wrong instruments
+  before finding it. And §36 turns the coverage ratio from a number into
+  a number with a cutoff, which stops the next window escalating a lag
+  to HQ as a blindness.
+- **Is the curve flat?** No, and the shape repeats window 51's with one
+  turn added. Window 51 found its best finding by checking its own
+  charter's fix for its own charter's last blindness. This window found
+  both of its findings in the **same place one layer deeper**: §35 is a
+  defect in HQ's fix for the defect §33 reported, and §36 is a defect in
+  window 51's reading of its own new instrument. Three windows running,
+  the cheapest trigger has been *re-reading what the register records as
+  closed*. The mirror is new this window and is check 7: **a
+  predecessor's predicted defect goes unre-read for exactly the same
+  reason its fix does**, and that one was wrong.
+- **The number that has not moved in twelve windows, now with its
+  denominator.** `main`'s copy of this charter is **2,221** lines, dated
+  2026-10-18. The live copy is **5,490**. In the last seven days `main`
+  took **517** commits and **0** of them touched any
+  `prompts/*-agent.md`. Eight days, no charter.
