@@ -13021,3 +13021,145 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   remaining 36, not a correction to the six already done by hand.
 - Cost: $0
 - Status: proposed
+
+## Competitive scan — 2026-10-26 (message run, 10, engineer's craft scan)
+
+**Product scanned:** GitHub's own merge queue, read today at
+`docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue`.
+Chosen because this run built a merge-order measurement for Ursa's queue,
+and GitHub has been running one at population scale for years, so its
+design decisions are evidence rather than opinion. The same rotation rule
+the 2026-10-26 hook run used.
+
+**The thing worth stealing, and only half-stolen today.** A merge queue's
+candidate merge is not the head against the trunk. GitHub's documentation
+is explicit: "the changes in the pull request are grouped into a
+`merge_group` with the latest version of the `base_branch` as well as
+changes from pull requests ahead of it in the queue." So the base of
+position *n* is the trunk plus positions 1 through *n-1*, and a collision
+between two heads that are each clean against the trunk is caught by
+construction rather than by a separate hunt. Ursa's queue measures each
+head against `origin/main` alone, which is precisely why the exo seat's
+2026-10-26 report had both #530 and #544 `MERGEABLE` and had to isolate
+their collision by hand. `tools/ledger/pairwise.mjs`, added this run,
+measures ordered **pairs**, which is the two-element case of GitHub's
+construction and not the general one. The general one is a ledger idea
+below, since it is cheaper rather than more expensive: a published order of
+*n* heads is *n-1* prefix merges, against the *n(n-1)* ordered pairs this
+run measured.
+
+**The thing Ursa does better, and it is a cost-structure argument rather
+than a taste one.** GitHub's failure handling is eviction. "If there are
+failed required status checks or conflicts with the base branch, the pull
+request will be removed from the queue." One policy, applied to every
+conflict, with no notion that some conflicts are resolvable by a committed
+merge driver and some need a person. That policy is right for GitHub,
+whose conflicts are source-code conflicts that genuinely need judgment, and
+it is wrong here, because this repository's conflicts are overwhelmingly
+two seats appending entries to the tail of an append-only register. Worse,
+GitHub's server-side merge honors no `.gitattributes` merge driver at all,
+which this repository measured on 2026-10-01 and recorded as Finding 1 of
+`docs/design/server-side-merge-measurement.md`. A GitHub merge queue run
+over today's thirteen open heads would therefore have evicted five of them
+on `docs/ideas.md`, each for a conflict that `tools/ledger/union-merge.mjs`
+resolves with no human input. `pairwise.mjs` reports the remedy instead of
+the verdict: all fourteen ordered collisions measured today classify
+`driver-resolvable`, zero need a human, and the remedy named per pair is
+one existing command, `bash tools/ledger/requeue.sh --push <second>`.
+
+### 2026-10-26 (engineer, message run, 10) — Measure a published merge order as a prefix chain, which is n-1 merges, instead of as every ordered pair, which is n(n-1)
+
+- Trigger: this run's own cost. `tools/ledger/pairwise.mjs` measured 23
+  candidate pairs and 46 ordered sequences over 13 open heads to answer one
+  question the exo seat had already narrowed to a single pair, and GitHub's
+  merge queue documentation, read in the same run, shows the cheaper shape:
+  the base of queue position *n* is the trunk plus positions 1 through
+  *n-1*, so a published order of *n* heads needs *n-1* merges and catches
+  every collision the order would actually hit.
+- What: a mode of `tools/ledger/pairwise.mjs` that takes an explicit merge
+  order rather than a set, merges it as a prefix chain in one worktree, and
+  reports the first position whose merge is not clean, measured in both of
+  the arms the tool already has. The pair mode stays, because it answers a
+  different question: pair mode finds collisions that exist for *some*
+  order, which is what you want before an order is published, and chain
+  mode verifies the one order that was published, which is what the exo
+  seat and the owner actually execute. Chain mode is also the only one that
+  can report a collision between three or more heads, where each pair is
+  clean and the third merge is not, and this run measured no such case
+  because its pair-only method cannot see one.
+- First step: add `--order <n>,<n>,<n>` to `tools/ledger/pairwise.mjs`,
+  reusing the exported `sequence` helper by merging cumulatively rather
+  than resetting to the base between positions, and a fixture in
+  `tools/ledger/pairwise.test.mjs` with three heads whose three pairs are
+  all clean and whose three-way chain conflicts. If that fixture cannot be
+  built on this repository's register grammars, record that as the finding
+  and leave pair mode alone.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 10) — A seat's fresh clone measures every register co-append as a conflict, because registering the merge drivers is a per-clone step no seat's first act performs
+
+- Trigger: this run's own first measurement was wrong in exactly this way.
+  In the clone as delivered, merging the skill seat's #544 and then this
+  seat's #540 conflicted on `docs/ideas.md`. After one command, `bash
+  tools/registers/install-drivers.sh`, the identical merge of the identical
+  commits exited 0 with zero conflicted paths and the driver's own line,
+  "16 block(s) taken from the other branch, 0 removed." Nothing else
+  changed. The exo seat's note that opened this run reports the same
+  collision as a property of the two branches, and recommends a manual
+  rebase on the strength of it, which is the conclusion a clone without the
+  drivers supports.
+- What: the drivers live in `.git/config`, which is per-clone and never
+  committed, and `tools/registers/install-drivers.sh` is the only thing
+  that writes them. Two tools already refuse to run without it:
+  `tools/ledger/requeue.sh` calls the installer and exits 2 if it fails,
+  and `tools/ledger/pairwise.mjs` (this run) throws if the arm that is
+  supposed to have no driver has one. Everything else a seat does with
+  `git merge` is unprotected, including every merge a seat performs to read
+  another seat's branch. `tools/ensure-full-clone.sh` already exists as
+  this repository's answer to "the clone you were given does not answer
+  history questions truthfully", with a `--check` mode and documented exit
+  codes, and merge truthfulness is the same class of fault: git answers,
+  at exit 0, with a conflict that is not a property of the commits.
+- First step: extend `tools/ensure-full-clone.sh` with a third repair
+  beside depth and refspec, which runs `tools/registers/install-drivers.sh`
+  and reports it in the same one-line-per-repair format, and extend
+  `tools/ensure-full-clone.test.mjs` with the case that fails today: a
+  fresh clone where two register appends conflict before the repair and
+  merge clean after it. Do not move the installer's logic; call it, so the
+  `.gitattributes` agreement check it already performs stays in one place.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 10) — The queue depth the owner is told counts heads that contain each other, and nothing names the one head per seat that subsumes the rest
+
+- Trigger: this run checked its own three open heads with `git merge-base
+  --is-ancestor` and found that #540 contains both #520 and #530. So three
+  of the five heads that collide on `docs/ideas.md` today are one piece of
+  work and one decision, and the charter's own rule for this ("the newest
+  one usually contains the older ones already, so check with `git
+  merge-base --is-ancestor`") puts the check on each seat, once per run,
+  by hand, from memory it does not have.
+- What: a report that groups every open head by its branch-name seat
+  prefix, computes the containment relation within each group, and prints
+  the maximal heads plus, for each non-maximal head, the head that contains
+  it. Two things follow from it that nothing produces today. The owner gets
+  a queue depth counted in decisions rather than in heads, which for this
+  seat today is one rather than three. And a seat's first act, which the
+  charter already defines as finding its own unlanded work, becomes reading
+  one line instead of running a pairwise ancestry check it has to remember
+  to run. The relation is cheap: containment needs no merge, only
+  `git merge-base --is-ancestor`, which is why this belongs beside
+  `pairwise.mjs` rather than inside it.
+- First step: `tools/ledger/containment.mjs`, taking the open head list
+  from `gh pr list --json number,headRefName`, fetching each as
+  `refs/prs/<n>`, and printing one block per seat prefix naming the maximal
+  heads and the containment edges. It must call
+  `tools/ensure-full-clone.sh` first and refuse to report otherwise,
+  because `--is-ancestor` on a shallow clone exits non-zero for a contained
+  pair, and non-zero means NOT CONTAINED, which is the opposite of the
+  truth. That failure mode is already written down in
+  `tools/ensure-full-clone.sh`'s own header and is the reason this entry
+  names the dependency rather than leaving it to the implementer.
+- Cost: $0
+- Status: proposed
