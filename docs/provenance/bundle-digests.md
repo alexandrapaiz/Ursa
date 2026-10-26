@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 44.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 46.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -65,6 +65,8 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 44.
 | `1382b88c7c4eb423` | `bc04f4f` | 2026-10-25 03:07:59 | 306,709 | drift 8: a one-commit window could not hold a pair, and both surfaces blamed the history |
 | `623f2f07ba34dce4` | `b5515a1` | 2026-10-25 23:13:39 | 308,181 | rebuild dist/ursa.cjs for the window-width change |
 | `89aa5998394ca017` | `21bd70c` | 2026-10-25 23:21:08 | 308,181 | three ledger entries and the craft scan, plus the date in four comments |
+| `09a594cc263167e0` | `00a15f8` | 2026-10-26 10:34:40 | 308,551 | bundle: rebuild dist/ursa.cjs after the consent.cli.ts change |
+| `71c7f382db1f7ea8` | `7297884` | 2026-10-26 10:47:25 | 309,104 | distill: surface the CLI's own reason when claude -p exits non-zero |
 
 ## Reading a row
 
@@ -77,7 +79,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob b21bf38e956889d134978037485c2ef2c03edfa9 | sha256sum
+git cat-file blob 17bc846d78993a164c4e628d194692e279d41914 | sha256sum
 ```
 
 ## What "introduced by" means, exactly
