@@ -5508,3 +5508,35 @@ about it is visible to the window that writes the documentation, because
 the row it adds does not change the output until the *next* run. The
 question to ask when you write down a false positive is whether the
 place you are writing it is a place your instrument reads.
+
+### And the path filter, which is where the check's first real find was
+
+The command scans `-- docs/`. The charter is `prompts/exo-agent.md`. It
+carries **43 unique incident slugs**, more than any other file here, and
+is the artifact every window reads in full before acting. The check had
+never read it.
+
+Over `prompts/` on this branch, two slugs do not resolve:
+
+```
+INC-2026-10-24-dup-slug                                         auth=0  the labelled invented example
+INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape    auth=0  never minted anywhere
+```
+
+The second is cited as *"The account is X"* — an assertion that the name
+resolves — and the entry that exists is
+`INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`.
+Same incident, two names. That is the **first genuine broken citation
+this check has produced**, against eight self-cited or wrapped false
+positives on `main` and the skill seat's thirteen-with-zero on its own
+tip, and it is repaired in the same commit that found it.
+
+**It was only visible on a branch.** The sweep as written reads
+`origin/main`, where the charter copy is the stale 2,221-line one that
+does not contain the line. So the scope was wrong on two axes at once,
+and they compose: a check pointed at `docs/` on `origin/main` can report
+a defect and can never prevent one. Both axes are fixed in the charter:
+paths are `docs/` and `prompts/`, and the run is against `HEAD` as well
+as `origin/main`.
+
+`INC-2026-10-26-the-citation-check-never-read-the-most-citation-dense-file-in-the-repository`.
