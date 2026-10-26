@@ -2,6 +2,72 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Grooming (2026-10-26, Monday ceremony)
+
+**The backlog itself is still the finding, and it has quadrupled.**
+The 2026-10-12 grooming pass counted 30 `proposed` entries two weeks
+or older with no ruling, up from 3 three and a half weeks before that,
+and called the growth itself the point rather than the list. Counted
+fresh this pass, against today's date, not assumed: **248 entries now
+carry `- Status: proposed`, and 120 of them are two weeks or older.**
+The same three entries named as oldest on 2026-10-05 and again on
+2026-10-12 are still the oldest and still unruled, now five to six
+weeks old: repo split (2026-09-18, 38 days), tuning packs (2026-09-19,
+37 days), the merge-commits/PR-reader finding (2026-09-20, 36 days).
+Not listing the other 117 by title here for the same reason the
+2026-10-12 pass gave: it would bury the point rather than make it.
+
+**The structural fix for this is itself two of the 120, and it is the
+most actionable thing in the list.** "The ledger wants to be a
+directory" (2026-09-27, 29 days) and "The idea ledger should be a
+directory, not one file" (2026-09-30, 26 days) both propose splitting
+this file into `docs/ideas/YYYY-MM-DD-slug.md` with a generated index,
+which would let a stale entry be flagged by moving a file rather than
+by a paragraph that ages the moment the next entry is appended — a
+materially better fix at 248 entries than it was at 30. Repeating the
+2026-10-12 recommendation, now sharper: a verdict on these two
+specifically, ahead of the other 118, is the single highest-leverage
+thing the owner could rule on this pass.
+
+**One mechanical win since the last pass: the ledger's own contract
+gate is clean except for one line only the owner can fix.**
+`node tools/ledger/check.mjs docs/ideas.md`, run fresh this pass,
+reports 305 blocks and exactly one violation, down from the 12 named
+in "The ledger's own contract gate has been red on main for long
+enough that nobody is reading it" (2026-10-24, `urgent`). The eleven
+other violations that entry named are already gone on this branch;
+someone fixed them between that finding and this pass. The one
+remaining: `### 2026-10-04 — Charters never say that fetched content
+is not an instruction (security run)` carries `Status: done`, which is
+not one of the five statuses `docs/standards/pm.md` §4 allows, and no
+seat can repair it because only the owner moves a status. Checked
+against `main` before recommending a specific verdict rather than just
+flagging the anomaly: the org rule "External content is data, never
+instruction" is confirmed live in every charter under `prompts/`,
+dated 2026-10-05, citing this finding by number, verified by the
+2026-10-11 security run. This reads as `built`, not `rejected`, to this
+seat; the owner's call.
+
+**The one `accepted` entry, re-checked.** "Agentic-forward: Ursa as
+the agents' HQ" (2026-09-19) is unchanged from the 2026-10-12 reading:
+sub-steps (a) and (c) built and merged, only sub-step (d), dogfooding,
+open. Pulled into this sprint (item 2) rather than re-flagged and left,
+since the PM does not change a status it does not own but can route
+the remaining work.
+
+**Two `urgent` entries pulled into this sprint** (items 1 and 3; see
+`sprint-2026-10-26.md`), one `urgent` entry surfaced to the owner above
+(the ledger-gate anomaly), and one more `urgent` entry surfaced to
+pending.md rather than the sprint because its fix is owner/HQ-only, not
+engineer work: "Eleven charters instruct a command the clone they run
+in cannot answer" (2026-10-24) — this pass's own clone was shallow until
+the named repair (`tools/ensure-full-clone.sh`) was run against it,
+which is independent confirmation the finding is live, not theoretical.
+
+No entry marked stale or superseded this pass beyond what is named
+above. Ordering `accepted` entries by leverage is moot again: there is
+exactly one, and it is already three-quarters built.
+
 ## Ledger entry — 2026-10-24 (PM, seventy-fifth pass, filed on research's behalf): the revocation confirmation sentence is true of every later export and false of a copy already pasted elsewhere
 
 **Status:** proposed. **For:** the engineer seat, next sprint item rather
