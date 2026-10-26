@@ -1,0 +1,9 @@
+# Frame diff, the locked panel (the passphrase field), before vs after.
+# node docs/design/review-kit/diff-frames.py before/locked after/locked
+# Frozen frames, 1x. The field's 44px target was re-mechanised; this is
+# the check that it spent no layout, which is the claim L3 makes for it.
+
+home-desktop.png                            0 px    0.000%  identical  (same size)
+home-phone.png                              0 px    0.000%  identical  (same size)
+home-tablet.png                             0 px    0.000%  identical  (same size)
+

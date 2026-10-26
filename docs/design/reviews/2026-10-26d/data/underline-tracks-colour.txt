@@ -1,0 +1,6 @@
+at rest:                 {"color":"rgb(139, 147, 167)","underline":"rgb(139, 147, 167)","declared":"(not set inline)"}
+hovered, scrubbed   0ms: rgb(139, 147, 167)     rgb(139, 147, 167)     same
+hovered, scrubbed  40ms: rgb(152, 171, 205)     rgb(152, 171, 205)     same
+hovered, scrubbed  80ms: rgb(161, 187, 231)     rgb(161, 187, 231)     same
+hovered, scrubbed 120ms: rgb(166, 196, 245)     rgb(166, 196, 245)     same
+hovered, scrubbed 160ms: rgb(168, 199, 250)     rgb(168, 199, 250)     same
