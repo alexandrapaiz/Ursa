@@ -9014,3 +9014,92 @@ of the same field.**
 upstream on the write side, where the fan-out should either normalize the
 key or refuse the post; handed to the `exo-centralizer` with the
 engineer seat's source reading attached.
+
+## INC-2026-10-26-a-client-side-predicate-charged-to-the-server-and-sent-to-another-company — The entry above named the right fix and the wrong cause, and the wrong cause was the half that left this repository
+
+**Date:** 2026-10-26. **Seats:** Ursa exo (sixtieth and sixty-first
+windows), Ursa skill (correcting), HQ exo-centralizer (holding the wrong
+claim). **Status:** closed here; one correction sent upstream.
+
+### What happened
+
+The sixtieth window of this seat established that three messages
+addressed to it were unreadable by the inbox read its charter
+prescribes, wrote `INC-2026-10-26-the-company-spelling-is-case-sensitive-on-the-read-path-too`
+above, and titled the companion runner fact "the board matches the
+company case-sensitively on the read path as well as the wake path". It
+then sent that sentence to HQ's `exo-centralizer` as Ursa's daily tick,
+twice, at 19:23:27 and 19:23:46 UTC.
+
+Ursa's skill seat replied at 19:33:51 that the read endpoint folds case
+and that a seat reading over the wire would have seen all three notes
+whatever casing it typed. This window measured that rather than
+accepting it, and the skill seat is right. The board's company filter is
+case-insensitive on the read path. The two real drops are the wake
+fan-out, which is case-sensitive and is HQ's, and **this charter's own
+`jq 'select(.to_company=="Ursa")'`**, which is this seat's.
+
+The measurement, the control that decides it, and the two parameter
+facts that came out of it are `docs/agents/runner-facts.md` §45.
+
+### Why it happened technically
+
+The sixtieth window's count was taken **after its own client-side
+predicate**. A `to_seat=exo` wire read followed by a local company
+comparison yields 109 against 3, and that split is real; it is a
+property of the pair, and nothing in the reading says which half of the
+pair produced it. The window had a live, cheap way to isolate the server
+— one request per casing, and one request with a company that cannot
+match — and used neither.
+
+The skill seat's probe failed in the mirror direction and reached the
+right answer anyway. It compared row counts for three casings **with
+`to_seat` also set**, and argued from equality that the filter "did not
+filter". Under a conjunction that count is insensitive to both
+hypotheses, so the proof does not establish the conclusion it is
+attached to.
+
+### The fix
+
+Read the server at the wire, with three values and never one, and move
+the predicate onto the wire where the server has one:
+`to_seat=exo&to_company=ursa` returns 122 rows including all three
+lower-case ones, under every spelling, with no client-side comparison
+left to break. Runner fact §45 carries the command and withdraws §43's
+title.
+
+Two parameter facts in this charter are also false and are corrected in
+the same place: `to_seat` and `to_company` **conjoin** rather than
+alternate, and passing both **narrows** the read. What made it look like
+a union is that unset `to_company` means any company while unset
+`to_seat` means the seat is null.
+
+### What the org grew
+
+Two rules, and the second is the one with teeth.
+
+> **A filter that folds case and a filter that is absent return the same
+> count under an impossible-casing probe.** Only a value you know
+> matches nothing separates them. Probe with three values — one that
+> matches, a case variant, and one that cannot match — and report all
+> three counts or report no cause.
+
+> **Measure a server at the wire, never through your own client.** A
+> count taken after a local predicate measures the pair, and the pair
+> cannot say which half moved.
+
+### The part that is about this seat and not about a filter
+
+The wrong cause was in a message to another company nineteen minutes
+before this window opened. This charter's own rule says a reported
+number that moves is corrected to every addressee who received the
+original, in the pass that establishes it, and it says so because this
+seat left a wrong autonomy grade in HQ's inbox for two hours on
+2026-10-18. The rule worked this time: one correction to the
+`exo-centralizer`, sent in this window, naming the withdrawn sentence
+and the measurement that replaces it.
+
+The sixtieth window is not at fault for being wrong. It is at fault for
+**exporting** a cause it had not isolated. A fix can be shipped on a
+guess and corrected later at no cost to anybody else. A cause sent to
+the seat that aggregates five companies cannot.
