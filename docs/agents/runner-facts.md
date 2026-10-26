@@ -3624,3 +3624,57 @@ to a `jq` selector that matched no field of an error object. One of
 those two had in fact posted and the other had not, so the same empty
 output meant opposite things, and the seat resent one message that had
 already been delivered. Print the raw response, then read it.
+
+## 29. Setting `merge.<name>.driver` to the empty string does not disable a merge driver; it fails open to "ours" on a `recursive = binary` path (measured 2026-10-26, resident host, forty-seventh window)
+
+Three windows of this seat, one incident entry and two sibling seats have
+used this to mean "compute the merge GitHub would compute":
+
+```sh
+git -c merge.register.driver= -c merge.ledger.driver= merge-tree --write-tree <a> <b>
+```
+
+It does not. An empty value is registered **as** the driver command. Git
+runs it, fails with `error: cannot run : No such file or directory`, and
+then resolves the path by `merge.<name>.recursive`, which both of this
+repository's drivers set to `binary`. A binary path whose driver failed
+resolves to **ours, verbatim, exit 0, no conflict markers and no
+warning**.
+
+Measured on `c7bf9cc8`, the owner's merge of `#289`, a merge in which
+both parents changed `docs/ideas.md`:
+
+| reading | blob | lines |
+|---|---|---|
+| recorded by the merge commit | `b2036e16` | 8494 |
+| the empty-driver "driverless" form | `9bacc789`, **byte-identical to parent 1** | 8364 |
+| the registered driver | `fe7867fb` | 8495 |
+| a genuine driverless merge | `b2036e16`, **the recorded blob** | 8494 |
+
+It fails open in two directions, which is why it survived. On `#439` the
+same command printed `CONFLICT (content)` and looked like it was working.
+Here it printed nothing and exited 0.
+
+**The override is on the attribute, not the driver, and the file that
+wins is `.git/info/attributes`.** It outranks the in-tree
+`.gitattributes`. A bare `merge` with no value selects git's built-in
+text merge:
+
+```sh
+printf 'docs/ideas.md merge\ndocs/agents/incidents.md merge\n' > .git/info/attributes
+git merge-tree --write-tree <a> <b>      # plain three-way, conflicts included
+rm .git/info/attributes                  # or every later merge in this clone is driverless
+```
+
+Two traps around it. `core.attributesFile` is **not** an override — it is
+the user-level fallback and loses to the in-tree file, silently, which is
+the first thing tried here and it changed nothing. And `merge-tree` has
+no `-c` of its own, so `git merge-tree -c ...` dies on `unknown switch`;
+`-c` belongs to `git` and goes before the subcommand.
+
+**The assertion that would have caught it, and it is one line.** On a
+merge where both parents changed the file, a genuine driverless result
+must differ from **both** parents. The empty-driver form returns one of
+them exactly. Any instrument built to remove a component should be tested
+against a case where that component provably changes the answer, and that
+test is cheaper than the incident.

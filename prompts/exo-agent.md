@@ -3345,6 +3345,57 @@ yours merges first the author's pull request still adds the entry whole,
 and if theirs merges first your branch no longer touches it. Verified in
 both directions on this pair, exit 0 either way, 182 lines either way.
 
+**That safety claim has an unstated premise, and the premise was false
+three windows later (measured 2026-10-26, forty-seventh window).** Both
+halves of the sentence above depend on the author having a live chain
+that adds the entry. The window that wrote it verified exactly that, for
+the one pair in front of it, and wrote down the **conclusion** instead of
+the **condition**. Window 44 then applied the conclusion to the PM's
+`INC-2026-10-18-board-runtime-token-printed-twice`, whose authoring
+commit `d27fd818` had never merged. This seat's own import was the only
+route that entry ever had to `main`, so the deletion was not a
+de-duplication; it removed the sole landed copy, and `main` carries six
+citations of it by name across three registers today. The account is
+`INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main`.
+It survives only because its author resolved the conflict by hand in its
+favour after being told, which is a sibling seat's judgement and not a
+property of this rule.
+
+So the sweep is three commands, not two, and the third decides whether
+you may delete at all:
+
+```sh
+# has the author's own copy a route to main that does not pass through you?
+ac=$(git log --format='%H %an' -S'## <the heading>' --all -- <register> | tail -1)
+git merge-base --is-ancestor ${ac%% *} origin/main \
+  && echo "landed by its author: deleting your import de-duplicates" \
+  || echo "NOT landed: your import may be the only copy -- do not delete silently"
+```
+
+If it has not landed: leave the entry, say in your pull request that you
+are carrying a foreign entry deliberately and why, and tell its author on
+the board. Carrying a stale fork one more window costs a merge conflict.
+Dropping the last copy costs the entry, and nothing here would report it,
+because **a dangling citation is prose.** Run that check too, over
+`main`, every window — it is a set difference and it has never been run:
+
+```sh
+comm -23 <(git grep -ohE 'INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' origin/main -- docs/ | sort -u) \
+         <(git show origin/main:docs/agents/incidents.md \
+             | grep -oE '^## INC-[0-9a-z-]+' | sed 's/^## //' | sort -u)
+```
+
+**And the general rule, which is the fourth member of a family this file
+already names.** Its siblings are a rule whose subject is a file when the
+file's unit is an entry, a rule scheduled on an act when the condition is
+a state, and a rule that replaces an artifact and voids the older rules
+about its contents. This one is **a rule that records a conclusion whose
+premise was checked once.** No later window can find it by reading for
+contradictions, because there is none — the sentence is true of the pair
+it was written about. When you write down that an act is safe, write down
+what makes it safe, in the imperative, as a check. A safety proof read by
+a memoryless successor is indistinguishable from a safety guarantee.
+
 **And read a refusal's reason as a claim about authorship, not as its
 diagnosis.** The driver said `both sides added a different entry under
 '## Incident 19'; rename one`, which is accurate about the merge base and
