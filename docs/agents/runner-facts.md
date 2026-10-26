@@ -3780,3 +3780,101 @@ fix upstream and nothing to fix in the tools. It is a property of the
 host's one-config-per-repository layout meeting two correct charter
 instructions, and the only place it can be recorded is a file that
 describes the runner.
+
+## 32. The two merges of one pull request disagree in two directions, and the instrument this org runs pins one of them on purpose, so the other direction has to be measured separately (measured 2026-10-26, resident host, forty-ninth window)
+
+§29, §30 and §31 are all about the merge drivers and none of them says
+how to read the queue once you have them. This does. The two commands
+below answer two different questions and the answers differ for a real
+fraction of the open queue, in both directions.
+
+**The question each command answers.**
+
+| command | question | authority |
+|---|---|---|
+| merge with `-c merge.<name>.driver='git merge-file …'` | will GitHub's merge button accept this? | permanent. GitHub merges server-side in a clone with no drivers and nothing a repository declares can reach it. |
+| merge with the installers run in the parent clone | does the result satisfy this repository's own merge semantics? | this repository's. Only reachable by a merge a seat performs in its own clone. |
+
+**The three states, and who owes what in each.** A fourth combination,
+both refusing, is a conflict of substance and is the authoring seat's
+rebase.
+
+| button | drivers | state | owed by |
+|---|---|---|---|
+| merges | merges | `ready` | the owner, one merge |
+| refuses | merges | `needs-local-merge` | the authoring seat: installers, `git merge origin/main`, push. No judgement. |
+| **merges** | **refuses** | **`drivers-disagree`** | the authoring seat, one judgement. Not a rebase and not the owner's. |
+
+**Measured over the whole open queue on 2026-10-26 at 06:12 UTC**,
+`main` at `5b7bcf61`, twelve open pull requests:
+
+| state | count | which |
+|---|---|---|
+| `ready` | 6 | `#478 #477 #476 #473 #447 #395` |
+| `needs-local-merge` | 5 | `#475 #461 #448 #445 #441` |
+| `drivers-disagree` | **1** | `#463` |
+
+HQ's `tools/check-merge-queue.sh` reports the first column of the table
+above and names the second as its own state, `NEEDS LOCAL MERGE`. It
+reports the third as `clean`, correctly, because from its question's
+point of view it is clean. `grep -c install-driver` over that tool
+returns **zero and always will**: the repair pins the driverless merge
+deliberately, and installing drivers into it would report clean a pull
+request the button refuses. Do not read that zero as an open ask.
+
+**The commands, with the three traps that cost this window turns.**
+
+```bash
+# 1. installers in the PARENT clone, never inside a worktree (§31), then assert
+bash tools/ledger/install-driver.sh && bash tools/registers/install-drivers.sh
+git config --get merge.register.driver   # must name THIS clone's tools/
+
+# 2. re-fetch the pull refs immediately before the census (§27). A ref fetched
+#    at the top of the window is stale by the time you publish, and a stale ref
+#    reads as a conflict. This window published FAIL for its own #447 twice on a
+#    ref three commits behind the branch it had just pushed.
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet
+
+# 3. one throwaway worktree per direction per PR, and branch on the exit code
+for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+  rm -rf /tmp/wd /tmp/wn
+  git worktree add -q --detach /tmp/wd origin/main
+  git worktree add -q --detach /tmp/wn origin/main
+  git -C /tmp/wd merge --no-edit -m x refs/prs/$n >/dev/null 2>&1 && d=merges || d=REFUSED
+  git -C /tmp/wn \
+    -c merge.ledger.driver='git merge-file -L ours -L base -L theirs "%A" "%O" "%B"' \
+    -c merge.register.driver='git merge-file -L ours -L base -L theirs "%A" "%O" "%B"' \
+    merge --no-edit -m x refs/prs/$n >/dev/null 2>&1 && b=merges || b=REFUSED
+  git worktree remove --force /tmp/wd; git worktree remove --force /tmp/wn
+  printf '#%s button=%-8s drivers=%-8s\n' "$n" "$b" "$d"
+done
+```
+
+**Read the driver's own refusal rather than the exit code**, because it
+names the block and the block is the whole finding. `#463`'s was:
+
+```
+ledger driver: 1 block(s) in docs/ideas.md were edited on both sides and need a human:
+  ### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0, ...
+```
+
+**And a `drivers-disagree` is not automatically a red `main`.** The
+driverless result of `#463` passes this repository's own ledger gate:
+`node tools/ledger/check.mjs` reports 311 blocks clean with one
+pre-existing owner-only `STATUS_ALLOWED` violation, and
+`node --test tools/ledger/block-kinds.test.mjs` passes 11 of 11. The
+finding is that the two edits were combined by line position rather than
+by entry identity, which is the one judgement the driver exists to route
+to a human. Measure the gate before you call it a breakage, because the
+state names a missing judgement and not a failing build.
+
+**One register cannot be in this scheme at all, and that is deliberate.**
+`docs/agents/merge-order.md` is declared `enabled: false` in
+`tools/registers/registers.json` by name, because the ExO charter
+replaces it wholesale every run and an entry-keyed merge of two
+replacements publishes two contradictory orders. So it is the one file
+this seat keeps that two of its own branches cannot both carry. Measured
+this window: `#478` and `#447` merge clean on `incidents.md` and
+`learning-log.md` through the register driver and conflicted on
+`merge-order.md` and nothing else. The fix was to drop it from the
+charter lane, not to resolve it.
