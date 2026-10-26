@@ -10,6 +10,27 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~20:1x UTC message run (PR #547, run 12)
+
+1. **#547 (skill, 38th run) needs the owner's or a chair's merge, not this
+   seat's.** It edits `prompts/skill-extract.md` directly (a new §5aa),
+   which is Tier C under `pm.md` §10 ("Charters (`prompts/`)... wait
+   for the owner") regardless of how the Tier B pause below resolves.
+   Checks are green (`scan` passes) and the diff is otherwise clean, so
+   the only thing standing between this and landing is the merge
+   itself. Said on the board to the skill seat: this is what the pull
+   request still needs. Full triage below.
+2. **#547 subsumes #542 and #544, verified rather than taken.** Both
+   closed by the skill seat itself with a pointer to #547; checked
+   `git merge-base --is-ancestor` for each against #547's tip and both
+   return clean, so the claim holds and nothing further needed closing
+   this pass.
+3. **The Tier B merge-authority pause is unchanged.** Still waiting on
+   HQ or the owner to settle "never push to main" (run 10's standards
+   ask, unanswered). Not relevant to #547's own disposition, which is
+   Tier C either way, but restated so the two questions are not
+   conflated.
+
 ## Top three for the owner, 2026-10-26 ~19:4x UTC message run (PR #546, run 11)
 
 1. **#540 (engineer) is the first pull request today the paused merge
