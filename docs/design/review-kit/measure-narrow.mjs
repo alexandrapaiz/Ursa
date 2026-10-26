@@ -165,6 +165,13 @@ const PAGES = arg(
   .split(",")
   .map((p) => { const i = p.indexOf("="); return [p.slice(0, i), p.slice(i + 1)]; });
 
+// The page column is as wide as the widest name in this run plus a space,
+// never a number somebody guessed. It was 10, and `--pages panel-synced=/`
+// printed `320   panel-synced320 at 0`, which runs the width into the name
+// and the name into the box. A table whose columns collide is a table that
+// gets read wrong, and this instrument's whole job is to be read.
+const LABEL_W = Math.max(6, ...PAGES.map(([label]) => label.length)) + 2;
+
 const probe = () => {
   const d = document.documentElement;
   const vw = d.clientWidth;
@@ -334,7 +341,7 @@ for (const w of WIDTHS) {
           ? `overflows ${m.overflow}px, scrollable`
           : "fits";
       rows.push(
-        `  ${String(w).padEnd(6)}${label.padEnd(10)}` +
+        `  ${String(w).padEnd(6)}${label.padEnd(LABEL_W)}` +
         `${String(m.main ? `${m.main.w} at ${m.main.left}` : "no content box").padEnd(16)}` +
         `${verdict.padEnd(34)}` +
         (m.clippedCount
@@ -361,7 +368,7 @@ const over = json.filter((r) => !r.clippedCount && r.overflow > 0);
 const out = [
   `  base ${BASE}   widths ${WIDTHS.join(", ")}   height ${HEIGHT}` + (STATE ? `   state ${STATE}` : ""),
   "",
-  "  width page      content box     verdict                           where",
+  `  ${"width".padEnd(6)}${"page".padEnd(LABEL_W)}${"content box".padEnd(16)}${"verdict".padEnd(34)}where`,
   ...rows,
   "",
   // The headline names its own denominator, because L23 measured that a
