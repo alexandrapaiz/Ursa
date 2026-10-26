@@ -772,6 +772,17 @@ Major itself.
   a neutral source, though its stated methodology is unaffected. The
   enterprise-contract-size gap (RLHF-specific) stays open. No pricing
   recommendation made.
+- 2026-10-26 (event-driven, message, 19th run) — found two new Category
+  3 entrants (Wire, Skillsync) via the demand-signals ceremony and read
+  both against the automated-round-trip portability bar set 2026-10-14.
+  Wire's own public critique of export-based portability corroborates
+  Major's thesis in words while solving it with the opposite
+  architecture (a new centralized store, not on-device data). Skillsync
+  is the first thing found in this landscape that even attempts
+  automated cross-vendor translation, narrowing the "nothing has been
+  shown to pass that test" claim to "nothing consumer-facing has," a
+  precise distinction rather than a reversal. No pricing recommendation
+  made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -815,3 +826,63 @@ selling the same asset, but it is the first concrete cost-side number
 this file can cite when a lab asks why Minor's margins look different
 from a labeling vendor's. No pricing recommendation made; the $10/$30
 tiers remain out of scope per this file's opening note.
+
+## Two new portability entrants, read against the automated-round-trip bar (2026-10-26)
+
+The 2026-10-14 entry stated the precise test any portability claim,
+Major's own included, should be held to: an export produced by one
+vendor, ingested by a different vendor's model, with no human
+copy-paste step and no bespoke parser written for the exporter
+specifically, reconstructing structure and attribution intact.
+Nothing in the landscape had been shown to pass it. This run's
+demand-signals ceremony (not a landscape sweep — both were found
+searching forum discussion of AI memory lock-in, not searching for
+competitors directly) surfaced two funded entrants built around
+exactly that gap, and each is informative in a different way.
+
+**Wire validates the thesis in words while answering it with the
+opposite architecture.** Wire's own 2026-08-31 blog post makes Major's
+argument for it, almost verbatim: "export satisfies data-portability
+obligations without changing the practical cost," because a copy-paste
+export creates "two copies" that drift apart from the live state.
+Independent, unprompted corroboration of CLAUDE.md's own case against
+every memory incumbent's manual-export workaround (the Claude export
+path this file already discounted on 2026-10-14 is exactly the "two
+copies" failure mode Wire names). But Wire's fix is not Major's fix: it
+proposes a new hosted, credit-metered container that every agent reads
+from instead of its own copy, meaning the user's context now lives on
+Wire's infrastructure under Wire's terms rather than on the user's own
+device. That is the identical centralization risk CLAUDE.md §0's
+third load-bearing constraint ("raw processing happens on-device, raw
+data never touches the aggregation layer") is written to avoid. Read
+plainly: a funded competitor has independently reached Major's
+diagnosis and chosen the architecture Major's own design explicitly
+rejects, which is evidence the diagnosis is right, not evidence the
+cure is interchangeable.
+
+**Skillsync is the first attempt at the mechanism itself, narrowly
+scoped.** Its open-source txcript engine translates a session's
+conversation, reasoning, and tool-call history from one coding agent's
+on-disk format into another's without a human copy-paste step — the
+first thing found anywhere in this landscape that even attempts the
+automated side of the 2026-10-14 test, as opposed to a manual
+workaround dressed up as portability. The honest scope correction: it
+moves raw session transcripts between coding agents (Claude Code,
+Codex, Cursor, and others), not a consumer's inferred preferences
+between chat products, and a Launch HN commenter's own skepticism
+about live-session state not reducing cleanly to a file suggests the
+translation has real fidelity limits even in its narrow domain. The
+precise claim this file can now make is narrower than before but
+sharper: nothing *consumer-facing* has been shown to pass the
+automated-round-trip test, where last run's wording ("nothing in this
+market") did not carry that qualifier. Whether Major itself would pass
+the test in its own domain is still a product question this file
+cannot answer from the outside.
+
+No pricing recommendation made; both entrants are Category 3
+competitive-landscape findings, not pricing comps. First step for
+whoever owns Major's product roadmap: Skillsync demonstrates the
+automated-translation mechanism is buildable today for a narrower
+case, which weakens any assumption that the bar is aspirational rather
+than achievable, and sharpens the case for testing Major's own export
+against it directly. Ledger proposal below.

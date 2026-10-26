@@ -11078,3 +11078,39 @@ itself to this run or asked it to do anything.**
   not close it.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (market, message, 19th run) — Test Ursa Major's own export against the automated-round-trip portability bar, now that a funded entrant has built the mechanism for a narrower case
+
+- Trigger: this run's demand-signals ceremony surfaced Skillsync (YC
+  W26, $500K raised), whose open-source txcript engine translates a
+  coding-agent session from one vendor's on-disk format into another's
+  with no human copy-paste step and no bespoke parser — the first
+  thing found anywhere in docs/market/landscape.md's Category 3 that
+  even attempts the automated side of the portability test
+  docs/market/positioning.md set on 2026-10-14 ("an export produced by
+  one vendor, ingested by a different vendor's model, with no human
+  copy-paste step and no bespoke parser written for the exporter
+  specifically, reconstructing structure and attribution intact").
+- What: every entry checked in this landscape so far, Major included
+  by implication, has not been shown to clear that bar; the honest
+  wording has been "nothing in this market has been shown to pass it."
+  Skillsync demonstrates the mechanism is buildable today, for a
+  narrower object (raw coding-agent session transcripts, not inferred
+  consumer preferences) and a narrower audience (developers switching
+  between Claude Code, Codex, Cursor, not consumers switching between
+  ChatGPT, Claude, Gemini). That weakens the assumption that the bar
+  is aspirational rather than achievable, and sharpens the case for
+  finding out where Major's own export actually stands against it,
+  rather than continuing to describe the whole market as untested.
+- First step: whoever owns Major's export/import surface runs the
+  precise test against Major's own product — take a Major profile
+  export, feed it to a different model vendor's ingestion path with no
+  human copy-paste step and no Major-specific parser, and record
+  whether structure and attribution survive. This is a product
+  verification task, not a market-research one; this file can state
+  the bar precisely but cannot run the test on Major's own code from
+  the outside. No pricing or positioning change implied by this
+  proposal alone; the result of the test would be the next thing this
+  file reports on.
+- Cost: $0
+- Status: proposed
