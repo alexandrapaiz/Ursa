@@ -1066,6 +1066,45 @@ ChatGPT Protesters Are Using Memory Forge to Take Their Data With
 Them](https://programminginsider.com/chatgpt-protesters-are-using-memory-forge-to-take-their-data-with-them/),
 [Memory Forge product page](https://pgsgrove.com/memoryforgeland).
 
+### MemoryLake
+
+What it is: a bootstrapped (founded 2024, no funding raised, per
+Tracxn) hosted "memory lake" that stores typed, versioned memories
+(conversations, documents, spreadsheets, audio, video) separately from
+chat logs and exposes them to "every AI and agent" (ChatGPT, Claude,
+Qwen, Gemini, OpenClaw, AutoGPT, Manus, Perplexity named, plus any
+API-compatible system) via MCP, REST, and a CLI, pitched explicitly as
+"neutral by design" and "outside any single vendor." Who it serves:
+individuals and enterprises wanting one memory store that follows them
+across tools rather than a per-vendor memory feature. Pricing: free
+tier (300K tokens/month), Pro $19/mo (6.2M tokens/month), Premium
+$199/mo (66M tokens/month), on-demand metering beyond that at roughly
+$3.125/million tokens. Strengths: the broadest platform-connection list
+found in this category to date (eight named AI products plus "any
+API-compatible system," versus Wire's MCP-client scope or Skillsync's
+six named coding agents), and a company blog post (2026-06-05) makes
+the identical architectural argument Wire's does independently — memory
+is simultaneously "a genuine feature and a retention mechanism," and
+the fix is a store the user owns outside any one vendor. Weakness
+against Ursa, and the same one as every other entry in this
+fragmentation count: the one external-validation data point on the
+page, a 94.03% LoCoMo score claimed as "the highest score in this
+evaluation," is MemoryLake's own self-reported result on its own
+product page, not a third party reading MemoryLake's export back in.
+Nothing on the site or in independent coverage found this run shows a
+competing platform (or a third party at all) importing a MemoryLake
+export and reconstructing it; the product is itself the destination
+every connected AI reads from, the same centralized-store architecture
+as Wire, not an on-device profile the user holds (CLAUDE.md §0,
+constraint 3). Another entry in this file's running count of commercial
+products solving portability for their own adapters only (Mem0, Letta,
+Zep, Wire, Skillsync, Memory Forge, and now this one) — a separate
+tally from the cross-cutting note's own count of protocol/format
+*specs* below, which this is not one of. Last observed 2026-10-26:
+[MemoryLake: Is AI Memory a Feature or a Lock-In?](https://www.memorylake.ai/en/blogs/is-ai-memory-a-feature-or-lock-in),
+[MemoryLake](https://www.memorylake.ai/), [MemoryLake pricing](https://www.memorylake.ai/en/pricing),
+[Tracxn: MemoryLake company profile](https://tracxn.com/d/companies/memorylake/___0NgAT2k9L33aWunlgxgnpw3otgpFY9Q6kIe_kmuA8o).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
