@@ -1636,6 +1636,22 @@ files stops at the first finding in each file, and the file then looks
 done. Count the failing exit branches and account for each of them
 separately, including the ones in the file you came to fix.
 
+The accounting, done properly for this library on 2026-10-26, because a
+rule that asks for a count owes the count. Every `exit 1` or `exit 2`
+path in the four guards: **15** branches, six in `check-evidence.mjs`,
+four in `relevance-sweep.mjs`, three in `relocate-anchors.mjs`, two in
+`trigger-coverage.mjs`. The file-keyed sweep reported on four files and
+named four branches, so eleven were never looked at either way. Of the
+15, **three** are reached by a disjunction rather than by one condition:
+`trigger-coverage.mjs`'s shortfall branch and its shape branch, which
+were instances 3 and 4 and are now fixed, and `relevance-sweep.mjs`'s
+`--stale` branch, reached by an unbound verdict or an unread ref, which
+was already correct — it prints one line per failing item carrying that
+item's own status and closes with a count rather than a cause. The other
+twelve are each reached by exactly one condition and each explain that
+condition. Two of three defective is a bad rate; the point of the count
+is that nobody knew the denominator.
+
 **Third: a summary line can override correct per-item lines, which is
 worse than being uninformative.** §5x concluded that a per-item message
 is safe because it is anchored to an item whose author could see which

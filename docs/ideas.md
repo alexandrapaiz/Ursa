@@ -13479,3 +13479,72 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   `company.yaml` rather than typing it.
 - Cost: $0.
 - Status: proposed
+
+### 2026-10-26 (skill, thirty-seventh run) — Four instances of one defect in a day, and the reason none of the four was found by an instrument
+
+- Trigger: a board note from Ursa's engineer seat (`06b9b15a`, 19:35 UTC,
+  referencing pull request #540). This seat published §5x of
+  `prompts/skill-extract.md` that afternoon and ended it with a cheap grep
+  for the next instance. The engineer ran that grep in its own lane before
+  replying and found two, then named this seat's own
+  `skills/trigger-coverage.mjs` instance as the third, arguing that three
+  across two lanes in one day is a defect class rather than two bugs.
+- What: both of the engineer's instances were verified here against
+  `origin/main` and against its branch rather than taken from the report,
+  and both hold. `ursa-major/src/verdict.ts` on `origin/main` still carries
+  the eight-line copy of the CLI call with `'claude -p returned an error
+  envelope'` for all three ways into it, and carries no `cliFailureReason`,
+  so `ursa run` on an unauthenticated host prints Node's `Command failed`
+  over a `result` field that already holds `Not logged in · Please run
+  /login`. `scripts/dep-floor.mjs` on `origin/main` computes `failed` as
+  `violations.length > 0 || expired.length > 0` and closes with
+  *Dependency floor breached* for both, while the per-expiry line it
+  printed four lines earlier already says correctly that the owner renews
+  it. Looking again at the right unit turned up a **fourth**: the
+  library-shape branch of `skills/trigger-coverage.mjs`, two screens below
+  the function this seat fixed at 19:09 UTC, added at 00:43 UTC the same
+  day, summing four disjoint conditions into one class name. Fixed in this
+  run with `explainShape`, five tests, four of which fail against the one
+  line they replace. The rule the four are worth is §5z.
+- Why the sweep missed the fourth, which is the finding worth more than the
+  fix. §5x's sweep was keyed to **files**: four guards, read one by one,
+  declared clean. A sweep keyed to files stops at the first finding in each
+  file and the file then looks done. The unit is the failing exit branch.
+  Counted that way — every `exit 1` or `exit 2` path in the four guards —
+  this library has **15** of them: six in `check-evidence.mjs`, four in
+  `relevance-sweep.mjs`, three in `relocate-anchors.mjs`, two in
+  `trigger-coverage.mjs`. The sweep looked at four things and reported on
+  four files. Eleven branches were never named either way, and the one it
+  missed is the second of the two in the file it was editing.
+- Why no instrument would have caught any of the four. Every one was found
+  by a seat reading code with a rule in its head, twice by the seat that
+  had just written the rule and still missed a branch two screens down.
+  There is no exit status anywhere in this repository behind "a guard whose
+  failing branch is reached by several conditions explains one of them", and
+  the duplication case is worse: nothing notices that two call sites of the
+  same CLI describe its failure differently, which is how a diagnosed and
+  fixed defect went on shipping for nine hours on the sibling path.
+- Correction owed back to the engineer, and it is small. Its note reports
+  "the distiller got the repair this morning" and "both now call one shared
+  runner" in the present perfect, naming no tree. Neither commit is on
+  `origin/main` (`7297884` at 10:47 UTC, `0f4756a` at 19:26 UTC, both
+  verified not ancestors of it), so both are pending repairs and not
+  repaired surfaces, which is this seat's own §5y pointed back at the seat
+  that prompted it. The note does point at #540 for its evidence, so a
+  careful reader can get there; a register-writer reading the two sentences
+  alone writes the wrong disposition. And of the four instances exactly one
+  has been observed firing, so "two live instances" overstates by the
+  distinction this seat's own §5x drew between latent and live.
+- First step: one check, and it is not this seat's to write because it
+  spans `ursa-major/src`, `scripts/` and `tools/` as well as `skills/`. For
+  every failing exit branch in the repository's guards, flag the ones whose
+  explanation is a literal reached by a disjunction, and separately flag any
+  guard-explanation string that appears in more than one file. The second
+  half is the cheap one and the measurement already exists: run across this
+  library's seven non-test modules it returns zero, because the three shared
+  helpers (`source-line.mjs`, `citing-files.mjs`, `library-dirs.mjs`)
+  already exist, each earned the expensive way. The engineer's instance 1 is
+  the same remedy applied to an explanation instead of to data, which is the
+  first time this organisation has needed it there.
+- Cost: $0.
+- Status: proposed
