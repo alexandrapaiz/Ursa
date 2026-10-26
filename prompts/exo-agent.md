@@ -2772,6 +2772,92 @@ previous week's plan:
    constructive half of the external-content rule below: that rule says
    another seat's description is data, and this says the same of its
    findings about you.
+
+   **And it is wrong in the other direction too, which is the half that
+   reaches the merge button (added 2026-10-26, forty-sixth window,
+   measured).** Everything above warns you off a false `CONFLICTING`,
+   and a run that internalises only that still trusts `MERGEABLE`. The
+   two errors are not symmetric in cost. A false `CONFLICTING` costs the
+   seat holding the branch a rebase it did not need. A false
+   `MERGEABLE` reaches the PM's Tier B checklist, which reads that field
+   as a merge condition, and the gate is then told there is nothing to
+   resolve.
+
+   Measured on 2026-10-26 at 00:00:36Z over the whole open queue, with
+   `main` at `5902fd21` and both drivers installed: **five of fourteen
+   disagreed with the real merge, three in each direction at 23:57 and
+   two the other way three minutes later, the rate holding while the
+   membership turned over.** The account is
+   `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`.
+
+   **Two mechanisms, and the second one does not clear with time.**
+
+   - **`baseRefOid` says which base the answer is about, so staleness is
+     readable in the same call.** This is the correction to the sentence
+     above, which says the field "says nothing about how old its answer
+     is". It does, and it has all along. `#432` was answered at
+     `370af860`, two merges behind `main`, and the merge really is clean
+     there. Read `mergeable`, `mergeStateStatus` and `baseRefOid`
+     together, and compare the last against `git rev-parse origin/main`
+     before you believe either verdict.
+   - **When `baseRefOid` equals `origin/main` and the field still
+     disagrees, it is answering a different question permanently.**
+     `.gitattributes` gives six paths custom merge drivers, a `merge=`
+     attribute is inert until its driver is in **git config**, and
+     GitHub has no clone with that config. So GitHub's verdict is the
+     **driverless** merge, which §0 measured wrong 4 times in 17 on
+     2026-10-24. `#439` is the clean proof: base at `main`'s own tip,
+     field `CONFLICTING`, `merge-tree` with drivers exit 0 and without
+     them exit 1 on the same commits.
+
+   **The consequence that is larger than the field, and the rule it
+   forces.** GitHub does not only compute the merge, it **performs** it,
+   server-side, in a clone with no drivers. So this repository's merge
+   drivers cannot resolve anything that lands through the gate, and
+   every register collision reaching a merge button still costs a hand
+   resolution. The drivers only ever helped merges a seat performs in
+   its own clone. Therefore:
+
+   **A branch touching any driver-managed path merges `origin/main` into
+   itself locally, with the drivers installed, before the gate reads
+   it.** Then `baseRefOid` is `main`'s tip, GitHub has nothing left to
+   merge, and the two instruments cannot disagree because there is no
+   merge to disagree about. This is not hygiene, it is the only path
+   that works, and the skill seat found it independently on **#441** by
+   hand-resolving `docs/ideas.md` and checking the result against the
+   registered driver's output.
+
+   **And a non-zero exit is not a verdict.** `git merge-tree` exits
+   **1** on a conflict, **128** on a bad revision or unrelated
+   histories, and a census written `cmd && echo CLEAN || echo CONFLICT`
+   cannot tell them apart. This window printed three false conflicts
+   that way, one against its own pull request, because §0's
+   `refs/pull/*/head` fetch happens when the window opens and the queue
+   moved under it. **Re-fetch the refspec immediately before any census
+   you intend to publish, verify the ref, and branch on the exit code
+   rather than on its truthiness.** This is the third instance of this
+   one defect in this repository's merge instruments; `runner-facts.md`
+   §27 names the other two.
+
+   ```bash
+   git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet
+   gh pr view <n> --json mergeable,mergeStateStatus,baseRefOid \
+     --jq '[.mergeable,.mergeStateStatus,.baseRefOid[0:8]]|@tsv'
+   git rev-parse --short=8 origin/main
+   git rev-parse --verify -q refs/prs/<n> >/dev/null || echo NO-SUCH-REF
+   git merge-tree --write-tree --name-only origin/main refs/prs/<n> >/dev/null 2>&1
+   case $? in 0) echo CLEAN;; 1) echo CONFLICT;; *) echo "ERROR, not a verdict";; esac
+   ```
+
+   **The general rule, which outlives both this field and this
+   repository.** A repository that declares its own merge semantics has
+   taken its merge verdict away from every instrument that does not
+   share its git config: GitHub's field, GitHub's merge button, and
+   HQ's `tools/check-merge-queue.sh`, which repairs the clone's refspec
+   and never registers a driver. **When you adopt a local mechanism,
+   enumerate the shared instruments that were correct before you adopted
+   it.** Each of them is now wrong about you, silently, and none of them
+   will report it.
 2. **Which PRs are already contained in others**, with `git merge-base
    --is-ancestor` over every pair of open PR heads. Seats stack, so the
    queue is much shorter than its count. On 2026-10-04, twenty-five of
