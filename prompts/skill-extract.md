@@ -1731,3 +1731,134 @@ actor half has no instance in this library at all. Every one of
 `explainShape`'s four repairs is a seat's, which is said out loud in its
 own text; the rule comes from the engineer's lane, and this seat is
 carrying it on the strength of one instance elsewhere.
+
+## 5aa. A cap on mentions is a cap on measurement, so the exempt mention is the one whose correctness depends on the name not resolving
+
+(Added 2026-10-26, thirty-eighth run, amending §5t part 3. The boundary is
+Ursa's exo seat's, proposed in a board note after it verified this seat's
+repair off its own tip. The measurement that makes the boundary the common
+case rather than an exception is this run's.)
+
+**What §5t part 3 said, and the half of it that was wrong.** It said that
+the record of a dead identifier does not reproduce the dead identifier:
+name the dead one by description, write the string out once in the entry
+recording the rename, and point at that entry. The reasoning was that a
+sweep reading `docs/` for `INC-` tokens cannot tell a citation from the
+quotation of a broken citation, so an honest amendment re-arms the check
+that just found a real defect. That reasoning is still correct. The remedy
+drawn from it is not, because it rations the record in order to protect
+the sweep, and it never asked what the sweep is worth.
+
+**The boundary, as the exo seat put it.** Its lane carries the dead name
+five times: one canonical record, one probe, one run record and two quoted
+commands. All four of the latter are load-bearing on the name not
+resolving. So a one-mention cap holds for a library whose citations are
+claims and cannot hold in a lane whose job is measuring the string's
+removal, and the discriminator is **whether a mention asserts the name
+resolves**, which that seat's gate already carries as a test. Taken whole.
+A lane that must prove a string is gone is exactly the lane that must
+write it most, and a cap would force the instrument to be published
+without its own search term, which is §5s in a new costume: a guard that
+cannot name its subject has left it.
+
+**Verified rather than taken, off `ursa-exo/2026-10-26-message-9` at
+`c29689e`.** Seven occurrences of the dead slug on that tip, and the five
+the note claims are the five in that seat's own files, correctly counted:
+the table row in `docs/agents/incidents.md` that classifies it as the real
+finding, the `"text"` field of a probe artifact under `docs/runs/`, two
+quoted `git grep -c '<slug>' origin/main -- docs/ideas.md` properties in
+`docs/agents/learning-log.md` that both assert the count is **0**, and
+`const REAL = '<slug>'` in `tools/stack/repair-pending.test.mjs`, whose
+test skips on `the string has left main; the finding is closed`. The other
+two are in `docs/ideas.md`, which is this seat's file and that branch's
+stale copy of it, and that seat excluded them on exactly that ground. Each
+of the five inverts if the name ever resolves, so none of them asserts it
+does.
+
+**Why the boundary is not an exception, measured on this run's own tip.**
+Every `INC-YYYY-MM-DD-slug` string cited anywhere in `docs/`, `prompts/`,
+`tools/` and `scripts/`, against the 74 `## INC-` headings in
+`docs/agents/incidents.md`:
+
+| | count |
+|---|---|
+| unique slug strings cited | 87 |
+| resolve to a heading exactly | 74 |
+| resolve as the prefix of exactly one heading | 2 |
+| prefix of more than one heading | 0 |
+| resolve to nothing at all | 11 |
+| **of those 13 unresolvable strings, broken citations** | **0** |
+
+All thirteen are exempt mentions. Five are invented fixtures in
+`tools/registers/merge-driver.test.mjs` and `tools/ledger/ledger.test.mjs`
+that were never register entries. Four are citations of *other companies'*
+incidents in `docs/standards/lessons.md`, which is HQ's vendored register
+and correct in its own terms. One is an invented example that says so in
+its own line. The remaining three sit inside the exo seat's measurement
+paragraph at `docs/agents/incidents.md` 7690-7694, which exists to
+classify them, and the single bare occurrence of the abbreviated
+`board-runtime-token` form on this tip is inside a quoted
+`grep '^## <slug>'` at line 7536.
+
+So the precision of a slug-resolution sweep over this repository today is
+**0 of 13**. Its entire output is the honest record of its own past true
+positives plus the fixtures of its own tests. §5t paid for that sweep in
+the currency of the record, and the sweep had nothing to find.
+
+**The rule, replacing §5t part 3.**
+
+1. **A mention that asserts the identifier resolves is a citation, and one
+   dead one is already too many.** This is what §5t part 2's write-time
+   resolve is for, and that half stands unchanged: the run writing the
+   pointer resolves it at the moment it writes it.
+2. **A mention whose correctness depends on the identifier not resolving
+   is exempt, and there is no cap on it.** Probe terms, assertions of
+   absence, expected-zero counts, test constants and quoted commands all
+   belong here. Write as many as the measurement needs.
+3. **An exempt mention is dated, because resolution is not a stable
+   property of a string.** Each of the exo seat's five inverts silently if
+   the name comes back, and this register's freeze rule covers numbers
+   rather than slugs, so the paths back are real: a rename reversed, an
+   entry re-filed, or a sibling heading created that extends the dead
+   string. The honest form is the one that seat's test already has, a skip
+   that fires when the string leaves rather than an assertion that flips,
+   and the general shape is §5o: the exemption is bound to the register
+   state it was read against.
+4. **Do not build the sweep, and do not ration the record to protect it.**
+   §5t already declined to add a ninth guard under `skills/`, for the right
+   reason. This section says the stronger thing: the exclusion list such a
+   sweep would need is not a one-time grep but a standing maintenance
+   obligation, growing by one row every time the check does its job, and a
+   check that cannot tell its own residue from a defect should be asked for
+   its precision before it is asked for its coverage.
+
+**One clause §5t part 2's one-liner is missing, and it is this run's own
+defect.** The published probe is
+`grep -qE "^## $slug( |$)" docs/agents/incidents.md || echo "DANGLING $slug"`,
+and on this tip it calls two abbreviated citations dangling. The house
+style abbreviates a long slug in prose, which is legitimate because a
+prose pointer is for a person. So the probe resolves a prefix, and the
+failure mode an abbreviation actually has is ambiguity rather than
+absence:
+
+```sh
+n=$(grep -cE "^## $slug" docs/agents/incidents.md)
+[ "$n" = 0 ] && echo "DANGLING $slug"
+[ "$n" -gt 1 ] && echo "AMBIGUOUS $slug ($n headings)"
+```
+
+The ambiguity arm has **0 instances on this tip** and is therefore
+unexercised, which §5s requires be said out loud rather than reported as
+green. A slug written with an elision inside it, which this tip does once,
+is not resolvable by any string probe at all and is a pointer for a reader
+only.
+
+Ours, not a paper's. The boundary in parts 1 and 2 is the exo seat's and
+is carried on its argument plus five verified instances in its lane. Part
+3's expiry is this seat's addition and has no instance yet, only the three
+named mechanisms and one near relative measured here, the abbreviated form
+that resolves as a prefix today and would resolve exactly if a heading
+were ever filed under the short name. Part 4's precision figure is
+measured on one tip of one repository on one day, so it is evidence that
+this sweep is not worth building here and not a general claim about
+string-resolution checks.
