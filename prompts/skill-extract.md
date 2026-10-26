@@ -1479,6 +1479,22 @@ the time of the fix, because 10 of 10 skills in this library carry a
 trigger test and 90 of 90 boundaries are covered, so that branch has
 never run against the real library with only the second condition set.
 
+**Superseded in part, 2026-10-26, later the same day.** The paragraph
+above is the sentence this rule got wrong about itself, and it is kept
+rather than edited because the error is the evidence. "The guard half
+was latent" was a claim about this library's traffic published in the
+voice of a claim about the rule's weight. Ursa's engineer seat ran the
+grep at the end of this section in its own lane within the hour and
+found two more, one of them a live exposure on a real host. A third turned
+up in the same file this section's own fix had just edited, missed because
+this section's sweep was keyed to files. Four instances across two lanes
+in a day is the measured weight, and **the sweep instruction here is
+narrower than it should be**: read §5z, which replaces the file-keyed
+sweep with an exit-branch one and adds the three mechanisms this section
+did not have — duplication as the way an instance survives its own
+repair, a summary line overriding correct per-item lines, and a message
+naming a repair the reader is not allowed to make.
+
 ## 5y. A repair reported without naming its tree is read against the default branch, and the receipts have the same tense
 
 **Where this comes from.** This seat, on 2026-10-26, corrected by Ursa's
@@ -1557,3 +1573,145 @@ identically on `origin/main` today, so `--base` has never yet changed a
 disposition in this library, and its only demonstration against real
 data is a tree eight days old, where it reports 216 problems of which
 162 are drifted receipts.
+
+## 5z. A guard's explanation is code, so it is duplicated like code, and a message naming a repair names who may make it
+
+**Where this comes from.** §5x, run in another lane. This seat published
+that rule on 2026-10-26 and ended it with a cheap place to look for the
+next instance. Ursa's engineer seat ran the grep in its own lane before
+replying, found two, and named this seat's `trigger-coverage.mjs`
+instance as the third. Three across two lanes in one day is its
+argument, and it is the right one: that is a defect class and not two
+bugs. Looking again at the right unit turned up a fourth, in the file
+this seat had already fixed. All four verified here against
+`origin/main` and the engineer's branch rather than taken from the
+report.
+
+**The four.** The first two are the engineer's and the diffs are on
+`ursa-engineer/2026-10-26-message-9`, pull request #540.
+
+1. **Both callers of the Claude Code CLI**, `claudeRunner` in
+   `ursa-major/src/tuning/distill.ts` and `claudeVerdictRunner` in
+   `ursa-major/src/verdict.ts`, held the same eight lines, and the same
+   `if (envelope.is_error || typeof envelope.result !== 'string')` with
+   `'claude -p returned an error envelope'` for all three ways in. The
+   expensive branch is the one where `is_error` is set and `result`
+   already holds the fix: on the host the engineer measured, that string
+   was `Not logged in · Please run /login`, and the message threw it
+   away in favour of a sentence naming no cause at all.
+2. **The dependency floor gate**, `scripts/dep-floor.mjs`, whose
+   `failed` is `violations.length > 0 || expired.length > 0` and whose
+   closing literal said *Dependency floor breached* for both. An expired
+   exception is the floor never having been breached. It is
+   `dep-floor.allow.json` working as its own header says it should, "a
+   risk the owner accepted on a Tuesday should come back and ask again".
+3. **`skills/trigger-coverage.mjs`'s shortfall branch**, reached by an
+   uncovered sibling boundary or a skill with no `TRIGGER-TEST.md`, both
+   explained with the near-miss arithmetic. Fixed at 19:09 UTC.
+4. **The same file's library-shape branch**, two screens below, added at
+   00:43 UTC the same day and untouched by the fix at 19:09 or by the
+   sweep that came with it. `N library-shape defect(s) above, listed
+   before the counts.` was one class name over a sum of four disjoint
+   conditions, and the sentence the reader acts on told them where to
+   scroll. Fixed here, with `explainShape`.
+
+**What §5x did not have, which is why this is its own section.**
+
+**First: duplication is the propagation mechanism, and it is why the
+instance survives its own repair.** The distiller got `cliFailureReason`
+at 10:47 UTC and the verdict reader, four directories away, kept the
+original bug until 19:26. For nine hours this repository held a
+diagnosed, fixed, documented defect and a working copy of it, and `ursa
+run` on an unauthenticated host still printed Node's `Command failed`
+over the top of the reason. Nobody reintroduced anything. The repair
+simply landed on one of two copies, and no instrument anywhere notices
+that two call sites of the same CLI explain its failure differently.
+
+**Second: the unit of the sweep is the exit branch, not the file.** §5x
+said to look for "a sentence about the cause that is not inside the loop
+over the failures", swept all four guards in this library at file
+granularity, and declared them clean. Instance 4 was in the file being
+edited, in the function below the one being fixed. A sweep keyed to
+files stops at the first finding in each file, and the file then looks
+done. Count the failing exit branches and account for each of them
+separately, including the ones in the file you came to fix.
+
+**Third: a summary line can override correct per-item lines, which is
+worse than being uninformative.** §5x concluded that a per-item message
+is safe because it is anchored to an item whose author could see which
+one it was. Instance 2 is the limit of that. `dep-floor.mjs` printed, per
+expired exception, *"the exception for X expired on Y (approved by Z).
+Fix it or have the owner renew it"* — correct, complete, naming the
+condition and the actor — and then printed *Dependency floor breached* as
+its conclusion. The reader believes the last line, because the last line
+is where a tool puts its verdict. So the closing literal is not merely
+under-informed. It can contradict information already on the screen and
+win.
+
+**Fourth: a message that names a repair names who may make it.** The
+expired-exception branch asked a seat for a repair only the owner can
+make, and a seat that believes a gate is its own to clear will either
+force it or spend a run discovering it cannot. This seat already holds
+the practice on the other side — a ledger status line is left alone
+because only the owner moves one — and had never written it as a rule
+about messages.
+
+**The rule.**
+
+1. **Count the failing exit branches in the file, not the findings.** One
+   message per branch, and a branch reached by a disjunction owes one
+   sentence per disjunct. A fix to one branch is not a fact about the
+   file.
+2. **Make the explanation a named pure function, and make every path
+   reach the same one.** This is the remedy in all four instances:
+   `runClaudePrint` and `envelopeFailure`, `summaryLine`,
+   `explainShortfall`, `explainShape`. It is also already this library's
+   answer whenever two guards disagreed about *data* —
+   `source-line.mjs`, `citing-files.mjs`, `library-dirs.mjs`, each
+   earned the expensive way. Explanations are the same kind of thing and
+   were not getting the same treatment. A duplicated explanation is a
+   repair that will land on one copy.
+3. **Never collapse several conditions into one count under one class
+   name.** Break the count out by condition, in the line that carries
+   it. `2 library-shape defects: 0 unread, 0 unlisted, 1 dangling index
+   row, 1 mislabelled` is two edits to one markdown file. `2
+   library-shape defects` is indistinguishable from two unguarded
+   skills.
+4. **Name the actor with the repair, whenever it is not the reader.**
+   "The owner renews it", "the repair is in this file and not in your
+   credentials", "this is paperwork and the floor holds". A repair with
+   no named hand defaults to the reader's, and a gate that asks for a
+   repair the reader cannot make is a gate that gets forced.
+5. **Order the conditions by which to repair first, and say why.** Where
+   one of them means something is actually unguarded and the others mean
+   something is merely unlisted, that is the order, and the sentence has
+   to carry it or the reader works top to bottom.
+6. **Quote a measured string from the file that holds it, not from
+   memory of the host.** The engineer's note to this seat quoted the
+   login message as `"Not logged in, please run /login"`; the envelope,
+   the test and the run note all carry `Not logged in · Please run
+   /login`. Nothing turned on it here. It is in the rule because the
+   whole subject is the distance between a measured string and a
+   remembered one, and a quote that drifts in transit is that distance
+   one level down.
+
+**On "live".** Of the four, exactly one has been observed firing: the
+verdict reader, on a real host, in the engineer's own dogfooding run.
+`dep-floor.allow.json` holds an empty `exceptions` array, so instance 2
+has never reached its branch; 10 of 10 skills carry a trigger test and 90
+of 90 boundaries are covered, so instance 3 has not; and this library has
+no unread directory and no index disagreement, so instance 4 fired only
+against a decoy. That does not weaken the class — §5x's third point is
+that the number of paths to a branch is a property of the code and not of
+this week's traffic — but a report of "two live instances" and a report
+of "one observed firing" hand a reader different urgencies, and the
+second one is what the evidence here supports.
+
+Ours, not a paper's. The honest limit: the duplication half is measured
+and cost a real exposure, nine hours of a fixed defect still shipping on
+a sibling path. The sweep-unit half is measured, because the sweep that
+missed instance 4 is this seat's own and the finding is a day old. The
+actor half has no instance in this library at all. Every one of
+`explainShape`'s four repairs is a seat's, which is said out loud in its
+own text; the rule comes from the engineer's lane, and this seat is
+carrying it on the strength of one instance elsewhere.
