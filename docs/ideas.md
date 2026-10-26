@@ -12703,3 +12703,154 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   not a replacement for either.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — The briefing can say why a unit was surfaced and has no answer for why one was not
+
+- Trigger: this run's dogfooding of `get_briefing` against this
+  repository's own 17 outcome records (sprint-2026-10-26 item 2). The
+  request named `ursa-major/src/consent.cli.ts` and the consent domain,
+  and the briefing returned `None on these files` over a store holding
+  204 corrections. After this run's fix the coverage line says the 204
+  were considered, which is the honest denominator, and the reader still
+  cannot tell apart the two things that sentence covers: a unit that was
+  scored and fell below `MIN_RELEVANCE`, and a unit that was never a
+  candidate. Those ask opposite things of the agent reading it. The first
+  says the HQ has something nearby and judged it too far; the second says
+  the HQ has nothing on this file at all.
+- What: `renderWhy` in `ursa-major/src/hq/briefing.ts` prints a full
+  score breakdown for every unit that was returned, and `buildBriefing`
+  throws away the `why` of every unit it filters out one line earlier.
+  The information already exists and is computed; it is discarded because
+  nothing asked for it. A `--dropped N` flag on `ursa brief` would print
+  the N highest-scoring units that fell below the floor with their `why`
+  blocks intact and the floor they missed, which turns `None on these
+  files` from a dead end into a bounded answer: either "the nearest thing
+  scored 1 against a floor of 2, here it is" or "nothing scored above
+  zero". It is off by default for the reason the floor exists, which is
+  that an agent's opening context is the scarce thing.
+- First step: add `dropped: CaseUnit[]` and `droppedRules: RuleUnit[]` to
+  the `Briefing` payload, populated only when the caller asks, since
+  `scoredCases` and `scoredRules` already hold every filtered unit with
+  its `why` at the point of the `.filter()` call. Then a `--dropped N`
+  flag on `src/hq/cli.ts` and one section in `renderBriefing`. The
+  `measureBriefing` fixed point absorbs the extra characters with no
+  change, because it measures whatever was rendered.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — The rules half of the HQ has never been exercised against a real record, because the one command that produces rules cannot run on a seat host
+
+- Trigger: this run tried to complete the dogfood end to end, `ursa run`
+  then `tuning distill` then `ursa brief`, and got as far as 17 real
+  records and no tuning record at all. `claude -p` is installed on this
+  host (`/usr/bin/claude`) and has no credentials: it exits 1 with
+  `"result":"Not logged in · Please run /login"`. So the briefing this
+  run took against real records had 0 rules for a reason that has nothing
+  to do with the records, and every rule-ranking claim this repository
+  makes still rests only on the four synthetic axioms in
+  `ursa-major/src/hq/fixtures.ts`.
+- What: `buildDistillPrompt` is already exported and `distill` already
+  takes an injectable runner, so the prompt a real record produces is
+  obtainable without any model call. What is missing is a door on the
+  CLI. A `--prompt-only` flag on `tuning/cli.ts distill` that writes the
+  prompt to stdout and exits 0 would let any seat produce the exact
+  prompt for a real record, have it answered once by hand, and commit the
+  answer as a fixture. That fixture is the thing the rules half has never
+  had: axioms distilled from this organization's own corrections rather
+  than written to make a test pass. The prompt sizes are small enough
+  that this is cheap rather than a project: measured on these 17 records,
+  3,062 to 27,781 characters, median about 4,600.
+- First step: `--prompt-only` on `src/tuning/cli.ts`, then run it against
+  `ursa-dogfood-2026-10-10-5bb8c6b` (54 one-shot corrections, the
+  richest of the 17), and commit the returned `DistillOutput` under
+  `ursa-major/fixtures/real/` beside the record fixture already there,
+  with the same provenance table that directory's README uses. Redaction
+  applies and is cheap here: these records are built from this public
+  repository's own commits.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — The redaction gate cannot tell a public identifier from a private one, and one charter permits a form it refuses
+
+- Trigger: a note from the ExO seat on the board at 09:45Z, reporting
+  that `prompts/engineer-agent.md` has a newer copy inside the research
+  seat's open pull request #395, eleven lines longer, and that the eleven
+  lines narrow this seat's redaction rider to the truncated identifier
+  form alone. Probed rather than taken on report: the rider on `main`
+  permits "a truncated **or clearly labelled** identifier", and
+  `.github/workflows/redaction-gate.yml`'s third pattern is a bare UUID
+  regex over every tracked file. A file containing one clearly labelled
+  public board-message identifier and nothing else fails the gate:
+  `node scripts/redaction-check.mjs --root=/tmp/redact-probe` exits 1
+  with "Full private session or conversation UUID. Truncate it to 8
+  characters."
+- What: the gate is right to be blunt and this entry does not propose
+  loosening it. Class-A exposure (Ursa incidents 2 and 4) is worth a
+  false positive on a public identifier, and a gate that tried to read
+  labels would be a gate an author could talk past. What is worth fixing
+  is that one charter's prose and the gate's behaviour disagree, and the
+  prose is the permissive one, so a seat obeying its charter literally
+  writes a line that cannot land. Two repairs, and they are held by
+  different people. The owner's: merge the eleven lines, which already
+  exist and already say "truncate to eight characters" (they are in #395,
+  which also edits two charter files and is therefore the owner's alone
+  to merge, held at Tier C by the PM for exactly that reason). A seat's:
+  nothing, which is why this is filed rather than fixed. This run
+  complied with the narrower rule everywhere it quoted an identifier,
+  because the gate binds mechanically whatever the prose allows, and
+  truncating costs nothing.
+- First step: the owner's, on #395, and it is a merge rather than a code
+  change. If the eleven lines are not what the owner wants, the
+  alternative that needs no charter edit is a sentence in
+  `docs/security/redaction-standard.md` stating that the truncated form
+  is the only writable one in this repository and that the gate's own
+  error message is the authority, which any seat could then cite.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — Craft scan: ripgrep 14.1.1 and `--stats`, where the denominator of a search is a flag rather than the default
+
+- Trigger: this run's own defect. `get_briefing` reported `0 correction
+  loops across 17 outcome records` over a store holding 204 corrections,
+  and the sentence was read, by this seat and by nobody else because
+  nobody else had run it, as "there is nothing here". So the craft
+  question for today is which tools make a reader able to tell an empty
+  answer from an unasked question, and the clearest published answer in a
+  tool this repository already depends on is ripgrep's.
+  **The thing worth stealing** is that `rg --stats` prints the
+  denominator beside the numerator, in the same block, with no extra
+  invocation. Measured on this host rather than read: `rg --stats -c
+  "nonexistent-token-xyzzy" docs/` on this checkout prints `0 matches`,
+  `0 files contained matches` and `1672 files searched`, and the third
+  line is what makes the first two interpretable. The second thing worth
+  stealing is `--debug`, which ripgrep's own guide describes as "useful
+  for understanding why a particular file might be ignored from search",
+  so the tool answers "why is this not in my results" per file rather
+  than only "here is what is". The preceding entry in this ledger is that
+  idea applied to the briefing, which has the per-unit explanation
+  already computed and discards it.
+  **The thing Ursa does better** is that the coverage block is not a
+  flag. `rg --stats` is opt-in, so ripgrep's default output for a search
+  that found nothing is a bare empty result and the reader has to already
+  suspect something to ask for the denominator — which is the precise
+  failure this run shipped and then found by hand. `renderBriefing`
+  prints its `## Coverage` section on every briefing including the empty
+  one, and after today it prints the two correction populations
+  separately, so the reading "0 loops means nothing to learn" is not
+  available to a reader who did not think to ask a second question. A
+  briefing is read once by an agent that will not ask again, which is why
+  the default matters more here than in an interactive search.
+  **Where ripgrep is ahead and this is not**: its stats are a stable,
+  documented output format that scripts parse, and `--stats` has carried
+  the same field names for years. The briefing's coverage block is prose
+  assembled by string concatenation in `renderBriefing`, and this run
+  changed its wording, which means any board message, pull request or
+  test quoting the old sentence is now stale. The JSON `coverage` object
+  is the stable surface and the markdown is not, and nothing says so
+  where a reader of the markdown would see it.
+  **No first step is filed here**, and the work this scan argues for is
+  the `--dropped` entry two above, filed there with all five fields
+  rather than duplicated. Sources:
+  [ripgrep GUIDE.md](https://raw.githubusercontent.com/BurntSushi/ripgrep/master/GUIDE.md),
+  [ripgrep FAQ.md](https://raw.githubusercontent.com/BurntSushi/ripgrep/master/FAQ.md),
+  and `rg --version` / `rg --stats` on this host.
