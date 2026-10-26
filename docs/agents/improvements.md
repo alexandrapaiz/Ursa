@@ -30,769 +30,6 @@ Three rules that give the file teeth, also HQ's:
    does, carried forward with the count of weeks it has been carried.
    That count is the most useful number on the page.
 
-## Window 37, 2026-10-24, hook on returned capacity
-
-### The daily tick: observe, orient, decide
-
-- **Observe.** The brief read whole from `GET /api/brief`, 1,835
-  characters, not from the wake excerpt. **363 runs attempted
-  portfolio-wide, 241 finished, 72 refused by the provider (20% of the
-  day, 28 before their first turn), 21 failed, 17 running, 12 lost with
-  their runner in 5 cohorts, 783 dark minutes of which 377 fell after
-  the limit had already reset.** Ursa's own row: **120 attempted, 80
-  finished, 23 refused, 8 failed, 5 running, 4 lost** — a third of the
-  portfolio's attempts and two thirds of them finishing. Queue: 24 open,
-  56 merged in seven days, oldest open 14 hours. 24 of 24 merge cleanly
-  into `main`; 13 of the 24 are contained in another, so eleven merges
-  close the queue. Three turn-cap overruns today, all at 101 of 100:
-  skill at 16:43, research at 17:13, this seat at 17:39.
-- **The biggest drag, named.** **Not the 72 refusals.** A provider limit
-  is a rented asset and nothing in this organization moves it. The drag
-  is `dark_after_reset`, **377 minutes**, because that is capacity the
-  portfolio *had*. 237 of the 377 sit in one gap, 07:07 to 11:05, which
-  begins the same second an eight-run, four-company lost cohort ends.
-  `INC-2026-10-24-six-hours-of-the-day-were-dark-after-the-limit-had-already-reset`
-  has the account and the explicit refusal to call the adjacency a cause.
-- **The anomaly in the numbers.** The brief's own `running` number is
-  trustworthy for the first time. HQ's capacity split merged at 18:12:23
-  and the five classes now sum to `attempted` exactly, 363 = 241 + 72 +
-  21 + 17 + 12. Before it the lost cohort was inside `running`.
-- **Orient: the weakest attribute is 7, dashboards, and HQ's own tool
-  routes this grade here rather than to autonomy.**
-  `tools/autonomy.py --repos Ursa --days 7` returns **57.1% as a floor
-  on 56 merges, 32 seat-claimed, 0 on Actions, 24 unresolved (43%)**,
-  and prints its refusal condition: over a third unresolved means the
-  number grades the instrument. So attribute 9 is not gradeable this
-  week and attribute 7 is what it points at. The dashboards number:
-  **27 of 93 Ursa run reports today name the pull request their run
-  opened, against 103 pull requests created in this repository today.**
-  Twenty of the 93 carry the bare `no pull request.` form, which is the
-  unauthenticated-read defect and is independent of the prefix one.
-- **The two instruments that moved today, and both were this seat's
-  filings.** The capacity split shipped (18:12:23). The run-report
-  branch-prefix resolver shipped too: from **18:27:17** the report text
-  reads *"for a pm/ **or ursa-pm/** branch"*, where every report before
-  it read *"for a pm/ branch"*. Four reports carry the new form and none
-  of the four had a pull request to find, so the fix is deployed and
-  **not yet exercised on a run that opened one**. Do not report it as
-  verified; report it as deployed.
-- **Decide.** One experiment, below, plus three `Ideas` notes to the
-  owner. The experiment's metric is on an endpoint rather than in a
-  register, which is a first for this seat.
-
-### The three-state rule was written for one tool sweep and its companion kept the two-state form
-
-- **Proposal.** Give the `L-*` enforcement sweep the same basename
-  resolution the `pm.md`/`secrets.md` sweep got from the twenty-seventh
-  window, so a tool this repository has deliberately vendored under its
-  own path reads as `VENDORED-ELSEWHERE` rather than as missing.
-- **Merged.** **No**, open in this window's pull request.
-- **Effect.** **Three names before, two `RULE-MISSING` plus one
-  `VENDORED-ELSEWHERE` after.** The reclassified name is
-  `tools/merge-register.py` from **L-A18** — resolved to
-  `tools/registers/merge-register.py`, where Ursa's engineer put it
-  deliberately on 2026-10-24 with the reason recorded in
-  `tools/registers/registers.json`. **That same file is the worked
-  example the three-state rule was written on, seventy lines up this
-  same charter.** The surviving binding finding is unchanged and still
-  real: `tools/check-secret-print.py` from **L-X5** is absent here and
-  this repository still has no `.claude/` directory to register it in,
-  while HQ's `main` carries it.
-- **Rule.** **A repair to one instrument is owed to every instrument
-  that asks the same question, not only to every instrument fed by the
-  same surface.** HQ's `L-A54` says the second and is why the companion
-  was missed: these two sweeps read different files, `pm.md` against
-  `lessons.md`, so a surface-keyed sweep exempts them from each other.
-  The question is identical and the question is what the fix belongs to.
-- **Next measure.** On the brief of **2026-10-31**, run both sweeps and
-  count `RULE-MISSING` names that resolve to a file under `tools/`. The
-  effect is positive if the count is **0**.
-
-### The guard that was retired, and the only kind of charter edit that compounds
-
-- **Proposal.** Retire the standing instruction to read `running` as an
-  upper bound, now that the class split is deployed, and cut the
-  subsection written to keep that guard in force down to the rule that
-  outlives its instance.
-- **Merged.** **No**, open in this window's pull request.
-- **Effect, and the first number this entry published was stale by the
-  end of the run, so both readings are here.** At the moment of the
-  retirement the file was **4,580 lines** with this window's own delta
-  at **+30/-29**, a replacement ratio of 0.97, and the entry said the
-  length did not move. **At the end of the run it is 4,634 lines,
-  +85/-30 against this seat's previous tip, so the file grew by 55
-  lines net and the ratio is 0.35.** The growth is two later
-  amendments, the companion-sweep fix and the Learn-step ordering rule,
-  each of which carries a measurement that was not available when the
-  retirement was written.
-  **Report the end-of-run number, not the number at the moment you
-  deleted something.** A replacement ratio taken immediately after a
-  deletion is the most flattering instant in the window, and this entry
-  published it before correcting itself in the same commit range. The
-  honest summary: the retirement was real, it was the first non-trivial
-  deletion this seat has made, and it was outweighed by the same run's
-  additions.
-- **Rule.** **The cheapest way to shorten this file is to watch for the
-  defects it guards against being fixed elsewhere.** A guard is written
-  when a defect is live and nothing in the loop re-reads it when the
-  defect dies. Two of the four instruments in this register's
-  fails-toward-good-news count were fixed today, and the only reason
-  this window could delete anything is that it checked.
-- **Next measure.** On the brief of **2026-10-31**, `wc -l
-  prompts/exo-agent.md` on this seat's tip. The effect is positive if it
-  is **at or below 4,634**, which is this window's closing length and
-  not its mid-run one.
-
-### Experiment for the week: does a lost cohort precede the dark minutes?
-
-- **Hypothesis.** The minutes of darkness that fall *after* a capacity
-  reset are concentrated behind lost runs rather than spread across the
-  day. Stated so it can fail: on any day with at least one
-  `lost_cohort`, the gap that begins within five minutes of a cohort's
-  end accounts for **more than half** of that day's
-  `dark_after_reset`.
-- **The metric, and it exists.** `GET /api/capacity` returns
-  `dark_after_reset`, `gaps[]` with per-gap `after_reset`, and
-  `lost_cohorts[]` with `from` and `to`. One call answers it. No
-  register, no hand count, and nothing for a later window to re-derive.
-- **Today's reading, which is n=1 and is the baseline.** 237 of 377
-  minutes, **63%**, in the gap beginning at 07:07, the second the
-  06:45–07:07 cohort ended. The two gaps with `after_reset: 0` had no
-  cohort in front of them.
-- **Read on 2026-10-26**, on the brief's tick, over the two intervening
-  days. Kept if the share is above half on both days; **reverted, and
-  the hypothesis written off, if either day puts the majority of its
-  post-reset darkness in a gap with no cohort behind it.** The honest
-  failure mode is that the lost cohort and the darkness share a cause in
-  the runtime and neither explains the other, which would still be worth
-  the two calls it costs to find out.
-- **What this seat does not do about it.** The scheduler is HQ's
-  runtime. The measurement and the handoff are this seat's, and the
-  handoff went to `exo-centralizer` with both numbers.
-
-### The compounding ratio, reported flat
-
-- **Files this window's changes touch: 7.** `prompts/exo-agent.md`,
-  five of this seat's registers (`incidents`, `improvements`,
-  `learning-log`, `merge-order`, `runner-facts`), and one deletion of a
-  stray scratch file at the repository root.
-- **Seats: 1.** This seat's own. No other seat's charter is in the diff.
-- **So the curve is flat on the measure HQ asks for**, and saying so is
-  the duty. The two pieces that can reach more than one seat left this
-  repository as a handoff rather than as a diff: the
-  repair-the-companion rule and the capacity finding, both to the
-  centralizer, which is the shape `L-A55` asks for in place of eleven
-  copies.
-
-### The pairing sweep answered in one call what forty minutes of measuring could not
-
-- **Proposal.** None; this is §3's existing sweep, run, and recorded
-  because its yield this window was larger than anything else in the run.
-- **Effect.** Reading HQ's 78-name `tools/` list against this register's
-  live findings produced one pairing that changed a finding's status:
-  **`capacity-retry.py`** against this window's dark-minutes
-  measurement. The tool exists, is deployed, woke this very run, cites
-  the identical 377-minute number in its own docstring, and **has one
-  gap**: its first condition is `run["class"] != "refused": continue`,
-  and the word `lost` is absent from all 233 lines. So the largest gap in
-  the day, 237 minutes, sits behind the only class the tool cannot see,
-  because that class shipped at 18:12:23 the same day the tool was
-  written against the older instrument.
-- **Four other pairings, reported as context rather than as findings.**
-  `check-turn-caps.sh` against today's three 101-of-100 overruns
-  (skill, research, this seat). `check-runner-alive.py` and
-  `check-run-ran.py` against the lost cohorts. `check-silence-clocks.py`
-  against the expired-clock entries. `check-secret-print.py` against
-  **L-X5**, which is the one that is still a live finding: absent here,
-  present on HQ's `main`, and this repository still has no `.claude/`
-  directory to register it in.
-- **Rule.** **Run the pairing sweep before you write the postmortem, not
-  after.** §6 already says to check whether this organization has
-  already written a postmortem for the mechanism; it did not say to check
-  whether somebody has already built the tool. This window spent forty
-  minutes measuring a gap, filed it as an untestable hypothesis about
-  HQ's scheduler, and then found in one call that the scheduler's fix was
-  already deployed and short by one word.
-- **Next measure.** On the brief of **2026-10-31**, count the incident
-  entries filed in the week whose account names an HQ tool. The effect is
-  positive if every entry about a runtime surface names one, including
-  the entries that name it to say no tool exists.
-
-### The merge drivers this repository declares are registered in zero of the clones it runs in
-
-- **Proposal.** Make the two driver installers a bootstrap step in the
-  charters of the two seats that act on a conflict verdict: this seat,
-  which writes `docs/agents/merge-order.md`, and the PM, which holds
-  the merge gate. Not in all eleven, because the durable fix is the
-  runtime running them after it clones, and eleven copies of a
-  workaround is the shape L-A55 refuses.
-- **Merged.** **No**, open in this window's pull request (**#404**),
-  two charter files, 55 lines in this seat's and 30 in the PM's.
-- **Effect.** Measured on the open queue of 2026-10-24, same commits
-  and same instrument, before and after `bash
-  tools/ledger/install-driver.sh` and `bash
-  tools/registers/install-drivers.sh`: **4 of 15** open pull requests
-  reported `CONFLICT docs/ideas.md`, then **0 of 15**. The whole queue
-  is clean. Confirmed a second way by performing all four merges in a
-  detached scratch worktree off `origin/main`. The four were #316,
-  #320, #348 and #393, one seat's four-deep chain, and the conflict
-  was never in any of them. `git config --get-regexp
-  'merge\.(ledger|register)\.'` printed nothing on the clone as handed.
-  Two costs are already paid and are not hypothetical: the gate held
-  four clean pull requests, and at 13:20 this seat sent Ursa's engineer
-  a measurement arguing that the one register with a driver declared
-  was the only one blocking branches, which is true and inverted,
-  because it was blocking them on the driver's absence. That correction
-  went back to the engineer at 22:50.
-- **Rule.** **A clone has three properties that fail silently and
-  independently, and a guard that fixes one reads to every later run as
-  having fixed the environment.** Depth, breadth, and now merge
-  configuration. §0 of this seat's charter already carried the first
-  two for exactly this reason and the third was missing from it, so
-  name which property each line fixes. The second half is the one worth
-  carrying further: **blindness has a direction, and the direction
-  decides who pays.** Every blind instrument on this register until
-  today failed toward good news, so the cost landed on the owner not
-  being told. This one fails toward bad news, so the cost lands on
-  seats burning runs on work that does not exist, and on a gate holding
-  clean work. The two call for opposite urgencies and the register had
-  only ever seen one of them.
-- **Next measure.** On the brief of **2026-10-31**, re-run the conflict
-  sweep twice, once on the clone as handed and once after the
-  installers, and record both numbers. The experiment succeeds if the
-  two agree, which means either the runtime now installs them or every
-  seat's charter does. If they still disagree and the charter line
-  merged, the charter is not the lever and the handoff to HQ is.
-
-### The capacity-return wake landed, and the darkness it was built for went from 377 minutes to 1
-
-- **Hypothesis.** A seat whose run the provider refused is simply over,
-  and nothing restarts it until its next scheduled window hours later,
-  so a tool that reads the reset time the refusal already announced and
-  wakes the seat at it should collapse the minutes of a day that fall
-  dark *after* capacity has returned.
-- **The metric, and it exists.** `GET /api/capacity` returns
-  `dark_after_reset` and per-gap `after_reset`. One call.
-- **Effect.** **377 minutes to 1.** The 37th window measured 377 dark
-  minutes falling after the provider limit had already reset on
-  2026-10-24. Today's reading at 02:25 UTC is `dark_after_reset: 1`, and
-  `last_start` is 02:20:33 against a `reset_at` of 02:20:00, so the wake
-  fired 33 seconds after capacity returned and took 17 seats in 5
-  companies with it. This window is one of them.
-- **What this seat did.** The measurement and the handoff only. The tool
-  is `tools/capacity-retry.py` and the scheduler is HQ's runtime. The
-  37th window's finding was that the tool's class predicate was
-  `refused` and the word `lost` was absent from all 233 lines; the
-  deployed version carries `OWED_CLASSES = ("refused", "lost")`.
-- **Next measure.** On the brief of **2026-10-31**, read
-  `dark_after_reset` over the intervening days. Carried as kept if it
-  stays under ten minutes on every day with at least one refusal window.
-
-### The run-pr resolver fix landed, and its auditor passes on a third of the runs
-
-- **Hypothesis.** `runtime/board/runpr.py` matched GitHub branches
-  against the board's **seat** column while the branch carries the host
-  manifest's **agent name**, so it resolved pull requests only for HQ,
-  and fixing the one line should stop this company's seats reading as
-  having shipped nothing.
-- **The metric, and it exists.** `tools/check-run-pr.py` counts run
-  reports whose claimed absence the repository contradicts.
-- **Effect, and it is two numbers that disagree.** The fix is deployed:
-  run reports from 2026-10-24T18:27 onward read `for a pm/ or ursa-pm/
-  branch`, and the auditor reports **"25 run(s) read, 0 reported an
-  absence the repository contradicts"**. That is a clean pass. In the
-  same twelve-hour window the host's own logs hold **69** finished Ursa
-  runs. **The auditor read 25 of 69 and passed, because the 44 it could
-  not see were missing the row it audits through.** So the fix held and
-  the surface it was measured on shrank under it.
-- **What this seat did.** Filed
-  `INC-2026-10-25-the-run-report-is-missing-for-twenty-two-of-thirty-five-windows`
-  and handed HQ a join rather than a bug report: `capacity.read_runs`
-  enumerates the runs that happened, `check-run-pr.py` reads the rows
-  the board holds, and nothing compares the two. Both halves are already
-  in HQ's `tools/`.
-- **Next measure.** On the brief of **2026-10-31**, run both and record
-  the pair. The experiment succeeds when the row count and the log count
-  agree to within the runs still in flight.
-
-### Experiment for the week: does installing the drivers a repository ships change what the owner is told to merge?
-
-- **Hypothesis.** Stated so it can fail: on any run of the §5b sweep,
-  the number of open pull requests reported as conflicting with `main`
-  is **strictly lower** after running this repository's two merge-driver
-  installers than before, and the difference is entirely accounted for
-  by files `.gitattributes` names.
-- **The metric, and it exists.** The sweep itself, run twice, and
-  `git config --get-regexp '^merge\.'` to say which state the clone was
-  in. No register and nothing for a later window to re-derive.
-- **Today's reading, which is the baseline.** **4 conflicts before, 0
-  after**, all four on `docs/ideas.md`, which `.gitattributes` names.
-  The clone as handed had no driver configured at all. The §5b
-  instrument would have told the owner that four of Ursa's skill pull
-  requests conflict with `main` when none of them do.
-- **Read on 2026-10-31.** Kept if the difference is non-zero and
-  attributable on at least two further runs. **Reverted, and the
-  installer duty written off as noise, if a clone as handed ever comes
-  back with the drivers already configured**, because that would mean
-  the runtime installs them and the charter line is dead weight. The
-  honest failure mode is the one this run already hit on the other
-  driver: `register` is installed, enabled and attributed, and still
-  does not fire, so "installed" and "working" are two states and this
-  experiment currently measures the first.
-- **What this seat does not do about it.** It does not patch either
-  driver. `tools/` here is shared machinery with a design document per
-  driver, and the `register` question belongs to whoever owns
-  `tools/registers/`.
-
-### Delta on that experiment, read the same night rather than on 2026-10-31: "installed" and "working" are two states, and the second one now has a number
-
-- **Hypothesis under test.** The entry above closes by naming its own
-  honest failure mode: "`register` is installed, enabled and attributed,
-  and still does not fire, so 'installed' and 'working' are two states
-  and this experiment currently measures the first." Ursa's PM said the
-  same thing from the other side at 02:47:22 UTC, that it had not
-  settled the question because no open pull request gave it an
-  overlapping hunk to test. Two seats independently reported the same
-  gap within three minutes, which under §24 makes it worth measuring
-  rather than waiting a week for.
-- **The metric, and it exists.** Four merge cases on `main`'s real
-  `docs/agents/incidents.md`, each run with the attribute on and off, so
-  every row carries its own control. Plus the ascending sweep of the
-  live queue, which is the same §5b instrument the experiment above
-  already uses.
-- **Reading.** **It fires.** Two different entries appended to the tail
-  go from `CONFLICT` to **exit 0 with both kept**, 35 entries to 37.
-  Duplicate identifiers are refused **by name** where git gives markers
-  and no diagnosis. `merge-tree` honours the driver, so the fix reaches
-  the sweep and not only `git merge`. So the experiment above is
-  **kept**, and its stated failure mode is retired rather than carried:
-  the second state is now measured and the number is four of four cases
-  behaving as designed.
-- **And the cost it also measured, which was not in the hypothesis.**
-  The driver's unit is the entry and git's is the line, so two edits
-  twelve lines apart inside one entry are refused on a tree **byte
-  identical** to git's clean merge — exit 1 against exit 0 over
-  `2fbf5fe`. That is a false conflict the drivers *introduce*, and it
-  belongs in the same ledger as the four they remove. Net on tonight's
-  queue: **four false conflicts removed, one true conflict surfaced,
-  zero false conflicts introduced**, because no open pair happened to be
-  in the row-4 shape. The honest statement is that the net is favourable
-  and the row-4 cost is unpaid rather than absent.
-- **Read on 2026-11-01.** Kept while the net stays favourable. The
-  reading that would revert it is a run that spends time resolving a
-  row-4 refusal whose tree matches the clean merge, because that is the
-  drivers charging this org for a conflict that does not exist. The
-  charter now tells a window to compare the trees when the refusal
-  reason is the entry-edited one, so the cost should be one command
-  rather than one hand resolution.
-- **What this seat does not do about it.** It still does not patch
-  either driver, and the row-4 granularity is a design property of
-  `tools/registers/` rather than a bug in it. Reported to the board, not
-  fixed here.
-
-### The compounding ratio, window 41
-
-- **Changes that touch more than one seat: one of three.** The
-  file-scoped-split finding is every seat's, because eleven seats run
-  under the same HQ scope clause and four of this repository's registers
-  are multi-author files. It is handed to HQ's `exo-centralizer` as an
-  all-seats clause rather than written into eleven charters, which is
-  the shape `L-A55` asks for. The driver matrix is this repository's
-  alone. The deletion of the frozen entry is this chain's alone.
-- **Files this run's changes touch: six.** `prompts/exo-agent.md`,
-  `docs/agents/incidents.md`, `runner-facts.md`, `merge-order.md`,
-  `learning-log.md`, and this file.
-- **Charter length, which is what the turn cap pays for.**
-  `prompts/exo-agent.md` is **4,850 lines**, +2,698 / −69 against
-  `main`. This window added 91 lines and deleted 2. The replacement
-  ratio is 0.026 and **the curve is not flat**, which is the honest
-  reading rather than the flattering one: this seat's charter is 11.5
-  times the median of the other eleven, and that remains the largest
-  single cost it imposes on itself. The one deletion it made tonight
-  replaced a sentence that said the driver "is still not firing" with
-  the measurement that it does, which is the only kind of edit that
-  makes a later window's charter shorter.
-
-## Window 42, 2026-10-25, message wake (a note from Ursa/pm, 03:06:40 UTC)
-
-### The delta on window 41's experiment, read the next window
-
-- **What window 41 shipped.** The register merge driver, measured with
-  controls in a scratch repository, and a charter clause saying to read
-  the refusal reason on stderr before believing the conflict count.
-- **The delta, measured.** The driver's positive case now has a live
-  confirmation instead of a synthetic one: this window's own branch and
-  the PM's share base `e3f14d9`, both append to
-  `docs/agents/incidents.md`, and the pair goes from `CONFLICT
-  (content)` with the attribute off to exit 0 with it on, same result in
-  both merge orders. **Kept.**
-- **And one line of it reverted, which is the point of reading a
-  delta.** §21's heading said a half-registered driver is a third exit
-  status. It is not; it is exit 1, identical to a missing driver.
-  Corrected in `runner-facts.md` §22 rather than quietly edited, because
-  the wrong version was published on the board and in a pull request
-  description.
-
-### This window's experiment
-
-- **Hypothesis.** This seat's registers are not held by a disagreement
-  about authority; they are held by branch *shape*. If the register half
-  ships on a branch carrying no `prompts/` path, the PM seat can merge it
-  the same day under §21, with no standard changed and no exception
-  asked for.
-- **The metric, and it exists in this repository rather than on a
-  dashboard.** The date of the newest commit on `main` touching
-  `docs/agents/*.md`. It has read **2026-10-18** for seven days.
-- **When it is read.** The next window of this seat. If `main`'s
-  register date has moved, splitting by merge authority is this seat's
-  default and the charter says so. If it has not, the hold was never
-  about the path and the escalation to HQ is the only live route.
-
-### The compounding ratio, window 42
-
-- **Changes that touch more than one seat: two of three.** The
-  authority-split finding is every seat's — eleven seats run under the
-  same §10 checklist, and any seat that amends its own charter alongside
-  its own registers is buying the same hold. Handed to HQ's
-  `exo-centralizer` as an all-seats clause plus the §10/§21 contradiction
-  underneath it, rather than written into eleven charters. The
-  "run the exit condition your own register already wrote down" lesson
-  is portable to every register in the portfolio and costs nothing.
-  The learning-log driver flip is this repository's alone.
-- **Files this run's changes touch: seven**, across two kinds.
-  `docs/agents/incidents.md`, `runner-facts.md`, `learning-log.md`,
-  `merge-order.md`, this file, plus `tools/registers/registers.json` and
-  `.gitattributes`. **Zero under `prompts/`**, deliberately, which is
-  this window's whole thesis expressed as a file list.
-- **Does it make the next change cheaper?** Yes, and for once the
-  mechanism is not a clause. One more register merges without a hand
-  resolution — the largest one this seat keeps, 6,846 lines, the file its
-  memory lives in. And if the split holds, every future window's
-  registers land on the day they are written instead of waiting on a
-  charter decision they have nothing to do with, which removes the need
-  for the §0 bootstrap block to grow.
-- **Charter length, and this is the honest part.**
-  `prompts/exo-agent.md` is **unchanged at 4,850 lines** by this window,
-  for the first time in this chain. Not restraint: this branch may not
-  contain it. The two clauses this window earned — split by merge
-  authority, and run your register's own exit conditions — are therefore
-  **owed to the charter and not in it**, named here so the next window
-  writes them rather than rediscovering them. **The curve is flat on the
-  charter and not flat on the registers**, and that is the first time
-  those two have been able to differ, because they were previously the
-  same branch.
-
-## Window 44, 2026-10-25, hook wake on returned capacity (23:02:10 UTC)
-
-### The delta on window 42's experiment: splitting by merge authority worked, and the number moved while this window was running
-
-- **What window 42 shipped.** #422, the register half of this seat's
-  chain alone, rooted so that it carries no `prompts/` path, on the
-  hypothesis that the hold was branch **shape** and not a disagreement
-  about authority. Nothing in any standard was changed and no exception
-  was asked for.
-- **The metric it named.** "The date of the newest commit on `main`
-  touching `docs/agents/*.md`. It has read **2026-10-18** for seven
-  days."
-- **The delta, measured.** It reads **2026-10-25**, for all five
-  registers. #422 merged at **2026-10-25T23:06:36Z**, about four minutes
-  into this window, after those files had been frozen on `main` for
-  seven days. **Kept, and it is now this seat's default.**
-- **The second number, which is the one that makes the case.** This
-  window's own diff against `main` went from **10 files and 11,315
-  lines** to **2 files and 302 lines** the moment #422 landed, because
-  everything else in it was window 38 to 43's unmerged output being
-  carried for want of a merge. The split did not only unblock the
-  registers; it made every later window's pull request legible to the
-  owner, which is the cost
-  `INC-2026-10-24-resolving-a-register-collision-imports-the-other-seats-whole-branch`
-  measured at twelve files and nine thousand lines.
-- **Honest residue.** The charter half, #418, is still held, correctly,
-  and the §10-versus-§21 contradiction underneath it is still HQ's to
-  resolve. The experiment proved the registers never needed that
-  decision. It proved nothing about the decision.
-
-### The delta on the capacity-retry driver, which is HQ's instrument and this seat's reported drag
-
-- **What was shipped, and by whom.** `tools/capacity-retry.py`, HQ's,
-  built after this seat and `epitome`'s exo independently measured that
-  most of the company's idle day was capacity sitting available with
-  nothing asking for it. Its own docstring cites **783 dark minutes on
-  2026-10-24, 377 of them after the provider's limit had already
-  reset.**
-- **The delta, measured on 2026-10-25.** The brief's renderer reports
-  **1 minute** of the day's darkness falling after the limit had reset,
-  against 377 the day before. **Kept.** The hole the driver was built
-  for is closed to within a minute.
-- **And the drag moved rather than disappearing, which is the part worth
-  reporting.** Total darkness went **up**: 783 minutes to **1,191**
-  (19.9 h), on 149 attempted runs of which **70 were refused by the
-  provider, 48% of the day, 53 of them before their first turn.** So
-  the scheduler's hole is closed and the quota's hole is now the whole
-  of it. A driver that woke seats into a still-exhausted quota would
-  show exactly this shape, and the 53 turn-one refusals are consistent
-  with it. **This is the biggest drag on this company and it is not
-  this seat's to fix**: it is the provider's limit and the owner's
-  question about how many seats wake into one quota.
-- **What this window adds to the same instrument.** The driver decides
-  from a seat's latest run alone, so a barren refusal landing on top of
-  a fertile one hides the fertile one — measured at **73 of 110 barren
-  wakes, 66.4%, across 19 seats and all five companies, nine runs deep
-  at worst.** One block fixes it, on HQ's already-open #456.
-  `runner-facts.md` §24 has the reproduction.
-
-### This window's experiment
-
-- **Hypothesis.** The two defects this window found in its own charter
-  are both **proxy failures**: §0 selects a charter by recency when it
-  wants evolution, and the fork sweep fires on an act when it guards a
-  state. If those are a class rather than a coincidence, then a sweep
-  over this charter for rules that select or fire on a proxy will find
-  more of them, and it will find them before they cost a window.
-- **The metric, and it exists in this repository.** The count of
-  standing rules in `prompts/exo-agent.md` whose trigger is an event
-  (`when you split`, `before you end`, `on any wake`) against the count
-  whose trigger is a state. Four of the five members of the
-  "jointly lossy" family already in `incidents.md` are the first kind.
-- **When it is read.** The next window of this seat that holds the
-  charter branch, because the sweep's output is a charter edit and the
-  charter is on #418.
-
-### The compounding ratio, window 44
-
-- **Changes that touch more than one seat: two of three.** The
-  retry-wake defect is every seat's in all five companies — 19 seats
-  measured, and the fix is one block in one deployment rather than
-  eleven charters, handed to HQ's `exo-centralizer` for #456. The
-  fork-sweep scheduling defect is every seat's that copies content
-  across a split, which today is this seat alone, so that one is
-  local and says so. The §0 proxy defect is this seat's only.
-- **Files this window changed: three**, all registers, all in this
-  seat's lane. **Seats whose charters it changed: none**, deliberately,
-  and the three charter amendments it owes are stated verbatim in the
-  register with the reason they are not on this branch.
-- **The curve is not flat this window and the reason is not this
-  window.** The register date on `main` moved seven days in one merge.
-
-## Window 45, 2026-10-25, message wake (the merge of #429, 23:25 UTC)
-
-### The delta on window 44's experiment, read by the first window to hold the charter branch
-
-- **What window 44 registered.** That the two defects it found in one run
-  were both **proxy failures** of one class, §0 selecting a charter by
-  recency when it wanted evolution and the fork sweep firing on an act
-  when it guards a state, and that a sweep of this charter for the same
-  shape would find more of them before they cost a window.
-- **The metric it named.** "The count of standing rules in
-  `prompts/exo-agent.md` whose trigger is an event against the count
-  whose trigger is a state."
-- **The delta, measured.** Thirteen distinct rules in this charter are
-  scheduled on an act. **Seven** of the thirteen guard a condition that
-  outlives the act, which is the defect shape. Three of those seven are
-  already paired with a standing check that catches the inherited case,
-  one is the fork sweep window 44 measured, and **three were unpaired**.
-  **Kept.** The hypothesis predicted more members and there were three,
-  found in one read rather than over three windows.
-- **One of the three was live rather than hypothetical, which is the
-  part that makes the case.** The rule "when a reported number moves,
-  the correction goes to every addressee" is checked only "before you
-  end a run", so an ask handed to another company and never answered is
-  a state nothing surfaces. Window 44 handed HQ a one-block fix on its
-  open **#456**. That pull request merged at 2026-10-25T23:23:54Z
-  **without the block**, confirmed by reading the deployed
-  `tools/capacity-retry.py` rather than the merge: `unresolved` appears
-  zero times and the loop is still keyed on `latest[agent]`. The 66.4%
-  census stands and the ask is live. It reached this window only because
-  window 44 wrote it into handover prose, which is memory by luck. It is
-  now a standing check and the correction has been sent.
-- **Honest residue.** The census counts rules, and "distinct rule" is a
-  judgement this window made by reading, not a number a script returned.
-  A successor recounting it may get twelve or fourteen. The three
-  unpaired members are the finding and they are each named, so the
-  finding is checkable even where the denominator is soft.
-
-### The delta on window 42's split, which this window had to repair rather than only report
-
-- **What window 42 shipped, and it is still right.** The register half
-  rooted in `main` with no charter path, so the 81.4% of this seat's
-  held work that needed no owner stopped waiting on one. Window 44
-  reported the register date on `main` moving seven days in one merge.
-- **What nobody had measured.** The split gives the two halves
-  **different clocks**, and the fast half drags `main` away from the
-  slow one. Measured at 23:30 UTC, fifteen minutes after #429 landed,
-  the charter half **#418 conflicted with `main` in all five
-  registers** and could not be merged at all. GitHub's `mergeable` field
-  read `UNKNOWN`, so the queue showed nothing.
-- **And merging it would have undone the previous window.** 42 of the 42
-  lines it held that `main` lacked were the fork of the PM's entry that
-  window 44 had deleted fourteen minutes earlier.
-- **Repaired, on #418.** `main` merged in, every register resolved to
-  `main`'s side, both charter files clean because `main` has not touched
-  them since 2026-10-18. Eight files and 13,897 insertions became two
-  and 2,843, and `merge-tree` exits 0.
-- **The standing fix, which is the compounding part.** A branch held
-  behind an authority must have `main` merged into it **every window**,
-  because the thing that staleness comes from is your own other branch
-  landing. Neither the depth warning nor the tier checklist can see
-  this, and the instrument that can has to be pointed at your own held
-  branch rather than at the queue.
-
-### This window's experiment
-
-- **Hypothesis.** The two defects above are both the same shape one
-  layer up from the proxy family: a **rule that was verified against a
-  pair of branches and then relied on against `main`**. Window 44 proved
-  deleting a fork is safe in both merge orders by merging two feature
-  branches, and the proof failed the moment one side was `main`. This
-  window proved the split was sound by measuring the register half, and
-  it failed the moment the other half had to merge. If that is a class,
-  then every safety claim in `incidents.md` whose proof was a
-  branch-to-branch merge is suspect when one side becomes the default
-  branch.
-- **The metric, and it exists in this repository.** The count of
-  entries in `docs/agents/incidents.md` whose stated verification is a
-  merge or ancestry check between two pull request refs, against the
-  count verified against `origin/main`. Both are greppable:
-  `refs/prs/` against `origin/main` inside the entries' own commands.
-- **When it is read.** The next window of this seat, on either half,
-  because the output is a register entry and not a charter edit.
-
-### The compounding ratio, window 45
-
-- **Changes that touch more than one seat: two of four.** The
-  stale-held-branch failure is every seat's that holds work behind an
-  authority, which on this board is several, and it was handed to HQ's
-  centralizer as portfolio shaped rather than fixed once here. The
-  import-then-delete conflict is the PM's problem today and any pair of
-  seats sharing an append-only register tomorrow, and the structural fix
-  is the sweep reschedule, which is one line. The §0 selection
-  amendment and the three standing-check conversions are this seat's
-  only.
-- **Files this window changed: six.** Four registers on the register
-  half, and `prompts/exo-agent.md` plus one inherited `prompts/pm-agent.md`
-  on the charter half. **Seats whose charters it changed: one**, and
-  that one arrived by inheritance rather than by this window.
-- **The curve is not flat, and the number that says so is the charter's
-  own.** `main`'s copy of this charter has been 2,221 lines since
-  2026-10-18. The live copy is 4,962 and now merges clean, where ninety
-  minutes ago it could not merge at all. Replacement ratio this window:
-  three amendments shipped against three owed, so the owed queue is
-  **zero** for the first time in three windows.
-
-## Window 46 — 2026-10-26 (message: the merge of #433, 23:49:44Z)
-
-### The delta on window 45's experiment, read
-
-- **What window 45 registered.** That its two findings were one shape:
-  a rule **verified against a pair of branches and then relied on
-  against `main`**. Window 44 proved deleting an imported fork is safe
-  in both merge orders by merging two feature branches, and the proof
-  failed the moment one side was `main`.
-- **The metric it named.** The count of entries in
-  `docs/agents/incidents.md` whose stated verification is a merge or
-  ancestry check between two pull request refs, against the count
-  verified against `origin/main`.
-- **The delta, measured over all 81 entries.** Six name `refs/prs/`
-  only, six name `origin/main` only, four name both, and 65 name no ref
-  at all.
-- **Verdict: the hypothesis is kept and the metric is replaced.** The
-  class is real, and this window found an independent instance of it at
-  a different layer, below. But the metric cannot find members. Three
-  of its six hits are
-  `INC-2026-10-18-branch-name-reuse`,
-  `INC-2026-10-18-shallow-clone-false-conflicts` and
-  `INC-2026-10-18-readied-sibling-is-not-a-branch-to-grow`, and every
-  one of them is a **containment fact about one named pair**. An
-  ancestry fact about two refs makes no claim that transfers to
-  anything, so there is nothing in it to be falsified by `main`. The
-  remaining three are windows 44 and 45's own entries, one of which is
-  the confirmed failure the hypothesis came from.
-- **So the discriminator is not which ref an entry names.** It is
-  whether the entry states a rule in the imperative that a later window
-  would **apply**, and whether that rule's proof was a pair of refs.
-  That is a read and not a grep. Window 45's own honest residue said
-  the same thing about its previous census: "distinct rule is a
-  judgement this window made by reading, not a number a script
-  returned." Two consecutive experiments have now chosen a greppable
-  metric and found that greppable and discriminating are different
-  properties. **That is the transferable result**, and it is worth more
-  than either count.
-- **The independent instance, which is why the hypothesis survives.**
-  GitHub's `mergeable` field is itself a claim verified against a
-  recorded base rather than against `main`: it answers for the commit
-  in `baseRefOid`, and five of fourteen open pull requests carry an
-  answer that is wrong about `main`. Same shape, one layer up from the
-  register, and found by measuring the queue rather than by reading
-  entries.
-
-### The owed queue, and the carried checks window 45 left
-
-All five answered this window, which is the first time this seat has
-cleared a handover list in one pass.
-
-1. **Take the longest charter.** Done. `main` is 2,221 lines, #418 is
-   4,962, and §0's new selection rule found it. The trap is still live
-   because #418 has not merged.
-2. **Merge `main` into whichever half is still held.** #418 needed
-   nothing: it merges clean at `5902fd21`, re-measured before and after
-   this window's push. Window 45's repair held through two further
-   merges to `main`.
-3. **Whether the PM resolved #432 and #438 in its own favour.** It did,
-   and nothing was lost. Its forty-eight-line postmortem survives
-   intact on **#443**, which contains both and merges clean. The
-   resolution this seat recommended at 23:41:22Z is the one taken.
-4. **Whether HQ answered the capacity-retry re-ask.** Not yet.
-   `unresolved` appears **zero** times in the deployed
-   `tools/capacity-retry.py` on HQ's `main`, 420 lines, and the loop is
-   still keyed on `latest[agent]`. The barren-wake census stands and
-   the ask is live. Re-sent.
-5. **The experiment.** Read above.
-
-### This window's experiment
-
-- **Hypothesis.** The defect behind tonight's finding is not GitHub's.
-  It is that **adopting a local mechanism silently invalidates every
-  shared instrument that was correct before**, and nothing in the
-  adoption reports it. This repository added six `merge=` attributes on
-  2026-10-24 to stop paying for register collisions, and in doing so
-  made GitHub's merge field, GitHub's merge button and HQ's mandated
-  `check-merge-queue.sh` all wrong about it, within two days, with no
-  signal. If that is a class, other local mechanisms this repository
-  has adopted have the same unreported blast radius.
-- **The metric, and it exists in this repository.** The count of
-  repository-local mechanisms declared in config-like files that a
-  shared instrument could be reading past: the entries of
-  `.gitattributes`, the registered git config drivers, the hooks in
-  `.claude/` if one ever exists, and anything under `tools/` a standard
-  names by a different path. Against each, the count of shared
-  instruments (HQ tools, GitHub fields, workflow steps) that compute
-  over the same files without the mechanism. Today the first number is
-  **6 attributes / 2 drivers** and the second is **3** for those.
-- **When it is read.** The next window of this seat, on either half.
-  The output is a register entry, so either can carry it.
-
-### The compounding ratio, window 46
-
-- **Changes that touch more than one seat: two of three.** The
-  merge-verdict finding is every seat's, because every seat's branch
-  passes the gate and two of them acted on the field tonight; it went
-  to the PM, to the skill seat and to HQ in the same pass. The
-  `check-merge-queue.sh` gap is HQ's tool and the portfolio's, handed
-  up rather than patched. The `merge-tree` exit-code rule is this
-  seat's instrument only.
-- **Files this window changed: five.** Four registers on the register
-  half (#442) and `prompts/exo-agent.md` on the charter half (#418).
-  **Seats whose charters it changed: none.** The `prompts/pm-agent.md`
-  change on #418 is window 45's, inherited unchanged.
-- **The curve, stated honestly.** The charter went 4,962 to 5,049
-  lines, one amendment against zero owed, so the owed queue stays at
-  **zero** for a second window. The amendment's reach is wider than
-  usual: the rule it adds is performed by every seat with a branch, not
-  only by this one. Against that, `main`'s copy of this charter has not
-  moved since 2026-10-18, so every amendment of the last eight days is
-  still invisible to every fresh clone, and that number has not
-  improved in three windows. The compounding is in the writing and not
-  yet in the reading.
 ## Week of 2026-10-12
 
 ### A seat posts its own live tip on the board, so no other seat has to point at it second-hand
@@ -2603,3 +1840,766 @@ cleared a handover list in one pass.
   charter rule can only move this seat's row; the receipt is what moves
   the other six seats, and that is with HQ.
 
+## Window 37, 2026-10-24, hook on returned capacity
+
+### The daily tick: observe, orient, decide
+
+- **Observe.** The brief read whole from `GET /api/brief`, 1,835
+  characters, not from the wake excerpt. **363 runs attempted
+  portfolio-wide, 241 finished, 72 refused by the provider (20% of the
+  day, 28 before their first turn), 21 failed, 17 running, 12 lost with
+  their runner in 5 cohorts, 783 dark minutes of which 377 fell after
+  the limit had already reset.** Ursa's own row: **120 attempted, 80
+  finished, 23 refused, 8 failed, 5 running, 4 lost** — a third of the
+  portfolio's attempts and two thirds of them finishing. Queue: 24 open,
+  56 merged in seven days, oldest open 14 hours. 24 of 24 merge cleanly
+  into `main`; 13 of the 24 are contained in another, so eleven merges
+  close the queue. Three turn-cap overruns today, all at 101 of 100:
+  skill at 16:43, research at 17:13, this seat at 17:39.
+- **The biggest drag, named.** **Not the 72 refusals.** A provider limit
+  is a rented asset and nothing in this organization moves it. The drag
+  is `dark_after_reset`, **377 minutes**, because that is capacity the
+  portfolio *had*. 237 of the 377 sit in one gap, 07:07 to 11:05, which
+  begins the same second an eight-run, four-company lost cohort ends.
+  `INC-2026-10-24-six-hours-of-the-day-were-dark-after-the-limit-had-already-reset`
+  has the account and the explicit refusal to call the adjacency a cause.
+- **The anomaly in the numbers.** The brief's own `running` number is
+  trustworthy for the first time. HQ's capacity split merged at 18:12:23
+  and the five classes now sum to `attempted` exactly, 363 = 241 + 72 +
+  21 + 17 + 12. Before it the lost cohort was inside `running`.
+- **Orient: the weakest attribute is 7, dashboards, and HQ's own tool
+  routes this grade here rather than to autonomy.**
+  `tools/autonomy.py --repos Ursa --days 7` returns **57.1% as a floor
+  on 56 merges, 32 seat-claimed, 0 on Actions, 24 unresolved (43%)**,
+  and prints its refusal condition: over a third unresolved means the
+  number grades the instrument. So attribute 9 is not gradeable this
+  week and attribute 7 is what it points at. The dashboards number:
+  **27 of 93 Ursa run reports today name the pull request their run
+  opened, against 103 pull requests created in this repository today.**
+  Twenty of the 93 carry the bare `no pull request.` form, which is the
+  unauthenticated-read defect and is independent of the prefix one.
+- **The two instruments that moved today, and both were this seat's
+  filings.** The capacity split shipped (18:12:23). The run-report
+  branch-prefix resolver shipped too: from **18:27:17** the report text
+  reads *"for a pm/ **or ursa-pm/** branch"*, where every report before
+  it read *"for a pm/ branch"*. Four reports carry the new form and none
+  of the four had a pull request to find, so the fix is deployed and
+  **not yet exercised on a run that opened one**. Do not report it as
+  verified; report it as deployed.
+- **Decide.** One experiment, below, plus three `Ideas` notes to the
+  owner. The experiment's metric is on an endpoint rather than in a
+  register, which is a first for this seat.
+
+### The three-state rule was written for one tool sweep and its companion kept the two-state form
+
+- **Proposal.** Give the `L-*` enforcement sweep the same basename
+  resolution the `pm.md`/`secrets.md` sweep got from the twenty-seventh
+  window, so a tool this repository has deliberately vendored under its
+  own path reads as `VENDORED-ELSEWHERE` rather than as missing.
+- **Merged.** **No**, open in this window's pull request.
+- **Effect.** **Three names before, two `RULE-MISSING` plus one
+  `VENDORED-ELSEWHERE` after.** The reclassified name is
+  `tools/merge-register.py` from **L-A18** — resolved to
+  `tools/registers/merge-register.py`, where Ursa's engineer put it
+  deliberately on 2026-10-24 with the reason recorded in
+  `tools/registers/registers.json`. **That same file is the worked
+  example the three-state rule was written on, seventy lines up this
+  same charter.** The surviving binding finding is unchanged and still
+  real: `tools/check-secret-print.py` from **L-X5** is absent here and
+  this repository still has no `.claude/` directory to register it in,
+  while HQ's `main` carries it.
+- **Rule.** **A repair to one instrument is owed to every instrument
+  that asks the same question, not only to every instrument fed by the
+  same surface.** HQ's `L-A54` says the second and is why the companion
+  was missed: these two sweeps read different files, `pm.md` against
+  `lessons.md`, so a surface-keyed sweep exempts them from each other.
+  The question is identical and the question is what the fix belongs to.
+- **Next measure.** On the brief of **2026-10-31**, run both sweeps and
+  count `RULE-MISSING` names that resolve to a file under `tools/`. The
+  effect is positive if the count is **0**.
+
+### The guard that was retired, and the only kind of charter edit that compounds
+
+- **Proposal.** Retire the standing instruction to read `running` as an
+  upper bound, now that the class split is deployed, and cut the
+  subsection written to keep that guard in force down to the rule that
+  outlives its instance.
+- **Merged.** **No**, open in this window's pull request.
+- **Effect, and the first number this entry published was stale by the
+  end of the run, so both readings are here.** At the moment of the
+  retirement the file was **4,580 lines** with this window's own delta
+  at **+30/-29**, a replacement ratio of 0.97, and the entry said the
+  length did not move. **At the end of the run it is 4,634 lines,
+  +85/-30 against this seat's previous tip, so the file grew by 55
+  lines net and the ratio is 0.35.** The growth is two later
+  amendments, the companion-sweep fix and the Learn-step ordering rule,
+  each of which carries a measurement that was not available when the
+  retirement was written.
+  **Report the end-of-run number, not the number at the moment you
+  deleted something.** A replacement ratio taken immediately after a
+  deletion is the most flattering instant in the window, and this entry
+  published it before correcting itself in the same commit range. The
+  honest summary: the retirement was real, it was the first non-trivial
+  deletion this seat has made, and it was outweighed by the same run's
+  additions.
+- **Rule.** **The cheapest way to shorten this file is to watch for the
+  defects it guards against being fixed elsewhere.** A guard is written
+  when a defect is live and nothing in the loop re-reads it when the
+  defect dies. Two of the four instruments in this register's
+  fails-toward-good-news count were fixed today, and the only reason
+  this window could delete anything is that it checked.
+- **Next measure.** On the brief of **2026-10-31**, `wc -l
+  prompts/exo-agent.md` on this seat's tip. The effect is positive if it
+  is **at or below 4,634**, which is this window's closing length and
+  not its mid-run one.
+
+### Experiment for the week: does a lost cohort precede the dark minutes?
+
+- **Hypothesis.** The minutes of darkness that fall *after* a capacity
+  reset are concentrated behind lost runs rather than spread across the
+  day. Stated so it can fail: on any day with at least one
+  `lost_cohort`, the gap that begins within five minutes of a cohort's
+  end accounts for **more than half** of that day's
+  `dark_after_reset`.
+- **The metric, and it exists.** `GET /api/capacity` returns
+  `dark_after_reset`, `gaps[]` with per-gap `after_reset`, and
+  `lost_cohorts[]` with `from` and `to`. One call answers it. No
+  register, no hand count, and nothing for a later window to re-derive.
+- **Today's reading, which is n=1 and is the baseline.** 237 of 377
+  minutes, **63%**, in the gap beginning at 07:07, the second the
+  06:45–07:07 cohort ended. The two gaps with `after_reset: 0` had no
+  cohort in front of them.
+- **Read on 2026-10-26**, on the brief's tick, over the two intervening
+  days. Kept if the share is above half on both days; **reverted, and
+  the hypothesis written off, if either day puts the majority of its
+  post-reset darkness in a gap with no cohort behind it.** The honest
+  failure mode is that the lost cohort and the darkness share a cause in
+  the runtime and neither explains the other, which would still be worth
+  the two calls it costs to find out.
+- **What this seat does not do about it.** The scheduler is HQ's
+  runtime. The measurement and the handoff are this seat's, and the
+  handoff went to `exo-centralizer` with both numbers.
+
+### The compounding ratio, reported flat
+
+- **Files this window's changes touch: 7.** `prompts/exo-agent.md`,
+  five of this seat's registers (`incidents`, `improvements`,
+  `learning-log`, `merge-order`, `runner-facts`), and one deletion of a
+  stray scratch file at the repository root.
+- **Seats: 1.** This seat's own. No other seat's charter is in the diff.
+- **So the curve is flat on the measure HQ asks for**, and saying so is
+  the duty. The two pieces that can reach more than one seat left this
+  repository as a handoff rather than as a diff: the
+  repair-the-companion rule and the capacity finding, both to the
+  centralizer, which is the shape `L-A55` asks for in place of eleven
+  copies.
+
+### The pairing sweep answered in one call what forty minutes of measuring could not
+
+- **Proposal.** None; this is §3's existing sweep, run, and recorded
+  because its yield this window was larger than anything else in the run.
+- **Effect.** Reading HQ's 78-name `tools/` list against this register's
+  live findings produced one pairing that changed a finding's status:
+  **`capacity-retry.py`** against this window's dark-minutes
+  measurement. The tool exists, is deployed, woke this very run, cites
+  the identical 377-minute number in its own docstring, and **has one
+  gap**: its first condition is `run["class"] != "refused": continue`,
+  and the word `lost` is absent from all 233 lines. So the largest gap in
+  the day, 237 minutes, sits behind the only class the tool cannot see,
+  because that class shipped at 18:12:23 the same day the tool was
+  written against the older instrument.
+- **Four other pairings, reported as context rather than as findings.**
+  `check-turn-caps.sh` against today's three 101-of-100 overruns
+  (skill, research, this seat). `check-runner-alive.py` and
+  `check-run-ran.py` against the lost cohorts. `check-silence-clocks.py`
+  against the expired-clock entries. `check-secret-print.py` against
+  **L-X5**, which is the one that is still a live finding: absent here,
+  present on HQ's `main`, and this repository still has no `.claude/`
+  directory to register it in.
+- **Rule.** **Run the pairing sweep before you write the postmortem, not
+  after.** §6 already says to check whether this organization has
+  already written a postmortem for the mechanism; it did not say to check
+  whether somebody has already built the tool. This window spent forty
+  minutes measuring a gap, filed it as an untestable hypothesis about
+  HQ's scheduler, and then found in one call that the scheduler's fix was
+  already deployed and short by one word.
+- **Next measure.** On the brief of **2026-10-31**, count the incident
+  entries filed in the week whose account names an HQ tool. The effect is
+  positive if every entry about a runtime surface names one, including
+  the entries that name it to say no tool exists.
+
+### The merge drivers this repository declares are registered in zero of the clones it runs in
+
+- **Proposal.** Make the two driver installers a bootstrap step in the
+  charters of the two seats that act on a conflict verdict: this seat,
+  which writes `docs/agents/merge-order.md`, and the PM, which holds
+  the merge gate. Not in all eleven, because the durable fix is the
+  runtime running them after it clones, and eleven copies of a
+  workaround is the shape L-A55 refuses.
+- **Merged.** **No**, open in this window's pull request (**#404**),
+  two charter files, 55 lines in this seat's and 30 in the PM's.
+- **Effect.** Measured on the open queue of 2026-10-24, same commits
+  and same instrument, before and after `bash
+  tools/ledger/install-driver.sh` and `bash
+  tools/registers/install-drivers.sh`: **4 of 15** open pull requests
+  reported `CONFLICT docs/ideas.md`, then **0 of 15**. The whole queue
+  is clean. Confirmed a second way by performing all four merges in a
+  detached scratch worktree off `origin/main`. The four were #316,
+  #320, #348 and #393, one seat's four-deep chain, and the conflict
+  was never in any of them. `git config --get-regexp
+  'merge\.(ledger|register)\.'` printed nothing on the clone as handed.
+  Two costs are already paid and are not hypothetical: the gate held
+  four clean pull requests, and at 13:20 this seat sent Ursa's engineer
+  a measurement arguing that the one register with a driver declared
+  was the only one blocking branches, which is true and inverted,
+  because it was blocking them on the driver's absence. That correction
+  went back to the engineer at 22:50.
+- **Rule.** **A clone has three properties that fail silently and
+  independently, and a guard that fixes one reads to every later run as
+  having fixed the environment.** Depth, breadth, and now merge
+  configuration. §0 of this seat's charter already carried the first
+  two for exactly this reason and the third was missing from it, so
+  name which property each line fixes. The second half is the one worth
+  carrying further: **blindness has a direction, and the direction
+  decides who pays.** Every blind instrument on this register until
+  today failed toward good news, so the cost landed on the owner not
+  being told. This one fails toward bad news, so the cost lands on
+  seats burning runs on work that does not exist, and on a gate holding
+  clean work. The two call for opposite urgencies and the register had
+  only ever seen one of them.
+- **Next measure.** On the brief of **2026-10-31**, re-run the conflict
+  sweep twice, once on the clone as handed and once after the
+  installers, and record both numbers. The experiment succeeds if the
+  two agree, which means either the runtime now installs them or every
+  seat's charter does. If they still disagree and the charter line
+  merged, the charter is not the lever and the handoff to HQ is.
+
+### The capacity-return wake landed, and the darkness it was built for went from 377 minutes to 1
+
+- **Hypothesis.** A seat whose run the provider refused is simply over,
+  and nothing restarts it until its next scheduled window hours later,
+  so a tool that reads the reset time the refusal already announced and
+  wakes the seat at it should collapse the minutes of a day that fall
+  dark *after* capacity has returned.
+- **The metric, and it exists.** `GET /api/capacity` returns
+  `dark_after_reset` and per-gap `after_reset`. One call.
+- **Effect.** **377 minutes to 1.** The 37th window measured 377 dark
+  minutes falling after the provider limit had already reset on
+  2026-10-24. Today's reading at 02:25 UTC is `dark_after_reset: 1`, and
+  `last_start` is 02:20:33 against a `reset_at` of 02:20:00, so the wake
+  fired 33 seconds after capacity returned and took 17 seats in 5
+  companies with it. This window is one of them.
+- **What this seat did.** The measurement and the handoff only. The tool
+  is `tools/capacity-retry.py` and the scheduler is HQ's runtime. The
+  37th window's finding was that the tool's class predicate was
+  `refused` and the word `lost` was absent from all 233 lines; the
+  deployed version carries `OWED_CLASSES = ("refused", "lost")`.
+- **Next measure.** On the brief of **2026-10-31**, read
+  `dark_after_reset` over the intervening days. Carried as kept if it
+  stays under ten minutes on every day with at least one refusal window.
+
+### The run-pr resolver fix landed, and its auditor passes on a third of the runs
+
+- **Hypothesis.** `runtime/board/runpr.py` matched GitHub branches
+  against the board's **seat** column while the branch carries the host
+  manifest's **agent name**, so it resolved pull requests only for HQ,
+  and fixing the one line should stop this company's seats reading as
+  having shipped nothing.
+- **The metric, and it exists.** `tools/check-run-pr.py` counts run
+  reports whose claimed absence the repository contradicts.
+- **Effect, and it is two numbers that disagree.** The fix is deployed:
+  run reports from 2026-10-24T18:27 onward read `for a pm/ or ursa-pm/
+  branch`, and the auditor reports **"25 run(s) read, 0 reported an
+  absence the repository contradicts"**. That is a clean pass. In the
+  same twelve-hour window the host's own logs hold **69** finished Ursa
+  runs. **The auditor read 25 of 69 and passed, because the 44 it could
+  not see were missing the row it audits through.** So the fix held and
+  the surface it was measured on shrank under it.
+- **What this seat did.** Filed
+  `INC-2026-10-25-the-run-report-is-missing-for-twenty-two-of-thirty-five-windows`
+  and handed HQ a join rather than a bug report: `capacity.read_runs`
+  enumerates the runs that happened, `check-run-pr.py` reads the rows
+  the board holds, and nothing compares the two. Both halves are already
+  in HQ's `tools/`.
+- **Next measure.** On the brief of **2026-10-31**, run both and record
+  the pair. The experiment succeeds when the row count and the log count
+  agree to within the runs still in flight.
+
+### Experiment for the week: does installing the drivers a repository ships change what the owner is told to merge?
+
+- **Hypothesis.** Stated so it can fail: on any run of the §5b sweep,
+  the number of open pull requests reported as conflicting with `main`
+  is **strictly lower** after running this repository's two merge-driver
+  installers than before, and the difference is entirely accounted for
+  by files `.gitattributes` names.
+- **The metric, and it exists.** The sweep itself, run twice, and
+  `git config --get-regexp '^merge\.'` to say which state the clone was
+  in. No register and nothing for a later window to re-derive.
+- **Today's reading, which is the baseline.** **4 conflicts before, 0
+  after**, all four on `docs/ideas.md`, which `.gitattributes` names.
+  The clone as handed had no driver configured at all. The §5b
+  instrument would have told the owner that four of Ursa's skill pull
+  requests conflict with `main` when none of them do.
+- **Read on 2026-10-31.** Kept if the difference is non-zero and
+  attributable on at least two further runs. **Reverted, and the
+  installer duty written off as noise, if a clone as handed ever comes
+  back with the drivers already configured**, because that would mean
+  the runtime installs them and the charter line is dead weight. The
+  honest failure mode is the one this run already hit on the other
+  driver: `register` is installed, enabled and attributed, and still
+  does not fire, so "installed" and "working" are two states and this
+  experiment currently measures the first.
+- **What this seat does not do about it.** It does not patch either
+  driver. `tools/` here is shared machinery with a design document per
+  driver, and the `register` question belongs to whoever owns
+  `tools/registers/`.
+
+### Delta on that experiment, read the same night rather than on 2026-10-31: "installed" and "working" are two states, and the second one now has a number
+
+- **Hypothesis under test.** The entry above closes by naming its own
+  honest failure mode: "`register` is installed, enabled and attributed,
+  and still does not fire, so 'installed' and 'working' are two states
+  and this experiment currently measures the first." Ursa's PM said the
+  same thing from the other side at 02:47:22 UTC, that it had not
+  settled the question because no open pull request gave it an
+  overlapping hunk to test. Two seats independently reported the same
+  gap within three minutes, which under §24 makes it worth measuring
+  rather than waiting a week for.
+- **The metric, and it exists.** Four merge cases on `main`'s real
+  `docs/agents/incidents.md`, each run with the attribute on and off, so
+  every row carries its own control. Plus the ascending sweep of the
+  live queue, which is the same §5b instrument the experiment above
+  already uses.
+- **Reading.** **It fires.** Two different entries appended to the tail
+  go from `CONFLICT` to **exit 0 with both kept**, 35 entries to 37.
+  Duplicate identifiers are refused **by name** where git gives markers
+  and no diagnosis. `merge-tree` honours the driver, so the fix reaches
+  the sweep and not only `git merge`. So the experiment above is
+  **kept**, and its stated failure mode is retired rather than carried:
+  the second state is now measured and the number is four of four cases
+  behaving as designed.
+- **And the cost it also measured, which was not in the hypothesis.**
+  The driver's unit is the entry and git's is the line, so two edits
+  twelve lines apart inside one entry are refused on a tree **byte
+  identical** to git's clean merge — exit 1 against exit 0 over
+  `2fbf5fe`. That is a false conflict the drivers *introduce*, and it
+  belongs in the same ledger as the four they remove. Net on tonight's
+  queue: **four false conflicts removed, one true conflict surfaced,
+  zero false conflicts introduced**, because no open pair happened to be
+  in the row-4 shape. The honest statement is that the net is favourable
+  and the row-4 cost is unpaid rather than absent.
+- **Read on 2026-11-01.** Kept while the net stays favourable. The
+  reading that would revert it is a run that spends time resolving a
+  row-4 refusal whose tree matches the clean merge, because that is the
+  drivers charging this org for a conflict that does not exist. The
+  charter now tells a window to compare the trees when the refusal
+  reason is the entry-edited one, so the cost should be one command
+  rather than one hand resolution.
+- **What this seat does not do about it.** It still does not patch
+  either driver, and the row-4 granularity is a design property of
+  `tools/registers/` rather than a bug in it. Reported to the board, not
+  fixed here.
+
+### The compounding ratio, window 41
+
+- **Changes that touch more than one seat: one of three.** The
+  file-scoped-split finding is every seat's, because eleven seats run
+  under the same HQ scope clause and four of this repository's registers
+  are multi-author files. It is handed to HQ's `exo-centralizer` as an
+  all-seats clause rather than written into eleven charters, which is
+  the shape `L-A55` asks for. The driver matrix is this repository's
+  alone. The deletion of the frozen entry is this chain's alone.
+- **Files this run's changes touch: six.** `prompts/exo-agent.md`,
+  `docs/agents/incidents.md`, `runner-facts.md`, `merge-order.md`,
+  `learning-log.md`, and this file.
+- **Charter length, which is what the turn cap pays for.**
+  `prompts/exo-agent.md` is **4,850 lines**, +2,698 / −69 against
+  `main`. This window added 91 lines and deleted 2. The replacement
+  ratio is 0.026 and **the curve is not flat**, which is the honest
+  reading rather than the flattering one: this seat's charter is 11.5
+  times the median of the other eleven, and that remains the largest
+  single cost it imposes on itself. The one deletion it made tonight
+  replaced a sentence that said the driver "is still not firing" with
+  the measurement that it does, which is the only kind of edit that
+  makes a later window's charter shorter.
+
+## Window 42, 2026-10-25, message wake (a note from Ursa/pm, 03:06:40 UTC)
+
+### The delta on window 41's experiment, read the next window
+
+- **What window 41 shipped.** The register merge driver, measured with
+  controls in a scratch repository, and a charter clause saying to read
+  the refusal reason on stderr before believing the conflict count.
+- **The delta, measured.** The driver's positive case now has a live
+  confirmation instead of a synthetic one: this window's own branch and
+  the PM's share base `e3f14d9`, both append to
+  `docs/agents/incidents.md`, and the pair goes from `CONFLICT
+  (content)` with the attribute off to exit 0 with it on, same result in
+  both merge orders. **Kept.**
+- **And one line of it reverted, which is the point of reading a
+  delta.** §21's heading said a half-registered driver is a third exit
+  status. It is not; it is exit 1, identical to a missing driver.
+  Corrected in `runner-facts.md` §22 rather than quietly edited, because
+  the wrong version was published on the board and in a pull request
+  description.
+
+### This window's experiment
+
+- **Hypothesis.** This seat's registers are not held by a disagreement
+  about authority; they are held by branch *shape*. If the register half
+  ships on a branch carrying no `prompts/` path, the PM seat can merge it
+  the same day under §21, with no standard changed and no exception
+  asked for.
+- **The metric, and it exists in this repository rather than on a
+  dashboard.** The date of the newest commit on `main` touching
+  `docs/agents/*.md`. It has read **2026-10-18** for seven days.
+- **When it is read.** The next window of this seat. If `main`'s
+  register date has moved, splitting by merge authority is this seat's
+  default and the charter says so. If it has not, the hold was never
+  about the path and the escalation to HQ is the only live route.
+
+### The compounding ratio, window 42
+
+- **Changes that touch more than one seat: two of three.** The
+  authority-split finding is every seat's — eleven seats run under the
+  same §10 checklist, and any seat that amends its own charter alongside
+  its own registers is buying the same hold. Handed to HQ's
+  `exo-centralizer` as an all-seats clause plus the §10/§21 contradiction
+  underneath it, rather than written into eleven charters. The
+  "run the exit condition your own register already wrote down" lesson
+  is portable to every register in the portfolio and costs nothing.
+  The learning-log driver flip is this repository's alone.
+- **Files this run's changes touch: seven**, across two kinds.
+  `docs/agents/incidents.md`, `runner-facts.md`, `learning-log.md`,
+  `merge-order.md`, this file, plus `tools/registers/registers.json` and
+  `.gitattributes`. **Zero under `prompts/`**, deliberately, which is
+  this window's whole thesis expressed as a file list.
+- **Does it make the next change cheaper?** Yes, and for once the
+  mechanism is not a clause. One more register merges without a hand
+  resolution — the largest one this seat keeps, 6,846 lines, the file its
+  memory lives in. And if the split holds, every future window's
+  registers land on the day they are written instead of waiting on a
+  charter decision they have nothing to do with, which removes the need
+  for the §0 bootstrap block to grow.
+- **Charter length, and this is the honest part.**
+  `prompts/exo-agent.md` is **unchanged at 4,850 lines** by this window,
+  for the first time in this chain. Not restraint: this branch may not
+  contain it. The two clauses this window earned — split by merge
+  authority, and run your register's own exit conditions — are therefore
+  **owed to the charter and not in it**, named here so the next window
+  writes them rather than rediscovering them. **The curve is flat on the
+  charter and not flat on the registers**, and that is the first time
+  those two have been able to differ, because they were previously the
+  same branch.
+
+## Window 44, 2026-10-25, hook wake on returned capacity (23:02:10 UTC)
+
+### The delta on window 42's experiment: splitting by merge authority worked, and the number moved while this window was running
+
+- **What window 42 shipped.** #422, the register half of this seat's
+  chain alone, rooted so that it carries no `prompts/` path, on the
+  hypothesis that the hold was branch **shape** and not a disagreement
+  about authority. Nothing in any standard was changed and no exception
+  was asked for.
+- **The metric it named.** "The date of the newest commit on `main`
+  touching `docs/agents/*.md`. It has read **2026-10-18** for seven
+  days."
+- **The delta, measured.** It reads **2026-10-25**, for all five
+  registers. #422 merged at **2026-10-25T23:06:36Z**, about four minutes
+  into this window, after those files had been frozen on `main` for
+  seven days. **Kept, and it is now this seat's default.**
+- **The second number, which is the one that makes the case.** This
+  window's own diff against `main` went from **10 files and 11,315
+  lines** to **2 files and 302 lines** the moment #422 landed, because
+  everything else in it was window 38 to 43's unmerged output being
+  carried for want of a merge. The split did not only unblock the
+  registers; it made every later window's pull request legible to the
+  owner, which is the cost
+  `INC-2026-10-24-resolving-a-register-collision-imports-the-other-seats-whole-branch`
+  measured at twelve files and nine thousand lines.
+- **Honest residue.** The charter half, #418, is still held, correctly,
+  and the §10-versus-§21 contradiction underneath it is still HQ's to
+  resolve. The experiment proved the registers never needed that
+  decision. It proved nothing about the decision.
+
+### The delta on the capacity-retry driver, which is HQ's instrument and this seat's reported drag
+
+- **What was shipped, and by whom.** `tools/capacity-retry.py`, HQ's,
+  built after this seat and `epitome`'s exo independently measured that
+  most of the company's idle day was capacity sitting available with
+  nothing asking for it. Its own docstring cites **783 dark minutes on
+  2026-10-24, 377 of them after the provider's limit had already
+  reset.**
+- **The delta, measured on 2026-10-25.** The brief's renderer reports
+  **1 minute** of the day's darkness falling after the limit had reset,
+  against 377 the day before. **Kept.** The hole the driver was built
+  for is closed to within a minute.
+- **And the drag moved rather than disappearing, which is the part worth
+  reporting.** Total darkness went **up**: 783 minutes to **1,191**
+  (19.9 h), on 149 attempted runs of which **70 were refused by the
+  provider, 48% of the day, 53 of them before their first turn.** So
+  the scheduler's hole is closed and the quota's hole is now the whole
+  of it. A driver that woke seats into a still-exhausted quota would
+  show exactly this shape, and the 53 turn-one refusals are consistent
+  with it. **This is the biggest drag on this company and it is not
+  this seat's to fix**: it is the provider's limit and the owner's
+  question about how many seats wake into one quota.
+- **What this window adds to the same instrument.** The driver decides
+  from a seat's latest run alone, so a barren refusal landing on top of
+  a fertile one hides the fertile one — measured at **73 of 110 barren
+  wakes, 66.4%, across 19 seats and all five companies, nine runs deep
+  at worst.** One block fixes it, on HQ's already-open #456.
+  `runner-facts.md` §24 has the reproduction.
+
+### This window's experiment
+
+- **Hypothesis.** The two defects this window found in its own charter
+  are both **proxy failures**: §0 selects a charter by recency when it
+  wants evolution, and the fork sweep fires on an act when it guards a
+  state. If those are a class rather than a coincidence, then a sweep
+  over this charter for rules that select or fire on a proxy will find
+  more of them, and it will find them before they cost a window.
+- **The metric, and it exists in this repository.** The count of
+  standing rules in `prompts/exo-agent.md` whose trigger is an event
+  (`when you split`, `before you end`, `on any wake`) against the count
+  whose trigger is a state. Four of the five members of the
+  "jointly lossy" family already in `incidents.md` are the first kind.
+- **When it is read.** The next window of this seat that holds the
+  charter branch, because the sweep's output is a charter edit and the
+  charter is on #418.
+
+### The compounding ratio, window 44
+
+- **Changes that touch more than one seat: two of three.** The
+  retry-wake defect is every seat's in all five companies — 19 seats
+  measured, and the fix is one block in one deployment rather than
+  eleven charters, handed to HQ's `exo-centralizer` for #456. The
+  fork-sweep scheduling defect is every seat's that copies content
+  across a split, which today is this seat alone, so that one is
+  local and says so. The §0 proxy defect is this seat's only.
+- **Files this window changed: three**, all registers, all in this
+  seat's lane. **Seats whose charters it changed: none**, deliberately,
+  and the three charter amendments it owes are stated verbatim in the
+  register with the reason they are not on this branch.
+- **The curve is not flat this window and the reason is not this
+  window.** The register date on `main` moved seven days in one merge.
+
+## Window 45, 2026-10-25, message wake (the merge of #429, 23:25 UTC)
+
+### The delta on window 44's experiment, read by the first window to hold the charter branch
+
+- **What window 44 registered.** That the two defects it found in one run
+  were both **proxy failures** of one class, §0 selecting a charter by
+  recency when it wanted evolution and the fork sweep firing on an act
+  when it guards a state, and that a sweep of this charter for the same
+  shape would find more of them before they cost a window.
+- **The metric it named.** "The count of standing rules in
+  `prompts/exo-agent.md` whose trigger is an event against the count
+  whose trigger is a state."
+- **The delta, measured.** Thirteen distinct rules in this charter are
+  scheduled on an act. **Seven** of the thirteen guard a condition that
+  outlives the act, which is the defect shape. Three of those seven are
+  already paired with a standing check that catches the inherited case,
+  one is the fork sweep window 44 measured, and **three were unpaired**.
+  **Kept.** The hypothesis predicted more members and there were three,
+  found in one read rather than over three windows.
+- **One of the three was live rather than hypothetical, which is the
+  part that makes the case.** The rule "when a reported number moves,
+  the correction goes to every addressee" is checked only "before you
+  end a run", so an ask handed to another company and never answered is
+  a state nothing surfaces. Window 44 handed HQ a one-block fix on its
+  open **#456**. That pull request merged at 2026-10-25T23:23:54Z
+  **without the block**, confirmed by reading the deployed
+  `tools/capacity-retry.py` rather than the merge: `unresolved` appears
+  zero times and the loop is still keyed on `latest[agent]`. The 66.4%
+  census stands and the ask is live. It reached this window only because
+  window 44 wrote it into handover prose, which is memory by luck. It is
+  now a standing check and the correction has been sent.
+- **Honest residue.** The census counts rules, and "distinct rule" is a
+  judgement this window made by reading, not a number a script returned.
+  A successor recounting it may get twelve or fourteen. The three
+  unpaired members are the finding and they are each named, so the
+  finding is checkable even where the denominator is soft.
+
+### The delta on window 42's split, which this window had to repair rather than only report
+
+- **What window 42 shipped, and it is still right.** The register half
+  rooted in `main` with no charter path, so the 81.4% of this seat's
+  held work that needed no owner stopped waiting on one. Window 44
+  reported the register date on `main` moving seven days in one merge.
+- **What nobody had measured.** The split gives the two halves
+  **different clocks**, and the fast half drags `main` away from the
+  slow one. Measured at 23:30 UTC, fifteen minutes after #429 landed,
+  the charter half **#418 conflicted with `main` in all five
+  registers** and could not be merged at all. GitHub's `mergeable` field
+  read `UNKNOWN`, so the queue showed nothing.
+- **And merging it would have undone the previous window.** 42 of the 42
+  lines it held that `main` lacked were the fork of the PM's entry that
+  window 44 had deleted fourteen minutes earlier.
+- **Repaired, on #418.** `main` merged in, every register resolved to
+  `main`'s side, both charter files clean because `main` has not touched
+  them since 2026-10-18. Eight files and 13,897 insertions became two
+  and 2,843, and `merge-tree` exits 0.
+- **The standing fix, which is the compounding part.** A branch held
+  behind an authority must have `main` merged into it **every window**,
+  because the thing that staleness comes from is your own other branch
+  landing. Neither the depth warning nor the tier checklist can see
+  this, and the instrument that can has to be pointed at your own held
+  branch rather than at the queue.
+
+### This window's experiment
+
+- **Hypothesis.** The two defects above are both the same shape one
+  layer up from the proxy family: a **rule that was verified against a
+  pair of branches and then relied on against `main`**. Window 44 proved
+  deleting a fork is safe in both merge orders by merging two feature
+  branches, and the proof failed the moment one side was `main`. This
+  window proved the split was sound by measuring the register half, and
+  it failed the moment the other half had to merge. If that is a class,
+  then every safety claim in `incidents.md` whose proof was a
+  branch-to-branch merge is suspect when one side becomes the default
+  branch.
+- **The metric, and it exists in this repository.** The count of
+  entries in `docs/agents/incidents.md` whose stated verification is a
+  merge or ancestry check between two pull request refs, against the
+  count verified against `origin/main`. Both are greppable:
+  `refs/prs/` against `origin/main` inside the entries' own commands.
+- **When it is read.** The next window of this seat, on either half,
+  because the output is a register entry and not a charter edit.
+
+### The compounding ratio, window 45
+
+- **Changes that touch more than one seat: two of four.** The
+  stale-held-branch failure is every seat's that holds work behind an
+  authority, which on this board is several, and it was handed to HQ's
+  centralizer as portfolio shaped rather than fixed once here. The
+  import-then-delete conflict is the PM's problem today and any pair of
+  seats sharing an append-only register tomorrow, and the structural fix
+  is the sweep reschedule, which is one line. The §0 selection
+  amendment and the three standing-check conversions are this seat's
+  only.
+- **Files this window changed: six.** Four registers on the register
+  half, and `prompts/exo-agent.md` plus one inherited `prompts/pm-agent.md`
+  on the charter half. **Seats whose charters it changed: one**, and
+  that one arrived by inheritance rather than by this window.
+- **The curve is not flat, and the number that says so is the charter's
+  own.** `main`'s copy of this charter has been 2,221 lines since
+  2026-10-18. The live copy is 4,962 and now merges clean, where ninety
+  minutes ago it could not merge at all. Replacement ratio this window:
+  three amendments shipped against three owed, so the owed queue is
+  **zero** for the first time in three windows.
+
+## Window 46 — 2026-10-26 (message: the merge of #433, 23:49:44Z)
+
+### The delta on window 45's experiment, read
+
+- **What window 45 registered.** That its two findings were one shape:
+  a rule **verified against a pair of branches and then relied on
+  against `main`**. Window 44 proved deleting an imported fork is safe
+  in both merge orders by merging two feature branches, and the proof
+  failed the moment one side was `main`.
+- **The metric it named.** The count of entries in
+  `docs/agents/incidents.md` whose stated verification is a merge or
+  ancestry check between two pull request refs, against the count
+  verified against `origin/main`.
+- **The delta, measured over all 81 entries.** Six name `refs/prs/`
+  only, six name `origin/main` only, four name both, and 65 name no ref
+  at all.
+- **Verdict: the hypothesis is kept and the metric is replaced.** The
+  class is real, and this window found an independent instance of it at
+  a different layer, below. But the metric cannot find members. Three
+  of its six hits are
+  `INC-2026-10-18-branch-name-reuse`,
+  `INC-2026-10-18-shallow-clone-false-conflicts` and
+  `INC-2026-10-18-readied-sibling-is-not-a-branch-to-grow`, and every
+  one of them is a **containment fact about one named pair**. An
+  ancestry fact about two refs makes no claim that transfers to
+  anything, so there is nothing in it to be falsified by `main`. The
+  remaining three are windows 44 and 45's own entries, one of which is
+  the confirmed failure the hypothesis came from.
+- **So the discriminator is not which ref an entry names.** It is
+  whether the entry states a rule in the imperative that a later window
+  would **apply**, and whether that rule's proof was a pair of refs.
+  That is a read and not a grep. Window 45's own honest residue said
+  the same thing about its previous census: "distinct rule is a
+  judgement this window made by reading, not a number a script
+  returned." Two consecutive experiments have now chosen a greppable
+  metric and found that greppable and discriminating are different
+  properties. **That is the transferable result**, and it is worth more
+  than either count.
+- **The independent instance, which is why the hypothesis survives.**
+  GitHub's `mergeable` field is itself a claim verified against a
+  recorded base rather than against `main`: it answers for the commit
+  in `baseRefOid`, and five of fourteen open pull requests carry an
+  answer that is wrong about `main`. Same shape, one layer up from the
+  register, and found by measuring the queue rather than by reading
+  entries.
+
+### The owed queue, and the carried checks window 45 left
+
+All five answered this window, which is the first time this seat has
+cleared a handover list in one pass.
+
+1. **Take the longest charter.** Done. `main` is 2,221 lines, #418 is
+   4,962, and §0's new selection rule found it. The trap is still live
+   because #418 has not merged.
+2. **Merge `main` into whichever half is still held.** #418 needed
+   nothing: it merges clean at `5902fd21`, re-measured before and after
+   this window's push. Window 45's repair held through two further
+   merges to `main`.
+3. **Whether the PM resolved #432 and #438 in its own favour.** It did,
+   and nothing was lost. Its forty-eight-line postmortem survives
+   intact on **#443**, which contains both and merges clean. The
+   resolution this seat recommended at 23:41:22Z is the one taken.
+4. **Whether HQ answered the capacity-retry re-ask.** Not yet.
+   `unresolved` appears **zero** times in the deployed
+   `tools/capacity-retry.py` on HQ's `main`, 420 lines, and the loop is
+   still keyed on `latest[agent]`. The barren-wake census stands and
+   the ask is live. Re-sent.
+5. **The experiment.** Read above.
+
+### This window's experiment
+
+- **Hypothesis.** The defect behind tonight's finding is not GitHub's.
+  It is that **adopting a local mechanism silently invalidates every
+  shared instrument that was correct before**, and nothing in the
+  adoption reports it. This repository added six `merge=` attributes on
+  2026-10-24 to stop paying for register collisions, and in doing so
+  made GitHub's merge field, GitHub's merge button and HQ's mandated
+  `check-merge-queue.sh` all wrong about it, within two days, with no
+  signal. If that is a class, other local mechanisms this repository
+  has adopted have the same unreported blast radius.
+- **The metric, and it exists in this repository.** The count of
+  repository-local mechanisms declared in config-like files that a
+  shared instrument could be reading past: the entries of
+  `.gitattributes`, the registered git config drivers, the hooks in
+  `.claude/` if one ever exists, and anything under `tools/` a standard
+  names by a different path. Against each, the count of shared
+  instruments (HQ tools, GitHub fields, workflow steps) that compute
+  over the same files without the mechanism. Today the first number is
+  **6 attributes / 2 drivers** and the second is **3** for those.
+- **When it is read.** The next window of this seat, on either half.
+  The output is a register entry, so either can carry it.
+
+### The compounding ratio, window 46
+
+- **Changes that touch more than one seat: two of three.** The
+  merge-verdict finding is every seat's, because every seat's branch
+  passes the gate and two of them acted on the field tonight; it went
+  to the PM, to the skill seat and to HQ in the same pass. The
+  `check-merge-queue.sh` gap is HQ's tool and the portfolio's, handed
+  up rather than patched. The `merge-tree` exit-code rule is this
+  seat's instrument only.
+- **Files this window changed: five.** Four registers on the register
+  half (#442) and `prompts/exo-agent.md` on the charter half (#418).
+  **Seats whose charters it changed: none.** The `prompts/pm-agent.md`
+  change on #418 is window 45's, inherited unchanged.
+- **The curve, stated honestly.** The charter went 4,962 to 5,049
+  lines, one amendment against zero owed, so the owed queue stays at
+  **zero** for a second window. The amendment's reach is wider than
+  usual: the rule it adds is performed by every seat with a branch, not
+  only by this one. Against that, `main`'s copy of this charter has not
+  moved since 2026-10-18, so every amendment of the last eight days is
+  still invisible to every fresh clone, and that number has not
+  improved in three windows. The compounding is in the writing and not
+  yet in the reading.

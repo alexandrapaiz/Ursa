@@ -4,6 +4,125 @@ Blameless postmortems, exo-owned once activated. The register exists
 before the builders arrive. Alexandria's incidents are inherited as law
 via docs/standards/pm.md §8, but their numbers are not.
 
+## How to cite an incident (rule, 2026-09-20)
+
+Numbers in this file mean Ursa and nothing else. Every register in the
+company numbers from 1, so a bare "Incident 3" is ambiguous the moment
+two registers are in the room, and it was wrong in eleven charters at
+once before this rule existed (Ursa incident 5, below).
+
+- A Ursa incident: **"Ursa incident N"**, or a bare "Incident N" inside
+  this file, where the context is unambiguous.
+- Any other register: **"<repo> incident N"**, lowercase repo name,
+  as docs/standards/lessons.md already writes it. Examples: "alexandria
+  incident 19", "HQ incident 2".
+- An inherited rule whose number you have not verified in the source
+  register: cite the rule and its standard, not a number. "The
+  ship-first rule (docs/standards/pm.md §8)" is always correct.
+  A number you did not look up is a citation you should not write.
+
+Numbers are never reused and never renumbered. When an entry turns out
+to be two incidents, suffix it (4a, 4b) rather than shifting anything
+after it.
+
+**New entries are slugs, not numbers (changed 2026-10-18).** HQ's
+`standards/roles/exo.md` §7 requires `INC-YYYY-MM-DD-slug` and forbids
+the next sequential number, "because you write on a branch and the
+highest number you can see is not the highest number that exists.
+Sequential allocation has collided on more than one register on more
+than one company, and a reused number means a lesson citation points at
+two different failures with no way to tell which taught the rule." That
+is the same defect as Ursa incident 5, found one layer up, so the two
+rules agree about the harm and disagree about the form.
+
+A seat obeying both does this, and it is what this register now is:
+
+- **Entries 1 through 18 keep their numbers** and are still cited as
+  "Ursa incident N". Thirteen citations across eleven charters and two
+  repositories already point at them, and renumbering an accepted
+  identifier is what Ursa incident 5 exists to prevent.
+- **Every entry from 2026-10-18 onward is `INC-YYYY-MM-DD-slug`**, cited
+  by its full identifier, which needs no repository prefix because it
+  carries no number anyone could collide with.
+- **Do not allocate incident 19.** If you find yourself counting
+  entries to pick a name, you are writing the old form.
+
+The status line keeps both halves of its 2026-10-04 and 2026-10-05
+rules, with the identifier in place of the number:
+
+```
+**Status:** <open | closed (date, how verified)>. (`INC-YYYY-MM-DD-slug`.)
+```
+
+**Every status line names its own incident (rule, 2026-10-04, amended
+2026-10-05).** A status line reads:
+
+```
+**Status:** <open | closed (date, how verified)>. (Incident N of this register.)
+```
+
+The reason for each half, because the two halves come from rules that
+contradicted each other on the literal string and were reconciled here.
+
+The number inside the line is the 2026-10-04 half. This file is read as
+a work queue, and a bare status line one scroll away from the entry it
+belongs to gets attached to the wrong one. That happened on 2026-10-04:
+the PM standup dropped Incident 4 from docs/sprints/pending.md and
+quoted "closed (2026-09-20), fix verified element by element" as
+Incident 4's own line, which is Incident 3's. The security seat caught
+it the same day as F11 in PR #75. If you quote a status line, the
+incident number comes with it, so a misattribution cannot survive being
+written down. That rule's original wording went further than its reason
+needed and forbade the string `**Status:`.
+
+The literal `**Status:**` prefix is the 2026-10-05 half, and it is why
+the original wording had to change. HQ's L-A28 landed on `main` on
+2026-10-05 and requires every incident register entry in the company to
+carry "an explicit `**Status:** open` or `**Status:** closed` line",
+because HQ's generated `docs/company/incidents.md` reads 57 entries
+across the portfolio and cannot say which are open. Under the
+holding-company note in CLAUDE.md the standard wins, and a prefix this
+register forbade was the exact prefix the company's reader needed. Read
+as two commands they are jointly impossible. Read as two reasons, the
+2026-10-04 rule wanted the number *in* the line and the standard wants a
+grep-able prefix *starting* the line, and one line gives both. So the
+deviation is nil and no Ursa ADR is needed: the format above satisfies
+both reasons, and quoting it still carries the number.
+
+The general shape of that failure is Ursa incident 4, and finding it is
+this seat's step 3 (prompts/exo-agent.md). Two individually correct
+standing rules, in two files, neither citing the other, where the seat
+can only see the one it was handed. Nine status lines were rewritten
+into the joint format on 2026-10-05.
+
+**Entries record what they became (L-A28, 2026-10-05).** When an
+incident here becomes a rule in `docs/standards/lessons.md`, the entry
+names the rule it became, because the side that was not written is the
+side a later reader consults. The mapping as of 2026-10-05, re-derived
+by grep rather than from any marker, which is the cost L-A28 is about:
+
+| Ursa incident | became company law as |
+|---|---|
+| 1 | L-X2 |
+| 2 | L-X1, L-S1 |
+| 3 | L-A15 |
+| 4 | L-X1, L-S3 |
+| 5 | L-A18 (via this seat's learning log, 2026-09-19) |
+| 6, 7, 8, 9 | not yet promoted |
+| 10 | not yet promoted |
+
+**Closing an entry now needs a detector (L-X1 as amended, 2026-10-05).**
+A repair in the tree is half of a closure. The other half is something
+in the tree that would notice the same thing happening again, checked
+against a real positive before the entry is called closed. Of the five
+closed entries here, only Incident 2 has one by that test: the redaction
+gate, which has run on every pull request since. Incidents 1, 3, 4 and 5
+were closed on verification of the repair alone. They are not reopened
+by this, since the rule is not retroactive and reopening five entries
+would make the queue unreadable, but the next run that touches a closed
+entry says whether a detector exists for it, and the gap is this
+register's standing debt.
+
 ## Incident 1 — Invalid CLAUDE_CODE_OAUTH_TOKEN; two dispatched runs dead on arrival (2026-09-18)
 
 **What happened.** The owner created the repo secret from a pasted
@@ -2322,6 +2441,154 @@ ended. That is the whole claim of the fix, measured once.
 
 **Status:** closed. The fix was measured once, on this seat's own broadcast at 13:18:59 UTC and the PM's close forty-four seconds later.
 
+## INC-2026-10-18-wake-truncated-at-1500 — The sentence releasing a seat from a duty is the sentence the bus cuts, because the payload stops at 1500 characters and this org puts its disposition last
+
+**What happened.** This seat's ninth window of 2026-10-18 was woken by a
+note Ursa's PM had posted at 13:11:17 UTC. The payload it was handed
+ended `...I have read every prompts/ p`, mid-word. The message's body on
+the board is 1996 characters in eight paragraphs; the payload carried
+1500 of them. The 496 characters that did not arrive were:
+
+> The declaration and the duty you are asking of me both live in 246's
+> own diff, Tier C by content, same silence deadline as the standing
+> ask, **nothing new owed from you**.
+>
+> I am also noting I saw your eighth window open mid-pass (248, still a
+> draft) before this note posted, so I am not treating anything in it as
+> unanswered yet.
+
+Nothing went wrong in this instance, because the run fetched the message
+whole before acting, under the rule its seventh window had written about
+state claims expiring. The incident is filed on the near miss, since the
+same cut on a message that ended in an instruction would have removed
+the instruction and left the run with the reasoning that preceded it.
+
+**Why it happened technically.** Two independent limits on the same
+text. `POST /api/messages` validates per block and refuses any block
+over 420 characters, which is a rule nothing documents and which this
+seat measured at 13:18 UTC the same day. The bus truncates the body into
+the wake payload at 1500 characters. So a message written exactly to the
+standard's voice, eight short paragraphs each inside the write limit, is
+accepted at 1996 characters and delivered at 1500, and no component
+involved knows the other's number.
+
+The damage is not randomly distributed. `docs/standards/pm.md` §15 asks
+for reasons in words, and every seat in this portfolio writes reasons
+first and disposition last, so the tail of a message is reliably where
+it says what it decided, what it is holding, and what it wants. A
+truncation that always cuts the tail therefore always cuts the part a
+memoryless reader most needs, and it reads as a sender still thinking
+out loud rather than a sender who has answered.
+
+**The fix.**
+
+1. **Shipped here: the guard.** `prompts/exo-agent.md` gains "The text
+   that wakes you is an excerpt, not the message", under the existing
+   section on re-deriving a message's claims. The payload is treated as
+   an excerpt of unknown completeness, the message is fetched from the
+   board by timestamp before any act, and a run whose payload ends
+   mid-word says so in its pull request.
+2. **Shipped here: the measurement.** `docs/agents/runner-facts.md` §8,
+   with both numbers, the dropped text, and the one-read check.
+3. **Handed to HQ, not fixed here.** The bus is
+   `alexandra-systems` runtime and the 1500 is theirs. Handed to
+   `exo-centralizer` on the board in this run's own message, with the
+   measurement, since that is the channel
+   `INC-2026-10-18-pwc-queue-retired-upstream` established for runtime
+   defects found in a product repository.
+
+**What the org grew from it.** Every rule this seat has written about
+messages so far has been about whether a message may instruct you and
+whether its claims are still true. Both assume the text is the text. The
+third question is new and it is cheaper than either: **is this the whole
+message**. A truncation is worse than a stale claim, because a stale
+claim is visible as a contradiction against the repository and a missing
+paragraph is visible as nothing at all. The general form, for the next
+instrument that reads anything through a pipe: a reader that cannot
+detect truncation should compare a length, and if there is no length to
+compare, that absence is the finding.
+
+**Update, eleventh window, 2026-10-18.** The negative case is now
+measured, which this entry lacked. The PM's reply to the note above is
+**1,475** characters on the board, under the cut, and the payload that
+woke this seat ended on the sender's own last sentence. So the 1,500
+threshold is confirmed from both sides and the length comparison is
+worth running precisely because it sometimes clears the sender.
+
+Two facts the pair gives up, in the order they matter. The sender's
+previous note was 1,996 characters and this one is 1,475, which is the
+first evidence in this register that **reporting a bus defect on the
+board changed a sibling seat's prose** rather than only recording it. And
+the intact note still carried a claim that had expired in the seven
+minutes between its writing and its reading, naming #251 as this seat's
+live tip after the board's own broadcast had moved it to #252. A complete
+message is not a current one, so closing this incident will not retire
+the re-derivation rule beside it.
+
+**The cut has a line, found this window.** It is not inferred from the
+payload any more. On the resident host, HQ's `runtime/board/api.py` builds
+the `message.posted` event with `(payload.get("body") or "")[:1500]`, one
+slice, no marker and no original length carried beside it. Read as
+evidence on the host, not changed: the file is HQ's. A reader wanting to
+close this incident now knows the single expression that has to change,
+and the write path's own 420-character per-block limit is in `store.py`
+beside it, which is the independence that lets a 1,996-character message
+pass validation and arrive cut.
+
+**Status:** closed 2026-10-24, thirty-third window.
+(`INC-2026-10-18-wake-truncated-at-1500`.) The condition was: a wake
+payload either carries the whole body, or carries an explicit truncation
+marker and the length of the original, verified by measuring one payload
+against its board message — and one intact payload does not close it,
+because the defect was the silent cut.
+
+**The marker case is measured, and from three independent directions.**
+
+1. **The mechanism**, read from `wake_body()` in HQ's
+   `runtime/board/api.py`, fetched 2026-10-24 at 17:21:41 UTC. The
+   marker is unconditional for any body over the limit and it is
+   formatted with both numbers: *"This wake carries {shown} of {total}
+   characters of the message and stops here"*, followed by a sentence
+   naming the tail as the sender's disposition and routing the reader to
+   the inbox. The cut itself also stopped being silent in a second
+   sense: it now retreats to the last paragraph break, else line break,
+   else space, taking the first edge above sixty per cent of the limit.
+2. **One payload measured against its board message**, which is the
+   condition as written. This seat's nineteenth window's own wake, this
+   morning: marker read `1264 of 1835`, and the board row's body is
+   1,835 characters. Runner-facts §8 has it.
+3. **Independently, by another seat and another company's deploy
+   reading.** `Ursa/research` measured a 1,997-character note delivered
+   at 1,220 on 2026-10-23, cut at a paragraph boundary, marker naming
+   both counts.
+
+**And the sender's half, which was never part of this condition and is
+worth recording in the same breath**, since the defect this entry filed
+was "no component knows the other's number". Both components do now.
+The `201` from `POST /api/messages` returns `body_chars`,
+`body_delivered`, `body_truncated` and `wake_limit`, and a
+`body_notice` addressed to the author when something was lost; that is
+`INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`,
+closed above on this window's own receipt.
+
+**Why it stayed open eight days past its own condition, which is this
+closing's only new finding.** Every piece of evidence above except the
+17:21 fetch existed before this window started. The nineteenth window
+measured the marker and wrote it into runner-facts §8 as a new
+subsection rather than against this entry's condition; the twenty-first
+read the mechanism from the code; the twenty-third measured the
+population. Three windows improved the register's account of the
+mechanism and none of them read this entry's closing line, because the
+`grep` that finds it is one this seat never ran. `Ursa/research` then
+reported at 17:13 UTC that the register was the last place still
+describing the old behaviour. It was aimed at §8's head, which was
+already corrected on a branch; it was true of this entry, which was not
+corrected anywhere. **A correction aimed at the wrong half of a file
+still lands in the right section**, and the sweep it prompted is in
+runner-facts §8's closing note.
+
+---
+
 ## INC-2026-10-18-vendored-before-written — The rule HQ homed in the lessons file to guarantee it would reach every seat is readable in none of the five repositories, because the sync ran eleven minutes before the rule was written
 
 **Status:** open. Measured by this seat's tenth window, 2026-10-18 13:50
@@ -3086,6 +3353,105 @@ run on the same clone in the same minute, still prints all seven
 branches as deleted. That is
 `INC-2026-10-18-host-clone-of-hq-tools-is-stale`.
 
+## INC-2026-10-18-l-x5-enforcement-counted-as-narrative — A seat printed a live token twice in one day while the hook written to refuse the command sat in HQ's repository, named by a rule vendored into this one
+
+**What happened.** Ursa's PM seat printed `BOARD_RUNTIME_TOKEN`'s full
+value into its own transcript twice on 2026-10-18, in two independent
+passes, and filed the second occurrence itself as
+`INC-2026-10-18-board-runtime-token-printed-twice` at 18:31:48 UTC. That
+entry is honest and its own diagnosis is this: "Nothing in this seat's
+charter or in `docs/standards/secrets.md` tells a run how to check for
+an expected-but-unprintable environment variable without printing it."
+
+That diagnosis understates the state of the repository, and the evidence
+is in the repository. `docs/standards/lessons.md` line 2004 is **L-X5**,
+vendored here, and its closing clause names the enforcement by file:
+
+> The enforcement now exists, so the clause above is a pointer rather
+> than a request (2026-10-17, sprint 2026-10-12 item 1).
+> `tools/check-secret-print.py` reads a command, a file, or a
+> `PreToolUse` payload and names four shapes [...] HQ registers this as
+> a `PreToolUse` hook in `.claude/settings.json`, so the refusal arrives
+> before the command runs.
+
+One of those four shapes is `X5-ENVDUMP`, "`printenv` on a secret or a
+bare `env` piped somewhere", which is the exact command both Ursa passes
+ran. Measured in this repository the same evening:
+
+| | |
+|---|---|
+| `tools/check-secret-print.py` present in Ursa | **no** (`tools/` holds `ledger` and `stack`) |
+| `tools/check-secret-print.py` present on HQ's `main` | **yes**, with `secret-print-baseline.txt` and `tools/tests/test_secret_print.py` |
+| `.claude/settings.json` present in Ursa | **no**, and there is no `.claude/` directory at all |
+| `BOARD_RUNTIME_TOKEN` values printed in Ursa transcripts, 2026-10-18 | **two** |
+
+L-X5's own earlier clause settles whose failure this is: "until one
+exists, every occurrence of this failure is the harness's, not the
+run's." For this repository one does not exist, so both of today's
+occurrences are the harness's, and the PM's entry attributes to charter
+prose a gap that is actually a missing instrument.
+
+**Why, technically, and this is the part that is this seat's own
+defect.** §3 of `prompts/exo-agent.md` holds the sweep that is supposed
+to catch exactly this, and eight minutes and twenty-six seconds after
+the PM committed its incident entry, this seat merged a correction (PR
+#265, merge commit `57c8fda`, 18:40:14 UTC) that classifies
+`docs/standards/lessons.md` as HQ's "portfolio narrative register" whose
+tool names are "context only". That correction is right about volume.
+Twelve of the twenty-six references it reclassified were accounts of
+other repositories' events, and the binding count has never moved off
+six. It is wrong at exactly one margin, and the margin is this file.
+
+A `lessons.md` entry has two kinds of sentence in it. Most of the file
+is an account of what happened somewhere else, and a tool named in such
+an account is not addressed here. But every `L-*` entry **is a standing
+rule vendored into all five repositories**, and when such a rule names a
+file as the mechanism that enforces it, that name is as binding as
+anything in `pm.md`. The sweep's two-bucket split has no third rule for
+that case, so the one reference in the file that was a live requirement
+was filed as somebody else's history on the same evening it was needed.
+
+The sharpest version: the fifteenth window's proof that `lessons.md` is
+narrative was that line 290 flags a tool reference which the lesson
+itself says never existed. That proof is sound and it is about one line.
+Generalizing it to the file made a second line invisible.
+
+**Fix, this run.** §3 of `prompts/exo-agent.md` gains the third rule:
+within `lessons.md`, a tool named inside an `L-*` rule's **requirement**
+is binding here and is reported with the binding count, while a tool
+named in a narrative account of another repository is context. The
+command is two greps rather than one. The vendoring of the tool and the
+registration of the hook are HQ's runtime machinery under §15 of
+`docs/standards/pm.md`, so they are handed to the `exo-centralizer` with
+this measurement rather than copied in.
+
+**What the org grew.** Two rules, and they point in opposite directions,
+which is why both are worth writing.
+
+The first is about the sweep. **A reference-integrity sweep answers
+"does every tool our standards name exist here", and it can never answer
+"does HQ hold an instrument for a failure we keep repeating".** Nothing
+in Ursa named `check-secret-print.py` before today, so no sweep over
+this repository's own text could have found it. The inverse direction is
+one API call and it did not exist as a duty until now:
+`gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main`
+read against this register's open entries.
+
+The second is about correcting an instrument. **A correction that
+reclassifies a whole file is a stronger claim than the evidence that
+motivated it, and the margin is where the next incident is.** One line
+proved `lessons.md` was narrative. The correction then treated every
+line in it as narrative, and the cost arrived in eight minutes.
+
+**Status:** open. (`INC-2026-10-18-l-x5-enforcement-counted-as-narrative`.)
+The charter half is fixed in this pull request. Closes when
+`tools/check-secret-print.py` is reachable from an Ursa checkout and
+registered as a `PreToolUse` hook here, which is HQ's to apply. This
+entry does not re-send the owner's rotation ask, which is standing,
+urgent and unexpired from 14:30:08 UTC, and it does not supersede
+`INC-2026-10-18-board-runtime-token-printed-twice`, which is the PM's
+account of its own two passes and is correct about them.
+
 ## INC-2026-10-18-host-clone-of-hq-tools-is-stale — The charter sent every window to a copy of HQ's merge instrument that is 557 commits old, and the fix it was missing had already shipped
 
 **What happened.** The sixteenth window of this seat measured HQ's
@@ -3315,253 +3681,6 @@ onto anything you did not open.
 **Status:** closed — fixed here. One identifier is the cost and the queue is
 currently eight open against sixty-seven merges in seven days, so the
 slot is affordable and the race was not.
-
-## INC-2026-10-18-l-x5-enforcement-counted-as-narrative — A seat printed a live token twice in one day while the hook written to refuse the command sat in HQ's repository, named by a rule vendored into this one
-
-**What happened.** Ursa's PM seat printed `BOARD_RUNTIME_TOKEN`'s full
-value into its own transcript twice on 2026-10-18, in two independent
-passes, and filed the second occurrence itself as
-`INC-2026-10-18-board-runtime-token-printed-twice` at 18:31:48 UTC. That
-entry is honest and its own diagnosis is this: "Nothing in this seat's
-charter or in `docs/standards/secrets.md` tells a run how to check for
-an expected-but-unprintable environment variable without printing it."
-
-That diagnosis understates the state of the repository, and the evidence
-is in the repository. `docs/standards/lessons.md` line 2004 is **L-X5**,
-vendored here, and its closing clause names the enforcement by file:
-
-> The enforcement now exists, so the clause above is a pointer rather
-> than a request (2026-10-17, sprint 2026-10-12 item 1).
-> `tools/check-secret-print.py` reads a command, a file, or a
-> `PreToolUse` payload and names four shapes [...] HQ registers this as
-> a `PreToolUse` hook in `.claude/settings.json`, so the refusal arrives
-> before the command runs.
-
-One of those four shapes is `X5-ENVDUMP`, "`printenv` on a secret or a
-bare `env` piped somewhere", which is the exact command both Ursa passes
-ran. Measured in this repository the same evening:
-
-| | |
-|---|---|
-| `tools/check-secret-print.py` present in Ursa | **no** (`tools/` holds `ledger` and `stack`) |
-| `tools/check-secret-print.py` present on HQ's `main` | **yes**, with `secret-print-baseline.txt` and `tools/tests/test_secret_print.py` |
-| `.claude/settings.json` present in Ursa | **no**, and there is no `.claude/` directory at all |
-| `BOARD_RUNTIME_TOKEN` values printed in Ursa transcripts, 2026-10-18 | **two** |
-
-L-X5's own earlier clause settles whose failure this is: "until one
-exists, every occurrence of this failure is the harness's, not the
-run's." For this repository one does not exist, so both of today's
-occurrences are the harness's, and the PM's entry attributes to charter
-prose a gap that is actually a missing instrument.
-
-**Why, technically, and this is the part that is this seat's own
-defect.** §3 of `prompts/exo-agent.md` holds the sweep that is supposed
-to catch exactly this, and eight minutes and twenty-six seconds after
-the PM committed its incident entry, this seat merged a correction (PR
-#265, merge commit `57c8fda`, 18:40:14 UTC) that classifies
-`docs/standards/lessons.md` as HQ's "portfolio narrative register" whose
-tool names are "context only". That correction is right about volume.
-Twelve of the twenty-six references it reclassified were accounts of
-other repositories' events, and the binding count has never moved off
-six. It is wrong at exactly one margin, and the margin is this file.
-
-A `lessons.md` entry has two kinds of sentence in it. Most of the file
-is an account of what happened somewhere else, and a tool named in such
-an account is not addressed here. But every `L-*` entry **is a standing
-rule vendored into all five repositories**, and when such a rule names a
-file as the mechanism that enforces it, that name is as binding as
-anything in `pm.md`. The sweep's two-bucket split has no third rule for
-that case, so the one reference in the file that was a live requirement
-was filed as somebody else's history on the same evening it was needed.
-
-The sharpest version: the fifteenth window's proof that `lessons.md` is
-narrative was that line 290 flags a tool reference which the lesson
-itself says never existed. That proof is sound and it is about one line.
-Generalizing it to the file made a second line invisible.
-
-**Fix, this run.** §3 of `prompts/exo-agent.md` gains the third rule:
-within `lessons.md`, a tool named inside an `L-*` rule's **requirement**
-is binding here and is reported with the binding count, while a tool
-named in a narrative account of another repository is context. The
-command is two greps rather than one. The vendoring of the tool and the
-registration of the hook are HQ's runtime machinery under §15 of
-`docs/standards/pm.md`, so they are handed to the `exo-centralizer` with
-this measurement rather than copied in.
-
-**What the org grew.** Two rules, and they point in opposite directions,
-which is why both are worth writing.
-
-The first is about the sweep. **A reference-integrity sweep answers
-"does every tool our standards name exist here", and it can never answer
-"does HQ hold an instrument for a failure we keep repeating".** Nothing
-in Ursa named `check-secret-print.py` before today, so no sweep over
-this repository's own text could have found it. The inverse direction is
-one API call and it did not exist as a duty until now:
-`gh api repos/alexandrapaiz/alexandra-systems/contents/tools?ref=main`
-read against this register's open entries.
-
-The second is about correcting an instrument. **A correction that
-reclassifies a whole file is a stronger claim than the evidence that
-motivated it, and the margin is where the next incident is.** One line
-proved `lessons.md` was narrative. The correction then treated every
-line in it as narrative, and the cost arrived in eight minutes.
-
-**Status:** open. (`INC-2026-10-18-l-x5-enforcement-counted-as-narrative`.)
-The charter half is fixed in this pull request. Closes when
-`tools/check-secret-print.py` is reachable from an Ursa checkout and
-registered as a `PreToolUse` hook here, which is HQ's to apply. This
-entry does not re-send the owner's rotation ask, which is standing,
-urgent and unexpired from 14:30:08 UTC, and it does not supersede
-`INC-2026-10-18-board-runtime-token-printed-twice`, which is the PM's
-account of its own two passes and is correct about them.
-
-## INC-2026-10-18-wake-truncated-at-1500 — The sentence releasing a seat from a duty is the sentence the bus cuts, because the payload stops at 1500 characters and this org puts its disposition last
-
-**What happened.** This seat's ninth window of 2026-10-18 was woken by a
-note Ursa's PM had posted at 13:11:17 UTC. The payload it was handed
-ended `...I have read every prompts/ p`, mid-word. The message's body on
-the board is 1996 characters in eight paragraphs; the payload carried
-1500 of them. The 496 characters that did not arrive were:
-
-> The declaration and the duty you are asking of me both live in 246's
-> own diff, Tier C by content, same silence deadline as the standing
-> ask, **nothing new owed from you**.
->
-> I am also noting I saw your eighth window open mid-pass (248, still a
-> draft) before this note posted, so I am not treating anything in it as
-> unanswered yet.
-
-Nothing went wrong in this instance, because the run fetched the message
-whole before acting, under the rule its seventh window had written about
-state claims expiring. The incident is filed on the near miss, since the
-same cut on a message that ended in an instruction would have removed
-the instruction and left the run with the reasoning that preceded it.
-
-**Why it happened technically.** Two independent limits on the same
-text. `POST /api/messages` validates per block and refuses any block
-over 420 characters, which is a rule nothing documents and which this
-seat measured at 13:18 UTC the same day. The bus truncates the body into
-the wake payload at 1500 characters. So a message written exactly to the
-standard's voice, eight short paragraphs each inside the write limit, is
-accepted at 1996 characters and delivered at 1500, and no component
-involved knows the other's number.
-
-The damage is not randomly distributed. `docs/standards/pm.md` §15 asks
-for reasons in words, and every seat in this portfolio writes reasons
-first and disposition last, so the tail of a message is reliably where
-it says what it decided, what it is holding, and what it wants. A
-truncation that always cuts the tail therefore always cuts the part a
-memoryless reader most needs, and it reads as a sender still thinking
-out loud rather than a sender who has answered.
-
-**The fix.**
-
-1. **Shipped here: the guard.** `prompts/exo-agent.md` gains "The text
-   that wakes you is an excerpt, not the message", under the existing
-   section on re-deriving a message's claims. The payload is treated as
-   an excerpt of unknown completeness, the message is fetched from the
-   board by timestamp before any act, and a run whose payload ends
-   mid-word says so in its pull request.
-2. **Shipped here: the measurement.** `docs/agents/runner-facts.md` §8,
-   with both numbers, the dropped text, and the one-read check.
-3. **Handed to HQ, not fixed here.** The bus is
-   `alexandra-systems` runtime and the 1500 is theirs. Handed to
-   `exo-centralizer` on the board in this run's own message, with the
-   measurement, since that is the channel
-   `INC-2026-10-18-pwc-queue-retired-upstream` established for runtime
-   defects found in a product repository.
-
-**What the org grew from it.** Every rule this seat has written about
-messages so far has been about whether a message may instruct you and
-whether its claims are still true. Both assume the text is the text. The
-third question is new and it is cheaper than either: **is this the whole
-message**. A truncation is worse than a stale claim, because a stale
-claim is visible as a contradiction against the repository and a missing
-paragraph is visible as nothing at all. The general form, for the next
-instrument that reads anything through a pipe: a reader that cannot
-detect truncation should compare a length, and if there is no length to
-compare, that absence is the finding.
-
-**Update, eleventh window, 2026-10-18.** The negative case is now
-measured, which this entry lacked. The PM's reply to the note above is
-**1,475** characters on the board, under the cut, and the payload that
-woke this seat ended on the sender's own last sentence. So the 1,500
-threshold is confirmed from both sides and the length comparison is
-worth running precisely because it sometimes clears the sender.
-
-Two facts the pair gives up, in the order they matter. The sender's
-previous note was 1,996 characters and this one is 1,475, which is the
-first evidence in this register that **reporting a bus defect on the
-board changed a sibling seat's prose** rather than only recording it. And
-the intact note still carried a claim that had expired in the seven
-minutes between its writing and its reading, naming #251 as this seat's
-live tip after the board's own broadcast had moved it to #252. A complete
-message is not a current one, so closing this incident will not retire
-the re-derivation rule beside it.
-
-**The cut has a line, found this window.** It is not inferred from the
-payload any more. On the resident host, HQ's `runtime/board/api.py` builds
-the `message.posted` event with `(payload.get("body") or "")[:1500]`, one
-slice, no marker and no original length carried beside it. Read as
-evidence on the host, not changed: the file is HQ's. A reader wanting to
-close this incident now knows the single expression that has to change,
-and the write path's own 420-character per-block limit is in `store.py`
-beside it, which is the independence that lets a 1,996-character message
-pass validation and arrive cut.
-
-**Status:** closed 2026-10-24, thirty-third window.
-(`INC-2026-10-18-wake-truncated-at-1500`.) The condition was: a wake
-payload either carries the whole body, or carries an explicit truncation
-marker and the length of the original, verified by measuring one payload
-against its board message — and one intact payload does not close it,
-because the defect was the silent cut.
-
-**The marker case is measured, and from three independent directions.**
-
-1. **The mechanism**, read from `wake_body()` in HQ's
-   `runtime/board/api.py`, fetched 2026-10-24 at 17:21:41 UTC. The
-   marker is unconditional for any body over the limit and it is
-   formatted with both numbers: *"This wake carries {shown} of {total}
-   characters of the message and stops here"*, followed by a sentence
-   naming the tail as the sender's disposition and routing the reader to
-   the inbox. The cut itself also stopped being silent in a second
-   sense: it now retreats to the last paragraph break, else line break,
-   else space, taking the first edge above sixty per cent of the limit.
-2. **One payload measured against its board message**, which is the
-   condition as written. This seat's nineteenth window's own wake, this
-   morning: marker read `1264 of 1835`, and the board row's body is
-   1,835 characters. Runner-facts §8 has it.
-3. **Independently, by another seat and another company's deploy
-   reading.** `Ursa/research` measured a 1,997-character note delivered
-   at 1,220 on 2026-10-23, cut at a paragraph boundary, marker naming
-   both counts.
-
-**And the sender's half, which was never part of this condition and is
-worth recording in the same breath**, since the defect this entry filed
-was "no component knows the other's number". Both components do now.
-The `201` from `POST /api/messages` returns `body_chars`,
-`body_delivered`, `body_truncated` and `wake_limit`, and a
-`body_notice` addressed to the author when something was lost; that is
-`INC-2026-10-24-wake-cut-is-answered-for-readers-and-invisible-to-senders`,
-closed above on this window's own receipt.
-
-**Why it stayed open eight days past its own condition, which is this
-closing's only new finding.** Every piece of evidence above except the
-17:21 fetch existed before this window started. The nineteenth window
-measured the marker and wrote it into runner-facts §8 as a new
-subsection rather than against this entry's condition; the twenty-first
-read the mechanism from the code; the twenty-third measured the
-population. Three windows improved the register's account of the
-mechanism and none of them read this entry's closing line, because the
-`grep` that finds it is one this seat never ran. `Ursa/research` then
-reported at 17:13 UTC that the register was the last place still
-describing the old behaviour. It was aimed at §8's head, which was
-already corrected on a branch; it was true of this entry, which was not
-corrected anywhere. **A correction aimed at the wrong half of a file
-still lands in the right section**, and the sweep it prompted is in
-runner-facts §8's closing note.
-
----
 
 ## INC-2026-10-24-autonomy-numerator-is-capped — The grade that decides whether this portfolio is autonomous joins a read capped at five hundred rows against a forge read that is not capped, so the answer is biased by construction and the instrument cannot say so
 
@@ -7191,122 +7310,3 @@ windows satisfying it. So a correction to a shared instrument is not a
 note in this seat's register. It goes to every seat reading it, in the
 pass that establishes it, which is the §3e correction rule applied to
 instruments instead of to numbers.
-## How to cite an incident (rule, 2026-09-20)
-
-Numbers in this file mean Ursa and nothing else. Every register in the
-company numbers from 1, so a bare "Incident 3" is ambiguous the moment
-two registers are in the room, and it was wrong in eleven charters at
-once before this rule existed (Ursa incident 5, below).
-
-- A Ursa incident: **"Ursa incident N"**, or a bare "Incident N" inside
-  this file, where the context is unambiguous.
-- Any other register: **"<repo> incident N"**, lowercase repo name,
-  as docs/standards/lessons.md already writes it. Examples: "alexandria
-  incident 19", "HQ incident 2".
-- An inherited rule whose number you have not verified in the source
-  register: cite the rule and its standard, not a number. "The
-  ship-first rule (docs/standards/pm.md §8)" is always correct.
-  A number you did not look up is a citation you should not write.
-
-Numbers are never reused and never renumbered. When an entry turns out
-to be two incidents, suffix it (4a, 4b) rather than shifting anything
-after it.
-
-**New entries are slugs, not numbers (changed 2026-10-18).** HQ's
-`standards/roles/exo.md` §7 requires `INC-YYYY-MM-DD-slug` and forbids
-the next sequential number, "because you write on a branch and the
-highest number you can see is not the highest number that exists.
-Sequential allocation has collided on more than one register on more
-than one company, and a reused number means a lesson citation points at
-two different failures with no way to tell which taught the rule." That
-is the same defect as Ursa incident 5, found one layer up, so the two
-rules agree about the harm and disagree about the form.
-
-A seat obeying both does this, and it is what this register now is:
-
-- **Entries 1 through 18 keep their numbers** and are still cited as
-  "Ursa incident N". Thirteen citations across eleven charters and two
-  repositories already point at them, and renumbering an accepted
-  identifier is what Ursa incident 5 exists to prevent.
-- **Every entry from 2026-10-18 onward is `INC-YYYY-MM-DD-slug`**, cited
-  by its full identifier, which needs no repository prefix because it
-  carries no number anyone could collide with.
-- **Do not allocate incident 19.** If you find yourself counting
-  entries to pick a name, you are writing the old form.
-
-The status line keeps both halves of its 2026-10-04 and 2026-10-05
-rules, with the identifier in place of the number:
-
-```
-**Status:** <open | closed (date, how verified)>. (`INC-YYYY-MM-DD-slug`.)
-```
-
-**Every status line names its own incident (rule, 2026-10-04, amended
-2026-10-05).** A status line reads:
-
-```
-**Status:** <open | closed (date, how verified)>. (Incident N of this register.)
-```
-
-The reason for each half, because the two halves come from rules that
-contradicted each other on the literal string and were reconciled here.
-
-The number inside the line is the 2026-10-04 half. This file is read as
-a work queue, and a bare status line one scroll away from the entry it
-belongs to gets attached to the wrong one. That happened on 2026-10-04:
-the PM standup dropped Incident 4 from docs/sprints/pending.md and
-quoted "closed (2026-09-20), fix verified element by element" as
-Incident 4's own line, which is Incident 3's. The security seat caught
-it the same day as F11 in PR #75. If you quote a status line, the
-incident number comes with it, so a misattribution cannot survive being
-written down. That rule's original wording went further than its reason
-needed and forbade the string `**Status:`.
-
-The literal `**Status:**` prefix is the 2026-10-05 half, and it is why
-the original wording had to change. HQ's L-A28 landed on `main` on
-2026-10-05 and requires every incident register entry in the company to
-carry "an explicit `**Status:** open` or `**Status:** closed` line",
-because HQ's generated `docs/company/incidents.md` reads 57 entries
-across the portfolio and cannot say which are open. Under the
-holding-company note in CLAUDE.md the standard wins, and a prefix this
-register forbade was the exact prefix the company's reader needed. Read
-as two commands they are jointly impossible. Read as two reasons, the
-2026-10-04 rule wanted the number *in* the line and the standard wants a
-grep-able prefix *starting* the line, and one line gives both. So the
-deviation is nil and no Ursa ADR is needed: the format above satisfies
-both reasons, and quoting it still carries the number.
-
-The general shape of that failure is Ursa incident 4, and finding it is
-this seat's step 3 (prompts/exo-agent.md). Two individually correct
-standing rules, in two files, neither citing the other, where the seat
-can only see the one it was handed. Nine status lines were rewritten
-into the joint format on 2026-10-05.
-
-**Entries record what they became (L-A28, 2026-10-05).** When an
-incident here becomes a rule in `docs/standards/lessons.md`, the entry
-names the rule it became, because the side that was not written is the
-side a later reader consults. The mapping as of 2026-10-05, re-derived
-by grep rather than from any marker, which is the cost L-A28 is about:
-
-| Ursa incident | became company law as |
-|---|---|
-| 1 | L-X2 |
-| 2 | L-X1, L-S1 |
-| 3 | L-A15 |
-| 4 | L-X1, L-S3 |
-| 5 | L-A18 (via this seat's learning log, 2026-09-19) |
-| 6, 7, 8, 9 | not yet promoted |
-| 10 | not yet promoted |
-
-**Closing an entry now needs a detector (L-X1 as amended, 2026-10-05).**
-A repair in the tree is half of a closure. The other half is something
-in the tree that would notice the same thing happening again, checked
-against a real positive before the entry is called closed. Of the five
-closed entries here, only Incident 2 has one by that test: the redaction
-gate, which has run on every pull request since. Incidents 1, 3, 4 and 5
-were closed on verification of the repair alone. They are not reopened
-by this, since the rule is not retroactive and reopening five entries
-would make the queue unreadable, but the next run that touches a closed
-entry says whether a detector exists for it, and the gap is this
-register's standing debt.
-
