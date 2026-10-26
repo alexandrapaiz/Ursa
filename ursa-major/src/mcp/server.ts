@@ -95,9 +95,37 @@ export const SERVER_NAME = 'ursa-major'
  * `.github/workflows/redaction-gate.yml` exists because it leaked once
  * already. Naming the file relative to nothing and raising a plain Error
  * keeps the one fact the user needs and drops the frames.
+ *
+ * THE READ IS INSIDE THE HANDLER TOO, and it was not until 2026-10-26.
+ * Only `JSON.parse` was wrapped, so the paragraph above was true of a
+ * corrupt file and false of an unreadable one. `readFileSync` puts the
+ * path in the *message* and not merely in the frames — `EACCES:
+ * permission denied, open '/home/<user>/<project>/.ursa/records/x.json'`
+ * — so the one case the wrapper existed to stop was the one case that
+ * still leaked, and it leaked more than a stack trace does: the
+ * username and the project's name, to whichever model the client is
+ * talking to. That is the on-device boundary CLAUDE.md §0 constraint 3
+ * names, crossed by an error string.
+ *
+ * It is reachable without anything going wrong on disk. `records()`
+ * calls `readdirSync` and then reads each name it listed, and this
+ * server re-reads per request on purpose so that a user editing their
+ * store while a client is connected sees the edit. A record removed
+ * between the listing and the read is therefore an ordinary outcome of
+ * the behaviour this file chose, not a race it can declare out of
+ * scope.
  */
 function readJsonFile<T>(file: string, what: string): T {
-  const text = readFileSync(file, 'utf8')
+  let text: string
+  try {
+    text = readFileSync(file, 'utf8')
+  } catch (e) {
+    const code = e instanceof Error && 'code' in e ? String((e as { code?: unknown }).code) : ''
+    throw new Error(
+      `${what} at ${basename(file)} could not be read${code ? ` (${code})` : ''}. ` +
+        `Nothing else in the store was touched.`
+    )
+  }
   try {
     return JSON.parse(text) as T
   } catch (e) {

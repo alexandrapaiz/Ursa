@@ -12,6 +12,15 @@
 import { blobIdFor } from './write-capability'
 
 export const PBKDF2_ITERATIONS = 600_000
+// A fixed application salt, the same for every user. The tradeoff and the
+// reason for it are written out in the bridge copy named above: the server
+// must never learn whose blob a blob is, so there is no per-user salt to
+// mix in, and the passphrase has to carry the whole weight instead. Said
+// here as well, because this is the copy a reviewer of the user-facing
+// surface reads, and this file is where a reader would otherwise conclude
+// the constant is arbitrary. `ursa bridge` warns when the passphrase is
+// short; this page does not, because by then the blob already exists and
+// the name of it is the passphrase.
 export const SALT = new TextEncoder().encode('ursa-overlay-v2')
 
 export interface DerivedKeys {

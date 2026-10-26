@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { RECORDS, TUNING } from '../hq/fixtures'
@@ -346,6 +346,42 @@ describe('the file-backed store', () => {
     // redaction standard calls private.
     expect(message).not.toContain(root)
     expect(message).toContain('Nothing else in the store was touched')
+  })
+
+  // The sibling of the test above, for the case that test's own subject
+  // did not cover. Until 2026-10-26 `readJsonFile` wrapped `JSON.parse`
+  // and not `readFileSync`, so a corrupt record was named safely and an
+  // *unreadable* one threw node's own message, which carries the
+  // absolute path rather than only the stack frames.
+  it('names an unreadable file and leaks no absolute path either', () => {
+    const root = mkdtempSync(join(tmpdir(), 'ursa-mcp-unreadable-'))
+    mkdirSync(join(root, '.ursa', 'records'), { recursive: true })
+    writeFileSync(join(root, '.ursa', 'tuning.json'), JSON.stringify(TUNING))
+    const unreadable = join(root, '.ursa', 'records', 'rec-locked.json')
+    writeFileSync(unreadable, JSON.stringify(RECORDS[0]))
+    // `readdirSync` still lists it and the read still fails, which is the
+    // same shape as a record deleted between the listing and the read.
+    chmodSync(unreadable, 0o000)
+
+    const store = fileStore(projectPaths(root))
+    let message = ''
+    expect(() => {
+      try {
+        store.records()
+      } catch (e) {
+        message = e instanceof Error ? e.message : String(e)
+        throw e
+      }
+    }).toThrow()
+
+    expect(message).toContain('rec-locked.json')
+    expect(message).not.toContain(root)
+    expect(message).toContain('Nothing else in the store was touched')
+    // The errno survives, because it is the one fact that tells the user
+    // whether to fix a permission or restore a file, and it carries no path.
+    expect(message).toMatch(/EACCES|EPERM/)
+
+    chmodSync(unreadable, 0o600)
   })
 
   it('still reads a store whose tuning.json is valid and whose records are all valid', () => {

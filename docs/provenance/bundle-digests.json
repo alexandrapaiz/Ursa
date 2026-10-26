@@ -586,6 +586,19 @@
           "subject": "security: the publish path built its output paths from an unchecked id"
         }
       ]
+    },
+    {
+      "digest": "80d47d927ef45245",
+      "sha256": "80d47d927ef45245f276dcf6f84b5e3b05eac7bf92711446a8f937abc9db6c2e",
+      "blob": "86d7b7d8b7b6e1c19599b644f6819ec38c5b7ff5",
+      "bytes": 309086,
+      "introducedBy": [
+        {
+          "commit": "252180aa663c977f7308deca8317a87176a0ff11",
+          "date": "2026-10-26T10:48:49.000Z",
+          "subject": "security: rebuild the committed bundle the inherited branch left stale"
+        }
+      ]
     }
   ]
 }

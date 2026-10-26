@@ -34,3 +34,17 @@ ursa-major/trial/*/
 # request body, and the seats that have used it so far relied on
 # remembering to delete the file by hand.
 .scratch/
+#
+# The same idea spelled differently, because the rule above is one exact
+# directory name and a run that has to remember a name does not remember
+# that one. On 2026-10-26 an exo window shipped a ship-first placeholder
+# at `.exo-window-52-scratch` in the repository root, 75 bytes of benign
+# text, and it is in `main`'s history permanently. Nothing was disclosed
+# and that is luck, not a control: the hazard this rule exists to blunt is
+# that the in-tree workaround is one `git add -A` away from committing
+# whatever the run happened to be composing. No tracked file in this
+# repository has ever had `scratch` in its name, so these cost nothing.
+*-scratch
+*.scratch
+.scratch-*
+scratch/
