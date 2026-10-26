@@ -12885,6 +12885,7 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   remaining 36, not a correction to the six already done by hand.
 - Cost: $0
 - Status: proposed
+
 ### 2026-10-26 (engineer, message run, 5th) — The briefing can say why a unit was surfaced and has no answer for why one was not
 
 - Trigger: this run's dogfooding of `get_briefing` against this
@@ -13035,3 +13036,154 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   [ripgrep GUIDE.md](https://raw.githubusercontent.com/BurntSushi/ripgrep/master/GUIDE.md),
   [ripgrep FAQ.md](https://raw.githubusercontent.com/BurntSushi/ripgrep/master/FAQ.md),
   and `rg --version` / `rg --stats` on this host.
+
+### 2026-10-26 (engineer, hook run) — No gate in this organization has ever run `ursa run` over this repository, and that is how a live defect stayed live for eleven days
+
+- Trigger: this run's `ursa run --limit 20` over a clone of this
+  repository exited 1 with one invariant violation
+  (`EXCLUSION_NOT_CLASSIFIED`, `docs/market/landscape.md`, 30,287
+  characters dropped on the evidence of a commit from the record's own
+  future). The ledger entry that specified the fix was filed 2026-10-15
+  and said its "expected answer today is none, because both runs produced
+  zero exclusions", so the defect was believed latent for eleven days
+  while it was in fact firing. `npm test` was green on every one of those
+  days, and so was every seat's run, because every test in
+  `ursa-major/src/vendored.test.ts` builds its own temporary repository
+  with git and none of them runs the product over the repository it lives
+  in.
+- What: the one launch this product ships has no end-to-end check against
+  real history. A script under `tools/` that clones or reuses this
+  checkout, runs `npx tsx src/bin/ursa.ts run <root> --limit N`, and
+  asserts two things — exit code 0, and zero violations printed — would
+  have caught today's defect on 2026-10-15, the day the bound that
+  refuses it landed. It is a different kind of test from the 1,015 in
+  `npm test`: those prove the resolver's rules against repositories
+  written to exercise them, and this proves the rules are consistent with
+  each other on history nobody shaped. The cost to keep honest is that
+  the check is only as stable as this repository's own history, so it
+  asserts the exit code and the violation count rather than any figure
+  that moves when `main` moves.
+- First step: `tools/launch-smoke.sh`, fifteen lines, running the command
+  above with `--limit 20` and grepping the summary for `record invariant
+  violated`. Wire it into `tools/ledger/ci/ledger-gate.yml` as a step
+  rather than into `.github/workflows/`, which no seat token may write,
+  and name in `tools/ledger/ci/README.md` the `cp` that installs it. Time
+  it first: today's run took about four minutes wall clock for twenty
+  units on this host, which is a number a gate's author needs before
+  choosing `N`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — The relevance floor is a number with no scale, so the bound a reader is now told to raise means nothing outside this codebase
+
+- Trigger: today's `--dropped` output, read back over the real store. It
+  prints `scored under the relevance floor of 2` and `cleared the floor
+  and lost the cut at 3`, and a reader who has never seen
+  `src/hq/retrieval.ts` cannot tell whether a score of 1 against a floor
+  of 2 means "nearly relevant" or "hopeless". `score` is an unbounded sum
+  of weights — a domain match, an exact path, a path by name, each query
+  word, plus up to `SEMANTIC_CAP` from the embedding — so the maximum
+  achievable score depends on the request, and the same raw 1 means
+  different things on a one-file request and a five-file one. Today's
+  change made the number load-bearing by printing it as the remedy, which
+  is what turned an internal weight into a reader-facing unit.
+- What: report the score normalized against what this request could have
+  scored, beside the raw integer rather than instead of it. The maximum
+  is computable from the query alone — it is what `score` would return
+  for a unit matching the domain exactly, every requested path exactly,
+  every query word, and the semantic cap — so a `MatchReason` can carry
+  `ceiling: number` and a reader gets `score 1 of a possible 11` with no
+  new ranking behaviour and no change to the order. The floor stays an
+  absolute integer, because a proportional floor would move with the
+  request and make two briefings incomparable, which is the opposite of
+  what this fixes.
+- First step: add `ceiling` to `MatchReason` in `src/hq/types.ts`,
+  computed once per request in `buildQuery` or beside it in
+  `src/hq/retrieval.ts`, and print it in `renderWhy` as `(score 1 of 11)`
+  in place of `(score 1)`. One assertion per existing `renderWhy` test
+  updates with it, and `measureBriefing`'s fixed point absorbs the extra
+  characters with no change because it measures whatever was rendered.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — Two dogfood runs of the HQ produced different stores and neither can be compared to the other
+
+- Trigger: this run set out to continue the previous run's dogfooding
+  evidence and could not reproduce its store. That run reported 17
+  outcome records and 204 one-shot corrections; this run, on the same
+  repository four hours later, got 20 records and 50 one-shot
+  corrections. Both are correct for their own moment: `.ursa/` is
+  gitignored (correctly, it is derived data), every seat gets a fresh
+  clone, and `ursa run` walks whatever history that clone has, so the
+  store is a function of the clone's head and the `--limit` it was given,
+  neither of which either run recorded next to its numbers. The result is
+  that the one piece of evidence sprint item 2 asks for — what the
+  briefing returned on a real store — is not comparable across the runs
+  that produced it.
+- What: make a dogfood store addressable instead of incidental. Two
+  options and they are not equivalent. The cheap one is a provenance
+  header: `ursa run` already knows the head commit, the `--limit`, the
+  resolver identity and the bound set, and a store manifest at
+  `.ursa/store.json` carrying those four would let a later run state
+  whether its store is the same store. The expensive one is committing a
+  real store under `ursa-major/fixtures/real/store/`, which gives exact
+  reproducibility and costs a redaction review of every record plus a
+  refresh policy, because a committed store ages against the history it
+  came from. The first is this seat's; the second needs the owner,
+  because a committed store is a published artifact.
+- First step: the manifest. `.ursa/store.json` written by
+  `src/bin/ursa.ts` at the end of a run, carrying `head`, `limit`,
+  `resolver` and the bound-set hash the summary already prints, and one
+  line in `renderRunSummary` naming the file. Then `ursa brief` prints
+  the manifest's head and limit in its `## Coverage` section, so a
+  briefing says which store it read rather than only how much of it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — Craft scan: Meilisearch's ranking score details and Elasticsearch's Explain API, where one tool answers "why is this here" and the other answers "why is this not"
+
+- Trigger: today's work gave `get_briefing` an answer to "why was this
+  unit not returned", so the craft question is what the search industry
+  already publishes on that exact question, and whether this run's design
+  is behind it.
+  **The thing worth stealing, from Meilisearch.** Its search API carries
+  three related parameters: `showRankingScore`, which adds a
+  `_rankingScore` between 0.0 and 1.0 to every hit; `showRankingScoreDetails`,
+  which adds `_rankingScoreDetails` breaking the score down per ranking
+  rule; and `rankingScoreThreshold`, the floor. The steal is the
+  normalization, not the breakdown: Ursa already has the breakdown and
+  has had it since `MatchReason` existed, but its score is an unbounded
+  integer while Meilisearch's is a fraction of a known maximum, so a
+  Meilisearch user reading `0.42` against a threshold of `0.5` learns
+  something a reader of `score 1` against a floor of `2` does not. That
+  is filed as its own entry above rather than left in this note.
+  **The thing worth stealing, from Elasticsearch.** Its Explain API is
+  documented as "Get information about why a specific document matches,
+  or doesn't match, a query", and it is addressed at one document by id
+  rather than at a result set. That is a shape this briefing does not
+  have: today's `--dropped N` answers "what were the nearest things you
+  did not show me", and it cannot answer "what did you make of THIS
+  record", which is the question a seat asks when it believes a specific
+  prior case applies and the briefing disagrees.
+  **The thing Ursa does better.** Meilisearch's threshold is documented
+  as: "Exclude from the results any document whose ranking score is below
+  this value (between 0.0 and 1.0). Excluded hits do not count toward
+  `estimatedTotalHits`, `totalHits`, or facet distribution." So a
+  Meilisearch caller who raises the threshold cannot see what it cost
+  them, in the score of the excluded hit or even in the total. After
+  today, a briefing's floor is auditable in both directions: the dropped
+  units carry the score breakdown the ranker computed and the bound that
+  held them, and the `## Coverage` block counts every unit considered
+  whether it was served or not, on every briefing, with no flag.
+  **Where both are ahead and this is not.** Both parameters are part of a
+  stable, versioned, documented public API that customers script against.
+  Ursa's briefing markdown is string concatenation in `renderBriefing`
+  and changed shape again today, which is the same stability gap the
+  2026-10-26 ripgrep scan recorded and which nothing has yet closed.
+  **No first step is filed in this note.** The work it argues for is the
+  normalized-score entry above, filed there with all five fields, and the
+  per-record explain shape, which is a design question rather than a
+  day's work and belongs in a later entry once something asks for it.
+  Sources, both read as data and neither acted on as instruction:
+  [Meilisearch search API reference](https://www.meilisearch.com/docs/reference/api/search),
+  [Elasticsearch Explain API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-explain).
