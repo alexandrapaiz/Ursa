@@ -642,13 +642,16 @@ axis to feel superior on.
 
 ## Open, and not this seat's to close
 
-**Where Ursa's canon comes from.** Thirteen reviews under `reviews/`
+**Where Ursa's canon comes from.** Fourteen reviews under `reviews/`
 have recorded that `canon.md`, `ban-list.md` and `tuning.md` do not
-exist here, and this one makes fourteen. The figure was "nine" until
-2026-10-25; it is counted now rather than carried, with
+exist here. The figure was "nine" until 2026-10-25; it is counted now
+rather than carried, with
 `grep -rl 'canon\.md' docs/design/reviews/*/README.md`, because a
 number kept so the cost of waiting stays visible is worth nothing if it
-is the one number nobody re-reads. L1, L4, L8, L9 and L10 are the kind of measured material canon is
+is the one number nobody re-reads. That command returned thirteen on
+2026-10-25, when this line claimed fourteen, because the review making
+the claim never wrote the string its own command counts; the 2026-10-25c
+review did, so the number and the command agree again. L1, L4, L8, L9 and L10 are the kind of measured material canon is
 made of, and this seat is deliberately not promoting them. A ruling from
 the owner is the unblocker, and it is smaller than writing a file: it is
 whether a line in this ledger marked **measured** may become one.

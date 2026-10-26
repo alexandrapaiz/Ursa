@@ -232,7 +232,39 @@ runs of 2026-10-24h and 2026-10-25b with nothing new found here to
 repair. Inventing a hover to have shipped one would be the vibe-coded
 instinct the design rules exist to stop.
 
-## 6. External sources read
+## 6. States exercised, and the three charter files
+
+Hover is not a screenshot of a page, so it is photographed in pairs
+(`data/hover-states.txt`). Ten targets, every one of them firing, each
+worth a pixel count rather than a computed-style claim:
+
+```
+quiet-link-404     10,995 px   65.6%   wash, hairline and a 1px lift
+sp-verbatim        10,451 px   31.7%   span fill 0.14 -> 0.26
+sp-mutated         10,462 px   30.8%
+sp-ngp              4,024 px   43.7%
+rec-action-record     379 px    1.0%   underline arriving
+rec-action-index      114 px    2.3%
+rec-row-index         218 px    0.2%
+mark-link-404         140 px    2.1%
+rec-action-home       113 px    0.3%
+cta-home                0 px    0.0%   by design: it ships disabled
+```
+
+The hero's call to action is the one target with no hover, which is the
+same fact §4 measures from the other side. Nothing here regressed and
+nothing here was changed.
+
+**The three files the charter calls law still do not exist in Ursa.**
+`docs/design/canon.md`, `ban-list.md` and `tuning.md`. This review is the
+fourteenth under `reviews/` to record it, counted with
+`grep -rl 'canon\.md' docs/design/reviews/*/README.md` rather than
+carried. One correction to the previous count while I am here: the
+2026-10-25b review wrote "fourteen with this one", and its own README
+does not carry the string, so the command it named returned thirteen.
+The number and the command agree again from this review on.
+
+## 7. External sources read
 
 - `board.libraryofalexandria.dev`, this seat's inbox and the Ursa board.
 - `linear.app`, `vercel.com`, `react.dev`, home pages, as benchmark
@@ -247,7 +279,7 @@ instinct the design rules exist to stop.
   to the engineer seat rather than to this one, so it is reported here
   and nowhere else.
 
-## 7. Checks
+## 8. Checks
 
 - `node selftest/check-contrast.mjs`: 17 of 17 expectations hold, exit 0.
 - `node selftest/check-hit-areas.mjs`: 9 of 9 hold, exit 0.
