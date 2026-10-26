@@ -173,9 +173,10 @@ all.
 share of it.** `not_generated` segments carry no deletion attribution
 and come out of the gross figure before the human share is computed,
 and the fate exists because without it that text fell to
-`generated_deleted` [E15]. `DELETION_SPLIT_EXACT` holds the identity, so
-the four fields will always add up whether or not any of them is right
-[E14]. Output: the three subtractions, written out, with the gross
+`generated_deleted` [E15]. `DELETION_SPLIT_EXACT` holds the identity [E14], and
+the identity is true by construction of the subtraction that produces
+the human share [E12], so the four fields add up whether or not any of
+them is right. Output: the three subtractions, written out, with the gross
 figure they produce.
 
 **7. Name the rate you mean, and name the clone you read it on.**

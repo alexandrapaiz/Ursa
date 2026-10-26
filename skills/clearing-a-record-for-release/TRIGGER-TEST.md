@@ -213,3 +213,38 @@ commit hashes out of the user's own repository are about to leave the
 machine under this skill's rules. That is a genuine handoff and it
 runs durability-side first, because what may leave cannot be settled
 until it is known what is being said.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is the phrase "before I call that". A number is about to be
+called something in a document, and this skill's own trigger 1 is a
+person about to paste something into a design doc. The two prompts have
+the same grammar.
+
+They do not have the same question. This skill rules on whether text or
+a number may leave at all, and its three exits have opposite rules
+about raw text. The sibling rules on whether the number is true before
+anyone asks whether it may leave, and its answer can be "nothing
+checked", which is not an exit condition in this file at all. The line
+is also mechanical rather than a matter of taste, in the same way this
+skill's line with the quoting skill is: every field under `stats`
+ships, so a one-record figure like `humanDeletedChars` is never blocked
+here, and nothing in the deletion split is an aggregate across
+contributors. So the sibling's prompt cannot reach any of this skill's
+three exits.
+
+Both directions are handled record-side first, because nothing can be
+cleared for release until it is settled what it is.

@@ -361,35 +361,35 @@
     "read": "2026-10-26",
     "lines": "575b33ed4d636d51",
     "what": "4009c030acbba09e",
-    "passages": "850de01331412969"
+    "passages": "7fa25a40f89eb61b"
   },
   "attributing-a-deleted-span/E11": {
-    "verdict": "widened",
+    "verdict": "supports",
     "read": "2026-10-26",
     "lines": "3d11ae9af02cdd77",
     "what": "50ff4c4ad937616c",
-    "passages": "d8ff3849f70b3e73"
+    "passages": "87c314cf67e0ae72"
   },
   "attributing-a-deleted-span/E12": {
     "verdict": "supports",
     "read": "2026-10-26",
     "lines": "a177a8ebcea7a8d3",
     "what": "10b1a7585769a1d3",
-    "passages": "22dbfb021b2ace67"
+    "passages": "369a6768b0290ac4"
   },
   "attributing-a-deleted-span/E13": {
     "verdict": "supports",
     "read": "2026-10-26",
     "lines": "2c713009d87f6fad",
     "what": "0830ac0aaa9fe07a",
-    "passages": "962be89032df124d"
+    "passages": "66cd8f92de46261c"
   },
   "attributing-a-deleted-span/E14": {
-    "verdict": "supports",
+    "verdict": "widened",
     "read": "2026-10-26",
     "lines": "8daf186964baf973",
     "what": "d141190c838aecb3",
-    "passages": "548938b2a455817a"
+    "passages": "3097d318122bf0d7"
   },
   "attributing-a-deleted-span/E15": {
     "verdict": "supports",
@@ -410,7 +410,7 @@
     "read": "2026-10-26",
     "lines": "7fd7d76862ab2759",
     "what": "3422b642f0da3c67",
-    "passages": "65971a788c57b139"
+    "passages": "ae99117d8a14b9c9"
   },
   "attributing-a-deleted-span/E4": {
     "verdict": "supports",
@@ -438,21 +438,21 @@
     "read": "2026-10-26",
     "lines": "278370f30325e13e",
     "what": "a877678a268fd964",
-    "passages": "826011fd62488f66"
+    "passages": "05ffa0a2baa3276c"
   },
   "attributing-a-deleted-span/E8": {
     "verdict": "supports",
     "read": "2026-10-26",
     "lines": "001eda19aa629894",
     "what": "f3ff5e58b4399231",
-    "passages": "bc3d96372171ee46"
+    "passages": "3d39aab27dd80e60"
   },
   "attributing-a-deleted-span/E9": {
-    "verdict": "supports",
+    "verdict": "widened",
     "read": "2026-10-26",
     "lines": "94cb98302194cc71",
     "what": "7c8a101318467fdc",
-    "passages": "58da835031d14aa7"
+    "passages": "670e580d391ca7ca"
   },
   "auditing-a-detected-correction-loop/E1": {
     "verdict": "widened",

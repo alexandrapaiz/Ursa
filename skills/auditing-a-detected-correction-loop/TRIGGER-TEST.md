@@ -224,3 +224,36 @@ treat a decayed span as evidence against `accepted_tacitly` is the
 obvious next move and was deliberately left undone. If that lands, a
 prompt about a decayed span contradicting a tacit acceptance sits on a
 real new edge, and this section is what has to be read again.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file in
+posture, because both skills audit a derived block against what
+actually happened rather than reading it as reported. The reader who
+has learned here that `recurrences` counts something other than what
+its name suggests is exactly the reader who will arrive with the
+sibling's prompt.
+
+The division is the block and the evidence behind it. This skill rules
+on `signals`, which is a fact about the sequence of prompts, and its
+evidence is the transcript. The sibling rules on `deletion`, which is a
+fact about one span's absence from a blob, and its evidence is the git
+trees of intervening merges. The two meet in prose and nowhere in the
+record: a correction the person made by deleting text rather than by
+complaining is a `human_edit` attribution over there, and whether it
+also appears as a loop here is a separate computation from separate
+input. Neither block is derived from the other, so neither can check
+the other.

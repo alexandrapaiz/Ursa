@@ -229,3 +229,35 @@ direction is owed in
 `quoting-a-number-from-an-outcome-record/TRIGGER-TEST.md`, under §5r's
 rule that the run landing a skill pays the debt in every existing
 skill's file, and this run pays it there rather than claiming it here.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+These two skills are the only ones in the library whose block is
+computed from git rather than from the record, and they fail in the
+same shape, which is why this near miss is the one worth reading. A
+`testedSpans: 0` here and a `mergeDeletedChars: 0` there are both zeros
+that could be a result or an absence, and both are read off a field
+whose name sounds measured. A reader who learned that shape in this
+file will reach for this file again.
+
+The division is which side of the closing commit the question is on,
+and it is decidable from the prompt alone. This skill walks forward
+from the closing commit to whatever HEAD was when the walk ran, over
+text that survived the episode. The sibling tests backward, at merge
+boundaries that sit inside the episode, over text that never reached
+the finished file at all. Nothing with a `deletion` block is in the
+final blob, so nothing it rules on can be walked forward, and nothing
+this skill rules on has a cause to attribute.

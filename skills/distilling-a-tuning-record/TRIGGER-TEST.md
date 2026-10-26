@@ -254,3 +254,36 @@ of thing an axiom should not be built on, so a run that distils from
 records carrying durability blocks should know what those blocks mean
 first. That is a reason to read the sibling before distilling, not a
 reason to answer its prompts here.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+This is the easiest of the ninth skill's eight boundaries and the
+artifact test is what makes it easy, which is worth saying because it
+is not true of the other seven. This skill's object is `tuning.json`
+and its question is what a record means about the user. The sibling's
+object is a block inside `outcome_record.json` and its question is what
+happened to one span.
+
+The pull that does exist is one step removed and it is a real hazard
+rather than a trigger. An axiom distilled from deletions the person did
+not make is an axiom resting on the sibling's output being right, and
+on a repo-path record with no attributor injected every deletion is
+attributed to the person by default. So the sibling's failure mode
+arrives here as a false confidence count about a correction nobody
+made. The honest place to guard it is the sibling's own step about
+naming the clone a figure was read on, not a trigger in this file,
+because by the time a distillation pass runs the attribution is already
+in the record and this skill reads it rather than recomputing it.

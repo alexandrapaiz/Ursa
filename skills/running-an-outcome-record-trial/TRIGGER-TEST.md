@@ -297,3 +297,33 @@ remedy is a trial choice and this skill owns it.
 So the routing is: the durability skill answers whether the two
 numbers measured comparable things, and hands back here only if the
 answer is that one of the projects was never a viable trial.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is a consideration this skill genuinely owns. A repository
+with many merges on its branches produces more `merge` attributions and
+more `unknown` ones, and a shallow or partial clone produces `unknown`
+across the board, so what a subject's git shape will do to the
+attribution figures is a trial-selection question and belongs in this
+file's step for choosing a subject rather than in the sibling's.
+
+That is a reason to say the boundary out loud, not a reason to fire.
+The sibling's whole input is a record that already exists and figures a
+run already produced, and the prompt hands it both: a character count,
+a denominator and a field name. A prompt choosing a subject has no
+record, so it has nothing to attribute, and a prompt holding a record
+has nothing left to choose. The two never overlap on one prompt even
+though they overlap on one consideration.

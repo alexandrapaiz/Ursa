@@ -308,3 +308,36 @@ durability denominator and quietly moves a number sold to a lab. That
 makes the new sibling a downstream consumer of this skill's verdicts,
 and it is a reason to be careful here rather than a reason to answer
 its prompts.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**13. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+Both skills take one span and ask what happened to it, and the
+sibling's prompt wears this file's own posture: "did anything actually
+check" is the sentence this skill teaches a reader to ask of a label.
+So the resemblance is in the shape of the judgment rather than in the
+object, which is the case `prompts/skill-extract.md` §5r says the
+artifact test cannot settle.
+
+The object settles it anyway, and mechanically. `uncertain` is a field
+on `FinalSpan`, set on a span over the finished work whose best
+candidate scored below threshold. `deletion` is a field on
+`GenerationSpan`, set only when that segment's fate is
+`generated_deleted`. They are different interfaces over different
+text, and no span carries both: a span this file's skill adjudicates is
+one the resolver could not place, and a span the sibling rules on is
+one it placed in the deleted class. A prompt asking which of the two
+you have is this skill's, and a prompt that has already been told is
+the sibling's.

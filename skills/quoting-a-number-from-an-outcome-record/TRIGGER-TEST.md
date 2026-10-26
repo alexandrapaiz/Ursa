@@ -286,3 +286,41 @@ one. Ask whether the question would survive someone answering "those
 two walks ended at different commits". If that answer dissolves the
 question, it was the durability skill's. If the question is still there
 afterwards, it is this skill's. `skills/README.md` records the order.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here. It is the hardest near miss in this file and the closest boundary
+in the library, so the division is stated in full rather than asserted.
+
+Both skills rule on the same four fields of `stats.generated`, and the
+sibling's prompt quotes two numbers and a rate name, which is this
+skill's trigger shape almost exactly. What separates them is which half
+of the sentence is in question. This skill rules on what a number is a
+share of: `deletedPct` divides by generated characters rather than by
+the finished work, and its numerator has the `not_generated` characters
+subtracted out while the denominator keeps them. The sibling rules on
+whether the numerator names a person at all, which is a question about
+whether a git test ran and what it could read.
+
+The sibling's prompt is entirely the second question. It has already
+named the right field, `humanDeletedChars`, and already given the right
+denominator, 307 generated characters, so there is no share-of ruling
+left to make. What it asks is whether anything checked, and no field in
+`stats` answers that.
+
+The ordering rule, stated once and the same in both files: a prompt
+that genuinely spans the two is handled quoting-side first, because a
+cause cannot be audited until it is settled which population the figure
+covers. This prompt does not span them, because it arrives with the
+population already settled.

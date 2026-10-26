@@ -283,3 +283,42 @@ from a measurement is what should catch it, and the sibling is where
 the person doing that separating learns the arithmetic. So the
 handoff runs durability-side first when a proposed bound is about a
 durability field.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is real and it is one sentence long. "Did anything actually
+check" is a question about whether a test ran, and the reflex answer in
+this file is to make the gate run it. Somebody will arrive proposing
+exactly that bound: `mergeDeletedChars` is non-zero whenever the
+episode had intervening merges. It is false on a correct record,
+because a merge can touch a paired path and leave every generation span
+of that path intact, which is the ordinary case rather than an edge
+one. This skill's own step for separating a bound from a measurement is
+what should catch it.
+
+The sharper reason it should not fire is already in this skill's
+evidence. `DELETION_SPLIT_EXACT` holds the three-way split exact
+against the gross figure, and it holds on a record every one of whose
+deletion figures is a default, because the identity is true by
+construction of the subtraction that produces the human share. So the
+gate is green on precisely the record the sibling exists to catch. That
+is not a missing bound. It is a claim no bound can reach, because the
+evidence that would settle a cause is a git tree and no record carries
+one, and a bound can only catch a record contradicting itself.
+
+The handoff therefore runs sibling-side first in both directions when a
+prompt is about a deletion cause, and gate-side first when it is about
+a rule.
