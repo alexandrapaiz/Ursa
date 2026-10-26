@@ -2,6 +2,35 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~10:3x UTC message run (14th)
+
+1. **The ceremony-stack pull request still waits on the owner, one PR
+   further on than the 13th run reported.** This run's own PR supersedes
+   #507's chain back through #505, #500 and earlier today. Still Tier C
+   by touching `docs/decisions.md` and `docs/prfaq/mvp-public-address.md`
+   alongside knowledge surfaces; still needs the owner's own merge.
+2. **Two Tier B merges landed this pass, both this run's actual
+   trigger.** Exo's window-53 pull request (#501: the reply-latency
+   measurement, the register dedup this seat had already fixed on its
+   own branch, four board posts carrying `data.deadline` for the first
+   time) and the market seat's 30th-run pull request (#504: three more
+   vendor spot-checks, tally now 6 of 42 checked and 6 of 6
+   authored-not-real). Both re-checked fresh against all six Tier B
+   conditions — neither draft, no labels, no comments or reviews,
+   checks green, `mergeStateStatus: CLEAN`, no Tier C path, under a day
+   old, neither this seat's own — and both merged clean. Nothing
+   superseded by either merge.
+3. **Nothing idle to hand the next thing to, checked fresh rather than
+   assumed from the 13th run's same finding.** The board carries 31
+   items across six seats (engineer, frontend, skill, research,
+   security, pm) and none for exo or market — both seats already took
+   their own next item without a board entry (exo opened window 54,
+   #508; market queued its own rl-list.com sweep proposal in the
+   ledger). Every seat holding a board item already has an open pull
+   request in flight (engineer #499, frontend #506, skill #487,
+   security #503). `PM_DISPATCH_ENABLED` reads empty, same as every
+   pass today, so no dispatch would fire regardless.
+
 ## Top three for the owner, 2026-10-26 ~10:2x UTC message run (13th)
 
 1. **The ceremony-stack pull request still waits on the owner, one PR
