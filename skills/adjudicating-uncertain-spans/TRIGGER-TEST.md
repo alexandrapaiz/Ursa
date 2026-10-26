@@ -342,3 +342,47 @@ one the resolver could not place, and a span the sibling rules on is
 one it placed in the deleted class. A prompt asking which of the two
 you have is this skill's, and a prompt that has already been told is
 the sibling's.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**14. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. This is the most instructive near miss in this file,
+because the two skills do not merely resemble each other: they run the
+same test on the same field at two different grains, and the sibling's
+schema says so outright.
+
+The field the prompt turns on is an author date, ordered against the
+work's own closing time, and the question is whether a matching commit
+outside the generation's line of descent is a *source* for the finished
+text or a *copy of* it. That is this skill's `rival` evidence exactly.
+`RIVAL_NOT_AFTER_FINAL` is the span-level bound, and the sibling's
+file-level date field is documented as carrying what the `rival`
+variant carries one level down. So a reader cannot tell these two apart
+by the question, and should not try.
+
+Tell them apart by the unit the answer moves. This skill's unit is a
+span: an adjudication settles whether one flagged region descends from a
+generation, and the record keeps the file either way. The sibling's unit
+is a path, and its answer removes the file from `files[]` entirely, so
+no span of it is ever adjudicated. The sibling's prompt has already
+named a path, a whole-file reason and a file-level relation, so the
+file-level refusal has already been made and the only question left is
+whether it was made the right way round. There is no uncertain span in
+it, and there cannot be: an excluded path has no classified spans to
+flag.
+
+The practical rule, ours rather than the schema's: if the prompt holds a
+`relation` it is the sibling's, and if it holds a `DescentEvidence`
+variant it is this skill's. Those two vocabularies are disjoint by
+construction and they are the cheapest discriminator available.

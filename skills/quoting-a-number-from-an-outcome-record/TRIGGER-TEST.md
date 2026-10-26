@@ -324,3 +324,43 @@ that genuinely spans the two is handled quoting-side first, because a
 cause cannot be audited until it is settled which population the figure
 covers. This prompt does not span them, because it arrives with the
 population already settled.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. The pull is real and comes from the last six words: a
+prompt asking whether something may be cited in a methods note is this
+skill's trigger shape almost exactly, and trigger 1 of this file is a
+methods doc for KR2.1.
+
+What separates them is that the sibling's prompt contains no number. It
+holds a path, a reason, a relation and two timestamps, and the ruling it
+wants is whether the refusal those four fields record points the right
+way in time. This skill rules on what a quantity is a share of, and
+there is no quantity here to take a denominator.
+
+The boundary that does exist between the two skills runs the other way
+and is worth naming, because a reader who finds it will arrive from this
+side. An exclusion changes the *domain* of this skill's figures: a path
+the record excludes is absent from `files[]` and therefore from
+`finalChars` and `coveredChars`, so every percentage this skill rules
+on is computed over the paths that survived the refusal. The ordering
+rule, stated once and the same in both files: a prompt that genuinely
+spans the two is handled exclusion-side first, because what a number is
+a share of cannot be settled until it is settled which paths are in the
+population at all. That is the reverse of the order this file takes with
+`attributing-a-deleted-span` under near miss 11, and the asymmetry is
+not an inconsistency. A deletion cause is read *out of* a figure, so the
+figure has to be pinned first. An exclusion decides which figure there
+is.

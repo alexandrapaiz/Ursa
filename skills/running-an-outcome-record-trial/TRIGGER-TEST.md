@@ -327,3 +327,43 @@ a denominator and a field name. A prompt choosing a subject has no
 record, so it has nothing to attribute, and a prompt holding a record
 has nothing left to choose. The two never overlap on one prompt even
 though they overlap on one consideration.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**13. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. The pull is stronger than it looks, and stronger than it
+was for any other sibling in this file, so it is worth being explicit
+about why the answer is still no.
+
+Whether a candidate repository carries vendored or synced files is a
+first-order trial-selection question. This repository's own second trial
+produced a headline survival figure that was 84.7 percent one imported
+file, which is a worse outcome than a thin trial would have been, and
+nothing in this skill's subject-choice step would have predicted it from
+the repository's size or commit count. So the sibling's subject matter
+belongs in this skill's deliberation, and the honest form of that is a
+consideration in choosing a subject rather than a trigger boundary.
+
+The boundary itself is the same one this file draws for every record
+sibling and it does not bend here. Every step the sibling has takes a
+record as input: an `exclusions` array to read, a `relation` to judge,
+two timestamps to order, `finalChars` to reconcile. The prompt arrives
+with all of that already in hand. A prompt choosing a subject has none
+of it, because no run has happened, so there is nothing for the sibling
+to rule on and no figure yet to be inflated.
+
+Direction, stated plainly: this skill hands the sibling its input, and
+the sibling hands this skill a reason to prefer one subject over
+another. Neither ordering is needed at trigger time, because a prompt
+either holds a record or does not.

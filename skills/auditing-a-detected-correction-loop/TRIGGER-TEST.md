@@ -257,3 +257,43 @@ complaining is a `human_edit` attribution over there, and whether it
 also appears as a loop here is a separate computation from separate
 input. Neither block is derived from the other, so neither can check
 the other.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. It is the easiest near miss in this file and the argument
+is still worth writing down, because the one thing the two skills share
+is an ordering question and that is enough for a reader to match on.
+
+Both skills check that a derived claim about *when* something happened
+survives contact with the thing it was derived from. This skill orders
+prompts: `openedStep` and `closedStep` are positions in a transcript,
+and a loop whose closure precedes its opening is a defect of the same
+family as a refusal dated after the work it claims to predate. The
+objects are disjoint. This skill's evidence is what the person said, in
+the order she said it. The sibling's evidence is commit author dates in
+the object store, which no transcript contains.
+
+They also cannot change each other's output. No exclusion moves a
+recurrence count, because `signals` is computed from the transcript and
+an excluded path's absence from `files[]` is invisible to it. No loop
+moves an exclusion, for the same reason in reverse.
+
+The one place the two meet is prose about a run, and it is worth naming
+because the error reaches a reader as a claim about the person. An
+import the record failed to refuse makes someone look satisfied with
+text she never wrote and never read, and a loop count sitting beside
+that survival figure inherits the impression without being wrong itself.
+That is a figure problem, handled on the sibling's side, and the honest
+note is that this skill's numbers were never the ones at fault.

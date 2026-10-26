@@ -248,3 +248,49 @@ three exits.
 
 Both directions are handled record-side first, because nothing can be
 cleared for release until it is settled what it is.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. It is the closest of this file's near misses, and the
+reason is in the prompt's last five words rather than in its subject.
+"Fine to cite the exclusion in the methods note" is a question about
+putting part of a record into a document, which is the exact shape of
+this skill's trigger 1, and a methods note is a document this skill has
+ruled on before.
+
+The line is the one this skill draws everywhere and it is worth stating
+plainly, because the surface similarity is high enough to override it.
+This skill rules on whether something *may leave*, and its three exits
+have different rules about raw text. The sibling rules on whether the
+thing is *true*. The prompt's answer is that the citation is false: the
+exclusion's date is an hour after the work closed, so the refusal points
+the wrong way in time and the entry says the opposite of what citing it
+would claim. Nothing about that answer concerns disclosure, consent, or
+which exit the document is.
+
+There is a genuine release question sitting on the same field, and the
+right move is to name it rather than to claim the boundary is clean. An
+exclusion entry carries a commit sha and that commit's subject line,
+kept so the record names the import in the commit author's own words.
+That is text which entered the record from the history rather than from
+the episode's transcript, and a subject line can carry a name, a
+customer, or an internal path. Ruling on whether it may leave is this
+skill's, and it is a thing to check when an exclusion is being quoted
+outward.
+
+So both skills have a claim on a prompt about citing an exclusion, and
+they are answering different questions about it. Ordering, stated once
+and the same in both files: record-side first, because nothing can be
+cleared for release until it is settled what it says.

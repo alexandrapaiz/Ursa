@@ -261,3 +261,45 @@ boundaries that sit inside the episode, over text that never reached
 the finished file at all. Nothing with a `deletion` block is in the
 final blob, so nothing it rules on can be walked forward, and nothing
 this skill rules on has a cause to attribute.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. The pull is that both skills order events against a clock
+and both treat a timestamp as a claim that can be backwards, which is a
+shape no other pair in this library shares.
+
+They order different clocks across different intervals. This skill walks
+forward from the episode's closing commit to whatever HEAD was when the
+walk ran, and its ordering question is whether that window is the window
+a figure is being quoted for. The sibling orders a single commit's
+author date against `task.generatedAt`, which is a point *before* the
+episode closed, and its question is whether a matching copy existed
+early enough to be a source. So the two intervals meet at the closing
+commit and do not overlap on either side of it.
+
+The sharper reason this should not fire is that the sibling's prompt is
+about a file that never entered this skill's population. A durability
+walk follows text that survived the episode and is carried in the
+record's `files[]`. An excluded path is not there, so no span of it has
+a `lifespan` and no part of it is in `durableChars`. The sibling's
+ruling happens one step upstream of everything this skill computes.
+
+What a reader should take from the pair, and the direction of the error
+is worth naming because it is the expensive one: an unrefused import
+inflates durability for exactly the same reason it inflates survival.
+The text sits in the finished tree, nobody touches it afterwards, and
+the walk reports it as durable. That figure is still this skill's to
+qualify, and the qualification it needs is the sibling's refusal having
+been made first.

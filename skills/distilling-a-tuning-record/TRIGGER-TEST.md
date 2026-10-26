@@ -287,3 +287,41 @@ made. The honest place to guard it is the sibling's own step about
 naming the clone a figure was read on, not a trigger in this file,
 because by the time a distillation pass runs the attribution is already
 in the record and this skill reads it rather than recomputing it.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. §5e's artifact test separates the two cleanly, since this
+skill's object is `tuning.json` and the sibling's is an array inside
+`outcome_record.json`, and the prompt asks for no distillation of
+anything.
+
+The pull is one step removed and is the same shape as this file's near
+miss for the deletion skill: an axiom is only as good as the labels
+under it. What makes the exclusion case worse than the others is scale.
+A wrong span label moves one axiom's confidence count by one. An
+unrefused import hands the distiller tens of thousands of characters of
+someone else's prose as text the person kept, and on this repository's
+own history that was 60,616 characters in a single file, so any axiom
+drawn about tone, structure or length would be an axiom about a standard
+written at another company.
+
+The boundary that matters here is therefore a precondition rather than
+an edge, and it points one way. A distillation inherits whatever
+exclusion ruling was or was not made upstream and has no means to
+revisit it, because `tuning.json` does not carry paths. So the sibling's
+refusal is a thing to have checked before this skill runs, and the right
+place to say so is the sibling's procedure. Not a trigger here, which
+would fire on every distillation prompt and tell the reader nothing
+about which one has the problem.

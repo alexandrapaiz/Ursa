@@ -322,3 +322,51 @@ one, and a bound can only catch a record contradicting itself.
 The handoff therefore runs sibling-side first in both directions when a
 prompt is about a deletion cause, and gate-side first when it is about
 a rule.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. This is the hardest near miss in this file, because the
+prompt describes a condition the gate already checks. The third clause
+of `EXCLUSION_NOT_CLASSIFIED` holds that a `sibling` exclusion's date
+is no later than the record's own `task.generatedAt`, and the record in
+the prompt violates it. So a reader who knows the gate will recognize
+the rule before recognizing the question, and will land here.
+
+The division is the same one this file argues everywhere and it holds
+with no special pleading: this skill's object is the checker and the
+sibling's object is a record. The prompt proposes no bound, changes no
+bound, and asks nothing about whether a violation means the bound or the
+resolver is wrong. It asks what one entry in one record is evidence for.
+That the gate would catch the entry is a fact about the record's state,
+not a question about the gate's design.
+
+Two things are worth taking from this pair, both of them about what a
+bound can and cannot be asked to do.
+
+The first is an asymmetry the gate cannot close. It can catch a refusal
+that was computed and then not applied, because both halves of that
+contradiction are inside the record and the first clause of the same
+bound is that same-set arithmetic. It can never catch a refusal that
+should have been made and was not, because no record carries the object
+store that would settle it. So the sibling's most expensive failure is
+structurally out of this skill's reach, and a seat proposing a bound
+against it should be told so rather than talked out of it.
+
+The second is that the sibling is a consumer of three bounds and one
+audit check rather than an author of any, which is the ordinary relation
+between a record skill and this one. A prompt that genuinely spans the
+two is handled gate-side first, for the reason this file gives for every
+such prompt: a record cannot be judged against a rule while the rule
+itself is in question.

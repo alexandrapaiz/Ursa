@@ -257,3 +257,48 @@ all, and the three exits have opposite rules about raw text. This skill
 rules on whether the number is true before anyone asks whether it may
 leave. Both directions are handled record-side first, because nothing
 can be cleared for release until it is settled what it is.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. These two skills are the closest pair in the library on
+one axis that matters: they are the only two whose evidence is git
+rather than the record, so both can return "this clone could not tell"
+instead of a value, and both are therefore read wrong in the same way by
+anyone who takes their fields at face value.
+
+The cheapest discriminator is the direction each one reads git, and it
+separates them completely. This skill reads trees at the merge
+boundaries *inside* the episode, to find out what destroyed a span that
+did not survive. The sibling reads blob object ids *outside* the
+generation's line of descent, to find out whether text that did survive
+was ever composed here at all. Deleted text and imported text are
+disjoint populations: nothing with a `deletion` block reached the
+finished file, and an exclusion is only ever about a path that did.
+
+Their defaults also point opposite ways, which is worth holding onto
+because it is the one place a reader can be wrong in both directions at
+once. This skill, unable to read a merge, attributes the deletion to
+`unknown` and keeps the span, so silence does not fall on the person.
+The sibling, unable to read a path's history, excludes nothing and
+resolves the file normally, so a hole in the clone does not cost real
+correction signal. Same class of failure, opposite safe answer, and each
+module says in its own comments that it is the opposite of the other's.
+
+One real overlap, and it runs from the sibling to here rather than the
+other way. Excluding a `pre_existing` file discards a true
+`generated_deleted` story along with the false survival labels, which
+is a cost the sibling's own procedure records about its output. That is
+a note the sibling owes, not a deletion cause this skill can attribute,
+because once a path is excluded there is no span here to carry one.
